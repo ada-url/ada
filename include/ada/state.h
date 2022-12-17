@@ -1,7 +1,8 @@
-#ifndef ADA_STATES_H
-#define ADA_STATES_H
+#ifndef ADA_STATE_H
+#define ADA_STATE_H
 
 namespace ada {
+
   enum state {
     AUTHORITY,
     SCHEME_START,
@@ -24,6 +25,7 @@ namespace ada {
     OPAQUE_PATH,
     PORT,
   };
+
 } // ada namespace
 
-#endif //ADA_STATES_H
+#endif // ADA_STATE_H
