@@ -1,0 +1,38 @@
+add_library(ada-include-source INTERFACE)
+target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+add_library(ada-source INTERFACE)
+target_sources(ada-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/ada.cpp)
+target_link_libraries(ada-source INTERFACE ada-include-source)
+add_library(ada STATIC ada.cpp)
+target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
+target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+
+if(MSVC)
+  if("${MSVC_TOOLSET_VERSION}" STREQUAL "140")
+    target_compile_options(ada INTERFACE /W0 /sdl)
+    set(ADA_LEGACY_VISUAL_STUDIO TRUE)
+  else()
+    target_compile_options(ada INTERFACE /WX /W3 /sdl /w34714) # https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4714?view=vs-2019
+  endif()
+else(MSVC)
+  if(NOT WIN32)
+    target_compile_options(ada INTERFACE -fPIC)
+  endif()
+  target_compile_options(ada PRIVATE -Wall -Wextra -Weffc++)
+  target_compile_options(ada PRIVATE -Wfatal-errors -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self -Wconversion -Wno-sign-conversion)
+endif(MSVC)
+
+# workaround for GNU GCC poor AVX load/store code generation
+if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$"))
+  target_compile_options(ada PRIVATE -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store)
+endif()
+
+if(ADA_SANITIZE)
+  target_compile_options(ada INTERFACE -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
+  target_compile_definitions(ada INTERFACE ASAN_OPTIONS=detect_leaks=1)
+  target_link_libraries(ada INTERFACE -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
+endif()
+
+if(MSVC AND BUILD_SHARED_LIBS)
+  set(ADA_WINDOWS_DLL TRUE)
+endif()

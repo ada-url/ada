@@ -1,0 +1,29 @@
+#ifndef ADA_STATES_H
+#define ADA_STATES_H
+
+namespace ada {
+  enum state {
+    AUTHORITY,
+    SCHEME_START,
+    SCHEME,
+    HOST,
+    NO_SCHEME,
+    FRAGMENT,
+    RELATIVE,
+    RELATIVE_SLASH,
+    FILE,
+    FILE_HOST,
+    FILE_SLASH,
+    PATH_OR_AUTHORITY,
+    SPECIAL_AUTHORITY_IGNORE_SLASHES,
+    SPECIAL_AUTHORITY_SLASHES,
+    SPECIAL_RELATIVE_OR_AUTHORITY,
+    QUERY,
+    PATH,
+    PATH_START,
+    OPAQUE_PATH,
+    PORT,
+  };
+} // ada namespace
+
+#endif //ADA_STATES_H

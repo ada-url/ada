@@ -1,0 +1,8 @@
+# common build directory
+build
+*-build-*
+
+# Python cache
+__pycache__
+
+cmake-build-debug
