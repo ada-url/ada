@@ -49,6 +49,11 @@ namespace ada {
      * the URL’s other components identify. It is initially null.
      */
     std::optional<char*> fragment;
+
+    /**
+     * Used for returning the validity from the result of the URL parser.
+     */
+    bool is_valid = true;
   };
 
 } // namespace ada
