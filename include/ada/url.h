@@ -54,6 +54,12 @@ namespace ada {
      * Used for returning the validity from the result of the URL parser.
      */
     bool is_valid = true;
+
+    /**
+     * A validation error indicates a mismatch between input and valid input.
+     * User agents, especially conformance checkers, are encouraged to report them somewhere.
+     */
+    bool has_validation_error = false;
   };
 
 } // namespace ada
