@@ -3,7 +3,7 @@
 
 namespace ada {
 
-  Parser::Parser(const char *input, std::optional<ada::URL> optional_base_url, std::optional<ada::encoding_type> encoding_override,
+  Parser::Parser(const std::string_view input, std::optional<ada::URL> optional_base_url, std::optional<ada::encoding_type> encoding_override,
                  std::optional<ada::state> state_override) {
     // Assign base_url if it exists
     base_url = optional_base_url;
@@ -25,7 +25,7 @@ namespace ada {
     }
 
     // Let pointer be a pointer for input.
-    pointer = const_cast<char*>(input);
+    pointer = input.begin();
 
     // Define parsed URL
     url = ada::URL();
@@ -33,12 +33,9 @@ namespace ada {
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
-    for (; *pointer != '\0'; pointer++) {
+    for (; pointer <= input.end(); pointer++) {
       parseState();
     }
-
-    // Run parseState one more time since it should run with EOF code point.
-    parseState();
   }
 
   void Parser::parseState() {
