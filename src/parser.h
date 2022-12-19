@@ -8,24 +8,25 @@ namespace ada {
   class Parser {
 
   public:
-    Parser(const std::string_view input, std::optional<ada::URL> optional_base_url, std::optional<ada::encoding_type> encoding, std::optional<ada::state> state);
+    Parser(const std::string_view input, std::optional<ada::URL> optional_base_url, 
+      std::optional<ada::encoding_type> encoding, std::optional<ada::state> state);
     ada::URL getURL();
 
   private:
     void parseState();
 
-    std::string_view buffer = "";
-    bool at_sign_seen = false;
-    bool inside_brackets = false;
-    bool password_token_seen = false;
+    std::string_view buffer{};
+    bool at_sign_seen{};
+    bool inside_brackets{};
+    bool password_token_seen{};
 
-    const char* pointer;
+    const char* pointer{};
 
-    ada::encoding_type encoding = ada::encoding_type::UTF8;
-    ada::state state = SCHEME_START;
+    ada::encoding_type encoding{ada::encoding_type::UTF8};
+    ada::state state{SCHEME_START};
 
-    ada::URL url;
-    std::optional<ada::URL> base_url;
+    ada::URL url{};
+    std::optional<ada::URL> base_url{};
   }; // class Parser
 
 }

@@ -3,33 +3,19 @@
 
 namespace ada {
 
-  Parser::Parser(const std::string_view input, std::optional<ada::URL> optional_base_url, std::optional<ada::encoding_type> encoding_override,
-                 std::optional<ada::state> state_override) {
-    // Assign base_url if it exists
-    base_url = optional_base_url;
+  Parser::Parser(const std::string_view input, std::optional<ada::URL> optional_base_url, 
+                 std::optional<ada::encoding_type> encoding_override,
+                 std::optional<ada::state> state_override) :
+                    buffer{}, pointer{input.begin()},
+                    encoding{encoding_override.value_or(ada::encoding_type::UTF8)},
+                    state{state_override.value_or(SCHEME_START)},
+                    base_url{optional_base_url} {
 
     // TODO: If input contains any leading or trailing C0 control or space, validation error.
     // TODO: Remove any leading and trailing C0 control or space from input.
 
     // TODO: If input contains any ASCII tab or newline, validation error.
     // TODO: Remove all ASCII tab or newline from input.
-
-    // Let state be state override if given, or scheme start state otherwise.
-    if (state_override.has_value()) {
-      state = state_override.value();
-    }
-
-    // Set encoding to the result of getting an output encoding from encoding.
-    if (encoding_override.has_value()) {
-      encoding = encoding_override.value();
-    }
-
-    // Let pointer be a pointer for input.
-    pointer = input.begin();
-
-    // Define parsed URL
-    url = ada::URL();
-
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
