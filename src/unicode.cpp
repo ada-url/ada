@@ -17,4 +17,14 @@ namespace ada::unicode {
     return is_ascii_upper_alpha(c) || is_ascii_lower_alpha(c);
   }
 
+  // An ASCII digit is a code point in the range U+0030 (0) to U+0039 (9), inclusive.
+  bool is_ascii_digit(const char c) {
+    return c >= 0 && c <= 9;
+  }
+
+  // An ASCII alphanumeric is an ASCII digit or ASCII alpha.
+  bool is_ascii_alphanumeric(const char c) {
+    return is_ascii_digit(c) || is_ascii_alpha(c);
+  }
+
 } // namespace ada::unicode
