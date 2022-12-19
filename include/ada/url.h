@@ -74,7 +74,7 @@ namespace ada {
      * @return
      */
     bool includes_credentials() const {
-      return username != nullptr || password != nullptr;
+      return !username.empty() || !password.empty();
     }
 
     /**
