@@ -14,7 +14,8 @@ namespace ada {
   private:
     void parseState();
 
-    std::string buffer = "";
+    std::string_view input;
+    std::string buffer;
     bool at_sign_seen = false;
     bool inside_brackets = false;
     bool password_token_seen = false;
