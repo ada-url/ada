@@ -3,7 +3,7 @@
 
 namespace ada {
 
-  ada_warn_unused ada::URL parse(const char* input, std::optional<ada::URL> base_url, ada::encoding_type encoding) noexcept {
+  ada_warn_unused ada::URL parse(std::string_view input, std::optional<ada::URL> base_url, ada::encoding_type encoding) noexcept {
     auto parser = new Parser(input, base_url, encoding, SCHEME_START);
 
     return parser->getURL();
