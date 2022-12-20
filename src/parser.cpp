@@ -13,9 +13,6 @@ namespace ada {
     // Assign base_url if it exists
     base_url = optional_base_url;
 
-    // TODO: If input contains any leading or trailing C0 control or space, validation error.
-    // TODO: Remove any leading and trailing C0 control or space from input.
-
     // TODO: If input contains any ASCII tab or newline, validation error.
     // TODO: Remove all ASCII tab or newline from input.
 
@@ -27,19 +24,32 @@ namespace ada {
       encoding = encoding_override.value();
     }
 
+    // Define parsed URL
+    url = ada::url();
+
     // Store original input
     input = user_input;
 
-    // Let pointer be a pointer for input.
-    pointer = input.begin();
+    // Remove any leading and trailing C0 control or space from input.
+    pointer_start = std::find_if(user_input.begin(), user_input.end(), [](unsigned char c) {
+      return !ada::unicode::is_c0_control_or_space(c);
+    });
+    pointer_end = std::find_if(user_input.rbegin(), user_input.rend(), [](unsigned char c) {
+      return !ada::unicode::is_c0_control_or_space(c);
+    }).base();
 
     // Define parsed URL
     url = ada::url();
+    // If input contains any leading or trailing C0 control or space, validation error.
+    url.has_validation_error = pointer_start != user_input.begin() || pointer_end != user_input.end() - 1;
+
+    // Let pointer be a pointer for input.
+    pointer = pointer_start;
 
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
-    for (; pointer <= input.end() && url.is_valid; pointer++) {
+    for (; pointer <= pointer_end && url.is_valid; pointer++) {
       parse_state();
     }
   }
@@ -110,7 +120,7 @@ namespace ada {
           // If url’s scheme is "file", then:
           if (url.scheme == "file") {
             // If remaining does not start with "//", validation error.
-            if (pointer + 2 < input.end() && pointer[1] == '/' && pointer[2] == '/') {
+            if (std::distance(pointer, pointer_end) < 2 && pointer[1] == '/' && pointer[2] == '/') {
               url.has_validation_error = true;
             }
             // Set state to file state.
@@ -130,7 +140,7 @@ namespace ada {
           }
           // Otherwise, if remaining starts with an U+002F (/), set state to path or authority state
           // and increase pointer by 1.
-          else if (pointer + 1 < input.end() && pointer[1] == '/') {
+          else if (std::distance(pointer, pointer_end) < 1 && pointer[1] == '/') {
             state = PATH_OR_AUTHORITY;
             pointer++;
           }
@@ -145,7 +155,7 @@ namespace ada {
         else if (!state_override.has_value()) {
           buffer = "";
           state = NO_SCHEME;
-          pointer = input.begin();
+          pointer = pointer_start;
           pointer--;
         }
         // Otherwise, validation error, return failure.
