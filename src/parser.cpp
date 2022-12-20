@@ -40,11 +40,11 @@ namespace ada {
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
     for (; pointer <= input.end() && url.is_valid; pointer++) {
-      parseState();
+      parse_state();
     }
   }
 
-  void Parser::parseState() {
+  void Parser::parse_state() {
     switch (state) {
       case SCHEME_START: {
         // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
@@ -159,7 +159,7 @@ namespace ada {
     }
   }
 
-  ada::URL Parser::getURL() {
+  ada::URL Parser::get_url() {
     return url;
   }
 
