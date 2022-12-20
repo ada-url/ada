@@ -8,7 +8,7 @@
 
 namespace ada {
 
-  Parser::Parser(std::string_view user_input, std::optional<ada::URL> optional_base_url, std::optional<ada::encoding_type> encoding_override,
+  url_parser::url_parser(std::string_view user_input, std::optional<ada::url> optional_base_url, std::optional<ada::encoding_type> encoding_override,
                  std::optional<ada::state> given_state_override) {
     // Assign base_url if it exists
     base_url = optional_base_url;
@@ -34,7 +34,7 @@ namespace ada {
     pointer = input.begin();
 
     // Define parsed URL
-    url = ada::URL();
+    url = ada::url();
 
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
@@ -44,7 +44,7 @@ namespace ada {
     }
   }
 
-  void Parser::parse_state() {
+  void url_parser::parse_state() {
     switch (state) {
       case SCHEME_START: {
         // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
@@ -159,7 +159,7 @@ namespace ada {
     }
   }
 
-  ada::URL Parser::get_url() {
+  ada::url url_parser::get_url() {
     return url;
   }
 

@@ -5,11 +5,11 @@
 
 namespace ada {
 
-  class Parser {
+  class url_parser {
 
   public:
-    Parser(std::string_view input, std::optional<ada::URL> optional_base_url, std::optional<ada::encoding_type> encoding, std::optional<ada::state> state);
-    ada::URL get_url();
+    url_parser(std::string_view input, std::optional<ada::url> optional_base_url, std::optional<ada::encoding_type> encoding, std::optional<ada::state> state);
+    ada::url get_url();
 
   private:
     void parse_state();
@@ -26,9 +26,9 @@ namespace ada {
     ada::state state{SCHEME_START};
     std::optional<ada::state> state_override;
 
-    ada::URL url;
-    std::optional<ada::URL> base_url;
-  }; // class Parser
+    ada::url url;
+    std::optional<ada::url> base_url;
+  }; // class url_parser
 
 }
 

@@ -17,7 +17,7 @@ namespace ada {
    * @param base_url the optional string input to use as a base url.
    * @param encoding encoding (default to UTF-8)
    */
-  ada_warn_unused ada::URL parse(std::string_view input, std::optional<ada::URL> base_url, ada::encoding_type encoding = UTF8) noexcept;
+  ada_warn_unused ada::url parse(std::string_view input, std::optional<ada::url> base_url, ada::encoding_type encoding = UTF8) noexcept;
 }
 
 #endif // ADA_IMPLEMENTATION_H
