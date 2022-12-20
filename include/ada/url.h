@@ -14,7 +14,7 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#url-representation
    */
-  struct URL {
+  struct url {
     /**
      * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
      * URL for further processing after parsing. It is initially the empty string.
@@ -84,7 +84,7 @@ namespace ada {
     bool is_special() const {
       return ada::scheme::is_special(scheme);
     }
-  };
+  }; // struct url
 
 } // namespace ada
 
