@@ -217,6 +217,20 @@ namespace ada {
           pointer--;
         }
       }
+      case SPECIAL_AUTHORITY_SLASHES: {
+        // If c is U+002F (/) and remaining starts with U+002F (/),
+        // then set state to special authority ignore slashes state and increase pointer by 1.
+        if (*pointer == '/' && std::distance(pointer, pointer_end) < 1 && pointer[1] == '/') {
+          pointer++;
+        }
+        // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.
+        else {
+          url.has_validation_error = true;
+          pointer--;
+        }
+
+        state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
+      }
       default:
         printf("not implemented");
     }
