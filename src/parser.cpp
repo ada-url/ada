@@ -165,6 +165,20 @@ namespace ada {
           url.is_valid = false;
         }
       }
+      case SPECIAL_RELATIVE_OR_AUTHORITY: {
+        // If c is U+002F (/) and remaining starts with U+002F (/),
+        // then set state to special authority ignore slashes state and increase pointer by 1.
+        if (*pointer == '/' && std::distance(pointer, pointer_end) < 1 && pointer[1] == '/') {
+          state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
+          pointer++;
+        }
+        // Otherwise, validation error, set state to relative state and decrease pointer by 1.
+        else {
+          url.has_validation_error = true;
+          state = RELATIVE;
+          pointer--;
+        }
+      }
       case PATH_OR_AUTHORITY: {
         // If c is U+002F (/), then set state to authority state.
         if (*pointer == '/') {
