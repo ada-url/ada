@@ -165,6 +165,17 @@ namespace ada {
           url.is_valid = false;
         }
       }
+      case PATH_OR_AUTHORITY: {
+        // If c is U+002F (/), then set state to authority state.
+        if (*pointer == '/') {
+          state = AUTHORITY;
+        }
+        // Otherwise, set state to path state, and decrease pointer by 1.
+        else {
+          state = PATH;
+          pointer--;
+        }
+      }
       default:
         printf("not implemented");
     }
