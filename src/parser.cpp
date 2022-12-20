@@ -231,6 +231,17 @@ namespace ada {
 
         state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
       }
+      case SPECIAL_AUTHORITY_IGNORE_SLASHES: {
+        // If c is neither U+002F (/) nor U+005C (\), then set state to authority state and decrease pointer by 1.
+        if (*pointer == '/' || *pointer == '\\') {
+          state = AUTHORITY;
+          pointer--;
+        }
+        // Otherwise, validation error.
+        else {
+          url.has_validation_error = true;
+        }
+      }
       default:
         printf("not implemented");
     }
