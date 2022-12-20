@@ -27,4 +27,15 @@ namespace ada::unicode {
     return is_ascii_digit(c) || is_ascii_alpha(c);
   }
 
+  // A C0 control or space is a C0 control or U+0020 SPACE.
+  // A C0 control is a code point in the range U+0000 NULL to U+001F INFORMATION SEPARATOR ONE, inclusive.
+  bool is_c0_control_or_space(const char c) {
+    return (unsigned char) c <= ' ';
+  }
+
+  // An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR.
+  bool is_ascii_tab_or_newline(const char c) {
+    return c == '\t' || c == '\n' || c == '\r';
+  }
+
 } // namespace ada::unicode

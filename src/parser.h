@@ -20,7 +20,9 @@ namespace ada {
     bool inside_brackets{};
     bool password_token_seen{};
 
-    const char* pointer;
+    std::string_view::iterator pointer;
+    std::string_view::iterator pointer_start;
+    std::string_view::iterator pointer_end;
 
     ada::encoding_type encoding{ada::encoding_type::UTF8};
     ada::state state{SCHEME_START};
