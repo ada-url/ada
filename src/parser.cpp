@@ -3,7 +3,6 @@
 #include "parser.h"
 #include "scheme.cpp"
 
-#include <cassert>
 #include <cctype>
 
 namespace ada {
@@ -128,9 +127,6 @@ namespace ada {
           }
           // Otherwise, if url is special, base is non-null, and base’s scheme is url’s scheme:
           else if (url.is_special() && base_url.has_value() && base_url->scheme == url.scheme) {
-            // Assert: base is is special (and therefore does not have an opaque path).
-            assert(base_url->is_special()); // TODO: Check to disable assert on release builds.
-
             // Set state to special relative or authority state.
             state = SPECIAL_RELATIVE_OR_AUTHORITY;
           }
