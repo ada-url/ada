@@ -19,9 +19,7 @@ namespace ada {
     state_override = given_state_override;
 
     // Set encoding to the result of getting an output encoding from encoding.
-    if (encoding_override.has_value()) {
-      encoding = encoding_override.value();
-    }
+    encoding = encoding_override.value_or(UTF8);
 
     // Define parsed URL
     url = ada::url();
