@@ -186,6 +186,38 @@ namespace ada {
           pointer--;
         }
       }
+      case RELATIVE_SLASH: {
+        // If url is special and c is U+002F (/) or U+005C (\), then:
+        if (url.is_special() && (*pointer == '/' || *pointer =='\\')) {
+          // If c is U+005C (\), validation error.
+          if (*pointer == '\\') {
+            url.has_validation_error = true;
+          }
+
+          // Set state to special authority ignore slashes state.
+          state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
+        }
+        // Otherwise, if c is U+002F (/), then set state to authority state.
+        else if (*pointer == '/') {
+          state = AUTHORITY;
+        }
+        // Otherwise, set
+        // - url’s username to base’s username,
+        // - url’s password to base’s password,
+        // - url’s host to base’s host,
+        // - url’s port to base’s port,
+        // - state to path state, and then, decrease pointer by 1.
+        else {
+          if (base_url.has_value()) {
+            url.username = base_url->username;
+            url.password = base_url->password;
+            url.host = base_url->host;
+            url.port = base_url->port;
+          }
+          state = PATH;
+          pointer--;
+        }
+      }
       default:
         printf("not implemented");
     }
