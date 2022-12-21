@@ -27,4 +27,4 @@ jobs:
           cd build &&
           CXX=g++-12 cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} ..  &&
           cmake --build .   &&
-          ctest --verbose --output-on-failure
+          ctest --output-on-failure
