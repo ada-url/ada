@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <cctype>
+#include <algorithm>
 
 namespace ada {
 
