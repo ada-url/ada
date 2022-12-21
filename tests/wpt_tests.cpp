@@ -11,7 +11,7 @@
 using namespace simdjson;
 
 #ifndef WPT_DATA_DIR
-#define WPT_DATA_DIR "tests/wpt/"
+#define WPT_DATA_DIR "wpt/"
 #endif
 const char *PERCENT_ENCODING_JSON = WPT_DATA_DIR "percent-encoding.json";
 const char *SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
