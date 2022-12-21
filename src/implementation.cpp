@@ -1,12 +1,13 @@
 #include "ada.h"
-#include "parser.h"
+#include "parser.cpp"
 
 namespace ada {
 
-  ada_warn_unused ada::url parse(std::string_view input, std::optional<ada::url> base_url, ada::encoding_type encoding) noexcept {
-    auto parser = new url_parser(input, base_url, encoding, SCHEME_START);
+  ada_warn_unused url parse(std::string_view input,
+                            std::optional<ada::url> base_url,
+                            ada::encoding_type encoding) noexcept {
 
-    return parser->get_url();
+    return ada::parse_url(input, base_url, encoding, SCHEME_START);
   }
 
 } // namespace ada
