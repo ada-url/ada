@@ -255,9 +255,11 @@ namespace ada {
           // If encoding is not UTF-8 and one of the following is true:
           // - url is not special
           // - url’s scheme is "ws" or "wss"
-          if (!url.is_special() || url.scheme == "ws" || url.scheme == "wss") {
-            // then set encoding to UTF-8.
-            encoding = UTF8;
+          if (encoding != UTF8) {
+            if (!url.is_special() || url.scheme == "ws" || url.scheme == "wss") {
+              // then set encoding to UTF-8.
+              encoding = UTF8;
+            }
           }
 
           // TODO: Implement query state
