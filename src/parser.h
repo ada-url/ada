@@ -16,9 +16,6 @@ namespace ada {
 
     std::string_view input{};
     std::string buffer{};
-    bool at_sign_seen{};
-    bool inside_brackets{};
-    bool password_token_seen{};
 
     std::string_view::iterator pointer;
     std::string_view::iterator pointer_start;
