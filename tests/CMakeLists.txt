@@ -1,14 +1,7 @@
+include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
 
-include(FetchContent)
-FetchContent_Declare(
-  simdjson
-  GIT_REPOSITORY https://github.com/simdjson/simdjson.git
-  GIT_SHALLOW TRUE
-  GIT_TAG tags/v3.0.1
-  )
-
-FetchContent_MakeAvailable(simdjson)
-
+import_dependency(simdjson simdjson/simdjson v3.0.1)
+add_dependency(simdjson)
 add_subdirectory(wpt)
 
 
