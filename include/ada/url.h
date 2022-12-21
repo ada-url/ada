@@ -19,44 +19,44 @@ namespace ada {
      * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
      * URL for further processing after parsing. It is initially the empty string.
      */
-    std::string_view scheme;
+    std::string_view scheme{};
 
     /**
      * A URL’s username is an ASCII string identifying a username. It is initially the empty string.
      */
-    std::string_view username;
+    std::string_view username{};
 
     /**
      * A URL’s password is an ASCII string identifying a password. It is initially the empty string.
      */
-    std::string_view password;
+    std::string_view password{};
 
     /**
      * A URL’s host is null or a host. It is initially null.
      */
-    std::optional<std::string_view> host;
+    std::optional<std::string_view> host{};
 
     /**
      * A URL’s port is either null or a 16-bit unsigned integer that identifies a networking port. It is initially null.
      */
-    std::optional<uint16_t> port;
+    std::optional<uint16_t> port{};
 
     /**
      * A URL’s path is either an ASCII string or a list of zero or more ASCII strings, usually identifying a location.
      * TODO: Change this to list.
      */
-    std::string_view path;
+    std::string_view path{};
 
     /**
      * A URL’s query is either null or an ASCII string. It is initially null.
      */
-    std::optional<std::string_view> query;
+    std::optional<std::string_view> query{};
 
     /**
      * A URL’s fragment is either null or an ASCII string that can be used for further processing on the resource
      * the URL’s other components identify. It is initially null.
      */
-    std::optional<std::string_view> fragment;
+    std::optional<std::string_view> fragment{};
 
     /**
      * Used for returning the validity from the result of the URL parser.
