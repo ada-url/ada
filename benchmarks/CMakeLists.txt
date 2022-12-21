@@ -15,7 +15,7 @@ target_include_directories(boost_url INTERFACE
            "${boost_url_SOURCE_DIR}/include")
 
 find_package(
-    Boost  REQUIRED
+    Boost
     COMPONENTS system
 )
 if(Boost_FOUND)

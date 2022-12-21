@@ -21,6 +21,11 @@ jobs:
           - {shared: OFF}
     steps:
       - uses: actions/checkout@v3
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.1
+        id: install-boost
+        with:
+          boost_version: 1.73.0
       - name: Use cmake
         run: |
           mkdir build &&
