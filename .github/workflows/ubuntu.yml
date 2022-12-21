@@ -3,10 +3,10 @@ name: Ubuntu 22.04 CI (GCC 12)
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   ubuntu-build:
