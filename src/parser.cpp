@@ -419,7 +419,44 @@ namespace ada::parser {
             }
           }
 
-          // TODO: Implement query state
+          // If one of the following is true:
+          // - state override is not given and c is U+0023 (#)
+          // - c is the EOF code point
+          if ((!state_override.has_value() && *pointer == '#') || pointer == pointer_end) {
+            // Let queryPercentEncodeSet be the special-query percent-encode set if url is special;
+            // otherwise the query percent-encode set.
+            auto query_percent_encode_set = url.is_special() ?
+                                  ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
+                                  ada::character_sets::QUERY_PERCENT_ENCODE;
+
+            // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
+            // and append the result to url’s query.
+            url.query->append(ada::unicode::utf8_percent_encode(buffer, query_percent_encode_set));
+
+            // Set buffer to the empty string.
+            buffer.clear();
+
+            // If c is U+0023 (#), then set url’s fragment to the empty string and state to fragment state.
+            if (*pointer == '#') {
+              url.fragment = "";
+              state = FRAGMENT;
+            }
+          }
+          // Otherwise, if c is not the EOF code point:
+          else if (pointer != pointer_end) {
+            // If c is not a URL code point and not U+0025 (%), validation error.
+            if (!ada::unicode::is_ascii_alphanumeric(*pointer) && *pointer != '%') {
+              url.has_validation_error = true;
+            }
+
+            // If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+            if (*pointer == '%' && std::distance(pointer, pointer_end) < 2 && (!ada::unicode::is_ascii_hex_digit(pointer[1]) || !ada::unicode::is_ascii_hex_digit(pointer[2]))) {
+              url.has_validation_error = true;
+            }
+
+            // Append c to buffer.
+            buffer.push_back(*pointer);
+          }
 
           break;
         }
