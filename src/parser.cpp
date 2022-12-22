@@ -230,17 +230,17 @@ namespace ada::parser {
               // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
               // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
               if (ada::scheme::is_special(url.scheme) != ada::scheme::is_special(buffer)) {
-                continue;
+                return url;
               }
 
               // If url includes credentials or has a non-null port, and buffer is "file", then return.
               if ((url.includes_credentials() || url.port.has_value()) && buffer == "file") {
-                continue;
+                return url;
               }
 
               // If url’s scheme is "file" and its host is an empty host, then return.
               if (url.scheme == "file" && (!url.host.has_value() || url.host->empty())) {
-                continue;
+                return url;
               }
             }
 
@@ -432,8 +432,7 @@ namespace ada::parser {
             }
             // If state override is given and state override is hostname state, then return.
             else if (state_override.has_value() && state_override == HOST) {
-              // TODO: Make sure this returns
-              break;
+              return url;
             }
 
             // Let host be the result of host parsing buffer with url is not special.
@@ -467,8 +466,7 @@ namespace ada::parser {
             // Otherwise, if state override is given, buffer is the empty string,
             // and either url includes credentials or url’s port is non-null, return.
             else if (state_override.has_value() && buffer.empty() && (url.includes_credentials() || url.port.has_value())) {
-              // TODO: Make sure this returns
-              break;
+              return url;
             }
 
             // Let host be the result of host parsing buffer with url is not special.
@@ -477,7 +475,7 @@ namespace ada::parser {
 
             // If host is failure, then return failure.
             if (host->empty()) {
-              // TODO: Make sure this returns
+              url.is_valid = false;
               break;
             }
 
@@ -488,8 +486,7 @@ namespace ada::parser {
 
             // If state override is given, then return.
             if (state_override) {
-              // TODO: Make sure this returns
-              break;
+              return url;
             }
           }
           // Otherwise:
