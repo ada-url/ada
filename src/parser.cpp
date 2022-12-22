@@ -4,8 +4,9 @@
 
 #include <algorithm>
 #include <cctype>
-#include <string>
+#include <cmath>
 #include <cstdlib>
+#include <string>
 
 namespace ada::parser {
 
@@ -55,8 +56,87 @@ namespace ada::parser {
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
   parser_result<std::string_view> parse_ipv4(std::string_view input) {
-    // TODO: Implement this
-    return std::make_tuple(std::nullopt, false);
+    // Let validationError be false.
+    bool validation_error = false;
+
+    // Let parts be the result of strictly splitting input on U+002E (.).
+    std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
+
+    // If the last item in parts is the empty string, then:
+    if (parts.back().empty()) {
+      // Set validationError to true.
+      validation_error = true;
+
+      // If parts’s size is greater than 1, then remove the last item from parts.
+      if (parts.size() > 1) {
+        parts.pop_back();
+      }
+    }
+
+    // If parts’s size is greater than 4, validation error, return failure.
+    if (parts.size() > 4) {
+      return std::make_tuple(std::nullopt, true);
+    }
+
+    // Let numbers be an empty list.
+    std::vector<uint16_t> numbers;
+
+    // For each part of parts:
+    for (auto part: parts) {
+      // Let result be the result of parsing part.
+      parser_result<uint16_t> result = parse_ipv4_number(part);
+      std::optional<uint16_t> parsed_number = std::get<0>(result);
+
+      // If result is failure, validation error, return failure.
+      if (!parsed_number.has_value()) {
+        return std::make_tuple(std::nullopt, true);
+      }
+
+      // If result[1] is true, then set validationError to true.
+      if (std::get<1>(result)) {
+        validation_error = true;
+      }
+
+      // If any item in numbers is greater than 255, validation error.
+      if (parsed_number.value() > 255) {
+        validation_error = true;
+      }
+
+      // Append result[0] to numbers.
+      numbers.push_back(parsed_number.value());
+    }
+
+    // Let ipv4 be the last item in numbers.
+    auto ipv4 = numbers.back();
+
+    // If any but the last item in numbers is greater than 255, then return failure.
+    if (ipv4 > 255) {
+      return std::make_tuple(std::nullopt, true);
+    }
+
+    // If the last item in numbers is greater than or equal to 256(5 − numbers’s size), validation error, return failure.
+    if (ipv4 >= std::pow(256, 5 - numbers.size())) {
+      return std::make_tuple(std::nullopt, true);
+    }
+
+    // Remove the last item from numbers.
+    numbers.pop_back();
+
+    // Let counter be 0.
+    int counter = 0;
+
+    // For each n of numbers:
+    for (auto n: numbers) {
+      // Increment ipv4 by n × 256(3 − counter).
+      ipv4 += n * std::pow(256, 3 - counter);
+
+      // Increment counter by 1.
+      counter++;
+    }
+
+    // Convert ipv4 to string to use it inside "parse_host"
+    // TODO: Convert ipv4 to string and return
+    return std::make_tuple("", validation_error);
   }
 
   /**
