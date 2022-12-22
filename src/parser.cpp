@@ -4,10 +4,75 @@
 #include "unicode.cpp"
 #include "scheme.cpp"
 
-#include <cctype>
 #include <algorithm>
+#include <cctype>
+#include <cstring>
 
 namespace ada {
+
+  /**
+   * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
+   */
+  std::optional<std::string_view> domain_to_ascii(const std::string_view input, bool be_strict = false) {
+    // TODO: Implement this
+  }
+
+  /**
+   * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
+   */
+  std::optional<std::string_view> parse_opaque_host(std::string_view input) {
+    // TODO: Implement this
+  }
+
+  /**
+   * @see https://url.spec.whatwg.org/#concept-ipv6-parser
+   */
+  std::optional<std::string_view> parse_ipv6(std::string_view input) {
+    // TODO: Implement this
+  }
+
+  /**
+   * The host parser takes a scalar value string input
+   * with an optional boolean isNotSpecial (default false), and then runs these steps:
+   * @see https://url.spec.whatwg.org/#host-parsing
+   */
+  std::optional<std::string_view> parse_host(std::string_view input, bool is_not_special = false) {
+    // If input starts with U+005B ([), then:
+    if (input.length() > 0 && input[0] == '[') {
+      // If input does not end with U+005D (]), validation error, return failure.
+      if (input.back() != ']') {
+        return nullptr;
+      }
+
+      // Return the result of IPv6 parsing input with its leading U+005B ([) and trailing U+005D (]) removed.
+      return parse_ipv6(input.substr(1, input.length() - 2));
+    }
+
+    // If isNotSpecial is true, then return the result of opaque-host parsing input.
+    if (is_not_special) {
+      return parse_opaque_host(input);
+    }
+
+    // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
+    std::string_view domain = ada::unicode::utf8_decode_without_bom(input);
+
+    // Let asciiDomain be the result of running domain to ASCII with domain and false.
+    std::optional<std::string_view> ascii_domain = domain_to_ascii(input, false);
+
+    // If asciiDomain is failure, validation error, return failure.
+    if (ascii_domain->empty()) {
+      return nullptr;
+    }
+
+    // If asciiDomain contains a forbidden domain code point, validation error, return failure.
+    // TODO: Implement this
+
+    // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
+    // TODO: Implement this
+
+    // Return asciiDomain.
+    return ascii_domain;
+  }
 
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
@@ -19,6 +84,9 @@ namespace ada {
 
     // Assign buffer
     std::string buffer = "";
+
+    // Assign inside brackets. Used by HOST state.
+    bool inside_brackets = false;
 
     // TODO: If input contains any ASCII tab or newline, validation error.
     // TODO: Remove all ASCII tab or newline from input.
@@ -263,6 +331,98 @@ namespace ada {
           }
 
           // TODO: Implement query state
+
+          break;
+        }
+        case HOST: {
+          // If state override is given and url’s scheme is "file",
+          // then decrease pointer by 1 and set state to file host state.
+          if (state_override.has_value() && url.scheme == "file") {
+            pointer--;
+            state = FILE_HOST;
+          }
+          // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
+          else if (*pointer == ':' && !inside_brackets) {
+            // If buffer is the empty string, validation error, return failure.
+            if (buffer.length() == 0) {
+              url.has_validation_error = true;
+              url.is_valid = false;
+              break;
+            }
+            // If state override is given and state override is hostname state, then return.
+            else if (state_override.has_value() && state_override == HOST) {
+              // TODO: Make sure this returns
+              break;
+            }
+
+            // Let host be the result of host parsing buffer with url is not special.
+            std::optional<std::string_view> host = parse_host(buffer, true);
+
+            // If host is failure, then return failure.
+            if (host->empty()) {
+              url.is_valid = false;
+              break;
+            }
+
+            // Set url’s host to host, buffer to the empty string, and state to port state.
+            url.host = host;
+            buffer = "";
+            state = PORT;
+          }
+          // Otherwise, if one of the following is true:
+          // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+          // - url is special and c is U+005C (\)
+          else if ((pointer == pointer_end && *pointer == '/' && *pointer == '?' && *pointer == '#') || (url.is_special() && *pointer == '\\')) {
+            // then decrease pointer by 1, and then:
+            pointer--;
+
+            // If url is special and buffer is the empty string, validation error, return failure.
+            if (url.is_special() && buffer.empty()) {
+              url.has_validation_error = true;
+              url.is_valid = false;
+              break;
+            }
+            // Otherwise, if state override is given, buffer is the empty string,
+            // and either url includes credentials or url’s port is non-null, return.
+            else if (state_override.has_value() && buffer.empty() && (url.includes_credentials() || url.port.has_value())) {
+              // TODO: Make sure this returns
+              break;
+            }
+
+            // Let host be the result of host parsing buffer with url is not special.
+            std::optional<std::string_view> host = parse_host(buffer, true);
+
+            // If host is failure, then return failure.
+            if (host->empty()) {
+              // TODO: Make sure this returns
+              break;
+            }
+
+            // Set url’s host to host, buffer to the empty string, and state to path start state.
+            url.host = host;
+            buffer = "";
+            state = PATH_START;
+
+            // If state override is given, then return.
+            if (state_override) {
+              // TODO: Make sure this returns
+              break;
+            }
+          }
+          // Otherwise:
+          else {
+            // If c is U+005B ([), then set insideBrackets to true.
+            if (*pointer == '[') {
+              inside_brackets = true;
+            }
+            // If c is U+005D (]), then set insideBrackets to false.
+            else if (*pointer == ']') {
+              inside_brackets = false;
+            }
+
+            // Append c to buffer.
+            buffer += *pointer;
+          }
 
           break;
         }

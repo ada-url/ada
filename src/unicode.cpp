@@ -38,4 +38,12 @@ namespace ada::unicode {
     return c == '\t' || c == '\n' || c == '\r';
   }
 
+  /**
+   * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
+   */
+  std::string_view utf8_decode_without_bom(const std::string_view input) {
+    // TODO: Implement this.
+    return "";
+  }
+
 } // namespace ada::unicode
