@@ -161,10 +161,7 @@ namespace ada::parser {
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
                 std::optional<ada::encoding_type> encoding_override,
-                std::optional<ada::state> given_state_override) {
-
-    // Assign state
-    ada::state state = SCHEME_START;
+                std::optional<ada::state> state_override) {
 
     // Assign buffer
     std::string buffer;
@@ -176,7 +173,7 @@ namespace ada::parser {
     // TODO: Remove all ASCII tab or newline from input.
 
     // Let state be state override if given, or scheme start state otherwise.
-    std::optional<ada::state> state_override = given_state_override;
+    ada::state state = state_override.value_or(SCHEME_START);
 
     // Set encoding to the result of getting an output encoding from encoding.
     ada::encoding_type encoding = encoding_override.value_or(UTF8);
