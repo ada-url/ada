@@ -78,7 +78,7 @@ namespace ada {
      * A URL’s fragment is either null or an ASCII string that can be used for further processing on the resource
      * the URL’s other components identify. It is initially null.
      */
-    std::optional<std::string_view> fragment{};
+    std::optional<std::string> fragment{};
 
     /**
      * Used for returning the validity from the result of the URL parser.

@@ -561,6 +561,25 @@ namespace ada::parser {
 
           break;
         }
+        case FRAGMENT: {
+          // If c is not the EOF code point, then:
+          if (pointer != pointer_end) {
+            // If c is not a URL code point and not U+0025 (%), validation error.
+            if (!ada::unicode::is_ascii_alphanumeric(*pointer) && *pointer != '%') {
+              url.has_validation_error = true;
+            }
+
+            // If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+            if (*pointer == '%' && std::distance(pointer, pointer_end) < 2 && (!ada::unicode::is_ascii_hex_digit(pointer[1]) || !ada::unicode::is_ascii_hex_digit(pointer[2]))) {
+              url.has_validation_error = true;
+            }
+
+            // UTF-8 percent-encode c using the fragment percent-encode set and append the result to url’s fragment.
+            std::string fragment(*pointer, 1);
+            std::string encoded = unicode::utf8_percent_encode(fragment, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+            url.fragment->append(encoded);
+          }
+        }
         default:
           printf("not implemented");
       }

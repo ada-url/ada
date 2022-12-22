@@ -67,12 +67,12 @@ namespace ada::unicode {
   /**
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
-  std::string_view utf8_decode_without_bom(const std::string_view input) {
+  std::string utf8_decode_without_bom(const std::string_view input) {
     // TODO: Implement this.
     return "";
   }
 
-  std::string_view utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) {
+  std::string utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) {
     // TODO: Implement this.
     return "";
   }
