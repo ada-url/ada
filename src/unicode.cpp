@@ -1,6 +1,17 @@
-#pragma once
+#include <set>
 
 namespace ada::unicode {
+
+  // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),
+  // U+002F (/), U+003A (:), U+003C (<), U+003E (>), U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]),
+  // U+005E (^), or U+007C (|).
+  static const std::set<char> FORBIDDEN_HOST_CODE_POINTS {
+    '\u0000', '\u0009', '\u000A', '\u000D', ' ', '#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '|'
+  };
+
+  bool is_in_code_points(char value, std::set<char> code_points) {
+    return code_points.find(value) != code_points.end();
+  }
 
   // An ASCII upper alpha is a code point in the range U+0041 (A) to U+005A (Z), inclusive.
   bool is_ascii_upper_alpha(const char c) {
@@ -20,6 +31,21 @@ namespace ada::unicode {
   // An ASCII digit is a code point in the range U+0030 (0) to U+0039 (9), inclusive.
   bool is_ascii_digit(const char c) {
     return c >= '0' && c <= '9';
+  }
+
+  // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
+  bool is_ascii_upper_hex_digit(const char c) {
+    return is_ascii_digit(c) || (c >= 'A' && c <= 'F');
+  }
+
+  //An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
+  bool is_ascii_lower_hex_digit(const char c) {
+    return is_ascii_digit(c) || (c >= 'a' && c<= 'f');
+  }
+
+  // An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit.
+  bool is_ascii_hex_digit(const char c) {
+    return is_ascii_upper_hex_digit(c) || is_ascii_lower_hex_digit(c);
   }
 
   // An ASCII alphanumeric is an ASCII digit or ASCII alpha.
@@ -42,6 +68,11 @@ namespace ada::unicode {
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
   std::string_view utf8_decode_without_bom(const std::string_view input) {
+    // TODO: Implement this.
+    return "";
+  }
+
+  std::string_view utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) {
     // TODO: Implement this.
     return "";
   }
