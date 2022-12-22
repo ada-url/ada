@@ -22,10 +22,16 @@ namespace ada::parser {
    */
   parser_result<std::string_view> parse_opaque_host(std::string_view input) {
     bool has_validation_error = false;
+
     for (auto i = input.begin(); i < input.end(); i++) {
       // If input contains a forbidden host code point, validation error, return failure.
       if (ada::unicode::is_in_code_points(*i, ada::unicode::FORBIDDEN_HOST_CODE_POINTS)) {
         return std::make_tuple(std::nullopt, true);
+      }
+
+      // Optimization: No need to continue the loop if we have a validation error
+      if (has_validation_error) {
+        break;
       }
 
       // If input contains a code point that is not a URL code point and not U+0025 (%), validation error.
@@ -40,7 +46,9 @@ namespace ada::parser {
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
-    return std::make_tuple(ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE), has_validation_error);
+    std::string_view result = ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+
+    return std::make_tuple(result, has_validation_error);
   }
 
   /**
