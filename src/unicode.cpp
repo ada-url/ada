@@ -64,12 +64,49 @@ namespace ada::unicode {
     return c == '\t' || c == '\n' || c == '\r';
   }
 
+  unsigned convert_hex_to_binary(const char c) {
+    if (c >= '0' && c <= '9')
+      return c - '0';
+    if (c >= 'A' && c <= 'F')
+      return 10 + (c - 'A');
+    if (c >= 'a' && c <= 'f')
+      return 10 + (c - 'a');
+  }
+
   /**
+   * Taken from Node.js
+   * https://github.com/nodejs/node/blob/main/src/node_url.cc#L245
+   *
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
   std::string utf8_decode_without_bom(const std::string_view input) {
-    // TODO: Implement this.
-    return "";
+    std::string output;
+
+    if (input.empty()) {
+      return "";
+    }
+
+    output.reserve(input.length());
+
+    for (auto pointer = input.begin(); pointer < input.end(); pointer++) {
+      size_t remaining = std::distance(pointer, input.end());
+
+      if (*pointer != '%' || remaining < 2 ||
+          (*pointer == '%' &&
+           (!is_ascii_hex_digit(pointer[1]) ||
+            !is_ascii_hex_digit(pointer[2])))) {
+        output += *pointer;
+        pointer++;
+        continue;
+      }
+
+      unsigned a = convert_hex_to_binary(pointer[1]);
+      unsigned b = convert_hex_to_binary(pointer[2]);
+      output += static_cast<char>(a * 16 + b);
+      pointer += 3;
+    }
+
+    return output;
   }
 
   std::string utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) {
