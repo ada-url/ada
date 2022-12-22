@@ -4,6 +4,7 @@
 #include "scheme.cpp"
 
 #include <optional>
+#include <string>
 #include <string_view>
 
 namespace ada {
@@ -71,7 +72,7 @@ namespace ada {
     /**
      * A URL’s query is either null or an ASCII string. It is initially null.
      */
-    std::optional<std::string_view> query{};
+    std::optional<std::string> query{};
 
     /**
      * A URL’s fragment is either null or an ASCII string that can be used for further processing on the resource
