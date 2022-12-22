@@ -1,6 +1,8 @@
 #include "ada.h"
 #include "unicode.cpp"
 
+#include <algorithm>
+
 namespace ada::checkers {
 
   bool ends_in_a_number(std::string_view input) {

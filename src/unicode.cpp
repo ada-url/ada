@@ -38,7 +38,7 @@ namespace ada::unicode {
     return is_ascii_digit(c) || (c >= 'A' && c <= 'F');
   }
 
-  //An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
+  // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
   bool is_ascii_lower_hex_digit(const char c) {
     return is_ascii_digit(c) || (c >= 'a' && c<= 'f');
   }
