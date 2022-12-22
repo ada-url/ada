@@ -44,6 +44,14 @@ namespace ada::parser {
   }
 
   /**
+   * @see
+   */
+  std::optional<std::string_view> parse_ipv4(std::string_view input) {
+    // TODO: Implement this
+    return std::nullopt;
+  }
+
+  /**
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
   std::optional<std::string_view> parse_ipv6(std::string_view input) {
@@ -143,7 +151,9 @@ namespace ada::parser {
     // TODO: Implement this
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
-    // TODO: Implement this
+    if (checkers::ends_in_a_number(ascii_domain.value())) {
+      return parse_ipv4(ascii_domain.value());
+    }
 
     // Return asciiDomain.
     return ascii_domain;
