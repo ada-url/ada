@@ -52,7 +52,7 @@ namespace ada::parser {
   }
 
   /**
-   * @see
+   * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
   parser_result<std::string_view> parse_ipv4(std::string_view input) {
     // TODO: Implement this
@@ -82,27 +82,29 @@ namespace ada::parser {
     // Let R be 10.
     int R = 10;
 
-    // If input contains at least two code points and the first two code points are either "0X" or "0x", then:
-    if (input.size() >= 2 && input[0] == '0' && (input[1] == 'X' || input[1] == 'x')) {
-      // Set validationError to true.
-      validation_error = true;
+    if (input.length() >= 2) {
+      // If input contains at least two code points and the first two code points are either "0X" or "0x", then:
+      if (input[0] == '0' && (input[1] == 'X' || input[1] == 'x')) {
+        // Set validationError to true.
+        validation_error = true;
 
-      // Remove the first two code points from input.
-      input.remove_prefix(2);
+        // Remove the first two code points from input.
+        input.remove_prefix(2);
 
-      // Set R to 16.
-      R = 16;
-    }
-    // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
-    if (input.size() >= 2 && input[1] == '0') {
-      // Set validationError to true.
-      validation_error = true;
+        // Set R to 16.
+        R = 16;
+      }
+      // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
+      else if (input[1] == '0') {
+        // Set validationError to true.
+        validation_error = true;
 
-      // Remove the first code point from input.
-      input.remove_prefix(1);
+        // Remove the first code point from input.
+        input.remove_prefix(1);
 
-      // Set R to 8.
-      R = 8;
+        // Set R to 8.
+        R = 8;
+      }
     }
 
     // If input is the empty string, then return (0, true).
