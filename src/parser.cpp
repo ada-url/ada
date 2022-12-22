@@ -123,8 +123,6 @@ namespace ada::parser {
   }
 
   /**
-   * The host parser takes a scalar value string input
-   * with an optional boolean isNotSpecial (default false), and then runs these steps:
    * @see https://url.spec.whatwg.org/#host-parsing
    */
   parser_result<std::string_view> parse_host(std::string_view input, bool is_not_special) {
@@ -200,10 +198,10 @@ namespace ada::parser {
     }).base();
 
     // If input contains any leading or trailing C0 control or space, validation error.
-    url.has_validation_error = pointer_start != user_input.begin() || pointer_end != user_input.end() - 1;
+    url.has_validation_error = pointer_start != user_input.begin() || pointer_end != user_input.end();
 
     // Let pointer be a pointer for input.
-    auto pointer = pointer_start;
+    std::string_view::iterator pointer = pointer_start;
 
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
@@ -263,7 +261,7 @@ namespace ada::parser {
 
               // If url’s port is url’s scheme’s default port, then set url’s port to null.
               if (url.port.value() == urls_scheme_port->second) {
-                url.port = NULL;
+                url.port = std::nullopt;
               }
 
               continue;
@@ -435,7 +433,7 @@ namespace ada::parser {
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
           else if (*pointer == ':' && !inside_brackets) {
             // If buffer is the empty string, validation error, return failure.
-            if (buffer.length() == 0) {
+            if (buffer.empty()) {
               url.has_validation_error = true;
               url.is_valid = false;
               break;
