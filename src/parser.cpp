@@ -447,6 +447,11 @@ namespace ada::parser {
             parser_result<std::string_view> host_result = parse_host(buffer, true);
             std::optional<std::string_view> host = std::get<0>(host_result);
 
+            // Update validation error
+            if (std::get<1>(host_result)) {
+              url.has_validation_error = true;
+            }
+
             // If host is failure, then return failure.
             if (host->empty()) {
               url.is_valid = false;
@@ -480,6 +485,11 @@ namespace ada::parser {
             // Let host be the result of host parsing buffer with url is not special.
             parser_result<std::string_view> host_result = parse_host(buffer, true);
             std::optional<std::string_view> host = std::get<0>(host_result);
+
+            // Update validation error
+            if (std::get<1>(host_result)) {
+              url.has_validation_error = true;
+            }
 
             // If host is failure, then return failure.
             if (host->empty()) {
