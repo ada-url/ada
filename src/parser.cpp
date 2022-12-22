@@ -12,60 +12,60 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
    */
-  std::optional<std::string_view> domain_to_ascii(const std::string_view input, bool be_strict) {
+  parser_result<std::string_view> domain_to_ascii(const std::string_view input, bool be_strict) {
     // TODO: Implement this
-    return std::nullopt;
+    return std::make_tuple(std::nullopt, false);
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
-  std::optional<std::string_view> parse_opaque_host(std::string_view input, bool validation_error) {
+  parser_result<std::string_view> parse_opaque_host(std::string_view input) {
+    bool has_validation_error = false;
     for (auto i = input.begin(); i < input.end(); i++) {
       // If input contains a forbidden host code point, validation error, return failure.
       if (ada::unicode::is_in_code_points(*i, ada::unicode::FORBIDDEN_HOST_CODE_POINTS)) {
-        validation_error = true;
-        return std::nullopt;
+        return std::make_tuple(std::nullopt, true);
       }
 
       // If input contains a code point that is not a URL code point and not U+0025 (%), validation error.
       if (!ada::unicode::is_ascii_alphanumeric(*i) && *i != '%') {
-        validation_error = true;
+        has_validation_error = true;
       }
 
       // If input contains a U+0025 (%) and the two code points following it are not ASCII hex digits, validation error.
       if (*i == '%' && std::distance(i, input.end()) < 2 && (!ada::unicode::is_ascii_hex_digit(i[1]) || !ada::unicode::is_ascii_hex_digit(i[2]))) {
-        validation_error = true;
+        has_validation_error = true;
       }
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
-    return ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+    return std::make_tuple(ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE), has_validation_error);
   }
 
   /**
    * @see
    */
-  std::optional<std::string_view> parse_ipv4(std::string_view input) {
+  parser_result<std::string_view> parse_ipv4(std::string_view input) {
     // TODO: Implement this
-    return std::nullopt;
+    return std::make_tuple(std::nullopt, false);
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
-  std::optional<std::string_view> parse_ipv6(std::string_view input) {
+  parser_result<std::string_view> parse_ipv6(std::string_view input) {
     // TODO: Implement this
-    return std::nullopt;
+    return std::make_tuple(std::nullopt, false);
   }
 
   /**
    * @see https://url.spec.whatwg.org/#ipv4-number-parser
    */
-  std::tuple<uint16_t, bool, bool> parse_ipv4_number(std::string_view input) {
+  parser_result<uint16_t> parse_ipv4_number(std::string_view input) {
     // If input is the empty string, then return failure.
     if (input.empty()) {
-      return std::make_tuple(0, true, true);
+      return std::make_tuple(std::nullopt, true);
     }
 
     // Let validationError be false.
@@ -99,7 +99,7 @@ namespace ada::parser {
 
     // If input is the empty string, then return (0, true).
     if (input.empty()) {
-      return std::make_tuple(0, true, false);
+      return std::make_tuple(0, true);
     }
 
     // TODO: If input contains a code point that is not a radix-R digit, then return failure.
@@ -109,7 +109,7 @@ namespace ada::parser {
     // TODO: Find a better way for this operation.
     uint16_t output = std::strtol(input.data(), nullptr, R);
 
-    return std::make_tuple(output, validation_error, false);
+    return std::make_tuple(output, validation_error);
   }
 
   /**
@@ -117,13 +117,12 @@ namespace ada::parser {
    * with an optional boolean isNotSpecial (default false), and then runs these steps:
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  std::optional<std::string_view> parse_host(std::string_view input, bool is_not_special, bool has_validation_error) {
+  parser_result<std::string_view> parse_host(std::string_view input, bool is_not_special) {
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
       if (input.back() != ']') {
-        has_validation_error = true;
-        return std::nullopt;
+        return std::make_tuple(std::nullopt, true);
       }
 
       // Return the result of IPv6 parsing input with its leading U+005B ([) and trailing U+005D (]) removed.
@@ -132,19 +131,19 @@ namespace ada::parser {
 
     // If isNotSpecial is true, then return the result of opaque-host parsing input.
     if (is_not_special) {
-      return parse_opaque_host(input, has_validation_error);
+      return parse_opaque_host(input);
     }
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
     std::string_view domain = ada::unicode::utf8_decode_without_bom(input);
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    std::optional<std::string_view> ascii_domain = domain_to_ascii(input, false);
+    parser_result<std::string_view> ascii_domain_result = domain_to_ascii(input, false);
+    std::optional<std::string_view> ascii_domain = std::get<0>(ascii_domain_result);
 
     // If asciiDomain is failure, validation error, return failure.
     if (ascii_domain->empty()) {
-      has_validation_error = true;
-      return std::nullopt;
+      return std::make_tuple(std::nullopt, true);
     }
 
     // If asciiDomain contains a forbidden domain code point, validation error, return failure.
@@ -156,7 +155,7 @@ namespace ada::parser {
     }
 
     // Return asciiDomain.
-    return ascii_domain;
+    return std::make_tuple(ascii_domain, false);
   }
 
   url parse_url(std::string_view user_input,
@@ -168,7 +167,7 @@ namespace ada::parser {
     ada::state state = SCHEME_START;
 
     // Assign buffer
-    std::string buffer = "";
+    std::string buffer;
 
     // Assign inside brackets. Used by HOST state.
     bool inside_brackets = false;
@@ -441,7 +440,8 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<std::string_view> host = parse_host(buffer, true, url.has_validation_error);
+            parser_result<std::string_view> host_result = parse_host(buffer, true);
+            std::optional<std::string_view> host = std::get<0>(host_result);
 
             // If host is failure, then return failure.
             if (host->empty()) {
@@ -475,7 +475,8 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<std::string_view> host = parse_host(buffer, true, url.has_validation_error);
+            parser_result<std::string_view> host_result = parse_host(buffer, true);
+            std::optional<std::string_view> host = std::get<0>(host_result);
 
             // If host is failure, then return failure.
             if (host->empty()) {

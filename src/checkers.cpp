@@ -33,11 +33,7 @@ namespace ada::checkers {
     }
 
     // If parsing last as an IPv4 number does not return failure, then return true.
-    if (std::get<2>(ada::parser::parse_ipv4_number(last))) {
-      return true;
-    }
-
-    return false;
+    return std::get<0>(ada::parser::parse_ipv4_number(last)).has_value();
   }
 
 } // namespace ada::checkers

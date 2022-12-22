@@ -9,13 +9,17 @@
 
 namespace ada::parser {
 
-   std::optional<std::string_view> domain_to_ascii(const std::string_view input, bool be_strict = false);
-   std::optional<std::string_view> parse_opaque_host(std::string_view input, bool validation_error);
-   std::optional<std::string_view> parse_ipv6(std::string_view input);
-   std::tuple<uint16_t, bool, bool> parse_ipv4_number(std::string_view input);
-   std::optional<std::string_view> parse_host(std::string_view input, bool is_not_special, bool has_validation_error);
+  // Return `std::nullopt` if the parser result is failure.
+  template<typename T> using output = std::optional<T>;
+  template<typename T> using parser_result = std::tuple<output<T>, bool>;
 
-   url parse_url(std::string_view user_input,
+  parser_result<std::string_view> domain_to_ascii(const std::string_view input, bool be_strict = false);
+  parser_result<uint16_t> parse_ipv4_number(std::string_view input);
+  parser_result<std::string_view> parse_opaque_host(std::string_view input, bool validation_error);
+  parser_result<std::string_view> parse_ipv6(std::string_view input);
+  parser_result<std::string_view> parse_host(std::string_view input, bool is_not_special, bool has_validation_error);
+
+  url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
                 std::optional<ada::encoding_type> encoding_override,
                 std::optional<ada::state> given_state_override);
