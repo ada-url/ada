@@ -296,7 +296,7 @@ namespace ada::parser {
             }
             // Otherwise, set url’s path to the empty string and set state to opaque path state.
             else {
-              url.path = "";
+              url.path.string_value = "";
               state = OPAQUE_PATH;
             }
           }

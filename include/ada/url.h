@@ -9,6 +9,28 @@
 namespace ada {
 
   /**
+   * A URL’s path is either an ASCII string or a list of zero or more ASCII strings, usually identifying a location.
+   * It is initially « ».
+   *
+   * Note: A special URL’s path is always a list, i.e., it is never opaque.
+   *
+   * @see https://url.spec.whatwg.org/#concept-url-path
+   */
+  struct url_path {
+
+    std::optional<std::string_view> string_value{};
+
+    std::vector<std::string_view> list_value{};
+
+    /**
+     * A URL has an opaque path if its path is a string.
+     */
+    bool is_opaque() const {
+      return string_value.has_value();
+    }
+  };
+
+  /**
    * A URL is a struct that represents a universal identifier.
    * To disambiguate from a valid URL string it can also be referred to as a URL record.
    *
@@ -43,9 +65,8 @@ namespace ada {
 
     /**
      * A URL’s path is either an ASCII string or a list of zero or more ASCII strings, usually identifying a location.
-     * TODO: Change this to list.
      */
-    std::string_view path{};
+    url_path path{};
 
     /**
      * A URL’s query is either null or an ASCII string. It is initially null.
@@ -71,7 +92,6 @@ namespace ada {
 
     /**
      * A URL includes credentials if its username or password is not the empty string.
-     * @return
      */
     bool includes_credentials() const {
       return !username.empty() || !password.empty();
@@ -79,10 +99,16 @@ namespace ada {
 
     /**
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
-     * @return
      */
     bool is_special() const {
       return ada::scheme::is_special(scheme);
+    }
+
+    /**
+     * A URL has an opaque path if its path is a string.
+     */
+    bool has_opaque_path() const {
+      return path.is_opaque();
     }
   }; // struct url
 
