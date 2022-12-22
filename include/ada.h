@@ -1,8 +1,12 @@
 #ifndef ADA_H
 #define ADA_H
 
-#include "ada/state.h"
+#include "ada/internal/helpers.h"
+
+#include "ada/checkers.h"
 #include "ada/encoding_type.h"
+#include "ada/parser.h"
+#include "ada/state.h"
 #include "ada/url.h"
 
 // Public API
