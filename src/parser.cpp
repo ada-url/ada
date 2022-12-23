@@ -135,8 +135,7 @@ namespace ada::parser {
     }
 
     // Convert ipv4 to string to use it inside "parse_host"
-    // TODO: Convert ipv4 to string and return
-    return std::make_tuple("", validation_error);
+    return std::make_tuple(std::to_string(ipv4), validation_error);
   }
 
   /**
