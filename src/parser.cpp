@@ -143,8 +143,208 @@ namespace ada::parser {
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
   parser_result<std::string_view> parse_ipv6(std::string_view input) {
-    // TODO: Implement this
-    return std::make_tuple(std::nullopt, false);
+    // Let address be a new IPv6 address whose IPv6 pieces are all 0.
+    std::vector<uint16_t> address(8);
+
+    // Let pieceIndex be 0.
+    int piece_index = 0;
+
+    // Let compress be null.
+    std::optional<int> compress{};
+
+    // Let pointer be a pointer for input.
+    std::string_view::iterator pointer = input.begin();
+
+    // If c is U+003A (:), then:
+    if (*pointer == ':') {
+      // If remaining does not start with U+003A (:), validation error, return failure.
+      if (std::distance(pointer, input.end()) < 1 && pointer[1] == ':') {
+        return std::make_tuple(std::nullopt, true);
+      }
+
+      // Increase pointer by 2.
+      pointer += 2;
+
+      // Increase pieceIndex by 1 and then set compress to pieceIndex.
+      piece_index += 1;
+      compress = piece_index;
+    }
+
+    // While c is not the EOF code point:
+    while (pointer != input.end()) {
+      // If pieceIndex is 8, validation error, return failure.
+      if (piece_index == 8) {
+        return std::make_tuple(std::nullopt, true);
+      }
+
+      // If c is U+003A (:), then:
+      if (*pointer == ':') {
+        // If compress is non-null, validation error, return failure.
+        if (compress.has_value()) {
+          return std::make_tuple(std::nullopt, true);
+        }
+
+        // Increase pointer and pieceIndex by 1, set compress to pieceIndex, and then continue.
+        pointer++;
+        piece_index++;
+        compress = piece_index;
+        continue;
+      }
+
+      // Let value and length be 0.
+      int value = 0;
+      int length = 0;
+
+      // While length is less than 4 and c is an ASCII hex digit,
+      // set value to value × 0x10 + c interpreted as hexadecimal number, and increase pointer and length by 1.
+      while (length < 4 && unicode::is_ascii_hex_digit(*pointer)) {
+        // TODO: Make sure this is interpreted as hexadecimal number
+        value = (value * 0x10) + *pointer;
+
+        pointer++;
+        length++;
+      }
+
+      // If c is U+002E (.), then:
+      if (*pointer == '.') {
+        // If length is 0, validation error, return failure.
+        if (length == 0) {
+          return std::make_tuple(std::nullopt, true);
+        }
+
+        // Decrease pointer by length.
+        pointer -= length;
+
+        // If pieceIndex is greater than 6, validation error, return failure.
+        if (piece_index > 6) {
+          return std::make_tuple(std::nullopt, true);
+        }
+
+        // Let numbersSeen be 0.
+        int numbers_seen = 0;
+
+        // While c is not the EOF code point:
+        while (pointer != input.end()) {
+          // Let ipv4Piece be null.
+          std::optional<float> ipv4_piece{};
+
+          // If numbersSeen is greater than 0, then:
+          if (numbers_seen > 0) {
+            // If c is a U+002E (.) and numbersSeen is less than 4, then increase pointer by 1.
+            if (*pointer == '.' && numbers_seen < 4) {
+              pointer++;
+            }
+            // Otherwise, validation error, return failure.
+            else {
+              return std::make_tuple(std::nullopt, true);
+            }
+          }
+
+          // If c is not an ASCII digit, validation error, return failure.
+          if (!unicode::is_ascii_digit(*pointer)) {
+            return std::make_tuple(std::nullopt, true);
+          }
+
+          // While c is an ASCII digit:
+          while (unicode::is_ascii_digit(*pointer)) {
+            // Let number be c interpreted as decimal number.
+            auto number = (float)*pointer;
+
+            // If ipv4Piece is null, then set ipv4Piece to number.
+            if (!ipv4_piece.has_value()) {
+              ipv4_piece = number;
+            }
+            // Otherwise, if ipv4Piece is 0, validation error, return failure.
+            else if (ipv4_piece == 0) {
+              return std::make_tuple(std::nullopt, true);
+            }
+            // Otherwise, set ipv4Piece to ipv4Piece × 10 + number.
+            else {
+              ipv4_piece = (ipv4_piece.value() * 10) + number;
+            }
+
+            // If ipv4Piece is greater than 255, validation error, return failure.
+            if (ipv4_piece > 255) {
+              return std::make_tuple(std::nullopt, true);
+            }
+
+            // Increase pointer by 1.
+            pointer++;
+          }
+
+          // Set address[pieceIndex] to address[pieceIndex] × 0x100 + ipv4Piece.
+          address[piece_index] = address[piece_index] * 0x100 + ipv4_piece.value();
+
+          // Increase numbersSeen by 1.
+          numbers_seen++;
+
+          // If numbersSeen is 2 or 4, then increase pieceIndex by 1.
+          if (numbers_seen == 2 || numbers_seen == 4) {
+            piece_index++;
+          }
+        }
+
+        // If numbersSeen is not 4, validation error, return failure.
+        if (numbers_seen != 4) {
+          return std::make_tuple(std::nullopt, true);
+        }
+
+        // Break.
+        break;
+      }
+      // Otherwise, if c is U+003A (:):
+      else if (*pointer == ':') {
+        // Increase pointer by 1.
+        pointer++;
+
+        // If c is the EOF code point, validation error, return failure.
+        if (pointer == input.end()) {
+          return std::make_tuple(std::nullopt, true);
+        }
+      }
+      // Otherwise, if c is not the EOF code point, validation error, return failure.
+      else if (pointer != input.end()) {
+        return std::make_tuple(std::nullopt, true);
+      }
+
+      // Set address[pieceIndex] to value.
+      address[piece_index] = value;
+
+      // Increase pieceIndex by 1.
+      piece_index++;
+    }
+
+    // If compress is non-null, then:
+    if (compress.has_value()) {
+      // Let swaps be pieceIndex − compress.
+      auto swaps = piece_index - compress.value();
+
+      // Set pieceIndex to 7.
+      piece_index = 7;
+
+      // While pieceIndex is not 0 and swaps is greater than 0,
+      // swap address[pieceIndex] with address[compress + swaps − 1], and then decrease both pieceIndex and swaps by 1.
+      while (piece_index != 0 && swaps > 0) {
+        std::swap(address[piece_index], address[compress.value() + swaps - 1]);
+        piece_index--;
+        swaps--;
+      }
+    }
+    // Otherwise, if compress is null and pieceIndex is not 8, validation error, return failure.
+    else if (piece_index != 8) {
+      return std::make_tuple(std::nullopt, true);
+    }
+
+    std::string result{};
+
+    for(const auto a : address) {
+      if (!result.empty()) {
+        result += ':';
+      }
+      result += std::to_string(a);
+    }
+
+    return std::make_tuple(result, false);
   }
 
   /**
