@@ -108,7 +108,7 @@ namespace ada::parser {
     }
 
     // Let ipv4 be the last item in numbers.
-    auto ipv4 = numbers.back();
+    uint16_t ipv4 = numbers.back();
 
     // If any but the last item in numbers is greater than 255, then return failure.
     if (ipv4 > 255) {
@@ -129,7 +129,7 @@ namespace ada::parser {
     // For each n of numbers:
     for (auto n: numbers) {
       // Increment ipv4 by n × 256(3 − counter).
-      ipv4 += n * std::pow(256, 3 - counter);
+      ipv4 += n * (uint16_t)std::pow(256, 3 - counter);
 
       // Increment counter by 1.
       counter++;
@@ -226,7 +226,7 @@ namespace ada::parser {
         // While c is not the EOF code point:
         while (pointer != input.end()) {
           // Let ipv4Piece be null.
-          std::optional<float> ipv4_piece{};
+          std::optional<uint16_t> ipv4_piece{};
 
           // If numbersSeen is greater than 0, then:
           if (numbers_seen > 0) {
@@ -248,7 +248,7 @@ namespace ada::parser {
           // While c is an ASCII digit:
           while (unicode::is_ascii_digit(*pointer)) {
             // Let number be c interpreted as decimal number.
-            auto number = (float)*pointer;
+            uint16_t number = static_cast<uint16_t>(*pointer);
 
             // If ipv4Piece is null, then set ipv4Piece to number.
             if (!ipv4_piece.has_value()) {
@@ -260,7 +260,7 @@ namespace ada::parser {
             }
             // Otherwise, set ipv4Piece to ipv4Piece × 10 + number.
             else {
-              ipv4_piece = (ipv4_piece.value() * 10) + number;
+              ipv4_piece = ipv4_piece.value() * 10 + number;
             }
 
             // If ipv4Piece is greater than 255, validation error, return failure.
@@ -308,7 +308,7 @@ namespace ada::parser {
       }
 
       // Set address[pieceIndex] to value.
-      address[piece_index] = value;
+      address[piece_index] = static_cast<uint16_t>(value);
 
       // Increase pieceIndex by 1.
       piece_index++;
@@ -396,8 +396,7 @@ namespace ada::parser {
 
     // Let output be the mathematical integer value that is represented by input in radix-R notation,
     // using ASCII hex digits for digits with values 0 through 15.
-    // TODO: Find a better way for this operation.
-    uint16_t output = std::strtol(input.data(), nullptr, R);
+    uint16_t output = static_cast<uint16_t>(std::strtol(input.data(), nullptr, R));
 
     return std::make_tuple(output, validation_error);
   }
@@ -426,7 +425,7 @@ namespace ada::parser {
     std::string_view domain = ada::unicode::utf8_decode_without_bom(input);
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    parser_result<std::string_view> ascii_domain_result = domain_to_ascii(input, false);
+    parser_result<std::string_view> ascii_domain_result = domain_to_ascii(domain, false);
     std::optional<std::string_view> ascii_domain = std::get<0>(ascii_domain_result);
 
     // If asciiDomain is failure, validation error, return failure.
