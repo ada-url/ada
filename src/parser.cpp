@@ -859,6 +859,38 @@ namespace ada::parser {
             url.fragment->append(encoded);
           }
         }
+        case OPAQUE_PATH: {
+          // If c is U+003F (?), then set url’s query to the empty string and state to query state.
+          if (*pointer == '?') {
+            url.query = "";
+            state = QUERY;
+          }
+          // Otherwise, if c is U+0023 (#), then set url’s fragment to the empty string and state to fragment state.
+          else if (*pointer == '#') {
+            url.fragment = "";
+            state = FRAGMENT;
+          }
+          // Otherwise:
+          else {
+            // If c is not the EOF code point, not a URL code point, and not U+0025 (%), validation error.
+            if (pointer != pointer_end && !unicode::is_ascii_alphanumeric(*pointer) && *pointer != '%') {
+              url.has_validation_error = true;
+            }
+
+            // If c is U+0025 (%) and remaining does not start with two ASCII hex digits, validation error.
+            if (*pointer == '%' && std::distance(pointer, pointer_end) < 2 && (!ada::unicode::is_ascii_hex_digit(pointer[1]) || !ada::unicode::is_ascii_hex_digit(pointer[2]))) {
+              url.has_validation_error = true;
+            }
+
+            // If c is not the EOF code point, UTF-8 percent-encode c using the C0 control percent-encode set
+            // and append the result to url’s path.
+            if (pointer != pointer_end) {
+              std::string encoded = unicode::utf8_percent_encode(pointer, character_sets::C0_CONTROL_PERCENT_ENCODE);
+              // TODO: Make sure this is a list_value not a string_value.
+              url.path.list_value.push_back(encoded);
+            }
+          }
+        }
         default:
           printf("not implemented");
       }
