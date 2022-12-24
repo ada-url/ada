@@ -2,6 +2,7 @@
 
 #include "checkers.cpp"
 
+#include <array>
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -143,7 +144,7 @@ namespace ada::parser {
    */
   parser_result<std::string_view> parse_ipv6(std::string_view input) {
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
-    std::vector<uint16_t> address(8);
+    std::array<uint16_t, 8> address{};
 
     // Let pieceIndex be 0.
     int piece_index = 0;
