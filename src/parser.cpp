@@ -48,7 +48,7 @@ namespace ada::parser {
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
-    std::string_view result = ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+    std::string result = ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
 
     return std::make_tuple(result, has_validation_error);
   }
@@ -422,7 +422,7 @@ namespace ada::parser {
     }
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
-    std::string_view domain = ada::unicode::utf8_decode_without_bom(input);
+    std::string domain = ada::unicode::utf8_decode_without_bom(input);
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
     parser_result<std::string_view> ascii_domain_result = domain_to_ascii(domain, false);
