@@ -1100,6 +1100,52 @@ namespace ada::parser {
 
           break;
         }
+        case PATH_START: {
+          // If url is special, then:
+          if (url.is_special()) {
+            // If c is U+005C (\), validation error.
+            if (*pointer == '\\') {
+              url.has_validation_error = true;
+            }
+
+            // Set state to path state.
+            state = PATH;
+
+            // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
+            if (*pointer != '/' && *pointer != '\\') {
+              pointer--;
+            }
+          }
+          // Otherwise, if state override is not given and c is U+003F (?),
+          // set url’s query to the empty string and state to query state.
+          else if (!state_override.has_value() && *pointer == '?') {
+            url.query = "";
+            state = QUERY;
+          }
+          // Otherwise, if state override is not given and c is U+0023 (#),
+          // set url’s fragment to the empty string and state to fragment state.
+          else if (!state_override.has_value() && *pointer == '#') {
+            url.fragment = "";
+            state = FRAGMENT;
+          }
+          // Otherwise, if c is not the EOF code point:
+          else if (pointer != pointer_end) {
+            // Set state to path state.
+            state = PATH;
+
+            // If c is not U+002F (/), then decrease pointer by 1.
+            if (*pointer != '/') {
+              pointer--;
+            }
+          }
+          // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
+          else if (state_override.has_value() && !url.host.has_value()) {
+            // To append to a list that is not an ordered set is to add the given item to the end of the list.
+            url.path.list_value.emplace_back("");
+          }
+
+          break;
+        }
         default:
           printf("not implemented");
       }
