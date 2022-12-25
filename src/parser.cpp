@@ -1251,7 +1251,75 @@ namespace ada::parser {
             state = PATH;
             pointer--;
           }
-          
+
+          break;
+        }
+        case FILE_HOST: {
+          // If c is the EOF code point, U+002F (/), U+005C (\), U+003F (?), or U+0023 (#),
+          // then decrease pointer by 1 and then:
+          if (pointer == pointer_end || *pointer == '/' || *pointer == '\\' || *pointer == '?' || *pointer == '#') {
+            pointer--;
+
+            // If state override is not given and buffer is a Windows drive letter, validation error,
+            // set state to path state.
+            if (!state_override.has_value() && checkers::is_windows_drive_letter(buffer)) {
+              url.has_validation_error = true;
+              state = PATH;
+            }
+            // Otherwise, if buffer is the empty string, then:
+            else if (buffer.empty()) {
+              // Set url’s host to the empty string.
+              url.host = "";
+
+              // If state override is given, then return.
+              if (state_override.has_value()) {
+                return url;
+              }
+
+              // Set state to path start state.
+              state = PATH_START;
+            }
+            // Otherwise, run these steps:
+            else {
+              // Let host be the result of host parsing buffer with url is not special.
+              parser_result<std::string_view> host_result = parse_host(buffer, true);
+              std::optional<std::string_view> host = std::get<0>(host_result);
+              bool has_validation_error = std::get<1>(host_result);
+
+              // Update validation error of the url.
+              if (has_validation_error) {
+                url.has_validation_error = true;
+              }
+
+              // If host is failure, then return failure.
+              if (!host.has_value()) {
+                url.is_valid = true;
+                return url;
+              }
+
+              // If host is "localhost", then set host to the empty string.
+              if (host.value() == "localhost") {
+                host = "";
+              }
+
+              // Set url’s host to host.
+              url.host = host;
+
+              // If state override is given, then return.
+              if (state_override.has_value()) {
+                return url;
+              }
+
+              // Set buffer to the empty string and state to path start state.
+              buffer.clear();
+              state = PATH_START;
+            }
+          }
+          // Otherwise, append c to buffer.
+          else {
+            buffer += *pointer;
+          }
+
           break;
         }
         default:
