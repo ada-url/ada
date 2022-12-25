@@ -617,7 +617,7 @@ namespace ada::parser {
               auto urls_scheme_port = ada::scheme::SPECIAL_SCHEME.find(url.scheme);
 
               // If url’s port is url’s scheme’s default port, then set url’s port to null.
-              if (url.port.value() == urls_scheme_port->second) {
+              if (url.port.has_value() && url.port.value() == urls_scheme_port->second) {
                 url.port = std::nullopt;
               }
 
