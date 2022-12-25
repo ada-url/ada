@@ -246,7 +246,7 @@ namespace ada::parser {
           // While c is an ASCII digit:
           while (unicode::is_ascii_digit(*pointer)) {
             // Let number be c interpreted as decimal number.
-            auto number = static_cast<uint16_t>(std::strtoul(pointer, nullptr, 10));
+            int number = *pointer - '0';
 
             // If ipv4Piece is null, then set ipv4Piece to number.
             if (!ipv4_piece.has_value()) {
