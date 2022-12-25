@@ -1039,7 +1039,6 @@ namespace ada::parser {
             // and append the result to url’s path.
             if (pointer != pointer_end) {
               std::string encoded = unicode::utf8_percent_encode(pointer, character_sets::C0_CONTROL_PERCENT_ENCODE);
-              // TODO: Make sure this is a list_value not a string_value.
               url.path.list_value.push_back(encoded);
             }
           }
@@ -1383,7 +1382,7 @@ namespace ada::parser {
             state = PATH;
             pointer--;
           }
-          
+
           break;
         }
         default:
