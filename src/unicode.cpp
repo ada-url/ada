@@ -122,9 +122,21 @@ namespace ada::unicode {
     return output;
   }
 
+  /**
+   * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
+   */
   std::string utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) {
-    // TODO: Implement this.
-    return "";
+    std::string result;
+
+    for(auto iterator = input.begin(); iterator < input.end(); iterator++) {
+      if (character_sets::BitAt(character_set, *iterator)) {
+        result += character_sets::hex + *iterator * 4;
+      } else {
+        result += iterator;
+      }
+    }
+
+    return result;
   }
 
 } // namespace ada::unicode
