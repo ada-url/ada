@@ -14,9 +14,21 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
    */
-  parser_result<std::string_view> domain_to_ascii(const std::string_view input, bool be_strict) {
-    // TODO: Implement this
-    return std::make_tuple(std::nullopt, false);
+  parser_result<std::string_view> domain_to_ascii(const std::string_view input) {
+    std::string result;
+
+    for (auto pointer = input.begin(); pointer < input.end(); pointer++) {
+      if (*pointer > '\x7f') {
+        // Domain contains non-ascii characters
+        return std::make_tuple(std::nullopt, true);
+      }
+
+      if (unicode::is_ascii_upper_alpha(*pointer)) {
+        pointer += 32;
+      }
+    }
+
+    return std::make_tuple(input, false);
   }
 
   /**
@@ -423,7 +435,7 @@ namespace ada::parser {
     std::string domain = ada::unicode::utf8_decode_without_bom(input);
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    parser_result<std::string_view> ascii_domain_result = domain_to_ascii(domain, false);
+    parser_result<std::string_view> ascii_domain_result = domain_to_ascii(domain);
     std::optional<std::string_view> ascii_domain = std::get<0>(ascii_domain_result);
 
     // If asciiDomain is failure, validation error, return failure.
