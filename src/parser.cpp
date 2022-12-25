@@ -456,6 +456,12 @@ namespace ada::parser {
     // Assign inside brackets. Used by HOST state.
     bool inside_brackets = false;
 
+    // Assign at sign seen.
+    bool at_sign_seen = false;
+
+    // Assign password token seen.
+    bool password_token_seen = false;
+
     // TODO: If input contains any ASCII tab or newline, validation error.
     // TODO: Remove all ASCII tab or newline from input.
 
@@ -487,6 +493,71 @@ namespace ada::parser {
     // Otherwise, increase pointer by 1 and continue with the state machine.
     for (; pointer <= pointer_end && url.is_valid; pointer++) {
       switch (state) {
+        case AUTHORITY: {
+          // If c is U+0040 (@), then:
+          if (*pointer == '@') {
+            // Validation error.
+            url.has_validation_error = true;
+
+            // If atSignSeen is true, then prepend "%40" to buffer.
+            if (at_sign_seen) {
+              buffer.insert(0, "%40");
+            }
+
+            // Set atSignSeen to true.
+            at_sign_seen = true;
+
+            // For each codePoint in buffer:
+            for (auto code_point: buffer) {
+              // If codePoint is U+003A (:) and passwordTokenSeen is false,
+              // then set passwordTokenSeen to true and continue.
+              if (code_point == ':' && !password_token_seen) {
+                password_token_seen = true;
+                continue;
+              }
+
+              // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint
+              // using the userinfo percent-encode set.
+              std::string encoded_code_points = unicode::utf8_percent_encode(std::to_string(code_point), character_sets::USERINFO_PERCENT_ENCODE);
+
+              // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
+              if (password_token_seen) {
+                url.password.append(encoded_code_points);
+              }
+              // Otherwise, append encodedCodePoints to url’s username.
+              else {
+                url.username.append(encoded_code_points);
+              }
+            }
+
+            // Set buffer to the empty string.
+            buffer.clear();
+          }
+          // Otherwise, if one of the following is true:
+          // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+          // - url is special and c is U+005C (\)
+          else if ((pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#') || (url.is_special() && *pointer == '\\')) {
+            // If atSignSeen is true and buffer is the empty string, validation error, return failure.
+            if (at_sign_seen) {
+              buffer.clear();
+              url.has_validation_error = true;
+              url.is_valid = false;
+              return url;
+            }
+
+            // Decrease pointer by the number of code points in buffer plus one,
+            // set buffer to the empty string, and set state to host state.
+            pointer -= buffer.length() + 1;
+            buffer.clear();
+            state = HOST;
+          }
+          // Otherwise, append c to buffer.
+          else {
+            buffer += *pointer;
+          }
+
+          break;
+        }
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
           if (ada::unicode::is_ascii_alpha(*pointer)) {
@@ -858,6 +929,8 @@ namespace ada::parser {
             std::string encoded = unicode::utf8_percent_encode(fragment, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
             url.fragment->append(encoded);
           }
+
+          break;
         }
         case OPAQUE_PATH: {
           // If c is U+003F (?), then set url’s query to the empty string and state to query state.
@@ -890,6 +963,8 @@ namespace ada::parser {
               url.path.list_value.push_back(encoded);
             }
           }
+
+          break;
         }
         default:
           printf("not implemented");
