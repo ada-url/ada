@@ -129,7 +129,13 @@ namespace ada {
     }
 
     [[nodiscard]] std::optional<uint16_t> scheme_default_port() const {
-      return scheme::SPECIAL_SCHEME.find(scheme)->second;
+      auto result = scheme::SPECIAL_SCHEME.find(scheme);
+
+      if (result == scheme::SPECIAL_SCHEME.end()) {
+        return std::nullopt;
+      }
+
+      return result->second;
     }
   }; // struct url
 
