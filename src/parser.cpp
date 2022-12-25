@@ -248,7 +248,7 @@ namespace ada::parser {
           // While c is an ASCII digit:
           while (unicode::is_ascii_digit(*pointer)) {
             // Let number be c interpreted as decimal number.
-            uint16_t number = static_cast<uint16_t>(*pointer);
+            auto number = static_cast<uint16_t>(std::strtoul(pointer, nullptr, 10));
 
             // If ipv4Piece is null, then set ipv4Piece to number.
             if (!ipv4_piece.has_value()) {
@@ -396,7 +396,7 @@ namespace ada::parser {
 
     // Let output be the mathematical integer value that is represented by input in radix-R notation,
     // using ASCII hex digits for digits with values 0 through 15.
-    uint16_t output = static_cast<uint16_t>(std::strtol(input.data(), nullptr, R));
+    auto output = static_cast<uint16_t>(std::strtol(input.data(), nullptr, R));
 
     return std::make_tuple(output, validation_error);
   }
@@ -774,7 +774,7 @@ namespace ada::parser {
           }
 
           break;
-        };
+        }
         case RELATIVE_SLASH: {
           // If url is special and c is U+002F (/) or U+005C (\), then:
           if (url.is_special() && (*pointer == '/' || *pointer =='\\')) {
