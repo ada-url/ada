@@ -1,8 +1,6 @@
 #ifndef ADA_URL_H
 #define ADA_URL_H
 
-#include "scheme.cpp"
-
 #include <optional>
 #include <string>
 #include <string_view>
@@ -101,9 +99,7 @@ namespace ada {
     /**
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
      */
-    [[nodiscard]] bool is_special() const {
-      return ada::scheme::is_special(scheme);
-    }
+    [[nodiscard]] bool is_special() const;
 
     /**
      * A URL has an opaque path if its path is a string.
@@ -128,15 +124,7 @@ namespace ada {
       path.list_value.pop_back();
     }
 
-    [[nodiscard]] std::optional<uint16_t> scheme_default_port() const {
-      auto result = scheme::SPECIAL_SCHEME.find(scheme);
-
-      if (result == scheme::SPECIAL_SCHEME.end()) {
-        return std::nullopt;
-      }
-
-      return result->second;
-    }
+    [[nodiscard]] std::optional<uint16_t> scheme_default_port() const;
   }; // struct url
 
 } // namespace ada
