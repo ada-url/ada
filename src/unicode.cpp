@@ -1,5 +1,4 @@
 #include <set>
-#include <locale>
 
 namespace ada::unicode {
 
