@@ -18,11 +18,8 @@ namespace ada::parser {
     std::string result;
 
     for (auto pointer = input.begin(); pointer < input.end(); pointer++) {
-      if (*pointer > '\x7f') {
-        // Domain contains non-ascii characters
-        return std::make_tuple(std::nullopt, true);
-      }
-
+      // TODO: Validate non-ascii characters, and reject.
+      
       if (unicode::is_ascii_upper_alpha(*pointer)) {
         pointer += 32;
       }
