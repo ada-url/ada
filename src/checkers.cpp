@@ -38,4 +38,15 @@ namespace ada::checkers {
     return std::get<0>(ada::parser::parse_ipv4_number(last)).has_value();
   }
 
+  // A Windows drive letter is two code points, of which the first is an ASCII alpha
+  // and the second is either U+003A (:) or U+007C (|).
+  bool is_windows_drive_letter(std::string_view input) {
+    return input.size() == 2 && unicode::is_ascii_alpha(input[0]) && (input[1] == ':' || input[1] == '|');
+  }
+
+  // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
+  bool is_normalized_windows_drive_letter(std::string_view input) {
+    return is_windows_drive_letter(input) && input[1] == ':';
+  }
+
 } // namespace ada::checkers
