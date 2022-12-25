@@ -5,6 +5,7 @@
 
 namespace ada::checkers {
 
+  // TODO: Refactor this to not use `std::vector` but use pointer arithmetic for performance.
   bool ends_in_a_number(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
     std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
