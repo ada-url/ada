@@ -111,6 +111,22 @@ namespace ada {
     bool has_opaque_path() const {
       return path.is_opaque();
     }
+
+    /**
+     * @see https://url.spec.whatwg.org/#shorten-a-urls-path
+     *
+     * This function assumes url does not have an opaque path.
+     */
+    void shorten_path() {
+      // Let path be url’s path.
+      // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized Windows drive letter, then return.
+      if (scheme == "file" && path.list_value.size() == 1 && checkers::is_normalized_windows_drive_letter(path.list_value[0])) {
+        return;
+      }
+
+      // Remove path’s last item, if any.
+      path.list_value.pop_back();
+    }
   }; // struct url
 
 } // namespace ada

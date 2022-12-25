@@ -725,6 +725,56 @@ namespace ada::parser {
 
           break;
         }
+        case RELATIVE: {
+          // Set url’s scheme to base’s scheme.
+          url.scheme = base_url->scheme;
+
+          // If c is U+002F (/), then set state to relative slash state.
+          if (*pointer == '/') {
+            state = RELATIVE_SLASH;
+          }
+          // Otherwise, if url is special and c is U+005C (\), validation error, set state to relative slash state.
+          else if (url.is_special() && *pointer == '\\') {
+            url.has_validation_error = true;
+            state = RELATIVE_SLASH;
+          }
+          // Otherwise:
+          else {
+            // Set url’s username to base’s username, url’s password to base’s password, url’s host to base’s host,
+            // url’s port to base’s port, url’s path to a clone of base’s path, and url’s query to base’s query.
+            url.username = base_url->username;
+            url.password = base_url->password;
+            url.host = base_url->host;
+            url.port = base_url->port;
+            url.path = base_url->path;
+            url.query = base_url->query;
+
+            // If c is U+003F (?), then set url’s query to the empty string, and state to query state.
+            if (*pointer == '?') {
+              url.query = "";
+              state = QUERY;
+            }
+            // Otherwise, if c is U+0023 (#), set url’s fragment to the empty string and state to fragment state.
+            else if (*pointer == '#') {
+              url.fragment = "";
+              state = FRAGMENT;
+            }
+            // Otherwise, if c is not the EOF code point:
+            else if (pointer != pointer_end) {
+              // Set url’s query to null.
+              url.query = std::nullopt;
+
+              // Shorten url’s path.
+              url.shorten_path();
+
+              // Set state to path state and decrease pointer by 1.
+              state = PATH;
+              pointer--;
+            }
+          }
+
+          break;
+        };
         case RELATIVE_SLASH: {
           // If url is special and c is U+002F (/) or U+005C (\), then:
           if (url.is_special() && (*pointer == '/' || *pointer =='\\')) {
