@@ -1216,6 +1216,44 @@ namespace ada::parser {
           }
           break;
         }
+        case FILE_SLASH: {
+          // If c is U+002F (/) or U+005C (\), then:
+          if (*pointer == '/' || *pointer == '\\') {
+            // If c is U+005C (\), validation error.
+            if (*pointer == '\\') {
+              url.has_validation_error = true;
+            }
+
+            // Set state to file host state.
+            state = FILE_HOST;
+          }
+          // Otherwise:
+          else {
+            // If base is non-null and base’s scheme is "file", then:
+            if (base_url.has_value() && base_url->scheme == "file") {
+              // Set url’s host to base’s host.
+              url.host = base_url->host;
+
+              // If the code point substring from pointer to the end of input does not start with
+              // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
+              // then append base’s path[0] to url’s path.
+              if (std::distance(pointer, pointer_end) < 1 && !base_url->path.list_value.empty()) {
+                auto starts_with_windows_drive_letter = checkers::is_windows_drive_letter(pointer + pointer[0]);
+                auto first_base_url_path = base_url->path.list_value[0];
+
+                if (!starts_with_windows_drive_letter && checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
+                  url.path.list_value.push_back(first_base_url_path);
+                }
+              }
+            }
+
+            // Set state to path state, and decrease pointer by 1.
+            state = PATH;
+            pointer--;
+          }
+          
+          break;
+        }
         default:
           printf("not implemented");
       }
