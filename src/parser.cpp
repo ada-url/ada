@@ -1322,6 +1322,70 @@ namespace ada::parser {
 
           break;
         }
+        case FILE: {
+          // Set url’s scheme to "file".
+          url.scheme = "file";
+
+          // Set url’s host to the empty string.
+          url.host = "";
+
+          // If c is U+002F (/) or U+005C (\), then:
+          if (*pointer == '/' || *pointer == '\\') {
+            // If c is U+005C (\), validation error.
+            if (*pointer == '\\') {
+              url.has_validation_error = true;
+            }
+            // Set state to file slash state.
+            state = FILE_SLASH;
+          }
+          // Otherwise, if base is non-null and base’s scheme is "file":
+          else if (base_url.has_value() && base_url->scheme == "file") {
+            // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
+            url.host = base_url->host;
+            url.path = base_url->path;
+            url.query = base_url->query;
+
+            // If c is U+003F (?), then set url’s query to the empty string and state to query state.
+            if (*pointer == '?') {
+              url.query = "";
+              state = QUERY;
+            }
+            // Otherwise, if c is U+0023 (#), set url’s fragment to the empty string and state to fragment state.
+            else if (*pointer == '#') {
+              url.fragment = "";
+              state = FRAGMENT;
+            }
+            // Otherwise, if c is not the EOF code point:
+            else if (pointer != pointer_end) {
+              // Set url’s query to null.
+              url.query = std::nullopt;
+
+              // If the code point substring from pointer to the end of input does not start with a
+              // Windows drive letter, then shorten url’s path.
+              if (std::distance(pointer, pointer_end) && !checkers::is_windows_drive_letter(pointer + pointer[0])) {
+                url.shorten_path();
+              }
+              // Otherwise:
+              else {
+                // Validation error.
+                url.has_validation_error = true;
+                // Set url’s path to an empty list.
+                url.path.list_value.clear();
+              }
+
+              // Set state to path state and decrease pointer by 1.
+              state = PATH;
+              pointer--;
+            }
+          }
+          // Otherwise, set state to path state, and decrease pointer by 1.
+          else {
+            state = PATH;
+            pointer--;
+          }
+          
+          break;
+        }
         default:
           printf("not implemented");
       }
