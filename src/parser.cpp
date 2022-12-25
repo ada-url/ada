@@ -666,6 +666,36 @@ namespace ada::parser {
 
           break;
         }
+        case NO_SCHEME: {
+          // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
+          if (!base_url.has_value() || (base_url->has_opaque_path() && *pointer != '#')) {
+            url.has_validation_error = true;
+            url.is_valid = false;
+            return url;
+          }
+          // Otherwise, if base has an opaque path and c is U+0023 (#),
+          // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
+          // url’s fragment to the empty string, and set state to fragment state.
+          else if (base_url->has_opaque_path() && *pointer == '#') {
+            url.scheme = base_url->scheme;
+            url.path = base_url->path;
+            url.query = base_url->query;
+            url.fragment = "";
+            state = FRAGMENT;
+          }
+          // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
+          else if (base_url->scheme != "file") {
+            state = RELATIVE;
+            pointer--;
+          }
+          // Otherwise, set state to file state and decrease pointer by 1.
+          else {
+            state = FILE;
+            pointer--;
+          }
+
+          break;
+        }
         case SPECIAL_RELATIVE_OR_AUTHORITY: {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
