@@ -192,15 +192,13 @@ namespace ada::parser {
       }
 
       // Let value and length be 0.
-      int value = 0;
-      int length = 0;
+      long value = 0;
+      long length = 0;
 
       // While length is less than 4 and c is an ASCII hex digit,
       // set value to value × 0x10 + c interpreted as hexadecimal number, and increase pointer and length by 1.
       while (length < 4 && unicode::is_ascii_hex_digit(*pointer)) {
-        // TODO: Make sure this is interpreted as hexadecimal number
-        value = (value * 0x10) + *pointer;
-
+        value = (value * 0x10) + std::strtol(pointer, nullptr, 16);
         pointer++;
         length++;
       }
