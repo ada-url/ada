@@ -47,12 +47,12 @@ namespace ada {
     /**
      * A URL’s username is an ASCII string identifying a username. It is initially the empty string.
      */
-    std::string_view username{};
+    std::string username{};
 
     /**
      * A URL’s password is an ASCII string identifying a password. It is initially the empty string.
      */
-    std::string_view password{};
+    std::string password{};
 
     /**
      * A URL’s host is null or a host. It is initially null.
