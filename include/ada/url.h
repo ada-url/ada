@@ -127,6 +127,10 @@ namespace ada {
       // Remove path’s last item, if any.
       path.list_value.pop_back();
     }
+
+    std::optional<uint16_t> scheme_default_port() const {
+      return scheme::SPECIAL_SCHEME.find(scheme)->second;
+    }
   }; // struct url
 
 } // namespace ada

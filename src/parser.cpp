@@ -1046,6 +1046,60 @@ namespace ada::parser {
 
           break;
         }
+        case PORT: {
+          // If c is an ASCII digit, append c to buffer.
+          if (unicode::is_ascii_digit(*pointer)) {
+            buffer += *pointer;
+          }
+          // Otherwise, if one of the following is true:
+          // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+          // - url is special and c is U+005C (\)
+          // - state override is given
+          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' ||
+                                (url.is_special() && *pointer == '\\') ||
+                                state_override.has_value()) {
+            // If buffer is not the empty string, then:
+            if (!buffer.empty()) {
+              // Let port be the mathematical integer value that is represented by buffer in radix-10
+              // using ASCII digits for digits with values 0 through 9.
+              auto port = static_cast<uint16_t>(std::strtoul(buffer.c_str(), nullptr, 10));
+
+              // If port is greater than 216 − 1, validation error, return failure.
+              if (port > (std::pow(2, 16) - 1)) {
+                url.has_validation_error = true;
+                url.is_valid = false;
+                return url;
+              }
+
+              // Set url’s port to null, if port is url’s scheme’s default port; otherwise to port.
+              if (port == url.scheme_default_port()) {
+                url.port = std::nullopt;
+              } else {
+                url.port = port;
+              }
+
+              // Set buffer to the empty string.
+              buffer.clear();
+            }
+
+            // If state override is given, then return.
+            if (state_override.has_value()) {
+              return url;
+            }
+
+            // Set state to path start state and decrease pointer by 1.
+            state = PATH_START;
+            pointer--;
+          }
+          // Otherwise, validation error, return failure.
+          else {
+            url.has_validation_error = true;
+            url.is_valid = false;
+            return url;
+          }
+
+          break;
+        }
         default:
           printf("not implemented");
       }
