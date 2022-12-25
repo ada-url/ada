@@ -1,4 +1,5 @@
 #include <set>
+#include <locale>
 
 namespace ada::unicode {
 
@@ -62,6 +63,19 @@ namespace ada::unicode {
   // An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR.
   bool is_ascii_tab_or_newline(const char c) {
     return c == '\t' || c == '\n' || c == '\r';
+  }
+
+  // A double-dot path segment must be ".." or an ASCII case-insensitive match for ".%2e", "%2e.", or "%2e%2e".
+  bool is_double_dot_path_segment(std::string_view input) {
+    return input == ".." ||
+      input == ".%2e" || input == ".%2E" ||
+      input == "%2e." || input == "%2E." ||
+      input == "%2e%2e" || input == "%2E%2E" || input == "%2E%2e" || input == "%2e%2E";
+  }
+
+  // A single-dot path segment must be "." or an ASCII case-insensitive match for "%2e".
+  bool is_single_dot_path_segment(std::string_view input) {
+    return input == "." || input == "%2e" || input == "%2E";
   }
 
   unsigned convert_hex_to_binary(const char c) {
