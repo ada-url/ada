@@ -6,7 +6,7 @@ namespace ada {
                             std::optional<ada::url> base_url,
                             ada::encoding_type encoding) noexcept {
 
-    return ada::parser::parse_url(input, base_url, encoding, SCHEME_START);
+    return ada::parser::parse_url(input, std::move(base_url), encoding, SCHEME_START);
   }
 
 } // namespace ada

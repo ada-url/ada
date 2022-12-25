@@ -13,7 +13,7 @@ namespace ada::parser {
   template<typename T> using output = std::optional<T>;
   template<typename T> using parser_result = std::tuple<output<T>, bool>;
 
-  parser_result<std::string_view> domain_to_ascii(const std::string_view input, bool be_strict = false);
+  parser_result<std::string_view> domain_to_ascii(std::string_view input, bool be_strict = false);
   parser_result<uint16_t> parse_ipv4_number(std::string_view input);
   parser_result<std::string_view> parse_opaque_host(std::string_view input, bool validation_error);
   parser_result<std::string_view> parse_ipv6(std::string_view input);

@@ -26,7 +26,7 @@ namespace ada {
     /**
      * A URL has an opaque path if its path is a string.
      */
-    bool is_opaque() const {
+    [[nodiscard]] bool is_opaque() const {
       return string_value.has_value();
     }
   };
@@ -94,21 +94,21 @@ namespace ada {
     /**
      * A URL includes credentials if its username or password is not the empty string.
      */
-    bool includes_credentials() const {
+    [[nodiscard]] bool includes_credentials() const {
       return !username.empty() || !password.empty();
     }
 
     /**
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
      */
-    bool is_special() const {
+    [[nodiscard]] bool is_special() const {
       return ada::scheme::is_special(scheme);
     }
 
     /**
      * A URL has an opaque path if its path is a string.
      */
-    bool has_opaque_path() const {
+    [[nodiscard]] bool has_opaque_path() const {
       return path.is_opaque();
     }
 
@@ -128,7 +128,7 @@ namespace ada {
       path.list_value.pop_back();
     }
 
-    std::optional<uint16_t> scheme_default_port() const {
+    [[nodiscard]] std::optional<uint16_t> scheme_default_port() const {
       return scheme::SPECIAL_SCHEME.find(scheme)->second;
     }
   }; // struct url
