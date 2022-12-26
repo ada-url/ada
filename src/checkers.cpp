@@ -6,7 +6,7 @@
 namespace ada::checkers {
 
   // TODO: Refactor this to not use `std::vector` but use pointer arithmetic for performance.
-  bool ends_in_a_number(std::string_view input, bool &has_validation_error) {
+  bool ends_in_a_number(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
     std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
 
@@ -36,7 +36,7 @@ namespace ada::checkers {
     }
 
     // If parsing last as an IPv4 number does not return failure, then return true.
-    return ada::parser::parse_ipv4_number(last, has_validation_error).has_value();
+    return ada::parser::parse_ipv4_number(last).has_value();
   }
 
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
