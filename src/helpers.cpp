@@ -21,4 +21,18 @@ namespace ada::helpers {
     return output;
   }
 
+  std::string join_vector_string(std::vector<std::string_view> input, std::string_view delimiter) {
+    std::string output{};
+    auto pointer = input.begin();
+
+    while (pointer <= input.end()) {
+      output += *pointer;
+      if (pointer != input.end()) {
+        output += delimiter;
+      }
+    }
+
+    return output;
+  }
+
 } // namespace ada::helpers
