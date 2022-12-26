@@ -93,12 +93,11 @@ namespace ada::unicode {
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
   std::string utf8_decode_without_bom(const std::string_view input) {
-    std::string output;
-
     if (input.empty()) {
       return "";
     }
 
+    std::string output;
     output.reserve(input.length());
 
     for (auto pointer = input.begin(); pointer < input.end(); pointer++) {
