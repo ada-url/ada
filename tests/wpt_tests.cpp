@@ -43,9 +43,16 @@ const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
   } while (0);
 #define TEST_SUCCEED()                                                         \
   do {                                                                         \
-    std::cout << "  success. " << std::endl;                                   \
     return true;                                                               \
   } while (0);
+#define TEST_ASSERT(LHS, RHS, MESSAGE)                                         \
+  do {                                                                         \
+    if (LHS == RHS) { TEST_SUCCEED(); }                                        \
+    else {                                                                     \
+      std::cerr << "Mismatch: '" << LHS << "' - '" << RHS << "'" << std::endl; \
+      TEST_FAIL(MESSAGE);                                                      \
+    }                                                                          \
+  } while (0);                                                                 \
 
 bool file_exists(const char *filename) {
   namespace fs = std::filesystem;
@@ -201,9 +208,7 @@ bool urltestdata_encoding() {
       bool failure = false;
       ada::url input_url = ada::parse(input, base_url, ada::UTF8);
       if (!object["failure"].get(failure)) {
-        if (input_url.is_valid != !failure) {
-          TEST_FAIL("Wrong failure")
-        }
+        TEST_ASSERT(input_url.is_valid, !failure, "Failure");
       } else {
         std::string_view href = object["href"];
         std::cout << "     href " << href << std::endl;
@@ -215,7 +220,9 @@ bool urltestdata_encoding() {
         }
 
         std::string_view protocol = object["protocol"];
-        std::cout << "     protocol " << protocol << std::endl;
+        // WPT tests add ":" suffix to protocol
+        protocol.remove_suffix(1);
+        TEST_ASSERT(input_url.scheme, protocol, "Protocol");
 
         std::string_view username = object["username"];
         std::cout << "     username " << username << std::endl;
