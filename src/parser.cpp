@@ -412,7 +412,7 @@ namespace ada::parser {
 
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
-                std::optional<ada::encoding_type> encoding_override,
+                ada::encoding_type encoding,
                 std::optional<ada::state> state_override) {
 
     // Assign buffer
@@ -429,9 +429,6 @@ namespace ada::parser {
 
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = state_override.value_or(SCHEME_START);
-
-    // Set encoding to the result of getting an output encoding from encoding.
-    ada::encoding_type encoding = encoding_override.value_or(UTF8);
 
     // Define parsed URL
     ada::url url = ada::url();
