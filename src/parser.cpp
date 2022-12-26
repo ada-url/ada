@@ -1299,7 +1299,7 @@ namespace ada::parser {
 
               // If host is failure, then return failure.
               if (!host.has_value()) {
-                url.is_valid = true;
+                url.is_valid = false;
                 return url;
               }
 
