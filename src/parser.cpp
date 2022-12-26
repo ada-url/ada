@@ -138,7 +138,7 @@ namespace ada::parser {
     // For each n of numbers:
     for (auto n: numbers) {
       // Increment ipv4 by n × 256(3 − counter).
-      ipv4 += n * (uint16_t)std::pow(256, 3 - counter);
+      ipv4 += n * static_cast<uint16_t>(std::pow(256, 3 - counter));
 
       // Increment counter by 1.
       counter++;
@@ -385,7 +385,7 @@ namespace ada::parser {
         R = 16;
 
         // Update allowed characters
-        strcpy(allowed_characters, "0123456789abcdefABCDEF");
+        std::strcpy(allowed_characters, "0123456789abcdefABCDEF");
       }
       // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
       else if (input[1] == '0') {
