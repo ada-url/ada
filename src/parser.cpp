@@ -424,9 +424,6 @@ namespace ada::parser {
     // Assign at sign seen.
     bool at_sign_seen = false;
 
-    // Assign password token seen.
-    bool password_token_seen = false;
-
     // TODO: If input contains any ASCII tab or newline, validation error.
     // TODO: Remove all ASCII tab or newline from input.
 
@@ -466,27 +463,14 @@ namespace ada::parser {
             // Set atSignSeen to true.
             at_sign_seen = true;
 
-            // For each codePoint in buffer:
-            for (auto code_point: buffer) {
-              // If codePoint is U+003A (:) and passwordTokenSeen is false,
-              // then set passwordTokenSeen to true and continue.
-              if (code_point == ':' && !password_token_seen) {
-                password_token_seen = true;
-                continue;
-              }
+            // Find the first occurance of ':' to split authority state
+            size_t password_token =  buffer.find(':');
 
-              // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint
-              // using the userinfo percent-encode set.
-              std::string encoded_code_points = unicode::utf8_percent_encode(std::to_string(code_point), character_sets::USERINFO_PERCENT_ENCODE);
-
-              // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
-              if (password_token_seen) {
-                url.password.append(encoded_code_points);
-              }
-              // Otherwise, append encodedCodePoints to url’s username.
-              else {
-                url.username.append(encoded_code_points);
-              }
+            if (password_token == std::string::npos) {
+              url.username = buffer;
+            } else {
+              url.username = unicode::utf8_percent_encode( buffer.substr(0, password_token), character_sets::USERINFO_PERCENT_ENCODE);
+              url.password = unicode::utf8_percent_encode(buffer.substr(password_token), character_sets::USERINFO_PERCENT_ENCODE);
             }
 
             // Set buffer to the empty string.
