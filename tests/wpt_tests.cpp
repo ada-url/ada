@@ -185,15 +185,12 @@ bool urltestdata_encoding() {
   ondemand::document doc = parser.iterate(json);
   for (auto element : doc.get_array()) {
     if (element.type() == ondemand::json_type::string) {
-      std::cout << "     comment: " << element.get_string() << std::endl;
     } else if (element.type() == ondemand::json_type::object) {
       ondemand::object object = element.get_object();
       auto input_element = object["input"];
       std::string_view input;
       auto error = input_element.get_string().get(input);
-      if (!error) {
-        std::cout << "     input " << input << std::endl;
-      } else {
+      if (error) {
         // we have a non-UTF-8 input.
         input = input_element.raw_json_token();
         std::cout << "     raw input " << input << std::endl;
@@ -210,39 +207,35 @@ bool urltestdata_encoding() {
       if (!object["failure"].get(failure)) {
         TEST_ASSERT(input_url.is_valid, !failure, "Failure");
       } else {
-        std::string_view href = object["href"];
-        std::cout << "     href " << href << std::endl;
-
-        std::string_view origin;
-        if (!object["     origin"].get(origin)) {
-          // origin is optional.
-          std::cout << "     origin " << origin << std::endl;
-        }
-
         std::string_view protocol = object["protocol"];
         // WPT tests add ":" suffix to protocol
         protocol.remove_suffix(1);
         TEST_ASSERT(input_url.scheme, protocol, "Protocol");
 
         std::string_view username = object["username"];
-        std::cout << "     username " << username << std::endl;
+        TEST_ASSERT(input_url.username, username, "Username");
 
         std::string_view password = object["password"];
-        std::cout << "     password " << password << std::endl;
+        TEST_ASSERT(input_url.password, password, "Password");
 
         std::string_view host = object["host"];
-        std::cout << "     host " << host << std::endl;
-
-        std::string_view hostname = object["hostname"];
-        std::cout << "     hostname " << hostname << std::endl;
+        TEST_ASSERT(input_url.host.value_or(""), host, "Host");
 
         std::string_view port = object["port"];
-        std::cout << "     port " << port << std::endl;
+        std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
+        TEST_ASSERT(expected_port, port, "Port");
 
-        std::string_view search = object["search"];
-        std::cout << "     search " << search << std::endl;
+        std::string_view pathname = object["pathname"];
+        auto expected_path = input_url.path.string_value.value_or(ada::helpers::join_vector_string(input_url.path.list_value, "/"));
+        TEST_ASSERT(expected_path, pathname, "Pathname");
+
+        std::string_view query;
+        if (!object["query"].get(query)) {
+          TEST_ASSERT(input_url.query.value_or(""), query, "Query");
+        }
+
         std::string_view hash = object["hash"];
-        std::cout << "     hash " << hash << std::endl;
+        TEST_ASSERT(input_url.fragment.value_or(""), hash, "Hash/Fragment");
       }
     }
   }
