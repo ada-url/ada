@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 
+#include "ada.h"
 #include "simdjson.h"
 using namespace simdjson;
 
@@ -193,12 +194,16 @@ bool urltestdata_encoding() {
         std::cout << "    warning: invalid UTF-8 input!" << std::endl;
       }
       std::string_view base;
+      std::optional<ada::url> base_url;
       if (!object["base"].get(base)) {
-        std::cout << "     base " << base << std::endl;
+        base_url = ada::parse(base, std::make_optional<ada::url>(), ada::UTF8);
       }
       bool failure = false;
+      ada::url input_url = ada::parse(input, base_url, ada::UTF8);
       if (!object["failure"].get(failure)) {
-        std::cout << "     failure" << std::endl;
+        if (input_url.is_valid != !failure) {
+          TEST_FAIL("Wrong failure")
+        }
       } else {
         std::string_view href = object["href"];
         std::cout << "     href " << href << std::endl;
