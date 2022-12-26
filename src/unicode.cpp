@@ -9,10 +9,6 @@ namespace ada::unicode {
     '\u0000', '\u0009', '\u000A', '\u000D', ' ', '#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '|'
   };
 
-  bool is_in_code_points(char value, std::set<char> code_points) {
-    return code_points.find(value) != code_points.end();
-  }
-
   // An ASCII upper alpha is a code point in the range U+0041 (A) to U+005A (Z), inclusive.
   bool is_ascii_upper_alpha(const char c) {
     return c >= 'A' && c <= 'Z';

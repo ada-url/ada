@@ -23,7 +23,7 @@ namespace ada::scheme {
    * @return If scheme is a special scheme
    */
   bool is_special(std::string_view scheme) {
-    return SPECIAL_SCHEME.find(scheme) != SPECIAL_SCHEME.end();
+    return SPECIAL_SCHEME.count(scheme);
   }
 
 } // namespace ada::scheme

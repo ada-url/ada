@@ -30,7 +30,8 @@ namespace ada::parser {
   std::optional<std::string_view> parse_opaque_host(std::string_view input) {
     for (auto i = input.begin(); i < input.end(); i++) {
       // If input contains a forbidden host code point, validation error, return failure.
-      if (ada::unicode::is_in_code_points(*i, ada::unicode::FORBIDDEN_HOST_CODE_POINTS)) {
+      // TODO: Replace this with .contains after moving to C++ 20.
+      if (ada::unicode::FORBIDDEN_HOST_CODE_POINTS.count(*i)) {
         return std::nullopt;
       }
     }
@@ -73,7 +74,7 @@ namespace ada::parser {
       }
 
       // Append result[0] to numbers.
-      numbers.push_back(result.value());
+      numbers.push_back(*result);
     }
 
     // Let ipv4 be the last item in numbers.
@@ -227,7 +228,7 @@ namespace ada::parser {
             }
             // Otherwise, set ipv4Piece to ipv4Piece × 10 + number.
             else {
-              ipv4_piece = ipv4_piece.value() * 10 + number;
+              ipv4_piece = *ipv4_piece * 10 + number;
             }
 
             // If ipv4Piece is greater than 255, validation error, return failure.
@@ -240,7 +241,7 @@ namespace ada::parser {
           }
 
           // Set address[pieceIndex] to address[pieceIndex] × 0x100 + ipv4Piece.
-          address[piece_index] = static_cast<uint16_t>(address[piece_index] * 0x100) + ipv4_piece.value();
+          address[piece_index] = static_cast<uint16_t>(address[piece_index] * 0x100) + *ipv4_piece;
 
           // Increase numbersSeen by 1.
           numbers_seen++;
@@ -284,7 +285,7 @@ namespace ada::parser {
     // If compress is non-null, then:
     if (compress.has_value()) {
       // Let swaps be pieceIndex − compress.
-      auto swaps = piece_index - compress.value();
+      auto swaps = piece_index - *compress;
 
       // Set pieceIndex to 7.
       piece_index = 7;
@@ -292,7 +293,7 @@ namespace ada::parser {
       // While pieceIndex is not 0 and swaps is greater than 0,
       // swap address[pieceIndex] with address[compress + swaps − 1], and then decrease both pieceIndex and swaps by 1.
       while (piece_index != 0 && swaps > 0) {
-        std::swap(address[piece_index], address[compress.value() + swaps - 1]);
+        std::swap(address[piece_index], address[*compress + swaps - 1]);
         piece_index--;
         swaps--;
       }
@@ -387,8 +388,7 @@ namespace ada::parser {
     }
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
-    std::string domain = ada::unicode::utf8_decode_without_bom(input);
-    std::string_view ascii_domain{domain};
+    std::string_view ascii_domain{ada::unicode::utf8_decode_without_bom(input)};
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
     bool ascii_domain_failed = domain_to_ascii(ascii_domain);
@@ -447,7 +447,7 @@ namespace ada::parser {
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
-    for (; pointer <= pointer_end && url.is_valid; pointer++) {
+    for (; pointer <= pointer_end; pointer++) {
       switch (state) {
         case AUTHORITY: {
           // If c is U+0040 (@), then:
@@ -511,6 +511,7 @@ namespace ada::parser {
           // Otherwise, validation error, return failure.
           else {
             url.is_valid = false;
+            return url;
           }
           break;
         }
@@ -548,7 +549,7 @@ namespace ada::parser {
               auto urls_scheme_port = ada::scheme::SPECIAL_SCHEME.find(url.scheme);
 
               // If url’s port is url’s scheme’s default port, then set url’s port to null.
-              if (url.port.has_value() && url.port.value() == urls_scheme_port->second) {
+              if (url.port.has_value() && *url.port == urls_scheme_port->second) {
                 url.port = std::nullopt;
               }
 
@@ -595,6 +596,7 @@ namespace ada::parser {
           // Otherwise, validation error, return failure.
           else {
             url.is_valid = false;
+            return url;
           }
 
           break;
@@ -810,7 +812,7 @@ namespace ada::parser {
             // If buffer is the empty string, validation error, return failure.
             if (buffer.empty()) {
               url.is_valid = false;
-              break;
+              return url;
             }
             // If state override is given and state override is hostname state, then return.
             else if (state_override.has_value() && state_override == HOST) {
@@ -823,7 +825,7 @@ namespace ada::parser {
             // If host is failure, then return failure.
             if (!host.has_value()) {
               url.is_valid = false;
-              break;
+              return url;
             }
 
             // Set url’s host to host, buffer to the empty string, and state to port state.
@@ -841,7 +843,7 @@ namespace ada::parser {
             // If url is special and buffer is the empty string, validation error, return failure.
             if (url.is_special() && buffer.empty()) {
               url.is_valid = false;
-              break;
+              return url;
             }
             // Otherwise, if state override is given, buffer is the empty string,
             // and either url includes credentials or url’s port is non-null, return.
@@ -855,7 +857,7 @@ namespace ada::parser {
             // If host is failure, then return failure.
             if (!host.has_value()) {
               url.is_valid = false;
-              break;
+              return url;
             }
 
             // Set url’s host to host, buffer to the empty string, and state to path start state.
@@ -1136,7 +1138,7 @@ namespace ada::parser {
               }
 
               // If host is "localhost", then set host to the empty string.
-              if (host.value() == "localhost") {
+              if (*host == "localhost") {
                 host = "";
               }
 

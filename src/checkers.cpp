@@ -26,11 +26,11 @@ namespace ada::checkers {
 
     // If last is non-empty and contains only ASCII digits, then return true.
     if (!last.empty()) {
-      auto non_ascii_digit = std::find_if(last.begin(), last.end(), [](char c) {
+      auto non_ascii_digit = std::any_of(last.begin(), last.end(), [](char c) {
         return !std::isdigit(c);
       });
 
-      if (non_ascii_digit != last.end()) {
+      if (non_ascii_digit) {
         return true;
       }
     }
