@@ -27,7 +27,7 @@ namespace ada::checkers {
     // If last is non-empty and contains only ASCII digits, then return true.
     if (!last.empty()) {
       auto non_ascii_digit = std::find_if(last.begin(), last.end(), [](char c) {
-        return !ada::unicode::is_ascii_digit(c);
+        return !std::isdigit(c);
       });
 
       if (non_ascii_digit != last.end()) {
@@ -42,7 +42,7 @@ namespace ada::checkers {
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
   // and the second is either U+003A (:) or U+007C (|).
   bool is_windows_drive_letter(std::string_view input) {
-    return input.size() == 2 && unicode::is_ascii_alpha(input[0]) && (input[1] == ':' || input[1] == '|');
+    return input.size() == 2 && std::isalpha(input[0]) && (input[1] == ':' || input[1] == '|');
   }
 
   // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).

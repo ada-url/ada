@@ -208,12 +208,12 @@ namespace ada::parser {
           }
 
           // If c is not an ASCII digit, validation error, return failure.
-          if (!unicode::is_ascii_digit(*pointer)) {
+          if (!std::isdigit(*pointer)) {
             return std::nullopt;
           }
 
           // While c is an ASCII digit:
-          while (unicode::is_ascii_digit(*pointer)) {
+          while (std::isdigit(*pointer)) {
             // Let number be c interpreted as decimal number.
             int number = *pointer - '0';
 
@@ -499,7 +499,7 @@ namespace ada::parser {
         }
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
-          if (ada::unicode::is_ascii_alpha(*pointer)) {
+          if (std::isalpha(*pointer)) {
             buffer += static_cast<char>(tolower(*pointer));
             state = SCHEME;
           }
@@ -516,7 +516,7 @@ namespace ada::parser {
         }
         case SCHEME: {
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
-          if (ada::unicode::is_ascii_alphanumeric(*pointer) || *pointer == '+' || *pointer == '-' || *pointer == '.') {
+          if (std::isalnum(*pointer) || *pointer == '+' || *pointer == '-' || *pointer == '.') {
             buffer += static_cast<char>(tolower(*pointer));
           }
           // Otherwise, if c is U+003A (:), then:
@@ -921,7 +921,7 @@ namespace ada::parser {
         }
         case PORT: {
           // If c is an ASCII digit, append c to buffer.
-          if (unicode::is_ascii_digit(*pointer)) {
+          if (std::isdigit(*pointer)) {
             buffer += *pointer;
           }
           // Otherwise, if one of the following is true:
