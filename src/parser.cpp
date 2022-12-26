@@ -722,12 +722,10 @@ namespace ada::parser {
           // - url’s port to base’s port,
           // - state to path state, and then, decrease pointer by 1.
           else {
-            if (base_url.has_value()) {
-              url.username = base_url->username;
-              url.password = base_url->password;
-              url.host = base_url->host;
-              url.port = base_url->port;
-            }
+            url.username = base_url->username;
+            url.password = base_url->password;
+            url.host = base_url->host;
+            url.port = base_url->port;
             state = PATH;
             pointer--;
           }
