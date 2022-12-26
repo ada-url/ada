@@ -40,7 +40,7 @@ namespace ada {
      * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
      * URL for further processing after parsing. It is initially the empty string.
      */
-    std::string_view scheme{};
+    std::string scheme{};
 
     /**
      * A URL’s username is an ASCII string identifying a username. It is initially the empty string.
