@@ -369,6 +369,9 @@ namespace ada::parser {
     // Let R be 10.
     int R = 10;
 
+    // Allowed characters
+    char allowed_characters[23] = "0123456789";
+
     if (input.length() >= 2) {
       // If input contains at least two code points and the first two code points are either "0X" or "0x", then:
       if (input[0] == '0' && (input[1] == 'X' || input[1] == 'x')) {
@@ -380,6 +383,9 @@ namespace ada::parser {
 
         // Set R to 16.
         R = 16;
+
+        // Update allowed characters
+        strcpy(allowed_characters, "0123456789abcdefABCDEF");
       }
       // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
       else if (input[1] == '0') {
@@ -399,7 +405,10 @@ namespace ada::parser {
       return std::make_tuple(0, true);
     }
 
-    // TODO: If input contains a code point that is not a radix-R digit, then return failure.
+    // If input contains a code point that is not a radix-R digit, then return failure.
+    if (std::strspn(input.data(), allowed_characters) < input.length()) {
+      return std::make_tuple(std::nullopt, true);
+    }
 
     // Let output be the mathematical integer value that is represented by input in radix-R notation,
     // using ASCII hex digits for digits with values 0 through 15.
