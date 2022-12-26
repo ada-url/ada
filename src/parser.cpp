@@ -5,9 +5,9 @@
 #include <array>
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <cmath>
 #include <cstdlib>
-#include <string>
 
 namespace ada::parser {
 
@@ -133,12 +133,12 @@ namespace ada::parser {
     numbers.pop_back();
 
     // Let counter be 0.
-    int counter = 0;
+    auto counter = 0;
 
     // For each n of numbers:
     for (auto n: numbers) {
       // Increment ipv4 by n × 256(3 − counter).
-      ipv4 += n * static_cast<uint16_t>(std::pow(256, 3 - counter));
+      ipv4 += static_cast<uint16_t>(n * std::pow(256, 3 - counter));
 
       // Increment counter by 1.
       counter++;
@@ -280,7 +280,7 @@ namespace ada::parser {
           }
 
           // Set address[pieceIndex] to address[pieceIndex] × 0x100 + ipv4Piece.
-          address[piece_index] = address[piece_index] * 0x100 + ipv4_piece.value();
+          address[piece_index] = static_cast<uint16_t>(address[piece_index] * 0x100) + ipv4_piece.value();
 
           // Increase numbersSeen by 1.
           numbers_seen++;
