@@ -7,6 +7,7 @@
 namespace ada::helpers {
 
   std::vector<std::string_view> split_string_view(std::string_view input, std::string_view delimiter);
+  std::string join_vector_string(std::vector<std::string_view> input, std::string_view delimiter);
 
 } // namespace ada::helpers
 
