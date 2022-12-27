@@ -918,6 +918,7 @@ namespace ada::parser {
             // If c is not the EOF code point, UTF-8 percent-encode c using the C0 control percent-encode set
             // and append the result to url’s path.
             if (pointer != pointer_end) {
+              // TODO: No need to iterate and push_back character by character. We can do it in bulk.
               std::string encoded = unicode::utf8_percent_encode(pointer, character_sets::C0_CONTROL_PERCENT_ENCODE);
               url.path.list_value.push_back(encoded);
             }

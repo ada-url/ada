@@ -19,6 +19,7 @@ namespace ada {
    */
   struct url_path {
 
+    // TODO: Investigate on how to reduce the usage of both vector and string_view
     std::optional<std::string_view> string_value{};
 
     std::vector<std::string_view> list_value{};
