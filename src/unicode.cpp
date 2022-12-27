@@ -1,11 +1,11 @@
-#include <set>
+#include <unordered_set>
 
 namespace ada::unicode {
 
   // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),
   // U+002F (/), U+003A (:), U+003C (<), U+003E (>), U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]),
   // U+005E (^), or U+007C (|).
-  static const std::set<char> FORBIDDEN_HOST_CODE_POINTS {
+  static const std::unordered_set<char> FORBIDDEN_HOST_CODE_POINTS {
     '\u0000', '\u0009', '\u000A', '\u000D', ' ', '#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '|'
   };
 
