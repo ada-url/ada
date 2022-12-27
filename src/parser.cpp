@@ -476,7 +476,7 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if ((pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#') || (url.is_special() && *pointer == '\\')) {
+          else if ((pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#') || (url.is_special && *pointer == '\\')) {
             // If atSignSeen is true and buffer is the empty string, validation error, return failure.
             if (at_sign_seen) {
               buffer.clear();
@@ -543,6 +543,7 @@ namespace ada::parser {
 
             // Set url’s scheme to buffer.
             url.scheme = buffer;
+            url.is_special = ada::scheme::is_special(buffer);
 
             // If state override is given, then:
             if (state_override.has_value()) {
@@ -567,12 +568,12 @@ namespace ada::parser {
               state = FILE;
             }
             // Otherwise, if url is special, base is non-null, and base’s scheme is url’s scheme:
-            else if (url.is_special() && base_url.has_value() && base_url->scheme == url.scheme) {
+            else if (url.is_special && base_url.has_value() && base_url->scheme == url.scheme) {
               // Set state to special relative or authority state.
               state = SPECIAL_RELATIVE_OR_AUTHORITY;
             }
             // Otherwise, if url is special, set state to special authority slashes state.
-            else if (url.is_special()) {
+            else if (url.is_special) {
               state = SPECIAL_AUTHORITY_SLASHES;
             }
             // Otherwise, if remaining starts with an U+002F (/), set state to path or authority state
@@ -613,6 +614,7 @@ namespace ada::parser {
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
           else if (base_url->has_opaque_path() && *pointer == '#') {
+            url.is_special = ada::scheme::is_special(base_url->scheme);
             url.scheme = base_url->scheme;
             url.path = base_url->path;
             url.query = base_url->query;
@@ -663,13 +665,14 @@ namespace ada::parser {
         case RELATIVE: {
           // Set url’s scheme to base’s scheme.
           url.scheme = base_url->scheme;
+          url.is_special = scheme::is_special(base_url->scheme);
 
           // If c is U+002F (/), then set state to relative slash state.
           if (*pointer == '/') {
             state = RELATIVE_SLASH;
           }
           // Otherwise, if url is special and c is U+005C (\), validation error, set state to relative slash state.
-          else if (url.is_special() && *pointer == '\\') {
+          else if (url.is_special && *pointer == '\\') {
             state = RELATIVE_SLASH;
           }
           // Otherwise:
@@ -711,7 +714,7 @@ namespace ada::parser {
         }
         case RELATIVE_SLASH: {
           // If url is special and c is U+002F (/) or U+005C (\), then:
-          if (url.is_special() && (*pointer == '/' || *pointer =='\\')) {
+          if (url.is_special && (*pointer == '/' || *pointer =='\\')) {
             // Set state to special authority ignore slashes state.
             state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
           }
@@ -765,7 +768,7 @@ namespace ada::parser {
           // - url is not special
           // - url’s scheme is "ws" or "wss"
           if (encoding != UTF8) {
-            if (!url.is_special() || url.scheme == "ws" || url.scheme == "wss") {
+            if (!url.is_special || url.scheme == "ws" || url.scheme == "wss") {
               // then set encoding to UTF-8.
               encoding = UTF8;
             }
@@ -777,7 +780,7 @@ namespace ada::parser {
           if ((!state_override.has_value() && *pointer == '#') || pointer == pointer_end) {
             // Let queryPercentEncodeSet be the special-query percent-encode set if url is special;
             // otherwise the query percent-encode set.
-            auto query_percent_encode_set = url.is_special() ?
+            auto query_percent_encode_set = url.is_special ?
                                   ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
                                   ada::character_sets::QUERY_PERCENT_ENCODE;
 
@@ -838,12 +841,12 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if ((pointer == pointer_end && *pointer == '/' && *pointer == '?' && *pointer == '#') || (url.is_special() && *pointer == '\\')) {
+          else if ((pointer == pointer_end && *pointer == '/' && *pointer == '?' && *pointer == '#') || (url.is_special && *pointer == '\\')) {
             // then decrease pointer by 1, and then:
             pointer--;
 
             // If url is special and buffer is the empty string, validation error, return failure.
-            if (url.is_special() && buffer.empty()) {
+            if (url.is_special && buffer.empty()) {
               url.is_valid = false;
               return url;
             }
@@ -933,7 +936,7 @@ namespace ada::parser {
           // - url is special and c is U+005C (\)
           // - state override is given
           else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' ||
-                                (url.is_special() && *pointer == '\\') ||
+                                (url.is_special && *pointer == '\\') ||
                                 state_override.has_value()) {
             // If buffer is not the empty string, then:
             if (!buffer.empty()) {
@@ -977,7 +980,7 @@ namespace ada::parser {
         }
         case PATH_START: {
           // If url is special, then:
-          if (url.is_special()) {
+          if (url.is_special) {
             // Set state to path state.
             state = PATH;
 
@@ -1021,7 +1024,7 @@ namespace ada::parser {
           // - c is the EOF code point or U+002F (/)
           // - url is special and c is U+005C (\)
           // - state override is not given and c is U+003F (?) or U+0023 (#)
-          if (pointer == pointer_end || *pointer == '/' || (url.is_special() && *pointer == '\\') || (!state_override.has_value() && (*pointer == '?' || *pointer == '#'))) {
+          if (pointer == pointer_end || *pointer == '/' || (url.is_special && *pointer == '\\') || (!state_override.has_value() && (*pointer == '?' || *pointer == '#'))) {
             // If buffer is a double-dot path segment, then:
             if (unicode::is_double_dot_path_segment(buffer)) {
               // Shorten url’s path.
@@ -1029,13 +1032,13 @@ namespace ada::parser {
 
               // If neither c is U+002F (/), nor url is special and c is U+005C (\),
               // append the empty string to url’s path.
-              if (*pointer != '/' && !(url.is_special() && *pointer == '\\')) {
+              if (*pointer != '/' && !(url.is_special && *pointer == '\\')) {
                 url.path.list_value.emplace_back("");
               }
             }
             // Otherwise, if buffer is a single-dot path segment and if neither c is U+002F (/),
             // nor url is special and c is U+005C (\), append the empty string to url’s path.
-            else if (unicode::is_single_dot_path_segment(buffer) && *pointer != '/' && !(url.is_special() && *pointer == '\\')) {
+            else if (unicode::is_single_dot_path_segment(buffer) && *pointer != '/' && !(url.is_special && *pointer == '\\')) {
               url.path.list_value.emplace_back("");
             }
             // Otherwise, if buffer is not a single-dot path segment, then:
@@ -1080,7 +1083,7 @@ namespace ada::parser {
           // Otherwise:
           else {
             // If base is non-null and base’s scheme is "file", then:
-            if (base_url.has_value() && base_url->scheme == "file") {
+            if (base_url->scheme == "file") {
               // Set url’s host to base’s host.
               url.host = base_url->host;
 
@@ -1167,6 +1170,7 @@ namespace ada::parser {
         case FILE: {
           // Set url’s scheme to "file".
           url.scheme = "file";
+          url.is_special = true;
 
           // Set url’s host to the empty string.
           url.host = "";
