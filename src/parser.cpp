@@ -536,7 +536,7 @@ namespace ada::parser {
               }
 
               // If url’s scheme is "file" and its host is an empty host, then return.
-              if (url.scheme == "file" && (!url.host.has_value() || url.host->empty())) {
+              if (url.scheme == "file" && url.host.empty()) {
                 return url;
               }
             }
@@ -834,7 +834,7 @@ namespace ada::parser {
             }
 
             // Set url’s host to host, buffer to the empty string, and state to port state.
-            url.host = host;
+            url.host = *host;
             buffer.clear();
             state = PORT;
           }
@@ -866,7 +866,7 @@ namespace ada::parser {
             }
 
             // Set url’s host to host, buffer to the empty string, and state to path start state.
-            url.host = host;
+            url.host = *host;
             buffer.clear();
             state = PATH_START;
 
@@ -896,8 +896,7 @@ namespace ada::parser {
           // If c is not the EOF code point, then:
           if (pointer != pointer_end) {
             // UTF-8 percent-encode c using the fragment percent-encode set and append the result to url’s fragment.
-            std::string fragment(*pointer, 1);
-            std::string encoded = unicode::utf8_percent_encode(fragment, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+            std::string encoded = unicode::utf8_percent_encode(std::to_string(*pointer), ada::character_sets::FRAGMENT_PERCENT_ENCODE);
             url.fragment->append(encoded);
           }
 
@@ -1012,7 +1011,7 @@ namespace ada::parser {
             }
           }
           // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
-          else if (state_override.has_value() && !url.host.has_value()) {
+          else if (state_override.has_value() && url.host.empty()) {
             // To append to a list that is not an ordered set is to add the given item to the end of the list.
             url.path.list_value.emplace_back("");
           }
@@ -1148,7 +1147,7 @@ namespace ada::parser {
               }
 
               // Set url’s host to host.
-              url.host = host;
+              url.host = *host;
 
               // If state override is given, then return.
               if (state_override.has_value()) {
@@ -1173,7 +1172,7 @@ namespace ada::parser {
           url.is_special = true;
 
           // Set url’s host to the empty string.
-          url.host = "";
+          url.host.clear();
 
           // If c is U+002F (/) or U+005C (\), then:
           if (*pointer == '/' || *pointer == '\\') {
