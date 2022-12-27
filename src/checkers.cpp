@@ -6,7 +6,7 @@
 namespace ada::checkers {
 
   // TODO: Refactor this to not use `std::vector` but use pointer arithmetic for performance.
-  ada_really_inline bool ends_in_a_number(std::string_view input) {
+  bool ends_in_a_number(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
     std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
 
@@ -41,12 +41,12 @@ namespace ada::checkers {
 
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
   // and the second is either U+003A (:) or U+007C (|).
-  ada_really_inline bool is_windows_drive_letter(std::string_view input) {
+  bool is_windows_drive_letter(std::string_view input) {
     return input.size() == 2 && std::isalpha(input[0]) && (input[1] == ':' || input[1] == '|');
   }
 
   // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
-  ada_really_inline bool is_normalized_windows_drive_letter(std::string_view input) {
+  bool is_normalized_windows_drive_letter(std::string_view input) {
     return is_windows_drive_letter(input) && input[1] == ':';
   }
 

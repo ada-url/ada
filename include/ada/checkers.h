@@ -7,9 +7,9 @@
 
 namespace ada::checkers {
 
-  ada_really_inline bool ends_in_a_number(std::string_view input);
-  ada_really_inline bool is_windows_drive_letter(std::string_view input);
-  ada_really_inline bool is_normalized_windows_drive_letter(std::string_view input);
+  bool ends_in_a_number(std::string_view input);
+  bool is_windows_drive_letter(std::string_view input);
+  bool is_normalized_windows_drive_letter(std::string_view input);
 
 } // namespace ada::checkers
 
