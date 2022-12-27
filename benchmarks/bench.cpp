@@ -25,7 +25,8 @@ std::string url_examples[] = {
     "https://images-na.ssl-images-amazon.com/images/I/"
     "41Gc3C8UysL.css?AUIClients/AmazonGatewayAuiAssets",
     "https://www.reddit.com/?after=t3_zvz1ze",
-    "https://www.reddit.com/login/?dest=https%3A%2F%2Fwww.reddit.com%2F"};
+    "https://www.reddit.com/login/?dest=https%3A%2F%2Fwww.reddit.com%2F",
+    "postgresql://other:9818274x1!!@localhost:5432/otherdb?connect_timeout=10&application_name=myapp"};
 
 
 
