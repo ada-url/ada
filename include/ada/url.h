@@ -86,12 +86,6 @@ namespace ada {
     bool is_valid = true;
 
     /**
-     * A validation error indicates a mismatch between input and valid input.
-     * User agents, especially conformance checkers, are encouraged to report them somewhere.
-     */
-    bool has_validation_error = false;
-
-    /**
      * A URL includes credentials if its username or password is not the empty string.
      */
     [[nodiscard]] ada_really_inline bool includes_credentials() const {
