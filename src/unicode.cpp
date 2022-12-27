@@ -10,38 +10,38 @@ namespace ada::unicode {
   };
 
   // An ASCII upper alpha is a code point in the range U+0041 (A) to U+005A (Z), inclusive.
-  bool is_ascii_upper_alpha(const char c) {
+  ada_really_inline bool is_ascii_upper_alpha(const char c) {
     return c >= 'A' && c <= 'Z';
   }
 
   // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
-  bool is_ascii_upper_hex_digit(const char c) {
+  ada_really_inline bool is_ascii_upper_hex_digit(const char c) {
     return std::isdigit(c) || (c >= 'A' && c <= 'F');
   }
 
   // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
-  bool is_ascii_lower_hex_digit(const char c) {
+  ada_really_inline bool is_ascii_lower_hex_digit(const char c) {
     return std::isdigit(c) || (c >= 'a' && c<= 'f');
   }
 
   // An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit.
-  bool is_ascii_hex_digit(const char c) {
+  ada_really_inline bool is_ascii_hex_digit(const char c) {
     return is_ascii_upper_hex_digit(c) || is_ascii_lower_hex_digit(c);
   }
 
   // A C0 control or space is a C0 control or U+0020 SPACE.
   // A C0 control is a code point in the range U+0000 NULL to U+001F INFORMATION SEPARATOR ONE, inclusive.
-  bool is_c0_control_or_space(const char c) {
+  ada_really_inline bool is_c0_control_or_space(const char c) {
     return (unsigned char) c <= ' ';
   }
 
   // An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR.
-  bool is_ascii_tab_or_newline(const char c) {
+  ada_really_inline bool is_ascii_tab_or_newline(const char c) {
     return c == '\t' || c == '\n' || c == '\r';
   }
 
   // A double-dot path segment must be ".." or an ASCII case-insensitive match for ".%2e", "%2e.", or "%2e%2e".
-  bool is_double_dot_path_segment(std::string_view input) {
+  ada_really_inline bool is_double_dot_path_segment(std::string_view input) {
     return input == ".." ||
       input == ".%2e" || input == ".%2E" ||
       input == "%2e." || input == "%2E." ||
@@ -49,7 +49,7 @@ namespace ada::unicode {
   }
 
   // A single-dot path segment must be "." or an ASCII case-insensitive match for "%2e".
-  bool is_single_dot_path_segment(std::string_view input) {
+  ada_really_inline bool is_single_dot_path_segment(std::string_view input) {
     return input == "." || input == "%2e" || input == "%2E";
   }
 
