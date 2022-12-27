@@ -73,17 +73,17 @@ namespace ada::parser {
         return std::nullopt;
       }
 
+      // If any but the last item in numbers is greater than 255, then return failure.
+      if (*result > 255 && part != parts.back()) {
+        return std::nullopt;
+      }
+
       // Append result[0] to numbers.
       numbers.push_back(*result);
     }
 
     // Let ipv4 be the last item in numbers.
     uint16_t ipv4 = numbers.back();
-
-    // If any but the last item in numbers is greater than 255, then return failure.
-    if (ipv4 > 255) {
-      return std::nullopt;
-    }
 
     // If the last item in numbers is greater than or equal to 256(5 − numbers’s size), validation error, return failure.
     if (ipv4 >= std::pow(256, 5 - numbers.size())) {
