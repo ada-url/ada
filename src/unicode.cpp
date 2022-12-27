@@ -103,9 +103,9 @@ namespace ada::unicode {
   std::string utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) {
     std::string result;
 
-    for(auto iterator = input.begin(); iterator < input.end(); iterator++) {
-      if (character_sets::BitAt(character_set, *iterator)) {
-        result += character_sets::hex + *iterator * 4;
+    for (auto iterator: input) {
+      if (character_sets::BitAt(character_set, iterator)) {
+        result += character_sets::hex + iterator * 4;
       } else {
         result += iterator;
       }
