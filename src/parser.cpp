@@ -350,11 +350,11 @@ namespace ada::parser {
         // Set R to 8.
         R = 8;
       }
-    }
 
-    // If input is the empty string, then return (0, true).
-    if (input.empty()) {
-      return 0;
+      // If input is the empty string, then return (0, true).
+      if (input.empty()) {
+        return 0;
+      }
     }
 
     // If input contains a code point that is not a radix-R digit, then return failure.
