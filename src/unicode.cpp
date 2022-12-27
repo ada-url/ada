@@ -10,38 +10,38 @@ namespace ada::unicode {
   };
 
   // An ASCII upper alpha is a code point in the range U+0041 (A) to U+005A (Z), inclusive.
-  ada_really_inline bool is_ascii_upper_alpha(const char c) {
+  ada_really_inline bool is_ascii_upper_alpha(const char c) noexcept {
     return c >= 'A' && c <= 'Z';
   }
 
   // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
-  ada_really_inline bool is_ascii_upper_hex_digit(const char c) {
+  ada_really_inline bool is_ascii_upper_hex_digit(const char c) noexcept {
     return std::isdigit(c) || (c >= 'A' && c <= 'F');
   }
 
   // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
-  ada_really_inline bool is_ascii_lower_hex_digit(const char c) {
+  ada_really_inline bool is_ascii_lower_hex_digit(const char c) noexcept {
     return std::isdigit(c) || (c >= 'a' && c<= 'f');
   }
 
   // An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit.
-  ada_really_inline bool is_ascii_hex_digit(const char c) {
+  ada_really_inline bool is_ascii_hex_digit(const char c) noexcept {
     return is_ascii_upper_hex_digit(c) || is_ascii_lower_hex_digit(c);
   }
 
   // A C0 control or space is a C0 control or U+0020 SPACE.
   // A C0 control is a code point in the range U+0000 NULL to U+001F INFORMATION SEPARATOR ONE, inclusive.
-  ada_really_inline bool is_c0_control_or_space(const char c) {
+  ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept {
     return (unsigned char) c <= ' ';
   }
 
   // An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR.
-  ada_really_inline bool is_ascii_tab_or_newline(const char c) {
+  ada_really_inline constexpr bool is_ascii_tab_or_newline(const char c) noexcept {
     return c == '\t' || c == '\n' || c == '\r';
   }
 
   // A double-dot path segment must be ".." or an ASCII case-insensitive match for ".%2e", "%2e.", or "%2e%2e".
-  ada_really_inline bool is_double_dot_path_segment(std::string_view input) {
+  ada_really_inline constexpr bool is_double_dot_path_segment(std::string_view input) noexcept {
     return input == ".." ||
       input == ".%2e" || input == ".%2E" ||
       input == "%2e." || input == "%2E." ||
@@ -49,11 +49,11 @@ namespace ada::unicode {
   }
 
   // A single-dot path segment must be "." or an ASCII case-insensitive match for "%2e".
-  ada_really_inline bool is_single_dot_path_segment(std::string_view input) {
+  ada_really_inline bool is_single_dot_path_segment(std::string_view input) noexcept {
     return input == "." || input == "%2e" || input == "%2E";
   }
 
-  unsigned convert_hex_to_binary(const char c) {
+  unsigned constexpr convert_hex_to_binary(const char c) noexcept {
     if (c >= '0' && c <= '9')
       return c - '0';
     else if (c >= 'A' && c <= 'F')
@@ -68,7 +68,7 @@ namespace ada::unicode {
    *
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
-  std::string utf8_decode_without_bom(const std::string_view input) {
+  std::string utf8_decode_without_bom(const std::string_view input) noexcept {
     if (input.empty()) {
       return "";
     }
@@ -100,7 +100,7 @@ namespace ada::unicode {
   /**
    * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
    */
-  std::string utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) {
+  std::string utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) noexcept {
     std::string result;
 
     for (auto iterator: input) {
