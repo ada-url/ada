@@ -57,7 +57,7 @@ namespace ada {
     /**
      * A URL’s host is null or a host. It is initially null.
      */
-    std::optional<std::string> host{};
+    std::string host{};
 
     /**
      * A URL’s port is either null or a 16-bit unsigned integer that identifies a networking port. It is initially null.

@@ -219,7 +219,7 @@ bool urltestdata_encoding() {
         TEST_ASSERT(input_url.password, password, "Password");
 
         std::string_view host = object["host"];
-        TEST_ASSERT(input_url.host.value_or(""), host, "Host");
+        TEST_ASSERT(input_url.host, host, "Host");
 
         std::string_view port = object["port"];
         std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
