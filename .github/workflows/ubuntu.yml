@@ -33,3 +33,10 @@ jobs:
           CXX=g++-12 cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} ..  &&
           cmake --build .   &&
           ctest --output-on-failure
+      - name: Run benchmark
+        run: ./build/benchmarks/bench --benchmark_format=json | tee benchmark_result.json
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: 'googlecpp'
+          output-file-path: ./benchmark_result.json
