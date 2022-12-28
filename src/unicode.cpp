@@ -101,7 +101,8 @@ namespace ada::unicode {
    * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
    */
   std::string utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) noexcept {
-    std::string result;
+    std::string result{};
+    result.reserve(input.length());
 
     for (auto iterator: input) {
       if (character_sets::BitAt(character_set, iterator)) {

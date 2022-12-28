@@ -416,16 +416,21 @@ namespace ada::parser {
                 std::optional<ada::state> state_override) {
 
     // Assign buffer
-    std::string buffer;
+    std::string buffer{};
 
     // Assign inside brackets. Used by HOST state.
-    bool inside_brackets = false;
+    bool inside_brackets{false};
 
     // Assign at sign seen.
-    bool at_sign_seen = false;
+    bool at_sign_seen{false};
 
-    // TODO: If input contains any ASCII tab or newline, validation error.
-    // TODO: Remove all ASCII tab or newline from input.
+    std::string trimmed_input = user_input.data();
+
+    // If input contains any ASCII tab or newline, validation error.
+    // Remove all ASCII tab or newline from input.
+    trimmed_input.erase(std::remove_if(trimmed_input.begin(), trimmed_input.end(), [](const char c) {
+      return ada::unicode::is_ascii_tab_or_newline(c);
+    }), trimmed_input.end());
 
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = state_override.value_or(SCHEME_START);
@@ -433,11 +438,13 @@ namespace ada::parser {
     // Define parsed URL
     ada::url url = ada::url();
 
+    std::string_view iterating_input{trimmed_input};
+
     // Remove any leading and trailing C0 control or space from input.
-    auto pointer_start = std::find_if(user_input.begin(), user_input.end(), [](char c) {
+    auto pointer_start = std::find_if(iterating_input.begin(), iterating_input.end(), [](const char c) {
       return !ada::unicode::is_c0_control_or_space(c);
     });
-    auto pointer_end = std::find_if(user_input.rbegin(), user_input.rend(), [](char c) {
+    auto pointer_end = std::find_if(iterating_input.rbegin(), iterating_input.rend(), [](const char c) {
       return !ada::unicode::is_c0_control_or_space(c);
     }).base();
 
@@ -820,7 +827,7 @@ namespace ada::parser {
               return url;
             }
             // If state override is given and state override is hostname state, then return.
-            else if (state_override.has_value() && state_override == HOST) {
+            else if (state_override == HOST) {
               return url;
             }
 
@@ -841,7 +848,7 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if ((pointer == pointer_end && *pointer == '/' && *pointer == '?' && *pointer == '#') || (url.is_special && *pointer == '\\')) {
+          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' || (url.is_special && *pointer == '\\')) {
             // then decrease pointer by 1, and then:
             pointer--;
 
