@@ -424,29 +424,15 @@ namespace ada::parser {
     // Assign at sign seen.
     bool at_sign_seen{false};
 
-    std::string trimmed_input = user_input.data();
-
-    // If input contains any ASCII tab or newline, validation error.
-    // Remove all ASCII tab or newline from input.
-    trimmed_input.erase(std::remove_if(trimmed_input.begin(), trimmed_input.end(), [](const char c) {
-      return ada::unicode::is_ascii_tab_or_newline(c);
-    }), trimmed_input.end());
-
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = state_override.value_or(SCHEME_START);
 
     // Define parsed URL
     ada::url url = ada::url();
 
-    std::string_view iterating_input{trimmed_input};
-
     // Remove any leading and trailing C0 control or space from input.
-    auto pointer_start = std::find_if(iterating_input.begin(), iterating_input.end(), [](const char c) {
-      return !ada::unicode::is_c0_control_or_space(c);
-    });
-    auto pointer_end = std::find_if(iterating_input.rbegin(), iterating_input.rend(), [](const char c) {
-      return !ada::unicode::is_c0_control_or_space(c);
-    }).base();
+    auto pointer_start = user_input.begin();
+    auto pointer_end = user_input.end();
 
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
@@ -455,6 +441,10 @@ namespace ada::parser {
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
     for (; pointer <= pointer_end; pointer++) {
+      if (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer)) {
+        continue;
+      }
+
       switch (state) {
         case AUTHORITY: {
           // If c is U+0040 (@), then:
@@ -513,7 +503,11 @@ namespace ada::parser {
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
           else if (!state_override.has_value()) {
             state = NO_SCHEME;
+
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
           // Otherwise, validation error, return failure.
           else {
@@ -602,6 +596,9 @@ namespace ada::parser {
             state = NO_SCHEME;
             pointer = pointer_start;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
           // Otherwise, validation error, return failure.
           else {
@@ -631,11 +628,17 @@ namespace ada::parser {
           else if (base_url->scheme != "file") {
             state = RELATIVE;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
           // Otherwise, set state to file state and decrease pointer by 1.
           else {
             state = FILE;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
 
           break;
@@ -651,6 +654,9 @@ namespace ada::parser {
           else {
             state = RELATIVE;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
 
           break;
@@ -664,6 +670,9 @@ namespace ada::parser {
           else {
             state = PATH;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
 
           break;
@@ -712,6 +721,9 @@ namespace ada::parser {
               // Set state to path state and decrease pointer by 1.
               state = PATH;
               pointer--;
+              while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+                pointer--;
+              }
             }
           }
 
@@ -740,6 +752,9 @@ namespace ada::parser {
             url.port = base_url->port;
             state = PATH;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
 
           break;
@@ -753,6 +768,9 @@ namespace ada::parser {
           // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.
           else {
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
 
           state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
@@ -764,6 +782,9 @@ namespace ada::parser {
           if (*pointer != '/' && *pointer != '\\') {
             state = AUTHORITY;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
 
           break;
@@ -817,6 +838,9 @@ namespace ada::parser {
           // then decrease pointer by 1 and set state to file host state.
           if (state_override.has_value() && url.scheme == "file") {
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
             state = FILE_HOST;
           }
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
@@ -851,6 +875,9 @@ namespace ada::parser {
           else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' || (url.is_special && *pointer == '\\')) {
             // then decrease pointer by 1, and then:
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
 
             // If url is special and buffer is the empty string, validation error, return failure.
             if (url.is_special && buffer.empty()) {
@@ -977,6 +1004,9 @@ namespace ada::parser {
             // Set state to path start state and decrease pointer by 1.
             state = PATH_START;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
           // Otherwise, validation error, return failure.
           else {
@@ -995,6 +1025,9 @@ namespace ada::parser {
             // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
             if (*pointer != '/' && *pointer != '\\') {
               pointer--;
+              while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+                pointer--;
+              }
             }
           }
           // Otherwise, if state override is not given and c is U+003F (?),
@@ -1015,6 +1048,9 @@ namespace ada::parser {
             // If c is not U+002F (/), then decrease pointer by 1.
             if (*pointer != '/') {
               pointer--;
+              while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+                pointer--;
+              }
             }
           }
           // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
@@ -1107,6 +1143,9 @@ namespace ada::parser {
             // Set state to path state, and decrease pointer by 1.
             state = PATH;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
 
           break;
@@ -1116,6 +1155,9 @@ namespace ada::parser {
           // then decrease pointer by 1 and then:
           if (pointer == pointer_end || *pointer == '/' || *pointer == '\\' || *pointer == '?' || *pointer == '#') {
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
 
             // If state override is not given and buffer is a Windows drive letter, validation error,
             // set state to path state.
@@ -1219,12 +1261,18 @@ namespace ada::parser {
               // Set state to path state and decrease pointer by 1.
               state = PATH;
               pointer--;
+              while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+                pointer--;
+              }
             }
           }
           // Otherwise, set state to path state, and decrease pointer by 1.
           else {
             state = PATH;
             pointer--;
+            while (pointer != pointer_start && (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer))) {
+              pointer--;
+            }
           }
 
           break;
