@@ -104,11 +104,11 @@ namespace ada::unicode {
     std::string result{};
     result.reserve(input.length());
 
-    for (auto iterator: input) {
-      if (character_sets::BitAt(character_set, iterator)) {
+    for (uint8_t iterator: input) {
+      if (character_sets::bit_at(character_set, iterator)) {
         result += character_sets::hex + iterator * 4;
       } else {
-        result += iterator;
+        result += static_cast<char>(iterator);
       }
     }
 
