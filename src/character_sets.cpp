@@ -436,7 +436,7 @@ namespace ada::character_sets {
       0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40 | 0x80
   };
 
-  bool BitAt(const uint8_t a[], const uint8_t i) {
+  bool bit_at(const uint8_t a[], const uint8_t i) {
     return !!(a[i >> 3] & (1 << (i & 7)));
   }
 

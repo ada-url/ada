@@ -436,7 +436,7 @@ namespace ada::parser {
 
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
-    auto pointer_previous = pointer_start;
+    std::string_view::iterator pointer_previous = pointer_start;
 
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
