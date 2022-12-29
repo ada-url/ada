@@ -35,4 +35,30 @@ namespace ada::helpers {
     return output;
   }
 
+  std::string get_state(ada::state state) {
+    switch (state) {
+      case AUTHORITY: return "Authority";
+      case SCHEME_START: return "Scheme Start";
+      case SCHEME: return "Scheme";
+      case HOST: return "Host";
+      case NO_SCHEME: return "No Scheme";
+      case FRAGMENT: return "Fragment";
+      case RELATIVE: return "Relative";
+      case RELATIVE_SLASH: return "Relative Slash";
+      case FILE: return "File";
+      case FILE_HOST: return "File Host";
+      case FILE_SLASH: return "File Slash";
+      case PATH_OR_AUTHORITY: return "Path or Authority";
+      case SPECIAL_AUTHORITY_IGNORE_SLASHES: return "Special Authority Ignore Slashes";
+      case SPECIAL_AUTHORITY_SLASHES: return "Special Authority Slashes";
+      case SPECIAL_RELATIVE_OR_AUTHORITY: return "Special Relative or Authority";
+      case QUERY: return "Query";
+      case PATH: return "Path";
+      case PATH_START: return "Path Start";
+      case OPAQUE_PATH: return "Opaque Path";
+      case PORT: return "Port";
+      default: return "";
+    }
+  }
+
 } // namespace ada::helpers

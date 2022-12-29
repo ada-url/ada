@@ -189,9 +189,8 @@ bool urltestdata_encoding() {
     } else if (element.type() == ondemand::json_type::object) {
       ondemand::object object = element.get_object();
       auto input_element = object["input"];
-      std::string_view input;
-      auto error = input_element.get_string().get(input);
-      if (error) {
+      std::string_view input{};
+      if (input_element.get_string().get(input)) {
         // we have a non-UTF-8 input.
         input = input_element.raw_json_token();
         std::cout << "     raw input " << input << std::endl;
@@ -201,10 +200,10 @@ bool urltestdata_encoding() {
       std::string_view base;
       std::optional<ada::url> base_url;
       if (!object["base"].get(base)) {
-        base_url = ada::parse(base, std::make_optional<ada::url>(), ada::UTF8);
+        base_url = ada::parse(base);
       }
       bool failure = false;
-      ada::url input_url = ada::parse(input, base_url, ada::UTF8);
+      ada::url input_url = ada::parse(input, base_url);
       if (!object["failure"].get(failure)) {
         TEST_ASSERT(input_url.is_valid, !failure, "Failure");
       }
