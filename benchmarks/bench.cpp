@@ -1,11 +1,12 @@
 #include <iostream>
-#include <boost/url/src.hpp>
+#include <memory>
 #include <uriparser/Uri.h>
+#include <EdUrlParser.h>
+#include <http_parser.h>
 
 #include "ada.h"
 
 #include <benchmark/benchmark.h>
-using namespace boost::urls;
 
 
 /**
@@ -28,12 +29,20 @@ std::string url_examples[] = {
     "https://www.reddit.com/login/?dest=https%3A%2F%2Fwww.reddit.com%2F",
     "postgresql://other:9818274x1!!@localhost:5432/otherdb?connect_timeout=10&application_name=myapp"};
 
+double url_examples_bytes =  []() {
+    size_t bytes{0};
+    for(std::string url_string : url_examples) { bytes += url_string.size(); }
+    return bytes;
+  }();
 
-
+#if BOOST_ENABLED
+#include <boost/url/src.hpp>
+using namespace boost::urls;
 
 static void BasicBench_BoostURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t numbers_of_parameters = 0;
+
   for (auto _ : state) {
     for(std::string url_string : url_examples) {
         url_view uv(url_string);
@@ -41,8 +50,37 @@ static void BasicBench_BoostURL(benchmark::State& state) {
     }
   }
   (void)numbers_of_parameters;
+
+  state.counters["time/byte"] = benchmark::Counter(
+	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_BoostURL);
+#endif
+
+
+#if CURL_ENABLED
+#include <curl/curl.h>
+
+static void BasicBench_CURL(benchmark::State& state) {
+  // volatile to prevent optimizations.
+  volatile bool is_valid{true};
+  CURLU *url = curl_url();
+  for (auto _ : state) {
+    for(std::string url_string : url_examples) {
+      CURLUcode rc = curl_url_set(url, CURLUPART_URL, url_string.c_str(), 0);
+      if(rc) { is_valid = false; }
+    }
+  }
+  curl_url_cleanup(url);
+
+
+  state.counters["time/byte"] = benchmark::Counter(
+	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+}
+BENCHMARK(BasicBench_CURL);
+#endif
 
 static void BasicBench_uriparser(benchmark::State& state) {
   // volatile to prevent optimizations.
@@ -56,8 +94,43 @@ static void BasicBench_uriparser(benchmark::State& state) {
   }
   uriFreeUriMembersA(&uri);
   if(!is_valid) { std::cout << "invalid? " << std::endl; }
+  state.counters["time/byte"] = benchmark::Counter(
+	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_uriparser);
+
+
+static void BasicBench_urlparser(benchmark::State& state) {
+  // volatile to prevent optimizations.
+  const char * errorPos;
+  UriUriA uri;
+  for (auto _ : state) {
+    for(std::string url_string : url_examples) {
+      std::unique_ptr<EdUrlParser> url(EdUrlParser::parseUrl(url_string));
+    }
+  }
+  state.counters["time/byte"] = benchmark::Counter(
+	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+}
+BENCHMARK(BasicBench_urlparser);
+
+static void BasicBench_http_parser(benchmark::State& state) {
+  volatile bool is_valid{true};
+  struct http_parser_url u;
+  http_parser_url_init(&u);
+  for (auto _ : state) {
+    for(std::string url_string : url_examples) {
+      is_valid &= !http_parser_parse_url(url_string.data(), url_string.size(), 0, &u);
+    }
+  }
+  if(!is_valid) { std::cout << "invalid? " << std::endl; }
+  state.counters["time/byte"] = benchmark::Counter(
+	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+}
+BENCHMARK(BasicBench_http_parser);
 
 static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
@@ -69,7 +142,23 @@ static void BasicBench_AdaURL(benchmark::State& state) {
     }
   }
   if(!is_valid) { std::cout << "invalid? " << std::endl; }
+  state.counters["time/byte"] = benchmark::Counter(
+	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_AdaURL);
 
-BENCHMARK_MAIN();
+int main(int argc, char **argv) {
+#if CURL_ENABLED
+    // the curl dependency will depend on the system.
+    benchmark::AddCustomContext("curl version ", LIBCURL_VERSION);
+#else
+    benchmark::AddCustomContext("curl ", "OMITTED");
+#endif
+#if !BOOST_ENABLED
+    benchmark::AddCustomContext("boost ", "OMITTED");
+#endif
+    benchmark::Initialize(&argc, argv);
+    benchmark::RunSpecifiedBenchmarks();
+    benchmark::Shutdown();
+}
