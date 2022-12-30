@@ -451,6 +451,9 @@ namespace ada::parser {
       pointer_start = internal_input.begin();
       pointer_end = internal_input.end();
     }
+    else if (std::distance(pointer_start, pointer_end) < 0) {
+      pointer_end = internal_input.end();
+    }
 
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
