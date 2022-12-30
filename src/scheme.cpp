@@ -22,8 +22,27 @@ namespace ada::scheme {
    * @param scheme
    * @return If scheme is a special scheme
    */
-  bool is_special(std::string_view scheme) {
-    return SPECIAL_SCHEME.count(scheme);
+  ada_really_inline constexpr bool is_special(std::string_view scheme) noexcept {
+    uint64_t schemeu = helpers::string_to_uint64(scheme);
+    if ((schemeu & 0xffffffffff) == helpers::string_to_uint64("https\0\0\0")) {
+      return scheme.size() == 5;
+    }
+    if ((schemeu & 0xffffffff) == helpers::string_to_uint64("http\0\0\0\0")) {
+      return scheme.size() == 4;
+    }
+    if (uint32_t(schemeu) == helpers::string_to_uint32("file")) {
+      return scheme.size() == 4;
+    }
+    if ((schemeu & 0xffffff) == helpers::string_to_uint32("ftp\0")) {
+      return scheme.size() == 3;
+    }
+    if ((schemeu & 0xffffff) == helpers::string_to_uint32("wss\0")) {
+      return scheme.size() == 3;
+    }
+    if ((schemeu & 0xffff) == helpers::string_to_uint32("ws\0\0")) {
+      return scheme.size() == 2;
+    }
+    return false;
   }
 
 } // namespace ada::scheme

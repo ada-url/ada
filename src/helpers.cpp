@@ -1,3 +1,4 @@
+#include <cstring>
 #include <vector>
 
 namespace ada::helpers {
@@ -59,6 +60,18 @@ namespace ada::helpers {
       case PORT: return "Port";
       default: return "";
     }
+  }
+
+  ada_really_inline uint64_t string_to_uint64(std::string_view view) {
+    uint64_t val;
+    std::memcpy(&val, view.data(), sizeof(uint64_t));
+    return val;
+  }
+
+  ada_really_inline uint32_t string_to_uint32(const char *data) {
+    uint32_t val;
+    std::memcpy(&val, data, sizeof(uint32_t));
+    return val;
   }
 
 } // namespace ada::helpers

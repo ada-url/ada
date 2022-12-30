@@ -1,7 +1,7 @@
 #ifndef ADA_H
 #define ADA_H
 
-#include "ada/internal/helpers.h"
+#include "ada/helpers.h"
 
 #include "ada/checkers.h"
 #include "ada/encoding_type.h"
