@@ -32,7 +32,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
-  std::optional<std::string_view> parse_opaque_host(std::string_view input) {
+  std::optional<std::string> parse_opaque_host(std::string_view input) {
     for (auto i = input.begin(); i < input.end(); i++) {
       // If input contains a forbidden host code point, validation error, return failure.
       // TODO: Replace this with .contains after moving to C++ 20.
@@ -48,7 +48,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
-  std::optional<std::string_view> parse_ipv4(std::string_view input) {
+  std::optional<std::string> parse_ipv4(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
     std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
 
@@ -117,7 +117,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
-  std::optional<std::string_view> parse_ipv6(std::string_view input) {
+  std::optional<std::string> parse_ipv6(std::string_view input) {
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
     std::array<uint16_t, 8> address{};
 
@@ -375,7 +375,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  std::optional<std::string_view> parse_host(std::string_view input, bool is_not_special) {
+  std::optional<std::string> parse_host(std::string_view input, bool is_not_special) {
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
@@ -409,7 +409,7 @@ namespace ada::parser {
     }
 
     // Return asciiDomain.
-    return ascii_domain;
+    return std::string{ascii_domain};
   }
 
   url parse_url(std::string user_input,
