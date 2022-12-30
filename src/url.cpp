@@ -13,4 +13,8 @@ namespace ada {
     return result->second;
   }
 
+  ada_really_inline bool url::is_special() const {
+    return scheme::SPECIAL_SCHEME.count(scheme);
+  }
+
 } // namespace ada

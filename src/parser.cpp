@@ -16,6 +16,11 @@ namespace ada::parser {
    */
   bool domain_to_ascii(const std::string_view input) {
     for (auto pointer: input) {
+      // If asciiDomain contains a forbidden domain code point, validation error, return failure.
+      if (unicode::is_forbidden_host_code_point(pointer)) {
+        return true;
+      }
+
       if (unicode::is_ascii_upper_alpha(pointer)) {
         pointer += 32;
       }
@@ -128,7 +133,7 @@ namespace ada::parser {
     // If c is U+003A (:), then:
     if (*pointer == ':') {
       // If remaining does not start with U+003A (:), validation error, return failure.
-      if (std::distance(pointer, input.end()) < 1 && pointer[1] == ':') {
+      if (std::distance(pointer, input.end()) > 0 && pointer[1] == ':') {
         return std::nullopt;
       }
 
@@ -388,18 +393,15 @@ namespace ada::parser {
     }
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
-    std::string_view ascii_domain{ada::unicode::utf8_decode_without_bom(input)};
+    std::string_view ascii_domain{ada::unicode::percent_decode(input)};
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    bool ascii_domain_failed = domain_to_ascii(ascii_domain);
+    bool is_ascii_domain_failure = domain_to_ascii(ascii_domain);
 
     // If asciiDomain is failure, validation error, return failure.
-    if (ascii_domain_failed) {
+    if (is_ascii_domain_failure) {
       return std::nullopt;
     }
-
-    // If asciiDomain contains a forbidden domain code point, validation error, return failure.
-    // TODO: Implement this
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
     if (checkers::ends_in_a_number(ascii_domain)) {
@@ -410,7 +412,7 @@ namespace ada::parser {
     return ascii_domain;
   }
 
-  url parse_url(std::string_view user_input,
+  url parse_url(std::string user_input,
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding,
                 std::optional<ada::state> state_override) {
@@ -431,23 +433,32 @@ namespace ada::parser {
     ada::url url = ada::url();
 
     // Remove any leading and trailing C0 control or space from input.
-    auto pointer_start = user_input.begin();
-    auto pointer_end = user_input.end();
+    user_input.erase(std::remove_if(user_input.begin(), user_input.end(), [](char c) {
+      return ada::unicode::is_ascii_tab_or_newline(c);
+    }), user_input.end());
+
+    std::string_view internal_input{user_input};
+
+    // TODO: Find a better way to trim from leading and trailing.
+    std::string_view::iterator pointer_start = std::find_if(internal_input.begin(), internal_input.end(), [](char c) {
+      return !ada::unicode::is_c0_control_or_space(c);
+    });
+    std::string_view::iterator pointer_end = std::find_if(internal_input.rbegin(), internal_input.rend(), [](char c) {
+      return !ada::unicode::is_c0_control_or_space(c);
+    }).base();
+
+    if (pointer_start == pointer_end) {
+      pointer_start = internal_input.begin();
+      pointer_end = internal_input.end();
+    }
 
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
-    std::string_view::iterator pointer_previous = pointer_start;
 
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
     for (; pointer <= pointer_end; pointer++) {
-      if (ada::unicode::is_c0_control_or_space(*pointer) || ada::unicode::is_ascii_tab_or_newline(*pointer)) {
-        continue;
-      }
-
-      pointer_previous = std::prev(pointer);
-
       switch (state) {
         case AUTHORITY: {
           // If c is U+0040 (@), then:
@@ -476,7 +487,7 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if ((pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#') || (url.is_special && *pointer == '\\')) {
+          else if ((pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#') || (url.is_special() && *pointer == '\\')) {
             // If atSignSeen is true and buffer is the empty string, validation error, return failure.
             if (at_sign_seen) {
               buffer.clear();
@@ -506,7 +517,7 @@ namespace ada::parser {
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
           else if (!state_override.has_value()) {
             state = NO_SCHEME;
-            pointer = pointer_previous;
+            pointer--;
           }
           // Otherwise, validation error, return failure.
           else {
@@ -526,7 +537,7 @@ namespace ada::parser {
             if (state_override.has_value()) {
               // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
               // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
-              if (ada::scheme::is_special(url.scheme) != ada::scheme::is_special(buffer)) {
+              if (url.is_special() != ada::scheme::is_special(buffer)) {
                 return url;
               }
 
@@ -543,7 +554,6 @@ namespace ada::parser {
 
             // Set url’s scheme to buffer.
             url.scheme = buffer;
-            url.is_special = ada::scheme::is_special(buffer);
 
             // If state override is given, then:
             if (state_override.has_value()) {
@@ -568,17 +578,17 @@ namespace ada::parser {
               state = FILE;
             }
             // Otherwise, if url is special, base is non-null, and base’s scheme is url’s scheme:
-            else if (url.is_special && base_url.has_value() && base_url->scheme == url.scheme) {
+            else if (url.is_special() && base_url.has_value() && base_url->scheme == url.scheme) {
               // Set state to special relative or authority state.
               state = SPECIAL_RELATIVE_OR_AUTHORITY;
             }
             // Otherwise, if url is special, set state to special authority slashes state.
-            else if (url.is_special) {
+            else if (url.is_special()) {
               state = SPECIAL_AUTHORITY_SLASHES;
             }
             // Otherwise, if remaining starts with an U+002F (/), set state to path or authority state
             // and increase pointer by 1.
-            else if (std::distance(pointer, pointer_end) < 1 && pointer[1] == '/') {
+            else if (std::distance(pointer, pointer_end) > 0 && pointer[1] == '/') {
               state = PATH_OR_AUTHORITY;
               pointer++;
             }
@@ -614,7 +624,6 @@ namespace ada::parser {
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
           else if (base_url->has_opaque_path() && *pointer == '#') {
-            url.is_special = ada::scheme::is_special(base_url->scheme);
             url.scheme = base_url->scheme;
             url.path = base_url->path;
             url.query = base_url->query;
@@ -623,12 +632,12 @@ namespace ada::parser {
           // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
           else if (base_url->scheme != "file") {
             state = RELATIVE;
-            pointer = pointer_previous;
+            pointer--;
           }
           // Otherwise, set state to file state and decrease pointer by 1.
           else {
             state = FILE;
-            pointer = pointer_previous;
+            pointer--;
           }
 
           break;
@@ -636,14 +645,14 @@ namespace ada::parser {
         case SPECIAL_RELATIVE_OR_AUTHORITY: {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
-          if (*pointer == '/' && std::distance(pointer, pointer_end) < 1 && pointer[1] == '/') {
+          if (*pointer == '/' && std::distance(pointer, pointer_end) > 0 && pointer[1] == '/') {
             state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
             pointer++;
           }
           // Otherwise, validation error, set state to relative state and decrease pointer by 1.
           else {
             state = RELATIVE;
-            pointer = pointer_previous;
+            pointer--;
           }
 
           break;
@@ -656,7 +665,7 @@ namespace ada::parser {
           // Otherwise, set state to path state, and decrease pointer by 1.
           else {
             state = PATH;
-            pointer = pointer_previous;
+            pointer--;
           }
 
           break;
@@ -664,14 +673,13 @@ namespace ada::parser {
         case RELATIVE: {
           // Set url’s scheme to base’s scheme.
           url.scheme = base_url->scheme;
-          url.is_special = scheme::is_special(base_url->scheme);
 
           // If c is U+002F (/), then set state to relative slash state.
           if (*pointer == '/') {
             state = RELATIVE_SLASH;
           }
           // Otherwise, if url is special and c is U+005C (\), validation error, set state to relative slash state.
-          else if (url.is_special && *pointer == '\\') {
+          else if (url.is_special() && *pointer == '\\') {
             state = RELATIVE_SLASH;
           }
           // Otherwise:
@@ -704,7 +712,7 @@ namespace ada::parser {
 
               // Set state to path state and decrease pointer by 1.
               state = PATH;
-              pointer = pointer_previous;
+              pointer--;
             }
           }
 
@@ -712,7 +720,7 @@ namespace ada::parser {
         }
         case RELATIVE_SLASH: {
           // If url is special and c is U+002F (/) or U+005C (\), then:
-          if (url.is_special && (*pointer == '/' || *pointer =='\\')) {
+          if (url.is_special() && (*pointer == '/' || *pointer =='\\')) {
             // Set state to special authority ignore slashes state.
             state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
           }
@@ -732,7 +740,7 @@ namespace ada::parser {
             url.host = base_url->host;
             url.port = base_url->port;
             state = PATH;
-            pointer = pointer_previous;
+            pointer--;
           }
 
           break;
@@ -740,12 +748,12 @@ namespace ada::parser {
         case SPECIAL_AUTHORITY_SLASHES: {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
-          if (*pointer == '/' && std::distance(pointer, pointer_end) < 1 && pointer[1] == '/') {
+          if (*pointer == '/' && std::distance(pointer, pointer_end) > 0 && pointer[1] == '/') {
             pointer++;
           }
           // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.
           else {
-            pointer = pointer_previous;
+            pointer--;
           }
 
           state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
@@ -756,7 +764,7 @@ namespace ada::parser {
           // If c is neither U+002F (/) nor U+005C (\), then set state to authority state and decrease pointer by 1.
           if (*pointer != '/' && *pointer != '\\') {
             state = AUTHORITY;
-            pointer = pointer_previous;
+            pointer--;
           }
 
           break;
@@ -766,7 +774,7 @@ namespace ada::parser {
           // - url is not special
           // - url’s scheme is "ws" or "wss"
           if (encoding != UTF8) {
-            if (!url.is_special || url.scheme == "ws" || url.scheme == "wss") {
+            if (!url.is_special() || url.scheme == "ws" || url.scheme == "wss") {
               // then set encoding to UTF-8.
               encoding = UTF8;
             }
@@ -782,7 +790,7 @@ namespace ada::parser {
 
           // Let queryPercentEncodeSet be the special-query percent-encode set if url is special;
           // otherwise the query percent-encode set.
-          auto query_percent_encode_set = url.is_special ?
+          auto query_percent_encode_set = url.is_special() ?
                                 ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
                                 ada::character_sets::QUERY_PERCENT_ENCODE;
 
@@ -809,7 +817,7 @@ namespace ada::parser {
           // If state override is given and url’s scheme is "file",
           // then decrease pointer by 1 and set state to file host state.
           if (state_override.has_value() && url.scheme == "file") {
-            pointer = pointer_previous;
+            pointer--;
             state = FILE_HOST;
           }
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
@@ -820,12 +828,12 @@ namespace ada::parser {
               return url;
             }
             // If state override is given and state override is hostname state, then return.
-            else if (state_override == HOST) {
+            else if (state_override.has_value() && state_override == HOST) {
               return url;
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<std::string_view> host = parse_host(buffer, true);
+            std::optional<std::string_view> host = parse_host(buffer, !url.is_special());
 
             // If host is failure, then return failure.
             if (!host.has_value()) {
@@ -841,12 +849,12 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' || (url.is_special && *pointer == '\\')) {
+          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' || (url.is_special() && *pointer == '\\')) {
             // then decrease pointer by 1, and then:
-            pointer = pointer_previous;
+            pointer--;
 
             // If url is special and buffer is the empty string, validation error, return failure.
-            if (url.is_special && buffer.empty()) {
+            if (url.is_special() && buffer.empty()) {
               url.is_valid = false;
               return url;
             }
@@ -857,7 +865,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<std::string_view> host = parse_host(buffer, true);
+            std::optional<std::string_view> host = parse_host(buffer, !url.is_special());
 
             // If host is failure, then return failure.
             if (!host.has_value()) {
@@ -937,16 +945,16 @@ namespace ada::parser {
           // - url is special and c is U+005C (\)
           // - state override is given
           else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' ||
-                                (url.is_special && *pointer == '\\') ||
+                                (url.is_special() && *pointer == '\\') ||
                                 state_override.has_value()) {
             // If buffer is not the empty string, then:
             if (!buffer.empty()) {
               // Let port be the mathematical integer value that is represented by buffer in radix-10
               // using ASCII digits for digits with values 0 through 9.
-              auto port = static_cast<uint16_t>(std::strtoul(buffer.c_str(), nullptr, 10));
+              long port = std::atol(buffer.c_str());
 
               // If port is greater than 216 − 1, validation error, return failure.
-              if (port > (std::pow(2, 16) - 1)) {
+              if (port > (1L<<16) - 1) {
                 url.is_valid = false;
                 return url;
               }
@@ -969,7 +977,7 @@ namespace ada::parser {
 
             // Set state to path start state and decrease pointer by 1.
             state = PATH_START;
-            pointer = pointer_previous;
+            pointer--;
           }
           // Otherwise, validation error, return failure.
           else {
@@ -981,13 +989,13 @@ namespace ada::parser {
         }
         case PATH_START: {
           // If url is special, then:
-          if (url.is_special) {
+          if (url.is_special()) {
             // Set state to path state.
             state = PATH;
 
             // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
             if (*pointer != '/' && *pointer != '\\') {
-              pointer = pointer_previous;
+              pointer--;
             }
           }
           // Otherwise, if state override is not given and c is U+003F (?),
@@ -1007,7 +1015,7 @@ namespace ada::parser {
 
             // If c is not U+002F (/), then decrease pointer by 1.
             if (*pointer != '/') {
-              pointer = pointer_previous;
+              pointer--;
             }
           }
           // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
@@ -1023,7 +1031,7 @@ namespace ada::parser {
           // - c is the EOF code point or U+002F (/)
           // - url is special and c is U+005C (\)
           // - state override is not given and c is U+003F (?) or U+0023 (#)
-          if (pointer == pointer_end || *pointer == '/' || (url.is_special && *pointer == '\\') || (!state_override.has_value() && (*pointer == '?' || *pointer == '#'))) {
+          if (pointer == pointer_end || *pointer == '/' || (url.is_special() && *pointer == '\\') || (!state_override.has_value() && (*pointer == '?' || *pointer == '#'))) {
             // If buffer is a double-dot path segment, then:
             if (unicode::is_double_dot_path_segment(buffer)) {
               // Shorten url’s path.
@@ -1031,13 +1039,13 @@ namespace ada::parser {
 
               // If neither c is U+002F (/), nor url is special and c is U+005C (\),
               // append the empty string to url’s path.
-              if (*pointer != '/' && !(url.is_special && *pointer == '\\')) {
+              if (*pointer != '/' && !(url.is_special() && *pointer == '\\')) {
                 url.path.list_value.emplace_back("");
               }
             }
             // Otherwise, if buffer is a single-dot path segment and if neither c is U+002F (/),
             // nor url is special and c is U+005C (\), append the empty string to url’s path.
-            else if (unicode::is_single_dot_path_segment(buffer) && *pointer != '/' && !(url.is_special && *pointer == '\\')) {
+            else if (unicode::is_single_dot_path_segment(buffer) && *pointer != '/' && !(url.is_special() && *pointer == '\\')) {
               url.path.list_value.emplace_back("");
             }
             // Otherwise, if buffer is not a single-dot path segment, then:
@@ -1069,6 +1077,7 @@ namespace ada::parser {
             // UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
             buffer += unicode::utf8_percent_encode(pointer, character_sets::PATH_PERCENT_ENCODE);
           }
+
           break;
         }
         case FILE_SLASH: {
@@ -1087,7 +1096,7 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
               // then append base’s path[0] to url’s path.
-              if (std::distance(pointer, pointer_end) < 1 && !base_url->path.list_value.empty()) {
+              if (std::distance(pointer, pointer_end) > 0 && !base_url->path.list_value.empty()) {
                 auto starts_with_windows_drive_letter = checkers::is_windows_drive_letter(pointer + pointer[0]);
                 auto first_base_url_path = base_url->path.list_value[0];
 
@@ -1099,7 +1108,7 @@ namespace ada::parser {
 
             // Set state to path state, and decrease pointer by 1.
             state = PATH;
-            pointer = pointer_previous;
+            pointer--;
           }
 
           break;
@@ -1108,7 +1117,7 @@ namespace ada::parser {
           // If c is the EOF code point, U+002F (/), U+005C (\), U+003F (?), or U+0023 (#),
           // then decrease pointer by 1 and then:
           if (pointer == pointer_end || *pointer == '/' || *pointer == '\\' || *pointer == '?' || *pointer == '#') {
-            pointer = pointer_previous;
+            pointer--;
 
             // If state override is not given and buffer is a Windows drive letter, validation error,
             // set state to path state.
@@ -1131,7 +1140,7 @@ namespace ada::parser {
             // Otherwise, run these steps:
             else {
               // Let host be the result of host parsing buffer with url is not special.
-              std::optional<std::string_view> host = parse_host(buffer, true);
+              std::optional<std::string_view> host = parse_host(buffer, !url.is_special());
 
               // If host is failure, then return failure.
               if (!host.has_value()) {
@@ -1167,7 +1176,6 @@ namespace ada::parser {
         case FILE: {
           // Set url’s scheme to "file".
           url.scheme = "file";
-          url.is_special = true;
 
           // Set url’s host to the empty string.
           url.host.clear();
@@ -1200,7 +1208,7 @@ namespace ada::parser {
 
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
-              if (std::distance(pointer, pointer_end) && !checkers::is_windows_drive_letter(pointer + pointer[0])) {
+              if (std::distance(pointer, pointer_end) >= 2 && !checkers::is_windows_drive_letter(pointer + pointer[0])) {
                 url.shorten_path();
               }
               // Otherwise:
@@ -1211,13 +1219,13 @@ namespace ada::parser {
 
               // Set state to path state and decrease pointer by 1.
               state = PATH;
-              pointer = pointer_previous;
+              pointer--;
             }
           }
           // Otherwise, set state to path state, and decrease pointer by 1.
           else {
             state = PATH;
-            pointer = pointer_previous;
+            pointer--;
           }
 
           break;

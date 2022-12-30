@@ -2,7 +2,7 @@
 
 namespace ada {
 
-  ada_warn_unused url parse(std::string_view input,
+  ada_warn_unused url parse(std::string input,
                             std::optional<ada::url> base_url,
                             ada::encoding_type encoding) noexcept {
 

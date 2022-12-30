@@ -96,7 +96,7 @@ namespace ada {
     /**
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
      */
-    bool is_special{false};
+    [[nodiscard]] ada_really_inline bool is_special() const;
 
     /**
      * A URL has an opaque path if its path is a string.

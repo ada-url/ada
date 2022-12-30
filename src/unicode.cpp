@@ -9,24 +9,26 @@ namespace ada::unicode {
     '\u0000', '\u0009', '\u000A', '\u000D', ' ', '#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '|'
   };
 
+  // A forbidden domain code point is a forbidden host code point, a C0 control, U+0025 (%), or U+007F DELETE.
+  ada_really_inline bool is_forbidden_host_code_point(const char c) {
+    // Check U+0025 (%), or U+007F DELETE.
+    if (c == '\u0025' || c == '\u007F') return true;
+    // Check C0 control
+    if ((c >= '\0' && c <= '\x1f')) return true;
+
+    return FORBIDDEN_HOST_CODE_POINTS.count(c);
+  }
+
   // An ASCII upper alpha is a code point in the range U+0041 (A) to U+005A (Z), inclusive.
   ada_really_inline bool is_ascii_upper_alpha(const char c) noexcept {
     return c >= 'A' && c <= 'Z';
   }
 
-  // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
-  ada_really_inline bool is_ascii_upper_hex_digit(const char c) noexcept {
-    return std::isdigit(c) || (c >= 'A' && c <= 'F');
-  }
-
-  // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
-  ada_really_inline bool is_ascii_lower_hex_digit(const char c) noexcept {
-    return std::isdigit(c) || (c >= 'a' && c<= 'f');
-  }
-
   // An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit.
+  // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
+  // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
   ada_really_inline bool is_ascii_hex_digit(const char c) noexcept {
-    return is_ascii_upper_hex_digit(c) || is_ascii_lower_hex_digit(c);
+    return std::isdigit(static_cast<unsigned char>(c)) || (c >= 'A' && c <= 'F') || (c >= 'a' && c<= 'f');
   }
 
   // A C0 control or space is a C0 control or U+0020 SPACE.
@@ -68,33 +70,33 @@ namespace ada::unicode {
    *
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
-  std::string utf8_decode_without_bom(const std::string_view input) noexcept {
-    if (input.empty()) {
-      return "";
-    }
+  std::string percent_decode(const std::string_view input) noexcept {
+    std::string dest;
+    if (input.length() == 0)
+      return dest;
+    dest.reserve(input.length());
+    const char* pointer = input.begin();
+    const char* end = input.end();
 
-    std::string output;
-    output.reserve(input.length());
-
-    for (auto pointer = input.begin(); pointer < input.end(); pointer++) {
-      size_t remaining = std::distance(pointer, input.end());
-
-      if (*pointer != '%' || remaining < 2 ||
-          (*pointer == '%' &&
+    while (pointer < end) {
+      const char ch = pointer[0];
+      size_t remaining = end - pointer - 1;
+      if (ch != '%' || remaining < 2 ||
+          (ch == '%' &&
            (!is_ascii_hex_digit(pointer[1]) ||
             !is_ascii_hex_digit(pointer[2])))) {
-        output += *pointer;
+        dest += ch;
         pointer++;
         continue;
+      } else {
+        unsigned a = convert_hex_to_binary(pointer[1]);
+        unsigned b = convert_hex_to_binary(pointer[2]);
+        char c = static_cast<char>(a * 16 + b);
+        dest += c;
+        pointer += 3;
       }
-
-      unsigned a = convert_hex_to_binary(pointer[1]);
-      unsigned b = convert_hex_to_binary(pointer[2]);
-      output += static_cast<char>(a * 16 + b);
-      pointer += 3;
     }
-
-    return output;
+    return dest;
   }
 
   /**
