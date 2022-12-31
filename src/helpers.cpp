@@ -23,6 +23,9 @@ namespace ada::helpers {
   }
 
   std::string join_vector_string(std::vector<std::string_view> input, std::string_view delimiter) {
+    if (input.size() == 1) {
+      return "/" + std::string{input[0]};
+    }
     std::string output{};
     auto pointer = input.begin();
 
