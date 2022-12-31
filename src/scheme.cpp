@@ -22,7 +22,7 @@ namespace ada::scheme {
    * @param scheme
    * @return If scheme is a special scheme
    */
-  ada_really_inline constexpr bool is_special(std::string_view scheme) noexcept {
+  ada_really_inline bool is_special(std::string_view scheme) noexcept {
     uint64_t schemeu = helpers::string_to_uint64(scheme);
     if ((schemeu & 0xffffffffff) == helpers::string_to_uint64("https\0\0\0")) {
       return scheme.size() == 5;
