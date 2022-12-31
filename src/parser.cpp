@@ -481,7 +481,7 @@ namespace ada::parser {
               url.username = buffer;
             } else {
               url.username = unicode::utf8_percent_encode( buffer.substr(0, password_token), character_sets::USERINFO_PERCENT_ENCODE);
-              url.password = unicode::utf8_percent_encode(buffer.substr(password_token), character_sets::USERINFO_PERCENT_ENCODE);
+              url.password = unicode::utf8_percent_encode(buffer.substr(password_token + 1), character_sets::USERINFO_PERCENT_ENCODE);
             }
 
             // Set buffer to the empty string.
