@@ -426,6 +426,9 @@ namespace ada::parser {
     // Assign at sign seen.
     bool at_sign_seen{false};
 
+    // Assign password token seen.
+    bool password_token_seen{false};
+
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = state_override.value_or(SCHEME_START);
 
@@ -474,14 +477,25 @@ namespace ada::parser {
             // Set atSignSeen to true.
             at_sign_seen = true;
 
-            // Find the first occurance of ':' to split authority state
-            size_t password_token =  buffer.find(':');
+            // For each codePoint in buffer:
+            for (auto code_point: buffer) {
+              // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
+              if (code_point == ':' && !password_token_seen) {
+                password_token_seen = true;
+                continue;
+              }
 
-            if (password_token == std::string::npos) {
-              url.username = buffer;
-            } else {
-              url.username = unicode::utf8_percent_encode(buffer.substr(0, password_token), character_sets::USERINFO_PERCENT_ENCODE);
-              url.password = unicode::utf8_percent_encode(buffer.substr(password_token + 1), character_sets::USERINFO_PERCENT_ENCODE);
+              // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
+              auto encoded_code_points = unicode::utf8_percent_encode(std::string{code_point}, character_sets::USERINFO_PERCENT_ENCODE);
+
+              // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
+              if (password_token_seen) {
+                url.password.append(encoded_code_points);
+              }
+              // Otherwise, append encodedCodePoints to url’s username.
+              else {
+                url.username.append(encoded_code_points);
+              }
             }
 
             // Set buffer to the empty string.
