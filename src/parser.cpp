@@ -480,7 +480,7 @@ namespace ada::parser {
             if (password_token == std::string::npos) {
               url.username = buffer;
             } else {
-              url.username = unicode::utf8_percent_encode( buffer.substr(0, password_token), character_sets::USERINFO_PERCENT_ENCODE);
+              url.username = unicode::utf8_percent_encode(buffer.substr(0, password_token), character_sets::USERINFO_PERCENT_ENCODE);
               url.password = unicode::utf8_percent_encode(buffer.substr(password_token + 1), character_sets::USERINFO_PERCENT_ENCODE);
             }
 
@@ -931,8 +931,8 @@ namespace ada::parser {
             // and append the result to url’s path.
             if (pointer != pointer_end) {
               // TODO: No need to iterate and push_back character by character. We can do it in bulk.
-              std::string encoded = unicode::utf8_percent_encode(pointer, character_sets::C0_CONTROL_PERCENT_ENCODE);
-              url.path.list_value.push_back(encoded);
+              std::string encoded = unicode::utf8_percent_encode(std::string{pointer, pointer + 1}, character_sets::C0_CONTROL_PERCENT_ENCODE);
+              url.path.string_value->append(encoded);
             }
           }
 
@@ -1078,7 +1078,7 @@ namespace ada::parser {
           // Otherwise, run these steps:
           else {
             // UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
-            buffer += unicode::utf8_percent_encode(pointer, character_sets::PATH_PERCENT_ENCODE);
+            buffer += unicode::utf8_percent_encode(std::string{*pointer}, character_sets::PATH_PERCENT_ENCODE);
           }
 
           break;

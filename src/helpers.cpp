@@ -1,5 +1,6 @@
-#include <cstring>
 #include <vector>
+#include <algorithm>
+#include <cstring>
 
 namespace ada::helpers {
 
@@ -17,23 +18,6 @@ namespace ada::helpers {
         break;
 
       pointer = next + 1;
-    }
-
-    return output;
-  }
-
-  std::string join_vector_string(std::vector<std::string_view> input, std::string_view delimiter) {
-    if (input.size() == 1) {
-      return "/" + std::string{input[0]};
-    }
-    std::string output{};
-    auto pointer = input.begin();
-
-    while (pointer <= input.end()) {
-      output += *pointer;
-      if (pointer != input.end()) {
-        output += delimiter;
-      }
     }
 
     return output;
