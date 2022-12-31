@@ -20,15 +20,33 @@ namespace ada {
   struct url_path {
 
     // TODO: Investigate on how to reduce the usage of both vector and string_view
-    std::optional<std::string_view> string_value{};
+    std::optional<std::string> string_value{};
 
-    std::vector<std::string_view> list_value{};
+    std::vector<std::string> list_value{};
 
     /**
      * A URL has an opaque path if its path is a string.
      */
-    [[nodiscard]] bool is_opaque() const {
+    [[nodiscard]] ada_really_inline bool is_opaque() const {
       return string_value.has_value();
+    }
+
+    [[nodiscard]] ada_really_inline std::string normalize() const {
+      if (is_opaque()) {
+        return *string_value;
+      }
+
+      std::string output{};
+
+      if (list_value.empty()) {
+        return output;
+      }
+
+      for (auto it = list_value.begin(); it != list_value.end(); it++) {
+        output += "/" + *it;
+      }
+
+      return output;
     }
   };
 

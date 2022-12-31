@@ -229,8 +229,7 @@ bool urltestdata_encoding() {
         TEST_ASSERT(expected_port, port, "Port");
 
         std::string_view pathname = object["pathname"];
-        auto expected_path = input_url.path.string_value.value_or(ada::helpers::join_vector_string(input_url.path.list_value, "/"));
-        TEST_ASSERT(expected_path, pathname, "Pathname");
+        TEST_ASSERT(input_url.path.normalize(), pathname, "Pathname");
 
         std::string_view query;
         if (!object["query"].get(query)) {
@@ -238,6 +237,10 @@ bool urltestdata_encoding() {
         }
 
         std::string_view hash = object["hash"];
+        if (!hash.empty()) {
+          // Test cases start with "#".
+          hash.remove_prefix(1);
+        }
         TEST_ASSERT(input_url.fragment.value_or(""), hash, "Hash/Fragment");
       }
     }
