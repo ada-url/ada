@@ -204,39 +204,42 @@ bool urltestdata_encoding() {
       }
       bool failure = false;
       ada::url input_url = ada::parse(std::string{input}, base_url);
+
       if (!object["failure"].get(failure)) {
         TEST_ASSERT(input_url.is_valid, !failure, "Failure");
+      } else {
+        TEST_ASSERT(input_url.is_valid, true, "Should not have failed");
+
+        std::string_view protocol = object["protocol"];
+         // WPT tests add ":" suffix to protocol
+        protocol.remove_suffix(1);
+        TEST_ASSERT(input_url.scheme, protocol, "Protocol");
+
+        std::string_view username = object["username"];
+        TEST_ASSERT(input_url.username, username, "Username");
+
+        std::string_view password = object["password"];
+        TEST_ASSERT(input_url.password, password, "Password");
+
+        std::string_view hostname = object["hostname"];
+        TEST_ASSERT(input_url.host, hostname, "Hostname");
+
+        std::string_view port = object["port"];
+        std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
+        TEST_ASSERT(expected_port, port, "Port");
+
+        std::string_view pathname = object["pathname"];
+        auto expected_path = input_url.path.string_value.value_or(ada::helpers::join_vector_string(input_url.path.list_value, "/"));
+        TEST_ASSERT(expected_path, pathname, "Pathname");
+
+        std::string_view query;
+        if (!object["query"].get(query)) {
+          TEST_ASSERT(input_url.query.value_or(""), query, "Query");
+        }
+
+        std::string_view hash = object["hash"];
+        TEST_ASSERT(input_url.fragment.value_or(""), hash, "Hash/Fragment");
       }
-
-      std::string_view protocol = object["protocol"];
-      // WPT tests add ":" suffix to protocol
-      protocol.remove_suffix(1);
-      TEST_ASSERT(input_url.scheme, protocol, "Protocol");
-
-      std::string_view username = object["username"];
-      TEST_ASSERT(input_url.username, username, "Username");
-
-      std::string_view password = object["password"];
-      TEST_ASSERT(input_url.password, password, "Password");
-
-      std::string_view host = object["host"];
-      TEST_ASSERT(input_url.host, host, "Host");
-
-      std::string_view port = object["port"];
-      std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
-      TEST_ASSERT(expected_port, port, "Port");
-
-      std::string_view pathname = object["pathname"];
-      auto expected_path = input_url.path.string_value.value_or(ada::helpers::join_vector_string(input_url.path.list_value, "/"));
-      TEST_ASSERT(expected_path, pathname, "Pathname");
-
-      std::string_view query;
-      if (!object["query"].get(query)) {
-        TEST_ASSERT(input_url.query.value_or(""), query, "Query");
-      }
-
-      std::string_view hash = object["hash"];
-      TEST_ASSERT(input_url.fragment.value_or(""), hash, "Hash/Fragment");
     }
   }
   TEST_SUCCEED()
