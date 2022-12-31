@@ -492,7 +492,7 @@ namespace ada::parser {
           // - url is special and c is U+005C (\)
           else if ((pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#') || (url.is_special() && *pointer == '\\')) {
             // If atSignSeen is true and buffer is the empty string, validation error, return failure.
-            if (at_sign_seen) {
+            if (at_sign_seen && buffer.empty()) {
               buffer.clear();
               url.is_valid = false;
               return url;
