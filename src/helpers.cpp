@@ -55,10 +55,4 @@ namespace ada::helpers {
     return val;
   }
 
-  ada_really_inline uint32_t string_to_uint32(const char *data) {
-    uint32_t val;
-    std::memcpy(&val, data, sizeof(uint32_t));
-    return val;
-  }
-
 } // namespace ada::helpers

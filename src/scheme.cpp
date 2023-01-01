@@ -23,26 +23,18 @@ namespace ada::scheme {
    * @return If scheme is a special scheme
    */
   ada_really_inline bool is_special(std::string_view scheme) noexcept {
-    uint64_t schemeu = helpers::string_to_uint64(scheme);
-    if ((schemeu & 0xffffffffff) == helpers::string_to_uint64("https\0\0\0")) {
-      return scheme.size() == 5;
+    uint64_t inputu = helpers::string_to_uint64(scheme);
+    uint64_t https = helpers::string_to_uint64("https\0\0\0");
+    uint64_t http = helpers::string_to_uint64("http\0\0\0\0");
+    uint64_t file = helpers::string_to_uint64("file\0\0\0\0");
+    uint64_t ftp = helpers::string_to_uint64("ftp\0\0\0\0\0");
+    uint64_t wss = helpers::string_to_uint64("wss\0\0\0\0\0");
+    uint64_t ws = helpers::string_to_uint64("ws\0\0\0\0\0\0");
+    if((inputu == https) | (inputu == http)) {
+      return true;
     }
-    if ((schemeu & 0xffffffff) == helpers::string_to_uint64("http\0\0\0\0")) {
-      return scheme.size() == 4;
-    }
-    if (uint32_t(schemeu) == helpers::string_to_uint32("file")) {
-      return scheme.size() == 4;
-    }
-    if ((schemeu & 0xffffff) == helpers::string_to_uint32("ftp\0")) {
-      return scheme.size() == 3;
-    }
-    if ((schemeu & 0xffffff) == helpers::string_to_uint32("wss\0")) {
-      return scheme.size() == 3;
-    }
-    if ((schemeu & 0xffff) == helpers::string_to_uint32("ws\0\0")) {
-      return scheme.size() == 2;
-    }
-    return false;
+    return ((inputu == file) | (inputu == ftp)
+            | (inputu == wss) | (inputu == ws));
   }
 
 } // namespace ada::scheme
