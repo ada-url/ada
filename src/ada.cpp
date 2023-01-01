@@ -1,4 +1,5 @@
 #include "ada.h"
+#include "serializers.cpp"
 #include "implementation.cpp"
 #include "helpers.cpp"
 #include "url.cpp"

@@ -2,12 +2,24 @@
 #define ADA_URL_H
 
 #include "common_defs.h"
+#include "serializers.h"
 
 #include <optional>
 #include <string>
 #include <string_view>
 
 namespace ada {
+
+  /**
+   * @see https://url.spec.whatwg.org/#host-representation
+   */
+  enum host_type {
+    BASIC_DOMAIN, // Had to use BASIC_ prefix due to global define in <cmath>
+    IPV6_ADDRESS,
+    IPV4_ADDRESS,
+    OPAQUE_HOST,
+    EMPTY_HOST,
+  };
 
   /**
    * A URL’s path is either an ASCII string or a list of zero or more ASCII strings, usually identifying a location.
@@ -51,6 +63,23 @@ namespace ada {
   };
 
   /**
+   * @see https://url.spec.whatwg.org/#host-representation
+   */
+  struct url_host {
+
+    ada::host_type type{EMPTY_HOST};
+
+    std::string entry{};
+
+    [[nodiscard]] ada_really_inline std::string normalize() const {
+      switch (type) {
+        case IPV6_ADDRESS: return "[" + ada::serializers::ipv6(entry) + "]";
+        default: return entry;
+      }
+    }
+  };
+
+  /**
    * A URL is a struct that represents a universal identifier.
    * To disambiguate from a valid URL string it can also be referred to as a URL record.
    *
@@ -76,7 +105,7 @@ namespace ada {
     /**
      * A URL’s host is null or a host. It is initially null.
      */
-    std::string host{};
+    std::optional<ada::url_host> host{};
 
     /**
      * A URL’s port is either null or a 16-bit unsigned integer that identifies a networking port. It is initially null.

@@ -28,7 +28,7 @@ namespace ada::unicode {
   // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
   // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
   ada_really_inline bool is_ascii_hex_digit(const char c) noexcept {
-    return std::isdigit(static_cast<unsigned char>(c)) || (c >= 'A' && c <= 'F') || (c >= 'a' && c<= 'f');
+    return std::isdigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c<= 'f');
   }
 
   // A C0 control or space is a C0 control or U+0020 SPACE.
