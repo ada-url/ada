@@ -6,6 +6,7 @@
 #include "ada/checkers.h"
 #include "ada/encoding_type.h"
 #include "ada/parser.h"
+#include "ada/serializers.h"
 #include "ada/state.h"
 #include "ada/url.h"
 

@@ -32,7 +32,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
-  std::optional<std::string> parse_opaque_host(std::string_view input) {
+  std::optional<ada::url_host> parse_opaque_host(std::string_view input) {
     for (auto i = input.begin(); i < input.end(); i++) {
       // If input contains a forbidden host code point, validation error, return failure.
       // TODO: Replace this with .contains after moving to C++ 20.
@@ -42,13 +42,15 @@ namespace ada::parser {
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
-    return ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+    auto result = ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+
+    return ada::url_host{OPAQUE_HOST, result};
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
-  std::optional<std::string> parse_ipv4(std::string_view input) {
+  std::optional<ada::url_host> parse_ipv4(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
     std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
 
@@ -111,13 +113,13 @@ namespace ada::parser {
     }
 
     // Convert ipv4 to string to use it inside "parse_host"
-    return std::to_string(ipv4);
+    return ada::url_host{IPV4_ADDRESS, std::to_string(ipv4)};
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
-  std::optional<std::string> parse_ipv6(std::string_view input) {
+  std::optional<ada::url_host> parse_ipv6(std::string_view input) {
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
     std::array<uint16_t, 8> address{};
 
@@ -141,8 +143,7 @@ namespace ada::parser {
       pointer += 2;
 
       // Increase pieceIndex by 1 and then set compress to pieceIndex.
-      piece_index += 1;
-      compress = piece_index;
+      compress = ++piece_index;
     }
 
     // While c is not the EOF code point:
@@ -161,19 +162,18 @@ namespace ada::parser {
 
         // Increase pointer and pieceIndex by 1, set compress to pieceIndex, and then continue.
         pointer++;
-        piece_index++;
-        compress = piece_index;
+        compress = ++piece_index;
         continue;
       }
 
       // Let value and length be 0.
-      long value = 0;
-      long length = 0;
+      uint16_t value = 0, length = 0;
 
       // While length is less than 4 and c is an ASCII hex digit,
       // set value to value × 0x10 + c interpreted as hexadecimal number, and increase pointer and length by 1.
       while (length < 4 && unicode::is_ascii_hex_digit(*pointer)) {
-        value = (value * 0x10) + std::strtol(pointer, nullptr, 16);
+        char temp[2] = {*pointer, 0};
+        value = static_cast<uint16_t>(value * 0x10) + static_cast<uint16_t>(std::strtol(temp, nullptr, 16));
         pointer++;
         length++;
       }
@@ -281,7 +281,7 @@ namespace ada::parser {
       }
 
       // Set address[pieceIndex] to value.
-      address[piece_index] = static_cast<uint16_t>(value);
+      address[piece_index] = value;
 
       // Increase pieceIndex by 1.
       piece_index++;
@@ -290,7 +290,7 @@ namespace ada::parser {
     // If compress is non-null, then:
     if (compress.has_value()) {
       // Let swaps be pieceIndex − compress.
-      auto swaps = piece_index - *compress;
+      int swaps = piece_index - *compress;
 
       // Set pieceIndex to 7.
       piece_index = 7;
@@ -317,7 +317,7 @@ namespace ada::parser {
       result += std::to_string(a);
     }
 
-    return result;
+    return ada::url_host{IPV6_ADDRESS, result};
   }
 
   /**
@@ -375,7 +375,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  std::optional<std::string> parse_host(std::string_view input, bool is_not_special) {
+  std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special) {
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
@@ -409,7 +409,7 @@ namespace ada::parser {
     }
 
     // Return asciiDomain.
-    return std::string{ascii_domain};
+    return ada::url_host{BASIC_DOMAIN, std::string{ascii_domain}};
   }
 
   url parse_url(std::string user_input,
@@ -564,7 +564,8 @@ namespace ada::parser {
               }
 
               // If url’s scheme is "file" and its host is an empty host, then return.
-              if (url.scheme == "file" && url.host.empty()) {
+              // An empty host is the empty string.
+              if (url.scheme == "file" && url.host.has_value() && (*url.host).type == EMPTY_HOST) {
                 return url;
               }
             }
@@ -850,7 +851,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<std::string_view> host = parse_host(buffer, !url.is_special());
+            std::optional<ada::url_host> host = parse_host(buffer, !url.is_special());
 
             // If host is failure, then return failure.
             if (!host.has_value()) {
@@ -882,7 +883,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<std::string_view> host = parse_host(buffer, !url.is_special());
+            std::optional<ada::url_host> host = parse_host(buffer, !url.is_special());
 
             // If host is failure, then return failure.
             if (!host.has_value()) {
@@ -1036,7 +1037,7 @@ namespace ada::parser {
             }
           }
           // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
-          else if (state_override.has_value() && url.host.empty()) {
+          else if (state_override.has_value() && !url.host.has_value()) {
             // To append to a list that is not an ordered set is to add the given item to the end of the list.
             url.path.list_value.emplace_back("");
           }
@@ -1144,7 +1145,7 @@ namespace ada::parser {
             // Otherwise, if buffer is the empty string, then:
             else if (buffer.empty()) {
               // Set url’s host to the empty string.
-              url.host = "";
+              url.host = ada::url_host{EMPTY_HOST, ""};
 
               // If state override is given, then return.
               if (state_override.has_value()) {
@@ -1157,7 +1158,7 @@ namespace ada::parser {
             // Otherwise, run these steps:
             else {
               // Let host be the result of host parsing buffer with url is not special.
-              std::optional<std::string_view> host = parse_host(buffer, !url.is_special());
+              std::optional<ada::url_host> host = parse_host(buffer, !url.is_special());
 
               // If host is failure, then return failure.
               if (!host.has_value()) {
@@ -1166,8 +1167,8 @@ namespace ada::parser {
               }
 
               // If host is "localhost", then set host to the empty string.
-              if (*host == "localhost") {
-                host = "";
+              if ((*host).entry == "localhost") {
+                (*host).entry = "";
               }
 
               // Set url’s host to host.
@@ -1195,7 +1196,7 @@ namespace ada::parser {
           url.scheme = "file";
 
           // Set url’s host to the empty string.
-          url.host.clear();
+          url.host = ada::url_host{EMPTY_HOST, ""};
 
           // If c is U+002F (/) or U+005C (\), then:
           if (*pointer == '/' || *pointer == '\\') {
