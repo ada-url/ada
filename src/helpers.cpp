@@ -56,21 +56,17 @@ namespace ada::helpers {
   }
 
   std::string from_decimal(std::string& res, uint16_t base, uint16_t input) {
-      int index = 0;
-
       while (input > 0) {
         int num = input % base;
         if (num >= 0 && num <= 9) {
           res += static_cast<char>(num + '0');
         } else {
-          res += static_cast<char>(num - 10 + 'A');
+          res += static_cast<char>(num - 10 + 'a');
         }
-        index++;
         input /= base;
       }
 
-      // Reverse the result
-      reverse(res.begin(), res.end());
+      std::reverse(res.begin(), res.end());
 
       return res;
   }
