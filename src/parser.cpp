@@ -132,7 +132,7 @@ namespace ada::parser {
     // If c is U+003A (:), then:
     if (*pointer == ':') {
       // If remaining does not start with U+003A (:), validation error, return failure.
-      if (std::distance(pointer, input.end()) > 0 && pointer[1] == ':') {
+      if (std::distance(pointer, input.end()) > 0 && pointer[1] != ':') {
         return std::nullopt;
       }
 
