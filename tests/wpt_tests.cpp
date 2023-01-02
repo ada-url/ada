@@ -222,7 +222,7 @@ bool urltestdata_encoding() {
         TEST_ASSERT(input_url.password, password, "Password");
 
         std::string_view hostname = object["hostname"];
-        TEST_ASSERT(input_url.host.value_or(ada::url_host{ada::EMPTY_HOST, ""}).normalize(), hostname, "Hostname");
+        TEST_ASSERT(input_url.host.value_or(ada::url_host{ada::EMPTY_HOST, ""}).entry, hostname, "Hostname");
 
         std::string_view port = object["port"];
         std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";

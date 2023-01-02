@@ -90,7 +90,7 @@ namespace ada::parser {
     }
 
     // Let ipv4 be the last item in numbers.
-    uint16_t ipv4 = numbers.back();
+    uint32_t ipv4 = numbers.back();
 
     // If the last item in numbers is greater than or equal to 256(5 − numbers’s size), validation error, return failure.
     if (ipv4 >= std::pow(256, 5 - numbers.size())) {
@@ -113,7 +113,7 @@ namespace ada::parser {
     }
 
     // Convert ipv4 to string to use it inside "parse_host"
-    return ada::url_host{IPV4_ADDRESS, std::to_string(ipv4)};
+    return ada::url_host{IPV4_ADDRESS, ada::serializers::ipv4(ipv4)};
   }
 
   /**
@@ -308,16 +308,7 @@ namespace ada::parser {
       return std::nullopt;
     }
 
-    std::string result{};
-
-    for (const auto a : address) {
-      if (!result.empty()) {
-        result += ':';
-      }
-      result += std::to_string(a);
-    }
-
-    return ada::url_host{IPV6_ADDRESS, result};
+    return ada::url_host{IPV6_ADDRESS, ada::serializers::ipv6(address)};
   }
 
   /**

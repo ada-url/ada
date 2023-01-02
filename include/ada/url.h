@@ -70,13 +70,6 @@ namespace ada {
     ada::host_type type{EMPTY_HOST};
 
     std::string entry{};
-
-    [[nodiscard]] ada_really_inline std::string normalize() const {
-      switch (type) {
-        case IPV6_ADDRESS: return "[" + ada::serializers::ipv6(entry) + "]";
-        default: return entry;
-      }
-    }
   };
 
   /**
