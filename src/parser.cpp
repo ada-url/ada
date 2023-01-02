@@ -15,18 +15,15 @@ namespace ada::parser {
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
    */
   bool domain_to_ascii(const std::string_view input) {
-    for (auto pointer: input) {
-      // If asciiDomain contains a forbidden domain code point, validation error, return failure.
-      if (unicode::is_forbidden_host_code_point(pointer)) {
-        return true;
-      }
+    static const char bad_bytes[] = {
+      /* */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+      0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+      0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
+      0x7f, 0x00 /* null-terminate */
+    };
 
-      if (unicode::is_ascii_upper_alpha(pointer)) {
-        pointer += 32;
-      }
-    }
-
-    return false;
+    return std::strcspn(input.begin(), bad_bytes) == input.length();
   }
 
   /**
@@ -387,10 +384,10 @@ namespace ada::parser {
     std::string_view ascii_domain{ada::unicode::percent_decode(input)};
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    bool is_ascii_domain_failure = domain_to_ascii(ascii_domain);
+    bool is_valid = domain_to_ascii(ascii_domain);
 
     // If asciiDomain is failure, validation error, return failure.
-    if (is_ascii_domain_failure) {
+    if (!is_valid) {
       return std::nullopt;
     }
 
