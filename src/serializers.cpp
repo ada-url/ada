@@ -1,7 +1,6 @@
 #include <array>
 #include <cmath>
 #include <cstring>
-#include <arpa/inet.h>
 
 namespace ada::serializers {
 
