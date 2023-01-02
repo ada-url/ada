@@ -158,7 +158,9 @@ namespace ada {
       }
 
       // Remove path’s last item, if any.
-      path.list_value.pop_back();
+      if (!path.list_value.empty()) {
+        path.list_value.pop_back();
+      }
     }
 
     [[nodiscard]] std::optional<uint16_t> scheme_default_port() const;
