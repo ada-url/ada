@@ -23,7 +23,7 @@ namespace ada::helpers {
     return output;
   }
 
-  std::string get_state(ada::state state) {
+  ada_unused std::string get_state(ada::state state) {
     switch (state) {
       case AUTHORITY: return "Authority";
       case SCHEME_START: return "Scheme Start";
@@ -49,7 +49,7 @@ namespace ada::helpers {
     }
   }
 
-  ada_really_inline uint64_t string_to_uint64(std::string_view view) {
+  ada_really_inline uint64_t string_to_uint64(const std::string_view view) {
     uint64_t val;
     std::memcpy(&val, view.data(), sizeof(uint64_t));
     return val;

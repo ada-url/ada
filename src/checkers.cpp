@@ -42,7 +42,7 @@ namespace ada::checkers {
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
   // and the second is either U+003A (:) or U+007C (|).
   bool is_windows_drive_letter(const std::string_view input) noexcept {
-    return input.size() == 2 && std::isalpha(input[0]) && (input[1] == ':' || input[1] == '|');
+    return input.length() == 2 && std::isalpha(input[0]) && (input[1] == ':' || input[1] == '|');
   }
 
   // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
@@ -69,7 +69,7 @@ namespace ada::checkers {
         }
 
         // If input contains a code point that is not a radix-R digit, then return failure.
-        return std::strspn(input.data(), "0123456789abcdefABCDEF") >= input.length();
+        return input.find_first_of("0123456789abcdefABCDEF") != std::string_view::npos;
       }
       // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
       else if (input[1] == '0') {
@@ -79,7 +79,7 @@ namespace ada::checkers {
     }
 
     // If input contains a code point that is not a radix-R digit, then return failure.
-    return std::strspn(input.data(), "0123456789") >= input.length();
+    return input.find_first_of("0123456789") != std::string_view::npos;
   }
 
 } // namespace ada::checkers

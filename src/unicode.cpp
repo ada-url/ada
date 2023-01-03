@@ -19,11 +19,6 @@ namespace ada::unicode {
     return FORBIDDEN_HOST_CODE_POINTS.count(c);
   }
 
-  // An ASCII upper alpha is a code point in the range U+0041 (A) to U+005A (Z), inclusive.
-  ada_really_inline bool is_ascii_upper_alpha(const char c) noexcept {
-    return c >= 'A' && c <= 'Z';
-  }
-
   // An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit.
   // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
   // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
@@ -55,7 +50,7 @@ namespace ada::unicode {
     return input == "." || input == "%2e" || input == "%2E";
   }
 
-  unsigned constexpr convert_hex_to_binary(const char c) noexcept {
+  ada_really_inline unsigned constexpr convert_hex_to_binary(const char c) noexcept {
     if (c >= '0' && c <= '9')
       return c - '0';
     else if (c >= 'A' && c <= 'F')
@@ -80,19 +75,15 @@ namespace ada::unicode {
 
     while (pointer < end) {
       const char ch = pointer[0];
-      size_t remaining = end - pointer - 1;
-      if (ch != '%' || remaining < 2 ||
-          (ch == '%' &&
-           (!is_ascii_hex_digit(pointer[1]) ||
+      if (ch != '%' || (end - pointer - 1) < 2 ||
+          ((!is_ascii_hex_digit(pointer[1]) ||
             !is_ascii_hex_digit(pointer[2])))) {
         dest += ch;
         pointer++;
-        continue;
       } else {
-        unsigned a = convert_hex_to_binary(pointer[1]);
-        unsigned b = convert_hex_to_binary(pointer[2]);
-        char c = static_cast<char>(a * 16 + b);
-        dest += c;
+        auto a = convert_hex_to_binary(pointer[1]);
+        auto b = convert_hex_to_binary(pointer[2]);
+        dest += (char)(a * 16 + b);
         pointer += 3;
       }
     }
@@ -108,9 +99,9 @@ namespace ada::unicode {
 
     for (uint8_t iterator: input) {
       if (character_sets::bit_at(character_set, iterator)) {
-        result += character_sets::hex + iterator * 4;
+        result.append(character_sets::hex + iterator * 4);
       } else {
-        result += static_cast<char>(iterator);
+        result += (char)iterator;
       }
     }
 

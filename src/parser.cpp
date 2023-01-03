@@ -15,7 +15,7 @@ namespace ada::parser {
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
    */
   bool domain_to_ascii(const std::string_view input) {
-    static const char bad_bytes[] = {
+    static constexpr char bad_bytes[] = {
       /* */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
       0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
       0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
@@ -29,7 +29,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
-  std::optional<ada::url_host> parse_opaque_host(std::string_view input) {
+  std::optional<ada::url_host> parse_opaque_host(std::string_view input) noexcept {
     for (auto i = input.begin(); i < input.end(); i++) {
       // If input contains a forbidden host code point, validation error, return failure.
       // TODO: Replace this with .contains after moving to C++ 20.
@@ -47,7 +47,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
-  std::optional<ada::url_host> parse_ipv4(std::string_view input) {
+  std::optional<ada::url_host> parse_ipv4(const std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
     std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
 
@@ -68,17 +68,13 @@ namespace ada::parser {
     std::vector<uint16_t> numbers;
 
     // For each part of parts:
-    for (auto part: parts) {
+    for (const auto part: parts) {
       // Let result be the result of parsing part.
       std::optional<uint16_t> result = parse_ipv4_number(part);
 
       // If result is failure, validation error, return failure.
-      if (!result.has_value()) {
-        return std::nullopt;
-      }
-
       // If any but the last item in numbers is greater than 255, then return failure.
-      if (*result > 255 && part != parts.back()) {
+      if (!result.has_value() || (*result > 255 && part != parts.back())) {
         return std::nullopt;
       }
 
@@ -116,7 +112,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
-  std::optional<ada::url_host> parse_ipv6(std::string_view input) {
+  std::optional<ada::url_host> parse_ipv6(std::string_view input) noexcept {
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
     std::array<uint16_t, 8> address{};
 
@@ -311,7 +307,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#ipv4-number-parser
    */
-  std::optional<uint16_t> parse_ipv4_number(std::string_view input) {
+  std::optional<uint16_t> parse_ipv4_number(std::string_view input) noexcept {
     // If input is the empty string, then return failure.
     if (input.empty()) {
       return std::nullopt;
@@ -363,7 +359,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special) {
+  std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special) noexcept {
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
@@ -403,7 +399,7 @@ namespace ada::parser {
   url parse_url(std::string user_input,
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding,
-                std::optional<ada::state> state_override) {
+                std::optional<ada::state> state_override) noexcept {
 
     // Assign buffer
     std::string buffer{};
@@ -1081,7 +1077,7 @@ namespace ada::parser {
           // Otherwise, run these steps:
           else {
             // UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
-            buffer += unicode::utf8_percent_encode(std::string{*pointer}, character_sets::PATH_PERCENT_ENCODE);
+            buffer.append(unicode::utf8_percent_encode(std::string{*pointer}, character_sets::PATH_PERCENT_ENCODE));
           }
 
           break;
