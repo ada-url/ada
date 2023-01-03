@@ -53,13 +53,14 @@ else(CURL_FOUND)
 endif(CURL_FOUND)
 
 find_package(
-    Boost
+    Boost 1.80
     COMPONENTS system
 )
+
 if(Boost_FOUND)
     target_link_libraries(bench PRIVATE Boost::system)
     target_link_libraries(bench PRIVATE boost_url)
     target_compile_definitions(bench PRIVATE BOOST_ENABLED=1)
 else(Boost_FOUND)
-    message(STATUS "Boost was not found, please install it for benchmarking purposes.")
+    message(STATUS "Boost 1.80 or better was not found, please install it for benchmarking purposes.")
 endif(Boost_FOUND)
