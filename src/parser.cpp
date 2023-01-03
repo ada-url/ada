@@ -520,7 +520,7 @@ namespace ada::parser {
             state = SCHEME;
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
-          else if (!state_override.has_value()) {
+          else if (ada_unlikely(!state_override.has_value())) {
             state = NO_SCHEME;
             pointer--;
           }
@@ -539,7 +539,7 @@ namespace ada::parser {
           // Otherwise, if c is U+003A (:), then:
           else if (*pointer == ':') {
             // If state override is given, then:
-            if (state_override.has_value()) {
+            if (ada_unlikely(state_override.has_value())) {
               // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
               // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
               if (url.is_special() != ada::scheme::is_special(buffer)) {
@@ -562,7 +562,7 @@ namespace ada::parser {
             url.scheme = buffer;
 
             // If state override is given, then:
-            if (state_override.has_value()) {
+            if (ada_unlikely(state_override.has_value())) {
               auto urls_scheme_port = ada::scheme::SPECIAL_SCHEME.find(url.scheme);
 
               if (urls_scheme_port != ada::scheme::SPECIAL_SCHEME.end()) {
@@ -606,7 +606,7 @@ namespace ada::parser {
           }
           // Otherwise, if state override is not given, set buffer to the empty string, state to no scheme state,
           // and start over (from the first code point in input).
-          else if (!state_override.has_value()) {
+          else if (ada_unlikely(!state_override.has_value())) {
             buffer.clear();
             state = NO_SCHEME;
             pointer = pointer_start;
@@ -810,7 +810,7 @@ namespace ada::parser {
 
           // If fragment iterator does not point to end of the input and state override is defined
           // set pointer to fragment pointer, state to fragment.
-          if (fragment_iterator != pointer_end && !state_override.has_value()) {
+          if (ada_unlikely(fragment_iterator != pointer_end && !state_override.has_value())) {
             pointer = fragment_iterator;
             state = FRAGMENT;
           } else {
@@ -822,7 +822,7 @@ namespace ada::parser {
         case HOST: {
           // If state override is given and url’s scheme is "file",
           // then decrease pointer by 1 and set state to file host state.
-          if (state_override.has_value() && url.scheme == "file") {
+          if (ada_unlikely(state_override.has_value() && url.scheme == "file")) {
             pointer--;
             state = FILE_HOST;
           }
@@ -834,7 +834,7 @@ namespace ada::parser {
               return url;
             }
             // If state override is given and state override is hostname state, then return.
-            else if (state_override.has_value() && state_override == HOST) {
+            else if (ada_unlikely(state_override.has_value() && state_override == HOST)) {
               return url;
             }
 
@@ -866,7 +866,7 @@ namespace ada::parser {
             }
             // Otherwise, if state override is given, buffer is the empty string,
             // and either url includes credentials or url’s port is non-null, return.
-            else if (state_override.has_value() && buffer.empty() && (url.includes_credentials() || url.port.has_value())) {
+            else if (ada_unlikely(state_override.has_value() && buffer.empty() && (url.includes_credentials() || url.port.has_value()))) {
               return url;
             }
 
@@ -885,7 +885,7 @@ namespace ada::parser {
             state = PATH_START;
 
             // If state override is given, then return.
-            if (state_override) {
+            if (ada_unlikely(state_override)) {
               return url;
             }
           }
@@ -977,7 +977,7 @@ namespace ada::parser {
             }
 
             // If state override is given, then return.
-            if (state_override.has_value()) {
+            if (ada_unlikely(state_override.has_value())) {
               return url;
             }
 
@@ -1025,7 +1025,7 @@ namespace ada::parser {
             }
           }
           // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
-          else if (state_override.has_value() && !url.host.has_value()) {
+          else if (ada_unlikely(state_override.has_value() && !url.host.has_value())) {
             // To append to a list that is not an ordered set is to add the given item to the end of the list.
             url.path.list_value.emplace_back("");
           }
@@ -1136,7 +1136,7 @@ namespace ada::parser {
               url.host = ada::url_host{EMPTY_HOST, ""};
 
               // If state override is given, then return.
-              if (state_override.has_value()) {
+              if (ada_unlikely(state_override.has_value())) {
                 return url;
               }
 
@@ -1163,7 +1163,7 @@ namespace ada::parser {
               url.host = *host;
 
               // If state override is given, then return.
-              if (state_override.has_value()) {
+              if (ada_unlikely(state_override.has_value())) {
                 return url;
               }
 
