@@ -22,47 +22,6 @@ namespace ada {
   };
 
   /**
-   * A URL’s path is either an ASCII string or a list of zero or more ASCII strings, usually identifying a location.
-   * It is initially « ».
-   *
-   * Note: A special URL’s path is always a list, i.e., it is never opaque.
-   *
-   * @see https://url.spec.whatwg.org/#concept-url-path
-   */
-  struct url_path {
-
-    // TODO: Investigate on how to reduce the usage of both vector and string_view
-    std::optional<std::string> string_value{};
-
-    std::vector<std::string> list_value{};
-
-    /**
-     * A URL has an opaque path if its path is a string.
-     */
-    [[nodiscard]] ada_really_inline bool is_opaque() const {
-      return string_value.has_value();
-    }
-
-    [[nodiscard]] ada_really_inline std::string normalize() const {
-      if (is_opaque()) {
-        return *string_value;
-      }
-
-      std::string output{};
-
-      if (list_value.empty()) {
-        return output;
-      }
-
-      for (auto it = list_value.begin(); it != list_value.end(); it++) {
-        output += "/" + *it;
-      }
-
-      return output;
-    }
-  };
-
-  /**
    * @see https://url.spec.whatwg.org/#host-representation
    */
   struct url_host {
@@ -108,7 +67,7 @@ namespace ada {
     /**
      * A URL’s path is either an ASCII string or a list of zero or more ASCII strings, usually identifying a location.
      */
-    url_path path{};
+    std::string path{};
 
     /**
      * A URL’s query is either null or an ASCII string. It is initially null.
@@ -141,25 +100,26 @@ namespace ada {
     /**
      * A URL has an opaque path if its path is a string.
      */
-    [[nodiscard]] ada_really_inline bool has_opaque_path() const {
-      return path.is_opaque();
-    }
+    bool has_opaque_path{false};
 
     /**
      * @see https://url.spec.whatwg.org/#shorten-a-urls-path
      *
      * This function assumes url does not have an opaque path.
      */
-    void shorten_path() {
+    void shorten_path() noexcept {
       // Let path be url’s path.
       // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized Windows drive letter, then return.
-      if (scheme == "file" && path.list_value.size() == 1 && checkers::is_normalized_windows_drive_letter(path.list_value[0])) {
-        return;
+      if (scheme == "file" && !path.empty() && path.find_first_of('/', 1) == std::string_view::npos) {
+        std::string first_element = path.substr(1, path.find_first_of('/', 1));
+        if (checkers::is_normalized_windows_drive_letter(first_element)) {
+          return;
+        }
       }
 
       // Remove path’s last item, if any.
-      if (!path.list_value.empty()) {
-        path.list_value.pop_back();
+      if (!path.empty()) {
+        path.erase(path.find_last_of('/'));
       }
     }
 

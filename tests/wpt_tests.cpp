@@ -229,7 +229,7 @@ bool urltestdata_encoding() {
         TEST_ASSERT(expected_port, port, "Port");
 
         std::string_view pathname = object["pathname"];
-        TEST_ASSERT(input_url.path.normalize(), pathname, "Pathname");
+        TEST_ASSERT(input_url.path, pathname, "Pathname");
 
         std::string_view query;
         if (!object["query"].get(query)) {
