@@ -380,11 +380,13 @@ namespace ada::parser {
       return parse_opaque_host(input);
     }
 
+    std::string decoded = ada::unicode::percent_decode(input);
+
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
-    std::string_view ascii_domain{ada::unicode::percent_decode(input)};
+    std::string_view domain{decoded};
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    bool is_valid = domain_to_ascii(ascii_domain);
+    bool is_valid = domain_to_ascii(domain);
 
     // If asciiDomain is failure, validation error, return failure.
     if (!is_valid) {
@@ -392,12 +394,12 @@ namespace ada::parser {
     }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
-    if (checkers::ends_in_a_number(ascii_domain)) {
-      return parse_ipv4(ascii_domain);
+    if (checkers::ends_in_a_number(domain)) {
+      return parse_ipv4(domain);
     }
 
     // Return asciiDomain.
-    return ada::url_host{BASIC_DOMAIN, std::string{ascii_domain}};
+    return ada::url_host{BASIC_DOMAIN, std::string{domain}};
   }
 
   url parse_url(std::string user_input,
@@ -492,7 +494,7 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if ((pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#') || (url.is_special() && *pointer == '\\')) {
+          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' || (url.is_special() && *pointer == '\\')) {
             // If atSignSeen is true and buffer is the empty string, validation error, return failure.
             if (at_sign_seen && buffer.empty()) {
               buffer.clear();
