@@ -666,7 +666,8 @@ namespace ada::parser {
             }
             // Otherwise, set url’s path to the empty string and set state to opaque path state.
             else {
-              url.path.string_value = "";
+              url.has_opaque_path = true;
+              url.path = "";
               state = OPAQUE_PATH;
             }
           }
@@ -688,16 +689,17 @@ namespace ada::parser {
         }
         case NO_SCHEME: {
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
-          if (!base_url.has_value() || (base_url->has_opaque_path() && *pointer != '#')) {
+          if (!base_url.has_value() || (base_url->has_opaque_path && *pointer != '#')) {
             url.is_valid = false;
             return url;
           }
           // Otherwise, if base has an opaque path and c is U+0023 (#),
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
-          else if (base_url->has_opaque_path() && *pointer == '#') {
+          else if (base_url->has_opaque_path && *pointer == '#') {
             url.scheme = base_url->scheme;
             url.path = base_url->path;
+            url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
             state = FRAGMENT;
           }
@@ -763,6 +765,7 @@ namespace ada::parser {
             url.host = base_url->host;
             url.port = base_url->port;
             url.path = base_url->path;
+            url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
 
             // If c is U+003F (?), then set url’s query to the empty string, and state to query state.
@@ -999,9 +1002,11 @@ namespace ada::parser {
             // If c is not the EOF code point, UTF-8 percent-encode c using the C0 control percent-encode set
             // and append the result to url’s path.
             if (pointer != pointer_end) {
-              // TODO: No need to iterate and push_back character by character. We can do it in bulk.
-              std::string encoded = unicode::percent_encode(std::string{pointer, pointer + 1}, character_sets::C0_CONTROL_PERCENT_ENCODE);
-              url.path.string_value->append(encoded);
+              if (character_sets::bit_at(character_sets::C0_CONTROL_PERCENT_ENCODE, *pointer)) {
+                url.path += character_sets::hex + *pointer * 4;
+              } else {
+                url.path += *pointer;
+              }
             }
           }
 
@@ -1093,7 +1098,7 @@ namespace ada::parser {
           // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
           else if (state_override.has_value() && !url.host.has_value()) {
             // To append to a list that is not an ordered set is to add the given item to the end of the list.
-            url.path.list_value.emplace_back("");
+            url.path += "/";
           }
 
           break;
@@ -1112,24 +1117,24 @@ namespace ada::parser {
               // If neither c is U+002F (/), nor url is special and c is U+005C (\),
               // append the empty string to url’s path.
               if (*pointer != '/' && !(url.is_special() && *pointer == '\\')) {
-                url.path.list_value.emplace_back("");
+                url.path += "/";
               }
             }
             // Otherwise, if buffer is a single-dot path segment and if neither c is U+002F (/),
             // nor url is special and c is U+005C (\), append the empty string to url’s path.
             else if (unicode::is_single_dot_path_segment(buffer) && *pointer != '/' && !(url.is_special() && *pointer == '\\')) {
-              url.path.list_value.emplace_back("");
+              url.path += "/";
             }
             // Otherwise, if buffer is not a single-dot path segment, then:
             else if (!unicode::is_single_dot_path_segment(buffer)) {
               // If url’s scheme is "file", url’s path is empty, and buffer is a Windows drive letter,
               // then replace the second code point in buffer with U+003A (:).
-              if (url.scheme == "file" && url.path.list_value.empty() && checkers::is_windows_drive_letter(buffer)){
+              if (url.scheme == "file" && url.path.empty() && checkers::is_windows_drive_letter(buffer)){
                 buffer[1] = ':';
               }
 
               // Append buffer to url’s path.
-              url.path.list_value.push_back(buffer);
+              url.path += "/" + buffer;
             }
 
             // Set buffer to the empty string.
@@ -1168,12 +1173,13 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
               // then append base’s path[0] to url’s path.
-              if (std::distance(pointer, pointer_end) > 0 && !base_url->path.list_value.empty()) {
-                auto starts_with_windows_drive_letter = checkers::is_windows_drive_letter(pointer + pointer[0]);
-                auto first_base_url_path = base_url->path.list_value[0];
+              if (std::distance(pointer, pointer_end) > 0 && !base_url->path.empty()) {
+                if (!checkers::is_windows_drive_letter(pointer + pointer[0])) {
+                  std::string first_base_url_path = base_url->path.substr(1, base_url->path.find_first_of('/', 1));
 
-                if (!starts_with_windows_drive_letter && checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
-                  url.path.list_value.push_back(first_base_url_path);
+                  if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
+                    url.path += "/" + first_base_url_path;
+                  }
                 }
               }
             }
@@ -1262,6 +1268,7 @@ namespace ada::parser {
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
             url.host = base_url->host;
             url.path = base_url->path;
+            url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
 
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
@@ -1286,7 +1293,8 @@ namespace ada::parser {
               // Otherwise:
               else {
                 // Set url’s path to an empty list.
-                url.path.list_value.clear();
+                url.path = "";
+                url.has_opaque_path = true;
               }
 
               // Set state to path state and decrease pointer by 1.
