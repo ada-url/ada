@@ -23,15 +23,8 @@ namespace ada::parser {
    * to_ascii does not expect the input to be percent decoded. This is
    * mostly used to conform with the test suite.
    */
-  std::optional<std::string> to_ascii(const std::string_view plain) noexcept {
-    std::string percent_decoded = unicode::percent_decode(plain);
-    return domain_to_ascii(percent_decoded, false);
-  }
-
-  /**
-   * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
-   */
-  std::optional<std::string> domain_to_ascii(const std::string_view input, const bool be_strict) noexcept {
+  std::optional<std::string> to_ascii(const std::string_view plain, const bool be_strict) noexcept {
+    std::string input = unicode::percent_decode(plain);
     UErrorCode status = U_ZERO_ERROR;
     uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
 
@@ -129,12 +122,12 @@ namespace ada::parser {
     }
 
     // Let numbers be an empty list.
-    std::vector<uint16_t> numbers;
+    std::vector<uint32_t> numbers;
 
     // For each part of parts:
     for (auto part: parts) {
       // Let result be the result of parsing part.
-      std::optional<uint16_t> result = parse_ipv4_number(part);
+      std::optional<uint32_t> result = parse_ipv4_number(part);
 
       // If result is failure, validation error, return failure.
       if (!result.has_value()) {
@@ -162,12 +155,12 @@ namespace ada::parser {
     numbers.pop_back();
 
     // Let counter be 0.
-    auto counter = 0;
+    int counter = 0;
 
     // For each n of numbers:
-    for (auto n: numbers) {
+    for (const uint32_t n: numbers) {
       // Increment ipv4 by n × 256(3 − counter).
-      ipv4 += static_cast<uint16_t>(n * std::pow(256, 3 - counter));
+      ipv4 += n * static_cast<uint32_t>(std::pow(256, 3 - counter));
 
       // Increment counter by 1.
       counter++;
@@ -375,7 +368,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#ipv4-number-parser
    */
-  std::optional<uint16_t> parse_ipv4_number(std::string_view input) {
+  std::optional<uint32_t> parse_ipv4_number(std::string_view input) {
     // If input is the empty string, then return failure.
     if (input.empty()) {
       return std::nullopt;
@@ -421,7 +414,7 @@ namespace ada::parser {
 
     // Let output be the mathematical integer value that is represented by input in radix-R notation,
     // using ASCII hex digits for digits with values 0 through 15.
-    return static_cast<uint16_t>(std::strtol(input.data(), nullptr, R));
+    return std::strtol(input.data(), nullptr, R);
   }
 
   /**
@@ -445,10 +438,8 @@ namespace ada::parser {
     }
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
-    std::string percent_decoded_input = unicode::percent_decode(input);
-
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    std::optional<std::string> ascii_domain = domain_to_ascii(percent_decoded_input, false);
+    std::optional<std::string> ascii_domain = to_ascii(input, false);
 
     // If asciiDomain is failure, validation error, return failure.
     if (!ascii_domain.has_value()) {

@@ -96,15 +96,15 @@ namespace ada::serializers {
     // For each i in the range 1 to 4, inclusive:
     for (size_t i = 1; i <= 4; i++) {
       // Prepend n % 256, serialized, to output.
-      output += static_cast<char>(n % 256);
+      output.insert(0, std::to_string(n % 256));
 
       // If i is not 4, then prepend U+002E (.) to output.
       if (i != 4) {
-        output += '.';
+        output.insert(0, ".");
       }
 
       // Set n to floor(n / 256).
-      n = static_cast<uint32_t>(std::floor(n / 256));
+      n = static_cast<uint32_t>(floor((double)n / 256));
     }
 
     // Return output.
