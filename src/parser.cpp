@@ -10,7 +10,9 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <unicode/utypes.h>
 #include <unicode/uidna.h>
+#include <unicode/utf8.h>
 
 namespace ada::parser {
 
@@ -31,13 +33,24 @@ namespace ada::parser {
     }
 
     UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    char output[255];
+    std::string result(255, ' ');
     int32_t length = uidna_nameToASCII_UTF8(uidna,
                                          input.data(),
-                                         static_cast<int32_t>(input.length()),
-                                         output, 255,
+                                         int32_t(input.length()),
+                                         result.data(), int32_t(result.capacity()),
                                          &info,
                                          &status);
+
+    if (status == U_BUFFER_OVERFLOW_ERROR) {
+      status = U_ZERO_ERROR;
+      result.resize(length);
+      length = uidna_nameToASCII_UTF8(uidna,
+                                     input.data(),
+                                     int32_t(input.length()),
+                                     result.data(), int32_t(result.capacity()),
+                                     &info,
+                                     &status);
+    }
 
     // A label contains hyphen-minus ('-') in the third and fourth positions.
     info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
@@ -60,8 +73,7 @@ namespace ada::parser {
       return std::nullopt;
     }
 
-    std::string result;
-    result.assign(output, length);
+    result.resize(length);
     uidna_close(uidna);
     return result;
   }
@@ -403,7 +415,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special) {
+  std::optional<ada::url_host> parse_host(const std::string_view input, bool is_not_special) {
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
