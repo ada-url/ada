@@ -18,9 +18,20 @@ namespace ada::parser {
 
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
+   *
+   * The only difference between domain_to_ascii and to_ascii is that
+   * to_ascii does not expect the input to be percent decoded. This is
+   * mostly used to conform with the test suite.
    */
-  std::optional<std::string> domain_to_ascii(const std::string_view plain_input, const bool be_strict) noexcept {
-    std::string input = unicode::percent_decode(plain_input);
+  std::optional<std::string> to_ascii(const std::string_view plain) noexcept {
+    std::string percent_decoded = unicode::percent_decode(plain);
+    return domain_to_ascii(percent_decoded, false);
+  }
+
+  /**
+   * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
+   */
+  std::optional<std::string> domain_to_ascii(const std::string_view input, const bool be_strict) noexcept {
     UErrorCode status = U_ZERO_ERROR;
     uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
 
@@ -36,7 +47,7 @@ namespace ada::parser {
     UIDNAInfo info = UIDNA_INFO_INITIALIZER;
     std::string result(255, ' ');
     int32_t length = uidna_nameToASCII_UTF8(uidna,
-                                         input.c_str(),
+                                         input.data(),
                                          int32_t(input.length()),
                                          result.data(), int32_t(result.capacity()),
                                          &info,
@@ -46,7 +57,7 @@ namespace ada::parser {
       status = U_ZERO_ERROR;
       result.resize(length);
       length = uidna_nameToASCII_UTF8(uidna,
-                                     input.c_str(),
+                                     input.data(),
                                      int32_t(input.length()),
                                      result.data(), int32_t(result.capacity()),
                                      &info,
@@ -92,7 +103,7 @@ namespace ada::parser {
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
-    auto result = ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+    auto result = ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
 
     return ada::url_host{OPAQUE_HOST, result};
   }
@@ -434,8 +445,10 @@ namespace ada::parser {
     }
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
+    std::string percent_decoded_input = unicode::percent_decode(input);
+
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    std::optional<std::string> ascii_domain = domain_to_ascii(input, false);
+    std::optional<std::string> ascii_domain = domain_to_ascii(percent_decoded_input, false);
 
     // If asciiDomain is failure, validation error, return failure.
     if (!ascii_domain.has_value()) {
@@ -530,7 +543,7 @@ namespace ada::parser {
               }
 
               // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
-              auto encoded_code_points = unicode::utf8_percent_encode(std::string{code_point}, character_sets::USERINFO_PERCENT_ENCODE);
+              auto encoded_code_points = unicode::percent_encode(std::string{code_point}, character_sets::USERINFO_PERCENT_ENCODE);
 
               // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
               if (password_token_seen) {
@@ -862,7 +875,7 @@ namespace ada::parser {
 
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          url.query = ada::unicode::utf8_percent_encode(query, query_percent_encode_set);
+          url.query = ada::unicode::percent_encode(query, query_percent_encode_set);
 
           // If fragment iterator does not point to end of the input and state override is defined
           // set pointer to fragment pointer, state to fragment.
@@ -967,7 +980,7 @@ namespace ada::parser {
           if (pointer != pointer_end) {
             // Optimization: Spec states that we should iterate character by character, instead of bulk operation.
             // UTF-8 percent-encode c using the fragment percent-encode set and append the result to url’s fragment.
-            url.fragment = unicode::utf8_percent_encode(
+            url.fragment = unicode::percent_encode(
                                   std::string(pointer, pointer_end),
                                   ada::character_sets::FRAGMENT_PERCENT_ENCODE);
             return url;
@@ -990,7 +1003,7 @@ namespace ada::parser {
             // and append the result to url’s path.
             if (pointer != pointer_end) {
               // TODO: No need to iterate and push_back character by character. We can do it in bulk.
-              std::string encoded = unicode::utf8_percent_encode(std::string{pointer, pointer + 1}, character_sets::C0_CONTROL_PERCENT_ENCODE);
+              std::string encoded = unicode::percent_encode(std::string{pointer, pointer + 1}, character_sets::C0_CONTROL_PERCENT_ENCODE);
               url.path.string_value->append(encoded);
             }
           }
@@ -1137,7 +1150,7 @@ namespace ada::parser {
           // Otherwise, run these steps:
           else {
             // UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
-            buffer += unicode::utf8_percent_encode(std::string{*pointer}, character_sets::PATH_PERCENT_ENCODE);
+            buffer += unicode::percent_encode(std::string{*pointer}, character_sets::PATH_PERCENT_ENCODE);
           }
 
           break;
