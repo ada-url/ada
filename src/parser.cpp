@@ -46,7 +46,7 @@ namespace ada::parser {
     // A label ends with a hyphen-minus ('-').
     info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
 
-    if (be_strict) {
+    if (!be_strict) {
       // A non-final domain name label (or the whole domain name) is empty.
       info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
       // A domain name label is longer than 63 bytes.
