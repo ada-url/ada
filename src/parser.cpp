@@ -87,16 +87,17 @@ namespace ada::parser {
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
   std::optional<ada::url_host> parse_opaque_host(std::string_view input) {
-    for (auto i = input.begin(); i < input.end(); i++) {
+    // TODO: Only iterate this once. No need to iterate it twice.
+    // Similar to: https://github.com/nodejs/node/blob/main/src/node_url.cc#L490
+    for (const auto c: input) {
       // If input contains a forbidden host code point, validation error, return failure.
-      // TODO: Replace this with .contains after moving to C++ 20.
-      if (ada::unicode::FORBIDDEN_HOST_CODE_POINTS.count(*i)) {
+      if (ada::unicode::is_forbidden_host_code_point(c)) {
         return std::nullopt;
       }
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
-    auto result = ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+    std::string result = ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
 
     return ada::url_host{OPAQUE_HOST, result};
   }
@@ -106,7 +107,7 @@ namespace ada::parser {
    */
   std::optional<ada::url_host> parse_ipv4(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
-    std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
+    std::vector<std::string> parts = ada::helpers::split_string_view(input, '.');
 
     // If the last item in parts is the empty string, then:
     if (parts.back().empty()) {
@@ -157,6 +158,7 @@ namespace ada::parser {
     // Let counter be 0.
     int counter = 0;
 
+    // TODO: Replace this with std::reduce when C++20 is supported.
     // For each n of numbers:
     for (const uint32_t n: numbers) {
       // Increment ipv4 by n × 256(3 − counter).
@@ -393,7 +395,7 @@ namespace ada::parser {
         std::strcpy(allowed_characters, "0123456789abcdefABCDEF");
       }
       // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
-      else if (input[1] == '0') {
+      else if (input[0] == '0') {
         // Remove the first code point from input.
         input.remove_prefix(1);
 
@@ -414,7 +416,7 @@ namespace ada::parser {
 
     // Let output be the mathematical integer value that is represented by input in radix-R notation,
     // using ASCII hex digits for digits with values 0 through 15.
-    return std::strtol(input.data(), nullptr, R);
+    return std::strtoll(input.data(), nullptr, R);
   }
 
   /**
@@ -447,8 +449,10 @@ namespace ada::parser {
     }
 
     // If asciiDomain contains a forbidden domain code point, validation error, return failure.
-    if (ascii_domain->find_first_of(ada::unicode::FORBIDDEN_DOMAIN_CODE_POINTS) != std::string_view::npos) {
-      return std::nullopt;
+    for (const auto c: *ascii_domain) {
+      if (unicode::is_forbidden_domain_code_point(c)) {
+        return std::nullopt;
+      }
     }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.

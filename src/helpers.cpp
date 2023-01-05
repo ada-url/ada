@@ -1,26 +1,22 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
+#include <sstream>
 
 namespace ada::helpers {
 
-  std::vector<std::string_view> split_string_view(std::string_view input, std::string_view delimiter) {
-    std::vector<std::string_view> output{};
-    size_t pointer = 0;
-
-    while (pointer < input.size()) {
-      const auto next = input.find_first_of(delimiter, pointer);
-
-      if (pointer != next)
-        output.emplace_back(input.substr(pointer, next - pointer));
-
-      if (next == std::string_view::npos)
-        break;
-
-      pointer = next + 1;
+  std::vector<std::string> split_string_view(std::string_view input, char delimiter, bool skip_empty) {
+    std::vector<std::string> out;
+    if (input.empty())
+      return out;
+    std::istringstream in_stream(std::string{input});
+    while (in_stream.good()) {
+      std::string item;
+      std::getline(in_stream, item, delimiter);
+      if (item.empty() && skip_empty) continue;
+      out.emplace_back(std::move(item));
     }
-
-    return output;
+    return out;
   }
 
   std::string get_state(ada::state state) {
