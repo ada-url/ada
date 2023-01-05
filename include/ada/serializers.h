@@ -13,7 +13,7 @@ namespace ada::serializers {
   std::string ipv6(std::array<uint16_t, 8> address) noexcept;
 
   // An IPv4 address is a 32-bit unsigned integer that identifies a network address.
-  std::string ipv4(uint32_t address) noexcept;
+  std::string ipv4(uint64_t address) noexcept;
 
 } // namespace ada::serializers
 

@@ -123,21 +123,22 @@ namespace ada::parser {
     }
 
     // Let numbers be an empty list.
-    std::vector<uint32_t> numbers;
+    std::vector<uint64_t> numbers;
+
+    int large_numbers = 0;
 
     // For each part of parts:
     for (auto part: parts) {
       // Let result be the result of parsing part.
-      std::optional<uint32_t> result = parse_ipv4_number(part);
+      std::optional<uint64_t> result = parse_ipv4_number(part);
 
       // If result is failure, validation error, return failure.
       if (!result.has_value()) {
         return std::nullopt;
       }
 
-      // If any but the last item in numbers is greater than 255, then return failure.
-      if (*result > 255 && part != parts.back()) {
-        return std::nullopt;
+      if (*result > 255) {
+        large_numbers++;
       }
 
       // Append result[0] to numbers.
@@ -145,10 +146,11 @@ namespace ada::parser {
     }
 
     // Let ipv4 be the last item in numbers.
-    uint32_t ipv4 = numbers.back();
+    uint64_t ipv4 = numbers.back();
 
+    // If any but the last item in numbers is greater than 255, then return failure.
     // If the last item in numbers is greater than or equal to 256(5 − numbers’s size), validation error, return failure.
-    if (ipv4 >= std::pow(256, 5 - numbers.size())) {
+    if (large_numbers > 1 || (large_numbers == 1 && ipv4 <= 255) || ipv4 >= static_cast<uint64_t>(std::pow(256, 5 - numbers.size()))) {
       return std::nullopt;
     }
 
@@ -160,9 +162,9 @@ namespace ada::parser {
 
     // TODO: Replace this with std::reduce when C++20 is supported.
     // For each n of numbers:
-    for (const uint32_t n: numbers) {
+    for (const auto n: numbers) {
       // Increment ipv4 by n × 256(3 − counter).
-      ipv4 += n * static_cast<uint32_t>(std::pow(256, 3 - counter));
+      ipv4 += n * static_cast<uint64_t>(std::pow(256, 3 - counter));
 
       // Increment counter by 1.
       counter++;
@@ -370,7 +372,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#ipv4-number-parser
    */
-  std::optional<uint32_t> parse_ipv4_number(std::string_view input) {
+  std::optional<uint64_t> parse_ipv4_number(std::string_view input) {
     // If input is the empty string, then return failure.
     if (input.empty()) {
       return std::nullopt;

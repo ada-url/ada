@@ -2,7 +2,6 @@
 #include "unicode.cpp"
 
 #include <algorithm>
-#include <cstring>
 
 namespace ada::checkers {
 

@@ -86,12 +86,12 @@ namespace ada::serializers {
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv4-serializer
    */
-  std::string ipv4(const uint32_t address) noexcept {
+  std::string ipv4(const uint64_t address) noexcept {
     // Let output be the empty string.
     std::string output{};
 
     // Let n be the value of address.
-    uint32_t n = address;
+    auto n = address;
 
     // For each i in the range 1 to 4, inclusive:
     for (size_t i = 1; i <= 4; i++) {
@@ -104,7 +104,7 @@ namespace ada::serializers {
       }
 
       // Set n to floor(n / 256).
-      n = static_cast<uint32_t>(floor((double)n / 256));
+      n = static_cast<uint64_t>(floor((double)n / 256));
     }
 
     // Return output.
