@@ -17,7 +17,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
    */
-  std::optional<std::string> domain_to_ascii(char* input, size_t input_length, const bool be_strict) noexcept {
+  std::optional<std::string> domain_to_ascii(const std::string_view input, const bool be_strict) noexcept {
     UErrorCode status = U_ZERO_ERROR;
     uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
 
@@ -33,8 +33,8 @@ namespace ada::parser {
     UIDNAInfo info = UIDNA_INFO_INITIALIZER;
     char output[255];
     int32_t length = uidna_nameToASCII_UTF8(uidna,
-                                         input,
-                                         static_cast<int32_t>(input_length),
+                                         input.data(),
+                                         static_cast<int32_t>(input.length()),
                                          output, 255,
                                          &info,
                                          &status);
@@ -419,7 +419,7 @@ namespace ada::parser {
     std::string domain = ada::unicode::percent_decode(input);
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    std::optional<std::string> ascii_domain = domain_to_ascii(domain.data(), domain.length(), false);
+    std::optional<std::string> ascii_domain = domain_to_ascii(domain, false);
 
     // If asciiDomain is failure, validation error, return failure.
     if (!ascii_domain.has_value()) {
