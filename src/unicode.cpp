@@ -10,14 +10,17 @@ namespace ada::unicode {
   };
 
   // A forbidden domain code point is a forbidden host code point, a C0 control, U+0025 (%), or U+007F DELETE.
-  ada_really_inline bool is_forbidden_host_code_point(const char c) {
-    // Check U+0025 (%), or U+007F DELETE.
-    if (c == '\u0025' || c == '\u007F') return true;
-    // Check C0 control
-    if ((c >= '\0' && c <= '\x1f')) return true;
-
-    return FORBIDDEN_HOST_CODE_POINTS.count(c);
-  }
+  static constexpr char FORBIDDEN_DOMAIN_CODE_POINTS[] = {
+    // Forbidden host code points
+    '\u0000', '\u0009', '\u000A', '\u000D', ' ', '#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '|',
+    // U+0025 (%), or U+007F DELETE.
+    '\u0025', '\u007F',
+    // C0 control
+    '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007', '\u0008',
+    '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017', '\u0018', '\u0019',
+    '\u0020', '\u0021', '\u0022', '\u0023', '\u0024', '\u0025', '\u0026', '\u0027', '\u0028', '\u0029',
+    '\u0030', '\u0031', '\u0032', '\u0033', '\u0034', '\u0035', '\u0036', '\u0037'
+  };
 
   // An ASCII upper alpha is a code point in the range U+0041 (A) to U+005A (Z), inclusive.
   ada_really_inline bool is_ascii_upper_alpha(const char c) noexcept {

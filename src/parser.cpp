@@ -39,18 +39,23 @@ namespace ada::parser {
                                          &info,
                                          &status);
 
+    // A label contains hyphen-minus ('-') in the third and fourth positions.
     info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
+    // A label starts with a hyphen-minus ('-').
     info.errors &= ~UIDNA_ERROR_LEADING_HYPHEN;
+    // A label ends with a hyphen-minus ('-').
     info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
 
     if (be_strict) {
-      // VerifyDnsLength = beStrict
+      // A non-final domain name label (or the whole domain name) is empty.
       info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
+      // A domain name label is longer than 63 bytes.
       info.errors &= ~UIDNA_ERROR_LABEL_TOO_LONG;
+      // A domain name is longer than 255 bytes in its storage form.
       info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
     }
 
-    if (U_FAILURE(status) || (be_strict && info.errors != 0)) {
+    if (U_FAILURE(status) || info.errors != 0) {
       uidna_close(uidna);
       return std::nullopt;
     }
@@ -423,6 +428,11 @@ namespace ada::parser {
 
     // If asciiDomain is failure, validation error, return failure.
     if (!ascii_domain.has_value()) {
+      return std::nullopt;
+    }
+
+    // If asciiDomain contains a forbidden domain code point, validation error, return failure.
+    if (ascii_domain->find_first_of(ada::unicode::FORBIDDEN_DOMAIN_CODE_POINTS) != std::string_view::npos) {
       return std::nullopt;
     }
 
