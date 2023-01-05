@@ -8,22 +8,57 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
+
+#include <unicode/uidna.h>
 
 namespace ada::parser {
 
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
    */
-  bool domain_to_ascii(const std::string_view input) {
-    static const char bad_bytes[] = {
-      /* */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-      0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-      0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
-      0x25, 0x3A, 0x7f, 0x00 /* null-terminate */
-    };
+  std::optional<std::string> domain_to_ascii(char* input, size_t input_length, const bool be_strict) noexcept {
+    UErrorCode status = U_ZERO_ERROR;
+    uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
 
-    return input.find_first_of(bad_bytes) == std::string_view::npos;
+    if (be_strict) {
+      options |= UIDNA_USE_STD3_RULES;
+    }
+
+    UIDNA* uidna = uidna_openUTS46(options, &status);
+    if (U_FAILURE(status)) {
+      return std::nullopt;
+    }
+
+    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+    char output[255];
+    int32_t length = uidna_nameToASCII_UTF8(uidna,
+                                         input,
+                                         static_cast<int32_t>(input_length),
+                                         output, 255,
+                                         &info,
+                                         &status);
+
+    info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
+    info.errors &= ~UIDNA_ERROR_LEADING_HYPHEN;
+    info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
+
+    if (be_strict) {
+      // VerifyDnsLength = beStrict
+      info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
+      info.errors &= ~UIDNA_ERROR_LABEL_TOO_LONG;
+      info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
+    }
+
+    if (U_FAILURE(status) || (be_strict && info.errors != 0)) {
+      uidna_close(uidna);
+      return std::nullopt;
+    }
+
+    std::string result;
+    result.assign(output, length);
+    uidna_close(uidna);
+    return result;
   }
 
   /**
@@ -380,26 +415,24 @@ namespace ada::parser {
       return parse_opaque_host(input);
     }
 
-    std::string decoded = ada::unicode::percent_decode(input);
-
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
-    std::string_view domain{decoded};
+    std::string domain = ada::unicode::percent_decode(input);
 
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    bool is_valid = domain_to_ascii(domain);
+    std::optional<std::string> ascii_domain = domain_to_ascii(domain.data(), domain.length(), false);
 
     // If asciiDomain is failure, validation error, return failure.
-    if (!is_valid) {
+    if (!ascii_domain.has_value()) {
       return std::nullopt;
     }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
-    if (checkers::ends_in_a_number(domain)) {
-      return parse_ipv4(domain);
+    if (checkers::ends_in_a_number(*ascii_domain)) {
+      return parse_ipv4(*ascii_domain);
     }
 
     // Return asciiDomain.
-    return ada::url_host{BASIC_DOMAIN, std::string{domain}};
+    return ada::url_host{BASIC_DOMAIN, *ascii_domain};
   }
 
   url parse_url(std::string user_input,

@@ -11,7 +11,7 @@ namespace ada::parser {
 
   // Return `std::nullopt` if the parser result is failure.
 
-  bool domain_to_ascii(std::string_view input);
+  std::optional<std::string> domain_to_ascii(char* input, size_t input_length, bool be_strict) noexcept;
   std::optional<uint16_t> parse_ipv4_number(std::string_view input);
   std::optional<ada::url_host> parse_opaque_host(std::string_view input);
   std::optional<ada::url_host> parse_ipv6(std::string_view input);

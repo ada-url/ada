@@ -38,6 +38,9 @@ set_target_properties(
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
+find_package(ICU COMPONENTS uc i18n REQUIRED)
+target_link_libraries(ada ICU::uc ICU::i18n)
+
 install(
   FILES include/ada.h
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
