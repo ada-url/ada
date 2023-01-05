@@ -197,9 +197,11 @@ bool urltestdata_encoding() {
         // raw input is a quoted string, unescaped.
         std::cout << "    warning: invalid UTF-8 input!" << std::endl;
       }
+      std::cout << "input=" << input << std::endl;
       std::string_view base;
       std::optional<ada::url> base_url;
       if (!object["base"].get(base)) {
+        std::cout << "base=" << base << std::endl;
         base_url = ada::parse(std::string{base});
       }
       bool failure = false;
