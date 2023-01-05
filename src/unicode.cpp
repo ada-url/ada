@@ -85,7 +85,8 @@ namespace ada::unicode {
       const char ch = pointer[0];
       size_t remaining = end - pointer - 1;
       if (ch != '%' || remaining < 2 ||
-          ((!is_ascii_hex_digit(pointer[1]) ||
+          (ch == '%' &&
+           (!is_ascii_hex_digit(pointer[1]) ||
             !is_ascii_hex_digit(pointer[2])))) {
         dest += ch;
         pointer++;

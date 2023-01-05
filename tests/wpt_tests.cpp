@@ -23,13 +23,6 @@ const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
   do {                                                                         \
     std::cout << "> Running " << __func__ << " ..." << std::endl;              \
   } while (0);
-#define ASSERT_SUCCESS(ACTUAL)                                                 \
-  do {                                                                         \
-    if (auto err = (ACTUAL); err) {                                            \
-      std::cout << err << std::endl;                                           \
-      return false;                                                            \
-    }                                                                          \
-  } while (0);
 #define RUN_TEST(ACTUAL)                                                       \
   do {                                                                         \
     if (!(ACTUAL)) {                                                           \
@@ -155,17 +148,15 @@ bool toascii_encoding() {
       std::cout << "   comment: " << element.get_string() << std::endl;
     } else if (element.type() == ondemand::json_type::object) {
       ondemand::object object = element.get_object();
-      std::string_view input =
-          object["input"]; // direct access to the JSON document (no escaping)
-      std::cout << "     input: " << input << std::endl;
+      std::string_view input = object["input"];
+      auto output = ada::parser::domain_to_ascii(input, false).value_or("");
+      auto expected_output = object["output"];
 
-      auto ouput_value = object["output"];
-      if (ouput_value.type() == ondemand::json_type::string) {
-        std::string_view output = ouput_value.get_string();
-        std::cout << "     output: " << output << std::endl;
-
-      } else if (ouput_value.is_null()) {
-        std::cout << "     output: null" << std::endl;
+      if (expected_output.type() == ondemand::json_type::string) {
+        std::string_view stringified_output = expected_output.get_string();
+        TEST_ASSERT(output, stringified_output, "Should have been equal");
+      } else if (expected_output.is_null()) {
+        TEST_ASSERT(output, "", "Should have been empty");
       }
     }
   }

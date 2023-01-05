@@ -19,7 +19,8 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
    */
-  std::optional<std::string> domain_to_ascii(const std::string_view input, const bool be_strict) noexcept {
+  std::optional<std::string> domain_to_ascii(const std::string_view plain_input, const bool be_strict) noexcept {
+    std::string input = unicode::percent_decode(plain_input);
     UErrorCode status = U_ZERO_ERROR;
     uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
 
@@ -35,7 +36,7 @@ namespace ada::parser {
     UIDNAInfo info = UIDNA_INFO_INITIALIZER;
     std::string result(255, ' ');
     int32_t length = uidna_nameToASCII_UTF8(uidna,
-                                         input.data(),
+                                         input.c_str(),
                                          int32_t(input.length()),
                                          result.data(), int32_t(result.capacity()),
                                          &info,
@@ -45,7 +46,7 @@ namespace ada::parser {
       status = U_ZERO_ERROR;
       result.resize(length);
       length = uidna_nameToASCII_UTF8(uidna,
-                                     input.data(),
+                                     input.c_str(),
                                      int32_t(input.length()),
                                      result.data(), int32_t(result.capacity()),
                                      &info,
@@ -433,10 +434,8 @@ namespace ada::parser {
     }
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
-    std::string domain = ada::unicode::percent_decode(input);
-
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    std::optional<std::string> ascii_domain = domain_to_ascii(domain, false);
+    std::optional<std::string> ascii_domain = domain_to_ascii(input, false);
 
     // If asciiDomain is failure, validation error, return failure.
     if (!ascii_domain.has_value()) {
