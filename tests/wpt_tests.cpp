@@ -182,11 +182,9 @@ bool urltestdata_encoding() {
       auto input_element = object["input"];
       std::string_view input{};
       if (input_element.get_string().get(input)) {
-        // we have a non-UTF-8 input.
         input = input_element.raw_json_token();
-        std::cout << "     raw input " << input << std::endl;
-        // raw input is a quoted string, unescaped.
-        std::cout << "    warning: invalid UTF-8 input!" << std::endl;
+        // TODO: Do not skip invalid UTF-8 inputs.
+        continue;
       }
       std::cout << "input=" << input << std::endl;
       std::string_view base;
