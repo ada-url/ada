@@ -107,7 +107,7 @@ namespace ada::parser {
    */
   std::optional<ada::url_host> parse_ipv4(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
-    std::vector<std::string> parts = ada::helpers::split_string_view(input, '.');
+    std::vector<std::string> parts = ada::helpers::split_string_view(input, '.', false);
 
     // If the last item in parts is the empty string, then:
     if (parts.back().empty()) {
