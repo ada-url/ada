@@ -9,10 +9,10 @@
 
 namespace ada::helpers {
 
-  std::vector<std::string_view> split_string_view(std::string_view input, std::string_view delimiter);
+  std::vector<std::string> split_string_view(std::string_view input, char delimiter, bool skip_empty = true);
   ada_really_inline uint64_t string_to_uint64(std::string_view view);
   std::string from_decimal(std::string& res, uint16_t base, uint16_t input);
 
 } // namespace ada::helpers
 
-#endif //ADA_HELPERS_H
+#endif // ADA_HELPERS_H

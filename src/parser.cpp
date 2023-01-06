@@ -8,38 +8,96 @@
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
+
+#include <unicode/utypes.h>
+#include <unicode/uidna.h>
+#include <unicode/utf8.h>
 
 namespace ada::parser {
 
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
+   *
+   * The only difference between domain_to_ascii and to_ascii is that
+   * to_ascii does not expect the input to be percent decoded. This is
+   * mostly used to conform with the test suite.
    */
-  bool domain_to_ascii(const std::string_view input) {
-    static const char bad_bytes[] = {
-      /* */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-      0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-      0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
-      0x25, 0x3A, 0x7f, 0x00 /* null-terminate */
-    };
+  std::optional<std::string> to_ascii(const std::string_view plain, const bool be_strict) noexcept {
+    std::string input = unicode::percent_decode(plain);
+    UErrorCode status = U_ZERO_ERROR;
+    uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
 
-    return input.find_first_of(bad_bytes) == std::string_view::npos;
+    if (be_strict) {
+      options |= UIDNA_USE_STD3_RULES;
+    }
+
+    UIDNA* uidna = uidna_openUTS46(options, &status);
+    if (U_FAILURE(status)) {
+      return std::nullopt;
+    }
+
+    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+    std::string result(255, ' ');
+    int32_t length = uidna_nameToASCII_UTF8(uidna,
+                                         input.data(),
+                                         int32_t(input.length()),
+                                         result.data(), int32_t(result.capacity()),
+                                         &info,
+                                         &status);
+
+    if (status == U_BUFFER_OVERFLOW_ERROR) {
+      status = U_ZERO_ERROR;
+      result.resize(length);
+      length = uidna_nameToASCII_UTF8(uidna,
+                                     input.data(),
+                                     int32_t(input.length()),
+                                     result.data(), int32_t(result.capacity()),
+                                     &info,
+                                     &status);
+    }
+
+    // A label contains hyphen-minus ('-') in the third and fourth positions.
+    info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
+    // A label starts with a hyphen-minus ('-').
+    info.errors &= ~UIDNA_ERROR_LEADING_HYPHEN;
+    // A label ends with a hyphen-minus ('-').
+    info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
+
+    if (!be_strict) {
+      // A non-final domain name label (or the whole domain name) is empty.
+      info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
+      // A domain name label is longer than 63 bytes.
+      info.errors &= ~UIDNA_ERROR_LABEL_TOO_LONG;
+      // A domain name is longer than 255 bytes in its storage form.
+      info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
+    }
+
+    uidna_close(uidna);
+
+    if (U_FAILURE(status) || info.errors != 0 || length == 0) {
+      return std::nullopt;
+    }
+
+    result.resize(length);
+    return result;
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
   std::optional<ada::url_host> parse_opaque_host(std::string_view input) {
-    for (auto i = input.begin(); i < input.end(); i++) {
+    // TODO: Only iterate this once. No need to iterate it twice.
+    // Similar to: https://github.com/nodejs/node/blob/main/src/node_url.cc#L490
+    for (const auto c: input) {
       // If input contains a forbidden host code point, validation error, return failure.
-      // TODO: Replace this with .contains after moving to C++ 20.
-      if (ada::unicode::FORBIDDEN_HOST_CODE_POINTS.count(*i)) {
+      if (ada::unicode::is_forbidden_host_code_point(c)) {
         return std::nullopt;
       }
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
-    auto result = ada::unicode::utf8_percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+    std::string result = ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
 
     return ada::url_host{OPAQUE_HOST, result};
   }
@@ -49,7 +107,7 @@ namespace ada::parser {
    */
   std::optional<ada::url_host> parse_ipv4(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
-    std::vector<std::string_view> parts = ada::helpers::split_string_view(input, ".");
+    std::vector<std::string> parts = ada::helpers::split_string_view(input, '.', false);
 
     // If the last item in parts is the empty string, then:
     if (parts.back().empty()) {
@@ -65,21 +123,22 @@ namespace ada::parser {
     }
 
     // Let numbers be an empty list.
-    std::vector<uint16_t> numbers;
+    std::vector<uint64_t> numbers;
+
+    int large_numbers = 0;
 
     // For each part of parts:
     for (auto part: parts) {
       // Let result be the result of parsing part.
-      std::optional<uint16_t> result = parse_ipv4_number(part);
+      std::optional<uint64_t> result = parse_ipv4_number(part);
 
       // If result is failure, validation error, return failure.
       if (!result.has_value()) {
         return std::nullopt;
       }
 
-      // If any but the last item in numbers is greater than 255, then return failure.
-      if (*result > 255 && part != parts.back()) {
-        return std::nullopt;
+      if (*result > 255) {
+        large_numbers++;
       }
 
       // Append result[0] to numbers.
@@ -87,10 +146,11 @@ namespace ada::parser {
     }
 
     // Let ipv4 be the last item in numbers.
-    uint32_t ipv4 = numbers.back();
+    uint64_t ipv4 = numbers.back();
 
+    // If any but the last item in numbers is greater than 255, then return failure.
     // If the last item in numbers is greater than or equal to 256(5 − numbers’s size), validation error, return failure.
-    if (ipv4 >= std::pow(256, 5 - numbers.size())) {
+    if (large_numbers > 1 || (large_numbers == 1 && ipv4 <= 255) || ipv4 >= static_cast<uint64_t>(std::pow(256, 5 - numbers.size()))) {
       return std::nullopt;
     }
 
@@ -98,12 +158,13 @@ namespace ada::parser {
     numbers.pop_back();
 
     // Let counter be 0.
-    auto counter = 0;
+    int counter = 0;
 
+    // TODO: Replace this with std::reduce when C++20 is supported.
     // For each n of numbers:
-    for (auto n: numbers) {
+    for (const auto n: numbers) {
       // Increment ipv4 by n × 256(3 − counter).
-      ipv4 += static_cast<uint16_t>(n * std::pow(256, 3 - counter));
+      ipv4 += n * static_cast<uint64_t>(std::pow(256, 3 - counter));
 
       // Increment counter by 1.
       counter++;
@@ -311,7 +372,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#ipv4-number-parser
    */
-  std::optional<uint16_t> parse_ipv4_number(std::string_view input) {
+  std::optional<uint64_t> parse_ipv4_number(std::string_view input) {
     // If input is the empty string, then return failure.
     if (input.empty()) {
       return std::nullopt;
@@ -336,12 +397,15 @@ namespace ada::parser {
         std::strcpy(allowed_characters, "0123456789abcdefABCDEF");
       }
       // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
-      else if (input[1] == '0') {
+      else if (input[0] == '0') {
         // Remove the first code point from input.
         input.remove_prefix(1);
 
         // Set R to 8.
         R = 8;
+
+        // Update allowed characters
+        std::strcpy(allowed_characters, "01234567");
       }
 
       // If input is the empty string, then return (0, true).
@@ -351,19 +415,19 @@ namespace ada::parser {
     }
 
     // If input contains a code point that is not a radix-R digit, then return failure.
-    if (std::strspn(input.data(), allowed_characters) < input.length()) {
+    if (input.find_first_not_of(allowed_characters) < input.length()) {
       return std::nullopt;
     }
 
     // Let output be the mathematical integer value that is represented by input in radix-R notation,
     // using ASCII hex digits for digits with values 0 through 15.
-    return static_cast<uint16_t>(std::strtol(input.data(), nullptr, R));
+    return std::strtoll(input.data(), nullptr, R);
   }
 
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special) {
+  std::optional<ada::url_host> parse_host(const std::string_view input, bool is_not_special) {
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
@@ -380,26 +444,29 @@ namespace ada::parser {
       return parse_opaque_host(input);
     }
 
-    std::string decoded = ada::unicode::percent_decode(input);
-
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
-    std::string_view domain{decoded};
-
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    bool is_valid = domain_to_ascii(domain);
+    std::optional<std::string> ascii_domain = to_ascii(input, false);
 
     // If asciiDomain is failure, validation error, return failure.
-    if (!is_valid) {
+    if (!ascii_domain.has_value()) {
       return std::nullopt;
     }
 
+    // If asciiDomain contains a forbidden domain code point, validation error, return failure.
+    for (const auto c: *ascii_domain) {
+      if (unicode::is_forbidden_domain_code_point(c)) {
+        return std::nullopt;
+      }
+    }
+
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
-    if (checkers::ends_in_a_number(domain)) {
-      return parse_ipv4(domain);
+    if (checkers::ends_in_a_number(*ascii_domain)) {
+      return parse_ipv4(*ascii_domain);
     }
 
     // Return asciiDomain.
-    return ada::url_host{BASIC_DOMAIN, std::string{domain}};
+    return ada::url_host{BASIC_DOMAIN, *ascii_domain};
   }
 
   url parse_url(std::string user_input,
@@ -476,7 +543,7 @@ namespace ada::parser {
               }
 
               // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
-              auto encoded_code_points = unicode::utf8_percent_encode(std::string{code_point}, character_sets::USERINFO_PERCENT_ENCODE);
+              auto encoded_code_points = unicode::percent_encode(std::string{code_point}, character_sets::USERINFO_PERCENT_ENCODE);
 
               // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
               if (password_token_seen) {
@@ -602,7 +669,8 @@ namespace ada::parser {
             }
             // Otherwise, set url’s path to the empty string and set state to opaque path state.
             else {
-              url.path.string_value = "";
+              url.has_opaque_path = true;
+              url.path = "";
               state = OPAQUE_PATH;
             }
           }
@@ -624,16 +692,17 @@ namespace ada::parser {
         }
         case NO_SCHEME: {
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
-          if (!base_url.has_value() || (base_url->has_opaque_path() && *pointer != '#')) {
+          if (!base_url.has_value() || (base_url->has_opaque_path && *pointer != '#')) {
             url.is_valid = false;
             return url;
           }
           // Otherwise, if base has an opaque path and c is U+0023 (#),
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
-          else if (base_url->has_opaque_path() && *pointer == '#') {
+          else if (base_url->has_opaque_path && *pointer == '#') {
             url.scheme = base_url->scheme;
             url.path = base_url->path;
+            url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
             state = FRAGMENT;
           }
@@ -699,6 +768,7 @@ namespace ada::parser {
             url.host = base_url->host;
             url.port = base_url->port;
             url.path = base_url->path;
+            url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
 
             // If c is U+003F (?), then set url’s query to the empty string, and state to query state.
@@ -808,7 +878,7 @@ namespace ada::parser {
 
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          url.query = ada::unicode::utf8_percent_encode(query, query_percent_encode_set);
+          url.query = ada::unicode::percent_encode(query, query_percent_encode_set);
 
           // If fragment iterator does not point to end of the input and state override is defined
           // set pointer to fragment pointer, state to fragment.
@@ -913,7 +983,7 @@ namespace ada::parser {
           if (pointer != pointer_end) {
             // Optimization: Spec states that we should iterate character by character, instead of bulk operation.
             // UTF-8 percent-encode c using the fragment percent-encode set and append the result to url’s fragment.
-            url.fragment = unicode::utf8_percent_encode(
+            url.fragment = unicode::percent_encode(
                                   std::string(pointer, pointer_end),
                                   ada::character_sets::FRAGMENT_PERCENT_ENCODE);
             return url;
@@ -935,9 +1005,11 @@ namespace ada::parser {
             // If c is not the EOF code point, UTF-8 percent-encode c using the C0 control percent-encode set
             // and append the result to url’s path.
             if (pointer != pointer_end) {
-              // TODO: No need to iterate and push_back character by character. We can do it in bulk.
-              std::string encoded = unicode::utf8_percent_encode(std::string{pointer, pointer + 1}, character_sets::C0_CONTROL_PERCENT_ENCODE);
-              url.path.string_value->append(encoded);
+              if (character_sets::bit_at(character_sets::C0_CONTROL_PERCENT_ENCODE, *pointer)) {
+                url.path += character_sets::hex + *pointer * 4;
+              } else {
+                url.path += *pointer;
+              }
             }
           }
 
@@ -1029,7 +1101,7 @@ namespace ada::parser {
           // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
           else if (state_override.has_value() && !url.host.has_value()) {
             // To append to a list that is not an ordered set is to add the given item to the end of the list.
-            url.path.list_value.emplace_back("");
+            url.path += "/";
           }
 
           break;
@@ -1048,24 +1120,24 @@ namespace ada::parser {
               // If neither c is U+002F (/), nor url is special and c is U+005C (\),
               // append the empty string to url’s path.
               if (*pointer != '/' && !(url.is_special() && *pointer == '\\')) {
-                url.path.list_value.emplace_back("");
+                url.path += "/";
               }
             }
             // Otherwise, if buffer is a single-dot path segment and if neither c is U+002F (/),
             // nor url is special and c is U+005C (\), append the empty string to url’s path.
             else if (unicode::is_single_dot_path_segment(buffer) && *pointer != '/' && !(url.is_special() && *pointer == '\\')) {
-              url.path.list_value.emplace_back("");
+              url.path += "/";
             }
             // Otherwise, if buffer is not a single-dot path segment, then:
             else if (!unicode::is_single_dot_path_segment(buffer)) {
               // If url’s scheme is "file", url’s path is empty, and buffer is a Windows drive letter,
               // then replace the second code point in buffer with U+003A (:).
-              if (url.scheme == "file" && url.path.list_value.empty() && checkers::is_windows_drive_letter(buffer)){
+              if (url.scheme == "file" && url.path.empty() && checkers::is_windows_drive_letter(buffer)){
                 buffer[1] = ':';
               }
 
               // Append buffer to url’s path.
-              url.path.list_value.push_back(buffer);
+              url.path += "/" + buffer;
             }
 
             // Set buffer to the empty string.
@@ -1083,7 +1155,7 @@ namespace ada::parser {
           // Otherwise, run these steps:
           else {
             // UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
-            buffer += unicode::utf8_percent_encode(std::string{*pointer}, character_sets::PATH_PERCENT_ENCODE);
+            buffer += unicode::percent_encode(std::string{*pointer}, character_sets::PATH_PERCENT_ENCODE);
           }
 
           break;
@@ -1104,12 +1176,13 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
               // then append base’s path[0] to url’s path.
-              if (std::distance(pointer, pointer_end) > 0 && !base_url->path.list_value.empty()) {
-                auto starts_with_windows_drive_letter = checkers::is_windows_drive_letter(pointer + pointer[0]);
-                auto first_base_url_path = base_url->path.list_value[0];
+              if (std::distance(pointer, pointer_end) > 0 && !base_url->path.empty()) {
+                if (!checkers::is_windows_drive_letter(pointer + pointer[0])) {
+                  std::string first_base_url_path = base_url->path.substr(1, base_url->path.find_first_of('/', 1));
 
-                if (!starts_with_windows_drive_letter && checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
-                  url.path.list_value.push_back(first_base_url_path);
+                  if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
+                    url.path += "/" + first_base_url_path;
+                  }
                 }
               }
             }
@@ -1198,6 +1271,7 @@ namespace ada::parser {
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
             url.host = base_url->host;
             url.path = base_url->path;
+            url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
 
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
@@ -1222,7 +1296,8 @@ namespace ada::parser {
               // Otherwise:
               else {
                 // Set url’s path to an empty list.
-                url.path.list_value.clear();
+                url.path = "";
+                url.has_opaque_path = true;
               }
 
               // Set state to path state and decrease pointer by 1.

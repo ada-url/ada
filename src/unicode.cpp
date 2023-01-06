@@ -5,23 +5,15 @@ namespace ada::unicode {
   // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),
   // U+002F (/), U+003A (:), U+003C (<), U+003E (>), U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]),
   // U+005E (^), or U+007C (|).
-  static const std::unordered_set<char> FORBIDDEN_HOST_CODE_POINTS {
-    '\u0000', '\u0009', '\u000A', '\u000D', ' ', '#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '|'
-  };
-
-  // A forbidden domain code point is a forbidden host code point, a C0 control, U+0025 (%), or U+007F DELETE.
-  ada_really_inline bool is_forbidden_host_code_point(const char c) {
-    // Check U+0025 (%), or U+007F DELETE.
-    if (c == '\u0025' || c == '\u007F') return true;
-    // Check C0 control
-    if ((c >= '\0' && c <= '\x1f')) return true;
-
-    return FORBIDDEN_HOST_CODE_POINTS.count(c);
+  ada_really_inline bool is_forbidden_host_code_point(const char c) noexcept {
+    return c == '\0' || c == '\t' || c == '\n' || c == '\r' || c == ' ' ||
+              c == '#' || c == '/' || c == ':' || c == '?' || c == '@' ||
+              c == '[' || c == '<' || c == '>' || c == '\\' || c == ']' ||
+              c == '^' || c == '|';
   }
 
-  // An ASCII upper alpha is a code point in the range U+0041 (A) to U+005A (Z), inclusive.
-  ada_really_inline bool is_ascii_upper_alpha(const char c) noexcept {
-    return c >= 'A' && c <= 'Z';
+  ada_really_inline bool is_forbidden_domain_code_point(const char c) noexcept {
+    return is_forbidden_host_code_point(c) || std::iscntrl(c) || c == '%' || c == '\x7f';
   }
 
   // An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit.
@@ -102,7 +94,7 @@ namespace ada::unicode {
   /**
    * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
    */
-  std::string utf8_percent_encode(const std::string_view input, const uint8_t character_set[]) noexcept {
+  std::string percent_encode(const std::string_view input, const uint8_t character_set[]) noexcept {
     std::string result{};
     result.reserve(input.length());
 

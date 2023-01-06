@@ -9,10 +9,9 @@
 
 namespace ada::parser {
 
-  // Return `std::nullopt` if the parser result is failure.
+  std::optional<std::string> to_ascii(std::string_view plain, bool be_strict) noexcept;
 
-  bool domain_to_ascii(std::string_view input);
-  std::optional<uint16_t> parse_ipv4_number(std::string_view input);
+  std::optional<uint64_t> parse_ipv4_number(std::string_view input);
   std::optional<ada::url_host> parse_opaque_host(std::string_view input);
   std::optional<ada::url_host> parse_ipv6(std::string_view input);
   std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special);

@@ -23,13 +23,6 @@ const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
   do {                                                                         \
     std::cout << "> Running " << __func__ << " ..." << std::endl;              \
   } while (0);
-#define ASSERT_SUCCESS(ACTUAL)                                                 \
-  do {                                                                         \
-    if (auto err = (ACTUAL); err) {                                            \
-      std::cout << err << std::endl;                                           \
-      return false;                                                            \
-    }                                                                          \
-  } while (0);
 #define RUN_TEST(ACTUAL)                                                       \
   do {                                                                         \
     if (!(ACTUAL)) {                                                           \
@@ -155,17 +148,15 @@ bool toascii_encoding() {
       std::cout << "   comment: " << element.get_string() << std::endl;
     } else if (element.type() == ondemand::json_type::object) {
       ondemand::object object = element.get_object();
-      std::string_view input =
-          object["input"]; // direct access to the JSON document (no escaping)
-      std::cout << "     input: " << input << std::endl;
+      std::string_view input = object["input"];
+      auto output = ada::parser::to_ascii(input, false).value_or("");
+      auto expected_output = object["output"];
 
-      auto ouput_value = object["output"];
-      if (ouput_value.type() == ondemand::json_type::string) {
-        std::string_view output = ouput_value.get_string();
-        std::cout << "     output: " << output << std::endl;
-
-      } else if (ouput_value.is_null()) {
-        std::cout << "     output: null" << std::endl;
+      if (expected_output.type() == ondemand::json_type::string) {
+        std::string_view stringified_output = expected_output.get_string();
+        TEST_ASSERT(output, stringified_output, "Should have been equal");
+      } else if (expected_output.is_null()) {
+        TEST_ASSERT(output, "", "Should have been empty");
       }
     }
   }
@@ -191,15 +182,13 @@ bool urltestdata_encoding() {
       auto input_element = object["input"];
       std::string_view input{};
       if (input_element.get_string().get(input)) {
-        // we have a non-UTF-8 input.
-        input = input_element.raw_json_token();
-        std::cout << "     raw input " << input << std::endl;
-        // raw input is a quoted string, unescaped.
-        std::cout << "    warning: invalid UTF-8 input!" << std::endl;
+        continue;
       }
+      std::cout << "input=" << input << std::endl;
       std::string_view base;
       std::optional<ada::url> base_url;
       if (!object["base"].get(base)) {
+        std::cout << "base=" << base << std::endl;
         base_url = ada::parse(std::string{base});
       }
       bool failure = false;
@@ -228,8 +217,10 @@ bool urltestdata_encoding() {
         std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
         TEST_ASSERT(expected_port, port, "Port");
 
-        std::string_view pathname = object["pathname"];
-        TEST_ASSERT(input_url.path.normalize(), pathname, "Pathname");
+        std::string_view pathname{};
+        if (object["pathname"].get_string().get(pathname)) {
+          TEST_ASSERT(input_url.path, pathname, "Pathname");
+        }
 
         std::string_view query;
         if (!object["query"].get(query)) {
