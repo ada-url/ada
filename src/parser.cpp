@@ -73,13 +73,13 @@ namespace ada::parser {
       info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
     }
 
-    if (U_FAILURE(status) || info.errors != 0) {
-      uidna_close(uidna);
+    uidna_close(uidna);
+
+    if (U_FAILURE(status) || info.errors != 0 || length == 0) {
       return std::nullopt;
     }
 
     result.resize(length);
-    uidna_close(uidna);
     return result;
   }
 
