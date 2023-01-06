@@ -403,6 +403,9 @@ namespace ada::parser {
 
         // Set R to 8.
         R = 8;
+
+        // Update allowed characters
+        std::strcpy(allowed_characters, "01234567");
       }
 
       // If input is the empty string, then return (0, true).
