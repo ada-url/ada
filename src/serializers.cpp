@@ -40,29 +40,27 @@ namespace ada::serializers {
     std::string output{};
 
     // Let compress be an index to the first IPv6 piece in the first longest sequences of address’s IPv6 pieces that are 0.
-    // If there is no sequence of address’s IPv6 pieces that are 0 that is longer than 1, then set compress to null.
     std::optional<size_t> compress = find_longest_sequence_of_ipv6_pieces(address);
 
     // Let ignore0 be false.
-    bool ignore_0{};
+    bool ignore_0{false};
 
     // For each pieceIndex in the range 0 to 7, inclusive:
-    for (size_t piece_index = 0; piece_index < address.size(); piece_index++) {
+    for (size_t piece_index = 0; piece_index < 8; piece_index++) {
       // If ignore0 is true and address[pieceIndex] is 0, then continue.
       if (ignore_0 && address[piece_index] == 0) {
         continue;
       }
-
       // Otherwise, if ignore0 is true, set ignore0 to false.
-      ignore_0 = false;
+      else if (ignore_0) {
+        ignore_0 = false;
+      }
 
       // If compress is pieceIndex, then:
-      if (compress.has_value() && *compress == piece_index) {
+      if (compress == piece_index) {
         // Let separator be "::" if pieceIndex is 0, and U+003A (:) otherwise.
-        std::string separator = (piece_index == 0) ? "::" : ":";
-
         // Append separator to output.
-        output += separator;
+        output += (piece_index == 0) ? "::" : ":";
 
         // Set ignore0 to true and continue.
         ignore_0 = true;
@@ -70,12 +68,12 @@ namespace ada::serializers {
       }
 
       // Append address[pieceIndex], represented as the shortest possible lowercase hexadecimal number, to output.
-      std::string piece_index_output{};
-      ada::helpers::from_decimal(piece_index_output, 16, address[piece_index]);
-      output += piece_index_output;
+      char buf[5];
+      snprintf(buf, sizeof(buf), "%x", address[piece_index]);
+      output += buf;
 
       // If pieceIndex is not 7, then append U+003A (:) to output.
-      if (piece_index != 7) {
+      if (piece_index < 7) {
         output += ':';
       }
     }
