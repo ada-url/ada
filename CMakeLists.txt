@@ -74,7 +74,7 @@ if (NOT ICU_FOUND)
 endif (NOT ICU_FOUND)
 ### Going forward, we have ICU for sure.
 
-target_link_libraries(ada ICU::uc ICU::i18n)
+target_link_libraries(ada PRIVATE ICU::uc ICU::i18n)
 
 install(
   FILES include/ada.h
