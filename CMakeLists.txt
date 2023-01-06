@@ -42,11 +42,15 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   message(STATUS "Apple system detected.")
   # People who run macOS often use brew.
   if(EXISTS /opt/homebrew/opt/icu4c)
-    message(STATUS "icu is provided by homebrew.")
+    message(STATUS "icu is provided by homebrew at /opt/homebrew/opt/icu4c.")
     ## This is a bit awkward, but it is a lot better than asking the
     ## user to figure that out.
     list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/icu4c/include")
     list(APPEND CMAKE_LIBRARY_PATH "/opt/homebrew/opt/icu4c/lib")
+  elseif(EXISTS /usr/local/opt/icu4c)
+    message(STATUS "icu is provided by homebrew at /usr/local/opt/icu4c.")
+    list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/icu4c/include")
+    list(APPEND CMAKE_LIBRARY_PATH "/usr/local/opt/icu4c/lib")
   endif()
 endif()
 
