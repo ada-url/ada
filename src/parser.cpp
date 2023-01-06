@@ -415,7 +415,7 @@ namespace ada::parser {
     }
 
     // If input contains a code point that is not a radix-R digit, then return failure.
-    if (std::strspn(input.data(), allowed_characters) < input.length()) {
+    if (input.find_first_not_of(allowed_characters) < input.length()) {
       return std::nullopt;
     }
 
