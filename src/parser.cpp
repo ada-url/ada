@@ -1006,7 +1006,10 @@ namespace ada::parser {
             // and append the result to url’s path.
             if (pointer != pointer_end) {
               if (character_sets::bit_at(character_sets::C0_CONTROL_PERCENT_ENCODE, *pointer)) {
-                url.path += character_sets::hex + *pointer * 4;
+                // We cast to an unsigned 8-bit integer because
+                // *pointer is of type 'char' which may be signed or unsigned.
+                // A negative index access in 'character_sets::hex' is unsafe.
+                url.path += character_sets::hex[uint8_t(*pointer) * 4];
               } else {
                 url.path += *pointer;
               }
@@ -1177,7 +1180,7 @@ namespace ada::parser {
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
               // then append base’s path[0] to url’s path.
               if (std::distance(pointer, pointer_end) > 0 && !base_url->path.empty()) {
-                if (!checkers::is_windows_drive_letter(pointer + pointer[0])) {
+                if (!checkers::is_windows_drive_letter({pointer, size_t(pointer_end - pointer)})) {
                   std::string first_base_url_path = base_url->path.substr(1, base_url->path.find_first_of('/', 1));
 
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
