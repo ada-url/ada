@@ -6,12 +6,13 @@ Specification for URL parser can be found from
 
 ## Requirements
 
-- [ICU](https://icu.unicode.org)
+- A recent C++ compiler supporting C++17.
+- [ICU](https://icu.unicode.org).
 
 ## Usage (CMake)
 
 ```
-cmake -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/icu4c -B build
+cmake -B build
 cmake --build build
 cd build
 ctest .
