@@ -231,7 +231,8 @@ namespace ada::parser {
       // set value to value × 0x10 + c interpreted as hexadecimal number, and increase pointer and length by 1.
       while (length < 4 && unicode::is_ascii_hex_digit(*pointer)) {
         char temp[2] = {*pointer, 0};
-        value = static_cast<uint16_t>(value * 0x10) + static_cast<uint16_t>(std::strtol(temp, nullptr, 16));
+        // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
+        value = uint16_t(value * 0x10 + std::strtol(temp, nullptr, 16));
         pointer++;
         length++;
       }
@@ -304,7 +305,8 @@ namespace ada::parser {
           }
 
           // Set address[pieceIndex] to address[pieceIndex] × 0x100 + ipv4Piece.
-          address[piece_index] = static_cast<uint16_t>(address[piece_index] * 0x100) + *ipv4_piece;
+          // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
+          address[piece_index] = uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
 
           // Increase numbersSeen by 1.
           numbers_seen++;
