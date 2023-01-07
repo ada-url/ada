@@ -5,7 +5,6 @@
 
 namespace ada::checkers {
 
-  // TODO: Refactor this to not use `std::vector` but use pointer arithmetic for performance.
   bool ends_in_a_number(const std::string_view input) noexcept {
     if (input.empty()) {
       return false;
