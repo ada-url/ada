@@ -4,10 +4,10 @@
 
 namespace ada::serializers {
 
-  std::optional<size_t> find_longest_sequence_of_ipv6_pieces(const std::array<uint16_t, 8> address) noexcept {
-    std::optional<size_t> max_index{};
+  size_t find_longest_sequence_of_ipv6_pieces(const std::array<uint16_t, 8> address) noexcept {
+    size_t max_index = -1;
     size_t max_length = 1;
-    std::optional<size_t> current_start{};
+    size_t current_start = -1;
     size_t current_length = 0;
 
     for (size_t i = 0; i < address.size(); i++) {
@@ -17,10 +17,12 @@ namespace ada::serializers {
           max_length = current_length;
         }
 
-        current_start = std::nullopt;
+        current_start = -1;
         current_length = 0;
       } else {
-        current_start = current_start.value_or(i);
+        if (current_start == size_t(-1)) {
+          current_start = i;
+        }
         current_length++;
       }
     }
@@ -40,7 +42,7 @@ namespace ada::serializers {
     std::string output{};
 
     // Let compress be an index to the first IPv6 piece in the first longest sequences of address’s IPv6 pieces that are 0.
-    std::optional<size_t> compress = find_longest_sequence_of_ipv6_pieces(address);
+    size_t compress = find_longest_sequence_of_ipv6_pieces(address);
 
     // Let ignore0 be false.
     bool ignore_0{false};

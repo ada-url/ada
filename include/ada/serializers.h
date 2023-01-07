@@ -7,7 +7,7 @@
 
 namespace ada::serializers {
 
-  std::optional<size_t> find_longest_sequence_of_ipv6_pieces(std::array<uint16_t, 8> address) noexcept;
+  size_t find_longest_sequence_of_ipv6_pieces(std::array<uint16_t, 8> address) noexcept;
 
   // An IPv6 address is a 128-bit unsigned integer that identifies a network address.
   std::string ipv6(std::array<uint16_t, 8> address) noexcept;
