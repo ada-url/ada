@@ -27,7 +27,9 @@ std::string url_examples[] = {
     "41Gc3C8UysL.css?AUIClients/AmazonGatewayAuiAssets",
     "https://www.reddit.com/?after=t3_zvz1ze",
     "https://www.reddit.com/login/?dest=https%3A%2F%2Fwww.reddit.com%2F",
-    "postgresql://other:9818274x1!!@localhost:5432/otherdb?connect_timeout=10&application_name=myapp"};
+    "postgresql://other:9818274x1!!@localhost:5432/otherdb?connect_timeout=10&application_name=myapp",
+    "http://192.168.1.1",
+    "http://[2606:4700:4700::1111]"};
 
 double url_examples_bytes =  []() {
     size_t bytes{0};
