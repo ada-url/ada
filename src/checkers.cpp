@@ -13,13 +13,12 @@ namespace ada::checkers {
     size_t parts_count = std::count(input.begin(), input.end(), '.');
 
     if (parts_count > 0) { parts_count++; }
-
-    static const std::string delimiter = ".";
+    static const char delimiter = '.';
     std::string_view::iterator pointer_start = input.begin();
     std::string_view::iterator pointer_end = input.end();
 
     // If the last item in parts is the empty string, then:
-    if (input.back() == '.') {
+    if (input.back() == delimiter) {
       // If parts’s size is 1, then return false.
       if (parts_count == 1) {
         return false;
@@ -35,7 +34,7 @@ namespace ada::checkers {
     }
 
     if (parts_count > 1) {
-      pointer_start = std::find_end(pointer_start, pointer_end, delimiter.begin(), delimiter.end());
+      pointer_start = pointer_start + std::string_view{pointer_start, size_t(pointer_end - pointer_start)}.rfind(delimiter);
 
       if (pointer_start == pointer_end) {
         return false;
@@ -48,14 +47,22 @@ namespace ada::checkers {
     return is_ipv4_number_valid(pointer_start, pointer_end);
   }
 
+  // Assuming that x is an ASCII letter, this returns the lower case equivalent.
+  // More likely to be inlined by the compiler and constexpr.
+  constexpr char to_lower(char x) { return (x | 0x20); }
+
+  // Returns true if the character is an ASCII letter. Equivalent to std::isalpha but
+  // more likely to be inlined by the compiler. Also, std::isalpha is not constexpr
+  // generally.
+  constexpr bool is_alpha(char x) { return (to_lower(x) >= 'a') & (to_lower(x) <= 'z'); }
+
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
   // and the second is either U+003A (:) or U+007C (|).
-  bool is_windows_drive_letter(const std::string_view input) noexcept {
-    return input.size() == 2 && std::isalpha(input[0]) && (input[1] == ':' || input[1] == '|');
+  inline bool is_windows_drive_letter(const std::string_view input) noexcept {
+    return input.size() >= 2 && (is_alpha(input[0]) & (input[1] == ':' | input[1] == '|'));
   }
-
   // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
-  bool is_normalized_windows_drive_letter(const std::string_view input) noexcept {
+  inline bool is_normalized_windows_drive_letter(const std::string_view input) noexcept {
     return is_windows_drive_letter(input) && input[1] == ':';
   }
 
@@ -71,7 +78,7 @@ namespace ada::checkers {
       std::string_view::iterator next_iterator = std::next(iterator_start);
 
       // The first two code points are either "0X" or "0x", then:
-      if (*iterator_start == '0' && (*next_iterator == 'X' || *next_iterator == 'x')) {
+      if (*iterator_start == '0' && (to_lower(*next_iterator) == 'x')) {
         if (length == 2) {
           return true;
         }

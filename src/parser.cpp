@@ -4,7 +4,7 @@
 
 #include <array>
 #include <algorithm>
-#include <cctype>
+//#include <cctype>
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
@@ -388,7 +388,7 @@ namespace ada::parser {
 
     if (input.length() >= 2) {
       // If input contains at least two code points and the first two code points are either "0X" or "0x", then:
-      if (input[0] == '0' && (input[1] == 'X' || input[1] == 'x')) {
+      if ((input[0] == '0') & (ada::checkers::to_lower(input[1]) == 'x')) {
         // Remove the first two code points from input.
         input.remove_prefix(2);
 
@@ -586,8 +586,8 @@ namespace ada::parser {
         }
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
-          if (std::isalpha(*pointer)) {
-            buffer += static_cast<char>(tolower(*pointer));
+          if (ada::checkers::is_alpha(*pointer)) {
+            buffer += static_cast<char>(ada::checkers::to_lower(*pointer));
             state = SCHEME;
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
@@ -605,7 +605,7 @@ namespace ada::parser {
         case SCHEME: {
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           if (std::isalnum(*pointer) || *pointer == '+' || *pointer == '-' || *pointer == '.') {
-            buffer += static_cast<char>(tolower(*pointer));
+            buffer += static_cast<char>(ada::checkers::to_lower(*pointer));
           }
           // Otherwise, if c is U+003A (:), then:
           else if (*pointer == ':') {
@@ -1181,8 +1181,10 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
               // then append base’s path[0] to url’s path.
-              if (std::distance(pointer, pointer_end) > 0 && !base_url->path.empty()) {
-                if (!checkers::is_windows_drive_letter({pointer, size_t(pointer_end - pointer)})) {
+              if (std::distance(pointer, pointer_end) > 1 && !base_url->path.empty()) {
+                // is_windows_drive_letter expects a size 2 string prefix.
+                if (!checkers::is_windows_drive_letter({pointer, 2})) {
+                  // Next few lines could be optimized by avoiding the creation of a string.
                   std::string first_base_url_path = base_url->path.substr(1, base_url->path.find_first_of('/', 1));
 
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
