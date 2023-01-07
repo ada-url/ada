@@ -5,14 +5,14 @@ namespace ada::unicode {
   // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),
   // U+002F (/), U+003A (:), U+003C (<), U+003E (>), U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]),
   // U+005E (^), or U+007C (|).
-  ada_really_inline bool is_forbidden_host_code_point(const char c) noexcept {
+  ada_really_inline constexpr bool is_forbidden_host_code_point(const char c) noexcept {
     return c == '\0' || c == '\t' || c == '\n' || c == '\r' || c == ' ' ||
               c == '#' || c == '/' || c == ':' || c == '?' || c == '@' ||
               c == '[' || c == '<' || c == '>' || c == '\\' || c == ']' ||
               c == '^' || c == '|';
   }
 
-  ada_really_inline bool is_forbidden_domain_code_point(const char c) noexcept {
+  ada_really_inline constexpr bool is_forbidden_domain_code_point(const char c) noexcept {
     return is_forbidden_host_code_point(c) || std::iscntrl(c) || c == '%' || c == '\x7f';
   }
 
