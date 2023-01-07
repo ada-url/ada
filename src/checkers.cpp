@@ -51,6 +51,10 @@ namespace ada::checkers {
   // More likely to be inlined by the compiler and constexpr.
   constexpr char to_lower(char x) { return (x | 0x20); }
 
+  // Check whether x is an ASCII digit. More likely to be inlined than std::isdigit.
+  constexpr bool is_digit(char x) { return (x >= '0') & (x <= '9'); }
+
+
   // Returns true if the character is an ASCII letter. Equivalent to std::isalpha but
   // more likely to be inlined by the compiler. Also, std::isalpha is not constexpr
   // generally.
@@ -98,7 +102,7 @@ namespace ada::checkers {
     }
 
 
-    return std::all_of(iterator_start, iterator_end, ::isdigit);
+    return std::all_of(iterator_start, iterator_end, ada::checkers::is_digit);
   }
 
 } // namespace ada::checkers

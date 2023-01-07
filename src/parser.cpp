@@ -4,7 +4,7 @@
 
 #include <array>
 #include <algorithm>
-//#include <cctype>
+#include <charconv>
 #include <cstring>
 #include <cmath>
 #include <cstdlib>
@@ -273,12 +273,12 @@ namespace ada::parser {
           }
 
           // If c is not an ASCII digit, validation error, return failure.
-          if (!std::isdigit(*pointer)) {
+          if (!ada::checkers::is_digit(*pointer)) {
             return std::nullopt;
           }
 
           // While c is an ASCII digit:
-          while (std::isdigit(*pointer)) {
+          while (ada::checkers::is_digit(*pointer)) {
             // Let number be c interpreted as decimal number.
             int number = *pointer - '0';
 
@@ -376,54 +376,21 @@ namespace ada::parser {
    */
   std::optional<uint64_t> parse_ipv4_number(std::string_view input) {
     // If input is the empty string, then return failure.
-    if (input.empty()) {
-      return std::nullopt;
+    if (input.empty()) { return std::nullopt; }
+    // using std::strtoll is potentially dangerous if the string is not null terminated.
+    uint64_t result{};
+    std::from_chars_result r;
+    if((input.length() >= 2) && ((input[0] == '0') & (ada::checkers::to_lower(input[1]) == 'x'))) {
+      if(input.length() == 2) { return 0; } // mysteriously, this is needed for the tests to pass! 0x -> 0
+      r = std::from_chars(input.data() + 2, input.data() + input.size(), result, 16);
+    } else if ((input.length() >= 2) && input[0] == '0') {
+      r = std::from_chars(input.data() + 1, input.data() + input.size(), result, 8);
+    } else {
+      r = std::from_chars(input.data(), input.data() + input.size(), result, 10);
     }
-
-    // Let R be 10.
-    int R = 10;
-
-    // Allowed characters
-    char allowed_characters[23] = "0123456789";
-
-    if (input.length() >= 2) {
-      // If input contains at least two code points and the first two code points are either "0X" or "0x", then:
-      if ((input[0] == '0') & (ada::checkers::to_lower(input[1]) == 'x')) {
-        // Remove the first two code points from input.
-        input.remove_prefix(2);
-
-        // Set R to 16.
-        R = 16;
-
-        // Update allowed characters
-        std::strcpy(allowed_characters, "0123456789abcdefABCDEF");
-      }
-      // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
-      else if (input[0] == '0') {
-        // Remove the first code point from input.
-        input.remove_prefix(1);
-
-        // Set R to 8.
-        R = 8;
-
-        // Update allowed characters
-        std::strcpy(allowed_characters, "01234567");
-      }
-
-      // If input is the empty string, then return (0, true).
-      if (input.empty()) {
-        return 0;
-      }
-    }
-
-    // If input contains a code point that is not a radix-R digit, then return failure.
-    if (input.find_first_not_of(allowed_characters) < input.length()) {
-      return std::nullopt;
-    }
-
-    // Let output be the mathematical integer value that is represented by input in radix-R notation,
-    // using ASCII hex digits for digits with values 0 through 15.
-    return std::strtoll(input.data(), nullptr, R);
+    if (r.ec != std::errc()) { return std::nullopt; }
+    // We could also check result.ptr to see where the parsing ended.
+    return result;
   }
 
   /**
@@ -1022,7 +989,7 @@ namespace ada::parser {
         }
         case PORT: {
           // If c is an ASCII digit, append c to buffer.
-          if (std::isdigit(*pointer)) {
+          if (ada::checkers::is_digit(*pointer)) {
             buffer += *pointer;
           }
           // Otherwise, if one of the following is true:
