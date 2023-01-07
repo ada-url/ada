@@ -29,10 +29,10 @@ namespace ada::checkers {
       // Remove the last item from parts.
       pointer_end--;
       parts_count--;
-    }
 
-    if (std::distance(pointer_start, pointer_end) == 0) {
-      return false;
+      if (std::distance(pointer_start, pointer_end) == 0) {
+        return false;
+      }
     }
 
     if (parts_count > 1) {
@@ -45,17 +45,8 @@ namespace ada::checkers {
       pointer_start++;
     }
 
-    if (std::distance(pointer_start, pointer_end) == 0) {
-      return false;
-    }
-
-    // If last is non-empty and contains only ASCII digits, then return true.
-    if (std::all_of(pointer_start, pointer_end, ::isdigit)) {
-      return true;
-    }
-
     // If parsing last as an IPv4 number does not return failure, then return true.
-    return is_ipv4_number_valid(std::string(pointer_start, pointer_end));
+    return is_ipv4_number_valid(pointer_start, pointer_end);
   }
 
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
@@ -70,29 +61,38 @@ namespace ada::checkers {
   }
 
   // This function assumes the input is not empty.
-  ada_really_inline constexpr bool is_ipv4_number_valid(const std::string_view input) noexcept {
-    // The first two code points are either "0X" or "0x", then:
-    if (input.length() >= 2 && input[0] == '0' && (input[1] == 'X' || input[1] == 'x')) {
-      if (input.length() == 2) {
-        return true;
-      }
+  ada_really_inline constexpr bool is_ipv4_number_valid(const std::string_view::iterator iterator_start, const std::string_view::iterator iterator_end) noexcept {
+    size_t length = std::distance(iterator_start, iterator_end);
 
-      // Remove the first two code points from input.
-      // If input contains a code point that is not a radix-R digit, then return failure.
-      return input.find_first_not_of("0123456789abcdefABCDEF", 2) == std::string_view::npos;
-    }
-    // Otherwise, if the first code point is U+0030 (0), then:
-    else if (input[0] == '0') {
-      if (input.length() == 1) {
-        return true;
-      }
-
-      // Remove the first code point from input.
-      // If input contains a code point that is not a radix-R digit, then return failure.
-      return input.find_first_not_of("01234567", 1) == std::string_view::npos;
+    if (length == 0) {
+      return false;
     }
 
-    return std::all_of(input.begin(), input.end(), ::isdigit);
+    if (length >= 2) {
+      std::string_view::iterator next_iterator = std::next(iterator_start);
+
+      // The first two code points are either "0X" or "0x", then:
+      if (*iterator_start == '0' && (*next_iterator == 'X' || *next_iterator == 'x')) {
+        if (length == 2) {
+          return true;
+        }
+
+        // Remove the first two code points from input.
+        // If input contains a code point that is not a radix-R digit, then return failure.
+        return std::all_of(iterator_start + 2, iterator_end, unicode::is_ascii_hex_digit);
+      }
+      // Otherwise, if the first code point is U+0030 (0), then:
+      else if (*iterator_start == '0') {
+        // Remove the first code point from input.
+        // If input contains a code point that is not a radix-R digit, then return failure.
+        return std::find_if_not(iterator_start + 1, iterator_end, [](char c) {
+          return c >= '0' && c <= '7';
+        });
+      }
+    }
+
+
+    return std::all_of(iterator_start, iterator_end, ::isdigit);
   }
 
 } // namespace ada::checkers
