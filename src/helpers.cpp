@@ -5,16 +5,22 @@
 
 namespace ada::helpers {
 
-  std::vector<std::string> split_string_view(std::string_view input, char delimiter, bool skip_empty) {
-    std::vector<std::string> out;
-    if (input.empty())
-      return out;
-    std::istringstream in_stream(std::string{input});
-    while (in_stream.good()) {
-      std::string item;
-      std::getline(in_stream, item, delimiter);
-      if (item.empty() && skip_empty) continue;
-      out.emplace_back(std::move(item));
+  std::vector<std::string_view> split_string_view(std::string_view input, char delimiter, bool skip_empty) {
+    std::vector<std::string_view> out;
+    if (input.empty()) { return out; }
+    size_t pos{0};
+    size_t end_pos{0};
+    while((end_pos = input.find(delimiter, pos)) != std::string_view::npos) {
+      // we have a match!
+      auto start = input.data() + pos;
+      size_t size = end_pos - pos;
+      pos = end_pos + 1; // next time, we start from there...
+      if(skip_empty && (size == 0)) { continue; }
+      out.emplace_back(std::string_view{start, size});
+    }
+    if(pos < input.size()) {
+      size_t size = input.size() - pos;
+      out.emplace_back(std::string_view{input.data() + pos, size});
     }
     return out;
   }

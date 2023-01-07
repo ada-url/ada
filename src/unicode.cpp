@@ -40,7 +40,7 @@ namespace ada::unicode {
   // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
   // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
   ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
-    return (c >= '0' & c <= '9') |  (ada::checkers::to_lower(c) >= 'a' & ada::checkers::to_lower(c) <= 'f');
+    return (c >= '0' & c <= '9') |  (checkers::to_lower(c) >= 'a' & checkers::to_lower(c) <= 'f');
   }
 
   // A C0 control or space is a C0 control or U+0020 SPACE.
@@ -51,7 +51,7 @@ namespace ada::unicode {
 
   // An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR.
   ada_really_inline constexpr bool is_ascii_tab_or_newline(const char c) noexcept {
-    return c == '\t' || c == '\n' || c == '\r';
+    return c == '\t' | c == '\n' | c == '\r';
   }
 
   // A double-dot path segment must be ".." or an ASCII case-insensitive match for ".%2e", "%2e.", or "%2e%2e".

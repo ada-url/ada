@@ -47,29 +47,6 @@ namespace ada::checkers {
     return is_ipv4_number_valid(pointer_start, pointer_end);
   }
 
-  // Assuming that x is an ASCII letter, this returns the lower case equivalent.
-  // More likely to be inlined by the compiler and constexpr.
-  constexpr char to_lower(char x) { return (x | 0x20); }
-
-  // Check whether x is an ASCII digit. More likely to be inlined than std::isdigit.
-  constexpr bool is_digit(char x) { return (x >= '0') & (x <= '9'); }
-
-
-  // Returns true if the character is an ASCII letter. Equivalent to std::isalpha but
-  // more likely to be inlined by the compiler. Also, std::isalpha is not constexpr
-  // generally.
-  constexpr bool is_alpha(char x) { return (to_lower(x) >= 'a') & (to_lower(x) <= 'z'); }
-
-  // A Windows drive letter is two code points, of which the first is an ASCII alpha
-  // and the second is either U+003A (:) or U+007C (|).
-  inline bool is_windows_drive_letter(const std::string_view input) noexcept {
-    return input.size() >= 2 && (is_alpha(input[0]) & (input[1] == ':' | input[1] == '|'));
-  }
-  // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
-  inline bool is_normalized_windows_drive_letter(const std::string_view input) noexcept {
-    return is_windows_drive_letter(input) && input[1] == ':';
-  }
-
   // This function assumes the input is not empty.
   ada_really_inline constexpr bool is_ipv4_number_valid(const std::string_view::iterator iterator_start, const std::string_view::iterator iterator_end) noexcept {
     size_t length = std::distance(iterator_start, iterator_end);
@@ -102,7 +79,7 @@ namespace ada::checkers {
     }
 
 
-    return std::all_of(iterator_start, iterator_end, ada::checkers::is_digit);
+    return std::all_of(iterator_start, iterator_end, checkers::is_digit);
   }
 
 } // namespace ada::checkers

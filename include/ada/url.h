@@ -3,6 +3,7 @@
 
 #include "common_defs.h"
 #include "serializers.h"
+#include "checkers.h"
 
 #include <optional>
 #include <string>

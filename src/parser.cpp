@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <charconv>
 #include <cstring>
-#include <cmath>
 #include <cstdlib>
 #include <iostream>
 
@@ -107,16 +106,7 @@ namespace ada::parser {
    */
   std::optional<ada::url_host> parse_ipv4(std::string_view input) {
     // Let parts be the result of strictly splitting input on U+002E (.).
-    std::vector<std::string> parts = ada::helpers::split_string_view(input, '.', false);
-
-    // If the last item in parts is the empty string, then:
-    if (parts.back().empty()) {
-      // If parts’s size is greater than 1, then remove the last item from parts.
-      if (parts.size() > 1) {
-        parts.pop_back();
-      }
-    }
-
+    const std::vector<std::string_view> parts = ada::helpers::split_string_view(input, '.', false);
     // If parts’s size is greater than 4, validation error, return failure.
     if (parts.size() > 4) {
       return std::nullopt;
@@ -150,7 +140,7 @@ namespace ada::parser {
 
     // If any but the last item in numbers is greater than 255, then return failure.
     // If the last item in numbers is greater than or equal to 256(5 − numbers’s size), validation error, return failure.
-    if (large_numbers > 1 || (large_numbers == 1 && ipv4 <= 255) || ipv4 >= static_cast<uint64_t>(std::pow(256, 5 - numbers.size()))) {
+    if (large_numbers > 1 || (large_numbers == 1 && ipv4 <= 255) || ipv4 >= helpers::pow256(5 - numbers.size())) {
       return std::nullopt;
     }
 
@@ -164,7 +154,7 @@ namespace ada::parser {
     // For each n of numbers:
     for (const auto n: numbers) {
       // Increment ipv4 by n × 256(3 − counter).
-      ipv4 += n * static_cast<uint64_t>(std::pow(256, 3 - counter));
+      ipv4 += n * helpers::pow256(3 - counter);
 
       // Increment counter by 1.
       counter++;
@@ -230,9 +220,8 @@ namespace ada::parser {
       // While length is less than 4 and c is an ASCII hex digit,
       // set value to value × 0x10 + c interpreted as hexadecimal number, and increase pointer and length by 1.
       while (length < 4 && unicode::is_ascii_hex_digit(*pointer)) {
-        char temp[2] = {*pointer, 0};
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
-        value = uint16_t(value * 0x10 + std::strtol(temp, nullptr, 16));
+        value = uint16_t(value * 0x10 + unicode::convert_hex_to_binary(*pointer));
         pointer++;
         length++;
       }
@@ -273,12 +262,12 @@ namespace ada::parser {
           }
 
           // If c is not an ASCII digit, validation error, return failure.
-          if (!ada::checkers::is_digit(*pointer)) {
+          if (!checkers::is_digit(*pointer)) {
             return std::nullopt;
           }
 
           // While c is an ASCII digit:
-          while (ada::checkers::is_digit(*pointer)) {
+          while (checkers::is_digit(*pointer)) {
             // Let number be c interpreted as decimal number.
             int number = *pointer - '0';
 
@@ -380,7 +369,7 @@ namespace ada::parser {
     // using std::strtoll is potentially dangerous if the string is not null terminated.
     uint64_t result{};
     std::from_chars_result r;
-    if((input.length() >= 2) && ((input[0] == '0') & (ada::checkers::to_lower(input[1]) == 'x'))) {
+    if((input.length() >= 2) && ((input[0] == '0') & (checkers::to_lower(input[1]) == 'x'))) {
       if(input.length() == 2) { return 0; } // mysteriously, this is needed for the tests to pass! 0x -> 0
       r = std::from_chars(input.data() + 2, input.data() + input.size(), result, 16);
     } else if ((input.length() >= 2) && input[0] == '0') {
@@ -553,8 +542,8 @@ namespace ada::parser {
         }
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
-          if (ada::checkers::is_alpha(*pointer)) {
-            buffer += static_cast<char>(ada::checkers::to_lower(*pointer));
+          if (checkers::is_alpha(*pointer)) {
+            buffer += static_cast<char>(checkers::to_lower(*pointer));
             state = SCHEME;
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
@@ -572,7 +561,7 @@ namespace ada::parser {
         case SCHEME: {
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           if (std::isalnum(*pointer) || *pointer == '+' || *pointer == '-' || *pointer == '.') {
-            buffer += static_cast<char>(ada::checkers::to_lower(*pointer));
+            buffer += static_cast<char>(checkers::to_lower(*pointer));
           }
           // Otherwise, if c is U+003A (:), then:
           else if (*pointer == ':') {
@@ -989,7 +978,7 @@ namespace ada::parser {
         }
         case PORT: {
           // If c is an ASCII digit, append c to buffer.
-          if (ada::checkers::is_digit(*pointer)) {
+          if (checkers::is_digit(*pointer)) {
             buffer += *pointer;
           }
           // Otherwise, if one of the following is true:
