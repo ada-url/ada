@@ -26,7 +26,7 @@ namespace ada::checkers {
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
   // and the second is either U+003A (:) or U+007C (|).
   inline bool is_windows_drive_letter(const std::string_view input) noexcept {
-    return input.size() >= 2 && (is_alpha(input[0]) & (input[1] == ':' | input[1] == '|'));
+    return input.size() >= 2 && (is_alpha(input[0]) & ((input[1] == ':') | (input[1] == '|')));
   }
 
   // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
