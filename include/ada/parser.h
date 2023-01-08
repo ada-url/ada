@@ -16,7 +16,12 @@ namespace ada::parser {
   std::optional<ada::url_host> parse_ipv6(std::string_view input);
   std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special);
 
-  url parse_url(std::string user_input,
+  url parse_url(std::string_view user_input,
+                std::optional<ada::url> base_url,
+                ada::encoding_type encoding = UTF8,
+                std::optional<ada::state> state_override = std::nullopt);
+
+  url parse_url(const std::string& user_input,
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding = UTF8,
                 std::optional<ada::state> state_override = std::nullopt);

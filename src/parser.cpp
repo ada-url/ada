@@ -427,11 +427,10 @@ namespace ada::parser {
     return ada::url_host{BASIC_DOMAIN, *ascii_domain};
   }
 
-  url parse_url(std::string user_input,
+  url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding,
                 std::optional<ada::state> state_override) {
-
     // Assign buffer
     std::string buffer{};
 
@@ -448,14 +447,25 @@ namespace ada::parser {
     ada::state state = state_override.value_or(SCHEME_START);
 
     // Define parsed URL
-    ada::url url = ada::url();
+    ada::url url{};
 
-    // Remove any leading and trailing C0 control or space from input.
-    user_input.erase(std::remove_if(user_input.begin(), user_input.end(), [](char c) {
-      return ada::unicode::is_ascii_tab_or_newline(c);
-    }), user_input.end());
-
-    std::string_view internal_input{user_input};
+    // The comment was:
+    // 'Remove any leading and trailing C0 control or space from input.'
+    // but it seems that one wants to remove any such control character from anywhere in the
+    // input!!!
+    // This is a damn string strange thing to allow arbitrary tabs or new lines anywhere
+    // in the input.
+    // We are going to copy to the a local buffer while pruning the characters.
+    std::string pruned_input;
+    // Optimization opportunity: we should be able to avoid
+    // the copy into pruned_input by a check such as ...
+    // if(std::any_of(user_input.begin(), user_input.end(), unicode::is_ascii_tab_or_newline)) {...}
+    //
+    pruned_input.reserve(user_input.size());
+    std::copy_if(user_input.begin(), user_input.end(),
+              std::back_inserter(pruned_input),
+              [](char x) { return !unicode::is_ascii_tab_or_newline(x); });
+    std::string_view internal_input{pruned_input.data(), pruned_input.size()};
 
     // TODO: Find a better way to trim from leading and trailing.
     std::string_view::iterator pointer_start = std::find_if(internal_input.begin(), internal_input.end(), [](char c) {
@@ -522,7 +532,7 @@ namespace ada::parser {
           else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' || (url.is_special() && *pointer == '\\')) {
             // If atSignSeen is true and buffer is the empty string, validation error, return failure.
             if (at_sign_seen && buffer.empty()) {
-              buffer.clear();
+              buffer.clear(); // seems unnecessary !!!
               url.is_valid = false;
               return url;
             }
@@ -1283,5 +1293,11 @@ namespace ada::parser {
 
     return url;
   }
+  url parse_url(const std::string& user_input,
+                std::optional<ada::url> base_url,
+                ada::encoding_type encoding,
+                std::optional<ada::state> state_override) {
+    return parse_url(std::string_view{user_input.data(), user_input.size()}, base_url, encoding, state_override);
 
+  }
 } // namespace ada::parser
