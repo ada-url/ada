@@ -40,6 +40,8 @@ namespace ada {
    */
   struct url {
 
+    ~url() = default;
+
     /**
      * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
      * URL for further processing after parsing. It is initially the empty string.
