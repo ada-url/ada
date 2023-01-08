@@ -449,12 +449,6 @@ namespace ada::parser {
     // Define parsed URL
     ada::url url{};
 
-    // The comment was:
-    // 'Remove any leading and trailing C0 control or space from input.'
-    // but it seems that one wants to remove any such control character from anywhere in the
-    // input!!!
-    // This is a damn string strange thing to allow arbitrary tabs or new lines anywhere
-    // in the input.
     // We are going to copy to the a local buffer while pruning the characters.
     std::string pruned_input;
     // Optimization opportunity: we should be able to avoid
@@ -467,6 +461,7 @@ namespace ada::parser {
               [](char x) { return !unicode::is_ascii_tab_or_newline(x); });
     std::string_view internal_input{pruned_input.data(), pruned_input.size()};
 
+    // Optimization opportunity: fused the trimming below with the pruning we just completed.
     // TODO: Find a better way to trim from leading and trailing.
     std::string_view::iterator pointer_start = std::find_if(internal_input.begin(), internal_input.end(), [](char c) {
       return !ada::unicode::is_c0_control_or_space(c);
