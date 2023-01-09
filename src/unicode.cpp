@@ -68,9 +68,9 @@ namespace ada::unicode {
   }
 
   unsigned constexpr convert_hex_to_binary(const char c) noexcept {
-    if (c >= '0' && c <= '9')
+    if ((c >= '0') & (c <= '9'))
       return c - '0';
-    else if (c >= 'A' && c <= 'F')
+    else if ((c >= 'A') & (c <= 'F'))
       return 10 + (c - 'A');
     else // if (c >= 'a' && c <= 'f')
       return 10 + (c - 'a');
@@ -83,6 +83,7 @@ namespace ada::unicode {
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
   std::string percent_decode(const std::string_view input) noexcept {
+    // optimization opportunity: this code is not efficient.
     std::string dest;
     if (input.length() == 0)
       return dest;
