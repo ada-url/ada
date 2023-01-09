@@ -572,7 +572,7 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' || (url.is_special() && *pointer == '\\')) {
+          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
             // If atSignSeen is true and buffer is the empty string, validation error, return failure.
             if (at_sign_seen && buffer.empty()) {
               buffer.clear();
@@ -703,7 +703,7 @@ namespace ada::parser {
         }
         case NO_SCHEME: {
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
-          if (!base_url.has_value() || (base_url->has_opaque_path && *pointer != '#')) {
+          if (!base_url.has_value() || (base_url->has_opaque_path && pointer != pointer_end)) {
             url.is_valid = false;
             return url;
           }
@@ -913,7 +913,7 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' || (url.is_special() && *pointer == '\\')) {
+          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
             // then decrease pointer by 1, and then:
             pointer--;
 
@@ -996,7 +996,7 @@ namespace ada::parser {
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
           // - state override is given
-          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || *pointer == '#' ||
+          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' ||
                                 (url.is_special() && *pointer == '\\') ||
                                 state_override.has_value()) {
             // If buffer is not the empty string, then:
@@ -1078,7 +1078,7 @@ namespace ada::parser {
           // - c is the EOF code point or U+002F (/)
           // - url is special and c is U+005C (\)
           // - state override is not given and c is U+003F (?) or U+0023 (#)
-          if (pointer == pointer_end || *pointer == '/' || (url.is_special() && *pointer == '\\') || (!state_override.has_value() && (*pointer == '?' || *pointer == '#'))) {
+          if (pointer == pointer_end || *pointer == '/' || (url.is_special() && *pointer == '\\') || (!state_override.has_value() && *pointer == '?')) {
             // If buffer is a double-dot path segment, then:
             if (unicode::is_double_dot_path_segment(buffer)) {
               // Shorten url’s path.
@@ -1160,7 +1160,7 @@ namespace ada::parser {
         case FILE_HOST: {
           // If c is the EOF code point, U+002F (/), U+005C (\), U+003F (?), or U+0023 (#),
           // then decrease pointer by 1 and then:
-          if (pointer == pointer_end || *pointer == '/' || *pointer == '\\' || *pointer == '?' || *pointer == '#') {
+          if (pointer == pointer_end || *pointer == '/' || *pointer == '\\' || *pointer == '?') {
             pointer--;
 
             // If state override is not given and buffer is a Windows drive letter, validation error,
