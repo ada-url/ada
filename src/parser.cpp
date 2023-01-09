@@ -520,6 +520,14 @@ namespace ada::parser {
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
 
+    // TODO: Search from right to left, and find the last occurrence.
+    std::string_view::iterator fragment_pointer_start = std::find_if(pointer_start, pointer_end, [](char c) { return c == '#'; });
+
+    if (fragment_pointer_start != pointer_end) {
+      url.fragment = unicode::percent_encode(fragment_pointer_start + 1, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+      pointer_end = fragment_pointer_start;
+    }
+
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
@@ -701,12 +709,12 @@ namespace ada::parser {
           // Otherwise, if base has an opaque path and c is U+0023 (#),
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
-          else if (base_url->has_opaque_path && *pointer == '#') {
+          else if (base_url->has_opaque_path && url.fragment.has_value()) {
             url.scheme = base_url->scheme;
             url.path = base_url->path;
             url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
-            state = FRAGMENT;
+            return url;
           }
           // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
           else if (base_url->scheme != "file") {
@@ -777,10 +785,6 @@ namespace ada::parser {
             if (*pointer == '?') {
               url.query = "";
               state = QUERY;
-            }
-            // Otherwise, if c is U+0023 (#), set url’s fragment to the empty string and state to fragment state.
-            else if (*pointer == '#') {
-              state = FRAGMENT;
             }
             // Otherwise, if c is not the EOF code point:
             else if (pointer != pointer_end) {
@@ -860,38 +864,17 @@ namespace ada::parser {
             }
           }
 
-          // Optimization: Spec states that the buffer should be cleared, but
-          // it does not make sense due to our optimization for skipping to fragment state.
-
-          // Optimization: Spec states that we should iterate character by character.
-          // But in reality we can first check the fragment character (iterator)
-          // Depending on the existence we can bulk encode and assign the query
-          // and later skip the pointers until the end of input or fragment iterator.
-
           // Let queryPercentEncodeSet be the special-query percent-encode set if url is special;
           // otherwise the query percent-encode set.
           auto query_percent_encode_set = url.is_special() ?
                                 ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
                                 ada::character_sets::QUERY_PERCENT_ENCODE;
 
-          // Let fragment iterator be the iterator for the # after the current iterator.
-          auto fragment_iterator = std::find(pointer, pointer_end, '#');
-          auto query = std::string(pointer, fragment_iterator);
-
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          url.query = ada::unicode::percent_encode(query, query_percent_encode_set);
+          url.query = ada::unicode::percent_encode(pointer, query_percent_encode_set);
 
-          // If fragment iterator does not point to end of the input and state override is defined
-          // set pointer to fragment pointer, state to fragment.
-          if (fragment_iterator != pointer_end && !state_override.has_value()) {
-            pointer = fragment_iterator;
-            state = FRAGMENT;
-          } else {
-            return url;
-          }
-
-          break;
+          return url;
         }
         case HOST: {
           // If state override is given and url’s scheme is "file",
@@ -980,27 +963,10 @@ namespace ada::parser {
 
           break;
         }
-        case FRAGMENT: {
-          // If c is not the EOF code point, then:
-          if (pointer != pointer_end) {
-            // Optimization: Spec states that we should iterate character by character, instead of bulk operation.
-            // UTF-8 percent-encode c using the fragment percent-encode set and append the result to url’s fragment.
-            url.fragment = unicode::percent_encode(
-                                  std::string(pointer, pointer_end),
-                                  ada::character_sets::FRAGMENT_PERCENT_ENCODE);
-            return url;
-          }
-
-          break;
-        }
         case OPAQUE_PATH: {
           // If c is U+003F (?), then set url’s query to the empty string and state to query state.
           if (*pointer == '?') {
             state = QUERY;
-          }
-          // Otherwise, if c is U+0023 (#), then set url’s fragment to the empty string and state to fragment state.
-          else if (*pointer == '#') {
-            state = FRAGMENT;
           }
           // Otherwise:
           else {
@@ -1088,11 +1054,6 @@ namespace ada::parser {
           else if (!state_override.has_value() && *pointer == '?') {
             state = QUERY;
           }
-          // Otherwise, if state override is not given and c is U+0023 (#),
-          // set url’s fragment to the empty string and state to fragment state.
-          else if (!state_override.has_value() && *pointer == '#') {
-            state = FRAGMENT;
-          }
           // Otherwise, if c is not the EOF code point:
           else if (pointer != pointer_end) {
             // Set state to path state.
@@ -1151,10 +1112,6 @@ namespace ada::parser {
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
             if (*pointer == '?') {
               state = QUERY;
-            }
-            // If c is U+0023 (#), then set url’s fragment to the empty string and state to fragment state.
-            else if (*pointer == '#') {
-              state = FRAGMENT;
             }
           }
           // Otherwise, run these steps:
@@ -1282,11 +1239,6 @@ namespace ada::parser {
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
             if (*pointer == '?') {
               state = QUERY;
-            }
-            // Otherwise, if c is U+0023 (#), set url’s fragment to the empty string and state to fragment state.
-            else if (*pointer == '#') {
-              url.fragment = "";
-              state = FRAGMENT;
             }
             // Otherwise, if c is not the EOF code point:
             else if (pointer != pointer_end) {

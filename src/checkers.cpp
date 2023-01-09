@@ -1,5 +1,4 @@
 #include "ada.h"
-#include "unicode.cpp"
 
 #include <algorithm>
 

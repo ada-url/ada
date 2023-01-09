@@ -9,6 +9,7 @@
 #include "ada/serializers.h"
 #include "ada/state.h"
 #include "ada/url.h"
+#include "ada/unicode.h"
 
 // Public API
 #include "ada/ada_version.h"
