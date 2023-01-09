@@ -3,15 +3,13 @@
 #include <optional>
 
 namespace ada::scheme {
-
-  static const std::unordered_map<std::string_view , std::optional<uint16_t>> SPECIAL_SCHEME {
-    { "ftp", 21 },
-    { "file", NULL },
-    { "http", 80 },
-    { "https", 443 },
-    { "ws", 80 },
-    { "wss", 443 },
-  };
+  namespace details {
+    // for use with is_special and get_special_port
+    constexpr std::string_view is_special_list[] = {"http", "", "https",
+      "ws", "ftp", "wss", "file", ""};
+    // for use with get_special_port
+    constexpr uint16_t special_ports[] = {80, 0xFFFF, 443, 80, 21, 443, 0, 0xFFFF};
+  }
 
   /**
    * A special scheme is an ASCII string that is listed in the first column of the following table.
@@ -22,19 +20,28 @@ namespace ada::scheme {
    * @param scheme
    * @return If scheme is a special scheme
    */
-  ada_really_inline bool is_special(std::string_view scheme) noexcept {
-    uint64_t inputu = helpers::string_to_uint64(scheme);
-    uint64_t https = helpers::string_to_uint64("https\0\0\0");
-    uint64_t http = helpers::string_to_uint64("http\0\0\0\0");
-    uint64_t file = helpers::string_to_uint64("file\0\0\0\0");
-    uint64_t ftp = helpers::string_to_uint64("ftp\0\0\0\0\0");
-    uint64_t wss = helpers::string_to_uint64("wss\0\0\0\0\0");
-    uint64_t ws = helpers::string_to_uint64("ws\0\0\0\0\0\0");
-    if((inputu == https) | (inputu == http)) {
-      return true;
-    }
-    return ((inputu == file) | (inputu == ftp)
-            | (inputu == wss) | (inputu == ws));
+  ada_really_inline constexpr bool is_special(std::string_view scheme) {
+    if(scheme.empty()) { return false; }
+    int hash_value = (2*scheme.size() + (unsigned)(scheme[0])) & 7;
+    const std::string_view target = details::is_special_list[hash_value];
+    return (target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1));
   }
 
+  /**
+   * A special scheme is an ASCII string that is listed in the first column of the following table.
+   * The default port for a special scheme is listed in the second column on the same row.
+   * The default port for any other ASCII string is null.
+   *
+   * @see https://url.spec.whatwg.org/#url-miscellaneous
+   * @param scheme
+   * @return The special port
+   */
+  constexpr std::optional<uint16_t> get_special_port(std::string_view scheme) noexcept {
+    if(scheme.empty()) { return false; }
+    int hash_value = (2*scheme.size() + (unsigned)(scheme[0])) & 7;
+    const std::string_view target = details::is_special_list[hash_value];
+    if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
+        return details::special_ports[hash_value];
+    } else { return std::nullopt; }
+  }
 } // namespace ada::scheme
