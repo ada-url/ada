@@ -4,6 +4,7 @@
 #include "common_defs.h"
 
 #include <string_view>
+#include <cstring>
 
 namespace ada::checkers {
 
