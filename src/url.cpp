@@ -4,11 +4,7 @@
 namespace ada {
 
   ada_really_inline std::optional<uint16_t> url::scheme_default_port() const {
-    if (!is_special()) {
-      return std::nullopt;
-    }
-
-    return scheme::SPECIAL_SCHEME.find(scheme)->second;
+    return scheme::get_special_port(scheme);
   }
 
   ada_really_inline bool url::is_special() const {

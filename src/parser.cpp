@@ -634,11 +634,11 @@ namespace ada::parser {
 
             // If state override is given, then:
             if (state_override.has_value()) {
-              auto urls_scheme_port = ada::scheme::SPECIAL_SCHEME.find(url.scheme);
+              auto urls_scheme_port = ada::scheme::get_special_port(url.scheme);
 
-              if (urls_scheme_port != ada::scheme::SPECIAL_SCHEME.end()) {
+              if (urls_scheme_port.has_value()) {
                 // If url’s port is url’s scheme’s default port, then set url’s port to null.
-                if (url.port.has_value() && *url.port == urls_scheme_port->second) {
+                if (url.port.has_value() && *url.port == urls_scheme_port.value()) {
                   url.port = std::nullopt;
                 }
               }
