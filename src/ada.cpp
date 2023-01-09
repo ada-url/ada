@@ -5,3 +5,4 @@
 #include "url.cpp"
 #include "character_sets.cpp"
 #include "parser.cpp"
+#include "unicode.cpp"
