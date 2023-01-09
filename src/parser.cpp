@@ -520,8 +520,7 @@ namespace ada::parser {
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
 
-    // TODO: Search from right to left, and find the last occurrence.
-    std::string_view::iterator fragment_pointer_start = std::find_if(pointer_start, pointer_end, [](char c) { return c == '#'; });
+    std::string_view::iterator fragment_pointer_start = std::find(pointer_start, pointer_end, '#');
 
     if (fragment_pointer_start != pointer_end) {
       url.fragment = unicode::percent_encode(std::string(fragment_pointer_start + 1, pointer_end),
