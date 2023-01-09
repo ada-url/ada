@@ -710,7 +710,7 @@ namespace ada::parser {
           // Otherwise, if base has an opaque path and c is U+0023 (#),
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
-          else if (base_url->has_opaque_path && url.fragment.has_value()) {
+          else if (base_url->has_opaque_path && url.fragment.has_value() && pointer == pointer_end) {
             url.scheme = base_url->scheme;
             url.path = base_url->path;
             url.has_opaque_path = base_url->has_opaque_path;
