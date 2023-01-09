@@ -369,7 +369,7 @@ namespace ada::parser {
     // using std::strtoll is potentially dangerous if the string is not null terminated.
     uint64_t result{};
     std::from_chars_result r;
-    if((input.length() >= 2) && ((input[0] == '0') & (checkers::to_lower(input[1]) == 'x'))) {
+    if(checkers::has_hex_prefix(input)) {
       if(input.length() == 2) { return 0; } // mysteriously, this is needed for the tests to pass! 0x -> 0
       r = std::from_chars(input.data() + 2, input.data() + input.size(), result, 16);
     } else if ((input.length() >= 2) && input[0] == '0') {

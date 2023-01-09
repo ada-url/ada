@@ -56,10 +56,8 @@ namespace ada::checkers {
     }
 
     if (length >= 2) {
-      std::string_view::iterator next_iterator = std::next(iterator_start);
-
       // The first two code points are either "0X" or "0x", then:
-      if (*iterator_start == '0' && (to_lower(*next_iterator) == 'x')) {
+      if (checkers::has_hex_prefix_unsafe(iterator_start)) {
         if (length == 2) {
           return true;
         }
