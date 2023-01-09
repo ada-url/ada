@@ -524,7 +524,8 @@ namespace ada::parser {
     std::string_view::iterator fragment_pointer_start = std::find_if(pointer_start, pointer_end, [](char c) { return c == '#'; });
 
     if (fragment_pointer_start != pointer_end) {
-      url.fragment = unicode::percent_encode(fragment_pointer_start + 1, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+      url.fragment = unicode::percent_encode(std::string(fragment_pointer_start + 1, pointer_end),
+                                             ada::character_sets::FRAGMENT_PERCENT_ENCODE);
       pointer_end = fragment_pointer_start;
     }
 
@@ -872,7 +873,7 @@ namespace ada::parser {
 
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          url.query = ada::unicode::percent_encode(pointer, query_percent_encode_set);
+          url.query = ada::unicode::percent_encode(std::string(pointer, pointer_end), query_percent_encode_set);
 
           return url;
         }
