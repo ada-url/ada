@@ -534,6 +534,11 @@ namespace ada::parser {
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
 
+    bool scheme_needs_lowercase{false};
+
+    std::optional<std::string_view::iterator> scheme_start_pointer{pointer};
+    std::optional<std::string_view::iterator> scheme_end_pointer;
+
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
@@ -542,11 +547,11 @@ namespace ada::parser {
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
           if (std::isalpha(*pointer)) {
-            buffer += static_cast<char>(tolower(*pointer));
             state = SCHEME;
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
           else if (!state_override.has_value()) {
+            scheme_start_pointer = std::nullopt;
             state = NO_SCHEME;
             pointer--;
           }
@@ -560,20 +565,31 @@ namespace ada::parser {
         case SCHEME: {
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           if (std::isalnum(*pointer) || *pointer == '+' || *pointer == '-' || *pointer == '.') {
-            buffer += static_cast<char>(tolower(*pointer));
+            // Optimization: No need to lowercase scheme, if we don't need it.
+            if (*pointer >= 'A' && *pointer <= 'Z') {
+              scheme_needs_lowercase = true;
+            }
           }
           // Otherwise, if c is U+003A (:), then:
           else if (*pointer == ':') {
+            scheme_end_pointer = pointer;
+
+            std::string _buffer = std::string(*scheme_start_pointer, *scheme_end_pointer - *scheme_start_pointer);
+
+            if (scheme_needs_lowercase) {
+              std::transform(_buffer.begin(), _buffer.end(), _buffer.begin(), ::tolower);
+            }
+
             // If state override is given, then:
             if (state_override.has_value()) {
               // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
               // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
-              if (url.is_special() != ada::scheme::is_special(buffer)) {
+              if (url.is_special() != ada::scheme::is_special(_buffer)) {
                 return url;
               }
 
               // If url includes credentials or has a non-null port, and buffer is "file", then return.
-              if ((url.includes_credentials() || url.port.has_value()) && buffer == "file") {
+              if ((url.includes_credentials() || url.port.has_value()) && _buffer == "file") {
                 return url;
               }
 
@@ -585,7 +601,7 @@ namespace ada::parser {
             }
 
             // Set url’s scheme to buffer.
-            url.scheme = buffer;
+            url.scheme = _buffer;
 
             // If state override is given, then:
             if (state_override.has_value()) {
@@ -600,9 +616,6 @@ namespace ada::parser {
 
               continue;
             }
-
-            // Set buffer to the empty string.
-            buffer.clear();
 
             // If url’s scheme is "file", then:
             if (url.scheme == "file") {
@@ -634,7 +647,6 @@ namespace ada::parser {
           // Otherwise, if state override is not given, set buffer to the empty string, state to no scheme state,
           // and start over (from the first code point in input).
           else if (!state_override.has_value()) {
-            buffer.clear();
             state = NO_SCHEME;
             pointer = pointer_start;
             pointer--;
