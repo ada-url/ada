@@ -539,63 +539,6 @@ namespace ada::parser {
     // Otherwise, increase pointer by 1 and continue with the state machine.
     for (; pointer <= pointer_end; pointer++) {
       switch (state) {
-        case AUTHORITY: {
-          // If c is U+0040 (@), then:
-          if (*pointer == '@') {
-            // If atSignSeen is true, then prepend "%40" to buffer.
-            if (at_sign_seen) {
-              buffer.insert(0, "%40");
-            }
-
-            // Set atSignSeen to true.
-            at_sign_seen = true;
-
-            // For each codePoint in buffer:
-            for (auto code_point: buffer) {
-              // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
-              if (code_point == ':' && !password_token_seen) {
-                password_token_seen = true;
-                continue;
-              }
-
-              // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
-              // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
-              if (password_token_seen) {
-                unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.password);
-              }
-              // Otherwise, append encodedCodePoints to url’s username.
-              else {
-                unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.username);
-              }
-            }
-
-            // Set buffer to the empty string.
-            buffer.clear();
-          }
-          // Otherwise, if one of the following is true:
-          // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
-          // - url is special and c is U+005C (\)
-          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
-            // If atSignSeen is true and buffer is the empty string, validation error, return failure.
-            if (at_sign_seen && buffer.empty()) {
-              buffer.clear();
-              url.is_valid = false;
-              return url;
-            }
-
-            // Decrease pointer by the number of code points in buffer plus one,
-            // set buffer to the empty string, and set state to host state.
-            pointer -= buffer.length() + 1;
-            buffer.clear();
-            state = HOST;
-          }
-          // Otherwise, append c to buffer.
-          else {
-            buffer += *pointer;
-          }
-
-          break;
-        }
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
           if (std::isalpha(*pointer)) {
@@ -729,6 +672,63 @@ namespace ada::parser {
           else {
             state = FILE;
             pointer--;
+          }
+
+          break;
+        }
+        case AUTHORITY: {
+          // If c is U+0040 (@), then:
+          if (*pointer == '@') {
+            // If atSignSeen is true, then prepend "%40" to buffer.
+            if (at_sign_seen) {
+              buffer.insert(0, "%40");
+            }
+
+            // Set atSignSeen to true.
+            at_sign_seen = true;
+
+            // For each codePoint in buffer:
+            for (auto code_point: buffer) {
+              // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
+              if (code_point == ':' && !password_token_seen) {
+                password_token_seen = true;
+                continue;
+              }
+
+              // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
+              // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
+              if (password_token_seen) {
+                unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.password);
+              }
+              // Otherwise, append encodedCodePoints to url’s username.
+              else {
+                unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.username);
+              }
+            }
+
+            // Set buffer to the empty string.
+            buffer.clear();
+          }
+          // Otherwise, if one of the following is true:
+          // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+          // - url is special and c is U+005C (\)
+          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
+            // If atSignSeen is true and buffer is the empty string, validation error, return failure.
+            if (at_sign_seen && buffer.empty()) {
+              buffer.clear();
+              url.is_valid = false;
+              return url;
+            }
+
+            // Decrease pointer by the number of code points in buffer plus one,
+            // set buffer to the empty string, and set state to host state.
+            pointer -= buffer.length() + 1;
+            buffer.clear();
+            state = HOST;
+          }
+          // Otherwise, append c to buffer.
+          else {
+            buffer += *pointer;
           }
 
           break;
