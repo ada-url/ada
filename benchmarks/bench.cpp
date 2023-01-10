@@ -28,8 +28,10 @@ std::string url_examples[] = {
     "https://www.reddit.com/?after=t3_zvz1ze",
     "https://www.reddit.com/login/?dest=https%3A%2F%2Fwww.reddit.com%2F",
     "postgresql://other:9818274x1!!@localhost:5432/otherdb?connect_timeout=10&application_name=myapp",
-    "http://192.168.1.1",
-    "http://[2606:4700:4700::1111]"};
+    "http://192.168.1.1", // ipv4
+    "http://[2606:4700:4700::1111]", // ipv6
+    "scheme:example.com:5432/path" // opaque-path
+};
 
 double url_examples_bytes =  []() {
     size_t bytes{0};
@@ -95,7 +97,7 @@ static void BasicBench_uriparser(benchmark::State& state) {
     }
   }
   uriFreeUriMembersA(&uri);
-  if(!is_valid) { std::cout << "invalid? " << std::endl; }
+  if(!is_valid) { std::cout << "uri-parser: invalid? " << std::endl; }
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
@@ -118,6 +120,7 @@ static void BasicBench_urlparser(benchmark::State& state) {
 }
 BENCHMARK(BasicBench_urlparser);
 
+// http_parser can't handle opaque path urls. this is a spec violation.
 static void BasicBench_http_parser(benchmark::State& state) {
   volatile bool is_valid{true};
   struct http_parser_url u;
@@ -127,7 +130,7 @@ static void BasicBench_http_parser(benchmark::State& state) {
       is_valid &= !http_parser_parse_url(url_string.data(), url_string.size(), 0, &u);
     }
   }
-  if(!is_valid) { std::cout << "invalid? " << std::endl; }
+  if(!is_valid) { std::cout << "http_parser: invalid? " << std::endl; }
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
@@ -143,7 +146,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
         is_valid &= url.is_valid;
     }
   }
-  if(!is_valid) { std::cout << "invalid? " << std::endl; }
+  if(!is_valid) { std::cout << "ada: invalid? " << std::endl; }
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);

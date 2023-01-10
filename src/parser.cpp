@@ -503,6 +503,9 @@ namespace ada::parser {
     std::optional<std::string_view::iterator> port_start_pointer;
     std::optional<std::string_view::iterator> port_end_pointer;
 
+    std::optional<std::string_view::iterator> opaque_path_start_pointer;
+    std::optional<std::string_view::iterator> opaque_path_end_pointer;
+
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
@@ -606,9 +609,11 @@ namespace ada::parser {
             }
             // Otherwise, set url’s path to the empty string and set state to opaque path state.
             else {
-              url.has_opaque_path = true;
-              url.path = "";
               state = OPAQUE_PATH;
+
+              if (std::distance(pointer, pointer_end) > 0) {
+                opaque_path_start_pointer = pointer + 1;
+              }
             }
           }
           // Otherwise, if state override is not given, set buffer to the empty string, state to no scheme state,
@@ -952,22 +957,14 @@ namespace ada::parser {
         }
         case OPAQUE_PATH: {
           // If c is U+003F (?), then set url’s query to the empty string and state to query state.
-          if (*pointer == '?') {
-            state = QUERY;
-          }
-          // Otherwise:
-          else {
-            // If c is not the EOF code point, UTF-8 percent-encode c using the C0 control percent-encode set
-            // and append the result to url’s path.
-            if (pointer != pointer_end) {
-              if (character_sets::bit_at(character_sets::C0_CONTROL_PERCENT_ENCODE, *pointer)) {
-                // We cast to an unsigned 8-bit integer because
-                // *pointer is of type 'char' which may be signed or unsigned.
-                // A negative index access in 'character_sets::hex' is unsafe.
-                url.path += character_sets::hex[uint8_t(*pointer) * 4];
-              } else {
-                url.path += *pointer;
-              }
+          if (*pointer == '?' || pointer == pointer_end) {
+            opaque_path_end_pointer = pointer;
+            url.has_opaque_path = true;
+            url.path = unicode::percent_encode(
+                                  std::string_view(*opaque_path_start_pointer, pointer - *opaque_path_start_pointer),
+                                  character_sets::C0_CONTROL_PERCENT_ENCODE);
+            if (*pointer == '?') {
+              state = QUERY;
             }
           }
 
