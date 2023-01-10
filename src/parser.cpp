@@ -499,7 +499,7 @@ namespace ada::parser {
     // Define parsed URL
     ada::url url = ada::url();
 
-    // most input strings will be ASCII which enables many optimizations.
+    // most input strings will be ASCII which may enable some optimizations.
     const bool is_ascii = 128>(std::reduce(user_input.begin()+1, user_input.end(), uint8_t(user_input[0]), std::bit_xor<uint8_t>()));
 
     // Remove any leading and trailing C0 control or space from input.
