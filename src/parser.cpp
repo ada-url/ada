@@ -516,14 +516,11 @@ namespace ada::parser {
       pointer_end = internal_input.end();
     }
 
-    // Let pointer be a pointer for input.
-    std::string_view::iterator pointer = pointer_start;
-
     std::string_view url_data(pointer_start, pointer_end - pointer_start);
 
-    auto result = helpers::prune_fragment(url_data);
+    std::optional<std::string_view> result = helpers::prune_fragment(url_data);
     if(result.has_value()) {
-      url.fragment = unicode::percent_encode(result.value(),
+      url.fragment = unicode::percent_encode(*result,
                                              ada::character_sets::FRAGMENT_PERCENT_ENCODE);
 
     }
@@ -533,6 +530,9 @@ namespace ada::parser {
     // bring back the pointers.
     pointer_start = url_data.begin();
     pointer_end = url_data.end();
+
+    // Let pointer be a pointer for input.
+    std::string_view::iterator pointer = pointer_start;
 
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
