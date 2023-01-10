@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <numeric>
 
 #include <unicode/utypes.h>
 #include <unicode/uidna.h>
@@ -428,7 +429,11 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  std::optional<ada::url_host> parse_host(const std::string_view input, bool is_not_special) {
+  std::optional<ada::url_host> parse_host(const std::string_view input, bool is_not_special, bool input_is_ascii) {
+    //
+    // Note: this function assumes that parse_host is not empty. Make sure we can
+    // guarantee that.
+    //
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
@@ -447,7 +452,8 @@ namespace ada::parser {
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    std::optional<std::string> ascii_domain = to_ascii(input, false);
+    // The most common case is an ASCII input, in which case we do not need to call the expensive 'to_ascii'.
+    std::optional<std::string> ascii_domain = input_is_ascii ? unicode::percent_decode(input) : to_ascii(input, false);
 
     // If asciiDomain is failure, validation error, return failure.
     if (!ascii_domain.has_value()) {
@@ -492,6 +498,9 @@ namespace ada::parser {
 
     // Define parsed URL
     ada::url url = ada::url();
+
+    // most input strings will be ASCII which enables many optimizations.
+    const bool is_ascii = 128>(std::reduce(user_input.begin()+1, user_input.end(), uint8_t(user_input[0]), std::bit_xor<uint8_t>()));
 
     // Remove any leading and trailing C0 control or space from input.
     user_input.erase(std::remove_if(user_input.begin(), user_input.end(), [](char c) {
@@ -913,7 +922,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<ada::url_host> host = parse_host(buffer, !url.is_special());
+            std::optional<ada::url_host> host = parse_host(buffer, !url.is_special(), is_ascii);
 
             // If host is failure, then return failure.
             if (!host.has_value()) {
@@ -945,7 +954,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<ada::url_host> host = parse_host(buffer, !url.is_special());
+            std::optional<ada::url_host> host = parse_host(buffer, !url.is_special(), is_ascii);
 
             // If host is failure, then return failure.
             if (!host.has_value()) {
@@ -1200,7 +1209,7 @@ namespace ada::parser {
             // Otherwise, run these steps:
             else {
               // Let host be the result of host parsing buffer with url is not special.
-              std::optional<ada::url_host> host = parse_host(buffer, !url.is_special());
+              std::optional<ada::url_host> host = parse_host(buffer, !url.is_special(), is_ascii);
 
               // If host is failure, then return failure.
               if (!host.has_value()) {
