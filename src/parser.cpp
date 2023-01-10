@@ -890,7 +890,6 @@ namespace ada::parser {
 
             // Set url’s host to host, buffer to the empty string, and state to port state.
             url.host = *host;
-            buffer.clear();
             state = PORT;
 
             if (std::distance(pointer, pointer_end) > 0) {
