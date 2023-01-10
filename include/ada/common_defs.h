@@ -113,4 +113,16 @@
 /// If EXPR is an error, returns it.
 #define ADA_TRY(EXPR) { auto _err = (EXPR); if (_err) { return _err; } }
 
+// __has_cpp_attribute is part of C++20
+#if !defined(__has_cpp_attribute)
+#define __has_cpp_attribute(x) 0
+#endif
+
+
+#if __has_cpp_attribute(gnu::noinline)
+#define ADA_ATTRIBUTE_NOINLINE [[gnu::noinline]]
+#else
+#define ADA_ATTRIBUTE_NOINLINE
+#endif
+
 #endif // ADA_COMMON_DEFS_H
