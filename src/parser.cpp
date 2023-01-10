@@ -98,7 +98,6 @@ namespace ada::parser {
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
     std::string result = ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
-
     return ada::url_host{OPAQUE_HOST, result};
   }
 
@@ -520,13 +519,20 @@ namespace ada::parser {
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
 
-    std::string_view::iterator fragment_pointer_start = std::find(pointer_start, pointer_end, '#');
+    std::string_view url_data(pointer_start, pointer_end - pointer_start);
 
-    if (fragment_pointer_start != pointer_end) {
-      url.fragment = unicode::percent_encode(std::string(fragment_pointer_start + 1, pointer_end),
+    auto result = helpers::prune_fragment(url_data);
+    if(result.has_value()) {
+      url.fragment = unicode::percent_encode(result.value(),
                                              ada::character_sets::FRAGMENT_PERCENT_ENCODE);
-      pointer_end = fragment_pointer_start;
+
     }
+    // Here url_data no longer has its fragment.
+    // The rest of the code might betterwork with std::string_view, not pointers, it would
+    // be easier to follow. But because we don't want to change everything, let us
+    // bring back the pointers.
+    pointer_start = url_data.begin();
+    pointer_end = url_data.end();
 
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
@@ -553,15 +559,13 @@ namespace ada::parser {
               }
 
               // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
-              auto encoded_code_points = unicode::percent_encode(std::string{code_point}, character_sets::USERINFO_PERCENT_ENCODE);
-
               // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
               if (password_token_seen) {
-                url.password.append(encoded_code_points);
+                unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.password);
               }
               // Otherwise, append encodedCodePoints to url’s username.
               else {
-                url.username.append(encoded_code_points);
+                unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.username);
               }
             }
 
@@ -872,7 +876,7 @@ namespace ada::parser {
 
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          url.query = ada::unicode::percent_encode(std::string(pointer, pointer_end), query_percent_encode_set);
+          url.query = ada::unicode::percent_encode(std::string_view(pointer, pointer_end-pointer), query_percent_encode_set);
 
           return url;
         }
@@ -1117,7 +1121,7 @@ namespace ada::parser {
           // Otherwise, run these steps:
           else {
             // UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
-            buffer += unicode::percent_encode(std::string{*pointer}, character_sets::PATH_PERCENT_ENCODE);
+            unicode::percent_encode_character(*pointer, character_sets::PATH_PERCENT_ENCODE, buffer);
           }
 
           break;
