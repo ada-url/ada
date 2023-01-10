@@ -108,18 +108,19 @@ namespace ada {
      * This function assumes url does not have an opaque path.
      */
     void shorten_path() noexcept {
+      size_t first_delimiter = path.find_first_of('/', 1);
+
       // Let path be url’s path.
       // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized Windows drive letter, then return.
-      if (scheme == "file" && !path.empty() && path.find_first_of('/', 1) == std::string_view::npos) {
-        std::string first_element = path.substr(1, path.find_first_of('/', 1));
-        if (checkers::is_normalized_windows_drive_letter(first_element)) {
+      if (scheme == "file" && first_delimiter == std::string_view::npos) {
+        if (checkers::is_normalized_windows_drive_letter(std::string_view(path.data() + 1, first_delimiter - 1))) {
           return;
         }
       }
 
       // Remove path’s last item, if any.
       if (!path.empty()) {
-        path.erase(path.find_last_of('/'));
+        path.erase(path.rfind('/'));
       }
     }
 
