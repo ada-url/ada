@@ -124,6 +124,8 @@ namespace ada {
     }
 
     [[nodiscard]] std::optional<uint16_t> scheme_default_port() const;
+
+    ADA_ATTRIBUTE_NOINLINE ~url() = default;
   }; // struct url
 
 } // namespace ada
