@@ -548,6 +548,7 @@ namespace ada::parser {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
           if (std::isalpha(*pointer)) {
             state = SCHEME;
+            pointer--;
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
           else if (!state_override.has_value()) {
