@@ -32,7 +32,7 @@ namespace ada::helpers {
   }
 
   // prune_fragment seeks the first '#' and returns everything after it as a
-  // strint_view, and modifies (in place) the input so that it points at everything
+  // string_view, and modifies (in place) the input so that it points at everything
   // before the '#'.
   // If no '#' is found, the input is left unchanged and std::nullopt is returned.
   // Note that the returned string_view might be empty!
@@ -48,7 +48,7 @@ namespace ada::helpers {
     return fragment;
   }
 
-  std::optional<uint16_t> get_port_fast(std::string_view::iterator begin, std::string_view::iterator end) noexcept {
+  std::optional<uint16_t> get_port_fast(const std::string_view::iterator begin, const std::string_view::iterator end) noexcept {
     uint16_t port{};
     std::string_view view(begin, end-begin);
     auto r = std::from_chars(view.data(), view.data() + view.size() , port);
