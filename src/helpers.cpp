@@ -51,4 +51,21 @@ namespace ada::helpers {
     return val;
   }
 
+  // prune_fragment seeks the first '#' and returns everything after it as a
+  // strint_view, and modifies (in place) the input so that it points at everything
+  // before the '#'.
+  // If no '#' is found, the input is left unchanged and std::nullopt is returned.
+  // Note that the returned string_view might be empty!
+  // The function is non-allocating and it does not throw.
+  ada_really_inline std::optional<std::string_view> prune_fragment(std::string_view& input) noexcept {
+    // compiles down to 20--30 instructions including a class to memchr (C function).
+    // this function should be quite fast.
+    size_t location_of_first = input.find('#');
+    if(location_of_first == std::string_view::npos) { return std::nullopt; }
+    std::string_view fragment = input;
+    fragment.remove_prefix(location_of_first+1);
+    input.remove_suffix(input.size() - location_of_first);
+    return fragment;
+  }
+
 } // namespace ada::helpers
