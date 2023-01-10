@@ -500,6 +500,9 @@ namespace ada::parser {
     std::optional<std::string_view::iterator> scheme_start_pointer{pointer};
     std::optional<std::string_view::iterator> scheme_end_pointer;
 
+    std::optional<std::string_view::iterator> port_start_pointer;
+    std::optional<std::string_view::iterator> port_end_pointer;
+
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
@@ -889,6 +892,10 @@ namespace ada::parser {
             url.host = *host;
             buffer.clear();
             state = PORT;
+
+            if (std::distance(pointer, pointer_end) > 0) {
+              port_start_pointer = pointer + 1;
+            }
           }
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
@@ -970,7 +977,7 @@ namespace ada::parser {
         case PORT: {
           // If c is an ASCII digit, append c to buffer.
           if (checkers::is_digit(*pointer)) {
-            buffer += *pointer;
+            // Optimization: Do nothing.
           }
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
@@ -979,11 +986,15 @@ namespace ada::parser {
           else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' ||
                                 (url.is_special() && *pointer == '\\') ||
                                 state_override.has_value()) {
+            port_end_pointer = pointer;
+
             // If buffer is not the empty string, then:
-            if (!buffer.empty()) {
+            if (*port_start_pointer != pointer) {
+              std::string _buffer = std::string(*port_start_pointer, *port_end_pointer - *port_start_pointer);
+
               // Let port be the mathematical integer value that is represented by buffer in radix-10
               // using ASCII digits for digits with values 0 through 9.
-              long port = std::atol(buffer.c_str());
+              long port = std::atol(_buffer.c_str());
 
               // If port is greater than 216 − 1, validation error, return failure.
               if (port > (1L<<16) - 1) {
@@ -997,9 +1008,6 @@ namespace ada::parser {
               } else {
                 url.port = port;
               }
-
-              // Set buffer to the empty string.
-              buffer.clear();
             }
 
             // If state override is given, then return.
