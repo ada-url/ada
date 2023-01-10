@@ -46,6 +46,7 @@ namespace ada::unicode {
   }
 
   unsigned constexpr convert_hex_to_binary(const char c) noexcept {
+    // this code can be optimized.
     if (c >= '0' && c <= '9')
       return c - '0';
     else if (c >= 'A' && c <= 'F')
@@ -55,19 +56,26 @@ namespace ada::unicode {
   }
 
   /**
-   * Taken from Node.js
+   * Adapted from Node.js
    * https://github.com/nodejs/node/blob/main/src/node_url.cc#L245
    *
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
-  std::string percent_decode(const std::string_view input) noexcept {
-    std::string dest;
-    if (input.length() == 0)
-      return dest;
+  std::string percent_decode(const std::string_view input) {
+    // We want to optimize for the case where '%' is not found, then we can just
+    // do a quick copy.
+    size_t first_percent = input.find("%");
+    if(first_percent == std::string_view::npos) { return std::string(input); }
+    // Most times, the code stopped here.
+    //
+    // General case follows.
+    // Time spent looking for '%' is not wasted.
+    std::string dest(input.substr(0, first_percent));
     dest.reserve(input.length());
-    const char* pointer = input.begin();
+    const char* pointer = input.begin() + first_percent;
     const char* end = input.end();
-
+    // Optimization opportunity: if the following code gets
+    // called often, it can be optimized quite a bit.
     while (pointer < end) {
       const char ch = pointer[0];
       size_t remaining = end - pointer - 1;
@@ -92,19 +100,43 @@ namespace ada::unicode {
   /**
    * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
    */
-  std::string percent_encode(const std::string_view input, const uint8_t character_set[]) noexcept {
+  std::string percent_encode(const std::string_view input, const uint8_t character_set[]) {
     std::string result{};
-    result.reserve(input.length());
+    result.reserve(input.length()); // in the worst case, percent encoding might produce 3 characters.
 
     for (uint8_t iterator: input) {
       if (character_sets::bit_at(character_set, iterator)) {
-        result += character_sets::hex + iterator * 4;
+        // append is likely much faster than +=, see percent_encode_character
+        result.append(character_sets::hex + iterator * 4, 3); // this almost never gets called.
       } else {
         result += static_cast<char>(iterator);
       }
     }
-
+    ////////////////////////////////////////
+    // Optimization opportunity.
+    // Most times, this function just retunrs a copy.
+    // character_sets::bit_at(character_set, iterator) is often false in practice.
+    // This means that we could do a quick check and then just copy.
+    ////////////////////////////////////////
     return result;
+  }
+  /**
+   * Encode a single character in the string. This is likely much faster than taking
+   * a character, making a string out of it, creating a new string, returning said string,
+   * and then appending the string at the caller site. Generally, we want to have as
+   * few std::string created as possible.
+   */
+  void percent_encode_character(const char input, const uint8_t character_set[], std::string &out) {
+    if (character_sets::bit_at(character_set, input)) {
+        // append will be faster because out += char* requires the
+        // system to determine the size of the input, by looking for the
+        // null byte, which implies a call to strlen. Yet we know that the
+        // size of the appended string is always 3. Let us tell it to the
+        // compiler.
+        out.append(character_sets::hex + uint8_t(input) * 4,3);
+      } else {
+        out += input;
+      }
   }
 
 } // namespace ada::unicode

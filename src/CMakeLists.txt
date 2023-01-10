@@ -18,7 +18,7 @@ else(MSVC)
   if(NOT WIN32)
     target_compile_options(ada INTERFACE -fPIC)
   endif()
-  target_compile_options(ada PRIVATE -Wall -Wextra -Weffc++)
+  target_compile_options(ada PRIVATE -Wall -Wextra -Weffc++ -Winline)
   target_compile_options(ada PRIVATE -Wfatal-errors -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self -Wconversion -Wno-sign-conversion)
 endif(MSVC)
 

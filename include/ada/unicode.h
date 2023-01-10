@@ -16,8 +16,11 @@ namespace ada::unicode {
 
   unsigned constexpr convert_hex_to_binary(char c) noexcept;
 
-  std::string percent_decode(const std::string_view input) noexcept;
-  std::string percent_encode(const std::string_view input, const uint8_t character_set[]) noexcept;
+  // todo: these functions would be faster as noexcept maybe, but it could be unsafe since
+  // they are allocating.
+  std::string percent_decode(const std::string_view input);
+  std::string percent_encode(const std::string_view input, const uint8_t character_set[]);
+  void percent_encode_character(const char input, const uint8_t character_set[], std::string& out);
 
 } // namespace ada::unicode
 
