@@ -30,7 +30,6 @@ std::string url_examples[] = {
     "postgresql://other:9818274x1!!@localhost:5432/otherdb?connect_timeout=10&application_name=myapp",
     "http://192.168.1.1", // ipv4
     "http://[2606:4700:4700::1111]", // ipv6
-    "scheme:example.com:5432/path" // opaque-path
 };
 
 double url_examples_bytes =  []() {
@@ -120,7 +119,6 @@ static void BasicBench_urlparser(benchmark::State& state) {
 }
 BENCHMARK(BasicBench_urlparser);
 
-// http_parser can't handle opaque path urls. this is a spec violation.
 static void BasicBench_http_parser(benchmark::State& state) {
   volatile bool is_valid{true};
   struct http_parser_url u;
