@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <charconv>
 #include <cstring>
 #include <sstream>
 
@@ -46,5 +47,13 @@ namespace ada::helpers {
     input.remove_suffix(input.size() - location_of_first);
     return fragment;
   }
+
+  std::optional<uint16_t> get_port_fast(std::string_view::iterator begin, std::string_view::iterator end) noexcept {
+    uint16_t port{};
+    std::string_view view(begin, end-begin);
+    auto r = std::from_chars(view.data(), view.data() + view.size() , port);
+    if (r.ec != std::errc()) { return std::nullopt; }
+    return port;
+}
 
 } // namespace ada::helpers

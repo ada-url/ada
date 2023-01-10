@@ -985,24 +985,22 @@ namespace ada::parser {
             port_end_pointer = pointer;
 
             // If buffer is not the empty string, then:
-            if (*port_start_pointer != pointer) {
-              std::string _buffer = std::string(*port_start_pointer, *port_end_pointer - *port_start_pointer);
-
+            if (std::distance(*port_start_pointer, pointer) > 0) {
               // Let port be the mathematical integer value that is represented by buffer in radix-10
               // using ASCII digits for digits with values 0 through 9.
-              long port = std::atol(_buffer.c_str());
+              std::optional<uint16_t> port = helpers::get_port_fast(port_start_pointer.value(), port_end_pointer.value());
 
               // If port is greater than 216 − 1, validation error, return failure.
-              if (port > (1L<<16) - 1) {
+              if (!port.has_value()) {
                 url.is_valid = false;
                 return url;
               }
 
               // Set url’s port to null, if port is url’s scheme’s default port; otherwise to port.
-              if (port == url.scheme_default_port()) {
+              if (*port == url.scheme_default_port()) {
                 url.port = std::nullopt;
               } else {
-                url.port = port;
+                url.port = *port;
               }
             }
 
