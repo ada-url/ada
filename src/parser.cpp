@@ -529,7 +529,7 @@ namespace ada::parser {
             std::string _buffer = std::string(*scheme_start_pointer, *scheme_end_pointer - *scheme_start_pointer);
 
             if (scheme_needs_lowercase) {
-              // optimization opportunity. W
+              // optimization opportunity. no need to start from beginning, just start from the first uppercase pointer
               std::transform(_buffer.begin(), _buffer.end(), _buffer.begin(),
                 [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
             }
