@@ -13,7 +13,7 @@ namespace ada::checkers {
 
     if (parts_count > 0) { parts_count++; }
 
-    static const std::string delimiter = ".";
+    static const char delimiter = '.';
     std::string_view::iterator pointer_start = input.begin();
     std::string_view::iterator pointer_end = input.end();
 
@@ -34,7 +34,7 @@ namespace ada::checkers {
     }
 
     if (parts_count > 1) {
-      pointer_start = std::find_end(pointer_start, pointer_end, delimiter.begin(), delimiter.end());
+      pointer_start = pointer_start + std::string_view{pointer_start, size_t(pointer_end - pointer_start)}.rfind(delimiter);
 
       if (pointer_start == pointer_end) {
         return false;
@@ -47,17 +47,6 @@ namespace ada::checkers {
     return is_ipv4_number_valid(pointer_start, pointer_end);
   }
 
-  // A Windows drive letter is two code points, of which the first is an ASCII alpha
-  // and the second is either U+003A (:) or U+007C (|).
-  bool is_windows_drive_letter(const std::string_view input) noexcept {
-    return input.size() == 2 && std::isalpha(input[0]) && (input[1] == ':' || input[1] == '|');
-  }
-
-  // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
-  bool is_normalized_windows_drive_letter(const std::string_view input) noexcept {
-    return is_windows_drive_letter(input) && input[1] == ':';
-  }
-
   // This function assumes the input is not empty.
   ada_really_inline constexpr bool is_ipv4_number_valid(const std::string_view::iterator iterator_start, const std::string_view::iterator iterator_end) noexcept {
     size_t length = std::distance(iterator_start, iterator_end);
@@ -67,10 +56,8 @@ namespace ada::checkers {
     }
 
     if (length >= 2) {
-      std::string_view::iterator next_iterator = std::next(iterator_start);
-
       // The first two code points are either "0X" or "0x", then:
-      if (*iterator_start == '0' && (*next_iterator == 'X' || *next_iterator == 'x')) {
+      if (checkers::has_hex_prefix_unsafe(iterator_start)) {
         if (length == 2) {
           return true;
         }
@@ -89,8 +76,7 @@ namespace ada::checkers {
       }
     }
 
-
-    return std::all_of(iterator_start, iterator_end, ::isdigit);
+    return std::all_of(iterator_start, iterator_end, checkers::is_digit);
   }
 
 } // namespace ada::checkers
