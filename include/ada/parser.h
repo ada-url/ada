@@ -11,10 +11,9 @@ namespace ada::parser {
   // first_percent should be  = plain.find('%')
   std::optional<std::string> to_ascii(std::string_view plain, bool be_strict, size_t first_percent);
 
-  std::optional<uint64_t> parse_ipv4_number(std::string_view input);
   std::optional<ada::url_host> parse_opaque_host(std::string_view input);
   std::optional<ada::url_host> parse_ipv6(std::string_view input);
-  std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special);
+  std::optional<ada::url_host> parse_host(std::string_view input, bool is_not_special, bool input_is_ascii);
 
   url parse_url(std::string user_input,
                 std::optional<ada::url> base_url,
