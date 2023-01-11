@@ -146,6 +146,11 @@ namespace ada::unicode {
     return input == "." || input == "%2e" || input == "%2E";
   }
 
+  // ipv4 character might contain 0-9 or a-f character ranges.
+  ada_really_inline constexpr bool is_ipv4_char(const char c) noexcept {
+    return (c >= '0' && c <= '9') || (c >= 'a' && c<= 'f');
+  }
+
   unsigned constexpr convert_hex_to_binary(const char c) noexcept {
     // this code can be optimized.
     if (c >= '0' && c <= '9')
