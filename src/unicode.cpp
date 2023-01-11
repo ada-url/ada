@@ -133,13 +133,49 @@ namespace ada::unicode {
     return c == '\t' || c == '\n' || c == '\r';
   }
 
+
+  constexpr std::string_view table_is_double_dot_path_segment[] = {"..", "%2e.", ".%2e", "%2e%2e"};
+
+
   // A double-dot path segment must be ".." or an ASCII case-insensitive match for ".%2e", "%2e.", or "%2e%2e".
   ada_really_inline constexpr bool is_double_dot_path_segment(std::string_view input) noexcept {
-    return input == ".." ||
-      input == ".%2e" || input == ".%2E" ||
-      input == "%2e." || input == "%2E." ||
-      input == "%2e%2e" || input == "%2E%2E" || input == "%2E%2e" || input == "%2e%2E";
+    // This will catch most cases:
+    // The length must be 2,4 or 6.
+    // We divide by two and require
+    // that the result be between 1 and 3 inclusively.
+   // printf("-");
+    uint64_t half_length = uint64_t(input.size())/2;
+    if(half_length - 1 > 2) { return false; }
+    // We have a string of length 2, 4 or 6.
+    // We now check the first character:
+    if((input[0] != '.') && (input[0] != '%')) { return false; }
+     // We are unlikely the get beyond this point.
+    int hash_value = (input.size() + (unsigned)(input[0])) & 3;
+    const std::string_view target = table_is_double_dot_path_segment[hash_value];
+    if(target.size() != input.size()) { return false; }
+    // We almost never get here.
+    // Optimizing the rest is relatively unimportant.
+    auto prefix_equal_unsafe = [](std::string_view a, std::string_view b) {
+      uint16_t A, B;
+      memcpy(&A,a.data(), sizeof(A));
+      memcpy(&B,b.data(), sizeof(B));
+      return A == B;
+    };
+    if(!prefix_equal_unsafe(input,target)) { return false; }
+    for(size_t i = 2; i < input.size(); i++) {
+      char c = input[i];
+      if((uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c) != target[i]) { return false; }
+    }
+    return true;
+    // The above code might be a bit better than the code below. Compilers
+    // are not stupid and may use the fact that these strings have length 2,4 and 6
+    // and other tricks.
+    //return input == ".." ||
+    //  input == ".%2e" || input == ".%2E" ||
+    //  input == "%2e." || input == "%2E." ||
+    //  input == "%2e%2e" || input == "%2E%2E" || input == "%2E%2e" || input == "%2e%2E";
   }
+
 
   // A single-dot path segment must be "." or an ASCII case-insensitive match for "%2e".
   ada_really_inline bool is_single_dot_path_segment(std::string_view input) noexcept {
