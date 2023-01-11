@@ -539,7 +539,9 @@ namespace ada::parser {
             std::string _buffer = std::string(*scheme_start_pointer, *scheme_end_pointer - *scheme_start_pointer);
 
             if (scheme_needs_lowercase) {
-              std::transform(_buffer.begin(), _buffer.end(), _buffer.begin(), ::tolower);
+              // optimization opportunity. W
+              std::transform(_buffer.begin(), _buffer.end(), _buffer.begin(),
+                [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
             }
 
             // If state override is given, then:
@@ -770,6 +772,7 @@ namespace ada::parser {
               url.query = std::nullopt;
 
               // Shorten url’s path.
+              // Optimization opportunity: shorten_path is maybe not inlined.
               url.shorten_path();
 
               // Set state to path state and decrease pointer by 1.
@@ -1059,6 +1062,7 @@ namespace ada::parser {
             // If buffer is a double-dot path segment, then:
             if (unicode::is_double_dot_path_segment(buffer)) {
               // Shorten url’s path.
+              // Optimization opportunity: shorten_path is maybe not inlined.
               url.shorten_path();
 
               // If neither c is U+002F (/), nor url is special and c is U+005C (\),
@@ -1226,6 +1230,7 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
               if (std::distance(pointer, pointer_end) >= 2 && !checkers::is_windows_drive_letter(std::string(pointer, pointer + 2))) {
+                // Optimization opportunity: shorten_path is maybe not inlined.
                 url.shorten_path();
               }
               // Otherwise:
