@@ -1215,7 +1215,7 @@ namespace ada::parser {
 
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
-              if (std::distance(pointer, pointer_end) >= 2 && !checkers::is_windows_drive_letter(std::string(pointer, pointer + 2))) {
+              if (std::distance(pointer, pointer_end) >= 2 && !checkers::is_windows_drive_letter(std::string_view(pointer, 2))) {
                 // Optimization opportunity: shorten_path is maybe not inlined.
                 url.shorten_path();
               }
