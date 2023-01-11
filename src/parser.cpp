@@ -457,20 +457,9 @@ namespace ada::parser {
     std::string_view internal_input{user_input};
 
     // TODO: Find a better way to trim from leading and trailing.
-    std::string_view::iterator pointer_start = std::find_if(internal_input.begin(), internal_input.end(), [](char c) {
-      return !ada::unicode::is_c0_control_or_space(c);
-    });
-    std::string_view::iterator pointer_end = std::find_if(internal_input.rbegin(), internal_input.rend(), [](char c) {
-      return !ada::unicode::is_c0_control_or_space(c);
-    }).base();
-
-    if (pointer_start == pointer_end) {
-      pointer_start = internal_input.begin();
-      pointer_end = internal_input.end();
-    }
-    else if (std::distance(pointer_start, pointer_end) < 0) {
-      pointer_end = internal_input.end();
-    }
+    std::string_view::iterator pointer_start = std::find_if_not(internal_input.begin(), internal_input.end(), ada::unicode::is_c0_control_or_space);
+    if (pointer_start == internal_input.end()) { pointer_start = internal_input.begin(); }
+    std::string_view::iterator pointer_end = std::find_if_not(internal_input.rbegin(), std::make_reverse_iterator(pointer_start), ada::unicode::is_c0_control_or_space).base();
 
     std::string_view url_data(pointer_start, pointer_end - pointer_start);
 
