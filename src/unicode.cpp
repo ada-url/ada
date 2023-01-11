@@ -101,25 +101,28 @@ namespace ada::unicode {
    * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
    */
   std::string percent_encode(const std::string_view input, const uint8_t character_set[]) {
-    std::string result{};
-    result.reserve(input.length()); // in the worst case, percent encoding might produce 3 characters.
+    auto pointer = std::find_if(input.begin(), input.end(), [character_set](const char c) {
+      return character_sets::bit_at(character_set, c);
+    });
+    // Optimization: Don't iterate if percent encode is not required
+    if (pointer == input.end()) { return std::string(input); }
 
-    for (uint8_t iterator: input) {
-      if (character_sets::bit_at(character_set, iterator)) {
-        // append is likely much faster than +=, see percent_encode_character
-        result.append(character_sets::hex + iterator * 4, 3); // this almost never gets called.
+    std::string result(input.substr(0,std::distance(input.begin(), pointer)));
+    result.reserve(input.length()); // in the worst case, percent encoding might produce 3 characters.
+    const char* end = input.end();
+
+    while (pointer < end) {
+      if (character_sets::bit_at(character_set, *pointer)) {
+        result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
       } else {
-        result += static_cast<char>(iterator);
+        result += *pointer;
       }
+      pointer++;
     }
-    ////////////////////////////////////////
-    // Optimization opportunity.
-    // Most times, this function just retunrs a copy.
-    // character_sets::bit_at(character_set, iterator) is often false in practice.
-    // This means that we could do a quick check and then just copy.
-    ////////////////////////////////////////
+
     return result;
   }
+
   /**
    * Encode a single character in the string. This is likely much faster than taking
    * a character, making a string out of it, creating a new string, returning said string,
