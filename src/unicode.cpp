@@ -147,7 +147,7 @@ namespace ada::unicode {
   }
 
   // ipv4 character might contain 0-9 or a-f character ranges.
-  ada_really_inline constexpr bool is_ipv4_char(const char c) noexcept {
+  ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept {
     return (c >= '0' && c <= '9') || (c >= 'a' && c<= 'f');
   }
 

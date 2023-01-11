@@ -416,7 +416,7 @@ namespace ada::parser {
       ipv4 if we return true here. We might as well parse it and have at least one
       number parsed when we get to parse_ipv4. */
       if(std::all_of(number.begin(), number.end(), ada::checkers::is_digit)) { return true; }
-      return (checkers::has_hex_prefix(number) && std::all_of(number.begin()+2, number.end(), ::ada::unicode::is_ipv4_char));
+      return (checkers::has_hex_prefix(number) && std::all_of(number.begin()+2, number.end(), ::ada::unicode::is_lowercase_hex));
     };
     if(is_ipv4(*ascii_domain)) {
       return parse_ipv4(*ascii_domain);
