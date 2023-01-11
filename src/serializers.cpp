@@ -1,5 +1,4 @@
 #include <array>
-#include <cmath>
 #include <cstring>
 
 namespace ada::serializers {
@@ -104,7 +103,7 @@ namespace ada::serializers {
       }
 
       // Set n to floor(n / 256).
-      n = static_cast<uint64_t>(floor((double)n / 256));
+      n >>= 8;
     }
 
     // Return output.

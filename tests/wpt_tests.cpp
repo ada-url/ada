@@ -149,7 +149,7 @@ bool toascii_encoding() {
     } else if (element.type() == ondemand::json_type::object) {
       ondemand::object object = element.get_object();
       std::string_view input = object["input"];
-      auto output = ada::parser::to_ascii(input, false).value_or("");
+      auto output = ada::parser::to_ascii(input, false, input.find("%")).value_or("");
       auto expected_output = object["output"];
 
       if (expected_output.type() == ondemand::json_type::string) {

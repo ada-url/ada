@@ -1,18 +1,119 @@
+#pragma once
 namespace ada::unicode {
 
   // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),
   // U+002F (/), U+003A (:), U+003C (<), U+003E (>), U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]),
   // U+005E (^), or U+007C (|).
+  constexpr static bool is_forbidden_host_code_point_table[] = {
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    static_assert(sizeof(is_forbidden_host_code_point_table) == 256);
+
   ada_really_inline constexpr bool is_forbidden_host_code_point(const char c) noexcept {
-    return c == '\0' || c == '\t' || c == '\n' || c == '\r' || c == ' ' ||
-              c == '#' || c == '/' || c == ':' || c == '?' || c == '@' ||
-              c == '[' || c == '<' || c == '>' || c == '\\' || c == ']' ||
-              c == '^' || c == '|';
+    return is_forbidden_host_code_point_table[uint8_t(c)];
   }
 
+  static_assert(unicode::is_forbidden_host_code_point('\0'));
+  static_assert(unicode::is_forbidden_host_code_point('\t'));
+  static_assert(unicode::is_forbidden_host_code_point('\n'));
+  static_assert(unicode::is_forbidden_host_code_point('\r'));
+  static_assert(unicode::is_forbidden_host_code_point(' '));
+  static_assert(unicode::is_forbidden_host_code_point('#'));
+  static_assert(unicode::is_forbidden_host_code_point('/'));
+  static_assert(unicode::is_forbidden_host_code_point(':'));
+  static_assert(unicode::is_forbidden_host_code_point('?'));
+  static_assert(unicode::is_forbidden_host_code_point('@'));
+  static_assert(unicode::is_forbidden_host_code_point('['));
+  static_assert(unicode::is_forbidden_host_code_point('?'));
+  static_assert(unicode::is_forbidden_host_code_point('<'));
+  static_assert(unicode::is_forbidden_host_code_point('>'));
+  static_assert(unicode::is_forbidden_host_code_point('\\'));
+  static_assert(unicode::is_forbidden_host_code_point(']'));
+  static_assert(unicode::is_forbidden_host_code_point('^'));
+  static_assert(unicode::is_forbidden_host_code_point('|'));
+
+  constexpr static bool is_forbidden_domain_code_point_table[] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    static_assert(sizeof(is_forbidden_domain_code_point_table) == 256);
+
   ada_really_inline constexpr bool is_forbidden_domain_code_point(const char c) noexcept {
-    return is_forbidden_host_code_point(c) || std::iscntrl(c) || c == '%' || c == '\x7f';
+   // abort();
+    return is_forbidden_domain_code_point_table[uint8_t(c)];
+    // A table is almost surely much faster than the
+    // following under most compilers: return
+    // is_forbidden_host_code_point(c) |
+    // std::iscntrl(c) | c == '%' | c == '\x7f';
   }
+
+  static_assert(unicode::is_forbidden_domain_code_point('%'));
+  static_assert(unicode::is_forbidden_domain_code_point('\x7f'));
+  static_assert(unicode::is_forbidden_domain_code_point('\0'));
+  static_assert(unicode::is_forbidden_domain_code_point('\t'));
+  static_assert(unicode::is_forbidden_domain_code_point('\n'));
+  static_assert(unicode::is_forbidden_domain_code_point('\r'));
+  static_assert(unicode::is_forbidden_domain_code_point(' '));
+  static_assert(unicode::is_forbidden_domain_code_point('#'));
+  static_assert(unicode::is_forbidden_domain_code_point('/'));
+  static_assert(unicode::is_forbidden_domain_code_point(':'));
+  static_assert(unicode::is_forbidden_domain_code_point('?'));
+  static_assert(unicode::is_forbidden_domain_code_point('@'));
+  static_assert(unicode::is_forbidden_domain_code_point('['));
+  static_assert(unicode::is_forbidden_domain_code_point('?'));
+  static_assert(unicode::is_forbidden_domain_code_point('<'));
+  static_assert(unicode::is_forbidden_domain_code_point('>'));
+  static_assert(unicode::is_forbidden_domain_code_point('\\'));
+  static_assert(unicode::is_forbidden_domain_code_point(']'));
+  static_assert(unicode::is_forbidden_domain_code_point('^'));
+  static_assert(unicode::is_forbidden_domain_code_point('|'));
+
+  constexpr static bool is_alnum_plus_table[] = {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+      0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+  static_assert(sizeof(is_alnum_plus_table) == 256);
+
+  ada_really_inline constexpr bool is_alnum_plus(const char c) noexcept {
+    return is_alnum_plus_table[uint8_t(c)];
+    // A table is almost surely much faster than the
+    // following under most compilers: return
+    // return (std::isalnum(c) || c == '+' || c == '-' || c == '.');
+  }
+  static_assert(unicode::is_alnum_plus('+'));
+  static_assert(unicode::is_alnum_plus('-'));
+  static_assert(unicode::is_alnum_plus('.'));
+  static_assert(unicode::is_alnum_plus('0'));
+  static_assert(unicode::is_alnum_plus('1'));
+  static_assert(unicode::is_alnum_plus('a'));
+  static_assert(unicode::is_alnum_plus('b'));
 
   // An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit.
   // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
@@ -56,20 +157,16 @@ namespace ada::unicode {
   }
 
   /**
+   * first_percent should be  = input.find('%')
    * Adapted from Node.js
    * https://github.com/nodejs/node/blob/main/src/node_url.cc#L245
    *
    * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
    */
-  std::string percent_decode(const std::string_view input) {
-    // We want to optimize for the case where '%' is not found, then we can just
-    // do a quick copy.
-    size_t first_percent = input.find("%");
+  std::string percent_decode(const std::string_view input, size_t first_percent) {
+    // next line is for safety only, we expect users to avoid calling percent_decode
+    // when first_percent is outside the range.
     if(first_percent == std::string_view::npos) { return std::string(input); }
-    // Most times, the code stopped here.
-    //
-    // General case follows.
-    // Time spent looking for '%' is not wasted.
     std::string dest(input.substr(0, first_percent));
     dest.reserve(input.length());
     const char* pointer = input.begin() + first_percent;

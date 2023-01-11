@@ -1,12 +1,12 @@
 #include "ada.h"
 
 #include "checkers.cpp"
+#include "unicode.cpp"
 
 #include <array>
 #include <algorithm>
-#include <cctype>
 #include <cstring>
-#include <cmath>
+#include <charconv>
 #include <cstdlib>
 #include <iostream>
 #include <numeric>
@@ -24,8 +24,13 @@ namespace ada::parser {
    * to_ascii does not expect the input to be percent decoded. This is
    * mostly used to conform with the test suite.
    */
-  std::optional<std::string> to_ascii(const std::string_view plain, const bool be_strict) noexcept {
-    std::string input = unicode::percent_decode(plain);
+  std::optional<std::string> to_ascii(const std::string_view plain, const bool be_strict, size_t first_percent) {
+    std::string percent_decoded_buffer;
+    std::string_view input = plain;
+    if(first_percent != std::string_view::npos) {
+      percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
+      input = percent_decoded_buffer;
+    }
     UErrorCode status = U_ZERO_ERROR;
     uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
 
@@ -81,6 +86,8 @@ namespace ada::parser {
     }
 
     result.resize(length);
+    if(std::any_of(result.begin(), result.end(), ada::unicode::is_forbidden_domain_code_point)) { return std::nullopt; }
+
     return result;
   }
 
@@ -106,71 +113,51 @@ namespace ada::parser {
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
   std::optional<ada::url_host> parse_ipv4(std::string_view input) {
-    // Let parts be the result of strictly splitting input on U+002E (.).
-    std::vector<std::string> parts = ada::helpers::split_string_view(input, '.', false);
-
-    // If the last item in parts is the empty string, then:
-    if (parts.back().empty()) {
-      // If parts’s size is greater than 1, then remove the last item from parts.
-      if (parts.size() > 1) {
-        parts.pop_back();
+    if(input[input.size()-1]=='.') {
+      input.remove_suffix(1);
+    }
+    size_t digit_count{0};
+    uint64_t ipv4{0};
+    // we could unroll for better performance?
+    for(;(digit_count < 4) && !(input.empty()); digit_count++) {
+      uint32_t result{}; // If any number exceeds 32 bits, we have an error.
+      bool is_hex = checkers::has_hex_prefix(input);
+      if(is_hex && ((input.length() == 2)|| ((input.length() > 2) && (input[2]=='.')))) {
+        // special case
+        result = 0;
+        input.remove_prefix(2);
+      } else {
+        std::from_chars_result r;
+        if(is_hex) {
+          r = std::from_chars(input.data() + 2, input.data() + input.size(), result, 16);
+        } else if ((input.length() >= 2) && input[0] == '0' && checkers::is_digit(input[1])) {
+          r = std::from_chars(input.data() + 1, input.data() + input.size(), result, 8);
+        } else {
+          r = std::from_chars(input.data(), input.data() + input.size(), result, 10);
+        }
+        if (r.ec != std::errc()) { return std::nullopt; }
+        input.remove_prefix(r.ptr-input.data());
+      }
+      if(input.empty()) {
+        // We have the last value.
+        // At this stage, ipv4 contains digit_count*8 bits.
+        // So we have 32-digit_count*8 bits left.
+        if(result > (uint64_t(1)<<(32-digit_count*8))) { return std::nullopt; }
+        ipv4 <<=(32-digit_count*8);
+        ipv4 |= result;
+        goto final;
+      } else {
+        // There is more, so that the value must no be larger than 255
+        // and we must have a '.'.
+        if ((result>255) || (input[0]!='.')) { return std::nullopt; }
+        ipv4 <<=8;
+        ipv4 |= result;
+        input.remove_prefix(1); // remove '.'
       }
     }
-
-    // If parts’s size is greater than 4, validation error, return failure.
-    if (parts.size() > 4) {
-      return std::nullopt;
-    }
-
-    // Let numbers be an empty list.
-    std::vector<uint64_t> numbers;
-
-    int large_numbers = 0;
-
-    // For each part of parts:
-    for (auto part: parts) {
-      // Let result be the result of parsing part.
-      std::optional<uint64_t> result = parse_ipv4_number(part);
-
-      // If result is failure, validation error, return failure.
-      if (!result.has_value()) {
-        return std::nullopt;
-      }
-
-      if (*result > 255) {
-        large_numbers++;
-      }
-
-      // Append result[0] to numbers.
-      numbers.push_back(*result);
-    }
-
-    // Let ipv4 be the last item in numbers.
-    uint64_t ipv4 = numbers.back();
-
-    // If any but the last item in numbers is greater than 255, then return failure.
-    // If the last item in numbers is greater than or equal to 256(5 − numbers’s size), validation error, return failure.
-    if (large_numbers > 1 || (large_numbers == 1 && ipv4 <= 255) || ipv4 >= static_cast<uint64_t>(std::pow(256, 5 - numbers.size()))) {
-      return std::nullopt;
-    }
-
-    // Remove the last item from numbers.
-    numbers.pop_back();
-
-    // Let counter be 0.
-    int counter = 0;
-
-    // TODO: Replace this with std::reduce when C++20 is supported.
-    // For each n of numbers:
-    for (const auto n: numbers) {
-      // Increment ipv4 by n × 256(3 − counter).
-      ipv4 += n * static_cast<uint64_t>(std::pow(256, 3 - counter));
-
-      // Increment counter by 1.
-      counter++;
-    }
-
-    // Convert ipv4 to string to use it inside "parse_host"
+    if((digit_count != 4) || (!input.empty())) {return std::nullopt; }
+    final:
+    // We could also check result.ptr to see where the parsing ended.
     return ada::url_host{IPV4_ADDRESS, ada::serializers::ipv4(ipv4)};
   }
 
@@ -230,9 +217,8 @@ namespace ada::parser {
       // While length is less than 4 and c is an ASCII hex digit,
       // set value to value × 0x10 + c interpreted as hexadecimal number, and increase pointer and length by 1.
       while (length < 4 && unicode::is_ascii_hex_digit(*pointer)) {
-        char temp[2] = {*pointer, 0};
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
-        value = uint16_t(value * 0x10 + std::strtol(temp, nullptr, 16));
+        value = uint16_t(value * 0x10 + unicode::convert_hex_to_binary(*pointer));
         pointer++;
         length++;
       }
@@ -273,12 +259,12 @@ namespace ada::parser {
           }
 
           // If c is not an ASCII digit, validation error, return failure.
-          if (!std::isdigit(*pointer)) {
+          if (!checkers::is_digit(*pointer)) {
             return std::nullopt;
           }
 
           // While c is an ASCII digit:
-          while (std::isdigit(*pointer)) {
+          while (checkers::is_digit(*pointer)) {
             // Let number be c interpreted as decimal number.
             int number = *pointer - '0';
 
@@ -372,61 +358,6 @@ namespace ada::parser {
   }
 
   /**
-   * @see https://url.spec.whatwg.org/#ipv4-number-parser
-   */
-  std::optional<uint64_t> parse_ipv4_number(std::string_view input) {
-    // If input is the empty string, then return failure.
-    if (input.empty()) {
-      return std::nullopt;
-    }
-
-    // Let R be 10.
-    int R = 10;
-
-    // Allowed characters
-    char allowed_characters[23] = "0123456789";
-
-    if (input.length() >= 2) {
-      // If input contains at least two code points and the first two code points are either "0X" or "0x", then:
-      if (input[0] == '0' && (input[1] == 'X' || input[1] == 'x')) {
-        // Remove the first two code points from input.
-        input.remove_prefix(2);
-
-        // Set R to 16.
-        R = 16;
-
-        // Update allowed characters
-        std::strcpy(allowed_characters, "0123456789abcdefABCDEF");
-      }
-      // Otherwise, if input contains at least two code points and the first code point is U+0030 (0), then:
-      else if (input[0] == '0') {
-        // Remove the first code point from input.
-        input.remove_prefix(1);
-
-        // Set R to 8.
-        R = 8;
-
-        // Update allowed characters
-        std::strcpy(allowed_characters, "01234567");
-      }
-
-      // If input is the empty string, then return (0, true).
-      if (input.empty()) {
-        return 0;
-      }
-    }
-
-    // If input contains a code point that is not a radix-R digit, then return failure.
-    if (input.find_first_not_of(allowed_characters) < input.length()) {
-      return std::nullopt;
-    }
-
-    // Let output be the mathematical integer value that is represented by input in radix-R notation,
-    // using ASCII hex digits for digits with values 0 through 15.
-    return std::strtoll(input.data(), nullptr, R);
-  }
-
-  /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
   std::optional<ada::url_host> parse_host(const std::string_view input, bool is_not_special, bool input_is_ascii) {
@@ -452,27 +383,49 @@ namespace ada::parser {
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
-    // The most common case is an ASCII input, in which case we do not need to call the expensive 'to_ascii'.
-    std::optional<std::string> ascii_domain = input_is_ascii ? unicode::percent_decode(input) : to_ascii(input, false);
+    // The most common case is an ASCII input, in which case we do not need to call the expensive 'to_ascii'
+    // if a few conditions are met: no '%' and no 'xn-' subsequence.
+    size_t first_percent = input.find('%');
+    // if simple_case is true, there is a good chance we might be able to use the fast path.
+    bool simple_case = input_is_ascii && (first_percent == std::string_view::npos);
+
+    // This function attemps to convert an ASCII string to a lower-case version.
+    // Once the lower cased version has been materialized, we check for the presence
+    // of the substring 'xn-', if it is found (unlikely), we then call the expensive 'to_ascii'.
+    auto to_lower_ascii_string = [first_percent](std::string_view view) -> std::optional<std::string> {
+      if(std::any_of(view.begin(), view.end(), ada::unicode::is_forbidden_domain_code_point)) { return std::nullopt; }
+      std::string result(view);
+      std::transform(result.begin(), result.end(), result.begin(),[](char c) -> char {
+        return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);}
+      );
+      return (result.find("xn-") == std::string_view::npos) ? result : to_ascii(view, false, first_percent);
+    };
+    // In the simple case, we call to_lower_ascii_string above, or else, we fall back on the expensive case.
+    std::optional<std::string> ascii_domain = simple_case ? to_lower_ascii_string(input) : to_ascii(input, false, first_percent);
 
     // If asciiDomain is failure, validation error, return failure.
     if (!ascii_domain.has_value()) {
       return std::nullopt;
     }
 
-    // If asciiDomain contains a forbidden domain code point, validation error, return failure.
-    for (const auto c: *ascii_domain) {
-      if (unicode::is_forbidden_domain_code_point(c)) {
-        return std::nullopt;
-      }
-    }
-
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
-    if (checkers::ends_in_a_number(*ascii_domain)) {
+    auto is_ipv4 = [](std::string_view view) {
+      size_t last_dot = view.rfind('.');
+      if(last_dot == view.size() - 1) {
+          view.remove_suffix(1);
+          last_dot = view.rfind('.');
+      }
+      std::string_view number = (last_dot == std::string_view::npos)? view : view.substr(last_dot+1);
+      if(number.empty()) { return false; }
+      /** Optimization opportunity: we have basically identified the last number of the
+      ipv4 if we return true here. We might as well parse it and have at least one
+      number parsed when we get to parse_ipv4. */
+      if(std::all_of(number.begin(), number.end(), ada::checkers::is_digit)) { return true; }
+      return (checkers::has_hex_prefix(number) && std::all_of(number.begin()+2, number.end(), [](char c) {return (c >= '0' && c <= '9') || (c >= 'a' && c<= 'f');}));
+    };
+    if(is_ipv4(*ascii_domain)) {
       return parse_ipv4(*ascii_domain);
     }
-
-    // Return asciiDomain.
     return ada::url_host{BASIC_DOMAIN, *ascii_domain};
   }
 
@@ -500,8 +453,7 @@ namespace ada::parser {
     ada::url url = ada::url();
 
     // most input strings will be ASCII which may enable some optimizations.
-    const bool is_ascii = 128>(std::reduce(user_input.begin()+1, user_input.end(), uint8_t(user_input[0]), std::bit_xor<uint8_t>()));
-
+    const bool is_ascii = !user_input.empty() && 128>(std::reduce(user_input.begin(), user_input.end(), uint8_t(user_input[0]), std::bit_or<uint8_t>()));
     // Remove any leading and trailing C0 control or space from input.
     user_input.erase(std::remove_if(user_input.begin(), user_input.end(), [](char c) {
       return ada::unicode::is_ascii_tab_or_newline(c);
@@ -555,7 +507,7 @@ namespace ada::parser {
       switch (state) {
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
-          if (std::isalpha(*pointer)) {
+          if (checkers::is_alpha(*pointer)) {
             state = SCHEME;
             pointer--;
           }
@@ -574,7 +526,7 @@ namespace ada::parser {
         }
         case SCHEME: {
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
-          if (std::isalnum(*pointer) || *pointer == '+' || *pointer == '-' || *pointer == '.') {
+          if (ada::unicode::is_alnum_plus(*pointer)) {
             // Optimization: No need to lowercase scheme, if we don't need it.
             if (*pointer >= 'A' && *pointer <= 'Z') {
               scheme_needs_lowercase = true;
@@ -1014,7 +966,7 @@ namespace ada::parser {
         }
         case PORT: {
           // If c is an ASCII digit, append c to buffer.
-          if (std::isdigit(*pointer)) {
+          if (checkers::is_digit(*pointer)) {
             buffer += *pointer;
           }
           // Otherwise, if one of the following is true:

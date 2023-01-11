@@ -1,23 +1,8 @@
-#include <vector>
 #include <algorithm>
 #include <cstring>
 #include <sstream>
 
 namespace ada::helpers {
-
-  std::vector<std::string> split_string_view(std::string_view input, char delimiter, bool skip_empty) {
-    std::vector<std::string> out;
-    if (input.empty())
-      return out;
-    std::istringstream in_stream(std::string{input});
-    while (in_stream.good()) {
-      std::string item;
-      std::getline(in_stream, item, delimiter);
-      if (item.empty() && skip_empty) continue;
-      out.emplace_back(std::move(item));
-    }
-    return out;
-  }
 
   ada_unused std::string get_state(ada::state state) {
     switch (state) {
@@ -43,12 +28,6 @@ namespace ada::helpers {
       case PORT: return "Port";
       default: return "";
     }
-  }
-
-  ada_really_inline uint64_t string_to_uint64(std::string_view view) {
-    uint64_t val;
-    std::memcpy(&val, view.data(), sizeof(uint64_t));
-    return val;
   }
 
   // prune_fragment seeks the first '#' and returns everything after it as a
