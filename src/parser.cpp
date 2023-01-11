@@ -175,7 +175,7 @@ namespace ada::parser {
     // If c is U+003A (:), then:
     if (*pointer == ':') {
       // If remaining does not start with U+003A (:), validation error, return failure.
-      if (std::distance(pointer, input.end()) > 0 && pointer[1] != ':') {
+      if (checkers::is_not_next_equals(pointer, input.end(), ':')) {
         return std::nullopt;
       }
 
@@ -577,7 +577,7 @@ namespace ada::parser {
               state = FILE;
             }
             // Otherwise, if url is special, base is non-null, and base’s scheme is url’s scheme:
-            else if (url.is_special() && base_url.has_value() && base_url->scheme == url.scheme) {
+            else if (url.is_special() && base_url->scheme == url.scheme) {
               // Set state to special relative or authority state.
               state = SPECIAL_RELATIVE_OR_AUTHORITY;
             }
@@ -704,7 +704,7 @@ namespace ada::parser {
         case SPECIAL_RELATIVE_OR_AUTHORITY: {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
-          if (*pointer == '/' && std::distance(pointer, pointer_end) > 0 && pointer[1] == '/') {
+          if (*pointer == '/' && checkers::is_next_equals(pointer, pointer_end, '/')) {
             state = SPECIAL_AUTHORITY_IGNORE_SLASHES;
             pointer++;
           }
@@ -805,7 +805,7 @@ namespace ada::parser {
         case SPECIAL_AUTHORITY_SLASHES: {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
-          if (*pointer == '/' && std::distance(pointer, pointer_end) > 0 && pointer[1] == '/') {
+          if (*pointer == '/' && checkers::is_next_equals(pointer, pointer_end, '/')) {
             pointer++;
           }
           // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.

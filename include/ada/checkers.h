@@ -55,6 +55,13 @@ namespace ada::checkers {
   bool is_normalized_windows_drive_letter(std::string_view input) noexcept;
   ada_really_inline constexpr bool is_ipv4_number_valid(std::string_view::iterator iterator_start, std::string_view::iterator iterator_end) noexcept;
 
+  ada_really_inline constexpr bool is_next_equals(const std::string_view::iterator start,
+                                              const std::string_view::iterator end,
+                                              const char c);
+  ada_really_inline constexpr bool is_not_next_equals(const std::string_view::iterator start,
+                                              const std::string_view::iterator end,
+                                              const char c);
+
 } // namespace ada::checkers
 
 #endif //ADA_CHECKERS_H
