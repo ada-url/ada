@@ -95,13 +95,8 @@ namespace ada::parser {
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
   std::optional<ada::url_host> parse_opaque_host(std::string_view input) {
-    // TODO: Only iterate this once. No need to iterate it twice.
-    // Similar to: https://github.com/nodejs/node/blob/main/src/node_url.cc#L490
-    for (const auto c: input) {
-      // If input contains a forbidden host code point, validation error, return failure.
-      if (ada::unicode::is_forbidden_host_code_point(c)) {
-        return std::nullopt;
-      }
+    if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
+      return std::nullopt;
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
