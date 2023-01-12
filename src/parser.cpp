@@ -493,7 +493,6 @@ namespace ada::parser {
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
     for (; pointer <= pointer_end; pointer++) {
-//      std::cout << "state=" << helpers::get_state(state).c_str() << "char==" << *pointer << std::endl;
       switch (state) {
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
