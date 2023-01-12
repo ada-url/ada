@@ -462,12 +462,16 @@ namespace ada::parser {
 
     std::string_view url_data(pointer_start, pointer_end - pointer_start);
 
-    std::optional<std::string_view> result = helpers::prune_fragment(url_data);
-    if(result.has_value()) {
-      url.fragment = unicode::percent_encode(*result,
-                                             ada::character_sets::FRAGMENT_PERCENT_ENCODE);
-
+    // This is required for pathname state override.
+    // '#' character is included in the pathname.
+    if (!state_override.has_value()) {
+      std::optional<std::string_view> result = helpers::prune_fragment(url_data);
+      if(result.has_value()) {
+        url.fragment = unicode::percent_encode(*result,
+                                               ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+      }
     }
+
     // Here url_data no longer has its fragment.
     // The rest of the code might betterwork with std::string_view, not pointers, it would
     // be easier to follow. But because we don't want to change everything, let us
