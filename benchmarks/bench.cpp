@@ -57,6 +57,9 @@ static void BasicBench_BoostURL(benchmark::State& state) {
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+	        std::size(url_examples),
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_BoostURL);
 #endif
@@ -81,6 +84,9 @@ static void BasicBench_CURL(benchmark::State& state) {
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+	        std::size(url_examples),
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_CURL);
 #endif
@@ -100,6 +106,9 @@ static void BasicBench_uriparser(benchmark::State& state) {
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+	        std::size(url_examples),
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_uriparser);
 
@@ -115,6 +124,9 @@ static void BasicBench_urlparser(benchmark::State& state) {
   }
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+	        std::size(url_examples),
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_urlparser);
@@ -132,6 +144,9 @@ static void BasicBench_http_parser(benchmark::State& state) {
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+	        std::size(url_examples),
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_http_parser);
 
@@ -147,6 +162,9 @@ static void BasicBench_AdaURL(benchmark::State& state) {
   if(!is_valid) { std::cout << "ada: invalid? " << std::endl; }
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+	        std::size(url_examples),
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
 }
 BENCHMARK(BasicBench_AdaURL);
