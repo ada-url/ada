@@ -766,8 +766,7 @@ namespace ada::parser {
               url.query = std::nullopt;
 
               // Shorten url’s path.
-              // Optimization opportunity: shorten_path is maybe not inlined.
-              url.shorten_path();
+              helpers::shorten_path(url);
 
               // Set state to path state and decrease pointer by 1.
               state = PATH;
@@ -962,6 +961,10 @@ namespace ada::parser {
                                                    url.is_special(),
                                                    state_override.has_value());
 
+          if (!url.is_valid) {
+            return url;
+          }
+
           if (out.has_value()) {
             if (url.scheme_default_port() == out) {
               url.port = std::nullopt;
@@ -970,7 +973,7 @@ namespace ada::parser {
             }
           }
 
-          if (!url.is_valid || should_return) {
+          if (should_return) {
             return url;
           }
 
@@ -1019,8 +1022,7 @@ namespace ada::parser {
             // If buffer is a double-dot path segment, then:
             if (unicode::is_double_dot_path_segment(buffer)) {
               // Shorten url’s path.
-              // Optimization opportunity: shorten_path is maybe not inlined.
-              url.shorten_path();
+              helpers::shorten_path(url);
 
               // If neither c is U+002F (/), nor url is special and c is U+005C (\),
               // append the empty string to url’s path.
@@ -1188,8 +1190,7 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
               if (std::distance(pointer, pointer_end) >= 2 && !checkers::is_windows_drive_letter(std::string_view(pointer, 2))) {
-                // Optimization opportunity: shorten_path is maybe not inlined.
-                url.shorten_path();
+                helpers::shorten_path(url);
               }
               // Otherwise:
               else {

@@ -20,6 +20,8 @@ namespace ada::helpers {
                   std::optional<uint16_t> &out,
                   bool is_url_special,
                   bool state_override_given) noexcept;
+
+  ada_really_inline void shorten_path(ada::url &url) noexcept;
 } // namespace ada::helpers
 
 #endif // ADA_HELPERS_H

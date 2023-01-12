@@ -112,4 +112,26 @@ namespace ada::helpers {
     return false;
   }
 
+  /**
+   * @see https://url.spec.whatwg.org/#shorten-a-urls-path
+   *
+   * This function assumes url does not have an opaque path.
+   */
+  inline void shorten_path(ada::url &url) noexcept {
+    size_t first_delimiter = url.path.find_first_of('/', 1);
+
+    // Let path be url’s path.
+    // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized Windows drive letter, then return.
+    if (url.scheme == "file" && first_delimiter == std::string_view::npos) {
+      if (checkers::is_normalized_windows_drive_letter(std::string_view(url.path.data() + 1, first_delimiter - 1))) {
+        return;
+      }
+    }
+
+    // Remove path’s last item, if any.
+    if (!url.path.empty()) {
+      url.path.erase(url.path.rfind('/'));
+    }
+  }
+
 } // namespace ada::helpers

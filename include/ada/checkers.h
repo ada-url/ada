@@ -50,12 +50,12 @@ namespace ada::checkers {
     return input.size() >= 2 && (is_alpha(input[0]) & (input[1] == ':'));
   }
 
-  ada_really_inline constexpr bool is_next_equals(const std::string_view::iterator start,
-                                              const std::string_view::iterator end,
-                                              const char c);
-  ada_really_inline constexpr bool is_not_next_equals(const std::string_view::iterator start,
-                                              const std::string_view::iterator end,
-                                              const char c);
+  inline constexpr bool is_next_equals(std::string_view::iterator start,
+                                       std::string_view::iterator end,
+                                       char c);
+  inline constexpr bool is_not_next_equals(std::string_view::iterator start,
+                                           std::string_view::iterator end,
+                                           char c);
 
 } // namespace ada::checkers
 
