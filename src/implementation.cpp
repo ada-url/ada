@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "ada.h"
 #include "character_sets.cpp"
 
@@ -8,7 +10,11 @@ namespace ada {
                             ada::encoding_type encoding,
                             std::optional<ada::state> state) noexcept {
 
-    return ada::parser::parse_url(input, base_url, encoding, std::nullopt, state);
+    return ada::parser::parse_url(std::move(input), std::move(base_url), encoding, std::nullopt, state);
+  }
+
+  ada_warn_unused url parse(std::string_view input) noexcept {
+    return ada::parser::parse_url(std::string(input));
   }
 
   /*

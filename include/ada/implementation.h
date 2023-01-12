@@ -22,6 +22,8 @@ namespace ada {
                                  ada::encoding_type encoding = UTF8,
                                  std::optional<ada::state> state = std::nullopt) noexcept;
 
+  ada_warn_unused ada::url parse(std::string_view input) noexcept;
+
   void set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
   void set_username(ada::url &base, std::string input) noexcept;
   void set_password(ada::url &base, std::string input) noexcept;

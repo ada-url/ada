@@ -129,7 +129,7 @@ bool setters_tests_encoding() {
         std::cout << "   comment: " << comment << std::endl;
       }
 
-      auto base = ada::parse(std::string{href});
+      auto base = ada::parse(href);
       TEST_ASSERT(base.is_valid, true, "Base url parsing should have succeeded")
 
       std::cout << "     " << category << ": " << href << std::endl;
