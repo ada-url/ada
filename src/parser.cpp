@@ -427,6 +427,7 @@ namespace ada::parser {
   url parse_url(std::string user_input,
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding,
+                std::optional<ada::url> optional_url,
                 std::optional<ada::state> state_override) {
 
     // Assign buffer
@@ -445,7 +446,7 @@ namespace ada::parser {
     ada::state state = state_override.value_or(SCHEME_START);
 
     // Define parsed URL
-    ada::url url = ada::url();
+    ada::url url = optional_url.value_or(ada::url());
 
     // most input strings will be ASCII which may enable some optimizations.
     const bool is_ascii = !user_input.empty() && 128>(std::reduce(user_input.begin(), user_input.end(), uint8_t(user_input[0]), std::bit_or<uint8_t>()));
@@ -549,7 +550,7 @@ namespace ada::parser {
 
               // If url’s scheme is "file" and its host is an empty host, then return.
               // An empty host is the empty string.
-              if (url.scheme == "file" && url.host.has_value() && (*url.host).type == EMPTY_HOST) {
+              if (url.scheme == "file" && url.host.has_value() && url.host.value().entry.empty()) {
                 return url;
               }
             }
@@ -568,7 +569,7 @@ namespace ada::parser {
                 }
               }
 
-              continue;
+              return url;
             }
 
             // If url’s scheme is "file", then:
@@ -1139,7 +1140,7 @@ namespace ada::parser {
             // Otherwise, if buffer is the empty string, then:
             else if (buffer.empty()) {
               // Set url’s host to the empty string.
-              url.host = ada::url_host{EMPTY_HOST, ""};
+              url.host = ada::url_host{BASIC_DOMAIN, ""};
 
               // If state override is given, then return.
               if (state_override.has_value()) {
@@ -1190,7 +1191,7 @@ namespace ada::parser {
           url.scheme = "file";
 
           // Set url’s host to the empty string.
-          url.host = ada::url_host{EMPTY_HOST, ""};
+          url.host = ada::url_host{BASIC_DOMAIN, ""};
 
           // If c is U+002F (/) or U+005C (\), then:
           if (*pointer == '/' || *pointer == '\\') {

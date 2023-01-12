@@ -18,6 +18,7 @@ namespace ada::parser {
   url parse_url(std::string user_input,
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding = UTF8,
+                std::optional<ada::url> optional_url = std::nullopt,
                 std::optional<ada::state> state_override = std::nullopt);
 
 } // namespace ada

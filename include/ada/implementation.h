@@ -19,7 +19,10 @@ namespace ada {
    */
   ada_warn_unused ada::url parse(std::string input,
                                  std::optional<ada::url> base_url = std::nullopt,
-                                 ada::encoding_type encoding = UTF8) noexcept;
+                                 ada::encoding_type encoding = UTF8,
+                                 std::optional<ada::state> state = std::nullopt) noexcept;
+
+  void set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
 }
 
 #endif // ADA_IMPLEMENTATION_H

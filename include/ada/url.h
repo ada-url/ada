@@ -18,7 +18,6 @@ namespace ada {
     IPV6_ADDRESS,
     IPV4_ADDRESS,
     OPAQUE_HOST,
-    EMPTY_HOST,
   };
 
   /**
@@ -26,7 +25,7 @@ namespace ada {
    */
   struct url_host {
 
-    ada::host_type type{EMPTY_HOST};
+    ada::host_type type{BASIC_DOMAIN};
 
     std::string entry{};
   };

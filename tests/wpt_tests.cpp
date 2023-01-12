@@ -112,22 +112,31 @@ bool setters_tests_encoding() {
             << " kB)" << std::endl;
   ondemand::document doc = parser.iterate(json);
   ondemand::object main_object = doc.get_object();
+
   for (auto mainfield : main_object) {
-    std::cout << mainfield.unescaped_key() << std::endl;
+    auto category = mainfield.key().value();
     ondemand::array cases = mainfield.value();
-    for (auto element : cases) {
-      if (element.type() == ondemand::json_type::string) {
-        continue;
-      }
-      std::string_view href = element["href"];
-      std::cout << "     href = " << href << std::endl;
-      std::string_view newvalue = element["new_value"];
-      std::cout << "     new_value = " << newvalue << std::endl;
-      ondemand::object expected = element["expected"];
-      for (auto field : expected) {
-        std::string_view key = field.unescaped_key();
-        std::string_view value = field.value().get_string();
-        std::cout << "       " << key << " : " << value << std::endl;
+
+    if (category == "protocol") {
+      for (auto element : cases) {
+        std::string_view new_value = element["new_value"].get_string();
+        std::string_view href = element["href"];
+        std::string_view comment{};
+        if (!element["comment"].get(comment)) {
+          std::cout << "   comment: " << comment << std::endl;
+        }
+
+
+        auto base = ada::parse(std::string{href});
+        TEST_ASSERT(base.is_valid, true, "Base url parsing should have succeeded")
+
+        std::cout << "     " << href << std::endl;
+        ada::set_scheme(base, std::string(new_value));
+
+        std::string_view expected_protocol;
+        if (!element["expected"]["protocol"].get(expected_protocol)) {
+          TEST_ASSERT(base.scheme + ":", expected_protocol, "Protocol");
+        }
       }
     }
   }
@@ -211,7 +220,7 @@ bool urltestdata_encoding() {
         TEST_ASSERT(input_url.password, password, "Password");
 
         std::string_view hostname = object["hostname"];
-        TEST_ASSERT(input_url.host.value_or(ada::url_host{ada::EMPTY_HOST, ""}).entry, hostname, "Hostname");
+        TEST_ASSERT(input_url.host.value_or(ada::url_host{ada::BASIC_DOMAIN, ""}).entry, hostname, "Hostname");
 
         std::string_view port = object["port"];
         std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
