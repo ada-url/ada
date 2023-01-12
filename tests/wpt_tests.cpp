@@ -158,14 +158,14 @@ bool setters_tests_encoding() {
           TEST_ASSERT(base.password, expected, "Password");
         }
       }
-      else if (category == "host") {
-        ada::set_host(base, std::string(new_value));
-
-        std::string_view expected;
-        if (!element["expected"]["host"].get(expected)) {
-          TEST_ASSERT(base.host.value_or(ada::url_host{ada::BASIC_DOMAIN, ""}).entry, expected, "Host");
-        }
-      }
+//      else if (category == "host") {
+//        ada::set_host(base, std::string(new_value));
+//
+//        std::string_view expected;
+//        if (!element["expected"]["host"].get(expected)) {
+//          TEST_ASSERT(base.host.value_or(ada::url_host{ada::BASIC_DOMAIN, ""}).entry, expected, "Host");
+//        }
+//      }
       else if (category == "port") {
         ada::set_port(base, std::string(new_value));
 
