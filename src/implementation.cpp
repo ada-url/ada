@@ -129,7 +129,7 @@ namespace ada {
   /**
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
-  void set_search(ada::url &base, std::string input, ada::encoding_type encoding) noexcept {
+  void set_search(ada::url &base, std::string input) noexcept {
     // If the given value is the empty string:
     if (input.empty()) {
       // Set url’s query to null.
@@ -143,18 +143,19 @@ namespace ada {
       return;
     }
 
-    // Let input be the given value with a single leading U+003F (?) removed, if any.
-    auto new_value = input[0] == '?' ? input.substr(1) : input;
+    auto new_value = input[0] == '?' ? input.substr(1, input.length() - 1) : input;
+    helpers::remove_ascii_tab_or_newline(new_value);
 
     // Set url’s query to the empty string.
     base.query = "";
 
-    // Basic URL parse input with url as url and query state as state override.
-    auto result = ada::parser::parse_url(new_value, std::nullopt, encoding, base, QUERY);
+    auto query_percent_encode_set = base.is_special() ?
+      ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
+      ada::character_sets::QUERY_PERCENT_ENCODE;
 
-    if (result.is_valid) {
-      base.query = result.query;
-    }
+    // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
+    // and append the result to url’s query.
+    base.query = ada::unicode::percent_encode(std::string_view(new_value), query_percent_encode_set);
 
     // Set this’s query object’s list to the result of parsing input.
     // TODO: Implement this if/when we have URLSearchParams.

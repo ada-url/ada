@@ -30,7 +30,7 @@ namespace ada {
   void set_host(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
   void set_port(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
   void set_pathname(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
-  void set_search(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
+  void set_search(ada::url &base, std::string input) noexcept;
   void set_hash(ada::url &base, std::string input) noexcept;
 }
 

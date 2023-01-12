@@ -167,12 +167,12 @@ bool setters_tests_encoding() {
 //        ada::set_pathname(base, std::string(new_value));
 //        TEST_ASSERT(base.path, expected, "Path");
 //      }
-//      else if (category == "search") {
-//        std::string_view expected = element["expected"]["search"];
-//        ada::set_search(base, std::string(new_value));
-//        auto normalized = !base.query.value_or("").empty() ? "?" + *base.query : "";
-//        TEST_ASSERT(normalized, expected, "Search");
-//      }
+      else if (category == "search") {
+        std::string_view expected = element["expected"]["search"];
+        ada::set_search(base, std::string(new_value));
+        auto normalized = !base.query.value_or("").empty() ? "?" + base.query.value() : "";
+        TEST_ASSERT(normalized, expected, "Search");
+      }
       else if (category == "hash") {
         std::string_view expected = element["expected"]["hash"];
         ada::set_hash(base, std::string(new_value));
