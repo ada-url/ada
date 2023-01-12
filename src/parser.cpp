@@ -483,9 +483,6 @@ namespace ada::parser {
     std::optional<std::string_view::iterator> scheme_start_pointer{pointer};
     std::optional<std::string_view::iterator> scheme_end_pointer;
 
-    std::optional<std::string_view::iterator> port_start_pointer;
-    std::optional<std::string_view::iterator> port_end_pointer;
-
     std::optional<std::string_view::iterator> opaque_path_start_pointer;
     std::optional<std::string_view::iterator> opaque_path_end_pointer;
 
