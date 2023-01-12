@@ -48,12 +48,68 @@ namespace ada::helpers {
     return fragment;
   }
 
-  std::optional<uint16_t> get_port_fast(const std::string_view::iterator begin, const std::string_view::iterator end) noexcept {
+  std::optional<uint16_t> get_port(const std::string_view::iterator begin, const std::string_view::iterator end) noexcept {
     uint16_t port{};
     std::string_view view(begin, end-begin);
     auto r = std::from_chars(view.data(), view.data() + view.size() , port);
     if (r.ec != std::errc()) { return std::nullopt; }
     return port;
-}
+  }
+
+  /**
+   * @return True if the state machine execution should finish.
+   */
+  bool parse_port(std::string_view::iterator &pointer_start,
+                  std::string_view::iterator pointer_end,
+                  ada::state &state,
+                  bool &is_valid,
+                  std::optional<uint16_t> &out,
+                  const bool is_url_special,
+                  const bool state_override_given) noexcept {
+    std::string_view::iterator first_non_digit = std::find_if_not(pointer_start, pointer_end, ::ada::checkers::is_digit);
+    std::string_view buffer = std::string_view(pointer_start, first_non_digit - pointer_start);
+    pointer_start += buffer.length();
+
+    // Otherwise, if one of the following is true:
+    // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+    // - url is special and c is U+005C (\)
+    // - state override is given
+    if (pointer_start == pointer_end || *first_non_digit == '/' || *first_non_digit == '?' ||
+        (is_url_special && *first_non_digit == '\\') ||
+        state_override_given) {
+
+      // If buffer is not the empty string, then:
+      if (!buffer.empty()) {
+        // Let port be the mathematical integer value that is represented by buffer in radix-10
+        // using ASCII digits for digits with values 0 through 9.
+        std::optional<uint16_t> port = helpers::get_port(buffer.begin(), buffer.end());
+
+        // If port is greater than 216 − 1, validation error, return failure.
+        // Set url’s port to null, if port is url’s scheme’s default port; otherwise to port.
+        if (!port.has_value()) {
+          is_valid = false;
+          return true;
+        }
+
+        out = port;
+      }
+
+      // If state override is given, then return.
+      if (state_override_given) {
+        return true;
+      }
+
+      // Set state to path start state and decrease pointer by 1.
+      state = PATH_START;
+      pointer_start--;
+    }
+    // Otherwise, validation error, return failure.
+    else {
+      is_valid = false;
+      return true;
+    }
+
+    return false;
+  }
 
 } // namespace ada::helpers

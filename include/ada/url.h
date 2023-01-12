@@ -1,6 +1,7 @@
 #ifndef ADA_URL_H
 #define ADA_URL_H
 
+#include "checkers.h"
 #include "common_defs.h"
 #include "serializers.h"
 

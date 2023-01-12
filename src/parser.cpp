@@ -495,6 +495,7 @@ namespace ada::parser {
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
     for (; pointer <= pointer_end; pointer++) {
+//      std::cout << "state=" << helpers::get_state(state).c_str() << "char==" << *pointer << std::endl;
       switch (state) {
         case SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
@@ -881,10 +882,6 @@ namespace ada::parser {
             // Set url’s host to host, buffer to the empty string, and state to port state.
             url.host = *host;
             state = PORT;
-
-            if (std::distance(pointer, pointer_end) > 0) {
-              port_start_pointer = pointer + 1;
-            }
           }
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
@@ -956,51 +953,24 @@ namespace ada::parser {
           break;
         }
         case PORT: {
-          // If c is an ASCII digit, append c to buffer.
-          if (checkers::is_digit(*pointer)) {
-            // Optimization: Do nothing.
-          }
-          // Otherwise, if one of the following is true:
-          // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
-          // - url is special and c is U+005C (\)
-          // - state override is given
-          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' ||
-                                (url.is_special() && *pointer == '\\') ||
-                                state_override.has_value()) {
-            port_end_pointer = pointer;
+          std::optional<uint16_t> out;
+          bool should_return = helpers::parse_port(pointer,
+                                                   pointer_end,
+                                                   state,
+                                                   url.is_valid,
+                                                   out,
+                                                   url.is_special(),
+                                                   state_override.has_value());
 
-            // If buffer is not the empty string, then:
-            if (std::distance(*port_start_pointer, pointer) > 0) {
-              // Let port be the mathematical integer value that is represented by buffer in radix-10
-              // using ASCII digits for digits with values 0 through 9.
-              std::optional<uint16_t> port = helpers::get_port_fast(port_start_pointer.value(), port_end_pointer.value());
-
-              // If port is greater than 216 − 1, validation error, return failure.
-              if (!port.has_value()) {
-                url.is_valid = false;
-                return url;
-              }
-
-              // Set url’s port to null, if port is url’s scheme’s default port; otherwise to port.
-              if (*port == url.scheme_default_port()) {
-                url.port = std::nullopt;
-              } else {
-                url.port = *port;
-              }
+          if (out.has_value()) {
+            if (url.scheme_default_port() == out) {
+              url.port = std::nullopt;
+            } else {
+              url.port = out;
             }
-
-            // If state override is given, then return.
-            if (state_override.has_value()) {
-              return url;
-            }
-
-            // Set state to path start state and decrease pointer by 1.
-            state = PATH_START;
-            pointer--;
           }
-          // Otherwise, validation error, return failure.
-          else {
-            url.is_valid = false;
+
+          if (!url.is_valid || should_return) {
             return url;
           }
 
