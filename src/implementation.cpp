@@ -118,7 +118,7 @@ namespace ada {
     base.path = "";
 
     // Basic URL parse the given value with this’s URL as url and path start state as state override.
-    auto result = ada::parser::parse_url(input, std::nullopt, encoding, base, PATH_START);
+    auto result = ada::parser::parse_url(std::move(input), std::nullopt, encoding, base, PATH_START);
 
     if (result.is_valid) {
       base.path = result.path;
