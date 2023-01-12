@@ -288,9 +288,8 @@ bool urltestdata_encoding() {
 int main() {
   std::cout << "Running WPT tests.\n" << std::endl;
 
-  if (setters_tests_encoding()) {
-//  if (percent_encoding() & setters_tests_encoding() & toascii_encoding() &
-//      urltestdata_encoding()) {
+  if (percent_encoding() && setters_tests_encoding() && toascii_encoding() &&
+      urltestdata_encoding()) {
     std::cout << "WPT tests are ok." << std::endl;
     return EXIT_SUCCESS;
   } else {
