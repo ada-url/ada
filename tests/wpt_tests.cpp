@@ -162,11 +162,11 @@ bool setters_tests_encoding() {
         auto normalized = base.port.has_value() ? std::to_string(*base.port) : "";
         TEST_ASSERT(normalized, expected, "Port");
       }
-//      else if (category == "pathname") {
-//        std::string_view expected = element["expected"]["pathname"];
-//        ada::set_pathname(base, std::string(new_value));
-//        TEST_ASSERT(base.path, expected, "Path");
-//      }
+      else if (category == "pathname") {
+        std::string_view expected = element["expected"]["pathname"];
+        ada::set_pathname(base, std::string(new_value));
+        TEST_ASSERT(base.path, expected, "Path");
+      }
       else if (category == "search") {
         std::string_view expected = element["expected"]["search"];
         ada::set_search(base, std::string(new_value));
