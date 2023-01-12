@@ -119,6 +119,8 @@ bool setters_tests_encoding() {
 
     if (category == "comment") {
       continue;
+    } else {
+       std::cout << "  " << category << ":" << std::endl;
     }
 
     for (auto element : cases) {
@@ -126,54 +128,56 @@ bool setters_tests_encoding() {
       std::string_view href = element["href"];
       std::string_view comment{};
       if (!element["comment"].get(comment)) {
-        std::cout << "   comment: " << comment << std::endl;
+        std::cout << "    comment: " << comment << std::endl;
       }
 
       auto base = ada::parse(href);
       TEST_ASSERT(base.is_valid, true, "Base url parsing should have succeeded")
 
-      std::cout << "     " << category << ": " << href << std::endl;
+      std::cout << "      " << href << std::endl;
 
       if (category == "protocol") {
+        std::string_view expected = element["expected"]["protocol"];
         ada::set_scheme(base, std::string(new_value));
-
-        std::string_view expected;
-        if (!element["expected"]["protocol"].get(expected)) {
-          TEST_ASSERT(base.scheme + ":", expected, "Protocol");
-        }
+        TEST_ASSERT(base.scheme + ":", expected, "Protocol");
       }
       else if (category == "username") {
+        std::string_view expected = element["expected"]["username"];
         ada::set_username(base, std::string(new_value));
-
-        std::string_view expected_username;
-        if (!element["expected"]["username"].get(expected_username)) {
-          TEST_ASSERT(base.username, expected_username, "Username");
-        }
+        TEST_ASSERT(base.username, expected, "Username");
       }
       else if (category == "password") {
+        std::string_view expected = element["expected"]["password"];
         ada::set_password(base, std::string(new_value));
-
-        std::string_view expected;
-        if (!element["expected"]["password"].get(expected)) {
-          TEST_ASSERT(base.password, expected, "Password");
-        }
+        TEST_ASSERT(base.password, expected, "Password");
       }
 //      else if (category == "host") {
+//        std::string_view expected = element["expected"]["host"];
 //        ada::set_host(base, std::string(new_value));
-//
-//        std::string_view expected;
-//        if (!element["expected"]["host"].get(expected)) {
-//          TEST_ASSERT(base.host.value_or(ada::url_host{ada::BASIC_DOMAIN, ""}).entry, expected, "Host");
-//        }
+//        TEST_ASSERT(base.host.value_or(ada::url_host{ada::BASIC_DOMAIN, ""}).entry, expected, "Host");
 //      }
       else if (category == "port") {
+        std::string_view expected = element["expected"]["port"];
         ada::set_port(base, std::string(new_value));
-
-        std::string_view expected;
-        if (!element["expected"]["port"].get(expected)) {
-          std::string base_port = (base.port.has_value()) ? std::to_string(base.port.value()) : "";
-          TEST_ASSERT(base_port, expected, "Host");
-        }
+        auto normalized = base.port.has_value() ? std::to_string(*base.port) : "";
+        TEST_ASSERT(normalized, expected, "Port");
+      }
+//      else if (category == "pathname") {
+//        std::string_view expected = element["expected"]["pathname"];
+//        ada::set_pathname(base, std::string(new_value));
+//        TEST_ASSERT(base.path, expected, "Path");
+//      }
+//      else if (category == "search") {
+//        std::string_view expected = element["expected"]["search"];
+//        ada::set_search(base, std::string(new_value));
+//        auto normalized = !base.query.value_or("").empty() ? "?" + *base.query : "";
+//        TEST_ASSERT(normalized, expected, "Search");
+//      }
+      else if (category == "hash") {
+        std::string_view expected = element["expected"]["hash"];
+        ada::set_hash(base, std::string(new_value));
+        auto normalized = !base.fragment.value_or("").empty() ? "#" + *base.fragment : "";
+        TEST_ASSERT(normalized, expected, "Fragment");
       }
     }
   }
