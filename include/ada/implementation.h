@@ -23,6 +23,10 @@ namespace ada {
                                  std::optional<ada::state> state = std::nullopt) noexcept;
 
   void set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
+  void set_username(ada::url &base, std::string input) noexcept;
+  void set_password(ada::url &base, std::string input) noexcept;
+  void set_host(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
+  void set_port(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
 }
 
 #endif // ADA_IMPLEMENTATION_H

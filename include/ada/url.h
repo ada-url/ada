@@ -125,6 +125,13 @@ namespace ada {
 
     [[nodiscard]] std::optional<uint16_t> scheme_default_port() const;
 
+    /**
+     * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
+     */
+    [[nodiscard]] bool cannot_have_credentials_or_port() const {
+      return !host.has_value() || host.value().entry.empty() || scheme == "file";
+    }
+
     ADA_ATTRIBUTE_NOINLINE ~url() = default;
   }; // struct url
 

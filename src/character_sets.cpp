@@ -1,3 +1,5 @@
+#pragma once
+
 namespace ada::character_sets {
 
   constexpr char hex[1024] =
