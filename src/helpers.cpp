@@ -117,7 +117,7 @@ namespace ada::helpers {
    *
    * This function assumes url does not have an opaque path.
    */
-  inline void shorten_path(ada::url &url) noexcept {
+  ada_really_inline void shorten_path(ada::url &url) noexcept {
     size_t first_delimiter = url.path.find_first_of('/', 1);
 
     // Let path be url’s path.
@@ -132,6 +132,12 @@ namespace ada::helpers {
     if (!url.path.empty()) {
       url.path.erase(url.path.rfind('/'));
     }
+  }
+
+  ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept {
+    input.erase(std::remove_if(input.begin(), input.end(), [](char c) {
+      return ada::unicode::is_ascii_tab_or_newline(c);
+    }), input.end());
   }
 
 } // namespace ada::helpers

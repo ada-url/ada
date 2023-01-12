@@ -177,7 +177,7 @@ namespace ada {
     // Let input be the given value with a single leading U+0023 (#) removed, if any.
     auto new_value = input[0] == '#' ? input.substr(1) : input;
 
-    // TODO: Remove tabs and newlines
+    helpers::remove_ascii_tab_or_newline(new_value);
 
     // Set this’s URL’s fragment to the empty string.
     // Basic URL parse input with this’s URL as url and fragment state as state override.

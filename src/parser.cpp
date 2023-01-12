@@ -450,10 +450,8 @@ namespace ada::parser {
 
     // most input strings will be ASCII which may enable some optimizations.
     const bool is_ascii = !user_input.empty() && 128>(std::reduce(user_input.begin(), user_input.end(), uint8_t(user_input[0]), std::bit_or<uint8_t>()));
-    // Remove any leading and trailing C0 control or space from input.
-    user_input.erase(std::remove_if(user_input.begin(), user_input.end(), [](char c) {
-      return ada::unicode::is_ascii_tab_or_newline(c);
-    }), user_input.end());
+
+    helpers::remove_ascii_tab_or_newline(user_input);
 
     std::string_view internal_input{user_input};
 
