@@ -1110,6 +1110,7 @@ namespace ada::parser {
                 if (!checkers::is_windows_drive_letter({pointer, size_t(pointer_end - pointer)})) {
                   std::string first_base_url_path = base_url->path.substr(1, base_url->path.find_first_of('/', 1));
 
+                  // Optimization opportunity: Get rid of initializing a std::string
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
                     url.path += "/" + first_base_url_path;
                   }
