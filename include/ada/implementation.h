@@ -18,18 +18,14 @@ namespace ada {
    * @param encoding encoding (default to UTF-8)
    */
   //
-  // TODO: This should take std::string_view input or at the very least const std::string& input.
-  //
   // TODO: As a user-facing function, this has poor usability. Users typically have
   // a ada::url base_url. To call this function they need to *copy* it to an
   // std::optional<ada::url> instance.
   //
-  ada_warn_unused ada::url parse(std::string input,
+  ada_warn_unused ada::url parse(std::string_view input,
                                  std::optional<ada::url> base_url = std::nullopt,
                                  ada::encoding_type encoding = ada::encoding_type::UTF8,
                                  std::optional<ada::state> state = std::nullopt) noexcept;
-
-  ada_warn_unused ada::url parse(std::string_view input) noexcept;
 
   void set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
   void set_username(ada::url &base, std::string input) noexcept;

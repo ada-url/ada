@@ -116,7 +116,7 @@ namespace ada {
     }
     /** For development purposes, we want to know when a copy is made. */
     url() = default;
-    url(const url &u) = delete;
+    url(const url &u) = delete; /**TODO: reanable this before the first release. */
     url(url &&u) = default;
     url &operator=(url &&u) = default;
     url &operator=(const url &u) = delete;

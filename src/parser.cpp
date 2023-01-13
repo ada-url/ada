@@ -424,7 +424,7 @@ namespace ada::parser {
     return ada::url_host{ada::host_type::BASIC_DOMAIN, *ascii_domain};
   }
 
-  url parse_url(std::string user_input,
+  url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding,
                 std::optional<ada::url> optional_url,
@@ -445,6 +445,12 @@ namespace ada::parser {
     ada::state state = state_override.value_or(ada::state::SCHEME_START);
 
     // Define parsed URL
+
+    /**
+     * Design concern: We take an optional_url as a parameter. Yet optional_url
+     * is only ever used on the next line.
+     */
+
     // If we have anything in optional_url, then it was copied there.
     // As much as possible, we do not want relatively expensive constructor in our
     // main function (parse_url).
@@ -454,9 +460,10 @@ namespace ada::parser {
     // most input strings will be ASCII which may enable some optimizations.
     const bool is_ascii = !user_input.empty() && 128>(std::reduce(user_input.begin(), user_input.end(), uint8_t(user_input[0]), std::bit_or<uint8_t>()));
 
-    helpers::remove_ascii_tab_or_newline(user_input);
-
-    const std::string_view internal_input{user_input};
+    // TODO: We don't need the tmp_buffer when there is no tabs or newline (Optimization opportunity).
+    std::string tmp_buffer{user_input};
+    helpers::remove_ascii_tab_or_newline(tmp_buffer);
+    const std::string_view internal_input{tmp_buffer};
 
     // TODO: Find a better way to trim from leading and trailing.
     std::string_view::iterator pointer_start = std::find_if_not(internal_input.begin(), internal_input.end(), ada::unicode::is_c0_control_or_space);
