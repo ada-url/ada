@@ -14,6 +14,7 @@ namespace ada {
     }
   }
 
+  // TODO: This should take std::string_view input or at the very least const std::string& input.
   ada_warn_unused url parse(std::string input,
                             std::optional<ada::url> base_url,
                             ada::encoding_type encoding,
@@ -22,6 +23,7 @@ namespace ada {
     return ada::parser::parse_url(std::move(input), std::move(base_url), encoding, std::nullopt, state);
   }
 
+  // TODO: This is worse than useless.
   ada_warn_unused url parse(std::string_view input) noexcept {
     return ada::parser::parse_url(std::string(input));
   }

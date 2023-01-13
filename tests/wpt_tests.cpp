@@ -236,13 +236,15 @@ bool urltestdata_encoding() {
       }
       std::cout << "input=" << input << std::endl;
       std::string_view base;
-      std::optional<ada::url> base_url;
+      ada::url base_url;
       if (!object["base"].get(base)) {
         std::cout << "base=" << base << std::endl;
         base_url = ada::parse(std::string{base});
       }
       bool failure = false;
-      ada::url input_url = ada::parse(std::string{input}, base_url);
+      ada::url input_url = (!object["base"].get(base)) ?
+      ada::parse(std::string{input}, ada::parse(std::string{base}))
+      : ada::parse(std::string{input});
 
       if (!object["failure"].get(failure)) {
         TEST_ASSERT(input_url.is_valid, !failure, "Failure");

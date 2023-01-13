@@ -17,6 +17,13 @@ namespace ada {
    * @param base_url the optional string input to use as a base url.
    * @param encoding encoding (default to UTF-8)
    */
+  //
+  // TODO: This should take std::string_view input or at the very least const std::string& input.
+  //
+  // TODO: As a user-facing function, this has poor usability. Users typically have
+  // a ada::url base_url. To call this function they need to *copy* it to an
+  // std::optional<ada::url> instance.
+  //
   ada_warn_unused ada::url parse(std::string input,
                                  std::optional<ada::url> base_url = std::nullopt,
                                  ada::encoding_type encoding = ada::encoding_type::UTF8,
