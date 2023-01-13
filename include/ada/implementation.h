@@ -22,6 +22,10 @@ namespace ada {
   // a ada::url base_url. To call this function they need to *copy* it to an
   // std::optional<ada::url> instance.
   //
+  // Specifically, the current syntax requires the user to do:
+  // ada::parse(input, std::optional<ada::url>(std::move(base_url)));
+  // if there is a base_url.
+  //
   ada_warn_unused ada::url parse(std::string_view input,
                                  std::optional<ada::url> base_url = std::nullopt,
                                  ada::encoding_type encoding = ada::encoding_type::UTF8,

@@ -463,7 +463,12 @@ namespace ada::parser {
     // TODO: We don't need the tmp_buffer when there is no tabs or newline (Optimization opportunity).
     std::string tmp_buffer{user_input};
     helpers::remove_ascii_tab_or_newline(tmp_buffer);
-    const std::string_view internal_input{tmp_buffer};
+    std::string_view internal_input;
+    if(std::any_of(user_input.begin(),user_input.end(),ada::unicode::is_ascii_tab_or_newline)) {
+      internal_input = tmp_buffer;
+    } else {
+      internal_input = user_input;
+    }
 
     // TODO: Find a better way to trim from leading and trailing.
     std::string_view::iterator pointer_start = std::find_if_not(internal_input.begin(), internal_input.end(), ada::unicode::is_c0_control_or_space);
@@ -504,10 +509,19 @@ namespace ada::parser {
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
     for (; pointer <= pointer_end; pointer++) {
+      ///////////////////////////////////////////////////////////////////////
+      // Important: we can't have 'pointer == pointer_end' and then dereference
+      // the pointer so the loop condition pointer <= pointer_end is a problem.
+      //
+      // The terrible thing is that dereferencing a pointer that is out of
+      // range may work in practice, maybe almost always, and then we
+      // end up with a random non-reproducible crash or bug.
+      ///////////////////////////////////////////////////////////////////////
       switch (state) {
         case ada::state::SCHEME_START: {
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
-          if (checkers::is_alpha(*pointer)) {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if ((pointer != pointer_end) && checkers::is_alpha(*pointer)) {
             state = ada::state::SCHEME;
             pointer--;
           }
@@ -526,14 +540,16 @@ namespace ada::parser {
         }
         case ada::state::SCHEME: {
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
-          if (ada::unicode::is_alnum_plus(*pointer)) {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if ((pointer != pointer_end) && ada::unicode::is_alnum_plus(*pointer)) {
             // Optimization: No need to lowercase scheme, if we don't need it.
             if (*pointer >= 'A' && *pointer <= 'Z') {
               scheme_needs_lowercase = true;
             }
           }
           // Otherwise, if c is U+003A (:), then:
-          else if (*pointer == ':') {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          else if ((pointer != pointer_end) && (*pointer == ':')) {
             scheme_end_pointer = pointer;
 
             std::string _buffer = std::string(*scheme_start_pointer, *scheme_end_pointer - *scheme_start_pointer);
@@ -587,7 +603,8 @@ namespace ada::parser {
               state = ada::state::FILE;
             }
             // Otherwise, if url is special, base is non-null, and base’s scheme is url’s scheme:
-            else if (url.is_special() && base_url->scheme == url.scheme) {
+            // Note: Doing base_url->scheme is unsafe if base_url.has_value() is false.
+            else if (url.is_special() && base_url.has_value() && base_url->scheme == url.scheme) {
               // Set state to special relative or authority state.
               state = ada::state::SPECIAL_RELATIVE_OR_AUTHORITY;
             }
@@ -627,7 +644,7 @@ namespace ada::parser {
         }
         case ada::state::NO_SCHEME: {
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
-          if (!base_url.has_value() || (base_url->has_opaque_path && pointer != pointer_end)) {
+          if (!base_url.has_value() || (base_url->has_opaque_path && (pointer != pointer_end))) {
             url.is_valid = false;
             return url;
           }
@@ -656,7 +673,8 @@ namespace ada::parser {
         }
         case ada::state::AUTHORITY: {
           // If c is U+0040 (@), then:
-          if (*pointer == '@') {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if ((pointer != pointer_end) && (*pointer == '@')) {
             // If atSignSeen is true, then prepend "%40" to buffer.
             if (at_sign_seen) {
               buffer.insert(0, "%40");
@@ -714,7 +732,8 @@ namespace ada::parser {
         case ada::state::SPECIAL_RELATIVE_OR_AUTHORITY: {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
-          if (*pointer == '/' && checkers::is_next_equals(pointer, pointer_end, '/')) {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if ((pointer != pointer_end) && (*pointer == '/') && checkers::is_next_equals(pointer, pointer_end, '/')) {
             state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
             pointer++;
           }
@@ -728,7 +747,8 @@ namespace ada::parser {
         }
         case ada::state::PATH_OR_AUTHORITY: {
           // If c is U+002F (/), then set state to authority state.
-          if (*pointer == '/') {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if ((pointer != pointer_end) && (*pointer == '/')) {
             state = ada::state::AUTHORITY;
           }
           // Otherwise, set state to path state, and decrease pointer by 1.
@@ -741,14 +761,22 @@ namespace ada::parser {
         }
         case ada::state::RELATIVE: {
           // Set url’s scheme to base’s scheme.
+#if ADA_DEVELOP_MODE
+          ///////
+          // next line is for development purposes, to ensure safety.
+          ///////
+          if(!base_url.has_value()) { throw std::runtime_error("Internal error.\n"); }
+#endif
           url.scheme = base_url->scheme;
 
           // If c is U+002F (/), then set state to relative slash state.
-          if (*pointer == '/') {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if ((pointer != pointer_end) && (*pointer == '/')) {
             state = ada::state::RELATIVE_SLASH;
           }
           // Otherwise, if url is special and c is U+005C (\), validation error, set state to relative slash state.
-          else if (url.is_special() && *pointer == '\\') {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          else if (url.is_special() && (pointer != pointer_end) && (*pointer == '\\')) {
             state = ada::state::RELATIVE_SLASH;
           }
           // Otherwise:
@@ -786,12 +814,14 @@ namespace ada::parser {
         }
         case ada::state::RELATIVE_SLASH: {
           // If url is special and c is U+002F (/) or U+005C (\), then:
-          if (url.is_special() && (*pointer == '/' || *pointer =='\\')) {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if (url.is_special() && (pointer != pointer_end) && (*pointer == '/' || *pointer =='\\')) {
             // Set state to special authority ignore slashes state.
             state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
           }
           // Otherwise, if c is U+002F (/), then set state to authority state.
-          else if (*pointer == '/') {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          else if ((pointer != pointer_end) && (*pointer == '/')) {
             state = ada::state::AUTHORITY;
           }
           // Otherwise, set
@@ -801,6 +831,12 @@ namespace ada::parser {
           // - url’s port to base’s port,
           // - state to path state, and then, decrease pointer by 1.
           else {
+#if ADA_DEVELOP_MODE
+            //////////
+            ///// For development purposes, to ensure safey:
+            /////////////
+            if(!base_url.has_value()) { throw std::runtime_error("Internal error.\n"); }
+#endif
             url.username = base_url->username;
             url.password = base_url->password;
             url.host = base_url->host;
@@ -814,7 +850,8 @@ namespace ada::parser {
         case ada::state::SPECIAL_AUTHORITY_SLASHES: {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
-          if (*pointer == '/' && checkers::is_next_equals(pointer, pointer_end, '/')) {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if ((pointer != pointer_end) && (*pointer == '/') && checkers::is_next_equals(pointer, pointer_end, '/')) {
             pointer++;
           }
           // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.
@@ -824,11 +861,12 @@ namespace ada::parser {
 
           state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
 
-          break;
+          break; /** Here we should just fall through !!! */
         }
         case ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES: {
           // If c is neither U+002F (/) nor U+005C (\), then set state to authority state and decrease pointer by 1.
-          if (*pointer != '/' && *pointer != '\\') {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
             state = ada::state::AUTHORITY;
             pointer--;
           }
@@ -866,7 +904,8 @@ namespace ada::parser {
             state = ada::state::FILE_HOST;
           }
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
-          else if (*pointer == ':' && !inside_brackets) {
+          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          else if ((pointer != pointer_end) && (*pointer == ':') && !inside_brackets) {
             // If buffer is the empty string, validation error, return failure.
             if (buffer.empty()) {
               url.is_valid = false;
@@ -1080,7 +1119,9 @@ namespace ada::parser {
           // Otherwise:
           else {
             // If base is non-null and base’s scheme is "file", then:
-            if (base_url.has_value() && base_url->scheme == "file") {
+            // Note: it is unsafe to do base_url->scheme unless you know that
+            // base_url_has_value() is true.
+            if (base_url.has_value() && base_url.has_value() && base_url->scheme == "file") {
               // Set url’s host to base’s host.
               url.host = base_url->host;
 

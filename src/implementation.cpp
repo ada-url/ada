@@ -42,7 +42,11 @@ namespace ada {
      */
 
     auto result = ada::parser::parse_url(input, std::nullopt, encoding,
+#if ADA_DEVELOP_MODE
     base.oh_no_we_need_to_copy_url(),
+#else
+    base,
+#endif
     ada::state::SCHEME_START);
 
     if (result.is_valid) {
@@ -102,7 +106,11 @@ namespace ada {
      */
     // Basic URL parse the given value with this’s URL as url and host state as state override.
     auto result = ada::parser::parse_url(input, std::nullopt, encoding,
+#if ADA_DEVELOP_MODE
     base.oh_no_we_need_to_copy_url(),
+#else
+    base,
+#endif
     ada::state::HOST);
 
     if (result.is_valid) {
@@ -135,7 +143,11 @@ namespace ada {
     // Otherwise, basic URL parse the given value with this’s URL as url and port state as state override.
     else {
       auto result = ada::parser::parse_url(input, std::nullopt, encoding,
+#if ADA_DEVELOP_MODE
       base.oh_no_we_need_to_copy_url(),
+#else
+      base,
+#endif
       ada::state::PORT);
 
       if (result.is_valid) {
@@ -165,8 +177,12 @@ namespace ada {
      */
     // Basic URL parse the given value with this’s URL as url and path start state as state override.
     auto result = ada::parser::parse_url(std::move(input), std::nullopt, encoding,
-    base.oh_no_we_need_to_copy_url(),
-    ada::state::PATH_START);
+#if ADA_DEVELOP_MODE
+      base.oh_no_we_need_to_copy_url(),
+#else
+      base,
+#endif
+      ada::state::PATH_START);
 
     if (result.is_valid) {
       base.path = result.path;

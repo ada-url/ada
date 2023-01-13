@@ -28,6 +28,7 @@ namespace ada {
     if (!is_valid) {
       return "null";
     }
+    // TODO: make sure that this is valid JSON by encoding the strings.
     return "{\"scheme\":\"" + scheme + "\"" + ","
          + "\"username\":\"" + username + "\"" + "," + "\"password\":\"" +
          password + "\"" + "," +

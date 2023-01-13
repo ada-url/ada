@@ -244,11 +244,11 @@ bool urltestdata_encoding() {
       }
       bool failure = false;
       ada::url input_url = (!object["base"].get(base)) ?
-      ada::parse(input, ada::parse(base))
+      ada::parse(input, std::optional<ada::url>(std::move(base_url)))
       : ada::parse(input);
 
       if (!object["failure"].get(failure)) {
-        TEST_ASSERT(input_url.is_valid, !failure, "Failure");
+        TEST_ASSERT(input_url.is_valid, !failure, "Should not have succeeded");
       } else {
         TEST_ASSERT(input_url.is_valid, true, "Should not have failed");
 

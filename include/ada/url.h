@@ -116,11 +116,20 @@ namespace ada {
     }
     /** For development purposes, we want to know when a copy is made. */
     url() = default;
-    url(const url &u) = delete; /**TODO: reanable this before the first release. */
+#if ADA_DEVELOP_MODE
+    url(const url &u) = delete; /**TODO: reenable this before the first release. */
+#else
+    url(const url &u) = default;
+#endif
     url(url &&u) = default;
     url &operator=(url &&u) = default;
+#if ADA_DEVELOP_MODE
     url &operator=(const url &u) = delete;
+#else
+    url &operator=(const url &u) = default;
+#endif
     ADA_ATTRIBUTE_NOINLINE ~url() = default;
+#if ADA_DEVELOP_MODE
     /** Only for development purposes so we can see where the copies are happening. **/
     url oh_no_we_need_to_copy_url() const {
       url answer;
@@ -135,6 +144,7 @@ namespace ada {
       answer.is_valid = is_valid;
       return answer;
     }
+#endif
 
     std::string to_string();
   }; // struct url
