@@ -17,7 +17,7 @@ namespace ada {
     return "{\"type\":\"" + ada::to_string(type) + "\",\"entry\":\"" + entry + "\"}";
   }
 
-  ada_really_inline std::optional<uint16_t> url::scheme_default_port() const {
+  ada_really_inline uint16_t url::scheme_default_port() const {
     return scheme::get_special_port(scheme);
   }
 

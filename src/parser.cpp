@@ -459,7 +459,6 @@ namespace ada::parser {
 
     // most input strings will be ASCII which may enable some optimizations.
     const bool is_ascii = !user_input.empty() && 128>(std::reduce(user_input.begin(), user_input.end(), uint8_t(user_input[0]), std::bit_or<uint8_t>()));
-
     // TODO: We don't need the tmp_buffer when there is no tabs or newline (Optimization opportunity).
     std::string tmp_buffer{user_input};
     helpers::remove_ascii_tab_or_newline(tmp_buffer);
@@ -493,6 +492,12 @@ namespace ada::parser {
     // bring back the pointers.
     pointer_start = state_override.has_value() ? internal_input.begin() : url_data.begin();
     pointer_end = state_override.has_value() ? internal_input.end() : url_data.end();
+
+    // most URLs have no @.
+    // TODO: Instead of just collecting a bool, collect the location of the '@' and do something useful with it.
+    // TODO: We could do various processing early on, using a single pass over the string to collect
+    // information about it, e.g., telling us whether there is a @ and if so, where (or how many).
+    const bool contains_ampersand = (std::find(pointer_start, pointer_end, '@') != pointer_end);
 
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
@@ -578,11 +583,11 @@ namespace ada::parser {
 
             // If state override is given, then:
             if (state_override.has_value()) {
-              auto urls_scheme_port = ada::scheme::get_special_port(url.scheme);
+              uint16_t urls_scheme_port = ada::scheme::get_special_port(url.scheme);
 
-              if (urls_scheme_port.has_value()) {
+              if (urls_scheme_port) {
                 // If url’s port is url’s scheme’s default port, then set url’s port to null.
-                if (url.port.has_value() && *url.port == urls_scheme_port.value()) {
+                if (url.port.has_value() && *url.port == urls_scheme_port) {
                   url.port = std::nullopt;
                 }
               }
@@ -665,8 +670,15 @@ namespace ada::parser {
           break;
         }
         case ada::state::AUTHORITY: {
+          if(!contains_ampersand) {
+            // TODO: This is a waste of time, we should never have arrived here.
+            pointer--;
+            state = ada::state::HOST;
+            break;
+          }
           std::string_view view(pointer, size_t(pointer_end-pointer));
           size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
+          // TODO: we append uselessly in some cases.
           buffer.append(view.data(), (location != std::string_view::npos) ? location :view.size());
           pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
           // If c is U+0040 (@), then:
@@ -674,7 +686,7 @@ namespace ada::parser {
           if ((pointer != pointer_end) && (*pointer == '@')) {
             // If atSignSeen is true, then prepend "%40" to buffer.
             if (at_sign_seen) {
-              buffer.insert(0, "%40");
+              buffer.insert(0, "%40"); // TODO: avoid inserting a prefix, as it is more expensive.
             }
 
             // Set atSignSeen to true.
@@ -711,11 +723,10 @@ namespace ada::parser {
               url.is_valid = false;
               return url;
             }
-
             // Decrease pointer by the number of code points in buffer plus one,
             // set buffer to the empty string, and set state to host state.
             pointer -= buffer.length() + 1;
-            buffer.clear();
+            buffer.clear(); // TODO: This is wasteful, we should not have to delete.
             state = ada::state::HOST;
           }
 
@@ -894,10 +905,29 @@ namespace ada::parser {
           if (state_override.has_value() && url.scheme == "file") {
             pointer--;
             state = ada::state::FILE_HOST;
+            break;
           }
+          // Given a call to parse_url, we should get here at most *ONCE*.
+          // There is the business with '[', but that's no problem.
+          std::string_view view(pointer, size_t(pointer_end-pointer) );
+          size_t location = url.is_special() ? view.find_first_of("[/?:\\") : view.find_first_of("[@/?:");
+          // Next while loop is almost never taken!
+          while((location != std::string_view::npos) && (view[location] == '[')) {
+            location = view.find(']',location);
+            if(location == std::string_view::npos) {
+              inside_brackets = true;
+            } else {
+              location = url.is_special() ? view.find_first_of("[/?:\\", location) : view.find_first_of("[@/?:", location);
+            }
+          }
+          // TODO: this buffer might be useless.
+          buffer.append(view.data(), (location != std::string_view::npos) ? location :view.size());
+          pointer = (location != std::string_view::npos) ? pointer + location : pointer_end;
+
+
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
-          else if ((pointer != pointer_end) && (*pointer == ':') && !inside_brackets) {
+          if ((pointer != pointer_end) && (*pointer == ':') && !inside_brackets) {
             // If buffer is the empty string, validation error, return failure.
             if (buffer.empty()) {
               url.is_valid = false;
@@ -958,21 +988,6 @@ namespace ada::parser {
               return url;
             }
           }
-          // Otherwise:
-          else {
-            // If c is U+005B ([), then set insideBrackets to true.
-            if (*pointer == '[') {
-              inside_brackets = true;
-            }
-            // If c is U+005D (]), then set insideBrackets to false.
-            else if (*pointer == ']') {
-              inside_brackets = false;
-            }
-
-            // Append c to buffer.
-            buffer += *pointer;
-          }
-
           break;
         }
         case ada::state::OPAQUE_PATH: {
@@ -1053,6 +1068,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::PATH: {
+          // TODO: We should get here once and just move as needed, no need to visit it multiple times.
           // If one of the following is true:
           // - c is the EOF code point or U+002F (/)
           // - url is special and c is U+005C (\)

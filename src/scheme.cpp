@@ -36,12 +36,12 @@ namespace ada::scheme {
    * @param scheme
    * @return The special port
    */
-  constexpr std::optional<uint16_t> get_special_port(std::string_view scheme) noexcept {
-    if(scheme.empty()) { return false; }
+  constexpr uint16_t get_special_port(std::string_view scheme) noexcept {
+    if(scheme.empty()) { return 0; }
     int hash_value = (2*scheme.size() + (unsigned)(scheme[0])) & 7;
     const std::string_view target = details::is_special_list[hash_value];
     if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
         return details::special_ports[hash_value];
-    } else { return std::nullopt; }
+    } else { return 0; }
   }
 } // namespace ada::scheme

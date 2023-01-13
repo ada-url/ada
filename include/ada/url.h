@@ -106,7 +106,7 @@ namespace ada {
      */
     bool has_opaque_path{false};
 
-    [[nodiscard]] std::optional<uint16_t> scheme_default_port() const;
+    [[nodiscard]] uint16_t scheme_default_port() const;
 
     /**
      * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
