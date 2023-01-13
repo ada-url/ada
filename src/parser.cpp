@@ -430,16 +430,16 @@ namespace ada::parser {
                 std::optional<ada::url> optional_url,
                 std::optional<ada::state> state_override) {
     // Assign buffer
-    std::string buffer{};
+    std::string buffer{}; /* TODO: Move within the sections of the parser, and grab the bytes you need. */
 
     // Assign inside brackets. Used by HOST state.
-    bool inside_brackets{false};
+    bool inside_brackets{false}; /* TODO: It should only be used within HOST. */
 
     // Assign at sign seen.
-    bool at_sign_seen{false};
+    bool at_sign_seen{false}; /* TODO: It should only be used within AUTHORITY. */
 
     // Assign password token seen.
-    bool password_token_seen{false};
+    bool password_token_seen{false}; /* TODO: It should only be used within AUTHORITY. */
 
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = state_override.value_or(ada::state::SCHEME_START);
@@ -665,6 +665,10 @@ namespace ada::parser {
           break;
         }
         case ada::state::AUTHORITY: {
+          std::string_view view(pointer, size_t(pointer_end-pointer));
+          size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
+          buffer.append(view.data(), (location != std::string_view::npos) ? location :view.size());
+          pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
           // If c is U+0040 (@), then:
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && (*pointer == '@')) {
@@ -675,7 +679,6 @@ namespace ada::parser {
 
             // Set atSignSeen to true.
             at_sign_seen = true;
-
             // For each codePoint in buffer:
             for (auto code_point: buffer) {
               // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
@@ -714,10 +717,6 @@ namespace ada::parser {
             pointer -= buffer.length() + 1;
             buffer.clear();
             state = ada::state::HOST;
-          }
-          // Otherwise, append c to buffer.
-          else {
-            buffer += *pointer;
           }
 
           break;
