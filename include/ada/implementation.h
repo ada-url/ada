@@ -19,17 +19,17 @@ namespace ada {
    */
   ada_warn_unused ada::url parse(std::string input,
                                  std::optional<ada::url> base_url = std::nullopt,
-                                 ada::encoding_type encoding = UTF8,
+                                 ada::encoding_type encoding = ada::encoding_type::UTF8,
                                  std::optional<ada::state> state = std::nullopt) noexcept;
 
   ada_warn_unused ada::url parse(std::string_view input) noexcept;
 
-  void set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
+  void set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
   void set_username(ada::url &base, std::string input) noexcept;
   void set_password(ada::url &base, std::string input) noexcept;
-  void set_host(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
-  void set_port(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
-  void set_pathname(ada::url &base, std::string input, ada::encoding_type encoding = UTF8) noexcept;
+  void set_host(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
+  void set_port(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
+  void set_pathname(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
   void set_search(ada::url &base, std::string input) noexcept;
   void set_hash(ada::url &base, std::string input) noexcept;
 }

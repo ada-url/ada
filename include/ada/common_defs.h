@@ -125,4 +125,15 @@
 #define ADA_ATTRIBUTE_NOINLINE
 #endif
 
+namespace ada {
+  [[noreturn]] inline void unreachable() {
+#ifdef __GNUC__
+    __builtin_unreachable();
+#elif defined(_MSC_VER)
+    __assume(false);
+#else
+#endif
+  }
+}
+
 #endif // ADA_COMMON_DEFS_H

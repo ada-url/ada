@@ -7,27 +7,27 @@ namespace ada::helpers {
 
   ada_unused std::string get_state(ada::state state) {
     switch (state) {
-      case AUTHORITY: return "Authority";
-      case SCHEME_START: return "Scheme Start";
-      case SCHEME: return "Scheme";
-      case HOST: return "Host";
-      case NO_SCHEME: return "No Scheme";
-      case FRAGMENT: return "Fragment";
-      case RELATIVE: return "Relative";
-      case RELATIVE_SLASH: return "Relative Slash";
-      case FILE: return "File";
-      case FILE_HOST: return "File Host";
-      case FILE_SLASH: return "File Slash";
-      case PATH_OR_AUTHORITY: return "Path or Authority";
-      case SPECIAL_AUTHORITY_IGNORE_SLASHES: return "Special Authority Ignore Slashes";
-      case SPECIAL_AUTHORITY_SLASHES: return "Special Authority Slashes";
-      case SPECIAL_RELATIVE_OR_AUTHORITY: return "Special Relative or Authority";
-      case QUERY: return "Query";
-      case PATH: return "Path";
-      case PATH_START: return "Path Start";
-      case OPAQUE_PATH: return "Opaque Path";
-      case PORT: return "Port";
-      default: return "";
+      case ada::state::AUTHORITY: return "Authority";
+      case ada::state::SCHEME_START: return "Scheme Start";
+      case ada::state::SCHEME: return "Scheme";
+      case ada::state::HOST: return "Host";
+      case ada::state::NO_SCHEME: return "No Scheme";
+      case ada::state::FRAGMENT: return "Fragment";
+      case ada::state::RELATIVE: return "Relative";
+      case ada::state::RELATIVE_SLASH: return "Relative Slash";
+      case ada::state::FILE: return "File";
+      case ada::state::FILE_HOST: return "File Host";
+      case ada::state::FILE_SLASH: return "File Slash";
+      case ada::state::PATH_OR_AUTHORITY: return "Path or Authority";
+      case ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES: return "Special Authority Ignore Slashes";
+      case ada::state::SPECIAL_AUTHORITY_SLASHES: return "Special Authority Slashes";
+      case ada::state::SPECIAL_RELATIVE_OR_AUTHORITY: return "Special Relative or Authority";
+      case ada::state::QUERY: return "Query";
+      case ada::state::PATH: return "Path";
+      case ada::state::PATH_START: return "Path Start";
+      case ada::state::OPAQUE_PATH: return "Opaque Path";
+      case ada::state::PORT: return "Port";
+      default: unreachable();
     }
   }
 
@@ -100,7 +100,7 @@ namespace ada::helpers {
       }
 
       // Set state to path start state and decrease pointer by 1.
-      state = PATH_START;
+      state = ada::state::PATH_START;
       pointer_start--;
     }
     // Otherwise, validation error, return failure.
@@ -141,3 +141,9 @@ namespace ada::helpers {
   }
 
 } // namespace ada::helpers
+
+namespace ada {
+  ada_warn_unused std::string to_string(ada::state state) {
+    return ada::helpers::get_state(state);
+  }
+}

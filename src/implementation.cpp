@@ -5,6 +5,15 @@
 
 namespace ada {
 
+  ada_warn_unused std::string to_string(ada::encoding_type type) {
+    switch(type) {
+    case ada::encoding_type::UTF8 : return "UTF-8";
+    case ada::encoding_type::UTF_16LE : return "UTF-16LE";
+    case ada::encoding_type::UTF_16BE : return "UTF-16BE";
+    default: unreachable();
+    }
+  }
+
   ada_warn_unused url parse(std::string input,
                             std::optional<ada::url> base_url,
                             ada::encoding_type encoding,
@@ -21,14 +30,24 @@ namespace ada {
    * The protocol setter steps are to basic URL parse the given value, followed by U+003A (:),
    * with this’s URL as url and scheme start state as state override.
    *
+   * TODO: This should probably a method in the struct ada::url.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
-  void set_scheme(ada::url &base, std::string input, ada::encoding_type encoding) noexcept {
+  void set_scheme(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
     if (!input.empty()) {
       input.append(":");
     }
 
-    auto result = ada::parser::parse_url(input, std::nullopt, encoding, base, SCHEME_START);
+    /**
+     * TODO: This needs to be reengineered. The next line calls
+     * a large function just to later update the scheme. We should
+     * specialize and just call what is needed: a scheme computation.
+     */
+
+    auto result = ada::parser::parse_url(input, std::nullopt, encoding,
+    base.oh_no_we_need_to_copy_url(),
+    ada::state::SCHEME_START);
 
     if (result.is_valid) {
       base.scheme = result.scheme;
@@ -36,6 +55,8 @@ namespace ada {
   }
 
   /**
+   * TODO: This should probably a method in the struct ada::url.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
   void set_username(ada::url &base, std::string input) noexcept {
@@ -51,6 +72,8 @@ namespace ada {
   }
 
   /**
+   * TODO: This should probably a method in the struct ada::url.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
   void set_password(ada::url &base, std::string input) noexcept {
@@ -66,16 +89,25 @@ namespace ada {
   }
 
   /**
+   * TODO: This should probably a method in the struct ada::url.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
-  void set_host(ada::url &base, std::string input, ada::encoding_type encoding) noexcept {
+  void set_host(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
     // If this’s URL has an opaque path, then return.
     if (base.has_opaque_path) {
       return;
     }
 
+    /**
+     * TODO: This needs to be reengineered. The next line calls
+     * a large function just to later update the host. We should
+     * specialize and just call what is needed: a host computation.
+     */
     // Basic URL parse the given value with this’s URL as url and host state as state override.
-    auto result = ada::parser::parse_url(input, std::nullopt, encoding, base, HOST);
+    auto result = ada::parser::parse_url(input, std::nullopt, encoding,
+    base.oh_no_we_need_to_copy_url(),
+    ada::state::HOST);
 
     if (result.is_valid) {
       base.host = result.host;
@@ -83,9 +115,11 @@ namespace ada {
   }
 
   /**
+   * TODO: This should probably a method in the struct ada::url.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
-  void set_port(ada::url &base, std::string input, ada::encoding_type encoding) noexcept {
+  void set_port(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
     if (base.cannot_have_credentials_or_port()) {
       return;
@@ -95,9 +129,18 @@ namespace ada {
     if (input.empty()) {
       base.port = std::nullopt;
     }
+
+
+    /**
+     * TODO: This needs to be reengineered. The next line calls
+     * a large function just to later update the port. We should
+     * specialize and just call what is needed: a port computation.
+     */
     // Otherwise, basic URL parse the given value with this’s URL as url and port state as state override.
     else {
-      auto result = ada::parser::parse_url(input, std::nullopt, encoding, base, PORT);
+      auto result = ada::parser::parse_url(input, std::nullopt, encoding,
+      base.oh_no_we_need_to_copy_url(),
+      ada::state::PORT);
 
       if (result.is_valid) {
         base.port = result.port;
@@ -106,9 +149,11 @@ namespace ada {
   }
 
   /**
+   * TODO: This should probably a method in the struct ada::url.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  void set_pathname(ada::url &base, std::string input, ada::encoding_type encoding) noexcept {
+  void set_pathname(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
     // If this’s URL has an opaque path, then return.
     if (base.has_opaque_path) {
       return;
@@ -117,13 +162,21 @@ namespace ada {
     // Empty this’s URL’s path.
     base.path = "";
 
+    /**
+     * TODO: This needs to be reengineered. The next line calls
+     * a large function just to later update the path. We should
+     * specialize and just call what is needed: a path computation.
+     */
     // Basic URL parse the given value with this’s URL as url and path start state as state override.
-    auto result = ada::parser::parse_url(std::move(input), std::nullopt, encoding, base, PATH_START);
+    auto result = ada::parser::parse_url(std::move(input), std::nullopt, encoding,
+    base.oh_no_we_need_to_copy_url(),
+    ada::state::PATH_START);
 
     if (result.is_valid) {
       base.path = result.path;
       base.has_opaque_path = result.has_opaque_path;
     }
+
   }
 
   /**
