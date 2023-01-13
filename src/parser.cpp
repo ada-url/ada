@@ -497,7 +497,7 @@ namespace ada::parser {
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
 
-    bool scheme_needs_lowercase{false};
+    // bool scheme_needs_lowercase{false}; // this complexifies the code and is of dubious utility.
 
     std::optional<std::string_view::iterator> scheme_start_pointer{pointer};
     std::optional<std::string_view::iterator> scheme_end_pointer;
@@ -541,24 +541,17 @@ namespace ada::parser {
         case ada::state::SCHEME: {
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
-          if ((pointer != pointer_end) && ada::unicode::is_alnum_plus(*pointer)) {
-            // Optimization: No need to lowercase scheme, if we don't need it.
-            if (*pointer >= 'A' && *pointer <= 'Z') {
-              scheme_needs_lowercase = true;
-            }
-          }
+          pointer = std::find_if_not(pointer, pointer_end, ada::unicode::is_alnum_plus);
           // Otherwise, if c is U+003A (:), then:
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
-          else if ((pointer != pointer_end) && (*pointer == ':')) {
+          if ((pointer != pointer_end) && (*pointer == ':')) {
             scheme_end_pointer = pointer;
 
+            // Optimization opportunity: instead of copying and then changing the case,
+            // we could directly append lower-cased to the string, thus doing one pass.
             std::string _buffer = std::string(*scheme_start_pointer, *scheme_end_pointer - *scheme_start_pointer);
-
-            if (scheme_needs_lowercase) {
-              // optimization opportunity. no need to start from beginning, just start from the first uppercase pointer
-              std::transform(_buffer.begin(), _buffer.end(), _buffer.begin(),
+            std::transform(_buffer.begin(), _buffer.end(), _buffer.begin(),
                 [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
-            }
 
             // If state override is given, then:
             if (state_override.has_value()) {
