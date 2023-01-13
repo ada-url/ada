@@ -18,7 +18,7 @@ namespace ada::unicode {
 
   unsigned constexpr convert_hex_to_binary(char c) noexcept;
 
-  // todo: these functions would be faster as noexcept maybe, but it could be unsafe since
+  // TODO: these functions would be faster as noexcept maybe, but it could be unsafe since
   // they are allocating.
   // first_percent should be  = plain.find('%')
   std::string percent_decode(const std::string_view input, size_t first_percent);

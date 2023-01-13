@@ -143,7 +143,6 @@ namespace ada::unicode {
     // The length must be 2,4 or 6.
     // We divide by two and require
     // that the result be between 1 and 3 inclusively.
-   // printf("-");
     uint64_t half_length = uint64_t(input.size())/2;
     if(half_length - 1 > 2) { return false; }
     // We have a string of length 2, 4 or 6.

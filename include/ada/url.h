@@ -14,21 +14,25 @@ namespace ada {
   /**
    * @see https://url.spec.whatwg.org/#host-representation
    */
-  enum host_type {
+  enum class host_type {
     BASIC_DOMAIN, // Had to use BASIC_ prefix due to global define in <cmath>
     IPV6_ADDRESS,
     IPV4_ADDRESS,
     OPAQUE_HOST,
   };
 
+  ada_warn_unused std::string to_string(ada::host_type type);
+
   /**
    * @see https://url.spec.whatwg.org/#host-representation
    */
   struct url_host {
 
-    ada::host_type type{BASIC_DOMAIN};
+    ada::host_type type{ada::host_type::BASIC_DOMAIN};
 
     std::string entry{};
+
+    ada_warn_unused std::string to_string();
   };
 
   /**
@@ -110,8 +114,29 @@ namespace ada {
     [[nodiscard]] bool cannot_have_credentials_or_port() const {
       return !host.has_value() || host.value().entry.empty() || scheme == "file";
     }
-
+    /** For development purposes, we want to know when a copy is made. */
+    url() = default;
+    url(const url &u) = delete; /**TODO: reanable this before the first release. */
+    url(url &&u) = default;
+    url &operator=(url &&u) = default;
+    url &operator=(const url &u) = delete;
     ADA_ATTRIBUTE_NOINLINE ~url() = default;
+    /** Only for development purposes so we can see where the copies are happening. **/
+    url oh_no_we_need_to_copy_url() const {
+      url answer;
+      answer.scheme = scheme;
+      answer.username = username;
+      answer.password = password;
+      answer.host = host;
+      answer.port = port;
+      answer.path = path;
+      answer.query = query;
+      answer.fragment = fragment;
+      answer.is_valid = is_valid;
+      return answer;
+    }
+
+    std::string to_string();
   }; // struct url
 
 } // namespace ada
