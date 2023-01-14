@@ -493,7 +493,8 @@ namespace ada::parser {
     pointer_start = state_override.has_value() ? internal_input.begin() : url_data.begin();
     pointer_end = state_override.has_value() ? internal_input.end() : url_data.end();
 
-    // most URLs have no @.
+    // most URLs have no @. Having no @ tells us that we don't have to worry about AUTHORITY. Of course,
+    // we could have @ and still not have to worry about AUTHORITY.
     // TODO: Instead of just collecting a bool, collect the location of the '@' and do something useful with it.
     // TODO: We could do various processing early on, using a single pass over the string to collect
     // information about it, e.g., telling us whether there is a @ and if so, where (or how many).
@@ -991,6 +992,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::OPAQUE_PATH: {
+          // TODO: advance directly to ? or to the end of string, don't do the switch case machine.
           // If c is U+003F (?), then set url’s query to the empty string and state to query state.
           if (*pointer == '?' || pointer == pointer_end) {
             opaque_path_end_pointer = pointer;
@@ -1068,14 +1070,19 @@ namespace ada::parser {
           break;
         }
         case ada::state::PATH: {
-          // TODO: We should get here once and just move as needed, no need to visit it multiple times.
           // If one of the following is true:
           // - c is the EOF code point or U+002F (/)
           // - url is special and c is U+005C (\)
           // - state override is not given and c is U+003F (?) or U+0023 (#)
-          if (pointer == pointer_end || *pointer == '/' || (url.is_special() && *pointer == '\\') || (!state_override.has_value() && *pointer == '?')) {
-            // If buffer is a double-dot path segment, then:
-            if (unicode::is_double_dot_path_segment(buffer)) {
+          do {
+            std::string_view view(pointer, size_t(pointer_end-pointer));
+            size_t location = url.is_special() ? (!state_override.has_value() ? view.find_first_of("/\\?") : view.find_first_of("/\\")) : (!state_override.has_value() ? view.find_first_of("/?") : view.find_first_of("/"));
+            std::string_view path_view(pointer, (location != std::string_view::npos) ? location :view.size());
+            std::string path_buffer = ada::unicode::percent_encode(path_view, character_sets::PATH_PERCENT_ENCODE);
+
+            pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
+            // If path_buffer is a double-dot path segment, then:
+            if (unicode::is_double_dot_path_segment(path_buffer)) {
               // Shorten url’s path.
               helpers::shorten_path(url);
 
@@ -1085,37 +1092,31 @@ namespace ada::parser {
                 url.path += "/";
               }
             }
-            // Otherwise, if buffer is a single-dot path segment and if neither c is U+002F (/),
+            // Otherwise, if path_buffer is a single-dot path segment and if neither c is U+002F (/),
             // nor url is special and c is U+005C (\), append the empty string to url’s path.
-            else if (unicode::is_single_dot_path_segment(buffer) && *pointer != '/' && !(url.is_special() && *pointer == '\\')) {
+            else if (unicode::is_single_dot_path_segment(path_buffer) && *pointer != '/' && !(url.is_special() && *pointer == '\\')) {
               url.path += "/";
             }
-            // Otherwise, if buffer is not a single-dot path segment, then:
-            else if (!unicode::is_single_dot_path_segment(buffer)) {
-              // If url’s scheme is "file", url’s path is empty, and buffer is a Windows drive letter,
-              // then replace the second code point in buffer with U+003A (:).
+            // Otherwise, if path_buffer is not a single-dot path segment, then:
+            else if (!unicode::is_single_dot_path_segment(path_buffer)) {
+              // If url’s scheme is "file", url’s path is empty, and path_buffer is a Windows drive letter,
+              // then replace the second code point in path_buffer with U+003A (:).
               if (url.scheme == "file" && url.path.empty() && checkers::is_windows_drive_letter(buffer)){
-                buffer[1] = ':';
+                path_buffer[1] = ':';
               }
 
-              // Append buffer to url’s path.
-              url.path += "/" + buffer;
+              // Append path_buffer to url’s path.
+              url.path += "/" + path_buffer;
             }
-
-            // Set buffer to the empty string.
-            buffer.clear();
 
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
             if (*pointer == '?') {
               state = ada::state::QUERY;
+              break;
             }
-          }
-          // Otherwise, run these steps:
-          else {
-            // UTF-8 percent-encode c using the path percent-encode set and append the result to buffer.
-            unicode::percent_encode_character(*pointer, character_sets::PATH_PERCENT_ENCODE, buffer);
-          }
-
+            if(pointer == pointer_end) { break; }
+            pointer++;
+          } while(true);
           break;
         }
         case ada::state::FILE_SLASH: {
