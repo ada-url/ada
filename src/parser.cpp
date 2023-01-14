@@ -432,15 +432,6 @@ namespace ada::parser {
     // Assign buffer
     std::string buffer{}; /* TODO: Move within the sections of the parser, and grab the bytes you need. */
 
-    // Assign inside brackets. Used by HOST state.
-    bool inside_brackets{false}; /* TODO: It should only be used within HOST. */
-
-    // Assign at sign seen.
-    bool at_sign_seen{false}; /* TODO: It should only be used within AUTHORITY. */
-
-    // Assign password token seen.
-    bool password_token_seen{false}; /* TODO: It should only be used within AUTHORITY. */
-
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = state_override.value_or(ada::state::SCHEME_START);
 
@@ -677,6 +668,8 @@ namespace ada::parser {
             state = ada::state::HOST;
             break;
           }
+          bool at_sign_seen{false};
+          bool password_token_seen{false};
           do {
             std::string_view view(pointer, size_t(pointer_end-pointer));
             size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
@@ -685,7 +678,7 @@ namespace ada::parser {
             // If c is U+0040 (@), then:
             // Note: we cannot access *pointer safely if (pointer == pointer_end).
             if ((pointer != pointer_end) && (*pointer == '@')) {
-              std::string authority_buffer(authority_view);
+              std::string authority_buffer(authority_view); // TODO: We don't need to allocate a new string.
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
                 authority_buffer.insert(0, "%40"); // TODO: avoid inserting a prefix, as it is more expensive.
@@ -711,9 +704,6 @@ namespace ada::parser {
                   unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.username);
                 }
               }
-
-              // Set buffer to the empty string.
-              //buffer.clear();
             }
             // Otherwise, if one of the following is true:
             // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
@@ -912,6 +902,8 @@ namespace ada::parser {
             state = ada::state::FILE_HOST;
             break;
           }
+          bool inside_brackets{false};
+
           // Given a call to parse_url, we should get here at most *ONCE*.
           // There is the business with '[', but that's no problem.
           std::string_view view(pointer, size_t(pointer_end-pointer) );
@@ -921,6 +913,10 @@ namespace ada::parser {
             location = view.find(']',location);
             if(location == std::string_view::npos) {
               inside_brackets = true;
+              /** 
+               * TODO: Ok. So if we arrive here then view has an unclosed [,
+               * Is the URL valid???
+               */
             } else {
               location = url.is_special() ? view.find_first_of("[/?:\\", location) : view.find_first_of("[@/?:", location);
             }
