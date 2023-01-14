@@ -921,8 +921,7 @@ namespace ada::parser {
               location = url.is_special() ? view.find_first_of("[/?:\\", location) : view.find_first_of("[@/?:", location);
             }
           }
-          // TODO: this buffer might be useless.
-          buffer.append(view.data(), (location != std::string_view::npos) ? location :view.size());
+          std::string_view host_view(view.data(), (location != std::string_view::npos) ? location :view.size());
           pointer = (location != std::string_view::npos) ? pointer + location : pointer_end;
 
 
@@ -930,7 +929,7 @@ namespace ada::parser {
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && (*pointer == ':') && !inside_brackets) {
             // If buffer is the empty string, validation error, return failure.
-            if (buffer.empty()) {
+            if (host_view.empty()) {
               url.is_valid = false;
               return url;
             }
@@ -940,7 +939,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<ada::url_host> host = parse_host(buffer, !url.is_special(), is_ascii);
+            std::optional<ada::url_host> host = parse_host(host_view, !url.is_special(), is_ascii);
 
             // If host is failure, then return failure.
             if (!host.has_value()) {
@@ -959,19 +958,19 @@ namespace ada::parser {
             // then decrease pointer by 1, and then:
             pointer--;
 
-            // If url is special and buffer is the empty string, validation error, return failure.
-            if (url.is_special() && buffer.empty()) {
+            // If url is special and host_view is the empty string, validation error, return failure.
+            if (url.is_special() && host_view.empty()) {
               url.is_valid = false;
               return url;
             }
-            // Otherwise, if state override is given, buffer is the empty string,
+            // Otherwise, if state override is given, host_view is the empty string,
             // and either url includes credentials or url’s port is non-null, return.
-            else if (state_override.has_value() && buffer.empty() && (url.includes_credentials() || url.port.has_value())) {
+            else if (state_override.has_value() && host_view.empty() && (url.includes_credentials() || url.port.has_value())) {
               return url;
             }
 
-            // Let host be the result of host parsing buffer with url is not special.
-            std::optional<ada::url_host> host = parse_host(buffer, !url.is_special(), is_ascii);
+            // Let host be the result of host parsing host_view with url is not special.
+            std::optional<ada::url_host> host = parse_host(host_view, !url.is_special(), is_ascii);
 
             // If host is failure, then return failure.
             if (!host.has_value()) {
@@ -979,9 +978,8 @@ namespace ada::parser {
               return url;
             }
 
-            // Set url’s host to host, buffer to the empty string, and state to path start state.
+            // Set url’s host to host, and state to path start state.
             url.host = *host;
-            buffer.clear();
             state = ada::state::PATH_START;
 
             // If state override is given, then return.
