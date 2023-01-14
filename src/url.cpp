@@ -24,6 +24,7 @@ namespace ada {
   ada_really_inline bool url::is_special() const {
     return scheme::is_special(scheme);
   }
+
   std::string url::to_string() {
     if (!is_valid) {
       return "null";

@@ -1,4 +1,3 @@
-
 #include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
@@ -9,6 +8,7 @@
 
 #include "ada.h"
 #include "simdjson.h"
+
 using namespace simdjson;
 
 #ifndef WPT_DATA_DIR
@@ -151,12 +151,15 @@ bool setters_tests_encoding() {
         ada::set_password(base, std::string{new_value});
         TEST_ASSERT(base.password, expected, "Password");
       }
-//TODO: Why is this commented out?
-//      else if (category == "host") {
-//        std::string_view expected = element["expected"]["host"];
-//        ada::set_host(base, std::string{new_value});
-//        TEST_ASSERT(base.host.value_or(ada::url_host{ada::BASIC_DOMAIN, ""}).entry, expected, "Host");
-//      }
+      else if (category == "hostname") {
+        std::string_view expected;
+
+        // TODO: Handle invalid utf-8 tests too.
+        if (!element["expected"]["hostname"].get(expected)) {
+          ada::set_host(base, std::string{new_value});
+          TEST_ASSERT(base.host.value_or(ada::url_host{ada::host_type::BASIC_DOMAIN, ""}).entry, expected, "Hostname");
+        }
+      }
       else if (category == "port") {
         std::string_view expected = element["expected"]["port"];
         ada::set_port(base, std::string{new_value});

@@ -1,7 +1,11 @@
+#include <iostream>
+#include <string_view>
 #include <utility>
 
 #include "ada.h"
 #include "ada/character_sets.h"
+#include "ada/parser.h"
+#include "ada/url.h"
 
 namespace ada {
 
@@ -93,11 +97,24 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
-  void set_host(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
+  void set_host(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
     // If this’s URL has an opaque path, then return.
     if (base.has_opaque_path) {
       return;
     }
+
+    auto pointer_start = input.begin();
+
+    // If input starts with #, it is required to trim the input.
+    if (!input.empty() && input[0] == '#') {
+      pointer_start++;
+    }
+
+    // Hostname setter should ignore all after # character.
+    auto pointer_end = std::find(pointer_start, input.end(), '#');
+
+    // If url's scheme is "file", then set state to file host state, instead of host state.
+    ada::state state = base.scheme == "file" ? state::FILE_HOST : state::HOST;
 
     /**
      * TODO: This needs to be reengineered. The next line calls
@@ -105,13 +122,13 @@ namespace ada {
      * specialize and just call what is needed: a host computation.
      */
     // Basic URL parse the given value with this’s URL as url and host state as state override.
-    auto result = ada::parser::parse_url(input, std::nullopt, encoding,
+    auto result = ada::parser::parse_url(std::string_view(pointer_start, pointer_end - pointer_start), std::nullopt, encoding,
 #if ADA_DEVELOP_MODE
     base.oh_no_we_need_to_copy_url(),
 #else
     base,
 #endif
-    ada::state::HOST);
+    state);
 
     if (result.is_valid) {
       base.host = result.host;

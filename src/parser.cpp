@@ -899,19 +899,13 @@ namespace ada::parser {
           return url;
         }
         case ada::state::HOST: {
-          // If state override is given and url’s scheme is "file",
-          // then decrease pointer by 1 and set state to file host state.
-          if (state_override.has_value() && url.scheme == "file") {
-            pointer--;
-            state = ada::state::FILE_HOST;
-            break;
-          }
           bool inside_brackets{false};
 
           // Given a call to parse_url, we should get here at most *ONCE*.
           // There is the business with '[', but that's no problem.
           std::string_view view(pointer, size_t(pointer_end-pointer) );
-          size_t location = url.is_special() ? view.find_first_of("[/?:\\") : view.find_first_of("[@/?:");
+          size_t location = url.is_special() ? view.find_first_of(":[/?\\") : view.find_first_of(":[/?");
+
           // Next while loop is almost never taken!
           while((location != std::string_view::npos) && (view[location] == '[')) {
             location = view.find(']',location);
@@ -922,7 +916,7 @@ namespace ada::parser {
                * Is the URL valid???
                */
             } else {
-              location = url.is_special() ? view.find_first_of("[/?:\\", location) : view.find_first_of("[@/?:", location);
+              location = url.is_special() ? view.find_first_of(":[/?\\#", location) : view.find_first_of(":[/?#", location);
             }
           }
           std::string_view host_view(view.data(), (location != std::string_view::npos) ? location :view.size());
