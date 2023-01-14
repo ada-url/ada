@@ -6,3 +6,5 @@ build
 __pycache__
 
 cmake-build-debug
+
+.cache

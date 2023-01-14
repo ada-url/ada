@@ -1,6 +1,7 @@
 #ifndef ADA_URL_H
 #define ADA_URL_H
 
+#include "checkers.h"
 #include "common_defs.h"
 #include "serializers.h"
 
@@ -13,22 +14,25 @@ namespace ada {
   /**
    * @see https://url.spec.whatwg.org/#host-representation
    */
-  enum host_type {
+  enum class host_type {
     BASIC_DOMAIN, // Had to use BASIC_ prefix due to global define in <cmath>
     IPV6_ADDRESS,
     IPV4_ADDRESS,
     OPAQUE_HOST,
-    EMPTY_HOST,
   };
+
+  ada_warn_unused std::string to_string(ada::host_type type);
 
   /**
    * @see https://url.spec.whatwg.org/#host-representation
    */
   struct url_host {
 
-    ada::host_type type{EMPTY_HOST};
+    ada::host_type type{ada::host_type::BASIC_DOMAIN};
 
     std::string entry{};
+
+    ada_warn_unused std::string to_string();
   };
 
   /**
@@ -102,31 +106,47 @@ namespace ada {
      */
     bool has_opaque_path{false};
 
+    [[nodiscard]] uint16_t scheme_default_port() const;
+
     /**
-     * @see https://url.spec.whatwg.org/#shorten-a-urls-path
-     *
-     * This function assumes url does not have an opaque path.
+     * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
      */
-    void shorten_path() noexcept {
-      size_t first_delimiter = path.find_first_of('/', 1);
-
-      // Let path be url’s path.
-      // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized Windows drive letter, then return.
-      if (scheme == "file" && first_delimiter == std::string_view::npos) {
-        if (checkers::is_normalized_windows_drive_letter(std::string_view(path.data() + 1, first_delimiter - 1))) {
-          return;
-        }
-      }
-
-      // Remove path’s last item, if any.
-      if (!path.empty()) {
-        path.erase(path.rfind('/'));
-      }
+    [[nodiscard]] bool cannot_have_credentials_or_port() const {
+      return !host.has_value() || host.value().entry.empty() || scheme == "file";
     }
-
-    [[nodiscard]] std::optional<uint16_t> scheme_default_port() const;
-
+    /** For development purposes, we want to know when a copy is made. */
+    url() = default;
+#if ADA_DEVELOP_MODE
+    url(const url &u) = delete; /**TODO: reenable this before the first release. */
+#else
+    url(const url &u) = default;
+#endif
+    url(url &&u) = default;
+    url &operator=(url &&u) = default;
+#if ADA_DEVELOP_MODE
+    url &operator=(const url &u) = delete;
+#else
+    url &operator=(const url &u) = default;
+#endif
     ADA_ATTRIBUTE_NOINLINE ~url() = default;
+#if ADA_DEVELOP_MODE
+    /** Only for development purposes so we can see where the copies are happening. **/
+    url oh_no_we_need_to_copy_url() const {
+      url answer;
+      answer.scheme = scheme;
+      answer.username = username;
+      answer.password = password;
+      answer.host = host;
+      answer.port = port;
+      answer.path = path;
+      answer.query = query;
+      answer.fragment = fragment;
+      answer.is_valid = is_valid;
+      return answer;
+    }
+#endif
+
+    std::string to_string();
   }; // struct url
 
 } // namespace ada

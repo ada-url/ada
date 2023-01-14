@@ -1,9 +1,11 @@
 #ifndef ADA_STATE_H
 #define ADA_STATE_H
 
+#include "common_defs.h"
+
 namespace ada {
 
-  enum state {
+  enum class state {
     AUTHORITY,
     SCHEME_START,
     SCHEME,
@@ -25,6 +27,8 @@ namespace ada {
     OPAQUE_PATH,
     PORT,
   };
+
+  ada_warn_unused std::string to_string(ada::state s);
 
 } // ada namespace
 

@@ -1,6 +1,9 @@
 #ifndef ADA_ENCODING_TYPE_H
 #define ADA_ENCODING_TYPE_H
 
+#include "common_defs.h"
+#include <string>
+
 namespace ada {
 
   /**
@@ -9,11 +12,13 @@ namespace ada {
    *
    * @see https://encoding.spec.whatwg.org/#encodings
    */
-  enum encoding_type {
+  enum class encoding_type {
     UTF8,
     UTF_16LE,
     UTF_16BE,
   };
+
+  ada_warn_unused std::string to_string(encoding_type type);
 
 } // ada namespace
 

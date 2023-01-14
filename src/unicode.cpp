@@ -1,4 +1,8 @@
-#pragma once
+#include "ada.h"
+#include "ada/character_sets.h"
+
+#include <algorithm>
+
 namespace ada::unicode {
 
   // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),
@@ -143,7 +147,6 @@ namespace ada::unicode {
     // The length must be 2,4 or 6.
     // We divide by two and require
     // that the result be between 1 and 3 inclusively.
-   // printf("-");
     uint64_t half_length = uint64_t(input.size())/2;
     if(half_length - 1 > 2) { return false; }
     // We have a string of length 2, 4 or 6.

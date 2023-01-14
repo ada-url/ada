@@ -1,6 +1,10 @@
 #ifndef ADA_COMMON_DEFS_H
 #define ADA_COMMON_DEFS_H
 
+#ifndef ADA_DEVELOP_MODE
+#define ADA_DEVELOP_MODE 1 /* This should be removed before the first release. */
+#endif
+
 #if defined(__GNUC__)
   // Marks a block with a name so that MCA analysis can see it.
   #define ADA_BEGIN_DEBUG_BLOCK(name) __asm volatile("# LLVM-MCA-BEGIN " #name);
@@ -124,5 +128,16 @@
 #else
 #define ADA_ATTRIBUTE_NOINLINE
 #endif
+
+namespace ada {
+  [[noreturn]] inline void unreachable() {
+#ifdef __GNUC__
+    __builtin_unreachable();
+#elif defined(_MSC_VER)
+    __assume(false);
+#else
+#endif
+  }
+}
 
 #endif // ADA_COMMON_DEFS_H
