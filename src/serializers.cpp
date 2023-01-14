@@ -1,5 +1,5 @@
 #include <array>
-#include <cstring>
+#include <string>
 
 namespace ada::serializers {
 

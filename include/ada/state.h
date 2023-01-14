@@ -1,6 +1,8 @@
 #ifndef ADA_STATE_H
 #define ADA_STATE_H
 
+#include "common_defs.h"
+
 namespace ada {
 
   enum class state {

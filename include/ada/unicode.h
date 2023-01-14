@@ -2,7 +2,7 @@
 #define ADA_UNICODE_H
 
 #include "common_defs.h"
-#include <cstring>
+#include <string>
 
 namespace ada::unicode {
 

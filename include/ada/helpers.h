@@ -1,7 +1,6 @@
 #ifndef ADA_HELPERS_H
 #define ADA_HELPERS_H
 
-#include "ada.h"
 #include "common_defs.h"
 #include "url.h"
 #include "state.h"

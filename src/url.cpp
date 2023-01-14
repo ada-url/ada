@@ -1,5 +1,5 @@
 #include "ada.h"
-#include "scheme.cpp"
+#include "ada/scheme.h"
 
 namespace ada {
 

@@ -1,4 +1,8 @@
-#pragma once
+#include "ada.h"
+#include "ada/character_sets.h"
+
+#include <algorithm>
+
 namespace ada::unicode {
 
   // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),

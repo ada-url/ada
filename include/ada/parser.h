@@ -3,6 +3,7 @@
 
 #include "state.h"
 #include "url.h"
+#include "encoding_type.h"
 
 #include <optional>
 #include <string_view>

@@ -1,3 +1,6 @@
+#include "ada.h"
+#include "ada/unicode.h"
+
 #include <algorithm>
 #include <charconv>
 #include <cstring>

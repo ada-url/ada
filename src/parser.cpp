@@ -1,7 +1,7 @@
 #include "ada.h"
-
-#include "checkers.cpp"
-#include "unicode.cpp"
+#include "ada/character_sets.h"
+#include "ada/checkers.h"
+#include "ada/unicode.h"
 
 #include <array>
 #include <algorithm>
