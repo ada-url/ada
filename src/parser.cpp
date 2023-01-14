@@ -677,59 +677,65 @@ namespace ada::parser {
             state = ada::state::HOST;
             break;
           }
-          std::string_view view(pointer, size_t(pointer_end-pointer));
-          size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
-          // TODO: we append uselessly in some cases.
-          buffer.append(view.data(), (location != std::string_view::npos) ? location :view.size());
-          pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
-          // If c is U+0040 (@), then:
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
-          if ((pointer != pointer_end) && (*pointer == '@')) {
-            // If atSignSeen is true, then prepend "%40" to buffer.
-            if (at_sign_seen) {
-              buffer.insert(0, "%40"); // TODO: avoid inserting a prefix, as it is more expensive.
-            }
-
-            // Set atSignSeen to true.
-            at_sign_seen = true;
-            // For each codePoint in buffer:
-            for (auto code_point: buffer) {
-              // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
-              if (code_point == ':' && !password_token_seen) {
-                password_token_seen = true;
-                continue;
+          do {
+            std::string_view view(pointer, size_t(pointer_end-pointer));
+            size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
+            // TODO: we append uselessly in some cases.
+            buffer.append(view.data(), (location != std::string_view::npos) ? location :view.size());
+            pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
+            // If c is U+0040 (@), then:
+            // Note: we cannot access *pointer safely if (pointer == pointer_end).
+            if ((pointer != pointer_end) && (*pointer == '@')) {
+              // If atSignSeen is true, then prepend "%40" to buffer.
+              if (at_sign_seen) {
+                buffer.insert(0, "%40"); // TODO: avoid inserting a prefix, as it is more expensive.
               }
 
-              // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
-              // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
-              if (password_token_seen) {
-                unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.password);
-              }
-              // Otherwise, append encodedCodePoints to url’s username.
-              else {
-                unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.username);
-              }
-            }
+              // Set atSignSeen to true.
+              at_sign_seen = true;
+              // For each codePoint in buffer:
+              for (auto code_point: buffer) {
+                // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
+                if (code_point == ':' && !password_token_seen) {
+                  password_token_seen = true;
+                  continue;
+                }
 
-            // Set buffer to the empty string.
-            buffer.clear();
-          }
-          // Otherwise, if one of the following is true:
-          // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
-          // - url is special and c is U+005C (\)
-          else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
-            // If atSignSeen is true and buffer is the empty string, validation error, return failure.
-            if (at_sign_seen && buffer.empty()) {
+                // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
+                // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
+                if (password_token_seen) {
+                  unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.password);
+                }
+                // Otherwise, append encodedCodePoints to url’s username.
+                else {
+                  unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.username);
+                }
+              }
+
+              // Set buffer to the empty string.
               buffer.clear();
-              url.is_valid = false;
-              return url;
             }
-            // Decrease pointer by the number of code points in buffer plus one,
-            // set buffer to the empty string, and set state to host state.
-            pointer -= buffer.length() + 1;
-            buffer.clear(); // TODO: This is wasteful, we should not have to delete.
-            state = ada::state::HOST;
-          }
+            // Otherwise, if one of the following is true:
+            // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+            // - url is special and c is U+005C (\)
+            else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
+              // If atSignSeen is true and buffer is the empty string, validation error, return failure.
+              if (at_sign_seen && buffer.empty()) {
+                //buffer.clear();
+                url.is_valid = false;
+                return url;
+              }
+              // Decrease pointer by the number of code points in buffer plus one,
+              // set buffer to the empty string, and set state to host state.
+              pointer -= buffer.length() + 1;
+              buffer.clear(); // TODO: This is wasteful, we should not have to delete.
+              state = ada::state::HOST;
+              break;
+            }
+          
+            if(pointer == pointer_end) { break; }
+            pointer++;
+          } while(true);
 
           break;
         }
@@ -1099,7 +1105,7 @@ namespace ada::parser {
             else if (!unicode::is_single_dot_path_segment(path_buffer)) {
               // If url’s scheme is "file", url’s path is empty, and path_buffer is a Windows drive letter,
               // then replace the second code point in path_buffer with U+003A (:).
-              if (url.scheme == "file" && url.path.empty() && checkers::is_windows_drive_letter(buffer)){
+              if (url.scheme == "file" && url.path.empty() && checkers::is_windows_drive_letter(path_buffer)){
                 path_buffer[1] = ':';
               }
 
