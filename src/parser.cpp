@@ -450,11 +450,14 @@ namespace ada::parser {
 
     // most input strings will be ASCII which may enable some optimizations.
     const bool is_ascii = !user_input.empty() && 128>(std::reduce(user_input.begin(), user_input.end(), uint8_t(user_input[0]), std::bit_or<uint8_t>()));
-    // TODO: We don't need the tmp_buffer when there is no tabs or newline (Optimization opportunity).
-    std::string tmp_buffer{user_input};
-    helpers::remove_ascii_tab_or_newline(tmp_buffer);
+
+    std::string tmp_buffer;
     std::string_view internal_input;
     if(std::any_of(user_input.begin(),user_input.end(),ada::unicode::is_ascii_tab_or_newline)) {
+      tmp_buffer = user_input;
+      // Optimization opportunity: Instead of copying and then pruning, we could just directly
+      // build the string from user_input.
+      helpers::remove_ascii_tab_or_newline(tmp_buffer);
       internal_input = tmp_buffer;
     } else {
       internal_input = user_input;
@@ -575,6 +578,7 @@ namespace ada::parser {
 
             // If state override is given, then:
             if (state_override.has_value()) {
+              // This is uncommon.
               uint16_t urls_scheme_port = ada::scheme::get_special_port(url.scheme);
 
               if (urls_scheme_port) {

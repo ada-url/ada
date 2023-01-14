@@ -36,7 +36,7 @@ namespace ada::scheme {
    * @param scheme
    * @return The special port
    */
-  constexpr uint16_t get_special_port(std::string_view scheme) noexcept {
+  ADA_ATTRIBUTE_NOINLINE constexpr uint16_t get_special_port(std::string_view scheme) noexcept {
     if(scheme.empty()) { return 0; }
     int hash_value = (2*scheme.size() + (unsigned)(scheme[0])) & 7;
     const std::string_view target = details::is_special_list[hash_value];
