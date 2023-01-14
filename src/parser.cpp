@@ -680,21 +680,21 @@ namespace ada::parser {
           do {
             std::string_view view(pointer, size_t(pointer_end-pointer));
             size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
-            // TODO: we append uselessly in some cases.
-            buffer.append(view.data(), (location != std::string_view::npos) ? location :view.size());
+            std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location :view.size());
             pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
             // If c is U+0040 (@), then:
             // Note: we cannot access *pointer safely if (pointer == pointer_end).
             if ((pointer != pointer_end) && (*pointer == '@')) {
+              std::string authority_buffer(authority_view);
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
-                buffer.insert(0, "%40"); // TODO: avoid inserting a prefix, as it is more expensive.
+                authority_buffer.insert(0, "%40"); // TODO: avoid inserting a prefix, as it is more expensive.
               }
 
               // Set atSignSeen to true.
               at_sign_seen = true;
-              // For each codePoint in buffer:
-              for (auto code_point: buffer) {
+              // For each codePoint in authority_buffer:
+              for (auto code_point: authority_buffer) {
                 // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
                 if (code_point == ':' && !password_token_seen) {
                   password_token_seen = true;
@@ -713,22 +713,20 @@ namespace ada::parser {
               }
 
               // Set buffer to the empty string.
-              buffer.clear();
+              //buffer.clear();
             }
             // Otherwise, if one of the following is true:
             // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
             // - url is special and c is U+005C (\)
             else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
-              // If atSignSeen is true and buffer is the empty string, validation error, return failure.
-              if (at_sign_seen && buffer.empty()) {
-                //buffer.clear();
+              // If atSignSeen is true and authority_view is the empty string, validation error, return failure.
+              if (at_sign_seen && authority_view.empty()) {
                 url.is_valid = false;
                 return url;
               }
               // Decrease pointer by the number of code points in buffer plus one,
               // set buffer to the empty string, and set state to host state.
-              pointer -= buffer.length() + 1;
-              buffer.clear(); // TODO: This is wasteful, we should not have to delete.
+              pointer -= authority_view.length() + 1;
               state = ada::state::HOST;
               break;
             }
