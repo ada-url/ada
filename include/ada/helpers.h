@@ -11,14 +11,12 @@
 namespace ada::helpers {
 
   ada_really_inline std::optional<std::string_view> prune_fragment(std::string_view& input) noexcept;
-  std::optional<uint16_t> get_port(std::string_view::iterator begin, std::string_view::iterator end) noexcept;
-  bool parse_port(std::string_view::iterator &pointer_start,
-                  std::string_view::iterator pointer_end,
+  std::optional<uint16_t> get_port(std::string_view input) noexcept;
+  std::optional<uint16_t> parse_port(std::string_view input,
                   ada::state &state,
                   bool &is_valid,
-                  std::optional<uint16_t> &out,
                   bool is_url_special,
-                  bool state_override_given) noexcept;
+                  bool state_override_given = false) noexcept;
 
   ada_really_inline void shorten_path(ada::url &url) noexcept;
   ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept;

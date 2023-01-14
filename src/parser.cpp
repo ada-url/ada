@@ -11,6 +11,7 @@
 #include <iostream>
 #include <numeric>
 
+#include <string_view>
 #include <unicode/utypes.h>
 #include <unicode/uidna.h>
 #include <unicode/utf8.h>
@@ -1004,18 +1005,10 @@ namespace ada::parser {
           break;
         }
         case ada::state::PORT: {
-          std::optional<uint16_t> out;
-          bool should_return = helpers::parse_port(pointer,
-                                                   pointer_end,
-                                                   state,
-                                                   url.is_valid,
-                                                   out,
-                                                   url.is_special(),
-                                                   state_override.has_value());
-
-          if (!url.is_valid) {
-            return url;
-          }
+          auto out = helpers::parse_port(std::string_view(pointer, pointer_end - pointer),
+                                         state,
+                                         url.is_valid,
+                                         url.is_special());
 
           if (out.has_value()) {
             if (url.scheme_default_port() == out) {
@@ -1023,10 +1016,6 @@ namespace ada::parser {
             } else {
               url.port = out;
             }
-          }
-
-          if (should_return) {
-            return url;
           }
 
           break;

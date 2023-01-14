@@ -4,7 +4,9 @@
 
 #include "ada.h"
 #include "ada/character_sets.h"
+#include "ada/common_defs.h"
 #include "ada/parser.h"
+#include "ada/state.h"
 #include "ada/url.h"
 
 namespace ada {
@@ -140,7 +142,7 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
-  void set_port(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
+  void set_port(ada::url& base, std::string_view input) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
     if (base.cannot_have_credentials_or_port()) {
       return;
@@ -150,25 +152,18 @@ namespace ada {
     if (input.empty()) {
       base.port = std::nullopt;
     }
-
-
-    /**
-     * TODO: This needs to be reengineered. The next line calls
-     * a large function just to later update the port. We should
-     * specialize and just call what is needed: a port computation.
-     */
     // Otherwise, basic URL parse the given value with this’s URL as url and port state as state override.
     else {
-      auto result = ada::parser::parse_url(input, std::nullopt, encoding,
-#if ADA_DEVELOP_MODE
-      base.oh_no_we_need_to_copy_url(),
-#else
-      base,
-#endif
-      ada::state::PORT);
+      bool is_valid{true};
+      auto state = ada::state::HOST;
+      std::optional<uint16_t> out = helpers::parse_port(input, state, is_valid, base.is_special(), true);
 
-      if (result.is_valid) {
-        base.port = result.port;
+      if (out.has_value()) {
+        if (base.scheme_default_port() == out) {
+          base.port = std::nullopt;
+        } else {
+          base.port = out;
+        }
       }
     }
   }
