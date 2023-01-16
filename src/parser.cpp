@@ -372,6 +372,9 @@ namespace ada::parser {
     // Note: this function assumes that parse_host is not empty. Make sure we can
     // guarantee that.
     //
+#if ADA_DEVELOP_MODE
+    if(input.empty()) { abort(); }
+#endif
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
