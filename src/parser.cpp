@@ -980,7 +980,6 @@ namespace ada::parser {
         case ada::state::OPAQUE_PATH: {
           // If c is U+003F (?), then set url’s query to the empty string and state to query state.
           std::string_view view(pointer, size_t(pointer_end-pointer));
-          std::cout << "opaque "<< view << std::endl;
           size_t location = view.find('?');
           if(location != std::string_view::npos) {
             view.remove_suffix(location);
