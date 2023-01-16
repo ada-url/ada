@@ -3,20 +3,6 @@
 
 namespace ada {
 
-  ada_warn_unused std::string to_string(ada::host_type type) {
-    switch(type) {
-    case ada::host_type::BASIC_DOMAIN : return "basic";
-    case ada::host_type::IPV6_ADDRESS : return "ipv6";
-    case ada::host_type::IPV4_ADDRESS : return "ipv4";
-    case ada::host_type::OPAQUE_HOST : return "opaque";
-    default: unreachable();
-    }
-  }
-
-  ada_warn_unused std::string url_host::to_string() {
-    return "{\"type\":\"" + ada::to_string(type) + "\",\"entry\":\"" + entry + "\"}";
-  }
-
   ada_really_inline uint16_t url::scheme_default_port() const {
     return scheme::get_special_port(scheme);
   }
@@ -33,7 +19,7 @@ namespace ada {
     return "{\"scheme\":\"" + scheme + "\"" + ","
          + "\"username\":\"" + username + "\"" + "," + "\"password\":\"" +
          password + "\"" + "," +
-         (host.has_value() ? "\"host\":\"" + host.value().to_string() + "\"" + "," : "") +
+         (host.has_value() ? "\"host\":\"" + host.value() + "\"" + "," : "") +
          (port.has_value() ? "\"port\":" + std::to_string(port.value()) + "" + ","
                          : "") +
          "\"path\":\"" + path + "\"" +
