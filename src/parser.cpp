@@ -661,16 +661,20 @@ namespace ada::parser {
             // If c is U+0040 (@), then:
             // Note: we cannot access *pointer safely if (pointer == pointer_end).
             if ((pointer != pointer_end) && (*pointer == '@')) {
-              std::string authority_buffer(authority_view); // TODO: We don't need to allocate a new string.
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
-                authority_buffer.insert(0, "%40"); // TODO: avoid inserting a prefix, as it is more expensive.
+                if (password_token_seen) {
+                  url.password += "%40";
+                } else {
+                  url.username += "%40";
+                }
               }
 
               // Set atSignSeen to true.
               at_sign_seen = true;
+
               // For each codePoint in authority_buffer:
-              for (auto code_point: authority_buffer) {
+              for (auto code_point: authority_view) {
                 // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
                 if (code_point == ':' && !password_token_seen) {
                   password_token_seen = true;
