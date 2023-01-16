@@ -469,6 +469,7 @@ namespace ada::parser {
 
     std::string_view url_data(pointer_start, pointer_end - pointer_start);
 
+    // Optimization opportunity. Most websites does not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
     if(fragment.has_value()) {
       url.fragment = unicode::percent_encode(*fragment,
