@@ -126,7 +126,6 @@ static void BasicBench_http_parser(benchmark::State& state) {
 BENCHMARK(BasicBench_http_parser);
 
 static void BasicBench_AdaURL(benchmark::State& state) {
-
   // volatile to prevent optimizations.
   volatile bool is_valid = true;
   for (auto _ : state) {
