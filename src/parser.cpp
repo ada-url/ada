@@ -1066,13 +1066,13 @@ namespace ada::parser {
               // Append path_buffer to url’s path.
               url.path += "/" + path_buffer;
             }
+            if(pointer == pointer_end) { break; }
 
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
             if ((pointer != pointer_end) && (*pointer == '?')) {
               state = ada::state::QUERY;
               break;
             }
-            if(pointer == pointer_end) { break; }
             pointer++;
           } while(true);
           break;

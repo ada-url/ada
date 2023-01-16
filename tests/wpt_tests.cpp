@@ -5,8 +5,21 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <memory>
 
 #include "ada.h"
+
+
+// This function copies your input onto a memory buffer that
+// has just the necessary size. This will entice tools to detect
+// an out-of-bound access.
+ada::url ada_parse(std::string_view view, std::optional<ada::url> base = std::nullopt) {
+  std::cout << "about to parse '" << view << "'" << std::endl;
+  std::unique_ptr<char[]> buffer(new char[view.size()+1]);
+  memcpy(buffer.get(), view.data(), view.size());
+  return ada::parse(std::string_view(buffer.get(), view.size()), std::move(base));
+}
+
 #include "simdjson.h"
 
 using namespace simdjson;
@@ -131,7 +144,7 @@ bool setters_tests_encoding() {
         std::cout << "    comment: " << comment << std::endl;
       }
 
-      auto base = ada::parse(href);
+      auto base = ada_parse(href);
       TEST_ASSERT(base.is_valid, true, "Base url parsing should have succeeded")
 
       std::cout << "      " << href << std::endl;
@@ -243,12 +256,12 @@ bool urltestdata_encoding() {
       ada::url base_url;
       if (!object["base"].get(base)) {
         std::cout << "base=" << base << std::endl;
-        base_url = ada::parse(base);
+        base_url = ada_parse(base);
       }
       bool failure = false;
       ada::url input_url = (!object["base"].get(base)) ?
-      ada::parse(input, std::optional<ada::url>(std::move(base_url)))
-      : ada::parse(input);
+      ada_parse(input, std::optional<ada::url>(std::move(base_url)))
+      : ada_parse(input);
 
       if (!object["failure"].get(failure)) {
         TEST_ASSERT(input_url.is_valid, !failure, "Should not have succeeded");
