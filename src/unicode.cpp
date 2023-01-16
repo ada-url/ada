@@ -181,7 +181,7 @@ namespace ada::unicode {
 
 
   // A single-dot path segment must be "." or an ASCII case-insensitive match for "%2e".
-  ada_really_inline bool is_single_dot_path_segment(std::string_view input) noexcept {
+  ada_really_inline constexpr bool is_single_dot_path_segment(std::string_view input) noexcept {
     return input == "." || input == "%2e" || input == "%2E";
   }
 
