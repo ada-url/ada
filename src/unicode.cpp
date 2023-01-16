@@ -286,19 +286,19 @@ namespace ada::unicode {
   // This function attemps to convert an ASCII string to a lower-case version.
   // Once the lower cased version has been materialized, we check for the presence
   // of the substring 'xn-', if it is found (unlikely), we then call the expensive 'to_ascii'.
-  ada_really_inline bool to_lower_ascii_string(std::optional<std::string>& out, size_t first_percent) noexcept {
-#if ADA_DEVELOP_MODE
-    if(!out.has_value()) { abort(); }
-#endif
-    if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) { return false; }
+  ada_really_inline void to_lower_ascii_string(std::optional<std::string>& out, size_t first_percent) noexcept {
+    if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
+      out = std::nullopt;
+      return;
+    }
     std::transform(out.value().begin(), out.value().end(), out.value().begin(), [](char c) -> char {
       return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);}
     );
     if (out.value().find("xn-") == std::string_view::npos) {
-      return true;
+      return;
     }
 
-    return ada::parser::to_ascii(out, out.value(), false, first_percent);
+    out = ada::parser::to_ascii(out.value(), false, first_percent);
   }
 
 } // namespace ada::unicode

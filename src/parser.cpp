@@ -22,12 +22,8 @@ namespace ada::parser {
 
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
-   *
-   * The only difference between domain_to_ascii and to_ascii is that
-   * to_ascii does not expect the input to be percent decoded. This is
-   * mostly used to conform with the test suite.
    */
-  bool to_ascii(std::optional<std::string>& out, const std::string_view plain, const bool be_strict, size_t first_percent) {
+  std::optional<std::string> to_ascii(const std::string_view plain, const bool be_strict, size_t first_percent) {
     std::string percent_decoded_buffer;
     std::string_view input = plain;
     if(first_percent != std::string_view::npos) {
@@ -43,25 +39,25 @@ namespace ada::parser {
 
     UIDNA* uidna = uidna_openUTS46(options, &status);
     if (U_FAILURE(status)) {
-      return false;
+      return std::nullopt;
     }
 
     UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    out = std::string(255, 0);
+    std::string out(255, 0);
     int32_t length = uidna_nameToASCII_UTF8(uidna,
                                          input.data(),
                                          int32_t(input.length()),
-                                         out.value().data(), 255,
+                                         out.data(), 255,
                                          &info,
                                          &status);
 
     if (status == U_BUFFER_OVERFLOW_ERROR) {
       status = U_ZERO_ERROR;
-      out.value().resize(length);
+      out.resize(length);
       length = uidna_nameToASCII_UTF8(uidna,
                                      input.data(),
                                      int32_t(input.length()),
-                                     out.value().data(), length,
+                                     out.data(), length,
                                      &info,
                                      &status);
     }
@@ -85,16 +81,14 @@ namespace ada::parser {
     uidna_close(uidna);
 
     if (U_FAILURE(status) || info.errors != 0 || length == 0) {
-      out = std::nullopt;
-      return false;
+      return std::nullopt;
     }
 
-    out.value().resize(length);
-    if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
-      out = std::nullopt;
-      return false;
+    out.resize(length);
+    if(std::any_of(out.begin(), out.end(), ada::unicode::is_forbidden_domain_code_point)) {
+      return std::nullopt;
     }
-    return true;
+    return out;
   }
 
   /**
@@ -400,20 +394,16 @@ namespace ada::parser {
     bool is_ascii = !input.empty() && 128>(std::reduce(input.begin(), input.end(), uint8_t(input[0]), std::bit_or<uint8_t>()));
 
     // if simple_case is true, there is a good chance we might be able to use the fast path.
-    bool simple_case = (is_ascii && (first_percent == std::string_view::npos));
-
-    // This is required since `to_lower_ascii_string` assumes non-null `out` parameter
-    if (simple_case) {
+    // In the simple case, we call to_lower_ascii_string above, or else, we fall back on the expensive case.
+    if (is_ascii && (first_percent == std::string_view::npos)) {
       out = input;
+      unicode::to_lower_ascii_string(out, first_percent);
+    } else {
+      out = to_ascii(input, false, first_percent);
     }
 
-    // In the simple case, we call to_lower_ascii_string above, or else, we fall back on the expensive case.
-    bool is_valid = (is_ascii && (first_percent == std::string_view::npos)) ?
-      unicode::to_lower_ascii_string(out, first_percent) :
-      to_ascii(out, input, false, first_percent);
-
     // If asciiDomain is failure, validation error, return failure.
-    if (!out.has_value() || !is_valid) {
+    if (!out.has_value()) {
       return false;
     }
 

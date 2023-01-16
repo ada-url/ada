@@ -25,7 +25,7 @@ namespace ada::unicode {
   std::string percent_decode(const std::string_view input, size_t first_percent);
   std::string percent_encode(const std::string_view input, const uint8_t character_set[]);
   void percent_encode_character(const char input, const uint8_t character_set[], std::string& out);
-  ada_really_inline bool to_lower_ascii_string(std::optional<std::string>& out, size_t first_percent) noexcept;
+  ada_really_inline void to_lower_ascii_string(std::optional<std::string>& out, size_t first_percent) noexcept;
 
 } // namespace ada::unicode
 
