@@ -7,4 +7,3 @@
 #include "ada.h"
 
 #include <benchmark/benchmark.h>
-
