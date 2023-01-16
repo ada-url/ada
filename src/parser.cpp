@@ -418,21 +418,7 @@ namespace ada::parser {
     }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
-    auto is_ipv4 = [](std::string_view view) {
-      size_t last_dot = view.rfind('.');
-      if(last_dot == view.size() - 1) {
-        view.remove_suffix(1);
-        last_dot = view.rfind('.');
-      }
-      std::string_view number = (last_dot == std::string_view::npos) ? view : view.substr(last_dot+1);
-      if(number.empty()) { return false; }
-      /** Optimization opportunity: we have basically identified the last number of the
-      ipv4 if we return true here. We might as well parse it and have at least one
-      number parsed when we get to parse_ipv4. */
-      if(std::all_of(number.begin(), number.end(), ada::checkers::is_digit)) { return true; }
-      return (checkers::has_hex_prefix(number) && std::all_of(number.begin()+2, number.end(), ::ada::unicode::is_lowercase_hex));
-    };
-    if(is_ipv4(*out)) {
+    if(checkers::is_ipv4(*out)) {
       return parse_ipv4(out, *out);
     }
     return true;
@@ -1010,6 +996,12 @@ namespace ada::parser {
             // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
             if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
               pointer--;
+            }
+
+            // Optimization: Avoiding going into PATH state improves the performance of urls ending with /.
+            if (std::next(pointer) == pointer_end) {
+              url.path = "/";
+              return url;
             }
           }
           // Otherwise, if state override is not given and c is U+003F (?),
