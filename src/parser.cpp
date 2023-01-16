@@ -2,6 +2,7 @@
 #include "ada/character_sets.h"
 #include "ada/checkers.h"
 #include "ada/unicode.h"
+#include "ada/url.h"
 
 #include <array>
 #include <algorithm>
@@ -95,20 +96,21 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
-  std::optional<ada::url_host> parse_opaque_host(std::string_view input) {
+  bool parse_opaque_host(std::optional<ada::url_host>& out, std::string_view input) {
     if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
-      return std::nullopt;
+      return false;
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
     std::string result = ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
-    return ada::url_host{ada::host_type::OPAQUE_HOST, result};
+    out = ada::url_host{ada::host_type::OPAQUE_HOST, result};
+    return true;
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
-  std::optional<ada::url_host> parse_ipv4(std::string_view input) {
+  bool parse_ipv4(std::optional<ada::url_host>& out, std::string_view input) {
     if(input[input.size()-1]=='.') {
       input.remove_suffix(1);
     }
@@ -131,36 +133,37 @@ namespace ada::parser {
         } else {
           r = std::from_chars(input.data(), input.data() + input.size(), result, 10);
         }
-        if (r.ec != std::errc()) { return std::nullopt; }
+        if (r.ec != std::errc()) { return false; }
         input.remove_prefix(r.ptr-input.data());
       }
       if(input.empty()) {
         // We have the last value.
         // At this stage, ipv4 contains digit_count*8 bits.
         // So we have 32-digit_count*8 bits left.
-        if(result > (uint64_t(1)<<(32-digit_count*8))) { return std::nullopt; }
+        if(result > (uint64_t(1)<<(32-digit_count*8))) { return false; }
         ipv4 <<=(32-digit_count*8);
         ipv4 |= result;
         goto final;
       } else {
         // There is more, so that the value must no be larger than 255
         // and we must have a '.'.
-        if ((result>255) || (input[0]!='.')) { return std::nullopt; }
+        if ((result>255) || (input[0]!='.')) { return false; }
         ipv4 <<=8;
         ipv4 |= result;
         input.remove_prefix(1); // remove '.'
       }
     }
-    if((digit_count != 4) || (!input.empty())) {return std::nullopt; }
+    if((digit_count != 4) || (!input.empty())) {return false; }
     final:
     // We could also check result.ptr to see where the parsing ended.
-    return ada::url_host{ada::host_type::IPV4_ADDRESS, ada::serializers::ipv4(ipv4)};
+    out = ada::url_host{ada::host_type::IPV4_ADDRESS, ada::serializers::ipv4(ipv4)};
+    return true;
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
-  std::optional<ada::url_host> parse_ipv6(std::string_view input) {
+  bool parse_ipv6(std::optional<ada::url_host>& out, std::string_view input) {
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
     std::array<uint16_t, 8> address{};
 
@@ -177,7 +180,7 @@ namespace ada::parser {
     if (*pointer == ':') {
       // If remaining does not start with U+003A (:), validation error, return failure.
       if (checkers::is_not_next_equals(pointer, input.end(), ':')) {
-        return std::nullopt;
+        return false;
       }
 
       // Increase pointer by 2.
@@ -191,14 +194,14 @@ namespace ada::parser {
     while (pointer != input.end()) {
       // If pieceIndex is 8, validation error, return failure.
       if (piece_index == 8) {
-        return std::nullopt;
+        return false;
       }
 
       // If c is U+003A (:), then:
       if (*pointer == ':') {
         // If compress is non-null, validation error, return failure.
         if (compress.has_value()) {
-          return std::nullopt;
+          return false;
         }
 
         // Increase pointer and pieceIndex by 1, set compress to pieceIndex, and then continue.
@@ -223,7 +226,7 @@ namespace ada::parser {
       if (*pointer == '.') {
         // If length is 0, validation error, return failure.
         if (length == 0) {
-          return std::nullopt;
+          return false;
         }
 
         // Decrease pointer by length.
@@ -231,7 +234,7 @@ namespace ada::parser {
 
         // If pieceIndex is greater than 6, validation error, return failure.
         if (piece_index > 6) {
-          return std::nullopt;
+          return false;
         }
 
         // Let numbersSeen be 0.
@@ -250,13 +253,13 @@ namespace ada::parser {
             }
             // Otherwise, validation error, return failure.
             else {
-              return std::nullopt;
+              return false;
             }
           }
 
           // If c is not an ASCII digit, validation error, return failure.
           if (!checkers::is_digit(*pointer)) {
-            return std::nullopt;
+            return false;
           }
 
           // While c is an ASCII digit:
@@ -270,7 +273,7 @@ namespace ada::parser {
             }
             // Otherwise, if ipv4Piece is 0, validation error, return failure.
             else if (ipv4_piece == 0) {
-              return std::nullopt;
+              return false;
             }
             // Otherwise, set ipv4Piece to ipv4Piece × 10 + number.
             else {
@@ -279,7 +282,7 @@ namespace ada::parser {
 
             // If ipv4Piece is greater than 255, validation error, return failure.
             if (ipv4_piece > 255) {
-              return std::nullopt;
+              return false;
             }
 
             // Increase pointer by 1.
@@ -301,7 +304,7 @@ namespace ada::parser {
 
         // If numbersSeen is not 4, validation error, return failure.
         if (numbers_seen != 4) {
-          return std::nullopt;
+          return false;
         }
 
         // Break.
@@ -314,12 +317,12 @@ namespace ada::parser {
 
         // If c is the EOF code point, validation error, return failure.
         if (pointer == input.end()) {
-          return std::nullopt;
+          return false;
         }
       }
       // Otherwise, if c is not the EOF code point, validation error, return failure.
       else if (pointer != input.end()) {
-        return std::nullopt;
+        return false;
       }
 
       // Set address[pieceIndex] to value.
@@ -347,16 +350,17 @@ namespace ada::parser {
     }
     // Otherwise, if compress is null and pieceIndex is not 8, validation error, return failure.
     else if (piece_index != 8) {
-      return std::nullopt;
+      return false;
     }
 
-    return ada::url_host{ada::host_type::IPV6_ADDRESS, ada::serializers::ipv6(address)};
+    out = ada::url_host{ada::host_type::IPV6_ADDRESS, ada::serializers::ipv6(address)};
+    return true;
   }
 
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  std::optional<ada::url_host> parse_host(const std::string_view input, bool is_not_special, bool input_is_ascii) {
+  bool parse_host(std::optional<ada::url_host>& out, const std::string_view input, bool is_not_special, bool input_is_ascii) {
     //
     // Note: this function assumes that parse_host is not empty. Make sure we can
     // guarantee that.
@@ -365,16 +369,16 @@ namespace ada::parser {
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
       if (input.back() != ']') {
-        return std::nullopt;
+        return false;
       }
 
       // Return the result of IPv6 parsing input with its leading U+005B ([) and trailing U+005D (]) removed.
-      return parse_ipv6(input.substr(1, input.length() - 2));
+      return parse_ipv6(out, std::string_view(input.begin() + 1, input.end() - input.begin() - 2));
     }
 
     // If isNotSpecial is true, then return the result of opaque-host parsing input.
     if (is_not_special) {
-      return parse_opaque_host(input);
+      return parse_opaque_host(out, input);
     }
 
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
@@ -401,7 +405,7 @@ namespace ada::parser {
 
     // If asciiDomain is failure, validation error, return failure.
     if (!ascii_domain.has_value()) {
-      return std::nullopt;
+      return false;
     }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
@@ -420,9 +424,10 @@ namespace ada::parser {
       return (checkers::has_hex_prefix(number) && std::all_of(number.begin()+2, number.end(), ::ada::unicode::is_lowercase_hex));
     };
     if(is_ipv4(*ascii_domain)) {
-      return parse_ipv4(*ascii_domain);
+      return parse_ipv4(out, *ascii_domain);
     }
-    return ada::url_host{ada::host_type::BASIC_DOMAIN, *ascii_domain};
+    out = ada::url_host{ada::host_type::BASIC_DOMAIN, *ascii_domain};
+    return true;
   }
 
   url parse_url(std::string_view user_input,
@@ -435,8 +440,6 @@ namespace ada::parser {
 
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = state_override.value_or(ada::state::SCHEME_START);
-
-    // Define parsed URL
 
     /**
      * Design concern: We take an optional_url as a parameter. Yet optional_url
@@ -927,16 +930,9 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            std::optional<ada::url_host> host = parse_host(host_view, !url.is_special(), is_ascii);
-
-            // If host is failure, then return failure.
-            if (!host.has_value()) {
-              url.is_valid = false;
-              return url;
-            }
+            url.is_valid = parse_host(url.host, host_view, !url.is_special(), is_ascii);
 
             // Set url’s host to host, buffer to the empty string, and state to port state.
-            url.host = *host;
             state = ada::state::PORT;
           }
           // Otherwise, if one of the following is true:
@@ -958,16 +954,9 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing host_view with url is not special.
-            std::optional<ada::url_host> host = parse_host(host_view, !url.is_special(), is_ascii);
-
-            // If host is failure, then return failure.
-            if (!host.has_value()) {
-              url.is_valid = false;
-              return url;
-            }
+            url.is_valid = parse_host(url.host, host_view, !url.is_special(), is_ascii);
 
             // Set url’s host to host, and state to path start state.
-            url.host = *host;
             state = ada::state::PATH_START;
 
             // If state override is given, then return.
@@ -1157,21 +1146,12 @@ namespace ada::parser {
             // Otherwise, run these steps:
             else {
               // Let host be the result of host parsing buffer with url is not special.
-              std::optional<ada::url_host> host = parse_host(buffer, !url.is_special(), is_ascii);
-
-              // If host is failure, then return failure.
-              if (!host.has_value()) {
-                url.is_valid = false;
-                return url;
-              }
+              url.is_valid = parse_host(url.host, buffer, !url.is_special(), is_ascii);
 
               // If host is "localhost", then set host to the empty string.
-              if ((*host).entry == "localhost") {
-                (*host).entry = "";
+              if (url.host.has_value() && url.host->entry == "localhost") {
+                url.host->entry = "";
               }
-
-              // Set url’s host to host.
-              url.host = *host;
 
               // If state override is given, then return.
               if (state_override.has_value()) {
