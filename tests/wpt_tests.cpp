@@ -157,7 +157,7 @@ bool setters_tests_encoding() {
         // TODO: Handle invalid utf-8 tests too.
         if (!element["expected"]["hostname"].get(expected)) {
           ada::set_host(base, std::string{new_value});
-          TEST_ASSERT(base.host.value_or(ada::url_host{ada::host_type::BASIC_DOMAIN, ""}).entry, expected, "Hostname");
+          TEST_ASSERT(base.host.value_or(""), expected, "Hostname");
         }
       }
       else if (category == "port") {
@@ -267,7 +267,7 @@ bool urltestdata_encoding() {
         TEST_ASSERT(input_url.password, password, "Password");
 
         std::string_view hostname = object["hostname"];
-        TEST_ASSERT(input_url.host.value_or(ada::url_host{ada::host_type::BASIC_DOMAIN, ""}).entry, hostname, "Hostname");
+        TEST_ASSERT(input_url.host.value_or(""), hostname, "Hostname");
 
         std::string_view port = object["port"];
         std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";

@@ -96,21 +96,20 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
-  bool parse_opaque_host(std::optional<ada::url_host>& out, std::string_view input) {
+  bool parse_opaque_host(std::optional<std::string>& out, std::string_view input) {
     if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
       return false;
     }
 
     // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
-    std::string result = ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
-    out = ada::url_host{ada::host_type::OPAQUE_HOST, result};
+    out = ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
     return true;
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
-  bool parse_ipv4(std::optional<ada::url_host>& out, std::string_view input) {
+  bool parse_ipv4(std::optional<std::string>& out, std::string_view input) {
     if(input[input.size()-1]=='.') {
       input.remove_suffix(1);
     }
@@ -156,14 +155,14 @@ namespace ada::parser {
     if((digit_count != 4) || (!input.empty())) {return false; }
     final:
     // We could also check result.ptr to see where the parsing ended.
-    out = ada::url_host{ada::host_type::IPV4_ADDRESS, ada::serializers::ipv4(ipv4)};
+    out = ada::serializers::ipv4(ipv4);
     return true;
   }
 
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
-  bool parse_ipv6(std::optional<ada::url_host>& out, std::string_view input) {
+  bool parse_ipv6(std::optional<std::string>& out, std::string_view input) {
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
     std::array<uint16_t, 8> address{};
 
@@ -353,14 +352,14 @@ namespace ada::parser {
       return false;
     }
 
-    out = ada::url_host{ada::host_type::IPV6_ADDRESS, ada::serializers::ipv6(address)};
+    out = ada::serializers::ipv6(address);
     return true;
   }
 
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  bool parse_host(std::optional<ada::url_host>& out, const std::string_view input, bool is_not_special, bool input_is_ascii) {
+  bool parse_host(std::optional<std::string>& out, const std::string_view input, bool is_not_special, bool input_is_ascii) {
     //
     // Note: this function assumes that parse_host is not empty. Make sure we can
     // guarantee that.
@@ -401,10 +400,10 @@ namespace ada::parser {
       return (result.find("xn-") == std::string_view::npos) ? result : to_ascii(view, false, first_percent);
     };
     // In the simple case, we call to_lower_ascii_string above, or else, we fall back on the expensive case.
-    std::optional<std::string> ascii_domain = simple_case ? to_lower_ascii_string(input) : to_ascii(input, false, first_percent);
+    out = simple_case ? to_lower_ascii_string(input) : to_ascii(input, false, first_percent);
 
     // If asciiDomain is failure, validation error, return failure.
-    if (!ascii_domain.has_value()) {
+    if (!out.has_value()) {
       return false;
     }
 
@@ -423,10 +422,9 @@ namespace ada::parser {
       if(std::all_of(number.begin(), number.end(), ada::checkers::is_digit)) { return true; }
       return (checkers::has_hex_prefix(number) && std::all_of(number.begin()+2, number.end(), ::ada::unicode::is_lowercase_hex));
     };
-    if(is_ipv4(*ascii_domain)) {
-      return parse_ipv4(out, *ascii_domain);
+    if(is_ipv4(*out)) {
+      return parse_ipv4(out, *out);
     }
-    out = ada::url_host{ada::host_type::BASIC_DOMAIN, *ascii_domain};
     return true;
   }
 
@@ -551,7 +549,7 @@ namespace ada::parser {
 
               // If url’s scheme is "file" and its host is an empty host, then return.
               // An empty host is the empty string.
-              if (url.scheme == "file" && url.host.has_value() && url.host.value().entry.empty()) {
+              if (url.scheme == "file" && url.host.has_value() && url.host.value().empty()) {
                 return url;
               }
             }
@@ -1120,7 +1118,7 @@ namespace ada::parser {
           }
           else if (file_host_buffer.empty()) {
             // Set url’s host to the empty string.
-            url.host = ada::url_host{ada::host_type::BASIC_DOMAIN, ""};
+            url.host = "";
 
             // If state override is given, then return.
             if (state_override.has_value()) {
@@ -1135,8 +1133,8 @@ namespace ada::parser {
             url.is_valid = parse_host(url.host, file_host_buffer, !url.is_special(), is_ascii);
 
             // If host is "localhost", then set host to the empty string.
-            if (url.host.has_value() && url.host->entry == "localhost") {
-              url.host->entry = "";
+            if (url.host.has_value() && url.host.value() == "localhost") {
+              url.host = "";
             }
 
             // If state override is given, then return.
@@ -1155,7 +1153,7 @@ namespace ada::parser {
           url.scheme = "file";
 
           // Set url’s host to the empty string.
-          url.host = ada::url_host{ada::host_type::BASIC_DOMAIN, ""};
+          url.host = "";
 
           // If c is U+002F (/) or U+005C (\), then:
           if (*pointer == '/' || *pointer == '\\') {

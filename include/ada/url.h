@@ -12,30 +12,6 @@
 namespace ada {
 
   /**
-   * @see https://url.spec.whatwg.org/#host-representation
-   */
-  enum class host_type {
-    BASIC_DOMAIN, // Had to use BASIC_ prefix due to global define in <cmath>
-    IPV6_ADDRESS,
-    IPV4_ADDRESS,
-    OPAQUE_HOST,
-  };
-
-  ada_warn_unused std::string to_string(ada::host_type type);
-
-  /**
-   * @see https://url.spec.whatwg.org/#host-representation
-   */
-  struct url_host {
-
-    ada::host_type type{ada::host_type::BASIC_DOMAIN};
-
-    std::string entry{};
-
-    ada_warn_unused std::string to_string();
-  };
-
-  /**
    * A URL is a struct that represents a universal identifier.
    * To disambiguate from a valid URL string it can also be referred to as a URL record.
    *
@@ -61,7 +37,7 @@ namespace ada {
     /**
      * A URL’s host is null or a host. It is initially null.
      */
-    std::optional<ada::url_host> host{};
+    std::optional<std::string> host{};
 
     /**
      * A URL’s port is either null or a 16-bit unsigned integer that identifies a networking port. It is initially null.
@@ -112,7 +88,7 @@ namespace ada {
      * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
      */
     [[nodiscard]] bool cannot_have_credentials_or_port() const {
-      return !host.has_value() || host.value().entry.empty() || scheme == "file";
+      return !host.has_value() || host.value().empty() || scheme == "file";
     }
     /** For development purposes, we want to know when a copy is made. */
     url() = default;
