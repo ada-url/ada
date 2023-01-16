@@ -435,9 +435,6 @@ namespace ada::parser {
                 ada::encoding_type encoding,
                 std::optional<ada::url> optional_url,
                 std::optional<ada::state> state_override) {
-    // Assign buffer
-    std::string buffer{}; /* TODO: Move within the sections of the parser, and grab the bytes you need. */
-
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = state_override.value_or(ada::state::SCHEME_START);
 
@@ -670,7 +667,7 @@ namespace ada::parser {
           do {
             std::string_view view(pointer, size_t(pointer_end-pointer));
             size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
-            std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location :view.size());
+            std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location : view.size());
             pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
             // If c is U+0040 (@), then:
             // Note: we cannot access *pointer safely if (pointer == pointer_end).
@@ -896,7 +893,7 @@ namespace ada::parser {
 
           // Given a call to parse_url, we should get here at most *ONCE*.
           // There is the business with '[', but that's no problem.
-          std::string_view view(pointer, size_t(pointer_end-pointer) );
+          std::string_view view(pointer, size_t(pointer_end-pointer));
           size_t location = url.is_special() ? view.find_first_of(":[/?\\") : view.find_first_of(":[/?");
 
           // Next while loop is almost never taken!
@@ -1120,52 +1117,42 @@ namespace ada::parser {
           break;
         }
         case ada::state::FILE_HOST: {
-          // If c is the EOF code point, U+002F (/), U+005C (\), U+003F (?), or U+0023 (#),
-          // then decrease pointer by 1 and then:
-          if (pointer == pointer_end || *pointer == '/' || *pointer == '\\' || *pointer == '?') {
-            pointer--;
+          std::string_view view(pointer, size_t(pointer_end-pointer));
+          size_t location = view.find_first_of("/\\?");
+          std::string_view file_host_buffer(view.data(), (location != std::string_view::npos) ? location : view.size());
+          pointer += location - 1;
 
-            // If state override is not given and buffer is a Windows drive letter, validation error,
-            // set state to path state.
-            if (!state_override.has_value() && checkers::is_windows_drive_letter(buffer)) {
-              state = ada::state::PATH;
-            }
-            // Otherwise, if buffer is the empty string, then:
-            else if (buffer.empty()) {
-              // Set url’s host to the empty string.
-              url.host = ada::url_host{ada::host_type::BASIC_DOMAIN, ""};
-
-              // If state override is given, then return.
-              if (state_override.has_value()) {
-                return url;
-              }
-
-              // Set state to path start state.
-              state = ada::state::PATH_START;
-            }
-            // Otherwise, run these steps:
-            else {
-              // Let host be the result of host parsing buffer with url is not special.
-              url.is_valid = parse_host(url.host, buffer, !url.is_special(), is_ascii);
-
-              // If host is "localhost", then set host to the empty string.
-              if (url.host.has_value() && url.host->entry == "localhost") {
-                url.host->entry = "";
-              }
-
-              // If state override is given, then return.
-              if (state_override.has_value()) {
-                return url;
-              }
-
-              // Set buffer to the empty string and state to path start state.
-              buffer.clear();
-              state = ada::state::PATH_START;
-            }
+          if (!state_override.has_value() && checkers::is_windows_drive_letter(file_host_buffer)) {
+            state = ada::state::PATH;
           }
-          // Otherwise, append c to buffer.
+          else if (file_host_buffer.empty()) {
+            // Set url’s host to the empty string.
+            url.host = ada::url_host{ada::host_type::BASIC_DOMAIN, ""};
+
+            // If state override is given, then return.
+            if (state_override.has_value()) {
+              return url;
+            }
+
+            // Set state to path start state.
+            state = ada::state::PATH_START;
+          }
           else {
-            buffer += *pointer;
+            // Let host be the result of host parsing buffer with url is not special.
+            url.is_valid = parse_host(url.host, file_host_buffer, !url.is_special(), is_ascii);
+
+            // If host is "localhost", then set host to the empty string.
+            if (url.host.has_value() && url.host->entry == "localhost") {
+              url.host->entry = "";
+            }
+
+            // If state override is given, then return.
+            if (state_override.has_value()) {
+              return url;
+            }
+
+            // Set buffer to the empty string and state to path start state.
+            state = ada::state::PATH_START;
           }
 
           break;
