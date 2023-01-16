@@ -1068,7 +1068,7 @@ namespace ada::parser {
             }
 
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
-            if (*pointer == '?') {
+            if ((pointer != pointer_end) && (*pointer == '?')) {
               state = ada::state::QUERY;
               break;
             }
