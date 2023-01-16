@@ -8,14 +8,13 @@
 
 namespace ada::checkers {
 
-
   // Assuming that x is an ASCII letter, this returns the lower case equivalent.
   // More likely to be inlined by the compiler and constexpr.
-  constexpr char to_lower(char x) { return (x | 0x20); }
+  constexpr char to_lower(char x) noexcept { return (x | 0x20); }
   // Returns true if the character is an ASCII letter. Equivalent to std::isalpha but
   // more likely to be inlined by the compiler. Also, std::isalpha is not constexpr
   // generally.
-  constexpr bool is_alpha(char x) { return (to_lower(x) >= 'a') & (to_lower(x) <= 'z'); }
+  constexpr bool is_alpha(char x) noexcept { return (to_lower(x) >= 'a') & (to_lower(x) <= 'z'); }
 
   // Check whether a string starts with 0x or 0X. The function is only
   // safe if input.size() >=2. See has_hex_prefix.
@@ -37,29 +36,29 @@ namespace ada::checkers {
   }
 
   // Check whether x is an ASCII digit. More likely to be inlined than std::isdigit.
-  constexpr bool is_digit(char x) { return (x >= '0') & (x <= '9'); }
+  constexpr bool is_digit(char x) noexcept { return (x >= '0') & (x <= '9'); }
 
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
   // and the second is either U+003A (:) or U+007C (|).
-  inline bool is_windows_drive_letter(const std::string_view input) noexcept {
+  inline constexpr bool is_windows_drive_letter(std::string_view input) noexcept {
     return input.size() >= 2 && (is_alpha(input[0]) & ((input[1] == ':') | (input[1] == '|')));
   }
 
   // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
-  inline bool is_normalized_windows_drive_letter(std::string_view input) noexcept {
+  inline constexpr bool is_normalized_windows_drive_letter(std::string_view input) noexcept {
     return input.size() >= 2 && (is_alpha(input[0]) & (input[1] == ':'));
   }
 
   ada_really_inline constexpr bool is_next_equals(const std::string_view::iterator start,
                                                   const std::string_view::iterator end,
-                                                  const char c) {
-    return (std::distance(start, end) > 0) && (start[1] == c);
+                                                  const char c) noexcept {
+    return (start != end) && (start[1] == c);
   }
 
   ada_really_inline constexpr bool is_not_next_equals(const std::string_view::iterator start,
                                                       const std::string_view::iterator end,
-                                                      const char c) {
-    return (std::distance(start, end) > 0) && (start[1] != c);
+                                                      const char c) noexcept {
+    return (start == end) || (start[1] != c);
   }
 
 } // namespace ada::checkers

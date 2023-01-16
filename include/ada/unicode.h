@@ -13,7 +13,7 @@ namespace ada::unicode {
   ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept;
   ada_really_inline constexpr bool is_ascii_tab_or_newline(const char c) noexcept;
   ada_really_inline constexpr bool is_double_dot_path_segment(const std::string_view input) noexcept;
-  ada_really_inline bool is_single_dot_path_segment(const std::string_view input) noexcept;
+  ada_really_inline constexpr bool is_single_dot_path_segment(const std::string_view input) noexcept;
   ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept;
 
   unsigned constexpr convert_hex_to_binary(char c) noexcept;
