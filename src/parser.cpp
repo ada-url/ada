@@ -163,6 +163,10 @@ namespace ada::parser {
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
   bool parse_ipv6(std::optional<std::string>& out, std::string_view input) {
+  #if ADA_DEVELOP_MODE
+    // prove that this is not necessary:
+    if(input.empty()) { return false; }
+  #endif
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
     std::array<uint16_t, 8> address{};
 
@@ -176,9 +180,9 @@ namespace ada::parser {
     std::string_view::iterator pointer = input.begin();
 
     // If c is U+003A (:), then:
-    if (*pointer == ':') {
+    if (input[0] == ':') {
       // If remaining does not start with U+003A (:), validation error, return failure.
-      if (checkers::is_not_next_equals(pointer, input.end(), ':')) {
+      if(input.size() == 1 && input[2] != ':') {
         return false;
       }
 
@@ -717,7 +721,8 @@ namespace ada::parser {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
-          if ((pointer != pointer_end) && (*pointer == '/') && checkers::is_next_equals(pointer, pointer_end, '/')) {
+          std::string_view view (pointer, size_t(pointer_end-pointer));
+          if (ada::checkers::begins_with(view, "//")) {
             state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
             pointer++;
           }
@@ -835,7 +840,8 @@ namespace ada::parser {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
-          if ((pointer != pointer_end) && (*pointer == '/') && checkers::is_next_equals(pointer, pointer_end, '/')) {
+           std::string_view view (pointer, size_t(pointer_end-pointer));
+          if (ada::checkers::begins_with(view, "//")) {
             pointer++;
           }
           // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.
