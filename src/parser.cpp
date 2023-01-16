@@ -476,13 +476,6 @@ namespace ada::parser {
     pointer_start = state_override.has_value() ? internal_input.begin() : url_data.begin();
     pointer_end = state_override.has_value() ? internal_input.end() : url_data.end();
 
-    // most URLs have no @. Having no @ tells us that we don't have to worry about AUTHORITY. Of course,
-    // we could have @ and still not have to worry about AUTHORITY.
-    // TODO: Instead of just collecting a bool, collect the location of the '@' and do something useful with it.
-    // TODO: We could do various processing early on, using a single pass over the string to collect
-    // information about it, e.g., telling us whether there is a @ and if so, where (or how many).
-    const bool contains_ampersand = (std::find(pointer_start, pointer_end, '@') != pointer_end);
-
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
 
@@ -637,6 +630,13 @@ namespace ada::parser {
           break;
         }
         case ada::state::AUTHORITY: {
+          // most URLs have no @. Having no @ tells us that we don't have to worry about AUTHORITY. Of course,
+          // we could have @ and still not have to worry about AUTHORITY.
+          // TODO: Instead of just collecting a bool, collect the location of the '@' and do something useful with it.
+          // TODO: We could do various processing early on, using a single pass over the string to collect
+          // information about it, e.g., telling us whether there is a @ and if so, where (or how many).
+          const bool contains_ampersand = (std::find(pointer, pointer_end, '@') != pointer_end);
+
           if(!contains_ampersand) {
             // TODO: This is a waste of time, we should never have arrived here.
             pointer--;
