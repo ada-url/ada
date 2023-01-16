@@ -74,7 +74,7 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  void set_username(ada::url &base, std::string input) noexcept {
+  void set_username(ada::url &base, std::string_view input) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
     if (base.cannot_have_credentials_or_port()) {
       return;
@@ -83,7 +83,7 @@ namespace ada {
     // Set the username given this’s URL and the given value.
     // To set the username given a url and username, set url’s username to the result of running UTF-8 percent-encode
     // on username using the userinfo percent-encode set.
-    base.username = ada::unicode::percent_encode(std::string_view(input), character_sets::USERINFO_PERCENT_ENCODE);
+    base.username = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
   }
 
   /**
@@ -91,7 +91,7 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  void set_password(ada::url &base, std::string input) noexcept {
+  void set_password(ada::url &base, std::string_view input) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
     if (base.cannot_have_credentials_or_port()) {
       return;
@@ -100,7 +100,7 @@ namespace ada {
     // Set the username given this’s URL and the given value.
     // To set the password given a url and password, set url’s password to the result of running UTF-8 percent-encode
     // on password using the userinfo percent-encode set.
-    base.password = unicode::percent_encode(std::string_view(input), character_sets::USERINFO_PERCENT_ENCODE);
+    base.password = unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
   }
 
   /**
@@ -182,7 +182,7 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  void set_pathname(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
+  void set_pathname(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
     // If this’s URL has an opaque path, then return.
     if (base.has_opaque_path) {
       return;
@@ -197,7 +197,7 @@ namespace ada {
      * specialize and just call what is needed: a path computation.
      */
     // Basic URL parse the given value with this’s URL as url and path start state as state override.
-    auto result = ada::parser::parse_url(std::move(input), std::nullopt, encoding,
+    auto result = ada::parser::parse_url(input, std::nullopt, encoding,
 #if ADA_DEVELOP_MODE
       base.oh_no_we_need_to_copy_url(),
 #else
@@ -215,7 +215,7 @@ namespace ada {
   /**
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
-  void set_search(ada::url &base, std::string input) noexcept {
+  void set_search(ada::url &base, std::string_view input) noexcept {
     // If the given value is the empty string:
     if (input.empty()) {
       // Set url’s query to null.
@@ -229,7 +229,8 @@ namespace ada {
       return;
     }
 
-    auto new_value = input[0] == '?' ? input.substr(1) : input;
+    std::string new_value;
+    new_value = input[0] == '?' ? input.substr(1) : input;
     helpers::remove_ascii_tab_or_newline(new_value);
 
     auto query_percent_encode_set = base.is_special() ?
@@ -247,7 +248,7 @@ namespace ada {
   /**
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
-  void set_hash(ada::url &base, std::string input) noexcept {
+  void set_hash(ada::url &base, std::string_view input) noexcept {
     // If the given value is the empty string:
     if (input.empty()) {
       // Set this’s URL’s fragment to null
@@ -259,7 +260,8 @@ namespace ada {
     }
 
     // Let input be the given value with a single leading U+0023 (#) removed, if any.
-    auto new_value = input[0] == '#' ? input.substr(1) : input;
+    std::string new_value;
+    new_value = input[0] == '#' ? input.substr(1) : input;
     helpers::remove_ascii_tab_or_newline(new_value);
 
     // Set this’s URL’s fragment to the empty string.
