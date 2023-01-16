@@ -1,8 +1,9 @@
+#include <array>
 #include <string>
 
 namespace ada::serializers {
 
-  size_t find_longest_sequence_of_ipv6_pieces(const uint16_t* address) noexcept {
+  size_t find_longest_sequence_of_ipv6_pieces(const std::array<uint16_t, 8>& address) noexcept {
     size_t max_index = -1;
     size_t max_length = 1;
     size_t current_start = -1;
@@ -35,7 +36,7 @@ namespace ada::serializers {
   /**
    * @see https://url.spec.whatwg.org/#concept-ipv6-serializer
    */
-  std::string ipv6(const uint16_t* address) noexcept {
+  std::string ipv6(const std::array<uint16_t, 8>& address) noexcept {
     // Let output be the empty string.
     std::string output{};
 

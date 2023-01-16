@@ -360,7 +360,7 @@ namespace ada::parser {
       return false;
     }
 
-    out = ada::serializers::ipv6(address.data());
+    out = ada::serializers::ipv6(address);
     return true;
   }
 
@@ -375,7 +375,7 @@ namespace ada::parser {
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
-      if (input[input.size()-1] != ']') {
+      if (input.back() != ']') {
         return false;
       }
 
