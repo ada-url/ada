@@ -15,7 +15,7 @@ namespace ada::parser {
   bool parse_opaque_host(std::optional<std::string>& out, std::string_view input);
   bool parse_ipv6(std::optional<std::string>& out, std::string_view input);
   bool parse_ipv4(std::optional<std::string>& out, std::string_view input);
-  bool parse_host(std::optional<std::string>& out, std::string_view input, bool is_not_special, bool input_is_ascii);
+  bool parse_host(std::optional<std::string>& out, std::string_view input, bool is_not_special);
 
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url = std::nullopt,

@@ -367,7 +367,7 @@ namespace ada::parser {
   /**
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  bool parse_host(std::optional<std::string>& out, const std::string_view input, bool is_not_special, bool input_is_ascii) {
+  bool parse_host(std::optional<std::string>& out, const std::string_view input, bool is_not_special) {
     //
     // Note: this function assumes that parse_host is not empty. Make sure we can
     // guarantee that.
@@ -393,9 +393,11 @@ namespace ada::parser {
     // The most common case is an ASCII input, in which case we do not need to call the expensive 'to_ascii'
     // if a few conditions are met: no '%' and no 'xn-' subsequence.
     size_t first_percent = input.find('%');
+    // most input strings will be ASCII which may enable some optimizations.
+    bool is_ascii = !input.empty() && 128>(std::reduce(input.begin(), input.end(), uint8_t(input[0]), std::bit_or<uint8_t>()));
 
     // if simple_case is true, there is a good chance we might be able to use the fast path.
-    bool simple_case = (input_is_ascii && (first_percent == std::string_view::npos));
+    bool simple_case = (is_ascii && (first_percent == std::string_view::npos));
 
     // This is required since `to_lower_ascii_string` assumes non-null `out` parameter
     if (simple_case) {
@@ -403,7 +405,7 @@ namespace ada::parser {
     }
 
     // In the simple case, we call to_lower_ascii_string above, or else, we fall back on the expensive case.
-    bool is_valid = (input_is_ascii && (first_percent == std::string_view::npos)) ?
+    bool is_valid = (is_ascii && (first_percent == std::string_view::npos)) ?
       unicode::to_lower_ascii_string(out, first_percent) :
       to_ascii(out, input, false, first_percent);
 
@@ -451,9 +453,6 @@ namespace ada::parser {
     // main function (parse_url).
     ada::url url = optional_url.has_value() ? std::move(optional_url.value()) : ada::url();
     // From this point forward, optional_url should not be used.
-
-    // most input strings will be ASCII which may enable some optimizations.
-    const bool is_ascii = !user_input.empty() && 128>(std::reduce(user_input.begin(), user_input.end(), uint8_t(user_input[0]), std::bit_or<uint8_t>()));
 
     std::string tmp_buffer;
     std::string_view internal_input;
@@ -926,7 +925,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing buffer with url is not special.
-            url.is_valid = parse_host(url.host, host_view, !url.is_special(), is_ascii);
+            url.is_valid = parse_host(url.host, host_view, !url.is_special());
 
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
@@ -950,7 +949,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing host_view with url is not special.
-            url.is_valid = parse_host(url.host, host_view, !url.is_special(), is_ascii);
+            url.is_valid = parse_host(url.host, host_view, !url.is_special());
 
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
@@ -1129,7 +1128,7 @@ namespace ada::parser {
           }
           else {
             // Let host be the result of host parsing buffer with url is not special.
-            url.is_valid = parse_host(url.host, file_host_buffer, !url.is_special(), is_ascii);
+            url.is_valid = parse_host(url.host, file_host_buffer, !url.is_special());
 
             // If host is "localhost", then set host to the empty string.
             if (url.host.has_value() && url.host.value() == "localhost") {
