@@ -61,6 +61,6 @@ size_t fuzz(size_t N, size_t seed = 0) {
 
 int main() {
   std::cout << "Running basic fuzzer.\n";
-  std::cout << "Excuted " << fuzz(200000) << " mutations.\n";
+  std::cout << "Excuted " << fuzz(400000) << " mutations.\n";
   return EXIT_SUCCESS;
 }
