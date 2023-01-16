@@ -3,6 +3,8 @@
 
 #include "common_defs.h"
 
+#include <string>
+
 namespace ada {
 
   enum class state {
