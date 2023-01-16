@@ -86,7 +86,6 @@ BENCHMARK(BasicBench_uriparser);
 static void BasicBench_urlparser(benchmark::State& state) {
   // volatile to prevent optimizations.
   const char * errorPos;
-  UriUriA uri;
   for (auto _ : state) {
     for(std::string& url_string : url_examples) {
       std::unique_ptr<EdUrlParser> url(EdUrlParser::parseUrl(url_string));
@@ -127,6 +126,7 @@ static void BasicBench_http_parser(benchmark::State& state) {
 BENCHMARK(BasicBench_http_parser);
 
 static void BasicBench_AdaURL(benchmark::State& state) {
+
   // volatile to prevent optimizations.
   volatile bool is_valid = true;
   for (auto _ : state) {
@@ -147,6 +147,31 @@ static void BasicBench_AdaURL(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_AdaURL);
+
+
+static void BasicBench_AdaURLJustInstantion(benchmark::State& state) {
+  // volatile to prevent optimizations.
+  volatile size_t count = 0;
+  for (auto _ : state) {
+    std::vector<ada::url> container;
+    // We want to measure the cost of just creating the URL instances.
+    for(std::string& url_string : url_examples) {
+      container.emplace_back(ada::url());
+    }
+    count += container.size();
+  }
+  state.counters["time/byte"] = benchmark::Counter(
+	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+	        std::size(url_examples),
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["url/s"] = benchmark::Counter(
+	        std::size(url_examples),
+          benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(BasicBench_AdaURLJustInstantion);
+
 
 int main(int argc, char **argv) {
 #if CURL_ENABLED
