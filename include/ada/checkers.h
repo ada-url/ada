@@ -52,13 +52,13 @@ namespace ada::checkers {
   ada_really_inline constexpr bool is_next_equals(const std::string_view::iterator start,
                                                   const std::string_view::iterator end,
                                                   const char c) noexcept {
-    return (start != end) && (start[1] == c);
+    return (std::distance(start, end) > 1) && (start[1] == c);
   }
 
   ada_really_inline constexpr bool is_not_next_equals(const std::string_view::iterator start,
                                                       const std::string_view::iterator end,
                                                       const char c) noexcept {
-    return (start == end) || (start[1] != c);
+    return (std::distance(start, end) > 1) && (start[1] != c);
   }
 
 } // namespace ada::checkers
