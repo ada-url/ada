@@ -45,7 +45,7 @@ size_t fuzz(size_t N, size_t seed = 0) {
                   copy.erase((11134*counter++)%copy.size());
                   break;
                 case 1:
-                  copy.insert(copy.begin()+(211311*counter++)%copy.size(), char(counter++*777));
+                  copy.insert(copy.begin()+(211311*counter)%copy.size(), char((counter+1)*777)); counter += 2;
                   break;
                 case 2:
                   copy[(13134*counter++)%copy.size()] = char(counter++*71117);
