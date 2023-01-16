@@ -49,16 +49,9 @@ namespace ada::checkers {
     return input.size() >= 2 && (is_alpha(input[0]) & (input[1] == ':'));
   }
 
-  ada_really_inline constexpr bool is_next_equals(const std::string_view::iterator start,
-                                                  const std::string_view::iterator end,
-                                                  const char c) noexcept {
-    return (std::distance(start, end) > 1) && (start[1] == c);
-  }
-
-  ada_really_inline constexpr bool is_not_next_equals(const std::string_view::iterator start,
-                                                      const std::string_view::iterator end,
-                                                      const char c) noexcept {
-    return (std::distance(start, end) > 1) && (start[1] != c);
+  ada_really_inline constexpr bool begins_with(std::string_view view, std::string_view prefix) {
+    // in C++20, you have view.begins_with(prefix)
+    return view.size() >= prefix.size() && (view.substr(0, prefix.size()) == prefix);
   }
 
 } // namespace ada::checkers
