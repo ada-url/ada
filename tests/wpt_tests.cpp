@@ -203,14 +203,15 @@ bool toascii_encoding() {
     } else if (element.type() == ondemand::json_type::object) {
       ondemand::object object = element.get_object();
       std::string_view input = object["input"];
-      auto output = ada::parser::to_ascii(input, false, input.find("%")).value_or("");
+      std::optional<std::string> output;
+      ada::parser::to_ascii(output, input, false, input.find("%"));
       auto expected_output = object["output"];
 
       if (expected_output.type() == ondemand::json_type::string) {
         std::string_view stringified_output = expected_output.get_string();
-        TEST_ASSERT(output, stringified_output, "Should have been equal");
+        TEST_ASSERT(output.value_or(""), stringified_output, "Should have been equal");
       } else if (expected_output.is_null()) {
-        TEST_ASSERT(output, "", "Should have been empty");
+        TEST_ASSERT(output.value_or(""), "", "Should have been empty");
       }
     }
   }

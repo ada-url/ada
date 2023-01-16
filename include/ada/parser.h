@@ -10,7 +10,7 @@
 
 namespace ada::parser {
   // first_percent should be  = plain.find('%')
-  std::optional<std::string> to_ascii(std::string_view plain, bool be_strict, size_t first_percent);
+  bool to_ascii(std::optional<std::string>& out, std::string_view plain, bool be_strict, size_t first_percent);
 
   bool parse_opaque_host(std::optional<std::string>& out, std::string_view input);
   bool parse_ipv6(std::optional<std::string>& out, std::string_view input);

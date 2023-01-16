@@ -12,6 +12,7 @@
 #include <iostream>
 #include <numeric>
 
+#include <optional>
 #include <string_view>
 #include <unicode/utypes.h>
 #include <unicode/uidna.h>
@@ -26,7 +27,7 @@ namespace ada::parser {
    * to_ascii does not expect the input to be percent decoded. This is
    * mostly used to conform with the test suite.
    */
-  std::optional<std::string> to_ascii(const std::string_view plain, const bool be_strict, size_t first_percent) {
+  bool to_ascii(std::optional<std::string>& out, const std::string_view plain, const bool be_strict, size_t first_percent) {
     std::string percent_decoded_buffer;
     std::string_view input = plain;
     if(first_percent != std::string_view::npos) {
@@ -42,25 +43,25 @@ namespace ada::parser {
 
     UIDNA* uidna = uidna_openUTS46(options, &status);
     if (U_FAILURE(status)) {
-      return std::nullopt;
+      return false;
     }
 
     UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    std::string result(255, ' ');
+    out = std::string(255, 0);
     int32_t length = uidna_nameToASCII_UTF8(uidna,
                                          input.data(),
                                          int32_t(input.length()),
-                                         result.data(), int32_t(result.capacity()),
+                                         out.value().data(), 255,
                                          &info,
                                          &status);
 
     if (status == U_BUFFER_OVERFLOW_ERROR) {
       status = U_ZERO_ERROR;
-      result.resize(length);
+      out.value().resize(length);
       length = uidna_nameToASCII_UTF8(uidna,
                                      input.data(),
                                      int32_t(input.length()),
-                                     result.data(), int32_t(result.capacity()),
+                                     out.value().data(), length,
                                      &info,
                                      &status);
     }
@@ -84,13 +85,16 @@ namespace ada::parser {
     uidna_close(uidna);
 
     if (U_FAILURE(status) || info.errors != 0 || length == 0) {
-      return std::nullopt;
+      out = std::nullopt;
+      return false;
     }
 
-    result.resize(length);
-    if(std::any_of(result.begin(), result.end(), ada::unicode::is_forbidden_domain_code_point)) { return std::nullopt; }
-
-    return result;
+    out.value().resize(length);
+    if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
+      out = std::nullopt;
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -356,7 +360,7 @@ namespace ada::parser {
       return false;
     }
 
-    out = ada::serializers::ipv6(address);
+    out = ada::serializers::ipv6(address.data());
     return true;
   }
 
@@ -371,7 +375,7 @@ namespace ada::parser {
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
       // If input does not end with U+005D (]), validation error, return failure.
-      if (input.back() != ']') {
+      if (input[input.size()-1] != ']') {
         return false;
       }
 
@@ -389,25 +393,22 @@ namespace ada::parser {
     // The most common case is an ASCII input, in which case we do not need to call the expensive 'to_ascii'
     // if a few conditions are met: no '%' and no 'xn-' subsequence.
     size_t first_percent = input.find('%');
-    // if simple_case is true, there is a good chance we might be able to use the fast path.
-    bool simple_case = input_is_ascii && (first_percent == std::string_view::npos);
 
-    // This function attemps to convert an ASCII string to a lower-case version.
-    // Once the lower cased version has been materialized, we check for the presence
-    // of the substring 'xn-', if it is found (unlikely), we then call the expensive 'to_ascii'.
-    auto to_lower_ascii_string = [first_percent](std::string_view view) -> std::optional<std::string> {
-      if(std::any_of(view.begin(), view.end(), ada::unicode::is_forbidden_domain_code_point)) { return std::nullopt; }
-      std::string result(view);
-      std::transform(result.begin(), result.end(), result.begin(),[](char c) -> char {
-        return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);}
-      );
-      return (result.find("xn-") == std::string_view::npos) ? result : to_ascii(view, false, first_percent);
-    };
+    // if simple_case is true, there is a good chance we might be able to use the fast path.
+    bool simple_case = (input_is_ascii && (first_percent == std::string_view::npos));
+
+    // This is required since `to_lower_ascii_string` assumes non-null `out` parameter
+    if (simple_case) {
+      out = input;
+    }
+
     // In the simple case, we call to_lower_ascii_string above, or else, we fall back on the expensive case.
-    out = simple_case ? to_lower_ascii_string(input) : to_ascii(input, false, first_percent);
+    bool is_valid = (input_is_ascii && (first_percent == std::string_view::npos)) ?
+      unicode::to_lower_ascii_string(out, first_percent) :
+      to_ascii(out, input, false, first_percent);
 
     // If asciiDomain is failure, validation error, return failure.
-    if (!out.has_value()) {
+    if (!out.has_value() || !is_valid) {
       return false;
     }
 
