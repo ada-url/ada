@@ -498,13 +498,8 @@ namespace ada::parser {
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
 
-    // bool scheme_needs_lowercase{false}; // this complexifies the code and is of dubious utility.
-
-    std::optional<std::string_view::iterator> scheme_start_pointer{pointer};
-    std::optional<std::string_view::iterator> scheme_end_pointer;
-
-    std::optional<std::string_view::iterator> opaque_path_start_pointer;
-    std::optional<std::string_view::iterator> opaque_path_end_pointer;
+    /** An std::optional<> has overhead, so let us record directly the iterator: */
+    const std::string_view::iterator start_pointer{pointer}; /* we record the beginning of the URL which is a potential starting point for the scheme. */
 
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
@@ -528,7 +523,6 @@ namespace ada::parser {
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
           else if (!state_override.has_value()) {
-            scheme_start_pointer = std::nullopt;
             state = ada::state::NO_SCHEME;
             pointer--;
           }
@@ -546,12 +540,11 @@ namespace ada::parser {
           // Otherwise, if c is U+003A (:), then:
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && (*pointer == ':')) {
-            scheme_end_pointer = pointer;
 
-            // Optimization opportunity: instead of copying and then changing the case,
+            // Instead of copying and then changing the case,
             // we could directly append lower-cased to the string, thus doing one pass.
-            std::string _buffer = std::string(*scheme_start_pointer, *scheme_end_pointer - *scheme_start_pointer);
-            std::transform(_buffer.begin(), _buffer.end(), _buffer.begin(),
+            std::string _buffer;
+            std::transform(start_pointer, pointer, std::back_inserter(_buffer),
                 [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
 
             // If state override is given, then:
@@ -616,10 +609,6 @@ namespace ada::parser {
             // Otherwise, set url’s path to the empty string and set state to opaque path state.
             else {
               state = ada::state::OPAQUE_PATH;
-
-              if (std::distance(pointer, pointer_end) > 0) {
-                opaque_path_start_pointer = pointer + 1;
-              }
             }
           }
           // Otherwise, if state override is not given, set buffer to the empty string, state to no scheme state,
@@ -989,19 +978,20 @@ namespace ada::parser {
           break;
         }
         case ada::state::OPAQUE_PATH: {
-          // TODO: advance directly to ? or to the end of string, don't do the switch case machine.
           // If c is U+003F (?), then set url’s query to the empty string and state to query state.
-          if (*pointer == '?' || pointer == pointer_end) {
-            opaque_path_end_pointer = pointer;
-            url.has_opaque_path = true;
-            url.path = unicode::percent_encode(
-                                  std::string_view(*opaque_path_start_pointer, pointer - *opaque_path_start_pointer),
-                                  character_sets::C0_CONTROL_PERCENT_ENCODE);
-            if (*pointer == '?') {
-              state = ada::state::QUERY;
-            }
+          std::string_view view(pointer, size_t(pointer_end-pointer));
+          std::cout << "opaque "<< view << std::endl;
+          size_t location = view.find('?');
+          if(location != std::string_view::npos) {
+            view.remove_suffix(location);
+            state = ada::state::QUERY;
+            pointer += location;
+          } else {
+            // TODO: we can probably just exit here.
+            pointer = pointer_end;
           }
-
+          url.has_opaque_path = true;
+          url.path = unicode::percent_encode(view, character_sets::C0_CONTROL_PERCENT_ENCODE);
           break;
         }
         case ada::state::PORT: {
