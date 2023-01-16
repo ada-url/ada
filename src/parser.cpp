@@ -952,7 +952,12 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing host_view with url is not special.
-            url.is_valid = parse_host(url.host, host_view, !url.is_special());
+            if (host_view.empty()) {
+              url.is_valid = true;
+              url.host = "";
+            } else {
+              url.is_valid = parse_host(url.host, host_view, !url.is_special());
+            }
 
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
