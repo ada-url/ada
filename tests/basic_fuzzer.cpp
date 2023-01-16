@@ -1,6 +1,7 @@
 
 #include "ada.h"
 #include <iostream>
+#include <memory>
 
 std::string url_examples[] = {
     "https://www.google.com/"
@@ -21,6 +22,16 @@ std::string url_examples[] = {
     "http://192.168.1.1", // ipv4
     "http://[2606:4700:4700::1111]", // ipv6
 };
+
+// This function copies your input onto a memory buffer that
+// has just the necessary size. This will entice tools to detect
+// an out-of-bound access.
+ada::url ada_parse(std::string_view view) {
+  std::unique_ptr<char[]> buffer(new char[view.size()]);
+  memcpy(buffer.get(), view.data(), view.size());
+  return ada::parse(std::string_view(buffer.get(), view.size()));
+}
+
 size_t fuzz(size_t N, size_t seed = 0) {
     size_t counter = seed;
     for(size_t trial = 0; trial < N; trial++) {
@@ -42,7 +53,7 @@ size_t fuzz(size_t N, size_t seed = 0) {
                 default:
                   break;
             }
-            url = ada::parser::parse_url(copy, std::nullopt);
+            url = ada_parse(copy);
         }
     }
     return counter;
