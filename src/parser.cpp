@@ -454,7 +454,7 @@ namespace ada::parser {
 
     std::string tmp_buffer;
     std::string_view internal_input;
-    if(std::any_of(user_input.begin(),user_input.end(),ada::unicode::is_ascii_tab_or_newline)) {
+    if(std::any_of(user_input.begin(), user_input.end(), ada::unicode::is_ascii_tab_or_newline)) {
       tmp_buffer = user_input;
       // Optimization opportunity: Instead of copying and then pruning, we could just directly
       // build the string from user_input.
@@ -498,9 +498,6 @@ namespace ada::parser {
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
 
-    /** An std::optional<> has overhead, so let us record directly the iterator: */
-    const std::string_view::iterator start_pointer{pointer}; /* we record the beginning of the URL which is a potential starting point for the scheme. */
-
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
@@ -522,15 +519,11 @@ namespace ada::parser {
             pointer--;
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
-          else if (!state_override.has_value()) {
+          else {
             state = ada::state::NO_SCHEME;
             pointer--;
           }
-          // Otherwise, validation error, return failure.
-          else {
-            url.is_valid = false;
-            return url;
-          }
+
           break;
         }
         case ada::state::SCHEME: {
@@ -544,7 +537,7 @@ namespace ada::parser {
             // Instead of copying and then changing the case,
             // we could directly append lower-cased to the string, thus doing one pass.
             std::string _buffer;
-            std::transform(start_pointer, pointer, std::back_inserter(_buffer),
+            std::transform(pointer_start, pointer, std::back_inserter(_buffer),
                 [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
 
             // If state override is given, then:

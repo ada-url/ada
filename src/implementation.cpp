@@ -4,6 +4,7 @@
 
 #include "ada.h"
 #include "ada/character_sets.h"
+#include "ada/checkers.h"
 #include "ada/common_defs.h"
 #include "ada/parser.h"
 #include "ada/state.h"
@@ -39,6 +40,14 @@ namespace ada {
   void set_scheme(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
     if (!input.empty()) {
       input.append(":");
+    } else {
+      // Empty schemes are not allowed according to spec.
+      return;
+    }
+
+    // Schemes should start with alpha values.
+    if (!checkers::is_alpha(input[0])) {
+      return;
     }
 
     /**
@@ -53,7 +62,7 @@ namespace ada {
 #else
     base,
 #endif
-    ada::state::SCHEME_START);
+    ada::state::SCHEME);
 
     if (result.is_valid) {
       base.scheme = result.scheme;
@@ -220,11 +229,8 @@ namespace ada {
       return;
     }
 
-    auto new_value = input[0] == '?' ? input.substr(1, input.length() - 1) : input;
+    auto new_value = input[0] == '?' ? input.substr(1) : input;
     helpers::remove_ascii_tab_or_newline(new_value);
-
-    // Set url’s query to the empty string.
-    base.query = "";
 
     auto query_percent_encode_set = base.is_special() ?
       ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
@@ -254,7 +260,6 @@ namespace ada {
 
     // Let input be the given value with a single leading U+0023 (#) removed, if any.
     auto new_value = input[0] == '#' ? input.substr(1) : input;
-
     helpers::remove_ascii_tab_or_newline(new_value);
 
     // Set this’s URL’s fragment to the empty string.
