@@ -1000,7 +1000,7 @@ namespace ada::parser {
             state = ada::state::PATH;
 
             // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
-            if (*pointer != '/' && *pointer != '\\') {
+            if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
               pointer--;
             }
           }
