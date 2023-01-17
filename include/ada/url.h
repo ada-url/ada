@@ -2,9 +2,11 @@
 #define ADA_URL_H
 
 #include "checkers.h"
+#include "scheme.h"
 #include "common_defs.h"
 #include "serializers.h"
 
+#include <charconv>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -66,23 +68,27 @@ namespace ada {
     bool is_valid = true;
 
     /**
+     * A URL has an opaque path if its path is a string.
+     */
+    bool has_opaque_path{false};
+
+    /**
      * A URL includes credentials if its username or password is not the empty string.
      */
-    [[nodiscard]] ada_really_inline bool includes_credentials() const {
+    [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept {
       return !username.empty() || !password.empty();
     }
 
     /**
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
      */
-    [[nodiscard]] ada_really_inline bool is_special() const;
+    [[nodiscard]] ada_really_inline  bool is_special() const noexcept {
+      return scheme::is_special(scheme);
+    }
 
-    /**
-     * A URL has an opaque path if its path is a string.
-     */
-    bool has_opaque_path{false};
-
-    [[nodiscard]] uint16_t scheme_default_port() const;
+    [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept {
+      return scheme::get_special_port(scheme);
+    }
 
     /**
      * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
@@ -121,6 +127,19 @@ namespace ada {
       return answer;
     }
 #endif
+    // returns how many bytes were consumed when a number is successfully parsed.
+    ada_really_inline size_t parse_port(std::string_view view) noexcept {
+          uint16_t parsed_port{};
+          auto r = std::from_chars(view.begin(), view.end(), parsed_port);
+          if(r.ec != std::errc()) {
+            is_valid = false;
+            return 0;
+          }
+          const size_t consumed = size_t(r.ptr - view.begin());
+          port = (scheme_default_port() == parsed_port) ? std::nullopt : std::optional<uint16_t>(parsed_port);
+          is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
+          return consumed;
+    }
 
     std::string to_string();
   }; // struct url

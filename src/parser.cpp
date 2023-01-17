@@ -978,21 +978,8 @@ namespace ada::parser {
           break;
         }
         case ada::state::PORT: {
-          uint16_t port{};
-          auto r = std::from_chars(pointer, pointer_end, port);
-          if (r.ec == std::errc()) {
-            if (url.scheme_default_port() == port) {
-              url.port = std::nullopt;
-            } else {
-              url.port = port;
-            }
-            pointer = r.ptr; /**IMPORTANT: We move forward. */
-          } else if(r.ec == std::errc::result_out_of_range) {
-            // we have a validation error
-            url.is_valid = false;
-            return url;
-          }
-          url.is_valid &= (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\'));
+          pointer += url.parse_port(std::string_view(pointer, size_t(pointer_end-pointer)));
+          if(!url.is_valid) { return url; }
           pointer_start--;
           state = ada::state::PATH_START;
           break;
