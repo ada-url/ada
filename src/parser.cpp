@@ -554,18 +554,18 @@ namespace ada::parser {
 
               // If url’s scheme is "file" and its host is an empty host, then return.
               // An empty host is the empty string.
-              if (url.scheme == "file" && url.host.has_value() && url.host.value().empty()) {
+              if (url.get_scheme_type() == ada::scheme::type::FILE && url.host.has_value() && url.host.value().empty()) {
                 return url;
               }
             }
 
             // Set url’s scheme to buffer.
-            url.scheme = _buffer;
+            url.set_scheme(std::move(_buffer));
 
             // If state override is given, then:
             if (state_override.has_value()) {
               // This is uncommon.
-              uint16_t urls_scheme_port = ada::scheme::get_special_port(url.scheme);
+              uint16_t urls_scheme_port = url.get_special_port();
 
               if (urls_scheme_port) {
                 // If url’s port is url’s scheme’s default port, then set url’s port to null.
@@ -578,13 +578,13 @@ namespace ada::parser {
             }
 
             // If url’s scheme is "file", then:
-            if (url.scheme == "file") {
+            if (url.get_scheme_type() == ada::scheme::type::FILE) {
               // Set state to file state.
               state = ada::state::FILE;
             }
             // Otherwise, if url is special, base is non-null, and base’s scheme is url’s scheme:
             // Note: Doing base_url->scheme is unsafe if base_url.has_value() is false.
-            else if (url.is_special() && base_url.has_value() && base_url->scheme == url.scheme) {
+            else if (url.is_special() && base_url.has_value() && base_url->get_scheme_type() == url.get_scheme_type()) {
               // Set state to special relative or authority state.
               state = ada::state::SPECIAL_RELATIVE_OR_AUTHORITY;
             }
@@ -628,14 +628,14 @@ namespace ada::parser {
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
           else if (base_url->has_opaque_path && url.fragment.has_value() && pointer == pointer_end) {
-            url.scheme = base_url->scheme;
+            url.copy_scheme(base_url.value());
             url.path = base_url->path;
             url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
             return url;
           }
           // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
-          else if (base_url->scheme != "file") {
+          else if (base_url->get_scheme_type() != ada::scheme::type::FILE) {
             state = ada::state::RELATIVE;
             pointer--;
           }
@@ -756,7 +756,7 @@ namespace ada::parser {
           ///////
           if(!base_url.has_value()) { throw std::runtime_error("Internal error.\n"); }
 #endif
-          url.scheme = base_url->scheme;
+          url.copy_scheme(base_url.value());
 
           // If c is U+002F (/), then set state to relative slash state.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
@@ -868,7 +868,7 @@ namespace ada::parser {
           // - url is not special
           // - url’s scheme is "ws" or "wss"
           if (encoding != ada::encoding_type::UTF8) {
-            if (!url.is_special() || url.scheme == "ws" || url.scheme == "wss") {
+            if (!url.is_special() || url.get_scheme_type() == ada::scheme::type::WS || url.get_scheme_type() == ada::scheme::type::WSS) {
               // then set encoding to UTF-8.
               encoding = ada::encoding_type::UTF8;
             }
@@ -978,19 +978,10 @@ namespace ada::parser {
           break;
         }
         case ada::state::PORT: {
-          auto out = helpers::parse_port(std::string_view(pointer, pointer_end - pointer),
-                                         state,
-                                         url.is_valid,
-                                         url.is_special());
-
-          if (out.has_value()) {
-            if (url.scheme_default_port() == out) {
-              url.port = std::nullopt;
-            } else {
-              url.port = out;
-            }
-          }
-
+          pointer += url.parse_port(std::string_view(pointer, size_t(pointer_end-pointer)));
+          if(!url.is_valid) { return url; }
+          pointer_start--;
+          state = ada::state::PATH_START;
           break;
         }
         case ada::state::PATH_START: {
@@ -1059,7 +1050,7 @@ namespace ada::parser {
             else if (!unicode::is_single_dot_path_segment(path_buffer)) {
               // If url’s scheme is "file", url’s path is empty, and path_buffer is a Windows drive letter,
               // then replace the second code point in path_buffer with U+003A (:).
-              if (url.scheme == "file" && url.path.empty() && checkers::is_windows_drive_letter(path_buffer)){
+              if (url.get_scheme_type() == ada::scheme::type::FILE && url.path.empty() && checkers::is_windows_drive_letter(path_buffer)){
                 path_buffer[1] = ':';
               }
 
@@ -1088,7 +1079,7 @@ namespace ada::parser {
             // If base is non-null and base’s scheme is "file", then:
             // Note: it is unsafe to do base_url->scheme unless you know that
             // base_url_has_value() is true.
-            if (base_url.has_value() && base_url.has_value() && base_url->scheme == "file") {
+            if (base_url.has_value() && base_url.has_value() && base_url->get_scheme_type() == ada::scheme::type::FILE) {
               // Set url’s host to base’s host.
               url.host = base_url->host;
 
@@ -1157,7 +1148,7 @@ namespace ada::parser {
         }
         case ada::state::FILE: {
           // Set url’s scheme to "file".
-          url.scheme = "file";
+          url.set_scheme("file");
 
           // Set url’s host to the empty string.
           url.host = "";
@@ -1168,7 +1159,7 @@ namespace ada::parser {
             state = ada::state::FILE_SLASH;
           }
           // Otherwise, if base is non-null and base’s scheme is "file":
-          else if (base_url.has_value() && base_url->scheme == "file") {
+          else if (base_url.has_value() && base_url->get_scheme_type() == ada::scheme::type::FILE) {
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
             url.host = base_url->host;
             url.path = base_url->path;

@@ -152,7 +152,7 @@ bool setters_tests_encoding() {
       if (category == "protocol") {
         std::string_view expected = element["expected"]["protocol"];
         ada::set_scheme(base, std::string{new_value});
-        TEST_ASSERT(base.scheme + ":", expected, "Protocol");
+        TEST_ASSERT(base.get_scheme() + ":", expected, "Protocol");
       }
       else if (category == "username") {
         std::string_view expected = element["expected"]["username"];
@@ -271,7 +271,7 @@ bool urltestdata_encoding() {
         std::string_view protocol = object["protocol"];
          // WPT tests add ":" suffix to protocol
         protocol.remove_suffix(1);
-        TEST_ASSERT(input_url.scheme, protocol, "Protocol");
+        TEST_ASSERT(input_url.get_scheme(), protocol, "Protocol");
 
         std::string_view username = object["username"];
         TEST_ASSERT(input_url.username, username, "Username");
