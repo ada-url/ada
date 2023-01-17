@@ -4,7 +4,7 @@ target_link_libraries(bench PRIVATE ada)
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
 
-add_executable(bbc_bench bench.cpp)
+add_executable(bbc_bench bbc_bench.cpp)
 target_link_libraries(bbc_bench PRIVATE ada)
 target_include_directories(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
