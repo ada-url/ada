@@ -51,59 +51,6 @@ namespace ada::helpers {
     return fragment;
   }
 
-  std::optional<uint16_t> get_port(const std::string_view input) noexcept {
-    uint16_t port{};
-    auto r = std::from_chars(input.data(), input.data() + input.size() , port);
-    if (r.ec != std::errc()) { return std::nullopt; }
-    return port;
-  }
-
-  /**
-   * @return True if the state machine execution should finish.
-   */
-  ada_really_inline std::optional<uint16_t> parse_port(const std::string_view input,
-                                     ada::state &state,
-                                     bool &is_valid,
-                                     const bool is_url_special,
-                                     const bool state_override_given) noexcept {
-    std::optional<uint16_t> out;
-    auto pointer_start = std::find_if_not(input.begin(), input.end(), ::ada::checkers::is_digit);
-    std::string_view buffer = std::string_view(input.begin(), pointer_start - input.begin());
-
-    // Otherwise, if one of the following is true:
-    // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
-    // - url is special and c is U+005C (\)
-    // - state override is given
-    if (pointer_start == input.end() || *pointer_start == '/' || *pointer_start == '?' ||
-        (is_url_special && *pointer_start == '\\') ||
-        state_override_given) {
-
-      // If buffer is not the empty string, then:
-      if (!buffer.empty()) {
-        // Let port be the mathematical integer value that is represented by buffer in radix-10
-        // using ASCII digits for digits with values 0 through 9.
-        out = helpers::get_port(buffer);
-
-        // If port is greater than 216 − 1, validation error, return failure.
-        // Set url’s port to null, if port is url’s scheme’s default port; otherwise to port.
-        if (!out.has_value()) {
-          is_valid = false;
-          return out;
-        }
-      }
-
-      // Set state to path start state and decrease pointer by 1.
-      state = ada::state::PATH_START;
-      pointer_start--;
-    }
-    // Otherwise, validation error, return failure.
-    else {
-      is_valid = false;
-    }
-
-    return out;
-  }
-
   /**
    * @see https://url.spec.whatwg.org/#shorten-a-urls-path
    *

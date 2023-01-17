@@ -1,3 +1,4 @@
+#include <charconv>
 #include <iostream>
 #include <string_view>
 #include <utility>
@@ -163,16 +164,20 @@ namespace ada {
     }
     // Otherwise, basic URL parse the given value with this’s URL as url and port state as state override.
     else {
-      bool is_valid{true};
-      auto state = ada::state::HOST;
-      std::optional<uint16_t> out = helpers::parse_port(input, state, is_valid, base.is_special(), true);
-
-      if (out.has_value()) {
-        if (base.scheme_default_port() == out) {
+      uint16_t port{};
+      auto r = std::from_chars(input.begin(), input.end(), port);
+      if (r.ec == std::errc::result_out_of_range) {
+        // we have a validation error
+        base.is_valid = false;
+      } else if (r.ec == std::errc()) {
+        // We parsed a number.
+        if (base.scheme_default_port() == port) {
           base.port = std::nullopt;
         } else {
-          base.port = out;
+          base.port = port;
         }
+      } else {
+        // ????
       }
     }
   }

@@ -11,7 +11,6 @@
 namespace ada::helpers {
 
   ada_really_inline std::optional<std::string_view> prune_fragment(std::string_view& input) noexcept;
-  std::optional<uint16_t> get_port(std::string_view input) noexcept;
   std::optional<uint16_t> parse_port(std::string_view input,
                   ada::state &state,
                   bool &is_valid,
