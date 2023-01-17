@@ -66,7 +66,7 @@ namespace ada {
     ada::state::SCHEME);
 
     if (result.is_valid) {
-      base.scheme = result.scheme;
+      base.copy_scheme(result);
     }
   }
 
@@ -126,7 +126,7 @@ namespace ada {
     auto pointer_end = std::find(pointer_start, input.end(), '#');
 
     // If url's scheme is "file", then set state to file host state, instead of host state.
-    ada::state state = base.scheme == "file" ? state::FILE_HOST : state::HOST;
+    ada::state state = base.get_scheme_type() == ada::scheme::type::FILE ? state::FILE_HOST : state::HOST;
 
     /**
      * TODO: This needs to be reengineered. The next line calls
@@ -157,29 +157,7 @@ namespace ada {
     if (base.cannot_have_credentials_or_port()) {
       return;
     }
-
-    // If the given value is the empty string, then set this’s URL’s port to null.
-    if (input.empty()) {
-      base.port = std::nullopt;
-    }
-    // Otherwise, basic URL parse the given value with this’s URL as url and port state as state override.
-    else {
-      uint16_t port{};
-      auto r = std::from_chars(input.begin(), input.end(), port);
-      if (r.ec == std::errc::result_out_of_range) {
-        // we have a validation error
-        base.is_valid = false;
-      } else if (r.ec == std::errc()) {
-        // We parsed a number.
-        if (base.scheme_default_port() == port) {
-          base.port = std::nullopt;
-        } else {
-          base.port = port;
-        }
-      } else {
-        // ????
-      }
-    }
+    base.parse_port(input);
   }
 
   /**

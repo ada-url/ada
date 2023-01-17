@@ -8,11 +8,11 @@
 
 #include <charconv>
 #include <optional>
+#include <iostream>
 #include <string>
 #include <string_view>
 
 namespace ada {
-
   /**
    * A URL is a struct that represents a universal identifier.
    * To disambiguate from a valid URL string it can also be referred to as a URL record.
@@ -21,15 +21,10 @@ namespace ada {
    */
   struct url {
     /**
-     * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
-     * URL for further processing after parsing. It is initially the empty string.
-     */
-    std::string scheme{};
-
-    /**
      * A URL’s username is an ASCII string identifying a username. It is initially the empty string.
      */
     std::string username{};
+
 
     /**
      * A URL’s password is an ASCII string identifying a password. It is initially the empty string.
@@ -65,7 +60,7 @@ namespace ada {
     /**
      * Used for returning the validity from the result of the URL parser.
      */
-    bool is_valid = true;
+    bool is_valid{true};
 
     /**
      * A URL has an opaque path if its path is a string.
@@ -83,11 +78,33 @@ namespace ada {
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
      */
     [[nodiscard]] ada_really_inline  bool is_special() const noexcept {
-      return scheme::is_special(scheme);
+      return type != ada::scheme::NOT_SPECIAL;
     }
 
+    /**
+     * Return the 'special port' if the URL is special and not 'file'.
+     * Returns 0 otherwise.
+     */
+    [[nodiscard]] uint16_t get_special_port() const {
+      return ada::scheme::get_special_port(type);
+    }
+
+    /**
+     * Return the scheme type. Note that it is faster to do
+     * get_scheme_type() == ada::scheme::type::FILE than to do
+     * get_scheme() == "file", since the former is a direct integer comparison,
+     * while the other involves a (cheap) string test.
+     */
+    [[nodiscard]] ada_really_inline  ada::scheme::type get_scheme_type() const noexcept {
+      return type;
+    }
+
+
+    /**
+     * Get the default port if the url's scheme has one, returns 0 otherwise.
+     */
     [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept {
-      return scheme::get_special_port(scheme);
+      return scheme::get_special_port(type);
     }
 
     /**
@@ -116,6 +133,7 @@ namespace ada {
     url oh_no_we_need_to_copy_url() const {
       url answer;
       answer.scheme = scheme;
+      answer.type = type;
       answer.username = username;
       answer.password = password;
       answer.host = host;
@@ -127,21 +145,68 @@ namespace ada {
       return answer;
     }
 #endif
-    // returns how many bytes were consumed when a number is successfully parsed.
+    // parse a port (16-bit decimal digit) at the start of the string_view.
+    // It returns how many bytes were consumed when a number is successfully parsed.
     ada_really_inline size_t parse_port(std::string_view view) noexcept {
           uint16_t parsed_port{};
           auto r = std::from_chars(view.begin(), view.end(), parsed_port);
-          if(r.ec != std::errc()) {
+          if(r.ec == std::errc::result_out_of_range) {
             is_valid = false;
             return 0;
           }
+          port = (r.ec == std::errc() && scheme_default_port() != parsed_port) ?
+            std::optional<uint16_t>(parsed_port) : std::nullopt;
           const size_t consumed = size_t(r.ptr - view.begin());
-          port = (scheme_default_port() == parsed_port) ? std::nullopt : std::optional<uint16_t>(parsed_port);
           is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
           return consumed;
     }
 
+    /**
+     * Return a string representing the scheme. Note that
+     * get_scheme_type() should often be used instead.
+     */
+    const std::string& get_scheme() const noexcept {
+      return scheme;
+    }
+
+    /**
+     * Set the scheme for this URL.
+     */
+    void set_scheme(std::string&& new_scheme) {
+      scheme = new_scheme;
+      type = ada::scheme::get_scheme_type(scheme);
+    }
+
+    /**
+     * Take the scheme from another URL.
+     */
+    void copy_scheme(ada::url&& u) {
+      scheme = u.scheme;
+      type = u.type;
+    }
+
+    /**
+     * Take the scheme from another URL.
+     */
+    void copy_scheme(const ada::url& u) {
+      scheme = u.scheme;
+      type = u.type;
+    }
+
+    /**
+     * Returns a string representation of this URL.  (Useful for debugging.)
+     */
     std::string to_string();
+
+  private:
+    ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
+
+    /**
+     * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
+     * URL for further processing after parsing. It is initially the empty string.
+     */
+    std::string scheme{};
+
   }; // struct url
 
 } // namespace ada
