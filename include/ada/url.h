@@ -194,11 +194,33 @@ namespace ada {
     }
 
     /**
+    * Return true on success.
+    * @see https://url.spec.whatwg.org/#host-parsing
+    */
+    ada_really_inline bool parse_host(const std::string_view input);
+    /**
      * Returns a string representation of this URL.  (Useful for debugging.)
      */
     std::string to_string();
 
   private:
+    /**
+     * Return true on success.
+     * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+     */
+    bool parse_ipv4(std::string_view input);
+    /**
+     * Return true on success.
+     * @see https://url.spec.whatwg.org/#concept-ipv6-parser
+     */
+    bool parse_ipv6(std::string_view input);
+    /**
+     * Return true on success.
+     * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
+     */
+    bool parse_opaque_host(std::string_view input) noexcept;
+
+
     ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
     /**
