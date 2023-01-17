@@ -3,14 +3,6 @@
 
 namespace ada {
 
-  ada_really_inline uint16_t url::scheme_default_port() const {
-    return scheme::get_special_port(scheme);
-  }
-
-  ada_really_inline bool url::is_special() const {
-    return scheme::is_special(scheme);
-  }
-
   std::string url::to_string() {
     if (!is_valid) {
       return "null";

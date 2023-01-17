@@ -1,3 +1,4 @@
+#include <charconv>
 #include <iostream>
 #include <string_view>
 #include <utility>
@@ -65,7 +66,7 @@ namespace ada {
     ada::state::SCHEME);
 
     if (result.is_valid) {
-      base.scheme = result.scheme;
+      base.copy_scheme(result);
     }
   }
 
@@ -125,7 +126,7 @@ namespace ada {
     auto pointer_end = std::find(pointer_start, input.end(), '#');
 
     // If url's scheme is "file", then set state to file host state, instead of host state.
-    ada::state state = base.scheme == "file" ? state::FILE_HOST : state::HOST;
+    ada::state state = base.get_scheme_type() == ada::scheme::type::FILE ? state::FILE_HOST : state::HOST;
 
     /**
      * TODO: This needs to be reengineered. The next line calls
@@ -156,25 +157,7 @@ namespace ada {
     if (base.cannot_have_credentials_or_port()) {
       return;
     }
-
-    // If the given value is the empty string, then set this’s URL’s port to null.
-    if (input.empty()) {
-      base.port = std::nullopt;
-    }
-    // Otherwise, basic URL parse the given value with this’s URL as url and port state as state override.
-    else {
-      bool is_valid{true};
-      auto state = ada::state::HOST;
-      std::optional<uint16_t> out = helpers::parse_port(input, state, is_valid, base.is_special(), true);
-
-      if (out.has_value()) {
-        if (base.scheme_default_port() == out) {
-          base.port = std::nullopt;
-        } else {
-          base.port = out;
-        }
-      }
-    }
+    base.parse_port(input);
   }
 
   /**
