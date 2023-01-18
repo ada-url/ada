@@ -316,19 +316,19 @@ namespace ada {
         ascii_runner |= c;
         return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);}
       );
-      if(ascii_runner>=128) { goto slow_fallback; }
-      if(is_forbidden) { goto slow_fallback; } /* we may have a '%' */
-      if (buffer.find("xn-") == std::string_view::npos) {
+      if (ascii_runner < 128 && !is_forbidden && buffer.find("xn-") == std::string_view::npos) {
+        // fast path
         host = std::move(buffer);
-        goto check_for_ipv4;
+        if (checkers::is_ipv4(host.value())) {
+          return parse_ipv4(host.value());
+        }
+        return true;
       }
     }
-    slow_fallback:
-    // fallback on the slow case
+
     is_valid = ada::parser::to_ascii(host, input, false,  input.find('%'));
     if (!is_valid) { return is_valid = false; }
 
-    check_for_ipv4:
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
     if(checkers::is_ipv4(host.value())) {
       return parse_ipv4(host.value());
