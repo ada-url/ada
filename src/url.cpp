@@ -2,6 +2,8 @@
 #include "ada/scheme.h"
 
 #include <numeric>
+#include <algorithm>
+#include <string>
 
 namespace ada {
   /**
@@ -308,6 +310,7 @@ namespace ada {
       bool is_forbidden{false};
       uint8_t ascii_runner{0};
 
+      buffer.reserve(input.size());
       std::transform(input.begin(), input.end(), std::back_inserter(buffer), [&is_forbidden, &ascii_runner](char c) -> char {
         is_forbidden |= ada::unicode::is_forbidden_domain_code_point(c);
         ascii_runner |= c;
