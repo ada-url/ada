@@ -341,6 +341,8 @@ namespace ada {
       return "null";
     }
     // TODO: make sure that this is valid JSON by encoding the strings.
+    // TODO: pre-allocate memory and write into it to avoid allocations
+    // and copies during concatenation.
     return "{\"scheme\":\"" + scheme + "\"" + ","
          + "\"username\":\"" + username + "\"" + "," + "\"password\":\"" +
          password + "\"" + "," +
