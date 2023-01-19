@@ -324,6 +324,7 @@ namespace ada::parser {
             size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
             std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location : view.size());
             pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
+
             // If c is U+0040 (@), then:
             // Note: we cannot access *pointer safely if (pointer == pointer_end).
             if ((pointer != pointer_end) && (*pointer == '@')) {
@@ -336,26 +337,21 @@ namespace ada::parser {
                 }
               }
 
-              // Set atSignSeen to true.
               at_sign_seen = true;
 
-              // For each codePoint in authority_buffer:
-              for (auto code_point: authority_view) {
-                // If codePoint is U+003A (:) and passwordTokenSeen is false, then set passwordTokenSeen to true and continue.
-                if (code_point == ':' && !password_token_seen) {
-                  password_token_seen = true;
-                  continue;
-                }
+              if (!password_token_seen) {
+                size_t password_token_location = authority_view.find(':');
+                password_token_seen = password_token_location != std::string_view::npos;
 
-                // Let encodedCodePoints be the result of running UTF-8 percent-encode codePoint using the userinfo percent-encode set.
-                // If passwordTokenSeen is true, then append encodedCodePoints to url’s password.
-                if (password_token_seen) {
-                  unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.password);
+                if (!password_token_seen) {
+                  url.username += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+                } else {
+                  url.username += unicode::percent_encode(std::string_view(authority_view.begin(), password_token_location), character_sets::USERINFO_PERCENT_ENCODE);
+                  url.password += unicode::percent_encode(std::string_view(authority_view.begin() + password_token_location + 1, size_t(authority_view.length() - password_token_location - 1)), character_sets::USERINFO_PERCENT_ENCODE);
                 }
-                // Otherwise, append encodedCodePoints to url’s username.
-                else {
-                  unicode::percent_encode_character(code_point, character_sets::USERINFO_PERCENT_ENCODE, url.username);
-                }
+              }
+              else {
+                url.password += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
               }
             }
             // Otherwise, if one of the following is true:
