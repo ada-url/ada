@@ -3,6 +3,7 @@
 #include "ada/checkers.h"
 #include "ada/unicode.h"
 #include "ada/url.h"
+#include "puny.cpp"
 
 #include <array>
 #include <algorithm>
@@ -14,18 +15,11 @@
 
 #include <optional>
 #include <string_view>
-#include <unicode/utypes.h>
-#include <unicode/uidna.h>
-#include <unicode/utf8.h>
 
 namespace ada::parser {
 
   /**
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
-   *
-   * The only difference between domain_to_ascii and to_ascii is that
-   * to_ascii does not expect the input to be percent decoded. This is
-   * mostly used to conform with the test suite.
    */
   bool to_ascii(std::optional<std::string>& out, const std::string_view plain, const bool be_strict, size_t first_percent) {
     std::string percent_decoded_buffer;
@@ -34,69 +28,14 @@ namespace ada::parser {
       percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
       input = percent_decoded_buffer;
     }
-    UErrorCode status = U_ZERO_ERROR;
-    uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
-
-    if (be_strict) {
-      options |= UIDNA_USE_STD3_RULES;
-    }
-
-    UIDNA* uidna = uidna_openUTS46(options, &status);
-    if (U_FAILURE(status)) {
-      return false;
-    }
-
-    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    out = std::string(255, 0);
-    int32_t length = uidna_nameToASCII_UTF8(uidna,
-                                         input.data(),
-                                         int32_t(input.length()),
-                                         out.value().data(), 255,
-                                         &info,
-                                         &status);
-
-    if (status == U_BUFFER_OVERFLOW_ERROR) {
-      status = U_ZERO_ERROR;
-      out.value().resize(length);
-      length = uidna_nameToASCII_UTF8(uidna,
-                                     input.data(),
-                                     int32_t(input.length()),
-                                     out.value().data(), length,
-                                     &info,
-                                     &status);
-    }
-
-    // A label contains hyphen-minus ('-') in the third and fourth positions.
-    info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
-    // A label starts with a hyphen-minus ('-').
-    info.errors &= ~UIDNA_ERROR_LEADING_HYPHEN;
-    // A label ends with a hyphen-minus ('-').
-    info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
-
-    if (!be_strict) {
-      // A non-final domain name label (or the whole domain name) is empty.
-      info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
-      // A domain name label is longer than 63 bytes.
-      info.errors &= ~UIDNA_ERROR_LABEL_TOO_LONG;
-      // A domain name is longer than 255 bytes in its storage form.
-      info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
-    }
-
-    uidna_close(uidna);
-
-    if (U_FAILURE(status) || info.errors != 0 || length == 0) {
-      out = std::nullopt;
-      return false;
-    }
-
-    out.value().resize(length);
+    out = ada::puny::convert_domain_to_puny(input, be_strict);
+    if(!out.has_value()) { return false; }
     if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
       out = std::nullopt;
       return false;
     }
     return true;
   }
-
 
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
