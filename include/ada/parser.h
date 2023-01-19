@@ -9,9 +9,6 @@
 #include <string_view>
 
 namespace ada::parser {
-  // first_percent should be  = plain.find('%')
-  bool to_ascii(std::optional<std::string>& out, std::string_view plain, bool be_strict, size_t first_percent);
-
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url = std::nullopt,
                 ada::encoding_type encoding = ada::encoding_type::UTF8,
