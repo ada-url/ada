@@ -1,81 +1,17 @@
-#include <cinttypes>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <filesystem>
 #include <iostream>
 #include <string>
 #include <memory>
+#include <string_view>
+#include <gtest/gtest.h>
 
 #include "ada.h"
+#include "fixture_generator.cpp"
 
 
-// This function copies your input onto a memory buffer that
-// has just the necessary size. This will entice tools to detect
-// an out-of-bound access.
-ada::url ada_parse(std::string_view view, std::optional<ada::url> base = std::nullopt) {
-  std::cout << "about to parse '" << view << "'" << std::endl;
-  std::unique_ptr<char[]> buffer(new char[view.size()+1]);
-  memcpy(buffer.get(), view.data(), view.size());
-  return ada::parse(std::string_view(buffer.get(), view.size()), std::move(base));
-}
-
-#include "simdjson.h"
-
-using namespace simdjson;
-
-#ifndef WPT_DATA_DIR
-#define WPT_DATA_DIR "wpt/"
-#endif
-const char *PERCENT_ENCODING_JSON = WPT_DATA_DIR "percent-encoding.json";
-const char *SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
-const char *TOASCII_JSON = WPT_DATA_DIR "toascii.json";
-const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
-
-#define TEST_START()                                                           \
-  do {                                                                         \
-    std::cout << "> Running " << __func__ << " ..." << std::endl;              \
-  } while (0);
-#define RUN_TEST(ACTUAL)                                                       \
-  do {                                                                         \
-    if (!(ACTUAL)) {                                                           \
-      return false;                                                            \
-    }                                                                          \
-  } while (0);
-#define TEST_FAIL(MESSAGE)                                                     \
-  do {                                                                         \
-    std::cerr << "FAIL: " << (MESSAGE) << std::endl;                           \
-    return false;                                                              \
-  } while (0);
-#define TEST_SUCCEED()                                                         \
-  do {                                                                         \
-    return true;                                                               \
-  } while (0);
-#define TEST_ASSERT(LHS, RHS, MESSAGE)                                         \
-  do {                                                                         \
-    if (LHS != RHS)  {                                                         \
-      std::cerr << "Mismatch: '" << LHS << "' - '" << RHS << "'" << std::endl; \
-      TEST_FAIL(MESSAGE);                                                      \
-    }                                                                          \
-  } while (0);                                                                 \
-
-bool file_exists(const char *filename) {
-  namespace fs = std::filesystem;
-  std::filesystem::path f{filename};
-  if (std::filesystem::exists(filename)) {
-    std::cout << "  file found: " << filename << std::endl;
-    return true;
-  } else {
-    std::cout << "  file missing: " << filename << std::endl;
-    return false;
-  }
-}
-
-bool percent_encoding() {
-  TEST_START()
+TEST(WPT, PercentEncoding) {
   ondemand::parser parser;
 
-  RUN_TEST(file_exists(PERCENT_ENCODING_JSON));
+  ASSERT_TRUE(file_exists(PERCENT_ENCODING_JSON));
   padded_string json = padded_string::load(PERCENT_ENCODING_JSON);
   std::cout << "  loaded " << PERCENT_ENCODING_JSON << " (" << json.size()
             << " kB)" << std::endl;
@@ -113,13 +49,12 @@ bool percent_encoding() {
       }
     }
   }
-  TEST_SUCCEED()
 }
 
-bool setters_tests_encoding() {
-  TEST_START()
+TEST(WPT, SettersTests) {
+  ASSERT_TRUE(file_exists(SETTERS_TESTS_JSON));
+
   ondemand::parser parser;
-  RUN_TEST(file_exists(SETTERS_TESTS_JSON));
   padded_string json = padded_string::load(SETTERS_TESTS_JSON);
   std::cout << "  loaded " << SETTERS_TESTS_JSON << " (" << json.size()
             << " kB)" << std::endl;
@@ -145,24 +80,24 @@ bool setters_tests_encoding() {
       }
 
       auto base = ada_parse(href);
-      TEST_ASSERT(base.is_valid, true, "Base url parsing should have succeeded")
+      ASSERT_DOUBLE_EQ(base.is_valid, true);
 
       std::cout << "      " << href << std::endl;
 
       if (category == "protocol") {
         std::string_view expected = element["expected"]["protocol"];
         ada::set_scheme(base, std::string{new_value});
-        TEST_ASSERT(base.get_scheme() + ":", expected, "Protocol");
+        ASSERT_EQ(base.get_scheme() + ":", expected);
       }
       else if (category == "username") {
         std::string_view expected = element["expected"]["username"];
         ada::set_username(base, std::string{new_value});
-        TEST_ASSERT(base.username, expected, "Username");
+        ASSERT_EQ(base.username, expected);
       }
       else if (category == "password") {
         std::string_view expected = element["expected"]["password"];
         ada::set_password(base, std::string{new_value});
-        TEST_ASSERT(base.password, expected, "Password");
+        ASSERT_EQ(base.password, expected);
       }
       else if (category == "hostname") {
         std::string_view expected;
@@ -170,73 +105,49 @@ bool setters_tests_encoding() {
         // TODO: Handle invalid utf-8 tests too.
         if (!element["expected"]["hostname"].get(expected)) {
           ada::set_host(base, std::string{new_value});
-          TEST_ASSERT(base.host.value_or(""), expected, "Hostname");
+          ASSERT_EQ(base.host.value_or(""), expected);
         }
       }
       else if (category == "port") {
         std::string_view expected = element["expected"]["port"];
         ada::set_port(base, std::string{new_value});
         auto normalized = base.port.has_value() ? std::to_string(*base.port) : "";
-        TEST_ASSERT(normalized, expected, "Port");
+        ASSERT_EQ(normalized, expected);
       }
       else if (category == "pathname") {
         std::string_view expected = element["expected"]["pathname"];
         ada::set_pathname(base, std::string{new_value});
-        TEST_ASSERT(base.path, expected, "Path");
+        ASSERT_EQ(base.path, expected);
       }
       else if (category == "search") {
         std::string_view expected = element["expected"]["search"];
         ada::set_search(base, std::string{new_value});
         auto normalized = !base.query.value_or("").empty() ? "?" + base.query.value() : "";
-        TEST_ASSERT(normalized, expected, "Search");
+        ASSERT_EQ(normalized, expected);
       }
       else if (category == "hash") {
         std::string_view expected = element["expected"]["hash"];
         ada::set_hash(base, std::string{new_value});
         auto normalized = !base.fragment.value_or("").empty() ? "#" + *base.fragment : "";
-        TEST_ASSERT(normalized, expected, "Fragment");
+        ASSERT_EQ(normalized, expected);
       }
     }
   }
-  TEST_SUCCEED()
 }
 
-bool toascii_encoding() {
-  TEST_START()
-  ondemand::parser parser;
-
-  RUN_TEST(file_exists(TOASCII_JSON));
-  padded_string json = padded_string::load(TOASCII_JSON);
-  std::cout << "  loaded " << TOASCII_JSON << " (" << json.size() << " kB)"
-            << std::endl;
-  ondemand::document doc = parser.iterate(json);
-  for (auto element : doc.get_array()) {
-    if (element.type() == ondemand::json_type::string) {
-      std::cout << "   comment: " << element.get_string() << std::endl;
-    } else if (element.type() == ondemand::json_type::object) {
-      ondemand::object object = element.get_object();
-      std::string_view input = object["input"];
-      std::optional<std::string> output;
-      ada::parser::to_ascii(output, input, false, input.find('%'));
-      auto expected_output = object["output"];
-
-      if (expected_output.type() == ondemand::json_type::string) {
-        std::string_view stringified_output = expected_output.get_string();
-        TEST_ASSERT(output.value_or(""), stringified_output, "Should have been equal");
-      } else if (expected_output.is_null()) {
-        TEST_ASSERT(output.value_or(""), "", "Should have been empty");
-      }
-    }
-  }
-  TEST_SUCCEED()
+TEST_P(ToAscii, Encoding) {
+  std::optional<std::string> input = std::string(GetParam().input);
+  ada::parser::to_ascii(input, GetParam().input, false, GetParam().input.find('%'));
+  const auto expected = GetParam().output;
+  EXPECT_EQ(input.value_or(""), expected);
 }
 
-bool urltestdata_encoding() {
+INSTANTIATE_TEST_SUITE_P(WPT, ToAscii, testing::ValuesIn(GetTestsForToAsciiEncoding()));
 
-  TEST_START()
+TEST(WPT, URLTestData) {
+  ASSERT_TRUE(file_exists(URLTESTDATA_JSON));
+
   ondemand::parser parser;
-
-  RUN_TEST(file_exists(URLTESTDATA_JSON));
   padded_string json = padded_string::load(URLTESTDATA_JSON);
   std::cout << "  loaded " << URLTESTDATA_JSON << " (" << json.size() << " kB)"
             << std::endl;
@@ -265,36 +176,36 @@ bool urltestdata_encoding() {
       : ada_parse(input);
 
       if (!object["failure"].get(failure)) {
-        TEST_ASSERT(input_url.is_valid, !failure, "Should not have succeeded");
+        ASSERT_EQ(input_url.is_valid, !failure);
       } else {
-        TEST_ASSERT(input_url.is_valid, true, "Should not have failed");
+        ASSERT_EQ(input_url.is_valid, true);
 
         std::string_view protocol = object["protocol"];
          // WPT tests add ":" suffix to protocol
         protocol.remove_suffix(1);
-        TEST_ASSERT(input_url.get_scheme(), protocol, "Protocol");
+        ASSERT_EQ(input_url.get_scheme(), protocol);
 
         std::string_view username = object["username"];
-        TEST_ASSERT(input_url.username, username, "Username");
+        ASSERT_EQ(input_url.username, username);
 
         std::string_view password = object["password"];
-        TEST_ASSERT(input_url.password, password, "Password");
+        ASSERT_EQ(input_url.password, password);
 
         std::string_view hostname = object["hostname"];
-        TEST_ASSERT(input_url.host.value_or(""), hostname, "Hostname");
+        ASSERT_EQ(input_url.host.value_or(""), hostname);
 
         std::string_view port = object["port"];
         std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
-        TEST_ASSERT(expected_port, port, "Port");
+        ASSERT_EQ(expected_port, port);
 
         std::string_view pathname{};
         if (object["pathname"].get_string().get(pathname)) {
-          TEST_ASSERT(input_url.path, pathname, "Pathname");
+          ASSERT_EQ(input_url.path, pathname);
         }
 
         std::string_view query;
         if (!object["query"].get(query)) {
-          TEST_ASSERT(input_url.query.value_or(""), query, "Query");
+          ASSERT_EQ(input_url.query.value_or(""), query);
         }
 
         std::string_view hash = object["hash"];
@@ -302,21 +213,13 @@ bool urltestdata_encoding() {
           // Test cases start with "#".
           hash.remove_prefix(1);
         }
-        TEST_ASSERT(input_url.fragment.value_or(""), hash, "Hash/Fragment");
+        ASSERT_EQ(input_url.fragment.value_or(""), hash);
       }
     }
   }
-  TEST_SUCCEED()
 }
 
-int main() {
-  std::cout << "Running WPT tests.\n" << std::endl;
-
-  if (percent_encoding() && setters_tests_encoding() && toascii_encoding() &&
-      urltestdata_encoding()) {
-    std::cout << "WPT tests are ok." << std::endl;
-    return EXIT_SUCCESS;
-  } else {
-    return EXIT_FAILURE;
-  }
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
