@@ -3,6 +3,10 @@
 
 #include <algorithm>
 
+#include <unicode/utypes.h>
+#include <unicode/uidna.h>
+#include <unicode/utf8.h>
+
 namespace ada::unicode {
 
   // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR, U+0020 SPACE, U+0023 (#),
@@ -283,6 +287,120 @@ namespace ada::unicode {
       }
   }
 
+  /**
+   * We receive a UTF-8 string representing a domain name.
+   * If the string is percent encoded, we apply percent decoding.
+   *
+   * Given a domain, we need to identify its labels.
+   * They are separated by label-separators:
+   *
+   * U+002E ( . ) FULL STOP
+   * U+FF0E ( ． ) FULLWIDTH FULL STOP
+   * U+3002 ( 。 ) IDEOGRAPHIC FULL STOP
+   * U+FF61 ( ｡ ) HALFWIDTH IDEOGRAPHIC FULL STOP
+   *
+   * They are all mapped to U+002E.
+   *
+   * We process each label into a string that should not exceed 63 octets.
+   * If the string is already punycode (starts with "xn--"), then we must
+   * scan it to look for unallowed code points.
+   * Otherwise, if the string is not pure ASCII, we need to transcode it
+   * to punycode by following RFC 3454 which requires us to
+   * - Map characters  (see section 3),
+   * - Normalize (see section 4),
+   * - Reject forbidden characters,
+   * - Check for right-to-left characters and if so, check all requirements (see section 6),
+   * - Optionally reject based on unassigned code points (section 7).
+   *
+   * The Unicode standard provides a table of code points with a mapping, a list of
+   * forbidden code points and so forth. This table is subject to change and will
+   * vary based on the implementation. For Unicode 15, the table is at
+   * https://www.unicode.org/Public/idna/15.0.0/IdnaMappingTable.txt
+   * If you use ICU, they parse this table and map it to code using a Python script.
+   *
+   * The resulting strings should not exceed 255 octets according to RFC 1035 section 2.3.4.
+   * ICU checks for label size and domain size, but if we pass "be_strict = false", these
+   * errors are ignored.
+   *
+   * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
+   *
+   */
+  bool to_ascii(std::optional<std::string>& out, const std::string_view plain, const bool be_strict, size_t first_percent) {
+    std::string percent_decoded_buffer;
+    std::string_view input = plain;
+    if(first_percent != std::string_view::npos) {
+      percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
+      input = percent_decoded_buffer;
+    }
+    UErrorCode status = U_ZERO_ERROR;
+    uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
+
+    if (be_strict) {
+      options |= UIDNA_USE_STD3_RULES;
+    }
+
+    UIDNA* uidna = uidna_openUTS46(options, &status);
+    if (U_FAILURE(status)) {
+      return false;
+    }
+
+    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+    out = std::string(255, 0);
+    // RFC 1035 section 2.3.4.
+    // The domain  name must be at most 255 octets.
+    // It cannot contain a label longer than 63 octets.
+    // Thus we should never need more than 255 octets, if we
+    // do the domain name is in error.
+    int32_t length = uidna_nameToASCII_UTF8(uidna,
+                                         input.data(),
+                                         int32_t(input.length()),
+                                         out.value().data(), 255,
+                                         &info,
+                                         &status);
+
+    if (status == U_BUFFER_OVERFLOW_ERROR) {
+      status = U_ZERO_ERROR;
+      out.value().resize(length);
+      // When be_strict is true, this should not be allowed!
+      length = uidna_nameToASCII_UTF8(uidna,
+                                     input.data(),
+                                     int32_t(input.length()),
+                                     out.value().data(), length,
+                                     &info,
+                                     &status);
+    }
+
+    // A label contains hyphen-minus ('-') in the third and fourth positions.
+    info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
+    // A label starts with a hyphen-minus ('-').
+    info.errors &= ~UIDNA_ERROR_LEADING_HYPHEN;
+    // A label ends with a hyphen-minus ('-').
+    info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
+
+    if (!be_strict) { // This seems to violate RFC 1035 section 2.3.4.
+      // A non-final domain name label (or the whole domain name) is empty.
+      info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
+      // A domain name label is longer than 63 bytes.
+      info.errors &= ~UIDNA_ERROR_LABEL_TOO_LONG;
+      // A domain name is longer than 255 bytes in its storage form.
+      info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
+    }
+
+    uidna_close(uidna);
+
+    if (U_FAILURE(status) || info.errors != 0 || length == 0) {
+      out = std::nullopt;
+      return false;
+    }
+
+    out.value().resize(length); // we possibly want to call :shrink_to_fit otherwise we use 255 bytes.
+    if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
+      out = std::nullopt;
+      return false;
+    }
+    return true;
+  }
+
   // This function attemps to convert an ASCII string to a lower-case version.
   // Once the lower cased version has been materialized, we check for the presence
   // of the substring 'xn-', if it is found (unlikely), we then call the expensive 'to_ascii'.
@@ -298,7 +416,7 @@ namespace ada::unicode {
       return true;
     }
 
-    return ada::parser::to_ascii(out, out.value(), false, first_percent);
+    return to_ascii(out, out.value(), false, first_percent);
   }
 
 } // namespace ada::unicode

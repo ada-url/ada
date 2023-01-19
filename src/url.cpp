@@ -326,7 +326,7 @@ namespace ada {
       }
     }
 
-    is_valid = ada::parser::to_ascii(host, input, false,  input.find('%'));
+    is_valid = ada::unicode::to_ascii(host, input, false,  input.find('%'));
     if (!is_valid) { return is_valid = false; }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
