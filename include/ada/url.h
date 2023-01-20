@@ -191,7 +191,8 @@ namespace ada {
     }
 
     /**
-     * Take the scheme from another URL.
+     * Take the scheme from another URL. The scheme string is moved from the
+     * provided url.
      */
     void copy_scheme(ada::url&& u) {
       non_special_scheme = u.non_special_scheme;
@@ -199,7 +200,8 @@ namespace ada {
     }
 
     /**
-     * Take the scheme from another URL.
+     * Take the scheme from another URL. The scheme string is copied from the
+     * provided url.
      */
     void copy_scheme(const ada::url& u) {
       non_special_scheme = u.non_special_scheme;
@@ -270,6 +272,9 @@ namespace ada {
      * URL for further processing after parsing. It is initially the empty string.
      * We only set non_special_scheme when the scheme is non-special, otherwise we avoid constructing
      * string.
+     *
+     * Special schemes are stored in ada::scheme::details::is_special_list so we typically do not need
+     * to store them in each url instance.
      */
     std::string non_special_scheme{};
 
