@@ -18,10 +18,9 @@ namespace ada::parser {
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding,
-                std::optional<ada::url> optional_url,
-                std::optional<ada::state> state_override) {
+                std::optional<ada::url> optional_url) {
     // Let state be state override if given, or scheme start state otherwise.
-    ada::state state = state_override.value_or(ada::state::SCHEME_START);
+    ada::state state = ada::state::SCHEME_START;
 
     /**
      * Design concern: We take an optional_url as a parameter. Yet optional_url
@@ -64,8 +63,8 @@ namespace ada::parser {
     // The rest of the code might work with std::string_view, not pointers, it would
     // be easier to follow. But because we don't want to change everything, let us
     // bring back the pointers.
-    pointer_start = state_override.has_value() ? internal_input.begin() : url_data.begin();
-    pointer_end = state_override.has_value() ? internal_input.end() : url_data.end();
+    pointer_start = url_data.begin();
+    pointer_end = url_data.end();
 
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
@@ -499,7 +498,7 @@ namespace ada::parser {
           }
           // Otherwise, if state override is not given and c is U+003F (?),
           // set url’s query to the empty string and state to query state.
-          else if (!state_override.has_value() && *pointer == '?') {
+          else if (*pointer == '?') {
             state = ada::state::QUERY;
           }
           // Otherwise, if c is not the EOF code point:
@@ -512,11 +511,6 @@ namespace ada::parser {
               pointer--;
             }
           }
-          // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
-          else if (state_override.has_value() && !url.host.has_value()) {
-            // To append to a list that is not an ordered set is to add the given item to the end of the list.
-            url.path += '/';
-          }
 
           break;
         }
@@ -525,7 +519,7 @@ namespace ada::parser {
           // Furthermore, we can immediately locate the '?'.
           std::string_view view(pointer, size_t(pointer_end-pointer));
           size_t locofquestionmark = view.find('?');
-          auto end_of_path = ((locofquestionmark != std::string_view::npos) && !state_override.has_value()) ? pointer + locofquestionmark: pointer_end;
+          auto end_of_path = (locofquestionmark != std::string_view::npos) ? pointer + locofquestionmark: pointer_end;
           if(end_of_path != pointer_end) {
             state = ada::state::QUERY;
             view.remove_suffix(pointer_end-end_of_path);
@@ -578,17 +572,12 @@ namespace ada::parser {
           std::string_view file_host_buffer(view.data(), (location != std::string_view::npos) ? location : view.size());
           pointer += location - 1;
 
-          if (!state_override.has_value() && checkers::is_windows_drive_letter(file_host_buffer)) {
+          if (checkers::is_windows_drive_letter(file_host_buffer)) {
             state = ada::state::PATH;
           }
           else if (file_host_buffer.empty()) {
             // Set url’s host to the empty string.
             url.host = "";
-
-            // If state override is given, then return.
-            if (state_override.has_value()) {
-              return url;
-            }
 
             // Set state to path start state.
             state = ada::state::PATH_START;
@@ -600,11 +589,6 @@ namespace ada::parser {
             // If host is "localhost", then set host to the empty string.
             if (url.host.has_value() && url.host.value() == "localhost") {
               url.host = "";
-            }
-
-            // If state override is given, then return.
-            if (state_override.has_value()) {
-              return url;
             }
 
             // Set buffer to the empty string and state to path start state.

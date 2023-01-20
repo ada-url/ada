@@ -24,13 +24,12 @@ namespace ada {
 
   ada_warn_unused url parse(std::string_view input,
                             std::optional<ada::url> base_url,
-                            ada::encoding_type encoding,
-                            std::optional<ada::state> state) noexcept {
+                            ada::encoding_type encoding) noexcept {
     if(encoding != encoding_type::UTF8) {
       // todo: unsupported !
     }
     // TODO std::move(base_url) might be unwise. Check.
-    return ada::parser::parse_url(input, std::move(base_url), encoding, std::nullopt, state);
+    return ada::parser::parse_url(input, std::move(base_url), encoding);
   }
 
   /*
@@ -123,13 +122,13 @@ namespace ada {
     helpers::remove_ascii_tab_or_newline(_host);
     std::string_view host(_host);
 
-    std::string_view host_view(_host.data(), _host.length());
-    bool inside_brackets{false};
-    size_t location = helpers::get_host_delimiter_location(base, host_view, inside_brackets);
-    std::string_view::iterator pointer = (location != std::string_view::npos) ? host.begin() + location : host.end();
-
     // If url's scheme is "file", then set state to file host state, instead of host state.
     if (base.get_scheme_type() != ada::scheme::type::FILE) {
+      std::string_view host_view(_host.data(), _host.length());
+      bool inside_brackets{false};
+      size_t location = helpers::get_host_delimiter_location(base, host_view, inside_brackets);
+      std::string_view::iterator pointer = (location != std::string_view::npos) ? host.begin() + location : host.end();
+
       // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
       // Note: we cannot access *pointer safely if (pointer == pointer_end).
       if ((pointer != host.end()) && (*pointer == ':') && !inside_brackets) {
@@ -152,25 +151,29 @@ namespace ada {
       return base.parse_host(host_view);
     }
 
-    ada::state state = base.get_scheme_type() == ada::scheme::type::FILE ? state::FILE_HOST : state::HOST;
+    size_t location = host.find_first_of("/\\?");
+    if (location != std::string_view::npos) { host.remove_suffix(host.length() - location); }
 
-    /**
-     * TODO: This needs to be reengineered. The next line calls
-     * a large function just to later update the host. We should
-     * specialize and just call what is needed: a host computation.
-     */
-    // Basic URL parse the given value with this’s URL as url and host state as state override.
-    auto result = ada::parser::parse_url(input, std::nullopt, encoding,
-#if ADA_DEVELOP_MODE
-    base.oh_no_we_need_to_copy_url(),
-#else
-    base,
-#endif
-    state);
-
-    if (result.is_valid) {
-      base.host = result.host;
+    if (host.empty()) {
+      // Set url’s host to the empty string.
+      base.host = "";
     }
+    else {
+      // TODO: This is required because to_ascii mutate input and does not revert if input fails.
+      auto existing_host = std::move(base.host);
+
+      // Let host be the result of host parsing buffer with url is not special.
+      if (!base.parse_host(host)) {
+        base.host = existing_host;
+        return false;
+      }
+
+      // If host is "localhost", then set host to the empty string.
+      if (base.host.has_value() && base.host.value() == "localhost") {
+        base.host = "";
+      }
+    }
+
     return true;
   }
 

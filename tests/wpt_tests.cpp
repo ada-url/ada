@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "ada.h"
+#include "ada/parser.h"
 
 
 // This function copies your input onto a memory buffer that
