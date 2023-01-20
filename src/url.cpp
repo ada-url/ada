@@ -425,6 +425,47 @@ namespace ada {
     return true;
   }
 
+  ada_really_inline bool url::parse_scheme(const std::string_view input, const bool has_state_override) {
+    std::string _buffer;
+    std::transform(input.begin(), input.end(), std::back_inserter(_buffer),
+        [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
+
+    if (has_state_override) {
+      // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
+      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+      if (is_special() != ada::scheme::is_special(_buffer)) {
+        return true;
+      }
+
+      // If url includes credentials or has a non-null port, and buffer is "file", then return.
+      if ((includes_credentials() || port.has_value()) && _buffer == "file") {
+        return true;
+      }
+
+      // If url’s scheme is "file" and its host is an empty host, then return.
+      // An empty host is the empty string.
+      if (get_scheme_type() == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
+        return true;
+      }
+    }
+
+    set_scheme(std::move(_buffer));
+
+    if (has_state_override) {
+      // This is uncommon.
+      uint16_t urls_scheme_port = get_special_port();
+
+      if (urls_scheme_port) {
+        // If url’s port is url’s scheme’s default port, then set url’s port to null.
+        if (port.has_value() && *port == urls_scheme_port) {
+          port = std::nullopt;
+        }
+      }
+    }
+
+    return true;
+  }
+
   std::string url::to_string() {
     if (!is_valid) {
       return "null";
