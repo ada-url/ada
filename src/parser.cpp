@@ -104,53 +104,11 @@ namespace ada::parser {
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           pointer = std::find_if_not(pointer, pointer_end, ada::unicode::is_alnum_plus);
+
           // Otherwise, if c is U+003A (:), then:
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && (*pointer == ':')) {
-
-            // Instead of copying and then changing the case,
-            // we could directly append lower-cased to the string, thus doing one pass.
-            std::string _buffer;
-            std::transform(pointer_start, pointer, std::back_inserter(_buffer),
-                [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
-
-            // If state override is given, then:
-            if (state_override.has_value()) {
-              // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
-              // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
-              if (url.is_special() != ada::scheme::is_special(_buffer)) {
-                return url;
-              }
-
-              // If url includes credentials or has a non-null port, and buffer is "file", then return.
-              if ((url.includes_credentials() || url.port.has_value()) && _buffer == "file") {
-                return url;
-              }
-
-              // If url’s scheme is "file" and its host is an empty host, then return.
-              // An empty host is the empty string.
-              if (url.get_scheme_type() == ada::scheme::type::FILE && url.host.has_value() && url.host.value().empty()) {
-                return url;
-              }
-            }
-
-            // Set url’s scheme to buffer.
-            url.set_scheme(std::move(_buffer));
-
-            // If state override is given, then:
-            if (state_override.has_value()) {
-              // This is uncommon.
-              uint16_t urls_scheme_port = url.get_special_port();
-
-              if (urls_scheme_port) {
-                // If url’s port is url’s scheme’s default port, then set url’s port to null.
-                if (url.port.has_value() && *url.port == urls_scheme_port) {
-                  url.port = std::nullopt;
-                }
-              }
-
-              return url;
-            }
+            url.parse_scheme(std::string_view(pointer_start, pointer - pointer_start));
 
             // If url’s scheme is "file", then:
             if (url.get_scheme_type() == ada::scheme::type::FILE) {
@@ -180,15 +138,10 @@ namespace ada::parser {
           }
           // Otherwise, if state override is not given, set buffer to the empty string, state to no scheme state,
           // and start over (from the first code point in input).
-          else if (!state_override.has_value()) {
+          else {
             state = ada::state::NO_SCHEME;
             pointer = pointer_start;
             pointer--;
-          }
-          // Otherwise, validation error, return failure.
-          else {
-            url.is_valid = false;
-            return url;
           }
 
           break;

@@ -59,24 +59,13 @@ namespace ada {
       return false;
     }
 
-    /**
-     * TODO: This needs to be reengineered. The next line calls
-     * a large function just to later update the scheme. We should
-     * specialize and just call what is needed: a scheme computation.
-     */
+    std::string::iterator pointer = std::find_if_not(input.begin(), input.end(), unicode::is_alnum_plus);
 
-    auto result = ada::parser::parse_url(input, std::nullopt, encoding,
-#if ADA_DEVELOP_MODE
-    base.oh_no_we_need_to_copy_url(),
-#else
-    base,
-#endif
-    ada::state::SCHEME);
-
-    if (result.is_valid) {
-      base.copy_scheme(result);
+    if (pointer != input.end() && *pointer == ':') {
+      return base.parse_scheme(std::string_view(input.data(), pointer - input.begin()), true);
     }
-    return true;
+
+    return false;
   }
 
   /**

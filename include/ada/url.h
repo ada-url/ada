@@ -228,6 +228,8 @@ namespace ada {
      */
     ada_really_inline bool parse_prepared_path(const std::string_view input);
 
+    ada_really_inline bool parse_scheme(const std::string_view input, const bool has_state_override = false);
+
     /**
      * Returns a string representation of this URL.  (Useful for debugging.)
      */
