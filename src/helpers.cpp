@@ -96,7 +96,9 @@ namespace ada::helpers {
       }
     }
 
-    view = std::string_view(view.data(), (location != std::string_view::npos) ? location : view.size());
+    if (location != std::string_view::npos) {
+      view.remove_suffix(view.size() - location);
+    }
     return location;
   }
 
