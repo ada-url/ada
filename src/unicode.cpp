@@ -269,25 +269,6 @@ namespace ada::unicode {
   }
 
   /**
-   * Encode a single character in the string. This is likely much faster than taking
-   * a character, making a string out of it, creating a new string, returning said string,
-   * and then appending the string at the caller site. Generally, we want to have as
-   * few std::string created as possible.
-   */
-  void percent_encode_character(const char input, const uint8_t character_set[], std::string &out) {
-    if (character_sets::bit_at(character_set, input)) {
-        // append will be faster because out += char* requires the
-        // system to determine the size of the input, by looking for the
-        // null byte, which implies a call to strlen. Yet we know that the
-        // size of the appended string is always 3. Let us tell it to the
-        // compiler.
-        out.append(character_sets::hex + uint8_t(input) * 4,3);
-      } else {
-        out += input;
-      }
-  }
-
-  /**
    * We receive a UTF-8 string representing a domain name.
    * If the string is percent encoded, we apply percent decoding.
    *
