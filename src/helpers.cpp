@@ -79,7 +79,7 @@ namespace ada::helpers {
     }), input.end());
   }
 
-  size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) {
+  ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept {
     size_t location = url.is_special() ? view.find_first_of(":[/?\\") : view.find_first_of(":[/?");
 
     // Next while loop is almost never taken!
