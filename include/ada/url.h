@@ -111,7 +111,7 @@ namespace ada {
      * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
      */
     [[nodiscard]] bool cannot_have_credentials_or_port() const {
-      return !host.has_value() || host.value().empty() || scheme == "file";
+      return !host.has_value() || host.value().empty() || type == ada::scheme::type::FILE;
     }
     /** For development purposes, we want to know when a copy is made. */
     url() = default;
@@ -132,7 +132,7 @@ namespace ada {
     /** Only for development purposes so we can see where the copies are happening. **/
     url oh_no_we_need_to_copy_url() const {
       url answer;
-      answer.scheme = scheme;
+      answer.non_special_scheme = non_special_scheme;
       answer.type = type;
       answer.username = username;
       answer.password = password;
@@ -171,23 +171,30 @@ namespace ada {
      * Return a string representing the scheme. Note that
      * get_scheme_type() should often be used instead.
      */
-    const std::string& get_scheme() const noexcept {
-      return scheme;
+    std::string_view get_scheme() const noexcept {
+      if(is_special()) { return ada::scheme::details::is_special_list[type]; }
+      // We only move the 'scheme' if it is non-special.
+      return non_special_scheme;
     }
 
     /**
-     * Set the scheme for this URL.
+     * Set the scheme for this URL. The provided scheme should be a valid
+     * scheme string, be lower-cased, not contain spaces or tabs. It should
+     * have no spurious trailing or leading content.
      */
     void set_scheme(std::string&& new_scheme) {
-      scheme = new_scheme;
-      type = ada::scheme::get_scheme_type(scheme);
+      type = ada::scheme::get_scheme_type(new_scheme);
+      // We only move the 'scheme' if it is non-special.
+      if(!is_special()) {
+        non_special_scheme = new_scheme;
+      }
     }
 
     /**
      * Take the scheme from another URL.
      */
     void copy_scheme(ada::url&& u) {
-      scheme = u.scheme;
+      non_special_scheme = u.non_special_scheme;
       type = u.type;
     }
 
@@ -195,7 +202,7 @@ namespace ada {
      * Take the scheme from another URL.
      */
     void copy_scheme(const ada::url& u) {
-      scheme = u.scheme;
+      non_special_scheme = u.non_special_scheme;
       type = u.type;
     }
 
@@ -228,7 +235,8 @@ namespace ada {
      */
     ada_really_inline bool parse_prepared_path(const std::string_view input);
 
-    ada_really_inline bool parse_scheme(const std::string_view input, const bool has_state_override = false);
+    template <bool has_state_override = false>
+    ada_really_inline bool parse_scheme(const std::string_view input);
 
     /**
      * Returns a string representation of this URL.  (Useful for debugging.)
@@ -260,8 +268,10 @@ namespace ada {
     /**
      * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
      * URL for further processing after parsing. It is initially the empty string.
+     * We only set non_special_scheme when the scheme is non-special, otherwise we avoid constructing
+     * string.
      */
-    std::string scheme{};
+    std::string non_special_scheme{};
 
   }; // struct url
 

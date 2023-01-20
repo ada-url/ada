@@ -62,7 +62,7 @@ namespace ada {
     std::string::iterator pointer = std::find_if_not(input.begin(), input.end(), unicode::is_alnum_plus);
 
     if (pointer != input.end() && *pointer == ':') {
-      return base.parse_scheme(std::string_view(input.data(), pointer - input.begin()), true);
+      return base.parse_scheme<true>(std::string_view(input.data(), pointer - input.begin()));
     }
 
     return false;

@@ -425,42 +425,83 @@ namespace ada {
     return true;
   }
 
-  ada_really_inline bool url::parse_scheme(const std::string_view input, const bool has_state_override) {
-    std::string _buffer;
-    // Optimization opportunity: Most of the time scheme's are all lowercase.
-    // If that's the case, there's no need to copy.
-    std::transform(input.begin(), input.end(), std::back_inserter(_buffer),
-        [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
+  template <bool has_state_override>
+  ada_really_inline bool url::parse_scheme(const std::string_view input) {
+    auto parsed_type = ada::scheme::get_scheme_type(input);
+    bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
+    /**
+     * In the common case, we will immediately recognize a special scheme (e.g., http, https),
+     * in which case, we can go really fast.
+     **/
+    if(is_input_special) { // fast path!!!
+      if (has_state_override) {
+        // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+        if (is_special() != is_input_special) {
+          return true;
+        }
 
-    if (has_state_override) {
-      // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
-      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
-      if (is_special() != ada::scheme::is_special(_buffer)) {
-        return true;
+        // If url includes credentials or has a non-null port, and buffer is "file", then return.
+        if ((includes_credentials() || port.has_value()) && parsed_type == ada::scheme::type::FILE) {
+          return true;
+        }
+
+        // If url’s scheme is "file" and its host is an empty host, then return.
+        // An empty host is the empty string.
+        if (get_scheme_type() == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
+          return true;
+        }
       }
 
-      // If url includes credentials or has a non-null port, and buffer is "file", then return.
-      if ((includes_credentials() || port.has_value()) && _buffer == "file") {
-        return true;
+      type = parsed_type;
+
+      if (has_state_override) {
+        // This is uncommon.
+        uint16_t urls_scheme_port = get_special_port();
+
+        if (urls_scheme_port) {
+          // If url’s port is url’s scheme’s default port, then set url’s port to null.
+          if (port.has_value() && *port == urls_scheme_port) {
+            port = std::nullopt;
+          }
+        }
+      }
+    } else { // slow path
+      std::string _buffer;
+      // Optimization opportunity: Most of the time scheme's are all lowercase.
+      // If that's the case, there's no need to copy.
+      std::transform(input.begin(), input.end(), std::back_inserter(_buffer),
+          [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
+
+      if (has_state_override) {
+        // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
+        // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+        if (is_special() != ada::scheme::is_special(_buffer)) {
+          return true;
+        }
+
+        // If url includes credentials or has a non-null port, and buffer is "file", then return.
+        if ((includes_credentials() || port.has_value()) && _buffer == "file") {
+          return true;
+        }
+
+        // If url’s scheme is "file" and its host is an empty host, then return.
+        // An empty host is the empty string.
+        if (get_scheme_type() == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
+          return true;
+        }
       }
 
-      // If url’s scheme is "file" and its host is an empty host, then return.
-      // An empty host is the empty string.
-      if (get_scheme_type() == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
-        return true;
-      }
-    }
+      set_scheme(std::move(_buffer));
 
-    set_scheme(std::move(_buffer));
+      if (has_state_override) {
+        // This is uncommon.
+        uint16_t urls_scheme_port = get_special_port();
 
-    if (has_state_override) {
-      // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
-
-      if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (port.has_value() && *port == urls_scheme_port) {
-          port = std::nullopt;
+        if (urls_scheme_port) {
+          // If url’s port is url’s scheme’s default port, then set url’s port to null.
+          if (port.has_value() && *port == urls_scheme_port) {
+            port = std::nullopt;
+          }
         }
       }
     }
@@ -475,7 +516,7 @@ namespace ada {
     // TODO: make sure that this is valid JSON by encoding the strings.
     // TODO: pre-allocate memory and write into it to avoid allocations
     // and copies during concatenation.
-    return "{\"scheme\":\"" + scheme + "\"" + ","
+    return "{\"scheme\":\"" + std::string(get_scheme()) + "\"" + ","
          + "\"username\":\"" + username + "\"" + "," + "\"password\":\"" +
          password + "\"" + "," +
          (host.has_value() ? "\"host\":\"" + host.value() + "\"" + "," : "") +

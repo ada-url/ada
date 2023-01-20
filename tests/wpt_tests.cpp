@@ -152,7 +152,7 @@ bool setters_tests_encoding() {
       if (category == "protocol") {
         std::string_view expected = element["expected"]["protocol"];
         ada::set_scheme(base, std::string{new_value});
-        TEST_ASSERT(base.get_scheme() + ":", expected, "Protocol");
+        TEST_ASSERT(std::string(base.get_scheme()) + ":", expected, "Protocol");
       }
       else if (category == "username") {
         std::string_view expected = element["expected"]["username"];
