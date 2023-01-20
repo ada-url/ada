@@ -26,6 +26,9 @@ namespace ada {
                             std::optional<ada::url> base_url,
                             ada::encoding_type encoding,
                             std::optional<ada::state> state) noexcept {
+    if(encoding != encoding_type::UTF8) {
+      // todo: unsupported !
+    }
     // TODO std::move(base_url) might be unwise. Check.
     return ada::parser::parse_url(input, std::move(base_url), encoding, std::nullopt, state);
   }
@@ -36,19 +39,24 @@ namespace ada {
    *
    * TODO: This should probably a method in the struct ada::url.
    *
+   * return true on success.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
-  void set_scheme(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
+  bool set_scheme(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
+    if(encoding != encoding_type::UTF8) {
+      return false; // unsupported !
+    }
     if (!input.empty()) {
       input.append(":");
     } else {
       // Empty schemes are not allowed according to spec.
-      return;
+      return false;
     }
 
     // Schemes should start with alpha values.
     if (!checkers::is_alpha(input[0])) {
-      return;
+      return false;
     }
 
     /**
@@ -68,6 +76,7 @@ namespace ada {
     if (result.is_valid) {
       base.copy_scheme(result);
     }
+    return true;
   }
 
   /**
@@ -107,12 +116,17 @@ namespace ada {
   /**
    * TODO: This should probably a method in the struct ada::url.
    *
+   * Return true on success.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
-  void set_host(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
+  bool set_host(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
+    if(encoding != encoding_type::UTF8) {
+      return false; // unsupported !
+    }
     // If this’s URL has an opaque path, then return.
     if (base.has_opaque_path) {
-      return;
+      return true;
     }
 
     auto pointer_start = input.begin();
@@ -145,54 +159,42 @@ namespace ada {
     if (result.is_valid) {
       base.host = result.host;
     }
+    return true;
   }
 
   /**
    * TODO: This should probably a method in the struct ada::url.
    *
+   * return true on success.
+   *
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
-  void set_port(ada::url& base, std::string_view input) noexcept {
+  bool set_port(ada::url& base, std::string_view input) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
     if (base.cannot_have_credentials_or_port()) {
-      return;
+      return false;
     }
-    base.parse_port(input);
+    return base.parse_port(input);
   }
 
   /**
+   * Return true on success.
    * TODO: This should probably a method in the struct ada::url.
    *
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  void set_pathname(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
+  bool set_pathname(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
+
+    if(encoding != encoding_type::UTF8) {
+      return false; // unsupported !
+    }
     // If this’s URL has an opaque path, then return.
     if (base.has_opaque_path) {
-      return;
+      return true;
     }
-
     // Empty this’s URL’s path.
     base.path = "";
-
-    /**
-     * TODO: This needs to be reengineered. The next line calls
-     * a large function just to later update the path. We should
-     * specialize and just call what is needed: a path computation.
-     */
-    // Basic URL parse the given value with this’s URL as url and path start state as state override.
-    auto result = ada::parser::parse_url(input, std::nullopt, encoding,
-#if ADA_DEVELOP_MODE
-      base.oh_no_we_need_to_copy_url(),
-#else
-      base,
-#endif
-      ada::state::PATH_START);
-
-    if (result.is_valid) {
-      base.path = result.path;
-      base.has_opaque_path = result.has_opaque_path;
-    }
-
+    return base.parse_path(input);
   }
 
   /**

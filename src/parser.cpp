@@ -288,7 +288,7 @@ namespace ada::parser {
               state = ada::state::HOST;
               break;
             }
-          
+
             if(pointer == pointer_end) { break; }
             pointer++;
           } while(true);
@@ -477,7 +477,7 @@ namespace ada::parser {
             location = view.find(']',location);
             if(location == std::string_view::npos) {
               inside_brackets = true;
-              /** 
+              /**
                * TODO: Ok. So if we arrive here then view has an unclosed [,
                * Is the URL valid???
                */
@@ -569,6 +569,7 @@ namespace ada::parser {
         case ada::state::PATH_START: {
           // If url is special, then:
           if (url.is_special()) {
+
             // Set state to path state.
             state = ada::state::PATH;
 
@@ -607,53 +608,15 @@ namespace ada::parser {
           break;
         }
         case ada::state::PATH: {
-          // If one of the following is true:
-          // - c is the EOF code point or U+002F (/)
-          // - url is special and c is U+005C (\)
-          // - state override is not given and c is U+003F (?) or U+0023 (#)
-          do {
-            std::string_view view(pointer, size_t(pointer_end-pointer));
-            size_t location = url.is_special() ? (!state_override.has_value() ? view.find_first_of("/\\?") : view.find_first_of("/\\")) : (!state_override.has_value() ? view.find_first_of("/?") : view.find_first_of("/"));
-            std::string_view path_view(pointer, (location != std::string_view::npos) ? location :view.size());
-            std::string path_buffer = ada::unicode::percent_encode(path_view, character_sets::PATH_PERCENT_ENCODE);
-
-            pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
-            // If path_buffer is a double-dot path segment, then:
-            if (unicode::is_double_dot_path_segment(path_buffer)) {
-              // Shorten url’s path.
-              helpers::shorten_path(url);
-
-              // If neither c is U+002F (/), nor url is special and c is U+005C (\),
-              // append the empty string to url’s path.
-              if (*pointer != '/' && !(url.is_special() && *pointer == '\\')) {
-                url.path += "/";
-              }
-            }
-            // Otherwise, if path_buffer is a single-dot path segment and if neither c is U+002F (/),
-            // nor url is special and c is U+005C (\), append the empty string to url’s path.
-            else if (unicode::is_single_dot_path_segment(path_buffer) && *pointer != '/' && !(url.is_special() && *pointer == '\\')) {
-              url.path += "/";
-            }
-            // Otherwise, if path_buffer is not a single-dot path segment, then:
-            else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-              // If url’s scheme is "file", url’s path is empty, and path_buffer is a Windows drive letter,
-              // then replace the second code point in path_buffer with U+003A (:).
-              if (url.get_scheme_type() == ada::scheme::type::FILE && url.path.empty() && checkers::is_windows_drive_letter(path_buffer)){
-                path_buffer[1] = ':';
-              }
-
-              // Append path_buffer to url’s path.
-              url.path += "/" + path_buffer;
-            }
-            if(pointer == pointer_end) { break; }
-
-            // If c is U+003F (?), then set url’s query to the empty string and state to query state.
-            if ((pointer != pointer_end) && (*pointer == '?')) {
-              state = ada::state::QUERY;
-              break;
-            }
-            pointer++;
-          } while(true);
+          // Most time, we do not need percent encoding.
+          // Furthermore, we can immediately locate the '?'.
+          size_t locofquestionmark = std::string_view(pointer, size_t(pointer_end-pointer)).find('?');
+          auto end_of_path = ((locofquestionmark != std::string_view::npos) && !state_override.has_value()) ? pointer + locofquestionmark: pointer_end;
+          if(end_of_path != pointer_end) {
+            state = ada::state::QUERY;
+          }
+          url.parse_prepared_path(std::string_view(pointer, size_t(end_of_path-pointer)));
+          pointer = end_of_path;
           break;
         }
         case ada::state::FILE_SLASH: {
