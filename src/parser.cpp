@@ -425,11 +425,6 @@ namespace ada::parser {
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && (*pointer == ':') && !inside_brackets) {
             // If buffer is the empty string, validation error, return failure.
-            if (host_view.empty()) {
-              url.is_valid = false;
-              return url;
-            }
-
             // Let host be the result of host parsing buffer with url is not special.
             url.parse_host(host_view);
 
@@ -451,7 +446,6 @@ namespace ada::parser {
 
             // Let host be the result of host parsing host_view with url is not special.
             if (host_view.empty()) {
-              url.is_valid = true;
               url.host = "";
             } else {
               url.parse_host(host_view);

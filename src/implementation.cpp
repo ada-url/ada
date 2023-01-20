@@ -137,12 +137,9 @@ namespace ada {
         return false;
       }
       // If url is special and host_view is the empty string, validation error, return failure.
-      else if (base.is_special() && host_view.empty()) {
-        return false;
-      }
       // Otherwise, if state override is given, host_view is the empty string,
       // and either url includes credentials or url’s port is non-null, return.
-      else if (host_view.empty() && (base.includes_credentials() || base.port.has_value())) {
+      else if (host_view.empty() && (base.is_special() || base.includes_credentials() || base.port.has_value())) {
         return false;
       }
 
