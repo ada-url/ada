@@ -13,7 +13,7 @@ namespace ada::helpers {
   ada_really_inline std::optional<std::string_view> prune_fragment(std::string_view& input) noexcept;
   ada_really_inline void shorten_path(ada::url &url) noexcept;
   ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept;
-  size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets);
+  ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept;
 
 } // namespace ada::helpers
 
