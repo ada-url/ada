@@ -2,11 +2,13 @@
 add_executable(bench bench.cpp)
 target_link_libraries(bench PRIVATE ada)
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
 
 add_executable(bbc_bench bbc_bench.cpp)
 target_link_libraries(bbc_bench PRIVATE ada)
 target_include_directories(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
 
 include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
