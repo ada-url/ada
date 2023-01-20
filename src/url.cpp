@@ -402,7 +402,7 @@ namespace ada {
       buffer.reserve(input.size());
       std::transform(input.begin(), input.end(), std::back_inserter(buffer), [&is_forbidden, &ascii_runner](char c) -> char {
         is_forbidden |= ada::unicode::is_forbidden_domain_code_point(c);
-        ascii_runner |= c;
+        ascii_runner |= uint8_t(c);
         return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);}
       );
       if (ascii_runner < 128 && !is_forbidden && buffer.find("xn-") == std::string_view::npos) {
