@@ -145,8 +145,14 @@ namespace ada {
       return answer;
     }
 #endif
-    // parse a port (16-bit decimal digit) at the start of the string_view.
-    // It returns how many bytes were consumed when a number is successfully parsed.
+
+    /**
+     * Parse a port (16-bit decimal digit) from the provided input.
+     * We assume that the input does not contain spaces or tabs
+     * within the ASCII digits.
+     * It returns how many bytes were consumed when a number is successfully parsed.
+     * @see https://url.spec.whatwg.org/#host-parsing
+     */
     ada_really_inline size_t parse_port(std::string_view view) noexcept {
           uint16_t parsed_port{};
           auto r = std::from_chars(view.begin(), view.end(), parsed_port);
@@ -194,10 +200,34 @@ namespace ada {
     }
 
     /**
-    * Return true on success.
-    * @see https://url.spec.whatwg.org/#host-parsing
-    */
+     * Parse the host from the provided input. We assume that
+     * the input does not contain spaces or tabs. Control
+     * characters and spaces are not trimmed (they should have
+     * been removed if needed).
+     * Return true on success.
+     * @see https://url.spec.whatwg.org/#host-parsing
+     */
     ada_really_inline bool parse_host(const std::string_view input);
+
+    /**
+     * Parse the path from the provided input.
+     * Return true on success. Control characters not
+     * trimmed from the ends (they should have
+     * been removed if needed).
+     * @see https://url.spec.whatwg.org/#host-parsing
+     */
+    ada_really_inline bool parse_path(const std::string_view input);
+
+    /**
+     * Parse the path from the provided input. It should have been
+     * 'prepared' (e.g., it cannot contain tabs and spaces). See
+     * parse_path.
+     *
+     * Return true on success.
+     * @see https://url.spec.whatwg.org/#host-parsing
+     */
+    ada_really_inline bool parse_prepared_path(const std::string_view input);
+
     /**
      * Returns a string representation of this URL.  (Useful for debugging.)
      */
@@ -209,11 +239,13 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
     bool parse_ipv4(std::string_view input);
+
     /**
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-ipv6-parser
      */
     bool parse_ipv6(std::string_view input);
+
     /**
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
