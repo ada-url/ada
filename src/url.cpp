@@ -427,6 +427,8 @@ namespace ada {
 
   ada_really_inline bool url::parse_scheme(const std::string_view input, const bool has_state_override) {
     std::string _buffer;
+    // Optimization opportunity: Most of the time scheme's are all lowercase.
+    // If that's the case, there's no need to copy.
     std::transform(input.begin(), input.end(), std::back_inserter(_buffer),
         [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
 
