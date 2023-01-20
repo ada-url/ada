@@ -79,6 +79,27 @@ namespace ada::helpers {
     }), input.end());
   }
 
+  size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) {
+    size_t location = url.is_special() ? view.find_first_of(":[/?\\") : view.find_first_of(":[/?");
+
+    // Next while loop is almost never taken!
+    while((location != std::string_view::npos) && (view[location] == '[')) {
+      location = view.find(']',location);
+      if(location == std::string_view::npos) {
+        inside_brackets = true;
+        /**
+         * TODO: Ok. So if we arrive here then view has an unclosed [,
+         * Is the URL valid???
+         */
+      } else {
+        location = url.is_special() ? view.find_first_of(":[/?\\#", location) : view.find_first_of(":[/?#", location);
+      }
+    }
+
+    view = std::string_view(view.data(), (location != std::string_view::npos) ? location : view.size());
+    return location;
+  }
+
 } // namespace ada::helpers
 
 namespace ada {

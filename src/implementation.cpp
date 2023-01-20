@@ -118,17 +118,50 @@ namespace ada {
       return true;
     }
 
-    auto pointer_start = input.begin();
+    std::string_view::iterator pointer_start = input.begin();
+    if (!input.empty() && input[0] == '#') { pointer_start++; }
+    std::string_view::iterator pointer_end = std::find(pointer_start, input.end(), '#');
 
-    // If input starts with #, it is required to trim the input.
-    if (!input.empty() && input[0] == '#') {
-      pointer_start++;
-    }
-
-    // Hostname setter should ignore all after # character.
-    auto pointer_end = std::find(pointer_start, input.end(), '#');
+    std::string _host(pointer_start, std::distance(pointer_start, pointer_end));
+    helpers::remove_ascii_tab_or_newline(_host);
+    std::string_view host(_host);
 
     // If url's scheme is "file", then set state to file host state, instead of host state.
+    if (base.get_scheme_type() != ada::scheme::type::FILE) {
+      std::string_view::iterator pointer = host.begin();
+      std::string_view host_view(_host.data(), _host.length());
+      bool inside_brackets{false};
+      size_t location = helpers::get_host_delimiter_location(base, host_view, inside_brackets);
+      pointer = (location != std::string_view::npos) ? pointer + location : host.end();
+
+      // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
+      // Note: we cannot access *pointer safely if (pointer == pointer_end).
+      if ((pointer != pointer_end) && (*pointer == ':') && !inside_brackets) {
+        // If buffer is the empty string, validation error, return failure.
+        return false;
+      }
+      // Otherwise, if one of the following is true:
+      // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+      // - url is special and c is U+005C (\)
+      else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (base.is_special() && *pointer == '\\')) {
+        // If url is special and host_view is the empty string, validation error, return failure.
+        // Otherwise, if state override is given, host_view is the empty string,
+        // and either url includes credentials or url’s port is non-null, return.
+        if (host_view.empty() && (base.is_special() || base.includes_credentials() || base.port.has_value())) {
+          return false;
+        }
+
+        // Let host be the result of host parsing host_view with url is not special.
+        if (host_view.empty()) {
+          base.host = "";
+          return true;
+        } else {
+          base.parse_host(host_view);
+          return true;
+        }
+      }
+    }
+
     ada::state state = base.get_scheme_type() == ada::scheme::type::FILE ? state::FILE_HOST : state::HOST;
 
     /**
