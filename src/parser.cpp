@@ -602,7 +602,7 @@ namespace ada::parser {
           // Otherwise, if state override is given and url’s host is null, append the empty string to url’s path.
           else if (state_override.has_value() && !url.host.has_value()) {
             // To append to a list that is not an ordered set is to add the given item to the end of the list.
-            url.path += "/";
+            url.path += '/';
           }
 
           break;
@@ -645,7 +645,8 @@ namespace ada::parser {
 
                   // Optimization opportunity: Get rid of initializing a std::string
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
-                    url.path += "/" + first_base_url_path;
+                    url.path += '/'; 
+                    url.path += first_base_url_path;
                   }
                 }
               }
