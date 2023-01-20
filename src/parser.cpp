@@ -610,12 +610,14 @@ namespace ada::parser {
         case ada::state::PATH: {
           // Most time, we do not need percent encoding.
           // Furthermore, we can immediately locate the '?'.
-          size_t locofquestionmark = std::string_view(pointer, size_t(pointer_end-pointer)).find('?');
+          std::string_view view(pointer, size_t(pointer_end-pointer));
+          size_t locofquestionmark = view.find('?');
           auto end_of_path = ((locofquestionmark != std::string_view::npos) && !state_override.has_value()) ? pointer + locofquestionmark: pointer_end;
           if(end_of_path != pointer_end) {
             state = ada::state::QUERY;
+            view.remove_suffix(pointer_end-end_of_path);
           }
-          url.parse_prepared_path(std::string_view(pointer, size_t(end_of_path-pointer)));
+          url.parse_prepared_path(view);
           pointer = end_of_path;
           break;
         }

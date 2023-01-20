@@ -46,6 +46,7 @@ namespace ada {
     path="";
     bool needs_percent_encoding = input.end() != std::find_if(input.begin(), input.end(),
     [](uint8_t c) {
+      // All the characters values needing percent encoding are within these ranges:
       return c <= 35 || c > 122 || c == 96 || (c>59 && c<=63) ; } );
     std::string path_buffer_tmp;
     do {
