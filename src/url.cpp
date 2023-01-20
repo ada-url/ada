@@ -65,7 +65,7 @@ namespace ada {
       }
       if (unicode::is_double_dot_path_segment(path_buffer)) {
         helpers::shorten_path(*this);
-        if ((location == std::string_view::npos)) {
+        if (location == std::string_view::npos) {
           path += '/';
         }
       }
