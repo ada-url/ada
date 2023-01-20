@@ -118,48 +118,41 @@ namespace ada {
       return true;
     }
 
-    std::string_view::iterator pointer_start = input.begin();
-    if (!input.empty() && input[0] == '#') { pointer_start++; }
-    std::string_view::iterator pointer_end = std::find(pointer_start, input.end(), '#');
-
-    std::string _host(pointer_start, std::distance(pointer_start, pointer_end));
+    std::string_view::iterator _host_end = std::find(input.begin(), input.end(), '#');
+    std::string _host(input.data(), std::distance(input.begin(), _host_end));
     helpers::remove_ascii_tab_or_newline(_host);
     std::string_view host(_host);
 
+    std::string_view host_view(_host.data(), _host.length());
+    bool inside_brackets{false};
+    size_t location = helpers::get_host_delimiter_location(base, host_view, inside_brackets);
+    std::string_view::iterator pointer = (location != std::string_view::npos) ? host.begin() + location : host.end();
+
     // If url's scheme is "file", then set state to file host state, instead of host state.
     if (base.get_scheme_type() != ada::scheme::type::FILE) {
-      std::string_view::iterator pointer = host.begin();
-      std::string_view host_view(_host.data(), _host.length());
-      bool inside_brackets{false};
-      size_t location = helpers::get_host_delimiter_location(base, host_view, inside_brackets);
-      pointer = (location != std::string_view::npos) ? pointer + location : host.end();
-
       // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
       // Note: we cannot access *pointer safely if (pointer == pointer_end).
-      if ((pointer != pointer_end) && (*pointer == ':') && !inside_brackets) {
+      if ((pointer != host.end()) && (*pointer == ':') && !inside_brackets) {
         // If buffer is the empty string, validation error, return failure.
         return false;
       }
-      // Otherwise, if one of the following is true:
-      // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
-      // - url is special and c is U+005C (\)
-      else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (base.is_special() && *pointer == '\\')) {
-        // If url is special and host_view is the empty string, validation error, return failure.
-        // Otherwise, if state override is given, host_view is the empty string,
-        // and either url includes credentials or url’s port is non-null, return.
-        if (host_view.empty() && (base.is_special() || base.includes_credentials() || base.port.has_value())) {
-          return false;
-        }
-
-        // Let host be the result of host parsing host_view with url is not special.
-        if (host_view.empty()) {
-          base.host = "";
-          return true;
-        } else {
-          base.parse_host(host_view);
-          return true;
-        }
+      // If url is special and host_view is the empty string, validation error, return failure.
+      else if (base.is_special() && host_view.empty()) {
+        return false;
       }
+      // Otherwise, if state override is given, host_view is the empty string,
+      // and either url includes credentials or url’s port is non-null, return.
+      else if (host_view.empty() && (base.includes_credentials() || base.port.has_value())) {
+        return false;
+      }
+
+      // Let host be the result of host parsing host_view with url is not special.
+      if (host_view.empty()) {
+        base.host = "";
+        return true;
+      }
+
+      return base.parse_host(host_view);
     }
 
     ada::state state = base.get_scheme_type() == ada::scheme::type::FILE ? state::FILE_HOST : state::HOST;
@@ -170,7 +163,7 @@ namespace ada {
      * specialize and just call what is needed: a host computation.
      */
     // Basic URL parse the given value with this’s URL as url and host state as state override.
-    auto result = ada::parser::parse_url(std::string_view(pointer_start, pointer_end - pointer_start), std::nullopt, encoding,
+    auto result = ada::parser::parse_url(input, std::nullopt, encoding,
 #if ADA_DEVELOP_MODE
     base.oh_no_we_need_to_copy_url(),
 #else
