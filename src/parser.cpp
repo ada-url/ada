@@ -7,8 +7,6 @@
 #include <array>
 #include <algorithm>
 #include <cstring>
-#include <charconv>
-#include <cstdlib>
 #include <iostream>
 #include <numeric>
 
@@ -418,29 +416,10 @@ namespace ada::parser {
           return url;
         }
         case ada::state::HOST: {
+          std::string_view host_view(pointer, pointer_end - pointer);
           bool inside_brackets{false};
-
-          // Given a call to parse_url, we should get here at most *ONCE*.
-          // There is the business with '[', but that's no problem.
-          std::string_view view(pointer, size_t(pointer_end-pointer));
-          size_t location = url.is_special() ? view.find_first_of(":[/?\\") : view.find_first_of(":[/?");
-
-          // Next while loop is almost never taken!
-          while((location != std::string_view::npos) && (view[location] == '[')) {
-            location = view.find(']',location);
-            if(location == std::string_view::npos) {
-              inside_brackets = true;
-              /**
-               * TODO: Ok. So if we arrive here then view has an unclosed [,
-               * Is the URL valid???
-               */
-            } else {
-              location = url.is_special() ? view.find_first_of(":[/?\\#", location) : view.find_first_of(":[/?#", location);
-            }
-          }
-          std::string_view host_view(view.data(), (location != std::string_view::npos) ? location : view.size());
+          size_t location = helpers::get_host_delimiter_location(url, host_view, inside_brackets);
           pointer = (location != std::string_view::npos) ? pointer + location : pointer_end;
-
 
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
@@ -450,12 +429,9 @@ namespace ada::parser {
               url.is_valid = false;
               return url;
             }
-            // If state override is given and state override is hostname state, then return.
-            else if (state_override.has_value() && state_override == ada::state::HOST) {
-              return url;
-            }
+
             // Let host be the result of host parsing buffer with url is not special.
-            if(!url.parse_host(host_view)) { return url; }
+            url.parse_host(host_view);
 
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
@@ -472,27 +448,17 @@ namespace ada::parser {
               url.is_valid = false;
               return url;
             }
-            // Otherwise, if state override is given, host_view is the empty string,
-            // and either url includes credentials or url’s port is non-null, return.
-            else if (state_override.has_value() && host_view.empty() && (url.includes_credentials() || url.port.has_value())) {
-              return url;
-            }
 
             // Let host be the result of host parsing host_view with url is not special.
             if (host_view.empty()) {
               url.is_valid = true;
               url.host = "";
             } else {
-              if(!url.parse_host(host_view)) { return url; }
+              url.parse_host(host_view);
             }
 
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
-
-            // If state override is given, then return.
-            if (state_override) {
-              return url;
-            }
           }
           break;
         }
