@@ -1,3 +1,4 @@
+#include "benchmark_header.h"
 
 #if BOOST_ENABLED
 #include <boost/url/src.hpp>
