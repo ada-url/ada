@@ -29,7 +29,7 @@ namespace ada {
   //
   ada_warn_unused ada::url parse(std::string_view input,
                                  std::optional<ada::url> base_url = std::nullopt,
-                                 ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
+                                 ada::encoding_type encoding = ada::encoding_type::UTF8);
 
   bool set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
   void set_username(ada::url &base, std::string_view input) noexcept;
