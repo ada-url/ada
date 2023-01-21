@@ -552,7 +552,7 @@ namespace ada::parser {
 
                   // Optimization opportunity: Get rid of initializing a std::string
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
-                    url.path += '/'; 
+                    url.path += '/';
                     url.path += first_base_url_path;
                   }
                 }

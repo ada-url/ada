@@ -140,4 +140,18 @@ namespace ada {
   }
 }
 
+
+
+#if defined(__GNUC__) && !defined(__clang__)
+#if __GNUC__ <= 8
+#define ADA_OLD_GCC 1
+#endif //  __GNUC__ <= 8
+#endif // defined(__GNUC__) && !defined(__clang__)
+
+#if ADA_OLD_GCC
+#define ada_constexpr
+#else
+#define ada_constexpr constexpr
+#endif
+
 #endif // ADA_COMMON_DEFS_H
