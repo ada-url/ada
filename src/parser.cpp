@@ -35,7 +35,7 @@ namespace ada::parser {
 
     std::string tmp_buffer;
     std::string_view internal_input;
-    if(std::any_of(user_input.begin(), user_input.end(), ada::unicode::is_ascii_tab_or_newline)) {
+    if(unicode::has_tabs_or_newline(user_input)) {
       tmp_buffer = user_input;
       // Optimization opportunity: Instead of copying and then pruning, we could just directly
       // build the string from user_input.

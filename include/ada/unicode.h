@@ -9,7 +9,7 @@ namespace ada::unicode {
 
   // first_percent should be  = plain.find('%')
   bool to_ascii(std::optional<std::string>& out, std::string_view plain, bool be_strict, size_t first_percent);
-
+  ada_really_inline constexpr bool has_tabs_or_newline(std::string_view user_input) noexcept;
   ada_really_inline constexpr bool is_forbidden_host_code_point(const char c) noexcept;
   ada_really_inline constexpr bool is_forbidden_domain_code_point(const char c) noexcept;
   ada_really_inline constexpr bool is_alnum_plus(const char c) noexcept;

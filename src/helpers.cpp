@@ -74,6 +74,7 @@ namespace ada::helpers {
   }
 
   ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept {
+    // if this ever becomes a performance issue, we could use an approach similar to has_tabs_or_newline
     input.erase(std::remove_if(input.begin(), input.end(), [](char c) {
       return ada::unicode::is_ascii_tab_or_newline(c);
     }), input.end());
