@@ -46,8 +46,8 @@ target_link_libraries(bbc_bench PRIVATE httpparser)
 
 find_package(CURL)
 if(CURL_FOUND)
-    message(STATUS "curl version ${CURL_VERSION}")
-    if (CURL_VERSION VERSION_LESS 7.62.0)
+    message(STATUS "curl version " ${CURL_VERSION_STRING})
+    if (CURL_VERSION_STRING VERSION_LESS "7.62.0")
         message(STATUS "curl is too old, we need version 7.62.0 or better")
     else()
         include_directories(${CURL_INCLUDE_DIRS})
@@ -67,10 +67,10 @@ endif(CURL_FOUND)
 
 option(ADA_BOOST_URL "Whether to install boost URL." ON)
 
-message(STATUS "Compiler is "${CMAKE_CXX_COMPILER_ID})
+message(STATUS "Compiler is " ${CMAKE_CXX_COMPILER_ID})
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-message(STATUS "Compiler version "${CMAKE_CXX_COMPILER_VERSION})
+message(STATUS "Compiler version " ${CMAKE_CXX_COMPILER_VERSION})
 
 if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
 message(STATUS "Compiler is too old, disabling boost url.")
