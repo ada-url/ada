@@ -8,6 +8,46 @@
 #include <unicode/utf8.h>
 
 namespace ada::unicode {
+#if ADA_GCC_AMD64_DISPATCH
+  /**
+   * The has_tabs_or_newline function is a bottleneck and it is simple enough that compilers
+   * like GCC can 'autovectorize it'. Most x64 processors today support AVX2 so we can entice
+   * the compiler to use AVX2 when needed.
+   */
+  __attribute__((__target__ ("avx2")))
+  ada_really_inline constexpr bool has_tabs_or_newline(std::string_view user_input) noexcept {
+  auto has_zero_byte = [](uint64_t v) {
+    return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
+  };
+  auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+  size_t i = 0;
+  uint64_t mask1 = broadcast('\r');
+  uint64_t mask2 = broadcast('\n');
+  uint64_t mask3 = broadcast('\t');
+  uint64_t running{0};
+  for (; i + 7 < user_input.size(); i += 8) {
+    uint64_t word{};
+    memcpy(&word, user_input.data() + i, sizeof(word));
+    uint64_t xor1 = word ^ mask1;
+    uint64_t xor2 = word ^ mask2;
+    uint64_t xor3 = word ^ mask3;
+    running |= has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);
+  }
+  if (i < user_input.size()) {
+    uint64_t word{};
+    memcpy(&word, user_input.data() + i, user_input.size() - i);
+    uint64_t xor1 = word ^ mask1;
+    uint64_t xor2 = word ^ mask2;
+    uint64_t xor3 = word ^ mask3;
+    running |= has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);
+  }
+  return running;
+}
+#endif
+
+#if ADA_GCC_AMD64_DISPATCH
+  __attribute__((__target__ ("default")))
+#endif
   ada_really_inline constexpr bool has_tabs_or_newline(std::string_view user_input) noexcept {
   auto has_zero_byte = [](uint64_t v) {
     return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);

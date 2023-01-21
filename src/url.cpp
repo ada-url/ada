@@ -9,7 +9,7 @@ namespace ada {
   ada_really_inline bool url::parse_path(std::string_view input) {
     std::string tmp_buffer;
     std::string_view internal_input;
-    if(std::any_of(input.begin(), input.end(), ada::unicode::is_ascii_tab_or_newline)) {
+    if(unicode::has_tabs_or_newline(input)) {
       tmp_buffer = input;
       // Optimization opportunity: Instead of copying and then pruning, we could just directly
       // build the string from user_input.
