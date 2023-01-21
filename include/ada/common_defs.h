@@ -154,4 +154,8 @@ namespace ada {
 #define ada_constexpr constexpr
 #endif
 
+#if (defined(__x86_64__) || defined(_M_AMD64)) && defined(__GNUC__)
+#define ADA_GCC_AMD64_DISPATCH 1
+#endif
+
 #endif // ADA_COMMON_DEFS_H
