@@ -3,7 +3,7 @@
 
 namespace ada::checkers {
 
-  ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept {
+  ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
     size_t last_dot = view.rfind('.');
     if(last_dot == view.size() - 1) {
       view.remove_suffix(1);

@@ -6,7 +6,7 @@ Specification for URL parser can be found from
 
 ## Requirements
 
-- A recent C++ compiler supporting C++17.
+- A recent C++ compiler supporting C++17 (e.g., gcc 8 or better)
 - [ICU](https://icu.unicode.org).
 
 ## Usage (CMake)
@@ -17,3 +17,4 @@ cmake --build build
 cd build
 ctest .
 ```
+

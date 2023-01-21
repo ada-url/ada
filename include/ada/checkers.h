@@ -54,7 +54,7 @@ namespace ada::checkers {
     return view.size() >= prefix.size() && (view.substr(0, prefix.size()) == prefix);
   }
 
-  ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept;
+  ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept;
 
 } // namespace ada::checkers
 

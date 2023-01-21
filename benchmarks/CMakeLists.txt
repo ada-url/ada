@@ -44,34 +44,54 @@ target_include_directories(httpparser PUBLIC "${httpparser_SOURCE_DIR}")
 target_link_libraries(bench PRIVATE httpparser)
 target_link_libraries(bbc_bench PRIVATE httpparser)
 
-import_dependency(boost_url boostorg/url boost-1.81.0)
-add_library(boost_url INTERFACE)
-target_include_directories(boost_url INTERFACE
-           "${boost_url_SOURCE_DIR}/include")
-
 find_package(CURL)
 if(CURL_FOUND)
-    message(STATUS "curl version ${CURL_VERSION}")
-    include_directories(${CURL_INCLUDE_DIRS})
-    if(NOT CURL_LIBRARIES)
-        target_link_libraries(bench PRIVATE CURL::libcurl)
-        target_link_libraries(bbc_bench PRIVATE CURL::libcurl)
+    message(STATUS "curl version " ${CURL_VERSION_STRING})
+    if (CURL_VERSION_STRING VERSION_LESS "7.62.0")
+        message(STATUS "curl is too old, we need version 7.62.0 or better")
     else()
-        target_link_libraries(bench PRIVATE ${CURL_LIBRARIES})
-        target_link_libraries(bbc_bench PRIVATE ${CURL_LIBRARIES})
+        include_directories(${CURL_INCLUDE_DIRS})
+        if(NOT CURL_LIBRARIES)
+            target_link_libraries(bench PRIVATE CURL::libcurl)
+            target_link_libraries(bbc_bench PRIVATE CURL::libcurl)
+        else()
+            target_link_libraries(bench PRIVATE ${CURL_LIBRARIES})
+           target_link_libraries(bbc_bench PRIVATE ${CURL_LIBRARIES})
+        endif()
+        target_compile_definitions(bench PRIVATE CURL_ENABLED=1)
+        target_compile_definitions(bbc_bench PRIVATE CURL_ENABLED=1)
     endif()
-    target_compile_definitions(bench PRIVATE CURL_ENABLED=1)
-    target_compile_definitions(bbc_bench PRIVATE CURL_ENABLED=1)
 else(CURL_FOUND)
     message(STATUS "Curl not found! Please install the curl library.")
 endif(CURL_FOUND)
 
+option(ADA_BOOST_URL "Whether to install boost URL." ON)
+
+message(STATUS "Compiler is " ${CMAKE_CXX_COMPILER_ID})
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+message(STATUS "Compiler version " ${CMAKE_CXX_COMPILER_VERSION})
+
+if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+message(STATUS "Compiler is too old, disabling boost url.")
+SET(ADA_BOOST_URL OFF CACHE BOOL "Whether to install boost URL." FORCE)
+endif()
+endif()
+
+if(ADA_BOOST_URL)
 find_package(
     Boost 1.80
     COMPONENTS system
 )
+endif(ADA_BOOST_URL)
 
 if(Boost_FOUND)
+
+    import_dependency(boost_url boostorg/url boost-1.81.0)
+    add_library(boost_url INTERFACE)
+    target_include_directories(boost_url INTERFACE
+           "${boost_url_SOURCE_DIR}/include")
+
     target_link_libraries(bench PRIVATE Boost::system)
     target_link_libraries(bench PRIVATE boost_url)
     target_compile_definitions(bench PRIVATE BOOST_ENABLED=1)
@@ -81,5 +101,7 @@ if(Boost_FOUND)
     target_link_libraries(bbc_bench PRIVATE boost_url)
     target_compile_definitions(bbc_bench PRIVATE BOOST_ENABLED=1)
 else(Boost_FOUND)
+if(ADA_BOOST_URL)
     message(STATUS "Boost 1.80 or better was not found, please install it for benchmarking purposes.")
+endif(ADA_BOOST_URL)
 endif(Boost_FOUND)
