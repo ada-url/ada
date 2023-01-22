@@ -27,7 +27,7 @@ jobs:
         uses: MarkusJx/install-boost@v2.4.1
         id: install-boost
         with:
-          boost_version: 1.73.0
+          boost_version: 1.81.0
       - name: Use cmake
         run: |
           mkdir build &&
