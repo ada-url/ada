@@ -43,14 +43,21 @@ namespace ada {
   }
 
   ada_really_inline bool url::parse_prepared_path(std::string_view input) {
-    path="";
+    path.clear();
     bool needs_percent_encoding = input.end() != std::find_if(input.begin(), input.end(),
     [](uint8_t c) {
+        /**
+         * We need percent encoding for code points 32 or less, 127 and more, as well
+         * as 34 ("), 35 (#), 60 (<), 62 (>), 63 (?), 96 (`), 123 ({), 125 (}).
+         *
+         * We add in '\\'.
+         */
+        return c <= 32 || c == 34 || c == 35 || c == 60 || c == 62
+               || c == 63  || c >= 127 || c == 96 || c == 123 || c == 125 || c == '\\'; } );
       // All the characters values needing percent encoding are within these ranges:
-      return c <= 35 || c > 122 || c == 96 || (c>59 && c<=63) ; } );
     std::string path_buffer_tmp;
     do {
-      size_t location = is_special() ? input.find_first_of("/\\") : input.find('/');
+      size_t location = is_special() && needs_percent_encoding ? input.find_first_of("/\\") : input.find('/');
       std::string_view path_view = input;
       if(location != std::string_view::npos) {
         path_view.remove_suffix(path_view.size() - location);
