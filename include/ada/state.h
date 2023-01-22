@@ -1,3 +1,7 @@
+/**
+ * @file state.h
+ * @brief Definitions for the states of the URL state machine.
+ */
 #ifndef ADA_STATE_H
 #define ADA_STATE_H
 
@@ -7,6 +11,9 @@
 
 namespace ada {
 
+  /**
+   * @see https://url.spec.whatwg.org/#url-parsing
+   */
   enum class state {
     AUTHORITY,
     SCHEME_START,
@@ -30,6 +37,9 @@ namespace ada {
     PORT,
   };
 
+  /**
+   * Stringify a URL state machine state.
+   */
   ada_warn_unused std::string to_string(ada::state s);
 
 } // ada namespace

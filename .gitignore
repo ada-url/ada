@@ -8,3 +8,4 @@ __pycache__
 cmake-build-debug
 
 .cache
+docs
