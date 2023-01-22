@@ -1,3 +1,7 @@
+/**
+ * @file common_defs.h
+ * @brief Common definitions for cross-platform compiler support.
+ */
 #ifndef ADA_COMMON_DEFS_H
 #define ADA_COMMON_DEFS_H
 

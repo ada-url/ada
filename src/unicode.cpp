@@ -9,10 +9,6 @@
 
 namespace ada::unicode {
 
-  /**
-   * The has_tabs_or_newline function is a bottleneck and it is simple enough that compilers
-   * like GCC can 'autovectorize it'.
-   */
   ada_really_inline constexpr bool has_tabs_or_newline(std::string_view user_input) noexcept {
     auto has_zero_byte = [](uint64_t v) {
       return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
@@ -156,29 +152,20 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
   static_assert(unicode::is_alnum_plus('a'));
   static_assert(unicode::is_alnum_plus('b'));
 
-  // An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit.
-  // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
-  // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
   ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
     return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c<= 'f');
   }
 
-  // A C0 control or space is a C0 control or U+0020 SPACE.
-  // A C0 control is a code point in the range U+0000 NULL to U+001F INFORMATION SEPARATOR ONE, inclusive.
   ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept {
     return (unsigned char) c <= ' ';
   }
 
-  // An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR.
   ada_really_inline constexpr bool is_ascii_tab_or_newline(const char c) noexcept {
     return c == '\t' || c == '\n' || c == '\r';
   }
 
-
   constexpr std::string_view table_is_double_dot_path_segment[] = {"..", "%2e.", ".%2e", "%2e%2e"};
 
-
-  // A double-dot path segment must be ".." or an ASCII case-insensitive match for ".%2e", "%2e.", or "%2e%2e".
   ada_really_inline ada_constexpr bool is_double_dot_path_segment(std::string_view input) noexcept {
     // This will catch most cases:
     // The length must be 2,4 or 6.
@@ -216,13 +203,10 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     //  input == "%2e%2e" || input == "%2E%2E" || input == "%2E%2e" || input == "%2e%2E";
   }
 
-
-  // A single-dot path segment must be "." or an ASCII case-insensitive match for "%2e".
   ada_really_inline constexpr bool is_single_dot_path_segment(std::string_view input) noexcept {
     return input == "." || input == "%2e" || input == "%2E";
   }
 
-  // ipv4 character might contain 0-9 or a-f character ranges.
   ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept {
     return (c >= '0' && c <= '9') || (c >= 'a' && c<= 'f');
   }
@@ -234,13 +218,6 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     return 10 + (c - del);
   }
 
-  /**
-   * first_percent should be  = input.find('%')
-   * Adapted from Node.js
-   * https://github.com/nodejs/node/blob/main/src/node_url.cc#L245
-   *
-   * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
-   */
   std::string percent_decode(const std::string_view input, size_t first_percent) {
     // next line is for safety only, we expect users to avoid calling percent_decode
     // when first_percent is outside the range.
@@ -272,9 +249,6 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     return dest;
   }
 
-  /**
-   * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
-   */
   std::string percent_encode(const std::string_view input, const uint8_t character_set[]) {
     auto pointer = std::find_if(input.begin(), input.end(), [character_set](const char c) {
       return character_sets::bit_at(character_set, c);
@@ -298,44 +272,6 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     return result;
   }
 
-  /**
-   * We receive a UTF-8 string representing a domain name.
-   * If the string is percent encoded, we apply percent decoding.
-   *
-   * Given a domain, we need to identify its labels.
-   * They are separated by label-separators:
-   *
-   * U+002E ( . ) FULL STOP
-   * U+FF0E ( ． ) FULLWIDTH FULL STOP
-   * U+3002 ( 。 ) IDEOGRAPHIC FULL STOP
-   * U+FF61 ( ｡ ) HALFWIDTH IDEOGRAPHIC FULL STOP
-   *
-   * They are all mapped to U+002E.
-   *
-   * We process each label into a string that should not exceed 63 octets.
-   * If the string is already punycode (starts with "xn--"), then we must
-   * scan it to look for unallowed code points.
-   * Otherwise, if the string is not pure ASCII, we need to transcode it
-   * to punycode by following RFC 3454 which requires us to
-   * - Map characters  (see section 3),
-   * - Normalize (see section 4),
-   * - Reject forbidden characters,
-   * - Check for right-to-left characters and if so, check all requirements (see section 6),
-   * - Optionally reject based on unassigned code points (section 7).
-   *
-   * The Unicode standard provides a table of code points with a mapping, a list of
-   * forbidden code points and so forth. This table is subject to change and will
-   * vary based on the implementation. For Unicode 15, the table is at
-   * https://www.unicode.org/Public/idna/15.0.0/IdnaMappingTable.txt
-   * If you use ICU, they parse this table and map it to code using a Python script.
-   *
-   * The resulting strings should not exceed 255 octets according to RFC 1035 section 2.3.4.
-   * ICU checks for label size and domain size, but if we pass "be_strict = false", these
-   * errors are ignored.
-   *
-   * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
-   *
-   */
   bool to_ascii(std::optional<std::string>& out, const std::string_view plain, const bool be_strict, size_t first_percent) {
     std::string percent_decoded_buffer;
     std::string_view input = plain;

@@ -1,3 +1,7 @@
+/**
+ * @file encoding_type.h
+ * @brief Definition for supported encoding types.
+ */
 #ifndef ADA_ENCODING_TYPE_H
 #define ADA_ENCODING_TYPE_H
 
@@ -18,6 +22,9 @@ namespace ada {
     UTF_16BE,
   };
 
+  /**
+   * Convert a encoding_type to string.
+   */
   ada_warn_unused std::string to_string(encoding_type type);
 
 } // ada namespace

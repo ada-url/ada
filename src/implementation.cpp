@@ -1,5 +1,3 @@
-#include <charconv>
-#include <iostream>
 #include <string_view>
 #include <utility>
 
@@ -13,34 +11,18 @@
 
 namespace ada {
 
-  ada_warn_unused std::string to_string(ada::encoding_type type) {
-    switch(type) {
-    case ada::encoding_type::UTF8 : return "UTF-8";
-    case ada::encoding_type::UTF_16LE : return "UTF-16LE";
-    case ada::encoding_type::UTF_16BE : return "UTF-16BE";
-    default: unreachable();
-    }
-  }
-
   ada_warn_unused url parse(std::string_view input,
                             std::optional<ada::url> base_url,
                             ada::encoding_type encoding) {
     if(encoding != encoding_type::UTF8) {
-      // todo: unsupported !
+      // \todo: unsupported
     }
     // TODO std::move(base_url) might be unwise. Check.
     return ada::parser::parse_url(input, std::move(base_url), encoding);
   }
 
   /*
-   * The protocol setter steps are to basic URL parse the given value, followed by U+003A (:),
-   * with this’s URL as url and scheme start state as state override.
-   *
-   * TODO: This should probably a method in the struct ada::url.
-   *
-   * return true on success.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-protocol
+   * @todo This should probably a method in the struct ada::url.
    */
   bool set_scheme(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
     if(encoding != encoding_type::UTF8) {
@@ -68,9 +50,7 @@ namespace ada {
   }
 
   /**
-   * TODO: This should probably a method in the struct ada::url.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-username
+   * @todo This should probably a method in the struct ada::url.
    */
   void set_username(ada::url &base, std::string_view input) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
@@ -85,9 +65,7 @@ namespace ada {
   }
 
   /**
-   * TODO: This should probably a method in the struct ada::url.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-password
+   * @todo This should probably a method in the struct ada::url.
    */
   void set_password(ada::url &base, std::string_view input) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
@@ -102,11 +80,7 @@ namespace ada {
   }
 
   /**
-   * TODO: This should probably a method in the struct ada::url.
-   *
-   * Return true on success.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-host
+   * @todo This should probably a method in the struct ada::url.
    */
   bool set_host(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
     if(encoding != encoding_type::UTF8) {
@@ -159,7 +133,7 @@ namespace ada {
       base.host = "";
     }
     else {
-      // TODO: This is required because to_ascii mutate input and does not revert if input fails.
+      // @todo This is required because to_ascii mutate input and does not revert if input fails.
       auto existing_host = std::move(base.host);
 
       // Let host be the result of host parsing buffer with url is not special.
@@ -178,11 +152,7 @@ namespace ada {
   }
 
   /**
-   * TODO: This should probably a method in the struct ada::url.
-   *
-   * return true on success.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-port
+   * @todo This should probably a method in the struct ada::url.
    */
   bool set_port(ada::url& base, std::string_view input) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
@@ -193,10 +163,7 @@ namespace ada {
   }
 
   /**
-   * Return true on success.
-   * TODO: This should probably a method in the struct ada::url.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-pathname
+   * @todo This should probably a method in the struct ada::url.
    */
   bool set_pathname(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
 
@@ -213,7 +180,7 @@ namespace ada {
   }
 
   /**
-   * @see https://url.spec.whatwg.org/#dom-url-search
+   * @todo This should probably a method in the struct ada::url.
    */
   void set_search(ada::url &base, std::string_view input) noexcept {
     // If the given value is the empty string:
@@ -222,7 +189,7 @@ namespace ada {
       base.query = std::nullopt;
 
       // Empty this’s query object’s list.
-      // TODO: Implement this if/when we have URLSearchParams.
+      // @todo Implement this if/when we have URLSearchParams.
 
       // Potentially strip trailing spaces from an opaque path with this.
 
@@ -242,11 +209,11 @@ namespace ada {
     base.query = ada::unicode::percent_encode(std::string_view(new_value), query_percent_encode_set);
 
     // Set this’s query object’s list to the result of parsing input.
-    // TODO: Implement this if/when we have URLSearchParams.
+    // @todo Implement this if/when we have URLSearchParams.
   }
 
   /**
-   * @see https://url.spec.whatwg.org/#dom-url-hash
+   * @todo This should probably a method in the struct ada::url.
    */
   void set_hash(ada::url &base, std::string_view input) noexcept {
     // If the given value is the empty string:
@@ -268,6 +235,15 @@ namespace ada {
     // Basic URL parse input with this’s URL as url and fragment state as state override.
     base.fragment = unicode::percent_encode(new_value,
                                             ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+  }
+
+  ada_warn_unused std::string to_string(ada::encoding_type type) {
+    switch(type) {
+    case ada::encoding_type::UTF8 : return "UTF-8";
+    case ada::encoding_type::UTF_16LE : return "UTF-16LE";
+    case ada::encoding_type::UTF_16BE : return "UTF-16BE";
+    default: unreachable();
+    }
   }
 
 } // namespace ada

@@ -1,3 +1,7 @@
+/**
+ * @file parser.h
+ * @brief Definitions for the parser.
+ */
 #ifndef ADA_PARSER_H
 #define ADA_PARSER_H
 
@@ -9,6 +13,10 @@
 #include <string_view>
 
 namespace ada::parser {
+
+  /**
+   * Parses a url.
+   */
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url = std::nullopt,
                 ada::encoding_type encoding = ada::encoding_type::UTF8,
