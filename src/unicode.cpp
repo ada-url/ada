@@ -433,4 +433,66 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     return to_ascii(out, out.value(), false, first_percent);
   }
 
+
+  size_t utf16_to_utf8(const char16_t* buf, size_t len, char* utf8_output, encoding_type type) {
+    uint32_t value_one = 1;
+    bool is_little_endian = (reinterpret_cast<char*>(&value_one)[0] == 1);
+    bool need_flip = (is_little_endian) ? (type == encoding_type::UTF_16BE) : (type == encoding_type::UTF_16LE);
+    const uint16_t *data = reinterpret_cast<const uint16_t *>(buf);
+    size_t pos = 0;
+    auto swap_bytes = [](uint16_t word) { return uint16_t((word >> 8) | (word << 8)); };
+    char* start{utf8_output};
+    while (pos < len) {
+      // try to convert the next block of 8 ASCII characters
+      if (pos + 4 <= len) { // if it is safe to read 8 more bytes, check that they are ascii
+        uint64_t v;
+        ::memcpy(&v, data + pos, sizeof(uint64_t));
+        if (need_flip) v = (v >> 8) | (v << (64 - 8));
+        if ((v & 0xFF80FF80FF80FF80) == 0) {
+          size_t final_pos = pos + 4;
+          while(pos < final_pos) {
+            *utf8_output++ = need_flip ? char(swap_bytes(buf[pos])) : char(buf[pos]);
+            pos++;
+          }
+          continue;
+        }
+      }
+      uint16_t word = need_flip ? swap_bytes(data[pos]) : data[pos];
+      if((word & 0xFF80)==0) {
+        // will generate one UTF-8 bytes
+        *utf8_output++ = char(word);
+        pos++;
+      } else if((word & 0xF800)==0) {
+        // will generate two UTF-8 bytes
+        // we have 0b110XXXXX 0b10XXXXXX
+        *utf8_output++ = char((word>>6) | 0b11000000);
+        *utf8_output++ = char((word & 0b111111) | 0b10000000);
+        pos++;
+      } else if((word &0xF800 ) != 0xD800) {
+        // will generate three UTF-8 bytes
+        // we have 0b1110XXXX 0b10XXXXXX 0b10XXXXXX
+        *utf8_output++ = char((word>>12) | 0b11100000);
+        *utf8_output++ = char(((word>>6) & 0b111111) | 0b10000000);
+        *utf8_output++ = char((word & 0b111111) | 0b10000000);
+        pos++;
+      } else {
+        // must be a surrogate pair
+        if(pos + 1 >= len) { return 0; }
+        uint16_t diff = uint16_t(word - 0xD800);
+        if(diff > 0x3FF) { return 0; }
+        uint16_t next_word = need_flip ? swap_bytes(data[pos + 1]) : data[pos + 1];
+        uint16_t diff2 = uint16_t(next_word - 0xDC00);
+        if(diff2 > 0x3FF) { return 0; }
+        uint32_t value = (diff << 10) + diff2 + 0x10000;
+        // will generate four UTF-8 bytes
+        // we have 0b11110XXX 0b10XXXXXX 0b10XXXXXX 0b10XXXXXX
+        *utf8_output++ = char((value>>18) | 0b11110000);
+        *utf8_output++ = char(((value>>12) & 0b111111) | 0b10000000);
+        *utf8_output++ = char(((value>>6) & 0b111111) | 0b10000000);
+        *utf8_output++ = char((value & 0b111111) | 0b10000000);
+        pos += 2;
+      }
+    }
+    return utf8_output - start;
+  }
 } // namespace ada::unicode

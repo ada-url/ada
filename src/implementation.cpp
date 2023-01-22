@@ -1,5 +1,7 @@
 #include <charconv>
 #include <iostream>
+#include <memory>
+#include <vector>
 #include <string_view>
 #include <utility>
 
@@ -26,10 +28,24 @@ namespace ada {
                             std::optional<ada::url> base_url,
                             ada::encoding_type encoding) {
     if(encoding != encoding_type::UTF8) {
-      // todo: unsupported !
+      // If there is a BOM, prune it out.
+      if(input.size() >= 2) {
+        if((uint8_t(input[0]) == 0xff) && (uint8_t(input[1]) == 0xfe) && encoding == encoding_type::UTF_16LE) {
+          input.remove_prefix(2);
+        } else if ((uint8_t(input[0]) == 0xfe) && (uint8_t(input[1]) == 0xff) && encoding == encoding_type::UTF_16BE) {
+          input.remove_prefix(2);
+        }
+      }
+      if(!input.empty()) {
+        std::unique_ptr<char[]> utf8buffer(new char[input.size() * 2]);
+        size_t utf8_length = unicode::utf16_to_utf8(reinterpret_cast<const char16_t*>(input.data()), input.size()/2,utf8buffer.get(), encoding);
+        if((input.size() % 2) != 0) { utf8_length = 0; }
+        std::string_view utf8_input(utf8buffer.get(), utf8_length); // in case of error utf8_length == 0
+        return ada::parser::parse_url(utf8_input, std::move(base_url));
+      }
     }
     // TODO std::move(base_url) might be unwise. Check.
-    return ada::parser::parse_url(input, std::move(base_url), encoding);
+    return ada::parser::parse_url(input, std::move(base_url));
   }
 
   /*
@@ -44,7 +60,20 @@ namespace ada {
    */
   bool set_scheme(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
     if(encoding != encoding_type::UTF8) {
-      return false; // unsupported !
+      std::string_view initial_input = input;
+      // If there is a BOM, prune it out.
+      if(initial_input.size() >= 2) {
+        if((uint8_t(initial_input[0]) == 0xff) && (uint8_t(initial_input[1]) == 0xfe) && encoding == encoding_type::UTF_16LE) {
+          initial_input.remove_prefix(2);
+        } else if ((uint8_t(input[0]) == 0xfe) && (uint8_t(initial_input[1]) == 0xff) && encoding == encoding_type::UTF_16BE) {
+          initial_input.remove_prefix(2);
+        }
+      }
+      std::unique_ptr<char[]> utf8buffer(new char[input.size() * 2]);
+      size_t utf8_length = unicode::utf16_to_utf8(reinterpret_cast<const char16_t*>(initial_input.data()), initial_input.size()/2,utf8buffer.get(), encoding);
+      if((input.size() % 2) != 0) { utf8_length = 0; }
+      std::string_view utf8_input(utf8buffer.get(), utf8_length); // in case of error utf8_length == 0
+      return set_scheme(base, std::string(utf8_input), encoding_type::UTF8);
     }
     if (!input.empty()) {
       input.append(":");
@@ -110,7 +139,20 @@ namespace ada {
    */
   bool set_host(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
     if(encoding != encoding_type::UTF8) {
-      return false; // unsupported !
+      std::string_view initial_input = input;
+      // If there is a BOM, prune it out.
+      if(initial_input.size() >= 2) {
+        if((uint8_t(initial_input[0]) == 0xff) && (uint8_t(initial_input[1]) == 0xfe) && encoding == encoding_type::UTF_16LE) {
+          initial_input.remove_prefix(2);
+        } else if ((uint8_t(input[0]) == 0xfe) && (uint8_t(initial_input[1]) == 0xff) && encoding == encoding_type::UTF_16BE) {
+          initial_input.remove_prefix(2);
+        }
+      }
+      std::unique_ptr<char[]> utf8buffer(new char[input.size() * 2]);
+      size_t utf8_length = unicode::utf16_to_utf8(reinterpret_cast<const char16_t*>(initial_input.data()), initial_input.size()/2,utf8buffer.get(), encoding);
+      if((input.size() % 2) != 0) { utf8_length = 0; }
+      std::string_view utf8_input(utf8buffer.get(), utf8_length); // in case of error utf8_length == 0
+      return set_host(base, utf8_input, encoding_type::UTF8);
     }
     // If this’s URL has an opaque path, then return.
     if (base.has_opaque_path) {
@@ -199,9 +241,21 @@ namespace ada {
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
   bool set_pathname(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
-
     if(encoding != encoding_type::UTF8) {
-      return false; // unsupported !
+      std::string_view initial_input = input;
+      // If there is a BOM, prune it out.
+      if(initial_input.size() >= 2) {
+        if((uint8_t(initial_input[0]) == 0xff) && (uint8_t(initial_input[1]) == 0xfe) && encoding == encoding_type::UTF_16LE) {
+          initial_input.remove_prefix(2);
+        } else if ((uint8_t(input[0]) == 0xfe) && (uint8_t(initial_input[1]) == 0xff) && encoding == encoding_type::UTF_16BE) {
+          initial_input.remove_prefix(2);
+        }
+      }
+      std::unique_ptr<char[]> utf8buffer(new char[input.size() * 2]);
+      size_t utf8_length = unicode::utf16_to_utf8(reinterpret_cast<const char16_t*>(initial_input.data()), initial_input.size()/2,utf8buffer.get(), encoding);
+      if((input.size() % 2) != 0) { utf8_length = 0; }
+      std::string_view utf8_input(utf8buffer.get(), utf8_length); // in case of error utf8_length == 0
+      return set_pathname(base, utf8_input, encoding_type::UTF8);
     }
     // If this’s URL has an opaque path, then return.
     if (base.has_opaque_path) {

@@ -17,7 +17,6 @@ namespace ada::parser {
 
   url parse_url(std::string_view user_input,
                 std::optional<ada::url> base_url,
-                ada::encoding_type encoding,
                 std::optional<ada::url> optional_url) {
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = ada::state::SCHEME_START;
@@ -395,12 +394,15 @@ namespace ada::parser {
           // If encoding is not UTF-8 and one of the following is true:
           // - url is not special
           // - url’s scheme is "ws" or "wss"
-          if (encoding != ada::encoding_type::UTF8) {
-            if (!url.is_special() || url.get_scheme_type() == ada::scheme::type::WS || url.get_scheme_type() == ada::scheme::type::WSS) {
-              // then set encoding to UTF-8.
-              encoding = ada::encoding_type::UTF8;
-            }
-          }
+          //////////////
+          // All of the processing *requires* UTF-8. So we would never get here:
+          /////////////
+          //if (encoding != ada::encoding_type::UTF8) {
+          //  if (!url.is_special() || url.get_scheme_type() == ada::scheme::type::WS || url.get_scheme_type() == ada::scheme::type::WSS) {
+          //    // then set encoding to UTF-8.
+          //    encoding = ada::encoding_type::UTF8;
+          //  }
+          //}
 
           // Let queryPercentEncodeSet be the special-query percent-encode set if url is special;
           // otherwise the query percent-encode set.
