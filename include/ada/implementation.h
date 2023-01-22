@@ -23,6 +23,12 @@ namespace ada {
    * @param input the string input to analyze.
    * @param base_url the optional string input to use as a base url.
    * @param encoding encoding (default to UTF-8)
+   *
+   * @example
+   *
+   * ```cpp
+   * auto url = ada::url parse("https://www.google.com");
+   * ```
    */
   ada_warn_unused ada::url parse(std::string_view input,
                                  std::optional<ada::url> base_url = std::nullopt,

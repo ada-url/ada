@@ -18,8 +18,8 @@
 
 namespace ada {
   /**
-   * A URL is a struct that represents a universal identifier.
-   * To disambiguate from a valid URL string it can also be referred to as a URL record.
+   * @brief A URL is a struct that represents a universal identifier.
+   * @details To disambiguate from a valid URL string it can also be referred to as a URL record.
    *
    * @see https://url.spec.whatwg.org/#url-representation
    */
