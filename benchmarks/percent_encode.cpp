@@ -162,6 +162,41 @@ static void UserInfo(benchmark::State& state) {
 }
 BENCHMARK(UserInfo);
 
+static void C0Control(benchmark::State& state) {
+  for (auto _ : state) {
+    for(std::string& url_string : examples) {
+      benchmark::DoNotOptimize(ada::unicode::percent_encode(url_string, ada::character_sets::C0_CONTROL_PERCENT_ENCODE));
+    }
+  }
+  if(collector.has_events()) {
+    event_aggregate aggregate{};
+    for(size_t i = 0 ; i < N; i++) {
+      std::atomic_thread_fence(std::memory_order_acquire);
+      collector.start();
+      for(std::string& url_string : examples) {
+        benchmark::DoNotOptimize(ada::unicode::percent_encode(url_string, ada::character_sets::C0_CONTROL_PERCENT_ENCODE));
+      }
+      std::atomic_thread_fence(std::memory_order_release);
+      event_count allocate_count = collector.end();
+      aggregate << allocate_count;
+    }
+    state.counters["instructions/url"] = aggregate.best.instructions() / std::size(examples);
+    state.counters["instructions/cycle"] = aggregate.total.instructions() / aggregate.total.cycles();
+    state.counters["instructions/byte"] = aggregate.best.instructions() / examples_bytes;
+    state.counters["GHz"] = aggregate.total.cycles() / aggregate.total.elapsed_ns();
+  }
+  state.counters["time/byte"] = benchmark::Counter(
+      examples_bytes,
+      benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+      std::size(examples),
+      benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["url/s"] = benchmark::Counter(
+      std::size(examples),
+      benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(C0Control);
+
 
 int main(int argc, char **argv) {
 #if (__APPLE__ &&  __aarch64__) || defined(__linux__)
