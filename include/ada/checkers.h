@@ -56,6 +56,11 @@ namespace ada::checkers {
 
   ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept;
 
+  // Returns a bitset. If the first bit is set, then at least one character needs
+  // percent encoding. If the second bit is set, a \\ is found. If the third bit is set
+  // then we have a dot. If the fourth bit is set, then we have a percent character.
+  ada_really_inline constexpr uint8_t path_signature(std::string_view input) noexcept;
+
 } // namespace ada::checkers
 
 #endif //ADA_CHECKERS_H
