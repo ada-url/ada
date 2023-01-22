@@ -42,63 +42,119 @@ namespace ada {
     return true;
   }
 
+
   ada_really_inline bool url::parse_prepared_path(std::string_view input) {
     path.clear();
-    bool needs_percent_encoding = input.end() != std::find_if(input.begin(), input.end(),
-    [](uint8_t c) {
-        /**
-         * We need percent encoding for code points 32 or less, 127 and more, as well
-         * as 34 ("), 35 (#), 60 (<), 62 (>), 63 (?), 96 (`), 123 ({), 125 (}).
-         *
-         * We add in '\\'.
-         */
-        return c <= 32 || c == 34 || c == 35 || c == 60 || c == 62
-               || c == 63  || c >= 127 || c == 96 || c == 123 || c == 125 || c == '\\'; } );
-      // All the characters values needing percent encoding are within these ranges:
-    std::string path_buffer_tmp;
-    do {
-      size_t location = is_special() && needs_percent_encoding ? input.find_first_of("/\\") : input.find('/');
-      std::string_view path_view = input;
-      if(location != std::string_view::npos) {
-        path_view.remove_suffix(path_view.size() - location);
-        input.remove_prefix(location + 1);
-      } else {
-        input.remove_prefix(input.size()); // make it empty!
-      }
-      std::string_view path_buffer = path_view;
-      if(needs_percent_encoding) {
-        path_buffer_tmp = ada::unicode::percent_encode(path_view, character_sets::PATH_PERCENT_ENCODE);
-        path_buffer = path_buffer_tmp;
-      }
-      if (unicode::is_double_dot_path_segment(path_buffer)) {
-        helpers::shorten_path(*this);
-        if (location == std::string_view::npos) {
+    uint8_t accumulator = checkers::path_signature(input);
+    // Let us first detect a trivial case.
+    // If it is special, we check that we have no dot, no %,  no \ and no
+    // character needing percent encoding. Otherwise, we check that we have no %,
+    // no dot, and no character needing percent encoding.
+    bool trivial_path =
+        (is_special() ? (accumulator == 0) : ((accumulator & 0b11111101) == 0)) &&
+        (get_scheme_type() != ada::scheme::type::FILE);
+    if (trivial_path) {
+      path += '/';
+      path += input;
+      return true;
+    }
+    // We are going to need to look a bit at the path, but let us see if we can
+    // ignore percent encoding *and* \ characters.
+    bool fast_path = (is_special() ? ((accumulator & 0b11111001) == 0)
+                                  : ((accumulator & 0b1111101) == 0)) &&
+                    (get_scheme_type() != ada::scheme::type::FILE);
+    if (fast_path) {
+
+      do {
+        // Here we don't need to worry about \\ or percent encoding.
+        size_t location = input.find('/');
+        std::string_view path_view = input;
+        if (location != std::string_view::npos) {
+          path_view.remove_suffix(path_view.size() - location);
+          input.remove_prefix(location + 1);
+        } else {
+          input.remove_prefix(input.size()); // make it empty!
+        }
+        std::string_view path_buffer = path_view;
+
+        if (unicode::is_double_dot_path_segment(path_buffer)) {
+          helpers::shorten_path(*this);
+          if (location == std::string_view::npos) {
+            path += '/';
+          }
+        } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+                  (location == std::string_view::npos)) {
           path += '/';
         }
-      }
-      else if (unicode::is_single_dot_path_segment(path_buffer) && (location == std::string_view::npos)) {
-        path += '/';
-      }
-      // Otherwise, if path_buffer is not a single-dot path segment, then:
-      else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-        // If url’s scheme is "file", url’s path is empty, and path_buffer is a Windows drive letter,
-        // then replace the second code point in path_buffer with U+003A (:).
-        if (get_scheme_type() == ada::scheme::type::FILE && path.empty() && checkers::is_windows_drive_letter(path_buffer)){
-          path += '/';
-          path += path_buffer[0];
-          path += ':';
-          path_buffer.remove_prefix(2);
-          path.append(path_buffer);
-        } else {
+        // Otherwise, if path_buffer is not a single-dot path segment, then:
+        else if (!unicode::is_single_dot_path_segment(path_buffer)) {
+          // If url’s scheme is "file", url’s path is empty, and path_buffer is a
+          // Windows drive letter, then replace the second code point in
+          // path_buffer with U+003A (:).
+
           // Append path_buffer to url’s path.
           path += '/';
           path.append(path_buffer);
         }
-      }
-      if(location == std::string_view::npos) { break; }
+        if (location == std::string_view::npos) {
+          return true;
+        }
 
-    } while(true);
-    return true;
+      } while (true);
+    } else {
+      // we have reached the general case
+      bool needs_percent_encoding = (accumulator & 1);
+      std::string path_buffer_tmp;
+      do {
+        size_t location = (is_special() && (accumulator & 2))
+                              ? input.find_first_of("/\\")
+                              : input.find('/');
+        std::string_view path_view = input;
+        if (location != std::string_view::npos) {
+          path_view.remove_suffix(path_view.size() - location);
+          input.remove_prefix(location + 1);
+        } else {
+          input.remove_prefix(input.size()); // make it empty!
+        }
+        std::string_view path_buffer = path_view;
+        if (needs_percent_encoding) {
+          path_buffer_tmp = ada::unicode::percent_encode(
+              path_view, character_sets::PATH_PERCENT_ENCODE);
+          path_buffer = path_buffer_tmp;
+        }
+        if (unicode::is_double_dot_path_segment(path_buffer)) {
+          helpers::shorten_path(*this);
+          if (location == std::string_view::npos) {
+            path += '/';
+          }
+        } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+                  (location == std::string_view::npos)) {
+          path += '/';
+        }
+        // Otherwise, if path_buffer is not a single-dot path segment, then:
+        else if (!unicode::is_single_dot_path_segment(path_buffer)) {
+          // If url’s scheme is "file", url’s path is empty, and path_buffer is a
+          // Windows drive letter, then replace the second code point in
+          // path_buffer with U+003A (:).
+          if (get_scheme_type() == ada::scheme::type::FILE && path.empty() &&
+              checkers::is_windows_drive_letter(path_buffer)) {
+            path += '/';
+            path += path_buffer[0];
+            path += ':';
+            path_buffer.remove_prefix(2);
+            path.append(path_buffer);
+          } else {
+            // Append path_buffer to url’s path.
+            path += '/';
+            path.append(path_buffer);
+          }
+        }
+        if (location == std::string_view::npos) {
+          return true;
+        }
+
+      } while (true);
+    }
   }
 
   /**
