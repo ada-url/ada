@@ -20,8 +20,8 @@ namespace ada::checkers {
   // safe if input.size() >=2. See has_hex_prefix.
   inline bool has_hex_prefix_unsafe(std::string_view input) {
     // This is actualy efficient code, see has_hex_prefix for the assembly.
-    uint32_t value = 1;
-    bool is_little_endian = (static_cast<uint8_t>(value) == 1);
+    uint32_t value_one = 1;
+    bool is_little_endian = (reinterpret_cast<char*>(&value_one)[0] == 1);
     uint16_t word0x{};
     std::memcpy(&word0x, "0x", 2); // we would use bit_cast in C++20 and the function could be constexpr.
     uint16_t two_first_bytes{};
