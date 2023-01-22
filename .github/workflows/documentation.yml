@@ -9,14 +9,35 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: mkdir docs
-      - run: ./tools/prepare-doxygen.sh
-      - uses: DenverCoder1/doxygen-github-pages-action@v1.2.0
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+      - name: Install Doxygen
+        run: sudo apt-get install doxygen graphviz -y
+      - name: Generate Doxygen Documentation
+        run: doxygen ./doxygen
+      - name: Install theme
+        run: mkdir docs && ./tools/prepare-doxygen.sh
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          config_file: doxygen
+          path: 'docs/html'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
