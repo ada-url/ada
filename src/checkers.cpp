@@ -46,14 +46,14 @@ namespace ada::checkers {
     size_t i = 0;
     uint8_t accumulator{};
     for (; i + 7 < input.size(); i += 8) {
-      accumulator |= path_signature_table[uint8_t(input[i])] |
+      accumulator |= uint8_t(path_signature_table[uint8_t(input[i])] |
                     path_signature_table[uint8_t(input[i + 1])] |
                     path_signature_table[uint8_t(input[i + 2])] |
                     path_signature_table[uint8_t(input[i + 3])] |
                     path_signature_table[uint8_t(input[i + 4])] |
                     path_signature_table[uint8_t(input[i + 5])] |
                     path_signature_table[uint8_t(input[i + 6])] |
-                    path_signature_table[uint8_t(input[i + 7])];
+                    path_signature_table[uint8_t(input[i + 7])]);
     }
     for (; i < input.size(); i++) {
       accumulator |= path_signature_table[uint8_t(input[i])];
