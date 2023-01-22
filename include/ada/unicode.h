@@ -27,7 +27,6 @@ namespace ada::unicode {
   // first_percent should be  = plain.find('%')
   std::string percent_decode(const std::string_view input, size_t first_percent);
   std::string percent_encode(const std::string_view input, const uint8_t character_set[]);
-  ada_really_inline bool to_lower_ascii_string(std::optional<std::string>& out, size_t first_percent) noexcept;
   size_t utf16_to_utf8(const char16_t* buf, size_t len, char* utf8_output, encoding_type type);
 } // namespace ada::unicode
 
