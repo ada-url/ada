@@ -1,5 +1,3 @@
-#include <charconv>
-#include <iostream>
 #include <string_view>
 #include <utility>
 
@@ -14,18 +12,22 @@
 namespace ada {
 
   ada_warn_unused std::string to_string(ada::encoding_type type) {
-    switch(type) {
-    case ada::encoding_type::UTF8 : return "UTF-8";
-    case ada::encoding_type::UTF_16LE : return "UTF-16LE";
-    case ada::encoding_type::UTF_16BE : return "UTF-16BE";
-    default: unreachable();
+    switch (type) {
+      case ada::encoding_type::UTF8 :
+        return "UTF-8";
+      case ada::encoding_type::UTF_16LE :
+        return "UTF-16LE";
+      case ada::encoding_type::UTF_16BE :
+        return "UTF-16BE";
+      default:
+        unreachable();
     }
   }
 
   ada_warn_unused url parse(std::string_view input,
                             std::optional<ada::url> base_url,
                             ada::encoding_type encoding) {
-    if(encoding != encoding_type::UTF8) {
+    if (encoding != encoding_type::UTF8) {
       // todo: unsupported !
     }
     // TODO std::move(base_url) might be unwise. Check.
@@ -42,8 +44,8 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
-  bool set_scheme(ada::url& base, std::string input, ada::encoding_type encoding) noexcept {
-    if(encoding != encoding_type::UTF8) {
+  bool set_scheme(ada::url &base, std::string input, ada::encoding_type encoding) noexcept {
+    if (encoding != encoding_type::UTF8) {
       return false; // unsupported !
     }
     if (!input.empty()) {
@@ -108,8 +110,8 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
-  bool set_host(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
-    if(encoding != encoding_type::UTF8) {
+  bool set_host(ada::url &base, std::string_view input, ada::encoding_type encoding) noexcept {
+    if (encoding != encoding_type::UTF8) {
       return false; // unsupported !
     }
     // If this’s URL has an opaque path, then return.
@@ -135,9 +137,9 @@ namespace ada {
         // If buffer is the empty string, validation error, return failure.
         return false;
       }
-      // If url is special and host_view is the empty string, validation error, return failure.
-      // Otherwise, if state override is given, host_view is the empty string,
-      // and either url includes credentials or url’s port is non-null, return.
+        // If url is special and host_view is the empty string, validation error, return failure.
+        // Otherwise, if state override is given, host_view is the empty string,
+        // and either url includes credentials or url’s port is non-null, return.
       else if (host_view.empty() && (base.is_special() || base.includes_credentials() || base.port.has_value())) {
         return false;
       }
@@ -157,8 +159,7 @@ namespace ada {
     if (host.empty()) {
       // Set url’s host to the empty string.
       base.host = "";
-    }
-    else {
+    } else {
       // TODO: This is required because to_ascii mutate input and does not revert if input fails.
       auto existing_host = std::move(base.host);
 
@@ -184,7 +185,7 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
-  bool set_port(ada::url& base, std::string_view input) noexcept {
+  bool set_port(ada::url &base, std::string_view input) noexcept {
     // If this’s URL cannot have a username/password/port, then return.
     if (base.cannot_have_credentials_or_port()) {
       return false;
@@ -198,9 +199,9 @@ namespace ada {
    *
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  bool set_pathname(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
+  bool set_pathname(ada::url &base, std::string_view input, ada::encoding_type encoding) noexcept {
 
-    if(encoding != encoding_type::UTF8) {
+    if (encoding != encoding_type::UTF8) {
       return false; // unsupported !
     }
     // If this’s URL has an opaque path, then return.
@@ -234,8 +235,8 @@ namespace ada {
     helpers::remove_ascii_tab_or_newline(new_value);
 
     auto query_percent_encode_set = base.is_special() ?
-      ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
-      ada::character_sets::QUERY_PERCENT_ENCODE;
+                                    ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
+                                    ada::character_sets::QUERY_PERCENT_ENCODE;
 
     // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
     // and append the result to url’s query.

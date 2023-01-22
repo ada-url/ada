@@ -15,7 +15,7 @@ namespace ada::unicode {
    */
   ada_really_inline constexpr bool has_tabs_or_newline(std::string_view user_input) noexcept {
     auto has_zero_byte = [](uint64_t v) {
-      return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
+      return ((v - 0x0101010101010101) & ~(v) & 0x8080808080808080);
     };
     auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
     size_t i = 0;
@@ -46,18 +46,18 @@ namespace ada::unicode {
   // U+002F (/), U+003A (:), U+003C (<), U+003E (>), U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]),
   // U+005E (^), or U+007C (|).
   constexpr static bool is_forbidden_host_code_point_table[] = {
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    static_assert(sizeof(is_forbidden_host_code_point_table) == 256);
+                        1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  static_assert(sizeof(is_forbidden_host_code_point_table) == 256);
 
   ada_really_inline constexpr bool is_forbidden_host_code_point(const char c) noexcept {
     return is_forbidden_host_code_point_table[uint8_t(c)];
@@ -82,23 +82,23 @@ namespace ada::unicode {
   static_assert(unicode::is_forbidden_host_code_point('^'));
   static_assert(unicode::is_forbidden_host_code_point('|'));
 
-constexpr static bool is_forbidden_domain_code_point_table[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  constexpr static bool is_forbidden_domain_code_point_table[] = {
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-    static_assert(sizeof(is_forbidden_domain_code_point_table) == 256);
+  static_assert(sizeof(is_forbidden_domain_code_point_table) == 256);
 
   ada_really_inline constexpr bool is_forbidden_domain_code_point(const char c) noexcept {
-   // abort();
+    // abort();
     return is_forbidden_domain_code_point_table[uint8_t(c)];
     // A table is almost surely much faster than the
     // following under most compilers: return
@@ -128,17 +128,17 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
   static_assert(unicode::is_forbidden_domain_code_point('|'));
 
   constexpr static bool is_alnum_plus_table[] = {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0,
-      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
-      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-      0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-      1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+                        0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   static_assert(sizeof(is_alnum_plus_table) == 256);
 
@@ -148,6 +148,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     // following under most compilers: return
     // return (std::isalnum(c) || c == '+' || c == '-' || c == '.');
   }
+
   static_assert(unicode::is_alnum_plus('+'));
   static_assert(unicode::is_alnum_plus('-'));
   static_assert(unicode::is_alnum_plus('.'));
@@ -160,7 +161,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
   // An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive.
   // An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
   ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
-    return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c<= 'f');
+    return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f');
   }
 
   // A C0 control or space is a C0 control or U+0020 SPACE.
@@ -184,27 +185,27 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     // The length must be 2,4 or 6.
     // We divide by two and require
     // that the result be between 1 and 3 inclusively.
-    uint64_t half_length = uint64_t(input.size())/2;
-    if(half_length - 1 > 2) { return false; }
+    uint64_t half_length = uint64_t(input.size()) / 2;
+    if (half_length - 1 > 2) { return false; }
     // We have a string of length 2, 4 or 6.
     // We now check the first character:
-    if((input[0] != '.') && (input[0] != '%')) { return false; }
-     // We are unlikely the get beyond this point.
-    int hash_value = (input.size() + (unsigned)(input[0])) & 3;
+    if ((input[0] != '.') && (input[0] != '%')) { return false; }
+    // We are unlikely the get beyond this point.
+    int hash_value = (input.size() + (unsigned) (input[0])) & 3;
     const std::string_view target = table_is_double_dot_path_segment[hash_value];
-    if(target.size() != input.size()) { return false; }
+    if (target.size() != input.size()) { return false; }
     // We almost never get here.
     // Optimizing the rest is relatively unimportant.
     auto prefix_equal_unsafe = [](std::string_view a, std::string_view b) {
       uint16_t A, B;
-      memcpy(&A,a.data(), sizeof(A));
-      memcpy(&B,b.data(), sizeof(B));
+      memcpy(&A, a.data(), sizeof(A));
+      memcpy(&B, b.data(), sizeof(B));
       return A == B;
     };
-    if(!prefix_equal_unsafe(input,target)) { return false; }
-    for(size_t i = 2; i < input.size(); i++) {
+    if (!prefix_equal_unsafe(input, target)) { return false; }
+    for (size_t i = 2; i < input.size(); i++) {
       char c = input[i];
-      if((uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c) != target[i]) { return false; }
+      if ((uint8_t((c | 0x20) - 0x61) <= 25 ? (c | 0x20) : c) != target[i]) { return false; }
     }
     return true;
     // The above code might be a bit better than the code below. Compilers
@@ -224,7 +225,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
 
   // ipv4 character might contain 0-9 or a-f character ranges.
   ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept {
-    return (c >= '0' && c <= '9') || (c >= 'a' && c<= 'f');
+    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
   }
 
   unsigned constexpr convert_hex_to_binary(const char c) noexcept {
@@ -244,11 +245,11 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
   std::string percent_decode(const std::string_view input, size_t first_percent) {
     // next line is for safety only, we expect users to avoid calling percent_decode
     // when first_percent is outside the range.
-    if(first_percent == std::string_view::npos) { return std::string(input); }
+    if (first_percent == std::string_view::npos) { return std::string(input); }
     std::string dest(input.substr(0, first_percent));
     dest.reserve(input.length());
-    const char* pointer = input.begin() + first_percent;
-    const char* end = input.end();
+    const char *pointer = input.begin() + first_percent;
+    const char *end = input.end();
     // Optimization opportunity: if the following code gets
     // called often, it can be optimized quite a bit.
     while (pointer < end) {
@@ -282,9 +283,9 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     // Optimization: Don't iterate if percent encode is not required
     if (pointer == input.end()) { return std::string(input); }
 
-    std::string result(input.substr(0,std::distance(input.begin(), pointer)));
+    std::string result(input.substr(0, std::distance(input.begin(), pointer)));
     result.reserve(input.length()); // in the worst case, percent encoding might produce 3 characters.
-    const char* end = input.end();
+    const char *end = input.end();
 
     while (pointer < end) {
       if (character_sets::bit_at(character_set, *pointer)) {
@@ -336,10 +337,11 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
    * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
    *
    */
-  bool to_ascii(std::optional<std::string>& out, const std::string_view plain, const bool be_strict, size_t first_percent) {
+  bool
+  to_ascii(std::optional<std::string> &out, const std::string_view plain, const bool be_strict, size_t first_percent) {
     std::string percent_decoded_buffer;
     std::string_view input = plain;
-    if(first_percent != std::string_view::npos) {
+    if (first_percent != std::string_view::npos) {
       percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
       input = percent_decoded_buffer;
     }
@@ -350,7 +352,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
       options |= UIDNA_USE_STD3_RULES;
     }
 
-    UIDNA* uidna = uidna_openUTS46(options, &status);
+    UIDNA *uidna = uidna_openUTS46(options, &status);
     if (U_FAILURE(status)) {
       return false;
     }
@@ -363,22 +365,22 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     // Thus we should never need more than 255 octets, if we
     // do the domain name is in error.
     int32_t length = uidna_nameToASCII_UTF8(uidna,
-                                         input.data(),
-                                         int32_t(input.length()),
-                                         out.value().data(), 255,
-                                         &info,
-                                         &status);
+                                            input.data(),
+                                            int32_t(input.length()),
+                                            out.value().data(), 255,
+                                            &info,
+                                            &status);
 
     if (status == U_BUFFER_OVERFLOW_ERROR) {
       status = U_ZERO_ERROR;
       out.value().resize(length);
       // When be_strict is true, this should not be allowed!
       length = uidna_nameToASCII_UTF8(uidna,
-                                     input.data(),
-                                     int32_t(input.length()),
-                                     out.value().data(), length,
-                                     &info,
-                                     &status);
+                                      input.data(),
+                                      int32_t(input.length()),
+                                      out.value().data(), length,
+                                      &info,
+                                      &status);
     }
 
     // A label contains hyphen-minus ('-') in the third and fourth positions.
@@ -405,7 +407,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     }
 
     out.value().resize(length); // we possibly want to call :shrink_to_fit otherwise we use 255 bytes.
-    if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
+    if (std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
       out = std::nullopt;
       return false;
     }

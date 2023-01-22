@@ -16,7 +16,7 @@
 // an out-of-bound access.
 ada::url ada_parse(std::string_view view, std::optional<ada::url> base = std::nullopt) {
   std::cout << "about to parse '" << view << "'" << std::endl;
-  std::unique_ptr<char[]> buffer(new char[view.size()+1]);
+  std::unique_ptr<char[]> buffer(new char[view.size() + 1]);
   memcpy(buffer.get(), view.data(), view.size());
   return ada::parse(std::string_view(buffer.get(), view.size()), std::move(base));
 }
@@ -60,6 +60,7 @@ const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
     }                                                                          \
   } while (0);                                                                 \
 
+
 bool file_exists(const char *filename) {
   namespace fs = std::filesystem;
   std::filesystem::path f{filename};
@@ -81,7 +82,7 @@ bool percent_encoding() {
   std::cout << "  loaded " << PERCENT_ENCODING_JSON << " (" << json.size()
             << " kB)" << std::endl;
   ondemand::document doc = parser.iterate(json);
-  for (auto element : doc.get_array()) {
+  for (auto element: doc.get_array()) {
     if (element.type() == ondemand::json_type::string) {
       std::cout << "   comment: " << element.get_string() << std::endl;
     } else if (element.type() == ondemand::json_type::object) {
@@ -106,7 +107,7 @@ bool percent_encoding() {
       }
 
       ondemand::object outputs = object["output"].get_object();
-      for (auto field : outputs) {
+      for (auto field: outputs) {
         std::string_view key = field.unescaped_key();
         std::string_view value = field.value().get_string();
 
@@ -127,17 +128,17 @@ bool setters_tests_encoding() {
   ondemand::document doc = parser.iterate(json);
   ondemand::object main_object = doc.get_object();
 
-  for (auto mainfield : main_object) {
+  for (auto mainfield: main_object) {
     auto category = mainfield.key().value();
     ondemand::array cases = mainfield.value();
 
     if (category == "comment") {
       continue;
     } else {
-       std::cout << "  " << category << ":" << std::endl;
+      std::cout << "  " << category << ":" << std::endl;
     }
 
-    for (auto element : cases) {
+    for (auto element: cases) {
       std::string_view new_value = element["new_value"].get_string();
       std::string_view href = element["href"];
       std::string_view comment{};
@@ -154,18 +155,15 @@ bool setters_tests_encoding() {
         std::string_view expected = element["expected"]["protocol"];
         ada::set_scheme(base, std::string{new_value});
         TEST_ASSERT(std::string(base.get_scheme()) + ":", expected, "Protocol");
-      }
-      else if (category == "username") {
+      } else if (category == "username") {
         std::string_view expected = element["expected"]["username"];
         ada::set_username(base, std::string{new_value});
         TEST_ASSERT(base.username, expected, "Username");
-      }
-      else if (category == "password") {
+      } else if (category == "password") {
         std::string_view expected = element["expected"]["password"];
         ada::set_password(base, std::string{new_value});
         TEST_ASSERT(base.password, expected, "Password");
-      }
-      else if (category == "hostname") {
+      } else if (category == "hostname") {
         std::string_view expected;
 
         // TODO: Handle invalid utf-8 tests too.
@@ -173,25 +171,21 @@ bool setters_tests_encoding() {
           ada::set_host(base, std::string{new_value});
           TEST_ASSERT(base.host.value_or(""), expected, "Hostname");
         }
-      }
-      else if (category == "port") {
+      } else if (category == "port") {
         std::string_view expected = element["expected"]["port"];
         ada::set_port(base, std::string{new_value});
         auto normalized = base.port.has_value() ? std::to_string(*base.port) : "";
         TEST_ASSERT(normalized, expected, "Port");
-      }
-      else if (category == "pathname") {
+      } else if (category == "pathname") {
         std::string_view expected = element["expected"]["pathname"];
         ada::set_pathname(base, std::string{new_value});
         TEST_ASSERT(base.path, expected, "Path");
-      }
-      else if (category == "search") {
+      } else if (category == "search") {
         std::string_view expected = element["expected"]["search"];
         ada::set_search(base, std::string{new_value});
         auto normalized = !base.query.value_or("").empty() ? "?" + base.query.value() : "";
         TEST_ASSERT(normalized, expected, "Search");
-      }
-      else if (category == "hash") {
+      } else if (category == "hash") {
         std::string_view expected = element["expected"]["hash"];
         ada::set_hash(base, std::string{new_value});
         auto normalized = !base.fragment.value_or("").empty() ? "#" + *base.fragment : "";
@@ -211,7 +205,7 @@ bool toascii_encoding() {
   std::cout << "  loaded " << TOASCII_JSON << " (" << json.size() << " kB)"
             << std::endl;
   ondemand::document doc = parser.iterate(json);
-  for (auto element : doc.get_array()) {
+  for (auto element: doc.get_array()) {
     if (element.type() == ondemand::json_type::string) {
       std::cout << "   comment: " << element.get_string() << std::endl;
     } else if (element.type() == ondemand::json_type::object) {
@@ -242,7 +236,7 @@ bool urltestdata_encoding() {
   std::cout << "  loaded " << URLTESTDATA_JSON << " (" << json.size() << " kB)"
             << std::endl;
   ondemand::document doc = parser.iterate(json);
-  for (auto element : doc.get_array()) {
+  for (auto element: doc.get_array()) {
     if (element.type() == ondemand::json_type::string) {
       std::string_view comment = element.get_string().value();
       std::cout << comment << std::endl;
@@ -262,8 +256,8 @@ bool urltestdata_encoding() {
       }
       bool failure = false;
       ada::url input_url = (!object["base"].get(base)) ?
-      ada_parse(input, std::optional<ada::url>(std::move(base_url)))
-      : ada_parse(input);
+                           ada_parse(input, std::optional<ada::url>(std::move(base_url)))
+                                                       : ada_parse(input);
 
       if (!object["failure"].get(failure)) {
         TEST_ASSERT(input_url.is_valid, !failure, "Should not have succeeded");
@@ -271,7 +265,7 @@ bool urltestdata_encoding() {
         TEST_ASSERT(input_url.is_valid, true, "Should not have failed");
 
         std::string_view protocol = object["protocol"];
-         // WPT tests add ":" suffix to protocol
+        // WPT tests add ":" suffix to protocol
         protocol.remove_suffix(1);
         TEST_ASSERT(input_url.get_scheme(), protocol, "Protocol");
 

@@ -20,13 +20,16 @@ struct performance_counters {
   double cachemiss;
   double missed_branches;
   double instructions;
+
   performance_counters(uint64_t c, uint64_t b, uint64_t m, uint64_t i)
-      : cycles(c), cachemiss(b), missed_branches(m), instructions(i) {}
+                        : cycles(c), cachemiss(b), missed_branches(m), instructions(i) {}
+
   performance_counters(double c, double b, double m, double i)
-      : cycles(c), cachemiss(b), missed_branches(m), instructions(i) {}
+                        : cycles(c), cachemiss(b), missed_branches(m), instructions(i) {}
+
   performance_counters(double init)
-      : cycles(init), cachemiss(init), missed_branches(init),
-        instructions(init) {}
+                        : cycles(init), cachemiss(init), missed_branches(init),
+                          instructions(init) {}
 
   inline performance_counters &operator-=(const performance_counters &other) {
     cycles -= other.cycles;
@@ -35,16 +38,18 @@ struct performance_counters {
     instructions -= other.instructions;
     return *this;
   }
+
   inline performance_counters &min(const performance_counters &other) {
     cycles = other.cycles < cycles ? other.cycles : cycles;
     cachemiss = other.cachemiss < cachemiss ? other.cachemiss : cachemiss;
     missed_branches = other.missed_branches < missed_branches
-                          ? other.missed_branches
-                          : missed_branches;
+                      ? other.missed_branches
+                      : missed_branches;
     instructions =
-        other.instructions < instructions ? other.instructions : instructions;
+                          other.instructions < instructions ? other.instructions : instructions;
     return *this;
   }
+
   inline performance_counters &operator+=(const performance_counters &other) {
     cycles += other.cycles;
     cachemiss += other.cachemiss;
@@ -90,6 +95,7 @@ inline bool setup_performance_counters();
 #define F(ret, name, ...)                                                      \
   typedef ret name##proc(__VA_ARGS__);                                         \
   static name##proc *name;
+
 KPERF_LIST
 #undef F
 
@@ -130,7 +136,7 @@ static bool configure_rdtsc() {
   static bool init = false;
   static bool worked = false;
 
-  if(init) { return worked; }
+  if (init) { return worked; }
   init = true;
   if (kpc_set_config(KPC_MASK, g_config)) {
     printf("kpc_set_config failed, run the program with sudo\n");
@@ -159,11 +165,11 @@ static bool init_rdtsc() {
   static bool init = false;
   static bool worked = false;
 
-  if(init) { return worked; }
+  if (init) { return worked; }
   init = true;
   void *kperf = dlopen(
-      "/System/Library/PrivateFrameworks/kperf.framework/Versions/A/kperf",
-      RTLD_LAZY);
+                        "/System/Library/PrivateFrameworks/kperf.framework/Versions/A/kperf",
+                        RTLD_LAZY);
   if (!kperf) {
     printf("kperf = %p\n", kperf);
     return false;
@@ -199,7 +205,7 @@ bool setup_performance_counters() {
   static bool init = false;
   static bool worked = false;
 
-  if(init) { return worked; }
+  if (init) { return worked; }
   int test_high_perf_cores = 1;
 
   if (test_high_perf_cores) {
@@ -207,7 +213,7 @@ bool setup_performance_counters() {
   } else {
     pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0);
   }
-  return  (worked = init_rdtsc() && configure_rdtsc());
+  return (worked = init_rdtsc() && configure_rdtsc());
 }
 
 inline performance_counters get_counters() {
