@@ -1,0 +1,37 @@
+name: Ubuntu 22.04 CI (LLVM 14)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ubuntu-build:
+    if: >-
+      ! contains(toJSON(github.event.commits.*.message), '[skip ci]') &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip github]')
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - {shared: ON}
+          - {shared: OFF}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install ICU
+        run: sudo apt-get install -y libicu-dev pkg-config
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.1
+        id: install-boost
+        with:
+          boost_version: 1.73.0
+      - name: Use cmake
+        run: |
+          mkdir build &&
+          cd build &&
+          CXX=clang++-14 cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} ..  &&
+          cmake --build .   &&
+          ctest --output-on-failure
