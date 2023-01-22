@@ -109,7 +109,7 @@ namespace ada::unicode {
   ada_really_inline constexpr bool is_single_dot_path_segment(const std::string_view input) noexcept;
 
   /**
-   * @example ipv4 character might contain 0-9 or a-f character ranges.
+   * @details ipv4 character might contain 0-9 or a-f character ranges.
    */
   ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept;
 
