@@ -35,7 +35,7 @@ jobs:
       - name: Generate Doxygen Documentation
         run: doxygen ./doxygen
       - name: Install theme
-        run: mkdir docs && ./tools/prepare-doxygen.sh
+        run: ./tools/prepare-doxygen.sh
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
