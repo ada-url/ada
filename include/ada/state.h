@@ -14,7 +14,7 @@ namespace ada {
     HOST,
     NO_SCHEME,
     FRAGMENT,
-    RELATIVE,
+    RELATIVE_SCHEME,
     RELATIVE_SLASH,
     FILE,
     FILE_HOST,

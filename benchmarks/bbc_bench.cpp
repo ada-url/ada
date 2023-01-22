@@ -23,12 +23,12 @@ std::string url_examples[] = {
     "20220908-1153-091014d07889c842a7bdc06e00fa711c9e04f049/modules/vendor/"
     "bower/modernizr/modernizr.js"};
 
-double url_examples_bytes = []() {
+double url_examples_bytes = []() -> double  {
   size_t bytes{0};
   for (std::string &url_string : url_examples) {
     bytes += url_string.size();
   }
-  return bytes;
+  return double(bytes);
 }();
 
 #include "benchmark_template.cpp"
