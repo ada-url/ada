@@ -32,10 +32,11 @@ jobs:
         uses: actions/configure-pages@v2
       - name: Install Doxygen
         run: sudo apt-get install doxygen graphviz -y
-      - name: Generate Doxygen Documentation
-        run: doxygen ./doxygen
+      - run: mkdir docs
       - name: Install theme
         run: ./tools/prepare-doxygen.sh
+      - name: Generate Doxygen Documentation
+        run: doxygen ./doxygen
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
