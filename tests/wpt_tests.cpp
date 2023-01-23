@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <map>
 
 #include "ada.h"
 #include "ada/parser.h"
@@ -32,6 +33,7 @@ const char *PERCENT_ENCODING_JSON = WPT_DATA_DIR "percent-encoding.json";
 const char *SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
 const char *TOASCII_JSON = WPT_DATA_DIR "toascii.json";
 const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
+const char *ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
 
 #define TEST_START()                                                           \
   do {                                                                         \
@@ -232,14 +234,14 @@ bool toascii_encoding() {
   TEST_SUCCEED()
 }
 
-bool urltestdata_encoding() {
+bool urltestdata_encoding(const char* source) {
 
   TEST_START()
   ondemand::parser parser;
 
-  RUN_TEST(file_exists(URLTESTDATA_JSON));
-  padded_string json = padded_string::load(URLTESTDATA_JSON);
-  std::cout << "  loaded " << URLTESTDATA_JSON << " (" << json.size() << " kB)"
+  RUN_TEST(file_exists(source));
+  padded_string json = padded_string::load(source);
+  std::cout << "  loaded " << source << " (" << json.size() << " kB)"
             << std::endl;
   ondemand::document doc = parser.iterate(json);
   for (auto element : doc.get_array()) {
@@ -270,6 +272,7 @@ bool urltestdata_encoding() {
       } else {
         TEST_ASSERT(input_url.is_valid, true, "Should not have failed");
 
+
         std::string_view protocol = object["protocol"];
          // WPT tests add ":" suffix to protocol
         protocol.remove_suffix(1);
@@ -281,6 +284,9 @@ bool urltestdata_encoding() {
         std::string_view password = object["password"];
         TEST_ASSERT(input_url.password, password, "Password");
 
+        std::string_view host = object["host"];
+        TEST_ASSERT(input_url.host.value_or("") + (input_url.port.has_value() ? ":" + std::to_string(input_url.port.value()) : ""), host, "Hostname");
+
         std::string_view hostname = object["hostname"];
         TEST_ASSERT(input_url.host.value_or(""), hostname, "Hostname");
 
@@ -289,7 +295,8 @@ bool urltestdata_encoding() {
         TEST_ASSERT(expected_port, port, "Port");
 
         std::string_view pathname{};
-        if (object["pathname"].get_string().get(pathname)) {
+        if (!object["pathname"].get_string().get(pathname)) {
+          std::cout <<"pathname " << pathname<<std::endl;
           TEST_ASSERT(input_url.path, pathname, "Pathname");
         }
 
@@ -304,16 +311,55 @@ bool urltestdata_encoding() {
           hash.remove_prefix(1);
         }
         TEST_ASSERT(input_url.fragment.value_or(""), hash, "Hash/Fragment");
+
+
+        std::string_view href = object["href"];
+        std::string computed_href = std::string(input_url.get_scheme())
+                   +"://"
+                   + input_url.username
+                   + (input_url.password.empty() ? "" : ":" + input_url.password)
+                   + (input_url.includes_credentials() ? "@" : "")
+                   + input_url.host.value_or("")
+                   + (input_url.port.has_value() ? ":" + std::to_string(input_url.port.value()) : "")
+                   + input_url.path 
+                   + (input_url.query.has_value() ? "?" +input_url.query.value() : "")
+                   + (input_url.fragment.has_value() ? "#" + input_url.fragment.value() : "");
+        TEST_ASSERT(computed_href, href, "href");
+
+        std::string_view origin = object["origin"];
+        std::string computed_origin = input_url.is_special() ?
+                   std::string(input_url.get_scheme())+"://"
+                   +input_url.host.value_or("")+(input_url.port.has_value() ? ":" 
+                   + std::to_string(input_url.port.value()) : "")
+                   : "null";
+        TEST_ASSERT(computed_origin, origin, "Origin");
       }
     }
   }
   TEST_SUCCEED()
 }
 
+
 int main() {
   std::cout << "Running WPT tests.\n" << std::endl;
 
-  if (percent_encoding() && setters_tests_encoding() && toascii_encoding() && urltestdata_encoding()) {
+  std::map<std::string, bool> results;
+  results["percent_encoding"] = percent_encoding();
+  results["toascii_encoding"] = toascii_encoding();
+  results["setters_tests_encoding"] = setters_tests_encoding();
+  results["toascii_encoding("+std::string(URLTESTDATA_JSON)+")"] = urltestdata_encoding(URLTESTDATA_JSON);
+  results["toascii_encoding("+std::string(ADA_URLTESTDATA_JSON)+")"] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
+  std::cout << std::endl;
+  std::cout << "==============="<< std::endl;
+  std::cout << "Final report: "<< std::endl;
+  std::cout << "==============="<< std::endl;
+
+  bool one_failed = false;
+  for(auto [s,b] : results) {
+    std::cout << std::left << std::setw(60) << std::setfill('.') << s << ": " << (b?"SUCCEEDED":"FAILED") << std::endl;
+    if(!b) { one_failed = true; }
+  }
+  if(!one_failed) {
     std::cout << "WPT tests are ok." << std::endl;
     return EXIT_SUCCESS;
   } else {
