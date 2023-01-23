@@ -16,10 +16,6 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
 jobs:
   deploy:
     environment:
@@ -29,7 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v3
+        with:
+          enablement: true
       - name: Install Doxygen
         run: sudo apt-get install doxygen graphviz -y
       - run: mkdir docs
