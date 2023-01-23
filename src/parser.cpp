@@ -68,6 +68,7 @@ namespace ada::parser {
 
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
+    goto goto_scheme_start;
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
@@ -82,6 +83,7 @@ namespace ada::parser {
       ///////////////////////////////////////////////////////////////////////
       switch (state) {
         case ada::state::SCHEME_START: {
+          goto_scheme_start:
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && checkers::is_alpha(*pointer)) {
@@ -120,6 +122,9 @@ namespace ada::parser {
             // Otherwise, if url is special, set state to special authority slashes state.
             else if (url.is_special()) {
               state = ada::state::SPECIAL_AUTHORITY_SLASHES;
+              if(pointer == pointer_end) { break; }
+              pointer++;
+              goto goto_special_authority_slashes;
             }
             // Otherwise, if remaining starts with an U+002F (/), set state to path or authority state
             // and increase pointer by 1.
@@ -366,6 +371,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::SPECIAL_AUTHORITY_SLASHES: {
+          goto_special_authority_slashes:
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
@@ -373,11 +379,15 @@ namespace ada::parser {
           std::string_view view (&*pointer, size_t(pointer_end-pointer));
           if (ada::checkers::begins_with(view, "//")) {
             pointer++;
+            if(pointer == pointer_end) { break; }
+            pointer++;
+            
           }
           // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.
-          else {
-            goto goto_special_authority_ignore_slashes;
-          }
+          //else {
+          //  goto goto_special_authority_ignore_slashes;
+          //}
+          goto goto_special_authority_ignore_slashes;
 
 
           break; /** Here we should just fall through !!! */
@@ -500,6 +510,8 @@ namespace ada::parser {
             if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
               goto goto_path;
             }
+            pointer++;
+            goto goto_path;
 
           }
           // Otherwise, if state override is not given and c is U+003F (?),
@@ -514,6 +526,9 @@ namespace ada::parser {
 
             // If c is not U+002F (/), then decrease pointer by 1.
             if (*pointer != '/') {
+              goto goto_path;
+            } else {
+              pointer++;
               goto goto_path;
             }
           }

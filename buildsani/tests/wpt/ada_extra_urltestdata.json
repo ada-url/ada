@@ -1,0 +1,18 @@
+[
+  "#Additional tests designed by the ada team.", 
+  {
+    "input": "https://lemire.me/école",
+    "base": "about:blank",
+    "href": "https://lemire.me/%C3%A9cole",
+    "origin": "https://lemire.me",
+    "protocol": "https:",
+    "username": "",
+    "password": "",
+    "host": "lemire.me",
+    "hostname": "lemire.me",
+    "port": "",
+    "pathname": "/%C3%A9cole",
+    "search": "",
+    "hash": ""
+  }
+]
