@@ -78,6 +78,6 @@ ada:set_search("target=self");
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_port("is-this-the-real-life");
+ada:set_hash("is-this-the-real-life");
 // Url is now: "https://www.google.com#is-this-the-real-life"
 ```
