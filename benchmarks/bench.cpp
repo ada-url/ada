@@ -23,10 +23,10 @@ std::string url_examples[] = {
     "http://[2606:4700:4700::1111]", // ipv6
 };
 
-double url_examples_bytes =  []() {
+double url_examples_bytes =  []() -> double {
     size_t bytes{0};
     for(std::string& url_string : url_examples) { bytes += url_string.size(); }
-    return bytes;
+    return double(bytes);
   }();
 
 

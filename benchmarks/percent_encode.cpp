@@ -16,10 +16,10 @@ std::string examples[] = {
     "connect_timeout=10&application_name=myapp"
 };
 
-double examples_bytes = []() {
+double examples_bytes = []() -> double {
   size_t bytes{0};
   for(std::string& url_string : examples) { bytes += url_string.size(); }
-  return bytes;
+  return double(bytes);
 }();
 
 static void Fragment(benchmark::State& state) {
@@ -49,10 +49,10 @@ static void Fragment(benchmark::State& state) {
       examples_bytes,
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["time/url"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["url/s"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(Fragment);
@@ -84,10 +84,10 @@ static void Query(benchmark::State& state) {
       examples_bytes,
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["time/url"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["url/s"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(Query);
@@ -119,10 +119,10 @@ static void SpecialQuery(benchmark::State& state) {
       examples_bytes,
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["time/url"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["url/s"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(SpecialQuery);
@@ -154,10 +154,10 @@ static void UserInfo(benchmark::State& state) {
       examples_bytes,
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["time/url"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["url/s"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(UserInfo);
@@ -189,10 +189,10 @@ static void C0Control(benchmark::State& state) {
       examples_bytes,
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["time/url"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
   state.counters["url/s"] = benchmark::Counter(
-      std::size(examples),
+      double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(C0Control);

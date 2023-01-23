@@ -427,7 +427,7 @@ namespace ada {
       }
 
       // Return the result of IPv6 parsing input with its leading U+005B ([) and trailing U+005D (]) removed.
-      return parse_ipv6(std::string_view(input.begin() + 1, input.end() - input.begin() - 2));
+      return parse_ipv6(std::string_view(&*input.begin() + 1, input.end() - input.begin() - 2));
     }
 
     // If isNotSpecial is true, then return the result of opaque-host parsing input.

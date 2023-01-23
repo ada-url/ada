@@ -26,7 +26,7 @@ namespace ada::checkers {
    *
    * @attention std::isalpha is not constexpr generally.
    */
-  constexpr bool is_alpha(char x) noexcept { return (to_lower(x) >= 'a') & (to_lower(x) <= 'z'); }
+  constexpr bool is_alpha(char x) noexcept { return (to_lower(x) >= 'a') && (to_lower(x) <= 'z'); }
 
   /**
    * Check whether a string starts with 0x or 0X. The function is only
@@ -63,14 +63,14 @@ namespace ada::checkers {
    * and the second is either U+003A (:) or U+007C (|).
    */
   inline constexpr bool is_windows_drive_letter(std::string_view input) noexcept {
-    return input.size() >= 2 && (is_alpha(input[0]) & ((input[1] == ':') | (input[1] == '|')));
+    return input.size() >= 2 && (is_alpha(input[0]) && ((input[1] == ':') || (input[1] == '|')));
   }
 
   /**
    * @details A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
    */
   inline constexpr bool is_normalized_windows_drive_letter(std::string_view input) noexcept {
-    return input.size() >= 2 && (is_alpha(input[0]) & (input[1] == ':'));
+    return input.size() >= 2 && (is_alpha(input[0]) && (input[1] == ':'));
   }
 
   /**

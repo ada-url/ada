@@ -9,6 +9,25 @@
 #define ADA_DEVELOP_MODE 1 /* This should be removed before the first release. */
 #endif
 
+
+
+#ifdef _MSC_VER
+#define ADA_VISUAL_STUDIO 1
+/**
+ * We want to differentiate carefully between
+ * clang under visual studio and regular visual
+ * studio.
+ */
+#ifdef __clang__
+// clang under visual studio
+#define ADA_CLANG_VISUAL_STUDIO 1
+#else
+// just regular visual studio (best guess)
+#define ADA_REGULAR_VISUAL_STUDIO 1
+#endif // __clang__
+#endif // _MSC_VER
+
+
 #if defined(__GNUC__)
   // Marks a block with a name so that MCA analysis can see it.
   #define ADA_BEGIN_DEBUG_BLOCK(name) __asm volatile("# LLVM-MCA-BEGIN " #name);

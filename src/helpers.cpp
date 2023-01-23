@@ -1,5 +1,6 @@
 #include "ada.h"
 #include "ada/unicode.h"
+#include "ada/scheme.h"
 
 #include <algorithm>
 #include <charconv>
@@ -8,15 +9,15 @@
 
 namespace ada::helpers {
 
-  ada_unused std::string get_state(ada::state state) {
-    switch (state) {
+  ada_unused std::string get_state(ada::state s) {
+    switch (s) {
       case ada::state::AUTHORITY: return "Authority";
       case ada::state::SCHEME_START: return "Scheme Start";
       case ada::state::SCHEME: return "Scheme";
       case ada::state::HOST: return "Host";
       case ada::state::NO_SCHEME: return "No Scheme";
       case ada::state::FRAGMENT: return "Fragment";
-      case ada::state::RELATIVE: return "Relative";
+      case ada::state::RELATIVE_SCHEME: return "Relative Scheme";
       case ada::state::RELATIVE_SLASH: return "Relative Slash";
       case ada::state::FILE: return "File";
       case ada::state::FILE_HOST: return "File Host";
@@ -30,7 +31,7 @@ namespace ada::helpers {
       case ada::state::PATH_START: return "Path Start";
       case ada::state::OPAQUE_PATH: return "Opaque Path";
       case ada::state::PORT: return "Port";
-      default: unreachable();
+      default: return "unknown state";
     }
   }
 
