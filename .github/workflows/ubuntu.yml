@@ -1,4 +1,4 @@
-name: Ubuntu 22.04 CI (GCC 12)
+name: Ubuntu 22.04
 
 on:
   push:
@@ -16,24 +16,27 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        include:
-          - {shared: ON}
-          - {shared: OFF}
+        shared: [ON, OFF]
+        cxx: [g++-12, clang++-14]
     steps:
       - uses: actions/checkout@v3
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Install curl
         run: sudo apt-get install -y libcurl4-openssl-dev
       - name: Install boost
         uses: MarkusJx/install-boost@v2.4.1
-        id: install-boost
         with:
           boost_version: 1.81.0
-      - name: Use cmake
-        run: |
-          mkdir build &&
-          cd build &&
-          CXX=g++-12 cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} ..  &&
-          cmake --build .   &&
-          ctest --output-on-failure
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
+      - name: Prepare
+        run: cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        env:
+          CXX: ${{matrix.cxx}}
+      - name: Build
+        run: cmake --build build -j=2
+      - name: Test
+        run: ctest --output-on-failure --test-dir build

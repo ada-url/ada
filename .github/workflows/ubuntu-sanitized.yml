@@ -1,4 +1,4 @@
-name: Ubuntu 22.04 CI (GCC 12 SANITIZED)
+name: Ubuntu 22.04 (GCC 12 SANITIZED)
 
 on:
   push:
@@ -16,17 +16,20 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        include:
-          - {shared: ON}
-          - {shared: OFF}
+        shared: [ON, OFF]
     steps:
       - uses: actions/checkout@v3
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
-      - name: Use cmake
-        run: |
-          mkdir build &&
-          cd build &&
-          CXX=g++-12 cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} ..  &&
-          cmake --build . --target wpt_tests --target basic_fuzzer  &&
-          ctest --output-on-failure
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
+      - name: Prepare
+        run: cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        env:
+          CXX: g++-12
+      - name: Build
+        run: cmake --build build --target wpt_tests --target basic_fuzzer -j=2
+      - name: Test
+        run: ctest --output-on-failure --test-dir build
