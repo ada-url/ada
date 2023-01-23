@@ -31,6 +31,7 @@ using namespace simdjson;
 #endif
 const char *PERCENT_ENCODING_JSON = WPT_DATA_DIR "percent-encoding.json";
 const char *SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
+const char *ADA_SETTERS_TESTS_JSON = WPT_DATA_DIR "ada_extra_setters_tests.json";
 const char *TOASCII_JSON = WPT_DATA_DIR "toascii.json";
 const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
 const char *ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
@@ -119,12 +120,12 @@ bool percent_encoding() {
   TEST_SUCCEED()
 }
 
-bool setters_tests_encoding() {
+bool setters_tests_encoding(const char *source) {
   TEST_START()
   ondemand::parser parser;
-  RUN_TEST(file_exists(SETTERS_TESTS_JSON));
-  padded_string json = padded_string::load(SETTERS_TESTS_JSON);
-  std::cout << "  loaded " << SETTERS_TESTS_JSON << " (" << json.size()
+  RUN_TEST(file_exists(source));
+  padded_string json = padded_string::load(source);
+  std::cout << "  loaded " << source << " (" << json.size()
             << " kB)" << std::endl;
   ondemand::document doc = parser.iterate(json);
   ondemand::object main_object = doc.get_object();
@@ -146,6 +147,20 @@ bool setters_tests_encoding() {
       if (!element["comment"].get(comment)) {
         std::cout << "    comment: " << comment << std::endl;
       }
+      std::string_view encoding{};
+      ada::encoding_type type = ada::encoding_type::UTF8;
+      if (!element["encoding"].get(encoding)) {
+        std::cout << "    encoding: " << encoding << std::endl;
+        if(encoding == "UTF-8") {
+          type = ada::encoding_type::UTF8;
+        } else if(encoding == "UTF-16LE") {
+          type = ada::encoding_type::UTF_16LE;
+        } else if(encoding == "UTF-16BE") {
+          type = ada::encoding_type::UTF_16BE;
+        } else {
+          std::cerr << "unrecognized encoding" << std::endl;
+        }
+      }
 
       auto base = ada_parse(href);
       TEST_ASSERT(base.is_valid, true, "Base url parsing should have succeeded")
@@ -154,7 +169,7 @@ bool setters_tests_encoding() {
 
       if (category == "protocol") {
         std::string_view expected = element["expected"]["protocol"];
-        ada::set_scheme(base, std::string{new_value});
+        ada::set_scheme(base, std::string{new_value}, type);
         TEST_ASSERT(std::string(base.get_scheme()) + ":", expected, "Protocol");
       }
       else if (category == "username") {
@@ -172,7 +187,7 @@ bool setters_tests_encoding() {
 
         // TODO: Handle invalid utf-8 tests too.
         if (!element["expected"]["hostname"].get(expected)) {
-          ada::set_host(base, std::string{new_value});
+          ada::set_host(base, std::string{new_value}, type);
           TEST_ASSERT(base.host.value_or(""), expected, "Hostname");
         }
       }
@@ -184,7 +199,7 @@ bool setters_tests_encoding() {
       }
       else if (category == "pathname") {
         std::string_view expected = element["expected"]["pathname"];
-        ada::set_pathname(base, std::string{new_value});
+        ada::set_pathname(base, std::string{new_value}, type);
         TEST_ASSERT(base.path, expected, "Path");
       }
       else if (category == "search") {
@@ -340,15 +355,44 @@ bool urltestdata_encoding(const char* source) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+  bool all_tests{true};
+  std::string filter;
+  if(argc > 1) {
+    all_tests = false;
+    filter = argv[1];
+    std::cout << "Only running tests containing the substring '"<< filter <<"'\n" << std::endl;
+  } else {
+    std::cout << "You may pass a parameter to the wpt_tests executable to filter the tests, by substring matching." << std::endl;
+  }
   std::cout << "Running WPT tests.\n" << std::endl;
 
   std::map<std::string, bool> results;
-  results["percent_encoding"] = percent_encoding();
-  results["toascii_encoding"] = toascii_encoding();
-  results["setters_tests_encoding"] = setters_tests_encoding();
-  results["toascii_encoding("+std::string(URLTESTDATA_JSON)+")"] = urltestdata_encoding(URLTESTDATA_JSON);
-  results["toascii_encoding("+std::string(ADA_URLTESTDATA_JSON)+")"] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
+  std::string name;
+  name = "percent_encoding";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = percent_encoding();
+  }
+  name = "toascii_encoding";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = toascii_encoding();
+  }
+  name = "setters_tests_encoding("+std::string(SETTERS_TESTS_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
+  }
+  name = "setters_tests_encoding("+std::string(ADA_SETTERS_TESTS_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = setters_tests_encoding(ADA_SETTERS_TESTS_JSON);
+  }
+  name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
+  }
+  name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
+  }
   std::cout << std::endl;
   std::cout << "==============="<< std::endl;
   std::cout << "Final report: "<< std::endl;

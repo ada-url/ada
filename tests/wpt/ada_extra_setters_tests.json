@@ -1,0 +1,34 @@
+{
+    "comment": [
+        "#Additional tests designed by the ada team."
+    ],
+    "pathname": [
+        {
+            "href": "https://lemire.me",
+            "new_value": "école",
+            "encoding": "UTF-8",
+            "expected": {
+                "href": "https://example.net/%C3%A9cole",
+                "pathname": "/%C3%A9cole"
+            }
+        },
+        {
+            "href": "https://lemire.me",
+            "new_value": "école",
+            "encoding": "UTF-16LE",
+            "expected": {
+                "href": "https://example.net/%E9%00c%00o%00l%00e%00",
+                "pathname": "/%E9%00c%00o%00l%00e%00"
+            }
+        },
+        {
+            "href": "https://example.net#nav",
+            "new_value": "école",
+            "encoding": "UTF-16BE",
+            "expected": {
+                "href": "https://lemire.me/%00%E9%00c%00o%00l%00e",
+                "pathname": "/%00%E9%00c%00o%00l%00e"
+            }
+        }
+    ]
+}
