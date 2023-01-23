@@ -12,6 +12,8 @@ var common__defs_8h =
     [ "ADA_DISABLE_UNDESIRED_WARNINGS", "d7/d19/common__defs_8h.html#a4af639e831b27233f728f88ee627f936", null ],
     [ "ADA_DLLIMPORTEXPORT", "d7/d19/common__defs_8h.html#a41927ee5072cb509f59dd20742a67a30", null ],
     [ "ADA_END_DEBUG_BLOCK", "d7/d19/common__defs_8h.html#af35beca8a7c5e657d7e0ff6bc26e8ffb", null ],
+    [ "ADA_IS_BIG_ENDIAN", "d7/d19/common__defs_8h.html#a0076490fdf8f2256ed9319348ab762b2", null ],
+    [ "ADA_IS_BIG_ENDIAN", "d7/d19/common__defs_8h.html#a0076490fdf8f2256ed9319348ab762b2", null ],
     [ "ADA_ISALIGNED_N", "d7/d19/common__defs_8h.html#a6a069f0d3d1400c28a80a8e5db9859bb", null ],
     [ "ada_likely", "d7/d19/common__defs_8h.html#afad02d7ad262323ba94fe6dec9dab4b6", null ],
     [ "ada_never_inline", "d7/d19/common__defs_8h.html#a0349da887815dc7cf3b4229a6bb45669", null ],
