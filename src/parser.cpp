@@ -87,17 +87,18 @@ namespace ada::parser {
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && checkers::is_alpha(*pointer)) {
             state = ada::state::SCHEME;
-            pointer--;
+            goto goto_scheme;
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
           else {
             state = ada::state::NO_SCHEME;
-            pointer--;
+            goto goto_no_scheme;;
           }
 
           break;
         }
         case ada::state::SCHEME: {
+          goto_scheme:
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           pointer = std::find_if_not(pointer, pointer_end, ada::unicode::is_alnum_plus);
@@ -138,12 +139,13 @@ namespace ada::parser {
           else {
             state = ada::state::NO_SCHEME;
             pointer = pointer_start;
-            pointer--;
+            goto goto_no_scheme;
           }
 
           break;
         }
         case ada::state::NO_SCHEME: {
+          goto_no_scheme:
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
           if (!base_url.has_value() || (base_url->has_opaque_path && (pointer != pointer_end))) {
             url.is_valid = false;
@@ -162,17 +164,18 @@ namespace ada::parser {
           // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
           else if (base_url->get_scheme_type() != ada::scheme::type::FILE) {
             state = ada::state::RELATIVE_SCHEME;
-            pointer--;
+            goto goto_relative_scheme;
           }
           // Otherwise, set state to file state and decrease pointer by 1.
           else {
             state = ada::state::FILE;
-            pointer--;
+            goto goto_file;
           }
 
           break;
         }
         case ada::state::AUTHORITY: {
+          goto_authority:
           // most URLs have no @. Having no @ tells us that we don't have to worry about AUTHORITY. Of course,
           // we could have @ and still not have to worry about AUTHORITY.
           // TODO: Instead of just collecting a bool, collect the location of the '@' and do something useful with it.
@@ -182,9 +185,8 @@ namespace ada::parser {
 
           if(!contains_ampersand) {
             // TODO: This is a waste of time, we should never have arrived here.
-            pointer--;
             state = ada::state::HOST;
-            break;
+            goto goto_host;
           }
           bool at_sign_seen{false};
           bool password_token_seen{false};
@@ -246,6 +248,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::SPECIAL_RELATIVE_OR_AUTHORITY: {
+          goto_special_authority_ignore_slashes:
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
@@ -257,7 +260,7 @@ namespace ada::parser {
           // Otherwise, validation error, set state to relative state and decrease pointer by 1.
           else {
             state = ada::state::RELATIVE_SCHEME;
-            pointer--;
+            goto goto_relative_scheme;
           }
 
           break;
@@ -271,12 +274,13 @@ namespace ada::parser {
           // Otherwise, set state to path state, and decrease pointer by 1.
           else {
             state = ada::state::PATH;
-            pointer--;
+            goto goto_path;
           }
 
           break;
         }
         case ada::state::RELATIVE_SCHEME: {
+          goto_relative_scheme:
           // Set url’s scheme to base’s scheme.
 #if ADA_DEVELOP_MODE
           ///////
@@ -323,7 +327,7 @@ namespace ada::parser {
 
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
-              pointer--;
+              goto goto_path;
             }
           }
 
@@ -359,7 +363,7 @@ namespace ada::parser {
             url.host = base_url->host;
             url.port = base_url->port;
             state = ada::state::PATH;
-            pointer--;
+            goto goto_path;
           }
 
           break;
@@ -368,16 +372,16 @@ namespace ada::parser {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
-           std::string_view view (&*pointer, size_t(pointer_end-pointer));
+          state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
+          std::string_view view (&*pointer, size_t(pointer_end-pointer));
           if (ada::checkers::begins_with(view, "//")) {
             pointer++;
           }
           // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.
           else {
-            pointer--;
+            goto goto_special_authority_ignore_slashes;
           }
 
-          state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
 
           break; /** Here we should just fall through !!! */
         }
@@ -386,7 +390,7 @@ namespace ada::parser {
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
             state = ada::state::AUTHORITY;
-            pointer--;
+            goto goto_authority;
           }
 
           break;
@@ -415,6 +419,7 @@ namespace ada::parser {
           return url;
         }
         case ada::state::HOST: {
+          goto_host:
           std::string_view host_view(&*pointer, pointer_end - pointer);
           bool inside_brackets{false};
           size_t location = helpers::get_host_delimiter_location(url, host_view, inside_brackets);
@@ -435,7 +440,7 @@ namespace ada::parser {
           // - url is special and c is U+005C (\)
           else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
             // then decrease pointer by 1, and then:
-            pointer--;
+            // pointer--;
 
             // If url is special and host_view is the empty string, validation error, return failure.
             if (url.is_special() && host_view.empty()) {
@@ -452,6 +457,7 @@ namespace ada::parser {
 
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
+            goto goto_path_start;
           }
           break;
         }
@@ -479,22 +485,23 @@ namespace ada::parser {
           break;
         }
         case ada::state::PATH_START: {
+          goto_path_start:
           // If url is special, then:
           if (url.is_special()) {
 
             // Set state to path state.
             state = ada::state::PATH;
 
-            // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
-            if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
-              pointer--;
-            }
-
             // Optimization: Avoiding going into PATH state improves the performance of urls ending with /.
-            if (std::next(pointer) == pointer_end) {
+            if (pointer == pointer_end) {
               url.path = "/";
               return url;
             }
+            // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
+            if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
+              goto goto_path;
+            }
+
           }
           // Otherwise, if state override is not given and c is U+003F (?),
           // set url’s query to the empty string and state to query state.
@@ -508,13 +515,14 @@ namespace ada::parser {
 
             // If c is not U+002F (/), then decrease pointer by 1.
             if (*pointer != '/') {
-              pointer--;
+              goto goto_path;
             }
           }
 
           break;
         }
         case ada::state::PATH: {
+          goto_path:
           // Most time, we do not need percent encoding.
           // Furthermore, we can immediately locate the '?'.
           std::string_view view(&*pointer, size_t(pointer_end-pointer));
@@ -561,7 +569,7 @@ namespace ada::parser {
 
             // Set state to path state, and decrease pointer by 1.
             state = ada::state::PATH;
-            pointer--;
+            goto goto_path;
           }
 
           break;
@@ -598,6 +606,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::FILE: {
+          goto_file:
           // Set url’s scheme to "file".
           url.set_scheme("file");
 
@@ -640,13 +649,13 @@ namespace ada::parser {
 
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
-              pointer--;
+              goto goto_path;
             }
           }
           // Otherwise, set state to path state, and decrease pointer by 1.
           else {
             state = ada::state::PATH;
-            pointer--;
+            goto goto_path;
           }
 
           break;

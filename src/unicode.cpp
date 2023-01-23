@@ -352,13 +352,13 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
       percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
       input = percent_decoded_buffer;
     }
-
 #ifdef _WIN32
-    std::unique_ptr<char32_t[]> buffer(new char32_t[input.size()]);
-    auto convert = [](const char* buf, size_t len, char32_t* utf32_output) {
+    // Windows function assumes UTF-16.
+    std::unique_ptr<char16_t[]> buffer(new char16_t[input.size()]);
+    auto convert = [](const char* buf, size_t len, char16_t* utf16_output) {
     const uint8_t *data = reinterpret_cast<const uint8_t *>(buf);
       size_t pos = 0;
-      char32_t* start{utf32_output};
+      char16_t* start{utf16_output};
       while (pos < len) {
         // try to convert the next block of 16 ASCII bytes
         if (pos + 16 <= len) { // if it is safe to read 16 more bytes, check that they are ascii
@@ -370,7 +370,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
           if ((v & 0x8080808080808080) == 0) {
             size_t final_pos = pos + 16;
             while(pos < final_pos) {
-              *utf32_output++ = char32_t(buf[pos]);
+              *utf16_output++ = char16_t(buf[pos]);
               pos++;
             }
             continue;
@@ -379,19 +379,21 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
         uint8_t leading_byte = data[pos]; // leading byte
         if (leading_byte < 0b10000000) {
           // converting one ASCII byte !!!
-          *utf32_output++ = char32_t(leading_byte);
+          *utf16_output++ = char16_t(leading_byte);
           pos++;
         } else if ((leading_byte & 0b11100000) == 0b11000000) {
-          // We have a two-byte UTF-8
+          // We have a two-byte UTF-8, it should become
+          // a single UTF-16 word.
           if(pos + 1 >= len) { return 0; } // minimal bound checking
           if ((data[pos + 1] & 0b11000000) != 0b10000000) { return 0; }
           // range check
           uint32_t code_point = (leading_byte & 0b00011111) << 6 | (data[pos + 1] & 0b00111111);
           if (code_point < 0x80 || 0x7ff < code_point) { return 0; }
-          *utf32_output++ = char32_t(code_point);
+          *utf16_output++ = char16_t(code_point);
           pos += 2;
         } else if ((leading_byte & 0b11110000) == 0b11100000) {
-          // We have a three-byte UTF-8
+          // We have a three-byte UTF-8, it should become
+          // a single UTF-16 word.
           if(pos + 2 >= len) { return 0; } // minimal bound checking
 
           if ((data[pos + 1] & 0b11000000) != 0b10000000) { return 0; }
@@ -404,7 +406,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
               (0xd7ff < code_point && code_point < 0xe000)) {
             return 0;
           }
-          *utf32_output++ = char32_t(code_point);
+          *utf16_output++ = char16_t(code_point);
           pos += 3;
         } else if ((leading_byte & 0b11111000) == 0b11110000) { // 0b11110000
           // we have a 4-byte UTF-8 word.
@@ -418,13 +420,17 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
               (leading_byte & 0b00000111) << 18 | (data[pos + 1] & 0b00111111) << 12 |
               (data[pos + 2] & 0b00111111) << 6 | (data[pos + 3] & 0b00111111);
           if (code_point <= 0xffff || 0x10ffff < code_point) { return 0; }
-          *utf32_output++ = char32_t(code_point);
+          code_point -= 0x10000;
+          uint16_t high_surrogate = uint16_t(0xD800 + (code_point >> 10));
+          uint16_t low_surrogate = uint16_t(0xDC00 + (code_point & 0x3FF));
+          *utf16_output++ = char16_t(high_surrogate);
+          *utf16_output++ = char16_t(low_surrogate);
           pos += 4;
         } else {
           return 0;
         }
       }
-      return int(utf32_output - start);
+      return int(utf16_output - start);
     };
     size_t codepoints = convert(input.data(), input.size(), buffer.get());
     if(codepoints == 0) {
@@ -432,15 +438,23 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
           return false;  
     }
     int required_buffer_size = IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, NULL, 0);
+
     if(required_buffer_size == 0) {
       out = std::nullopt;
       return false;
     }
+
     out = std::string(required_buffer_size, 0);
-    std::unique_ptr<char32_t[]> ascii_buffer(new char32_t[required_buffer_size]);
+    std::unique_ptr<char16_t[]> ascii_buffer(new char16_t[required_buffer_size]);
 
     required_buffer_size = IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, (LPWSTR)ascii_buffer.get(), required_buffer_size);
     if(required_buffer_size == 0) {
+      out = std::nullopt;
+      return false;
+    }
+    // This will not validate the punycode, so let us work it in reverse.
+    int test_reverse = IdnToUnicode(IDN_ALLOW_UNASSIGNED, (LPCWSTR)ascii_buffer.get(), required_buffer_size, NULL, 0);
+    if(test_reverse == 0) {
       out = std::nullopt;
       return false;
     }

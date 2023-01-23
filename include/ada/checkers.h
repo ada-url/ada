@@ -14,7 +14,7 @@ namespace ada::checkers {
   // Returns true if the character is an ASCII letter. Equivalent to std::isalpha but
   // more likely to be inlined by the compiler. Also, std::isalpha is not constexpr
   // generally.
-  constexpr bool is_alpha(char x) noexcept { return (to_lower(x) >= 'a') & (to_lower(x) <= 'z'); }
+  constexpr bool is_alpha(char x) noexcept { return (to_lower(x) >= 'a') && (to_lower(x) <= 'z'); }
 
   // Check whether a string starts with 0x or 0X. The function is only
   // safe if input.size() >=2. See has_hex_prefix.
@@ -41,12 +41,12 @@ namespace ada::checkers {
   // A Windows drive letter is two code points, of which the first is an ASCII alpha
   // and the second is either U+003A (:) or U+007C (|).
   inline constexpr bool is_windows_drive_letter(std::string_view input) noexcept {
-    return input.size() >= 2 && (is_alpha(input[0]) & ((input[1] == ':') | (input[1] == '|')));
+    return input.size() >= 2 && (is_alpha(input[0]) && ((input[1] == ':') || (input[1] == '|')));
   }
 
   // A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:).
   inline constexpr bool is_normalized_windows_drive_letter(std::string_view input) noexcept {
-    return input.size() >= 2 && (is_alpha(input[0]) & (input[1] == ':'));
+    return input.size() >= 2 && (is_alpha(input[0]) && (input[1] == ':'));
   }
 
   ada_really_inline constexpr bool begins_with(std::string_view view, std::string_view prefix) {
