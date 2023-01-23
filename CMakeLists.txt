@@ -35,6 +35,12 @@ set_target_properties(
   WINDOWS_EXPORT_ALL_SYMBOLS YES
 )
 
+include (TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN)
+  message(STATUS "Big-endian system detected.")
+endif()
+
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
