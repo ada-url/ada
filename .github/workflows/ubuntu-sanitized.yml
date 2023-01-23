@@ -1,4 +1,4 @@
-name: Ubuntu 22.04 CI (GCC 12 SANITIZED)
+name: Ubuntu 22.04 (GCC 12 SANITIZED)
 
 on:
   push:
@@ -23,15 +23,11 @@ jobs:
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
-      - name: Use cmake
-        run: |
-          mkdir build && cd build
       - name: Prepare
-        working-directory: build
-        run: CXX=g++-12 cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja ..
+        run: cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        env:
+          CXX: g++-12
       - name: Build
-        working-directory: build
-        run: cmake --build . --target wpt_tests --target basic_fuzzer
+        run: cmake --build build --target wpt_tests --target basic_fuzzer
       - name: Test
-        working-directory: build
-        run: ctest --output-on-failure
+        run: ctest --output-on-failure --test-dir build

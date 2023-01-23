@@ -1,4 +1,4 @@
-name: Ubuntu 22.04 CI (GCC 12) Fails On Compiler Warnings
+name: Ubuntu 22.04 (GCC 12) Fails On Compiler Warnings
 
 on:
   push:
@@ -23,18 +23,16 @@ jobs:
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Install boost
         uses: MarkusJx/install-boost@v2.4.1
-        id: install-boost
         with:
           boost_version: 1.81.0
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare
-        run: |
-          mkdir build && cd build &&
-          CXX=g++-12 CXXFLAGS=-Werror cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja ..
+        run: cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        env:
+          CXX: g++-12
+          CXXFLAGS: -Werror
       - name: Build
-        working-directory: build
-        run: cmake --build .
+        run: cmake --build build
       - name: Test
-        working-directory: build
-        run: ctest --output-on-failure
+        run: ctest --output-on-failure --test-dir build
