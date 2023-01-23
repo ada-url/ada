@@ -34,13 +34,6 @@ namespace ada::checkers {
       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
   ada_really_inline constexpr uint8_t path_signature(std::string_view input) noexcept {
-    /**
-    * We need percent encoding for code points 32 or less, 127 and more, as well
-    * as 34 ("), 35 (#), 60 (<), 62 (>), 63 (?), 96 (`), 123 ({), 125 (}). We set
-    * those to '1' in the next array.
-    * The character '\' is set to 2. The character '.' is set to 4.
-    * The character '%' is set to 8.
-    */
     size_t i = 0;
     uint8_t accumulator{};
     for (; i + 7 < input.size(); i += 8) {
