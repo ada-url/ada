@@ -132,14 +132,14 @@ Usage</h1>
 <li>Update hostname</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
-<div class="line"><a class="code" href="dd/d64/namespaceada.html#a7ca26ace03973d89717bb497fc37e23e">ada::set_host</a>(<span class="stringliteral">&quot;github.com&quot;</span>);</div>
+<div class="line"><a class="code" href="dd/d64/namespaceada.html#a7ca26ace03973d89717bb497fc37e23e">ada::set_host</a>(url, <span class="stringliteral">&quot;github.com&quot;</span>);</div>
 <div class="line"><span class="comment">// Url is now: &quot;https://github.com&quot;</span></div>
 <div class="ttc" id="anamespaceada_html_a7ca26ace03973d89717bb497fc37e23e"><div class="ttname"><a href="dd/d64/namespaceada.html#a7ca26ace03973d89717bb497fc37e23e">ada::set_host</a></div><div class="ttdeci">bool set_host(ada::url &amp;base, std::string_view input, ada::encoding_type encoding=ada::encoding_type::UTF8) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="d8/df6/implementation_8cpp_source.html#l00085">implementation.cpp:85</a></div></div>
 </div><!-- fragment --><ul>
 <li>Update port</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
-<div class="line"><a class="code" href="dd/d64/namespaceada.html">ada</a>:<a class="code" href="dd/d64/namespaceada.html#ab7f2aa9e82bb9baa76af5cf1f51b0b89">set_port</a>(<span class="stringliteral">&quot;8080&quot;</span>);</div>
+<div class="line"><a class="code" href="dd/d64/namespaceada.html">ada</a>:<a class="code" href="dd/d64/namespaceada.html#ab7f2aa9e82bb9baa76af5cf1f51b0b89">set_port</a>(url, <span class="stringliteral">&quot;8080&quot;</span>);</div>
 <div class="line"><span class="comment">// Url is now: &quot;https://www.google.com:8080&quot;</span></div>
 <div class="ttc" id="anamespaceada_html"><div class="ttname"><a href="dd/d64/namespaceada.html">ada</a></div><div class="ttdef"><b>Definition:</b> <a href="d7/d80/ada__version_8h_source.html#l00010">ada_version.h:10</a></div></div>
 <div class="ttc" id="anamespaceada_html_ab7f2aa9e82bb9baa76af5cf1f51b0b89"><div class="ttname"><a href="dd/d64/namespaceada.html#ab7f2aa9e82bb9baa76af5cf1f51b0b89">ada::set_port</a></div><div class="ttdeci">bool set_port(ada::url &amp;base, std::string_view input) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="d8/df6/implementation_8cpp_source.html#l00157">implementation.cpp:157</a></div></div>
@@ -147,21 +147,21 @@ Usage</h1>
 <li>Update pathname</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
-<div class="line"><a class="code" href="dd/d64/namespaceada.html">ada</a>:<a class="code" href="dd/d64/namespaceada.html#aa536094847af2b3ab9522b864ea10f35">set_pathname</a>(<span class="stringliteral">&quot;/my-super-long-path&quot;</span>);</div>
+<div class="line"><a class="code" href="dd/d64/namespaceada.html">ada</a>:<a class="code" href="dd/d64/namespaceada.html#aa536094847af2b3ab9522b864ea10f35">set_pathname</a>(url, <span class="stringliteral">&quot;/my-super-long-path&quot;</span>);</div>
 <div class="line"><span class="comment">// Url is now: &quot;https://www.google.com/my-super-long-path&quot;</span></div>
 <div class="ttc" id="anamespaceada_html_aa536094847af2b3ab9522b864ea10f35"><div class="ttname"><a href="dd/d64/namespaceada.html#aa536094847af2b3ab9522b864ea10f35">ada::set_pathname</a></div><div class="ttdeci">bool set_pathname(ada::url &amp;base, std::string_view input, ada::encoding_type encoding=ada::encoding_type::UTF8) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="d8/df6/implementation_8cpp_source.html#l00168">implementation.cpp:168</a></div></div>
 </div><!-- fragment --><ul>
 <li>Update search/query</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
-<div class="line"><a class="code" href="dd/d64/namespaceada.html">ada</a>:<a class="code" href="dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96">set_search</a>(<span class="stringliteral">&quot;target=self&quot;</span>);</div>
+<div class="line"><a class="code" href="dd/d64/namespaceada.html">ada</a>:<a class="code" href="dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96">set_search</a>(url, <span class="stringliteral">&quot;target=self&quot;</span>);</div>
 <div class="line"><span class="comment">// Url is now: &quot;https://www.google.com?target=self&quot;</span></div>
 <div class="ttc" id="anamespaceada_html_ab5a1b65aee051e0e6bbb1aa6fc916f96"><div class="ttname"><a href="dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96">ada::set_search</a></div><div class="ttdeci">void set_search(ada::url &amp;base, std::string_view input) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="d8/df6/implementation_8cpp_source.html#l00185">implementation.cpp:185</a></div></div>
 </div><!-- fragment --><ul>
 <li>Update hash/fragment</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
-<div class="line"><a class="code" href="dd/d64/namespaceada.html">ada</a>:<a class="code" href="dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd">set_hash</a>(<span class="stringliteral">&quot;is-this-the-real-life&quot;</span>);</div>
+<div class="line"><a class="code" href="dd/d64/namespaceada.html">ada</a>:<a class="code" href="dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd">set_hash</a>(url, <span class="stringliteral">&quot;is-this-the-real-life&quot;</span>);</div>
 <div class="line"><span class="comment">// Url is now: &quot;https://www.google.com#is-this-the-real-life&quot;</span></div>
 <div class="ttc" id="anamespaceada_html_ad72365f73c117b6c6674ea6f441899cd"><div class="ttname"><a href="dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd">ada::set_hash</a></div><div class="ttdeci">void set_hash(ada::url &amp;base, std::string_view input) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="d8/df6/implementation_8cpp_source.html#l00218">implementation.cpp:218</a></div></div>
 </div><!-- fragment --> </div></div><!-- PageDoc -->
