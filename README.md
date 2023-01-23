@@ -46,7 +46,7 @@ ada::set_password(url, "password");
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada::set_host("github.com");
+ada::set_host(url, "github.com");
 // Url is now: "https://github.com"
 ```
 
@@ -54,7 +54,7 @@ ada::set_host("github.com");
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_port("8080");
+ada:set_port(url, "8080");
 // Url is now: "https://www.google.com:8080"
 ```
 
@@ -62,7 +62,7 @@ ada:set_port("8080");
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_pathname("/my-super-long-path");
+ada:set_pathname(url, "/my-super-long-path");
 // Url is now: "https://www.google.com/my-super-long-path"
 ```
 
@@ -70,7 +70,7 @@ ada:set_pathname("/my-super-long-path");
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_search("target=self");
+ada:set_search(url, "target=self");
 // Url is now: "https://www.google.com?target=self"
 ```
 
@@ -78,6 +78,6 @@ ada:set_search("target=self");
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_hash("is-this-the-real-life");
+ada:set_hash(url, "is-this-the-real-life");
 // Url is now: "https://www.google.com#is-this-the-real-life"
 ```
