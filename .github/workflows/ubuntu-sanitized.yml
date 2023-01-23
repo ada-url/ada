@@ -16,19 +16,19 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        include:
-          - {shared: ON}
-          - {shared: OFF}
+        shared: [ON, OFF]
     steps:
       - uses: actions/checkout@v3
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
       - name: Use cmake
         run: |
           mkdir build && cd build
       - name: Prepare
         working-directory: build
-        run: CXX=g++-12 cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} ..
+        run: CXX=g++-12 cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja ..
       - name: Build
         working-directory: build
         run: cmake --build . --target wpt_tests --target basic_fuzzer

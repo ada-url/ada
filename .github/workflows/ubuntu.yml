@@ -28,10 +28,12 @@ jobs:
         id: install-boost
         with:
           boost_version: 1.81.0
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
       - name: Prepare
         run: |
           mkdir build && cd build &&
-          CXX=g++-12 cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} ..
+          CXX=g++-12 cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja ..
       - name: Build
         working-directory: build
         run: cmake --build .
