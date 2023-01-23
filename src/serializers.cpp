@@ -33,9 +33,6 @@ namespace ada::serializers {
     return max_index;
   }
 
-  /**
-   * @see https://url.spec.whatwg.org/#concept-ipv6-serializer
-   */
   std::string ipv6(const std::array<uint16_t, 8>& address) noexcept {
     // Let output be the empty string.
     std::string output{};
@@ -82,9 +79,6 @@ namespace ada::serializers {
     return "[" + output + "]";
   }
 
-  /**
-   * @see https://url.spec.whatwg.org/#concept-ipv4-serializer
-   */
   std::string ipv4(const uint64_t address) noexcept {
     // Let output be the empty string.
     std::string output{};

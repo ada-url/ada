@@ -157,10 +157,6 @@ namespace ada {
     }
   }
 
-  /**
-   * Return true on success.
-   * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
-   */
   bool url::parse_opaque_host(std::string_view input) noexcept {
     if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
       return is_valid = false;
@@ -171,10 +167,6 @@ namespace ada {
     return true;
   }
 
-  /**
-   * Return true on success.
-   * @see https://url.spec.whatwg.org/#concept-ipv4-parser
-   */
   bool url::parse_ipv4(std::string_view input) {
     if(input[input.size()-1]=='.') {
       input.remove_suffix(1);
@@ -225,10 +217,6 @@ namespace ada {
     return true;
   }
 
-  /**
-   * Return true on success.
-   * @see https://url.spec.whatwg.org/#concept-ipv6-parser
-   */
   bool url::parse_ipv6(std::string_view input) {
 
     if(input.empty()) { return is_valid = false; }
@@ -425,10 +413,6 @@ namespace ada {
     return true;
   }
 
-  /**
-   * Return true on success.
-   * @see https://url.spec.whatwg.org/#host-parsing
-   */
   ada_really_inline bool url::parse_host(const std::string_view input) {
     //
     // Note: this function assumes that parse_host is not empty. Make sure we can

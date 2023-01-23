@@ -1,7 +1,11 @@
+/**
+ * @file ada_version.h
+ * @brief Definitions for Ada's version number.
+ */
 #ifndef ADA_ADA_VERSION_H
 #define ADA_ADA_VERSION_H
 
-#define ADA_VERSION 0.1.0
+#define ADA_VERSION "0.1.0"
 
 namespace ada {
 

@@ -35,12 +35,6 @@ namespace ada::helpers {
     }
   }
 
-  // prune_fragment seeks the first '#' and returns everything after it as a
-  // string_view, and modifies (in place) the input so that it points at everything
-  // before the '#'.
-  // If no '#' is found, the input is left unchanged and std::nullopt is returned.
-  // Note that the returned string_view might be empty!
-  // The function is non-allocating and it does not throw.
   ada_really_inline std::optional<std::string_view> prune_fragment(std::string_view& input) noexcept {
     // compiles down to 20--30 instructions including a class to memchr (C function).
     // this function should be quite fast.
@@ -52,11 +46,6 @@ namespace ada::helpers {
     return fragment;
   }
 
-  /**
-   * @see https://url.spec.whatwg.org/#shorten-a-urls-path
-   *
-   * This function assumes url does not have an opaque path.
-   */
   ada_really_inline void shorten_path(ada::url &url) noexcept {
     size_t first_delimiter = url.path.find_first_of('/', 1);
 

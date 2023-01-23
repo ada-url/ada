@@ -1,3 +1,7 @@
+/**
+ * @file url.h
+ * @brief Definitions for the URL
+ */
 #ifndef ADA_URL_H
 #define ADA_URL_H
 
@@ -14,8 +18,8 @@
 
 namespace ada {
   /**
-   * A URL is a struct that represents a universal identifier.
-   * To disambiguate from a valid URL string it can also be referred to as a URL record.
+   * @brief A URL is a struct that represents a universal identifier.
+   * @details To disambiguate from a valid URL string it can also be referred to as a URL record.
    *
    * @see https://url.spec.whatwg.org/#url-representation
    */
@@ -24,7 +28,6 @@ namespace ada {
      * A URL’s username is an ASCII string identifying a username. It is initially the empty string.
      */
     std::string username{};
-
 
     /**
      * A URL’s password is an ASCII string identifying a password. It is initially the empty string.

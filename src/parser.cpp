@@ -45,7 +45,7 @@ namespace ada::parser {
       internal_input = user_input;
     }
 
-    // TODO: Find a better way to trim from leading and trailing.
+    // @todo Find a better way to trim from leading and trailing.
     std::string_view::iterator pointer_start = std::find_if_not(internal_input.begin(), internal_input.end(), ada::unicode::is_c0_control_or_space);
     if (pointer_start == internal_input.end()) { pointer_start = internal_input.begin(); }
     std::string_view::iterator pointer_end = std::find_if_not(internal_input.rbegin(), std::make_reverse_iterator(pointer_start), ada::unicode::is_c0_control_or_space).base();

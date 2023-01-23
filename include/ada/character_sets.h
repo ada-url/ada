@@ -1,3 +1,9 @@
+/**
+ * @file character_sets.h
+ * @brief Definitions of the character sets used by unicode functions.
+ * @author Node.js
+ * @see https://github.com/nodejs/node/blob/main/src/node_url_tables.cc
+ */
 #ifndef ADA_CHARACTER_SETS_H
 #define ADA_CHARACTER_SETS_H
 

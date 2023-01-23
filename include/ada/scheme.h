@@ -1,3 +1,7 @@
+/**
+ * @file scheme.h
+ * @brief Definitions for the URL scheme.
+ */
 #ifndef ADA_SCHEME_H
 #define ADA_SCHEME_H
 
@@ -68,10 +72,17 @@ namespace ada::scheme {
     } else { return 0; }
   }
 
+  /**
+   * Returns the port number of a special scheme.
+   * @see https://url.spec.whatwg.org/#special-scheme
+   */
   constexpr uint16_t get_special_port(ada::scheme::type type) noexcept {
     return details::special_ports[int(type)];
   }
 
+  /**
+   * Returns the scheme of an input, or NOT_SPECIAL if it's not a special scheme defined by the spec.
+   */
   constexpr ada::scheme::type get_scheme_type(std::string_view scheme) noexcept {
     if(scheme.empty()) { return ada::scheme::NOT_SPECIAL; }
     int hash_value = (2*scheme.size() + (unsigned)(scheme[0])) & 7;
