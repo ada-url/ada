@@ -25,8 +25,13 @@ jobs:
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Use cmake
         run: |
-          mkdir build &&
-          cd build &&
-          CXX=g++-12 cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} ..  &&
-          cmake --build . --target wpt_tests --target basic_fuzzer  &&
-          ctest --output-on-failure
+          mkdir build && cd build
+      - name: Prepare
+        working-directory: build
+        run: CXX=g++-12 cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} ..
+      - name: Build
+        working-directory: build
+        run: cmake --build . --target wpt_tests --target basic_fuzzer
+      - name: Test
+        working-directory: build
+        run: ctest --output-on-failure
