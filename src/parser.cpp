@@ -68,7 +68,6 @@ namespace ada::parser {
 
     // Let pointer be a pointer for input.
     std::string_view::iterator pointer = pointer_start;
-
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
@@ -107,7 +106,6 @@ namespace ada::parser {
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && (*pointer == ':')) {
             url.parse_scheme(std::string_view(&*pointer_start, pointer - pointer_start));
-
             // If url’s scheme is "file", then:
             if (url.get_scheme_type() == ada::scheme::type::FILE) {
               // Set state to file state.
@@ -248,7 +246,6 @@ namespace ada::parser {
           break;
         }
         case ada::state::SPECIAL_RELATIVE_OR_AUTHORITY: {
-          goto_special_authority_ignore_slashes:
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
@@ -386,11 +383,15 @@ namespace ada::parser {
           break; /** Here we should just fall through !!! */
         }
         case ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES: {
+          goto_special_authority_ignore_slashes:
           // If c is neither U+002F (/) nor U+005C (\), then set state to authority state and decrease pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
-          if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
-            state = ada::state::AUTHORITY;
-            goto goto_authority;
+          while(true) {
+            if ((pointer == pointer_end) || ((*pointer != '/') && (*pointer != '\\'))) {
+              state = ada::state::AUTHORITY;
+              goto goto_authority;
+            }
+            pointer++;
           }
 
           break;
