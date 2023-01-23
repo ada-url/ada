@@ -29,8 +29,3 @@ jobs:
         cd build
         # ctest -C Release   --output-on-failure
         ctest -C Release -R basic_fuzzer  --output-on-failure
-    - name: Run Debug tests
-      run: |
-        cd build
-        # ctest -C Debug  --output-on-failure
-        ctest -C Debug  -R basic_fuzzer --output-on-failure
