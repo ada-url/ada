@@ -440,8 +440,6 @@ namespace ada::parser {
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
           else if (pointer == pointer_end || *pointer == '/' || *pointer == '?' || (url.is_special() && *pointer == '\\')) {
-            // then decrease pointer by 1, and then:
-            // pointer--;
 
             // If url is special and host_view is the empty string, validation error, return failure.
             if (url.is_special() && host_view.empty()) {
