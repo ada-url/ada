@@ -418,8 +418,6 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Returns a bitset. If the first bit is set, then at least one character needs percent encoding. If the second bit is set, a \ is found. If the third bit is set then we have a dot. If the fourth bit is set, then we have a percent character. </p>
-<p>We need percent encoding for code points 32 or less, 127 and more, as well as 34 ("), 35 (#), 60 (&lt;), 62 (&gt;), 63 (?), 96 (&lsquo;), 123 ({), 125 (}). We set those to '1&rsquo; in the next array. The character '\' is set to 2. The character '.' is set to 4. The character '' is set to 8.</p>
-<p>We need percent encoding for code points 32 or less, 127 and more, as well as 34 ("), 35 (#), 60 (&lt;), 62 (&gt;), 63 (?), 96 (&lsquo;), 123 ({), 125 (}). We set those to '1&rsquo; in the next array. The character '\' is set to 2. The character '.' is set to 4. The character '' is set to 8.</p>
 
 <p class="definition">Definition at line <a class="el" href="../../d4/dd6/checkers_8cpp_source.html#l00036">36</a> of file <a class="el" href="../../d4/dd6/checkers_8cpp_source.html">checkers.cpp</a>.</p>
 
