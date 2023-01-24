@@ -64,7 +64,7 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-href
      * @see https://url.spec.whatwg.org/#concept-url-serializer
      */
-    std::string get_href() {
+    [[nodiscard]] std::string get_href() const noexcept {
       return get_protocol()
         + (host.has_value() ?
           "//" + username + (password.empty() ? "" : ":" + password) + (includes_credentials() ? "@" : "") + host.value() +
@@ -79,7 +79,7 @@ namespace ada {
      * The origin getter steps are to return the serialization of this’s URL’s origin. [HTML]
      * @see https://url.spec.whatwg.org/#concept-url-origin
      */
-    std::string get_origin() {
+    [[nodiscard]] std::string get_origin() const noexcept {
       if (is_special()) {
         // Return the tuple origin (url’s scheme, url’s host, url’s port, null).
         return get_protocol() + "//" + get_host();
@@ -97,7 +97,7 @@ namespace ada {
      * The protocol getter steps are to return this’s URL’s scheme, followed by U+003A (:).
      * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
-    std::string get_protocol() {
+    [[nodiscard]] std::string get_protocol() const noexcept {
       return std::string(get_scheme()) + ":";
     }
 
@@ -105,7 +105,7 @@ namespace ada {
      * Return url’s host, serialized, followed by U+003A (:) and url’s port, serialized.
      * @see https://url.spec.whatwg.org/#dom-url-host
      */
-    std::string get_host() {
+    [[nodiscard]] std::string get_host() const noexcept {
       if (!host.has_value()) { return ""; }
       return host.value() + (port.has_value() ? ":" + get_port() : "");
     }
@@ -114,7 +114,7 @@ namespace ada {
      * Return this’s URL’s host, serialized.
      * @see https://url.spec.whatwg.org/#dom-url-hostname
      */
-    std::string get_hostname() {
+    [[nodiscard]] std::string get_hostname() const noexcept {
       return host.value_or("");
     }
 
@@ -122,7 +122,7 @@ namespace ada {
      * The pathname getter steps are to return the result of URL path serializing this’s URL.
      * @see https://url.spec.whatwg.org/#dom-url-pathname
      */
-    std::string get_pathname() {
+    [[nodiscard]] std::string get_pathname() const noexcept {
       return path;
     }
 
@@ -130,7 +130,7 @@ namespace ada {
      * Return U+003F (?), followed by this’s URL’s query.
      * @see https://url.spec.whatwg.org/#dom-url-search
      */
-    std::string get_search() {
+    [[nodiscard]] std::string get_search() const noexcept {
       return query.has_value() ? "?" + query.value() : "";
     }
 
@@ -138,7 +138,7 @@ namespace ada {
      * The username getter steps are to return this’s URL’s username.
      * @see https://url.spec.whatwg.org/#dom-url-username
      */
-    std::string get_username() {
+    [[nodiscard]] std::string get_username() const noexcept {
       return username;
     }
 
@@ -146,7 +146,7 @@ namespace ada {
      * The password getter steps are to return this’s URL’s password.
      * @see https://url.spec.whatwg.org/#dom-url-password
      */
-    std::string get_password() {
+    [[nodiscard]] std::string get_password() const noexcept {
       return password;
     }
 
@@ -154,7 +154,7 @@ namespace ada {
      * Return this’s URL’s port, serialized.
      * @see https://url.spec.whatwg.org/#dom-url-port
      */
-    std::string get_port() {
+    [[nodiscard]] std::string get_port() const noexcept {
       return port.has_value() ? std::to_string(port.value()) : "";
     }
 
@@ -162,7 +162,7 @@ namespace ada {
      * Return U+0023 (#), followed by this’s URL’s fragment.
      * @see https://url.spec.whatwg.org/#dom-url-hash
      */
-    std::string get_hash() {
+    [[nodiscard]] std::string get_hash() const noexcept {
       return fragment.has_value() ? "#" + fragment.value() : "";
     }
 
@@ -186,7 +186,7 @@ namespace ada {
     /**
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
      */
-    [[nodiscard]] ada_really_inline  bool is_special() const noexcept {
+    [[nodiscard]] ada_really_inline bool is_special() const noexcept {
       return type != ada::scheme::NOT_SPECIAL;
     }
 
@@ -204,7 +204,7 @@ namespace ada {
      * get_scheme() == "file", since the former is a direct integer comparison,
      * while the other involves a (cheap) string test.
      */
-    [[nodiscard]] ada_really_inline  ada::scheme::type get_scheme_type() const noexcept {
+    [[nodiscard]] ada_really_inline ada::scheme::type get_scheme_type() const noexcept {
       return type;
     }
 
@@ -236,23 +236,6 @@ namespace ada {
     url &operator=(const url &u) = default;
 #endif
     ADA_ATTRIBUTE_NOINLINE ~url() = default;
-#if ADA_DEVELOP_MODE
-    /** Only for development purposes so we can see where the copies are happening. **/
-    url oh_no_we_need_to_copy_url() const {
-      url answer;
-      answer.non_special_scheme = non_special_scheme;
-      answer.type = type;
-      answer.username = username;
-      answer.password = password;
-      answer.host = host;
-      answer.port = port;
-      answer.path = path;
-      answer.query = query;
-      answer.fragment = fragment;
-      answer.is_valid = is_valid;
-      return answer;
-    }
-#endif
 
     /**
      * Parse a port (16-bit decimal digit) from the provided input.
