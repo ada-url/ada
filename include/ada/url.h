@@ -61,6 +61,20 @@ namespace ada {
     std::optional<std::string> fragment{};
 
     /**
+     * @see https://url.spec.whatwg.org/#dom-url-href
+     */
+    std::string get_href() {
+      return std::string(get_scheme())
+        + ":"
+        + (host.has_value() ?  "//" +
+          username + (password.empty() ? "" : ":" + password) + (includes_credentials() ? "@" : "") +
+          host.value() + (port.has_value() ? ":" + std::to_string(port.value()) : "") : "")
+        + path
+        + (query.has_value() ? "?" + query.value() : "")
+        + (fragment.has_value() ? "#" + fragment.value() : "");
+    }
+
+    /**
      * Used for returning the validity from the result of the URL parser.
      */
     bool is_valid{true};
