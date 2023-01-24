@@ -62,16 +62,108 @@ namespace ada {
 
     /**
      * @see https://url.spec.whatwg.org/#dom-url-href
+     * @see https://url.spec.whatwg.org/#concept-url-serializer
      */
     std::string get_href() {
-      return std::string(get_scheme())
-        + ":"
-        + (host.has_value() ?  "//" +
-          username + (password.empty() ? "" : ":" + password) + (includes_credentials() ? "@" : "") +
-          host.value() + (port.has_value() ? ":" + std::to_string(port.value()) : "") : "")
-        + path
-        + (query.has_value() ? "?" + query.value() : "")
-        + (fragment.has_value() ? "#" + fragment.value() : "");
+      return get_protocol()
+        + (host.has_value() ?
+          "//" + username + (password.empty() ? "" : ":" + password) + (includes_credentials() ? "@" : "") + host.value() +
+          (port.has_value() ? ":" + get_port() : "")
+          : "")
+        + get_pathname()
+        + get_search()
+        + get_hash();
+    }
+
+    /**
+     * The origin getter steps are to return the serialization of this’s URL’s origin. [HTML]
+     * @see https://url.spec.whatwg.org/#concept-url-origin
+     */
+    std::string get_origin() {
+      if (is_special()) {
+        // Return the tuple origin (url’s scheme, url’s host, url’s port, null).
+        return get_protocol() + "//" + get_host();
+      }
+
+      if (get_scheme() == "blob") {
+        // TODO: Implement blob origin serializer
+      }
+
+      // Return a new opaque origin.
+      return "null";
+    }
+
+    /**
+     * The protocol getter steps are to return this’s URL’s scheme, followed by U+003A (:).
+     * @see https://url.spec.whatwg.org/#dom-url-protocol
+     */
+    std::string get_protocol() {
+      return std::string(get_scheme()) + ":";
+    }
+
+    /**
+     * Return url’s host, serialized, followed by U+003A (:) and url’s port, serialized.
+     * @see https://url.spec.whatwg.org/#dom-url-host
+     */
+    std::string get_host() {
+      if (!host.has_value()) { return ""; }
+      return host.value() + (port.has_value() ? ":" + get_port() : "");
+    }
+
+    /**
+     * Return this’s URL’s host, serialized.
+     * @see https://url.spec.whatwg.org/#dom-url-hostname
+     */
+    std::string get_hostname() {
+      return host.value_or("");
+    }
+
+    /**
+     * The pathname getter steps are to return the result of URL path serializing this’s URL.
+     * @see https://url.spec.whatwg.org/#dom-url-pathname
+     */
+    std::string get_pathname() {
+      return path;
+    }
+
+    /**
+     * Return U+003F (?), followed by this’s URL’s query.
+     * @see https://url.spec.whatwg.org/#dom-url-search
+     */
+    std::string get_search() {
+      return query.has_value() ? "?" + query.value() : "";
+    }
+
+    /**
+     * The username getter steps are to return this’s URL’s username.
+     * @see https://url.spec.whatwg.org/#dom-url-username
+     */
+    std::string get_username() {
+      return username;
+    }
+
+    /**
+     * The password getter steps are to return this’s URL’s password.
+     * @see https://url.spec.whatwg.org/#dom-url-password
+     */
+    std::string get_password() {
+      return password;
+    }
+
+    /**
+     * Return this’s URL’s port, serialized.
+     * @see https://url.spec.whatwg.org/#dom-url-port
+     */
+    std::string get_port() {
+      return port.has_value() ? std::to_string(port.value()) : "";
+    }
+
+    /**
+     * Return U+0023 (#), followed by this’s URL’s fragment.
+     * @see https://url.spec.whatwg.org/#dom-url-hash
+     */
+    std::string get_hash() {
+      return fragment.has_value() ? "#" + fragment.value() : "";
     }
 
     /**
@@ -115,7 +207,6 @@ namespace ada {
     [[nodiscard]] ada_really_inline  ada::scheme::type get_scheme_type() const noexcept {
       return type;
     }
-
 
     /**
      * Get the default port if the url's scheme has one, returns 0 otherwise.
@@ -200,8 +291,9 @@ namespace ada {
     }
 
     /**
-     * Return a string representing the scheme. Note that
-     * get_scheme_type() should often be used instead.
+     * Return a string representing the scheme. Note that get_scheme_type() should often be used instead.
+     *
+     * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
     std::string_view get_scheme() const noexcept {
       if(is_special()) { return ada::scheme::details::is_special_list[type]; }
