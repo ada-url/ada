@@ -55,7 +55,7 @@ BENCHMARK(BasicBench_AdaURL);
 
 
 
-#if CURL_ENABLED
+#if ADA_CURL_ENABLED
 #include <curl/curl.h>
 
 static void BasicBench_CURL(benchmark::State& state) {
@@ -106,7 +106,7 @@ BENCHMARK(BasicBench_CURL);
 #endif
 
 
-#if BOOST_ENABLED
+#if ADA_BOOST_ENABLED
 #include <boost/url/src.hpp>
 using namespace boost::urls;
 static void BasicBench_BoostURL(benchmark::State& state) {
@@ -156,10 +156,9 @@ static void BasicBench_BoostURL(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_BoostURL);
+#endif // ADA_BOOST_ENABLED
 
-#endif
-
-
+#if ADA_VARIOUS_COMPETITION_ENABLED
 static void BasicBench_uriparser(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile bool is_valid = true;
@@ -206,8 +205,9 @@ static void BasicBench_uriparser(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_uriparser);
+#endif // ADA_VARIOUS_COMPETITION_ENABLED
 
-
+#if ADA_VARIOUS_COMPETITION_ENABLED
 static void BasicBench_urlparser(benchmark::State& state) {
   // volatile to prevent optimizations.
   for (auto _ : state) {
@@ -248,7 +248,9 @@ static void BasicBench_urlparser(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_urlparser);
+#endif // ADA_VARIOUS_COMPETITION_ENABLED
 
+#if ADA_VARIOUS_COMPETITION_ENABLED
 static void BasicBench_http_parser(benchmark::State& state) {
   volatile bool is_valid{true};
   struct http_parser_url u;
@@ -293,16 +295,14 @@ static void BasicBench_http_parser(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_http_parser);
+#endif // ADA_VARIOUS_COMPETITION_ENABLED
 
 int main(int argc, char **argv) {
-#if CURL_ENABLED
+#if ADA_CURL_ENABLED
     // the curl dependency will depend on the system.
     benchmark::AddCustomContext("curl version ", LIBCURL_VERSION);
 #else
     benchmark::AddCustomContext("curl ", "OMITTED");
-#endif
-#if !BOOST_ENABLED
-    benchmark::AddCustomContext("boost ", "OMITTED");
 #endif
 #if (__APPLE__ &&  __aarch64__) || defined(__linux__)
     if(!collector.has_events()) {
