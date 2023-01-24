@@ -28,28 +28,36 @@ target_link_libraries(bench PRIVATE benchmark::benchmark)
 target_link_libraries(bbc_bench PRIVATE benchmark::benchmark)
 target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
 
-# URI Parser
-set_off(URIPARSER_BUILD_TESTS)
-set_off(URIPARSER_BUILD_DOCS)
-import_dependency(uriparser uriparser/uriparser 634b678)
-add_dependency(uriparser)
-target_link_libraries(bench PRIVATE uriparser)
-target_link_libraries(bbc_bench PRIVATE uriparser)
+option(COMPETITION "Whether to install various competitors." OFF)
 
-# URL Parser
-import_dependency(urlparser netmindms/urlparser 69c09ed)
-add_library(urlparser STATIC "${urlparser_SOURCE_DIR}/src/EdUrlParser.cpp")
-target_include_directories(urlparser PUBLIC "${urlparser_SOURCE_DIR}/src")
-target_link_libraries(bench PRIVATE urlparser)
-target_link_libraries(bbc_bench PRIVATE urlparser)
+if(COMPETITION)
+    # URI Parser
+    set_off(URIPARSER_BUILD_TESTS)
+    set_off(URIPARSER_BUILD_DOCS)
+    import_dependency(uriparser uriparser/uriparser 634b678)
+    add_dependency(uriparser)
+    target_link_libraries(bench PRIVATE uriparser)
+    target_link_libraries(bbc_bench PRIVATE uriparser)
 
-# HTTP Parser
-import_dependency(httpparser nodejs/http-parser v2.9.4)
-add_library(httpparser STATIC "${httpparser_SOURCE_DIR}/http_parser.c")
-set_source_files_properties("${httpparser_SOURCE_DIR}/http_parser.c" PROPERTIES LANGUAGE C)
-target_include_directories(httpparser PUBLIC "${httpparser_SOURCE_DIR}")
-target_link_libraries(bench PRIVATE httpparser)
-target_link_libraries(bbc_bench PRIVATE httpparser)
+    # URL Parser
+    import_dependency(urlparser netmindms/urlparser 69c09ed)
+    add_library(urlparser STATIC "${urlparser_SOURCE_DIR}/src/EdUrlParser.cpp")
+    target_include_directories(urlparser PUBLIC "${urlparser_SOURCE_DIR}/src")
+    target_link_libraries(bench PRIVATE urlparser)
+    target_link_libraries(bbc_bench PRIVATE urlparser)
+
+    # HTTP Parser
+    import_dependency(httpparser nodejs/http-parser v2.9.4)
+    add_library(httpparser STATIC "${httpparser_SOURCE_DIR}/http_parser.c")
+    set_source_files_properties("${httpparser_SOURCE_DIR}/http_parser.c" PROPERTIES LANGUAGE C)
+    target_include_directories(httpparser PUBLIC "${httpparser_SOURCE_DIR}")
+    target_link_libraries(bench PRIVATE httpparser)
+    target_link_libraries(bbc_bench PRIVATE httpparser)
+
+
+    target_compile_definitions(bench PRIVATE ADA_VARIOUS_COMPETITION_ENABLED=1)
+    target_compile_definitions(bbc_bench PRIVATE ADA_VARIOUS_COMPETITION_ENABLED=1)
+endif(COMPETITION)
 
 # CURL
 find_package(CURL)
@@ -73,7 +81,7 @@ else(CURL_FOUND)
     message(STATUS "Curl not found! Please install the curl library.")
 endif(CURL_FOUND)
 
-option(ADA_BOOST_URL "Whether to install boost URL." ON)
+option(ADA_BOOST_URL "Whether to install boost URL." OFF)
 
 message(STATUS "Compiler is " ${CMAKE_CXX_COMPILER_ID})
 

@@ -98,6 +98,7 @@ static void BasicBench_CURL(benchmark::State& state) {
 BENCHMARK(BasicBench_CURL);
 #endif
 
+#if ADA_VARIOUS_COMPETITION_ENABLED
 static void BasicBench_uriparser(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile bool is_valid = true;
@@ -140,8 +141,9 @@ static void BasicBench_uriparser(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_uriparser);
+#endif // ADA_VARIOUS_COMPETITION_ENABLED
 
-
+#if ADA_VARIOUS_COMPETITION_ENABLED
 static void BasicBench_urlparser(benchmark::State& state) {
   // volatile to prevent optimizations.
   for (auto _ : state) {
@@ -179,7 +181,9 @@ static void BasicBench_urlparser(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_urlparser);
+#endif // ADA_VARIOUS_COMPETITION_ENABLED
 
+#if ADA_VARIOUS_COMPETITION_ENABLED
 static void BasicBench_http_parser(benchmark::State& state) {
   volatile bool is_valid{true};
   struct http_parser_url u;
@@ -220,6 +224,7 @@ static void BasicBench_http_parser(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_http_parser);
+#endif // ADA_VARIOUS_COMPETITION_ENABLED
 
 static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
