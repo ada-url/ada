@@ -5,7 +5,7 @@
 #ifndef ADA_CHECKERS_H
 #define ADA_CHECKERS_H
 
-#include "common_defs.h"
+#include "ada/common_defs.h"
 
 #include <string_view>
 #include <cstring>
