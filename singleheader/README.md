@@ -20,3 +20,5 @@ It remains to link with libicuuc and libicui18n. This is specific to your system
 c++ -std=c++17 -o demo demo.cpp -licuuc -licui18n
 ./demo
 ```
+
+You may build and link using CMake (--target demo), because CMake is smart enough to configure all the necessary flags.

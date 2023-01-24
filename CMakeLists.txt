@@ -92,6 +92,7 @@ else()
 endif()
 ### Going forward, we have ICU for sure, except under Windows.
 
+add_subdirectory(singleheader)
 
 install(
   FILES include/ada.h

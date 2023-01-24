@@ -108,6 +108,8 @@ print(f"timestamp is {timestamp}")
 os.makedirs(AMALGAMATE_OUTPUT_PATH, exist_ok=True)
 AMAL_H = os.path.join(AMALGAMATE_OUTPUT_PATH, "ada.h")
 AMAL_C = os.path.join(AMALGAMATE_OUTPUT_PATH, "ada.cpp")
+DEMOCPP = os.path.join(AMALGAMATE_OUTPUT_PATH, "cpp")
+README = os.path.join(AMALGAMATE_OUTPUT_PATH, "README.md")
 
 print(f"Creating {AMAL_H}")
 amal_h = open(AMAL_H, 'w')
@@ -126,6 +128,10 @@ for c in ALLCFILES:
 
 amal_c.close()
 
+# copy the README and DEMOCPP
+if SCRIPTPATH != AMALGAMATE_OUTPUT_PATH:
+  shutil.copy2(os.path.join(SCRIPTPATH,"demo.cpp"),AMALGAMATE_OUTPUT_PATH)
+  shutil.copy2(os.path.join(SCRIPTPATH,"README.md"),AMALGAMATE_OUTPUT_PATH)
 
 import zipfile
 zf = zipfile.ZipFile(os.path.join(AMALGAMATE_OUTPUT_PATH,'singleheader.zip'), 'w', zipfile.ZIP_DEFLATED)
