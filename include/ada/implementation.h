@@ -9,10 +9,10 @@
 #include <string>
 #include <optional>
 
-#include "common_defs.h"
-#include "encoding_type.h"
-#include "url.h"
-#include "state.h"
+#include "ada/common_defs.h"
+#include "ada/encoding_type.h"
+#include "ada/url.h"
+#include "ada/state.h"
 
 namespace ada {
 

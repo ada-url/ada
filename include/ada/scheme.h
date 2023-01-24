@@ -5,7 +5,7 @@
 #ifndef ADA_SCHEME_H
 #define ADA_SCHEME_H
 
-#include "common_defs.h"
+#include "ada/common_defs.h"
 
 #include <array>
 #include <optional>

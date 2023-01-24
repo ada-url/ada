@@ -23,10 +23,6 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
-      - name: Install boost
-        uses: MarkusJx/install-boost@v2.4.1
-        with:
-          boost_version: 1.81.0
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare

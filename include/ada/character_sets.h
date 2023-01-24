@@ -7,7 +7,7 @@
 #ifndef ADA_CHARACTER_SETS_H
 #define ADA_CHARACTER_SETS_H
 
-#include "common_defs.h"
+#include "ada/common_defs.h"
 #include <stdint.h>
 
 namespace ada::character_sets {
