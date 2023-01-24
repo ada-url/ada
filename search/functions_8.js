@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['remove_5fascii_5ftab_5for_5fnewline_266',['remove_ascii_tab_or_newline',['../d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e',1,'ada::helpers']]]
+  ['operator_3d_278',['operator=',['../dd/d03/structada_1_1url.html#afceb274295a92e2715303a19c994bf52',1,'ada::url::operator=(url &amp;&amp;u)=default'],['../dd/d03/structada_1_1url.html#a5b9014ee57227d8083ffc5516cc96fe0',1,'ada::url::operator=(const url &amp;u)=default']]]
 ];

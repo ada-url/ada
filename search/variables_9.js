@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['userinfo_5fpercent_5fencode_306',['USERINFO_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da',1,'ada::character_sets']]],
-  ['username_307',['username',['../dd/d03/structada_1_1url.html#a00f020317fd55f204a7c64868d5e15c7',1,'ada::url']]]
+  ['readme_343',['README',['../dd/d27/namespaceamalgamate.html#a47203a1cf56ed0e239ef955d04393cd5',1,'amalgamate']]]
 ];

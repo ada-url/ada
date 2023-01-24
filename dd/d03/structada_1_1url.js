@@ -1,7 +1,7 @@
 var structada_1_1url =
 [
     [ "url", "dd/d03/structada_1_1url.html#a842ca2e00db267baba8f0b5a08d7a130", null ],
-    [ "url", "dd/d03/structada_1_1url.html#ad4e3e7b79b526b3f51ec8dfbe31cae23", null ],
+    [ "url", "dd/d03/structada_1_1url.html#a7c686183f4195f5059993e97e64fd537", null ],
     [ "url", "dd/d03/structada_1_1url.html#aed59571413fc35e37886a280f798ec41", null ],
     [ "~url", "dd/d03/structada_1_1url.html#a8b4168f1ec6093bc26203738fde2b45b", null ],
     [ "cannot_have_credentials_or_port", "dd/d03/structada_1_1url.html#a9c41f22ffc4e6ad545787f0a178d0e18", null ],
@@ -12,8 +12,7 @@ var structada_1_1url =
     [ "get_special_port", "dd/d03/structada_1_1url.html#a314c877cedcbf815b98e27c7c16d3b1f", null ],
     [ "includes_credentials", "dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b", null ],
     [ "is_special", "dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9", null ],
-    [ "oh_no_we_need_to_copy_url", "dd/d03/structada_1_1url.html#aa2e596cf4605d1d957d75e36c1fbdb23", null ],
-    [ "operator=", "dd/d03/structada_1_1url.html#ac623fa2483633a74e3698dbc20143edb", null ],
+    [ "operator=", "dd/d03/structada_1_1url.html#a5b9014ee57227d8083ffc5516cc96fe0", null ],
     [ "operator=", "dd/d03/structada_1_1url.html#afceb274295a92e2715303a19c994bf52", null ],
     [ "parse_host", "dd/d03/structada_1_1url.html#a632976433d794ba46478c47c4dc8a68c", null ],
     [ "parse_ipv4", "dd/d03/structada_1_1url.html#a1c6d28ef668a5d4046f619c30ca363a7", null ],

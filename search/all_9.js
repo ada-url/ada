@@ -1,6 +1,28 @@
 var searchData=
 [
-  ['no_5fscheme_106',['NO_SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab6e5680904440aafe18fa12e655b1397',1,'ada']]],
-  ['non_5fspecial_5fscheme_107',['non_special_scheme',['../dd/d03/structada_1_1url.html#a10dc22b0fc00645086d67a2f250e426b',1,'ada::url']]],
-  ['not_5fspecial_108',['NOT_SPECIAL',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faaff84b9b3b0f0f7c8f56b9a01f3107af',1,'ada::scheme']]]
+  ['implementation_2ecpp_99',['implementation.cpp',['../d8/df6/implementation_8cpp.html',1,'']]],
+  ['implementation_2eh_100',['implementation.h',['../dd/d6b/implementation_8h.html',1,'']]],
+  ['includes_5fcredentials_101',['includes_credentials',['../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b',1,'ada::url']]],
+  ['ipv4_102',['ipv4',['../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5',1,'ada::serializers']]],
+  ['ipv6_103',['ipv6',['../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4',1,'ada::serializers']]],
+  ['is_5falnum_5fplus_104',['is_alnum_plus',['../d2/dc3/namespaceada_1_1unicode.html#a7c53b50b81eb6f56629dc55a26908700',1,'ada::unicode']]],
+  ['is_5falnum_5fplus_5ftable_105',['is_alnum_plus_table',['../d2/dc3/namespaceada_1_1unicode.html#a505b0da95aca0b4581df4d320ea50312',1,'ada::unicode']]],
+  ['is_5falpha_106',['is_alpha',['../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5',1,'ada::checkers']]],
+  ['is_5fascii_5fhex_5fdigit_107',['is_ascii_hex_digit',['../d2/dc3/namespaceada_1_1unicode.html#adca6f3cd4ba58e901c7a357030d6ada5',1,'ada::unicode']]],
+  ['is_5fascii_5ftab_5for_5fnewline_108',['is_ascii_tab_or_newline',['../d2/dc3/namespaceada_1_1unicode.html#afe28390da8b8ddb1e3e522bfee617bc0',1,'ada::unicode']]],
+  ['is_5fc0_5fcontrol_5for_5fspace_109',['is_c0_control_or_space',['../d2/dc3/namespaceada_1_1unicode.html#a3cdc63951562d4f4c7085a8d251fa4c3',1,'ada::unicode']]],
+  ['is_5fdigit_110',['is_digit',['../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6',1,'ada::checkers']]],
+  ['is_5fdouble_5fdot_5fpath_5fsegment_111',['is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a2a5c2e0ef11ea4d4fe564b7fb1fa1f16',1,'ada::unicode']]],
+  ['is_5fforbidden_5fdomain_5fcode_5fpoint_112',['is_forbidden_domain_code_point',['../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924',1,'ada::unicode']]],
+  ['is_5fforbidden_5fdomain_5fcode_5fpoint_5ftable_113',['is_forbidden_domain_code_point_table',['../d2/dc3/namespaceada_1_1unicode.html#a4dfb968a9eed76414c1fd18a706aac98',1,'ada::unicode']]],
+  ['is_5fforbidden_5fhost_5fcode_5fpoint_114',['is_forbidden_host_code_point',['../d2/dc3/namespaceada_1_1unicode.html#af18e28910c496ebeac5f1b1d309fb287',1,'ada::unicode']]],
+  ['is_5fforbidden_5fhost_5fcode_5fpoint_5ftable_115',['is_forbidden_host_code_point_table',['../d2/dc3/namespaceada_1_1unicode.html#aedf60884c2f9bf443a974d29741a7d11',1,'ada::unicode']]],
+  ['is_5fipv4_116',['is_ipv4',['../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0',1,'ada::checkers']]],
+  ['is_5flowercase_5fhex_117',['is_lowercase_hex',['../d2/dc3/namespaceada_1_1unicode.html#aa39138fa1cd1de15cc179bc970d8e9cb',1,'ada::unicode']]],
+  ['is_5fnormalized_5fwindows_5fdrive_5fletter_118',['is_normalized_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b',1,'ada::checkers']]],
+  ['is_5fsingle_5fdot_5fpath_5fsegment_119',['is_single_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#ad3f83e3d837a2451c194e82e9f3bf9ae',1,'ada::unicode']]],
+  ['is_5fspecial_120',['is_special',['../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9',1,'ada::url::is_special()'],['../d2/d63/namespaceada_1_1scheme.html#a330d87c07464ad4b10aa250f52fecbf2',1,'ada::scheme::is_special()']]],
+  ['is_5fspecial_5flist_121',['is_special_list',['../d1/dfb/namespaceada_1_1scheme_1_1details.html#a45786dafa7d1a411f6606fee8f667a6f',1,'ada::scheme::details']]],
+  ['is_5fvalid_122',['is_valid',['../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426',1,'ada::url']]],
+  ['is_5fwindows_5fdrive_5fletter_123',['is_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca',1,'ada::checkers']]]
 ];

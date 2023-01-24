@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['query_137',['query',['../dd/d03/structada_1_1url.html#ab6c0677370240d12fbe5ee0b66d2cafe',1,'ada::url']]],
-  ['query_138',['QUERY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5662080872eece1e1ceeec5750198283',1,'ada']]],
-  ['query_5fpercent_5fencode_139',['QUERY_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a18aa23e2f62732f939016a46b0b5e94b',1,'ada::character_sets']]]
+  ['opaque_5fpath_128',['OPAQUE_PATH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd',1,'ada']]],
+  ['operator_3d_129',['operator=',['../dd/d03/structada_1_1url.html#afceb274295a92e2715303a19c994bf52',1,'ada::url::operator=(url &amp;&amp;u)=default'],['../dd/d03/structada_1_1url.html#a5b9014ee57227d8083ffc5516cc96fe0',1,'ada::url::operator=(const url &amp;u)=default']]]
 ];

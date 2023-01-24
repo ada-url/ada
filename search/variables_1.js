@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['fragment_284',['fragment',['../dd/d03/structada_1_1url.html#a478a94fbc5881d7484ff605537c4c5dd',1,'ada::url']]],
-  ['fragment_5fpercent_5fencode_285',['FRAGMENT_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67',1,'ada::character_sets']]]
+  ['c0_5fcontrol_5fpercent_5fencode_319',['C0_CONTROL_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a961ff8bb694197e2f9f339cae226db66',1,'ada::character_sets']]],
+  ['current_5fimplementation_320',['current_implementation',['../dd/d27/namespaceamalgamate.html#a4871526c0781ddf449adfae43fb0889f',1,'amalgamate']]]
 ];

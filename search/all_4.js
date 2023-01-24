@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['encoding_5ftype_55',['encoding_type',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b',1,'ada']]],
-  ['encoding_5ftype_2eh_56',['encoding_type.h',['../d0/dbb/encoding__type_8h.html',1,'']]]
+  ['demo_2ecpp_67',['demo.cpp',['../d2/d68/demo_8cpp.html',1,'']]],
+  ['democpp_68',['DEMOCPP',['../dd/d27/namespaceamalgamate.html#a54375f5a9fab402368e1532820a90068',1,'amalgamate']]],
+  ['dofile_69',['dofile',['../dd/d27/namespaceamalgamate.html#ae8cf965a43b3e48eb72cd4a34f337684',1,'amalgamate']]],
+  ['doinclude_70',['doinclude',['../dd/d27/namespaceamalgamate.html#a6bf95637e9f94255f53c73b8596e9177',1,'amalgamate']]]
 ];
