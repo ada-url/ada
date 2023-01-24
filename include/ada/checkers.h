@@ -98,7 +98,7 @@ namespace ada::checkers {
   * A domain cannot be more than 255 octets and have more than 127 labels, each label must have
   * a maximum of 63 octets.
   */
-  ada_really_inline constexpr bool check_domain(std::string_view input) noexcept;
+  ada_really_inline constexpr bool verify_dns_length(std::string_view input) noexcept;
 
 } // namespace ada::checkers
 

@@ -52,32 +52,32 @@ namespace ada::checkers {
     return accumulator;
   }
 
-  ada_really_inline constexpr bool check_domain(std::string_view input) noexcept {
-    if(input.size() > 255) {
+  ada_really_inline constexpr bool verify_dns_length(std::string_view input) noexcept {
+    if(input.size() > 254) {
       return false;
     }
 
-    const char* start = input.data();
-    const char* end = start + input.size();
+    std::string_view::iterator it_start = input.begin();
+    std::string_view::iterator it_end = input.end();
+    const char delimiter = '.';
 
-    int dot_count = 0;
-    while (start < end) {
+    if(*it_end == delimiter) {
+      --it_end;
+    }
+
+    int label_count = 0;
+    while (it_start < it_end) {
         // Find the next dot in the domain
-        const char* dot = std::find(start, end, '.');
+        auto dot_location = std::find(it_start, it_end, delimiter);
 
-        // Calculate the size of the current label
-        auto size = dot - start;
+        // Calculate the size of the current label.
+        auto size = dot_location - it_start;
         if (size > 63 || size == 0) {
             return false;
         }
 
-        ++dot_count;
-        start = dot + 1;
-    }
-
-    // Number of Labels is greater than 127
-    if(dot_count > 127) {
-        return false;
+        ++label_count;
+        it_start = dot_location + 1;
     }
 
     return true;
