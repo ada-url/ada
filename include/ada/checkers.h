@@ -93,6 +93,13 @@ namespace ada::checkers {
    */
   ada_really_inline constexpr uint8_t path_signature(std::string_view input) noexcept;
 
+
+  /** 
+  * A domain cannot be more than 255 octets and have more than 127 labels, each label must have
+  * a maximum of 63 octets.
+  */
+  ada_really_inline constexpr bool check_domain(std::string_view input) noexcept;
+
 } // namespace ada::checkers
 
 #endif //ADA_CHECKERS_H

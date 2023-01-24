@@ -51,5 +51,36 @@ namespace ada::checkers {
     }
     return accumulator;
   }
+
+  ada_really_inline constexpr bool check_domain(std::string_view input) noexcept {
+    if(input.size() > 255) {
+      return false;
+    }
+
+    const char* start = input.data();
+    const char* end = start + input.size();
+
+    int dot_count = 0;
+    while (start < end) {
+        // Find the next dot in the domain
+        const char* dot = std::find(start, end, '.');
+
+        // Calculate the size of the current label
+        auto size = dot - start;
+        if (size > 63 || size == 0) {
+            return false;
+        }
+
+        ++dot_count;
+        start = dot + 1;
+    }
+
+    // Number of Labels is greater than 127
+    if(dot_count > 127) {
+        return false;
+    }
+
+    return true;
+  }
   
 } // namespace ada::checkers

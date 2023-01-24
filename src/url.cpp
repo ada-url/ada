@@ -458,6 +458,11 @@ namespace ada {
         if (checkers::is_ipv4(host.value())) {
           return parse_ipv4(host.value());
         }
+
+        if(host.value().find_first_of(".") != std::string_view::npos) {
+          return checkers::check_domain(host.value());
+        }
+        
         return true;
       }
     }
@@ -469,6 +474,13 @@ namespace ada {
     if(checkers::is_ipv4(host.value())) {
       return parse_ipv4(host.value());
     }
+
+    // The domain label size ehckers should only be applied for fully qualified domain names.
+    // FQDNs have label hierarchy (meaning at least one dot).
+    if(host.value().find_first_of(".") != std::string_view::npos) {
+      return checkers::check_domain(host.value());
+    }
+
     return true;
   }
 
