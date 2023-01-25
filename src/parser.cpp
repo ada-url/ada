@@ -243,7 +243,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           bool at_sign_seen{false};
           bool password_token_seen{false};
           do {
-            std::string_view view(&*pointer, size_t(pointer_end-pointer));
+            std::string_view view = url_data.substr(input_position);
             size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
             std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location : view.size());
             pointer = (location == std::string_view::npos) ? pointer_end : pointer + location;
@@ -316,7 +316,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
-          std::string_view view (&*pointer, size_t(pointer_end-pointer));
+          std::string_view view  = url_data.substr(input_position);
           if (ada::checkers::begins_with(view, "//")) {
             state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
             pointer++;
@@ -457,7 +457,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
-          std::string_view view (&*pointer, size_t(pointer_end-pointer));
+          std::string_view view  = url_data.substr(input_position);
           if (ada::checkers::begins_with(view, "//")) {
             pointer++;
             input_position++;
@@ -567,7 +567,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           break;
         }
         case ada::state::OPAQUE_PATH: {
-          std::string_view view(&*pointer, size_t(pointer_end-pointer));
+          std::string_view view = url_data.substr(input_position);
 #if ADA_LOGGING
           std::cout << "OPAQUE_PATH '" << view <<"' [" << view.size() << " bytes]" << std::endl;
 #endif
@@ -597,7 +597,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           break;
         }
         case ada::state::PORT: {
-          std::string_view port_view(&*pointer, size_t(pointer_end-pointer));
+          std::string_view port_view = url_data.substr(input_position);
 #if ADA_LOGGING
           std::cout << "PORT : parsing '" << port_view << "'" << std::endl;
 #endif
@@ -614,7 +614,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
         case ada::state::PATH_START: {
           goto_path_start:
 #if ADA_LOGGING
-          std::cout << "PATH_START '" << std::string_view(&*pointer, size_t(pointer_end-pointer)) <<"' [" << size_t(pointer_end-pointer) << " bytes]" << std::endl;
+          std::cout << "PATH_START '" << url_data.substr(input_position) <<"' [" << size_t(pointer_end-pointer) << " bytes]" << std::endl;
 #endif
                         if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugw19"); }
 
@@ -655,7 +655,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
         }
         case ada::state::PATH: {
           goto_path:
-          std::string_view view(&*pointer, size_t(pointer_end-pointer));
+          std::string_view view = url_data.substr(input_position);
 #if ADA_LOGGING
           std::cout << "PATH '" << view <<"' [" << view.size() << " bytes]" << std::endl;
 #endif
@@ -674,7 +674,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
         }
         case ada::state::FILE_SLASH: {
 #if ADA_LOGGING
-          std::cout << "FILE_SLASH " << std::string_view(&*pointer, size_t(pointer_end-pointer)) << std::endl;
+          std::cout << "FILE_SLASH " << url_data.substr(input_position) << std::endl;
 #endif
           // If c is U+002F (/) or U+005C (\), then:
           if (url_data[input_position] == '/' || url_data[input_position] == '\\') {
@@ -730,7 +730,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           break;
         }
         case ada::state::FILE_HOST: {
-          std::string_view view(&*pointer, size_t(pointer_end-pointer));
+          std::string_view view = url_data.substr(input_position);
 #if ADA_LOGGING
           std::cout << "FILE_HOST '" << view <<"' [" << view.size() << " bytes]" << std::endl;
 #endif
@@ -781,7 +781,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
         }
         case ada::state::FILE: {
           goto_file:
-          std::string_view file_view(&*pointer, size_t(pointer_end-pointer));
+          std::string_view file_view = url_data.substr(input_position);
 #if ADA_LOGGING
           std::cout << "FILE " << file_view << std::endl;
 #endif
