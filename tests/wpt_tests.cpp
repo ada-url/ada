@@ -151,20 +151,6 @@ bool setters_tests_encoding(const char *source) {
       if (!element["comment"].get(comment)) {
         std::cout << "    comment: " << comment << std::endl;
       }
-      std::string_view encoding{};
-      ada::encoding_type type = ada::encoding_type::UTF8;
-      if (!element["encoding"].get(encoding)) {
-        std::cout << "    encoding: " << encoding << std::endl;
-        if(encoding == "UTF-8") {
-          type = ada::encoding_type::UTF8;
-        } else if(encoding == "UTF-16LE") {
-          type = ada::encoding_type::UTF_16LE;
-        } else if(encoding == "UTF-16BE") {
-          type = ada::encoding_type::UTF_16BE;
-        } else {
-          std::cerr << "unrecognized encoding while reading " + element_string << std::endl;
-        }
-      }
 
       auto base = ada_parse(href);
       TEST_ASSERT(base.is_valid, true, "Base url parsing should have succeeded")
