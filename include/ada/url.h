@@ -241,7 +241,10 @@ namespace ada {
      * Return true on success. Control characters not
      * trimmed from the ends (they should have
      * been removed if needed).
-     * @see https://url.spec.whatwg.org/#host-parsing
+     *
+     * The input is expected to be UTF-8.
+     *
+     * @see https://url.spec.whatwg.org/
      */
     ada_really_inline bool parse_path(const std::string_view input);
 
@@ -250,8 +253,10 @@ namespace ada {
      * 'prepared' (e.g., it cannot contain tabs and spaces). See
      * parse_path.
      *
+     * The input is expected to be UTF-8.
+     *
      * Return true on success.
-     * @see https://url.spec.whatwg.org/#host-parsing
+     * @see https://url.spec.whatwg.org/
      */
     ada_really_inline bool parse_prepared_path(const std::string_view input);
 

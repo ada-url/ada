@@ -8,7 +8,7 @@
 namespace ada {
   ada_really_inline bool url::parse_path(std::string_view input) {
 #if ADA_LOGGING
-    std::cout << "url::parse_path('"<< path << "')" << std::endl;
+    std::cout << "url::parse_path('"<< path << "') [" << path.size() << " bytes]" << std::endl;
 #endif
     std::string tmp_buffer;
     std::string_view internal_input;
@@ -48,7 +48,7 @@ namespace ada {
 
   ada_really_inline bool url::parse_prepared_path(std::string_view input) {
 #if ADA_LOGGING
-    std::cout << "url::parse_prepared_path(" << input << ")" << std::endl;
+    std::cout << "url::parse_prepared_path(" << input << ") [" << input.size() << " bytes]" << std::endl;
     std::cout << "url.path = " << path << std::endl;
 #endif
     //path.clear();
@@ -74,38 +74,43 @@ namespace ada {
                     (get_scheme_type() != ada::scheme::type::FILE);
     if (fast_path) {
 #if ADA_LOGGING
-    std::cout << "url::parse_prepared_path: fast path " << std::endl;
+      std::cout << "url::parse_prepared_path: fast path " << std::endl;
 #endif
       do {
         // Here we don't need to worry about \\ or percent encoding.
+#if ADA_LOGGING
+        std::cout << "url::parse_prepared_path: searching for separator in  " << input << std::endl;
+#endif
         size_t location = input.find('/');
         std::string_view path_view = input;
         if (location != std::string_view::npos) {
           path_view.remove_suffix(path_view.size() - location);
+#if ADA_DEVELOP_MODE
+          if(location + 1 > input.size()) { throw std::runtime_error("We can't make input emptier than empty"); }
+#endif
           input.remove_prefix(location + 1);
-        } else {
-          input.remove_prefix(input.size()); // make it empty!
         }
-        std::string_view path_buffer = path_view;
-
-        if (unicode::is_double_dot_path_segment(path_buffer)) {
+#if ADA_LOGGING
+        std::cout << "url::parse_prepared_path: path segment is " << path_view << std::endl;
+#endif
+        if (unicode::is_double_dot_path_segment(path_view)) {
           helpers::shorten_path(*this);
           if (location == std::string_view::npos) {
             path += '/';
           }
-        } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+        } else if (unicode::is_single_dot_path_segment(path_view) &&
                   (location == std::string_view::npos)) {
           path += '/';
         }
-        // Otherwise, if path_buffer is not a single-dot path segment, then:
-        else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-          // If url’s scheme is "file", url’s path is empty, and path_buffer is a
+        // Otherwise, if path_view is not a single-dot path segment, then:
+        else if (!unicode::is_single_dot_path_segment(path_view)) {
+          // If url’s scheme is "file", url’s path is empty, and path_view is a
           // Windows drive letter, then replace the second code point in
-          // path_buffer with U+003A (:).
+          // path_view with U+003A (:).
 
           // Append path_buffer to url’s path.
           path += '/';
-          path.append(path_buffer);
+          path.append(path_view);
         }
         if (location == std::string_view::npos) {
           return true;
@@ -120,22 +125,29 @@ namespace ada {
       bool needs_percent_encoding = (accumulator & 1);
       std::string path_buffer_tmp;
       do {
+#if ADA_LOGGING
+        std::cout << "url::parse_prepared_path: searching for separator in  " << input << std::endl;
+#endif
         size_t location = (is_special() && (accumulator & 2))
                               ? input.find_first_of("/\\")
                               : input.find('/');
         std::string_view path_view = input;
         if (location != std::string_view::npos) {
+#if ADA_DEVELOP_MODE
+          if(location + 1 > input.size()) { throw std::runtime_error("We can't make input emptier than empty"); }
+#endif
           path_view.remove_suffix(path_view.size() - location);
           input.remove_prefix(location + 1);
-        } else {
-          input.remove_prefix(input.size()); // make it empty!
         }
-        std::string_view path_buffer = path_view;
-        if (needs_percent_encoding) {
-          path_buffer_tmp = ada::unicode::percent_encode(
-              path_view, character_sets::PATH_PERCENT_ENCODE);
-          path_buffer = path_buffer_tmp;
-        }
+#if ADA_LOGGING
+        std::cout << "url::parse_prepared_path: path segment is " << path_view << std::endl;
+#endif
+        // path_buffer is either path_view or it might point at a percent encoded temporary file.
+        std::string_view path_buffer =
+         (needs_percent_encoding
+           && ada::unicode::percent_encode(path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp)) ?
+          path_buffer_tmp :
+          path_view;
         if (unicode::is_double_dot_path_segment(path_buffer)) {
           helpers::shorten_path(*this);
           if (location == std::string_view::npos) {
@@ -166,7 +178,6 @@ namespace ada {
         if (location == std::string_view::npos) {
           return true;
         }
-
       } while (true);
     }
   }

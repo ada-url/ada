@@ -1,3 +1,7 @@
+
+message(STATUS "Compiler ID : " ${CMAKE_CXX_COMPILER_ID})
+message(STATUS "CMAKE_BUILD_TYPE : " ${CMAKE_BUILD_TYPE})
+
 add_library(ada-include-source INTERFACE)
 target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 add_library(ada-source INTERFACE)
@@ -18,6 +22,7 @@ else(MSVC)
   if(NOT WIN32)
     target_compile_options(ada INTERFACE -fPIC)
   endif()
+  message(STATUS "Assuming GCC-like compiler.")
   target_compile_options(ada PRIVATE -Wall -Wextra -Weffc++)
   target_compile_options(ada PRIVATE -Wfatal-errors -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self -Wconversion -Wno-sign-conversion)
 endif(MSVC)
@@ -25,6 +30,11 @@ endif(MSVC)
 # workaround for GNU GCC poor AVX load/store code generation
 if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$"))
   target_compile_options(ada PRIVATE -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store)
+endif()
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_BUILD_TYPE STREQUAL "Debug"))
+  message(STATUS "Enabling _GLIBCXX_DEBUG")
+  target_compile_definitions(ada PRIVATE _GLIBCXX_DEBUG=1)
 endif()
 
 if(ADA_SANITIZE)

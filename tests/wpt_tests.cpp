@@ -16,8 +16,8 @@
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
 ada::url ada_parse(std::string_view view, std::optional<ada::url> base = std::nullopt) {
-  std::cout << "about to parse '" << view << "'" << std::endl;
-  std::unique_ptr<char[]> buffer(new char[view.size()+1]);
+  std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]" << std::endl;
+  std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
   return ada::parse(std::string_view(buffer.get(), view.size()), std::move(base));
 }
@@ -282,7 +282,7 @@ bool urltestdata_encoding(const char* source) {
       if (input_element.get_string().get(input)) {
         continue;
       }
-      std::cout << "input=" << input << std::endl;
+      std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
       std::string_view base;
       ada::url base_url;
       if (!object["base"].get(base)) {
@@ -401,13 +401,13 @@ int main(int argc, char** argv) {
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
   }
-  name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
-  if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
-  }
   name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding(URLTESTDATA_JSON);
+  }
+  name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
   }
   ///////////////
   // TODO either make these tests obsolete or fix them.
