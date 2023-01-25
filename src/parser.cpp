@@ -90,7 +90,7 @@ namespace ada::parser {
     for (; input_position <= input_size; pointer++, input_position++) {
 if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugc"); }
       ///////////////////////////////////////////////////////////////////////
-      // Important: we can't have 'pointer == pointer_end' and then dereference
+      // Important: we can't have 'input_position == input_size' and then dereference
       // the pointer so the loop condition pointer <= pointer_end is a problem.
       //
       // The terrible thing is that dereferencing a pointer that is out of
@@ -105,7 +105,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
 if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugd"); }
 
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           if ((input_position != input_size) && checkers::is_alpha(url_data[input_position])) {
             state = ada::state::SCHEME;
             goto goto_scheme;
@@ -127,7 +127,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
 if(url_data.begin() + input_position != pointer) { throw std::runtime_error("buga"); }
 
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           auto first_non_alnum = std::find_if_not(pointer, pointer_end, ada::unicode::is_alnum_plus);
 #if ADA_LOGGING
           std::cout << "SCHEME moving forward by " << (first_non_alnum - pointer) << " bytes" << std::endl;
@@ -137,7 +137,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
               if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugaaaaza"); }
 
           // Otherwise, if c is U+003A (:), then:
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           if ((input_position != input_size) && (url_data[input_position] == ':')) {
                           if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugaaaa00000za"); }
                           /*if(std::string_view(&*pointer_start, pointer - pointer_start) != url_data.substr(0,input_position)) { 
@@ -202,7 +202,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           // Otherwise, if base has an opaque path and c is U+0023 (#),
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
-          else if (base_url->has_opaque_path && url.fragment.has_value() && pointer == pointer_end) {
+          else if (base_url->has_opaque_path && url.fragment.has_value() && input_position == input_size) {
             url.copy_scheme(base_url.value());
             url.path = base_url->path;
             url.has_opaque_path = base_url->has_opaque_path;
@@ -251,7 +251,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
                         if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugw3"); }
 
             // If c is U+0040 (@), then:
-            // Note: we cannot access *pointer safely if (pointer == pointer_end).
+            // Note: we cannot access *pointer safely if (input_position == input_size).
             if ((input_position != input_size) && (url_data[input_position] == '@')) {
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
@@ -282,7 +282,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
             // Otherwise, if one of the following is true:
             // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
             // - url is special and c is U+005C (\)
-            else if (pointer == pointer_end || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
+            else if (input_position == input_size || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
               // If atSignSeen is true and authority_view is the empty string, validation error, return failure.
               if (at_sign_seen && authority_view.empty()) {
                 url.is_valid = false;
@@ -297,7 +297,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
             }
                         if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugw4"); }
 
-            if(pointer == pointer_end) { break; }
+            if(input_position == input_size) { break; }
             pointer++;
             input_position++;
                                     if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugw5"); }
@@ -315,7 +315,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
 
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           std::string_view view  = url_data.substr(input_position);
           if (ada::checkers::begins_with(view, "//")) {
             state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
@@ -337,7 +337,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           std::cout << "PATH_OR_AUTHORITY " << url_data.substr(input_position) << std::endl;
 #endif
           // If c is U+002F (/), then set state to authority state.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           if ((input_position != input_size) && (url_data[input_position] == '/')) {
             state = ada::state::AUTHORITY;
           }
@@ -366,12 +366,12 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           url.copy_scheme(base_url.value());
 
           // If c is U+002F (/), then set state to relative slash state.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           if ((input_position != input_size) && (url_data[input_position] == '/')) {
             state = ada::state::RELATIVE_SLASH;
           }
           // Otherwise, if url is special and c is U+005C (\), validation error, set state to relative slash state.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           else if (url.is_special() && (input_position != input_size) && (url_data[input_position] == '\\')) {
             state = ada::state::RELATIVE_SLASH;
           }
@@ -416,13 +416,13 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
                         if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugw12"); }
 
           // If url is special and c is U+002F (/) or U+005C (\), then:
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           if (url.is_special() && (input_position != input_size) && (url_data[input_position] == '/' || url_data[input_position] =='\\')) {
             // Set state to special authority ignore slashes state.
             state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
           }
           // Otherwise, if c is U+002F (/), then set state to authority state.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           else if ((input_position != input_size) && (url_data[input_position] == '/')) {
             state = ada::state::AUTHORITY;
           }
@@ -455,7 +455,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
 #endif
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
           std::string_view view  = url_data.substr(input_position);
           if (ada::checkers::begins_with(view, "//")) {
@@ -478,9 +478,9 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           std::cout << "SPECIAL_AUTHORITY_IGNORE_SLASHES " << url_data.substr(input_position) << std::endl;
 #endif
           // If c is neither U+002F (/) nor U+005C (\), then set state to authority state and decrease pointer by 1.
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           while(true) {
-            if ((pointer == pointer_end) || ((url_data[input_position] != '/') && (url_data[input_position] != '\\'))) {
+            if ((input_position == input_size) || ((url_data[input_position] != '/') && (url_data[input_position] != '\\'))) {
               state = ada::state::AUTHORITY;
               goto goto_authority;
             }
@@ -532,7 +532,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
                         if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugw16"); }
 
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
-          // Note: we cannot access *pointer safely if (pointer == pointer_end).
+          // Note: we cannot access *pointer safely if (input_position == input_size).
           if ((input_position != input_size) && (url_data[input_position] == ':') && !inside_brackets) {
             // If buffer is the empty string, validation error, return failure.
             // Let host be the result of host parsing buffer with url is not special.
@@ -544,7 +544,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if (pointer == pointer_end || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
+          else if (input_position == input_size || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
 
             // If url is special and host_view is the empty string, validation error, return failure.
             if (url.is_special() && host_view.empty()) {
@@ -614,7 +614,7 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
         case ada::state::PATH_START: {
           goto_path_start:
 #if ADA_LOGGING
-          std::cout << "PATH_START '" << url_data.substr(input_position) <<"' [" << size_t(pointer_end-pointer) << " bytes]" << std::endl;
+          std::cout << "PATH_START '" << url_data.substr(input_position) <<"' [" << (input_size - input_position) << " bytes]" << std::endl;
 #endif
                         if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bugw19"); }
 
@@ -625,12 +625,12 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
             state = ada::state::PATH;
 
             // Optimization: Avoiding going into PATH state improves the performance of urls ending with /.
-            if (pointer == pointer_end) {
+            if (input_position == input_size) {
               url.path = "/";
               return url;
             }
             // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
-            if ((pointer == pointer_end) || ((url_data[input_position] != '/') && (url_data[input_position] != '\\'))) {
+            if ((input_position == input_size) || ((url_data[input_position] != '/') && (url_data[input_position] != '\\'))) {
               goto goto_path;
             }
 
@@ -662,14 +662,19 @@ if(url_data.begin() + input_position != pointer) { throw std::runtime_error("bug
           // Most time, we do not need percent encoding.
           // Furthermore, we can immediately locate the '?'.
           size_t locofquestionmark = view.find('?');
-          auto end_of_path = (locofquestionmark != std::string_view::npos) ? pointer + locofquestionmark: pointer_end;
-          if(end_of_path != pointer_end) {
+          if(locofquestionmark != std::string_view::npos) {
             state = ada::state::QUERY;
-            view.remove_suffix(pointer_end-end_of_path);
+            view.remove_suffix(view.size()-locofquestionmark);
+            input_position += locofquestionmark;
+          } else {
+            input_position = input_size;
           }
           url.parse_prepared_path(view);
+
+          auto end_of_path = (locofquestionmark != std::string_view::npos) ? pointer + locofquestionmark: pointer_end;
           pointer = end_of_path;
-          input_position = (locofquestionmark != std::string_view::npos) ? input_position + locofquestionmark: input_size;
+
+          //input_position = (locofquestionmark != std::string_view::npos) ? input_position + locofquestionmark: input_size;
           break;
         }
         case ada::state::FILE_SLASH: {
