@@ -19,6 +19,15 @@ namespace ada::parser {
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding,
                 std::optional<ada::url> optional_url) {
+#if ADA_LOGGING
+    std::cout << "ada::parser::parse_url('" << user_input
+    << "',"
+    << (base_url.has_value() ? base_url.value().to_string() : "null")
+    << "," << ada::to_string(encoding)
+    << ","
+    << (optional_url.has_value() ? optional_url.value().to_string() : "null")
+    << ")" << std::endl;
+#endif
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = ada::state::SCHEME_START;
 
@@ -82,6 +91,9 @@ namespace ada::parser {
       ///////////////////////////////////////////////////////////////////////
       switch (state) {
         case ada::state::SCHEME_START: {
+#if ADA_LOGGING
+          std::cout << "SCHEME_START " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && checkers::is_alpha(*pointer)) {
@@ -98,6 +110,9 @@ namespace ada::parser {
         }
         case ada::state::SCHEME: {
           goto_scheme:
+#if ADA_LOGGING
+          std::cout << "SCHEME " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           pointer = std::find_if_not(pointer, pointer_end, ada::unicode::is_alnum_plus);
@@ -144,6 +159,9 @@ namespace ada::parser {
         }
         case ada::state::NO_SCHEME: {
           goto_no_scheme:
+#if ADA_LOGGING
+          std::cout << "NO_SCHEME " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
           if (!base_url.has_value() || (base_url->has_opaque_path && (pointer != pointer_end))) {
             url.is_valid = false;
@@ -174,6 +192,9 @@ namespace ada::parser {
         }
         case ada::state::AUTHORITY: {
           goto_authority:
+#if ADA_LOGGING
+          std::cout << "AUTHORITY " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // most URLs have no @. Having no @ tells us that we don't have to worry about AUTHORITY. Of course,
           // we could have @ and still not have to worry about AUTHORITY.
           // TODO: Instead of just collecting a bool, collect the location of the '@' and do something useful with it.
@@ -246,6 +267,9 @@ namespace ada::parser {
           break;
         }
         case ada::state::SPECIAL_RELATIVE_OR_AUTHORITY: {
+#if ADA_LOGGING
+          std::cout << "SPECIAL_RELATIVE_OR_AUTHORITY " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
@@ -263,6 +287,9 @@ namespace ada::parser {
           break;
         }
         case ada::state::PATH_OR_AUTHORITY: {
+#if ADA_LOGGING
+          std::cout << "PATH_OR_AUTHORITY " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If c is U+002F (/), then set state to authority state.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if ((pointer != pointer_end) && (*pointer == '/')) {
@@ -278,6 +305,9 @@ namespace ada::parser {
         }
         case ada::state::RELATIVE_SCHEME: {
           goto_relative_scheme:
+#if ADA_LOGGING
+          std::cout << "RELATIVE_SCHEME " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // Set url’s scheme to base’s scheme.
 #if ADA_DEVELOP_MODE
           ///////
@@ -331,6 +361,9 @@ namespace ada::parser {
           break;
         }
         case ada::state::RELATIVE_SLASH: {
+#if ADA_LOGGING
+          std::cout << "RELATIVE_SLASH " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If url is special and c is U+002F (/) or U+005C (\), then:
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           if (url.is_special() && (pointer != pointer_end) && (*pointer == '/' || *pointer =='\\')) {
@@ -366,6 +399,9 @@ namespace ada::parser {
           break;
         }
         case ada::state::SPECIAL_AUTHORITY_SLASHES: {
+#if ADA_LOGGING
+          std::cout << "SPECIAL_AUTHORITY_SLASHES " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
@@ -384,6 +420,9 @@ namespace ada::parser {
         }
         case ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES: {
           goto_special_authority_ignore_slashes:
+#if ADA_LOGGING
+          std::cout << "SPECIAL_AUTHORITY_IGNORE_SLASHES " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If c is neither U+002F (/) nor U+005C (\), then set state to authority state and decrease pointer by 1.
           // Note: we cannot access *pointer safely if (pointer == pointer_end).
           while(true) {
@@ -397,6 +436,9 @@ namespace ada::parser {
           break;
         }
         case ada::state::QUERY: {
+#if ADA_LOGGING
+          std::cout << "QUERY " << std::string_view(&*pointer, pointer_end - pointer) << std::endl;
+#endif
           // If encoding is not UTF-8 and one of the following is true:
           // - url is not special
           // - url’s scheme is "ws" or "wss"
@@ -422,6 +464,9 @@ namespace ada::parser {
         case ada::state::HOST: {
           goto_host:
           std::string_view host_view(&*pointer, pointer_end - pointer);
+#if ADA_LOGGING
+          std::cout << "HOST " << host_view << std::endl;
+#endif
           bool inside_brackets{false};
           size_t location = helpers::get_host_delimiter_location(url, host_view, inside_brackets);
           pointer = (location != std::string_view::npos) ? pointer + location : pointer_end;
@@ -461,11 +506,20 @@ namespace ada::parser {
           break;
         }
         case ada::state::OPAQUE_PATH: {
-          // If c is U+003F (?), then set url’s query to the empty string and state to query state.
           std::string_view view(&*pointer, size_t(pointer_end-pointer));
+#if ADA_LOGGING
+          std::cout << "OPAQUE_PATH " << view << std::endl;
+#endif
+          // If c is U+003F (?), then set url’s query to the empty string and state to query state.
           size_t location = view.find('?');
           if(location != std::string_view::npos) {
-            view.remove_suffix(location);
+#if ADA_LOGGING
+            std::cout << "OPAQUE_PATH found a ? in '" << view << "' at index " << location << std::endl;
+#endif
+            view.remove_suffix(view.size() - location);
+#if ADA_LOGGING
+            std::cout << "OPAQUE_PATH identified the path as " << view << std::endl;
+#endif
             state = ada::state::QUERY;
             pointer += location;
           } else {
@@ -477,14 +531,22 @@ namespace ada::parser {
           break;
         }
         case ada::state::PORT: {
-          pointer += url.parse_port(std::string_view(&*pointer, size_t(pointer_end-pointer)));
+          std::string_view port_view(&*pointer, size_t(pointer_end-pointer));
+#if ADA_LOGGING
+          std::cout << "PORT : parsing '" << port_view << "'" << std::endl;
+#endif
+          pointer += url.parse_port(port_view);
+#if ADA_LOGGING
+          if(!url.is_valid) { std::cout << "PORT parsing failed" << std::endl; }
+#endif
           if(!url.is_valid) { return url; }
-          pointer_start--;
-          state = ada::state::PATH_START;
-          break;
+          goto goto_path_start;
         }
         case ada::state::PATH_START: {
           goto_path_start:
+#if ADA_LOGGING
+          std::cout << "PATH_START  " << std::string_view(&*pointer, size_t(pointer_end-pointer)) << std::endl;
+#endif
           // If url is special, then:
           if (url.is_special()) {
 
@@ -522,9 +584,12 @@ namespace ada::parser {
         }
         case ada::state::PATH: {
           goto_path:
+          std::string_view view(&*pointer, size_t(pointer_end-pointer));
+#if ADA_LOGGING
+          std::cout << "PATH " << view << std::endl;
+#endif
           // Most time, we do not need percent encoding.
           // Furthermore, we can immediately locate the '?'.
-          std::string_view view(&*pointer, size_t(pointer_end-pointer));
           size_t locofquestionmark = view.find('?');
           auto end_of_path = (locofquestionmark != std::string_view::npos) ? pointer + locofquestionmark: pointer_end;
           if(end_of_path != pointer_end) {
@@ -536,27 +601,46 @@ namespace ada::parser {
           break;
         }
         case ada::state::FILE_SLASH: {
+#if ADA_LOGGING
+          std::cout << "FILE_SLASH " << std::string_view(&*pointer, size_t(pointer_end-pointer)) << std::endl;
+#endif
           // If c is U+002F (/) or U+005C (\), then:
           if (*pointer == '/' || *pointer == '\\') {
+#if ADA_LOGGING
+            std::cout << "FILE_SLASH -> moving to FILE_HOSE due to / or \\ " << std::endl;
+#endif
             // Set state to file host state.
             state = ada::state::FILE_HOST;
           }
           // Otherwise:
           else {
+#if ADA_LOGGING
+            std::cout << "FILE_SLASH no / or \\, checking for base_url" << std::endl;
+#endif
             // If base is non-null and base’s scheme is "file", then:
             // Note: it is unsafe to do base_url->scheme unless you know that
             // base_url_has_value() is true.
             if (base_url.has_value() && base_url.has_value() && base_url->get_scheme_type() == ada::scheme::type::FILE) {
+#if ADA_LOGGING
+              std::cout << "FILE_SLASH accessing base_url: path is " << base_url->path << std::endl;
+#endif
               // Set url’s host to base’s host.
               url.host = base_url->host;
 
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
               // then append base’s path[0] to url’s path.
-              if (std::distance(pointer, pointer_end) > 0 && !base_url->path.empty()) {
+              if (!base_url->path.empty()) {
                 if (!checkers::is_windows_drive_letter({&*pointer, size_t(pointer_end - pointer)})) {
-                  std::string first_base_url_path = base_url->path.substr(1, base_url->path.find_first_of('/', 1));
-
+                  std::string_view first_base_url_path = base_url->path;
+                  first_base_url_path.remove_prefix(1);
+                  size_t loc = first_base_url_path.find('/');
+                  if(loc != std::string_view::npos) {
+                    first_base_url_path.remove_suffix(first_base_url_path.size() - loc);
+                  }
+#if ADA_LOGGING
+                  std::cout << "FILE_SLASH first_base_url_path = " << first_base_url_path << std::endl;
+#endif
                   // Optimization opportunity: Get rid of initializing a std::string
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
                     url.path += '/';
@@ -575,21 +659,36 @@ namespace ada::parser {
         }
         case ada::state::FILE_HOST: {
           std::string_view view(&*pointer, size_t(pointer_end-pointer));
+#if ADA_LOGGING
+          std::cout << "FILE_HOST " << view << std::endl;
+#endif
           size_t location = view.find_first_of("/\\?");
           std::string_view file_host_buffer(view.data(), (location != std::string_view::npos) ? location : view.size());
-          pointer += location - 1;
-
+#if ADA_LOGGING
+          std::cout << "FILE_HOST file_host_buffer " << file_host_buffer << std::endl;
+#endif
           if (checkers::is_windows_drive_letter(file_host_buffer)) {
+#if ADA_LOGGING
+            std::cout << "FILE_HOST is_windows_drive_letter " << view << std::endl;
+#endif
             state = ada::state::PATH;
+            goto goto_path;
           }
           else if (file_host_buffer.empty()) {
+#if ADA_LOGGING
+            std::cout << "FILE_HOST empty " << view << std::endl;
+#endif
             // Set url’s host to the empty string.
             url.host = "";
-
             // Set state to path start state.
             state = ada::state::PATH_START;
+            goto goto_path_start;
           }
           else {
+#if ADA_LOGGING
+            std::cout << "FILE_HOST other: parse host on  " << file_host_buffer << std::endl;
+#endif
+            pointer += file_host_buffer.size();
             // Let host be the result of host parsing buffer with url is not special.
             if(!url.parse_host(file_host_buffer)) { return url; }
 
@@ -600,12 +699,17 @@ namespace ada::parser {
 
             // Set buffer to the empty string and state to path start state.
             state = ada::state::PATH_START;
+            goto goto_path_start;
           }
 
           break;
         }
         case ada::state::FILE: {
           goto_file:
+          std::string_view file_view(&*pointer, size_t(pointer_end-pointer));
+#if ADA_LOGGING
+          std::cout << "FILE " << file_view << std::endl;
+#endif
           // Set url’s scheme to "file".
           url.set_scheme("file");
 
@@ -614,11 +718,17 @@ namespace ada::parser {
 
           // If c is U+002F (/) or U+005C (\), then:
           if (*pointer == '/' || *pointer == '\\') {
+#if ADA_LOGGING
+            std::cout << "FILE found a slash, moving to FILE_SLASH" << std::endl;
+#endif
             // Set state to file slash state.
             state = ada::state::FILE_SLASH;
           }
           // Otherwise, if base is non-null and base’s scheme is "file":
           else if (base_url.has_value() && base_url->get_scheme_type() == ada::scheme::type::FILE) {
+#if ADA_LOGGING
+            std::cout << "FILE is copying the base" << std::endl;
+#endif
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
             url.host = base_url->host;
             url.path = base_url->path;
@@ -627,22 +737,37 @@ namespace ada::parser {
 
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
             if (*pointer == '?') {
+#if ADA_LOGGING
+              std::cout << "FILE is moving to QUERY" << std::endl;
+#endif
               state = ada::state::QUERY;
             }
             // Otherwise, if c is not the EOF code point:
             else if (pointer != pointer_end) {
+#if ADA_LOGGING
+              std::cout << "FILE found more content" << std::endl;
+#endif
               // Set url’s query to null.
               url.query = std::nullopt;
 
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
-              if (std::distance(pointer, pointer_end) >= 2 && !checkers::is_windows_drive_letter(std::string_view(&*pointer, 2))) {
+              if (!checkers::is_windows_drive_letter(file_view)) {
+#if ADA_LOGGING
+              std::cout << "FILE Shortening the path" << std::endl;
+#endif
                 helpers::shorten_path(url);
+#if ADA_LOGGING
+              std::cout << "FILE Shortened the path to " << url.path << std::endl;
+#endif
               }
               // Otherwise:
               else {
+#if ADA_LOGGING
+                std::cout << "FILE clearing the path" << std::endl;
+#endif
                 // Set url’s path to an empty list.
-                url.path = "";
+                url.path.clear();
                 url.has_opaque_path = true;
               }
 
@@ -663,7 +788,9 @@ namespace ada::parser {
           ada::unreachable();
       }
     }
-
+#if ADA_LOGGING
+    std::cout << "returning " << url.to_string() << std::endl;
+#endif
     return url;
   }
 

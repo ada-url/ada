@@ -1,4 +1,4 @@
-name: VS17-CI BUILD-ONLY
+name: VS17-CI
 
 on: [push, pull_request]
 

@@ -209,4 +209,12 @@ namespace ada {
  #define ADA_IS_BIG_ENDIAN 1
  #endif // __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
+
+// To enable logging, set ADA_LOGGING to 1:
+
+#ifndef ADA_LOGGING
+#define ADA_LOGGING 0
+#endif
+
+
  #endif // defined __BYTE_ORDER__ && defined __ORDER_BIG_ENDIAN__
