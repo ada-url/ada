@@ -25,15 +25,7 @@ ada::url url = ada::parse("https://www.google.com");
 // url.is_valid will return true
 ```
 
-- Update a scheme
-
-```cpp
-ada::url url = ada::parse("https://www.google.com");
-ada::set_scheme(url, "http");
-// Url is now: "http://www.google.com"
-```
-
-- Update credentials
+- Get/Update credentials
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
@@ -42,42 +34,51 @@ ada::set_password(url, "password");
 // Url is now: "https://username:password@www.google.com"
 ```
 
-- Update hostname
+- Get/Update Protocol
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada::set_host(url, "github.com");
-// Url is now: "https://github.com"
+url.set_protocol("wss");
+// url.get_protocol() will return "wss"
+// url.get_href() will return "wss://www.google.com"
 ```
 
-- Update port
+- Get/Update hostname
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_port(url, "8080");
-// Url is now: "https://www.google.com:8080"
+url.set_host("github.com");
+// url.get_host() will return "github.com"
 ```
 
-- Update pathname
+- Get/Update port
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_pathname(url, "/my-super-long-path");
-// Url is now: "https://www.google.com/my-super-long-path"
+url.set_port("8080");
+// url.get_port() will return "8080"
 ```
 
-- Update search/query
+- Get/Update pathname
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_search(url, "target=self");
-// Url is now: "https://www.google.com?target=self"
+url.set_pathname("/my-super-long-path")
+// url.get_pathname() will return "/my-super-long-path"
 ```
 
-- Update hash/fragment
+- Get/Update search/query
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada:set_hash(url, "is-this-the-real-life");
-// Url is now: "https://www.google.com#is-this-the-real-life"
+url.set_search("target=self");
+// url.get_search() will return "?target=self"
+```
+
+- Get/Update hash/fragment
+
+```cpp
+ada::url url = ada::parse("https://www.google.com");
+url.set_hash("is-this-the-real-life");
+// url.get_hash() will return "#is-this-the-real-life"
 ```
