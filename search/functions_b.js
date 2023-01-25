@@ -1,13 +1,13 @@
 var searchData=
 [
-  ['scheme_5fdefault_5fport_294',['scheme_default_port',['../dd/d03/structada_1_1url.html#a780b3f0755dd31a2d4269557632f4382',1,'ada::url']]],
-  ['set_5fhash_295',['set_hash',['../dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd',1,'ada']]],
-  ['set_5fhost_296',['set_host',['../dd/d64/namespaceada.html#a7ca26ace03973d89717bb497fc37e23e',1,'ada']]],
-  ['set_5fpassword_297',['set_password',['../dd/d64/namespaceada.html#a785adb334c0c35b239300e57a7bf4e92',1,'ada']]],
-  ['set_5fpathname_298',['set_pathname',['../dd/d64/namespaceada.html#aa536094847af2b3ab9522b864ea10f35',1,'ada']]],
-  ['set_5fport_299',['set_port',['../dd/d64/namespaceada.html#ab7f2aa9e82bb9baa76af5cf1f51b0b89',1,'ada']]],
-  ['set_5fscheme_300',['set_scheme',['../dd/d03/structada_1_1url.html#a60da389021781ad9586898c79a9ce860',1,'ada::url::set_scheme()'],['../dd/d64/namespaceada.html#a59d29dcb29e502fc33a489f76b3de40b',1,'ada::set_scheme(ada::url &amp;base, std::string input, ada::encoding_type encoding=ada::encoding_type::UTF8) noexcept']]],
-  ['set_5fsearch_301',['set_search',['../dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96',1,'ada']]],
-  ['set_5fusername_302',['set_username',['../dd/d64/namespaceada.html#a59d7a18796b38a87d2a1d35c2ded2621',1,'ada']]],
-  ['shorten_5fpath_303',['shorten_path',['../d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00',1,'ada::helpers']]]
+  ['scheme_5fdefault_5fport_295',['scheme_default_port',['../dd/d03/structada_1_1url.html#a780b3f0755dd31a2d4269557632f4382',1,'ada::url']]],
+  ['set_5fhash_296',['set_hash',['../dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd',1,'ada']]],
+  ['set_5fhost_297',['set_host',['../dd/d64/namespaceada.html#a7ca26ace03973d89717bb497fc37e23e',1,'ada']]],
+  ['set_5fpassword_298',['set_password',['../dd/d64/namespaceada.html#a785adb334c0c35b239300e57a7bf4e92',1,'ada']]],
+  ['set_5fpathname_299',['set_pathname',['../dd/d64/namespaceada.html#aa536094847af2b3ab9522b864ea10f35',1,'ada']]],
+  ['set_5fport_300',['set_port',['../dd/d64/namespaceada.html#ab7f2aa9e82bb9baa76af5cf1f51b0b89',1,'ada']]],
+  ['set_5fscheme_301',['set_scheme',['../dd/d03/structada_1_1url.html#a60da389021781ad9586898c79a9ce860',1,'ada::url::set_scheme()'],['../dd/d64/namespaceada.html#a59d29dcb29e502fc33a489f76b3de40b',1,'ada::set_scheme(ada::url &amp;base, std::string input, ada::encoding_type encoding=ada::encoding_type::UTF8) noexcept']]],
+  ['set_5fsearch_302',['set_search',['../dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96',1,'ada']]],
+  ['set_5fusername_303',['set_username',['../dd/d64/namespaceada.html#a59d7a18796b38a87d2a1d35c2ded2621',1,'ada']]],
+  ['shorten_5fpath_304',['shorten_path',['../d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00',1,'ada::helpers']]]
 ];
