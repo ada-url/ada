@@ -1,11 +1,10 @@
-
 #include "ada.cpp"
 #include "ada.h"
 
 int main(int , char *[]) {
   ada::url url = ada::parse("https://www.google.com");
-  ada::set_scheme(url, "http");
-  std::cout << url.get_scheme() << std::endl;
-  std::cout << *url.host << std::endl;
+  url.set_protocol("http");
+  std::cout << url.get_protocol() << std::endl;
+  std::cout << url.get_host() << std::endl;
   return EXIT_SUCCESS;
 }
