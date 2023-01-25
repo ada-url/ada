@@ -9,6 +9,8 @@
 #include "ada/scheme.h"
 #include "ada/common_defs.h"
 #include "ada/serializers.h"
+#include "ada/log.h"
+
 
 #include <charconv>
 #include <optional>
@@ -157,31 +159,21 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#host-parsing
      */
     ada_really_inline size_t parse_port(std::string_view view) noexcept {
-#if ADA_LOGGING
-          std::cout << "parse_port('" << view << "') "<< view.size()  << std::endl;
-#endif
+          ada::log("parse_port('", view, "') ", view.size());
           uint16_t parsed_port{};
           auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
           if(r.ec == std::errc::result_out_of_range) {
-#if ADA_LOGGING
-            std::cout << "parse_port: std::errc::result_out_of_range" << std::endl;
-#endif
+            ada::log("parse_port: std::errc::result_out_of_range");
             is_valid = false;
             return 0;
           }
-#if ADA_LOGGING
-          std::cout << "parse_port: " << parsed_port << std::endl;
-#endif
+          ada::log("parse_port: ", parsed_port);
           port = (r.ec == std::errc() && scheme_default_port() != parsed_port) ?
             std::optional<uint16_t>(parsed_port) : std::nullopt;
           const size_t consumed = size_t(r.ptr - view.data());
-#if ADA_LOGGING
-          std::cout << "parse_port: consumed = " << consumed << std::endl;
-#endif
+          ada::log("parse_port: consumed ", consumed);
           is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
-#if ADA_LOGGING
-          std::cout << "parse_port: is_valid = " << is_valid << std::endl;
-#endif
+          ada::log("parse_port: is_valid = ", is_valid);
           return consumed;
     }
 

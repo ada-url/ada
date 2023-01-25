@@ -389,7 +389,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     size_t codepoints = convert(input.data(), input.size(), buffer.get());
     if(codepoints == 0) {
           out = std::nullopt;
-          return false;  
+          return false;
     }
     int required_buffer_size = IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, NULL, 0);
 

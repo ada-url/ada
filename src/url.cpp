@@ -1,5 +1,6 @@
 #include "ada.h"
 #include "ada/scheme.h"
+#include "ada/log.h"
 
 #include <numeric>
 #include <algorithm>
@@ -7,9 +8,7 @@
 
 namespace ada {
   ada_really_inline bool url::parse_path(std::string_view input) {
-#if ADA_LOGGING
-    std::cout << "url::parse_path('"<< path << "') [" << path.size() << " bytes]" << std::endl;
-#endif
+    ada::log("parse_path ", input);
     std::string tmp_buffer;
     std::string_view internal_input;
     if(unicode::has_tabs_or_newline(input)) {
@@ -47,10 +46,8 @@ namespace ada {
 
 
   ada_really_inline bool url::parse_prepared_path(std::string_view input) {
-#if ADA_LOGGING
-    std::cout << "url::parse_prepared_path(" << input << ") [" << input.size() << " bytes]" << std::endl;
-    std::cout << "url.path = " << path << std::endl;
-#endif
+    ada::log("parse_path ", input, " url: ", to_string());
+
     //path.clear();
     uint8_t accumulator = checkers::path_signature(input);
     // Let us first detect a trivial case.
@@ -61,9 +58,7 @@ namespace ada {
         (is_special() ? (accumulator == 0) : ((accumulator & 0b11111101) == 0)) &&
         (get_scheme_type() != ada::scheme::type::FILE);
     if (trivial_path) {
-#if ADA_LOGGING
-    std::cout << "url::parse_prepared_path: trivial_path " << std::endl;
-#endif
+      ada::log("parse_path trivial");
       path += '/';
       path += input;
       return true;
@@ -73,26 +68,15 @@ namespace ada {
     bool fast_path = (is_special() && (accumulator & 0b11111011) == 0) &&
                     (get_scheme_type() != ada::scheme::type::FILE);
     if (fast_path) {
-#if ADA_LOGGING
-      std::cout << "url::parse_prepared_path: fast path " << std::endl;
-#endif
+      ada::log("parse_path fast");
       do {
         // Here we don't need to worry about \\ or percent encoding.
-#if ADA_LOGGING
-        std::cout << "url::parse_prepared_path: searching for separator in  " << input << std::endl;
-#endif
         size_t location = input.find('/');
         std::string_view path_view = input;
         if (location != std::string_view::npos) {
           path_view.remove_suffix(path_view.size() - location);
-#if ADA_DEVELOP_MODE
-          if(location + 1 > input.size()) { throw std::runtime_error("We can't make input emptier than empty"); }
-#endif
           input.remove_prefix(location + 1);
         }
-#if ADA_LOGGING
-        std::cout << "url::parse_prepared_path: path segment is " << path_view << std::endl;
-#endif
         if (unicode::is_double_dot_path_segment(path_view)) {
           helpers::shorten_path(*this);
           if (location == std::string_view::npos) {
@@ -118,30 +102,19 @@ namespace ada {
 
       } while (true);
     } else {
-#if ADA_LOGGING
-      std::cout << "url::parse_prepared_path: slow path " << std::endl;
-#endif
+      ada::log("parse_path slow");
       // we have reached the general case
       bool needs_percent_encoding = (accumulator & 1);
       std::string path_buffer_tmp;
       do {
-#if ADA_LOGGING
-        std::cout << "url::parse_prepared_path: searching for separator in  " << input << std::endl;
-#endif
         size_t location = (is_special() && (accumulator & 2))
                               ? input.find_first_of("/\\")
                               : input.find('/');
         std::string_view path_view = input;
         if (location != std::string_view::npos) {
-#if ADA_DEVELOP_MODE
-          if(location + 1 > input.size()) { throw std::runtime_error("We can't make input emptier than empty"); }
-#endif
           path_view.remove_suffix(path_view.size() - location);
           input.remove_prefix(location + 1);
         }
-#if ADA_LOGGING
-        std::cout << "url::parse_prepared_path: path segment is " << path_view << std::endl;
-#endif
         // path_buffer is either path_view or it might point at a percent encoded temporary file.
         std::string_view path_buffer =
          (needs_percent_encoding
@@ -439,9 +412,7 @@ namespace ada {
   }
 
   ada_really_inline bool url::parse_host(std::string_view input) {
-#if ADA_LOGGING
-    std::cout << "url::parse_host('" << input <<"')" << std::endl;
-#endif
+      ada::log("parse_host", input);
     if(input.empty()) { return is_valid = false; } // technically unnecessary.
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
@@ -449,9 +420,8 @@ namespace ada {
       if (input.back() != ']') {
         return is_valid = false;
       }
-#if ADA_LOGGING
-      std::cout << "url::parse_host : got ipv6" << std::endl;
-#endif
+      ada::log("parse_host ipv6");
+
       // Return the result of IPv6 parsing input with its leading U+005B ([) and trailing U+005D (]) removed.
       input.remove_prefix(1);
       input.remove_suffix(1);
@@ -484,28 +454,20 @@ namespace ada {
         // fast path
         host = std::move(buffer);
         if (checkers::is_ipv4(host.value())) {
-#if ADA_LOGGING
-          std::cout << "url::parse_host : got fast path for ipv4" << std::endl;
-#endif
+          ada::log("parse_host fast path ipv4");
           return parse_ipv4(host.value());
         }
-#if ADA_LOGGING
-        std::cout << "url::parse_host : got fast path for '" << *host <<"'" << std::endl;
-#endif
+        ada::log("parse_host fast path ", *host);
         return true;
       }
     }
-#if ADA_LOGGING
-    std::cout << "url::parse_host : calling to_ascii" << std::endl;
-#endif
+    ada::log("parse_host  calling to_ascii");
     is_valid = ada::unicode::to_ascii(host, input, false,  input.find('%'));
     if (!is_valid) { return is_valid = false; }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
     if(checkers::is_ipv4(host.value())) {
-#if ADA_LOGGING
-      std::cout << "url::parse_host : got ipv4" << std::endl;
-#endif
+      ada::log("parse_host  got ipv4", *host);
       return parse_ipv4(host.value());
     }
     return true;

@@ -1,7 +1,7 @@
-# Ada 
+# Ada
 
 Ada is a fast and spec-compliant URL parser written in C++.
-Specification for URL parser can be found from 
+Specification for URL parser can be found from the
 [WHATWG](https://url.spec.whatwg.org/#url-parsing) website.
 
 ## Requirements

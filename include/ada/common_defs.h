@@ -4,7 +4,6 @@
  */
 #ifndef ADA_COMMON_DEFS_H
 #define ADA_COMMON_DEFS_H
-
 #ifdef _MSC_VER
 #define ADA_VISUAL_STUDIO 1
 /**
@@ -202,6 +201,5 @@ namespace ada {
  #else // __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
  #define ADA_IS_BIG_ENDIAN 1
  #endif // __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-
 
  #endif // defined __BYTE_ORDER__ && defined __ORDER_BIG_ENDIAN__
