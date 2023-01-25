@@ -26,7 +26,7 @@ namespace ada {
       output += "/.";
     }
 
-    output += get_pathname() + get_search() + (fragment.has_value() ? "#" + fragment.value() : "");
+    output += get_pathname() + (query.has_value() ? "?" + query.value() : "") + (fragment.has_value() ? "#" + fragment.value() : "");
     return output;
   }
 
@@ -66,7 +66,7 @@ namespace ada {
   }
 
   [[nodiscard]] std::string url::get_search() const noexcept {
-    return query.has_value() ? "?" + query.value() : "";
+    return !query.value_or("").empty() ? "?" + query.value() : "";
   }
 
   [[nodiscard]] std::string url::get_username() const noexcept {

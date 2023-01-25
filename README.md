@@ -29,9 +29,9 @@ ada::url url = ada::parse("https://www.google.com");
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-ada::set_username(url, "username");
-ada::set_password(url, "password");
-// Url is now: "https://username:password@www.google.com"
+url.set_username(url, "username");
+url.set_password(url, "password");
+// ada.get_href() will return "https://username:password@www.google.com"
 ```
 
 - Get/Update Protocol

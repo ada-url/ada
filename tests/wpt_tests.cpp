@@ -202,7 +202,7 @@ bool setters_tests_encoding(const char *source) {
 
         // TODO: Handle invalid utf-8 tests too.
         if (!element["expected"]["hostname"].get(expected)) {
-          base.set_host(new_value);
+          base.set_hostname(new_value);
           TEST_ASSERT(base.get_hostname(), expected, "Hostname " + element_string);
         }
       }
