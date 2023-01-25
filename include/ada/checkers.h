@@ -95,8 +95,12 @@ namespace ada::checkers {
 
 
   /** 
-  * A domain cannot be more than 255 octets and have more than 127 labels, each label must have
-  * a maximum of 63 octets.
+   * Returns true if the length of the domain name and its labels are according to the specifications.
+   * The length of the domain must be 255 octets (253 characters not including the last 2 which are the empty
+   * label reserved at the end). When the empty label is included (a dot at the end), the domain name can have
+   * 254 characters. The length of a label must be at least 1 and at most 63 characters.
+   * @see section 3.1. of https://www.rfc-editor.org/rfc/rfc1034
+   * @see https://www.unicode.org/reports/tr46/#ToASCII
   */
   ada_really_inline constexpr bool verify_dns_length(std::string_view input) noexcept;
 

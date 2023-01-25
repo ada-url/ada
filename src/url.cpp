@@ -459,7 +459,7 @@ namespace ada {
           return parse_ipv4(host.value());
         }
 
-        return checkers::verify_dns_length(host.value());
+        return is_valid = checkers::verify_dns_length(host.value());
       }
     }
 
@@ -472,7 +472,7 @@ namespace ada {
     }
 
 
-    return checkers::verify_dns_length(host.value());
+    return is_valid = checkers::verify_dns_length(host.value());
   }
 
   template <bool has_state_override>

@@ -1,0 +1,88 @@
+[
+  "Tests for the verify_dns_length function. See the section 2.3.4 of https://www.ietf.org/rfc/rfc1035.txt .",
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 1",
+    "input": "http://lorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlore.com",
+    "failure": true
+  },
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 2",
+    "input": "http://br.lorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlore.org/",
+    "failure": true
+  },
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 3",
+    "input": "http://exampleexampleexampleexampleexampleexampleexampleexampleexampleexample.lorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlore.org.br/",
+    "failure": true
+  },
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
+    "input": "http://br.exampleexampleexampleexampleexampleexampleexampleexampleexampleexample.lorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlorenlore",
+    "failure": true
+  },
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
+    "input": "http://example..com.br",
+    "failure": true
+  },
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
+    "input": "http://example.com.br..",
+    "failure": true
+  },
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
+    "input": "http://example.com.br....",
+    "failure": true
+  },
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
+    "input": "http://.example.com.br",
+    "failure": true
+  },
+  {
+    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
+    "input": "http://example.com..br",
+    "failure": true
+  },
+  {
+    "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 1",
+    "input": "http://example.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br",
+    "failure": true
+  },
+  {
+    "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 4",
+    "input": "http://example.com.",
+    "failure": false
+  },
+  {
+    "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 2",
+    "input": "http://example.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.comm.br.",
+    "failure": false
+  },
+  {
+    "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 3",
+    "input": "http://example.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.comm.br",
+    "failure": false
+  },
+  {
+    "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 3",
+    "input": "http://example.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.comm.br.",
+    "failure": false
+  },
+  {
+    "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 6",
+    "input": "http://aaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaa.com",
+    "failure": false
+  },
+  {
+    "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 6",
+    "input": "http://example.com.",
+    "failure": false
+  },
+  {
+    "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 6",
+    "input": "http://example.com./",
+    "failure": false
+  }
+]
