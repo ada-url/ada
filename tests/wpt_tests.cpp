@@ -164,7 +164,7 @@ bool setters_tests_encoding(const char *source) {
         } else if(encoding == "UTF-16BE") {
           type = ada::encoding_type::UTF_16BE;
         } else {
-          std::cerr << "unrecognized encoding while reading "+element_string << std::endl;
+          std::cerr << "unrecognized encoding while reading " + element_string << std::endl;
         }
       }
 
@@ -175,50 +175,55 @@ bool setters_tests_encoding(const char *source) {
 
       if (category == "protocol") {
         std::string_view expected = element["expected"]["protocol"];
-        ada::set_scheme(base, std::string{new_value}, type);
-        TEST_ASSERT(std::string(base.get_scheme()) + ":", expected, "Protocol "+element_string);
+        ada::set_scheme(base, std::string(new_value), type);
+        TEST_ASSERT(std::string(base.get_scheme()) + ":", expected, "Protocol " + element_string);
       }
       else if (category == "username") {
         std::string_view expected = element["expected"]["username"];
-        ada::set_username(base, std::string{new_value});
-        TEST_ASSERT(base.username, expected, "Username "+element_string);
+        base.set_username(new_value);
+        TEST_ASSERT(base.get_username(), expected, "Username " + element_string);
       }
       else if (category == "password") {
         std::string_view expected = element["expected"]["password"];
-        ada::set_password(base, std::string{new_value});
-        TEST_ASSERT(base.password, expected, "Password "+element_string);
+        base.set_password(new_value);
+        TEST_ASSERT(base.get_password(), expected, "Password " + element_string);
+      }
+      else if (category == "host") {
+        std::string_view expected;
+
+        // TODO: Handle invalid utf-8 tests too.
+        if (!element["expected"]["host"].get(expected)) {
+          ada::set_host(base, new_value, type);
+          TEST_ASSERT(base.get_host(), expected, "Host " + element_string);
+        }
       }
       else if (category == "hostname") {
         std::string_view expected;
 
         // TODO: Handle invalid utf-8 tests too.
         if (!element["expected"]["hostname"].get(expected)) {
-          ada::set_host(base, std::string{new_value}, type);
-          TEST_ASSERT(base.host.value_or(""), expected, "Hostname "+element_string);
+          ada::set_host(base, new_value, type);
+          TEST_ASSERT(base.get_hostname(), expected, "Hostname " + element_string);
         }
       }
       else if (category == "port") {
         std::string_view expected = element["expected"]["port"];
-        ada::set_port(base, std::string{new_value});
-        auto normalized = base.port.has_value() ? std::to_string(*base.port) : "";
-        TEST_ASSERT(normalized, expected, "Port "+element_string);
+        ada::set_port(base, new_value);
+        TEST_ASSERT(base.get_port(), expected, "Port " + element_string);
       }
       else if (category == "pathname") {
         std::string_view expected = element["expected"]["pathname"];
-        ada::set_pathname(base, std::string{new_value}, type);
-        TEST_ASSERT(base.path, expected, "Path "+element_string);
+        TEST_ASSERT(base.get_pathname(), expected, "Path " + element_string);
       }
       else if (category == "search") {
         std::string_view expected = element["expected"]["search"];
-        ada::set_search(base, std::string{new_value});
-        auto normalized = !base.query.value_or("").empty() ? "?" + base.query.value() : "";
-        TEST_ASSERT(normalized, expected, "Search "+element_string);
+        ada::set_search(base, new_value);
+        TEST_ASSERT(base.get_search(), expected, "Search " + element_string);
       }
       else if (category == "hash") {
         std::string_view expected = element["expected"]["hash"];
-        ada::set_hash(base, std::string{new_value});
-        auto normalized = !base.fragment.value_or("").empty() ? "#" + *base.fragment : "";
-        TEST_ASSERT(normalized, expected, "Fragment "+element_string);
+        ada::set_hash(base, new_value);
+        TEST_ASSERT(base.get_hash(), expected, "Fragment " + element_string);
       }
     }
   }
@@ -298,74 +303,45 @@ bool urltestdata_encoding(const char* source) {
       } else {
         TEST_ASSERT(input_url.is_valid, true, "Should not have failed");
 
-
         std::string_view protocol = object["protocol"];
-         // WPT tests add ":" suffix to protocol
-        protocol.remove_suffix(1);
-        TEST_ASSERT(input_url.get_scheme(), protocol, "Protocol "+element_string);
+        TEST_ASSERT(input_url.get_protocol(), protocol, "Protocol " + element_string);
 
         std::string_view username = object["username"];
-        TEST_ASSERT(input_url.username, username, "Username "+element_string);
+        TEST_ASSERT(input_url.get_username(), username, "Username " + element_string);
 
         std::string_view password = object["password"];
-        TEST_ASSERT(input_url.password, password, "Password "+element_string);
+        TEST_ASSERT(input_url.get_password(), password, "Password " + element_string);
 
         std::string_view host = object["host"];
-        TEST_ASSERT(input_url.host.value_or("") + (input_url.port.has_value() ? ":" + std::to_string(input_url.port.value()) : ""), host, "Hostname");
+        TEST_ASSERT(input_url.get_host(), host, "Hostname " + element_string);
 
         std::string_view hostname = object["hostname"];
-        TEST_ASSERT(input_url.host.value_or(""), hostname, "Hostname "+element_string);
+        TEST_ASSERT(input_url.get_hostname(), hostname, "Hostname " + element_string);
 
         std::string_view port = object["port"];
         std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
-        TEST_ASSERT(expected_port, port, "Port "+element_string);
+        TEST_ASSERT(expected_port, port, "Port " + element_string);
 
         std::string_view pathname{};
         if (!object["pathname"].get_string().get(pathname)) {
           std::cout <<"pathname " << pathname<<std::endl;
-          TEST_ASSERT(input_url.path, pathname, "Pathname "+element_string);
+          TEST_ASSERT(input_url.path, pathname, "Pathname " + element_string);
         }
         std::string_view query;
         if (!object["query"].get(query)) {
-          TEST_ASSERT(input_url.query.value_or(""), query, "Query "+element_string);
+          TEST_ASSERT(input_url.query.value_or(""), query, "Query " + element_string);
         }
 
         std::string_view hash = object["hash"];
-        if (!hash.empty()) {
-          // Test cases start with "#".
-          hash.remove_prefix(1);
-        }
-        TEST_ASSERT(input_url.fragment.value_or(""), hash, "Hash/Fragment "+element_string);
-        ///////
-        /// TODO: We need to implement href getters.
-        //////
-        /*std::string_view href = object["href"];
-        std::string computed_href = std::string(input_url.get_scheme())
-                   +":"
-                   + (input_url.host.has_value() ?
-                   "//"
-                   + input_url.username
-                   + (input_url.password.empty() ? "" : ":" + input_url.password)
-                   + (input_url.includes_credentials() ? "@" : "")
-                   + input_url.host.value()
-                   + (input_url.port.has_value() ? ":" + std::to_string(input_url.port.value()) : "")
-                   : "")
-                   + input_url.path
-                   + (input_url.query.has_value() ? "?" +input_url.query.value() : "")
-                   + (input_url.fragment.has_value() ? "#" + input_url.fragment.value() : "");
-        TEST_ASSERT(computed_href, href, "href "+element_string);*/
-        ///////
-        /// TODO: We need to implement origin getters.
-        //////
-        /*std::string_view origin;
+        TEST_ASSERT(input_url.get_hash(), hash, "Hash/Fragment " + element_string);
+
+        std::string_view href = object["href"];
+        TEST_ASSERT(input_url.get_href(), href, "href " + element_string);
+
+        std::string_view origin;
         if(!object["origin"].get(origin)) {
-          std::string computed_origin = input_url.is_special() ?
-                    std::string(input_url.get_scheme())+"://"
-                    +input_url.host.value_or("")+(input_url.port.has_value() ? ":"
-                    + std::to_string(input_url.port.value()) : "")
-                    : "null";
-          TEST_ASSERT(computed_origin, origin, "Origin "+element_string);
-        }*/
+          TEST_ASSERT(input_url.get_origin(), origin, "Origin " + element_string);
+        }
         counter ++;
       }
     }
@@ -373,7 +349,6 @@ bool urltestdata_encoding(const char* source) {
   std::cout << "Tests executed = "<< counter << std::endl;
   TEST_SUCCEED()
 }
-
 
 int main(int argc, char** argv) {
   bool all_tests{true};

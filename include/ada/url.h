@@ -11,6 +11,7 @@
 #include "ada/serializers.h"
 #include "ada/unicode.h"
 
+#include <algorithm>
 #include <charconv>
 #include <optional>
 #include <iostream>
@@ -72,123 +73,77 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-href
      * @see https://url.spec.whatwg.org/#concept-url-serializer
      */
-    [[nodiscard]] std::string get_href() const noexcept {
-      return get_protocol()
-        + (host.has_value() ?
-          "//" + username + (password.empty() ? "" : ":" + password) + (includes_credentials() ? "@" : "") + host.value() +
-          (port.has_value() ? ":" + get_port() : "")
-          : "")
-        + get_pathname()
-        + get_search()
-        + get_hash();
-    }
+    [[nodiscard]] std::string get_href() const noexcept;
 
     /**
      * The origin getter steps are to return the serialization of this’s URL’s origin. [HTML]
      * @see https://url.spec.whatwg.org/#concept-url-origin
      */
-    [[nodiscard]] std::string get_origin() const noexcept {
-      if (is_special()) {
-        // Return the tuple origin (url’s scheme, url’s host, url’s port, null).
-        return get_protocol() + "//" + get_host();
-      }
-
-      if (get_scheme() == "blob") {
-        // TODO: Implement blob origin serializer
-      }
-
-      // Return a new opaque origin.
-      return "null";
-    }
+    [[nodiscard]] std::string get_origin() const noexcept;
 
     /**
      * The protocol getter steps are to return this’s URL’s scheme, followed by U+003A (:).
      * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
-    [[nodiscard]] std::string get_protocol() const noexcept {
-      return std::string(get_scheme()) + ":";
-    }
+    [[nodiscard]] std::string get_protocol() const noexcept;
 
     /**
      * Return url’s host, serialized, followed by U+003A (:) and url’s port, serialized.
      * @see https://url.spec.whatwg.org/#dom-url-host
      */
-    [[nodiscard]] std::string get_host() const noexcept {
-      if (!host.has_value()) { return ""; }
-      return host.value() + (port.has_value() ? ":" + get_port() : "");
-    }
+    [[nodiscard]] std::string get_host() const noexcept;
 
     /**
      * Return this’s URL’s host, serialized.
      * @see https://url.spec.whatwg.org/#dom-url-hostname
      */
-    [[nodiscard]] std::string get_hostname() const noexcept {
-      return host.value_or("");
-    }
+    [[nodiscard]] std::string get_hostname() const noexcept;
 
     /**
      * The pathname getter steps are to return the result of URL path serializing this’s URL.
      * @see https://url.spec.whatwg.org/#dom-url-pathname
      */
-    [[nodiscard]] std::string get_pathname() const noexcept {
-      return path;
-    }
+    [[nodiscard]] std::string get_pathname() const noexcept;
 
     /**
      * Return U+003F (?), followed by this’s URL’s query.
      * @see https://url.spec.whatwg.org/#dom-url-search
      */
-    [[nodiscard]] std::string get_search() const noexcept {
-      return query.has_value() ? "?" + query.value() : "";
-    }
+    [[nodiscard]] std::string get_search() const noexcept;
 
     /**
      * The username getter steps are to return this’s URL’s username.
      * @see https://url.spec.whatwg.org/#dom-url-username
      */
-    [[nodiscard]] std::string get_username() const noexcept {
-      return username;
-    }
+    [[nodiscard]] std::string get_username() const noexcept;
 
     /**
      * @see https://url.spec.whatwg.org/#dom-url-username
      */
-    void set_username(const std::string_view input) {
-      if (cannot_have_credentials_or_port()) return;
-      username = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
-    }
+    void set_username(const std::string_view input);
 
     /**
      * @see https://url.spec.whatwg.org/#dom-url-password
      */
-    void set_password(const std::string_view input) {
-      if (cannot_have_credentials_or_port()) return;
-      password = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
-    }
+    void set_password(const std::string_view input);
 
     /**
      * The password getter steps are to return this’s URL’s password.
      * @see https://url.spec.whatwg.org/#dom-url-password
      */
-    [[nodiscard]] std::string get_password() const noexcept {
-      return password;
-    }
+    [[nodiscard]] std::string get_password() const noexcept;
 
     /**
      * Return this’s URL’s port, serialized.
      * @see https://url.spec.whatwg.org/#dom-url-port
      */
-    [[nodiscard]] std::string get_port() const noexcept {
-      return port.has_value() ? std::to_string(port.value()) : "";
-    }
+    [[nodiscard]] std::string get_port() const noexcept;
 
     /**
      * Return U+0023 (#), followed by this’s URL’s fragment.
      * @see https://url.spec.whatwg.org/#dom-url-hash
      */
-    [[nodiscard]] std::string get_hash() const noexcept {
-      return fragment.has_value() ? "#" + fragment.value() : "";
-    }
+    [[nodiscard]] std::string get_hash() const noexcept;
 
     /**
      * Used for returning the validity from the result of the URL parser.
