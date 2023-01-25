@@ -187,15 +187,14 @@ namespace ada {
   }
 
   void url::set_protocol(const std::string_view input) {
-    if (input.empty()) { return; }
-
     std::string view(input);
-    if (!view.empty() && view.back() != ':') {
-      view.append(":");
-    }
+    helpers::remove_ascii_tab_or_newline(view);
+    if (view.empty()) { return; }
 
     // Schemes should start with alpha values.
     if (!checkers::is_alpha(view[0])) { return; }
+
+    view.append(":");
 
     std::string::iterator pointer = std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
 
