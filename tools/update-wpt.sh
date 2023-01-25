@@ -15,6 +15,11 @@ cleanup () {
 trap cleanup INT TERM EXIT
 
 cd "$WORKSPACE"
-git clone --depth=1 --single-branch git@github.com:web-platform-tests/wpt.git wpt
-rm -rf "$WPT_DIR"
-mv "$WORKSPACE/wpt/url/resources" "$WPT_DIR"
+git clone \
+  --depth=1 \
+  --filter=blob:none \
+  --sparse \
+  git@github.com:web-platform-tests/wpt.git wpt
+cd wpt
+git sparse-checkout set "url/resources"
+cp url/resources/*.json "$WPT_DIR"
