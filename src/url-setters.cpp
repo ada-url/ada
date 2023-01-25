@@ -80,7 +80,7 @@ namespace ada {
       // Note: we cannot access *pointer safely if (pointer == pointer_end).
       if ((pointer != new_host.end()) && (*pointer == ':') && !inside_brackets) {
         // TODO: The next 2 lines is the only difference between set_host and set_hostname. Let's simplify it.
-        std::string_view buffer(pointer + 1);
+        std::string_view buffer(&*(pointer + 1));
         if (!buffer.empty()) { set_port(buffer); }
       }
       // If url is special and host_view is the empty string, validation error, return failure.
