@@ -186,4 +186,22 @@ namespace ada {
     }
   }
 
+  void url::set_protocol(const std::string_view input) {
+    if (input.empty()) { return; }
+
+    std::string view(input);
+    if (!view.empty() && view.back() != ':') {
+      view.append(":");
+    }
+
+    // Schemes should start with alpha values.
+    if (!checkers::is_alpha(view[0])) { return; }
+
+    std::string::iterator pointer = std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
+
+    if (pointer != view.end() && *pointer == ':') {
+      parse_scheme<true>(std::string_view(view.data(), pointer - view.begin()));
+    }
+  }
+
 } // namespace ada

@@ -34,15 +34,6 @@ namespace ada {
                                  std::optional<ada::url> base_url = std::nullopt,
                                  ada::encoding_type encoding = ada::encoding_type::UTF8);
 
-  /**
-   * Scheme setter is used to override the scheme of an ada::url instance.
-   * It will only update if the input is valid within the context of the base url.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-protocol
-   * @return Returns true if setter is successful.
-   */
-  bool set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
-
 }
 
 #endif // ADA_IMPLEMENTATION_H

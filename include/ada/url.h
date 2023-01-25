@@ -159,6 +159,11 @@ namespace ada {
     void set_hostname(const std::string_view input);
 
     /**
+     * @see https://url.spec.whatwg.org/#dom-url-protocol
+     */
+    void set_protocol(const std::string_view input);
+
+    /**
      * The password getter steps are to return this’s URL’s password.
      * @see https://url.spec.whatwg.org/#dom-url-password
      */

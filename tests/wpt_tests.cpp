@@ -1,5 +1,3 @@
-#include <cinttypes>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
@@ -175,8 +173,8 @@ bool setters_tests_encoding(const char *source) {
 
       if (category == "protocol") {
         std::string_view expected = element["expected"]["protocol"];
-        ada::set_scheme(base, std::string(new_value), type);
-        TEST_ASSERT(std::string(base.get_scheme()) + ":", expected, "Protocol " + element_string);
+        base.set_protocol(new_value);
+        TEST_ASSERT(base.get_protocol(), expected, "Protocol " + element_string);
       }
       else if (category == "username") {
         std::string_view expected = element["expected"]["username"];
