@@ -234,7 +234,7 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/#host-parsing
      */
-    ada_really_inline bool parse_host(const std::string_view input);
+    ada_really_inline bool parse_host(std::string_view input);
 
     /**
      * Parse the path from the provided input.

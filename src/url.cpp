@@ -438,7 +438,7 @@ namespace ada {
     return true;
   }
 
-  ada_really_inline bool url::parse_host(const std::string_view input) {
+  ada_really_inline bool url::parse_host(std::string_view input) {
 #if ADA_LOGGING
     std::cout << "url::parse_host('" << input <<"')" << std::endl;
 #endif
@@ -453,7 +453,9 @@ namespace ada {
       std::cout << "url::parse_host : got ipv6" << std::endl;
 #endif
       // Return the result of IPv6 parsing input with its leading U+005B ([) and trailing U+005D (]) removed.
-      return parse_ipv6(std::string_view(&*input.begin() + 1, input.end() - input.begin() - 2));
+      input.remove_prefix(1);
+      input.remove_suffix(1);
+      return parse_ipv6(input);
     }
 
     // If isNotSpecial is true, then return the result of opaque-host parsing input.
