@@ -9,6 +9,7 @@
 #include "ada/scheme.h"
 #include "ada/common_defs.h"
 #include "ada/serializers.h"
+#include "ada/unicode.h"
 
 #include <charconv>
 #include <optional>
@@ -147,6 +148,22 @@ namespace ada {
      */
     [[nodiscard]] std::string get_username() const noexcept {
       return username;
+    }
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-username
+     */
+    void set_username(const std::string_view input) {
+      if (cannot_have_credentials_or_port()) return;
+      username = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
+    }
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-password
+     */
+    void set_password(const std::string_view input) {
+      if (cannot_have_credentials_or_port()) return;
+      password = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
     }
 
     /**

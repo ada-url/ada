@@ -52,36 +52,6 @@ namespace ada {
   /**
    * @todo This should probably a method in the struct ada::url.
    */
-  void set_username(ada::url &base, std::string_view input) noexcept {
-    // If this’s URL cannot have a username/password/port, then return.
-    if (base.cannot_have_credentials_or_port()) {
-      return;
-    }
-
-    // Set the username given this’s URL and the given value.
-    // To set the username given a url and username, set url’s username to the result of running UTF-8 percent-encode
-    // on username using the userinfo percent-encode set.
-    base.username = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
-  }
-
-  /**
-   * @todo This should probably a method in the struct ada::url.
-   */
-  void set_password(ada::url &base, std::string_view input) noexcept {
-    // If this’s URL cannot have a username/password/port, then return.
-    if (base.cannot_have_credentials_or_port()) {
-      return;
-    }
-
-    // Set the username given this’s URL and the given value.
-    // To set the password given a url and password, set url’s password to the result of running UTF-8 percent-encode
-    // on password using the userinfo percent-encode set.
-    base.password = unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
-  }
-
-  /**
-   * @todo This should probably a method in the struct ada::url.
-   */
   bool set_host(ada::url& base, std::string_view input, ada::encoding_type encoding) noexcept {
     if(encoding != encoding_type::UTF8) {
       return false; // unsupported !

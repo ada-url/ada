@@ -44,20 +44,6 @@ namespace ada {
   bool set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
 
   /**
-   * Username setter is used for overriding the username of an ada::url instance.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-username
-   */
-  void set_username(ada::url &base, std::string_view input) noexcept;
-
-  /**
-   * Password setter is used for overriding the username of an ada::url instance.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-password
-   */
-  void set_password(ada::url &base, std::string_view input) noexcept;
-
-  /**
    * Update the hostname of an existing ada::url instance.
    * It will only update if the input is valid within the context of the base url.
    *
