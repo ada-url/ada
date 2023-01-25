@@ -128,6 +128,32 @@ namespace ada {
     void set_password(const std::string_view input);
 
     /**
+     * @see https://url.spec.whatwg.org/#dom-url-port
+     */
+    void set_port(const std::string_view input);
+
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-hash
+     */
+    void set_hash(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-search
+     */
+    void set_search(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-search
+     */
+    void set_pathname(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-host
+     */
+    void set_host(const std::string_view input);
+
+    /**
      * The password getter steps are to return this’s URL’s password.
      * @see https://url.spec.whatwg.org/#dom-url-password
      */

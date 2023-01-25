@@ -43,47 +43,6 @@ namespace ada {
    */
   bool set_scheme(ada::url &base, std::string input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
 
-  /**
-   * Update the hostname of an existing ada::url instance.
-   * It will only update if the input is valid within the context of the base url.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-host
-   * @return Returns true if setter is successful.
-   */
-  bool set_host(ada::url &base, std::string_view input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
-
-  /**
-   * Update the port of an existing ada::url instance.
-   * It will only update if the input is valid within the context of the base url.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-port
-   * @return Returns true if setter is successful.
-   */
-  bool set_port(ada::url &base, std::string_view input) noexcept;
-
-  /**
-   * Update the pathname of an existing ada::url instance.
-   * It will only update if the input is valid within the context of the base url.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-pathname
-   * @return Returns true if setter is successful.
-   */
-  bool set_pathname(ada::url &base, std::string_view input, ada::encoding_type encoding = ada::encoding_type::UTF8) noexcept;
-
-  /**
-   * Update the query/search of an existing ada::url instance.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-search
-   */
-  void set_search(ada::url &base, std::string_view input) noexcept;
-
-  /**
-   * Update the hash/fragment of an existing ada::url instance.
-   *
-   * @see https://url.spec.whatwg.org/#dom-url-hash
-   */
-  void set_hash(ada::url &base, std::string_view input) noexcept;
-
 }
 
 #endif // ADA_IMPLEMENTATION_H

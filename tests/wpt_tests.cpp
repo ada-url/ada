@@ -193,7 +193,7 @@ bool setters_tests_encoding(const char *source) {
 
         // TODO: Handle invalid utf-8 tests too.
         if (!element["expected"]["host"].get(expected)) {
-          ada::set_host(base, new_value, type);
+          base.set_host(new_value);
           TEST_ASSERT(base.get_host(), expected, "Host " + element_string);
         }
       }
@@ -202,27 +202,28 @@ bool setters_tests_encoding(const char *source) {
 
         // TODO: Handle invalid utf-8 tests too.
         if (!element["expected"]["hostname"].get(expected)) {
-          ada::set_host(base, new_value, type);
+          base.set_host(new_value);
           TEST_ASSERT(base.get_hostname(), expected, "Hostname " + element_string);
         }
       }
       else if (category == "port") {
         std::string_view expected = element["expected"]["port"];
-        ada::set_port(base, new_value);
+        base.set_port(new_value);
         TEST_ASSERT(base.get_port(), expected, "Port " + element_string);
       }
       else if (category == "pathname") {
         std::string_view expected = element["expected"]["pathname"];
+        base.set_pathname(new_value);
         TEST_ASSERT(base.get_pathname(), expected, "Path " + element_string);
       }
       else if (category == "search") {
         std::string_view expected = element["expected"]["search"];
-        ada::set_search(base, new_value);
+        base.set_search(new_value);
         TEST_ASSERT(base.get_search(), expected, "Search " + element_string);
       }
       else if (category == "hash") {
         std::string_view expected = element["expected"]["hash"];
-        ada::set_hash(base, new_value);
+        base.set_hash(new_value);
         TEST_ASSERT(base.get_hash(), expected, "Fragment " + element_string);
       }
     }
