@@ -11,7 +11,7 @@ Specification for URL parser can be found from the
 ## Requirements
 
 - A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
-- We use [ICU](https://icu.unicode.org) under non-Windows systems (macOS, Linux). Under Windows, we rely on Normaliz.
+- We use [ICU](https://icu.unicode.org) under non-Windows systems (macOS, Linux). Under Windows, [we rely on Microsoft's builtin IdnToAscii function](https://learn.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-idntoascii).
 
 ## Local Development
 
@@ -19,6 +19,11 @@ Ada uses cmake as a build system. It's recommended you to run the following comm
 
 - **Build**: `cmake -B build && cmake --build build`
 - **Test**: `ctest --output-on-failure --test-dir build`
+
+Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
+
+**Installing ICU**: For macOS, you may install it with [brew](https://brew.sh) using `brew install icu4c`. Linux users may install ICU according to the their distribution: under Ubuntu, the command is `apt-get install -y libicu-dev`.
+
 
 ## Usage
 
