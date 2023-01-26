@@ -94,8 +94,8 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <h1><a class="anchor" id="autotoc_md1"></a>
 Requirements</h1>
 <ul>
-<li>A recent C++ compiler supporting C++17 (e.g., gcc 8 or better)</li>
-<li><a href="https://icu.unicode.org">ICU</a>.</li>
+<li>A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.</li>
+<li>We use <a href="https://icu.unicode.org">ICU</a> under non-Windows systems (macOS, Linux). Under Windows, we rely on Normaliz.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md2"></a>
 Local Development</h1>
