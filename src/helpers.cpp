@@ -70,6 +70,11 @@ namespace ada::helpers {
     }), input.end());
   }
 
+  ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept {
+    ada::log("substring(", input, " [", input.size() ,"bytes],", pos, ")");
+    return pos > input.size() ? std::string_view() : input.substr(pos);
+  }
+
   ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept {
     size_t location = url.is_special() ? view.find_first_of(":[/?\\") : view.find_first_of(":[/?");
 

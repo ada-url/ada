@@ -4,6 +4,7 @@
 #include "ada/character_sets.h"
 #include "ada/checkers.h"
 #include "ada/common_defs.h"
+#include "ada/log.h"
 #include "ada/encoding_type.h"
 #include "ada/helpers.h"
 #include "ada/parser.h"

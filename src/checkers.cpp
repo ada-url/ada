@@ -51,5 +51,5 @@ namespace ada::checkers {
     }
     return accumulator;
   }
-  
+
 } // namespace ada::checkers

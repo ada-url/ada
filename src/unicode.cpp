@@ -267,18 +267,36 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
 
     std::string result(input.substr(0,std::distance(input.begin(), pointer)));
     result.reserve(input.length()); // in the worst case, percent encoding might produce 3 characters.
-    const char* end = &*input.end();
 
-    while (&*pointer < end) {
+    for (;pointer != input.end(); pointer++) {
       if (character_sets::bit_at(character_set, *pointer)) {
         result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
       } else {
         result += *pointer;
       }
-      pointer++;
     }
 
     return result;
+  }
+
+
+  bool percent_encode(const std::string_view input, const uint8_t character_set[], std::string &out) {
+    auto pointer = std::find_if(input.begin(), input.end(), [character_set](const char c) {
+      return character_sets::bit_at(character_set, c);
+    });
+    // Optimization: Don't iterate if percent encode is not required
+    if (pointer == input.end()) { return false; }
+    out.clear();
+    out.append(input.data(), std::distance(input.begin(), pointer));
+
+    for (;pointer != input.end(); pointer++) {
+      if (character_sets::bit_at(character_set, *pointer)) {
+        out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
+      } else {
+        out += *pointer;
+      }
+    }
+    return true;
   }
 
   bool to_ascii(std::optional<std::string>& out, const std::string_view plain, const bool be_strict, size_t first_percent) {
@@ -371,7 +389,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     size_t codepoints = convert(input.data(), input.size(), buffer.get());
     if(codepoints == 0) {
           out = std::nullopt;
-          return false;  
+          return false;
     }
     int required_buffer_size = IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, NULL, 0);
 
