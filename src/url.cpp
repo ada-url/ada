@@ -473,7 +473,7 @@ namespace ada {
           return parse_ipv4(host.value());
         }
         ada::log("parse_host fast path ", *host);
-        return true;
+        return is_valid = checkers::verify_dns_length(host.value());
       }
     }
     ada::log("parse_host  calling to_ascii");
@@ -485,7 +485,9 @@ namespace ada {
       ada::log("parse_host  got ipv4", *host);
       return parse_ipv4(host.value());
     }
-    return true;
+
+
+    return is_valid = checkers::verify_dns_length(host.value());
   }
 
   template <bool has_state_override>

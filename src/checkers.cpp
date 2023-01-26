@@ -52,4 +52,26 @@ namespace ada::checkers {
     return accumulator;
   }
 
+
+  ada_really_inline constexpr bool verify_dns_length(std::string_view input) noexcept {
+    if(input.back() == '.') { 
+      if(input.size() > 254) return false;
+    } else if (input.size() > 253) return false;
+
+    int label_count = 0;
+    size_t start = 0;
+    while (start < input.size()) {
+      auto dot_location = input.find('.', start);
+      // If not found, it's likely the end of the domain
+      if(dot_location == std::string_view::npos) dot_location = input.size();
+
+      auto label_size = dot_location - start;
+      if (label_size > 63 || label_size == 0) return false;
+
+      ++label_count;
+      start = dot_location + 1;
+    }
+
+    return true;
+  }
 } // namespace ada::checkers
