@@ -95,7 +95,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 Requirements</h1>
 <ul>
 <li>A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.</li>
-<li>We use <a href="https://icu.unicode.org">ICU</a> under non-Windows systems (macOS, Linux). Under Windows, we rely on Normaliz.</li>
+<li>We use <a href="https://icu.unicode.org">ICU</a> under non-Windows systems (macOS, Linux). Under Windows, <a href="https://learn.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-idntoascii">we rely on Microsoft's builtin IdnToAscii function</a>.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md2"></a>
 Local Development</h1>
@@ -104,6 +104,8 @@ Local Development</h1>
 <li><b>Build</b>: <code>cmake -B build &amp;&amp; cmake --build build</code></li>
 <li><b>Test</b>: <code>ctest --output-on-failure --test-dir build</code></li>
 </ul>
+<p>Windows users need additional flags to specify the build configuration, e.g. <code>--config Release</code>.</p>
+<p><b>Installing ICU</b>: For macOS, you may install it with <a href="https://brew.sh">brew</a> using <code>brew install icu4c</code>. Linux users may install ICU according to the their distribution: under Ubuntu, the command is <code>apt-get install -y libicu-dev</code>.</p>
 <h1><a class="anchor" id="autotoc_md3"></a>
 Usage</h1>
 <ul>
