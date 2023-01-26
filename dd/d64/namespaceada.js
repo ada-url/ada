@@ -21,6 +21,7 @@ var namespaceada =
       [ "is_windows_drive_letter", "d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca", null ],
       [ "path_signature", "d3/dbe/namespaceada_1_1checkers.html#a3a1950cb3b0e363c38dae086285194ea", null ],
       [ "to_lower", "d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b", null ],
+      [ "verify_dns_length", "d3/dbe/namespaceada_1_1checkers.html#a755570190c883a443f94640167b099b3", null ],
       [ "path_signature_table", "d3/dbe/namespaceada_1_1checkers.html#a228548ec9f967976482088d2e29e132d", null ]
     ] ],
     [ "helpers", "d7/d6c/namespaceada_1_1helpers.html", [
