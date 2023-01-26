@@ -9,6 +9,8 @@
 #include "ada/scheme.h"
 #include "ada/common_defs.h"
 #include "ada/serializers.h"
+#include "ada/log.h"
+
 
 #include <charconv>
 #include <optional>
@@ -118,36 +120,11 @@ namespace ada {
     }
     /** For development purposes, we want to know when a copy is made. */
     url() = default;
-#if ADA_DEVELOP_MODE
-    url(const url &u) = delete; /**TODO: reenable this before the first release. */
-#else
     url(const url &u) = default;
-#endif
     url(url &&u) = default;
     url &operator=(url &&u) = default;
-#if ADA_DEVELOP_MODE
-    url &operator=(const url &u) = delete;
-#else
     url &operator=(const url &u) = default;
-#endif
     ADA_ATTRIBUTE_NOINLINE ~url() = default;
-#if ADA_DEVELOP_MODE
-    /** Only for development purposes so we can see where the copies are happening. **/
-    url oh_no_we_need_to_copy_url() const {
-      url answer;
-      answer.non_special_scheme = non_special_scheme;
-      answer.type = type;
-      answer.username = username;
-      answer.password = password;
-      answer.host = host;
-      answer.port = port;
-      answer.path = path;
-      answer.query = query;
-      answer.fragment = fragment;
-      answer.is_valid = is_valid;
-      return answer;
-    }
-#endif
 
     /**
      * Parse a port (16-bit decimal digit) from the provided input.
@@ -157,31 +134,21 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#host-parsing
      */
     ada_really_inline size_t parse_port(std::string_view view) noexcept {
-#if ADA_LOGGING
-          std::cout << "parse_port('" << view << "') "<< view.size()  << std::endl;
-#endif
+          ada::log("parse_port('", view, "') ", view.size());
           uint16_t parsed_port{};
           auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
           if(r.ec == std::errc::result_out_of_range) {
-#if ADA_LOGGING
-            std::cout << "parse_port: std::errc::result_out_of_range" << std::endl;
-#endif
+            ada::log("parse_port: std::errc::result_out_of_range");
             is_valid = false;
             return 0;
           }
-#if ADA_LOGGING
-          std::cout << "parse_port: " << parsed_port << std::endl;
-#endif
+          ada::log("parse_port: ", parsed_port);
           port = (r.ec == std::errc() && scheme_default_port() != parsed_port) ?
             std::optional<uint16_t>(parsed_port) : std::nullopt;
           const size_t consumed = size_t(r.ptr - view.data());
-#if ADA_LOGGING
-          std::cout << "parse_port: consumed = " << consumed << std::endl;
-#endif
+          ada::log("parse_port: consumed ", consumed);
           is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
-#if ADA_LOGGING
-          std::cout << "parse_port: is_valid = " << is_valid << std::endl;
-#endif
+          ada::log("parse_port: is_valid = ", is_valid);
           return consumed;
     }
 
@@ -234,14 +201,17 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/#host-parsing
      */
-    ada_really_inline bool parse_host(const std::string_view input);
+    ada_really_inline bool parse_host(std::string_view input);
 
     /**
      * Parse the path from the provided input.
      * Return true on success. Control characters not
      * trimmed from the ends (they should have
      * been removed if needed).
-     * @see https://url.spec.whatwg.org/#host-parsing
+     *
+     * The input is expected to be UTF-8.
+     *
+     * @see https://url.spec.whatwg.org/
      */
     ada_really_inline bool parse_path(const std::string_view input);
 
@@ -250,8 +220,10 @@ namespace ada {
      * 'prepared' (e.g., it cannot contain tabs and spaces). See
      * parse_path.
      *
+     * The input is expected to be UTF-8.
+     *
      * Return true on success.
-     * @see https://url.spec.whatwg.org/#host-parsing
+     * @see https://url.spec.whatwg.org/
      */
     ada_really_inline bool parse_prepared_path(const std::string_view input);
 
@@ -280,7 +252,7 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
      */
-    bool parse_opaque_host(std::string_view input) noexcept;
+    bool parse_opaque_host(std::string_view input);
 
 
     ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
