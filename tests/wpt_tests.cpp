@@ -37,6 +37,7 @@ const char *ADA_SETTERS_TESTS_JSON = WPT_DATA_DIR "ada_extra_setters_tests.json"
 const char *TOASCII_JSON = WPT_DATA_DIR "toascii.json";
 const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
 const char *ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
+const char *VERIFYDNSLENGTH_TESTS_JSON = WPT_DATA_DIR "verifydnslength_tests.json";
 
 #define TEST_START()                                                           \
   do {                                                                         \
@@ -342,6 +343,33 @@ bool urltestdata_encoding(const char* source) {
   TEST_SUCCEED()
 }
 
+bool verifydnslength_tests(const char* source) {
+  TEST_START()
+  ondemand::parser parser;
+
+  RUN_TEST(file_exists(source));
+  padded_string json = padded_string::load(source);
+  std::cout << "  loaded " << source << " (" << json.size() << " kB)"
+            << std::endl;
+  ondemand::document doc = parser.iterate(json);
+  for (auto element : doc.get_array()) {
+    if (element.type() == ondemand::json_type::string) {
+      std::string_view comment = element.get_string().value();
+      std::cout << comment << std::endl;
+    } else if (element.type() == ondemand::json_type::object) {
+      ondemand::object object = element.get_object();
+      std::string_view input = object["input"].get_string().value();
+      std::string_view message = object["message"].get_string().value();
+      bool failure = object["failure"].get_bool().value();
+      
+      ada::url input_url = ada_parse(input);
+
+      TEST_ASSERT(!input_url.is_valid, failure, message);
+    }
+  }
+  TEST_SUCCEED()
+}
+
 int main(int argc, char** argv) {
   bool all_tests{true};
   std::string filter;
@@ -380,6 +408,10 @@ int main(int argc, char** argv) {
   name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
+  }
+  name = "verifydnslength_tests("+std::string(VERIFYDNSLENGTH_TESTS_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
   }
   std::cout << std::endl;
   std::cout << "==============="<< std::endl;
