@@ -1,0 +1,36 @@
+name: Ubuntu 20.04
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ubuntu-build:
+    if: >-
+      ! contains(toJSON(github.event.commits.*.message), '[skip ci]') &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip github]')
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        shared: [ON, OFF]
+        cxx: [g++-9, clang++-10]
+    steps:
+      - uses: actions/checkout@v3
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Install ICU
+        run: sudo apt-get install -y libicu-dev pkg-config
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
+      - name: Prepare
+        run: cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        env:
+          CXX: ${{matrix.cxx}}
+      - name: Build
+        run: cmake --build build -j=2
+      - name: Test
+        run: ctest --output-on-failure --test-dir build
