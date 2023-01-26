@@ -5,9 +5,9 @@
 #ifndef ADA_HELPERS_H
 #define ADA_HELPERS_H
 
-#include "common_defs.h"
-#include "url.h"
-#include "state.h"
+#include "ada/common_defs.h"
+#include "ada/url.h"
+#include "ada/state.h"
 
 #include <string_view>
 #include <optional>
@@ -37,6 +37,11 @@ namespace ada::helpers {
    */
   ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept;
 
+  /**
+   * Return the substring from input going from index pos to the end. If pos > input.size(),
+   * it returns an empty string_view. This function cannot throw.
+   */
+  ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept;
   /**
    * Returns a host's delimiter location depending on the state of the instance.
    * Used by the host parser.

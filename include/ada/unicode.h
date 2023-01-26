@@ -5,7 +5,7 @@
 #ifndef ADA_UNICODE_H
 #define ADA_UNICODE_H
 
-#include "common_defs.h"
+#include "ada/common_defs.h"
 #include <string>
 #include <optional>
 
@@ -126,9 +126,17 @@ namespace ada::unicode {
   std::string percent_decode(const std::string_view input, size_t first_percent);
 
   /**
+   * Returns a percent-encoding string whether percent encoding was needed or not.
    * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
    */
   std::string percent_encode(const std::string_view input, const uint8_t character_set[]);
+
+  /**
+   * Returns true if percent encoding was needed, in which case, we store
+   * the percent-encoded content in 'out'. Otherwise, out is left unchanged.
+   * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
+   */
+  bool percent_encode(const std::string_view input, const uint8_t character_set[], std::string& out);
 
 } // namespace ada::unicode
 

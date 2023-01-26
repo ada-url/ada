@@ -74,5 +74,4 @@ namespace ada::checkers {
 
     return true;
   }
-  
 } // namespace ada::checkers

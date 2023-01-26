@@ -4,13 +4,6 @@
  */
 #ifndef ADA_COMMON_DEFS_H
 #define ADA_COMMON_DEFS_H
-
-#ifndef ADA_DEVELOP_MODE
-#define ADA_DEVELOP_MODE 1 /* This should be removed before the first release. */
-#endif
-
-
-
 #ifdef _MSC_VER
 #define ADA_VISUAL_STUDIO 1
 /**

@@ -1,0 +1,19 @@
+[
+  "# Windows' codebase will not allow this case for now.",
+  "# Host",
+  {
+    "input": "http://ğığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığığı.com",
+    "base": "about:blank",
+    "href": "http://xn--teaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa78hbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.com/",
+    "origin": "http://xn--teaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa78hbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.com",
+    "protocol": "http:",
+    "username": "",
+    "password": "",
+    "host": "xn--teaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa78hbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.com",
+    "hostname": "xn--teaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa78hbabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.com",
+    "port": "",
+    "pathname": "/",
+    "search": "",
+    "hash": ""
+  }
+]

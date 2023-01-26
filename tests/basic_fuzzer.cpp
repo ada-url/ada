@@ -21,6 +21,24 @@ std::string url_examples[] = {
     "postgresql://other:9818274x1!!@localhost:5432/otherdb?connect_timeout=10&application_name=myapp",
     "http://192.168.1.1", // ipv4
     "http://[2606:4700:4700::1111]", // ipv6
+    "https://static.files.bbci.co.uk/orbit/737a4ee2bed596eb65afc4d2ce9af568/js/"
+    "polyfills.js",
+    "https://static.files.bbci.co.uk/orbit/737a4ee2bed596eb65afc4d2ce9af568/"
+    "css/orbit-v5-ltr.min.css",
+    "https://static.files.bbci.co.uk/orbit/737a4ee2bed596eb65afc4d2ce9af568/js/"
+    "require.min.js",
+    "https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Rg.woff2",
+    "https://nav.files.bbci.co.uk/searchbox/c8bfe8595e453f2b9483fda4074e9d15/"
+    "css/box.css",
+    "https://static.files.bbci.co.uk/cookies/d3bb303e79f041fec95388e04f84e716/"
+    "cookie-banner/cookie-library.bundle.js",
+    "https://static.files.bbci.co.uk/account/id-cta/597/style/id-cta.css",
+    "https://gn-web-assets.api.bbc.com/wwhp/"
+    "20220908-1153-091014d07889c842a7bdc06e00fa711c9e04f049/responsive/css/"
+    "old-ie.min.css",
+    "https://gn-web-assets.api.bbc.com/wwhp/"
+    "20220908-1153-091014d07889c842a7bdc06e00fa711c9e04f049/modules/vendor/"
+    "bower/modernizr/modernizr.js"
 };
 
 // This function copies your input onto a memory buffer that
@@ -32,7 +50,7 @@ ada::url ada_parse(std::string_view view) {
   return ada::parse(std::string_view(buffer.get(), view.size()));
 }
 
-size_t fuzz(size_t N, size_t seed = 0) {
+size_t fancy_fuzz(size_t N, size_t seed = 0) {
     size_t counter = seed;
     for(size_t trial = 0; trial < N; trial++) {
         std::string copy = url_examples[(seed++)%(sizeof(url_examples)/sizeof(std::string))];
@@ -59,8 +77,42 @@ size_t fuzz(size_t N, size_t seed = 0) {
     return counter;
 }
 
+size_t simple_fuzz(size_t N, size_t seed = 0) {
+    size_t counter = seed;
+    for(size_t trial = 0; trial < N; trial++) {
+        std::string copy = url_examples[(seed++)%(sizeof(url_examples)/sizeof(std::string))];
+        auto url = ada::parser::parse_url(copy, std::nullopt);
+        while(url.is_valid) {
+            // mutate the string.
+            copy[(13134*counter++)%copy.size()] = char(counter++*71117);
+            url = ada_parse(copy);
+        }
+    }
+    return counter;
+}
+
+
+size_t roller_fuzz(size_t N) {
+    size_t valid{};
+
+    for(std::string copy : url_examples) {
+        for(int index = 0; index < copy.size(); index++) {
+            char orig = copy[index];
+            for(unsigned int value = 0; value < 255; value++) {
+              copy[index] = char(value);
+              ada::url url = ada_parse(copy);
+              if(url.is_valid) { valid++; }
+            }
+            copy[index] = orig;
+        }
+    }
+    return valid;
+}
+
 int main() {
   std::cout << "Running basic fuzzer.\n";
-  std::cout << "Executed " << fuzz(400000) << " mutations.\n";
+  std::cout << "[fancy]  Executed " << fancy_fuzz(100000) << " mutations.\n";
+  std::cout << "[simple] Executed " << simple_fuzz(40000) << " mutations.\n";
+  std::cout << "[roller] Executed " << roller_fuzz(40000) << " correct cases.\n";
   return EXIT_SUCCESS;
 }

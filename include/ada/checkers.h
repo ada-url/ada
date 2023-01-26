@@ -5,7 +5,7 @@
 #ifndef ADA_CHECKERS_H
 #define ADA_CHECKERS_H
 
-#include "common_defs.h"
+#include "ada/common_defs.h"
 
 #include <string_view>
 #include <cstring>
@@ -59,11 +59,17 @@ namespace ada::checkers {
   constexpr bool is_digit(char x) noexcept { return (x >= '0') & (x <= '9'); }
 
   /**
-   * @details A Windows drive letter is two code points, of which the first is an ASCII alpha
-   * and the second is either U+003A (:) or U+007C (|).
+   * @details A string starts with a Windows drive letter if all of the following are true:
+   *
+   *   - its length is greater than or equal to 2
+   *   - its first two code points are a Windows drive letter
+   *   - its length is 2 or its third code point is U+002F (/), U+005C (\), U+003F (?), or U+0023 (#).
+   *
+   * https://url.spec.whatwg.org/#start-with-a-windows-drive-letter
    */
   inline constexpr bool is_windows_drive_letter(std::string_view input) noexcept {
-    return input.size() >= 2 && (is_alpha(input[0]) && ((input[1] == ':') || (input[1] == '|')));
+    return input.size() >= 2 && (is_alpha(input[0]) && ((input[1] == ':') || (input[1] == '|')))
+      && ((input.size() == 2) || (input[2] == '/' || input[2] == '\\' || input[2] == '?' || input[2] == '#'));
   }
 
   /**

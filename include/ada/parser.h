@@ -5,9 +5,9 @@
 #ifndef ADA_PARSER_H
 #define ADA_PARSER_H
 
-#include "state.h"
-#include "url.h"
-#include "encoding_type.h"
+#include "ada/state.h"
+#include "ada/url.h"
+#include "ada/encoding_type.h"
 
 #include <optional>
 #include <string_view>
