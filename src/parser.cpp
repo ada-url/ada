@@ -20,7 +20,7 @@ namespace ada::parser {
                 std::optional<ada::url> base_url,
                 ada::encoding_type encoding,
                 std::optional<ada::url> optional_url) {
-    ada::log("ada::parser::parse_url('", user_input,
+    ada_log("ada::parser::parse_url('", user_input,
      "' [", user_input.size()," bytes],", (base_url.has_value() ? base_url.value().to_string() : "null"),
      ",", ada::to_string(encoding), ",", (optional_url.has_value() ? optional_url.value().to_string() : "null"), ")");
     // Let state be state override if given, or scheme start state otherwise.
@@ -74,7 +74,7 @@ namespace ada::parser {
     for (; input_position <= input_size; input_position++) {
       switch (state) {
         case ada::state::SCHEME_START: {
-          ada::log("SCHEME_START ", helpers::substring(url_data, input_position));
+          ada_log("SCHEME_START ", helpers::substring(url_data, input_position));
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
           if ((input_position != input_size) && checkers::is_alpha(url_data[input_position])) {
             state = ada::state::SCHEME;
@@ -89,16 +89,16 @@ namespace ada::parser {
         }
         case ada::state::SCHEME: {
           goto_scheme:
-           ada::log("SCHEME ", helpers::substring(url_data, input_position));
+           ada_log("SCHEME ", helpers::substring(url_data, input_position));
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           while((input_position != input_size) && (ada::unicode::is_alnum_plus(url_data[input_position]))) {
             input_position++;
           }
           // Otherwise, if c is U+003A (:), then:
           if ((input_position != input_size) && (url_data[input_position] == ':')) {
-            ada::log("SCHEME the scheme should be ", url_data.substr(0,input_position));
+            ada_log("SCHEME the scheme should be ", url_data.substr(0,input_position));
             url.parse_scheme(url_data.substr(0,input_position));
-            ada::log("SCHEME the scheme is ", url.get_scheme());
+            ada_log("SCHEME the scheme is ", url.get_scheme());
             // If url’s scheme is "file", then:
             if (url.get_scheme_type() == ada::scheme::type::FILE) {
               // Set state to file state.
@@ -136,10 +136,10 @@ namespace ada::parser {
         }
         case ada::state::NO_SCHEME: {
           goto_no_scheme:
-          ada::log("NO_SCHEME ", helpers::substring(url_data, input_position));
+          ada_log("NO_SCHEME ", helpers::substring(url_data, input_position));
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
           if (!base_url.has_value() || (base_url->has_opaque_path && (input_position != input_size))) {
-            ada::log("NO_SCHEME validation error");
+            ada_log("NO_SCHEME validation error");
             url.is_valid = false;
             return url;
           }
@@ -147,7 +147,7 @@ namespace ada::parser {
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
           else if (base_url->has_opaque_path && url.fragment.has_value() && input_position == input_size) {
-            ada::log("NO_SCHEME opaque base with fragment");
+            ada_log("NO_SCHEME opaque base with fragment");
             url.copy_scheme(base_url.value());
             url.path = base_url->path;
             url.has_opaque_path = base_url->has_opaque_path;
@@ -156,13 +156,13 @@ namespace ada::parser {
           }
           // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
           else if (base_url->get_scheme_type() != ada::scheme::type::FILE) {
-            ada::log("NO_SCHEME non-file relative path");
+            ada_log("NO_SCHEME non-file relative path");
             state = ada::state::RELATIVE_SCHEME;
             goto goto_relative_scheme;
           }
           // Otherwise, set state to file state and decrease pointer by 1.
           else {
-            ada::log("NO_SCHEME file base type");
+            ada_log("NO_SCHEME file base type");
             state = ada::state::FILE;
             goto goto_file;
           }
@@ -170,7 +170,7 @@ namespace ada::parser {
         }
         case ada::state::AUTHORITY: {
           goto_authority:
-           ada::log("AUTHORITY ", helpers::substring(url_data, input_position));
+           ada_log("AUTHORITY ", helpers::substring(url_data, input_position));
           // most URLs have no @. Having no @ tells us that we don't have to worry about AUTHORITY. Of course,
           // we could have @ and still not have to worry about AUTHORITY.
           // TODO: Instead of just collecting a bool, collect the location of the '@' and do something useful with it.
@@ -238,7 +238,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::SPECIAL_RELATIVE_OR_AUTHORITY: {
-          ada::log("SPECIAL_RELATIVE_OR_AUTHORITY ", helpers::substring(url_data, input_position));
+          ada_log("SPECIAL_RELATIVE_OR_AUTHORITY ", helpers::substring(url_data, input_position));
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           std::string_view view  = helpers::substring(url_data, input_position);
@@ -255,7 +255,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::PATH_OR_AUTHORITY: {
-          ada::log("PATH_OR_AUTHORITY ", helpers::substring(url_data, input_position));
+          ada_log("PATH_OR_AUTHORITY ", helpers::substring(url_data, input_position));
           // If c is U+002F (/), then set state to authority state.
           if ((input_position != input_size) && (url_data[input_position] == '/')) {
             state = ada::state::AUTHORITY;
@@ -270,22 +270,22 @@ namespace ada::parser {
         }
         case ada::state::RELATIVE_SCHEME: {
           goto_relative_scheme:
-          ada::log("RELATIVE_SCHEME ", helpers::substring(url_data, input_position));
+          ada_log("RELATIVE_SCHEME ", helpers::substring(url_data, input_position));
           // Set url’s scheme to base’s scheme.
           url.copy_scheme(base_url.value());
           // If c is U+002F (/), then set state to relative slash state.
           if ((input_position != input_size) && (url_data[input_position] == '/')) {
-            ada::log("RELATIVE_SCHEME if c is U+002F (/), then set state to relative slash state");
+            ada_log("RELATIVE_SCHEME if c is U+002F (/), then set state to relative slash state");
             state = ada::state::RELATIVE_SLASH;
           }
           // Otherwise, if url is special and c is U+005C (\), validation error, set state to relative slash state.
           else if (url.is_special() && (input_position != input_size) && (url_data[input_position] == '\\')) {
-            ada::log("RELATIVE_SCHEME  if url is special and c is U+005C, validation error, set state to relative slash state");
+            ada_log("RELATIVE_SCHEME  if url is special and c is U+005C, validation error, set state to relative slash state");
             state = ada::state::RELATIVE_SLASH;
           }
           // Otherwise:
           else {
-            ada::log("RELATIVE_SCHEME otherwise");
+            ada_log("RELATIVE_SCHEME otherwise");
             // Set url’s username to base’s username, url’s password to base’s password, url’s host to base’s host,
             // url’s port to base’s port, url’s path to a clone of base’s path, and url’s query to base’s query.
             url.username = base_url->username;
@@ -317,7 +317,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::RELATIVE_SLASH: {
-          ada::log("RELATIVE_SLASH ", helpers::substring(url_data, input_position));
+          ada_log("RELATIVE_SLASH ", helpers::substring(url_data, input_position));
           // If url is special and c is U+002F (/) or U+005C (\), then:
           if (url.is_special() && (input_position != input_size) && (url_data[input_position] == '/' || url_data[input_position] =='\\')) {
             // Set state to special authority ignore slashes state.
@@ -345,7 +345,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::SPECIAL_AUTHORITY_SLASHES: {
-          ada::log("SPECIAL_AUTHORITY_SLASHES ", helpers::substring(url_data, input_position));
+          ada_log("SPECIAL_AUTHORITY_SLASHES ", helpers::substring(url_data, input_position));
 
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
@@ -364,7 +364,7 @@ namespace ada::parser {
         }
         case ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES: {
           goto_special_authority_ignore_slashes:
-          ada::log("SPECIAL_AUTHORITY_IGNORE_SLASHES ", helpers::substring(url_data, input_position));
+          ada_log("SPECIAL_AUTHORITY_IGNORE_SLASHES ", helpers::substring(url_data, input_position));
 
           // If c is neither U+002F (/) nor U+005C (\), then set state to authority state and decrease pointer by 1.
           while(true) {
@@ -378,7 +378,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::QUERY: {
-          ada::log("QUERY ", helpers::substring(url_data, input_position));
+          ada_log("QUERY ", helpers::substring(url_data, input_position));
           // If encoding is not UTF-8 and one of the following is true:
           // - url is not special
           // - url’s scheme is "ws" or "wss"
@@ -402,7 +402,7 @@ namespace ada::parser {
         }
         case ada::state::HOST: {
           goto_host:
-          ada::log("HOST ", helpers::substring(url_data, input_position));
+          ada_log("HOST ", helpers::substring(url_data, input_position));
           std::string_view host_view = helpers::substring(url_data, input_position);
           bool inside_brackets{false};
           size_t location = helpers::get_host_delimiter_location(url, host_view, inside_brackets);
@@ -411,10 +411,10 @@ namespace ada::parser {
           if ((input_position != input_size) && (url_data[input_position] == ':') && !inside_brackets) {
             // If buffer is the empty string, validation error, return failure.
             // Let host be the result of host parsing buffer with url is not special.
-            ada::log("HOST parsing ", host_view);
+            ada_log("HOST parsing ", host_view);
             url.parse_host(host_view);
             if(!url.is_valid) { return url; }
-            ada::log("HOST parsing results in ", url.host.has_value() ? "none" : url.host.value());
+            ada_log("HOST parsing results in ", url.host.has_value() ? "none" : url.host.value());
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
           }
@@ -442,7 +442,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::OPAQUE_PATH: {
-          ada::log("OPAQUE_PATH ", helpers::substring(url_data, input_position));
+          ada_log("OPAQUE_PATH ", helpers::substring(url_data, input_position));
           std::string_view view = helpers::substring(url_data, input_position);
           // If c is U+003F (?), then set url’s query to the empty string and state to query state.
           size_t location = view.find('?');
@@ -458,7 +458,7 @@ namespace ada::parser {
           break;
         }
         case ada::state::PORT: {
-          ada::log("PORT ", helpers::substring(url_data, input_position));
+          ada_log("PORT ", helpers::substring(url_data, input_position));
           std::string_view port_view = helpers::substring(url_data, input_position);
           size_t consumed_bytes = url.parse_port(port_view);
           input_position += consumed_bytes;
@@ -467,7 +467,7 @@ namespace ada::parser {
         }
         case ada::state::PATH_START: {
           goto_path_start:
-          ada::log("PATH_START ", helpers::substring(url_data, input_position));
+          ada_log("PATH_START ", helpers::substring(url_data, input_position));
           // If url is special, then:
           if (url.is_special()) {
 
@@ -506,7 +506,7 @@ namespace ada::parser {
         case ada::state::PATH: {
           goto_path:
           std::string_view view = helpers::substring(url_data, input_position);
-          ada::log("PATH ", helpers::substring(url_data, input_position));
+          ada_log("PATH ", helpers::substring(url_data, input_position));
 
           // Most time, we do not need percent encoding.
           // Furthermore, we can immediately locate the '?'.
@@ -522,17 +522,17 @@ namespace ada::parser {
           break;
         }
         case ada::state::FILE_SLASH: {
-          ada::log("FILE_SLASH ", helpers::substring(url_data, input_position));
+          ada_log("FILE_SLASH ", helpers::substring(url_data, input_position));
 
           // If c is U+002F (/) or U+005C (\), then:
           if ((input_position != input_size) && (url_data[input_position] == '/' || url_data[input_position] == '\\')) {
-            ada::log("FILE_SLASH c is U+002F or U+005C");
+            ada_log("FILE_SLASH c is U+002F or U+005C");
             // Set state to file host state.
             state = ada::state::FILE_HOST;
           }
           // Otherwise:
           else {
-            ada::log("FILE_SLASH otherwise");
+            ada_log("FILE_SLASH otherwise");
             // If base is non-null and base’s scheme is "file", then:
             // Note: it is unsafe to do base_url->scheme unless you know that
             // base_url_has_value() is true.
@@ -569,7 +569,7 @@ namespace ada::parser {
         }
         case ada::state::FILE_HOST: {
           std::string_view view = helpers::substring(url_data, input_position);
-          ada::log("FILE_HOST ", helpers::substring(url_data, input_position));
+          ada_log("FILE_HOST ", helpers::substring(url_data, input_position));
 
           size_t location = view.find_first_of("/\\?");
           std::string_view file_host_buffer(view.data(), (location != std::string_view::npos) ? location : view.size());
@@ -604,7 +604,7 @@ namespace ada::parser {
         }
         case ada::state::FILE: {
           goto_file:
-          ada::log("FILE ", helpers::substring(url_data, input_position));
+          ada_log("FILE ", helpers::substring(url_data, input_position));
           std::string_view file_view = helpers::substring(url_data, input_position);
 
           // Set url’s scheme to "file".
@@ -615,14 +615,14 @@ namespace ada::parser {
 
           // If c is U+002F (/) or U+005C (\), then:
           if (input_position != input_size && (url_data[input_position] == '/' || url_data[input_position] == '\\')) {
-            ada::log("FILE c is U+002F or U+005C");
+            ada_log("FILE c is U+002F or U+005C");
             // Set state to file slash state.
             state = ada::state::FILE_SLASH;
           }
           // Otherwise, if base is non-null and base’s scheme is "file":
           else if (base_url.has_value() && base_url->get_scheme_type() == ada::scheme::type::FILE) {
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
-            ada::log("FILE base non-null");
+            ada_log("FILE base non-null");
             url.host = base_url->host;
             url.path = base_url->path;
             url.has_opaque_path = base_url->has_opaque_path;
@@ -656,7 +656,7 @@ namespace ada::parser {
           }
           // Otherwise, set state to path state, and decrease pointer by 1.
           else {
-            ada::log("FILE go to path");
+            ada_log("FILE go to path");
             state = ada::state::PATH;
             goto goto_path;
           }
@@ -667,7 +667,7 @@ namespace ada::parser {
           ada::unreachable();
       }
     }
-    ada::log("returning ", url.to_string());
+    ada_log("returning ", url.to_string());
     return url;
   }
 

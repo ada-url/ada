@@ -411,10 +411,6 @@ int main(int argc, char** argv) {
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
-  name = "verifydnslength_tests("+std::string(VERIFYDNSLENGTH_TESTS_JSON)+")";
-  if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
-  }
   name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
@@ -422,6 +418,10 @@ int main(int argc, char** argv) {
   name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding(URLTESTDATA_JSON);
+  }
+  name = "verifydnslength_tests("+std::string(VERIFYDNSLENGTH_TESTS_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
   }
   std::cout << std::endl;
   std::cout << "==============="<< std::endl;

@@ -64,8 +64,17 @@ ada_really_inline void log([[maybe_unused]] T t) {
 #endif
 
 }
-
-
 }
+
+#if ADA_LOGGING
+
+#ifndef ada_log
+#define ada_log(...) do { \
+    ada::log(__VA_ARGS__); \
+} while(0)
+#endif // ada_log
+#else
+#define ada_log(...)
+#endif // ADA_LOGGING
 
 #endif // ADA_LOG_H

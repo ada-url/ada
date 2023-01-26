@@ -8,7 +8,7 @@
 
 namespace ada {
   ada_really_inline bool url::parse_path(std::string_view input) {
-    ada::log("parse_path ", input);
+    ada_log("parse_path ", input);
     std::string tmp_buffer;
     std::string_view internal_input;
     if(unicode::has_tabs_or_newline(input)) {
@@ -46,7 +46,7 @@ namespace ada {
 
 
   ada_really_inline bool url::parse_prepared_path(std::string_view input) {
-    ada::log("parse_path ", input, " url: ", to_string());
+    ada_log("parse_path ", input, " url: ", to_string());
 
     //path.clear();
     uint8_t accumulator = checkers::path_signature(input);
@@ -58,7 +58,7 @@ namespace ada {
         (is_special() ? (accumulator == 0) : ((accumulator & 0b11111101) == 0)) &&
         (get_scheme_type() != ada::scheme::type::FILE);
     if (trivial_path) {
-      ada::log("parse_path trivial");
+      ada_log("parse_path trivial");
       path += '/';
       path += input;
       return true;
@@ -68,7 +68,7 @@ namespace ada {
     bool fast_path = (is_special() && (accumulator & 0b11111011) == 0) &&
                     (get_scheme_type() != ada::scheme::type::FILE);
     if (fast_path) {
-      ada::log("parse_path fast");
+      ada_log("parse_path fast");
       do {
         // Here we don't need to worry about \\ or percent encoding.
         size_t location = input.find('/');
@@ -102,7 +102,7 @@ namespace ada {
 
       } while (true);
     } else {
-      ada::log("parse_path slow");
+      ada_log("parse_path slow");
       // we have reached the general case
       bool needs_percent_encoding = (accumulator & 1);
       std::string path_buffer_tmp;
@@ -156,7 +156,7 @@ namespace ada {
   }
 
   bool url::parse_opaque_host(std::string_view input) {
-    ada::log("parse_opaque_host ", input, "[", input.size(), " bytes]");
+    ada_log("parse_opaque_host ", input, "[", input.size(), " bytes]");
     if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
       return is_valid = false;
     }
@@ -167,7 +167,7 @@ namespace ada {
   }
 
   bool url::parse_ipv4(std::string_view input) {
-    ada::log("parse_ipv4 ", input, "[", input.size(), " bytes]");
+    ada_log("parse_ipv4 ", input, "[", input.size(), " bytes]");
     if(input.back()=='.') {
       input.remove_suffix(1);
     }
@@ -218,7 +218,7 @@ namespace ada {
   }
 
   bool url::parse_ipv6(std::string_view input) {
-    ada::log("parse_ipv6 ", input, "[", input.size(), " bytes]");
+    ada_log("parse_ipv6 ", input, "[", input.size(), " bytes]");
 
     if(input.empty()) { return is_valid = false; }
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
@@ -237,7 +237,7 @@ namespace ada {
     if (input[0] == ':') {
       // If remaining does not start with U+003A (:), validation error, return failure.
       if(input.size() == 1 || input[1] != ':') {
-        ada::log("parse_ipv6 starts with : but the rest does not start with :");
+        ada_log("parse_ipv6 starts with : but the rest does not start with :");
         return is_valid = false;
       }
 
@@ -252,7 +252,7 @@ namespace ada {
     while (pointer != input.end()) {
       // If pieceIndex is 8, validation error, return failure.
       if (piece_index == 8) {
-        ada::log("parse_ipv6 piece_index == 8");
+        ada_log("parse_ipv6 piece_index == 8");
         return is_valid = false;
       }
 
@@ -260,7 +260,7 @@ namespace ada {
       if (*pointer == ':') {
         // If compress is non-null, validation error, return failure.
         if (compress.has_value()) {
-          ada::log("parse_ipv6 compress is non-null");
+          ada_log("parse_ipv6 compress is non-null");
           return is_valid = false;
         }
 
@@ -286,7 +286,7 @@ namespace ada {
       if (pointer != input.end() && *pointer == '.') {
         // If length is 0, validation error, return failure.
         if (length == 0) {
-          ada::log("parse_ipv6 length is 0");
+          ada_log("parse_ipv6 length is 0");
           return is_valid = false;
         }
 
@@ -295,7 +295,7 @@ namespace ada {
 
         // If pieceIndex is greater than 6, validation error, return failure.
         if (piece_index > 6) {
-          ada::log("parse_ipv6 piece_index > 6");
+          ada_log("parse_ipv6 piece_index > 6");
           return is_valid = false;
         }
 
@@ -315,14 +315,14 @@ namespace ada {
             }
             // Otherwise, validation error, return failure.
             else {
-              ada::log("parse_ipv6 Otherwise, validation error, return failure");
+              ada_log("parse_ipv6 Otherwise, validation error, return failure");
               return is_valid = false;
             }
           }
 
           // If c is not an ASCII digit, validation error, return failure.
           if (pointer == input.end() || !checkers::is_digit(*pointer)) {
-            ada::log("parse_ipv6 If c is not an ASCII digit, validation error, return failure");
+            ada_log("parse_ipv6 If c is not an ASCII digit, validation error, return failure");
             return is_valid = false;
           }
 
@@ -337,7 +337,7 @@ namespace ada {
             }
             // Otherwise, if ipv4Piece is 0, validation error, return failure.
             else if (ipv4_piece == 0) {
-              ada::log("parse_ipv6 if ipv4Piece is 0, validation error");
+              ada_log("parse_ipv6 if ipv4Piece is 0, validation error");
               return is_valid = false;
             }
             // Otherwise, set ipv4Piece to ipv4Piece × 10 + number.
@@ -347,7 +347,7 @@ namespace ada {
 
             // If ipv4Piece is greater than 255, validation error, return failure.
             if (ipv4_piece > 255) {
-              ada::log("parse_ipv6 ipv4_piece > 255");
+              ada_log("parse_ipv6 ipv4_piece > 255");
               return is_valid = false;
             }
 
@@ -383,13 +383,13 @@ namespace ada {
 
         // If c is the EOF code point, validation error, return failure.
         if (pointer == input.end()) {
-          ada::log("parse_ipv6 If c is the EOF code point, validation error, return failure");
+          ada_log("parse_ipv6 If c is the EOF code point, validation error, return failure");
           return is_valid = false;
         }
       }
       // Otherwise, if c is not the EOF code point, validation error, return failure.
       else if (pointer != input.end()) {
-        ada::log("parse_ipv6 Otherwise, if c is not the EOF code point, validation error, return failure");
+        ada_log("parse_ipv6 Otherwise, if c is not the EOF code point, validation error, return failure");
         return is_valid = false;
       }
 
@@ -418,16 +418,16 @@ namespace ada {
     }
     // Otherwise, if compress is null and pieceIndex is not 8, validation error, return failure.
     else if (piece_index != 8) {
-      ada::log("parse_ipv6 if compress is null and pieceIndex is not 8, validation error, return failure");
+      ada_log("parse_ipv6 if compress is null and pieceIndex is not 8, validation error, return failure");
       return is_valid = false;
     }
     host = ada::serializers::ipv6(address);
-    ada::log("parse_ipv6 ", *host);
+    ada_log("parse_ipv6 ", *host);
     return true;
   }
 
   ada_really_inline bool url::parse_host(std::string_view input) {
-    ada::log("parse_host", input, "[", input.size(), " bytes]");
+    ada_log("parse_host", input, "[", input.size(), " bytes]");
     if(input.empty()) { return is_valid = false; } // technically unnecessary.
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
@@ -435,7 +435,7 @@ namespace ada {
       if (input.back() != ']') {
         return is_valid = false;
       }
-      ada::log("parse_host ipv6");
+      ada_log("parse_host ipv6");
 
       // Return the result of IPv6 parsing input with its leading U+005B ([) and trailing U+005D (]) removed.
       input.remove_prefix(1);
@@ -469,20 +469,20 @@ namespace ada {
         // fast path
         host = std::move(buffer);
         if (checkers::is_ipv4(host.value())) {
-          ada::log("parse_host fast path ipv4");
+          ada_log("parse_host fast path ipv4");
           return parse_ipv4(host.value());
         }
-        ada::log("parse_host fast path ", *host);
+        ada_log("parse_host fast path ", *host);
         return is_valid = checkers::verify_dns_length(host.value());
       }
     }
-    ada::log("parse_host  calling to_ascii");
+    ada_log("parse_host  calling to_ascii");
     is_valid = ada::unicode::to_ascii(host, input, false,  input.find('%'));
     if (!is_valid) { return is_valid = false; }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
     if(checkers::is_ipv4(host.value())) {
-      ada::log("parse_host  got ipv4", *host);
+      ada_log("parse_host  got ipv4", *host);
       return parse_ipv4(host.value());
     }
 
