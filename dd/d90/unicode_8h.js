@@ -13,5 +13,6 @@ var unicode_8h =
     [ "is_single_dot_path_segment", "dd/d90/unicode_8h.html#ad3f83e3d837a2451c194e82e9f3bf9ae", null ],
     [ "percent_decode", "dd/d90/unicode_8h.html#acf371f0a0ee8c11dfaedb1963be2c57a", null ],
     [ "percent_encode", "dd/d90/unicode_8h.html#a1c564a30bc61d41abd97cc6b8be084ff", null ],
+    [ "percent_encode", "dd/d90/unicode_8h.html#ab23d66383793f477b4f89f1d4cfd6bf9", null ],
     [ "to_ascii", "dd/d90/unicode_8h.html#ac8772e2727fff9bbb4c12bc68040f3b8", null ]
 ];

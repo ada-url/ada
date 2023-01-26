@@ -358,212 +358,230 @@ $(document).ready(function(){initNavTree('dd/d9c/unicode_8cpp_source.html','../.
 <div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160; </div>
 <div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;    std::string result(input.substr(0,std::distance(input.begin(), pointer)));</div>
 <div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    result.reserve(input.length()); <span class="comment">// in the worst case, percent encoding might produce 3 characters.</span></div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">char</span>* end = &amp;*input.end();</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160; </div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;    <span class="keywordflow">while</span> (&amp;*pointer &lt; end) {</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;      <span class="keywordflow">if</span> (<a class="code" href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">character_sets::bit_at</a>(character_set, *pointer)) {</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        result.append(<a class="code" href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">character_sets::hex</a> + uint8_t(*pointer) * 4, 3);</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;      } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;        result += *pointer;</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;      }</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;      pointer++;</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    }</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160; </div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;    <span class="keywordflow">return</span> result;</div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;  }</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160; </div>
-<div class="line"><a name="l00284"></a><span class="lineno"><a class="line" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">  284</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">to_ascii</a>(std::optional&lt;std::string&gt;&amp; out, <span class="keyword">const</span> std::string_view plain, <span class="keyword">const</span> <span class="keywordtype">bool</span> be_strict, <span class="keywordtype">size_t</span> first_percent) {</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;    std::string percent_decoded_buffer;</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;    std::string_view input = plain;</div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;    <span class="keywordflow">if</span>(first_percent != std::string_view::npos) {</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;      percent_decoded_buffer = <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a">unicode::percent_decode</a>(plain, first_percent);</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;      input = percent_decoded_buffer;</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    }</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;<span class="preprocessor">#ifdef _WIN32</span></div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    <span class="comment">// Windows function assumes UTF-16.</span></div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;    std::unique_ptr&lt;char16_t[]&gt; buffer(<span class="keyword">new</span> char16_t[input.size()]);</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    <span class="keyword">auto</span> convert = [](<span class="keyword">const</span> <span class="keywordtype">char</span>* buf, <span class="keywordtype">size_t</span> len, char16_t* utf16_output) {</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    <span class="keyword">const</span> uint8_t *data = <span class="keyword">reinterpret_cast&lt;</span><span class="keyword">const </span>uint8_t *<span class="keyword">&gt;</span>(buf);</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;      <span class="keywordtype">size_t</span> pos = 0;</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;      char16_t* start{utf16_output};</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;      <span class="keywordflow">while</span> (pos &lt; len) {</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;        <span class="comment">// try to convert the next block of 16 ASCII bytes</span></div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;        <span class="keywordflow">if</span> (pos + 16 &lt;= len) { <span class="comment">// if it is safe to read 16 more bytes, check that they are ascii</span></div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;          uint64_t v1;</div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;          ::memcpy(&amp;v1, data + pos, <span class="keyword">sizeof</span>(uint64_t));</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;          uint64_t v2;</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;          ::memcpy(&amp;v2, data + pos + <span class="keyword">sizeof</span>(uint64_t), <span class="keyword">sizeof</span>(uint64_t));</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;          uint64_t v{v1 | v2};</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;          <span class="keywordflow">if</span> ((v &amp; 0x8080808080808080) == 0) {</div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;            <span class="keywordtype">size_t</span> final_pos = pos + 16;</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;            <span class="keywordflow">while</span>(pos &lt; final_pos) {</div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;              *utf16_output++ = char16_t(buf[pos]);</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;              pos++;</div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;            }</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;            <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;          }</div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;        }</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;        uint8_t leading_byte = data[pos]; <span class="comment">// leading byte</span></div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;        <span class="keywordflow">if</span> (leading_byte &lt; 0b10000000) {</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;          <span class="comment">// converting one ASCII byte !!!</span></div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;          *utf16_output++ = char16_t(leading_byte);</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;          pos++;</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((leading_byte &amp; 0b11100000) == 0b11000000) {</div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;          <span class="comment">// We have a two-byte UTF-8, it should become</span></div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;          <span class="comment">// a single UTF-16 word.</span></div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;          <span class="keywordflow">if</span>(pos + 1 &gt;= len) { <span class="keywordflow">return</span> 0; } <span class="comment">// minimal bound checking</span></div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 1] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;          <span class="comment">// range check</span></div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;          uint32_t code_point = (leading_byte &amp; 0b00011111) &lt;&lt; 6 | (data[pos + 1] &amp; 0b00111111);</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;          <span class="keywordflow">if</span> (code_point &lt; 0x80 || 0x7ff &lt; code_point) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;          *utf16_output++ = char16_t(code_point);</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;          pos += 2;</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((leading_byte &amp; 0b11110000) == 0b11100000) {</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;          <span class="comment">// We have a three-byte UTF-8, it should become</span></div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;          <span class="comment">// a single UTF-16 word.</span></div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;          <span class="keywordflow">if</span>(pos + 2 &gt;= len) { <span class="keywordflow">return</span> 0; } <span class="comment">// minimal bound checking</span></div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160; </div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 1] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 2] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;          <span class="comment">// range check</span></div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;          uint32_t code_point = (leading_byte &amp; 0b00001111) &lt;&lt; 12 |</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;                      (data[pos + 1] &amp; 0b00111111) &lt;&lt; 6 |</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;                      (data[pos + 2] &amp; 0b00111111);</div>
-<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;          <span class="keywordflow">if</span> (code_point &lt; 0x800 || 0xffff &lt; code_point ||</div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;              (0xd7ff &lt; code_point &amp;&amp; code_point &lt; 0xe000)) {</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;            <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;          }</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;          *utf16_output++ = char16_t(code_point);</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;          pos += 3;</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((leading_byte &amp; 0b11111000) == 0b11110000) { <span class="comment">// 0b11110000</span></div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;          <span class="comment">// we have a 4-byte UTF-8 word.</span></div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;          <span class="keywordflow">if</span>(pos + 3 &gt;= len) { <span class="keywordflow">return</span> 0; } <span class="comment">// minimal bound checking</span></div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 1] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 2] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 3] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160; </div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;          <span class="comment">// range check</span></div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;          uint32_t code_point =</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;              (leading_byte &amp; 0b00000111) &lt;&lt; 18 | (data[pos + 1] &amp; 0b00111111) &lt;&lt; 12 |</div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;              (data[pos + 2] &amp; 0b00111111) &lt;&lt; 6 | (data[pos + 3] &amp; 0b00111111);</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;          <span class="keywordflow">if</span> (code_point &lt;= 0xffff || 0x10ffff &lt; code_point) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;          code_point -= 0x10000;</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;          uint16_t high_surrogate = uint16_t(0xD800 + (code_point &gt;&gt; 10));</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;          uint16_t low_surrogate = uint16_t(0xDC00 + (code_point &amp; 0x3FF));</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;          *utf16_output++ = char16_t(high_surrogate);</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;          *utf16_output++ = char16_t(low_surrogate);</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;          pos += 4;</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;          <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;        }</div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;      }</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;      <span class="keywordflow">return</span> int(utf16_output - start);</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;    };</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    <span class="keywordtype">size_t</span> codepoints = convert(input.data(), input.size(), buffer.get());</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    <span class="keywordflow">if</span>(codepoints == 0) {</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;          out = std::nullopt;</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">false</span>;  </div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;    }</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;    <span class="keywordtype">int</span> required_buffer_size = IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, NULL, 0);</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160; </div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;    <span class="keywordflow">if</span>(required_buffer_size == 0) {</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;      out = std::nullopt;</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;    }</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160; </div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;    out = std::string(required_buffer_size, 0);</div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;    std::unique_ptr&lt;char16_t[]&gt; ascii_buffer(<span class="keyword">new</span> char16_t[required_buffer_size]);</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160; </div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;    required_buffer_size = IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, (LPWSTR)ascii_buffer.get(), required_buffer_size);</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;    <span class="keywordflow">if</span>(required_buffer_size == 0) {</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;      out = std::nullopt;</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;    }</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    <span class="comment">// This will not validate the punycode, so let us work it in reverse.</span></div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;    <span class="keywordtype">int</span> test_reverse = IdnToUnicode(IDN_ALLOW_UNASSIGNED, (LPCWSTR)ascii_buffer.get(), required_buffer_size, NULL, 0);</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;    <span class="keywordflow">if</span>(test_reverse == 0) {</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;      out = std::nullopt;</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;    }</div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;    out = std::string(required_buffer_size, 0);</div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">size_t</span> i = 0; i &lt; required_buffer_size; i++) { (*out)[i] = char(ascii_buffer.get()[i]); }</div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;    out = std::string(255, 0);</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160; </div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    UErrorCode status = U_ZERO_ERROR;</div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;    uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160; </div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    <span class="keywordflow">if</span> (be_strict) {</div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;      options |= UIDNA_USE_STD3_RULES;</div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;    }</div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160; </div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    UIDNA* uidna = uidna_openUTS46(options, &amp;status);</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;    <span class="keywordflow">if</span> (U_FAILURE(status)) {</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;    }</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160; </div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;    UIDNAInfo info = UIDNA_INFO_INITIALIZER;</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;    <span class="comment">// RFC 1035 section 2.3.4.</span></div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;    <span class="comment">// The domain  name must be at most 255 octets.</span></div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    <span class="comment">// It cannot contain a label longer than 63 octets.</span></div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;    <span class="comment">// Thus we should never need more than 255 octets, if we</span></div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <span class="comment">// do the domain name is in error.</span></div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;    int32_t length = uidna_nameToASCII_UTF8(uidna,</div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                                         input.data(),</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                                         int32_t(input.length()),</div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;                                         out.value().data(), 255,</div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;                                         &amp;info,</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;                                         &amp;status);</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160; </div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;    <span class="keywordflow">for</span> (;pointer != input.end(); pointer++) {</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;      <span class="keywordflow">if</span> (<a class="code" href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">character_sets::bit_at</a>(character_set, *pointer)) {</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;        result.append(<a class="code" href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">character_sets::hex</a> + uint8_t(*pointer) * 4, 3);</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;      } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;        result += *pointer;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;      }</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;    }</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160; </div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;  }</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160; </div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160; </div>
+<div class="line"><a name="l00283"></a><span class="lineno"><a class="line" href="../../d2/dc3/namespaceada_1_1unicode.html#ab23d66383793f477b4f89f1d4cfd6bf9">  283</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#a1c564a30bc61d41abd97cc6b8be084ff">percent_encode</a>(<span class="keyword">const</span> std::string_view input, <span class="keyword">const</span> uint8_t character_set[], std::string &amp;out) {</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;    <span class="keyword">auto</span> pointer = std::find_if(input.begin(), input.end(), [character_set](<span class="keyword">const</span> <span class="keywordtype">char</span> c) {</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;      return character_sets::bit_at(character_set, c);</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;    });</div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;    <span class="comment">// Optimization: Don&#39;t iterate if percent encode is not required</span></div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;    <span class="keywordflow">if</span> (pointer == input.end()) { <span class="keywordflow">return</span> <span class="keyword">false</span>; }</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;    out.clear();</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    out.append(input.data(), std::distance(input.begin(), pointer));</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160; </div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    <span class="keywordflow">for</span> (;pointer != input.end(); pointer++) {</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;      <span class="keywordflow">if</span> (<a class="code" href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">character_sets::bit_at</a>(character_set, *pointer)) {</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;        out.append(<a class="code" href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">character_sets::hex</a> + uint8_t(*pointer) * 4, 3);</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;      } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;        out += *pointer;</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;      }</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    }</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;  }</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160; </div>
+<div class="line"><a name="l00302"></a><span class="lineno"><a class="line" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">  302</a></span>&#160;  <span class="keywordtype">bool</span> <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">to_ascii</a>(std::optional&lt;std::string&gt;&amp; out, <span class="keyword">const</span> std::string_view plain, <span class="keyword">const</span> <span class="keywordtype">bool</span> be_strict, <span class="keywordtype">size_t</span> first_percent) {</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;    std::string percent_decoded_buffer;</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;    std::string_view input = plain;</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;    <span class="keywordflow">if</span>(first_percent != std::string_view::npos) {</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;      percent_decoded_buffer = <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a">unicode::percent_decode</a>(plain, first_percent);</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;      input = percent_decoded_buffer;</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;    }</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;<span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;    <span class="comment">// Windows function assumes UTF-16.</span></div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;    std::unique_ptr&lt;char16_t[]&gt; buffer(<span class="keyword">new</span> char16_t[input.size()]);</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;    <span class="keyword">auto</span> convert = [](<span class="keyword">const</span> <span class="keywordtype">char</span>* buf, <span class="keywordtype">size_t</span> len, char16_t* utf16_output) {</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;    <span class="keyword">const</span> uint8_t *data = <span class="keyword">reinterpret_cast&lt;</span><span class="keyword">const </span>uint8_t *<span class="keyword">&gt;</span>(buf);</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;      <span class="keywordtype">size_t</span> pos = 0;</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;      char16_t* start{utf16_output};</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;      <span class="keywordflow">while</span> (pos &lt; len) {</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;        <span class="comment">// try to convert the next block of 16 ASCII bytes</span></div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;        <span class="keywordflow">if</span> (pos + 16 &lt;= len) { <span class="comment">// if it is safe to read 16 more bytes, check that they are ascii</span></div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;          uint64_t v1;</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;          ::memcpy(&amp;v1, data + pos, <span class="keyword">sizeof</span>(uint64_t));</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;          uint64_t v2;</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;          ::memcpy(&amp;v2, data + pos + <span class="keyword">sizeof</span>(uint64_t), <span class="keyword">sizeof</span>(uint64_t));</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;          uint64_t v{v1 | v2};</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;          <span class="keywordflow">if</span> ((v &amp; 0x8080808080808080) == 0) {</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;            <span class="keywordtype">size_t</span> final_pos = pos + 16;</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;            <span class="keywordflow">while</span>(pos &lt; final_pos) {</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;              *utf16_output++ = char16_t(buf[pos]);</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;              pos++;</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;            }</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;          }</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;        }</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;        uint8_t leading_byte = data[pos]; <span class="comment">// leading byte</span></div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;        <span class="keywordflow">if</span> (leading_byte &lt; 0b10000000) {</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;          <span class="comment">// converting one ASCII byte !!!</span></div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;          *utf16_output++ = char16_t(leading_byte);</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;          pos++;</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((leading_byte &amp; 0b11100000) == 0b11000000) {</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;          <span class="comment">// We have a two-byte UTF-8, it should become</span></div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;          <span class="comment">// a single UTF-16 word.</span></div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;          <span class="keywordflow">if</span>(pos + 1 &gt;= len) { <span class="keywordflow">return</span> 0; } <span class="comment">// minimal bound checking</span></div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 1] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;          <span class="comment">// range check</span></div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;          uint32_t code_point = (leading_byte &amp; 0b00011111) &lt;&lt; 6 | (data[pos + 1] &amp; 0b00111111);</div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;          <span class="keywordflow">if</span> (code_point &lt; 0x80 || 0x7ff &lt; code_point) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;          *utf16_output++ = char16_t(code_point);</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;          pos += 2;</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((leading_byte &amp; 0b11110000) == 0b11100000) {</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;          <span class="comment">// We have a three-byte UTF-8, it should become</span></div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;          <span class="comment">// a single UTF-16 word.</span></div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;          <span class="keywordflow">if</span>(pos + 2 &gt;= len) { <span class="keywordflow">return</span> 0; } <span class="comment">// minimal bound checking</span></div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160; </div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 1] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 2] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;          <span class="comment">// range check</span></div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;          uint32_t code_point = (leading_byte &amp; 0b00001111) &lt;&lt; 12 |</div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;                      (data[pos + 1] &amp; 0b00111111) &lt;&lt; 6 |</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;                      (data[pos + 2] &amp; 0b00111111);</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;          <span class="keywordflow">if</span> (code_point &lt; 0x800 || 0xffff &lt; code_point ||</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;              (0xd7ff &lt; code_point &amp;&amp; code_point &lt; 0xe000)) {</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;            <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;          }</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;          *utf16_output++ = char16_t(code_point);</div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;          pos += 3;</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((leading_byte &amp; 0b11111000) == 0b11110000) { <span class="comment">// 0b11110000</span></div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;          <span class="comment">// we have a 4-byte UTF-8 word.</span></div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;          <span class="keywordflow">if</span>(pos + 3 &gt;= len) { <span class="keywordflow">return</span> 0; } <span class="comment">// minimal bound checking</span></div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 1] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 2] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;          <span class="keywordflow">if</span> ((data[pos + 3] &amp; 0b11000000) != 0b10000000) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160; </div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;          <span class="comment">// range check</span></div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;          uint32_t code_point =</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;              (leading_byte &amp; 0b00000111) &lt;&lt; 18 | (data[pos + 1] &amp; 0b00111111) &lt;&lt; 12 |</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;              (data[pos + 2] &amp; 0b00111111) &lt;&lt; 6 | (data[pos + 3] &amp; 0b00111111);</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;          <span class="keywordflow">if</span> (code_point &lt;= 0xffff || 0x10ffff &lt; code_point) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;          code_point -= 0x10000;</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;          uint16_t high_surrogate = uint16_t(0xD800 + (code_point &gt;&gt; 10));</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;          uint16_t low_surrogate = uint16_t(0xDC00 + (code_point &amp; 0x3FF));</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;          *utf16_output++ = char16_t(high_surrogate);</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;          *utf16_output++ = char16_t(low_surrogate);</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;          pos += 4;</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;          <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;        }</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;      }</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;      <span class="keywordflow">return</span> int(utf16_output - start);</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;    };</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;    <span class="keywordtype">size_t</span> codepoints = convert(input.data(), input.size(), buffer.get());</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;    <span class="keywordflow">if</span>(codepoints == 0) {</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;          out = std::nullopt;</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;    }</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;    <span class="keywordtype">int</span> required_buffer_size = IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, NULL, 0);</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160; </div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;    <span class="keywordflow">if</span>(required_buffer_size == 0) {</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;      out = std::nullopt;</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;    }</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160; </div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;    out = std::string(required_buffer_size, 0);</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    std::unique_ptr&lt;char16_t[]&gt; ascii_buffer(<span class="keyword">new</span> char16_t[required_buffer_size]);</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160; </div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    required_buffer_size = IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, (LPWSTR)ascii_buffer.get(), required_buffer_size);</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    <span class="keywordflow">if</span>(required_buffer_size == 0) {</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;      out = std::nullopt;</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;    }</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    <span class="comment">// This will not validate the punycode, so let us work it in reverse.</span></div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;    <span class="keywordtype">int</span> test_reverse = IdnToUnicode(IDN_ALLOW_UNASSIGNED, (LPCWSTR)ascii_buffer.get(), required_buffer_size, NULL, 0);</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;    <span class="keywordflow">if</span>(test_reverse == 0) {</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;      out = std::nullopt;</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;    }</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;    out = std::string(required_buffer_size, 0);</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">size_t</span> i = 0; i &lt; required_buffer_size; i++) { (*out)[i] = char(ascii_buffer.get()[i]); }</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;    out = std::string(255, 0);</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160; </div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;    UErrorCode status = U_ZERO_ERROR;</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;    uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160; </div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    <span class="keywordflow">if</span> (be_strict) {</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;      options |= UIDNA_USE_STD3_RULES;</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;    }</div>
 <div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160; </div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;    <span class="keywordflow">if</span> (status == U_BUFFER_OVERFLOW_ERROR) {</div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;      status = U_ZERO_ERROR;</div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;      out.value().resize(length);</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;      <span class="comment">// When be_strict is true, this should not be allowed!</span></div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;      length = uidna_nameToASCII_UTF8(uidna,</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;                                     input.data(),</div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;                                     int32_t(input.length()),</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;                                     out.value().data(), length,</div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;                                     &amp;info,</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;                                     &amp;status);</div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;    }</div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160; </div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;    <span class="comment">// A label contains hyphen-minus (&#39;-&#39;) in the third and fourth positions.</span></div>
-<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;    info.errors &amp;= ~UIDNA_ERROR_HYPHEN_3_4;</div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;    <span class="comment">// A label starts with a hyphen-minus (&#39;-&#39;).</span></div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;    info.errors &amp;= ~UIDNA_ERROR_LEADING_HYPHEN;</div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;    <span class="comment">// A label ends with a hyphen-minus (&#39;-&#39;).</span></div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;    info.errors &amp;= ~UIDNA_ERROR_TRAILING_HYPHEN;</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160; </div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;    <span class="keywordflow">if</span> (!be_strict) { <span class="comment">// This seems to violate RFC 1035 section 2.3.4.</span></div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;      <span class="comment">// A non-final domain name label (or the whole domain name) is empty.</span></div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;      info.errors &amp;= ~UIDNA_ERROR_EMPTY_LABEL;</div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;      <span class="comment">// A domain name label is longer than 63 bytes.</span></div>
-<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;      info.errors &amp;= ~UIDNA_ERROR_LABEL_TOO_LONG;</div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;      <span class="comment">// A domain name is longer than 255 bytes in its storage form.</span></div>
-<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;      info.errors &amp;= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;</div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    }</div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160; </div>
-<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;    uidna_close(uidna);</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;    UIDNA* uidna = uidna_openUTS46(options, &amp;status);</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;    <span class="keywordflow">if</span> (U_FAILURE(status)) {</div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;    }</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160; </div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;    UIDNAInfo info = UIDNA_INFO_INITIALIZER;</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    <span class="comment">// RFC 1035 section 2.3.4.</span></div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;    <span class="comment">// The domain  name must be at most 255 octets.</span></div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;    <span class="comment">// It cannot contain a label longer than 63 octets.</span></div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;    <span class="comment">// Thus we should never need more than 255 octets, if we</span></div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;    <span class="comment">// do the domain name is in error.</span></div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;    int32_t length = uidna_nameToASCII_UTF8(uidna,</div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;                                         input.data(),</div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;                                         int32_t(input.length()),</div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;                                         out.value().data(), 255,</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;                                         &amp;info,</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;                                         &amp;status);</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160; </div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;    <span class="keywordflow">if</span> (status == U_BUFFER_OVERFLOW_ERROR) {</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;      status = U_ZERO_ERROR;</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;      out.value().resize(length);</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;      <span class="comment">// When be_strict is true, this should not be allowed!</span></div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;      length = uidna_nameToASCII_UTF8(uidna,</div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;                                     input.data(),</div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;                                     int32_t(input.length()),</div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;                                     out.value().data(), length,</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;                                     &amp;info,</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;                                     &amp;status);</div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;    }</div>
 <div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160; </div>
-<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;    <span class="keywordflow">if</span> (U_FAILURE(status) || info.errors != 0 || length == 0) {</div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;      out = std::nullopt;</div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;    }</div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;    out.value().resize(length); <span class="comment">// we possibly want to call :shrink_to_fit otherwise we use 255 bytes.</span></div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;    out.value().shrink_to_fit();</div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;    <span class="keywordflow">if</span>(std::any_of(out.value().begin(), out.value().end(), <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924">ada::unicode::is_forbidden_domain_code_point</a>)) {</div>
-<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;      out = std::nullopt;</div>
-<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;    }</div>
-<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;  }</div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160; </div>
-<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;} <span class="comment">// namespace ada::unicode</span></div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;    <span class="comment">// A label contains hyphen-minus (&#39;-&#39;) in the third and fourth positions.</span></div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;    info.errors &amp;= ~UIDNA_ERROR_HYPHEN_3_4;</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;    <span class="comment">// A label starts with a hyphen-minus (&#39;-&#39;).</span></div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;    info.errors &amp;= ~UIDNA_ERROR_LEADING_HYPHEN;</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;    <span class="comment">// A label ends with a hyphen-minus (&#39;-&#39;).</span></div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;    info.errors &amp;= ~UIDNA_ERROR_TRAILING_HYPHEN;</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160; </div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;    <span class="keywordflow">if</span> (!be_strict) { <span class="comment">// This seems to violate RFC 1035 section 2.3.4.</span></div>
+<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;      <span class="comment">// A non-final domain name label (or the whole domain name) is empty.</span></div>
+<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;      info.errors &amp;= ~UIDNA_ERROR_EMPTY_LABEL;</div>
+<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;      <span class="comment">// A domain name label is longer than 63 bytes.</span></div>
+<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;      info.errors &amp;= ~UIDNA_ERROR_LABEL_TOO_LONG;</div>
+<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;      <span class="comment">// A domain name is longer than 255 bytes in its storage form.</span></div>
+<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;      info.errors &amp;= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;</div>
+<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;    }</div>
+<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160; </div>
+<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;    uidna_close(uidna);</div>
+<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160; </div>
+<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;    <span class="keywordflow">if</span> (U_FAILURE(status) || info.errors != 0 || length == 0) {</div>
+<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;      out = std::nullopt;</div>
+<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;    }</div>
+<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    out.value().resize(length); <span class="comment">// we possibly want to call :shrink_to_fit otherwise we use 255 bytes.</span></div>
+<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;    out.value().shrink_to_fit();</div>
+<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;    <span class="keywordflow">if</span>(std::any_of(out.value().begin(), out.value().end(), <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924">ada::unicode::is_forbidden_domain_code_point</a>)) {</div>
+<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;      out = std::nullopt;</div>
+<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;    }</div>
+<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;  }</div>
+<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160; </div>
+<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;} <span class="comment">// namespace ada::unicode</span></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div></div>
 <div class="ttc" id="acharacter__sets_8h_html"><div class="ttname"><a href="../../d3/d4e/character__sets_8h.html">character_sets.h</a></div><div class="ttdoc">Definitions of the character sets used by unicode functions.</div></div>
-<div class="ttc" id="acommon__defs_8h_html_a07d379d8d79da994acde714818eaefbe"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#a07d379d8d79da994acde714818eaefbe">ada_constexpr</a></div><div class="ttdeci">#define ada_constexpr</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00177">common_defs.h:177</a></div></div>
-<div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00085">common_defs.h:85</a></div></div>
+<div class="ttc" id="acommon__defs_8h_html_a07d379d8d79da994acde714818eaefbe"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#a07d379d8d79da994acde714818eaefbe">ada_constexpr</a></div><div class="ttdeci">#define ada_constexpr</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00170">common_defs.h:170</a></div></div>
+<div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00078">common_defs.h:78</a></div></div>
 <div class="ttc" id="anamespaceada_1_1character__sets_html_aee6c8e39f71490cb037234f38bfdc5f9"><div class="ttname"><a href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">ada::character_sets::bit_at</a></div><div class="ttdeci">ada_really_inline bool bit_at(const uint8_t a[], const uint8_t i)</div><div class="ttdef"><b>Definition:</b> <a href="../../d3/d4e/character__sets_8h_source.html#l00451">character_sets.h:451</a></div></div>
 <div class="ttc" id="anamespaceada_1_1character__sets_html_af0a664da2aca1e06bb14bb068f62f27d"><div class="ttname"><a href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">ada::character_sets::hex</a></div><div class="ttdeci">constexpr char hex[1024]</div><div class="ttdef"><b>Definition:</b> <a href="../../d3/d4e/character__sets_8h_source.html#l00015">character_sets.h:15</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html">ada::unicode</a></div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d90/unicode_8h_source.html#l00012">unicode.h:12</a></div></div>
@@ -577,7 +595,7 @@ $(document).ready(function(){initNavTree('dd/d9c/unicode_8cpp_source.html','../.
 <div class="ttc" id="anamespaceada_1_1unicode_html_a7c997c07906bb9e6ce09e5bab8e8364f"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f">ada::unicode::table_is_double_dot_path_segment</a></div><div class="ttdeci">constexpr std::string_view table_is_double_dot_path_segment[]</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00176">unicode.cpp:176</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_aa2115611b3343d6cb28f476badf41924"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924">ada::unicode::is_forbidden_domain_code_point</a></div><div class="ttdeci">constexpr ada_really_inline bool is_forbidden_domain_code_point(const char c) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00105">unicode.cpp:105</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_aa39138fa1cd1de15cc179bc970d8e9cb"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#aa39138fa1cd1de15cc179bc970d8e9cb">ada::unicode::is_lowercase_hex</a></div><div class="ttdeci">constexpr ada_really_inline bool is_lowercase_hex(const char c) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00219">unicode.cpp:219</a></div></div>
-<div class="ttc" id="anamespaceada_1_1unicode_html_ac8772e2727fff9bbb4c12bc68040f3b8"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">ada::unicode::to_ascii</a></div><div class="ttdeci">bool to_ascii(std::optional&lt; std::string &gt; &amp;out, std::string_view plain, bool be_strict, size_t first_percent)</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00284">unicode.cpp:284</a></div></div>
+<div class="ttc" id="anamespaceada_1_1unicode_html_ac8772e2727fff9bbb4c12bc68040f3b8"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">ada::unicode::to_ascii</a></div><div class="ttdeci">bool to_ascii(std::optional&lt; std::string &gt; &amp;out, std::string_view plain, bool be_strict, size_t first_percent)</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00302">unicode.cpp:302</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_acf371f0a0ee8c11dfaedb1963be2c57a"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a">ada::unicode::percent_decode</a></div><div class="ttdeci">std::string percent_decode(const std::string_view input, size_t first_percent)</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00230">unicode.cpp:230</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_ad3f83e3d837a2451c194e82e9f3bf9ae"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#ad3f83e3d837a2451c194e82e9f3bf9ae">ada::unicode::is_single_dot_path_segment</a></div><div class="ttdeci">constexpr ada_really_inline bool is_single_dot_path_segment(const std::string_view input) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00215">unicode.cpp:215</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_adca6f3cd4ba58e901c7a357030d6ada5"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#adca6f3cd4ba58e901c7a357030d6ada5">ada::unicode::is_ascii_hex_digit</a></div><div class="ttdeci">constexpr ada_really_inline bool is_ascii_hex_digit(const char c) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00164">unicode.cpp:164</a></div></div>

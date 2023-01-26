@@ -1,8 +1,27 @@
 var searchData=
 [
-  ['table_5fis_5fdouble_5fdot_5fpath_5fsegment_188',['table_is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f',1,'ada::unicode']]],
-  ['to_5fascii_189',['to_ascii',['../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8',1,'ada::unicode']]],
-  ['to_5flower_190',['to_lower',['../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b',1,'ada::checkers']]],
-  ['to_5fstring_191',['to_string',['../dd/d03/structada_1_1url.html#abc08ed1a346e39113d5c5724c5f89a9f',1,'ada::url::to_string()'],['../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7',1,'ada::to_string(encoding_type type)'],['../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6',1,'ada::to_string(ada::state s)']]],
-  ['type_192',['type',['../dd/d03/structada_1_1url.html#a13a05be717dfb0d8e6917936489c2870',1,'ada::url::type()'],['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573f',1,'ada::scheme::type()']]]
+  ['scheme_167',['SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a3a70b5d6e416eeccda948d3ccc246f25',1,'ada']]],
+  ['scheme_2eh_168',['scheme.h',['../d2/d64/scheme_8h.html',1,'']]],
+  ['scheme_5fdefault_5fport_169',['scheme_default_port',['../dd/d03/structada_1_1url.html#a780b3f0755dd31a2d4269557632f4382',1,'ada::url']]],
+  ['scheme_5fstart_170',['SCHEME_START',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae773385c8d9dd6358a604116b8fb188c',1,'ada']]],
+  ['scriptpath_171',['SCRIPTPATH',['../dd/d27/namespaceamalgamate.html#a4a8067b8f5f73e6aae229884741421be',1,'amalgamate']]],
+  ['serializers_2ecpp_172',['serializers.cpp',['../da/d84/serializers_8cpp.html',1,'']]],
+  ['serializers_2eh_173',['serializers.h',['../d7/d2e/serializers_8h.html',1,'']]],
+  ['set_5fhash_174',['set_hash',['../dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd',1,'ada']]],
+  ['set_5fhost_175',['set_host',['../dd/d64/namespaceada.html#a7ca26ace03973d89717bb497fc37e23e',1,'ada']]],
+  ['set_5fpassword_176',['set_password',['../dd/d64/namespaceada.html#a785adb334c0c35b239300e57a7bf4e92',1,'ada']]],
+  ['set_5fpathname_177',['set_pathname',['../dd/d64/namespaceada.html#aa536094847af2b3ab9522b864ea10f35',1,'ada']]],
+  ['set_5fport_178',['set_port',['../dd/d64/namespaceada.html#ab7f2aa9e82bb9baa76af5cf1f51b0b89',1,'ada']]],
+  ['set_5fscheme_179',['set_scheme',['../dd/d03/structada_1_1url.html#a60da389021781ad9586898c79a9ce860',1,'ada::url::set_scheme()'],['../dd/d64/namespaceada.html#a59d29dcb29e502fc33a489f76b3de40b',1,'ada::set_scheme(ada::url &amp;base, std::string input, ada::encoding_type encoding=ada::encoding_type::UTF8) noexcept']]],
+  ['set_5fsearch_180',['set_search',['../dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96',1,'ada']]],
+  ['set_5fusername_181',['set_username',['../dd/d64/namespaceada.html#a59d7a18796b38a87d2a1d35c2ded2621',1,'ada']]],
+  ['shorten_5fpath_182',['shorten_path',['../d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00',1,'ada::helpers']]],
+  ['special_5fauthority_5fignore_5fslashes_183',['SPECIAL_AUTHORITY_IGNORE_SLASHES',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae65c30c3a220bc0aae9e11dc316c4625',1,'ada']]],
+  ['special_5fauthority_5fslashes_184',['SPECIAL_AUTHORITY_SLASHES',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5839c72e828b49749aa4a8f390a8d097',1,'ada']]],
+  ['special_5fports_185',['special_ports',['../d1/dfb/namespaceada_1_1scheme_1_1details.html#a75649c394af1b43d325ac9fffde2e2a3',1,'ada::scheme::details']]],
+  ['special_5fquery_5fpercent_5fencode_186',['SPECIAL_QUERY_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a2a5253f4fefdf61c146c4daf9a3633b9',1,'ada::character_sets']]],
+  ['special_5frelative_5for_5fauthority_187',['SPECIAL_RELATIVE_OR_AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a218882a191c9c4136a977c25b895eaff',1,'ada']]],
+  ['state_188',['state',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574',1,'ada']]],
+  ['state_2eh_189',['state.h',['../db/d3b/state_8h.html',1,'']]],
+  ['substring_190',['substring',['../d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06',1,'ada::helpers']]]
 ];

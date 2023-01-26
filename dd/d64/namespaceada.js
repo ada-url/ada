@@ -28,7 +28,8 @@ var namespaceada =
       [ "get_state", "d7/d6c/namespaceada_1_1helpers.html#a6b55d7d7b1918e00a9a1eeb3c91b8f90", null ],
       [ "prune_fragment", "d7/d6c/namespaceada_1_1helpers.html#a27195c97e4ce5f8bf9187e5b24a478ba", null ],
       [ "remove_ascii_tab_or_newline", "d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e", null ],
-      [ "shorten_path", "d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00", null ]
+      [ "shorten_path", "d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00", null ],
+      [ "substring", "d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06", null ]
     ] ],
     [ "parser", "d6/da3/namespaceada_1_1parser.html", [
       [ "parse_url", "d6/da3/namespaceada_1_1parser.html#acf6921efe6f055295a77113a5f1f94dc", null ]
@@ -53,6 +54,7 @@ var namespaceada =
       [ "is_single_dot_path_segment", "d2/dc3/namespaceada_1_1unicode.html#ad3f83e3d837a2451c194e82e9f3bf9ae", null ],
       [ "percent_decode", "d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a", null ],
       [ "percent_encode", "d2/dc3/namespaceada_1_1unicode.html#a1c564a30bc61d41abd97cc6b8be084ff", null ],
+      [ "percent_encode", "d2/dc3/namespaceada_1_1unicode.html#ab23d66383793f477b4f89f1d4cfd6bf9", null ],
       [ "to_ascii", "d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8", null ],
       [ "is_alnum_plus_table", "d2/dc3/namespaceada_1_1unicode.html#a505b0da95aca0b4581df4d320ea50312", null ],
       [ "is_forbidden_domain_code_point_table", "d2/dc3/namespaceada_1_1unicode.html#a4dfb968a9eed76414c1fd18a706aac98", null ],
@@ -87,6 +89,10 @@ var namespaceada =
       [ "OPAQUE_PATH", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd", null ],
       [ "PORT", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5", null ]
     ] ],
+    [ "inner_log", "dd/d64/namespaceada.html#aaf07b88d6b2dac9b867d6bad8cc14c62", null ],
+    [ "inner_log", "dd/d64/namespaceada.html#accd48d9920d0d0f514a2a3efc7cd480f", null ],
+    [ "log", "dd/d64/namespaceada.html#a91a11522733883fc916671a2a6b182c3", null ],
+    [ "log", "dd/d64/namespaceada.html#a326c61beec709ba92c05e1d373503b04", null ],
     [ "parse", "dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867", null ],
     [ "set_hash", "dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd", null ],
     [ "set_host", "dd/d64/namespaceada.html#a7ca26ace03973d89717bb497fc37e23e", null ],

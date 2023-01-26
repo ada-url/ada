@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['opaque_5fpath_129',['OPAQUE_PATH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd',1,'ada']]],
-  ['operator_3d_130',['operator=',['../dd/d03/structada_1_1url.html#afceb274295a92e2715303a19c994bf52',1,'ada::url::operator=(url &amp;&amp;u)=default'],['../dd/d03/structada_1_1url.html#a5b9014ee57227d8083ffc5516cc96fe0',1,'ada::url::operator=(const url &amp;u)=default']]]
+  ['no_5fscheme_128',['NO_SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab6e5680904440aafe18fa12e655b1397',1,'ada']]],
+  ['non_5fspecial_5fscheme_129',['non_special_scheme',['../dd/d03/structada_1_1url.html#a10dc22b0fc00645086d67a2f250e426b',1,'ada::url']]],
+  ['not_5fspecial_130',['NOT_SPECIAL',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faaff84b9b3b0f0f7c8f56b9a01f3107af',1,'ada::scheme']]]
 ];

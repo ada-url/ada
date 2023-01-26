@@ -1,26 +1,8 @@
 var searchData=
 [
-  ['scheme_165',['SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a3a70b5d6e416eeccda948d3ccc246f25',1,'ada']]],
-  ['scheme_2eh_166',['scheme.h',['../d2/d64/scheme_8h.html',1,'']]],
-  ['scheme_5fdefault_5fport_167',['scheme_default_port',['../dd/d03/structada_1_1url.html#a780b3f0755dd31a2d4269557632f4382',1,'ada::url']]],
-  ['scheme_5fstart_168',['SCHEME_START',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae773385c8d9dd6358a604116b8fb188c',1,'ada']]],
-  ['scriptpath_169',['SCRIPTPATH',['../dd/d27/namespaceamalgamate.html#a4a8067b8f5f73e6aae229884741421be',1,'amalgamate']]],
-  ['serializers_2ecpp_170',['serializers.cpp',['../da/d84/serializers_8cpp.html',1,'']]],
-  ['serializers_2eh_171',['serializers.h',['../d7/d2e/serializers_8h.html',1,'']]],
-  ['set_5fhash_172',['set_hash',['../dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd',1,'ada']]],
-  ['set_5fhost_173',['set_host',['../dd/d64/namespaceada.html#a7ca26ace03973d89717bb497fc37e23e',1,'ada']]],
-  ['set_5fpassword_174',['set_password',['../dd/d64/namespaceada.html#a785adb334c0c35b239300e57a7bf4e92',1,'ada']]],
-  ['set_5fpathname_175',['set_pathname',['../dd/d64/namespaceada.html#aa536094847af2b3ab9522b864ea10f35',1,'ada']]],
-  ['set_5fport_176',['set_port',['../dd/d64/namespaceada.html#ab7f2aa9e82bb9baa76af5cf1f51b0b89',1,'ada']]],
-  ['set_5fscheme_177',['set_scheme',['../dd/d03/structada_1_1url.html#a60da389021781ad9586898c79a9ce860',1,'ada::url::set_scheme()'],['../dd/d64/namespaceada.html#a59d29dcb29e502fc33a489f76b3de40b',1,'ada::set_scheme(ada::url &amp;base, std::string input, ada::encoding_type encoding=ada::encoding_type::UTF8) noexcept']]],
-  ['set_5fsearch_178',['set_search',['../dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96',1,'ada']]],
-  ['set_5fusername_179',['set_username',['../dd/d64/namespaceada.html#a59d7a18796b38a87d2a1d35c2ded2621',1,'ada']]],
-  ['shorten_5fpath_180',['shorten_path',['../d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00',1,'ada::helpers']]],
-  ['special_5fauthority_5fignore_5fslashes_181',['SPECIAL_AUTHORITY_IGNORE_SLASHES',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae65c30c3a220bc0aae9e11dc316c4625',1,'ada']]],
-  ['special_5fauthority_5fslashes_182',['SPECIAL_AUTHORITY_SLASHES',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5839c72e828b49749aa4a8f390a8d097',1,'ada']]],
-  ['special_5fports_183',['special_ports',['../d1/dfb/namespaceada_1_1scheme_1_1details.html#a75649c394af1b43d325ac9fffde2e2a3',1,'ada::scheme::details']]],
-  ['special_5fquery_5fpercent_5fencode_184',['SPECIAL_QUERY_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a2a5253f4fefdf61c146c4daf9a3633b9',1,'ada::character_sets']]],
-  ['special_5frelative_5for_5fauthority_185',['SPECIAL_RELATIVE_OR_AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a218882a191c9c4136a977c25b895eaff',1,'ada']]],
-  ['state_186',['state',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574',1,'ada']]],
-  ['state_2eh_187',['state.h',['../db/d3b/state_8h.html',1,'']]]
+  ['readme_162',['README',['../dd/d27/namespaceamalgamate.html#a47203a1cf56ed0e239ef955d04393cd5',1,'amalgamate']]],
+  ['readme_2emd_163',['README.md',['../da/ddd/README_8md.html',1,'(Global Namespace)'],['../d0/d6a/singleheader_2README_8md.html',1,'(Global Namespace)']]],
+  ['relative_5fscheme_164',['RELATIVE_SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ad418402f9786d8d940e8cbb595090523',1,'ada']]],
+  ['relative_5fslash_165',['RELATIVE_SLASH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ec740dccfce73682b0fc766b3367b20',1,'ada']]],
+  ['remove_5fascii_5ftab_5for_5fnewline_166',['remove_ascii_tab_or_newline',['../d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e',1,'ada::helpers']]]
 ];

@@ -123,6 +123,8 @@ Functions</h2></td></tr>
 <tr class="separator:acf371f0a0ee8c11dfaedb1963be2c57a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c564a30bc61d41abd97cc6b8be084ff"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a1c564a30bc61d41abd97cc6b8be084ff">percent_encode</a> (const std::string_view input, const uint8_t character_set[])</td></tr>
 <tr class="separator:a1c564a30bc61d41abd97cc6b8be084ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab23d66383793f477b4f89f1d4cfd6bf9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#ab23d66383793f477b4f89f1d4cfd6bf9">percent_encode</a> (const std::string_view input, const uint8_t character_set[], std::string &amp;out)</td></tr>
+<tr class="separator:ab23d66383793f477b4f89f1d4cfd6bf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -386,7 +388,7 @@ Variables</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a4dfb968a9eed76414c1fd18a706aac98">is_forbidden_domain_code_point_table</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#a632976433d794ba46478c47c4dc8a68c">ada::url::parse_host()</a>, and <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">to_ascii()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#aa67987a8657d7f509e3ef246ce0fd723">ada::url::parse_host()</a>, and <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">to_ascii()</a>.</p>
 
 </div>
 </div>
@@ -419,7 +421,7 @@ Variables</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#aedf60884c2f9bf443a974d29741a7d11">is_forbidden_host_code_point_table</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#ad0b179470113b71938405ddaa72940e6">ada::url::parse_opaque_host()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#a968773612d08fe064965924bad49e50f">ada::url::parse_opaque_host()</a>.</p>
 
 </div>
 </div>
@@ -525,7 +527,7 @@ Variables</h2></td></tr>
 </div>
 </div>
 <a id="a1c564a30bc61d41abd97cc6b8be084ff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c564a30bc61d41abd97cc6b8be084ff">&#9670;&nbsp;</a></span>percent_encode()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c564a30bc61d41abd97cc6b8be084ff">&#9670;&nbsp;</a></span>percent_encode() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -549,13 +551,52 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a href="https://github.com/nodejs/node/blob/main/src/node_url.cc#L226">https://github.com/nodejs/node/blob/main/src/node_url.cc#L226</a> </dd></dl>
+<p>Returns a percent-encoding string whether percent encoding was needed or not. </p><dl class="section see"><dt>See also</dt><dd><a href="https://github.com/nodejs/node/blob/main/src/node_url.cc#L226">https://github.com/nodejs/node/blob/main/src/node_url.cc#L226</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00261">261</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">ada::character_sets::bit_at()</a>, and <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">ada::character_sets::hex</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#ad0b179470113b71938405ddaa72940e6">ada::url::parse_opaque_host()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#aee5124577360879845d6559f5b82514b">ada::url::parse_prepared_path()</a>, <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#acf6921efe6f055295a77113a5f1f94dc">ada::parser::parse_url()</a>, <a class="el" href="../../dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd">ada::set_hash()</a>, <a class="el" href="../../dd/d64/namespaceada.html#a785adb334c0c35b239300e57a7bf4e92">ada::set_password()</a>, <a class="el" href="../../dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96">ada::set_search()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a59d7a18796b38a87d2a1d35c2ded2621">ada::set_username()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#a968773612d08fe064965924bad49e50f">ada::url::parse_opaque_host()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#aee5124577360879845d6559f5b82514b">ada::url::parse_prepared_path()</a>, <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#acf6921efe6f055295a77113a5f1f94dc">ada::parser::parse_url()</a>, <a class="el" href="../../dd/d64/namespaceada.html#ad72365f73c117b6c6674ea6f441899cd">ada::set_hash()</a>, <a class="el" href="../../dd/d64/namespaceada.html#a785adb334c0c35b239300e57a7bf4e92">ada::set_password()</a>, <a class="el" href="../../dd/d64/namespaceada.html#ab5a1b65aee051e0e6bbb1aa6fc916f96">ada::set_search()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a59d7a18796b38a87d2a1d35c2ded2621">ada::set_username()</a>.</p>
+
+</div>
+</div>
+<a id="ab23d66383793f477b4f89f1d4cfd6bf9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab23d66383793f477b4f89f1d4cfd6bf9">&#9670;&nbsp;</a></span>percent_encode() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ada::unicode::percent_encode </td>
+          <td>(</td>
+          <td class="paramtype">const std::string_view&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t&#160;</td>
+          <td class="paramname"><em>character_set</em>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>out</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns true if percent encoding was needed, in which case, we store the percent-encoded content in 'out'. Otherwise, out is left unchanged. </p><dl class="section see"><dt>See also</dt><dd><a href="https://github.com/nodejs/node/blob/main/src/node_url.cc#L226">https://github.com/nodejs/node/blob/main/src/node_url.cc#L226</a> </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00283">283</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">ada::character_sets::bit_at()</a>, and <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">ada::character_sets::hex</a>.</p>
 
 </div>
 </div>
@@ -611,11 +652,11 @@ Variables</h2></td></tr>
 <p>The resulting strings should not exceed 255 octets according to RFC 1035 section 2.3.4. ICU checks for label size and domain size, but if we pass "be_strict = false", these errors are ignored.</p>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#concept-domain-to-ascii">https://url.spec.whatwg.org/#concept-domain-to-ascii</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00284">284</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00302">302</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924">is_forbidden_domain_code_point()</a>, and <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a">percent_decode()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#a632976433d794ba46478c47c4dc8a68c">ada::url::parse_host()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#aa67987a8657d7f509e3ef246ce0fd723">ada::url::parse_host()</a>.</p>
 
 </div>
 </div>

@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['readme_160',['README',['../dd/d27/namespaceamalgamate.html#a47203a1cf56ed0e239ef955d04393cd5',1,'amalgamate']]],
-  ['readme_2emd_161',['README.md',['../da/ddd/README_8md.html',1,'(Global Namespace)'],['../d0/d6a/singleheader_2README_8md.html',1,'(Global Namespace)']]],
-  ['relative_5fscheme_162',['RELATIVE_SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ad418402f9786d8d940e8cbb595090523',1,'ada']]],
-  ['relative_5fslash_163',['RELATIVE_SLASH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ec740dccfce73682b0fc766b3367b20',1,'ada']]],
-  ['remove_5fascii_5ftab_5for_5fnewline_164',['remove_ascii_tab_or_newline',['../d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e',1,'ada::helpers']]]
+  ['query_159',['query',['../dd/d03/structada_1_1url.html#ab6c0677370240d12fbe5ee0b66d2cafe',1,'ada::url']]],
+  ['query_160',['QUERY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5662080872eece1e1ceeec5750198283',1,'ada']]],
+  ['query_5fpercent_5fencode_161',['QUERY_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a18aa23e2f62732f939016a46b0b5e94b',1,'ada::character_sets']]]
 ];

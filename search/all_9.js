@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['implementation_2ecpp_100',['implementation.cpp',['../d8/df6/implementation_8cpp.html',1,'']]],
-  ['implementation_2eh_101',['implementation.h',['../dd/d6b/implementation_8h.html',1,'']]],
-  ['includes_5fcredentials_102',['includes_credentials',['../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b',1,'ada::url']]],
+  ['implementation_2ecpp_99',['implementation.cpp',['../d8/df6/implementation_8cpp.html',1,'']]],
+  ['implementation_2eh_100',['implementation.h',['../dd/d6b/implementation_8h.html',1,'']]],
+  ['includes_5fcredentials_101',['includes_credentials',['../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b',1,'ada::url']]],
+  ['inner_5flog_102',['inner_log',['../dd/d64/namespaceada.html#aaf07b88d6b2dac9b867d6bad8cc14c62',1,'ada::inner_log([[maybe_unused]] T t)'],['../dd/d64/namespaceada.html#accd48d9920d0d0f514a2a3efc7cd480f',1,'ada::inner_log([[maybe_unused]] T t, [[maybe_unused]] Args... args)']]],
   ['ipv4_103',['ipv4',['../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5',1,'ada::serializers']]],
   ['ipv6_104',['ipv6',['../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4',1,'ada::serializers']]],
   ['is_5falnum_5fplus_105',['is_alnum_plus',['../d2/dc3/namespaceada_1_1unicode.html#a7c53b50b81eb6f56629dc55a26908700',1,'ada::unicode']]],

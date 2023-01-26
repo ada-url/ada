@@ -13,6 +13,7 @@ var unicode_8cpp =
     [ "is_single_dot_path_segment", "dd/d9c/unicode_8cpp.html#ad3f83e3d837a2451c194e82e9f3bf9ae", null ],
     [ "percent_decode", "dd/d9c/unicode_8cpp.html#acf371f0a0ee8c11dfaedb1963be2c57a", null ],
     [ "percent_encode", "dd/d9c/unicode_8cpp.html#a1c564a30bc61d41abd97cc6b8be084ff", null ],
+    [ "percent_encode", "dd/d9c/unicode_8cpp.html#ab23d66383793f477b4f89f1d4cfd6bf9", null ],
     [ "to_ascii", "dd/d9c/unicode_8cpp.html#ac8772e2727fff9bbb4c12bc68040f3b8", null ],
     [ "is_alnum_plus_table", "dd/d9c/unicode_8cpp.html#a505b0da95aca0b4581df4d320ea50312", null ],
     [ "is_forbidden_domain_code_point_table", "dd/d9c/unicode_8cpp.html#a4dfb968a9eed76414c1fd18a706aac98", null ],

@@ -1,14 +1,8 @@
 var searchData=
 [
-  ['unicode_2ecpp_193',['unicode.cpp',['../dd/d9c/unicode_8cpp.html',1,'']]],
-  ['unicode_2eh_194',['unicode.h',['../dd/d90/unicode_8h.html',1,'']]],
-  ['unreachable_195',['unreachable',['../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d',1,'ada']]],
-  ['url_196',['url',['../dd/d03/structada_1_1url.html',1,'ada::url'],['../dd/d03/structada_1_1url.html#a842ca2e00db267baba8f0b5a08d7a130',1,'ada::url::url()=default'],['../dd/d03/structada_1_1url.html#a7c686183f4195f5059993e97e64fd537',1,'ada::url::url(const url &amp;u)=default'],['../dd/d03/structada_1_1url.html#aed59571413fc35e37886a280f798ec41',1,'ada::url::url(url &amp;&amp;u)=default']]],
-  ['url_2ecpp_197',['url.cpp',['../d6/d0e/url_8cpp.html',1,'']]],
-  ['url_2eh_198',['url.h',['../df/db8/url_8h.html',1,'']]],
-  ['userinfo_5fpercent_5fencode_199',['USERINFO_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da',1,'ada::character_sets']]],
-  ['username_200',['username',['../dd/d03/structada_1_1url.html#a00f020317fd55f204a7c64868d5e15c7',1,'ada::url']]],
-  ['utf8_201',['UTF8',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1',1,'ada']]],
-  ['utf_5f16be_202',['UTF_16BE',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84',1,'ada']]],
-  ['utf_5f16le_203',['UTF_16LE',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240',1,'ada']]]
+  ['table_5fis_5fdouble_5fdot_5fpath_5fsegment_191',['table_is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f',1,'ada::unicode']]],
+  ['to_5fascii_192',['to_ascii',['../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8',1,'ada::unicode']]],
+  ['to_5flower_193',['to_lower',['../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b',1,'ada::checkers']]],
+  ['to_5fstring_194',['to_string',['../dd/d03/structada_1_1url.html#abc08ed1a346e39113d5c5724c5f89a9f',1,'ada::url::to_string()'],['../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7',1,'ada::to_string(encoding_type type)'],['../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6',1,'ada::to_string(ada::state s)']]],
+  ['type_195',['type',['../dd/d03/structada_1_1url.html#a13a05be717dfb0d8e6917936489c2870',1,'ada::url::type()'],['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573f',1,'ada::scheme::type()']]]
 ];

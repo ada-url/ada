@@ -7,6 +7,7 @@ var dir_34d9464866e8421e4e78493bdf5982a5 =
     [ "encoding_type.h", "d0/dbb/encoding__type_8h.html", "d0/dbb/encoding__type_8h" ],
     [ "helpers.h", "d1/d98/helpers_8h.html", "d1/d98/helpers_8h" ],
     [ "implementation.h", "dd/d6b/implementation_8h.html", "dd/d6b/implementation_8h" ],
+    [ "log.h", "d7/d7f/log_8h.html", "d7/d7f/log_8h" ],
     [ "parser.h", "d5/d36/parser_8h.html", "d5/d36/parser_8h" ],
     [ "scheme.h", "d2/d64/scheme_8h.html", "d2/d64/scheme_8h" ],
     [ "serializers.h", "d7/d2e/serializers_8h.html", "d7/d2e/serializers_8h" ],
