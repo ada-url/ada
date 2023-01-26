@@ -1,12 +1,6 @@
 #ifndef ADA_H
 #define ADA_H
 
-
-#ifndef ADA_DEVELOP_MODE
-#define ADA_DEVELOP_MODE 1 /* Should be set to 0 in a release. */
-#endif
-
-
 #include "ada/character_sets.h"
 #include "ada/checkers.h"
 #include "ada/common_defs.h"
