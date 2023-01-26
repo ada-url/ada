@@ -86,3 +86,7 @@ ada::url url = ada::parse("https://www.google.com");
 url.set_hash("is-this-the-real-life");
 // url.get_hash() will return "#is-this-the-real-life"
 ```
+
+## Amalgamation
+
+You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) by typing executing the Python 3 script `singleheader/amalgamate.py`. By default, the files are created in the `singleheader` directory.
