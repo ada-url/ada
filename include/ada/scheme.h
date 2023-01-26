@@ -11,8 +11,6 @@
 #include <optional>
 #include <string>
 
-
-
 namespace ada::scheme {
   /**
    * Type of the scheme as an enum.

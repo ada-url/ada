@@ -9,9 +9,11 @@
 #include "ada/scheme.h"
 #include "ada/common_defs.h"
 #include "ada/serializers.h"
+#include "ada/unicode.h"
 #include "ada/log.h"
 
 
+#include <algorithm>
 #include <charconv>
 #include <optional>
 #include <iostream>
@@ -27,40 +29,159 @@ namespace ada {
    */
   struct url {
     /**
+     * @private
      * A URL’s username is an ASCII string identifying a username. It is initially the empty string.
      */
     std::string username{};
 
     /**
+     * @private
      * A URL’s password is an ASCII string identifying a password. It is initially the empty string.
      */
     std::string password{};
 
     /**
+     * @private
      * A URL’s host is null or a host. It is initially null.
      */
     std::optional<std::string> host{};
 
     /**
+     * @private
      * A URL’s port is either null or a 16-bit unsigned integer that identifies a networking port. It is initially null.
      */
     std::optional<uint16_t> port{};
 
     /**
+     * @private
      * A URL’s path is either an ASCII string or a list of zero or more ASCII strings, usually identifying a location.
      */
     std::string path{};
 
     /**
+     * @private
      * A URL’s query is either null or an ASCII string. It is initially null.
      */
     std::optional<std::string> query{};
 
     /**
+     * @private
      * A URL’s fragment is either null or an ASCII string that can be used for further processing on the resource
      * the URL’s other components identify. It is initially null.
      */
     std::optional<std::string> fragment{};
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-href
+     * @see https://url.spec.whatwg.org/#concept-url-serializer
+     */
+    [[nodiscard]] std::string get_href() const noexcept;
+
+    /**
+     * The origin getter steps are to return the serialization of this’s URL’s origin. [HTML]
+     * @see https://url.spec.whatwg.org/#concept-url-origin
+     */
+    [[nodiscard]] std::string get_origin() const noexcept;
+
+    /**
+     * The protocol getter steps are to return this’s URL’s scheme, followed by U+003A (:).
+     * @see https://url.spec.whatwg.org/#dom-url-protocol
+     */
+    [[nodiscard]] std::string get_protocol() const noexcept;
+
+    /**
+     * Return url’s host, serialized, followed by U+003A (:) and url’s port, serialized.
+     * @see https://url.spec.whatwg.org/#dom-url-host
+     */
+    [[nodiscard]] std::string get_host() const noexcept;
+
+    /**
+     * Return this’s URL’s host, serialized.
+     * @see https://url.spec.whatwg.org/#dom-url-hostname
+     */
+    [[nodiscard]] std::string get_hostname() const noexcept;
+
+    /**
+     * The pathname getter steps are to return the result of URL path serializing this’s URL.
+     * @see https://url.spec.whatwg.org/#dom-url-pathname
+     */
+    [[nodiscard]] std::string get_pathname() const noexcept;
+
+    /**
+     * Return U+003F (?), followed by this’s URL’s query.
+     * @see https://url.spec.whatwg.org/#dom-url-search
+     */
+    [[nodiscard]] std::string get_search() const noexcept;
+
+    /**
+     * The username getter steps are to return this’s URL’s username.
+     * @see https://url.spec.whatwg.org/#dom-url-username
+     */
+    [[nodiscard]] std::string get_username() const noexcept;
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-username
+     */
+    void set_username(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-password
+     */
+    void set_password(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-port
+     */
+    void set_port(const std::string_view input);
+
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-hash
+     */
+    void set_hash(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-search
+     */
+    void set_search(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-search
+     */
+    void set_pathname(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-host
+     */
+    void set_host(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-hostname
+     */
+    void set_hostname(const std::string_view input);
+
+    /**
+     * @see https://url.spec.whatwg.org/#dom-url-protocol
+     */
+    void set_protocol(const std::string_view input);
+
+    /**
+     * The password getter steps are to return this’s URL’s password.
+     * @see https://url.spec.whatwg.org/#dom-url-password
+     */
+    [[nodiscard]] std::string get_password() const noexcept;
+
+    /**
+     * Return this’s URL’s port, serialized.
+     * @see https://url.spec.whatwg.org/#dom-url-port
+     */
+    [[nodiscard]] std::string get_port() const noexcept;
+
+    /**
+     * Return U+0023 (#), followed by this’s URL’s fragment.
+     * @see https://url.spec.whatwg.org/#dom-url-hash
+     */
+    [[nodiscard]] std::string get_hash() const noexcept;
 
     /**
      * Used for returning the validity from the result of the URL parser.
@@ -82,11 +203,13 @@ namespace ada {
     /**
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
      */
-    [[nodiscard]] ada_really_inline  bool is_special() const noexcept {
+    [[nodiscard]] ada_really_inline bool is_special() const noexcept {
       return type != ada::scheme::NOT_SPECIAL;
     }
 
     /**
+     * @private
+     *
      * Return the 'special port' if the URL is special and not 'file'.
      * Returns 0 otherwise.
      */
@@ -95,17 +218,20 @@ namespace ada {
     }
 
     /**
+     * @private
+     *
      * Return the scheme type. Note that it is faster to do
      * get_scheme_type() == ada::scheme::type::FILE than to do
      * get_scheme() == "file", since the former is a direct integer comparison,
      * while the other involves a (cheap) string test.
      */
-    [[nodiscard]] ada_really_inline  ada::scheme::type get_scheme_type() const noexcept {
+    [[nodiscard]] ada_really_inline ada::scheme::type get_scheme_type() const noexcept {
       return type;
     }
 
-
     /**
+     * @private
+     *
      * Get the default port if the url's scheme has one, returns 0 otherwise.
      */
     [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept {
@@ -113,6 +239,8 @@ namespace ada {
     }
 
     /**
+     * @private
+     *
      * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
      */
     [[nodiscard]] bool cannot_have_credentials_or_port() const {
@@ -127,6 +255,8 @@ namespace ada {
     ADA_ATTRIBUTE_NOINLINE ~url() = default;
 
     /**
+     * @private
+     *
      * Parse a port (16-bit decimal digit) from the provided input.
      * We assume that the input does not contain spaces or tabs
      * within the ASCII digits.
@@ -153,10 +283,12 @@ namespace ada {
     }
 
     /**
-     * Return a string representing the scheme. Note that
-     * get_scheme_type() should often be used instead.
+     * @private
+     *
+     * Return a string representing the scheme. Note that get_scheme_type() should often be used instead.
+     * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
-    std::string_view get_scheme() const noexcept {
+    [[nodiscard]] std::string_view get_scheme() const noexcept {
       if(is_special()) { return ada::scheme::details::is_special_list[type]; }
       // We only move the 'scheme' if it is non-special.
       return non_special_scheme;
@@ -176,6 +308,8 @@ namespace ada {
     }
 
     /**
+     * @private
+     *
      * Take the scheme from another URL. The scheme string is moved from the
      * provided url.
      */
@@ -185,6 +319,8 @@ namespace ada {
     }
 
     /**
+     * @private
+     *
      * Take the scheme from another URL. The scheme string is copied from the
      * provided url.
      */
@@ -194,6 +330,8 @@ namespace ada {
     }
 
     /**
+     * @private
+     *
      * Parse the host from the provided input. We assume that
      * the input does not contain spaces or tabs. Control
      * characters and spaces are not trimmed (they should have
@@ -204,6 +342,8 @@ namespace ada {
     ada_really_inline bool parse_host(std::string_view input);
 
     /**
+     * @private
+     *
      * Parse the path from the provided input.
      * Return true on success. Control characters not
      * trimmed from the ends (they should have
@@ -216,6 +356,8 @@ namespace ada {
     ada_really_inline bool parse_path(const std::string_view input);
 
     /**
+     * @private
+     *
      * Parse the path from the provided input. It should have been
      * 'prepared' (e.g., it cannot contain tabs and spaces). See
      * parse_path.
@@ -227,6 +369,9 @@ namespace ada {
      */
     ada_really_inline bool parse_prepared_path(const std::string_view input);
 
+    /**
+     * @private
+     */
     template <bool has_state_override = false>
     ada_really_inline bool parse_scheme(const std::string_view input);
 
@@ -236,28 +381,39 @@ namespace ada {
     std::string to_string();
 
   private:
+
     /**
+     * @private
+     *
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
     bool parse_ipv4(std::string_view input);
 
     /**
+     * @private
+     *
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-ipv6-parser
      */
     bool parse_ipv6(std::string_view input);
 
     /**
+     * @private
+     *
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
      */
     bool parse_opaque_host(std::string_view input);
 
-
+    /**
+     * @private
+     */
     ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
     /**
+     * @private
+     *
      * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
      * URL for further processing after parsing. It is initially the empty string.
      * We only set non_special_scheme when the scheme is non-special, otherwise we avoid constructing

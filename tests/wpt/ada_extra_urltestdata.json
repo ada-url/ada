@@ -1,5 +1,5 @@
 [
-  "#Additional tests designed by the ada team.",
+  "# Additional tests designed by the ada team.",
   {
     "input": "https://lemire.me/école",
     "base": "about:blank",
@@ -12,6 +12,139 @@
     "hostname": "lemire.me",
     "port": "",
     "pathname": "/%C3%A9cole",
+    "search": "",
+    "hash": ""
+  },
+  {
+    "input": "example.com`x.example.com",
+    "failure": true
+  },
+  {
+    "input": "http://Yağız.com",
+    "base": "about:blank",
+    "href": "http://xn--yaz-isa4g.com/",
+    "origin": "http://xn--yaz-isa4g.com",
+    "protocol": "http:",
+    "username": "",
+    "password": "",
+    "host": "xn--yaz-isa4g.com",
+    "hostname": "xn--yaz-isa4g.com",
+    "port": "",
+    "pathname": "/",
+    "search": "",
+    "hash": ""
+  },
+  {
+    "input": "fs:/hello.eth",
+    "base": "about:blank",
+    "href": "fs:/hello.eth",
+    "origin": "null",
+    "protocol": "fs:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "/hello.eth",
+    "search": "",
+    "hash": ""
+  },
+  {
+    "input": "http://\/\/\/\\'",
+    "base": "about:blank",
+    "href": "http://'/",
+    "origin": "http://'",
+    "protocol": "http:",
+    "username": "",
+    "password": "",
+    "host": "'",
+    "hostname": "'",
+    "port": "",
+    "pathname": "/",
+    "search": "",
+    "hash": ""
+  },
+  "# Ipv6 Edge Cases",
+  {
+    "input": "http://[0:0:0:0:0:0:0:0",
+    "base": "about:blank",
+    "failure": true
+  },
+  {
+    "input": "http://0:0:0:0:0:0:0:0]",
+    "base": "about:blank",
+    "failure": true
+  },
+  "# Opaque Paths",
+  {
+    "input": "mailto:a@b.com",
+    "base": "about:blank",
+    "href": "mailto:a@b.com",
+    "origin": "null",
+    "protocol": "mailto:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "a@b.com",
+    "search": "",
+    "hash": ""
+  },
+  {
+    "input": "scheme:example.com",
+    "base": "about:blank",
+    "href": "scheme:example.com",
+    "origin": "null",
+    "protocol": "scheme:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "example.com",
+    "search": "",
+    "hash": ""
+  },
+  {
+    "input": "scheme:example.com/path",
+    "base": "about:blank",
+    "href": "scheme:example.com/path",
+    "origin": "null",
+    "protocol": "scheme:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "example.com/path",
+    "search": "",
+    "hash": ""
+  },
+  "# Port",
+  {
+    "input": "scheme://example.com:-1",
+    "base": "about:blank",
+    "failure": true
+  },
+  {
+    "input": "scheme://example.com:+1",
+    "base": "about:blank",
+    "failure": true
+  },
+  "# Credentials",
+  {
+    "input": "scheme://username@@@@example.com",
+    "base": "about:blank",
+    "href": "scheme://username%40%40%40@example.com",
+    "origin": "null",
+    "protocol": "scheme:",
+    "username": "username%40%40%40",
+    "password": "",
+    "host": "example.com",
+    "hostname": "example.com",
+    "port": "",
+    "pathname": "",
     "search": "",
     "hash": ""
   }
