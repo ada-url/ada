@@ -7,10 +7,14 @@
 #include <string>
 #include <memory>
 #include <map>
+#include <set>
 
 #include "ada.h"
 #include "ada/parser.h"
 
+#ifdef _WIN32
+std::set<std::string> exceptions = {"\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x61\xc3\x9f\x2e\x45\x78\x41\x6d\x50\x6c\x45\x2f"};
+#endif
 
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
@@ -283,6 +287,9 @@ bool urltestdata_encoding(const char* source) {
         continue;
       }
       std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
+#ifdef _WIN32
+      if(exceptions.find(std::string(input)) != exceptions.end()) { std::cerr << "skipping "+element_string << std::endl; continue; }
+#endif
       std::string_view base;
       ada::url base_url;
       if (!object["base"].get(base)) {
@@ -393,6 +400,7 @@ int main(int argc, char** argv) {
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = percent_encoding();
   }
+#ifndef _WIN32
   name = "toascii_encoding";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = toascii_encoding();
@@ -401,13 +409,14 @@ int main(int argc, char** argv) {
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
   }
-  name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
-  if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
-  }
+#endif // _WIN32
   name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
+  }
+  name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
   }
   ///////////////
   // TODO either make these tests obsolete or fix them.

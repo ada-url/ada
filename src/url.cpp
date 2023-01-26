@@ -155,7 +155,8 @@ namespace ada {
     }
   }
 
-  bool url::parse_opaque_host(std::string_view input) noexcept {
+  bool url::parse_opaque_host(std::string_view input) {
+    ada::log("parse_opaque_host ", input, "[", input.size(), " bytes]");
     if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
       return is_valid = false;
     }
@@ -166,7 +167,8 @@ namespace ada {
   }
 
   bool url::parse_ipv4(std::string_view input) {
-    if(input[input.size()-1]=='.') {
+    ada::log("parse_ipv4 ", input, "[", input.size(), " bytes]");
+    if(input.back()=='.') {
       input.remove_suffix(1);
     }
     size_t digit_count{0};
@@ -216,6 +218,7 @@ namespace ada {
   }
 
   bool url::parse_ipv6(std::string_view input) {
+    ada::log("parse_ipv6 ", input, "[", input.size(), " bytes]");
 
     if(input.empty()) { return is_valid = false; }
     // Let address be a new IPv6 address whose IPv6 pieces are all 0.
@@ -233,7 +236,8 @@ namespace ada {
     // If c is U+003A (:), then:
     if (input[0] == ':') {
       // If remaining does not start with U+003A (:), validation error, return failure.
-      if(input.size() == 1 && input[2] != ':') {
+      if(input.size() == 1 || input[1] != ':') {
+        ada::log("parse_ipv6 starts with : but the rest does not start with :");
         return is_valid = false;
       }
 
@@ -248,6 +252,7 @@ namespace ada {
     while (pointer != input.end()) {
       // If pieceIndex is 8, validation error, return failure.
       if (piece_index == 8) {
+        ada::log("parse_ipv6 piece_index == 8");
         return is_valid = false;
       }
 
@@ -255,6 +260,7 @@ namespace ada {
       if (*pointer == ':') {
         // If compress is non-null, validation error, return failure.
         if (compress.has_value()) {
+          ada::log("parse_ipv6 compress is non-null");
           return is_valid = false;
         }
 
@@ -269,7 +275,7 @@ namespace ada {
 
       // While length is less than 4 and c is an ASCII hex digit,
       // set value to value × 0x10 + c interpreted as hexadecimal number, and increase pointer and length by 1.
-      while (length < 4 && unicode::is_ascii_hex_digit(*pointer)) {
+      while (length < 4 && pointer != input.end() && unicode::is_ascii_hex_digit(*pointer)) {
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
         value = uint16_t(value * 0x10 + unicode::convert_hex_to_binary(*pointer));
         pointer++;
@@ -277,9 +283,10 @@ namespace ada {
       }
 
       // If c is U+002E (.), then:
-      if (*pointer == '.') {
+      if (pointer != input.end() && *pointer == '.') {
         // If length is 0, validation error, return failure.
         if (length == 0) {
+          ada::log("parse_ipv6 length is 0");
           return is_valid = false;
         }
 
@@ -288,6 +295,7 @@ namespace ada {
 
         // If pieceIndex is greater than 6, validation error, return failure.
         if (piece_index > 6) {
+          ada::log("parse_ipv6 piece_index > 6");
           return is_valid = false;
         }
 
@@ -307,17 +315,19 @@ namespace ada {
             }
             // Otherwise, validation error, return failure.
             else {
+              ada::log("parse_ipv6 Otherwise, validation error, return failure");
               return is_valid = false;
             }
           }
 
           // If c is not an ASCII digit, validation error, return failure.
-          if (!checkers::is_digit(*pointer)) {
+          if (pointer == input.end() || !checkers::is_digit(*pointer)) {
+            ada::log("parse_ipv6 If c is not an ASCII digit, validation error, return failure");
             return is_valid = false;
           }
 
           // While c is an ASCII digit:
-          while (checkers::is_digit(*pointer)) {
+          while (pointer != input.end() && checkers::is_digit(*pointer)) {
             // Let number be c interpreted as decimal number.
             int number = *pointer - '0';
 
@@ -327,6 +337,7 @@ namespace ada {
             }
             // Otherwise, if ipv4Piece is 0, validation error, return failure.
             else if (ipv4_piece == 0) {
+              ada::log("parse_ipv6 if ipv4Piece is 0, validation error");
               return is_valid = false;
             }
             // Otherwise, set ipv4Piece to ipv4Piece × 10 + number.
@@ -336,6 +347,7 @@ namespace ada {
 
             // If ipv4Piece is greater than 255, validation error, return failure.
             if (ipv4_piece > 255) {
+              ada::log("parse_ipv6 ipv4_piece > 255");
               return is_valid = false;
             }
 
@@ -365,17 +377,19 @@ namespace ada {
         break;
       }
       // Otherwise, if c is U+003A (:):
-      else if (*pointer == ':') {
+      else if ((pointer != input.end()) && (*pointer == ':')) {
         // Increase pointer by 1.
         pointer++;
 
         // If c is the EOF code point, validation error, return failure.
         if (pointer == input.end()) {
+          ada::log("parse_ipv6 If c is the EOF code point, validation error, return failure");
           return is_valid = false;
         }
       }
       // Otherwise, if c is not the EOF code point, validation error, return failure.
       else if (pointer != input.end()) {
+        ada::log("parse_ipv6 Otherwise, if c is not the EOF code point, validation error, return failure");
         return is_valid = false;
       }
 
@@ -404,15 +418,16 @@ namespace ada {
     }
     // Otherwise, if compress is null and pieceIndex is not 8, validation error, return failure.
     else if (piece_index != 8) {
+      ada::log("parse_ipv6 if compress is null and pieceIndex is not 8, validation error, return failure");
       return is_valid = false;
     }
-
     host = ada::serializers::ipv6(address);
+    ada::log("parse_ipv6 ", *host);
     return true;
   }
 
   ada_really_inline bool url::parse_host(std::string_view input) {
-      ada::log("parse_host", input);
+    ada::log("parse_host", input, "[", input.size(), " bytes]");
     if(input.empty()) { return is_valid = false; } // technically unnecessary.
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {

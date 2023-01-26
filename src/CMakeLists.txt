@@ -43,6 +43,10 @@ if(ADA_SANITIZE)
   target_link_libraries(ada INTERFACE -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
 endif()
 
+if(ADA_LOGGING)
+  target_compile_definitions(ada PRIVATE ADA_LOGGING=1)
+endif()
+
 if(MSVC AND BUILD_SHARED_LIBS)
   set(ADA_WINDOWS_DLL TRUE)
 endif()

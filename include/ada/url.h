@@ -277,7 +277,7 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
      */
-    bool parse_opaque_host(std::string_view input) noexcept;
+    bool parse_opaque_host(std::string_view input);
 
 
     ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
