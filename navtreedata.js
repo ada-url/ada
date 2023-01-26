@@ -28,6 +28,7 @@ var NAVTREE =
     [ "Requirements", "index.html#autotoc_md1", null ],
     [ "Local Development", "index.html#autotoc_md2", null ],
     [ "Usage", "index.html#autotoc_md3", null ],
+    [ "Amalgamation", "index.html#autotoc_md4", null ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
