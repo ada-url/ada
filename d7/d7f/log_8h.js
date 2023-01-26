@@ -1,5 +1,6 @@
 var log_8h =
 [
+    [ "ada_log", "d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd", null ],
     [ "ADA_LOGGING", "d7/d7f/log_8h.html#aacebaecd907d38726e1427d3782be518", null ],
     [ "inner_log", "d7/d7f/log_8h.html#aaf07b88d6b2dac9b867d6bad8cc14c62", null ],
     [ "inner_log", "d7/d7f/log_8h.html#accd48d9920d0d0f514a2a3efc7cd480f", null ],

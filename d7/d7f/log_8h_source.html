@@ -134,11 +134,20 @@ $(document).ready(function(){initNavTree('d7/d7f/log_8h_source.html','../../'); 
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;}</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#if ADA_LOGGING</span></div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// ADA_LOG_H</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#ifndef ada_log</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="preprocessor">#define ada_log(...) do { \</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">    ada::log(__VA_ARGS__); \</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor">} while(0)</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// ada_log</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">   77</a></span>&#160;<span class="preprocessor">#define ada_log(...)</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// ADA_LOGGING</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// ADA_LOG_H</span></div>
 <div class="ttc" id="acommon__defs_8h_html"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html">common_defs.h</a></div><div class="ttdoc">Common definitions for cross-platform compiler support.</div></div>
 <div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00078">common_defs.h:78</a></div></div>
 <div class="ttc" id="anamespaceada_html"><div class="ttname"><a href="../../dd/d64/namespaceada.html">ada</a></div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d80/ada__version_8h_source.html#l00010">ada_version.h:10</a></div></div>

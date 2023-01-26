@@ -99,7 +99,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="../../dd/d64/namespaceada.html">ada</a> {</div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;  <a class="code" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> url::parse_path(std::string_view input) {</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;    ada::log(<span class="stringliteral">&quot;parse_path &quot;</span>, input);</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_path &quot;</span>, input);</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;    std::string tmp_buffer;</div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    std::string_view internal_input;</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    <span class="keywordflow">if</span>(<a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#af6a43ab73c2b1e20f81de57b18e1f388">unicode::has_tabs_or_newline</a>(input)) {</div>
@@ -137,7 +137,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <a class="code" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> url::parse_prepared_path(std::string_view input) {</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    ada::log(<span class="stringliteral">&quot;parse_path &quot;</span>, input, <span class="stringliteral">&quot; url: &quot;</span>, <a class="code" href="../../dd/d03/structada_1_1url.html#abc08ed1a346e39113d5c5724c5f89a9f">to_string</a>());</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_path &quot;</span>, input, <span class="stringliteral">&quot; url: &quot;</span>, <a class="code" href="../../dd/d03/structada_1_1url.html#abc08ed1a346e39113d5c5724c5f89a9f">to_string</a>());</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="comment">//path.clear();</span></div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    uint8_t accumulator = <a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a3a1950cb3b0e363c38dae086285194ea">checkers::path_signature</a>(input);</div>
@@ -149,7 +149,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        (<a class="code" href="../../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9">is_special</a>() ? (accumulator == 0) : ((accumulator &amp; 0b11111101) == 0)) &amp;&amp;</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        (get_scheme_type() != <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>);</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordflow">if</span> (trivial_path) {</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;      ada::log(<span class="stringliteral">&quot;parse_path trivial&quot;</span>);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_path trivial&quot;</span>);</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;      path += <span class="charliteral">&#39;/&#39;</span>;</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;      path += input;</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
@@ -159,7 +159,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keywordtype">bool</span> fast_path = (<a class="code" href="../../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9">is_special</a>() &amp;&amp; (accumulator &amp; 0b11111011) == 0) &amp;&amp;</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                    (get_scheme_type() != <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>);</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordflow">if</span> (fast_path) {</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;      ada::log(<span class="stringliteral">&quot;parse_path fast&quot;</span>);</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_path fast&quot;</span>);</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;      <span class="keywordflow">do</span> {</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="comment">// Here we don&#39;t need to worry about \\ or percent encoding.</span></div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="keywordtype">size_t</span> location = input.find(<span class="charliteral">&#39;/&#39;</span>);</div>
@@ -193,7 +193,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;      } <span class="keywordflow">while</span> (<span class="keyword">true</span>);</div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;      ada::log(<span class="stringliteral">&quot;parse_path slow&quot;</span>);</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_path slow&quot;</span>);</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;      <span class="comment">// we have reached the general case</span></div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;      <span class="keywordtype">bool</span> needs_percent_encoding = (accumulator &amp; 1);</div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;      std::string path_buffer_tmp;</div>
@@ -247,7 +247,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;  }</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160; </div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;  <span class="keywordtype">bool</span> url::parse_opaque_host(std::string_view input) {</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    ada::log(<span class="stringliteral">&quot;parse_opaque_host &quot;</span>, input, <span class="stringliteral">&quot;[&quot;</span>, input.size(), <span class="stringliteral">&quot; bytes]&quot;</span>);</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_opaque_host &quot;</span>, input, <span class="stringliteral">&quot;[&quot;</span>, input.size(), <span class="stringliteral">&quot; bytes]&quot;</span>);</div>
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    <span class="keywordflow">if</span> (std::any_of(input.begin(), input.end(), <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#af18e28910c496ebeac5f1b1d309fb287">ada::unicode::is_forbidden_host_code_point</a>)) {</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;      <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    }</div>
@@ -258,7 +258,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  }</div>
 <div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160; </div>
 <div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  <span class="keywordtype">bool</span> url::parse_ipv4(std::string_view input) {</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    ada::log(<span class="stringliteral">&quot;parse_ipv4 &quot;</span>, input, <span class="stringliteral">&quot;[&quot;</span>, input.size(), <span class="stringliteral">&quot; bytes]&quot;</span>);</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv4 &quot;</span>, input, <span class="stringliteral">&quot;[&quot;</span>, input.size(), <span class="stringliteral">&quot; bytes]&quot;</span>);</div>
 <div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    <span class="keywordflow">if</span>(input.back()==<span class="charliteral">&#39;.&#39;</span>) {</div>
 <div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;      input.remove_suffix(1);</div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    }</div>
@@ -309,7 +309,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  }</div>
 <div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160; </div>
 <div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;  <span class="keywordtype">bool</span> url::parse_ipv6(std::string_view input) {</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;    ada::log(<span class="stringliteral">&quot;parse_ipv6 &quot;</span>, input, <span class="stringliteral">&quot;[&quot;</span>, input.size(), <span class="stringliteral">&quot; bytes]&quot;</span>);</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 &quot;</span>, input, <span class="stringliteral">&quot;[&quot;</span>, input.size(), <span class="stringliteral">&quot; bytes]&quot;</span>);</div>
 <div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160; </div>
 <div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;    <span class="keywordflow">if</span>(input.empty()) { <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>; }</div>
 <div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;    <span class="comment">// Let address be a new IPv6 address whose IPv6 pieces are all 0.</span></div>
@@ -328,7 +328,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;    <span class="keywordflow">if</span> (input[0] == <span class="charliteral">&#39;:&#39;</span>) {</div>
 <div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;      <span class="comment">// If remaining does not start with U+003A (:), validation error, return failure.</span></div>
 <div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;      <span class="keywordflow">if</span>(input.size() == 1 || input[1] != <span class="charliteral">&#39;:&#39;</span>) {</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        ada::log(<span class="stringliteral">&quot;parse_ipv6 starts with : but the rest does not start with :&quot;</span>);</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 starts with : but the rest does not start with :&quot;</span>);</div>
 <div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;      }</div>
 <div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160; </div>
@@ -343,7 +343,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;    <span class="keywordflow">while</span> (pointer != input.end()) {</div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;      <span class="comment">// If pieceIndex is 8, validation error, return failure.</span></div>
 <div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;      <span class="keywordflow">if</span> (piece_index == 8) {</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;        ada::log(<span class="stringliteral">&quot;parse_ipv6 piece_index == 8&quot;</span>);</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;        <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 piece_index == 8&quot;</span>);</div>
 <div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;      }</div>
 <div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160; </div>
@@ -351,7 +351,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;      <span class="keywordflow">if</span> (*pointer == <span class="charliteral">&#39;:&#39;</span>) {</div>
 <div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        <span class="comment">// If compress is non-null, validation error, return failure.</span></div>
 <div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;        <span class="keywordflow">if</span> (compress.has_value()) {</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;          ada::log(<span class="stringliteral">&quot;parse_ipv6 compress is non-null&quot;</span>);</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;          <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 compress is non-null&quot;</span>);</div>
 <div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;          <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;        }</div>
 <div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160; </div>
@@ -377,7 +377,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;      <span class="keywordflow">if</span> (pointer != input.end() &amp;&amp; *pointer == <span class="charliteral">&#39;.&#39;</span>) {</div>
 <div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;        <span class="comment">// If length is 0, validation error, return failure.</span></div>
 <div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;        <span class="keywordflow">if</span> (length == 0) {</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;          ada::log(<span class="stringliteral">&quot;parse_ipv6 length is 0&quot;</span>);</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;          <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 length is 0&quot;</span>);</div>
 <div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;          <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;        }</div>
 <div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160; </div>
@@ -386,7 +386,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160; </div>
 <div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;        <span class="comment">// If pieceIndex is greater than 6, validation error, return failure.</span></div>
 <div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;        <span class="keywordflow">if</span> (piece_index &gt; 6) {</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;          ada::log(<span class="stringliteral">&quot;parse_ipv6 piece_index &gt; 6&quot;</span>);</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;          <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 piece_index &gt; 6&quot;</span>);</div>
 <div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;          <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;        }</div>
 <div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160; </div>
@@ -406,14 +406,14 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;            }</div>
 <div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;            <span class="comment">// Otherwise, validation error, return failure.</span></div>
 <div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;            <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;              ada::log(<span class="stringliteral">&quot;parse_ipv6 Otherwise, validation error, return failure&quot;</span>);</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;              <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 Otherwise, validation error, return failure&quot;</span>);</div>
 <div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;              <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;            }</div>
 <div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;          }</div>
 <div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160; </div>
 <div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;          <span class="comment">// If c is not an ASCII digit, validation error, return failure.</span></div>
 <div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;          <span class="keywordflow">if</span> (pointer == input.end() || !<a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">checkers::is_digit</a>(*pointer)) {</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;            ada::log(<span class="stringliteral">&quot;parse_ipv6 If c is not an ASCII digit, validation error, return failure&quot;</span>);</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;            <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 If c is not an ASCII digit, validation error, return failure&quot;</span>);</div>
 <div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;            <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;          }</div>
 <div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160; </div>
@@ -428,7 +428,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;            }</div>
 <div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;            <span class="comment">// Otherwise, if ipv4Piece is 0, validation error, return failure.</span></div>
 <div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ipv4_piece == 0) {</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;              ada::log(<span class="stringliteral">&quot;parse_ipv6 if ipv4Piece is 0, validation error&quot;</span>);</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;              <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 if ipv4Piece is 0, validation error&quot;</span>);</div>
 <div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;              <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;            }</div>
 <div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;            <span class="comment">// Otherwise, set ipv4Piece to ipv4Piece × 10 + number.</span></div>
@@ -438,7 +438,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160; </div>
 <div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;            <span class="comment">// If ipv4Piece is greater than 255, validation error, return failure.</span></div>
 <div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;            <span class="keywordflow">if</span> (ipv4_piece &gt; 255) {</div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;              ada::log(<span class="stringliteral">&quot;parse_ipv6 ipv4_piece &gt; 255&quot;</span>);</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;              <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 ipv4_piece &gt; 255&quot;</span>);</div>
 <div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;              <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;            }</div>
 <div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160; </div>
@@ -474,13 +474,13 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160; </div>
 <div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;        <span class="comment">// If c is the EOF code point, validation error, return failure.</span></div>
 <div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;        <span class="keywordflow">if</span> (pointer == input.end()) {</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;          ada::log(<span class="stringliteral">&quot;parse_ipv6 If c is the EOF code point, validation error, return failure&quot;</span>);</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;          <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 If c is the EOF code point, validation error, return failure&quot;</span>);</div>
 <div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;          <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;        }</div>
 <div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;      }</div>
 <div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;      <span class="comment">// Otherwise, if c is not the EOF code point, validation error, return failure.</span></div>
 <div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (pointer != input.end()) {</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;        ada::log(<span class="stringliteral">&quot;parse_ipv6 Otherwise, if c is not the EOF code point, validation error, return failure&quot;</span>);</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;        <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 Otherwise, if c is not the EOF code point, validation error, return failure&quot;</span>);</div>
 <div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;      }</div>
 <div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160; </div>
@@ -509,16 +509,16 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;    }</div>
 <div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <span class="comment">// Otherwise, if compress is null and pieceIndex is not 8, validation error, return failure.</span></div>
 <div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (piece_index != 8) {</div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;      ada::log(<span class="stringliteral">&quot;parse_ipv6 if compress is null and pieceIndex is not 8, validation error, return failure&quot;</span>);</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 if compress is null and pieceIndex is not 8, validation error, return failure&quot;</span>);</div>
 <div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;      <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    }</div>
 <div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;    host = <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ada::serializers::ipv6</a>(address);</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;    ada::log(<span class="stringliteral">&quot;parse_ipv6 &quot;</span>, *host);</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_ipv6 &quot;</span>, *host);</div>
 <div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;  }</div>
 <div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160; </div>
 <div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;  <a class="code" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> url::parse_host(std::string_view input) {</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;    ada::log(<span class="stringliteral">&quot;parse_host&quot;</span>, input, <span class="stringliteral">&quot;[&quot;</span>, input.size(), <span class="stringliteral">&quot; bytes]&quot;</span>);</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host&quot;</span>, input, <span class="stringliteral">&quot;[&quot;</span>, input.size(), <span class="stringliteral">&quot; bytes]&quot;</span>);</div>
 <div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;    <span class="keywordflow">if</span>(input.empty()) { <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>; } <span class="comment">// technically unnecessary.</span></div>
 <div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;    <span class="comment">// If input starts with U+005B ([), then:</span></div>
 <div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    <span class="keywordflow">if</span> (input[0] == <span class="charliteral">&#39;[&#39;</span>) {</div>
@@ -526,7 +526,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;      <span class="keywordflow">if</span> (input.back() != <span class="charliteral">&#39;]&#39;</span>) {</div>
 <div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;      }</div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;      ada::log(<span class="stringliteral">&quot;parse_host ipv6&quot;</span>);</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host ipv6&quot;</span>);</div>
 <div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160; </div>
 <div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;      <span class="comment">// Return the result of IPv6 parsing input with its leading U+005B ([) and trailing U+005D (]) removed.</span></div>
 <div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;      input.remove_prefix(1);</div>
@@ -560,20 +560,20 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;        <span class="comment">// fast path</span></div>
 <div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;        host = std::move(buffer);</div>
 <div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">checkers::is_ipv4</a>(host.value())) {</div>
-<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;          ada::log(<span class="stringliteral">&quot;parse_host fast path ipv4&quot;</span>);</div>
+<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;          <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host fast path ipv4&quot;</span>);</div>
 <div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;          <span class="keywordflow">return</span> parse_ipv4(host.value());</div>
 <div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;        }</div>
-<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;        ada::log(<span class="stringliteral">&quot;parse_host fast path &quot;</span>, *host);</div>
+<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;        <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host fast path &quot;</span>, *host);</div>
 <div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a755570190c883a443f94640167b099b3">checkers::verify_dns_length</a>(host.value());</div>
 <div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;      }</div>
 <div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;    }</div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    ada::log(<span class="stringliteral">&quot;parse_host  calling to_ascii&quot;</span>);</div>
+<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host  calling to_ascii&quot;</span>);</div>
 <div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;    <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">ada::unicode::to_ascii</a>(host, input, <span class="keyword">false</span>,  input.find(<span class="charliteral">&#39;%&#39;</span>));</div>
 <div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;    <span class="keywordflow">if</span> (!<a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a>) { <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>; }</div>
 <div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160; </div>
 <div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;    <span class="comment">// If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.</span></div>
 <div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;    <span class="keywordflow">if</span>(<a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">checkers::is_ipv4</a>(host.value())) {</div>
-<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;      ada::log(<span class="stringliteral">&quot;parse_host  got ipv4&quot;</span>, *host);</div>
+<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host  got ipv4&quot;</span>, *host);</div>
 <div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;      <span class="keywordflow">return</span> parse_ipv4(host.value());</div>
 <div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;    }</div>
 <div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160; </div>
@@ -687,6 +687,7 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div></div>
 <div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00078">common_defs.h:78</a></div></div>
 <div class="ttc" id="alog_8h_html"><div class="ttname"><a href="../../d7/d7f/log_8h.html">log.h</a></div><div class="ttdoc">logging code.</div></div>
+<div class="ttc" id="alog_8h_html_ad5e88db0a4001ef3e9742f23109688dd"><div class="ttname"><a href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a></div><div class="ttdeci">#define ada_log(...)</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d7f/log_8h_source.html#l00077">log.h:77</a></div></div>
 <div class="ttc" id="anamespaceada_1_1character__sets_html_a781f16c18f4d1b11603443cd039e33db"><div class="ttname"><a href="../../d7/d35/namespaceada_1_1character__sets.html#a781f16c18f4d1b11603443cd039e33db">ada::character_sets::PATH_PERCENT_ENCODE</a></div><div class="ttdeci">constexpr uint8_t PATH_PERCENT_ENCODE[32]</div><div class="ttdef"><b>Definition:</b> <a href="../../d3/d4e/character__sets_8h_source.html#l00384">character_sets.h:384</a></div></div>
 <div class="ttc" id="anamespaceada_1_1character__sets_html_a961ff8bb694197e2f9f339cae226db66"><div class="ttname"><a href="../../d7/d35/namespaceada_1_1character__sets.html#a961ff8bb694197e2f9f339cae226db66">ada::character_sets::C0_CONTROL_PERCENT_ENCODE</a></div><div class="ttdeci">constexpr uint8_t C0_CONTROL_PERCENT_ENCODE[32]</div><div class="ttdef"><b>Definition:</b> <a href="../../d3/d4e/character__sets_8h_source.html#l00049">character_sets.h:49</a></div></div>
 <div class="ttc" id="anamespaceada_1_1checkers_html_a14231efa76a2139432359418296556d0"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">ada::checkers::is_ipv4</a></div><div class="ttdeci">ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../d4/dd6/checkers_8cpp_source.html#l00006">checkers.cpp:6</a></div></div>
