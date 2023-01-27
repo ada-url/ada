@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
+# Let us help macOS users:
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   message(STATUS "Apple system detected.")
   # People who run macOS often use brew.
@@ -33,12 +34,11 @@ else()
     return()
   endif (NOT ICU_FOUND)
 endif()
-### Going forward, we have ICU for sure, except under Windows.
-
 
 find_package(ada REQUIRED)
 
 
+# You can provide your own code, this is just an example:
 
 file(WRITE main.cpp "
 #include \"ada.h\"
