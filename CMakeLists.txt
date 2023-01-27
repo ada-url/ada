@@ -18,13 +18,24 @@ set(ADA_SOURCE_DIR src)
 
 add_subdirectory(src)
 
-IF (BUILD_TESTING)
+If (BUILD_TESTING)
   message(STATUS "The tests are enabled.")
   add_subdirectory(tests)
-  add_subdirectory(benchmarks)
 else()
-  message(STATUS "The tests are disabled.")
+  if(is_top_project)
+    message(STATUS "The tests are disabled.")
+  endif()
 endif(BUILD_TESTING)
+
+option(ADA_BENCHMARKS "Build benchmarks" OFF)
+If(ADA_BENCHMARKS)
+  message(STATUS "Ada benchmarks enabled.")
+  add_subdirectory(benchmarks)
+else(ADA_BENCHMARKS)
+  if(is_top_project)
+    message(STATUS "Ada benchmarks disabled. Set ADA_BENCHMARKS=ON to enable them.")
+  endif()
+endif(ADA_BENCHMARKS)
 
 add_library(ada::ada ALIAS ada)
 
@@ -119,7 +130,7 @@ install(
 configure_file(cmake/ada-config.cmake.in ada-config.cmake @ONLY)
 
 write_basic_package_version_file(
-  ada-config.version.cmake
+  ada-config-version.cmake
   COMPATIBILITY SameMinorVersion
 )
 
@@ -152,9 +163,8 @@ install(
 )
 
 if(is_top_project)
-  # TODO: Update contact information
   set(CPACK_PACKAGE_VENDOR "Ada Authors")
-  set(CPACK_PACKAGE_CONTACT "example@email.com")
+  set(CPACK_PACKAGE_CONTACT "yagiz@nizipli.com")
   set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE-MIT")
   set(CPACK_RPM_PACKAGE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE-MIT")
   set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.md")

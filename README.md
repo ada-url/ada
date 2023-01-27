@@ -95,3 +95,7 @@ url.set_hash("is-this-the-real-life");
 ## Amalgamation
 
 You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) by typing executing the Python 3 script `singleheader/amalgamate.py`. By default, the files are created in the `singleheader` directory.
+
+## Use ada as a CMake dependency
+
+See the file `tests/installation/CMakeLists.txt` for an example of how you might use ada from your own CMake project, after having installed ada on your system.

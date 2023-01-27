@@ -1,5 +1,6 @@
 #include "ada.cpp"
 #include "ada.h"
+#include <iostream>
 
 int main(int , char *[]) {
   ada::url url = ada::parse("https://www.google.com");
