@@ -47,8 +47,6 @@ namespace ada {
 
   ada_really_inline bool url::parse_prepared_path(std::string_view input) {
     ada_log("parse_path ", input, " url: ", to_string());
-
-    //path.clear();
     uint8_t accumulator = checkers::path_signature(input);
     // Let us first detect a trivial case.
     // If it is special, we check that we have no dot, no %,  no \ and no
