@@ -104,6 +104,7 @@ endif()
 ### Going forward, we have ICU for sure, except under Windows.
 
 add_subdirectory(singleheader)
+add_subdirectory(tools)
 
 install(
   FILES include/ada.h

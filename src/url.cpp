@@ -572,26 +572,53 @@ namespace ada {
     return true;
   }
 
-  std::string url::to_string() {
+  std::string url::to_string() const {
     if (!is_valid) {
       return "null";
     }
-    // TODO: make sure that this is valid JSON by encoding the strings.
-    // TODO: pre-allocate memory and write into it to avoid allocations
-    // and copies during concatenation.
-    return "{\"scheme\":\"" + std::string(get_scheme()) + "\"" + ","
-         + "\"username\":\"" + username + "\"" + "," + "\"password\":\"" +
-         password + "\"" + "," +
-         (host.has_value() ? "\"host\":\"" + host.value() + "\"" + "," : "") +
-         (port.has_value() ? "\"port\":" + std::to_string(port.value()) + "" + ","
-                         : "") +
-         "\"path\":\"" + path + "\"," +
-         "\"opaque path\":" + (has_opaque_path ? "true" : "false") +
-         (query.has_value() ? ",\"query\":\"" + query.value() + "\"" + ","
-                          : "") +
-         (fragment.has_value()
-              ? ",\"fragment\":\"" + fragment.value() + "\"" + ","
-              : "") + "}";
+    std::string answer;
+    auto back = std::back_insert_iterator(answer);
+    answer.append("{\n");
+    answer.append("\t\"scheme\":\"");
+    helpers::encode_json(get_scheme(), back);
+    answer.append("\",\n");
+    if(includes_credentials()) {
+      answer.append("\t\"username\":\"");
+      helpers::encode_json(username, back);
+      answer.append("\",\n");
+      answer.append("\t\"password\":\"");
+      helpers::encode_json(password, back);
+      answer.append("\",\n");
+    }
+    if(host.has_value()) {
+      answer.append("\t\"host\":\"");
+      helpers::encode_json(host.value(), back);
+      answer.append("\",\n");
+    }
+    if(port.has_value()) {
+      answer.append("\t\"port\":\"");
+      answer.append(std::to_string(port.value()));
+      answer.append("\",\n");
+    }
+    answer.append("\t\"path\":\"");
+    helpers::encode_json(path, back);
+    answer.append("\",\n");
+    answer.append("\t\"opaque path\":");
+    answer.append((has_opaque_path ? "true" : "false"));
+    if(query.has_value()) {
+      answer.append(",\n");
+      answer.append("\t\"query\":\"");
+      helpers::encode_json(query.value(), back);
+      answer.append("\"");
+    }
+    if(fragment.has_value()) {
+      answer.append(",\n");
+      answer.append("\t\"fragment\":\"");
+      helpers::encode_json(fragment.value(), back);
+      answer.append("\"");
+    }
+    answer.append("\n}");
+    return answer;
   }
 
 } // namespace ada
