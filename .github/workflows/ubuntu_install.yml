@@ -1,0 +1,34 @@
+name: Ubuntu 22.04 (installation only)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ubuntu-build:
+    if: >-
+      ! contains(toJSON(github.event.commits.*.message), '[skip ci]') &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip github]')
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Install ICU
+        run: sudo apt-get install -y libicu-dev pkg-config
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
+      - name: Prepare
+        run: cmake -G Ninja -DCMAKE_INSTALL_PREFIX:PATH=destination -B build 
+      - name: Build
+        run: cmake --build build -j=2
+      - name: Install
+        run: cmake --install build
+      - name: Prepare test package
+        run: cmake -DCMAKE_INSTALL_PREFIX:PATH=../../destination -S tests/installation -B buildbabyada
+      - name: Build test package
+        run: cmake --build buildbabyada

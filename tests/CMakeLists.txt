@@ -13,11 +13,8 @@ endif()
 include(${PROJECT_SOURCE_DIR}/cmake/add-cpp-test.cmake)
 link_libraries(ada)
 
-
-
 add_cpp_test(wpt_tests)
-target_link_libraries(wpt_tests PUBLIC simdjson)
-
+target_link_libraries(wpt_tests PRIVATE simdjson)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
 target_link_libraries(wpt_tests PUBLIC stdc++fs)
