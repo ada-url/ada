@@ -21,11 +21,11 @@ std::set<std::string> exceptions = {"\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x61\xc
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-ada::url ada_parse(std::string_view view, std::optional<ada::url> base = std::nullopt) {
+ada::url ada_parse(std::string_view view,const ada::url* base = nullptr) {
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]" << std::endl;
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
-  return ada::parse(std::string_view(buffer.get(), view.size()), std::move(base));
+  return ada::parse(std::string_view(buffer.get(), view.size()), base);
 }
 
 #include "simdjson.h"
@@ -294,7 +294,7 @@ bool urltestdata_encoding(const char* source) {
       }
       bool failure = false;
       ada::url input_url = (!object["base"].get(base)) ?
-      ada_parse(input, std::optional<ada::url>(std::move(base_url)))
+      ada_parse(input, &base_url)
       : ada_parse(input);
       if (!object["failure"].get(failure)) {
         TEST_ASSERT(input_url.is_valid, !failure, "Should not have succeeded " + element_string);

@@ -54,7 +54,7 @@ size_t fancy_fuzz(size_t N, size_t seed = 0) {
     size_t counter = seed;
     for(size_t trial = 0; trial < N; trial++) {
         std::string copy = url_examples[(seed++)%(sizeof(url_examples)/sizeof(std::string))];
-        auto url = ada::parser::parse_url(copy, std::nullopt);
+        auto url = ada::parser::parse_url(copy);
         while(url.is_valid) {
             // mutate the string.
             int k = ((321321*counter++) %3);
@@ -81,7 +81,7 @@ size_t simple_fuzz(size_t N, size_t seed = 0) {
     size_t counter = seed;
     for(size_t trial = 0; trial < N; trial++) {
         std::string copy = url_examples[(seed++)%(sizeof(url_examples)/sizeof(std::string))];
-        auto url = ada::parser::parse_url(copy, std::nullopt);
+        auto url = ada::parser::parse_url(copy);
         while(url.is_valid) {
             // mutate the string.
             copy[(13134*counter++)%copy.size()] = char(counter++*71117);

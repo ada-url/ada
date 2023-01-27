@@ -31,7 +31,7 @@ namespace ada {
    * ```
    */
   ada_warn_unused ada::url parse(std::string_view input,
-                                 std::optional<ada::url> base_url = std::nullopt,
+                                 const ada::url* base_url = nullptr,
                                  ada::encoding_type encoding = ada::encoding_type::UTF8);
 
 }
