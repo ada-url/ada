@@ -1,13 +1,13 @@
 var searchData=
 [
-  ['ada_207',['ada',['../dd/d64/namespaceada.html',1,'']]],
-  ['amalgamate_208',['amalgamate',['../dd/d27/namespaceamalgamate.html',1,'']]],
-  ['character_5fsets_209',['character_sets',['../d7/d35/namespaceada_1_1character__sets.html',1,'ada']]],
-  ['checkers_210',['checkers',['../d3/dbe/namespaceada_1_1checkers.html',1,'ada']]],
-  ['details_211',['details',['../d1/dfb/namespaceada_1_1scheme_1_1details.html',1,'ada::scheme']]],
-  ['helpers_212',['helpers',['../d7/d6c/namespaceada_1_1helpers.html',1,'ada']]],
-  ['parser_213',['parser',['../d6/da3/namespaceada_1_1parser.html',1,'ada']]],
-  ['scheme_214',['scheme',['../d2/d63/namespaceada_1_1scheme.html',1,'ada']]],
-  ['serializers_215',['serializers',['../d9/dea/namespaceada_1_1serializers.html',1,'ada']]],
-  ['unicode_216',['unicode',['../d2/dc3/namespaceada_1_1unicode.html',1,'ada']]]
+  ['ada_209',['ada',['../dd/d64/namespaceada.html',1,'']]],
+  ['amalgamate_210',['amalgamate',['../dd/d27/namespaceamalgamate.html',1,'']]],
+  ['character_5fsets_211',['character_sets',['../d7/d35/namespaceada_1_1character__sets.html',1,'ada']]],
+  ['checkers_212',['checkers',['../d3/dbe/namespaceada_1_1checkers.html',1,'ada']]],
+  ['details_213',['details',['../d1/dfb/namespaceada_1_1scheme_1_1details.html',1,'ada::scheme']]],
+  ['helpers_214',['helpers',['../d7/d6c/namespaceada_1_1helpers.html',1,'ada']]],
+  ['parser_215',['parser',['../d6/da3/namespaceada_1_1parser.html',1,'ada']]],
+  ['scheme_216',['scheme',['../d2/d63/namespaceada_1_1scheme.html',1,'ada']]],
+  ['serializers_217',['serializers',['../d9/dea/namespaceada_1_1serializers.html',1,'ada']]],
+  ['unicode_218',['unicode',['../d2/dc3/namespaceada_1_1unicode.html',1,'ada']]]
 ];

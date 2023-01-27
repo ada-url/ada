@@ -25,6 +25,7 @@ var namespaceada =
       [ "path_signature_table", "d3/dbe/namespaceada_1_1checkers.html#a228548ec9f967976482088d2e29e132d", null ]
     ] ],
     [ "helpers", "d7/d6c/namespaceada_1_1helpers.html", [
+      [ "encode_json", "d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad", null ],
       [ "get_host_delimiter_location", "d7/d6c/namespaceada_1_1helpers.html#afcffe4b56f77a2d643a1a53c24c093c4", null ],
       [ "get_state", "d7/d6c/namespaceada_1_1helpers.html#a6b55d7d7b1918e00a9a1eeb3c91b8f90", null ],
       [ "prune_fragment", "d7/d6c/namespaceada_1_1helpers.html#a27195c97e4ce5f8bf9187e5b24a478ba", null ],
@@ -94,6 +95,7 @@ var namespaceada =
     [ "inner_log", "dd/d64/namespaceada.html#accd48d9920d0d0f514a2a3efc7cd480f", null ],
     [ "log", "dd/d64/namespaceada.html#a91a11522733883fc916671a2a6b182c3", null ],
     [ "log", "dd/d64/namespaceada.html#a326c61beec709ba92c05e1d373503b04", null ],
+    [ "operator<<", "dd/d64/namespaceada.html#a76242a85d6f480dbb59157562d9771d4", null ],
     [ "parse", "dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6", null ],
     [ "to_string", "dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6", null ],
     [ "to_string", "dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7", null ],

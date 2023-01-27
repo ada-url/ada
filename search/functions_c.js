@@ -1,6 +1,15 @@
 var searchData=
 [
-  ['to_5fascii_308',['to_ascii',['../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8',1,'ada::unicode']]],
-  ['to_5flower_309',['to_lower',['../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b',1,'ada::checkers']]],
-  ['to_5fstring_310',['to_string',['../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2',1,'ada::url::to_string()'],['../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7',1,'ada::to_string(encoding_type type)'],['../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6',1,'ada::to_string(ada::state s)']]]
+  ['set_5fhash_300',['set_hash',['../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283',1,'ada::url']]],
+  ['set_5fhost_301',['set_host',['../dd/d03/structada_1_1url.html#a38761f5696d73ddcd477a0c76a41ed86',1,'ada::url']]],
+  ['set_5fhostname_302',['set_hostname',['../dd/d03/structada_1_1url.html#a51ccef347bff2ce905a3695bd75a7ac6',1,'ada::url']]],
+  ['set_5fpassword_303',['set_password',['../dd/d03/structada_1_1url.html#a9345dfe50988968b5828af7ba73cffe8',1,'ada::url']]],
+  ['set_5fpathname_304',['set_pathname',['../dd/d03/structada_1_1url.html#a833d227a7861f8406fe38ca754c8ac25',1,'ada::url']]],
+  ['set_5fport_305',['set_port',['../dd/d03/structada_1_1url.html#a2462c738562711baafb1f9b273233f18',1,'ada::url']]],
+  ['set_5fprotocol_306',['set_protocol',['../dd/d03/structada_1_1url.html#a6315bdfd3b80bfe8cfac024b62e0221f',1,'ada::url']]],
+  ['set_5fscheme_307',['set_scheme',['../dd/d03/structada_1_1url.html#a60da389021781ad9586898c79a9ce860',1,'ada::url']]],
+  ['set_5fsearch_308',['set_search',['../dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1',1,'ada::url']]],
+  ['set_5fusername_309',['set_username',['../dd/d03/structada_1_1url.html#accb0dab3a976a5a3858ed518fc6a757d',1,'ada::url']]],
+  ['shorten_5fpath_310',['shorten_path',['../d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00',1,'ada::helpers']]],
+  ['substring_311',['substring',['../d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06',1,'ada::helpers']]]
 ];

@@ -13,7 +13,5 @@ var dir_34d9464866e8421e4e78493bdf5982a5 =
     [ "serializers.h", "d7/d2e/serializers_8h.html", "d7/d2e/serializers_8h" ],
     [ "state.h", "db/d3b/state_8h.html", "db/d3b/state_8h" ],
     [ "unicode.h", "dd/d90/unicode_8h.html", "dd/d90/unicode_8h" ],
-    [ "url.h", "df/db8/url_8h.html", [
-      [ "url", "dd/d03/structada_1_1url.html", "dd/d03/structada_1_1url" ]
-    ] ]
+    [ "url.h", "df/db8/url_8h.html", "df/db8/url_8h" ]
 ];
