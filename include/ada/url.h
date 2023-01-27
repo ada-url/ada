@@ -378,7 +378,7 @@ namespace ada {
     /**
      * Returns a string representation of this URL.  (Useful for debugging.)
      */
-    std::string to_string();
+    std::string to_string() const;
 
   private:
 

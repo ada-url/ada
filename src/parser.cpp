@@ -21,8 +21,8 @@ namespace ada::parser {
                 ada::encoding_type encoding,
                 const ada::url* optional_url) {
     ada_log("ada::parser::parse_url('", user_input,
-     "' [", user_input.size()," bytes],", (base_url != nullptr ? *base_url.to_string() : "null"),
-     ",", ada::to_string(encoding), ",", (optional_url.has_value() ? optional_url.value().to_string() : "null"), ")");
+     "' [", user_input.size()," bytes],", (base_url != nullptr ? base_url->to_string() : "null"),
+     ",", ada::to_string(encoding), ",", (optional_url != nullptr ? optional_url->to_string() : "null"), ")");
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = ada::state::SCHEME_START;
 

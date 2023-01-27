@@ -572,7 +572,7 @@ namespace ada {
     return true;
   }
 
-  std::string url::to_string() {
+  std::string url::to_string() const {
     if (!is_valid) {
       return "null";
     }
