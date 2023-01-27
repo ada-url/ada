@@ -376,7 +376,7 @@ namespace ada {
     ada_really_inline bool parse_scheme(const std::string_view input);
 
     /**
-     * Returns a string representation of this URL.  (Useful for debugging.)
+     * Returns a JSON string representation of this URL.
      */
     std::string to_string() const;
 
@@ -426,6 +426,10 @@ namespace ada {
 
   }; // struct url
 
+
+  inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
+    return out << u.to_string();
+  }
 } // namespace ada
 
 #endif // ADA_URL_H

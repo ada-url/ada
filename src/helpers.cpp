@@ -9,6 +9,25 @@
 
 namespace ada::helpers {
 
+  template <typename out_iter>
+  void encode_json(std::string_view view, out_iter out) {
+    // trivial implementation. could be faster.
+    const char * hexvalues = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    for(uint8_t c : view) {
+      if(c == '\\') {
+        *out++ = '\\'; *out++ = '\\';
+      } else if(c == '"') {
+        *out++ = '\\'; *out++ = '"';
+      } else if(c <= 0x1f) {
+        *out++ = '\\'; *out++= 'u'; *out++= '0'; *out++= '0';
+        *out++ = hexvalues[2*c];
+        *out++ = hexvalues[2*c+1];
+      } else {
+        *out++ = c;
+      }
+    }
+  }
+
   ada_unused std::string get_state(ada::state s) {
     switch (s) {
       case ada::state::AUTHORITY: return "Authority";

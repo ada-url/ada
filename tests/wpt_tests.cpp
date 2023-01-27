@@ -340,6 +340,22 @@ bool urltestdata_encoding(const char* source) {
         if(!object["origin"].get(origin)) {
           TEST_ASSERT(input_url.get_origin(), origin, "Origin " + element_string);
         }
+
+        // Next we test the 'to_string' method.
+        std::string parsed_url_json = input_url.to_string();
+        // We need padding.
+        simdjson::padded_string padded_url_json = parsed_url_json;
+        // We need a second parser.
+        ondemand::parser urlparser;
+        ondemand::document parsed_doc = urlparser.iterate(padded_url_json);
+        ondemand::object parsed_object = parsed_doc.get_object();
+        std::string_view json_recovered_path = parsed_object["path"];
+
+        std::string_view json_recovered_scheme = parsed_object["scheme"];
+        // We could test more fields.
+        TEST_ASSERT(json_recovered_scheme, protocol.substr(0,protocol.size()-1), "JSON protocol " + element_string + parsed_url_json);
+
+        TEST_ASSERT(json_recovered_path, pathname, "JSON Path " + element_string + parsed_url_json);
         counter ++;
       }
     }
