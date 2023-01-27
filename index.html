@@ -111,14 +111,14 @@ Usage</h1>
 <ul>
 <li>Parse and validate a URL</li>
 </ul>
-<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line"><span class="comment">// url.is_valid will return true</span></div>
-<div class="ttc" id="anamespaceada_html_a3599c7e3929e0162d2970d227d840867"><div class="ttname"><a href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a></div><div class="ttdeci">ada_warn_unused ada::url parse(std::string_view input, std::optional&lt; ada::url &gt; base_url=std::nullopt, ada::encoding_type encoding=ada::encoding_type::UTF8)</div><div class="ttdef"><b>Definition:</b> <a href="d8/df6/implementation_8cpp_source.html#l00011">implementation.cpp:11</a></div></div>
+<div class="ttc" id="anamespaceada_html_a135ad7ef320d4357500ba78a4dfd05e6"><div class="ttname"><a href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a></div><div class="ttdeci">ada_warn_unused ada::url parse(std::string_view input, const ada::url *base_url=nullptr, ada::encoding_type encoding=ada::encoding_type::UTF8)</div><div class="ttdef"><b>Definition:</b> <a href="d8/df6/implementation_8cpp_source.html#l00011">implementation.cpp:11</a></div></div>
 <div class="ttc" id="astructada_1_1url_html"><div class="ttname"><a href="dd/d03/structada_1_1url.html">ada::url</a></div><div class="ttdoc">A URL is a struct that represents a universal identifier.</div><div class="ttdef"><b>Definition:</b> <a href="df/db8/url_8h_source.html#l00030">url.h:30</a></div></div>
 </div><!-- fragment --><ul>
 <li>Get/Update credentials</li>
 </ul>
-<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url.<a class="code" href="dd/d03/structada_1_1url.html#accb0dab3a976a5a3858ed518fc6a757d">set_username</a>(url, <span class="stringliteral">&quot;username&quot;</span>);</div>
 <div class="line">url.<a class="code" href="dd/d03/structada_1_1url.html#a9345dfe50988968b5828af7ba73cffe8">set_password</a>(url, <span class="stringliteral">&quot;password&quot;</span>);</div>
 <div class="line"><span class="comment">// ada.get_href() will return &quot;https://username:password@www.google.com&quot;</span></div>
@@ -127,7 +127,7 @@ Usage</h1>
 </div><!-- fragment --><ul>
 <li>Get/Update Protocol</li>
 </ul>
-<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url.<a class="code" href="dd/d03/structada_1_1url.html#a6315bdfd3b80bfe8cfac024b62e0221f">set_protocol</a>(<span class="stringliteral">&quot;wss&quot;</span>);</div>
 <div class="line"><span class="comment">// url.get_protocol() will return &quot;wss&quot;</span></div>
 <div class="line"><span class="comment">// url.get_href() will return &quot;wss://www.google.com&quot;</span></div>
@@ -135,35 +135,35 @@ Usage</h1>
 </div><!-- fragment --><ul>
 <li>Get/Update hostname</li>
 </ul>
-<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url.<a class="code" href="dd/d03/structada_1_1url.html#a38761f5696d73ddcd477a0c76a41ed86">set_host</a>(<span class="stringliteral">&quot;github.com&quot;</span>);</div>
 <div class="line"><span class="comment">// url.get_host() will return &quot;github.com&quot;</span></div>
 <div class="ttc" id="astructada_1_1url_html_a38761f5696d73ddcd477a0c76a41ed86"><div class="ttname"><a href="dd/d03/structada_1_1url.html#a38761f5696d73ddcd477a0c76a41ed86">ada::url::set_host</a></div><div class="ttdeci">void set_host(const std::string_view input)</div><div class="ttdef"><b>Definition:</b> <a href="d5/dee/url-setters_8cpp_source.html#l00064">url-setters.cpp:64</a></div></div>
 </div><!-- fragment --><ul>
 <li>Get/Update port</li>
 </ul>
-<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url.<a class="code" href="dd/d03/structada_1_1url.html#a2462c738562711baafb1f9b273233f18">set_port</a>(<span class="stringliteral">&quot;8080&quot;</span>);</div>
 <div class="line"><span class="comment">// url.get_port() will return &quot;8080&quot;</span></div>
 <div class="ttc" id="astructada_1_1url_html_a2462c738562711baafb1f9b273233f18"><div class="ttname"><a href="dd/d03/structada_1_1url.html#a2462c738562711baafb1f9b273233f18">ada::url::set_port</a></div><div class="ttdeci">void set_port(const std::string_view input)</div><div class="ttdef"><b>Definition:</b> <a href="d5/dee/url-setters_8cpp_source.html#l00017">url-setters.cpp:17</a></div></div>
 </div><!-- fragment --><ul>
 <li>Get/Update pathname</li>
 </ul>
-<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url.<a class="code" href="dd/d03/structada_1_1url.html#a833d227a7861f8406fe38ca754c8ac25">set_pathname</a>(<span class="stringliteral">&quot;/my-super-long-path&quot;</span>)</div>
 <div class="line"><span class="comment">// url.get_pathname() will return &quot;/my-super-long-path&quot;</span></div>
 <div class="ttc" id="astructada_1_1url_html_a833d227a7861f8406fe38ca754c8ac25"><div class="ttname"><a href="dd/d03/structada_1_1url.html#a833d227a7861f8406fe38ca754c8ac25">ada::url::set_pathname</a></div><div class="ttdeci">void set_pathname(const std::string_view input)</div><div class="ttdef"><b>Definition:</b> <a href="d5/dee/url-setters_8cpp_source.html#l00058">url-setters.cpp:58</a></div></div>
 </div><!-- fragment --><ul>
 <li>Get/Update search/query</li>
 </ul>
-<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url.<a class="code" href="dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1">set_search</a>(<span class="stringliteral">&quot;target=self&quot;</span>);</div>
 <div class="line"><span class="comment">// url.get_search() will return &quot;?target=self&quot;</span></div>
 <div class="ttc" id="astructada_1_1url_html_a9a8f2b84b2298f2bfd26a13e80469bf1"><div class="ttname"><a href="dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1">ada::url::set_search</a></div><div class="ttdeci">void set_search(const std::string_view input)</div><div class="ttdef"><b>Definition:</b> <a href="d5/dee/url-setters_8cpp_source.html#l00035">url-setters.cpp:35</a></div></div>
 </div><!-- fragment --><ul>
 <li>Get/Update hash/fragment</li>
 </ul>
-<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code" href="dd/d03/structada_1_1url.html">ada::url</a> url = <a class="code" href="dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url.<a class="code" href="dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">set_hash</a>(<span class="stringliteral">&quot;is-this-the-real-life&quot;</span>);</div>
 <div class="line"><span class="comment">// url.get_hash() will return &quot;#is-this-the-real-life&quot;</span></div>
 <div class="ttc" id="astructada_1_1url_html_ac5f3e0abdb99b836f142f991ea1c4283"><div class="ttname"><a href="dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">ada::url::set_hash</a></div><div class="ttdeci">void set_hash(const std::string_view input)</div><div class="ttdef"><b>Definition:</b> <a href="d5/dee/url-setters_8cpp_source.html#l00022">url-setters.cpp:22</a></div></div>

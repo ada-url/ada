@@ -165,8 +165,8 @@ Functions</h2></td></tr>
 <tr class="separator:ad3a5d67b58ebecc2e711d4b444408f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51224d0fd7b3f84be3ee3c5b44be0bd7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">to_string</a> (<a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b">encoding_type</a> type)</td></tr>
 <tr class="separator:a51224d0fd7b3f84be3ee3c5b44be0bd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3599c7e3929e0162d2970d227d840867"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">parse</a> (std::string_view input, std::optional&lt; <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &gt; base_url=std::nullopt, <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b">ada::encoding_type</a> encoding=<a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1">ada::encoding_type::UTF8</a>)</td></tr>
-<tr class="separator:a3599c7e3929e0162d2970d227d840867"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a135ad7ef320d4357500ba78a4dfd05e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">parse</a> (std::string_view input, const <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> *base_url=nullptr, <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b">ada::encoding_type</a> encoding=<a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1">ada::encoding_type::UTF8</a>)</td></tr>
+<tr class="separator:a135ad7ef320d4357500ba78a4dfd05e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b7cc372b3ac372722c850ca149215d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6">to_string</a> (<a class="el" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">ada::state</a> s)</td></tr>
 <tr class="separator:a3b7cc372b3ac372722c850ca149215d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -271,8 +271,8 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a3599c7e3929e0162d2970d227d840867"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3599c7e3929e0162d2970d227d840867">&#9670;&nbsp;</a></span>parse()</h2>
+<a id="a135ad7ef320d4357500ba78a4dfd05e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a135ad7ef320d4357500ba78a4dfd05e6">&#9670;&nbsp;</a></span>parse()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -286,8 +286,8 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::optional&lt; <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &gt;&#160;</td>
-          <td class="paramname"><em>base_url</em> = <code>std::nullopt</code>, </td>
+          <td class="paramtype">const <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> *&#160;</td>
+          <td class="paramname"><em>base_url</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -307,7 +307,7 @@ Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00011">11</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#acf6921efe6f055295a77113a5f1f94dc">ada::parser::parse_url()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1">UTF8</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a5d9bbab2ed3e4bb3f424f6ffc50e1e2d">ada::parser::parse_url()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1">UTF8</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d2/d68/demo_8cpp.html#a81ce304348a420752ee080480d2b3095">main()</a>.</p>
 
@@ -357,7 +357,7 @@ Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d">unreachable()</a>, <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1">UTF8</a>, <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84">UTF_16BE</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240">UTF_16LE</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#acef0e8c266e5586b15e2dcab5c7f566f">ada::url::get_port()</a>, <a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ada::serializers::ipv4()</a>, <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#acf6921efe6f055295a77113a5f1f94dc">ada::parser::parse_url()</a>, and <a class="el" href="../../dd/d03/structada_1_1url.html#abc08ed1a346e39113d5c5724c5f89a9f">ada::url::to_string()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#acef0e8c266e5586b15e2dcab5c7f566f">ada::url::get_port()</a>, <a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ada::serializers::ipv4()</a>, <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a5d9bbab2ed3e4bb3f424f6ffc50e1e2d">ada::parser::parse_url()</a>, and <a class="el" href="../../dd/d03/structada_1_1url.html#abc08ed1a346e39113d5c5724c5f89a9f">ada::url::to_string()</a>.</p>
 
 </div>
 </div>
@@ -386,7 +386,7 @@ Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d7/d19/common__defs_8h_source.html#l00149">149</a> of file <a class="el" href="../../d7/d19/common__defs_8h_source.html">common_defs.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#acf6921efe6f055295a77113a5f1f94dc">ada::parser::parse_url()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">to_string()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a5d9bbab2ed3e4bb3f424f6ffc50e1e2d">ada::parser::parse_url()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">to_string()</a>.</p>
 
 </div>
 </div>

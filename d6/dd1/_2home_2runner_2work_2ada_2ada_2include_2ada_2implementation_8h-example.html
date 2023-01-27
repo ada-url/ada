@@ -98,8 +98,8 @@ $(document).ready(function(){initNavTree('d6/dd1/_2home_2runner_2work_2ada_2ada_
   </table>
   </dd>
 </dl>
-<div class="fragment"><div class="line"><span class="keyword">auto</span> url = <a name="_a0"></a><a class="code" href="../../dd/d03/structada_1_1url.html">ada::url</a> <a name="a1"></a><a class="code" href="../../dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
-<div class="ttc" id="anamespaceada_html_a3599c7e3929e0162d2970d227d840867"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">ada::parse</a></div><div class="ttdeci">ada_warn_unused ada::url parse(std::string_view input, std::optional&lt; ada::url &gt; base_url=std::nullopt, ada::encoding_type encoding=ada::encoding_type::UTF8)</div><div class="ttdef"><b>Definition:</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00011">implementation.cpp:11</a></div></div>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> url = <a name="_a0"></a><a class="code" href="../../dd/d03/structada_1_1url.html">ada::url</a> <a name="a1"></a><a class="code" href="../../dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
+<div class="ttc" id="anamespaceada_html_a135ad7ef320d4357500ba78a4dfd05e6"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">ada::parse</a></div><div class="ttdeci">ada_warn_unused ada::url parse(std::string_view input, const ada::url *base_url=nullptr, ada::encoding_type encoding=ada::encoding_type::UTF8)</div><div class="ttdef"><b>Definition:</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00011">implementation.cpp:11</a></div></div>
 <div class="ttc" id="astructada_1_1url_html"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html">ada::url</a></div><div class="ttdoc">A URL is a struct that represents a universal identifier.</div><div class="ttdef"><b>Definition:</b> <a href="../../df/db8/url_8h_source.html#l00030">url.h:30</a></div></div>
 </div><!-- fragment --><div class="fragment"><div class="line"> </div>
 <div class="line"><span class="preprocessor">#ifndef ADA_IMPLEMENTATION_H</span></div>
@@ -115,8 +115,8 @@ $(document).ready(function(){initNavTree('d6/dd1/_2home_2runner_2work_2ada_2ada_
 <div class="line"> </div>
 <div class="line"><span class="keyword">namespace </span><a class="code" href="../../dd/d64/namespaceada.html">ada</a> {</div>
 <div class="line"> </div>
-<div class="line">  <a name="a0"></a><a class="code" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> <a class="code" href="../../dd/d03/structada_1_1url.html">ada::url</a> <a class="code" href="../../dd/d64/namespaceada.html#a3599c7e3929e0162d2970d227d840867">parse</a>(std::string_view input,</div>
-<div class="line">                                 std::optional&lt;ada::url&gt; base_url = std::nullopt,</div>
+<div class="line">  <a name="a0"></a><a class="code" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> <a class="code" href="../../dd/d03/structada_1_1url.html">ada::url</a> <a class="code" href="../../dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">parse</a>(std::string_view input,</div>
+<div class="line">                                 <span class="keyword">const</span> <a class="code" href="../../dd/d03/structada_1_1url.html">ada::url</a>* base_url = <span class="keyword">nullptr</span>,</div>
 <div class="line">                                 <a class="code" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b">ada::encoding_type</a> encoding = <a name="a1"></a><a class="code" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1">ada::encoding_type::UTF8</a>);</div>
 <div class="line"> </div>
 <div class="line">}</div>
