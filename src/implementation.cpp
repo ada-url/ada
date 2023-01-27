@@ -9,7 +9,7 @@
 namespace ada {
 
   ada_warn_unused url parse(std::string_view input,
-                            std::optional<ada::url> base_url,
+                            const ada::url* base_url,
                             ada::encoding_type encoding) {
     if(encoding != encoding_type::UTF8) {
       // @todo Add support for non UTF8 input

@@ -7,7 +7,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
 
   for (auto _ : state) {
     for(std::string& url_string : url_examples) {
-      auto url = ada::parser::parse_url(url_string, std::nullopt);
+      auto url = ada::parser::parse_url(url_string);
       numbers_of_parameters += url.path.size()
        + (url.query.has_value() ? url.query->size() : 0) + url.get_scheme().size() + url.host->size();
       is_valid &= url.is_valid;
@@ -20,7 +20,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
       for(std::string& url_string : url_examples) {
-        auto url = ada::parser::parse_url(url_string, std::nullopt);
+        auto url = ada::parser::parse_url(url_string);
         numbers_of_parameters += url.path.size()
          + (url.query.has_value() ? url.query->size() : 0) + url.get_scheme().size()
          + (url.host.has_value() ? url.host->size() : 0);

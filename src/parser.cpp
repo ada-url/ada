@@ -17,11 +17,11 @@
 namespace ada::parser {
 
   url parse_url(std::string_view user_input,
-                std::optional<ada::url> base_url,
+                const ada::url* base_url,
                 ada::encoding_type encoding,
-                std::optional<ada::url> optional_url) {
+                const ada::url* optional_url) {
     ada_log("ada::parser::parse_url('", user_input,
-     "' [", user_input.size()," bytes],", (base_url.has_value() ? base_url.value().to_string() : "null"),
+     "' [", user_input.size()," bytes],", (base_url != nullptr ? *base_url.to_string() : "null"),
      ",", ada::to_string(encoding), ",", (optional_url.has_value() ? optional_url.value().to_string() : "null"), ")");
     // Let state be state override if given, or scheme start state otherwise.
     ada::state state = ada::state::SCHEME_START;
@@ -34,7 +34,7 @@ namespace ada::parser {
     // If we have anything in optional_url, then it was copied there.
     // As much as possible, we do not want relatively expensive constructor in our
     // main function (parse_url).
-    ada::url url = optional_url.has_value() ? std::move(optional_url.value()) : ada::url();
+    ada::url url = optional_url != nullptr ? *optional_url : ada::url();
     // From this point forward, optional_url should not be used.
 
     std::string tmp_buffer;
@@ -105,8 +105,8 @@ namespace ada::parser {
               state = ada::state::FILE;
             }
             // Otherwise, if url is special, base is non-null, and base’s scheme is url’s scheme:
-            // Note: Doing base_url->scheme is unsafe if base_url.has_value() is false.
-            else if (url.is_special() && base_url.has_value() && base_url->get_scheme_type() == url.get_scheme_type()) {
+            // Note: Doing base_url->scheme is unsafe if base_url != nullptr is false.
+            else if (url.is_special() && base_url != nullptr && base_url->get_scheme_type() == url.get_scheme_type()) {
               // Set state to special relative or authority state.
               state = ada::state::SPECIAL_RELATIVE_OR_AUTHORITY;
             }
@@ -138,7 +138,7 @@ namespace ada::parser {
           goto_no_scheme:
           ada_log("NO_SCHEME ", helpers::substring(url_data, input_position));
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
-          if (!base_url.has_value() || (base_url->has_opaque_path && (input_position != input_size))) {
+          if (base_url == nullptr || (base_url->has_opaque_path && (input_position != input_size))) {
             ada_log("NO_SCHEME validation error");
             url.is_valid = false;
             return url;
@@ -148,7 +148,7 @@ namespace ada::parser {
           // url’s fragment to the empty string, and set state to fragment state.
           else if (base_url->has_opaque_path && url.fragment.has_value() && input_position == input_size) {
             ada_log("NO_SCHEME opaque base with fragment");
-            url.copy_scheme(base_url.value());
+            url.copy_scheme(*base_url);
             url.path = base_url->path;
             url.has_opaque_path = base_url->has_opaque_path;
             url.query = base_url->query;
@@ -272,7 +272,7 @@ namespace ada::parser {
           goto_relative_scheme:
           ada_log("RELATIVE_SCHEME ", helpers::substring(url_data, input_position));
           // Set url’s scheme to base’s scheme.
-          url.copy_scheme(base_url.value());
+          url.copy_scheme(*base_url);
           // If c is U+002F (/), then set state to relative slash state.
           if ((input_position != input_size) && (url_data[input_position] == '/')) {
             ada_log("RELATIVE_SCHEME if c is U+002F (/), then set state to relative slash state");
@@ -536,7 +536,7 @@ namespace ada::parser {
             // If base is non-null and base’s scheme is "file", then:
             // Note: it is unsafe to do base_url->scheme unless you know that
             // base_url_has_value() is true.
-            if (base_url.has_value() && base_url.has_value() && base_url->get_scheme_type() == ada::scheme::type::FILE) {
+            if (base_url != nullptr && base_url->get_scheme_type() == ada::scheme::type::FILE) {
               // Set url’s host to base’s host.
               url.host = base_url->host;
 
@@ -620,7 +620,7 @@ namespace ada::parser {
             state = ada::state::FILE_SLASH;
           }
           // Otherwise, if base is non-null and base’s scheme is "file":
-          else if (base_url.has_value() && base_url->get_scheme_type() == ada::scheme::type::FILE) {
+          else if (base_url != nullptr && base_url->get_scheme_type() == ada::scheme::type::FILE) {
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
             ada_log("FILE base non-null");
             url.host = base_url->host;
