@@ -10,6 +10,28 @@ endif()
 if(ADA_SANITIZE_UNDEFINED)
   message(STATUS "Undefined sanitizer enabled.")
 endif()
+option(ADA_COVERAGE "Compute coverage" OFF)
+
+if (ADA_COVERAGE)
+    message(STATUS "You want to compute coverage. We assume that you have installed gcovr.")
+    if (NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+    endif()
+    #######################
+    # You need to install gcovr. Under macos, you may do so with brew.
+    # brew install gcovr
+    # Then build...
+    # cmake -D ADA_COVERAGE=ON  -B buildcoverage
+    # cmake --build buildcoverage
+    # cmake --build buildcoverage --target ada_coverage
+    #
+    # open buildcoverage/ada_coverage/index.html
+    #####################
+    include(${PROJECT_SOURCE_DIR}/cmake/codecoverage.cmake)
+    APPEND_COVERAGE_COMPILER_FLAGS()
+    setup_target_for_coverage_gcovr_html(NAME ada_coverage EXECUTABLE ctest EXCLUDE "${PROJECT_SOURCE_DIR}/dependencies/*" "${PROJECT_SOURCE_DIR}/tools/*"  "${PROJECT_SOURCE_DIR}/singleheader/*" ${PROJECT_SOURCE_DIR}/include/ada/common_defs.h)
+endif()
+
 if (NOT CMAKE_BUILD_TYPE)
   if(ADA_SANITIZE OR ADA_SANITIZE_BOUNDS_STRICT OR ADA_SANITIZE_UNDEFINED)
     message(STATUS "No build type selected, default to Debug because you have sanitizers.")
