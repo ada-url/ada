@@ -19,7 +19,7 @@ git clone \
   --depth=1 \
   --filter=blob:none \
   --sparse \
-  git@github.com:web-platform-tests/wpt.git wpt
+  https://github.com/web-platform-tests/wpt.git wpt
 cd wpt
 git sparse-checkout set "url/resources"
 cp url/resources/*.json "$WPT_DIR"
