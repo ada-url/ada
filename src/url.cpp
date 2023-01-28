@@ -471,7 +471,7 @@ namespace ada {
           return parse_ipv4(host.value());
         }
         ada_log("parse_host fast path ", *host);
-        return is_valid = checkers::verify_dns_length(host.value());
+        return true;
       }
     }
     ada_log("parse_host  calling to_ascii");
@@ -485,7 +485,7 @@ namespace ada {
     }
 
 
-    return is_valid = checkers::verify_dns_length(host.value());
+    return true;
   }
 
   template <bool has_state_override>
@@ -621,4 +621,8 @@ namespace ada {
     return answer;
   }
 
+  [[nodiscard]] bool url::has_valid_domain() const noexcept {
+    if(!host.has_value()) { return false; }
+    return checkers::verify_dns_length(host.value());
+  }
 } // namespace ada

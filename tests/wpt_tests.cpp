@@ -10,7 +10,7 @@
 #include "ada.h"
 #include "ada/parser.h"
 
-// We think that these examples have bad domains and should not pass.
+// We think that these examples have bad domains.
 std::set<std::string> bad_domains = {"http://./", "http://../", "http://foo.09.."};
 
 #ifdef _WIN32
@@ -282,7 +282,6 @@ bool urltestdata_encoding(const char* source) {
         continue;
       }
       std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
-      if(bad_domains.find(std::string(input)) != bad_domains.end()) { std::cerr << "skipping "+element_string << std::endl; continue; }
 #ifdef _WIN32
       if(exceptions.find(std::string(input)) != exceptions.end()) { std::cerr << "skipping "+element_string << std::endl; continue; }
 #endif
@@ -340,7 +339,9 @@ bool urltestdata_encoding(const char* source) {
         if(!object["origin"].get(origin)) {
           TEST_ASSERT(input_url.get_origin(), origin, "Origin " + element_string + input_url.to_string());
         }
-
+        if(bad_domains.find(std::string(input)) != bad_domains.end()) {
+          TEST_ASSERT(input_url.has_valid_domain(), false, "Bad domain " + element_string + input_url.to_string());
+        }
         // Next we test the 'to_string' method.
         std::string parsed_url_json = input_url.to_string();
         // We need padding.
@@ -385,10 +386,10 @@ bool verifydnslength_tests(const char* source) {
       std::string message = std::string(object["message"].get_string().value());
       bool failure = object["failure"].get_bool().value();
       ada::url input_url = ada_parse(input);
-      std::cout << input << " should " << (failure ? "fail" : "succeed") 
-        << " and it " << (input_url.is_valid ? "succeeds" : "fails") 
-        << (!failure == input_url.is_valid ? " OK" : " ERROR" ) << std::endl;
-      TEST_ASSERT(!input_url.is_valid, failure, message + " " + element_string);
+      std::cout << input << " should " << (failure ? "fail" : "succeed")
+        << " and it " << (input_url.has_valid_domain() ? "succeeds" : "fails")
+        << (!failure == input_url.has_valid_domain() ? " OK" : " ERROR" ) << std::endl;
+      TEST_ASSERT(!input_url.has_valid_domain(), failure, message + " " + element_string);
       counter++;
     }
   }
