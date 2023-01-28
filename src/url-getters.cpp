@@ -26,7 +26,11 @@ namespace ada {
       output += "/.";
     }
 
-    output += get_pathname() + (query.has_value() ? "?" + query.value() : "") + (fragment.has_value() ? "#" + fragment.value() : "");
+    output += get_pathname() 
+           // If query is non-null, then set this’s query object’s list to the result of parsing query.
+           + (query.has_value() ? "?" + query.value() : "")
+           // If  url’s fragment is non-null, then append U+0023 (#), followed by url’s fragment, to output.
+           + (fragment.has_value() ? "#" + fragment.value() : "");
     return output;
   }
 
@@ -55,6 +59,9 @@ namespace ada {
   }
 
   [[nodiscard]] std::string url::get_host() const noexcept {
+    // If url’s host is null, then return the empty string.
+    // If url’s port is null, return url’s host, serialized.
+    // Return url’s host, serialized, followed by U+003A (:) and url’s port, serialized.
     if (!host.has_value()) { return ""; }
     return host.value() + (port.has_value() ? ":" + get_port() : "");
   }
@@ -68,7 +75,9 @@ namespace ada {
   }
 
   [[nodiscard]] std::string url::get_search() const noexcept {
-    return query.has_value() ? "?" + query.value() : "";
+    // If this’s URL’s query is either null or the empty string, then return the empty string.
+    // Return U+003F (?), followed by this’s URL’s query.
+    return (!query.has_value() || (query.value().empty())) ? "" : "?" + query.value();
   }
 
   [[nodiscard]] std::string url::get_username() const noexcept {
@@ -84,7 +93,9 @@ namespace ada {
   }
 
   [[nodiscard]] std::string url::get_hash() const noexcept {
-    return fragment.has_value() ? "#" + fragment.value() : "";
+    // If this’s URL’s fragment is either null or the empty string, then return the empty string.
+    // Return U+0023 (#), followed by this’s URL’s fragment.
+    return (!fragment.has_value() || (fragment.value().empty())) ? "" : "#" + fragment.value();
   }
 
 } // namespace ada
