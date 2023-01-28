@@ -26,7 +26,7 @@ namespace ada {
       output += "/.";
     }
 
-    output += get_pathname() + (query.has_value() ? "?" + query.value() : "") + (fragment.has_value() ? "#" + fragment.value() : "");
+    output += get_pathname() + get_search() + get_hash();
     return output;
   }
 
