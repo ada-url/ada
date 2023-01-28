@@ -10,9 +10,6 @@
 #include "ada.h"
 #include "ada/parser.h"
 
-// We think that these examples have bad domains and should not pass.
-std::set<std::string> bad_domains = {"http://./", "http://../", "http://foo.09.."};
-
 #ifdef _WIN32
 // Under Windows, we use get transitional IDN, but the spec is based on non-transitional.
 std::set<std::string> exceptions = {"\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x61\xc3\x9f\x2e\x45\x78\x41\x6d\x50\x6c\x45\x2f"};
@@ -282,7 +279,6 @@ bool urltestdata_encoding(const char* source) {
         continue;
       }
       std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
-      if(bad_domains.find(std::string(input)) != bad_domains.end()) { std::cerr << "skipping "+element_string << std::endl; continue; }
 #ifdef _WIN32
       if(exceptions.find(std::string(input)) != exceptions.end()) { std::cerr << "skipping "+element_string << std::endl; continue; }
 #endif

@@ -66,7 +66,7 @@ namespace ada::checkers {
       if(dot_location == std::string_view::npos) dot_location = input.size();
 
       auto label_size = dot_location - start;
-      if (label_size > 63 || label_size == 0) return false;
+      if (label_size > 63) return false;
 
       ++label_count;
       start = dot_location + 1;

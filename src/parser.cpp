@@ -223,6 +223,7 @@ namespace ada::parser {
             else if (input_position == input_size || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
               // If atSignSeen is true and authority_view is the empty string, validation error, return failure.
               if (at_sign_seen && authority_view.empty()) {
+                ada_log("AUTHORITY at sign seen and buffer is empty error");
                 url.is_valid = false;
                 return url;
               }
@@ -413,7 +414,10 @@ namespace ada::parser {
             // Let host be the result of host parsing buffer with url is not special.
             ada_log("HOST parsing ", host_view);
             url.parse_host(host_view);
-            if(!url.is_valid) { return url; }
+            if(!url.is_valid) {
+              ada_log("HOST parsing failed with", host_view);
+              return url;
+            }
             ada_log("HOST parsing results in ", url.host.has_value() ? "none" : url.host.value());
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
@@ -434,6 +438,10 @@ namespace ada::parser {
               url.host = "";
             } else {
               url.parse_host(host_view);
+              if (!url.is_valid) {
+                ada_log("HOST parsing failed with ", host_view);
+                return url;
+              }
             }
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
@@ -475,7 +483,7 @@ namespace ada::parser {
             state = ada::state::PATH;
 
             // Optimization: Avoiding going into PATH state improves the performance of urls ending with /.
-            if (input_position == input_size) {
+            if (input_position == input_size - 1 && url_data[input_position] == '/') {
               url.path = "/";
               return url;
             }

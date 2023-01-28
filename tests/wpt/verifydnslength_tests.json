@@ -21,31 +21,6 @@
     "failure": true
   },
   {
-    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
-    "input": "http://example..com.br",
-    "failure": true
-  },
-  {
-    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
-    "input": "http://example.com.br..",
-    "failure": true
-  },
-  {
-    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
-    "input": "http://example.com.br....",
-    "failure": true
-  },
-  {
-    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
-    "input": "http://.example.com.br",
-    "failure": true
-  },
-  {
-    "message": "A domain label must be a mininum of 1 character and a maximum of 63 characters. 4",
-    "input": "http://example.com..br",
-    "failure": true
-  },
-  {
     "message": "A domain name must be a maximum of 253 characters (or 254 if there is a dot at the end). 1",
     "input": "http://example.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br.com.br",
     "failure": true
