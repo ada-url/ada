@@ -15,6 +15,7 @@ var structada_1_1url =
     [ "get_protocol", "dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1", null ],
     [ "get_search", "dd/d03/structada_1_1url.html#a049adbb069b60b2157bb9f1b5d9d3f8b", null ],
     [ "get_username", "dd/d03/structada_1_1url.html#aaf3b830a2a7e7389d7f518a055f882ef", null ],
+    [ "has_valid_domain", "dd/d03/structada_1_1url.html#a5758e6623e671cd40045cac4075b9161", null ],
     [ "includes_credentials", "dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b", null ],
     [ "is_special", "dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9", null ],
     [ "operator=", "dd/d03/structada_1_1url.html#a5b9014ee57227d8083ffc5516cc96fe0", null ],
