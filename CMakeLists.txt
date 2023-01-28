@@ -18,6 +18,8 @@ set(ADA_SOURCE_DIR src)
 
 add_subdirectory(src)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
+
 If (BUILD_TESTING)
   message(STATUS "The tests are enabled.")
   add_subdirectory(tests)
@@ -103,8 +105,10 @@ else()
 endif()
 ### Going forward, we have ICU for sure, except under Windows.
 
-add_subdirectory(singleheader)
-add_subdirectory(tools)
+if(NOT ADA_COVERAGE)
+  add_subdirectory(singleheader)
+  add_subdirectory(tools)
+endif()
 
 install(
   FILES include/ada.h
