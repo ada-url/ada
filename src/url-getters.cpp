@@ -68,7 +68,7 @@ namespace ada {
   }
 
   [[nodiscard]] std::string url::get_search() const noexcept {
-    return !query.value_or("").empty() ? "?" + query.value() : "";
+    return query.has_value() ? "?" + query.value() : "";
   }
 
   [[nodiscard]] std::string url::get_username() const noexcept {
@@ -84,7 +84,7 @@ namespace ada {
   }
 
   [[nodiscard]] std::string url::get_hash() const noexcept {
-    return !fragment.value_or("").empty() ? "#" + fragment.value() : "";
+    return fragment.has_value() ? "#" + fragment.value() : "";
   }
 
 } // namespace ada
