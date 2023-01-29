@@ -120,50 +120,59 @@ namespace ada {
     [[nodiscard]] std::string get_username() const noexcept;
 
     /**
+     * Returns true on success.
      * @see https://url.spec.whatwg.org/#dom-url-username
      */
-    void set_username(const std::string_view input);
+    bool set_username(const std::string_view input);
 
     /**
+     * Returns true on success.
      * @see https://url.spec.whatwg.org/#dom-url-password
      */
-    void set_password(const std::string_view input);
+    bool set_password(const std::string_view input);
 
     /**
+     * Returns true on success.
      * @see https://url.spec.whatwg.org/#dom-url-port
      */
-    void set_port(const std::string_view input);
+    bool set_port(const std::string_view input);
 
 
     /**
+     * This function always succeeds.
      * @see https://url.spec.whatwg.org/#dom-url-hash
      */
     void set_hash(const std::string_view input);
 
     /**
+     * This function always succeeds.
      * @see https://url.spec.whatwg.org/#dom-url-search
      */
     void set_search(const std::string_view input);
 
     /**
+     * Returns true on success.
      * @see https://url.spec.whatwg.org/#dom-url-search
      */
-    void set_pathname(const std::string_view input);
+    bool set_pathname(const std::string_view input);
 
     /**
+     * Returns true on success.
      * @see https://url.spec.whatwg.org/#dom-url-host
      */
-    void set_host(const std::string_view input);
+    bool set_host(const std::string_view input);
 
     /**
+     * Returns true on success.
      * @see https://url.spec.whatwg.org/#dom-url-hostname
      */
-    void set_hostname(const std::string_view input);
+    bool set_hostname(const std::string_view input);
 
     /**
+     * Returns true on success.
      * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
-    void set_protocol(const std::string_view input);
+    bool set_protocol(const std::string_view input);
 
     /**
      * The password getter steps are to return this’s URL’s password.
@@ -268,9 +277,10 @@ namespace ada {
      * We assume that the input does not contain spaces or tabs
      * within the ASCII digits.
      * It returns how many bytes were consumed when a number is successfully parsed.
+     * On failure, it returns zero.
      * @see https://url.spec.whatwg.org/#host-parsing
      */
-    ada_really_inline size_t parse_port(std::string_view view) noexcept {
+    ada_really_inline size_t parse_port(std::string_view view, bool check_trailing_content) noexcept {
           ada_log("parse_port('", view, "') ", view.size());
           uint16_t parsed_port{};
           auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
@@ -280,12 +290,16 @@ namespace ada {
             return 0;
           }
           ada_log("parse_port: ", parsed_port);
-          port = (r.ec == std::errc() && scheme_default_port() != parsed_port) ?
-            std::optional<uint16_t>(parsed_port) : std::nullopt;
           const size_t consumed = size_t(r.ptr - view.data());
           ada_log("parse_port: consumed ", consumed);
-          is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
+          if(check_trailing_content) {
+            is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
+          }
           ada_log("parse_port: is_valid = ", is_valid);
+          if(is_valid) {
+            port = (r.ec == std::errc() && scheme_default_port() != parsed_port) ?
+              std::optional<uint16_t>(parsed_port) : std::nullopt;
+          }
           return consumed;
     }
 
@@ -346,7 +360,7 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/#host-parsing
      */
-    ada_really_inline bool parse_host(std::string_view input);
+    [[nodiscard]] ada_really_inline bool parse_host(std::string_view input);
 
     /**
      * @private
@@ -360,7 +374,7 @@ namespace ada {
      *
      * @see https://url.spec.whatwg.org/
      */
-    ada_really_inline bool parse_path(const std::string_view input);
+    [[nodiscard]] ada_really_inline bool parse_path(const std::string_view input);
 
     /**
      * @private
@@ -374,13 +388,13 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/
      */
-    ada_really_inline bool parse_prepared_path(const std::string_view input);
+    [[nodiscard]] ada_really_inline bool parse_prepared_path(const std::string_view input);
 
     /**
      * @private
      */
     template <bool has_state_override = false>
-    ada_really_inline bool parse_scheme(const std::string_view input);
+    [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
 
     /**
      * Returns a JSON string representation of this URL.
@@ -395,7 +409,7 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-ipv4-parser
      */
-    bool parse_ipv4(std::string_view input);
+    [[nodiscard]] bool parse_ipv4(std::string_view input);
 
     /**
      * @private
@@ -403,7 +417,7 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-ipv6-parser
      */
-    bool parse_ipv6(std::string_view input);
+    [[nodiscard]] bool parse_ipv6(std::string_view input);
 
     /**
      * @private
@@ -411,7 +425,7 @@ namespace ada {
      * Return true on success.
      * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
      */
-    bool parse_opaque_host(std::string_view input);
+    [[nodiscard]] bool parse_opaque_host(std::string_view input);
 
     /**
      * @private

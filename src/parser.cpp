@@ -37,6 +37,11 @@ namespace ada::parser {
     ada::url url = optional_url != nullptr ? *optional_url : ada::url();
     // From this point forward, optional_url should not be used.
 
+    // If we are provided with an invalid base, or the optional_url was invalid,
+    // we must return.
+    if(base_url != nullptr) { url.is_valid &= base_url->is_valid; }
+    if(!url.is_valid) { return url; }
+
     std::string tmp_buffer;
     std::string_view internal_input;
     if(unicode::has_tabs_or_newline(user_input)) {
@@ -97,7 +102,7 @@ namespace ada::parser {
           // Otherwise, if c is U+003A (:), then:
           if ((input_position != input_size) && (url_data[input_position] == ':')) {
             ada_log("SCHEME the scheme should be ", url_data.substr(0,input_position));
-            url.parse_scheme(url_data.substr(0,input_position));
+            if(!url.parse_scheme(url_data.substr(0,input_position))) { return url; }
             ada_log("SCHEME the scheme is ", url.get_scheme());
             // If url’s scheme is "file", then:
             if (url.get_scheme_type() == ada::scheme::type::FILE) {
@@ -412,8 +417,7 @@ namespace ada::parser {
             // If buffer is the empty string, validation error, return failure.
             // Let host be the result of host parsing buffer with url is not special.
             ada_log("HOST parsing ", host_view);
-            url.parse_host(host_view);
-            if(!url.is_valid) { return url; }
+            if(!url.parse_host(host_view)) { return url; }
             ada_log("HOST parsing results in ", url.host.has_value() ? "none" : url.host.value());
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
@@ -433,7 +437,7 @@ namespace ada::parser {
             if (host_view.empty()) {
               url.host = "";
             } else {
-              url.parse_host(host_view);
+              if(!url.parse_host(host_view)) { return url; }
             }
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
@@ -460,7 +464,7 @@ namespace ada::parser {
         case ada::state::PORT: {
           ada_log("PORT ", helpers::substring(url_data, input_position));
           std::string_view port_view = helpers::substring(url_data, input_position);
-          size_t consumed_bytes = url.parse_port(port_view);
+          size_t consumed_bytes = url.parse_port(port_view, true);
           input_position += consumed_bytes;
           if(!url.is_valid) { return url; }
           goto goto_path_start;
@@ -518,7 +522,7 @@ namespace ada::parser {
           } else {
             input_position = input_size;
           }
-          url.parse_prepared_path(view);
+          if(!url.parse_prepared_path(view)) { return url; }
           break;
         }
         case ada::state::FILE_SLASH: {
