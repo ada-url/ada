@@ -19,8 +19,7 @@ namespace ada::parser {
    */
   url parse_url(std::string_view user_input,
                 const ada::url* base_url = nullptr,
-                ada::encoding_type encoding = ada::encoding_type::UTF8,
-                const ada::url* optional_url = nullptr);
+                ada::encoding_type encoding = ada::encoding_type::UTF8);
 
 } // namespace ada
 
