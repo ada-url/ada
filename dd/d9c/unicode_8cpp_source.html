@@ -332,7 +332,7 @@ $(document).ready(function(){initNavTree('dd/d9c/unicode_8cpp_source.html','../.
 <div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">char</span> ch = pointer[0];</div>
 <div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;      <span class="keywordtype">size_t</span> remaining = end - pointer - 1;</div>
 <div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;      <span class="keywordflow">if</span> (ch != <span class="charliteral">&#39;%&#39;</span> || remaining &lt; 2 ||</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;          (ch == <span class="charliteral">&#39;%&#39;</span> &amp;&amp;</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;          (<span class="comment">//ch == &#39;%&#39; &amp;&amp; // It is unnecessary to check that ch == &#39;%&#39;.</span></div>
 <div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;           (!<a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#adca6f3cd4ba58e901c7a357030d6ada5">is_ascii_hex_digit</a>(pointer[1]) ||</div>
 <div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;            !<a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#adca6f3cd4ba58e901c7a357030d6ada5">is_ascii_hex_digit</a>(pointer[2])))) {</div>
 <div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;        dest += ch;</div>
