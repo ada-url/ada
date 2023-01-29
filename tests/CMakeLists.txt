@@ -1,6 +1,6 @@
 include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
 
-import_dependency(simdjson simdjson/simdjson 8452b5f08470a6b80ccede17c09b157c0781bf11)
+import_dependency(simdjson simdjson/simdjson 0a3a00c95665cc1fda760e121ba8d442945ede13)
 add_dependency(simdjson)
 add_subdirectory(wpt)
 
