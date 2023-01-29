@@ -18,7 +18,7 @@ namespace ada {
 
   bool url::set_port(const std::string_view input) {
     if (cannot_have_credentials_or_port()) { return false; }
-    return parse_port(input,false);
+    return parse_port(input);
   }
 
   void url::set_hash(const std::string_view input) {
