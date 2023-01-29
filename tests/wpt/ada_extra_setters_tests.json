@@ -1,34 +1,23 @@
 {
-    "comment": [
-        "#Additional tests designed by the ada team."
-    ],
-    "pathname": [
-        {
-            "href": "https://lemire.me",
-            "new_value": "école",
-            "encoding": "UTF-8",
-            "expected": {
-                "href": "https://example.net/%C3%A9cole",
-                "pathname": "/%C3%A9cole"
-            }
-        },
-        {
-            "href": "https://lemire.me",
-            "new_value": "école",
-            "encoding": "UTF-16LE",
-            "expected": {
-                "href": "https://example.net/%E9%00c%00o%00l%00e%00",
-                "pathname": "/%E9%00c%00o%00l%00e%00"
-            }
-        },
-        {
-            "href": "https://example.net#nav",
-            "new_value": "école",
-            "encoding": "UTF-16BE",
-            "expected": {
-                "href": "https://lemire.me/%00%E9%00c%00o%00l%00e",
-                "pathname": "/%00%E9%00c%00o%00l%00e"
-            }
-        }
-    ]
+  "comment": [
+    "#Additional tests designed by the ada team."
+  ],
+  "href": [
+    {
+      "comment": "Update with pathname, fragment and search state filled",
+      "href": "https://yagiz.co",
+      "new_value": "https://google.com/url?search=true#fragment",
+      "expected": {
+        "href": "https://google.com/url?search=true#fragment"
+      }
+    },
+    {
+      "comment": "Update with authority state filled",
+      "href": "https://yagiz.co",
+      "new_value": "https://username:password@localhost:5432/my-db",
+      "expected": {
+        "href": "https://username:password@localhost:5432/my-db"
+      }
+    }
+  ]
 }
