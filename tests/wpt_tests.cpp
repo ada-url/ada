@@ -220,6 +220,7 @@ bool setters_tests_encoding(const char *source) {
       else if (category == "href") {
         std::string_view expected = element["expected"]["href"];
         base.set_href(new_value);
+        TEST_ASSERT(base.set_href(new_value), true, "set_href should return true");
         TEST_ASSERT(base.get_href(), expected, "Href " + element_string + base.to_string());
       }
     }
