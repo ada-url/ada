@@ -23,6 +23,7 @@ var structada_1_1url =
     [ "set_hash", "dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283", null ],
     [ "set_host", "dd/d03/structada_1_1url.html#a38761f5696d73ddcd477a0c76a41ed86", null ],
     [ "set_hostname", "dd/d03/structada_1_1url.html#a51ccef347bff2ce905a3695bd75a7ac6", null ],
+    [ "set_href", "dd/d03/structada_1_1url.html#a9cbad568b85dbae513da65c3a48c45a3", null ],
     [ "set_password", "dd/d03/structada_1_1url.html#a9345dfe50988968b5828af7ba73cffe8", null ],
     [ "set_pathname", "dd/d03/structada_1_1url.html#a833d227a7861f8406fe38ca754c8ac25", null ],
     [ "set_port", "dd/d03/structada_1_1url.html#a2462c738562711baafb1f9b273233f18", null ],

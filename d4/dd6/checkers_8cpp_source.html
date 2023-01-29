@@ -146,23 +146,21 @@ $(document).ready(function(){initNavTree('d4/dd6/checkers_8cpp_source.html','../
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      <span class="keywordflow">if</span>(input.size() &gt; 254) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (input.size() &gt; 253) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordtype">int</span> label_count = 0;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keywordtype">size_t</span> start = 0;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keywordflow">while</span> (start &lt; input.size()) {</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;      <span class="keyword">auto</span> dot_location = input.find(<span class="charliteral">&#39;.&#39;</span>, start);</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;      <span class="comment">// If not found, it&#39;s likely the end of the domain</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;      <span class="keywordflow">if</span>(dot_location == std::string_view::npos) dot_location = input.size();</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;      <span class="keyword">auto</span> label_size = dot_location - start;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;      <span class="keywordflow">if</span> (label_size &gt; 63 || label_size == 0) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;      ++label_count;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;      start = dot_location + 1;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    }</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;  }</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;} <span class="comment">// namespace ada::checkers</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordtype">size_t</span> start = 0;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keywordflow">while</span> (start &lt; input.size()) {</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;      <span class="keyword">auto</span> dot_location = input.find(<span class="charliteral">&#39;.&#39;</span>, start);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;      <span class="comment">// If not found, it&#39;s likely the end of the domain</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;      <span class="keywordflow">if</span>(dot_location == std::string_view::npos) dot_location = input.size();</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;      <span class="keyword">auto</span> label_size = dot_location - start;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;      <span class="keywordflow">if</span> (label_size &gt; 63 || label_size == 0) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      start = dot_location + 1;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    }</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;  }</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;} <span class="comment">// namespace ada::checkers</span></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div></div>
 <div class="ttc" id="acommon__defs_8h_html_a07d379d8d79da994acde714818eaefbe"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#a07d379d8d79da994acde714818eaefbe">ada_constexpr</a></div><div class="ttdeci">#define ada_constexpr</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00170">common_defs.h:170</a></div></div>
 <div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00078">common_defs.h:78</a></div></div>
