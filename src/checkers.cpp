@@ -58,7 +58,6 @@ namespace ada::checkers {
       if(input.size() > 254) return false;
     } else if (input.size() > 253) return false;
 
-    int label_count = 0;
     size_t start = 0;
     while (start < input.size()) {
       auto dot_location = input.find('.', start);
@@ -68,7 +67,6 @@ namespace ada::checkers {
       auto label_size = dot_location - start;
       if (label_size > 63 || label_size == 0) return false;
 
-      ++label_count;
       start = dot_location + 1;
     }
 
