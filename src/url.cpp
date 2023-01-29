@@ -445,34 +445,27 @@ namespace ada {
     if (!is_special()) {
       return parse_opaque_host(input);
     }
-    static_assert(ada::unicode::is_forbidden_domain_code_point('%'));
-
     // Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
     // The most common case is an ASCII input, in which case we do not need to call the expensive 'to_ascii'
     // if a few conditions are met: no '%' and no 'xn-' subsequence.
-    //size_t first_percent = input.find('%');
-    if (ada::unicode::is_forbidden_domain_code_point('%')) {
-      std::string buffer;
-      bool is_forbidden{false};
-      uint8_t ascii_runner{0};
+    std::string buffer;
+    uint8_t is_forbidden{0};
 
-      buffer.reserve(input.size());
-      std::transform(input.begin(), input.end(), std::back_inserter(buffer), [&is_forbidden, &ascii_runner](char c) -> char {
-        is_forbidden |= ada::unicode::is_forbidden_domain_code_point(c);
-        ascii_runner |= uint8_t(c);
-        return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);}
-      );
-      if (ascii_runner < 128 && !is_forbidden && buffer.find("xn-") == std::string_view::npos) {
-        // fast path
-        host = std::move(buffer);
-        if (checkers::is_ipv4(host.value())) {
-          ada_log("parse_host fast path ipv4");
-          return parse_ipv4(host.value());
-        }
-        ada_log("parse_host fast path ", *host);
-        return true;
+    buffer.reserve(input.size());
+    std::transform(input.begin(), input.end(), std::back_inserter(buffer), [&is_forbidden](char c) -> char {
+      is_forbidden |= ada::unicode::is_forbidden_domain_code_point(c);
+      return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);}
+    );
+    if (is_forbidden == 0 && buffer.find("xn-") == std::string_view::npos) {
+      // fast path
+      host = std::move(buffer);
+      if (checkers::is_ipv4(host.value())) {
+        ada_log("parse_host fast path ipv4");
+        return parse_ipv4(host.value());
       }
+      ada_log("parse_host fast path ", *host);
+      return true;
     }
     ada_log("parse_host  calling to_ascii");
     is_valid = ada::unicode::to_ascii(host, input, false,  input.find('%'));
