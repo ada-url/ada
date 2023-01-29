@@ -85,6 +85,7 @@ bool file_exists(const char *filename) {
 bool percent_encoding() {
   TEST_START()
   ondemand::parser parser;
+  size_t counter{0};
 
   RUN_TEST(file_exists(PERCENT_ENCODING_JSON));
   padded_string json = padded_string::load(PERCENT_ENCODING_JSON);
@@ -104,29 +105,26 @@ bool percent_encoding() {
       // are forbidden by the UTF-8 spec).
       auto input_element = object["input"];
       std::string_view input;
-      auto error = input_element.get_string().get(input);
-      if (!error) {
-        std::cout << "     input: " << input << std::endl;
-
-      } else {
-        // A single surrogate has no accompanying well-defined code point
-        // as per the standard.
-
-        input = input_element.raw_json_token(); // points at padded_string json,
-        // **unescaped**, has the surrounding quote characters
-        std::cout << "    raw input: " << input << std::endl;
-        std::cout << "    warning: invalid UTF-8 input! in " << element_string << std::endl;
+      // Try UTF-8.
+      bool allow_replacement_characters = true;
+      auto error = input_element.get_string(allow_replacement_characters).get(input);
+      if(error) {
+        std::cout << " I cannot parse " << element_string << std::endl;
+        return false;
       }
-
+      std::string my_input_encoded = ada::unicode::percent_encode(input, ada::character_sets::QUERY_PERCENT_ENCODE);
       ondemand::object outputs = object["output"].get_object();
-      for (auto field : outputs) {
-        std::string_view key = field.unescaped_key();
-        std::string_view value = field.value().get_string();
-
-        std::cout << "     output[" << key << "]: " << value << std::endl;
+      std::string_view expected_view;
+      if(!outputs["utf-8"].get(expected_view)) {
+        TEST_ASSERT(my_input_encoded, expected_view, "Percent encoded " + element_string + my_input_encoded);
+      } else {
+        std::cout << "Missing UTF-8?" << std::endl;
+        return false;
       }
+      counter++;
     }
   }
+  std::cout << "Tests executed = "<< counter << std::endl;
   TEST_SUCCEED()
 }
 
@@ -278,8 +276,10 @@ bool urltestdata_encoding(const char* source) {
 
       auto input_element = object["input"];
       std::string_view input{};
-      if (input_element.get_string().get(input)) {
-        continue;
+      bool allow_replacement_characters = true;
+      if (input_element.get_string(allow_replacement_characters).get(input)) {
+        std::cout << "I could not parse " << element_string << std::endl;
+        return false;
       }
       std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
 #ifdef _WIN32
@@ -357,7 +357,7 @@ bool urltestdata_encoding(const char* source) {
         TEST_ASSERT(json_recovered_scheme, protocol.substr(0,protocol.size()-1), "JSON protocol " + element_string + parsed_url_json);
 
         TEST_ASSERT(json_recovered_path, pathname, "JSON Path " + element_string + parsed_url_json);
-        counter ++;
+        counter++;
       }
     }
   }
