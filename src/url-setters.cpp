@@ -203,7 +203,7 @@ namespace ada {
     }
   }
 
-  void url::set_href(const std::string_view input) {
+  bool url::set_href(const std::string_view input) {
     ada::url out = ada::parse(input);
 
     if (out.is_valid) {
@@ -217,6 +217,8 @@ namespace ada {
       set_hash(out.get_hash());
       set_search(out.get_search());
     }
+
+    return out.is_valid;
   }
 
 } // namespace ada
