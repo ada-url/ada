@@ -134,7 +134,6 @@ namespace ada {
      */
     void set_port(const std::string_view input);
 
-
     /**
      * @see https://url.spec.whatwg.org/#dom-url-hash
      */
