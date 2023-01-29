@@ -241,7 +241,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
       const char ch = pointer[0];
       size_t remaining = end - pointer - 1;
       if (ch != '%' || remaining < 2 ||
-          (ch == '%' &&
+          (//ch == '%' && // It is unnecessary to check that ch == '%'.
            (!is_ascii_hex_digit(pointer[1]) ||
             !is_ascii_hex_digit(pointer[2])))) {
         dest += ch;

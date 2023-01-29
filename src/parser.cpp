@@ -480,7 +480,8 @@ namespace ada::parser {
               return url;
             }
             // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
-            if ((input_position == input_size) || ((url_data[input_position] != '/') && (url_data[input_position] != '\\'))) {
+            // We know that (input_position == input_size) is impossible here, because of the previous if-check.
+            if ((url_data[input_position] != '/') && (url_data[input_position] != '\\')) {
               goto goto_path;
             }
 
