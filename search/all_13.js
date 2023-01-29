@@ -3,7 +3,7 @@ var searchData=
   ['unicode_2ecpp_192',['unicode.cpp',['../dd/d9c/unicode_8cpp.html',1,'']]],
   ['unicode_2eh_193',['unicode.h',['../dd/d90/unicode_8h.html',1,'']]],
   ['unreachable_194',['unreachable',['../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d',1,'ada']]],
-  ['url_195',['url',['../dd/d03/structada_1_1url.html',1,'ada::url'],['../dd/d03/structada_1_1url.html#a842ca2e00db267baba8f0b5a08d7a130',1,'ada::url::url()=default'],['../dd/d03/structada_1_1url.html#a7c686183f4195f5059993e97e64fd537',1,'ada::url::url(const url &amp;u)=default'],['../dd/d03/structada_1_1url.html#aed59571413fc35e37886a280f798ec41',1,'ada::url::url(url &amp;&amp;u)=default']]],
+  ['url_195',['url',['../dd/d03/structada_1_1url.html',1,'ada::url'],['../dd/d03/structada_1_1url.html#a842ca2e00db267baba8f0b5a08d7a130',1,'ada::url::url()=default'],['../dd/d03/structada_1_1url.html#a7c686183f4195f5059993e97e64fd537',1,'ada::url::url(const url &amp;u)=default'],['../dd/d03/structada_1_1url.html#a17a7a9b5775703722bfc70dd192aeab1',1,'ada::url::url(url &amp;&amp;u) noexcept=default']]],
   ['url_2dgetters_2ecpp_196',['url-getters.cpp',['../d5/d25/url-getters_8cpp.html',1,'']]],
   ['url_2dsetters_2ecpp_197',['url-setters.cpp',['../d5/dee/url-setters_8cpp.html',1,'']]],
   ['url_2ecpp_198',['url.cpp',['../d6/d0e/url_8cpp.html',1,'']]],
