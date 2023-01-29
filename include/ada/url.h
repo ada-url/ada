@@ -256,8 +256,8 @@ namespace ada {
     /** For development purposes, we want to know when a copy is made. */
     url() = default;
     url(const url &u) = default;
-    url(url &&u) = default;
-    url &operator=(url &&u) = default;
+    url(url &&u) noexcept = default;
+    url &operator=(url &&u) noexcept = default;
     url &operator=(const url &u) = default;
     ADA_ATTRIBUTE_NOINLINE ~url() = default;
 
@@ -306,7 +306,7 @@ namespace ada {
      * scheme string, be lower-cased, not contain spaces or tabs. It should
      * have no spurious trailing or leading content.
      */
-    void set_scheme(std::string&& new_scheme) {
+    void set_scheme(std::string&& new_scheme) noexcept {
       type = ada::scheme::get_scheme_type(new_scheme);
       // We only move the 'scheme' if it is non-special.
       if(!is_special()) {
@@ -320,7 +320,7 @@ namespace ada {
      * Take the scheme from another URL. The scheme string is moved from the
      * provided url.
      */
-    void copy_scheme(ada::url&& u) {
+    void copy_scheme(ada::url&& u) noexcept {
       non_special_scheme = u.non_special_scheme;
       type = u.type;
     }
