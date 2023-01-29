@@ -217,6 +217,11 @@ bool setters_tests_encoding(const char *source) {
         base.set_hash(new_value);
         TEST_ASSERT(base.get_hash(), expected, "Fragment " + element_string + base.to_string());
       }
+      else if (category == "href") {
+        std::string_view expected = element["expected"]["href"];
+        base.set_href(new_value);
+        TEST_ASSERT(base.get_hash(), expected, "Href " + element_string + base.to_string());
+      }
     }
   }
   TEST_SUCCEED()

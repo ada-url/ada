@@ -203,4 +203,20 @@ namespace ada {
     }
   }
 
+  void url::set_href(const std::string_view input) {
+    ada::url out = ada::parse(input);
+    // TODO: Setter tests for href is missing.
+    if (out.is_valid) {
+      set_protocol(out.get_protocol());
+      set_username(out.get_username());
+      set_password(out.get_password());
+      set_host(out.get_host());
+      set_hostname(out.get_hostname());
+      set_port(out.get_port());
+      set_pathname(out.get_pathname());
+      set_hash(out.get_hash());
+      set_search(out.get_search());
+    }
+  }
+
 } // namespace ada
