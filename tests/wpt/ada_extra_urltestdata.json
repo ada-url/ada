@@ -1,6 +1,11 @@
 [
   "# Additional tests designed by the ada team.",
   {
+    "input": "https://www.google.com",
+    "base": "http://[0:0:0:0:0:0:0:0",
+    "failure": true
+  },
+  {
     "input": "https://lemire.me/école",
     "base": "about:blank",
     "href": "https://lemire.me/%C3%A9cole",

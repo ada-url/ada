@@ -14,8 +14,7 @@ namespace ada {
     if(encoding != encoding_type::UTF8) {
       // @todo Add support for non UTF8 input
     }
-    // @todo std::move(base_url) might be unwise. Check.
-    return ada::parser::parse_url(input, std::move(base_url), encoding);
+    return ada::parser::parse_url(input, base_url, encoding);
   }
 
   ada_warn_unused std::string to_string(ada::encoding_type type) {

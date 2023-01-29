@@ -26,15 +26,15 @@ namespace ada {
       if(internal_input.empty()) {
         path = "/";
       } else if((internal_input[0] == '/') ||(internal_input[0] == '\\')){
-        parse_prepared_path(internal_input.substr(1));
+        return parse_prepared_path(internal_input.substr(1));
       } else {
-        parse_prepared_path(internal_input);
+        return parse_prepared_path(internal_input);
       }
     } else if (!internal_input.empty()) {
       if(internal_input[0] == '/') {
-        parse_prepared_path(internal_input.substr(1));
+        return parse_prepared_path(internal_input.substr(1));
       } else {
-        parse_prepared_path(internal_input);
+        return parse_prepared_path(internal_input);
       }
     } else {
       if(!host.has_value()) {
