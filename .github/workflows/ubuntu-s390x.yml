@@ -27,5 +27,6 @@ jobs:
             apt-get install -y ninja-build ccache
           run: |
             cmake -DCMAKE_BUILD_TYPE=Release -G Ninja -B build
+            rm -r -f dependencies
             cmake --build build -j=2
             ctest --output-on-failure --test-dir build
