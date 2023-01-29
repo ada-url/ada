@@ -536,183 +536,176 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;    <span class="keywordflow">if</span> (!<a class="code" href="../../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9">is_special</a>()) {</div>
 <div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;      <span class="keywordflow">return</span> parse_opaque_host(input);</div>
 <div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;    }</div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;    static_assert(<a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924">ada::unicode::is_forbidden_domain_code_point</a>(<span class="charliteral">&#39;%&#39;</span>));</div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160; </div>
-<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;    <span class="comment">// Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.</span></div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;    <span class="comment">// Let asciiDomain be the result of running domain to ASCII with domain and false.</span></div>
-<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;    <span class="comment">// The most common case is an ASCII input, in which case we do not need to call the expensive &#39;to_ascii&#39;</span></div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    <span class="comment">// if a few conditions are met: no &#39;%&#39; and no &#39;xn-&#39; subsequence.</span></div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;    <span class="comment">//size_t first_percent = input.find(&#39;%&#39;);</span></div>
-<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;    <span class="keywordflow">if</span> (<a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924">ada::unicode::is_forbidden_domain_code_point</a>(<span class="charliteral">&#39;%&#39;</span>)) {</div>
-<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;      std::string buffer;</div>
-<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;      <span class="keywordtype">bool</span> is_forbidden{<span class="keyword">false</span>};</div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;      uint8_t ascii_runner{0};</div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160; </div>
-<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;      buffer.reserve(input.size());</div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;      std::transform(input.begin(), input.end(), std::back_inserter(buffer), [&amp;is_forbidden, &amp;ascii_runner](<span class="keywordtype">char</span> c) -&gt; <span class="keywordtype">char</span> {</div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;        is_forbidden |= ada::unicode::is_forbidden_domain_code_point(c);</div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;        ascii_runner |= uint8_t(c);</div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;        return (uint8_t((c|0x20) - 0x61) &lt;= 25 ? (c|0x20) : c);}</div>
-<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;      );</div>
-<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;      <span class="keywordflow">if</span> (ascii_runner &lt; 128 &amp;&amp; !is_forbidden &amp;&amp; buffer.find(<span class="stringliteral">&quot;xn-&quot;</span>) == std::string_view::npos) {</div>
-<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;        <span class="comment">// fast path</span></div>
-<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;        host = std::move(buffer);</div>
-<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">checkers::is_ipv4</a>(host.value())) {</div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;          <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host fast path ipv4&quot;</span>);</div>
-<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;          <span class="keywordflow">return</span> parse_ipv4(host.value());</div>
-<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;        }</div>
-<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;        <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host fast path &quot;</span>, *host);</div>
-<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;      }</div>
-<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;    }</div>
-<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host  calling to_ascii&quot;</span>);</div>
-<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;    <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">ada::unicode::to_ascii</a>(host, input, <span class="keyword">false</span>,  input.find(<span class="charliteral">&#39;%&#39;</span>));</div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    <span class="keywordflow">if</span> (!<a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a>) { <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>; }</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;    <span class="comment">// Let domain be the result of running UTF-8 decode without BOM on the percent-decoding of input.</span></div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;    <span class="comment">// Let asciiDomain be the result of running domain to ASCII with domain and false.</span></div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;    <span class="comment">// The most common case is an ASCII input, in which case we do not need to call the expensive &#39;to_ascii&#39;</span></div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;    <span class="comment">// if a few conditions are met: no &#39;%&#39; and no &#39;xn-&#39; subsequence.</span></div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;    std::string buffer;</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    uint8_t is_forbidden{0};</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160; </div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;    buffer.reserve(input.size());</div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;    std::transform(input.begin(), input.end(), std::back_inserter(buffer), [&amp;is_forbidden](<span class="keywordtype">char</span> c) -&gt; <span class="keywordtype">char</span> {</div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;      is_forbidden |= ada::unicode::is_forbidden_domain_code_point(c);</div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;      return (uint8_t((c|0x20) - 0x61) &lt;= 25 ? (c|0x20) : c);}</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;    );</div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;    <span class="keywordflow">if</span> (is_forbidden == 0 &amp;&amp; buffer.find(<span class="stringliteral">&quot;xn-&quot;</span>) == std::string_view::npos) {</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;      <span class="comment">// fast path</span></div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;      host = std::move(buffer);</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;      <span class="keywordflow">if</span> (<a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">checkers::is_ipv4</a>(host.value())) {</div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;        <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host fast path ipv4&quot;</span>);</div>
+<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;        <span class="keywordflow">return</span> parse_ipv4(host.value());</div>
+<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;      }</div>
+<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host fast path &quot;</span>, *host);</div>
+<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;      <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;    }</div>
+<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;    <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host  calling to_ascii&quot;</span>);</div>
+<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;    <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <a class="code" href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">ada::unicode::to_ascii</a>(host, input, <span class="keyword">false</span>,  input.find(<span class="charliteral">&#39;%&#39;</span>));</div>
+<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;    <span class="keywordflow">if</span> (!<a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a>) { <span class="keywordflow">return</span> <a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a> = <span class="keyword">false</span>; }</div>
+<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160; </div>
+<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;    <span class="comment">// If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.</span></div>
+<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;    <span class="keywordflow">if</span>(<a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">checkers::is_ipv4</a>(host.value())) {</div>
+<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host  got ipv4&quot;</span>, *host);</div>
+<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;      <span class="keywordflow">return</span> parse_ipv4(host.value());</div>
+<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;    }</div>
+<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160; </div>
 <div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160; </div>
-<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;    <span class="comment">// If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.</span></div>
-<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;    <span class="keywordflow">if</span>(<a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">checkers::is_ipv4</a>(host.value())) {</div>
-<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;      <a class="code" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>(<span class="stringliteral">&quot;parse_host  got ipv4&quot;</span>, *host);</div>
-<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;      <span class="keywordflow">return</span> parse_ipv4(host.value());</div>
-<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;    }</div>
-<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160; </div>
-<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160; </div>
-<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;  }</div>
-<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160; </div>
-<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;  <span class="keyword">template</span> &lt;<span class="keywordtype">bool</span> has_state_overr<span class="keywordtype">id</span>e&gt;</div>
-<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;  <a class="code" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> url::parse_scheme(<span class="keyword">const</span> std::string_view input) {</div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;    <span class="keyword">auto</span> parsed_type = <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a5e6e7cb90bb372cd1554c6bebb944de6">ada::scheme::get_scheme_type</a>(input);</div>
-<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;    <span class="keywordtype">bool</span> is_input_special = (parsed_type != <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faaff84b9b3b0f0f7c8f56b9a01f3107af">ada::scheme::NOT_SPECIAL</a>);</div>
-<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;    <span class="keywordflow">if</span>(is_input_special) { <span class="comment">// fast path!!!</span></div>
-<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;      <span class="keywordflow">if</span> (has_state_override) {</div>
-<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;        <span class="comment">// If url’s scheme is not a special scheme and buffer is a special scheme, then return.</span></div>
-<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="../../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9">is_special</a>() != is_input_special) {</div>
-<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;        }</div>
-<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160; </div>
-<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;        <span class="comment">// If url includes credentials or has a non-null port, and buffer is &quot;file&quot;, then return.</span></div>
-<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;        <span class="keywordflow">if</span> ((<a class="code" href="../../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b">includes_credentials</a>() || port.has_value()) &amp;&amp; parsed_type == <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
-<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;        }</div>
+<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;  }</div>
+<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160; </div>
+<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;  <span class="keyword">template</span> &lt;<span class="keywordtype">bool</span> has_state_overr<span class="keywordtype">id</span>e&gt;</div>
+<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;  <a class="code" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> url::parse_scheme(<span class="keyword">const</span> std::string_view input) {</div>
+<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;    <span class="keyword">auto</span> parsed_type = <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a5e6e7cb90bb372cd1554c6bebb944de6">ada::scheme::get_scheme_type</a>(input);</div>
+<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;    <span class="keywordtype">bool</span> is_input_special = (parsed_type != <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faaff84b9b3b0f0f7c8f56b9a01f3107af">ada::scheme::NOT_SPECIAL</a>);</div>
+<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;    <span class="keywordflow">if</span>(is_input_special) { <span class="comment">// fast path!!!</span></div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;      <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;        <span class="comment">// If url’s scheme is not a special scheme and buffer is a special scheme, then return.</span></div>
+<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="../../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9">is_special</a>() != is_input_special) {</div>
+<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;        }</div>
+<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160; </div>
+<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;        <span class="comment">// If url includes credentials or has a non-null port, and buffer is &quot;file&quot;, then return.</span></div>
+<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;        <span class="keywordflow">if</span> ((<a class="code" href="../../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b">includes_credentials</a>() || port.has_value()) &amp;&amp; parsed_type == <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
+<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;        }</div>
+<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160; </div>
+<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;        <span class="comment">// If url’s scheme is &quot;file&quot; and its host is an empty host, then return.</span></div>
+<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;        <span class="comment">// An empty host is the empty string.</span></div>
+<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;        <span class="keywordflow">if</span> (get_scheme_type() == <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp; host.has_value() &amp;&amp; host.value().empty()) {</div>
+<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;        }</div>
+<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;      }</div>
 <div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160; </div>
-<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;        <span class="comment">// If url’s scheme is &quot;file&quot; and its host is an empty host, then return.</span></div>
-<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;        <span class="comment">// An empty host is the empty string.</span></div>
-<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;        <span class="keywordflow">if</span> (get_scheme_type() == <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp; host.has_value() &amp;&amp; host.value().empty()) {</div>
-<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;        }</div>
-<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;      }</div>
-<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160; </div>
-<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;      type = parsed_type;</div>
-<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160; </div>
-<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;      <span class="keywordflow">if</span> (has_state_override) {</div>
-<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;        <span class="comment">// This is uncommon.</span></div>
-<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;        uint16_t urls_scheme_port = get_special_port();</div>
-<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160; </div>
-<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;        <span class="keywordflow">if</span> (urls_scheme_port) {</div>
-<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;          <span class="comment">// If url’s port is url’s scheme’s default port, then set url’s port to null.</span></div>
-<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;          <span class="keywordflow">if</span> (port.has_value() &amp;&amp; *port == urls_scheme_port) {</div>
-<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;            port = std::nullopt;</div>
-<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;          }</div>
-<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;        }</div>
-<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;      }</div>
-<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;    } <span class="keywordflow">else</span> { <span class="comment">// slow path</span></div>
-<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;      std::string _buffer;</div>
-<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;      <span class="comment">// Optimization opportunity: Most of the time scheme&#39;s are all lowercase.</span></div>
-<div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160;      <span class="comment">// If that&#39;s the case, there&#39;s no need to copy.</span></div>
-<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;      std::transform(input.begin(), input.end(), std::back_inserter(_buffer),</div>
-<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;          [](<span class="keywordtype">char</span> c) -&gt; <span class="keywordtype">char</span> { return (uint8_t((c|0x20) - 0x61) &lt;= 25 ? (c|0x20) : c);});</div>
+<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;      type = parsed_type;</div>
+<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160; </div>
+<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;      <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;        <span class="comment">// This is uncommon.</span></div>
+<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;        uint16_t urls_scheme_port = get_special_port();</div>
+<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160; </div>
+<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;        <span class="keywordflow">if</span> (urls_scheme_port) {</div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;          <span class="comment">// If url’s port is url’s scheme’s default port, then set url’s port to null.</span></div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;          <span class="keywordflow">if</span> (port.has_value() &amp;&amp; *port == urls_scheme_port) {</div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;            port = std::nullopt;</div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;          }</div>
+<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;        }</div>
+<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;      }</div>
+<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;    } <span class="keywordflow">else</span> { <span class="comment">// slow path</span></div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;      std::string _buffer;</div>
+<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;      <span class="comment">// Optimization opportunity: Most of the time scheme&#39;s are all lowercase.</span></div>
+<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;      <span class="comment">// If that&#39;s the case, there&#39;s no need to copy.</span></div>
+<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;      std::transform(input.begin(), input.end(), std::back_inserter(_buffer),</div>
+<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;          [](<span class="keywordtype">char</span> c) -&gt; <span class="keywordtype">char</span> { return (uint8_t((c|0x20) - 0x61) &lt;= 25 ? (c|0x20) : c);});</div>
+<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160; </div>
+<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;      <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;        <span class="comment">// If url’s scheme is a special scheme and buffer is not a special scheme, then return.</span></div>
+<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;        <span class="comment">// If url’s scheme is not a special scheme and buffer is a special scheme, then return.</span></div>
+<div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="../../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9">is_special</a>() != <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a330d87c07464ad4b10aa250f52fecbf2">ada::scheme::is_special</a>(_buffer)) {</div>
+<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;        }</div>
 <div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160; </div>
-<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;      <span class="keywordflow">if</span> (has_state_override) {</div>
-<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;        <span class="comment">// If url’s scheme is a special scheme and buffer is not a special scheme, then return.</span></div>
-<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;        <span class="comment">// If url’s scheme is not a special scheme and buffer is a special scheme, then return.</span></div>
-<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="../../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9">is_special</a>() != <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a330d87c07464ad4b10aa250f52fecbf2">ada::scheme::is_special</a>(_buffer)) {</div>
-<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;        }</div>
-<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160; </div>
-<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;        <span class="comment">// If url includes credentials or has a non-null port, and buffer is &quot;file&quot;, then return.</span></div>
-<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;        <span class="keywordflow">if</span> ((<a class="code" href="../../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b">includes_credentials</a>() || port.has_value()) &amp;&amp; _buffer == <span class="stringliteral">&quot;file&quot;</span>) {</div>
-<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;        }</div>
+<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;        <span class="comment">// If url includes credentials or has a non-null port, and buffer is &quot;file&quot;, then return.</span></div>
+<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;        <span class="keywordflow">if</span> ((<a class="code" href="../../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b">includes_credentials</a>() || port.has_value()) &amp;&amp; _buffer == <span class="stringliteral">&quot;file&quot;</span>) {</div>
+<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;        }</div>
+<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160; </div>
+<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;        <span class="comment">// If url’s scheme is &quot;file&quot; and its host is an empty host, then return.</span></div>
+<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;        <span class="comment">// An empty host is the empty string.</span></div>
+<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;        <span class="keywordflow">if</span> (get_scheme_type() == <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp; host.has_value() &amp;&amp; host.value().empty()) {</div>
+<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;        }</div>
+<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;      }</div>
 <div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160; </div>
-<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;        <span class="comment">// If url’s scheme is &quot;file&quot; and its host is an empty host, then return.</span></div>
-<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;        <span class="comment">// An empty host is the empty string.</span></div>
-<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;        <span class="keywordflow">if</span> (get_scheme_type() == <a class="code" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp; host.has_value() &amp;&amp; host.value().empty()) {</div>
-<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;          <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;        }</div>
-<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;      }</div>
-<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160; </div>
-<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#a60da389021781ad9586898c79a9ce860">set_scheme</a>(std::move(_buffer));</div>
-<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160; </div>
-<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;      <span class="keywordflow">if</span> (has_state_override) {</div>
-<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;        <span class="comment">// This is uncommon.</span></div>
-<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;        uint16_t urls_scheme_port = get_special_port();</div>
-<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160; </div>
-<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;        <span class="keywordflow">if</span> (urls_scheme_port) {</div>
-<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;          <span class="comment">// If url’s port is url’s scheme’s default port, then set url’s port to null.</span></div>
-<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;          <span class="keywordflow">if</span> (port.has_value() &amp;&amp; *port == urls_scheme_port) {</div>
-<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;            port = std::nullopt;</div>
-<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160;          }</div>
-<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;        }</div>
-<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;      }</div>
-<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;    }</div>
-<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160; </div>
-<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;  }</div>
-<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160; </div>
-<div class="line"><a name="l00575"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2">  575</a></span>&#160;  std::string <a class="code" href="../../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2">url::to_string</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;    <span class="keywordflow">if</span> (!<a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a>) {</div>
-<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;null&quot;</span>;</div>
-<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;    }</div>
-<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;    std::string answer;</div>
-<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;    <span class="keyword">auto</span> back = std::back_insert_iterator(answer);</div>
-<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;    answer.append(<span class="stringliteral">&quot;{\n&quot;</span>);</div>
-<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;    answer.append(<span class="stringliteral">&quot;\t\&quot;scheme\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;    <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(get_scheme(), back);</div>
-<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;    answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;    <span class="keywordflow">if</span>(<a class="code" href="../../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b">includes_credentials</a>()) {</div>
-<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;username\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(username, back);</div>
-<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;password\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(password, back);</div>
-<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;    }</div>
-<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;    <span class="keywordflow">if</span>(host.has_value()) {</div>
-<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;host\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(host.value(), back);</div>
-<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;    }</div>
-<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;    <span class="keywordflow">if</span>(port.has_value()) {</div>
-<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;port\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00600"></a><span class="lineno">  600</span>&#160;      answer.append(<a class="code" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">std::to_string</a>(port.value()));</div>
-<div class="line"><a name="l00601"></a><span class="lineno">  601</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;    }</div>
-<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;    answer.append(<span class="stringliteral">&quot;\t\&quot;path\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160;    <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(path, back);</div>
-<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160;    answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160;    answer.append(<span class="stringliteral">&quot;\t\&quot;opaque path\&quot;:&quot;</span>);</div>
-<div class="line"><a name="l00607"></a><span class="lineno">  607</span>&#160;    answer.append((<a class="code" href="../../dd/d03/structada_1_1url.html#a51dc2521590d7c196a3ecc89cec1e48a">has_opaque_path</a> ? <span class="stringliteral">&quot;true&quot;</span> : <span class="stringliteral">&quot;false&quot;</span>));</div>
-<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;    <span class="keywordflow">if</span>(query.has_value()) {</div>
-<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;      answer.append(<span class="stringliteral">&quot;,\n&quot;</span>);</div>
-<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;query\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(query.value(), back);</div>
-<div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160;    }</div>
-<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;    <span class="keywordflow">if</span>(fragment.has_value()) {</div>
-<div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;      answer.append(<span class="stringliteral">&quot;,\n&quot;</span>);</div>
-<div class="line"><a name="l00616"></a><span class="lineno">  616</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;fragment\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00617"></a><span class="lineno">  617</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(fragment.value(), back);</div>
-<div class="line"><a name="l00618"></a><span class="lineno">  618</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;&quot;</span>);</div>
-<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160;    }</div>
-<div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160;    answer.append(<span class="stringliteral">&quot;\n}&quot;</span>);</div>
-<div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;    <span class="keywordflow">return</span> answer;</div>
-<div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160;  }</div>
-<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160; </div>
-<div class="line"><a name="l00624"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#a5758e6623e671cd40045cac4075b9161">  624</a></span>&#160;  [[nodiscard]] <span class="keywordtype">bool</span> <a class="code" href="../../dd/d03/structada_1_1url.html#a5758e6623e671cd40045cac4075b9161">url::has_valid_domain</a>() const noexcept {</div>
-<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;    <span class="keywordflow">if</span>(!host.has_value()) { <span class="keywordflow">return</span> <span class="keyword">false</span>; }</div>
-<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a755570190c883a443f94640167b099b3">checkers::verify_dns_length</a>(host.value());</div>
-<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;  }</div>
-<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;} <span class="comment">// namespace ada</span></div>
+<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#a60da389021781ad9586898c79a9ce860">set_scheme</a>(std::move(_buffer));</div>
+<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160; </div>
+<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;      <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;        <span class="comment">// This is uncommon.</span></div>
+<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;        uint16_t urls_scheme_port = get_special_port();</div>
+<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160; </div>
+<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;        <span class="keywordflow">if</span> (urls_scheme_port) {</div>
+<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;          <span class="comment">// If url’s port is url’s scheme’s default port, then set url’s port to null.</span></div>
+<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;          <span class="keywordflow">if</span> (port.has_value() &amp;&amp; *port == urls_scheme_port) {</div>
+<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;            port = std::nullopt;</div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;          }</div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;        }</div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;      }</div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;    }</div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160; </div>
+<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;  }</div>
+<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160; </div>
+<div class="line"><a name="l00568"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2">  568</a></span>&#160;  std::string <a class="code" href="../../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2">url::to_string</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;    <span class="keywordflow">if</span> (!<a class="code" href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">is_valid</a>) {</div>
+<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;      <span class="keywordflow">return</span> <span class="stringliteral">&quot;null&quot;</span>;</div>
+<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;    }</div>
+<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;    std::string answer;</div>
+<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;    <span class="keyword">auto</span> back = std::back_insert_iterator(answer);</div>
+<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;    answer.append(<span class="stringliteral">&quot;{\n&quot;</span>);</div>
+<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;    answer.append(<span class="stringliteral">&quot;\t\&quot;scheme\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;    <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(get_scheme(), back);</div>
+<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;    answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;    <span class="keywordflow">if</span>(<a class="code" href="../../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b">includes_credentials</a>()) {</div>
+<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;username\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(username, back);</div>
+<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;password\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(password, back);</div>
+<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;    }</div>
+<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;    <span class="keywordflow">if</span>(host.has_value()) {</div>
+<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;host\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(host.value(), back);</div>
+<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;    }</div>
+<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;    <span class="keywordflow">if</span>(port.has_value()) {</div>
+<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;port\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;      answer.append(<a class="code" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">std::to_string</a>(port.value()));</div>
+<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;    }</div>
+<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;    answer.append(<span class="stringliteral">&quot;\t\&quot;path\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;    <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(path, back);</div>
+<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;    answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;    answer.append(<span class="stringliteral">&quot;\t\&quot;opaque path\&quot;:&quot;</span>);</div>
+<div class="line"><a name="l00600"></a><span class="lineno">  600</span>&#160;    answer.append((<a class="code" href="../../dd/d03/structada_1_1url.html#a51dc2521590d7c196a3ecc89cec1e48a">has_opaque_path</a> ? <span class="stringliteral">&quot;true&quot;</span> : <span class="stringliteral">&quot;false&quot;</span>));</div>
+<div class="line"><a name="l00601"></a><span class="lineno">  601</span>&#160;    <span class="keywordflow">if</span>(query.has_value()) {</div>
+<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;      answer.append(<span class="stringliteral">&quot;,\n&quot;</span>);</div>
+<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;query\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(query.value(), back);</div>
+<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160;    }</div>
+<div class="line"><a name="l00607"></a><span class="lineno">  607</span>&#160;    <span class="keywordflow">if</span>(fragment.has_value()) {</div>
+<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;      answer.append(<span class="stringliteral">&quot;,\n&quot;</span>);</div>
+<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;      answer.append(<span class="stringliteral">&quot;\t\&quot;fragment\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;      <a class="code" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">helpers::encode_json</a>(fragment.value(), back);</div>
+<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;      answer.append(<span class="stringliteral">&quot;\&quot;&quot;</span>);</div>
+<div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;    }</div>
+<div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160;    answer.append(<span class="stringliteral">&quot;\n}&quot;</span>);</div>
+<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;    <span class="keywordflow">return</span> answer;</div>
+<div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;  }</div>
+<div class="line"><a name="l00616"></a><span class="lineno">  616</span>&#160; </div>
+<div class="line"><a name="l00617"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#a5758e6623e671cd40045cac4075b9161">  617</a></span>&#160;  [[nodiscard]] <span class="keywordtype">bool</span> <a class="code" href="../../dd/d03/structada_1_1url.html#a5758e6623e671cd40045cac4075b9161">url::has_valid_domain</a>() const noexcept {</div>
+<div class="line"><a name="l00618"></a><span class="lineno">  618</span>&#160;    <span class="keywordflow">if</span>(!host.has_value()) { <span class="keywordflow">return</span> <span class="keyword">false</span>; }</div>
+<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="../../d3/dbe/namespaceada_1_1checkers.html#a755570190c883a443f94640167b099b3">checkers::verify_dns_length</a>(host.value());</div>
+<div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160;  }</div>
+<div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;} <span class="comment">// namespace ada</span></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div></div>
 <div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d19/common__defs_8h_source.html#l00078">common_defs.h:78</a></div></div>
 <div class="ttc" id="alog_8h_html"><div class="ttname"><a href="../../d7/d7f/log_8h.html">log.h</a></div><div class="ttdoc">logging code.</div></div>
@@ -737,7 +730,6 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="ttc" id="anamespaceada_1_1unicode_html_a1c564a30bc61d41abd97cc6b8be084ff"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#a1c564a30bc61d41abd97cc6b8be084ff">ada::unicode::percent_encode</a></div><div class="ttdeci">std::string percent_encode(const std::string_view input, const uint8_t character_set[])</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00261">unicode.cpp:261</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_a2a5c2e0ef11ea4d4fe564b7fb1fa1f16"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#a2a5c2e0ef11ea4d4fe564b7fb1fa1f16">ada::unicode::is_double_dot_path_segment</a></div><div class="ttdeci">ada_really_inline ada_constexpr bool is_double_dot_path_segment(const std::string_view input) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00178">unicode.cpp:178</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_a753fc83b58bb0afeaf0c1d7d534869e2"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#a753fc83b58bb0afeaf0c1d7d534869e2">ada::unicode::convert_hex_to_binary</a></div><div class="ttdeci">constexpr unsigned convert_hex_to_binary(char c) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00223">unicode.cpp:223</a></div></div>
-<div class="ttc" id="anamespaceada_1_1unicode_html_aa2115611b3343d6cb28f476badf41924"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924">ada::unicode::is_forbidden_domain_code_point</a></div><div class="ttdeci">constexpr ada_really_inline bool is_forbidden_domain_code_point(const char c) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00105">unicode.cpp:105</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_ac8772e2727fff9bbb4c12bc68040f3b8"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8">ada::unicode::to_ascii</a></div><div class="ttdeci">bool to_ascii(std::optional&lt; std::string &gt; &amp;out, std::string_view plain, bool be_strict, size_t first_percent)</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00302">unicode.cpp:302</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_ad3f83e3d837a2451c194e82e9f3bf9ae"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#ad3f83e3d837a2451c194e82e9f3bf9ae">ada::unicode::is_single_dot_path_segment</a></div><div class="ttdeci">constexpr ada_really_inline bool is_single_dot_path_segment(const std::string_view input) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00215">unicode.cpp:215</a></div></div>
 <div class="ttc" id="anamespaceada_1_1unicode_html_adca6f3cd4ba58e901c7a357030d6ada5"><div class="ttname"><a href="../../d2/dc3/namespaceada_1_1unicode.html#adca6f3cd4ba58e901c7a357030d6ada5">ada::unicode::is_ascii_hex_digit</a></div><div class="ttdeci">constexpr ada_really_inline bool is_ascii_hex_digit(const char c) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/d9c/unicode_8cpp_source.html#l00164">unicode.cpp:164</a></div></div>
@@ -747,12 +739,12 @@ $(document).ready(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../')
 <div class="ttc" id="anamespaceada_html_a51224d0fd7b3f84be3ee3c5b44be0bd7"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">ada::to_string</a></div><div class="ttdeci">ada_warn_unused std::string to_string(encoding_type type)</div><div class="ttdef"><b>Definition:</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00021">implementation.cpp:21</a></div></div>
 <div class="ttc" id="ascheme_8h_html"><div class="ttname"><a href="../../d2/d64/scheme_8h.html">scheme.h</a></div><div class="ttdoc">Definitions for the URL scheme.</div></div>
 <div class="ttc" id="astructada_1_1url_html_a51dc2521590d7c196a3ecc89cec1e48a"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a51dc2521590d7c196a3ecc89cec1e48a">ada::url::has_opaque_path</a></div><div class="ttdeci">bool has_opaque_path</div><div class="ttdef"><b>Definition:</b> <a href="../../df/db8/url_8h_source.html#l00201">url.h:201</a></div></div>
-<div class="ttc" id="astructada_1_1url_html_a5758e6623e671cd40045cac4075b9161"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a5758e6623e671cd40045cac4075b9161">ada::url::has_valid_domain</a></div><div class="ttdeci">bool has_valid_domain() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../d6/d0e/url_8cpp_source.html#l00624">url.cpp:624</a></div></div>
+<div class="ttc" id="astructada_1_1url_html_a5758e6623e671cd40045cac4075b9161"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a5758e6623e671cd40045cac4075b9161">ada::url::has_valid_domain</a></div><div class="ttdeci">bool has_valid_domain() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../d6/d0e/url_8cpp_source.html#l00617">url.cpp:617</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_a60da389021781ad9586898c79a9ce860"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a60da389021781ad9586898c79a9ce860">ada::url::set_scheme</a></div><div class="ttdeci">void set_scheme(std::string &amp;&amp;new_scheme)</div><div class="ttdef"><b>Definition:</b> <a href="../../df/db8/url_8h_source.html#l00309">url.h:309</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_aa0ed735a171c4bfd539c79194a48e426"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426">ada::url::is_valid</a></div><div class="ttdeci">bool is_valid</div><div class="ttdef"><b>Definition:</b> <a href="../../df/db8/url_8h_source.html#l00196">url.h:196</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_aa376b050ccf294f9cf04abbcd91db8b9"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9">ada::url::is_special</a></div><div class="ttdeci">ada_really_inline bool is_special() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../df/db8/url_8h_source.html#l00213">url.h:213</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_ac08a3b4e790519ce7fabb85139ddcb3b"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b">ada::url::includes_credentials</a></div><div class="ttdeci">ada_really_inline bool includes_credentials() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../df/db8/url_8h_source.html#l00206">url.h:206</a></div></div>
-<div class="ttc" id="astructada_1_1url_html_acfed28dc37726668c70832008d9caea2"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2">ada::url::to_string</a></div><div class="ttdeci">std::string to_string() const</div><div class="ttdef"><b>Definition:</b> <a href="../../d6/d0e/url_8cpp_source.html#l00575">url.cpp:575</a></div></div>
+<div class="ttc" id="astructada_1_1url_html_acfed28dc37726668c70832008d9caea2"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2">ada::url::to_string</a></div><div class="ttdeci">std::string to_string() const</div><div class="ttdef"><b>Definition:</b> <a href="../../d6/d0e/url_8cpp_source.html#l00568">url.cpp:568</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
