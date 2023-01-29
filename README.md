@@ -13,19 +13,9 @@ Specification for URL parser can be found from the
 - A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
 - We use [ICU](https://icu.unicode.org) under non-Windows systems (macOS, Linux). Under Windows, [we rely on Microsoft's builtin IdnToAscii function](https://learn.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-idntoascii).
 
-## Local Development
-
-Ada uses cmake as a build system. It's recommended you to run the following commands to build it locally.
-
-- **Build**: `cmake -B build && cmake --build build`
-- **Test**: `ctest --output-on-failure --test-dir build`
-
-Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
-
-**Installing ICU**: For macOS, you may install it with [brew](https://brew.sh) using `brew install icu4c`. Linux users may install ICU according to the their distribution: under Ubuntu, the command is `apt-get install -y libicu-dev`.
-
-
 ## Usage
+
+### Examples
 
 - Parse and validate a URL
 
@@ -38,8 +28,8 @@ ada::url url = ada::parse("https://www.google.com");
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
-url.set_username(url, "username");
-url.set_password(url, "password");
+url.set_username("username");
+url.set_password("password");
 // ada.get_href() will return "https://username:password@www.google.com"
 ```
 
@@ -52,12 +42,13 @@ url.set_protocol("wss");
 // url.get_href() will return "wss://www.google.com"
 ```
 
-- Get/Update hostname
+- Get/Update host
 
 ```cpp
 ada::url url = ada::parse("https://www.google.com");
 url.set_host("github.com");
 // url.get_host() will return "github.com"
+// you can use `url.set_hostname` depending on your usage.
 ```
 
 - Get/Update port
@@ -92,10 +83,26 @@ url.set_hash("is-this-the-real-life");
 // url.get_hash() will return "#is-this-the-real-life"
 ```
 
-## Amalgamation
 
-You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) by typing executing the Python 3 script `singleheader/amalgamate.py`. By default, the files are created in the `singleheader` directory.
-
-## Use ada as a CMake dependency
+### CMake dependency
 
 See the file `tests/installation/CMakeLists.txt` for an example of how you might use ada from your own CMake project, after having installed ada on your system.
+
+## Contributing
+
+### Building
+
+Ada uses cmake as a build system. It's recommended you to run the following commands to build it locally.
+
+- **Build**: `cmake -B build && cmake --build build`
+- **Test**: `ctest --output-on-failure --test-dir build`
+
+Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
+
+### Installing ICU
+
+For macOS, you may install it with [brew](https://brew.sh) using `brew install icu4c`. Linux users may install ICU according to the their distribution: under Ubuntu, the command is `apt-get install -y libicu-dev`.
+
+### Amalgamation
+
+You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) by typing executing the Python 3 script `singleheader/amalgamate.py`. By default, the files are created in the `singleheader` directory.

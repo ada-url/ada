@@ -1,3 +1,7 @@
+/**
+ * @file url-getters.cpp
+ * Includes all the getters of `ada::url`
+ */
 #include "ada.h"
 
 #include <algorithm>

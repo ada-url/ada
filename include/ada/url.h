@@ -12,7 +12,6 @@
 #include "ada/unicode.h"
 #include "ada/log.h"
 
-
 #include <algorithm>
 #include <charconv>
 #include <optional>
