@@ -120,7 +120,7 @@ namespace ada {
     [[nodiscard]] std::string get_username() const noexcept;
 
     /**
-     * @return Returns true on success.
+     * @return Returns true on successful operation.
      * @see https://url.spec.whatwg.org/#dom-url-username
      */
     bool set_username(const std::string_view input);
