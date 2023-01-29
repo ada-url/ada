@@ -18,24 +18,13 @@ namespace ada::parser {
 
   url parse_url(std::string_view user_input,
                 const ada::url* base_url,
-                ada::encoding_type encoding,
-                const ada::url* optional_url) {
+                ada::encoding_type encoding) {
     ada_log("ada::parser::parse_url('", user_input,
      "' [", user_input.size()," bytes],", (base_url != nullptr ? base_url->to_string() : "null"),
-     ",", ada::to_string(encoding), ",", (optional_url != nullptr ? optional_url->to_string() : "null"), ")");
-    // Let state be state override if given, or scheme start state otherwise.
+     ",", ada::to_string(encoding), ")");
+
     ada::state state = ada::state::SCHEME_START;
-
-    /**
-     * Design concern: We take an optional_url as a parameter. Yet optional_url
-     * is only ever used on the next line.
-     */
-
-    // If we have anything in optional_url, then it was copied there.
-    // As much as possible, we do not want relatively expensive constructor in our
-    // main function (parse_url).
-    ada::url url = optional_url != nullptr ? *optional_url : ada::url();
-    // From this point forward, optional_url should not be used.
+    ada::url url = ada::url();
 
     std::string tmp_buffer;
     std::string_view internal_input;
