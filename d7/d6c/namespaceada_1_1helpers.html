@@ -104,6 +104,8 @@ Functions</h2></td></tr>
 <tr class="separator:ab89ebc75c4ef1ec2f0f82b51b3a68f06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afcffe4b56f77a2d643a1a53c24c093c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#afcffe4b56f77a2d643a1a53c24c093c4">get_host_delimiter_location</a> (const <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;<a class="el" href="../../dd/d03/structada_1_1url.html">url</a>, std::string_view &amp;view, bool &amp;inside_brackets) noexcept</td></tr>
 <tr class="separator:afcffe4b56f77a2d643a1a53c24c093c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e7a930166b3365d93acd6c42620f45b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a7e7a930166b3365d93acd6c42620f45b">trim_c0_whitespace</a> (std::string_view &amp;input) noexcept</td></tr>
+<tr class="separator:a7e7a930166b3365d93acd6c42620f45b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memTemplParams" colspan="2">template&lt;typename out_iter &gt; </td></tr>
 <tr class="memitem:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">encode_json</a> (std::string_view view, out_iter out)</td></tr>
 <tr class="separator:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -281,7 +283,7 @@ template&lt;typename out_iter &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00085">85</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">ada::url::set_hash()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a716bea9e0b8f60b16c97b5268458da7f">ada::url::set_host()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a0427d8495d50e40e13215d7b7e36fa63">ada::url::set_hostname()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a5c9e3746ad2921a4cf6e506605047013">ada::url::set_protocol()</a>, and <a class="el" href="../../dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1">ada::url::set_search()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">ada::url::set_hash()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a716bea9e0b8f60b16c97b5268458da7f">ada::url::set_host()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a0427d8495d50e40e13215d7b7e36fa63">ada::url::set_hostname()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#afa758006b81473c457ff8f460db7f115">ada::url::set_port()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a5c9e3746ad2921a4cf6e506605047013">ada::url::set_protocol()</a>, and <a class="el" href="../../dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1">ada::url::set_search()</a>.</p>
 
 </div>
 </div>
@@ -356,6 +358,39 @@ template&lt;typename out_iter &gt; </div>
 <p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00092">92</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d7f/log_8h.html#ad5e88db0a4001ef3e9742f23109688dd">ada_log</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>.</p>
+
+</div>
+</div>
+<a id="a7e7a930166b3365d93acd6c42620f45b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e7a930166b3365d93acd6c42620f45b">&#9670;&nbsp;</a></span>trim_c0_whitespace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void ada::helpers::trim_c0_whitespace </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view &amp;&#160;</td>
+          <td class="paramname"><em>input</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Removes leading and trailing C0 control and whitespace characters from string. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00120">120</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a3cdc63951562d4f4c7085a8d251fa4c3">ada::unicode::is_c0_control_or_space()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>.</p>
 

@@ -7,5 +7,6 @@ var helpers_8cpp =
     [ "remove_ascii_tab_or_newline", "d2/df4/helpers_8cpp.html#afe80bc0093fc27eceb0102b13207261e", null ],
     [ "shorten_path", "d2/df4/helpers_8cpp.html#a9409999807c7be56822ee7ba5d06fa00", null ],
     [ "substring", "d2/df4/helpers_8cpp.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06", null ],
-    [ "to_string", "d2/df4/helpers_8cpp.html#a3b7cc372b3ac372722c850ca149215d6", null ]
+    [ "to_string", "d2/df4/helpers_8cpp.html#a3b7cc372b3ac372722c850ca149215d6", null ],
+    [ "trim_c0_whitespace", "d2/df4/helpers_8cpp.html#a7e7a930166b3365d93acd6c42620f45b", null ]
 ];

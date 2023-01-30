@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['readme_349',['README',['../dd/d27/namespaceamalgamate.html#a47203a1cf56ed0e239ef955d04393cd5',1,'amalgamate']]]
+  ['readme_351',['README',['../dd/d27/namespaceamalgamate.html#a47203a1cf56ed0e239ef955d04393cd5',1,'amalgamate']]]
 ];

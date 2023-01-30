@@ -31,7 +31,8 @@ var namespaceada =
       [ "prune_fragment", "d7/d6c/namespaceada_1_1helpers.html#a27195c97e4ce5f8bf9187e5b24a478ba", null ],
       [ "remove_ascii_tab_or_newline", "d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e", null ],
       [ "shorten_path", "d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00", null ],
-      [ "substring", "d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06", null ]
+      [ "substring", "d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06", null ],
+      [ "trim_c0_whitespace", "d7/d6c/namespaceada_1_1helpers.html#a7e7a930166b3365d93acd6c42620f45b", null ]
     ] ],
     [ "parser", "d6/da3/namespaceada_1_1parser.html", [
       [ "parse_url", "d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14", null ]
