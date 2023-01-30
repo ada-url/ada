@@ -145,7 +145,7 @@ namespace ada {
   bool url::set_hostname(const std::string_view input) {
     if (has_opaque_path) { return false; }
 
-    std::string previous_host = std::move(host.value_or(""));
+    std::optional<std::string> previous_host = host;
 
     std::string_view::iterator input_pointer_end = std::find(input.begin(), input.end(), '#');
     std::string _host(input.data(), std::distance(input.begin(), input_pointer_end));
