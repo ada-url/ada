@@ -425,7 +425,7 @@ namespace ada {
   }
 
   ada_really_inline bool url::parse_host(std::string_view input) {
-    ada_log("parse_host", input, "[", input.size(), " bytes]");
+    ada_log("parse_host ", input, "[", input.size(), " bytes]");
     if(input.empty()) { return is_valid = false; } // technically unnecessary.
     // If input starts with U+005B ([), then:
     if (input[0] == '[') {
@@ -467,16 +467,18 @@ namespace ada {
       ada_log("parse_host fast path ", *host);
       return true;
     }
-    ada_log("parse_host  calling to_ascii");
+    ada_log("parse_host calling to_ascii");
     is_valid = ada::unicode::to_ascii(host, input, false,  input.find('%'));
-    if (!is_valid) { return is_valid = false; }
+    if (!is_valid) {
+      ada_log("parse_host to_ascii returns false");
+      return is_valid = false;
+    }
 
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
     if(checkers::is_ipv4(host.value())) {
-      ada_log("parse_host  got ipv4", *host);
+      ada_log("parse_host got ipv4", *host);
       return parse_ipv4(host.value());
     }
-
 
     return true;
   }

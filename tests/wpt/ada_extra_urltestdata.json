@@ -84,6 +84,20 @@
     "search": "",
     "hash": ""
   },
+  {
+    "input": "./foo",
+    "base": "http://www.example.org",
+    "href": "http://www.example.org/foo",
+    "protocol": "http:",
+    "username": "",
+    "password": "",
+    "host": "www.example.org",
+    "hostname": "www.example.org",
+    "port": "",
+    "pathname": "/foo",
+    "search": "",
+    "hash": ""
+  },
   "# Ipv6 Edge Cases",
   {
     "input": "http://[0:0:0:0:0:0:0:0",
