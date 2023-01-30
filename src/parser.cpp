@@ -65,24 +65,21 @@ namespace ada::parser {
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
-    for (; input_position <= input_size; input_position++) {
+    while (input_position <= input_size) {
       switch (state) {
         case ada::state::SCHEME_START: {
           ada_log("SCHEME_START ", helpers::substring(url_data, input_position));
           // If c is an ASCII alpha, append c, lowercased, to buffer, and set state to scheme state.
           if ((input_position != input_size) && checkers::is_alpha(url_data[input_position])) {
             state = ada::state::SCHEME;
-            goto goto_scheme;
           }
           // Otherwise, if state override is not given, set state to no scheme state and decrease pointer by 1.
           else {
             state = ada::state::NO_SCHEME;
-            goto goto_no_scheme;;
           }
           break;
         }
         case ada::state::SCHEME: {
-          goto_scheme:
            ada_log("SCHEME ", helpers::substring(url_data, input_position));
           // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.), append c, lowercased, to buffer.
           while((input_position != input_size) && (ada::unicode::is_alnum_plus(url_data[input_position]))) {
@@ -118,18 +115,18 @@ namespace ada::parser {
             else {
               state = ada::state::OPAQUE_PATH;
             }
+
+            input_position++;
           }
           // Otherwise, if state override is not given, set buffer to the empty string, state to no scheme state,
           // and start over (from the first code point in input).
           else {
             state = ada::state::NO_SCHEME;
             input_position = 0;
-            goto goto_no_scheme;
           }
           break;
         }
         case ada::state::NO_SCHEME: {
-          goto_no_scheme:
           ada_log("NO_SCHEME ", helpers::substring(url_data, input_position));
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
           if (base_url == nullptr || (base_url->has_opaque_path && (input_position != input_size))) {
@@ -152,18 +149,15 @@ namespace ada::parser {
           else if (base_url->get_scheme_type() != ada::scheme::type::FILE) {
             ada_log("NO_SCHEME non-file relative path");
             state = ada::state::RELATIVE_SCHEME;
-            goto goto_relative_scheme;
           }
           // Otherwise, set state to file state and decrease pointer by 1.
           else {
             ada_log("NO_SCHEME file base type");
             state = ada::state::FILE;
-            goto goto_file;
           }
           break;
         }
         case ada::state::AUTHORITY: {
-          goto_authority:
            ada_log("AUTHORITY ", helpers::substring(url_data, input_position));
           // most URLs have no @. Having no @ tells us that we don't have to worry about AUTHORITY. Of course,
           // we could have @ and still not have to worry about AUTHORITY.
@@ -174,61 +168,61 @@ namespace ada::parser {
 
           if(!contains_ampersand) {
             state = ada::state::HOST;
-            goto goto_host;
-          }
-          bool at_sign_seen{false};
-          bool password_token_seen{false};
-          do {
-            std::string_view view = helpers::substring(url_data, input_position);
-            size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
-            std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location : view.size());
-            input_position = (location == std::string_view::npos) ? input_size : input_position + location;
-            // If c is U+0040 (@), then:
-            if ((input_position != input_size) && (url_data[input_position] == '@')) {
-              // If atSignSeen is true, then prepend "%40" to buffer.
-              if (at_sign_seen) {
-                if (password_token_seen) {
-                  url.password += "%40";
-                } else {
-                  url.username += "%40";
+          } else {
+            bool at_sign_seen{false};
+            bool password_token_seen{false};
+            do {
+              std::string_view view = helpers::substring(url_data, input_position);
+              size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
+              std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location : view.size());
+              input_position = (location == std::string_view::npos) ? input_size : input_position + location;
+              // If c is U+0040 (@), then:
+              if ((input_position != input_size) && (url_data[input_position] == '@')) {
+                // If atSignSeen is true, then prepend "%40" to buffer.
+                if (at_sign_seen) {
+                  if (password_token_seen) {
+                    url.password += "%40";
+                  } else {
+                    url.username += "%40";
+                  }
                 }
-              }
 
-              at_sign_seen = true;
-
-              if (!password_token_seen) {
-                size_t password_token_location = authority_view.find(':');
-                password_token_seen = password_token_location != std::string_view::npos;
+                at_sign_seen = true;
 
                 if (!password_token_seen) {
-                  url.username += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
-                } else {
-                    url.username += unicode::percent_encode(authority_view.substr(0,password_token_location), character_sets::USERINFO_PERCENT_ENCODE);
-                    url.password += unicode::percent_encode(authority_view.substr(password_token_location+1), character_sets::USERINFO_PERCENT_ENCODE);
+                  size_t password_token_location = authority_view.find(':');
+                  password_token_seen = password_token_location != std::string_view::npos;
+
+                  if (!password_token_seen) {
+                    url.username += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+                  } else {
+                      url.username += unicode::percent_encode(authority_view.substr(0,password_token_location), character_sets::USERINFO_PERCENT_ENCODE);
+                      url.password += unicode::percent_encode(authority_view.substr(password_token_location+1), character_sets::USERINFO_PERCENT_ENCODE);
+                  }
+                }
+                else {
+                  url.password += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
                 }
               }
-              else {
-                url.password += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+              // Otherwise, if one of the following is true:
+              // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+              // - url is special and c is U+005C (\)
+              else if (input_position == input_size || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
+                // If atSignSeen is true and authority_view is the empty string, validation error, return failure.
+                if (at_sign_seen && authority_view.empty()) {
+                  url.is_valid = false;
+                  return url;
+                }
+                // Decrease pointer by the number of code points in buffer plus one,
+                // set buffer to the empty string, and set state to host state.
+                input_position -= authority_view.length() + 1;
+                state = ada::state::HOST;
+                break;
               }
-            }
-            // Otherwise, if one of the following is true:
-            // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
-            // - url is special and c is U+005C (\)
-            else if (input_position == input_size || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
-              // If atSignSeen is true and authority_view is the empty string, validation error, return failure.
-              if (at_sign_seen && authority_view.empty()) {
-                url.is_valid = false;
-                return url;
-              }
-              // Decrease pointer by the number of code points in buffer plus one,
-              // set buffer to the empty string, and set state to host state.
-              input_position -= authority_view.length() + 1;
-              state = ada::state::HOST;
-              break;
-            }
-            if(input_position == input_size) { break; }
-            input_position++;
-          } while(true);
+              if(input_position == input_size) { break; }
+              input_position++;
+            } while(true);
+          }
           break;
         }
         case ada::state::SPECIAL_RELATIVE_OR_AUTHORITY: {
@@ -243,7 +237,6 @@ namespace ada::parser {
           // Otherwise, validation error, set state to relative state and decrease pointer by 1.
           else {
             state = ada::state::RELATIVE_SCHEME;
-            goto goto_relative_scheme;
           }
 
           break;
@@ -257,13 +250,11 @@ namespace ada::parser {
           // Otherwise, set state to path state, and decrease pointer by 1.
           else {
             state = ada::state::PATH;
-            goto goto_path;
           }
 
           break;
         }
         case ada::state::RELATIVE_SCHEME: {
-          goto_relative_scheme:
           ada_log("RELATIVE_SCHEME ", helpers::substring(url_data, input_position));
           // Set url’s scheme to base’s scheme.
           url.copy_scheme(*base_url);
@@ -305,7 +296,6 @@ namespace ada::parser {
 
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
-              goto goto_path;
             }
           }
           break;
@@ -333,7 +323,6 @@ namespace ada::parser {
             url.host = base_url->host;
             url.port = base_url->port;
             state = ada::state::PATH;
-            goto goto_path;
           }
 
           break;
@@ -348,11 +337,6 @@ namespace ada::parser {
           if (ada::checkers::begins_with(view, "//")) {
             input_position++;
           }
-          // Otherwise, validation error, set state to special authority ignore slashes state and decrease pointer by 1.
-          else {
-            goto goto_special_authority_ignore_slashes;
-          }
-
 
           break; /** Here we should just fall through !!! */
         }
@@ -364,7 +348,7 @@ namespace ada::parser {
           while(true) {
             if ((input_position == input_size) || ((url_data[input_position] != '/') && (url_data[input_position] != '\\'))) {
               state = ada::state::AUTHORITY;
-              goto goto_authority;
+              break;
             }
             input_position++;
           }
@@ -395,7 +379,6 @@ namespace ada::parser {
           return url;
         }
         case ada::state::HOST: {
-          goto_host:
           ada_log("HOST ", helpers::substring(url_data, input_position));
           std::string_view host_view = helpers::substring(url_data, input_position);
           bool inside_brackets{false};
@@ -430,7 +413,6 @@ namespace ada::parser {
             }
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
-            goto goto_path_start;
           }
           break;
         }
@@ -456,10 +438,9 @@ namespace ada::parser {
           size_t consumed_bytes = url.parse_port(port_view, true);
           input_position += consumed_bytes;
           if(!url.is_valid) { return url; }
-          goto goto_path_start;
+          break;
         }
         case ada::state::PATH_START: {
-          goto_path_start:
           ada_log("PATH_START ", helpers::substring(url_data, input_position));
           // If url is special, then:
           if (url.is_special()) {
@@ -486,19 +467,18 @@ namespace ada::parser {
           }
           // Otherwise, if c is not the EOF code point:
           else if (input_position != input_size) {
+            // If c is U+002F (/), then inc pointer by 1.
+            if (url_data[input_position] == '/') {
+              input_position++;
+            }
+
             // Set state to path state.
             state = ada::state::PATH;
-
-            // If c is not U+002F (/), then decrease pointer by 1.
-            if (url_data[input_position] != '/') {
-              goto goto_path;
-            }
           }
 
           break;
         }
         case ada::state::PATH: {
-          goto_path:
           std::string_view view = helpers::substring(url_data, input_position);
           ada_log("PATH ", helpers::substring(url_data, input_position));
 
@@ -556,7 +536,6 @@ namespace ada::parser {
 
             // Set state to path state, and decrease pointer by 1.
             state = ada::state::PATH;
-            goto goto_path;
           }
 
           break;
@@ -569,14 +548,12 @@ namespace ada::parser {
           std::string_view file_host_buffer(view.data(), (location != std::string_view::npos) ? location : view.size());
           if (checkers::is_windows_drive_letter(file_host_buffer)) {
             state = ada::state::PATH;
-            goto goto_path;
           }
           else if (file_host_buffer.empty()) {
             // Set url’s host to the empty string.
             url.host = "";
             // Set state to path start state.
             state = ada::state::PATH_START;
-            goto goto_path_start;
           }
           else {
             size_t consumed_bytes = file_host_buffer.size();
@@ -591,13 +568,11 @@ namespace ada::parser {
 
             // Set buffer to the empty string and state to path start state.
             state = ada::state::PATH_START;
-            goto goto_path_start;
           }
 
           break;
         }
         case ada::state::FILE: {
-          goto_file:
           ada_log("FILE ", helpers::substring(url_data, input_position));
           std::string_view file_view = helpers::substring(url_data, input_position);
 
@@ -645,14 +620,12 @@ namespace ada::parser {
 
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
-              goto goto_path;
             }
           }
           // Otherwise, set state to path state, and decrease pointer by 1.
           else {
             ada_log("FILE go to path");
             state = ada::state::PATH;
-            goto goto_path;
           }
 
           break;
