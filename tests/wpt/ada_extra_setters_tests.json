@@ -30,18 +30,26 @@
   ],
   "port": [
     {
-      "comment": "Removes leading and trailing control characters",
+      "comment": "Should not update on leading control characters",
       "href": "https://yagiz.co:443",
       "new_value": "\u000080\u0000",
       "expected": {
-        "port": "80"
+        "port": ""
+      }
+    },
+    {
+      "comment": "Trailing control characters",
+      "href": "https://yagiz.co:443",
+      "new_value": "8080\u0000",
+      "expected": {
+        "port": "8080"
       }
     },
     {
       "href": "https://yagiz.co",
       "new_value": "\u000044\u00093\u0000",
       "expected": {
-        "port": "44"
+        "port": ""
       }
     },
     {

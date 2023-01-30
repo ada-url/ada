@@ -3,6 +3,7 @@
  * Includes all the setters of `ada::url`
  */
 #include "ada.h"
+#include "ada/helpers.h"
 
 #include <optional>
 #include <string>
@@ -23,9 +24,11 @@ namespace ada {
 
   bool url::set_port(const std::string_view input) {
     if (cannot_have_credentials_or_port()) { return false; }
-    std::string_view trimmed = input;
-    helpers::trim_c0_whitespace(trimmed);
-    if (trimmed.empty()) { port = std::nullopt; }
+    std::string trimmed(input);
+    helpers::remove_ascii_tab_or_newline(trimmed);
+    if (trimmed.empty()) { port = std::nullopt; return true; }
+    // Input should not start with control characters.
+    if (ada::unicode::is_c0_control_or_space(trimmed.front())) { return false; }
     return parse_port(trimmed);
   }
 
