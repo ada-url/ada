@@ -42,11 +42,17 @@ namespace ada::helpers {
    * it returns an empty string_view. This function cannot throw.
    */
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept;
+
   /**
    * Returns a host's delimiter location depending on the state of the instance.
    * Used by the host parser.
    */
   ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept;
+
+  /**
+   * Removes leading and trailing C0 control and whitespace characters from string.
+   */
+  ada_really_inline void trim_c0_whitespace(std::string_view& input) noexcept;
 
 } // namespace ada::helpers
 
