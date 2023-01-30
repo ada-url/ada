@@ -22,7 +22,9 @@ namespace ada {
 
   bool url::set_port(const std::string_view input) {
     if (cannot_have_credentials_or_port()) { return false; }
-    return parse_port(input);
+    std::string_view trimmed = input;
+    helpers::trim_c0_whitespace(trimmed);
+    return parse_port(trimmed);
   }
 
   void url::set_hash(const std::string_view input) {
@@ -216,7 +218,9 @@ namespace ada {
   }
 
   bool url::set_href(const std::string_view input) {
-    ada::url out = ada::parse(input);
+    std::string_view trimmed = input;
+    helpers::trim_c0_whitespace(trimmed);
+    ada::url out = ada::parse(trimmed);
 
     if (out.is_valid) {
       set_protocol(out.get_protocol());

@@ -18,6 +18,24 @@
       "expected": {
         "href": "https://username:password@localhost:5432/my-db"
       }
+    },
+    {
+      "comment": "Removes leading and trailing control characters",
+      "href": "https://yagiz.co",
+      "new_value": "\u0000http://www.google.com\u0000",
+      "expected": {
+        "href": "http://www.google.com/"
+      }
+    }
+  ],
+  "port": [
+    {
+      "comment": "Removes extra tab and newline characters",
+      "href": "https://yagiz.co",
+      "new_value": "\u000080\u0000",
+      "expected": {
+        "port": "80"
+      }
     }
   ]
 }
