@@ -439,23 +439,23 @@ int main(int argc, char** argv) {
 
   std::map<std::string, bool> results;
   std::string name;
-//  name = "percent_encoding";
-//  if(all_tests || name.find(filter) != std::string::npos) {
-//    results[name] = percent_encoding();
-//  }
-//#ifndef _WIN32
-//  name = "toascii_encoding";
-//  if(all_tests || name.find(filter) != std::string::npos) {
-//    results[name] = toascii_encoding();
-//  }
-//#endif // _WIN32
-//  name = "setters_tests_encoding("+std::string(SETTERS_TESTS_JSON)+")";
-//  if(all_tests || name.find(filter) != std::string::npos) {
-//    results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
-//#ifdef _WIN32
-//    results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
-//#endif // _WIN32
-//  }
+  name = "percent_encoding";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = percent_encoding();
+  }
+#ifndef _WIN32
+  name = "toascii_encoding";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = toascii_encoding();
+  }
+#endif // _WIN32
+  name = "setters_tests_encoding("+std::string(SETTERS_TESTS_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
+#ifdef _WIN32
+    results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
+#endif // _WIN32
+  }
   name = "setters_tests_encoding("+std::string(ADA_SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(ADA_SETTERS_TESTS_JSON);
@@ -463,18 +463,18 @@ int main(int argc, char** argv) {
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
-//  name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
-//  if(all_tests || name.find(filter) != std::string::npos) {
-//    results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
-//  }
-//  name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
-//  if(all_tests || name.find(filter) != std::string::npos) {
-//    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
-//  }
-//  name = "verifydnslength_tests("+std::string(VERIFYDNSLENGTH_TESTS_JSON)+")";
-//  if(all_tests || name.find(filter) != std::string::npos) {
-//    results[name] = verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
-//  }
+  name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
+  }
+  name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
+  }
+  name = "verifydnslength_tests("+std::string(VERIFYDNSLENGTH_TESTS_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
+  }
   std::cout << std::endl;
   std::cout << "==============="<< std::endl;
   std::cout << "Final report: "<< std::endl;
