@@ -51,5 +51,15 @@
         "port": ""
       }
     }
+  ],
+  "hash": [
+    {
+      "comment": "Should not trim leading and trailing control characters",
+      "href": "https://domain.com",
+      "new_value": "\u0000hello\u0000",
+      "expected": {
+        "hash": "#%00hello%00"
+      }
+    }
   ]
 }
