@@ -4,6 +4,7 @@
  */
 #include "ada.h"
 
+#include <optional>
 #include <string>
 
 namespace ada {
@@ -24,6 +25,7 @@ namespace ada {
     if (cannot_have_credentials_or_port()) { return false; }
     std::string_view trimmed = input;
     helpers::trim_c0_whitespace(trimmed);
+    if (trimmed.empty()) { port = std::nullopt; }
     return parse_port(trimmed);
   }
 

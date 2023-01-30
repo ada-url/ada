@@ -50,6 +50,14 @@
       "expected": {
         "port": ""
       }
+    },
+    {
+      "comment": "Should remove port on invalid input",
+      "href": "https://www.google.com:443",
+      "new_value": "99999",
+      "expected": {
+        "port": ""
+      }
     }
   ],
   "hash": [
