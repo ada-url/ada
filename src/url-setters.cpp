@@ -74,6 +74,9 @@ namespace ada {
   bool url::set_host(const std::string_view input) {
     if (has_opaque_path) { return false; }
 
+    std::optional<std::string> previous_host = host;
+    std::optional<uint16_t> previous_port = port;
+
     std::string_view::iterator _host_end = std::find(input.begin(), input.end(), '#');
     std::string _host(input.data(), std::distance(input.begin(), _host_end));
     helpers::remove_ascii_tab_or_newline(_host);
@@ -106,7 +109,12 @@ namespace ada {
         return true;
       }
 
-      return parse_host(host_view);
+      bool succeeded = parse_host(host_view);
+      if (!succeeded) {
+        host = previous_host;
+        port = previous_port;
+      }
+      return succeeded;
     }
 
     size_t location = new_host.find_first_of("/\\?");
@@ -117,12 +125,10 @@ namespace ada {
       host = "";
     }
     else {
-      // @todo This is required because to_ascii mutate input and does not revert if input fails.
-      auto existing_host = std::move(host);
-
       // Let host be the result of host parsing buffer with url is not special.
       if (!parse_host(new_host)) {
-        host = existing_host;
+        host = previous_host;
+        port = previous_port;
         return false;
       }
 
@@ -136,6 +142,8 @@ namespace ada {
 
   bool url::set_hostname(const std::string_view input) {
     if (has_opaque_path) { return false; }
+
+    std::string previous_host = std::move(host.value_or(""));
 
     std::string_view::iterator input_pointer_end = std::find(input.begin(), input.end(), '#');
     std::string _host(input.data(), std::distance(input.begin(), input_pointer_end));
@@ -171,7 +179,9 @@ namespace ada {
         return true;
       }
 
-      return parse_host(host_view);
+      bool succeeded = parse_host(host_view);
+      if (!succeeded) { host = previous_host; }
+      return succeeded;
     }
 
     size_t location = new_host.find_first_of("/\\?");
@@ -182,12 +192,9 @@ namespace ada {
       host = "";
     }
     else {
-      // @todo This is required because to_ascii mutate input and does not revert if input fails.
-      auto existing_host = std::move(host);
-
       // Let host be the result of host parsing buffer with url is not special.
       if (!parse_host(new_host)) {
-        host = existing_host;
+        host = previous_host;
         return false;
       }
 

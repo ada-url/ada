@@ -260,7 +260,22 @@ bool toascii_encoding() {
         TEST_ASSERT(current.get_pathname(), "/x", "Shouldn't have updated pathname");
         TEST_ASSERT(current.get_href(), "https://" + std::string(stringified_output) + "/x", "Href should have been equal. From: " + element_string);
       } else if (expected_output.is_null()) {
-        TEST_ASSERT(current.is_valid, false, "Should have failed. From: "+ element_string);
+        TEST_ASSERT(current.is_valid, false, "Should have failed. From: " + element_string);
+      }
+
+      // Test setters for host and hostname values.
+      ada::url setter = ada::parse("https://x/x");
+      TEST_ASSERT(setter.set_host(input), !expected_output.is_null(), "set_host return value. " + element_string);
+      TEST_ASSERT(setter.set_hostname(input), !expected_output.is_null(), "set_hostname return value. " + element_string);
+
+      if (expected_output.type() == ondemand::json_type::string) {
+        std::string_view stringified_output = expected_output.get_string();
+        TEST_ASSERT(setter.get_host(), stringified_output, "Host should have been equal. From: "+ element_string);
+        TEST_ASSERT(setter.get_hostname(), stringified_output, "Hostname should have been equal. From: "+ element_string);
+      } else if (expected_output.is_null()) {
+        // host and hostname should not be updated if the input is invalid.
+        TEST_ASSERT(setter.get_host(), "x", "Host should have been equal. From: "+ element_string);
+        TEST_ASSERT(setter.get_hostname(), "x", "Hostname should have been equal. From: "+ element_string);
       }
     }
   }
