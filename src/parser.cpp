@@ -45,8 +45,7 @@ namespace ada::parser {
 
     // Leading and trailing control characters are uncommon and easy to deal with (no performance concern).
     std::string_view url_data = internal_input;
-    while(!url_data.empty() && ada::unicode::is_c0_control_or_space(url_data.front())) { url_data.remove_prefix(1); }
-    while(!url_data.empty() && ada::unicode::is_c0_control_or_space(url_data.back())) { url_data.remove_suffix(1); }
+    helpers::trim_c0_whitespace(url_data);
 
     // Optimization opportunity. Most websites do not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);

@@ -18,6 +18,38 @@
       "expected": {
         "href": "https://username:password@localhost:5432/my-db"
       }
+    },
+    {
+      "comment": "Removes leading and trailing control characters",
+      "href": "https://yagiz.co",
+      "new_value": "\u0000http://www.google.com\u0000",
+      "expected": {
+        "href": "http://www.google.com/"
+      }
+    }
+  ],
+  "port": [
+    {
+      "comment": "Removes leading and trailing control characters",
+      "href": "https://yagiz.co:443",
+      "new_value": "\u000080\u0000",
+      "expected": {
+        "port": "80"
+      }
+    },
+    {
+      "href": "https://yagiz.co",
+      "new_value": "\u000044\u00093\u0000",
+      "expected": {
+        "port": "44"
+      }
+    },
+    {
+      "href": "https://yagiz.co:443",
+      "new_value": "\u0000\u0009\u0000",
+      "expected": {
+        "port": ""
+      }
     }
   ]
 }
