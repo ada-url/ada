@@ -249,11 +249,18 @@ bool toascii_encoding() {
       ada::unicode::to_ascii(output, input, false, input.find('%'));
       auto expected_output = object["output"];
 
+      // The following code replicates `toascii.window.js` from web-platform tests.
+      // @see https://github.com/web-platform-tests/wpt/blob/master/url/toascii.window.js
+      ada::url current = ada::parse("https://" + std::string(input) + "/x");
+
       if (expected_output.type() == ondemand::json_type::string) {
         std::string_view stringified_output = expected_output.get_string();
-        TEST_ASSERT(output.value_or(""), stringified_output, "Should have been equal. From: "+ element_string);
+        TEST_ASSERT(current.get_host(), stringified_output, "Host should have been equal. From: "+ element_string);
+        TEST_ASSERT(current.get_hostname(), stringified_output, "Hostname should have been equal. From: "+ element_string);
+        TEST_ASSERT(current.get_pathname(), "/x", "Shouldn't have updated pathname");
+        TEST_ASSERT(current.get_href(), "https://" + std::string(stringified_output) + "/x", "Href should have been equal. From: " + element_string);
       } else if (expected_output.is_null()) {
-        TEST_ASSERT(output.value_or(""), "", "Should have been empty. From: "+ element_string);
+        TEST_ASSERT(current.is_valid, false, "Should have failed. From: "+ element_string);
       }
     }
   }
