@@ -204,16 +204,16 @@ namespace ada {
  #endif // defined __BYTE_ORDER__ && defined __ORDER_BIG_ENDIAN__
 
 
-#ifndef ADA_HAS_UCI
+#ifndef ADA_HAS_ICU
 #if __has_include(<unicode/uidna.h>)
 #include <unicode/utypes.h>
 #include <unicode/uidna.h>
 #include <unicode/utf8.h>
-#define ADA_HAS_UCI 1
+#define ADA_HAS_ICU 1
 #else
-#define ADA_HAS_UCI 0
+#define ADA_HAS_ICU 0
 #endif // __has_include(<unicode/uidna.h>)
-#endif // ADA_HAS_UCI
+#endif // ADA_HAS_ICU
 
 
 #endif // ADA_COMMON_DEFS_H
