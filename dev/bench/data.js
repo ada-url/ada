@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675203801275,
+  "lastUpdate": 1675203804361,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -452,6 +452,36 @@ window.BENCHMARK_DATA = {
             "value": 415328.27553444536,
             "unit": "ns/iter",
             "extra": "iterations: 1684\ncpu: 415311.9952494062 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "f7f40b0f474396262b91cf9327fb3896084d7301",
+          "message": "fix: improve longest sequence finder",
+          "timestamp": "2023-01-31T17:22:07-05:00",
+          "tree_id": "d9faf6777220a389da9f9b04f6e7a1e4200b8521",
+          "url": "https://github.com/ada-url/ada/commit/f7f40b0f474396262b91cf9327fb3896084d7301"
+        },
+        "date": 1675203803607,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 368893.419746561,
+            "unit": "ns/iter",
+            "extra": "iterations: 1894\ncpu: 368579.98944033793 ns\nthreads: 1"
           }
         ]
       }
