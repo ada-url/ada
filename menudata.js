@@ -111,5 +111,7 @@ var menudata={children:[
 {text:"a",url:"globals.html#index_a"},
 {text:"m",url:"globals.html#index_m"}]},
 {text:"Functions",url:"globals_func.html"},
-{text:"Macros",url:"globals_defs.html"}]}]},
+{text:"Macros",url:"globals_defs.html",children:[
+{text:"_",url:"globals_defs.html#index__5F"},
+{text:"a",url:"globals_defs.html#index_a"}]}]}]},
 {text:"Examples",url:"examples.html"}]}
