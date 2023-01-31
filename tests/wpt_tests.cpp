@@ -8,6 +8,7 @@
 #include <set>
 
 #include "ada.h"
+#include "ada/character_sets-inl.h"
 #include "ada/parser.h"
 
 // We think that these examples have bad domains.

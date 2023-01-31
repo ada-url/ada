@@ -3,6 +3,7 @@
  * Includes all the setters of `ada::url`
  */
 #include "ada.h"
+#include "ada/checkers-inl.h"
 #include "ada/helpers.h"
 
 #include <optional>
