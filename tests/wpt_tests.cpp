@@ -443,7 +443,7 @@ int main(int argc, char** argv) {
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = percent_encoding();
   }
-#ifndef _WIN32
+#if ADA_HAS_UCI
   name = "toascii_encoding";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = toascii_encoding();
@@ -452,14 +452,14 @@ int main(int argc, char** argv) {
   name = "setters_tests_encoding("+std::string(SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
-#ifdef _WIN32
+#if !ADA_HAS_UCI
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
   name = "setters_tests_encoding("+std::string(ADA_SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(ADA_SETTERS_TESTS_JSON);
-#ifdef _WIN32
+#if !ADA_HAS_UCI
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
