@@ -215,7 +215,7 @@ namespace ada::parser {
               input_position++;
               break;
             }
-            if(input_position == input_size) { input_position++; break; }
+            if(input_position == input_size) { return url; }
             input_position++;
           } while(true);
 
@@ -455,7 +455,7 @@ namespace ada::parser {
             state = ada::state::PATH;
 
             // Optimization: Avoiding going into PATH state improves the performance of urls ending with /.
-            if (input_position == input_size && url_data[input_position] == '/') {
+            if (input_position == input_size) {
               url.path = "/";
               return url;
             }
