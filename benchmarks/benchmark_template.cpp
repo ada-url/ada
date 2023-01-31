@@ -162,7 +162,7 @@ inline standard_url to_standard_url(CURLU *url) {
   return u;
 }
 
-
+// curl follows RFC3986+
 static void BasicBench_CURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t numbers_of_parameters = 0;
@@ -239,6 +239,7 @@ inline standard_url to_standard_url(boost::urls::url_view* url) {
   return u;
 }
 
+// Boost URL follows RFC3986
 static void BasicBench_BoostURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t numbers_of_parameters = 0;
@@ -437,11 +438,16 @@ BENCHMARK(BasicBench_http_parser);
 #endif // ADA_VARIOUS_COMPETITION_ENABLED
 
 int main(int argc, char **argv) {
+    benchmark::AddCustomContext("ada spec", "Ada follows whatwg/url");
 #if ADA_CURL_ENABLED
     // the curl dependency will depend on the system.
     benchmark::AddCustomContext("curl version ", LIBCURL_VERSION);
+    benchmark::AddCustomContext("curl spec", "Curl follows RFC3986, not whatwg/url");
 #else
     benchmark::AddCustomContext("curl ", "OMITTED");
+#endif
+#if ADA_BOOST_ENABLED
+    benchmark::AddCustomContext("boost-url spec", "Boost URL follows RFC3986, not whatwg/url");
 #endif
 #if (__APPLE__ &&  __aarch64__) || defined(__linux__)
     if(!collector.has_events()) {
