@@ -451,7 +451,7 @@ namespace ada {
     // if a few conditions are met: no '%' and no 'xn-' subsequence.
     std::string buffer = std::string(input);
     // This next function checks that the result is ascii, but we are going to
-    // to check in anyhow with is_forbidden.
+    // to check anyhow with is_forbidden.
     // bool is_ascii =
     unicode::to_lower_ascii(buffer.data(), buffer.size());
     uint8_t is_forbidden = 0;
