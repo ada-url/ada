@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675203853454,
+  "lastUpdate": 1675203856008,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -524,6 +524,36 @@ window.BENCHMARK_DATA = {
             "value": 368893.419746561,
             "unit": "ns/iter",
             "extra": "iterations: 1894\ncpu: 368579.98944033793 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b93d39c7c9c8bd3753ce335c22d3ae2af81a4b87",
+          "message": "fix: Separating the headers so that the inline functions are not messing up the declarations. (#187)\n\n* Separating the headers so that the inline functions are not messing up the declarations.\r\n\r\n* Nope.",
+          "timestamp": "2023-01-31T17:22:28-05:00",
+          "tree_id": "60455f852a17df31e97d6946e76821d858393f5a",
+          "url": "https://github.com/ada-url/ada/commit/b93d39c7c9c8bd3753ce335c22d3ae2af81a4b87"
+        },
+        "date": 1675203855364,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 505152.85745140817,
+            "unit": "ns/iter",
+            "extra": "iterations: 1389\ncpu: 503447.01223902096 ns\nthreads: 1"
           }
         ]
       }
