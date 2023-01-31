@@ -3,7 +3,7 @@
 #include "ada/common_defs.h"
 
 #include <algorithm>
-#if ADA_HAS_UCI
+#if ADA_HAS_ICU
 // We are god.
 #else
 
@@ -20,7 +20,7 @@
 #include <winnls.h>
 #endif // _WIN32
 
-#endif // ADA_HAS_UCI
+#endif // ADA_HAS_ICU
 
 namespace ada::unicode {
 
@@ -312,7 +312,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
       percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
       input = percent_decoded_buffer;
     }
-#if ADA_HAS_UCI
+#if ADA_HAS_ICU
     out = std::string(255, 0);
 
     UErrorCode status = U_ZERO_ERROR;
@@ -379,7 +379,7 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
 
 #elif defined(_WIN32)
     (void)be_strict; // unused.
-    // Fallback on the system if UCI is not available.
+    // Fallback on the system if ICU is not available.
     // Windows function assumes UTF-16.
     std::unique_ptr<char16_t[]> buffer(new char16_t[input.size()]);
     auto convert = [](const char* buf, size_t len, char16_t* utf16_output) {

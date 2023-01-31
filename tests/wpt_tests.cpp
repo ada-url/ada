@@ -443,7 +443,7 @@ int main(int argc, char** argv) {
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = percent_encoding();
   }
-#if ADA_HAS_UCI
+#if ADA_HAS_ICU
   name = "toascii_encoding";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = toascii_encoding();
@@ -452,14 +452,14 @@ int main(int argc, char** argv) {
   name = "setters_tests_encoding("+std::string(SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
-#if !ADA_HAS_UCI
+#if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
   name = "setters_tests_encoding("+std::string(ADA_SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(ADA_SETTERS_TESTS_JSON);
-#if !ADA_HAS_UCI
+#if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
@@ -479,12 +479,12 @@ int main(int argc, char** argv) {
   std::cout << "==============="<< std::endl;
   std::cout << "Final report: "<< std::endl;
   std::cout << "==============="<< std::endl;
-#if ADA_HAS_UCI
-  std::cout << "We are using UCI."<< std::endl;
+#if ADA_HAS_ICU
+  std::cout << "We are using ICU."<< std::endl;
 #elif defined(_WIN32)
   std::cout << "We are using Microsoft's Normaliz."<< std::endl;
 #else
-  std::cout << "UCI is unavailable and we have no feedback."<< std::endl;
+  std::cout << "ICU is unavailable and we have no feedback."<< std::endl;
 #endif
   bool one_failed = false;
   for(auto [s,b] : results) {
