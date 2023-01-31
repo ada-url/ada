@@ -171,9 +171,9 @@ namespace ada::parser {
             std::string_view view = helpers::substring(url_data, input_position);
             size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
             std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location : view.size());
-            input_position = (location == std::string_view::npos) ? input_size : input_position + location;
+            size_t end_of_autority = input_position + authority_view.size();
             // If c is U+0040 (@), then:
-            if ((input_position != input_size) && (url_data[input_position] == '@')) {
+            if ((end_of_autority != input_size) && (url_data[end_of_autority] == '@')) {
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
                 if (password_token_seen) {
@@ -203,20 +203,17 @@ namespace ada::parser {
             // Otherwise, if one of the following is true:
             // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
             // - url is special and c is U+005C (\)
-            else if (input_position == input_size || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
+            else if (end_of_autority == input_size || url_data[end_of_autority] == '/' || url_data[end_of_autority] == '?' || (url.is_special() && url_data[end_of_autority] == '\\')) {
               // If atSignSeen is true and authority_view is the empty string, validation error, return failure.
               if (at_sign_seen && authority_view.empty()) {
                 url.is_valid = false;
                 return url;
               }
-              // Decrease pointer by the number of code points in buffer plus one and set state to host state.
-              input_position -= authority_view.length() + 1;
               state = ada::state::HOST;
-              input_position++;
               break;
             }
-            if(input_position == input_size) { return url; }
-            input_position++;
+            if(end_of_autority == input_size) { return url; }
+            input_position = end_of_autority + 1;
           } while(true);
 
           break;
