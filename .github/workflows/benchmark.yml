@@ -20,7 +20,7 @@ jobs:
         run: cmake --build build
 
       - name: Run default benchmark
-        run: build/benchmarks/bench --benchmark_format=json | tee default_benchmark_result.json
+        run: sudo build/benchmarks/bench --benchmark_format=json | tee default_benchmark_result.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
@@ -35,7 +35,7 @@ jobs:
           alert-comment-cc-users: '@anonrig @lemire'
 
       - name: Run WPT benchmark
-        run: build/benchmarks/wpt_bench tests/wpt/urltestdata.json --benchmark_format=json | tee wpt_benchmark_result.json
+        run: sudo build/benchmarks/wpt_bench tests/wpt/urltestdata.json --benchmark_format=json | tee wpt_benchmark_result.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
@@ -50,7 +50,7 @@ jobs:
           alert-comment-cc-users: '@anonrig @lemire'
 
       - name: Run BBC benchmark
-        run: build/benchmarks/bbc_bench --benchmark_format=json | tee bbc_benchmark_result.json
+        run: sudo build/benchmarks/bbc_bench --benchmark_format=json | tee bbc_benchmark_result.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         with:
