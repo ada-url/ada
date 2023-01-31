@@ -60,6 +60,7 @@ namespace ada::parser {
     // Keep running the following state machine by switching on state.
     // If after a run pointer points to the EOF code point, go to the next step.
     // Otherwise, increase pointer by 1 and continue with the state machine.
+    // We never decrement input_position.
     while(input_position <= input_size) {
       switch (state) {
         case ada::state::SCHEME_START: {
@@ -171,9 +172,9 @@ namespace ada::parser {
             std::string_view view = helpers::substring(url_data, input_position);
             size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
             std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location : view.size());
-            size_t end_of_autority = input_position + authority_view.size();
+            size_t end_of_authority = input_position + authority_view.size();
             // If c is U+0040 (@), then:
-            if ((end_of_autority != input_size) && (url_data[end_of_autority] == '@')) {
+            if ((end_of_authority != input_size) && (url_data[end_of_authority] == '@')) {
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
                 if (password_token_seen) {
@@ -203,7 +204,7 @@ namespace ada::parser {
             // Otherwise, if one of the following is true:
             // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
             // - url is special and c is U+005C (\)
-            else if (end_of_autority == input_size || url_data[end_of_autority] == '/' || url_data[end_of_autority] == '?' || (url.is_special() && url_data[end_of_autority] == '\\')) {
+            else if (end_of_authority == input_size || url_data[end_of_authority] == '/' || url_data[end_of_authority] == '?' || (url.is_special() && url_data[end_of_authority] == '\\')) {
               // If atSignSeen is true and authority_view is the empty string, validation error, return failure.
               if (at_sign_seen && authority_view.empty()) {
                 url.is_valid = false;
@@ -212,8 +213,8 @@ namespace ada::parser {
               state = ada::state::HOST;
               break;
             }
-            if(end_of_autority == input_size) { return url; }
-            input_position = end_of_autority + 1;
+            if(end_of_authority == input_size) { return url; }
+            input_position = end_of_authority + 1;
           } while(true);
 
           break;
