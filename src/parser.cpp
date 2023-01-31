@@ -86,6 +86,7 @@ namespace ada::parser {
             ada_log("SCHEME the scheme should be ", url_data.substr(0,input_position));
             if(!url.parse_scheme(url_data.substr(0,input_position))) { return url; }
             ada_log("SCHEME the scheme is ", url.get_scheme());
+
             // If url’s scheme is "file", then:
             if (url.get_scheme_type() == ada::scheme::type::FILE) {
               // Set state to file state.
@@ -277,7 +278,6 @@ namespace ada::parser {
 
             // If c is U+003F (?), then set url’s query to the empty string, and state to query state.
             if ((input_position != input_size) && (url_data[input_position] == '?')) {
-              url.query = "";
               state = ada::state::QUERY;
             }
             // Otherwise, if c is not the EOF code point:
@@ -332,24 +332,21 @@ namespace ada::parser {
           // If c is U+002F (/) and remaining starts with U+002F (/),
           // then set state to special authority ignore slashes state and increase pointer by 1.
           state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
-          std::string_view view  = helpers::substring(url_data, input_position);
+          std::string_view view = helpers::substring(url_data, input_position);
           if (ada::checkers::begins_with(view, "//")) {
             input_position += 2;
           }
 
-          break; /** Here we should just fall through !!! */
+          [[fallthrough]];
         }
         case ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES: {
           ada_log("SPECIAL_AUTHORITY_IGNORE_SLASHES ", helpers::substring(url_data, input_position));
 
           // If c is neither U+002F (/) nor U+005C (\), then set state to authority state and decrease pointer by 1.
-          while(true) {
-            if ((input_position == input_size) || ((url_data[input_position] != '/') && (url_data[input_position] != '\\'))) {
-              state = ada::state::AUTHORITY;
-              break;
-            }
+          while ((input_position != input_size) && ((url_data[input_position] == '/') || (url_data[input_position] == '\\'))) {
             input_position++;
           }
+          state = ada::state::AUTHORITY;
 
           break;
         }
@@ -392,6 +389,7 @@ namespace ada::parser {
             ada_log("HOST parsing results in ", url.host.has_value() ? "none" : url.host.value());
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
+            input_position++;
           }
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
@@ -412,10 +410,8 @@ namespace ada::parser {
             }
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
-            break;
           }
 
-          input_position++;
           break;
         }
         case ada::state::OPAQUE_PATH: {
@@ -426,13 +422,12 @@ namespace ada::parser {
           if(location != std::string_view::npos) {
             view.remove_suffix(view.size() - location);
             state = ada::state::QUERY;
-            input_position += location;
+            input_position += location + 1;
           } else {
-            input_position = input_size;
+            input_position = input_size + 1;
           }
           url.has_opaque_path = true;
           url.path = unicode::percent_encode(view, character_sets::C0_CONTROL_PERCENT_ENCODE);
-          input_position++;
           break;
         }
         case ada::state::PORT: {
@@ -465,7 +460,7 @@ namespace ada::parser {
           }
           // Otherwise, if state override is not given and c is U+003F (?),
           // set url’s query to the empty string and state to query state.
-          else if ((input_position < input_size) && (url_data[input_position] == '?')) {
+          else if ((input_position != input_size) && (url_data[input_position] == '?')) {
             state = ada::state::QUERY;
           }
           // Otherwise, if c is not the EOF code point:
@@ -492,12 +487,11 @@ namespace ada::parser {
           if(locofquestionmark != std::string_view::npos) {
             state = ada::state::QUERY;
             view.remove_suffix(view.size()-locofquestionmark);
-            input_position += locofquestionmark;
+            input_position += locofquestionmark + 1;
           } else {
-            input_position = input_size;
+            input_position = input_size + 1;
           }
           if(!url.parse_prepared_path(view)) { return url; }
-          input_position++;
           break;
         }
         case ada::state::FILE_SLASH: {
@@ -508,6 +502,7 @@ namespace ada::parser {
             ada_log("FILE_SLASH c is U+002F or U+005C");
             // Set state to file host state.
             state = ada::state::FILE_HOST;
+            input_position++;
           } else {
             ada_log("FILE_SLASH otherwise");
             // If base is non-null and base’s scheme is "file", then:
@@ -528,7 +523,6 @@ namespace ada::parser {
                   if(loc != std::string_view::npos) {
                     first_base_url_path.remove_suffix(first_base_url_path.size() - loc);
                   }
-                  // Optimization opportunity: Get rid of initializing a std::string
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
                     url.path += '/';
                     url.path += first_base_url_path;
@@ -539,10 +533,8 @@ namespace ada::parser {
 
             // Set state to path state, and decrease pointer by 1.
             state = ada::state::PATH;
-            break;
           }
 
-          input_position++;
           break;
         }
         case ada::state::FILE_HOST: {
@@ -551,15 +543,14 @@ namespace ada::parser {
 
           size_t location = view.find_first_of("/\\?");
           std::string_view file_host_buffer(view.data(), (location != std::string_view::npos) ? location : view.size());
+
           if (checkers::is_windows_drive_letter(file_host_buffer)) {
             state = ada::state::PATH;
-            break;
           } else if (file_host_buffer.empty()) {
             // Set url’s host to the empty string.
             url.host = "";
             // Set state to path start state.
             state = ada::state::PATH_START;
-            break;
           } else {
             size_t consumed_bytes = file_host_buffer.size();
             input_position += consumed_bytes;
@@ -573,10 +564,8 @@ namespace ada::parser {
 
             // Set buffer to the empty string and state to path start state.
             state = ada::state::PATH_START;
-            break;
           }
 
-          input_position++;
           break;
         }
         case ada::state::FILE: {
