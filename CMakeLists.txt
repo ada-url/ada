@@ -81,22 +81,23 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   endif()
 endif()
 
-## If we put 'REQUIRED' under find_package, it is a hard error and
-## we get no chance to provide instructions to the user.
-if(MSVC) # could be WIN32 but there are other systems under Windows.
-  if(MSVC_VERSION GREATER_EQUAL 1920)
-    message(STATUS "You have a recent Visual Studio (2019 or better), congratulations!")
-  else()
-    message(SEND_ERROR "If you use Visual Studio, then Visual Studio 2019 or better is required.")
-    return()
-  endif()
-  # find_package(ICU COMPONENTS uc in) # will not work
-  option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-  target_link_libraries(ada PRIVATE Normaliz)
-else()
-  find_package(ICU COMPONENTS uc i18n)
-  ### If the user does not have ICU, let us help them with instructions:
-  if (NOT ICU_FOUND)
+
+find_package(ICU COMPONENTS uc i18n)
+### If the user does not have ICU, let us help them with instructions:
+if(ICU_FOUND)
+  target_link_libraries(ada PRIVATE ICU::uc ICU::i18n)
+elseif (ICU_FOUND)
+  # Under Windows, we have a backup.
+  if(MSVC) # could be WIN32 but there are other systems under Windows.
+    if(MSVC_VERSION GREATER_EQUAL 1920)
+      message(STATUS "You have a recent Visual Studio (2019 or better), congratulations!")
+    else()
+      message(SEND_ERROR "If you use Visual Studio, then Visual Studio 2019 or better is required.")
+      return()
+    endif()
+    option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+    target_link_libraries(ada PRIVATE Normaliz)
+  else(MSVC)
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       if(EXISTS /opt/homebrew)
         message(STATUS "Under macOS, you may install ICU with brew, using 'brew install icu4c'.")
@@ -108,9 +109,8 @@ else()
     endif()
     message(SEND_ERROR "ICU with components uc and i18n/in is required for building ada.")
     return()
-  endif (NOT ICU_FOUND)
-  target_link_libraries(ada PRIVATE ICU::uc ICU::i18n)
-endif()
+  endif(MSVC)
+endif (ICU_FOUND)
 ### Going forward, we have ICU for sure, except under Windows.
 
 if(NOT ADA_COVERAGE)

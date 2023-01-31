@@ -1,21 +1,27 @@
 #include "ada.h"
 #include "ada/character_sets.h"
+#include "ada/common_defs.h"
 
 #include <algorithm>
-#ifdef _WIN32
+#if ADA_HAS_UCI
+// We are god.
+#else
+
+#ifdef _WIN32 // let us hope that we are linking with the proper libraries.
+
 #ifndef __wtypes_h__
 #include <wtypes.h>
-#endif
+#endif // __wtypes_h__
 
 #ifndef __WINDEF_
 #include <windef.h>
-#endif
+#endif // __WINDEF_
+
 #include <winnls.h>
-#else
-#include <unicode/utypes.h>
-#include <unicode/uidna.h>
-#include <unicode/utf8.h>
-#endif
+#endif // _WIN32
+
+#endif // ADA_HAS_UCI
+
 namespace ada::unicode {
 
   ada_really_inline constexpr bool has_tabs_or_newline(std::string_view user_input) noexcept {
@@ -306,7 +312,74 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
       percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
       input = percent_decoded_buffer;
     }
-#ifdef _WIN32
+#if ADA_HAS_UCI
+    out = std::string(255, 0);
+
+    UErrorCode status = U_ZERO_ERROR;
+    uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
+
+    if (be_strict) {
+      options |= UIDNA_USE_STD3_RULES;
+    }
+
+    UIDNA* uidna = uidna_openUTS46(options, &status);
+    if (U_FAILURE(status)) {
+      return false;
+    }
+
+    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+    // RFC 1035 section 2.3.4.
+    // The domain  name must be at most 255 octets.
+    // It cannot contain a label longer than 63 octets.
+    // Thus we should never need more than 255 octets, if we
+    // do the domain name is in error.
+    int32_t length = uidna_nameToASCII_UTF8(uidna,
+                                         input.data(),
+                                         int32_t(input.length()),
+                                         out.value().data(), 255,
+                                         &info,
+                                         &status);
+
+    if (status == U_BUFFER_OVERFLOW_ERROR) {
+      status = U_ZERO_ERROR;
+      out.value().resize(length);
+      // When be_strict is true, this should not be allowed!
+      length = uidna_nameToASCII_UTF8(uidna,
+                                     input.data(),
+                                     int32_t(input.length()),
+                                     out.value().data(), length,
+                                     &info,
+                                     &status);
+    }
+
+    // A label contains hyphen-minus ('-') in the third and fourth positions.
+    info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
+    // A label starts with a hyphen-minus ('-').
+    info.errors &= ~UIDNA_ERROR_LEADING_HYPHEN;
+    // A label ends with a hyphen-minus ('-').
+    info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
+
+    if (!be_strict) { // This seems to violate RFC 1035 section 2.3.4.
+      // A non-final domain name label (or the whole domain name) is empty.
+      info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
+      // A domain name label is longer than 63 bytes.
+      info.errors &= ~UIDNA_ERROR_LABEL_TOO_LONG;
+      // A domain name is longer than 255 bytes in its storage form.
+      info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
+    }
+
+    uidna_close(uidna);
+
+    if (U_FAILURE(status) || info.errors != 0 || length == 0) {
+      out = std::nullopt;
+      return false;
+    }
+    out.value().resize(length); // we possibly want to call :shrink_to_fit otherwise we use 255 bytes.
+    out.value().shrink_to_fit();
+
+#elif defined(_WIN32)
+    (void)be_strict; // unused.
+    // Fallback on the system if UCI is not available.
     // Windows function assumes UTF-16.
     std::unique_ptr<char16_t[]> buffer(new char16_t[input.size()]);
     auto convert = [](const char* buf, size_t len, char16_t* utf16_output) {
@@ -415,69 +488,8 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     out = std::string(required_buffer_size, 0);
     for(size_t i = 0; i < required_buffer_size; i++) { (*out)[i] = char(ascii_buffer.get()[i]); }
 #else
-    out = std::string(255, 0);
-
-    UErrorCode status = U_ZERO_ERROR;
-    uint32_t options = UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
-
-    if (be_strict) {
-      options |= UIDNA_USE_STD3_RULES;
-    }
-
-    UIDNA* uidna = uidna_openUTS46(options, &status);
-    if (U_FAILURE(status)) {
-      return false;
-    }
-
-    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    // RFC 1035 section 2.3.4.
-    // The domain  name must be at most 255 octets.
-    // It cannot contain a label longer than 63 octets.
-    // Thus we should never need more than 255 octets, if we
-    // do the domain name is in error.
-    int32_t length = uidna_nameToASCII_UTF8(uidna,
-                                         input.data(),
-                                         int32_t(input.length()),
-                                         out.value().data(), 255,
-                                         &info,
-                                         &status);
-
-    if (status == U_BUFFER_OVERFLOW_ERROR) {
-      status = U_ZERO_ERROR;
-      out.value().resize(length);
-      // When be_strict is true, this should not be allowed!
-      length = uidna_nameToASCII_UTF8(uidna,
-                                     input.data(),
-                                     int32_t(input.length()),
-                                     out.value().data(), length,
-                                     &info,
-                                     &status);
-    }
-
-    // A label contains hyphen-minus ('-') in the third and fourth positions.
-    info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
-    // A label starts with a hyphen-minus ('-').
-    info.errors &= ~UIDNA_ERROR_LEADING_HYPHEN;
-    // A label ends with a hyphen-minus ('-').
-    info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
-
-    if (!be_strict) { // This seems to violate RFC 1035 section 2.3.4.
-      // A non-final domain name label (or the whole domain name) is empty.
-      info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
-      // A domain name label is longer than 63 bytes.
-      info.errors &= ~UIDNA_ERROR_LABEL_TOO_LONG;
-      // A domain name is longer than 255 bytes in its storage form.
-      info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
-    }
-
-    uidna_close(uidna);
-
-    if (U_FAILURE(status) || info.errors != 0 || length == 0) {
-      out = std::nullopt;
-      return false;
-    }
-    out.value().resize(length); // we possibly want to call :shrink_to_fit otherwise we use 255 bytes.
-    out.value().shrink_to_fit();
+    (void)be_strict; // unused.
+    out = input; // We cannot do much more for now.
 #endif
     if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
       out = std::nullopt;

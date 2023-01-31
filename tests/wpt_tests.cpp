@@ -479,7 +479,13 @@ int main(int argc, char** argv) {
   std::cout << "==============="<< std::endl;
   std::cout << "Final report: "<< std::endl;
   std::cout << "==============="<< std::endl;
-
+#if ADA_HAS_UCI
+  std::cout << "We are using UCI."<< std::endl;
+#elif defined(_WIN32)
+  std::cout << "We are using Microsoft's Normaliz."<< std::endl;
+#else
+  std::cout << "UCI is unavailable and we have no feedback."<< std::endl;
+#endif
   bool one_failed = false;
   for(auto [s,b] : results) {
     std::cout << std::left << std::setw(60) << std::setfill('.') << s << ": " << (b?"SUCCEEDED":"FAILED") << std::endl;
