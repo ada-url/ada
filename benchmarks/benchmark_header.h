@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <cstdlib>
 #if ADA_VARIOUS_COMPETITION_ENABLED
 #include <uriparser/Uri.h>
 #include <EdUrlParser.h>
