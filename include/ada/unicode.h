@@ -67,10 +67,10 @@ namespace ada::unicode {
 
 
   /**
-   * Checks if the input is a forbidden host code point.
-   * @see https://url.spec.whatwg.org/#forbidden-host-code-point
+   * Checks if the input is a forbidden domain code point.
+   * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
    */
-  ada_really_inline constexpr bool contains_forbidden_host_code_point(char * input, size_t length) noexcept;
+  ada_really_inline constexpr bool contains_forbidden_domain_code_point(char * input, size_t length) noexcept;
 
   /**
    * Checks if the input is a forbidden doamin code point.
@@ -120,6 +120,9 @@ namespace ada::unicode {
    */
   ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept;
 
+  /**
+   * @details Convert hex to binary.
+   */
   unsigned constexpr convert_hex_to_binary(char c) noexcept;
 
   /**

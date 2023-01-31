@@ -134,14 +134,10 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
     static_assert(sizeof(is_forbidden_domain_code_point_table) == 256);
 
   ada_really_inline constexpr bool is_forbidden_domain_code_point(const char c) noexcept {
-   // abort();
     return is_forbidden_domain_code_point_table[uint8_t(c)];
-    // A table is almost surely much faster than the
-    // following under most compilers: return
-    // is_forbidden_host_code_point(c) |
-    // std::iscntrl(c) | c == '%' | c == '\x7f';
   }
-  ada_really_inline constexpr bool contains_forbidden_host_code_point(char * input, size_t length) noexcept {
+
+  ada_really_inline constexpr bool contains_forbidden_domain_code_point(char * input, size_t length) noexcept {
     size_t i = 0;
     uint8_t accumulator{};
     for(; i + 4 <= length; i+=4) {
@@ -155,7 +151,6 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
     }
     return accumulator;
   }
-
 
   static_assert(unicode::is_forbidden_domain_code_point('%'));
   static_assert(unicode::is_forbidden_domain_code_point('\x7f'));
