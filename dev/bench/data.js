@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675181671531,
+  "lastUpdate": 1675189862936,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -72,6 +72,42 @@ window.BENCHMARK_DATA = {
             "value": 8338.15019892677,
             "unit": "ns/iter",
             "extra": "iterations: 82191\ncpu: 8335.670572203766 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "5fe635736da6afe450db334d5a0a573241668d0c",
+          "message": "Minor optimization.",
+          "timestamp": "2023-01-31T13:29:33-05:00",
+          "tree_id": "019df6dcaa86b2d6f8e6eb476b66294ab6d06e95",
+          "url": "https://github.com/ada-url/ada/commit/5fe635736da6afe450db334d5a0a573241668d0c"
+        },
+        "date": 1675189861394,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 5686.708884044954,
+            "unit": "ns/iter",
+            "extra": "iterations: 123401\ncpu: 5685.785366407079 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 8365.71025938143,
+            "unit": "ns/iter",
+            "extra": "iterations: 83699\ncpu: 8342.680318761275 ns\nthreads: 1"
           }
         ]
       }
