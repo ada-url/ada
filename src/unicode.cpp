@@ -1,5 +1,5 @@
 #include "ada.h"
-#include "ada/character_sets.h"
+#include "ada/character_sets-inl.h"
 #include "ada/common_defs.h"
 
 #include <algorithm>

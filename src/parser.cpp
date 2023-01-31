@@ -1,8 +1,8 @@
 #include "ada.h"
-#include "ada/character_sets.h"
-#include "ada/checkers.h"
+#include "ada/character_sets-inl.h"
+#include "ada/checkers-inl.h"
 #include "ada/unicode.h"
-#include "ada/url.h"
+#include "ada/url-inl.h"
 #include "ada/log.h"
 
 #include <iostream>
