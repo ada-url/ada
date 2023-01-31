@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675203809087,
+  "lastUpdate": 1675203853454,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -270,6 +270,48 @@ window.BENCHMARK_DATA = {
             "value": 7427.111080412093,
             "unit": "ns/iter",
             "extra": "iterations: 94103\ncpu: 7426.9661966143485 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b93d39c7c9c8bd3753ce335c22d3ae2af81a4b87",
+          "message": "fix: Separating the headers so that the inline functions are not messing up the declarations. (#187)\n\n* Separating the headers so that the inline functions are not messing up the declarations.\r\n\r\n* Nope.",
+          "timestamp": "2023-01-31T17:22:28-05:00",
+          "tree_id": "60455f852a17df31e97d6946e76821d858393f5a",
+          "url": "https://github.com/ada-url/ada/commit/b93d39c7c9c8bd3753ce335c22d3ae2af81a4b87"
+        },
+        "date": 1675203852722,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 6619.065555233762,
+            "unit": "ns/iter",
+            "extra": "iterations: 107009\ncpu: 6610.265491687616 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 5945.917891644002,
+            "unit": "ns/iter",
+            "extra": "iterations: 117077\ncpu: 5944.143597803155 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 8846.615615767212,
+            "unit": "ns/iter",
+            "extra": "iterations: 79202\ncpu: 8845.019065175122 ns\nthreads: 1"
           }
         ]
       }
