@@ -65,6 +65,13 @@ namespace ada::unicode {
    */
   ada_really_inline constexpr bool is_forbidden_host_code_point(const char c) noexcept;
 
+
+  /**
+   * Checks if the input is a forbidden host code point.
+   * @see https://url.spec.whatwg.org/#forbidden-host-code-point
+   */
+  ada_really_inline constexpr bool contains_forbidden_host_code_point(char * input, size_t length) noexcept;
+
   /**
    * Checks if the input is a forbidden doamin code point.
    * @see https://url.spec.whatwg.org/#forbidden-domain-code-point

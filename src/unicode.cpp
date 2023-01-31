@@ -118,7 +118,7 @@ namespace ada::unicode {
   static_assert(unicode::is_forbidden_host_code_point('^'));
   static_assert(unicode::is_forbidden_host_code_point('|'));
 
-constexpr static bool is_forbidden_domain_code_point_table[] = {
+constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -141,6 +141,21 @@ constexpr static bool is_forbidden_domain_code_point_table[] = {
     // is_forbidden_host_code_point(c) |
     // std::iscntrl(c) | c == '%' | c == '\x7f';
   }
+  ada_really_inline constexpr bool contains_forbidden_host_code_point(char * input, size_t length) noexcept {
+    size_t i = 0;
+    uint8_t accumulator{};
+    for(; i + 4 <= length; i+=4) {
+      accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i])];
+      accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i+1])];
+      accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i+2])];
+      accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i+3])];
+    }
+    for(; i < length; i++) {
+      accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i])];
+    }
+    return accumulator;
+  }
+
 
   static_assert(unicode::is_forbidden_domain_code_point('%'));
   static_assert(unicode::is_forbidden_domain_code_point('\x7f'));
