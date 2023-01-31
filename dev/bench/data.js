@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675203856008,
+  "lastUpdate": 1675203859792,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -826,6 +826,48 @@ window.BENCHMARK_DATA = {
             "value": 5845.736861187734,
             "unit": "ns/iter",
             "extra": "iterations: 121358\ncpu: 5807.6261968720655 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b93d39c7c9c8bd3753ce335c22d3ae2af81a4b87",
+          "message": "fix: Separating the headers so that the inline functions are not messing up the declarations. (#187)\n\n* Separating the headers so that the inline functions are not messing up the declarations.\r\n\r\n* Nope.",
+          "timestamp": "2023-01-31T17:22:28-05:00",
+          "tree_id": "60455f852a17df31e97d6946e76821d858393f5a",
+          "url": "https://github.com/ada-url/ada/commit/b93d39c7c9c8bd3753ce335c22d3ae2af81a4b87"
+        },
+        "date": 1675203859377,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 6363.542909173747,
+            "unit": "ns/iter",
+            "extra": "iterations: 109825\ncpu: 6361.508763942636 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 5243.548915292798,
+            "unit": "ns/iter",
+            "extra": "iterations: 132893\ncpu: 5242.060153657452 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 6966.110397514273,
+            "unit": "ns/iter",
+            "extra": "iterations: 101053\ncpu: 6963.901121193828 ns\nthreads: 1"
           }
         ]
       }
