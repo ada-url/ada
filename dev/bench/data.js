@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675201439164,
+  "lastUpdate": 1675201443667,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -598,6 +598,48 @@ window.BENCHMARK_DATA = {
             "value": 5789.128373156097,
             "unit": "ns/iter",
             "extra": "iterations: 121622\ncpu: 5788.660768610943 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "e05921109c9895a43e2e166a97e040c50c310ead",
+          "message": "fix: change the invalid function name for forbidden",
+          "timestamp": "2023-01-31T16:42:44-05:00",
+          "tree_id": "393a55f56a4dc7f96cb8431c3355bcbd3c7334d7",
+          "url": "https://github.com/ada-url/ada/commit/e05921109c9895a43e2e166a97e040c50c310ead"
+        },
+        "date": 1675201443066,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5175.749533314557,
+            "unit": "ns/iter",
+            "extra": "iterations: 136066\ncpu: 5140.942630782121 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4372.83780015863,
+            "unit": "ns/iter",
+            "extra": "iterations: 159957\ncpu: 4372.316310008316 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5808.509665135126,
+            "unit": "ns/iter",
+            "extra": "iterations: 120795\ncpu: 5807.880293058491 ns\nthreads: 1"
           }
         ]
       }
