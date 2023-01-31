@@ -449,14 +449,13 @@ namespace ada {
     // Let asciiDomain be the result of running domain to ASCII with domain and false.
     // The most common case is an ASCII input, in which case we do not need to call the expensive 'to_ascii'
     // if a few conditions are met: no '%' and no 'xn-' subsequence.
-    std::string buffer;
-    uint8_t is_forbidden{0};
-
-    buffer.reserve(input.size());
-    std::transform(input.begin(), input.end(), std::back_inserter(buffer), [&is_forbidden](char c) -> char {
-      is_forbidden |= ada::unicode::is_forbidden_domain_code_point(c);
-      return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);}
-    );
+    std::string buffer = std::string(input);
+    // This next function checks that the result is ascii, but we are going to
+    // to check in anyhow with is_forbidden.
+    // bool is_ascii =
+    unicode::to_lower_ascii(buffer.data(), buffer.size());
+    uint8_t is_forbidden = 0;
+    for(char c : buffer) { is_forbidden |= ada::unicode::is_forbidden_domain_code_point(c); }
     if (is_forbidden == 0 && buffer.find("xn-") == std::string_view::npos) {
       // fast path
       host = std::move(buffer);
@@ -524,11 +523,12 @@ namespace ada {
         }
       }
     } else { // slow path
-      std::string _buffer;
-      // Optimization opportunity: Most of the time scheme's are all lowercase.
-      // If that's the case, there's no need to copy.
-      std::transform(input.begin(), input.end(), std::back_inserter(_buffer),
-          [](char c) -> char { return (uint8_t((c|0x20) - 0x61) <= 25 ? (c|0x20) : c);});
+      std::string _buffer = std::string(input);
+      // Next function is only valid if the input is ASCII and returns false
+      // otherwise, but it seems that we always have ascii content so we do not need
+      // to check the return value.
+      //bool is_ascii =
+      unicode::to_lower_ascii(_buffer.data(), _buffer.size());
 
       if (has_state_override) {
         // If url’s scheme is a special scheme and buffer is not a special scheme, then return.

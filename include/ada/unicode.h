@@ -138,6 +138,11 @@ namespace ada::unicode {
    */
   bool percent_encode(const std::string_view input, const uint8_t character_set[], std::string& out);
 
+  /**
+   * Lowers the string in-place, assuming that the content is ASCII.
+   * Return true if the content was ASCII.
+   */
+  constexpr bool to_lower_ascii(char * input, size_t length) noexcept;
 } // namespace ada::unicode
 
 #endif // ADA_UNICODE_H
