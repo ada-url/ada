@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675179782833,
+  "lastUpdate": 1675179785958,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "C++ Benchmark": [
@@ -94,6 +94,38 @@ window.BENCHMARK_DATA = {
             "value": 5011.880961790783,
             "unit": "ns/iter",
             "extra": "iterations: 111334\ncpu: 5011.1852623637 ns\nthreads: 1"
+          }
+        ]
+      }
+    ],
+    "Benchmark": [
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "7eed863ae4c1a99d1f6699a03dd44d767ead1c7d",
+          "message": "build: add continious benchmark CI",
+          "timestamp": "2023-01-31T10:41:10-05:00",
+          "tree_id": "8e24b2cc752a55a9246c32dd02f32e4aa7ce8297",
+          "url": "https://github.com/ada-url/ada/commit/7eed863ae4c1a99d1f6699a03dd44d767ead1c7d"
+        },
+        "date": 1675179785042,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 5655.314355079352,
+            "unit": "ns/iter",
+            "extra": "iterations: 118627\ncpu: 5649.227410286024 ns\nthreads: 1"
           }
         ]
       }
