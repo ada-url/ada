@@ -181,5 +181,20 @@
     "pathname": "",
     "search": "",
     "hash": ""
+  },
+  {
+    "input": "file://localhost/path/to/file.txt",
+    "base": "about:blank",
+    "href": "file:///path/to/file.txt",
+    "origin": "null",
+    "protocol": "file:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "/path/to/file.txt",
+    "search": "",
+    "hash": ""
   }
 ]
