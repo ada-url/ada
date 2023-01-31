@@ -1,5 +1,6 @@
 var unicode_8h =
 [
+    [ "contains_forbidden_host_code_point", "dd/d90/unicode_8h.html#ab78970d4a20d82b09f93549163d0b9c0", null ],
     [ "convert_hex_to_binary", "dd/d90/unicode_8h.html#a753fc83b58bb0afeaf0c1d7d534869e2", null ],
     [ "has_tabs_or_newline", "dd/d90/unicode_8h.html#af6a43ab73c2b1e20f81de57b18e1f388", null ],
     [ "is_alnum_plus", "dd/d90/unicode_8h.html#a7c53b50b81eb6f56629dc55a26908700", null ],
@@ -14,5 +15,6 @@ var unicode_8h =
     [ "percent_decode", "dd/d90/unicode_8h.html#acf371f0a0ee8c11dfaedb1963be2c57a", null ],
     [ "percent_encode", "dd/d90/unicode_8h.html#a1c564a30bc61d41abd97cc6b8be084ff", null ],
     [ "percent_encode", "dd/d90/unicode_8h.html#ab23d66383793f477b4f89f1d4cfd6bf9", null ],
-    [ "to_ascii", "dd/d90/unicode_8h.html#ac8772e2727fff9bbb4c12bc68040f3b8", null ]
+    [ "to_ascii", "dd/d90/unicode_8h.html#ac8772e2727fff9bbb4c12bc68040f3b8", null ],
+    [ "to_lower_ascii", "dd/d90/unicode_8h.html#ab9b70de07868ab60794c3079aa4db46f", null ]
 ];

@@ -44,6 +44,7 @@ var namespaceada =
       [ "ipv6", "d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4", null ]
     ] ],
     [ "unicode", "d2/dc3/namespaceada_1_1unicode.html", [
+      [ "contains_forbidden_host_code_point", "d2/dc3/namespaceada_1_1unicode.html#ab78970d4a20d82b09f93549163d0b9c0", null ],
       [ "convert_hex_to_binary", "d2/dc3/namespaceada_1_1unicode.html#a753fc83b58bb0afeaf0c1d7d534869e2", null ],
       [ "has_tabs_or_newline", "d2/dc3/namespaceada_1_1unicode.html#af6a43ab73c2b1e20f81de57b18e1f388", null ],
       [ "is_alnum_plus", "d2/dc3/namespaceada_1_1unicode.html#a7c53b50b81eb6f56629dc55a26908700", null ],
@@ -59,8 +60,9 @@ var namespaceada =
       [ "percent_encode", "d2/dc3/namespaceada_1_1unicode.html#a1c564a30bc61d41abd97cc6b8be084ff", null ],
       [ "percent_encode", "d2/dc3/namespaceada_1_1unicode.html#ab23d66383793f477b4f89f1d4cfd6bf9", null ],
       [ "to_ascii", "d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8", null ],
+      [ "to_lower_ascii", "d2/dc3/namespaceada_1_1unicode.html#ab9b70de07868ab60794c3079aa4db46f", null ],
       [ "is_alnum_plus_table", "d2/dc3/namespaceada_1_1unicode.html#a505b0da95aca0b4581df4d320ea50312", null ],
-      [ "is_forbidden_domain_code_point_table", "d2/dc3/namespaceada_1_1unicode.html#a4dfb968a9eed76414c1fd18a706aac98", null ],
+      [ "is_forbidden_domain_code_point_table", "d2/dc3/namespaceada_1_1unicode.html#aaa31bc91ae8e08100d13f4477075a0ca", null ],
       [ "is_forbidden_host_code_point_table", "d2/dc3/namespaceada_1_1unicode.html#aedf60884c2f9bf443a974d29741a7d11", null ],
       [ "table_is_double_dot_path_segment", "d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f", null ]
     ] ],
