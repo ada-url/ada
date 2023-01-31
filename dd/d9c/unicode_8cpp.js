@@ -1,6 +1,6 @@
 var unicode_8cpp =
 [
-    [ "contains_forbidden_host_code_point", "dd/d9c/unicode_8cpp.html#ab78970d4a20d82b09f93549163d0b9c0", null ],
+    [ "contains_forbidden_domain_code_point", "dd/d9c/unicode_8cpp.html#a26fcfd642181408d0e95cf806ba87c63", null ],
     [ "convert_hex_to_binary", "dd/d9c/unicode_8cpp.html#a753fc83b58bb0afeaf0c1d7d534869e2", null ],
     [ "has_tabs_or_newline", "dd/d9c/unicode_8cpp.html#af6a43ab73c2b1e20f81de57b18e1f388", null ],
     [ "is_alnum_plus", "dd/d9c/unicode_8cpp.html#a7c53b50b81eb6f56629dc55a26908700", null ],
