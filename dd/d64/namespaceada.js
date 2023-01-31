@@ -98,7 +98,7 @@ var namespaceada =
     [ "inner_log", "dd/d64/namespaceada.html#accd48d9920d0d0f514a2a3efc7cd480f", null ],
     [ "log", "dd/d64/namespaceada.html#a91a11522733883fc916671a2a6b182c3", null ],
     [ "log", "dd/d64/namespaceada.html#a326c61beec709ba92c05e1d373503b04", null ],
-    [ "operator<<", "dd/d64/namespaceada.html#a76242a85d6f480dbb59157562d9771d4", null ],
+    [ "operator<<", "dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed", null ],
     [ "parse", "dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6", null ],
     [ "to_string", "dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6", null ],
     [ "to_string", "dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7", null ],

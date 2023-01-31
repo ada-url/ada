@@ -1,7 +1,9 @@
 var searchData=
 [
-  ['character_5fsets_2eh_229',['character_sets.h',['../d3/d4e/character__sets_8h.html',1,'']]],
-  ['checkers_2ecpp_230',['checkers.cpp',['../d4/dd6/checkers_8cpp.html',1,'']]],
-  ['checkers_2eh_231',['checkers.h',['../d4/dec/checkers_8h.html',1,'']]],
-  ['common_5fdefs_2eh_232',['common_defs.h',['../d7/d19/common__defs_8h.html',1,'']]]
+  ['character_5fsets_2dinl_2eh_233',['character_sets-inl.h',['../da/d69/character__sets-inl_8h.html',1,'']]],
+  ['character_5fsets_2eh_234',['character_sets.h',['../d3/d4e/character__sets_8h.html',1,'']]],
+  ['checkers_2dinl_2eh_235',['checkers-inl.h',['../d4/d46/checkers-inl_8h.html',1,'']]],
+  ['checkers_2ecpp_236',['checkers.cpp',['../d4/dd6/checkers_8cpp.html',1,'']]],
+  ['checkers_2eh_237',['checkers.h',['../d4/dec/checkers_8h.html',1,'']]],
+  ['common_5fdefs_2eh_238',['common_defs.h',['../d7/d19/common__defs_8h.html',1,'']]]
 ];
