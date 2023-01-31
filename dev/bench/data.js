@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675198101476,
+  "lastUpdate": 1675198105018,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -376,6 +376,42 @@ window.BENCHMARK_DATA = {
             "value": 7445.065646158265,
             "unit": "ns/iter",
             "extra": "iterations: 91719\ncpu: 7442.8057436300005 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bf1cbabdf1c28e8bcaefface7964de44d613ff61",
+          "message": "refactor: couple of improvements (#183)",
+          "timestamp": "2023-01-31T15:46:53-05:00",
+          "tree_id": "1fe91d38f94693f73644aa2f3727926ed63d755d",
+          "url": "https://github.com/ada-url/ada/commit/bf1cbabdf1c28e8bcaefface7964de44d613ff61"
+        },
+        "date": 1675198104164,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 5206.715920000136,
+            "unit": "ns/iter",
+            "extra": "iterations: 100000\ncpu: 5143.139 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 7206.743964125897,
+            "unit": "ns/iter",
+            "extra": "iterations: 92323\ncpu: 7205.668143366225 ns\nthreads: 1"
           }
         ]
       }
