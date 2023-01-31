@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675198105018,
+  "lastUpdate": 1675198296221,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -144,6 +144,48 @@ window.BENCHMARK_DATA = {
             "value": 8671.966346440528,
             "unit": "ns/iter",
             "extra": "iterations: 83795\ncpu: 8671.436243212602 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "80479fd3c1aa53dfa2dd67134abde473a9f2d584",
+          "message": "fix: normalize (some) of the benchmarks (#184)",
+          "timestamp": "2023-01-31T15:50:11-05:00",
+          "tree_id": "d7bfae8f32915703dc6c699c9add0a8495905960",
+          "url": "https://github.com/ada-url/ada/commit/80479fd3c1aa53dfa2dd67134abde473a9f2d584"
+        },
+        "date": 1675198294770,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5686.493233913206,
+            "unit": "ns/iter",
+            "extra": "iterations: 123114\ncpu: 5681.549620676771 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 5087.639563618437,
+            "unit": "ns/iter",
+            "extra": "iterations: 137586\ncpu: 5085.016644135305 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 7474.815042613852,
+            "unit": "ns/iter",
+            "extra": "iterations: 93162\ncpu: 7474.1997810266 ns\nthreads: 1"
           }
         ]
       }
