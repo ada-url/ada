@@ -4,33 +4,22 @@
 namespace ada::serializers {
 
   size_t find_longest_sequence_of_ipv6_pieces(const std::array<uint16_t, 8>& address) noexcept {
-    size_t max_index = -1;
-    size_t max_length = 1;
-    size_t current_start = -1;
-    size_t current_length = 0;
-
+    size_t last_count = 1;
+    size_t result = -1;
     for (size_t i = 0; i < 8; i++) {
-      if (address[i] != 0) {
-        if (current_length > max_length) {
-          max_index = current_start;
-          max_length = current_length;
+      if (address[i] == 0) {
+        size_t next = i + 1;
+        while (next != 8 && address[next] == 0) ++next;
+        const size_t count = next - i;
+        if (last_count < count) {
+          last_count = count;
+          result = i;
+          if (next == 8) break;
+          i = next;
         }
-
-        current_start = -1;
-        current_length = 0;
-      } else {
-        if (current_start == size_t(-1)) {
-          current_start = i;
-        }
-        current_length++;
       }
     }
-
-    if (current_length > max_length) {
-      return current_start;
-    }
-
-    return max_index;
+    return result;
   }
 
   std::string ipv6(const std::array<uint16_t, 8>& address) noexcept {
