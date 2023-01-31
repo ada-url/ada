@@ -454,7 +454,7 @@ namespace ada {
     // to check anyhow with is_forbidden.
     // bool is_ascii =
     unicode::to_lower_ascii(buffer.data(), buffer.size());
-    bool is_forbidden = unicode::contains_forbidden_host_code_point(buffer.data(), buffer.size());
+    bool is_forbidden = unicode::contains_forbidden_domain_code_point(buffer.data(), buffer.size());
     if (is_forbidden == 0 && buffer.find("xn-") == std::string_view::npos) {
       // fast path
       host = std::move(buffer);
