@@ -172,7 +172,7 @@ static void BasicBench_CURL(benchmark::State& state) {
     url_container.clear();
     for(std::string& url_string : url_examples) {
       CURLUcode rc = curl_url_set(url, CURLUPART_URL, url_string.c_str(), 0);
-      //if(rc) { url_container.emplace_back(to_standard_url(url)); }
+      if(rc) { url_container.emplace_back(to_standard_url(url)); }
     }
     numbers_of_parameters += url_container.size();
   }
