@@ -86,7 +86,7 @@ find_package(ICU COMPONENTS uc i18n)
 ### If the user does not have ICU, let us help them with instructions:
 if(ICU_FOUND)
   target_link_libraries(ada PRIVATE ICU::uc ICU::i18n)
-elseif (ICU_FOUND)
+else(ICU_FOUND)
   # Under Windows, we have a backup.
   if(MSVC) # could be WIN32 but there are other systems under Windows.
     if(MSVC_VERSION GREATER_EQUAL 1920)
@@ -110,7 +110,7 @@ elseif (ICU_FOUND)
     message(SEND_ERROR "ICU with components uc and i18n/in is required for building ada.")
     return()
   endif(MSVC)
-endif (ICU_FOUND)
+endif(ICU_FOUND)
 ### Going forward, we have ICU for sure, except under Windows.
 
 if(NOT ADA_COVERAGE)
