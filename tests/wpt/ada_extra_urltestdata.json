@@ -196,5 +196,10 @@
     "pathname": "/path/to/file.txt",
     "search": "",
     "hash": ""
+  },
+  {
+    "input": "file://localhost:8098/path/to/file.txt",
+    "base": "about:blank",
+    "failure": true
   }
 ]
