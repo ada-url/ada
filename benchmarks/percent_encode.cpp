@@ -51,6 +51,8 @@ static void Fragment(benchmark::State& state) {
   state.counters["time/url"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
   state.counters["url/s"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
@@ -86,6 +88,8 @@ static void Query(benchmark::State& state) {
   state.counters["time/url"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
   state.counters["url/s"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
@@ -121,6 +125,8 @@ static void SpecialQuery(benchmark::State& state) {
   state.counters["time/url"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
   state.counters["url/s"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
@@ -156,6 +162,8 @@ static void UserInfo(benchmark::State& state) {
   state.counters["time/url"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
   state.counters["url/s"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);
@@ -191,6 +199,8 @@ static void C0Control(benchmark::State& state) {
   state.counters["time/url"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
   state.counters["url/s"] = benchmark::Counter(
       double(std::size(examples)),
       benchmark::Counter::kIsIterationInvariantRate);

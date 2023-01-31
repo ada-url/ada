@@ -20,7 +20,15 @@ add_subdirectory(src)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 
-If (BUILD_TESTING)
+option(ADA_BENCHMARKS "Build benchmarks" OFF)
+
+if(BUILD_TESTING OR ADA_BENCHMARKS)
+  include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
+  import_dependency(simdjson simdjson/simdjson 0a3a00c95665cc1fda760e121ba8d442945ede13)
+  add_dependency(simdjson)
+endif()
+
+if (BUILD_TESTING)
   message(STATUS "The tests are enabled.")
   add_subdirectory(tests)
 else()
@@ -29,7 +37,7 @@ else()
   endif()
 endif(BUILD_TESTING)
 
-option(ADA_BENCHMARKS "Build benchmarks" OFF)
+
 If(ADA_BENCHMARKS)
   message(STATUS "Ada benchmarks enabled.")
   add_subdirectory(benchmarks)

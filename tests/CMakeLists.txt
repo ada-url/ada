@@ -1,9 +1,4 @@
-include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
-
-import_dependency(simdjson simdjson/simdjson 0a3a00c95665cc1fda760e121ba8d442945ede13)
-add_dependency(simdjson)
 add_subdirectory(wpt)
-
 
 set(ADA_TEST_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)
 if(MSVC)

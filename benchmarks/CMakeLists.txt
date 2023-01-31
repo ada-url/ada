@@ -1,4 +1,11 @@
 # Bench
+add_executable(wpt_bench wpt_bench.cpp)
+target_link_libraries(wpt_bench PRIVATE ada)
+target_link_libraries(wpt_bench PRIVATE simdjson)
+target_include_directories(wpt_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(wpt_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
+
+# Bench
 add_executable(bench bench.cpp)
 target_link_libraries(bench PRIVATE ada)
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -24,6 +31,7 @@ set_off(BENCHMARK_ENABLE_WERROR)
 
 import_dependency(google_benchmarks google/benchmark f91b6b4)
 add_dependency(google_benchmarks)
+target_link_libraries(wpt_bench PRIVATE benchmark::benchmark)
 target_link_libraries(bench PRIVATE benchmark::benchmark)
 target_link_libraries(bbc_bench PRIVATE benchmark::benchmark)
 target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
