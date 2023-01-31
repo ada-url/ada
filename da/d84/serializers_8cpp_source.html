@@ -95,110 +95,99 @@ $(document).ready(function(){initNavTree('da/d84/serializers_8cpp_source.html','
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="keyword">namespace </span><a class="code" href="../../d9/dea/namespaceada_1_1serializers.html">ada::serializers</a> {</div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
 <div class="line"><a name="l00006"></a><span class="lineno"><a class="line" href="../../d9/dea/namespaceada_1_1serializers.html#ac0accbbd3fd05be526b101dee828984a">    6</a></span>&#160;  <span class="keywordtype">size_t</span> <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#ac0accbbd3fd05be526b101dee828984a">find_longest_sequence_of_ipv6_pieces</a>(<span class="keyword">const</span> std::array&lt;uint16_t, 8&gt;&amp; address) noexcept {</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;    <span class="keywordtype">size_t</span> max_index = -1;</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;    <span class="keywordtype">size_t</span> max_length = 1;</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;    <span class="keywordtype">size_t</span> current_start = -1;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;    <span class="keywordtype">size_t</span> current_length = 0;</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160; </div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; 8; i++) {</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;      <span class="keywordflow">if</span> (address[i] != 0) {</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;        <span class="keywordflow">if</span> (current_length &gt; max_length) {</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;          max_index = current_start;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;          max_length = current_length;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;        }</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        current_start = -1;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;        current_length = 0;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;      } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;        <span class="keywordflow">if</span> (current_start == <span class="keywordtype">size_t</span>(-1)) {</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;          current_start = i;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        }</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;        current_length++;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;      }</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    }</div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;    <span class="keywordtype">size_t</span> last_count = 1;</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;    <span class="keywordtype">size_t</span> result = -1;</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; 8; i++) {</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;      <span class="keywordflow">if</span> (address[i] == 0) {</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;        <span class="keywordtype">size_t</span> next = i + 1;</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;        <span class="keywordflow">while</span> (next != 8 &amp;&amp; address[next] == 0) ++next;</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">size_t</span> count = next - i;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;        <span class="keywordflow">if</span> (last_count &lt; count) {</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;          last_count = count;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;          result = i;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;          <span class="keywordflow">if</span> (next == 8) <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;          i = next;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        }</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;      }</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    }</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  }</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">   25</a></span>&#160;  std::string <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ipv6</a>(<span class="keyword">const</span> std::array&lt;uint16_t, 8&gt;&amp; address) noexcept {</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="comment">// Let output be the empty string.</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    std::string output{};</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keywordflow">if</span> (current_length &gt; max_length) {</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;      <span class="keywordflow">return</span> current_start;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    }</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keywordflow">return</span> max_index;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  }</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
-<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">   36</a></span>&#160;  std::string <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ipv6</a>(<span class="keyword">const</span> std::array&lt;uint16_t, 8&gt;&amp; address) noexcept {</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="comment">// Let output be the empty string.</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    std::string output{};</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="comment">// Let compress be an index to the first IPv6 piece in the first longest sequences of address’s IPv6 pieces that are 0.</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordtype">size_t</span> compress = <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#ac0accbbd3fd05be526b101dee828984a">find_longest_sequence_of_ipv6_pieces</a>(address);</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="comment">// Let ignore0 be false.</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordtype">bool</span> ignore_0{<span class="keyword">false</span>};</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="comment">// Let compress be an index to the first IPv6 piece in the first longest sequences of address’s IPv6 pieces that are 0.</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keywordtype">size_t</span> compress = <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#ac0accbbd3fd05be526b101dee828984a">find_longest_sequence_of_ipv6_pieces</a>(address);</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="comment">// Let ignore0 be false.</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keywordtype">bool</span> ignore_0{<span class="keyword">false</span>};</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="comment">// For each pieceIndex in the range 0 to 7, inclusive:</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> piece_index = 0; piece_index &lt; 8; piece_index++) {</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;      <span class="comment">// If ignore0 is true and address[pieceIndex] is 0, then continue.</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;      <span class="keywordflow">if</span> (ignore_0 &amp;&amp; address[piece_index] == 0) {</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;      }</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;      <span class="comment">// Otherwise, if ignore0 is true, set ignore0 to false.</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ignore_0) {</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        ignore_0 = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;      }</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="comment">// For each pieceIndex in the range 0 to 7, inclusive:</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> piece_index = 0; piece_index &lt; 8; piece_index++) {</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;      <span class="comment">// If ignore0 is true and address[pieceIndex] is 0, then continue.</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;      <span class="keywordflow">if</span> (ignore_0 &amp;&amp; address[piece_index] == 0) {</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;      }</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;      <span class="comment">// Otherwise, if ignore0 is true, set ignore0 to false.</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ignore_0) {</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        ignore_0 = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;      <span class="comment">// If compress is pieceIndex, then:</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;      <span class="keywordflow">if</span> (compress == piece_index) {</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="comment">// Let separator be &quot;::&quot; if pieceIndex is 0, and U+003A (:) otherwise.</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="comment">// Append separator to output.</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        output += (piece_index == 0) ? <span class="stringliteral">&quot;::&quot;</span> : <span class="stringliteral">&quot;:&quot;</span>;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="comment">// Set ignore0 to true and continue.</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        ignore_0 = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keywordflow">continue</span>;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;      }</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;      <span class="comment">// If compress is pieceIndex, then:</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      <span class="keywordflow">if</span> (compress == piece_index) {</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="comment">// Let separator be &quot;::&quot; if pieceIndex is 0, and U+003A (:) otherwise.</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="comment">// Append separator to output.</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        output += (piece_index == 0) ? <span class="stringliteral">&quot;::&quot;</span> : <span class="stringliteral">&quot;:&quot;</span>;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="comment">// Set ignore0 to true and continue.</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        ignore_0 = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;      }</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;      <span class="comment">// Append address[pieceIndex], represented as the shortest possible lowercase hexadecimal number, to output.</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      <span class="keywordtype">char</span> buf[5];</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;      snprintf(buf, <span class="keyword">sizeof</span>(buf), <span class="stringliteral">&quot;%x&quot;</span>, address[piece_index]);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;      output += buf;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;      <span class="comment">// If pieceIndex is not 7, then append U+003A (:) to output.</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;      <span class="keywordflow">if</span> (piece_index &lt; 7) {</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        output += <span class="charliteral">&#39;:&#39;</span>;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;      }</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;      <span class="comment">// Append address[pieceIndex], represented as the shortest possible lowercase hexadecimal number, to output.</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;      <span class="keywordtype">char</span> buf[5];</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;      snprintf(buf, <span class="keyword">sizeof</span>(buf), <span class="stringliteral">&quot;%x&quot;</span>, address[piece_index]);</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;      output += buf;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;      <span class="comment">// If pieceIndex is not 7, then append U+003A (:) to output.</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;      <span class="keywordflow">if</span> (piece_index &lt; 7) {</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        output += <span class="charliteral">&#39;:&#39;</span>;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;      }</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    }</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">return</span> <span class="stringliteral">&quot;[&quot;</span> + output + <span class="stringliteral">&quot;]&quot;</span>;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  }</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
-<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">   82</a></span>&#160;  std::string <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ipv4</a>(<span class="keyword">const</span> uint64_t address) noexcept {</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="comment">// Let output be the empty string.</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    std::string output{};</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="comment">// Let n be the value of address.</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keyword">auto</span> n = address;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="comment">// For each i in the range 1 to 4, inclusive:</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt;= 4; i++) {</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;      <span class="comment">// Prepend n % 256, serialized, to output.</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;      output.insert(0, <a class="code" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">std::to_string</a>(n % 256));</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;      <span class="comment">// If i is not 4, then prepend U+002E (.) to output.</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;      <span class="keywordflow">if</span> (i != 4) {</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        output.insert(0, <span class="stringliteral">&quot;.&quot;</span>);</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;      }</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;      <span class="comment">// Set n to floor(n / 256).</span></div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;      n &gt;&gt;= 8;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    }</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <span class="comment">// Return output.</span></div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keywordflow">return</span> output;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  }</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;} <span class="comment">// namespace ada::serializers</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keywordflow">return</span> <span class="stringliteral">&quot;[&quot;</span> + output + <span class="stringliteral">&quot;]&quot;</span>;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  }</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno"><a class="line" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">   71</a></span>&#160;  std::string <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ipv4</a>(<span class="keyword">const</span> uint64_t address) noexcept {</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <span class="comment">// Let output be the empty string.</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    std::string output{};</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="comment">// Let n be the value of address.</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keyword">auto</span> n = address;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="comment">// For each i in the range 1 to 4, inclusive:</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt;= 4; i++) {</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;      <span class="comment">// Prepend n % 256, serialized, to output.</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;      output.insert(0, <a class="code" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">std::to_string</a>(n % 256));</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;      <span class="comment">// If i is not 4, then prepend U+002E (.) to output.</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;      <span class="keywordflow">if</span> (i != 4) {</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        output.insert(0, <span class="stringliteral">&quot;.&quot;</span>);</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;      }</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;      <span class="comment">// Set n to floor(n / 256).</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;      n &gt;&gt;= 8;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    }</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="comment">// Return output.</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keywordflow">return</span> output;</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;  }</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;} <span class="comment">// namespace ada::serializers</span></div>
 <div class="ttc" id="anamespaceada_1_1serializers_html"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html">ada::serializers</a></div><div class="ttdef"><b>Definition:</b> <a href="../../d7/d2e/serializers_8h_source.html#l00014">serializers.h:14</a></div></div>
-<div class="ttc" id="anamespaceada_1_1serializers_html_a18d92c8904f03bf914c9ff5f943194e4"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ada::serializers::ipv6</a></div><div class="ttdeci">std::string ipv6(const std::array&lt; uint16_t, 8 &gt; &amp;address) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00036">serializers.cpp:36</a></div></div>
-<div class="ttc" id="anamespaceada_1_1serializers_html_ab61ad957ad92ba4f14f5ac6ee618efa5"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ada::serializers::ipv4</a></div><div class="ttdeci">std::string ipv4(const uint64_t address) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00082">serializers.cpp:82</a></div></div>
+<div class="ttc" id="anamespaceada_1_1serializers_html_a18d92c8904f03bf914c9ff5f943194e4"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ada::serializers::ipv6</a></div><div class="ttdeci">std::string ipv6(const std::array&lt; uint16_t, 8 &gt; &amp;address) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00025">serializers.cpp:25</a></div></div>
+<div class="ttc" id="anamespaceada_1_1serializers_html_ab61ad957ad92ba4f14f5ac6ee618efa5"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ada::serializers::ipv4</a></div><div class="ttdeci">std::string ipv4(const uint64_t address) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00071">serializers.cpp:71</a></div></div>
 <div class="ttc" id="anamespaceada_1_1serializers_html_ac0accbbd3fd05be526b101dee828984a"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#ac0accbbd3fd05be526b101dee828984a">ada::serializers::find_longest_sequence_of_ipv6_pieces</a></div><div class="ttdeci">size_t find_longest_sequence_of_ipv6_pieces(const std::array&lt; uint16_t, 8 &gt; &amp;address) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00006">serializers.cpp:6</a></div></div>
 <div class="ttc" id="anamespaceada_html_a51224d0fd7b3f84be3ee3c5b44be0bd7"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">ada::to_string</a></div><div class="ttdeci">ada_warn_unused std::string to_string(encoding_type type)</div><div class="ttdef"><b>Definition:</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00019">implementation.cpp:19</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
