@@ -4,6 +4,7 @@
  */
 #ifndef ADA_COMMON_DEFS_H
 #define ADA_COMMON_DEFS_H
+
 #ifdef _MSC_VER
 #define ADA_VISUAL_STUDIO 1
 /**
@@ -170,8 +171,6 @@ namespace ada {
 #define ada_constexpr constexpr
 #endif
 
-#endif // ADA_COMMON_DEFS_H
-
  #if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__)
  #define ADA_IS_BIG_ENDIAN (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
  #elif defined(_WIN32)
@@ -203,3 +202,18 @@ namespace ada {
  #endif // __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 
  #endif // defined __BYTE_ORDER__ && defined __ORDER_BIG_ENDIAN__
+
+
+#ifndef ADA_HAS_UCI
+#if __has_include(<unicode/uidna.h>)
+#include <unicode/utypes.h>
+#include <unicode/uidna.h>
+#include <unicode/utf8.h>
+#define ADA_HAS_UCI 1
+#else
+#define ADA_HAS_UCI 0
+#endif // __has_include(<unicode/uidna.h>)
+#endif // ADA_HAS_UCI
+
+
+#endif // ADA_COMMON_DEFS_H
