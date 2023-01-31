@@ -29,7 +29,7 @@ namespace ada::unicode {
     uint64_t broadcast_80 = broadcast(0x80);
     uint64_t broadcast_Ap = broadcast(128 - 'A');
     uint64_t broadcast_Zp = broadcast(128 - 'Z');
-    uint8_t non_ascii = 0;
+    uint64_t non_ascii = 0;
     size_t i = 0;
 
     for (; i + 7 < length; i += 8) {
