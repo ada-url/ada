@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675206194553,
+  "lastUpdate": 1675206198642,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -940,6 +940,48 @@ window.BENCHMARK_DATA = {
             "value": 6966.110397514273,
             "unit": "ns/iter",
             "extra": "iterations: 101053\ncpu: 6963.901121193828 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "7545bbfaaa1844fa1c971224bdccca524d1a1c97",
+          "message": "Revert \"build: run benchmarks in self-hosted runner\"\n\nThis reverts commit d2a443695bedbca706e886ca6befb213f627fd93.",
+          "timestamp": "2023-01-31T18:02:20-05:00",
+          "tree_id": "60455f852a17df31e97d6946e76821d858393f5a",
+          "url": "https://github.com/ada-url/ada/commit/7545bbfaaa1844fa1c971224bdccca524d1a1c97"
+        },
+        "date": 1675206198305,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5076.989920743696,
+            "unit": "ns/iter",
+            "extra": "iterations: 137907\ncpu: 5076.629902760556 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4361.5785199623215,
+            "unit": "ns/iter",
+            "extra": "iterations: 160577\ncpu: 4359.635564246436 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5786.78937606652,
+            "unit": "ns/iter",
+            "extra": "iterations: 121311\ncpu: 5786.145526786525 ns\nthreads: 1"
           }
         ]
       }
