@@ -9,3 +9,6 @@ cmake-build-debug
 
 .cache
 docs
+
+# Generated using only the Github workflow
+benchmark_result.json

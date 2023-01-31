@@ -1,0 +1,65 @@
+name: Benchmark
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  benchmarks:
+    name: Run benchmarks
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare
+        run: cmake -B build -DADA_BENCHMARKS=ON
+      - name: Build
+        run: cmake --build build
+
+      - name: Run default benchmark
+        run: build/benchmarks/bench --benchmark_format=json | tee default_benchmark_result.json
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Benchmark
+          tool: 'googlecpp'
+          output-file-path: default_benchmark_result.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          alert-threshold: '200%'
+          comment-on-alert: true
+          fail-on-alert: true
+          alert-comment-cc-users: '@anonrig @lemire'
+
+      - name: Run WPT benchmark
+        run: build/benchmarks/wpt_bench tests/wpt/urltestdata.json --benchmark_format=json | tee wpt_benchmark_result.json
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Web Platform Tests
+          tool: 'googlecpp'
+          output-file-path: wpt_benchmark_result.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          alert-threshold: '200%'
+          comment-on-alert: true
+          fail-on-alert: true
+          alert-comment-cc-users: '@anonrig @lemire'
+
+      - name: Run BBC benchmark
+        run: build/benchmarks/bbc_bench --benchmark_format=json | tee bbc_benchmark_result.json
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: BBC URLs
+          tool: 'googlecpp'
+          output-file-path: bbc_benchmark_result.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          alert-threshold: '200%'
+          comment-on-alert: true
+          fail-on-alert: true
+          alert-comment-cc-users: '@anonrig @lemire'

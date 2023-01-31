@@ -9,7 +9,6 @@ bool file_exists(const char *filename) {
   namespace fs = std::filesystem;
   std::filesystem::path f{filename};
   if (std::filesystem::exists(filename)) {
-    std::cout << "  file found: " << filename << std::endl;
     return true;
   } else {
     std::cout << "  file missing: " << filename << std::endl;
@@ -29,8 +28,6 @@ size_t init_data(const char *source) {
     return 0;
   }
   padded_string json = padded_string::load(source);
-  std::cout << "  loaded " << source << " (" << json.size() << " kB)"
-            << std::endl;
   ondemand::document doc = parser.iterate(json);
   for (auto element : doc.get_array()) {
     if (element.type() == ondemand::json_type::object) {
