@@ -108,7 +108,6 @@ static void BasicBench_AdaURL(benchmark::State &state) {
         aggregate.best.elapsed_ns() / std::size(url_examples);
     state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
   }
-  (void)numbers_of_parameters;
   state.counters["time/byte"] = benchmark::Counter(
       url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate |
                               benchmark::Counter::kInvert);
@@ -123,6 +122,86 @@ static void BasicBench_AdaURL(benchmark::State &state) {
                          benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_AdaURL);
+
+
+
+#if ADA_url_whatwg_ENABLED
+
+#include <src/url.h>
+
+static void BasicBench_whatwg(benchmark::State &state) {
+  volatile size_t success{};
+  for (auto _ : state) {
+    for (const std::pair<std::string, std::string> &url_strings :
+         url_examples) {
+      whatwg::url base;
+      whatwg::url* base_ptr = nullptr;
+      if(!url_strings.second.empty()) {
+        if(whatwg::success(base.parse(url_strings.second, nullptr))) {
+          base_ptr = &base;
+        }
+      }
+      whatwg::url url;
+      if(whatwg::success(url.parse(url_strings.first, base_ptr))) {
+        success++;
+      }
+    }
+  }
+  if (collector.has_events()) {
+    event_aggregate aggregate{};
+    for (size_t i = 0; i < N; i++) {
+      std::atomic_thread_fence(std::memory_order_acquire);
+      collector.start();
+      for (const std::pair<std::string, std::string> &url_strings :
+           url_examples) {
+        whatwg::url base;
+        whatwg::url* base_ptr = nullptr;
+        if(!url_strings.second.empty()) {
+          if(whatwg::success(base.parse(url_strings.second, nullptr))) {
+            base_ptr = &base;
+          }
+        }
+        whatwg::url url;
+        if(whatwg::success(url.parse(url_strings.first, base_ptr))) {
+          success++;
+        }
+      }
+      std::atomic_thread_fence(std::memory_order_release);
+      event_count allocate_count = collector.end();
+      aggregate << allocate_count;
+    }
+    (void)success;
+    state.counters["cycles/url"] =
+        aggregate.best.cycles() / std::size(url_examples);
+    state.counters["instructions/url"] =
+        aggregate.best.instructions() / std::size(url_examples);
+    state.counters["instructions/cycle"] =
+        aggregate.best.instructions() / aggregate.best.cycles();
+    state.counters["instructions/byte"] =
+        aggregate.best.instructions() / url_examples_bytes;
+    state.counters["instructions/ns"] =
+        aggregate.best.instructions() / aggregate.best.elapsed_ns();
+    state.counters["GHz"] =
+        aggregate.best.cycles() / aggregate.best.elapsed_ns();
+    state.counters["ns/url"] =
+        aggregate.best.elapsed_ns() / std::size(url_examples);
+    state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
+  }
+  state.counters["time/byte"] = benchmark::Counter(
+      url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate |
+                              benchmark::Counter::kInvert);
+  state.counters["time/url"] =
+      benchmark::Counter(double(std::size(url_examples)),
+                         benchmark::Counter::kIsIterationInvariantRate |
+                             benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+  state.counters["url/s"] =
+      benchmark::Counter(double(std::size(url_examples)),
+                         benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(BasicBench_whatwg);
+#endif // ADA_url_whatwg_ENABLED
 
 int main(int argc, char **argv) {
   if (argc == 1 || !init_data(argv[1])) {

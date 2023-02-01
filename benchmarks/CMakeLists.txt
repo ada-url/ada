@@ -55,12 +55,16 @@ if(ICU_FOUND)
 
     target_link_libraries(bench PRIVATE url_whatwg_lib)
     target_link_libraries(bbc_bench PRIVATE url_whatwg_lib)
+    target_link_libraries(wpt_bench PRIVATE url_whatwg_lib)
 
     target_include_directories(bench PUBLIC "${url_whatwg_SOURCE_DIR}")
     target_include_directories(bbc_bench PUBLIC "${url_whatwg_SOURCE_DIR}")
+    target_include_directories(wpt_bench PUBLIC "${url_whatwg_SOURCE_DIR}")
 
     target_compile_definitions(bench PRIVATE ADA_url_whatwg_ENABLED=1)
     target_compile_definitions(bbc_bench PRIVATE ADA_url_whatwg_ENABLED=1)
+    target_compile_definitions(wpt_bench PRIVATE ADA_url_whatwg_ENABLED=1)
+
 endif(ICU_FOUND)
 
 if(ADA_COMPETITION)
