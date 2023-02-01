@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675287594943,
+  "lastUpdate": 1675287598619,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -686,6 +686,42 @@ window.BENCHMARK_DATA = {
             "value": 434276.23291924765,
             "unit": "ns/iter",
             "extra": "iterations: 1610\ncpu: 434252.36024844734 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "4ae7c7625f596054ff95b345b7b3feac0bd22178",
+          "message": "test: add more tests for node.js",
+          "timestamp": "2023-02-01T16:38:38-05:00",
+          "tree_id": "26a20d6ce8c90e9f9fe5c5ef03ef1d5613ba2a58",
+          "url": "https://github.com/ada-url/ada/commit/4ae7c7625f596054ff95b345b7b3feac0bd22178"
+        },
+        "date": 1675287598243,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 365754.15154691983,
+            "unit": "ns/iter",
+            "extra": "iterations: 1907\ncpu: 365700.99632931297 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 432917.6672862403,
+            "unit": "ns/iter",
+            "extra": "iterations: 1614\ncpu: 432860.34696406446 ns\nthreads: 1"
           }
         ]
       }
