@@ -6,6 +6,9 @@
 #include <EdUrlParser.h>
 #include <http_parser.h>
 #endif
+#if ADA_url_whatwg_ENABLED
+#include <src/url.h>
+#endif
 
 #include "ada.h"
 #include "performancecounters/event_counter.h"

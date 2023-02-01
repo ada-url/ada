@@ -46,3 +46,7 @@ endmacro()
 function(set_off NAME)
   set("${NAME}" OFF CACHE INTERNAL "")
 endfunction()
+
+function(set_on NAME)
+  set("${NAME}" ON CACHE INTERNAL "")
+endfunction()
