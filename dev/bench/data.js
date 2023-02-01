@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675214347073,
+  "lastUpdate": 1675214352533,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1180,6 +1180,54 @@ window.BENCHMARK_DATA = {
             "value": 5686.274507094849,
             "unit": "ns/iter",
             "extra": "iterations: 123046\ncpu: 5685.820749963428 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1e20fae0ee24190627fddf8ea25920c2d0f6ad4e",
+          "message": "Adding the url_whatwg library to some benchmarks. (#189)",
+          "timestamp": "2023-01-31T20:17:59-05:00",
+          "tree_id": "2571270882eca4ee015c32f54d2327b60a5cb278",
+          "url": "https://github.com/ada-url/ada/commit/1e20fae0ee24190627fddf8ea25920c2d0f6ad4e"
+        },
+        "date": 1675214351777,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5116.034864829229,
+            "unit": "ns/iter",
+            "extra": "iterations: 136642\ncpu: 5109.402672677508 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4544.309959838404,
+            "unit": "ns/iter",
+            "extra": "iterations: 153878\ncpu: 4543.976396885845 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 10503.417162073003,
+            "unit": "ns/iter",
+            "extra": "iterations: 66612\ncpu: 10503.008466942887 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5767.743240809008,
+            "unit": "ns/iter",
+            "extra": "iterations: 122130\ncpu: 5767.3421763694405 ns\nthreads: 1"
           }
         ]
       }
