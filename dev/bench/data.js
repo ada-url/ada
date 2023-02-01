@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675214342720,
+  "lastUpdate": 1675214347073,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -746,6 +746,42 @@ window.BENCHMARK_DATA = {
             "value": 419150.1677651319,
             "unit": "ns/iter",
             "extra": "iterations: 1669\ncpu: 419099.460754943 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1e20fae0ee24190627fddf8ea25920c2d0f6ad4e",
+          "message": "Adding the url_whatwg library to some benchmarks. (#189)",
+          "timestamp": "2023-01-31T20:17:59-05:00",
+          "tree_id": "2571270882eca4ee015c32f54d2327b60a5cb278",
+          "url": "https://github.com/ada-url/ada/commit/1e20fae0ee24190627fddf8ea25920c2d0f6ad4e"
+        },
+        "date": 1675214346356,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 367440.8256302518,
+            "unit": "ns/iter",
+            "extra": "iterations: 1904\ncpu: 367399.05462184874 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 434276.23291924765,
+            "unit": "ns/iter",
+            "extra": "iterations: 1610\ncpu: 434252.36024844734 ns\nthreads: 1"
           }
         ]
       }
