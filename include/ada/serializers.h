@@ -15,10 +15,8 @@ namespace ada::serializers {
 
   /**
    * Finds and returns the longest sequence of 0 values in a ipv6 input.
-   *
-   * @returns -1 if not found.
    */
-  size_t find_longest_sequence_of_ipv6_pieces(const std::array<uint16_t, 8>& address) noexcept;
+  void find_longest_sequence_of_ipv6_pieces(const std::array<uint16_t, 8>& address, size_t& compress, size_t& compress_length) noexcept;
 
   /**
    * Serializes an ipv6 address.
