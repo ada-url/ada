@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675287808628,
+  "lastUpdate": 1675287811698,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -770,6 +770,42 @@ window.BENCHMARK_DATA = {
             "value": 432917.6672862403,
             "unit": "ns/iter",
             "extra": "iterations: 1614\ncpu: 432860.34696406446 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "lemire@gmail.com",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "86e5551a0092c79587fb2b9bda965b76398136c4",
+          "message": "We should avoid reserialization if we can cheaply avoid it.",
+          "timestamp": "2023-02-01T16:40:06-05:00",
+          "tree_id": "e5bbed4a92c5b7f62e2d93302ad8286a24fd6e04",
+          "url": "https://github.com/ada-url/ada/commit/86e5551a0092c79587fb2b9bda965b76398136c4"
+        },
+        "date": 1675287811301,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 560868.9476896453,
+            "unit": "ns/iter",
+            "extra": "iterations: 1147\ncpu: 559881.8657367044 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 638862.5273722541,
+            "unit": "ns/iter",
+            "extra": "iterations: 1096\ncpu: 638823.9051094891 ns\nthreads: 1"
           }
         ]
       }
