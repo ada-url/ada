@@ -39,6 +39,8 @@ target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
 option(ADA_COMPETITION "Whether to install various competitors." OFF)
 
 if(ICU_FOUND)
+    set_off(URL_BUILD_TESTS)
+    set_off(URL_USE_LIBS)
     import_dependency(url_whatwg rmisev/url_whatwg cbcf3043eccb380cb4bef7486465ac3b02d2f674)
     add_dependency(url_whatwg)
     add_library(url_whatwg_lib STATIC "${url_whatwg_SOURCE_DIR}/src/url.cpp"
