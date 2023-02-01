@@ -94,16 +94,16 @@ $(document).ready(function(){initNavTree('d9/dea/namespaceada_1_1serializers.htm
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ac0accbbd3fd05be526b101dee828984a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#ac0accbbd3fd05be526b101dee828984a">find_longest_sequence_of_ipv6_pieces</a> (const std::array&lt; uint16_t, 8 &gt; &amp;address) noexcept</td></tr>
-<tr class="separator:ac0accbbd3fd05be526b101dee828984a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3807c277d4c9ad2c8f2fa252e790edf4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4">find_longest_sequence_of_ipv6_pieces</a> (const std::array&lt; uint16_t, 8 &gt; &amp;address, size_t &amp;compress, size_t &amp;compress_length) noexcept</td></tr>
+<tr class="separator:a3807c277d4c9ad2c8f2fa252e790edf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18d92c8904f03bf914c9ff5f943194e4"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ipv6</a> (const std::array&lt; uint16_t, 8 &gt; &amp;address) noexcept</td></tr>
 <tr class="separator:a18d92c8904f03bf914c9ff5f943194e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab61ad957ad92ba4f14f5ac6ee618efa5"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ipv4</a> (const uint64_t address) noexcept</td></tr>
 <tr class="separator:ab61ad957ad92ba4f14f5ac6ee618efa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ac0accbbd3fd05be526b101dee828984a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac0accbbd3fd05be526b101dee828984a">&#9670;&nbsp;</a></span>find_longest_sequence_of_ipv6_pieces()</h2>
+<a id="a3807c277d4c9ad2c8f2fa252e790edf4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3807c277d4c9ad2c8f2fa252e790edf4">&#9670;&nbsp;</a></span>find_longest_sequence_of_ipv6_pieces()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -112,11 +112,27 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">size_t ada::serializers::find_longest_sequence_of_ipv6_pieces </td>
+          <td class="memname">void ada::serializers::find_longest_sequence_of_ipv6_pieces </td>
           <td>(</td>
           <td class="paramtype">const std::array&lt; uint16_t, 8 &gt; &amp;&#160;</td>
-          <td class="paramname"><em>address</em></td><td>)</td>
+          <td class="paramname"><em>address</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">size_t &amp;&#160;</td>
+          <td class="paramname"><em>compress</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t &amp;&#160;</td>
+          <td class="paramname"><em>compress_length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -125,10 +141,9 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Finds and returns the longest sequence of 0 values in a ipv6 input.</p>
-<dl class="section return"><dt>Returns</dt><dd>-1 if not found. </dd></dl>
+<p>Finds and returns the longest sequence of 0 values in a ipv6 input. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../da/d84/serializers_8cpp_source.html#l00006">6</a> of file <a class="el" href="../../da/d84/serializers_8cpp_source.html">serializers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/d84/serializers_8cpp_source.html#l00008">8</a> of file <a class="el" href="../../da/d84/serializers_8cpp_source.html">serializers.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ipv6()</a>.</p>
 
@@ -160,9 +175,7 @@ Functions</h2></td></tr>
 <p>Serializes an ipv4 address.</p>
 <p>An IPv4 address is a 32-bit unsigned integer that identifies a network address. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#concept-ipv4-serializer">https://url.spec.whatwg.org/#concept-ipv4-serializer</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../da/d84/serializers_8cpp_source.html#l00071">71</a> of file <a class="el" href="../../da/d84/serializers_8cpp_source.html">serializers.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">ada::to_string()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/d84/serializers_8cpp_source.html#l00054">54</a> of file <a class="el" href="../../da/d84/serializers_8cpp_source.html">serializers.cpp</a>.</p>
 
 </div>
 </div>
@@ -192,9 +205,9 @@ Functions</h2></td></tr>
 <p>Serializes an ipv6 address.</p>
 <p>An IPv6 address is a 128-bit unsigned integer that identifies a network address. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#concept-ipv6-serializer">https://url.spec.whatwg.org/#concept-ipv6-serializer</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../da/d84/serializers_8cpp_source.html#l00025">25</a> of file <a class="el" href="../../da/d84/serializers_8cpp_source.html">serializers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/d84/serializers_8cpp_source.html#l00024">24</a> of file <a class="el" href="../../da/d84/serializers_8cpp_source.html">serializers.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#ac0accbbd3fd05be526b101dee828984a">find_longest_sequence_of_ipv6_pieces()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4">find_longest_sequence_of_ipv6_pieces()</a>.</p>
 
 </div>
 </div>

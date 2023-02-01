@@ -39,7 +39,7 @@ var namespaceada =
     ] ],
     [ "scheme", "d2/d63/namespaceada_1_1scheme.html", "d2/d63/namespaceada_1_1scheme" ],
     [ "serializers", "d9/dea/namespaceada_1_1serializers.html", [
-      [ "find_longest_sequence_of_ipv6_pieces", "d9/dea/namespaceada_1_1serializers.html#ac0accbbd3fd05be526b101dee828984a", null ],
+      [ "find_longest_sequence_of_ipv6_pieces", "d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4", null ],
       [ "ipv4", "d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5", null ],
       [ "ipv6", "d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4", null ]
     ] ],
