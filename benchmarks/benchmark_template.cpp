@@ -114,6 +114,76 @@ BENCHMARK(BasicBench_AdaURL_With_Move);
 
 
 
+
+#if ADA_url_whatwg_ENABLED
+
+
+inline standard_url to_standard_url(whatwg::url* url) {
+  // It might be possible to do better performance-wise.
+  standard_url u;
+  u.port = url->port_int();
+  u.scheme = url->protocol();
+  u.username = url->username();
+  u.password = url->password();
+  u.host = url->host();
+  u.path = url->pathname();
+  u.fragment = url->hash();
+  u.query = url->search();
+  return u;
+}
+
+static void BasicBench_whatwg(benchmark::State& state) {
+  // volatile to prevent optimizations.
+  volatile size_t numbers_of_parameters = 0;
+  url_container.reserve(std::size(url_examples));
+  for (auto _ : state) {
+    url_container.clear();
+    for(std::string& url_string : url_examples) {
+        whatwg::url url(url_string);
+        url_container.emplace_back(to_standard_url(&url));
+    }
+    numbers_of_parameters += url_container.size();
+  }
+  if(collector.has_events()) {
+    event_aggregate aggregate{};
+    for(size_t i = 0 ; i < N; i++) {
+      std::atomic_thread_fence(std::memory_order_acquire);
+      collector.start();
+      url_container.clear();
+      for(std::string& url_string : url_examples) {
+        whatwg::url url(url_string);
+        url_container.emplace_back(to_standard_url(&url));
+      }
+      numbers_of_parameters += url_container.size();
+      std::atomic_thread_fence(std::memory_order_release);
+      event_count allocate_count = collector.end();
+      aggregate << allocate_count;
+    }
+    state.counters["cycles/url"] = aggregate.best.cycles() / std::size(url_examples);
+    state.counters["instructions/url"] = aggregate.best.instructions() / std::size(url_examples);
+    state.counters["instructions/cycle"] = aggregate.best.instructions() / aggregate.best.cycles();
+    state.counters["instructions/byte"] = aggregate.best.instructions() / url_examples_bytes;
+    state.counters["instructions/ns"] = aggregate.best.instructions() / aggregate.best.elapsed_ns();
+    state.counters["GHz"] = aggregate.best.cycles() / aggregate.best.elapsed_ns();
+    state.counters["ns/url"] = aggregate.best.elapsed_ns() / std::size(url_examples);
+    state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
+  }
+  (void)numbers_of_parameters;
+  state.counters["time/byte"] = benchmark::Counter(
+	        url_examples_bytes,
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+	        std::size(url_examples),
+          benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+          url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+  state.counters["url/s"] = benchmark::Counter(
+	        std::size(url_examples),
+          benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(BasicBench_whatwg);
+#endif // ADA_url_whatwg_ENABLED
+
 #if ADA_CURL_ENABLED
 #include <curl/curl.h>
 

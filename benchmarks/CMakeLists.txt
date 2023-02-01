@@ -38,6 +38,29 @@ target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
 
 option(ADA_COMPETITION "Whether to install various competitors." OFF)
 
+if(ICU_FOUND)
+    import_dependency(url_whatwg rmisev/url_whatwg cbcf3043eccb380cb4bef7486465ac3b02d2f674)
+    add_dependency(url_whatwg)
+    add_library(url_whatwg_lib STATIC "${url_whatwg_SOURCE_DIR}/src/url.cpp"
+      "${url_whatwg_SOURCE_DIR}/src/url_idna.cpp"
+      "${url_whatwg_SOURCE_DIR}/src/url_ip.cpp"
+      "${url_whatwg_SOURCE_DIR}/src/url_percent_encode.cpp"
+      "${url_whatwg_SOURCE_DIR}/src/url_search_params.cpp"
+      "${url_whatwg_SOURCE_DIR}/src/url_utf.cpp"
+      "${url_whatwg_SOURCE_DIR}/src/url.cpp")
+    target_link_libraries(url_whatwg_lib PRIVATE ICU::uc ICU::i18n)
+
+
+    target_link_libraries(bench PRIVATE url_whatwg_lib)
+    target_link_libraries(bbc_bench PRIVATE url_whatwg_lib)
+
+    target_include_directories(bench PUBLIC "${url_whatwg_SOURCE_DIR}")
+    target_include_directories(bbc_bench PUBLIC "${url_whatwg_SOURCE_DIR}")
+
+    target_compile_definitions(bench PRIVATE ADA_url_whatwg_ENABLED=1)
+    target_compile_definitions(bbc_bench PRIVATE ADA_url_whatwg_ENABLED=1)
+endif(ICU_FOUND)
+
 if(ADA_COMPETITION)
     # URI Parser
     set_off(URIPARSER_BUILD_TESTS)
