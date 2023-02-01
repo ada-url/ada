@@ -170,6 +170,8 @@ namespace ada {
       input.remove_suffix(1);
     }
     size_t digit_count{0};
+    int pure_decimal_count = 0; // entries that are decimal
+    std::string_view original_input = input; // we might use this if pure_decimal_count == 4.
     uint64_t ipv4{0};
     // we could unroll for better performance?
     for(;(digit_count < 4) && !(input.empty()); digit_count++) {
@@ -186,6 +188,7 @@ namespace ada {
         } else if ((input.length() >= 2) && input[0] == '0' && checkers::is_digit(input[1])) {
           r = std::from_chars(input.data() + 1, input.data() + input.size(), result, 8);
         } else {
+          pure_decimal_count++;
           r = std::from_chars(input.data(), input.data() + input.size(), result, 10);
         }
         if (r.ec != std::errc()) { return is_valid = false; }
@@ -211,7 +214,11 @@ namespace ada {
     if((digit_count != 4) || (!input.empty())) {return is_valid = false; }
     final:
     // We could also check result.ptr to see where the parsing ended.
-    host = ada::serializers::ipv4(ipv4);
+    if(pure_decimal_count == 4) {
+      host = original_input; // The original input was already all decimal and we validated it.
+    } else {
+      host = ada::serializers::ipv4(ipv4); // We have to reserialize the address.
+    }
     return true;
   }
 
