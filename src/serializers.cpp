@@ -52,27 +52,15 @@ namespace ada::serializers {
   }
 
   std::string ipv4(const uint64_t address) noexcept {
-    // Let output be the empty string.
-    std::string output{};
-
-    // Let n be the value of address.
-    auto n = address;
-
-    // For each i in the range 1 to 4, inclusive:
-    for (size_t i = 1; i <= 4; i++) {
-      // Prepend n % 256, serialized, to output.
-      output.insert(0, std::to_string(n % 256));
-
-      // If i is not 4, then prepend U+002E (.) to output.
-      if (i != 4) {
-        output.insert(0, ".");
-      }
-
-      // Set n to floor(n / 256).
-      n >>= 8;
+    std::string output(15, '\0');
+    char *point = output.data();
+    char *point_end = output.data() + output.size();
+    point = std::to_chars(point, point_end, uint8_t(address >> 24)).ptr;
+    for (int i = 2; i >= 0; i--) {
+     *point++ = '.';
+     point = std::to_chars(point, point_end, uint8_t(address >> (i * 8))).ptr;
     }
-
-    // Return output.
+    output.resize(point - output.data());
     return output;
   }
 
