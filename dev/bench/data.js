@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675287603648,
+  "lastUpdate": 1675287808628,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -348,6 +348,54 @@ window.BENCHMARK_DATA = {
             "value": 7393.257096157445,
             "unit": "ns/iter",
             "extra": "iterations: 93607\ncpu: 7392.469580266432 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "lemire@gmail.com",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "86e5551a0092c79587fb2b9bda965b76398136c4",
+          "message": "We should avoid reserialization if we can cheaply avoid it.",
+          "timestamp": "2023-02-01T16:40:06-05:00",
+          "tree_id": "e5bbed4a92c5b7f62e2d93302ad8286a24fd6e04",
+          "url": "https://github.com/ada-url/ada/commit/86e5551a0092c79587fb2b9bda965b76398136c4"
+        },
+        "date": 1675287807797,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 7803.667046313168,
+            "unit": "ns/iter",
+            "extra": "iterations: 91313\ncpu: 7792.823584812679 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 6950.948872718227,
+            "unit": "ns/iter",
+            "extra": "iterations: 100729\ncpu: 6949.900227342672 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 14828.02852121646,
+            "unit": "ns/iter",
+            "extra": "iterations: 47228\ncpu: 14826.670619124248 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 10054.708652208112,
+            "unit": "ns/iter",
+            "extra": "iterations: 69254\ncpu: 10053.85537297485 ns\nthreads: 1"
           }
         ]
       }
