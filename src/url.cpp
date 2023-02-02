@@ -71,33 +71,28 @@ namespace ada {
         // Here we don't need to worry about \\ or percent encoding.
         size_t location = input.find('/');
         std::string_view path_view = input;
-        if (location != std::string_view::npos) {
+        if (location == std::string_view::npos) {
+          if (unicode::is_double_dot_path_segment(path_view)) {
+            if(path.empty()) { path = '/'; return true; }
+            if(path.back() == '/') { return true; }
+            path.erase(path.rfind('/')+1);
+            return true;
+          } 
+          path += '/';
+          if (!unicode::is_single_dot_path_segment(path_view)) {
+            path.append(path_view);
+          }
+          return true;
+        } else {
           path_view.remove_suffix(path_view.size() - location);
           input.remove_prefix(location + 1);
-        }
-        if (unicode::is_double_dot_path_segment(path_view)) {
-          if(!path.empty()) { path.erase(path.rfind('/')); }
-          if (location == std::string_view::npos) {
+          if (unicode::is_double_dot_path_segment(path_view)) {
+            if(!path.empty()) { path.erase(path.rfind('/')); }
+          } else if (!unicode::is_single_dot_path_segment(path_view)) {
             path += '/';
+            path.append(path_view);
           }
-        } else if (unicode::is_single_dot_path_segment(path_view) &&
-                  (location == std::string_view::npos)) {
-          path += '/';
         }
-        // Otherwise, if path_view is not a single-dot path segment, then:
-        else if (!unicode::is_single_dot_path_segment(path_view)) {
-          // If url’s scheme is "file", url’s path is empty, and path_view is a
-          // Windows drive letter, then replace the second code point in
-          // path_view with U+003A (:).
-
-          // Append path_buffer to url’s path.
-          path += '/';
-          path.append(path_view);
-        }
-        if (location == std::string_view::npos) {
-          return true;
-        }
-
       } while (true);
     } else {
       ada_log("parse_path slow");
