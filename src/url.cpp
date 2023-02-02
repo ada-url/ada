@@ -69,19 +69,25 @@ namespace ada {
       ada_log("parse_path fast");
       do {
         // Here we don't need to worry about \\ or percent encoding.
-        // We also do not have a file protocol. We might have dots, however.
+        // We also do not have a file protocol. We might have dots, however,
+        // but dots must as appear as '.', and they cannot be encoded because
+        // the symbol '%' is not present.
         size_t location = input.find('/');
         std::string_view path_view = input;
         // We process the last segment separately:
         if (location == std::string_view::npos) {
-          if (unicode::is_double_dot_path_segment(path_view)) {
+          if (path_view == "..") { // The path ends with ..
+            // e.g., if you receive ".." with an empty path, you go to "/".
             if(path.empty()) { path = '/'; return true; }
+            // Fast case where we have nothing to do:
             if(path.back() == '/') { return true; }
-            path.erase(path.rfind('/') +1 );
+            // If you have the path "/joe/myfriend", 
+            // then you delete 'myfriend'.
+            path.resize(path.rfind('/') + 1);
             return true;
           } 
           path += '/';
-          if (!unicode::is_single_dot_path_segment(path_view)) {
+          if (path_view != ".") {
             path.append(path_view);
           }
           return true;
@@ -89,9 +95,9 @@ namespace ada {
           // This is a non-final segment.
           path_view.remove_suffix(path_view.size() - location);
           input.remove_prefix(location + 1);
-          if (unicode::is_double_dot_path_segment(path_view)) {
+          if (path_view == "..") {
             if(!path.empty()) { path.erase(path.rfind('/')); }
-          } else if (!unicode::is_single_dot_path_segment(path_view)) {
+          } else if (path_view != ".") {
             path += '/';
             path.append(path_view);
           }
