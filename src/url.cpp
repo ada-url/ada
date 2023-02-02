@@ -62,20 +62,24 @@ namespace ada {
       return true;
     }
     // We are going to need to look a bit at the path, but let us see if we can
-    // ignore percent encoding *and* \ characters.
+    // ignore percent encoding *and* backslashes *and* percent characters.
+    // Except for the trivial case, this is likely to capture 99% of paths out
+    // there.
     bool fast_path = (is_special() && (accumulator & 0b11111011) == 0) &&
                     (get_scheme_type() != ada::scheme::type::FILE);
     if (fast_path) {
       ada_log("parse_path fast");
+      // Here we don't need to worry about \ or percent encoding.
+      // We also do not have a file protocol. We might have dots, however,
+      // but dots must as appear as '.', and they cannot be encoded because
+      // the symbol '%' is not present.
+      size_t previous_location = 0; // We start at 0.
       do {
-        // Here we don't need to worry about \\ or percent encoding.
-        // We also do not have a file protocol. We might have dots, however,
-        // but dots must as appear as '.', and they cannot be encoded because
-        // the symbol '%' is not present.
-        size_t location = input.find('/');
-        std::string_view path_view = input;
+        size_t new_location = input.find('/', previous_location);
+        //std::string_view path_view = input;
         // We process the last segment separately:
-        if (location == std::string_view::npos) {
+        if (new_location == std::string_view::npos) {
+          std::string_view path_view = input.substr(previous_location);
           if (path_view == "..") { // The path ends with ..
             // e.g., if you receive ".." with an empty path, you go to "/".
             if(path.empty()) { path = '/'; return true; }
@@ -93,8 +97,8 @@ namespace ada {
           return true;
         } else {
           // This is a non-final segment.
-          path_view.remove_suffix(path_view.size() - location);
-          input.remove_prefix(location + 1);
+          std::string_view path_view = input.substr(previous_location, new_location - previous_location);
+          previous_location = new_location + 1;
           if (path_view == "..") {
             if(!path.empty()) { path.erase(path.rfind('/')); }
           } else if (path_view != ".") {
