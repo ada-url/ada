@@ -76,7 +76,7 @@ namespace ada {
           input.remove_prefix(location + 1);
         }
         if (unicode::is_double_dot_path_segment(path_view)) {
-          helpers::shorten_path(*this);
+          if(!path.empty()) { path.erase(path.rfind('/')); }
           if (location == std::string_view::npos) {
             path += '/';
           }
