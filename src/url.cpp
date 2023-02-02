@@ -69,13 +69,15 @@ namespace ada {
       ada_log("parse_path fast");
       do {
         // Here we don't need to worry about \\ or percent encoding.
+        // We also do not have a file protocol. We might have dots, however.
         size_t location = input.find('/');
         std::string_view path_view = input;
+        // We process the last segment separately:
         if (location == std::string_view::npos) {
           if (unicode::is_double_dot_path_segment(path_view)) {
             if(path.empty()) { path = '/'; return true; }
             if(path.back() == '/') { return true; }
-            path.erase(path.rfind('/')+1);
+            path.erase(path.rfind('/') +1 );
             return true;
           } 
           path += '/';
@@ -84,6 +86,7 @@ namespace ada {
           }
           return true;
         } else {
+          // This is a non-final segment.
           path_view.remove_suffix(path_view.size() - location);
           input.remove_prefix(location + 1);
           if (unicode::is_double_dot_path_segment(path_view)) {
