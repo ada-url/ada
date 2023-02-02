@@ -23,6 +23,7 @@ namespace ada {
    * @param input the string input to analyze.
    * @param base_url the optional string input to use as a base url.
    * @param encoding encoding (default to UTF-8)
+   * @return a parsed URL.  The caller *must* check that url.is_valid is true before using the url instance.
    *
    * @example
    *
