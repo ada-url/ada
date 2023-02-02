@@ -139,8 +139,10 @@ static void BasicBench_whatwg(benchmark::State& state) {
   for (auto _ : state) {
     url_container.clear();
     for(std::string& url_string : url_examples) {
-        whatwg::url url(url_string);
-        url_container.emplace_back(to_standard_url(&url));
+        whatwg::url url;
+        if (whatwg::success(url.parse(url_string, nullptr))) {
+          url_container.emplace_back(to_standard_url(&url));
+        }
     }
     numbers_of_parameters += url_container.size();
   }
@@ -151,8 +153,10 @@ static void BasicBench_whatwg(benchmark::State& state) {
       collector.start();
       url_container.clear();
       for(std::string& url_string : url_examples) {
-        whatwg::url url(url_string);
-        url_container.emplace_back(to_standard_url(&url));
+        whatwg::url url;
+        if (whatwg::success(url.parse(url_string, nullptr))) {
+          url_container.emplace_back(to_standard_url(&url));
+        }
       }
       numbers_of_parameters += url_container.size();
       std::atomic_thread_fence(std::memory_order_release);
@@ -317,8 +321,8 @@ static void BasicBench_BoostURL(benchmark::State& state) {
   for (auto _ : state) {
     url_container.clear();
     for(std::string& url_string : url_examples) {
-        url_view uv(url_string);
-        url_container.emplace_back(to_standard_url(&uv));
+        result<url_view> uv = parse_uri(url_string);
+        if(uv.has_value()) { url_container.emplace_back(to_standard_url(&uv.value())); }
     }
     numbers_of_parameters += url_container.size();
   }
@@ -329,8 +333,8 @@ static void BasicBench_BoostURL(benchmark::State& state) {
       collector.start();
       url_container.clear();
       for(std::string& url_string : url_examples) {
-        url_view uv(url_string);
-        url_container.emplace_back(to_standard_url(&uv));
+        result<url_view> uv = parse_uri(url_string);
+        if(uv.has_value()) { url_container.emplace_back(to_standard_url(&uv.value())); }
       }
       numbers_of_parameters += url_container.size();
       std::atomic_thread_fence(std::memory_order_release);
