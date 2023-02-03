@@ -19,9 +19,8 @@ jobs:
         shared: [ON, OFF]
     steps:
       - uses: actions/checkout@v3
-      # Caching is causing problems. Temporarily disabling.
-      #- name: ccache
-      #  uses: hendrikmuhs/ccache-action@v1.2
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Setup Ninja
@@ -31,6 +30,6 @@ jobs:
         env:
           CXX: g++-12
       - name: Build
-        run: cmake --build build --target wpt_tests --target demo --target basic_fuzzer -j=2
+        run: cmake --build build --target wpt_tests --target from_file_tests --target demo --target basic_fuzzer -j=2
       - name: Test
         run: ctest --output-on-failure --test-dir build
