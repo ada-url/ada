@@ -286,7 +286,7 @@ namespace ada::parser {
               url.query = std::nullopt;
 
               // Shorten url’s path.
-              helpers::shorten_path(url);
+              helpers::shorten_path(url.path, url.get_scheme_type());
 
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
@@ -491,7 +491,7 @@ namespace ada::parser {
           } else {
             input_position = input_size + 1;
           }
-          if(!url.parse_prepared_path(view)) { return url; }
+          if(!helpers::parse_prepared_path(view, url.get_scheme_type(), url.path)) { return url; }
           break;
         }
         case ada::state::FILE_SLASH: {
@@ -605,7 +605,7 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
               if (!checkers::is_windows_drive_letter(file_view)) {
-                helpers::shorten_path(url);
+                helpers::shorten_path(url.path, url.get_scheme_type());
               }
               // Otherwise:
               else {

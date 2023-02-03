@@ -30,7 +30,22 @@ namespace ada::helpers {
    * Defined by the URL specification, shorten a URLs paths.
    * @see https://url.spec.whatwg.org/#shorten-a-urls-path
    */
-  ada_really_inline void shorten_path(ada::url &url) noexcept;
+  ada_really_inline void shorten_path(std::string& path, ada::scheme::type type) noexcept;
+
+
+ /**
+  * @private
+  *
+  * Parse the path from the provided input and append to the existing
+  * (possibly empty) path. The input cannot contain tabs and spaces: it
+  * is the user's responsibility to check.
+  *
+  * The input is expected to be UTF-8.
+  *
+  * @return true on success.
+  * @see https://url.spec.whatwg.org/
+  */
+  [[nodiscard]] ada_really_inline bool parse_prepared_path(const std::string_view input, ada::scheme::type type, std::string& path);
 
   /**
    * Remove and mutate all ASCII tab or newline characters from an input.
