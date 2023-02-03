@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675455460620,
+  "lastUpdate": 1675455464322,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1106,6 +1106,42 @@ window.BENCHMARK_DATA = {
             "value": 430408.63530134194,
             "unit": "ns/iter",
             "extra": "iterations: 1626\ncpu: 429520.479704797 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "593668f885ec2ded233cecefa26c93413d1af3fa",
+          "message": "feat: Adds a new fast function 'ada::href_from_file'. (#197)\n\n* Adds a new fast function 'ada::href_from_file'.\n\n* Simplifying.\n\n* Removing caching for this runner.\n\n* Fixing runner\n\n* Adding empty new line.\n\n* Removing nodiscard",
+          "timestamp": "2023-02-03T15:16:32-05:00",
+          "tree_id": "eac4731758ed1450f73355b8e170c66ffee6b2f5",
+          "url": "https://github.com/ada-url/ada/commit/593668f885ec2ded233cecefa26c93413d1af3fa"
+        },
+        "date": 1675455463929,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 365537.07304256957,
+            "unit": "ns/iter",
+            "extra": "iterations: 1903\ncpu: 365488.28166053595 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 437336.04057431483,
+            "unit": "ns/iter",
+            "extra": "iterations: 1602\ncpu: 437302.7465667916 ns\nthreads: 1"
           }
         ]
       }
