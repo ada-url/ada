@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['zf_370',['zf',['../dd/d27/namespaceamalgamate.html#a8f67c264369b6238f105e517d3103985',1,'amalgamate']]]
+  ['zf_372',['zf',['../dd/d27/namespaceamalgamate.html#a8f67c264369b6238f105e517d3103985',1,'amalgamate']]]
 ];

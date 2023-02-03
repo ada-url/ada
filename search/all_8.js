@@ -9,6 +9,7 @@ var searchData=
   ['helpers_2eh_107',['helpers.h',['../d1/d98/helpers_8h.html',1,'']]],
   ['hex_108',['hex',['../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d',1,'ada::character_sets']]],
   ['host_109',['HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5',1,'ada']]],
-  ['http_110',['HTTP',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fa96c100d8fef9b4f39cdf795b587c2d4c',1,'ada::scheme']]],
-  ['https_111',['HTTPS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faf73362b3cc4c1413ba3d52e4a6931df0',1,'ada::scheme']]]
+  ['href_5ffrom_5ffile_110',['href_from_file',['../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70',1,'ada']]],
+  ['http_111',['HTTP',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fa96c100d8fef9b4f39cdf795b587c2d4c',1,'ada::scheme']]],
+  ['https_112',['HTTPS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faf73362b3cc4c1413ba3d52e4a6931df0',1,'ada::scheme']]]
 ];

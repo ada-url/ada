@@ -167,6 +167,8 @@ Functions</h2></td></tr>
 <tr class="separator:a51224d0fd7b3f84be3ee3c5b44be0bd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a135ad7ef320d4357500ba78a4dfd05e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6">parse</a> (std::string_view input, const <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> *base_url=nullptr, <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b">ada::encoding_type</a> encoding=<a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1">ada::encoding_type::UTF8</a>)</td></tr>
 <tr class="separator:a135ad7ef320d4357500ba78a4dfd05e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4796e4f266c83d76b490d423c8336a70"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">href_from_file</a> (std::string_view path)</td></tr>
+<tr class="separator:a4796e4f266c83d76b490d423c8336a70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b7cc372b3ac372722c850ca149215d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6">to_string</a> (<a class="el" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">ada::state</a> s)</td></tr>
 <tr class="separator:a3b7cc372b3ac372722c850ca149215d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e483bbc60c5905f8885c2dc134a30ed"><td class="memItemLeft" align="right" valign="top">std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed">operator&lt;&lt;</a> (std::ostream &amp;out, const <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;u)</td></tr>
@@ -273,6 +275,37 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="a4796e4f266c83d76b490d423c8336a70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4796e4f266c83d76b490d423c8336a70">&#9670;&nbsp;</a></span>href_from_file()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string ada::href_from_file </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>path</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Computes a href string from a file path. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>a path </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a href string (starts with <a href="file:://">file:://</a>) </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../d6/dd1/_2home_2runner_2work_2ada_2ada_2include_2ada_2implementation_8h-example.html#a2">/home/runner/work/ada/ada/include/ada/implementation.h</a>.</dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00019">19</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::FILE</a>, <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#af6a43ab73c2b1e20f81de57b18e1f388">ada::unicode::has_tabs_or_newline()</a>, and <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e">ada::helpers::remove_ascii_tab_or_newline()</a>.</p>
+
+</div>
+</div>
 <a id="a4e483bbc60c5905f8885c2dc134a30ed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4e483bbc60c5905f8885c2dc134a30ed">&#9670;&nbsp;</a></span>operator&lt;&lt;()</h2>
 
@@ -372,7 +405,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Stringify a URL state machine state. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00128">128</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00245">245</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a6b55d7d7b1918e00a9a1eeb3c91b8f90">ada::helpers::get_state()</a>.</p>
 
@@ -395,7 +428,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Convert a encoding_type to string. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00019">19</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00041">41</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d">unreachable()</a>, <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1">UTF8</a>, <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84">UTF_16BE</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240">UTF_16LE</a>.</p>
 

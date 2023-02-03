@@ -28,9 +28,10 @@ var namespaceada =
       [ "encode_json", "d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad", null ],
       [ "get_host_delimiter_location", "d7/d6c/namespaceada_1_1helpers.html#afcffe4b56f77a2d643a1a53c24c093c4", null ],
       [ "get_state", "d7/d6c/namespaceada_1_1helpers.html#a6b55d7d7b1918e00a9a1eeb3c91b8f90", null ],
+      [ "parse_prepared_path", "d7/d6c/namespaceada_1_1helpers.html#a96d897faaf4536addf3cedf3b2f2b975", null ],
       [ "prune_fragment", "d7/d6c/namespaceada_1_1helpers.html#a27195c97e4ce5f8bf9187e5b24a478ba", null ],
       [ "remove_ascii_tab_or_newline", "d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e", null ],
-      [ "shorten_path", "d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00", null ],
+      [ "shorten_path", "d7/d6c/namespaceada_1_1helpers.html#a3846f1e6a123292a4460aec9c375a91d", null ],
       [ "substring", "d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06", null ],
       [ "trim_c0_whitespace", "d7/d6c/namespaceada_1_1helpers.html#a7e7a930166b3365d93acd6c42620f45b", null ]
     ] ],
@@ -94,6 +95,7 @@ var namespaceada =
       [ "OPAQUE_PATH", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd", null ],
       [ "PORT", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5", null ]
     ] ],
+    [ "href_from_file", "dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70", null ],
     [ "inner_log", "dd/d64/namespaceada.html#aaf07b88d6b2dac9b867d6bad8cc14c62", null ],
     [ "inner_log", "dd/d64/namespaceada.html#accd48d9920d0d0f514a2a3efc7cd480f", null ],
     [ "log", "dd/d64/namespaceada.html#a91a11522733883fc916671a2a6b182c3", null ],

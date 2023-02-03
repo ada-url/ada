@@ -96,8 +96,8 @@ $(document).ready(function(){initNavTree('d7/d6c/namespaceada_1_1helpers.html','
 Functions</h2></td></tr>
 <tr class="memitem:a27195c97e4ce5f8bf9187e5b24a478ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> std::optional&lt; std::string_view &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a27195c97e4ce5f8bf9187e5b24a478ba">prune_fragment</a> (std::string_view &amp;input) noexcept</td></tr>
 <tr class="separator:a27195c97e4ce5f8bf9187e5b24a478ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9409999807c7be56822ee7ba5d06fa00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a9409999807c7be56822ee7ba5d06fa00">shorten_path</a> (<a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;<a class="el" href="../../dd/d03/structada_1_1url.html">url</a>) noexcept</td></tr>
-<tr class="separator:a9409999807c7be56822ee7ba5d06fa00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3846f1e6a123292a4460aec9c375a91d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a3846f1e6a123292a4460aec9c375a91d">shorten_path</a> (std::string &amp;path, <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573f">ada::scheme::type</a> type) noexcept</td></tr>
+<tr class="separator:a3846f1e6a123292a4460aec9c375a91d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe80bc0093fc27eceb0102b13207261e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e">remove_ascii_tab_or_newline</a> (std::string &amp;input) noexcept</td></tr>
 <tr class="separator:afe80bc0093fc27eceb0102b13207261e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab89ebc75c4ef1ec2f0f82b51b3a68f06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> std::string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06">substring</a> (std::string_view input, size_t pos) noexcept</td></tr>
@@ -283,12 +283,12 @@ template&lt;typename out_iter &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00085">85</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">ada::url::set_hash()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a716bea9e0b8f60b16c97b5268458da7f">ada::url::set_host()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a0427d8495d50e40e13215d7b7e36fa63">ada::url::set_hostname()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#afa758006b81473c457ff8f460db7f115">ada::url::set_port()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a5c9e3746ad2921a4cf6e506605047013">ada::url::set_protocol()</a>, and <a class="el" href="../../dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1">ada::url::set_search()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file()</a>, <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">ada::url::set_hash()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a716bea9e0b8f60b16c97b5268458da7f">ada::url::set_host()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a0427d8495d50e40e13215d7b7e36fa63">ada::url::set_hostname()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#afa758006b81473c457ff8f460db7f115">ada::url::set_port()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a5c9e3746ad2921a4cf6e506605047013">ada::url::set_protocol()</a>, and <a class="el" href="../../dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1">ada::url::set_search()</a>.</p>
 
 </div>
 </div>
-<a id="a9409999807c7be56822ee7ba5d06fa00"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9409999807c7be56822ee7ba5d06fa00">&#9670;&nbsp;</a></span>shorten_path()</h2>
+<a id="a3846f1e6a123292a4460aec9c375a91d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3846f1e6a123292a4460aec9c375a91d">&#9670;&nbsp;</a></span>shorten_path()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -299,9 +299,19 @@ template&lt;typename out_iter &gt; </div>
         <tr>
           <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void ada::helpers::shorten_path </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;&#160;</td>
-          <td class="paramname"><em>url</em></td><td>)</td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573f">ada::scheme::type</a>&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
