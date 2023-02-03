@@ -34,7 +34,12 @@ namespace ada {
   ada_warn_unused ada::url parse(std::string_view input,
                                  const ada::url* base_url = nullptr,
                                  ada::encoding_type encoding = ada::encoding_type::UTF8);
-
+  /**
+   * Computes a href string from a file path.
+   * @param input a path
+   * @return a href string (starts with file:://)
+   */
+  std::string href_from_file(std::string_view path);
 }
 
 #endif // ADA_IMPLEMENTATION_H
