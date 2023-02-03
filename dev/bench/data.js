@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675460114055,
+  "lastUpdate": 1675460119347,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1948,6 +1948,54 @@ window.BENCHMARK_DATA = {
             "value": 5825.53790071719,
             "unit": "ns/iter",
             "extra": "iterations: 120565\ncpu: 5815.422386264669 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e09e11b6d205e40b5f2d6b13d1623ae3bf04e94e",
+          "message": "Update README.md",
+          "timestamp": "2023-02-03T16:34:08-05:00",
+          "tree_id": "97d9ca7e9bb3f9eead52f820e199e153bb3308c4",
+          "url": "https://github.com/ada-url/ada/commit/e09e11b6d205e40b5f2d6b13d1623ae3bf04e94e"
+        },
+        "date": 1675460118795,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5301.8111701520165,
+            "unit": "ns/iter",
+            "extra": "iterations: 131547\ncpu: 5289.837092446046 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4697.737237943081,
+            "unit": "ns/iter",
+            "extra": "iterations: 148918\ncpu: 4696.408090358453 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 9724.57491716114,
+            "unit": "ns/iter",
+            "extra": "iterations: 71826\ncpu: 9716.949294127477 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5866.584125200036,
+            "unit": "ns/iter",
+            "extra": "iterations: 117444\ncpu: 5864.672524777769 ns\nthreads: 1"
           }
         ]
       }
