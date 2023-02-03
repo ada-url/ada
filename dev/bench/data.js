@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675455469350,
+  "lastUpdate": 1675459973655,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -588,6 +588,54 @@ window.BENCHMARK_DATA = {
             "value": 7480.777093044986,
             "unit": "ns/iter",
             "extra": "iterations: 93954\ncpu: 7466.6719884198665 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "distinct": true,
+          "id": "1a4d67aba53c817124d6296c7fee5a8653fd0c3e",
+          "message": "Minor fix.",
+          "timestamp": "2023-02-03T16:31:41-05:00",
+          "tree_id": "d01000c08b66dd35bd4d3b0dfda564479075624e",
+          "url": "https://github.com/ada-url/ada/commit/1a4d67aba53c817124d6296c7fee5a8653fd0c3e"
+        },
+        "date": 1675459972055,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5836.147586378988,
+            "unit": "ns/iter",
+            "extra": "iterations: 120255\ncpu: 5816.673734979834 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 5176.178137022763,
+            "unit": "ns/iter",
+            "extra": "iterations: 135160\ncpu: 5175.75910032554 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 10856.04621953057,
+            "unit": "ns/iter",
+            "extra": "iterations: 64410\ncpu: 10855.160689333954 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 7467.001856677292,
+            "unit": "ns/iter",
+            "extra": "iterations: 94793\ncpu: 7466.532338885785 ns\nthreads: 1"
           }
         ]
       }
