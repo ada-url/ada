@@ -12,6 +12,10 @@
 #include <optional>
 #include <string_view>
 
+/**
+ * @namespace ada::parser
+ * @brief Includes the definitions for supported parsers
+ */
 namespace ada::parser {
 
   /**

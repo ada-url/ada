@@ -9,6 +9,10 @@
 #include <string>
 #include <optional>
 
+/**
+ * @namespace ada::unicode
+ * @brief Includes the definitions for unicode operations
+ */
 namespace ada::unicode {
 
   /**

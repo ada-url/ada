@@ -12,6 +12,10 @@
 #include <string_view>
 #include <optional>
 
+/**
+ * @namespace ada::helpers
+ * @brief Includes the definitions for helper functions
+ */
 namespace ada::helpers {
 
   /**

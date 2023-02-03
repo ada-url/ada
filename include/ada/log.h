@@ -1,8 +1,7 @@
-
 /**
  * @file log.h
- * @private
- * @brief logging code.
+ * @brief Includes the definitions for logging.
+ * @private Excluded from docs through the doxygen file.
  */
 #ifndef ADA_LOG_H
 #define ADA_LOG_H

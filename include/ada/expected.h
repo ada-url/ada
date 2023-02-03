@@ -1,3 +1,8 @@
+/**
+ * @file expected.h
+ * @brief Definitions for std::expected
+ * @private Excluded from docs through the doxygen file.
+ */
 ///
 // expected - An implementation of std::expected with extensions
 // Written in 2017 by Sy Brand (tartanllama@gmail.com, @TartanLlama)

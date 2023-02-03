@@ -11,7 +11,12 @@
 #include <optional>
 #include <string>
 
+/**
+ * @namespace ada::scheme
+ * @brief Includes the scheme declarations
+ */
 namespace ada::scheme {
+
   /**
    * Type of the scheme as an enum.
    * Using strings to represent a scheme type is not ideal because

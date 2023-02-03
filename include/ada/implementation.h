@@ -1,6 +1,5 @@
 /**
  * @file implementation.h
- *
  * @brief Definitions for user facing functions for parsing URL and it's components.
  */
 #ifndef ADA_IMPLEMENTATION_H
@@ -29,19 +28,12 @@ namespace ada {
    * @param base_url the optional string input to use as a base url.
    * @param encoding encoding (default to UTF-8)
    * @return a parsed URL.
-   *
-   * @example
-   *
-   * ```cpp
-   * auto url = ada::url parse("https://www.google.com");
-   * ```
    */
   ada_warn_unused ada::result parse(std::string_view input,
                                  const ada::url* base_url = nullptr,
                                  ada::encoding_type encoding = ada::encoding_type::UTF8);
   /**
    * Computes a href string from a file path.
-   * @param input a path
    * @return a href string (starts with file:://)
    */
   std::string href_from_file(std::string_view path);

@@ -1,3 +1,7 @@
+/**
+ * @file ada.h
+ * @brief Includes all definitions for Ada.
+ */
 #ifndef ADA_H
 #define ADA_H
 

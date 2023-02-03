@@ -11,6 +11,10 @@
 #include <optional>
 #include <string>
 
+/**
+ * @namespace ada::serializers
+ * @brief Includes the definitions for URL serializers
+ */
 namespace ada::serializers {
 
   /**

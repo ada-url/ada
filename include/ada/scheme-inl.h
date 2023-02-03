@@ -8,6 +8,11 @@
 #include "ada/scheme.h"
 
 namespace ada::scheme {
+
+  /**
+   * @namespace ada::scheme::details
+   * @brief Includes the definitions for scheme specific entities
+   */
   namespace details {
     // for use with is_special and get_special_port
     // Spaces, if present, are removed from URL.
@@ -16,6 +21,7 @@ namespace ada::scheme {
     // for use with get_special_port
     constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
   }
+
   ada_really_inline constexpr bool is_special(std::string_view scheme) {
     if(scheme.empty()) { return false; }
     int hash_value = (2*scheme.size() + (unsigned)(scheme[0])) & 7;

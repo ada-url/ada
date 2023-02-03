@@ -10,6 +10,10 @@
 #include <string_view>
 #include <cstring>
 
+/**
+ * @namespace ada::checkers
+ * @brief Includes the definitions for validation functions
+ */
 namespace ada::checkers {
 
   /**
@@ -75,7 +79,6 @@ namespace ada::checkers {
    * then we have a dot. If the fourth bit is set, then we have a percent character.
    */
   ada_really_inline constexpr uint8_t path_signature(std::string_view input) noexcept;
-
 
   /** 
    * Returns true if the length of the domain name and its labels are according to the specifications.
