@@ -3,9 +3,9 @@
 #include <iostream>
 
 std::string long_way(std::string path) {
-  ada::url base = ada::parse("file://");
-  base.set_pathname(path);
-  return base.get_href();
+  ada::result base = ada::parse("file://");
+  base->set_pathname(path);
+  return base->get_href();
 }
 
 void test(std::string path) {
