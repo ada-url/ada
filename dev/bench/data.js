@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675455464322,
+  "lastUpdate": 1675455469350,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1684,6 +1684,54 @@ window.BENCHMARK_DATA = {
             "value": 5887.793650527003,
             "unit": "ns/iter",
             "extra": "iterations: 119065\ncpu: 5885.710326292358 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "593668f885ec2ded233cecefa26c93413d1af3fa",
+          "message": "feat: Adds a new fast function 'ada::href_from_file'. (#197)\n\n* Adds a new fast function 'ada::href_from_file'.\n\n* Simplifying.\n\n* Removing caching for this runner.\n\n* Fixing runner\n\n* Adding empty new line.\n\n* Removing nodiscard",
+          "timestamp": "2023-02-03T15:16:32-05:00",
+          "tree_id": "eac4731758ed1450f73355b8e170c66ffee6b2f5",
+          "url": "https://github.com/ada-url/ada/commit/593668f885ec2ded233cecefa26c93413d1af3fa"
+        },
+        "date": 1675455468929,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5096.201493619469,
+            "unit": "ns/iter",
+            "extra": "iterations: 137920\ncpu: 5088.0916473317875 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4466.751382413545,
+            "unit": "ns/iter",
+            "extra": "iterations: 156791\ncpu: 4466.406235051758 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 9909.089876983608,
+            "unit": "ns/iter",
+            "extra": "iterations: 70641\ncpu: 9908.186463951528 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5876.245544239389,
+            "unit": "ns/iter",
+            "extra": "iterations: 119396\ncpu: 5875.880263995444 ns\nthreads: 1"
           }
         ]
       }
