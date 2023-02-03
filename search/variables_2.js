@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['democpp_351',['DEMOCPP',['../dd/d27/namespaceamalgamate.html#a54375f5a9fab402368e1532820a90068',1,'amalgamate']]]
+  ['democpp_595',['DEMOCPP',['../dd/d27/namespaceamalgamate.html#a54375f5a9fab402368e1532820a90068',1,'amalgamate']]]
 ];

@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['operator_3c_3c_309',['operator&lt;&lt;',['../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed',1,'ada']]],
-  ['operator_3d_310',['operator=',['../dd/d03/structada_1_1url.html#a1b4a3d63a032bfb8592a2251ea7bd9f9',1,'ada::url::operator=(url &amp;&amp;u) noexcept=default'],['../dd/d03/structada_1_1url.html#a5b9014ee57227d8083ffc5516cc96fe0',1,'ada::url::operator=(const url &amp;u)=default']]]
+  ['main_528',['main',['../d2/d68/demo_8cpp.html#a81ce304348a420752ee080480d2b3095',1,'demo.cpp']]],
+  ['make_5funexpected_529',['make_unexpected',['../d6/da5/namespacetl.html#a01de1a0282a693451af969f35e88bcf9',1,'tl']]],
+  ['map_530',['map',['../de/d75/classtl_1_1expected.html#a46c1021bcc084694446ec0d17fef0f49',1,'tl::expected']]],
+  ['map_5ferror_5fimpl_531',['map_error_impl',['../d2/d00/namespacetl_1_1detail.html#a578686dbf755eac2ea47fb3e46320212',1,'tl::detail::map_error_impl(Exp &amp;&amp;exp, F &amp;&amp;f) -&gt; expected&lt; exp_t&lt; Exp &gt;, detail::decay_t&lt; Ret &gt;&gt;'],['../d2/d00/namespacetl_1_1detail.html#a326623053a71b66be4acc622c501e1a2',1,'tl::detail::map_error_impl(Exp &amp;&amp;exp, F &amp;&amp;f) -&gt; expected&lt; exp_t&lt; Exp &gt;, monostate &gt;']]]
 ];

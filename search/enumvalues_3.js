@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['no_5fscheme_388',['NO_SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab6e5680904440aafe18fa12e655b1397',1,'ada']]],
-  ['not_5fspecial_389',['NOT_SPECIAL',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faaff84b9b3b0f0f7c8f56b9a01f3107af',1,'ada::scheme']]]
+  ['host_665',['HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5',1,'ada']]],
+  ['http_666',['HTTP',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fa96c100d8fef9b4f39cdf795b587c2d4c',1,'ada::scheme']]],
+  ['https_667',['HTTPS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faf73362b3cc4c1413ba3d52e4a6931df0',1,'ada::scheme']]]
 ];

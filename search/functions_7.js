@@ -1,21 +1,9 @@
 var searchData=
 [
-  ['includes_5fcredentials_290',['includes_credentials',['../dd/d03/structada_1_1url.html#ac08a3b4e790519ce7fabb85139ddcb3b',1,'ada::url']]],
-  ['ipv4_291',['ipv4',['../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5',1,'ada::serializers']]],
-  ['ipv6_292',['ipv6',['../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4',1,'ada::serializers']]],
-  ['is_5falnum_5fplus_293',['is_alnum_plus',['../d2/dc3/namespaceada_1_1unicode.html#a7c53b50b81eb6f56629dc55a26908700',1,'ada::unicode']]],
-  ['is_5falpha_294',['is_alpha',['../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5',1,'ada::checkers']]],
-  ['is_5fascii_5fhex_5fdigit_295',['is_ascii_hex_digit',['../d2/dc3/namespaceada_1_1unicode.html#adca6f3cd4ba58e901c7a357030d6ada5',1,'ada::unicode']]],
-  ['is_5fascii_5ftab_5for_5fnewline_296',['is_ascii_tab_or_newline',['../d2/dc3/namespaceada_1_1unicode.html#afe28390da8b8ddb1e3e522bfee617bc0',1,'ada::unicode']]],
-  ['is_5fc0_5fcontrol_5for_5fspace_297',['is_c0_control_or_space',['../d2/dc3/namespaceada_1_1unicode.html#a3cdc63951562d4f4c7085a8d251fa4c3',1,'ada::unicode']]],
-  ['is_5fdigit_298',['is_digit',['../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6',1,'ada::checkers']]],
-  ['is_5fdouble_5fdot_5fpath_5fsegment_299',['is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a2a5c2e0ef11ea4d4fe564b7fb1fa1f16',1,'ada::unicode']]],
-  ['is_5fforbidden_5fdomain_5fcode_5fpoint_300',['is_forbidden_domain_code_point',['../d2/dc3/namespaceada_1_1unicode.html#aa2115611b3343d6cb28f476badf41924',1,'ada::unicode']]],
-  ['is_5fforbidden_5fhost_5fcode_5fpoint_301',['is_forbidden_host_code_point',['../d2/dc3/namespaceada_1_1unicode.html#af18e28910c496ebeac5f1b1d309fb287',1,'ada::unicode']]],
-  ['is_5fipv4_302',['is_ipv4',['../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0',1,'ada::checkers']]],
-  ['is_5flowercase_5fhex_303',['is_lowercase_hex',['../d2/dc3/namespaceada_1_1unicode.html#aa39138fa1cd1de15cc179bc970d8e9cb',1,'ada::unicode']]],
-  ['is_5fnormalized_5fwindows_5fdrive_5fletter_304',['is_normalized_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b',1,'ada::checkers']]],
-  ['is_5fsingle_5fdot_5fpath_5fsegment_305',['is_single_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#ad3f83e3d837a2451c194e82e9f3bf9ae',1,'ada::unicode']]],
-  ['is_5fspecial_306',['is_special',['../dd/d03/structada_1_1url.html#aa376b050ccf294f9cf04abbcd91db8b9',1,'ada::url::is_special()'],['../d2/d63/namespaceada_1_1scheme.html#a330d87c07464ad4b10aa250f52fecbf2',1,'ada::scheme::is_special()']]],
-  ['is_5fwindows_5fdrive_5fletter_307',['is_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca',1,'ada::checkers']]]
+  ['has_5fhex_5fprefix_502',['has_hex_prefix',['../d3/dbe/namespaceada_1_1checkers.html#aa30ee2c6ba3a3e942c7e2e70729a1cca',1,'ada::checkers']]],
+  ['has_5fhex_5fprefix_5funsafe_503',['has_hex_prefix_unsafe',['../d3/dbe/namespaceada_1_1checkers.html#a429bd47d8a8754da869ae095c9bb1c9f',1,'ada::checkers']]],
+  ['has_5ftabs_5for_5fnewline_504',['has_tabs_or_newline',['../d2/dc3/namespaceada_1_1unicode.html#af6a43ab73c2b1e20f81de57b18e1f388',1,'ada::unicode']]],
+  ['has_5fvalid_5fdomain_505',['has_valid_domain',['../dd/d03/structada_1_1url.html#a5758e6623e671cd40045cac4075b9161',1,'ada::url']]],
+  ['has_5fvalue_506',['has_value',['../d2/d55/structtl_1_1detail_1_1expected__operations__base.html#af760709a4e7cf31d78099e280ec1e06a',1,'tl::detail::expected_operations_base::has_value()'],['../d7/df6/structtl_1_1detail_1_1expected__operations__base_3_01void_00_01E_01_4.html#ac53001044748a1b2f7a7d5f07306c53e',1,'tl::detail::expected_operations_base&lt; void, E &gt;::has_value()'],['../de/d75/classtl_1_1expected.html#a557dd5bdabe9535165a11fc2123ac513',1,'tl::expected::has_value()']]],
+  ['href_5ffrom_5ffile_507',['href_from_file',['../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70',1,'ada']]]
 ];

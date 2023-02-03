@@ -7,6 +7,7 @@ var dir_34d9464866e8421e4e78493bdf5982a5 =
     [ "checkers.h", "d4/dec/checkers_8h.html", "d4/dec/checkers_8h" ],
     [ "common_defs.h", "d7/d19/common__defs_8h.html", "d7/d19/common__defs_8h" ],
     [ "encoding_type.h", "d0/dbb/encoding__type_8h.html", "d0/dbb/encoding__type_8h" ],
+    [ "expected.h", "d1/d91/expected_8h.html", "d1/d91/expected_8h" ],
     [ "helpers.h", "d1/d98/helpers_8h.html", "d1/d98/helpers_8h" ],
     [ "implementation.h", "dd/d6b/implementation_8h.html", "dd/d6b/implementation_8h" ],
     [ "log.h", "d7/d7f/log_8h.html", "d7/d7f/log_8h" ],

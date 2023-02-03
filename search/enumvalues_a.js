@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['ws_406',['WS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fa1b6522b40511ec15ca60df3eb3858df2',1,'ada::scheme']]],
-  ['wss_407',['WSS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fac48a95c337aa2775b07339cf74cf903d',1,'ada::scheme']]]
+  ['utf8_683',['UTF8',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1',1,'ada']]],
+  ['utf_5f16be_684',['UTF_16BE',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84',1,'ada']]],
+  ['utf_5f16le_685',['UTF_16LE',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240',1,'ada']]]
 ];

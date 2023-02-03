@@ -68,10 +68,14 @@ var namespaceada =
       [ "table_is_double_dot_path_segment", "d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f", null ]
     ] ],
     [ "url", "dd/d03/structada_1_1url.html", "dd/d03/structada_1_1url" ],
+    [ "result", "dd/d64/namespaceada.html#a3d60d994682b227af774a12e6302a80a", null ],
     [ "encoding_type", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b", [
       [ "UTF8", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1", null ],
       [ "UTF_16LE", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240", null ],
       [ "UTF_16BE", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84", null ]
+    ] ],
+    [ "errors", "dd/d64/namespaceada.html#a6e2c9c4694121664afd9db2d56453cb2", [
+      [ "generic_error", "dd/d64/namespaceada.html#a6e2c9c4694121664afd9db2d56453cb2a05415a94da18b556b4d90a210cc950d5", null ]
     ] ],
     [ "state", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574", [
       [ "AUTHORITY", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39", null ],
@@ -101,7 +105,7 @@ var namespaceada =
     [ "log", "dd/d64/namespaceada.html#a91a11522733883fc916671a2a6b182c3", null ],
     [ "log", "dd/d64/namespaceada.html#a326c61beec709ba92c05e1d373503b04", null ],
     [ "operator<<", "dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed", null ],
-    [ "parse", "dd/d64/namespaceada.html#a135ad7ef320d4357500ba78a4dfd05e6", null ],
+    [ "parse", "dd/d64/namespaceada.html#af8b1caee49e93f9811a7a5cf4a19ac25", null ],
     [ "to_string", "dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6", null ],
     [ "to_string", "dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7", null ],
     [ "unreachable", "dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d", null ]

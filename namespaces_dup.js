@@ -21,5 +21,6 @@ var namespaces_dup =
       [ "README", "dd/d27/namespaceamalgamate.html#a47203a1cf56ed0e239ef955d04393cd5", null ],
       [ "SCRIPTPATH", "dd/d27/namespaceamalgamate.html#a4a8067b8f5f73e6aae229884741421be", null ],
       [ "zf", "dd/d27/namespaceamalgamate.html#a8f67c264369b6238f105e517d3103985", null ]
-    ] ]
+    ] ],
+    [ "tl", "d6/da5/namespacetl.html", "d6/da5/namespacetl" ]
 ];

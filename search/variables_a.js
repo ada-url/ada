@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['table_5fis_5fdouble_5fdot_5fpath_5fsegment_370',['table_is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f',1,'ada::unicode']]]
+  ['readme_619',['README',['../dd/d27/namespaceamalgamate.html#a47203a1cf56ed0e239ef955d04393cd5',1,'amalgamate']]]
 ];
