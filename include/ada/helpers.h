@@ -45,7 +45,7 @@ namespace ada::helpers {
   * @return true on success.
   * @see https://url.spec.whatwg.org/
   */
-  [[nodiscard]] ada_really_inline bool parse_prepared_path(const std::string_view input, ada::scheme::type type, std::string& path);
+  ada_really_inline bool parse_prepared_path(const std::string_view input, ada::scheme::type type, std::string& path);
 
   /**
    * Remove and mutate all ASCII tab or newline characters from an input.

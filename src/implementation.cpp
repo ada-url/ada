@@ -31,9 +31,9 @@ namespace ada {
     if(internal_input.empty()) {
       path = "/";
     } else if((internal_input[0] == '/') ||(internal_input[0] == '\\')){
-      (void)helpers::parse_prepared_path(internal_input.substr(1), ada::scheme::type::FILE, path);
+      helpers::parse_prepared_path(internal_input.substr(1), ada::scheme::type::FILE, path);
     } else {
-      (void)helpers::parse_prepared_path(internal_input, ada::scheme::type::FILE, path);
+      helpers::parse_prepared_path(internal_input, ada::scheme::type::FILE, path);
     }
     return "file://" + path;
   }
