@@ -22,8 +22,6 @@ Specification for URL parser can be found from the
 ```cpp
 ada::result url = ada::parse("https://www.google.com");
 if(result) { /* URL is valid */ }
-// url.is_valid will return true
-// You are responsible to ensure that url.is_valid is true.
 ```
 
 - Get/Update credentials
