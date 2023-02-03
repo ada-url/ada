@@ -22,7 +22,7 @@ std::set<std::string> exceptions = {"\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x61\xc
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-tl::expected<ada::url,ada::errors> ada_parse(std::string_view view,const ada::url* base = nullptr) {
+ada::result ada_parse(std::string_view view,const ada::url* base = nullptr) {
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]" << std::endl;
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
@@ -161,7 +161,7 @@ bool setters_tests_encoding(const char *source) {
       }
 
       auto base = ada_parse(href);
-      TEST_ASSERT(bool(base), true, "Base url parsing should have succeeded")
+      TEST_ASSERT(base.has_value(), true, "Base url parsing should have succeeded")
 
       std::cout << "      " << href << std::endl;
 
@@ -252,7 +252,7 @@ bool toascii_encoding() {
 
       // The following code replicates `toascii.window.js` from web-platform tests.
       // @see https://github.com/web-platform-tests/wpt/blob/master/url/toascii.window.js
-      tl::expected<ada::url,ada::errors> current = ada::parse("https://" + std::string(input) + "/x");
+      ada::result current = ada::parse("https://" + std::string(input) + "/x");
 
       if (expected_output.type() == ondemand::json_type::string) {
         std::string_view stringified_output = expected_output.get_string();
@@ -261,11 +261,11 @@ bool toascii_encoding() {
         TEST_ASSERT(current->get_pathname(), "/x", "Shouldn't have updated pathname");
         TEST_ASSERT(current->get_href(), "https://" + std::string(stringified_output) + "/x", "Href should have been equal. From: " + element_string);
       } else if (expected_output.is_null()) {
-        TEST_ASSERT(bool(current), false, "Should have failed. From: " + element_string);
+        TEST_ASSERT(current.has_value(), false, "Should have failed. From: " + element_string);
       }
 
       // Test setters for host and hostname values.
-      tl::expected<ada::url,ada::errors> setter = ada::parse("https://x/x");
+      ada::result setter = ada::parse("https://x/x");
       TEST_ASSERT(setter->set_host(input), !expected_output.is_null(), "set_host return value. " + element_string);
       TEST_ASSERT(setter->set_hostname(input), !expected_output.is_null(), "set_hostname return value. " + element_string);
 
@@ -315,20 +315,28 @@ bool urltestdata_encoding(const char* source) {
       if(exceptions.find(std::string(input)) != exceptions.end()) { std::cerr << "skipping "+element_string << std::endl; continue; }
 #endif
       std::string_view base;
-      tl::expected<ada::url,ada::errors>  base_url;
+      ada::result  base_url;
       if (!object["base"].get(base)) {
         std::cout << "base=" << base << std::endl;
         base_url = ada_parse(base);
-        TEST_ASSERT(bool(base_url), true, "Base should succeed " + element_string);
+        if(!base_url) {
+          bool failure = false;
+          if (!object["failure"].get(failure) && failure == true) {
+            // We are good. Failure was expected.
+            continue; // We can't proceed any further.
+          } else {
+            TEST_ASSERT(base_url.has_value(), true, "Based should not have failred " + element_string);
+          }
+        }
       }
       bool failure = false;
-      tl::expected<ada::url,ada::errors> input_url = (!object["base"].get(base)) ?
+      ada::result input_url = (!object["base"].get(base)) ?
       ada_parse(input, &*base_url)
       : ada_parse(input);
-      if (!object["failure"].get(failure)) {
-        TEST_ASSERT(bool(input_url), !failure, "Should not have succeeded " + element_string + input_url->to_string());
+      if (!object["failure"].get(failure) && failure == true) {
+        TEST_ASSERT(input_url.has_value(), !failure, "Should not have succeeded " + element_string + input_url->to_string());
       } else {
-        TEST_ASSERT(bool(input_url), true, "Should not have failed " + element_string + input_url->to_string());
+        TEST_ASSERT(input_url.has_value(), true, "Should not have failed " + element_string + input_url->to_string());
 
         std::string_view protocol = object["protocol"];
         TEST_ASSERT(input_url->get_protocol(), protocol, "Protocol " + element_string + input_url->to_string());
@@ -415,7 +423,7 @@ bool verifydnslength_tests(const char* source) {
       std::string_view input = object["input"].get_string();
       std::string message = std::string(object["message"].get_string().value());
       bool failure = object["failure"].get_bool().value();
-      tl::expected<ada::url,ada::errors> input_url = ada_parse(input);
+      ada::result input_url = ada_parse(input);
       std::cout << input << " should " << (failure ? "fail" : "succeed")
         << " and it " << (input_url->has_valid_domain() ? "succeeds" : "fails")
         << (!failure == input_url->has_valid_domain() ? " OK" : " ERROR" ) << std::endl;

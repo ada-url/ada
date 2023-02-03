@@ -44,25 +44,23 @@ size_t init_data(const char *source) {
 
 static void BasicBench_AdaURL(benchmark::State &state) {
   // volatile to prevent optimizations.
-  volatile bool is_valid = true;
   volatile size_t numbers_of_parameters = 0;
 
   for (auto _ : state) {
     for (const std::pair<std::string, std::string> &url_strings :
          url_examples) {
-      ada::url base;
+      ada::result base;
       ada::url* base_ptr = nullptr;
       if(!url_strings.second.empty()) {
-        base = ada::parser::parse_url(url_strings.second);
-        base_ptr = &base;
+        base = ada::parse(url_strings.second);
+        if(base) { base_ptr = &*base; } else { continue; }
       }
-      auto url = ada::parser::parse_url(url_strings.first, base_ptr);
-      if (url.is_valid) {
+      auto url = ada::parse(url_strings.first, base_ptr);
+      if (url) {
         numbers_of_parameters +=
-            url.path.size() + (url.query.has_value() ? url.query->size() : 0) +
-            url.get_scheme().size() + url.host->size();
+            url->path.size() + (url->query.has_value() ? url->query->size() : 0) +
+            url->get_scheme().size() + url->host->size();
       }
-      is_valid &= url.is_valid;
     }
   }
   if (collector.has_events()) {
@@ -72,21 +70,20 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       collector.start();
       for (const std::pair<std::string, std::string> &url_strings :
            url_examples) {
-        ada::url base;
+        ada::result base;
         ada::url* base_ptr = nullptr;
         if(!url_strings.second.empty()) {
-            base = ada::parser::parse_url(url_strings.second);
-            base_ptr = &base;
+            base = ada::parse(url_strings.second);
+            if(base) { base_ptr = &*base; } else { continue; }
         }
-        auto url = ada::parser::parse_url(url_strings.first, base_ptr);
-        if (url.is_valid) {
+        auto url = ada::parse(url_strings.first, base_ptr);
+        if (url) {
           numbers_of_parameters +=
-              url.path.size() +
-              (url.query.has_value() ? url.query->size() : 0) +
-              url.get_scheme().size() +
-              (url.host.has_value() ? url.host->size() : 0);
+              url->path.size() +
+              (url->query.has_value() ? url->query->size() : 0) +
+              url->get_scheme().size() +
+              (url->host.has_value() ? url->host->size() : 0);
         }
-        is_valid &= url.is_valid;
       }
       std::atomic_thread_fence(std::memory_order_release);
       event_count allocate_count = collector.end();

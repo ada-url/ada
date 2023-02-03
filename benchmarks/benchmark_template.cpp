@@ -54,12 +54,12 @@ static void BasicBench_AdaURL(benchmark::State& state) {
   for (auto _ : state) {
     url_container.clear();
     for(std::string& url_string : url_examples) {
-      auto url = ada::parser::parse_url(url_string);
-      if(url.is_valid) {
+      auto url = ada::parse(url_string);
+      if(url) {
         if(with_copy) {
-          url_container.emplace_back(to_standard_url_with_copy(&url));
+          url_container.emplace_back(to_standard_url_with_copy(&*url));
         } else {
-          url_container.emplace_back(to_standard_url(&url));
+          url_container.emplace_back(to_standard_url(&*url));
         }
       }
     }
@@ -73,12 +73,12 @@ static void BasicBench_AdaURL(benchmark::State& state) {
       collector.start();
       url_container.clear();
       for(std::string& url_string : url_examples) {
-        auto url = ada::parser::parse_url(url_string);
-        if(url.is_valid) {
+        auto url = ada::parse(url_string);
+        if(url) {
           if(with_copy) {
-            url_container.emplace_back(to_standard_url_with_copy(&url));
+            url_container.emplace_back(to_standard_url_with_copy(&*url));
           } else {
-            url_container.emplace_back(to_standard_url(&url));
+            url_container.emplace_back(to_standard_url(&*url));
           }
         }
       }

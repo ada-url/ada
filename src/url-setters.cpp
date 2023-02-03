@@ -231,7 +231,7 @@ namespace ada {
   }
 
   bool url::set_href(const std::string_view input) {
-    tl::expected<ada::url,ada::errors> out = ada::parse(input);
+    ada::result out = ada::parse(input);
 
     if (out) {
       set_protocol(out->get_protocol());
@@ -245,7 +245,7 @@ namespace ada {
       set_search(out->get_search());
     }
 
-    return bool(out);
+    return out.has_value();
   }
 
 } // namespace ada

@@ -19,6 +19,8 @@ namespace ada {
     generic_error
   };
 
+  using result = tl::expected<ada::url,ada::errors>;
+
   /**
    * The URL parser takes a scalar value string input, with an optional null or base URL base (default null)
    * and an optional encoding encoding (default UTF-8).
@@ -34,7 +36,7 @@ namespace ada {
    * auto url = ada::url parse("https://www.google.com");
    * ```
    */
-  ada_warn_unused tl::expected<ada::url,ada::errors> parse(std::string_view input,
+  ada_warn_unused ada::result parse(std::string_view input,
                                  const ada::url* base_url = nullptr,
                                  ada::encoding_type encoding = ada::encoding_type::UTF8);
 
