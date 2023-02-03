@@ -18,7 +18,7 @@ void test(std::string path) {
 int main() {
   for (std::string in :
        {"", "fsfds", "C:\\\\blabala\\fdfds\\back.txt", "/home/user/txt.txt",
-        "/%2e.bar", "/foo/%2e%2", "/foo/..bar", "foo\t\u0091%91"}) {
+        "/%2e.bar", "/foo/%2e%2", "/foo/..bar", "foo\t%91"}) {
     test(in);
   }
   return EXIT_SUCCESS;
