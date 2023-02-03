@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675460218325,
+  "lastUpdate": 1675460223922,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -2080,6 +2080,54 @@ window.BENCHMARK_DATA = {
             "value": 5866.584125200036,
             "unit": "ns/iter",
             "extra": "iterations: 117444\ncpu: 5864.672524777769 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "487c098557bbafa5953d12adbd224e7d7205cffd",
+          "message": "Update README.md",
+          "timestamp": "2023-02-03T16:36:02-05:00",
+          "tree_id": "cca2d4c6a8643401588b68dda927765e9bf3a0cd",
+          "url": "https://github.com/ada-url/ada/commit/487c098557bbafa5953d12adbd224e7d7205cffd"
+        },
+        "date": 1675460223119,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5181.956594100584,
+            "unit": "ns/iter",
+            "extra": "iterations: 134590\ncpu: 5181.68957574857 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4624.643852643289,
+            "unit": "ns/iter",
+            "extra": "iterations: 151252\ncpu: 4622.164335017058 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 10035.9521722316,
+            "unit": "ns/iter",
+            "extra": "iterations: 69813\ncpu: 10035.79992265051 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5830.069993508584,
+            "unit": "ns/iter",
+            "extra": "iterations: 120154\ncpu: 5829.665262912596 ns\nthreads: 1"
           }
         ]
       }
