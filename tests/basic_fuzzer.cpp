@@ -44,7 +44,7 @@ std::string url_examples[] = {
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-ada::url ada_parse(std::string_view view) {
+tl::expected<ada::url,ada::errors> ada_parse(std::string_view view) {
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
   return ada::parse(std::string_view(buffer.get(), view.size()));
@@ -54,8 +54,8 @@ size_t fancy_fuzz(size_t N, size_t seed = 0) {
     size_t counter = seed;
     for(size_t trial = 0; trial < N; trial++) {
         std::string copy = url_examples[(seed++)%(sizeof(url_examples)/sizeof(std::string))];
-        auto url = ada::parser::parse_url(copy);
-        while(url.is_valid) {
+        auto url = ada::parse(copy);
+        while(bool(url)) {
             // mutate the string.
             int k = ((321321*counter++) %3);
             switch(k) {
@@ -81,8 +81,8 @@ size_t simple_fuzz(size_t N, size_t seed = 0) {
     size_t counter = seed;
     for(size_t trial = 0; trial < N; trial++) {
         std::string copy = url_examples[(seed++)%(sizeof(url_examples)/sizeof(std::string))];
-        auto url = ada::parser::parse_url(copy);
-        while(url.is_valid) {
+        auto url = ada::parse(copy);
+        while(bool(url)) {
             // mutate the string.
             copy[(13134*counter++)%copy.size()] = char(counter++*71117);
             url = ada_parse(copy);
@@ -100,8 +100,8 @@ size_t roller_fuzz(size_t N) {
             char orig = copy[index];
             for(unsigned int value = 0; value < 255; value++) {
               copy[index] = char(value);
-              ada::url url = ada_parse(copy);
-              if(url.is_valid) { valid++; }
+              auto url = ada_parse(copy);
+              if(url) { valid++; }
             }
             copy[index] = orig;
         }

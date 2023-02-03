@@ -22,7 +22,7 @@ std::set<std::string> exceptions = {"\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x61\xc
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-ada::url ada_parse(std::string_view view,const ada::url* base = nullptr) {
+tl::expected<ada::url,ada::errors> ada_parse(std::string_view view,const ada::url* base = nullptr) {
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]" << std::endl;
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
@@ -161,32 +161,32 @@ bool setters_tests_encoding(const char *source) {
       }
 
       auto base = ada_parse(href);
-      TEST_ASSERT(base.is_valid, true, "Base url parsing should have succeeded")
+      TEST_ASSERT(bool(base), true, "Base url parsing should have succeeded")
 
       std::cout << "      " << href << std::endl;
 
       if (category == "protocol") {
         std::string_view expected = element["expected"]["protocol"];
-        base.set_protocol(new_value);
-        TEST_ASSERT(base.get_protocol(), expected, "Protocol " + element_string + base.to_string());
+        base->set_protocol(new_value);
+        TEST_ASSERT(base->get_protocol(), expected, "Protocol " + element_string + base->to_string());
       }
       else if (category == "username") {
         std::string_view expected = element["expected"]["username"];
-        base.set_username(new_value);
-        TEST_ASSERT(base.get_username(), expected, "Username " + element_string + base.to_string());
+        base->set_username(new_value);
+        TEST_ASSERT(base->get_username(), expected, "Username " + element_string + base->to_string());
       }
       else if (category == "password") {
         std::string_view expected = element["expected"]["password"];
-        base.set_password(new_value);
-        TEST_ASSERT(base.get_password(), expected, "Password " + element_string + base.to_string());
+        base->set_password(new_value);
+        TEST_ASSERT(base->get_password(), expected, "Password " + element_string + base->to_string());
       }
       else if (category == "host") {
         std::string_view expected;
 
         // We only support valid UTF-8 cases.
         if (!element["expected"]["host"].get(expected)) {
-          base.set_host(new_value);
-          TEST_ASSERT(base.get_host(), expected, "Host " + element_string + base.to_string());
+          base->set_host(new_value);
+          TEST_ASSERT(base->get_host(), expected, "Host " + element_string + base->to_string());
         }
       }
       else if (category == "hostname") {
@@ -194,35 +194,35 @@ bool setters_tests_encoding(const char *source) {
 
         // TODO: Handle invalid utf-8 tests too.
         if (!element["expected"]["hostname"].get(expected)) {
-          base.set_hostname(new_value);
-          TEST_ASSERT(base.get_hostname(), expected, "Hostname " + element_string + base.to_string());
+          base->set_hostname(new_value);
+          TEST_ASSERT(base->get_hostname(), expected, "Hostname " + element_string + base->to_string());
         }
       }
       else if (category == "port") {
         std::string_view expected = element["expected"]["port"];
-        base.set_port(new_value);
-        TEST_ASSERT(base.get_port(), expected, "Port " + element_string + base.to_string());
+        base->set_port(new_value);
+        TEST_ASSERT(base->get_port(), expected, "Port " + element_string + base->to_string());
       }
       else if (category == "pathname") {
         std::string_view expected = element["expected"]["pathname"];
-        base.set_pathname(new_value);
-        TEST_ASSERT(base.get_pathname(), expected, "Path " + element_string + base.to_string());
+        base->set_pathname(new_value);
+        TEST_ASSERT(base->get_pathname(), expected, "Path " + element_string + base->to_string());
       }
       else if (category == "search") {
         std::string_view expected = element["expected"]["search"];
-        base.set_search(new_value);
-        TEST_ASSERT(base.get_search(), expected, "Search " + element_string + base.to_string());
+        base->set_search(new_value);
+        TEST_ASSERT(base->get_search(), expected, "Search " + element_string + base->to_string());
       }
       else if (category == "hash") {
         std::string_view expected = element["expected"]["hash"];
-        base.set_hash(new_value);
-        TEST_ASSERT(base.get_hash(), expected, "Fragment " + element_string + base.to_string());
+        base->set_hash(new_value);
+        TEST_ASSERT(base->get_hash(), expected, "Fragment " + element_string + base->to_string());
       }
       else if (category == "href") {
         std::string_view expected = element["expected"]["href"];
-        base.set_href(new_value);
-        TEST_ASSERT(base.set_href(new_value), true, "set_href should return true");
-        TEST_ASSERT(base.get_href(), expected, "Href " + element_string + base.to_string());
+        base->set_href(new_value);
+        TEST_ASSERT(base->set_href(new_value), true, "set_href should return true");
+        TEST_ASSERT(base->get_href(), expected, "Href " + element_string + base->to_string());
       }
     }
   }
@@ -252,31 +252,31 @@ bool toascii_encoding() {
 
       // The following code replicates `toascii.window.js` from web-platform tests.
       // @see https://github.com/web-platform-tests/wpt/blob/master/url/toascii.window.js
-      ada::url current = ada::parse("https://" + std::string(input) + "/x");
+      tl::expected<ada::url,ada::errors> current = ada::parse("https://" + std::string(input) + "/x");
 
       if (expected_output.type() == ondemand::json_type::string) {
         std::string_view stringified_output = expected_output.get_string();
-        TEST_ASSERT(current.get_host(), stringified_output, "Host should have been equal. From: "+ element_string);
-        TEST_ASSERT(current.get_hostname(), stringified_output, "Hostname should have been equal. From: "+ element_string);
-        TEST_ASSERT(current.get_pathname(), "/x", "Shouldn't have updated pathname");
-        TEST_ASSERT(current.get_href(), "https://" + std::string(stringified_output) + "/x", "Href should have been equal. From: " + element_string);
+        TEST_ASSERT(current->get_host(), stringified_output, "Host should have been equal. From: "+ element_string);
+        TEST_ASSERT(current->get_hostname(), stringified_output, "Hostname should have been equal. From: "+ element_string);
+        TEST_ASSERT(current->get_pathname(), "/x", "Shouldn't have updated pathname");
+        TEST_ASSERT(current->get_href(), "https://" + std::string(stringified_output) + "/x", "Href should have been equal. From: " + element_string);
       } else if (expected_output.is_null()) {
-        TEST_ASSERT(current.is_valid, false, "Should have failed. From: " + element_string);
+        TEST_ASSERT(bool(current), false, "Should have failed. From: " + element_string);
       }
 
       // Test setters for host and hostname values.
-      ada::url setter = ada::parse("https://x/x");
-      TEST_ASSERT(setter.set_host(input), !expected_output.is_null(), "set_host return value. " + element_string);
-      TEST_ASSERT(setter.set_hostname(input), !expected_output.is_null(), "set_hostname return value. " + element_string);
+      tl::expected<ada::url,ada::errors> setter = ada::parse("https://x/x");
+      TEST_ASSERT(setter->set_host(input), !expected_output.is_null(), "set_host return value. " + element_string);
+      TEST_ASSERT(setter->set_hostname(input), !expected_output.is_null(), "set_hostname return value. " + element_string);
 
       if (expected_output.type() == ondemand::json_type::string) {
         std::string_view stringified_output = expected_output.get_string();
-        TEST_ASSERT(setter.get_host(), stringified_output, "Host should have been equal. From: "+ element_string);
-        TEST_ASSERT(setter.get_hostname(), stringified_output, "Hostname should have been equal. From: "+ element_string);
+        TEST_ASSERT(setter->get_host(), stringified_output, "Host should have been equal. From: "+ element_string);
+        TEST_ASSERT(setter->get_hostname(), stringified_output, "Hostname should have been equal. From: "+ element_string);
       } else if (expected_output.is_null()) {
         // host and hostname should not be updated if the input is invalid.
-        TEST_ASSERT(setter.get_host(), "x", "Host should have been equal. From: "+ element_string);
-        TEST_ASSERT(setter.get_hostname(), "x", "Hostname should have been equal. From: "+ element_string);
+        TEST_ASSERT(setter->get_host(), "x", "Host should have been equal. From: "+ element_string);
+        TEST_ASSERT(setter->get_hostname(), "x", "Hostname should have been equal. From: "+ element_string);
       }
     }
   }
@@ -315,64 +315,65 @@ bool urltestdata_encoding(const char* source) {
       if(exceptions.find(std::string(input)) != exceptions.end()) { std::cerr << "skipping "+element_string << std::endl; continue; }
 #endif
       std::string_view base;
-      ada::url base_url;
+      tl::expected<ada::url,ada::errors>  base_url;
       if (!object["base"].get(base)) {
         std::cout << "base=" << base << std::endl;
         base_url = ada_parse(base);
+        TEST_ASSERT(bool(base_url), true, "Base should succeed " + element_string);
       }
       bool failure = false;
-      ada::url input_url = (!object["base"].get(base)) ?
-      ada_parse(input, &base_url)
+      tl::expected<ada::url,ada::errors> input_url = (!object["base"].get(base)) ?
+      ada_parse(input, &*base_url)
       : ada_parse(input);
       if (!object["failure"].get(failure)) {
-        TEST_ASSERT(input_url.is_valid, !failure, "Should not have succeeded " + element_string + input_url.to_string());
+        TEST_ASSERT(bool(input_url), !failure, "Should not have succeeded " + element_string + input_url->to_string());
       } else {
-        TEST_ASSERT(input_url.is_valid, true, "Should not have failed " + element_string + input_url.to_string());
+        TEST_ASSERT(bool(input_url), true, "Should not have failed " + element_string + input_url->to_string());
 
         std::string_view protocol = object["protocol"];
-        TEST_ASSERT(input_url.get_protocol(), protocol, "Protocol " + element_string + input_url.to_string());
+        TEST_ASSERT(input_url->get_protocol(), protocol, "Protocol " + element_string + input_url->to_string());
 
         std::string_view username = object["username"];
-        TEST_ASSERT(input_url.get_username(), username, "Username " + element_string + input_url.to_string());
+        TEST_ASSERT(input_url->get_username(), username, "Username " + element_string + input_url->to_string());
 
         std::string_view password = object["password"];
-        TEST_ASSERT(input_url.get_password(), password, "Password " + element_string + input_url.to_string());
+        TEST_ASSERT(input_url->get_password(), password, "Password " + element_string + input_url->to_string());
 
         std::string_view host = object["host"];
-        TEST_ASSERT(input_url.get_host(), host, "Hostname " + element_string + input_url.to_string());
+        TEST_ASSERT(input_url->get_host(), host, "Hostname " + element_string + input_url->to_string());
 
         std::string_view hostname = object["hostname"];
-        TEST_ASSERT(input_url.get_hostname(), hostname, "Hostname " + element_string + input_url.to_string());
+        TEST_ASSERT(input_url->get_hostname(), hostname, "Hostname " + element_string + input_url->to_string());
 
         std::string_view port = object["port"];
-        std::string expected_port = (input_url.port.has_value()) ? std::to_string(input_url.port.value()) : "";
+        std::string expected_port = (input_url->port.has_value()) ? std::to_string(input_url->port.value()) : "";
         TEST_ASSERT(expected_port, port, "Port " + element_string);
 
         std::string_view pathname{};
         if (!object["pathname"].get_string().get(pathname)) {
           std::cout <<"pathname " << pathname<<std::endl;
-          TEST_ASSERT(input_url.path, pathname, "Pathname " + element_string + input_url.to_string());
+          TEST_ASSERT(input_url->path, pathname, "Pathname " + element_string + input_url->to_string());
         }
         std::string_view query;
         if (!object["query"].get(query)) {
-          TEST_ASSERT(input_url.query.value_or(""), query, "Query " + element_string + input_url.to_string());
+          TEST_ASSERT(input_url->query.value_or(""), query, "Query " + element_string + input_url->to_string());
         }
 
         std::string_view hash = object["hash"];
-        TEST_ASSERT(input_url.get_hash(), hash, "Hash/Fragment " + element_string + input_url.to_string());
+        TEST_ASSERT(input_url->get_hash(), hash, "Hash/Fragment " + element_string + input_url->to_string());
 
         std::string_view href = object["href"];
-        TEST_ASSERT(input_url.get_href(), href, "href " + element_string + input_url.to_string());
+        TEST_ASSERT(input_url->get_href(), href, "href " + element_string + input_url->to_string());
 
         std::string_view origin;
         if(!object["origin"].get(origin)) {
-          TEST_ASSERT(input_url.get_origin(), origin, "Origin " + element_string + input_url.to_string());
+          TEST_ASSERT(input_url->get_origin(), origin, "Origin " + element_string + input_url->to_string());
         }
         if(bad_domains.find(std::string(input)) != bad_domains.end()) {
-          TEST_ASSERT(input_url.has_valid_domain(), false, "Bad domain " + element_string + input_url.to_string());
+          TEST_ASSERT(input_url->has_valid_domain(), false, "Bad domain " + element_string + input_url->to_string());
         }
         // Next we test the 'to_string' method.
-        std::string parsed_url_json = input_url.to_string();
+        std::string parsed_url_json = input_url->to_string();
         // We need padding.
         simdjson::padded_string padded_url_json = parsed_url_json;
         // We need a second parser.
@@ -414,11 +415,11 @@ bool verifydnslength_tests(const char* source) {
       std::string_view input = object["input"].get_string();
       std::string message = std::string(object["message"].get_string().value());
       bool failure = object["failure"].get_bool().value();
-      ada::url input_url = ada_parse(input);
+      tl::expected<ada::url,ada::errors> input_url = ada_parse(input);
       std::cout << input << " should " << (failure ? "fail" : "succeed")
-        << " and it " << (input_url.has_valid_domain() ? "succeeds" : "fails")
-        << (!failure == input_url.has_valid_domain() ? " OK" : " ERROR" ) << std::endl;
-      TEST_ASSERT(!input_url.has_valid_domain(), failure, message + " " + element_string);
+        << " and it " << (input_url->has_valid_domain() ? "succeeds" : "fails")
+        << (!failure == input_url->has_valid_domain() ? " OK" : " ERROR" ) << std::endl;
+      TEST_ASSERT(!input_url->has_valid_domain(), failure, message + " " + element_string);
       counter++;
     }
   }

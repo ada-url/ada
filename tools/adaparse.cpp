@@ -22,7 +22,8 @@ int main(int argc, char**argv) {
         std::cout << "use a URL as a parameter." << std::endl;
         return EXIT_SUCCESS;
     }
-    ada::url url = ada::parse(argv[1]);
-    std::cout << url << std::endl;
-    return url.is_valid;
+    auto url = ada::parse(argv[1]);
+    if(!url) { std::cerr << "Invalid." << std::endl; return EXIT_FAILURE; }
+    std::cout << *url << std::endl;
+    return EXIT_SUCCESS;
 }
