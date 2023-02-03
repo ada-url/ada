@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675461764752,
+  "lastUpdate": 1675461768646,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1442,6 +1442,42 @@ window.BENCHMARK_DATA = {
             "value": 438446.53551225044,
             "unit": "ns/iter",
             "extra": "iterations: 1591\ncpu: 438429.16404776875 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "a1c32a52c293ff17f329c5e561f2467c51ea69a3",
+          "message": "docs: update namespace definitions",
+          "timestamp": "2023-02-03T17:01:28-05:00",
+          "tree_id": "e74bd9e20da14bee13297bab5ddc56aeb15d90b4",
+          "url": "https://github.com/ada-url/ada/commit/a1c32a52c293ff17f329c5e561f2467c51ea69a3"
+        },
+        "date": 1675461768231,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 457449.59714100044,
+            "unit": "ns/iter",
+            "extra": "iterations: 1539\ncpu: 457093.0474333983 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 486022.28313672775,
+            "unit": "ns/iter",
+            "extra": "iterations: 1441\ncpu: 485990.6315058988 ns\nthreads: 1"
           }
         ]
       }
