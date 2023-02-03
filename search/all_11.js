@@ -1,31 +1,4 @@
 var searchData=
 [
-  ['scheme_275',['SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a3a70b5d6e416eeccda948d3ccc246f25',1,'ada']]],
-  ['scheme_2dinl_2eh_276',['scheme-inl.h',['../d7/dcf/scheme-inl_8h.html',1,'']]],
-  ['scheme_2eh_277',['scheme.h',['../d2/d64/scheme_8h.html',1,'']]],
-  ['scheme_5fstart_278',['SCHEME_START',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae773385c8d9dd6358a604116b8fb188c',1,'ada']]],
-  ['scriptpath_279',['SCRIPTPATH',['../dd/d27/namespaceamalgamate.html#a4a8067b8f5f73e6aae229884741421be',1,'amalgamate']]],
-  ['serializers_2ecpp_280',['serializers.cpp',['../da/d84/serializers_8cpp.html',1,'']]],
-  ['serializers_2eh_281',['serializers.h',['../d7/d2e/serializers_8h.html',1,'']]],
-  ['set_5fhash_282',['set_hash',['../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283',1,'ada::url']]],
-  ['set_5fhost_283',['set_host',['../dd/d03/structada_1_1url.html#a716bea9e0b8f60b16c97b5268458da7f',1,'ada::url']]],
-  ['set_5fhostname_284',['set_hostname',['../dd/d03/structada_1_1url.html#a0427d8495d50e40e13215d7b7e36fa63',1,'ada::url']]],
-  ['set_5fhref_285',['set_href',['../dd/d03/structada_1_1url.html#a9cbad568b85dbae513da65c3a48c45a3',1,'ada::url']]],
-  ['set_5fpassword_286',['set_password',['../dd/d03/structada_1_1url.html#a930de7c3fb7913d4dab5b9a1b5175233',1,'ada::url']]],
-  ['set_5fpathname_287',['set_pathname',['../dd/d03/structada_1_1url.html#ad25f560e4c3ff137c82c32203044e034',1,'ada::url']]],
-  ['set_5fport_288',['set_port',['../dd/d03/structada_1_1url.html#afa758006b81473c457ff8f460db7f115',1,'ada::url']]],
-  ['set_5fprotocol_289',['set_protocol',['../dd/d03/structada_1_1url.html#a5c9e3746ad2921a4cf6e506605047013',1,'ada::url']]],
-  ['set_5fscheme_290',['set_scheme',['../dd/d03/structada_1_1url.html#ab5402b0ef8016726b432152975304b42',1,'ada::url']]],
-  ['set_5fsearch_291',['set_search',['../dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1',1,'ada::url']]],
-  ['set_5fusername_292',['set_username',['../dd/d03/structada_1_1url.html#ac707d72cbe701a619a7ddeafa0562590',1,'ada::url']]],
-  ['shorten_5fpath_293',['shorten_path',['../d7/d6c/namespaceada_1_1helpers.html#a3846f1e6a123292a4460aec9c375a91d',1,'ada::helpers']]],
-  ['special_5fauthority_5fignore_5fslashes_294',['SPECIAL_AUTHORITY_IGNORE_SLASHES',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae65c30c3a220bc0aae9e11dc316c4625',1,'ada']]],
-  ['special_5fauthority_5fslashes_295',['SPECIAL_AUTHORITY_SLASHES',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5839c72e828b49749aa4a8f390a8d097',1,'ada']]],
-  ['special_5fports_296',['special_ports',['../d1/dfb/namespaceada_1_1scheme_1_1details.html#a75649c394af1b43d325ac9fffde2e2a3',1,'ada::scheme::details']]],
-  ['special_5fquery_5fpercent_5fencode_297',['SPECIAL_QUERY_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a2a5253f4fefdf61c146c4daf9a3633b9',1,'ada::character_sets']]],
-  ['special_5frelative_5for_5fauthority_298',['SPECIAL_RELATIVE_OR_AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a218882a191c9c4136a977c25b895eaff',1,'ada']]],
-  ['state_299',['state',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574',1,'ada']]],
-  ['state_2eh_300',['state.h',['../db/d3b/state_8h.html',1,'']]],
-  ['substring_301',['substring',['../d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06',1,'ada::helpers']]],
-  ['swap_302',['swap',['../de/d75/classtl_1_1expected.html#a6d42a33d57e23d877c5848383a2ac000',1,'tl::expected::swap()'],['../de/d54/namespacetl_1_1detail_1_1swap__adl__tests.html#adfaa1f0e13aadc3a031d2ee42487482e',1,'tl::detail::swap_adl_tests::swap(T &amp;, T &amp;)'],['../de/d54/namespacetl_1_1detail_1_1swap__adl__tests.html#abf71dd30d4397f304b2efb8213a89b9d',1,'tl::detail::swap_adl_tests::swap(T(&amp;a)[N], T(&amp;b)[N])'],['../d6/da5/namespacetl.html#ad21c563420ef263cb63a9abd6659c9ba',1,'tl::swap()']]]
+  ['verify_5fdns_5flength_192',['verify_dns_length',['../d3/dbe/namespaceada_1_1checkers.html#a755570190c883a443f94640167b099b3',1,'ada::checkers']]]
 ];

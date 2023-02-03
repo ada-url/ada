@@ -100,10 +100,6 @@ var namespaceada =
       [ "PORT", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5", null ]
     ] ],
     [ "href_from_file", "dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70", null ],
-    [ "inner_log", "dd/d64/namespaceada.html#aaf07b88d6b2dac9b867d6bad8cc14c62", null ],
-    [ "inner_log", "dd/d64/namespaceada.html#accd48d9920d0d0f514a2a3efc7cd480f", null ],
-    [ "log", "dd/d64/namespaceada.html#a91a11522733883fc916671a2a6b182c3", null ],
-    [ "log", "dd/d64/namespaceada.html#a326c61beec709ba92c05e1d373503b04", null ],
     [ "operator<<", "dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed", null ],
     [ "parse", "dd/d64/namespaceada.html#af8b1caee49e93f9811a7a5cf4a19ac25", null ],
     [ "to_string", "dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6", null ],

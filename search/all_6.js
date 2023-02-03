@@ -1,12 +1,19 @@
 var searchData=
 [
-  ['file_133',['FILE',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9',1,'ada::scheme::FILE()'],['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719',1,'ada::FILE()']]],
-  ['file_134',['file',['../dd/d27/namespaceamalgamate.html#a1231c78b5f93e5d7696c5c186df38dd2',1,'amalgamate']]],
-  ['file_5fhost_135',['FILE_HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a8de3c990e78108965db7c3f38cc5fca7',1,'ada']]],
-  ['file_5fslash_136',['FILE_SLASH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a33e2ce137194c80639c32978fb77a489',1,'ada']]],
-  ['find_5flongest_5fsequence_5fof_5fipv6_5fpieces_137',['find_longest_sequence_of_ipv6_pieces',['../d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4',1,'ada::serializers']]],
-  ['found_5fincludes_138',['found_includes',['../dd/d27/namespaceamalgamate.html#a2e92316733ed535e84bc55d158945ab9',1,'amalgamate']]],
-  ['fragment_139',['FRAGMENT',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a7345a249ed5c2f850d85dc1727c24716',1,'ada']]],
-  ['fragment_5fpercent_5fencode_140',['FRAGMENT_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67',1,'ada::character_sets']]],
-  ['ftp_141',['FTP',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fa187c62659589aaf7d9cbfbd1df04aabf',1,'ada::scheme']]]
+  ['generic_5ferror_67',['generic_error',['../dd/d64/namespaceada.html#a6e2c9c4694121664afd9db2d56453cb2a05415a94da18b556b4d90a210cc950d5',1,'ada']]],
+  ['get_5fhash_68',['get_hash',['../dd/d03/structada_1_1url.html#a8c833c2d7549b00de6fa11252d6a5f09',1,'ada::url']]],
+  ['get_5fhost_69',['get_host',['../dd/d03/structada_1_1url.html#a8b54b08041a460995f5c7c950e224294',1,'ada::url']]],
+  ['get_5fhost_5fdelimiter_5flocation_70',['get_host_delimiter_location',['../d7/d6c/namespaceada_1_1helpers.html#afcffe4b56f77a2d643a1a53c24c093c4',1,'ada::helpers']]],
+  ['get_5fhostname_71',['get_hostname',['../dd/d03/structada_1_1url.html#aa4f23a030f0adb5301962fd5b5e68f86',1,'ada::url']]],
+  ['get_5fhref_72',['get_href',['../dd/d03/structada_1_1url.html#a1b4171a6490ca8995b9a40f803921834',1,'ada::url']]],
+  ['get_5forigin_73',['get_origin',['../dd/d03/structada_1_1url.html#a363ab484a8ed7821f08affb7240b8b3c',1,'ada::url']]],
+  ['get_5fpassword_74',['get_password',['../dd/d03/structada_1_1url.html#a24d7d8e96da5b53a7b14ad9546633f00',1,'ada::url']]],
+  ['get_5fpathname_75',['get_pathname',['../dd/d03/structada_1_1url.html#a83b46d3289f297e888df56f210cb3add',1,'ada::url']]],
+  ['get_5fport_76',['get_port',['../dd/d03/structada_1_1url.html#acef0e8c266e5586b15e2dcab5c7f566f',1,'ada::url']]],
+  ['get_5fprotocol_77',['get_protocol',['../dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1',1,'ada::url']]],
+  ['get_5fscheme_5ftype_78',['get_scheme_type',['../d2/d63/namespaceada_1_1scheme.html#a5e6e7cb90bb372cd1554c6bebb944de6',1,'ada::scheme']]],
+  ['get_5fsearch_79',['get_search',['../dd/d03/structada_1_1url.html#a049adbb069b60b2157bb9f1b5d9d3f8b',1,'ada::url']]],
+  ['get_5fspecial_5fport_80',['get_special_port',['../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde',1,'ada::scheme::get_special_port(std::string_view scheme) noexcept'],['../d2/d63/namespaceada_1_1scheme.html#aba53560a51ae2f47d4295398c57c73ba',1,'ada::scheme::get_special_port(ada::scheme::type type) noexcept']]],
+  ['get_5fstate_81',['get_state',['../d7/d6c/namespaceada_1_1helpers.html#a6b55d7d7b1918e00a9a1eeb3c91b8f90',1,'ada::helpers']]],
+  ['get_5fusername_82',['get_username',['../dd/d03/structada_1_1url.html#aaf3b830a2a7e7389d7f518a055f882ef',1,'ada::url']]]
 ];

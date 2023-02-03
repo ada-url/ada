@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['bad_5fexpected_5faccess_458',['bad_expected_access',['../d1/d6e/classtl_1_1bad__expected__access.html#a0fba3223b81997e499cded09ec0d6d16',1,'tl::bad_expected_access']]],
-  ['begins_5fwith_459',['begins_with',['../d3/dbe/namespaceada_1_1checkers.html#ab424292e23a72ff1790f8b34e9775092',1,'ada::checkers']]],
-  ['bit_5fat_460',['bit_at',['../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9',1,'ada::character_sets']]]
+  ['contains_5fforbidden_5fdomain_5fcode_5fpoint_237',['contains_forbidden_domain_code_point',['../d2/dc3/namespaceada_1_1unicode.html#a26fcfd642181408d0e95cf806ba87c63',1,'ada::unicode']]],
+  ['convert_5fhex_5fto_5fbinary_238',['convert_hex_to_binary',['../d2/dc3/namespaceada_1_1unicode.html#a753fc83b58bb0afeaf0c1d7d534869e2',1,'ada::unicode']]]
 ];

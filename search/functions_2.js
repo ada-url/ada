@@ -1,9 +1,4 @@
 var searchData=
 [
-  ['can_5fswap_461',['can_swap',['../de/d54/namespacetl_1_1detail_1_1swap__adl__tests.html#a54d2a933983aeb9332b1eeb5c0d3f210',1,'tl::detail::swap_adl_tests::can_swap(...) noexcept(false)'],['../de/d54/namespacetl_1_1detail_1_1swap__adl__tests.html#a1a682bf661dae9aa6e4d98289c1996d7',1,'tl::detail::swap_adl_tests::can_swap(int) noexcept(noexcept(swap(std::declval&lt; T &amp; &gt;(), std::declval&lt; U &amp; &gt;())))']]],
-  ['construct_462',['construct',['../d2/d55/structtl_1_1detail_1_1expected__operations__base.html#a98cf2c13f940dbad49965dfec606ca4c',1,'tl::detail::expected_operations_base::construct()'],['../d7/df6/structtl_1_1detail_1_1expected__operations__base_3_01void_00_01E_01_4.html#a1a499ff5f157d874f0e6d2338fff74ff',1,'tl::detail::expected_operations_base&lt; void, E &gt;::construct()']]],
-  ['construct_5ferror_463',['construct_error',['../d2/d55/structtl_1_1detail_1_1expected__operations__base.html#ac05b215a29df21499daa1825e28e6261',1,'tl::detail::expected_operations_base::construct_error()'],['../d7/df6/structtl_1_1detail_1_1expected__operations__base_3_01void_00_01E_01_4.html#a680b89f5aaa03e637bc2f422d947f7f8',1,'tl::detail::expected_operations_base&lt; void, E &gt;::construct_error()']]],
-  ['construct_5fwith_464',['construct_with',['../d2/d55/structtl_1_1detail_1_1expected__operations__base.html#ab4ee7be83f513d5aea26536746018f06',1,'tl::detail::expected_operations_base::construct_with()'],['../d7/df6/structtl_1_1detail_1_1expected__operations__base_3_01void_00_01E_01_4.html#aae948931a40e98857448205431d8353e',1,'tl::detail::expected_operations_base&lt; void, E &gt;::construct_with()']]],
-  ['contains_5fforbidden_5fdomain_5fcode_5fpoint_465',['contains_forbidden_domain_code_point',['../d2/dc3/namespaceada_1_1unicode.html#a26fcfd642181408d0e95cf806ba87c63',1,'ada::unicode']]],
-  ['convert_5fhex_5fto_5fbinary_466',['convert_hex_to_binary',['../d2/dc3/namespaceada_1_1unicode.html#a753fc83b58bb0afeaf0c1d7d534869e2',1,'ada::unicode']]]
+  ['encode_5fjson_239',['encode_json',['../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad',1,'ada::helpers']]]
 ];

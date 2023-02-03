@@ -1,28 +1,5 @@
 var searchData=
 [
-  ['detail_303',['detail',['../d2/d00/namespacetl_1_1detail.html',1,'tl']]],
-  ['swap_5fadl_5ftests_304',['swap_adl_tests',['../de/d54/namespacetl_1_1detail_1_1swap__adl__tests.html',1,'tl::detail']]],
-  ['table_5fis_5fdouble_5fdot_5fpath_5fsegment_305',['table_is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f',1,'ada::unicode']]],
-  ['tag_306',['tag',['../df/d24/structtl_1_1detail_1_1swap__adl__tests_1_1tag.html',1,'tl::detail::swap_adl_tests']]],
-  ['tc_307',['TC',['../d5/d75/structtl_1_1detail_1_1TC.html',1,'tl::detail']]],
-  ['throw_5fexception_308',['throw_exception',['../d2/d00/namespacetl_1_1detail.html#aa5e6dc2362309394a354a099490713ea',1,'tl::detail']]],
-  ['tl_309',['tl',['../d6/da5/namespacetl.html',1,'']]],
-  ['tl_5fexpected_5f11_5fconstexpr_310',['TL_EXPECTED_11_CONSTEXPR',['../d1/d91/expected_8h.html#afcf2885de795b56720e6b1859f024878',1,'expected.h']]],
-  ['tl_5fexpected_5fgcc49_5fconstexpr_311',['TL_EXPECTED_GCC49_CONSTEXPR',['../d1/d91/expected_8h.html#a1e481c5da9cbeafb13bc26e7d56b4174',1,'expected.h']]],
-  ['tl_5fexpected_5fis_5ftrivially_5fcopy_5fassignable_312',['TL_EXPECTED_IS_TRIVIALLY_COPY_ASSIGNABLE',['../d1/d91/expected_8h.html#ac2444400fd67dfb4d1ab94c99f3b3c99',1,'expected.h']]],
-  ['tl_5fexpected_5fis_5ftrivially_5fcopy_5fconstructible_313',['TL_EXPECTED_IS_TRIVIALLY_COPY_CONSTRUCTIBLE',['../d1/d91/expected_8h.html#a41a04e965415b2f0888bca5e00c1e6a4',1,'expected.h']]],
-  ['tl_5fexpected_5fis_5ftrivially_5fdestructible_314',['TL_EXPECTED_IS_TRIVIALLY_DESTRUCTIBLE',['../d1/d91/expected_8h.html#a254b10aa984b9cc4fb6897fa6473b42e',1,'expected.h']]],
-  ['tl_5fexpected_5fmsvc2015_5fconstexpr_315',['TL_EXPECTED_MSVC2015_CONSTEXPR',['../d1/d91/expected_8h.html#a82213517e6ee3d30ee092474e4d9a09d',1,'expected.h']]],
-  ['tl_5fexpected_5fversion_5fmajor_316',['TL_EXPECTED_VERSION_MAJOR',['../d1/d91/expected_8h.html#ac1ef9ded128f01e0e6b39d59c7e92348',1,'expected.h']]],
-  ['tl_5fexpected_5fversion_5fminor_317',['TL_EXPECTED_VERSION_MINOR',['../d1/d91/expected_8h.html#a2744f534922443ef435b2b221ecffde6',1,'expected.h']]],
-  ['tl_5fexpected_5fversion_5fpatch_318',['TL_EXPECTED_VERSION_PATCH',['../d1/d91/expected_8h.html#a4511187db10e0faafed6f63a216e01f8',1,'expected.h']]],
-  ['tl_5fmonostate_5finplace_5fmutex_319',['TL_MONOSTATE_INPLACE_MUTEX',['../d1/d91/expected_8h.html#aada132df87570346fb17ebb0c6c62ae7',1,'expected.h']]],
-  ['tl_5ftraits_5fmutex_320',['TL_TRAITS_MUTEX',['../d1/d91/expected_8h.html#a72467552f8a2944113e9a59c14b13356',1,'expected.h']]],
-  ['to_5fascii_321',['to_ascii',['../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8',1,'ada::unicode']]],
-  ['to_5flower_322',['to_lower',['../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b',1,'ada::checkers']]],
-  ['to_5flower_5fascii_323',['to_lower_ascii',['../d2/dc3/namespaceada_1_1unicode.html#ab9b70de07868ab60794c3079aa4db46f',1,'ada::unicode']]],
-  ['to_5fstring_324',['to_string',['../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6',1,'ada::to_string(ada::state s)'],['../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7',1,'ada::to_string(encoding_type type)'],['../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2',1,'ada::url::to_string()']]],
-  ['transform_325',['transform',['../de/d75/classtl_1_1expected.html#a7c688b3550927481a7af57b12c8a9997',1,'tl::expected::transform(F &amp;&amp;f) &amp;&amp;'],['../de/d75/classtl_1_1expected.html#a6531f68939e3ecf0dc82aae94e175f9b',1,'tl::expected::transform()'],['../de/d75/classtl_1_1expected.html#a707ec3e992fcdbb51e0609bac58c6489',1,'tl::expected::transform()'],['../de/d75/classtl_1_1expected.html#a599c8f85ed9c43e09a3fa3258213a07c',1,'tl::expected::transform()']]],
-  ['trim_5fc0_5fwhitespace_326',['trim_c0_whitespace',['../d7/d6c/namespaceada_1_1helpers.html#a7e7a930166b3365d93acd6c42620f45b',1,'ada::helpers']]],
-  ['type_327',['type',['../d5/d34/structtl_1_1detail_1_1invoke__result__impl_3_01F_00_01decltype_07detail_1_1invoke_07std_1_1declvcbceb13962854eff875073298b31c9c4.html#a4d5adc2f2bf22b54507454d55ecb865b',1,'tl::detail::invoke_result_impl&lt; F, decltype(detail::invoke(std::declval&lt; F &gt;(), std::declval&lt; Us &gt;()...), void()), Us... &gt;::type()'],['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573f',1,'ada::scheme::type()']]]
+  ['ws_193',['WS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fa1b6522b40511ec15ca60df3eb3858df2',1,'ada::scheme']]],
+  ['wss_194',['WSS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fac48a95c337aa2775b07339cf74cf903d',1,'ada::scheme']]]
 ];

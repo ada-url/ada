@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['file_596',['file',['../dd/d27/namespaceamalgamate.html#a1231c78b5f93e5d7696c5c186df38dd2',1,'amalgamate']]],
-  ['found_5fincludes_597',['found_includes',['../dd/d27/namespaceamalgamate.html#a2e92316733ed535e84bc55d158945ab9',1,'amalgamate']]],
-  ['fragment_5fpercent_5fencode_598',['FRAGMENT_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67',1,'ada::character_sets']]]
+  ['is_5falnum_5fplus_5ftable_314',['is_alnum_plus_table',['../d2/dc3/namespaceada_1_1unicode.html#a505b0da95aca0b4581df4d320ea50312',1,'ada::unicode']]],
+  ['is_5fforbidden_5fdomain_5fcode_5fpoint_5ftable_315',['is_forbidden_domain_code_point_table',['../d2/dc3/namespaceada_1_1unicode.html#aaa31bc91ae8e08100d13f4477075a0ca',1,'ada::unicode']]],
+  ['is_5fforbidden_5fhost_5fcode_5fpoint_5ftable_316',['is_forbidden_host_code_point_table',['../d2/dc3/namespaceada_1_1unicode.html#aedf60884c2f9bf443a974d29741a7d11',1,'ada::unicode']]],
+  ['is_5fspecial_5flist_317',['is_special_list',['../d1/dfb/namespaceada_1_1scheme_1_1details.html#a45786dafa7d1a411f6606fee8f667a6f',1,'ada::scheme::details']]],
+  ['is_5fvalid_318',['is_valid',['../dd/d03/structada_1_1url.html#aa0ed735a171c4bfd539c79194a48e426',1,'ada::url']]]
 ];

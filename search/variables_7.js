@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['no_5finit_614',['no_init',['../d2/d00/namespacetl_1_1detail.html#a00dbfd31efe41bd63133c717e5eaf390',1,'tl::detail']]]
+  ['table_5fis_5fdouble_5fdot_5fpath_5fsegment_324',['table_is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f',1,'ada::unicode']]]
 ];

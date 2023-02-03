@@ -49,32 +49,26 @@ var NAVTREE =
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
-      [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
-        [ "All", "functions.html", "functions_dup" ],
-        [ "Functions", "functions_func.html", "functions_func" ],
-        [ "Variables", "functions_vars.html", null ],
-        [ "Typedefs", "functions_type.html", null ]
+        [ "All", "functions.html", null ],
+        [ "Functions", "functions_func.html", null ],
+        [ "Variables", "functions_vars.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ],
       [ "File Members", "globals.html", [
         [ "All", "globals.html", null ],
-        [ "Functions", "globals_func.html", null ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
-    ] ],
-    [ "Examples", "examples.html", "examples" ]
+    ] ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
 "annotated.html",
-"d2/de8/structtl_1_1detail_1_1expected__default__ctor__base_3_01T_00_01E_00_01false_01_4.html#af12eed994f177fc32b148f9d98bfcb45",
-"d8/db7/structtl_1_1detail_1_1expected__delete__ctor__base_3_01T_00_01E_00_01true_00_01false_01_4.html#a0c8058326886e809b4038d038aea5853",
-"dd/d9c/unicode_8cpp.html#af6a43ab73c2b1e20f81de57b18e1f388"
+"db/d3b/state_8h.html#a7a6e382cd6d05da70cf566a2cf636574ad418402f9786d8d940e8cbb595090523"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
