@@ -231,21 +231,21 @@ namespace ada {
   }
 
   bool url::set_href(const std::string_view input) {
-    ada::url out = ada::parse(input);
+    ada::result out = ada::parse(input);
 
-    if (out.is_valid) {
-      set_protocol(out.get_protocol());
-      set_username(out.get_username());
-      set_password(out.get_password());
-      set_host(out.get_host());
-      set_hostname(out.get_hostname());
-      set_port(out.get_port());
-      set_pathname(out.get_pathname());
-      set_hash(out.get_hash());
-      set_search(out.get_search());
+    if (out) {
+      set_protocol(out->get_protocol());
+      set_username(out->get_username());
+      set_password(out->get_password());
+      set_host(out->get_host());
+      set_hostname(out->get_hostname());
+      set_port(out->get_port());
+      set_pathname(out->get_pathname());
+      set_hash(out->get_hash());
+      set_search(out->get_search());
     }
 
-    return out.is_valid;
+    return out.has_value();
   }
 
 } // namespace ada

@@ -66,21 +66,21 @@ namespace ada {
     uint64_t ipv4{0};
     // we could unroll for better performance?
     for(;(digit_count < 4) && !(input.empty()); digit_count++) {
-      uint32_t result{}; // If any number exceeds 32 bits, we have an error.
+      uint32_t segment_result{}; // If any number exceeds 32 bits, we have an error.
       bool is_hex = checkers::has_hex_prefix(input);
       if(is_hex && ((input.length() == 2)|| ((input.length() > 2) && (input[2]=='.')))) {
         // special case
-        result = 0;
+        segment_result = 0;
         input.remove_prefix(2);
       } else {
         std::from_chars_result r;
         if(is_hex) {
-          r = std::from_chars(input.data() + 2, input.data() + input.size(), result, 16);
+          r = std::from_chars(input.data() + 2, input.data() + input.size(), segment_result, 16);
         } else if ((input.length() >= 2) && input[0] == '0' && checkers::is_digit(input[1])) {
-          r = std::from_chars(input.data() + 1, input.data() + input.size(), result, 8);
+          r = std::from_chars(input.data() + 1, input.data() + input.size(), segment_result, 8);
         } else {
           pure_decimal_count++;
-          r = std::from_chars(input.data(), input.data() + input.size(), result, 10);
+          r = std::from_chars(input.data(), input.data() + input.size(), segment_result, 10);
         }
         if (r.ec != std::errc()) { return is_valid = false; }
         input.remove_prefix(r.ptr-input.data());
@@ -89,22 +89,22 @@ namespace ada {
         // We have the last value.
         // At this stage, ipv4 contains digit_count*8 bits.
         // So we have 32-digit_count*8 bits left.
-        if(result > (uint64_t(1)<<(32-digit_count*8))) { return is_valid = false; }
+        if(segment_result > (uint64_t(1)<<(32-digit_count*8))) { return is_valid = false; }
         ipv4 <<=(32-digit_count*8);
-        ipv4 |= result;
+        ipv4 |= segment_result;
         goto final;
       } else {
         // There is more, so that the value must no be larger than 255
         // and we must have a '.'.
-        if ((result>255) || (input[0]!='.')) { return is_valid = false; }
+        if ((segment_result>255) || (input[0]!='.')) { return is_valid = false; }
         ipv4 <<=8;
-        ipv4 |= result;
+        ipv4 |= segment_result;
         input.remove_prefix(1); // remove '.'
       }
     }
     if((digit_count != 4) || (!input.empty())) {return is_valid = false; }
     final:
-    // We could also check result.ptr to see where the parsing ended.
+    // We could also check r.ptr to see where the parsing ended.
     if(pure_decimal_count == 4) {
       host = original_input; // The original input was already all decimal and we validated it.
     } else {

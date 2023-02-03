@@ -8,7 +8,7 @@
 #include "ada/state.h"
 #include "ada/url.h"
 #include "ada/encoding_type.h"
-
+#include "ada/expected.h"
 #include <optional>
 #include <string_view>
 
