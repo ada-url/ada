@@ -3,9 +3,10 @@
 #include <iostream>
 
 int main(int , char *[]) {
-  ada::url url = ada::parse("https://www.google.com");
-  url.set_protocol("http");
-  std::cout << url.get_protocol() << std::endl;
-  std::cout << url.get_host() << std::endl;
+  auto url = ada::parse("https://www.google.com");
+  if(!url) { std::cout << "failure" << std::endl; return EXIT_FAILURE; }
+  url->set_protocol("http");
+  std::cout << url->get_protocol() << std::endl;
+  std::cout << url->get_host() << std::endl;
   return EXIT_SUCCESS;
 }
