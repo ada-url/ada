@@ -114,14 +114,14 @@ Examples</h2>
 <div class="fragment"><div class="line"><a class="code" href="dd/d64/namespaceada.html#a3d60d994682b227af774a12e6302a80a">ada::result</a> url = <a class="code" href="dd/d64/namespaceada.html#af8b1caee49e93f9811a7a5cf4a19ac25">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url-&gt;set_username(<span class="stringliteral">&quot;username&quot;</span>);</div>
 <div class="line">url-&gt;set_password(<span class="stringliteral">&quot;password&quot;</span>);</div>
-<div class="line"><span class="comment">// ada-&gt;get_href() will return &quot;https://username:password@www.google.com&quot;</span></div>
+<div class="line"><span class="comment">// ada-&gt;get_href() will return &quot;https://username:password@www.google.com/&quot;</span></div>
 </div><!-- fragment --><ul>
 <li>Get/Update Protocol</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code" href="dd/d64/namespaceada.html#a3d60d994682b227af774a12e6302a80a">ada::result</a> url = <a class="code" href="dd/d64/namespaceada.html#af8b1caee49e93f9811a7a5cf4a19ac25">ada::parse</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line">url-&gt;set_protocol(<span class="stringliteral">&quot;wss&quot;</span>);</div>
-<div class="line"><span class="comment">// url-&gt;get_protocol() will return &quot;wss&quot;</span></div>
-<div class="line"><span class="comment">// url-&gt;get_href() will return &quot;wss://www.google.com&quot;</span></div>
+<div class="line"><span class="comment">// url-&gt;get_protocol() will return &quot;wss:&quot;</span></div>
+<div class="line"><span class="comment">// url-&gt;get_href() will return &quot;wss://www.google.com/&quot;</span></div>
 </div><!-- fragment --><ul>
 <li>Get/Update host</li>
 </ul>
