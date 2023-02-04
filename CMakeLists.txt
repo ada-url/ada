@@ -21,6 +21,7 @@ add_subdirectory(src)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
+option(ADA_USE_ICU "Use ICU if available" ON)
 
 if(BUILD_TESTING OR ADA_BENCHMARKS)
   include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
@@ -37,6 +38,7 @@ else()
   endif()
 endif(BUILD_TESTING)
 
+if(ADA_USE_ICU)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   message(STATUS "Apple system detected.")
@@ -83,7 +85,12 @@ else(ICU_FOUND)
     return()
   endif(MSVC)
 endif(ICU_FOUND)
+
+else(ADA_USE_ICU)
+target_compile_definitions(ada PUBLIC ADA_HAS_ICU=0)
+
 ### Going forward, we have ICU for sure, except under Windows.
+endif(ADA_USE_ICU)
 
 If(ADA_BENCHMARKS)
   message(STATUS "Ada benchmarks enabled.")

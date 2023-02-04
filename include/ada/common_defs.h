@@ -218,5 +218,6 @@ namespace ada {
 #include <unicode/utf8.h>
 #endif // ADA_HAS_ICU
 
+#define ADA_WINDOWS_TO_ASCII_FALLBACK 0 // we never use anything but ICU. No fallback.
 
 #endif // ADA_COMMON_DEFS_H

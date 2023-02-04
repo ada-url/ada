@@ -411,8 +411,11 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
     }
     out.value().resize(length); // we possibly want to call :shrink_to_fit otherwise we use 255 bytes.
     out.value().shrink_to_fit();
-
-#elif defined(_WIN32)
+    if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
+      out = std::nullopt;
+      return false;
+    }
+#elif defined(_WIN32) && ADA_WINDOWS_TO_ASCII_FALLBACK
     (void)be_strict; // unused.
     // Fallback on the system if ICU is not available.
     // Windows function assumes UTF-16.
@@ -522,14 +525,14 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
     }
     out = std::string(required_buffer_size, 0);
     for(size_t i = 0; i < required_buffer_size; i++) { (*out)[i] = char(ascii_buffer.get()[i]); }
-#else
-    (void)be_strict; // unused.
-    out = input; // We cannot do much more for now.
-#endif
     if(std::any_of(out.value().begin(), out.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
       out = std::nullopt;
       return false;
     }
+#else
+    (void)be_strict; // unused.
+    out = input; // We cannot do much more for now.
+#endif
     return true;
   }
 
