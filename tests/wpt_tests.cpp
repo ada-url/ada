@@ -14,11 +14,6 @@
 // We think that these examples have bad domains.
 std::set<std::string> bad_domains = {"http://./", "http://../", "http://foo.09.."};
 
-#ifdef _WIN32
-// Under Windows, we use get transitional IDN, but the spec is based on non-transitional.
-std::set<std::string> exceptions = {"\x68\x74\x74\x70\x73\x3a\x2f\x2f\x66\x61\xc3\x9f\x2e\x45\x78\x41\x6d\x50\x6c\x45\x2f"};
-#endif
-
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
@@ -311,9 +306,6 @@ bool urltestdata_encoding(const char* source) {
         return false;
       }
       std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
-#ifdef _WIN32
-      if(exceptions.find(std::string(input)) != exceptions.end()) { std::cerr << "skipping "+element_string << std::endl; continue; }
-#endif
       std::string_view base;
       ada::result  base_url;
       if (!object["base"].get(base)) {
@@ -458,13 +450,13 @@ int main(int argc, char** argv) {
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = toascii_encoding();
   }
-#endif // _WIN32
+#endif // ADA_HAS_ICU
   name = "setters_tests_encoding("+std::string(SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
 #if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif // _WIN32
+#endif // !ADA_HAS_ICU
   }
   name = "setters_tests_encoding("+std::string(ADA_SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
@@ -493,8 +485,6 @@ int main(int argc, char** argv) {
   std::cout << "==============="<< std::endl;
 #if ADA_HAS_ICU
   std::cout << "We are using ICU."<< std::endl;
-#elif defined(_WIN32)
-  std::cout << "We are using Microsoft's Normaliz."<< std::endl;
 #else
   std::cout << "ICU is unavailable and we have no feedback."<< std::endl;
 #endif

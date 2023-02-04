@@ -4,10 +4,10 @@
 
 #include <algorithm>
 #if ADA_HAS_ICU
-// We are god.
+// We are good.
 #else
 
-#ifdef _WIN32 // let us hope that we are linking with the proper libraries.
+#if defined(_WIN32) && ADA_WINDOWS_TO_ASCII_FALLBACK
 
 #ifndef __wtypes_h__
 #include <wtypes.h>
@@ -18,7 +18,7 @@
 #endif // __WINDEF_
 
 #include <winnls.h>
-#endif // _WIN32
+#endif //defined(_WIN32) && ADA_WINDOWS_TO_ASCII_FALLBACK
 
 #endif // ADA_HAS_ICU
 
