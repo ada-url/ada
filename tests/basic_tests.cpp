@@ -47,9 +47,29 @@ bool set_host_should_return_true_sometimes() {
     TEST_SUCCEED() 
 }
 
+
+bool set_hostname_should_return_false_sometimes() {
+    TEST_START()
+    ada::result r = ada::parse("mailto:a@b.com");
+    bool b = r->set_hostname("something");
+    TEST_ASSERT(b, false, "set_hostname should return false")
+    TEST_SUCCEED() 
+}
+
+bool set_hostname_should_return_true_sometimes() {
+    TEST_START()
+    ada::result r = ada::parse("https://www.google.com");
+    bool b = r->set_hostname("something");
+    TEST_ASSERT(b, true, "set_hostname should return true")
+    TEST_SUCCEED() 
+}
+
+
 int main() {
     bool success = set_host_should_return_false_sometimes()
-     && set_host_should_return_true_sometimes();
+     && set_host_should_return_true_sometimes()
+     && set_hostname_should_return_false_sometimes()
+     && set_hostname_should_return_true_sometimes();
     if(success) { return EXIT_SUCCESS; }
     return EXIT_FAILURE;
 }
