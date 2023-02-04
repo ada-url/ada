@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675535058162,
+  "lastUpdate": 1675535062586,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1610,6 +1610,42 @@ window.BENCHMARK_DATA = {
             "value": 486975.67414156784,
             "unit": "ns/iter",
             "extra": "iterations: 1427\ncpu: 486951.15627189906 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "5bad7e3f2544bae8b52235e4b687f0213a757cc1",
+          "message": "fix: handle ADA_HAS_ICU properly",
+          "timestamp": "2023-02-04T13:22:35-05:00",
+          "tree_id": "124673c59b4715e8506640ae1f2ad68bccc0514d",
+          "url": "https://github.com/ada-url/ada/commit/5bad7e3f2544bae8b52235e4b687f0213a757cc1"
+        },
+        "date": 1675535061786,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 415228.6248520623,
+            "unit": "ns/iter",
+            "extra": "iterations: 1690\ncpu: 415210.76923076925 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 435915.33873985434,
+            "unit": "ns/iter",
+            "extra": "iterations: 1603\ncpu: 435897.8165938863 ns\nthreads: 1"
           }
         ]
       }
