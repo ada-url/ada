@@ -12,3 +12,7 @@ docs
 
 # Generated using only the Github workflow
 benchmark_result.json
+
+singleheader/ada.h
+singleheader/ada.cpp
+singleheader/singleheader.zip
