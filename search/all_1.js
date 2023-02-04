@@ -35,13 +35,14 @@ var searchData=
   ['ada_5fversion_5fminor_33',['ADA_VERSION_MINOR',['../dd/d64/namespaceada.html#a234b49f8ed06b16bb47f1f22c10f633fa03d1a99d518d05ee8221fbea0051b56c',1,'ada']]],
   ['ada_5fversion_5frevision_34',['ADA_VERSION_REVISION',['../dd/d64/namespaceada.html#a234b49f8ed06b16bb47f1f22c10f633fa574e2fbf1c698b45963d68dcc9b4863a',1,'ada']]],
   ['ada_5fwarn_5funused_35',['ada_warn_unused',['../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34',1,'common_defs.h']]],
-  ['authority_36',['AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39',1,'ada']]],
-  ['character_5fsets_37',['character_sets',['../d7/d35/namespaceada_1_1character__sets.html',1,'ada']]],
-  ['checkers_38',['checkers',['../d3/dbe/namespaceada_1_1checkers.html',1,'ada']]],
-  ['details_39',['details',['../d1/dfb/namespaceada_1_1scheme_1_1details.html',1,'ada::scheme']]],
-  ['helpers_40',['helpers',['../d7/d6c/namespaceada_1_1helpers.html',1,'ada']]],
-  ['parser_41',['parser',['../d6/da3/namespaceada_1_1parser.html',1,'ada']]],
-  ['scheme_42',['scheme',['../d2/d63/namespaceada_1_1scheme.html',1,'ada']]],
-  ['serializers_43',['serializers',['../d9/dea/namespaceada_1_1serializers.html',1,'ada']]],
-  ['unicode_44',['unicode',['../d2/dc3/namespaceada_1_1unicode.html',1,'ada']]]
+  ['ada_5fwindows_5fto_5fascii_5ffallback_36',['ADA_WINDOWS_TO_ASCII_FALLBACK',['../d7/d19/common__defs_8h.html#a22fec2928e82da050018d4554a2fe839',1,'common_defs.h']]],
+  ['authority_37',['AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39',1,'ada']]],
+  ['character_5fsets_38',['character_sets',['../d7/d35/namespaceada_1_1character__sets.html',1,'ada']]],
+  ['checkers_39',['checkers',['../d3/dbe/namespaceada_1_1checkers.html',1,'ada']]],
+  ['details_40',['details',['../d1/dfb/namespaceada_1_1scheme_1_1details.html',1,'ada::scheme']]],
+  ['helpers_41',['helpers',['../d7/d6c/namespaceada_1_1helpers.html',1,'ada']]],
+  ['parser_42',['parser',['../d6/da3/namespaceada_1_1parser.html',1,'ada']]],
+  ['scheme_43',['scheme',['../d2/d63/namespaceada_1_1scheme.html',1,'ada']]],
+  ['serializers_44',['serializers',['../d9/dea/namespaceada_1_1serializers.html',1,'ada']]],
+  ['unicode_45',['unicode',['../d2/dc3/namespaceada_1_1unicode.html',1,'ada']]]
 ];
