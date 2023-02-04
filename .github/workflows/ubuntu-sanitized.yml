@@ -30,6 +30,6 @@ jobs:
         env:
           CXX: g++-12
       - name: Build
-        run: cmake --build build --target wpt_tests --target from_file_tests --target demo --target basic_fuzzer -j=2
+        run: cmake --build build -j=2
       - name: Test
         run: ctest --output-on-failure --test-dir build

@@ -19,4 +19,5 @@ endif()
 
 add_cpp_test(basic_fuzzer)
 add_cpp_test(from_file_tests)
+add_cpp_test(basic_tests)
 

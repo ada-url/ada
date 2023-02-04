@@ -30,7 +30,7 @@ if(url) { /* URL is valid */ }
 ada::result url = ada::parse("https://www.google.com");
 url->set_username("username");
 url->set_password("password");
-// ada->get_href() will return "https://username:password@www.google.com"
+// ada->get_href() will return "https://username:password@www.google.com/"
 ```
 
 - Get/Update Protocol
@@ -38,8 +38,8 @@ url->set_password("password");
 ```cpp
 ada::result url = ada::parse("https://www.google.com");
 url->set_protocol("wss");
-// url->get_protocol() will return "wss"
-// url->get_href() will return "wss://www.google.com"
+// url->get_protocol() will return "wss:"
+// url->get_href() will return "wss://www.google.com/"
 ```
 
 - Get/Update host
