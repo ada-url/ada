@@ -206,13 +206,16 @@ namespace ada {
 
 #ifndef ADA_HAS_ICU
 #if __has_include(<unicode/uidna.h>)
-#include <unicode/utypes.h>
-#include <unicode/uidna.h>
-#include <unicode/utf8.h>
 #define ADA_HAS_ICU 1
 #else
 #define ADA_HAS_ICU 0
 #endif // __has_include(<unicode/uidna.h>)
+#endif // ADA_HAS_ICU
+
+#if ADA_HAS_ICU
+#include <unicode/utypes.h>
+#include <unicode/uidna.h>
+#include <unicode/utf8.h>
 #endif // ADA_HAS_ICU
 
 
