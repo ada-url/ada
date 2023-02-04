@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675545536334,
+  "lastUpdate": 1675545540239,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1778,6 +1778,42 @@ window.BENCHMARK_DATA = {
             "value": 437712.27781392756,
             "unit": "ns/iter",
             "extra": "iterations: 1537\ncpu: 437687.50813272595 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "c01e3868cb78654c38973407c83662dfdc3b08d2",
+          "message": "Patching for Windows.",
+          "timestamp": "2023-02-04T16:17:27-05:00",
+          "tree_id": "edcc46879d4a74ec7a226e3318cc63cda154c062",
+          "url": "https://github.com/ada-url/ada/commit/c01e3868cb78654c38973407c83662dfdc3b08d2"
+        },
+        "date": 1675545539579,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 474844.62620028487,
+            "unit": "ns/iter",
+            "extra": "iterations: 1458\ncpu: 474436.2139917695 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 505778.2968980782,
+            "unit": "ns/iter",
+            "extra": "iterations: 1354\ncpu: 505719.4977843426 ns\nthreads: 1"
           }
         ]
       }
