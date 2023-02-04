@@ -39,8 +39,17 @@ bool set_host_should_return_false_sometimes() {
     TEST_SUCCEED() 
 }
 
+bool set_host_should_return_true_sometimes() {
+    TEST_START()
+    ada::result r = ada::parse("https://www.google.com");
+    bool b = r->set_host("something");
+    TEST_ASSERT(b, true, "set_host should return true")
+    TEST_SUCCEED() 
+}
+
 int main() {
-    bool success = set_host_should_return_false_sometimes();
+    bool success = set_host_should_return_false_sometimes()
+     && set_host_should_return_true_sometimes();
     if(success) { return EXIT_SUCCESS; }
     return EXIT_FAILURE;
 }
