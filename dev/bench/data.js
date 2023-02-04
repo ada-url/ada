@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675530144744,
+  "lastUpdate": 1675530148050,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1526,6 +1526,42 @@ window.BENCHMARK_DATA = {
             "value": 486022.28313672775,
             "unit": "ns/iter",
             "extra": "iterations: 1441\ncpu: 485990.6315058988 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "4c76670329ad2bd2b1c7f9541b2faee923086438",
+          "message": "build: add singleheader files to gitignore",
+          "timestamp": "2023-02-04T12:01:29-05:00",
+          "tree_id": "061cb04be2908dcba5a3d204eab85c46628c0e0c",
+          "url": "https://github.com/ada-url/ada/commit/4c76670329ad2bd2b1c7f9541b2faee923086438"
+        },
+        "date": 1675530147654,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 504202.08299999556,
+            "unit": "ns/iter",
+            "extra": "iterations: 1000\ncpu: 502860.70000000007 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 486975.67414156784,
+            "unit": "ns/iter",
+            "extra": "iterations: 1427\ncpu: 486951.15627189906 ns\nthreads: 1"
           }
         ]
       }
