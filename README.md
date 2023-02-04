@@ -11,7 +11,7 @@ Specification for URL parser can be found from the
 ## Requirements
 
 - A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
-- We use [ICU](https://icu.unicode.org) under non-Windows systems (macOS, Linux). Under Windows, [we rely on Microsoft's builtin IdnToAscii function](https://learn.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-idntoascii).
+- We use [ICU](https://icu.unicode.org) when it is available.
 
 ## Usage
 
