@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675541421251,
+  "lastUpdate": 1675541425141,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1694,6 +1694,42 @@ window.BENCHMARK_DATA = {
             "value": 435915.33873985434,
             "unit": "ns/iter",
             "extra": "iterations: 1603\ncpu: 435897.8165938863 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0cfea874630265c8e0a597606e317c6323e834c3",
+          "message": "Adding a new file where we can put basic tests. (#203)\n\n* Adding a new file where we can put basic tests.\r\n\r\n* Adding a test for the reverse.\r\n\r\n* More tests.\r\n\r\n* Testing all examples from the README.\r\n\r\n* Minor fix\r\n\r\n* Build everything",
+          "timestamp": "2023-02-04T15:08:07-05:00",
+          "tree_id": "f1be2b483e46ac69e16d29c15fe319a035a1a803",
+          "url": "https://github.com/ada-url/ada/commit/0cfea874630265c8e0a597606e317c6323e834c3"
+        },
+        "date": 1675541424596,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 414331.37277051527,
+            "unit": "ns/iter",
+            "extra": "iterations: 1682\ncpu: 414322.5326991677 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 437712.27781392756,
+            "unit": "ns/iter",
+            "extra": "iterations: 1537\ncpu: 437687.50813272595 ns\nthreads: 1"
           }
         ]
       }
