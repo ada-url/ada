@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675535068138,
+  "lastUpdate": 1675541421251,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -876,6 +876,54 @@ window.BENCHMARK_DATA = {
             "value": 7697.044810304766,
             "unit": "ns/iter",
             "extra": "iterations: 88194\ncpu: 7696.799101979728 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0cfea874630265c8e0a597606e317c6323e834c3",
+          "message": "Adding a new file where we can put basic tests. (#203)\n\n* Adding a new file where we can put basic tests.\r\n\r\n* Adding a test for the reverse.\r\n\r\n* More tests.\r\n\r\n* Testing all examples from the README.\r\n\r\n* Minor fix\r\n\r\n* Build everything",
+          "timestamp": "2023-02-04T15:08:07-05:00",
+          "tree_id": "f1be2b483e46ac69e16d29c15fe319a035a1a803",
+          "url": "https://github.com/ada-url/ada/commit/0cfea874630265c8e0a597606e317c6323e834c3"
+        },
+        "date": 1675541420207,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5855.097347577914,
+            "unit": "ns/iter",
+            "extra": "iterations: 119438\ncpu: 5853.720758887457 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 5219.292581518394,
+            "unit": "ns/iter",
+            "extra": "iterations: 134448\ncpu: 5218.897268832559 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 10897.638527903882,
+            "unit": "ns/iter",
+            "extra": "iterations: 64561\ncpu: 10897.462864577692 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 7531.870669095189,
+            "unit": "ns/iter",
+            "extra": "iterations: 92244\ncpu: 7531.486058713844 ns\nthreads: 1"
           }
         ]
       }
