@@ -370,6 +370,11 @@ namespace ada {
       return is_valid = false;
     }
 
+    if(std::any_of(host.value().begin(), host.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
+      host = std::nullopt;
+      return is_valid = false;
+    }
+
     // If asciiDomain ends in a number, then return the result of IPv4 parsing asciiDomain.
     if(checkers::is_ipv4(host.value())) {
       ada_log("parse_host got ipv4", *host);
