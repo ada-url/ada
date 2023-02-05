@@ -130,6 +130,15 @@ bool readme8() {
     TEST_SUCCEED() 
 }
 
+bool nodejs1() {
+  TEST_START()
+  auto base = ada::parse("http://other.com/");
+  TEST_ASSERT(base.has_value(), true, "base should have a value");
+  auto url = ada::parse("http://GOOgoo.com", &base.value());
+  TEST_ASSERT(url.has_value(), true, "root should have a value");
+  TEST_SUCCEED()
+}
+
 int main() {
     bool success = set_host_should_return_false_sometimes()
      && set_host_should_return_true_sometimes()
@@ -137,7 +146,7 @@ int main() {
      && set_hostname_should_return_true_sometimes()
      && readme1() && readme2() && readme3() 
      && readme4() && readme5() && readme6()
-      && readme7(); 
+     && readme7() && nodejs1();
     if(success) { return EXIT_SUCCESS; }
     return EXIT_FAILURE;
 }
