@@ -207,6 +207,11 @@ bool setters_tests_encoding(const char *source) {
         std::string_view expected = element["expected"]["search"];
         base->set_search(new_value);
         TEST_ASSERT(base->get_search(), expected, "Search " + element_string + base->to_string());
+
+        std::string_view expected_pathname;
+        if (!element["expected"]["pathname"].get(expected_pathname)) {
+          TEST_ASSERT(base->get_pathname(), expected_pathname, "Pathname " + element_string);
+        }
       }
       else if (category == "hash") {
         std::string_view expected = element["expected"]["hash"];

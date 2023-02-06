@@ -87,5 +87,16 @@
         "pathname": "/Users/yagiz/Developer/node/test/fixtures/loop.%25.js"
       }
     }
+  ],
+  "search": [
+    {
+      "comment": "Remove non-existent param removes ? from URL",
+      "href": "data:space    ?test",
+      "new_value": "",
+      "expected": {
+        "search": "",
+        "pathname": "space"
+      }
+    }
   ]
 }
