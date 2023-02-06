@@ -8,7 +8,8 @@ __pycache__
 cmake-build-debug
 
 .cache
-docs
+docs/html
+docs/theme
 
 # Generated using only the Github workflow
 benchmark_result.json
