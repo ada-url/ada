@@ -20,8 +20,6 @@ jobs:
         cxx: [g++-9, clang++-10]
     steps:
       - uses: actions/checkout@v3
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
       - name: Clear the cache
         run: rm -r -f dependencies
       - name: Install ICU
