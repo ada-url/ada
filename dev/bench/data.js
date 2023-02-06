@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675711173759,
+  "lastUpdate": 1675711177887,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1946,6 +1946,42 @@ window.BENCHMARK_DATA = {
             "value": 438674.75203506835,
             "unit": "ns/iter",
             "extra": "iterations: 1597\ncpu: 438645.83594239206 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "9e345e88800793d04bdb282fcf53c06d14facd91",
+          "message": "build: disable ccache from all workflows",
+          "timestamp": "2023-02-06T14:18:02-05:00",
+          "tree_id": "f28388c4acf778f3688ef8130bdb4efe59279e5e",
+          "url": "https://github.com/ada-url/ada/commit/9e345e88800793d04bdb282fcf53c06d14facd91"
+        },
+        "date": 1675711177320,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 409661.76321972447,
+            "unit": "ns/iter",
+            "extra": "iterations: 1702\ncpu: 409611.92714453576 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 442065.70495917974,
+            "unit": "ns/iter",
+            "extra": "iterations: 1593\ncpu: 442031.88951663545 ns\nthreads: 1"
           }
         ]
       }
