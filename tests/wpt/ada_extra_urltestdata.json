@@ -206,5 +206,20 @@
     "input": "file://localhost:8098/path/to/file.txt",
     "base": "about:blank",
     "failure": true
+  },
+  {
+    "input": "data:space    ?test#test",
+    "base": "about:blank",
+    "href": "data:space    ?test#test",
+    "origin": "null",
+    "protocol": "data:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "space    ",
+    "search": "?test",
+    "hash": "#test"
   }
 ]
