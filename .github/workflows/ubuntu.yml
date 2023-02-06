@@ -20,8 +20,6 @@ jobs:
         cxx: [g++-12, clang++-14]
     steps:
       - uses: actions/checkout@v3
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Setup Ninja
