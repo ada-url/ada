@@ -50,9 +50,12 @@ namespace ada {
   void url::set_search(const std::string_view input) {
     if (input.empty()) {
       query = std::nullopt;
-      // Empty this’s query object’s list.
-      // @todo Implement this if/when we have URLSearchParams.
-      // Potentially strip trailing spaces from an opaque path with this.
+      if (has_opaque_path) {
+        size_t non_whitespace_location = path.find_first_of(' ');
+        if (non_whitespace_location != std::string_view::npos) {
+          path = path.substr(0, non_whitespace_location);
+        }
+      }
       return;
     }
 
