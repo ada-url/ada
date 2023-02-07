@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675795869544,
+  "lastUpdate": 1675795874629,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -3400,6 +3400,54 @@ window.BENCHMARK_DATA = {
             "value": 5848.627932240434,
             "unit": "ns/iter",
             "extra": "iterations: 117828\ncpu: 5848.2491428183475 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "40719fcf5a32402205a1b930ddf181b85be75e3c",
+          "message": "fix: potentially strip trailing spaces from opaque path",
+          "timestamp": "2023-02-07T13:49:11-05:00",
+          "tree_id": "f505c7de26ff8d10e9ebe617790cbb7ab6048b86",
+          "url": "https://github.com/ada-url/ada/commit/40719fcf5a32402205a1b930ddf181b85be75e3c"
+        },
+        "date": 1675795874210,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5440.267062616201,
+            "unit": "ns/iter",
+            "extra": "iterations: 127794\ncpu: 5434.337292830649 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4861.473100380569,
+            "unit": "ns/iter",
+            "extra": "iterations: 144779\ncpu: 4841.550915533329 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 9846.268301902388,
+            "unit": "ns/iter",
+            "extra": "iterations: 71427\ncpu: 9845.086591905023 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5922.372998672034,
+            "unit": "ns/iter",
+            "extra": "iterations: 116735\ncpu: 5922.017389814535 ns\nthreads: 1"
           }
         ]
       }
