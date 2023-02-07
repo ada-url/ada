@@ -73,6 +73,11 @@ namespace ada::helpers {
    */
   ada_really_inline void trim_c0_whitespace(std::string_view& input) noexcept;
 
+  /**
+   * @see https://url.spec.whatwg.org/#potentially-strip-trailing-spaces-from-an-opaque-path
+   */
+  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url& url) noexcept;
+
 } // namespace ada::helpers
 
 #endif // ADA_HELPERS_H
