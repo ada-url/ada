@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675730782538,
+  "lastUpdate": 1675730786642,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -2114,6 +2114,42 @@ window.BENCHMARK_DATA = {
             "value": 437920.4449311574,
             "unit": "ns/iter",
             "extra": "iterations: 1598\ncpu: 437900.6883604503 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "adc93ac27be6da440a23dc464bd4ad91bd04e29d",
+          "message": "test: add more edge cases",
+          "timestamp": "2023-02-06T19:44:55-05:00",
+          "tree_id": "b77d05323306984aeb2ca5857a96c85be4b701f6",
+          "url": "https://github.com/ada-url/ada/commit/adc93ac27be6da440a23dc464bd4ad91bd04e29d"
+        },
+        "date": 1675730786091,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 456733.21881123236,
+            "unit": "ns/iter",
+            "extra": "iterations: 1531\ncpu: 456681.31939908554 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 489442.1159217959,
+            "unit": "ns/iter",
+            "extra": "iterations: 1432\ncpu: 489379.67877094966 ns\nthreads: 1"
           }
         ]
       }
