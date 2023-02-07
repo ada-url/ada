@@ -25,5 +25,6 @@ var searchData=
   ['special_5frelative_5for_5fauthority_171',['SPECIAL_RELATIVE_OR_AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a218882a191c9c4136a977c25b895eaff',1,'ada']]],
   ['state_172',['state',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574',1,'ada']]],
   ['state_2eh_173',['state.h',['../db/d3b/state_8h.html',1,'']]],
-  ['substring_174',['substring',['../d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06',1,'ada::helpers']]]
+  ['strip_5ftrailing_5fspaces_5ffrom_5fopaque_5fpath_174',['strip_trailing_spaces_from_opaque_path',['../d7/d6c/namespaceada_1_1helpers.html#abbaf180311c0e9a812e7a579fa8568a2',1,'ada::helpers']]],
+  ['substring_175',['substring',['../d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06',1,'ada::helpers']]]
 ];

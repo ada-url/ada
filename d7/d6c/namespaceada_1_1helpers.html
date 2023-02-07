@@ -137,6 +137,8 @@ Functions</h2></td></tr>
 <tr class="separator:afcffe4b56f77a2d643a1a53c24c093c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e7a930166b3365d93acd6c42620f45b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a7e7a930166b3365d93acd6c42620f45b">trim_c0_whitespace</a> (std::string_view &amp;input) noexcept</td></tr>
 <tr class="separator:a7e7a930166b3365d93acd6c42620f45b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbaf180311c0e9a812e7a579fa8568a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#abbaf180311c0e9a812e7a579fa8568a2">strip_trailing_spaces_from_opaque_path</a> (<a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;<a class="el" href="../../dd/d03/structada_1_1url.html">url</a>) noexcept</td></tr>
+<tr class="separator:abbaf180311c0e9a812e7a579fa8568a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memTemplParams" colspan="2">template&lt;typename out_iter &gt; </td></tr>
 <tr class="memitem:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">encode_json</a> (std::string_view view, out_iter out)</td></tr>
 <tr class="separator:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -360,6 +362,39 @@ template&lt;typename out_iter &gt; </div>
 <p class="reference">References <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::FILE</a>, and <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">ada::checkers::is_normalized_windows_drive_letter()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>.</p>
+
+</div>
+</div>
+<a id="abbaf180311c0e9a812e7a579fa8568a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbaf180311c0e9a812e7a579fa8568a2">&#9670;&nbsp;</a></span>strip_trailing_spaces_from_opaque_path()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> void ada::helpers::strip_trailing_spaces_from_opaque_path </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;&#160;</td>
+          <td class="paramname"><em>url</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#potentially-strip-trailing-spaces-from-an-opaque-path">https://url.spec.whatwg.org/#potentially-strip-trailing-spaces-from-an-opaque-path</a> </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00243">243</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dd/d03/structada_1_1url.html#a51dc2521590d7c196a3ecc89cec1e48a">ada::url::has_opaque_path</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">ada::url::set_hash()</a>, and <a class="el" href="../../dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1">ada::url::set_search()</a>.</p>
 
 </div>
 </div>

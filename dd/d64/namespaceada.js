@@ -32,6 +32,7 @@ var namespaceada =
       [ "prune_fragment", "d7/d6c/namespaceada_1_1helpers.html#a27195c97e4ce5f8bf9187e5b24a478ba", null ],
       [ "remove_ascii_tab_or_newline", "d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e", null ],
       [ "shorten_path", "d7/d6c/namespaceada_1_1helpers.html#a3846f1e6a123292a4460aec9c375a91d", null ],
+      [ "strip_trailing_spaces_from_opaque_path", "d7/d6c/namespaceada_1_1helpers.html#abbaf180311c0e9a812e7a579fa8568a2", null ],
       [ "substring", "d7/d6c/namespaceada_1_1helpers.html#ab89ebc75c4ef1ec2f0f82b51b3a68f06", null ],
       [ "trim_c0_whitespace", "d7/d6c/namespaceada_1_1helpers.html#a7e7a930166b3365d93acd6c42620f45b", null ]
     ] ],
