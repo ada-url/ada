@@ -150,6 +150,17 @@ bool nodejs2() {
   TEST_SUCCEED()
 }
 
+bool nodejs3() {
+  TEST_START()
+  auto url = ada::parse("data:space    ?test#test");
+  TEST_ASSERT(url->get_search(), "?test", "search is not equal");
+  url->set_search("");
+  TEST_ASSERT(url->get_search(), "", "search should have been empty");
+  TEST_ASSERT(url->get_pathname(), "space    ", "pathname should have been 'space' without trailing spaces");
+  TEST_ASSERT(url->get_href(), "data:space    #test", "href is not equal");
+  TEST_SUCCEED()
+}
+
 int main() {
     bool success = set_host_should_return_false_sometimes()
      && set_host_should_return_true_sometimes()
@@ -157,7 +168,8 @@ int main() {
      && set_hostname_should_return_true_sometimes()
      && readme1() && readme2() && readme3() 
      && readme4() && readme5() && readme6()
-     && readme7() && nodejs1() && nodejs2();
+     && readme7() && nodejs1() && nodejs2()
+     && nodejs3();
     if(success) { return EXIT_SUCCESS; }
     return EXIT_FAILURE;
 }

@@ -50,11 +50,13 @@ namespace ada {
   void url::set_search(const std::string_view input) {
     if (input.empty()) {
       query = std::nullopt;
-      if (has_opaque_path) {
-        size_t non_whitespace_location = path.find_first_of(' ');
-        if (non_whitespace_location != std::string_view::npos) {
-          path = path.substr(0, non_whitespace_location);
-        }
+
+      // Potentially strip trailing spaces from an opaque path
+      if (!has_opaque_path || fragment.has_value()) return;
+
+      size_t non_whitespace_location = path.find_first_of(' ');
+      if (non_whitespace_location != std::string_view::npos) {
+        path = path.substr(0, non_whitespace_location);
       }
       return;
     }
