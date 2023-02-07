@@ -239,6 +239,13 @@ namespace ada::helpers {
       } while (true);
     }
   }
+
+  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url& url) noexcept {
+    if (!url.has_opaque_path) return;
+    if (url.fragment.has_value()) return;
+    if (url.query.has_value()) return;
+    while (!url.path.empty() && url.path.back() == ' ') { url.path.resize(url.path.size()-1); }
+  }
 } // namespace ada::helpers
 
 namespace ada {

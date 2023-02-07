@@ -36,7 +36,7 @@ namespace ada {
   void url::set_hash(const std::string_view input) {
     if (input.empty()) {
       fragment = std::nullopt;
-      // TODO: Potentially strip trailing spaces from an opaque path with this.
+      helpers::strip_trailing_spaces_from_opaque_path(*this);
       return;
     }
 
@@ -50,14 +50,7 @@ namespace ada {
   void url::set_search(const std::string_view input) {
     if (input.empty()) {
       query = std::nullopt;
-
-      // Potentially strip trailing spaces from an opaque path
-      if (!has_opaque_path || fragment.has_value()) return;
-
-      size_t non_whitespace_location = path.find_first_of(' ');
-      if (non_whitespace_location != std::string_view::npos) {
-        path = path.substr(0, non_whitespace_location);
-      }
+      helpers::strip_trailing_spaces_from_opaque_path(*this);
       return;
     }
 
@@ -70,10 +63,6 @@ namespace ada {
       ada::character_sets::QUERY_PERCENT_ENCODE;
 
     query = ada::unicode::percent_encode(std::string_view(new_value), query_percent_encode_set);
-
-    // Set this’s query object’s list to the result of parsing input.
-    // @todo Implement this if/when we have URLSearchParams.
-    return ;
   }
 
   bool url::set_pathname(const std::string_view input) {
