@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675795865521,
+  "lastUpdate": 1675795869544,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -2198,6 +2198,42 @@ window.BENCHMARK_DATA = {
             "value": 489442.1159217959,
             "unit": "ns/iter",
             "extra": "iterations: 1432\ncpu: 489379.67877094966 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "40719fcf5a32402205a1b930ddf181b85be75e3c",
+          "message": "fix: potentially strip trailing spaces from opaque path",
+          "timestamp": "2023-02-07T13:49:11-05:00",
+          "tree_id": "f505c7de26ff8d10e9ebe617790cbb7ab6048b86",
+          "url": "https://github.com/ada-url/ada/commit/40719fcf5a32402205a1b930ddf181b85be75e3c"
+        },
+        "date": 1675795869104,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 460539.2311722415,
+            "unit": "ns/iter",
+            "extra": "iterations: 1527\ncpu: 459192.14145383105 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 486170.0416666695,
+            "unit": "ns/iter",
+            "extra": "iterations: 1440\ncpu: 486132.8472222221 ns\nthreads: 1"
           }
         ]
       }
