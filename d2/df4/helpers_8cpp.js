@@ -3,7 +3,6 @@ var helpers_8cpp =
     [ "encode_json", "d2/df4/helpers_8cpp.html#a73e5d4035440d10f8f5cb93b1ba92cad", null ],
     [ "get_host_delimiter_location", "d2/df4/helpers_8cpp.html#afcffe4b56f77a2d643a1a53c24c093c4", null ],
     [ "get_state", "d2/df4/helpers_8cpp.html#a6b55d7d7b1918e00a9a1eeb3c91b8f90", null ],
-    [ "parse_prepared_path", "d2/df4/helpers_8cpp.html#a96d897faaf4536addf3cedf3b2f2b975", null ],
     [ "prune_fragment", "d2/df4/helpers_8cpp.html#a27195c97e4ce5f8bf9187e5b24a478ba", null ],
     [ "remove_ascii_tab_or_newline", "d2/df4/helpers_8cpp.html#afe80bc0093fc27eceb0102b13207261e", null ],
     [ "shorten_path", "d2/df4/helpers_8cpp.html#a3846f1e6a123292a4460aec9c375a91d", null ],

@@ -35,9 +35,9 @@ var NAVTREE =
       [ "Installing ICU", "index.html#autotoc_md10", null ],
       [ "Amalgamation", "index.html#autotoc_md11", null ]
     ] ],
-    [ "Release Document", "d0/d4a/md_docs_RELEASE.html", [
-      [ "Preparation", "d0/d4a/md_docs_RELEASE.html#autotoc_md1", null ],
-      [ "Release", "d0/d4a/md_docs_RELEASE.html#autotoc_md2", null ]
+    [ "Release Document", "d9/de2/md_docs__r_e_l_e_a_s_e.html", [
+      [ "Preparation", "d9/de2/md_docs__r_e_l_e_a_s_e.html#autotoc_md1", null ],
+      [ "Release", "d9/de2/md_docs__r_e_l_e_a_s_e.html#autotoc_md2", null ]
     ] ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
@@ -72,7 +72,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"db/d3b/state_8h.html#a7a6e382cd6d05da70cf566a2cf636574a8de3c990e78108965db7c3f38cc5fca7"
+"db/d3b/state_8h.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
