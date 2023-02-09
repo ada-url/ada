@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675808909002,
+  "lastUpdate": 1675960283435,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1260,6 +1260,54 @@ window.BENCHMARK_DATA = {
             "value": 7381.652036527997,
             "unit": "ns/iter",
             "extra": "iterations: 94941\ncpu: 7380.321462803214 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "debadree333@gmail.com",
+            "name": "Debadree Chatterjee",
+            "username": "debadree25"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "52f15ef4295b940aa2008f7b29b658d53461dd5a",
+          "message": "feat: simplify impl of set_host and set_hostname (#215)\n\n* feat: simplify impl of set_host and set_hostname\r\n\r\n* fixup! remove space, move function below setters",
+          "timestamp": "2023-02-09T11:29:53-05:00",
+          "tree_id": "d99de803e0a1dbc4bff3206eed0d68bb2dfa7bcf",
+          "url": "https://github.com/ada-url/ada/commit/52f15ef4295b940aa2008f7b29b658d53461dd5a"
+        },
+        "date": 1675960282111,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5783.284634653697,
+            "unit": "ns/iter",
+            "extra": "iterations: 117765\ncpu: 5763.206385598438 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 5203.510060145733,
+            "unit": "ns/iter",
+            "extra": "iterations: 134839\ncpu: 5198.9899064810625 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 10371.610666310826,
+            "unit": "ns/iter",
+            "extra": "iterations: 67446\ncpu: 10370.540877146159 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 7303.110678179141,
+            "unit": "ns/iter",
+            "extra": "iterations: 96243\ncpu: 7302.254709433415 ns\nthreads: 1"
           }
         ]
       }
