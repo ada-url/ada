@@ -368,6 +368,16 @@ namespace ada {
 
     /**
      * @private
+     * 
+     * Sets the host or hostname according to override condition.
+     * Return true on success.
+     * @see https://url.spec.whatwg.org/#hostname-state
+     */
+
+    [[nodiscard]] bool set_host_or_hostname(std::string_view input, bool override_hostname);
+
+    /**
+     * @private
      */
     ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
