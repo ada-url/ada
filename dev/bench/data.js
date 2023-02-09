@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1675960283435,
+  "lastUpdate": 1675960287916,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -2366,6 +2366,42 @@ window.BENCHMARK_DATA = {
             "value": 487061.7176634122,
             "unit": "ns/iter",
             "extra": "iterations: 1438\ncpu: 486997.21835883154 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "debadree333@gmail.com",
+            "name": "Debadree Chatterjee",
+            "username": "debadree25"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "52f15ef4295b940aa2008f7b29b658d53461dd5a",
+          "message": "feat: simplify impl of set_host and set_hostname (#215)\n\n* feat: simplify impl of set_host and set_hostname\r\n\r\n* fixup! remove space, move function below setters",
+          "timestamp": "2023-02-09T11:29:53-05:00",
+          "tree_id": "d99de803e0a1dbc4bff3206eed0d68bb2dfa7bcf",
+          "url": "https://github.com/ada-url/ada/commit/52f15ef4295b940aa2008f7b29b658d53461dd5a"
+        },
+        "date": 1675960287310,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 454627.96995427454,
+            "unit": "ns/iter",
+            "extra": "iterations: 1531\ncpu: 454400.4572175049 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 486051.63541666954,
+            "unit": "ns/iter",
+            "extra": "iterations: 1440\ncpu: 485995.34722222213 ns\nthreads: 1"
           }
         ]
       }
