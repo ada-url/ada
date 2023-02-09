@@ -204,20 +204,4 @@ namespace ada {
  #endif // defined __BYTE_ORDER__ && defined __ORDER_BIG_ENDIAN__
 
 
-#ifndef ADA_HAS_ICU
-#if __has_include(<unicode/uidna.h>)
-#define ADA_HAS_ICU 1
-#else
-#define ADA_HAS_ICU 0
-#endif // __has_include(<unicode/uidna.h>)
-#endif // ADA_HAS_ICU
-
-#if ADA_HAS_ICU
-#include <unicode/utypes.h>
-#include <unicode/uidna.h>
-#include <unicode/utf8.h>
-#endif // ADA_HAS_ICU
-
-#define ADA_WINDOWS_TO_ASCII_FALLBACK 0 // we never use anything but ICU. No fallback.
-
 #endif // ADA_COMMON_DEFS_H

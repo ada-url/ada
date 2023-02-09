@@ -112,9 +112,7 @@ size_t roller_fuzz(size_t N) {
 int main() {
   std::cout << "Running basic fuzzer.\n";
   std::cout << "[fancy]  Executed " << fancy_fuzz(100000) << " mutations.\n";
-#if ADA_HAS_ICU
   std::cout << "[simple] Executed " << simple_fuzz(40000) << " mutations.\n";
-#endif
   std::cout << "[roller] Executed " << roller_fuzz(40000) << " correct cases.\n";
   return EXIT_SUCCESS;
 }

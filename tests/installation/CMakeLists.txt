@@ -23,18 +23,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   endif()
 endif()
 
-
-if(MSVC) # could be WIN32 but there are other systems under Windows.
-  target_link_libraries(ada PRIVATE Normaliz)
-else()
-  find_package(ICU COMPONENTS uc i18n)
-  ### If the user does not have ICU, let us help them with instructions:
-  if (NOT ICU_FOUND)
-    message(SEND_ERROR "ICU with components uc and i18n/in is required for building ada.")
-    return()
-  endif (NOT ICU_FOUND)
-endif()
-
 find_package(ada REQUIRED)
 
 
