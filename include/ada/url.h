@@ -186,6 +186,15 @@ namespace ada {
     bool set_href(const std::string_view input);
 
     /**
+     * @private
+     * 
+     * Sets the host or hostname according to override condition.
+     * Return true on success.
+     * @see https://url.spec.whatwg.org/#hostname-state
+     */
+    bool set_host_or_hostname(std::string_view input, bool override_hostname);
+
+    /**
      * The password getter steps are to return this’s URL’s password.
      * @see https://url.spec.whatwg.org/#dom-url-password
      */
