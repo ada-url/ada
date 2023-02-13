@@ -40,7 +40,7 @@ namespace ada::serializers {
       if (piece_index == compress) {
         *point++ = ':';
         if(piece_index != 0) { *point++ = ':'; }
-        piece_index += compress_length
+        piece_index += compress_length;
         if(piece_index == 8) { break; }
       }
       point = std::to_chars(point, point_end, address[piece_index]).ptr;
