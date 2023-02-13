@@ -22,8 +22,8 @@ namespace ada::serializers {
   }
 
   std::string ipv6(const std::array<uint16_t, 8>& address) noexcept {
-    size_t compress_length = 0;
-    size_t compress = 0;
+    size_t compress_length = 0; // The length of a long sequence of zeros.
+    size_t compress = 0; // The start of a long sequence of zeros.
     find_longest_sequence_of_ipv6_pieces(address, compress, compress_length);
 
     if (compress_length <= 1) {
@@ -39,11 +39,13 @@ namespace ada::serializers {
     while (true) {
       if (piece_index == compress) {
         *point++ = ':';
-        if(piece_index != 0) { *point++ = ':'; }
+        // If we skip a value initially, we need to write '::', otherwise
+        // a single ':' will do since it follows a previous ':'.
+        if(piece_index == 0) { *point++ = ':'; }
         piece_index += compress_length;
         if(piece_index == 8) { break; }
       }
-      point = std::to_chars(point, point_end, address[piece_index]).ptr;
+      point = std::to_chars(point, point_end, address[piece_index], 16).ptr;
       piece_index++;
       if(piece_index == 8) { break; }
       *point++ = ':';
