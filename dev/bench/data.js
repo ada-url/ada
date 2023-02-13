@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1676327307904,
+  "lastUpdate": 1676327313556,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -3796,6 +3796,54 @@ window.BENCHMARK_DATA = {
             "value": 5933.562273474641,
             "unit": "ns/iter",
             "extra": "iterations: 116157\ncpu: 5931.5030519038855 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ae9233e86918b4f9ad42a68f3200d65c7a182888",
+          "message": "Optimize the ipv6 serializer (#220)\n\n* Optimizing serialization\r\n\r\n* Saving.\r\n\r\n* Better documentation.",
+          "timestamp": "2023-02-13T17:26:54-05:00",
+          "tree_id": "a4deee5a18a67d404f1e5ec442e8226597c22067",
+          "url": "https://github.com/ada-url/ada/commit/ae9233e86918b4f9ad42a68f3200d65c7a182888"
+        },
+        "date": 1676327312781,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5312.30583636915,
+            "unit": "ns/iter",
+            "extra": "iterations: 131760\ncpu: 5296.741803278689 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4754.086164256887,
+            "unit": "ns/iter",
+            "extra": "iterations: 147184\ncpu: 4753.921621915426 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 9810.507073256249,
+            "unit": "ns/iter",
+            "extra": "iterations: 71325\ncpu: 9809.920785138453 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5835.7771976282165,
+            "unit": "ns/iter",
+            "extra": "iterations: 120084\ncpu: 5835.710835748311 ns\nthreads: 1"
           }
         ]
       }
