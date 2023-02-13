@@ -141,8 +141,8 @@ $(document).ready(function(){initNavTree('da/d84/serializers_8cpp_source.html','
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  }</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
 <div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">   24</a></span>&#160;  std::string <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ipv6</a>(<span class="keyword">const</span> std::array&lt;uint16_t, 8&gt;&amp; address) noexcept {</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordtype">size_t</span> compress_length = 0;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordtype">size_t</span> compress = 0;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordtype">size_t</span> compress_length = 0; <span class="comment">// The length of a long sequence of zeros.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordtype">size_t</span> compress = 0; <span class="comment">// The start of a long sequence of zeros.</span></div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4">find_longest_sequence_of_ipv6_pieces</a>(address, compress, compress_length);</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keywordflow">if</span> (compress_length &lt;= 1) {</div>
@@ -150,45 +150,49 @@ $(document).ready(function(){initNavTree('da/d84/serializers_8cpp_source.html','
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;      compress = compress_length = 8;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    }</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    std::string output{};</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    std::string output(4 * 8 + 7 + 2, <span class="charliteral">&#39;\0&#39;</span>);</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keywordtype">size_t</span> piece_index = 0;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordtype">char</span> buf[5];</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;      <span class="keywordflow">if</span> (piece_index == compress) {</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        output.append(<span class="stringliteral">&quot;::&quot;</span>, piece_index == 0 ? 2 : 1);</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keywordflow">if</span> ((piece_index = piece_index + compress_length) == 8) <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;      }</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;      <span class="comment">// Optimization opportunity: Get rid of snprintf.</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;      snprintf(buf, 5, <span class="stringliteral">&quot;%x&quot;</span>, address[piece_index]);</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;      output += buf;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;      <span class="keywordflow">if</span> (++piece_index == 8) <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;      output.push_back(<span class="charliteral">&#39;:&#39;</span>);</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keywordflow">return</span> <span class="stringliteral">&quot;[&quot;</span> + output + <span class="stringliteral">&quot;]&quot;</span>;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  }</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">   54</a></span>&#160;  std::string <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ipv4</a>(<span class="keyword">const</span> uint64_t address) noexcept {</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    std::string output(15, <span class="charliteral">&#39;\0&#39;</span>);</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">char</span> *point = output.data();</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordtype">char</span> *point_end = output.data() + output.size();</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    point = std::to_chars(point, point_end, uint8_t(address &gt;&gt; 24)).ptr;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 2; i &gt;= 0; i--) {</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;     *point++ = <span class="charliteral">&#39;.&#39;</span>;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;     point = std::to_chars(point, point_end, uint8_t(address &gt;&gt; (i * 8))).ptr;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    }</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    output.resize(point - output.data());</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keywordflow">return</span> output;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  }</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;} <span class="comment">// namespace ada::serializers</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordtype">char</span> *point = output.data();</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">char</span> *point_end = output.data() + output.size();</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    *point++ = <span class="charliteral">&#39;[&#39;</span>;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;      <span class="keywordflow">if</span> (piece_index == compress) {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        *point++ = <span class="charliteral">&#39;:&#39;</span>;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="comment">// If we skip a value initially, we need to write &#39;::&#39;, otherwise</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="comment">// a single &#39;:&#39; will do since it follows a previous &#39;:&#39;.</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordflow">if</span>(piece_index == 0) { *point++ = <span class="charliteral">&#39;:&#39;</span>; }</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        piece_index += compress_length;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keywordflow">if</span>(piece_index == 8) { <span class="keywordflow">break</span>; }</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;      }</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;      point = std::to_chars(point, point_end, address[piece_index], 16).ptr;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;      piece_index++;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;      <span class="keywordflow">if</span>(piece_index == 8) { <span class="keywordflow">break</span>; }</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;      *point++ = <span class="charliteral">&#39;:&#39;</span>;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    }</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    *point++ = <span class="charliteral">&#39;]&#39;</span>;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    output.resize(point - output.data());</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keywordflow">return</span> output;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  }</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno"><a class="line" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">   58</a></span>&#160;  std::string <a class="code" href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ipv4</a>(<span class="keyword">const</span> uint64_t address) noexcept {</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    std::string output(15, <span class="charliteral">&#39;\0&#39;</span>);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordtype">char</span> *point = output.data();</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordtype">char</span> *point_end = output.data() + output.size();</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    point = std::to_chars(point, point_end, uint8_t(address &gt;&gt; 24)).ptr;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 2; i &gt;= 0; i--) {</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;     *point++ = <span class="charliteral">&#39;.&#39;</span>;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;     point = std::to_chars(point, point_end, uint8_t(address &gt;&gt; (i * 8))).ptr;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    output.resize(point - output.data());</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keywordflow">return</span> output;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  }</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;} <span class="comment">// namespace ada::serializers</span></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
 <div class="ttc" id="anamespaceada_1_1serializers_html"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html">ada::serializers</a></div><div class="ttdoc">Includes the definitions for URL serializers.</div></div>
 <div class="ttc" id="anamespaceada_1_1serializers_html_a18d92c8904f03bf914c9ff5f943194e4"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ada::serializers::ipv6</a></div><div class="ttdeci">std::string ipv6(const std::array&lt; uint16_t, 8 &gt; &amp;address) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00024">serializers.cpp:24</a></div></div>
 <div class="ttc" id="anamespaceada_1_1serializers_html_a3807c277d4c9ad2c8f2fa252e790edf4"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4">ada::serializers::find_longest_sequence_of_ipv6_pieces</a></div><div class="ttdeci">void find_longest_sequence_of_ipv6_pieces(const std::array&lt; uint16_t, 8 &gt; &amp;address, size_t &amp;compress, size_t &amp;compress_length) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00008">serializers.cpp:8</a></div></div>
-<div class="ttc" id="anamespaceada_1_1serializers_html_ab61ad957ad92ba4f14f5ac6ee618efa5"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ada::serializers::ipv4</a></div><div class="ttdeci">std::string ipv4(const uint64_t address) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00054">serializers.cpp:54</a></div></div>
+<div class="ttc" id="anamespaceada_1_1serializers_html_ab61ad957ad92ba4f14f5ac6ee618efa5"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5">ada::serializers::ipv4</a></div><div class="ttdeci">std::string ipv4(const uint64_t address) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../da/d84/serializers_8cpp_source.html#l00058">serializers.cpp:58</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
