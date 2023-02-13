@@ -77,8 +77,11 @@ namespace ada::helpers {
     }
 
     // Remove path’s last item, if any.
-    if (!path.empty()) {
-      path.erase(path.rfind('/'));
+    for (long i = path.size() - 1; i >= 0; --i) {
+      if (path[i] == '/') {
+        path.erase(i);
+        break;
+      }
     }
   }
 
