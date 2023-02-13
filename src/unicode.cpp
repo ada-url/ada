@@ -262,10 +262,8 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
   }
 
   unsigned constexpr convert_hex_to_binary(const char c) noexcept {
-    // this code can be optimized.
-    if (c <= '9') { return c - '0'; }
-    char del = c >= 'a' ? 'a' : 'A';
-    return 10 + (c - del);
+    if (c <= '9') return c - '0';
+    return 10 + ((c & ~0x20) - 'A');
   }
 
   std::string percent_decode(const std::string_view input, size_t first_percent) {
