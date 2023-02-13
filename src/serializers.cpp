@@ -22,8 +22,8 @@ namespace ada::serializers {
   }
 
   std::string ipv6(const std::array<uint16_t, 8>& address) noexcept {
-    size_t compress_length = 0;
-    size_t compress = 0;
+    size_t compress_length = 0; // The length of a long sequence of zeros.
+    size_t compress = 0; // The start of a long sequence of zeros.
     find_longest_sequence_of_ipv6_pieces(address, compress, compress_length);
 
     if (compress_length <= 1) {
@@ -31,24 +31,28 @@ namespace ada::serializers {
       compress = compress_length = 8;
     }
 
-    std::string output{};
+    std::string output(4 * 8 + 7 + 2, '\0');
     size_t piece_index = 0;
-    char buf[5];
-
+    char *point = output.data();
+    char *point_end = output.data() + output.size();
+    *point++ = '[';
     while (true) {
       if (piece_index == compress) {
-        output.append("::", piece_index == 0 ? 2 : 1);
-        if ((piece_index = piece_index + compress_length) == 8) break;
+        *point++ = ':';
+        // If we skip a value initially, we need to write '::', otherwise
+        // a single ':' will do since it follows a previous ':'.
+        if(piece_index == 0) { *point++ = ':'; }
+        piece_index += compress_length;
+        if(piece_index == 8) { break; }
       }
-
-      // Optimization opportunity: Get rid of snprintf.
-      snprintf(buf, 5, "%x", address[piece_index]);
-      output += buf;
-      if (++piece_index == 8) break;
-      output.push_back(':');
+      point = std::to_chars(point, point_end, address[piece_index], 16).ptr;
+      piece_index++;
+      if(piece_index == 8) { break; }
+      *point++ = ':';
     }
-
-    return "[" + output + "]";
+    *point++ = ']';
+    output.resize(point - output.data());
+    return output;
   }
 
   std::string ipv4(const uint64_t address) noexcept {
