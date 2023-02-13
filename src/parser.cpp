@@ -552,8 +552,7 @@ namespace ada::parser {
             // Set state to path start state.
             state = ada::state::PATH_START;
           } else {
-            size_t consumed_bytes = file_host_buffer.size();
-            input_position += consumed_bytes;
+            input_position += file_host_buffer.size();
             // Let host be the result of host parsing buffer with url is not special.
             if(!url.parse_host(file_host_buffer)) { return url; }
 
