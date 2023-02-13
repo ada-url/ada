@@ -31,24 +31,26 @@ namespace ada::serializers {
       compress = compress_length = 8;
     }
 
-    std::string output{};
+    std::string output(4 * 8 + 7 + 2, '\0');
     size_t piece_index = 0;
-    char buf[5];
-
+    char *point = output.data();
+    char *point_end = output.data() + output.size();
+    *point++ = '[';
     while (true) {
       if (piece_index == compress) {
-        output.append("::", piece_index == 0 ? 2 : 1);
-        if ((piece_index = piece_index + compress_length) == 8) break;
+        *point++ = ':';
+        if(piece_index != 0) { *point++ = ':'; }
+        piece_index += compress_length
+        if(piece_index == 8) { break; }
       }
-
-      // Optimization opportunity: Get rid of snprintf.
-      snprintf(buf, 5, "%x", address[piece_index]);
-      output += buf;
-      if (++piece_index == 8) break;
-      output.push_back(':');
+      point = std::to_chars(point, point_end, address[piece_index]).ptr;
+      piece_index++;
+      if(piece_index == 8) { break; }
+      *point++ = ':';
     }
-
-    return "[" + output + "]";
+    *point++ = ']';
+    output.resize(point - output.data());
+    return output;
   }
 
   std::string ipv4(const uint64_t address) noexcept {
