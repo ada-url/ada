@@ -26,4 +26,3 @@ jobs:
           path: "tests/wpt"
           commit-message: "test: update web platform tests"
           reviewers: lemire, anonrig
-          auto-merge: rebase
