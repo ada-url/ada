@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1676738517583,
+  "lastUpdate": 1676738522456,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -4192,6 +4192,54 @@ window.BENCHMARK_DATA = {
             "value": 6776.12732758548,
             "unit": "ns/iter",
             "extra": "iterations: 102413\ncpu: 6765.652797984629 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "WPT Updater",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "b17a606a9242951e4b6c525f8c120b6ec901055b",
+          "message": "test: update web platform tests",
+          "timestamp": "2023-02-18T11:40:22-05:00",
+          "tree_id": "f96305f4553f759d636f7ce61253e36421addac9",
+          "url": "https://github.com/ada-url/ada/commit/b17a606a9242951e4b6c525f8c120b6ec901055b"
+        },
+        "date": 1676738522081,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5295.061138386481,
+            "unit": "ns/iter",
+            "extra": "iterations: 131783\ncpu: 5292.4823383896255 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4779.619269465399,
+            "unit": "ns/iter",
+            "extra": "iterations: 146605\ncpu: 4779.250366631425 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 9784.508247408929,
+            "unit": "ns/iter",
+            "extra": "iterations: 71477\ncpu: 9784.015837262334 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5880.29104346265,
+            "unit": "ns/iter",
+            "extra": "iterations: 119343\ncpu: 5879.232967161878 ns\nthreads: 1"
           }
         ]
       }
