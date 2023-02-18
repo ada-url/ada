@@ -22,7 +22,7 @@ jobs:
           title: "Update web platform tests"
           body: "This is an automated pull request for updating the WPT"
           branch: "automatic-update-wpt"
-          author: "wpt-updater"
+          author: "WPT Updater <yagiz@nizipli.com>"
           path: "tests/wpt"
           commit-message: "test: update web platform tests"
           reviewers: lemire, anonrig
