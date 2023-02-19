@@ -1,0 +1,11 @@
+[package]
+name = "servo-url"
+version = "0.1.0"
+
+[lib]
+path = "lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+url = "2.3.1"
+libc = "0.2"
