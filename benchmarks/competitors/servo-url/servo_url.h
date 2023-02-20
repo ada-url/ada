@@ -22,7 +22,7 @@ struct StandardUrl {
 
 extern "C" {
 
-StandardUrl parse_url(const char *raw_input);
+StandardUrl parse_url(const char *raw_input, uintptr_t raw_input_length);
 
 } // extern "C"
 

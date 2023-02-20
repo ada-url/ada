@@ -556,7 +556,7 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
   // volatile to prevent optimizations.
   for (auto _ : state) {
     for(std::string& url_string : url_examples) {
-      benchmark::DoNotOptimize(servo_url::parse_url(url_string.c_str()));
+      benchmark::DoNotOptimize(servo_url::parse_url(url_string.c_str(), url_string.length()));
     }
   }
   if(collector.has_events()) {
@@ -565,7 +565,7 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
       for(std::string& url_string : url_examples) {
-        benchmark::DoNotOptimize(servo_url::parse_url(url_string.c_str()));
+        benchmark::DoNotOptimize(servo_url::parse_url(url_string.c_str(), url_string.length()));
       }
       std::atomic_thread_fence(std::memory_order_release);
       event_count allocate_count = collector.end();

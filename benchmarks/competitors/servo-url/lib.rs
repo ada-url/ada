@@ -1,6 +1,7 @@
 use url::Url;
-use std::ffi::{CStr, CString};
-use libc::c_char;
+use std::ffi::{CString};
+use std::{slice};
+use libc::{c_char};
 
 extern crate url;
 extern crate libc;
@@ -19,9 +20,10 @@ pub struct StandardUrl {
 }
 
 #[no_mangle]
-pub extern "C" fn parse_url(raw_input: *const c_char) -> StandardUrl {
-  let input_str = unsafe { CStr::from_ptr(raw_input) };
-  let input = input_str.to_str().unwrap();
+pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: usize) -> StandardUrl {
+  let input = unsafe {
+    std::str::from_utf8_unchecked(slice::from_raw_parts(raw_input as *const u8, raw_input_length))
+  };
   let result = Url::parse(input).unwrap();
 
   let scheme = CString::new(result.scheme()).unwrap().into_raw();
