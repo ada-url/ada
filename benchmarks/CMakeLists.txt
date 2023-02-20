@@ -157,3 +157,9 @@ if(ADA_BOOST_URL)
     message(STATUS "Boost 1.80 or better was not found, please install it for benchmarking purposes.")
 endif(ADA_BOOST_URL)
 endif(Boost_FOUND)
+
+target_link_libraries(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/competitors/servo-url/target/release/libservo_url.dylib>")
+target_link_libraries(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/competitors/servo-url/target/release/libservo_url.dylib>")
+target_link_libraries(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/competitors/servo-url/target/release/libservo_url.dylib>")
+target_link_libraries(wpt_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/competitors/servo-url/target/release/libservo_url.dylib>")
+
