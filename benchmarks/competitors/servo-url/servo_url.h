@@ -8,21 +8,13 @@
 
 namespace servo_url {
 
-struct StandardUrl {
-  uint16_t port;
-  char *scheme;
-  char *username;
-  char *password;
-  char *host;
-  char *query;
-  char *fragment;
-  char *path;
-  char *href;
-};
+struct StandardUrl;
 
 extern "C" {
 
-StandardUrl parse_url(const char *raw_input, uintptr_t raw_input_length);
+StandardUrl *parse_url(const char *raw_input, uintptr_t raw_input_length);
+
+void free_standard_url(StandardUrl *raw);
 
 } // extern "C"
 
