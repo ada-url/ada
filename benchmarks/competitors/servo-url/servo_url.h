@@ -13,6 +13,7 @@
 
 namespace servo_url {
 
+/// A parsed URL record.
 struct Url;
 
 extern "C" {
