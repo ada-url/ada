@@ -13,13 +13,13 @@
 
 namespace servo_url {
 
-struct StandardUrl;
+struct Url;
 
 extern "C" {
 
-StandardUrl *parse_url(const char *raw_input, size_t raw_input_length);
+Url *parse_url(const char *raw_input, size_t raw_input_length);
 
-void free_standard_url(StandardUrl *raw);
+void free_url(Url *raw);
 
 } // extern "C"
 
