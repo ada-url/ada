@@ -39,5 +39,9 @@ pub unsafe extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: s
 
 #[no_mangle]
 pub unsafe extern "C" fn free_standard_url(raw: *mut StandardUrl) {
+  if raw.is_null() {
+    return;
+  }
+
   drop(Box::from_raw(raw))
 }
