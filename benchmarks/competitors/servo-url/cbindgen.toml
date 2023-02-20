@@ -4,6 +4,3 @@ line_length = 100
 tab_width = 2
 language = "C++"
 namespaces = ["servo_url"]
-
-[export.rename]
-"ThinVec" = "nsTArray"
