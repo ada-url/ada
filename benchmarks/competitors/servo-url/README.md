@@ -13,4 +13,5 @@ This folder includes FFI bindings for servo/url.
 - Generating cbindgen output
   - Install dependencies with `brew install cbindgen`
   - Generate with `cbindgen --config cbindgen.toml --crate servo-url --output servo_url.h`
-  
+- Building
+  - Run with `cargo build --release`
