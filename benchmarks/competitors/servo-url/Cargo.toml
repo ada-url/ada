@@ -9,3 +9,8 @@ crate-type = ["cdylib"]
 [dependencies]
 url = "2.3.1"
 libc = "0.2"
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true
