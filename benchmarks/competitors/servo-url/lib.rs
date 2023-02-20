@@ -1,12 +1,11 @@
 use url::Url;
 use std::ffi::{CString};
-use std::{slice};
+use std::{slice, ptr};
 use libc::{c_char};
 
 extern crate url;
 extern crate libc;
 
-#[repr(C)]
 pub struct StandardUrl {
   pub port: u16,
   pub scheme: *mut c_char,
@@ -20,7 +19,7 @@ pub struct StandardUrl {
 }
 
 #[no_mangle]
-pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: usize) -> StandardUrl {
+pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: usize) -> *mut StandardUrl {
   let input = unsafe {
     std::str::from_utf8_unchecked(slice::from_raw_parts(raw_input as *const u8, raw_input_length))
   };
@@ -35,7 +34,7 @@ pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: usize) -
   let path = CString::new(result.path().to_string()).unwrap().into_raw();
   let href = CString::new(result.as_str()).unwrap().into_raw();
 
-  StandardUrl {
+  let mut out = StandardUrl {
       port: result.port().unwrap_or(0),
       scheme,
       username,
@@ -45,5 +44,12 @@ pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: usize) -
       fragment,
       path,
       href,
-  }
+  };
+
+  ptr::addr_of_mut!(out)
+}
+
+#[no_mangle]
+pub extern "C" fn free_standard_url(raw: *mut StandardUrl) {
+  drop(unsafe { Box::from_raw(raw) })
 }
