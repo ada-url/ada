@@ -12,7 +12,7 @@ struct StandardUrl;
 
 extern "C" {
 
-StandardUrl *parse_url(const char *raw_input, uintptr_t raw_input_length);
+StandardUrl *parse_url(const char *raw_input, size_t raw_input_length);
 
 void free_standard_url(StandardUrl *raw);
 

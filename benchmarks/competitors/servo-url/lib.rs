@@ -1,6 +1,6 @@
 use url::Url;
 use std::{slice, ptr};
-use libc::c_char;
+use libc::{c_char, size_t};
 
 extern crate url;
 extern crate libc;
@@ -18,7 +18,7 @@ pub struct StandardUrl {
 }
 
 #[no_mangle]
-pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: usize) -> *mut StandardUrl {
+pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: size_t) -> *mut StandardUrl {
   let input = unsafe {
     std::str::from_utf8_unchecked(slice::from_raw_parts(raw_input as *const u8, raw_input_length))
   };
