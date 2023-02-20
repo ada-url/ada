@@ -18,10 +18,8 @@ pub struct StandardUrl {
 }
 
 #[no_mangle]
-pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: size_t) -> *mut StandardUrl {
-  let input = unsafe {
-    std::str::from_utf8_unchecked(slice::from_raw_parts(raw_input as *const u8, raw_input_length))
-  };
+pub unsafe extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: size_t) -> *mut StandardUrl {
+  let input = std::str::from_utf8_unchecked(slice::from_raw_parts(raw_input as *const u8, raw_input_length));
   let result = Url::parse(input).unwrap();
 
   let mut out = StandardUrl {
@@ -40,6 +38,6 @@ pub extern "C" fn parse_url(raw_input: *const c_char, raw_input_length: size_t) 
 }
 
 #[no_mangle]
-pub extern "C" fn free_standard_url(raw: *mut StandardUrl) {
-  drop(unsafe { Box::from_raw(raw) })
+pub unsafe extern "C" fn free_standard_url(raw: *mut StandardUrl) {
+  drop(Box::from_raw(raw))
 }
