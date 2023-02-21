@@ -161,7 +161,7 @@ endif(Boost_FOUND)
 
 
 # We want the check whether Rust is available before trying to build a crate.
-set(Rust_FIND_QUIETLY ON)
+set(Rust_FIND_QUIETLY ON) # No need to alarm the user if rust is not available.
 import_dependency(corrosion corrosion-rs/corrosion v0.3.3)
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
 
@@ -183,5 +183,15 @@ if(RUST_FOUND)
   target_link_libraries(wpt_bench PRIVATE servo-url)
   target_compile_definitions(wpt_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 else()
-  message(STATUS "Rust is unavailable." )
+  message(STATUS "Rust/Cargo is unavailable." )
+  message(STATUS "We will not benchmark servo-url." )
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    message(STATUS "Under macOS, you may be able to install rust with")
+    message(STATUS "curl https://sh.rustup.rs -sSf | sh")
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(STATUS "Under Linux, you may be able to install rust with a command such as")
+    message(STATUS "apt-get install cargo" )
+    message(STATUS "or" )
+    message(STATUS "curl https://sh.rustup.rs -sSf | sh")
+  endif()
 endif()
