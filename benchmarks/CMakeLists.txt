@@ -158,8 +158,30 @@ if(ADA_BOOST_URL)
 endif(ADA_BOOST_URL)
 endif(Boost_FOUND)
 
-target_link_libraries(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/competitors/servo-url/target/release/libservo_url.dylib>")
-target_link_libraries(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/competitors/servo-url/target/release/libservo_url.dylib>")
-target_link_libraries(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/competitors/servo-url/target/release/libservo_url.dylib>")
-target_link_libraries(wpt_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/competitors/servo-url/target/release/libservo_url.dylib>")
 
+
+# We want the check whether Rust is available before trying to build a crate.
+set(Rust_FIND_QUIETLY ON)
+import_dependency(corrosion corrosion-rs/corrosion v0.3.3)
+include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
+
+if(RUST_FOUND)
+  message(STATUS "Rust found: " ${Rust_VERSION} )
+  add_dependency(corrosion)
+  # Important: we want to build in release mode!
+  corrosion_import_crate(MANIFEST_PATH "competitors/servo-url/Cargo.toml" PROFILE release)
+
+  target_link_libraries(bench PRIVATE servo-url)
+  target_compile_definitions(bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+
+  target_link_libraries(bbc_bench PRIVATE servo-url)
+  target_compile_definitions(bbc_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+
+  target_link_libraries(percent_encode PRIVATE servo-url)
+  target_compile_definitions(percent_encode PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+
+  target_link_libraries(wpt_bench PRIVATE servo-url)
+  target_compile_definitions(wpt_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+else()
+  message(STATUS "Rust is unavailable." )
+endif()
