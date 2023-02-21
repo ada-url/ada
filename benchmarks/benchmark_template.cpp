@@ -605,6 +605,11 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
       event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
+    // let us not leak memory:
+    while(!rust_url_container.empty()) {
+      servo_url::free_url(rust_url_container.back());
+      rust_url_container.pop_back();
+    }
     state.counters["cycles/url"] = aggregate.best.cycles() / std::size(url_examples);
     state.counters["instructions/url"] = aggregate.best.instructions() / std::size(url_examples);
     state.counters["instructions/cycle"] = aggregate.best.instructions() / aggregate.best.cycles();
