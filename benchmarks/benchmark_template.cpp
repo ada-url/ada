@@ -556,20 +556,9 @@ int main(int argc, char **argv) {
 #if defined(ADA_RUST_VERSION)
 #include "competitors/servo-url/servo_url.h"
 
-// Ideally, the binding should define the struct, but it does not
-// seem to do it. Let us assume that it is the following:
-/*struct servo_url::Url {
-   uint16_t port;
-   char *scheme;
-   char *username;
-   char *password;
-   char *host;
-   char *query;
-   char *fragment;
-   char *path;
-   char *href;
-};*/
-
+// Emilio from Mozilla recommended that using an opaque-pointer will improve the performance
+// of this benchmark. It has indeed improved but with the cost of validating the output.
+// Reference: https://twitter.com/ecbos_/status/1627494441656238082?s=61&t=vCdcfSGWHH056CBdklWfCg
 static void BasicBench_ServoUrl(benchmark::State& state) {
   // Other benchmarks copy the 'standard url' to a structure.
   // We try to mimick the effect.
