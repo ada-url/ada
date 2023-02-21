@@ -32,9 +32,9 @@ size_t init_data(const char *source) {
   for (auto element : doc.get_array()) {
     if (element.type() == ondemand::json_type::object) {
       std::string_view input;
-      (void)element["input"].get_string(true).get(input);
+      if(element["input"].get_string(true).get(input) != simdjson::SUCCESS) { printf("missing input.\n"); }
       std::string_view base;
-      (void)element["base"].get_string(true).get(base);
+      if(element["base"].get_string(true).get(base) != simdjson::SUCCESS) { printf("missing base.\n"); }
       url_examples.push_back({std::string(input), std::string(base)});
       url_examples_bytes += input.size() + base.size();
     }
