@@ -170,15 +170,16 @@ namespace ada {
     ada::result out = ada::parse(input);
 
     if (out) {
-      set_protocol(out->get_protocol());
-      set_username(out->get_username());
-      set_password(out->get_password());
-      set_host(out->get_host());
-      set_hostname(out->get_hostname());
-      set_port(out->get_port());
-      set_pathname(out->get_pathname());
-      set_hash(out->get_hash());
-      set_search(out->get_search());
+      username = out->username;
+      password = out->password;
+      host = out->host;
+      port = out->port;
+      path = out->path;
+      query = out->query;
+      fragment = out->fragment;
+      type = out->type;
+      non_special_scheme = out->non_special_scheme;
+      has_opaque_path = out->has_opaque_path;
     }
 
     return out.has_value();
