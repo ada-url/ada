@@ -517,6 +517,9 @@ BENCHMARK(BasicBench_http_parser);
 
 int main(int argc, char **argv) {
     benchmark::AddCustomContext("ada spec", "Ada follows whatwg/url");
+#if defined(ADA_RUST_VERSION)
+    benchmark::AddCustomContext("rust version ", ADA_RUST_VERSION);
+#endif
 #if ADA_CURL_ENABLED
     // the curl dependency will depend on the system.
     benchmark::AddCustomContext("curl version ", LIBCURL_VERSION);
@@ -550,13 +553,38 @@ int main(int argc, char **argv) {
     benchmark::Shutdown();
 }
 
+#if defined(ADA_RUST_VERSION)
 #include "competitors/servo-url/servo_url.h"
 
+// Ideally, the binding should define the struct, but it does not
+// seem to do it. Let us assume that it is the following:
+/*struct servo_url::Url {
+   uint16_t port;
+   char *scheme;
+   char *username;
+   char *password;
+   char *host;
+   char *query;
+   char *fragment;
+   char *path;
+   char *href;
+};*/
+
 static void BasicBench_ServoUrl(benchmark::State& state) {
-  // volatile to prevent optimizations.
+  // Other benchmarks copy the 'standard url' to a structure.
+  // We try to mimick the effect.
+  std::vector<servo_url::Url*> rust_url_container;
+  rust_url_container.reserve(std::size(url_examples));
+
   for (auto _ : state) {
+    while(!rust_url_container.empty()) {
+      servo_url::free_url(rust_url_container.back());
+      rust_url_container.pop_back();
+    }
     for(std::string& url_string : url_examples) {
-      benchmark::DoNotOptimize(servo_url::parse_url(url_string.c_str(), url_string.length()));
+      // benchmark::DoNotOptimize is unnecessary and potentially misleading.
+      servo_url::Url * url = servo_url::parse_url(url_string.c_str(), url_string.length());
+      rust_url_container.push_back(url);
     }
   }
   if(collector.has_events()) {
@@ -564,8 +592,14 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
     for(size_t i = 0 ; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
+      // mimicks a clear()
+      while(!rust_url_container.empty()) {
+        servo_url::free_url(rust_url_container.back());
+        rust_url_container.pop_back();
+      }
       for(std::string& url_string : url_examples) {
-        benchmark::DoNotOptimize(servo_url::parse_url(url_string.c_str(), url_string.length()));
+        servo_url::Url * url = servo_url::parse_url(url_string.c_str(), url_string.length());
+        rust_url_container.push_back(url);
       }
       std::atomic_thread_fence(std::memory_order_release);
       event_count allocate_count = collector.end();
@@ -594,3 +628,4 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
       benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_ServoUrl);
+#endif // ADA_RUST

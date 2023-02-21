@@ -209,6 +209,9 @@ BENCHMARK(C0Control);
 
 
 int main(int argc, char **argv) {
+#if defined(ADA_RUST_VERSION)
+    benchmark::AddCustomContext("rust version ", ADA_RUST_VERSION);
+#endif
 #if (__APPLE__ &&  __aarch64__) || defined(__linux__)
   if(!collector.has_events()) {
     benchmark::AddCustomContext("performance counters", "No privileged access (sudo may help).");
