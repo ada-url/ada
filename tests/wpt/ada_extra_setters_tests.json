@@ -66,6 +66,22 @@
       "expected": {
         "port": ""
       }
+    },
+    {
+      "comment": "Should revert back to original on invalid input",
+      "href": "https://www.google.com:4343",
+      "new_value": "yagiz",
+      "expected": {
+        "port": "4343"
+      }
+    },
+    {
+      "comment": "Should use all ascii prefixed characters as port",
+      "href": "https://www.google.com:4343",
+      "new_value": "4yagiz",
+      "expected": {
+        "port": "4"
+      }
     }
   ],
   "hash": [

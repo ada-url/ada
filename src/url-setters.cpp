@@ -32,7 +32,14 @@ namespace ada {
     if (ada::unicode::is_c0_control_or_space(trimmed.front())) { return false; }
     // Input should start with ascii digit character.
     if (!checkers::is_digit(input.front())) { return false; }
-    return parse_port(trimmed);
+
+    // Revert changes if parse_port fails.
+    std::optional<uint16_t> previous_port = port;
+    parse_port(trimmed);
+    if (is_valid) { return true; }
+    port = previous_port;
+    is_valid = true;
+    return false;
   }
 
   void url::set_hash(const std::string_view input) {
