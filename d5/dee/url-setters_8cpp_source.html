@@ -295,21 +295,22 @@ $(document).ready(function(){initNavTree('d5/dee/url-setters_8cpp_source.html','
 <div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    <a class="code" href="../../dd/d64/namespaceada.html#a3d60d994682b227af774a12e6302a80a">ada::result</a> out = <a class="code" href="../../dd/d64/namespaceada.html#af8b1caee49e93f9811a7a5cf4a19ac25">ada::parse</a>(input);</div>
 <div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160; </div>
 <div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    <span class="keywordflow">if</span> (out) {</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#a5c9e3746ad2921a4cf6e506605047013">set_protocol</a>(out-&gt;get_protocol());</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#ac707d72cbe701a619a7ddeafa0562590">set_username</a>(out-&gt;get_username());</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#a930de7c3fb7913d4dab5b9a1b5175233">set_password</a>(out-&gt;get_password());</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#a716bea9e0b8f60b16c97b5268458da7f">set_host</a>(out-&gt;get_host());</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#a0427d8495d50e40e13215d7b7e36fa63">set_hostname</a>(out-&gt;get_hostname());</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#afa758006b81473c457ff8f460db7f115">set_port</a>(out-&gt;get_port());</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#ad25f560e4c3ff137c82c32203044e034">set_pathname</a>(out-&gt;get_pathname());</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">set_hash</a>(out-&gt;get_hash());</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1">set_search</a>(out-&gt;get_search());</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    }</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160; </div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    <span class="keywordflow">return</span> out.has_value();</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  }</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160; </div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;} <span class="comment">// namespace ada</span></div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;      username = out-&gt;username;</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;      password = out-&gt;password;</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;      host = out-&gt;host;</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;      port = out-&gt;port;</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;      path = out-&gt;path;</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;      query = out-&gt;query;</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;      fragment = out-&gt;fragment;</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;      type = out-&gt;type;</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;      non_special_scheme = out-&gt;non_special_scheme;</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;      <a class="code" href="../../dd/d03/structada_1_1url.html#a51dc2521590d7c196a3ecc89cec1e48a">has_opaque_path</a> = out-&gt;has_opaque_path;</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    }</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160; </div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    <span class="keywordflow">return</span> out.has_value();</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  }</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160; </div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;} <span class="comment">// namespace ada</span></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
 <div class="ttc" id="acheckers-inl_8h_html"><div class="ttname"><a href="../../d4/d46/checkers-inl_8h.html">checkers-inl.h</a></div><div class="ttdoc">Definitions for URL specific checkers used within Ada.</div></div>
 <div class="ttc" id="ahelpers_8h_html"><div class="ttname"><a href="../../d1/d98/helpers_8h.html">helpers.h</a></div><div class="ttdoc">Definitions for helper functions used within Ada.</div></div>
