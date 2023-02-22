@@ -38,6 +38,22 @@
       }
     },
     {
+      "comment": "Leading u0009 on special scheme",
+      "href": "https://yagiz.co:443",
+      "new_value": "\u00098080",
+      "expected": {
+        "port": "8080"
+      }
+    },
+    {
+      "comment": "Leading u0009 on non-special scheme",
+      "href": "wpt++://yagiz.co:443",
+      "new_value": "\u00098080",
+      "expected": {
+        "port": "8080"
+      }
+    },
+    {
       "comment": "Trailing control characters",
       "href": "https://yagiz.co:443",
       "new_value": "8080\u0000",

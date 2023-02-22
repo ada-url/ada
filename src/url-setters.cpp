@@ -30,8 +30,8 @@ namespace ada {
     if (trimmed.empty()) { port = std::nullopt; return true; }
     // Input should not start with control characters.
     if (ada::unicode::is_c0_control_or_space(trimmed.front())) { return false; }
-    // Input should start with ascii digit character.
-    if (!checkers::is_digit(input.front())) { return false; }
+    // Input should contain at least one ascii digit.
+    if (input.find_first_of("0123456789") == std::string_view::npos) { return false; }
 
     // Revert changes if parse_port fails.
     std::optional<uint16_t> previous_port = port;
