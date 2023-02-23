@@ -77,8 +77,8 @@ namespace ada {
     std::optional<std::string> previous_host = host;
     std::optional<uint16_t> previous_port = port;
 
-    std::string_view::iterator _host_end = std::find(input.begin(), input.end(), '#');
-    std::string _host(input.data(), std::distance(input.begin(), _host_end));
+    size_t host_end_pos = input.find('#');
+    std::string _host(input.data(), host_end_pos != std::string_view::npos ? host_end_pos : input.size());
     helpers::remove_ascii_tab_or_newline(_host);
     std::string_view new_host(_host);
 

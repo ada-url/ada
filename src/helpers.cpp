@@ -94,26 +94,35 @@ namespace ada::helpers {
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 
-  ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept {
-    size_t location = url.is_special() ? view.find_first_of(":[/?\\") : view.find_first_of(":[/?");
+ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept {
+    const size_t view_size = view.size();
+    size_t location = 0;
 
-    // Next while loop is almost never taken!
-    while((location != std::string_view::npos) && (view[location] == '[')) {
-      location = view.find(']',location);
-      if(location == std::string_view::npos) {
-        inside_brackets = true;
-        /**
-         * TODO: Ok. So if we arrive here then view has an unclosed [,
-         * Is the URL valid???
-         */
+    while (location < view_size) {
+      if (view[location] == '[') {
+        location = view.find(']', location);
+        if (location == std::string_view::npos) {
+          inside_brackets = true;
+          // TODO: Ok. So if we arrive here then view has an unclosed [,
+          // Is the URL valid???
+          break;
+        }
+      } else if (url.is_special()) {
+        if (view[location] == ':' || view[location] == '/' || view[location] == '?' || view[location] == '\\') {
+          break;
+        }
       } else {
-        location = url.is_special() ? view.find_first_of(":[/?\\#", location) : view.find_first_of(":[/?#", location);
+        if (view[location] == ':' || view[location] == '/' || view[location] == '?') {
+          break;
+        }
       }
+      ++location;
     }
 
     if (location != std::string_view::npos) {
-      view.remove_suffix(view.size() - location);
+      view.remove_suffix(view_size - location);
     }
+
     return location;
   }
 
