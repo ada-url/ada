@@ -172,8 +172,7 @@ namespace ada::parser {
           bool password_token_seen{false};
           do {
             std::string_view view = helpers::substring(url_data, input_position);
-            size_t location = url.is_special() ? view.find_first_of("@/?\\") : view.find_first_of("@/?");
-            std::string_view authority_view(view.data(), (location != std::string_view::npos) ? location : view.size());
+            std::string_view authority_view(view.data(), helpers::find_authority_delimiter(url.is_special(), view));
             size_t end_of_authority = input_position + authority_view.size();
             // If c is U+0040 (@), then:
             if ((end_of_authority != input_size) && (url_data[end_of_authority] == '@')) {

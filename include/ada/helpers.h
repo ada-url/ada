@@ -88,6 +88,12 @@ namespace ada::helpers {
    * Reverse the order of the bytes but only if the system is big endian
    */
   ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept;
+  
+  /**
+   * Finds the delimiter of a view in authority state.
+   */
+  ada_really_inline size_t find_authority_delimiter(bool is_special, std::string_view view) noexcept;
+
 } // namespace ada::helpers
 
 #endif // ADA_HELPERS_H

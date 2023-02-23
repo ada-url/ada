@@ -436,6 +436,16 @@ namespace ada::helpers {
     if (url.query.has_value()) return;
     while (!url.path.empty() && url.path.back() == ' ') { url.path.resize(url.path.size()-1); }
   }
+
+  ada_really_inline size_t find_authority_delimiter(bool is_special, std::string_view view) noexcept {
+    size_t location = 0;
+    for (; location < view.size(); ++location) {
+      if (view[location] == '@' || view[location] == '/' || view[location] == '?' || (is_special && view[location] == '\\')) {
+        break;
+      }
+    }
+    return location < view.size() ? location : view.size();
+  }
 } // namespace ada::helpers
 
 namespace ada {
