@@ -94,19 +94,20 @@ namespace ada::helpers {
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 
-  ada_really_inline size_t get_host_delimiter_location(const bool is_special, std::string_view& view, bool& inside_brackets) noexcept {
+  ada_really_inline std::pair<size_t,bool> get_host_delimiter_location(const bool is_special, std::string_view& view) noexcept {
     const size_t view_size = view.size();
     size_t location = 0;
+    bool found_colon = false;
     // It is marginally better to have two loops.
     if(is_special) {
       for (;location < view_size; ++location) {
         if (view[location] == '[') {
           location = view.find(']', location);
           if (location == std::string_view::npos) {
-            inside_brackets = true;
             break;
           }
         } else if (view[location] == ':' || view[location] == '/' || view[location] == '?' || view[location] == '\\') {
+          found_colon = view[location] == ':';
           break;
         } 
       }
@@ -115,10 +116,10 @@ namespace ada::helpers {
         if (view[location] == '[') {
           location = view.find(']', location);
           if (location == std::string_view::npos) {
-            inside_brackets = true;
             break;
           }
         } else if (view[location] == ':' || view[location] == '/' || view[location] == '?') {
+          found_colon = view[location] == ':';
           break;
         }
       }
@@ -129,7 +130,7 @@ namespace ada::helpers {
       view.remove_suffix(view_size - location);
     }
 
-    return location;
+    return {location, found_colon};
   }
 
   ada_really_inline void trim_c0_whitespace(std::string_view& input) noexcept {

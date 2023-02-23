@@ -377,11 +377,10 @@ namespace ada::parser {
           ada_log("HOST ", helpers::substring(url_data, input_position));
 
           std::string_view host_view = helpers::substring(url_data, input_position);
-          bool inside_brackets{false};
-          size_t location = helpers::get_host_delimiter_location(url.is_special(), host_view, inside_brackets);
+          auto [location, found_colon] = helpers::get_host_delimiter_location(url.is_special(), host_view);
           input_position = (location != std::string_view::npos) ? input_position + location : input_size;
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
-          if ((input_position != input_size) && (url_data[input_position] == ':') && !inside_brackets) {
+          if (found_colon) {
             // If buffer is the empty string, validation error, return failure.
             // Let host be the result of host parsing buffer with url is not special.
             ada_log("HOST parsing ", host_view);

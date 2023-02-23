@@ -85,15 +85,13 @@ namespace ada {
     // If url's scheme is "file", then set state to file host state, instead of host state.
     if (get_scheme_type() != ada::scheme::type::FILE) {
       std::string_view host_view(_host.data(), _host.length());
-      bool inside_brackets{false};
-      size_t location = helpers::get_host_delimiter_location(is_special(), host_view, inside_brackets);
-      std::string_view::iterator pointer = (location != std::string_view::npos) ? new_host.begin() + location : new_host.end();
+      auto [location,found_colon] = helpers::get_host_delimiter_location(is_special(), host_view);
 
       // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
       // Note: we cannot access *pointer safely if (pointer == pointer_end).
-      if ((pointer != new_host.end()) && (*pointer == ':') && !inside_brackets) {
+      if (found_colon) {
         if (override_hostname) { return false; }
-        std::string_view buffer(&*(pointer + 1));
+        std::string_view  buffer = new_host.substr(location+1);
         if (!buffer.empty()) { set_port(buffer); }
       }
       // If url is special and host_view is the empty string, validation error, return failure.
