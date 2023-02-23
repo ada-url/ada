@@ -94,30 +94,36 @@ namespace ada::helpers {
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 
-ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept {
+  ada_really_inline size_t get_host_delimiter_location(const bool is_special, std::string_view& view, bool& inside_brackets) noexcept {
     const size_t view_size = view.size();
     size_t location = 0;
-
-    while (location < view_size) {
-      if (view[location] == '[') {
-        location = view.find(']', location);
-        if (location == std::string_view::npos) {
-          inside_brackets = true;
-          // TODO: Ok. So if we arrive here then view has an unclosed [,
-          // Is the URL valid???
+    // It is marginally better to have two loops.
+    if(is_special) {
+      for (;location < view_size; ++location) {
+        if (view[location] == '[') {
+          location = view.find(']', location);
+          if (location == std::string_view::npos) {
+            inside_brackets = true;
+            break;
+          }
+        } else if (view[location] == ':' || view[location] == '/' || view[location] == '?' || view[location] == '\\') {
           break;
-        }
-      } else if (url.is_special()) {
-        if (view[location] == ':' || view[location] == '/' || view[location] == '?' || view[location] == '\\') {
-          break;
-        }
-      } else {
-        if (view[location] == ':' || view[location] == '/' || view[location] == '?') {
+        } 
+      }
+    } else {
+      for (;location < view_size; ++location) {
+        if (view[location] == '[') {
+          location = view.find(']', location);
+          if (location == std::string_view::npos) {
+            inside_brackets = true;
+            break;
+          }
+        } else if (view[location] == ':' || view[location] == '/' || view[location] == '?') {
           break;
         }
       }
-      ++location;
     }
+
 
     if (location != std::string_view::npos) {
       view.remove_suffix(view_size - location);

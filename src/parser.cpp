@@ -378,7 +378,7 @@ namespace ada::parser {
 
           std::string_view host_view = helpers::substring(url_data, input_position);
           bool inside_brackets{false};
-          size_t location = helpers::get_host_delimiter_location(url, host_view, inside_brackets);
+          size_t location = helpers::get_host_delimiter_location(url.is_special(), host_view, inside_brackets);
           input_position = (location != std::string_view::npos) ? input_position + location : input_size;
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
           if ((input_position != input_size) && (url_data[input_position] == ':') && !inside_brackets) {
@@ -394,7 +394,7 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if (input_position == input_size || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
+          else {
 
             // If url is special and host_view is the empty string, validation error, return failure.
             if (url.is_special() && host_view.empty()) {

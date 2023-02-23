@@ -86,7 +86,7 @@ namespace ada {
     if (get_scheme_type() != ada::scheme::type::FILE) {
       std::string_view host_view(_host.data(), _host.length());
       bool inside_brackets{false};
-      size_t location = helpers::get_host_delimiter_location(*this, host_view, inside_brackets);
+      size_t location = helpers::get_host_delimiter_location(is_special(), host_view, inside_brackets);
       std::string_view::iterator pointer = (location != std::string_view::npos) ? new_host.begin() + location : new_host.end();
 
       // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
