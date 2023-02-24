@@ -1,4 +1,5 @@
 #include "ada.h"
+#include "ada/common_defs.h" // make sure ADA_IS_BIG_ENDIAN gets defined.
 #include "ada/unicode.h"
 #include "ada/scheme.h"
 
@@ -94,6 +95,18 @@ namespace ada::helpers {
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 
+  // Reverse the byte order.
+  ada_really_inline uint64_t swap_bytes(uint64_t val) {
+        return ((((val) & 0xff00000000000000ull) >> 56) |
+                (((val) & 0x00ff000000000000ull) >> 40) |
+                (((val) & 0x0000ff0000000000ull) >> 24) |
+                (((val) & 0x000000ff00000000ull) >> 8 ) |
+                (((val) & 0x00000000ff000000ull) << 8 ) |
+                (((val) & 0x0000000000ff0000ull) << 24) |
+                (((val) & 0x000000000000ff00ull) << 40) |
+                (((val) & 0x00000000000000ffull) << 56));
+  }
+
   // starting at index location, this finds the next location of a character
   // :, /, \\, ? or [. If none is found, view.size() is returned.
   // For use within get_host_delimiter_location.
@@ -102,6 +115,9 @@ namespace ada::helpers {
       return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
     };
     auto index_of_first_set_byte = [](uint64_t v) {
+#if ADA_IS_BIG_ENDIAN
+      v = swap_bytes(v);
+#endif
       return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
     };
     auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
@@ -148,7 +164,11 @@ namespace ada::helpers {
       return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
     };
     auto index_of_first_set_byte = [](uint64_t v) {
+#if ADA_IS_BIG_ENDIAN
+      v = swap_bytes(v);
+#endif
       return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
+
     };
     auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
     size_t i = location;

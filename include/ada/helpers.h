@@ -79,6 +79,10 @@ namespace ada::helpers {
    */
   ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url& url) noexcept;
 
+  /**
+   * Reverse the order of the bytes.
+   */
+  ada_really_inline uint64_t swap_bytes(uint64_t val);
 } // namespace ada::helpers
 
 #endif // ADA_HELPERS_H
