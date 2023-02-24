@@ -94,6 +94,95 @@ namespace ada::helpers {
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 
+  // starting at index location, this finds the next location of a character
+  // :, /, \\, ? or [. If none is found, view.size() is returned.
+  // For use within get_host_delimiter_location.
+  ada_really_inline size_t find_next_host_delimiter_special(std::string_view view, size_t location) noexcept {
+    auto has_zero_byte = [](uint64_t v) {
+      return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
+    };
+    auto index_of_first_set_byte = [](uint64_t v) {
+      return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
+    };
+    auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+    size_t i = location;
+    uint64_t mask1 = broadcast(':');
+    uint64_t mask2 = broadcast('/');
+    uint64_t mask3 = broadcast('\\');
+    uint64_t mask4 = broadcast('?');
+    uint64_t mask5 = broadcast('[');
+    for (; i + 7 < view.size(); i += 8) {
+      uint64_t word{};
+      memcpy(&word, view.data() + i, sizeof(word));
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor3 = word ^ mask3;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t xor5 = word ^ mask5;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3) | has_zero_byte(xor4) | has_zero_byte(xor5);
+      if(is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+    if (i < view.size()) {
+      uint64_t word{};
+      memcpy(&word, view.data() + i, view.size() - i);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor3 = word ^ mask3;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t xor5 = word ^ mask5;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3) | has_zero_byte(xor4) | has_zero_byte(xor5);
+      if(is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+    return view.size();
+  }
+
+  // starting at index location, this finds the next location of a character
+  // :, /, ? or [. If none is found, view.size() is returned.
+  // For use within get_host_delimiter_location.
+  ada_really_inline size_t find_next_host_delimiter(std::string_view view, size_t location) noexcept {
+    auto has_zero_byte = [](uint64_t v) {
+      return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
+    };
+    auto index_of_first_set_byte = [](uint64_t v) {
+      return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
+    };
+    auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+    size_t i = location;
+    uint64_t mask1 = broadcast(':');
+    uint64_t mask2 = broadcast('/');
+    uint64_t mask4 = broadcast('?');
+    uint64_t mask5 = broadcast('[');
+    for (; i + 7 < view.size(); i += 8) {
+      uint64_t word{};
+      memcpy(&word, view.data() + i, sizeof(word));
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t xor5 = word ^ mask5;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor4) | has_zero_byte(xor5);
+      if(is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+    if (i < view.size()) {
+      uint64_t word{};
+      memcpy(&word, view.data() + i, view.size() - i);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t xor5 = word ^ mask5;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor4) | has_zero_byte(xor5);
+      if(is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+    return view.size();
+  }
+
   ada_really_inline std::pair<size_t,bool> get_host_delimiter_location(const bool is_special, std::string_view& view) noexcept {
     /**
      * The spec at https://url.spec.whatwg.org/#hostname-state expects us to compute
@@ -107,44 +196,57 @@ namespace ada::helpers {
     const size_t view_size = view.size();
     size_t location = 0;
     bool found_colon = false;
-
     /**
-     * Performance  analysis:
+     * Performance analysis:
      *
      * Here, we are basically seeking the end of the hostname which can be indicated
      * by the end of the view, or by one of the characters ':', '/', '?', '\\' (where '\\' is only
      * applicable for special URLs). However, these must appear outside a bracket range. E.g.,
      * if you have [something?]fd: then the '?' does not count.
+     *
+     * So we can skip ahead to the next delimiter, as long as we include '[' in the set of delimiters,
+     * and that we handle it first.
+     *
+     * So the trick is to have a fast function that locates the next delimiter. Unless we find '[',
+     * then it only needs to be called once! Ideally, such a function would be provided by the C++
+     * standard library, but it seems that find_first_of is not very fast, so we are forced to roll
+     * our own.
+     *
+     * We do not break into two loops for speed, but for clarity.
      */
-
-
-    // It is marginally better to have two loops.
     if(is_special) {
-      for (;location < view_size; ++location) {
+      // We move to the next delimiter.
+      location = find_next_host_delimiter_special(view, location);
+      // Unless we find '[' then we are going only going to have to call
+      // find_next_host_delimiter_special once.
+      for (;location < view_size; location = find_next_host_delimiter_special(view, location)) {
         if (view[location] == '[') {
           location = view.find(']', location);
           if (location == std::string_view::npos) {
             break;
           }
-        } else if (view[location] == ':' || view[location] == '/' || view[location] == '?' || view[location] == '\\') {
+        } else {
           found_colon = view[location] == ':';
           break;
         }
       }
     } else {
-      for (;location < view_size; ++location) {
+      // We move to the next delimiter.
+      location = find_next_host_delimiter(view, location);
+      // Unless we find '[' then we are going only going to have to call
+      // find_next_host_delimiter_special once.
+      for (;location < view_size; location = find_next_host_delimiter(view, location)) {
         if (view[location] == '[') {
           location = view.find(']', location);
           if (location == std::string_view::npos) {
             break;
           }
-        } else if (view[location] == ':' || view[location] == '/' || view[location] == '?') {
+        } else {
           found_colon = view[location] == ':';
           break;
         }
       }
     }
-
 
     if (location != std::string_view::npos) {
       view.remove_suffix(view_size - location);
