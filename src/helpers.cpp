@@ -95,9 +95,29 @@ namespace ada::helpers {
   }
 
   ada_really_inline std::pair<size_t,bool> get_host_delimiter_location(const bool is_special, std::string_view& view) noexcept {
+    /**
+     * The spec at https://url.spec.whatwg.org/#hostname-state expects us to compute
+     * a variable called insideBrackets but this variable is only used once, to check
+     * whether a ':' character was found outside brackets.
+     * Exact text:
+     * "Otherwise, if c is U+003A (:) and insideBrackets is false, then:".
+     * It is conceptually simpler and arguably more efficient to just return a Boolean
+     * indicating whether ':' was found outside brackets.
+     */
     const size_t view_size = view.size();
     size_t location = 0;
     bool found_colon = false;
+
+    /**
+     * Performance  analysis:
+     * 
+     * Here, we are basically seeking the end of the hostname which can be indicated
+     * by the end of the view, or by one of the characters ':', '/', '?', '\\' (where '\\' is only
+     * applicable for special URLs). However, these must appear outside a bracket range. E.g.,
+     * if you have [something?]fd: then the '?' does not count.
+     */
+
+
     // It is marginally better to have two loops.
     if(is_special) {
       for (;location < view_size; ++location) {
