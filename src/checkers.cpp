@@ -54,7 +54,7 @@ namespace ada::checkers {
 
 
   ada_really_inline constexpr bool verify_dns_length(std::string_view input) noexcept {
-    if(input.back() == '.') { 
+    if(input.back() == '.') {
       if(input.size() > 254) return false;
     } else if (input.size() > 253) return false;
 
