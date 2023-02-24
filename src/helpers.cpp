@@ -96,7 +96,7 @@ namespace ada::helpers {
   }
 
   // Reverse the byte order.
-  ada_really_inline uint64_t swap_bytes(uint64_t val) {
+  ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept {
         return ((((val) & 0xff00000000000000ull) >> 56) |
                 (((val) & 0x00ff000000000000ull) >> 40) |
                 (((val) & 0x0000ff0000000000ull) >> 24) |
@@ -107,6 +107,14 @@ namespace ada::helpers {
                 (((val) & 0x00000000000000ffull) << 56));
   }
 
+  ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept {
+#if ADA_IS_BIG_ENDIAN
+    return swap_bytes(val);
+#else
+    return val; // unchanged (trivial)
+#endif
+  }
+
   // starting at index location, this finds the next location of a character
   // :, /, \\, ? or [. If none is found, view.size() is returned.
   // For use within get_host_delimiter_location.
@@ -115,9 +123,7 @@ namespace ada::helpers {
       return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
     };
     auto index_of_first_set_byte = [](uint64_t v) {
-#if ADA_IS_BIG_ENDIAN
-      v = swap_bytes(v);
-#endif
+      v = swap_bytes_if_big_endian(v);
       return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
     };
     auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
@@ -164,11 +170,8 @@ namespace ada::helpers {
       return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
     };
     auto index_of_first_set_byte = [](uint64_t v) {
-#if ADA_IS_BIG_ENDIAN
-      v = swap_bytes(v);
-#endif
+      v = swap_bytes_if_big_endian(v);
       return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
-
     };
     auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
     size_t i = location;

@@ -82,7 +82,12 @@ namespace ada::helpers {
   /**
    * Reverse the order of the bytes.
    */
-  ada_really_inline uint64_t swap_bytes(uint64_t val);
+  ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept;
+
+  /**
+   * Reverse the order of the bytes but only if the system is big endian
+   */
+  ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept;
 } // namespace ada::helpers
 
 #endif // ADA_HELPERS_H
