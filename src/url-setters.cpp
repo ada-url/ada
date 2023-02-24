@@ -88,7 +88,8 @@ namespace ada {
       auto [location,found_colon] = helpers::get_host_delimiter_location(is_special(), host_view);
 
       // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
-      // Note: we cannot access *pointer safely if (pointer == pointer_end).
+      // Note: the 'found_colon' value is true if and only if a colon was encountered
+      // while not inside brackets.
       if (found_colon) {
         if (override_hostname) { return false; }
         std::string_view  buffer = new_host.substr(location+1);

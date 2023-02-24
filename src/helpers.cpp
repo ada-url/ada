@@ -110,7 +110,7 @@ namespace ada::helpers {
 
     /**
      * Performance  analysis:
-     * 
+     *
      * Here, we are basically seeking the end of the hostname which can be indicated
      * by the end of the view, or by one of the characters ':', '/', '?', '\\' (where '\\' is only
      * applicable for special URLs). However, these must appear outside a bracket range. E.g.,
@@ -129,7 +129,7 @@ namespace ada::helpers {
         } else if (view[location] == ':' || view[location] == '/' || view[location] == '?' || view[location] == '\\') {
           found_colon = view[location] == ':';
           break;
-        } 
+        }
       }
     } else {
       for (;location < view_size; ++location) {
@@ -200,11 +200,11 @@ namespace ada::helpers {
             if(path.empty()) { path = '/'; return true; }
             // Fast case where we have nothing to do:
             if(path.back() == '/') { return true; }
-            // If you have the path "/joe/myfriend", 
+            // If you have the path "/joe/myfriend",
             // then you delete 'myfriend'.
             path.resize(path.rfind('/') + 1);
             return true;
-          } 
+          }
           path += '/';
           if (path_view != ".") {
             path.append(path_view);
