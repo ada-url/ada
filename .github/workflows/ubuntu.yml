@@ -33,6 +33,6 @@ jobs:
       - name: Test
         run: ctest --output-on-failure --test-dir build
       - name: Display files
-        run: sudo find .
+        run: find build
       - name: Run default benchmark
-        run: sudo build/benchmarks/bench
+        run: build/benchmarks/bench
