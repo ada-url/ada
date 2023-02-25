@@ -491,7 +491,12 @@ int main(int argc, char** argv) {
 #if ADA_HAS_ICU
   std::cout << "We are using ICU."<< std::endl;
 #else
-  std::cout << "ICU is unavailable and we have no feedback."<< std::endl;
+  std::cout << "We are not using ICU."<< std::endl;
+#endif
+#if ADA_IS_BIG_ENDIAN
+  std::cout << "You have big-endian system."<< std::endl;
+#else
+  std::cout << "You have litte-endian system."<< std::endl;
 #endif
   bool one_failed = false;
   for(auto [s,b] : results) {
