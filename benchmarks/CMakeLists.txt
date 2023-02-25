@@ -170,6 +170,9 @@ if(RUST_FOUND)
   add_dependency(corrosion)
   # Important: we want to build in release mode!
   corrosion_import_crate(MANIFEST_PATH "competitors/servo-url/Cargo.toml" PROFILE release)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(CMAKE_BUILD_RPATH "${CMAKE_BINARY_DIR}")
+  endif()
 
   target_link_libraries(bench PRIVATE servo-url)
   target_compile_definitions(bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
