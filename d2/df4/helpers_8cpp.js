@@ -1,6 +1,8 @@
 var helpers_8cpp =
 [
     [ "encode_json", "d2/df4/helpers_8cpp.html#a73e5d4035440d10f8f5cb93b1ba92cad", null ],
+    [ "find_authority_delimiter", "d2/df4/helpers_8cpp.html#af6529a9eb620b959cdec2d7ee81559eb", null ],
+    [ "find_authority_delimiter_special", "d2/df4/helpers_8cpp.html#a88b90a38c83fb5caac56301e07d8ff27", null ],
     [ "find_next_host_delimiter", "d2/df4/helpers_8cpp.html#a2a58f86cdd1531639773044c45320fa7", null ],
     [ "find_next_host_delimiter_special", "d2/df4/helpers_8cpp.html#a507c70c395c7a5a152cc214f7a335fe5", null ],
     [ "get_host_delimiter_location", "d2/df4/helpers_8cpp.html#a3f2c8f0eaf1e6d60e3c3e8bc6d6bf5e5", null ],

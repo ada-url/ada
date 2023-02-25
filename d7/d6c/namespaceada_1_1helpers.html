@@ -143,6 +143,10 @@ Functions</h2></td></tr>
 <tr class="separator:a67eff309455efd05c7430b7b866bd9e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69f19e16480adfafc02d1dc68df69eb2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a69f19e16480adfafc02d1dc68df69eb2">swap_bytes_if_big_endian</a> (uint64_t val) noexcept</td></tr>
 <tr class="separator:a69f19e16480adfafc02d1dc68df69eb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88b90a38c83fb5caac56301e07d8ff27"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a88b90a38c83fb5caac56301e07d8ff27">find_authority_delimiter_special</a> (std::string_view view) noexcept</td></tr>
+<tr class="separator:a88b90a38c83fb5caac56301e07d8ff27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6529a9eb620b959cdec2d7ee81559eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#af6529a9eb620b959cdec2d7ee81559eb">find_authority_delimiter</a> (std::string_view view) noexcept</td></tr>
+<tr class="separator:af6529a9eb620b959cdec2d7ee81559eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memTemplParams" colspan="2">template&lt;typename out_iter &gt; </td></tr>
 <tr class="memitem:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad">encode_json</a> (std::string_view view, out_iter out)</td></tr>
 <tr class="separator:a73e5d4035440d10f8f5cb93b1ba92cad"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -187,6 +191,72 @@ template&lt;typename out_iter &gt; </div>
 <p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00014">14</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2">ada::url::to_string()</a>.</p>
+
+</div>
+</div>
+<a id="af6529a9eb620b959cdec2d7ee81559eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6529a9eb620b959cdec2d7ee81559eb">&#9670;&nbsp;</a></span>find_authority_delimiter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> size_t ada::helpers::find_authority_delimiter </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>view</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Finds the delimiter of a view in authority state. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00485">485</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a69f19e16480adfafc02d1dc68df69eb2">swap_bytes_if_big_endian()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>.</p>
+
+</div>
+</div>
+<a id="a88b90a38c83fb5caac56301e07d8ff27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88b90a38c83fb5caac56301e07d8ff27">&#9670;&nbsp;</a></span>find_authority_delimiter_special()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> size_t ada::helpers::find_authority_delimiter_special </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>view</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Finds the delimiter of a view in authority state. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l00440">440</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a69f19e16480adfafc02d1dc68df69eb2">swap_bytes_if_big_endian()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14">ada::parser::parse_url()</a>.</p>
 
 </div>
 </div>
@@ -595,7 +665,7 @@ template&lt;typename out_iter &gt; </div>
 
 <p class="reference">References <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a67eff309455efd05c7430b7b866bd9e8">swap_bytes()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a2a58f86cdd1531639773044c45320fa7">find_next_host_delimiter()</a>, and <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a507c70c395c7a5a152cc214f7a335fe5">find_next_host_delimiter_special()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#af6529a9eb620b959cdec2d7ee81559eb">find_authority_delimiter()</a>, <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a88b90a38c83fb5caac56301e07d8ff27">find_authority_delimiter_special()</a>, <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a2a58f86cdd1531639773044c45320fa7">find_next_host_delimiter()</a>, and <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a507c70c395c7a5a152cc214f7a335fe5">find_next_host_delimiter_special()</a>.</p>
 
 </div>
 </div>
