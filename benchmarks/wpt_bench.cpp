@@ -34,7 +34,7 @@ size_t init_data(const char *source) {
       std::string_view input;
       if(element["input"].get_string(true).get(input) != simdjson::SUCCESS) { printf("missing input.\n"); }
       std::string_view base;
-      if(element["base"].get_string(true).get(base) != simdjson::SUCCESS) { printf("missing base.\n"); }
+      if(element["base"].get_string(true).get(base) != simdjson::SUCCESS) {}
       url_examples.push_back({std::string(input), std::string(base)});
       url_examples_bytes += input.size() + base.size();
     }
