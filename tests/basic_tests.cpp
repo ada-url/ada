@@ -161,6 +161,16 @@ bool nodejs3() {
   TEST_SUCCEED()
 }
 
+// https://github.com/nodejs/node/issues/46755
+bool nodejs4() {
+  TEST_START()
+  auto url = ada::parse("file:///var/log/system.log");
+  url->set_href("http://0300.168.0xF0");
+  TEST_ASSERT(url->get_protocol(), "http:", "protocol should have been updated");
+  TEST_ASSERT(url->get_href(), "http://192.168.0.240/", "href should have been updated");
+  TEST_SUCCEED()
+}
+
 int main() {
 #if ADA_HAS_ICU
   std::cout << "We are using ICU."<< std::endl;
@@ -179,7 +189,7 @@ int main() {
      && readme1() && readme2() && readme3() 
      && readme4() && readme5() && readme6()
      && readme7() && nodejs1() && nodejs2()
-     && nodejs3();
+     && nodejs3() && nodejs4();
   if(success) { return EXIT_SUCCESS; }
   return EXIT_FAILURE;
 }

@@ -30,7 +30,16 @@ namespace ada {
     if (trimmed.empty()) { port = std::nullopt; return true; }
     // Input should not start with control characters.
     if (ada::unicode::is_c0_control_or_space(trimmed.front())) { return false; }
-    return parse_port(trimmed);
+    // Input should contain at least one ascii digit.
+    if (input.find_first_of("0123456789") == std::string_view::npos) { return false; }
+
+    // Revert changes if parse_port fails.
+    std::optional<uint16_t> previous_port = port;
+    parse_port(trimmed);
+    if (is_valid) { return true; }
+    port = previous_port;
+    is_valid = true;
+    return false;
   }
 
   void url::set_hash(const std::string_view input) {
@@ -169,15 +178,16 @@ namespace ada {
     ada::result out = ada::parse(input);
 
     if (out) {
-      set_protocol(out->get_protocol());
-      set_username(out->get_username());
-      set_password(out->get_password());
-      set_host(out->get_host());
-      set_hostname(out->get_hostname());
-      set_port(out->get_port());
-      set_pathname(out->get_pathname());
-      set_hash(out->get_hash());
-      set_search(out->get_search());
+      username = out->username;
+      password = out->password;
+      host = out->host;
+      port = out->port;
+      path = out->path;
+      query = out->query;
+      fragment = out->fragment;
+      type = out->type;
+      non_special_scheme = out->non_special_scheme;
+      has_opaque_path = out->has_opaque_path;
     }
 
     return out.has_value();
