@@ -32,5 +32,7 @@ jobs:
         run: cmake --build build -j=2
       - name: Test
         run: ctest --output-on-failure --test-dir build
+      - name: Display files
+        run: sudo find .
       - name: Run default benchmark
         run: sudo build/benchmarks/bench
