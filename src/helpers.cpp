@@ -1,4 +1,5 @@
 #include "ada.h"
+#include "ada/common_defs.h" // make sure ADA_IS_BIG_ENDIAN gets defined.
 #include "ada/unicode.h"
 #include "ada/scheme.h"
 
@@ -94,27 +95,216 @@ namespace ada::helpers {
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 
-  ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept {
-    size_t location = url.is_special() ? view.find_first_of(":[/?\\") : view.find_first_of(":[/?");
+  // Reverse the byte order.
+  ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept {
+    // performance: this often compiles to a single instruction (e.g., bswap)
+    return ((((val) & 0xff00000000000000ull) >> 56) |
+          (((val) & 0x00ff000000000000ull) >> 40) |
+          (((val) & 0x0000ff0000000000ull) >> 24) |
+          (((val) & 0x000000ff00000000ull) >> 8 ) |
+          (((val) & 0x00000000ff000000ull) << 8 ) |
+          (((val) & 0x0000000000ff0000ull) << 24) |
+          (((val) & 0x000000000000ff00ull) << 40) |
+          (((val) & 0x00000000000000ffull) << 56));
+  }
 
-    // Next while loop is almost never taken!
-    while((location != std::string_view::npos) && (view[location] == '[')) {
-      location = view.find(']',location);
-      if(location == std::string_view::npos) {
-        inside_brackets = true;
-        /**
-         * TODO: Ok. So if we arrive here then view has an unclosed [,
-         * Is the URL valid???
-         */
-      } else {
-        location = url.is_special() ? view.find_first_of(":[/?\\#", location) : view.find_first_of(":[/?#", location);
+  ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept {
+    // performance: under little-endian systems (most systems), this function
+    // is free (just returns the input).
+#if ADA_IS_BIG_ENDIAN
+    return swap_bytes(val);
+#else
+    return val; // unchanged (trivial)
+#endif
+  }
+
+  // starting at index location, this finds the next location of a character
+  // :, /, \\, ? or [. If none is found, view.size() is returned.
+  // For use within get_host_delimiter_location.
+  ada_really_inline size_t find_next_host_delimiter_special(std::string_view view, size_t location) noexcept {
+    // performance: if you plan to call find_next_host_delimiter more than once,
+    // you *really* want find_next_host_delimiter to be inlined, because
+    // otherwise, the constants may get reloaded each time (bad).
+    auto has_zero_byte = [](uint64_t v) {
+      return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
+    };
+    auto index_of_first_set_byte = [](uint64_t v) {
+      return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
+    };
+    auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+    size_t i = location;
+    uint64_t mask1 = broadcast(':');
+    uint64_t mask2 = broadcast('/');
+    uint64_t mask3 = broadcast('\\');
+    uint64_t mask4 = broadcast('?');
+    uint64_t mask5 = broadcast('[');
+    // This loop will get autovectorized under many optimizing compilers,
+    // so you get actually SIMD!
+    for (; i + 7 < view.size(); i += 8) {
+      uint64_t word{};
+      // performance: the next memcpy translates into a single CPU instruction.
+      memcpy(&word, view.data() + i, sizeof(word));
+      // performance: on little-endian systems (most systems), this next line is free.
+      word = swap_bytes_if_big_endian(word);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor3 = word ^ mask3;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t xor5 = word ^ mask5;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3) | has_zero_byte(xor4) | has_zero_byte(xor5);
+      if(is_match) {
+        return i + index_of_first_set_byte(is_match);
       }
     }
-
-    if (location != std::string_view::npos) {
-      view.remove_suffix(view.size() - location);
+    if (i < view.size()) {
+      uint64_t word{};
+      // performance: the next memcpy translates into a function call, but
+      // that is difficult to avoid. Might be a bit expensive.
+      memcpy(&word, view.data() + i, view.size() - i);
+      word = swap_bytes_if_big_endian(word);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor3 = word ^ mask3;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t xor5 = word ^ mask5;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3) | has_zero_byte(xor4) | has_zero_byte(xor5);
+      if(is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
     }
-    return location;
+    return view.size();
+  }
+
+  // starting at index location, this finds the next location of a character
+  // :, /, ? or [. If none is found, view.size() is returned.
+  // For use within get_host_delimiter_location.
+  ada_really_inline size_t find_next_host_delimiter(std::string_view view, size_t location) noexcept {
+    // performance: if you plan to call find_next_host_delimiter more than once,
+    // you *really* want find_next_host_delimiter to be inlined, because
+    // otherwise, the constants may get reloaded each time (bad).
+    auto has_zero_byte = [](uint64_t v) {
+      return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
+    };
+    auto index_of_first_set_byte = [](uint64_t v) {
+      return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
+    };
+    auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+    size_t i = location;
+    uint64_t mask1 = broadcast(':');
+    uint64_t mask2 = broadcast('/');
+    uint64_t mask4 = broadcast('?');
+    uint64_t mask5 = broadcast('[');
+    // This loop will get autovectorized under many optimizing compilers,
+    // so you get actually SIMD!
+    for (; i + 7 < view.size(); i += 8) {
+      uint64_t word{};
+      // performance: the next memcpy translates into a single CPU instruction.
+      memcpy(&word, view.data() + i, sizeof(word));
+      // performance: on little-endian systems (most systems), this next line is free.
+      word = swap_bytes_if_big_endian(word);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t xor5 = word ^ mask5;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor4) | has_zero_byte(xor5);
+      if(is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+    if (i < view.size()) {
+      uint64_t word{};
+      // performance: the next memcpy translates into a function call, but
+      // that is difficult to avoid. Might be a bit expensive.
+      memcpy(&word, view.data() + i, view.size() - i);
+      // performance: on little-endian systems (most systems), this next line is free.
+      word = swap_bytes_if_big_endian(word);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t xor5 = word ^ mask5;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor4) | has_zero_byte(xor5);
+      if(is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+    return view.size();
+  }
+
+  ada_really_inline std::pair<size_t,bool> get_host_delimiter_location(const bool is_special, std::string_view& view) noexcept {
+    /**
+     * The spec at https://url.spec.whatwg.org/#hostname-state expects us to compute
+     * a variable called insideBrackets but this variable is only used once, to check
+     * whether a ':' character was found outside brackets.
+     * Exact text:
+     * "Otherwise, if c is U+003A (:) and insideBrackets is false, then:".
+     * It is conceptually simpler and arguably more efficient to just return a Boolean
+     * indicating whether ':' was found outside brackets.
+     */
+    const size_t view_size = view.size();
+    size_t location = 0;
+    bool found_colon = false;
+    /**
+     * Performance analysis:
+     *
+     * We are basically seeking the end of the hostname which can be indicated
+     * by the end of the view, or by one of the characters ':', '/', '?', '\\' (where '\\' is only
+     * applicable for special URLs). However, these must appear outside a bracket range. E.g.,
+     * if you have [something?]fd: then the '?' does not count.
+     *
+     * So we can skip ahead to the next delimiter, as long as we include '[' in the set of delimiters,
+     * and that we handle it first.
+     *
+     * So the trick is to have a fast function that locates the next delimiter. Unless we find '[',
+     * then it only needs to be called once! Ideally, such a function would be provided by the C++
+     * standard library, but it seems that find_first_of is not very fast, so we are forced to roll
+     * our own.
+     *
+     * We do not break into two loops for speed, but for clarity.
+     */
+    if(is_special) {
+      // We move to the next delimiter.
+      location = find_next_host_delimiter_special(view, location);
+      // Unless we find '[' then we are going only going to have to call
+      // find_next_host_delimiter_special once.
+      for (;location < view_size; location = find_next_host_delimiter_special(view, location)) {
+        if (view[location] == '[') {
+          location = view.find(']', location);
+          if (location == std::string_view::npos) {
+            // performance: view.find might get translated to a memchr, which
+            // has no notion of std::string_view::npos, so the code does not
+            // reflect the assembly.
+            location = view_size;
+            break;
+          }
+        } else {
+          found_colon = view[location] == ':';
+          break;
+        }
+      }
+    } else {
+      // We move to the next delimiter.
+      location = find_next_host_delimiter(view, location);
+      // Unless we find '[' then we are going only going to have to call
+      // find_next_host_delimiter_special once.
+      for (;location < view_size; location = find_next_host_delimiter(view, location)) {
+        if (view[location] == '[') {
+          location = view.find(']', location);
+          if (location == std::string_view::npos) {
+            // performance: view.find might get translated to a memchr, which
+            // has no notion of std::string_view::npos, so the code does not
+            // reflect the assembly.
+            location = view_size;
+            break;
+          }
+        } else {
+          found_colon = view[location] == ':';
+          break;
+        }
+      }
+    }
+    // performance: remove_suffix may translate into a single instruction.
+    view.remove_suffix(view_size - location);
+    return {location, found_colon};
   }
 
   ada_really_inline void trim_c0_whitespace(std::string_view& input) noexcept {
@@ -164,11 +354,11 @@ namespace ada::helpers {
             if(path.empty()) { path = '/'; return true; }
             // Fast case where we have nothing to do:
             if(path.back() == '/') { return true; }
-            // If you have the path "/joe/myfriend", 
+            // If you have the path "/joe/myfriend",
             // then you delete 'myfriend'.
             path.resize(path.rfind('/') + 1);
             return true;
-          } 
+          }
           path += '/';
           if (path_view != ".") {
             path.append(path_view);

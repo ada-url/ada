@@ -86,23 +86,22 @@ namespace ada {
     std::optional<std::string> previous_host = host;
     std::optional<uint16_t> previous_port = port;
 
-    std::string_view::iterator _host_end = std::find(input.begin(), input.end(), '#');
-    std::string _host(input.data(), std::distance(input.begin(), _host_end));
+    size_t host_end_pos = input.find('#');
+    std::string _host(input.data(), host_end_pos != std::string_view::npos ? host_end_pos : input.size());
     helpers::remove_ascii_tab_or_newline(_host);
     std::string_view new_host(_host);
 
     // If url's scheme is "file", then set state to file host state, instead of host state.
     if (get_scheme_type() != ada::scheme::type::FILE) {
       std::string_view host_view(_host.data(), _host.length());
-      bool inside_brackets{false};
-      size_t location = helpers::get_host_delimiter_location(*this, host_view, inside_brackets);
-      std::string_view::iterator pointer = (location != std::string_view::npos) ? new_host.begin() + location : new_host.end();
+      auto [location,found_colon] = helpers::get_host_delimiter_location(is_special(), host_view);
 
       // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
-      // Note: we cannot access *pointer safely if (pointer == pointer_end).
-      if ((pointer != new_host.end()) && (*pointer == ':') && !inside_brackets) {
+      // Note: the 'found_colon' value is true if and only if a colon was encountered
+      // while not inside brackets.
+      if (found_colon) {
         if (override_hostname) { return false; }
-        std::string_view buffer(&*(pointer + 1));
+        std::string_view  buffer = new_host.substr(location+1);
         if (!buffer.empty()) { set_port(buffer); }
       }
       // If url is special and host_view is the empty string, validation error, return failure.

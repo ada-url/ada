@@ -378,11 +378,12 @@ namespace ada::parser {
           ada_log("HOST ", helpers::substring(url_data, input_position));
 
           std::string_view host_view = helpers::substring(url_data, input_position);
-          bool inside_brackets{false};
-          size_t location = helpers::get_host_delimiter_location(url, host_view, inside_brackets);
+          auto [location, found_colon] = helpers::get_host_delimiter_location(url.is_special(), host_view);
           input_position = (location != std::string_view::npos) ? input_position + location : input_size;
           // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
-          if ((input_position != input_size) && (url_data[input_position] == ':') && !inside_brackets) {
+          // Note: the 'found_colon' value is true if and only if a colon was encountered
+          // while not inside brackets.
+          if (found_colon) {
             // If buffer is the empty string, validation error, return failure.
             // Let host be the result of host parsing buffer with url is not special.
             ada_log("HOST parsing ", host_view);
@@ -395,7 +396,9 @@ namespace ada::parser {
           // Otherwise, if one of the following is true:
           // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
           // - url is special and c is U+005C (\)
-          else if (input_position == input_size || url_data[input_position] == '/' || url_data[input_position] == '?' || (url.is_special() && url_data[input_position] == '\\')) {
+          // The get_host_delimiter_location function either brings us to
+          // the colon outside of the bracket, or to one of those characters.
+          else {
 
             // If url is special and host_view is the empty string, validation error, return failure.
             if (url.is_special() && host_view.empty()) {

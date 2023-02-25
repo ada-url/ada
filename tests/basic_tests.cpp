@@ -172,7 +172,17 @@ bool nodejs4() {
 }
 
 int main() {
-    bool success = set_host_should_return_false_sometimes()
+#if ADA_HAS_ICU
+  std::cout << "We are using ICU."<< std::endl;
+#else
+  std::cout << "We are not using ICU."<< std::endl;
+#endif
+#if ADA_IS_BIG_ENDIAN
+  std::cout << "You have big-endian system."<< std::endl;
+#else
+  std::cout << "You have litte-endian system."<< std::endl;
+#endif
+  bool success = set_host_should_return_false_sometimes()
      && set_host_should_return_true_sometimes()
      && set_hostname_should_return_false_sometimes()
      && set_hostname_should_return_true_sometimes()
@@ -180,6 +190,6 @@ int main() {
      && readme4() && readme5() && readme6()
      && readme7() && nodejs1() && nodejs2()
      && nodejs3() && nodejs4();
-    if(success) { return EXIT_SUCCESS; }
-    return EXIT_FAILURE;
+  if(success) { return EXIT_SUCCESS; }
+  return EXIT_FAILURE;
 }

@@ -63,10 +63,11 @@ namespace ada::helpers {
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept;
 
   /**
-   * Returns a host's delimiter location depending on the state of the instance.
+   * Returns a host's delimiter location depending on the state of the instance, and 
+   * whether a colon was found outside brackets.
    * Used by the host parser.
    */
-  ada_really_inline size_t get_host_delimiter_location(const ada::url& url, std::string_view& view, bool& inside_brackets) noexcept;
+  ada_really_inline std::pair<size_t,bool> get_host_delimiter_location(const bool is_special, std::string_view& view) noexcept;
 
   /**
    * Removes leading and trailing C0 control and whitespace characters from string.
@@ -78,6 +79,15 @@ namespace ada::helpers {
    */
   ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url& url) noexcept;
 
+  /**
+   * Reverse the order of the bytes.
+   */
+  ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept;
+
+  /**
+   * Reverse the order of the bytes but only if the system is big endian
+   */
+  ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept;
 } // namespace ada::helpers
 
 #endif // ADA_HELPERS_H

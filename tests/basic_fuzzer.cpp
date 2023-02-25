@@ -110,6 +110,16 @@ size_t roller_fuzz(size_t N) {
 }
 
 int main() {
+#if ADA_HAS_ICU
+  std::cout << "We are using ICU."<< std::endl;
+#else
+  std::cout << "We are not using ICU."<< std::endl;
+#endif
+#if ADA_IS_BIG_ENDIAN
+  std::cout << "You have big-endian system."<< std::endl;
+#else
+  std::cout << "You have litte-endian system."<< std::endl;
+#endif
   std::cout << "Running basic fuzzer.\n";
   std::cout << "[fancy]  Executed " << fancy_fuzz(100000) << " mutations.\n";
 #if ADA_HAS_ICU
