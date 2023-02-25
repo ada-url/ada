@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1676738522456,
+  "lastUpdate": 1677364058150,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1500,6 +1500,60 @@ window.BENCHMARK_DATA = {
             "value": 7577.293153399773,
             "unit": "ns/iter",
             "extra": "iterations: 92849\ncpu: 7576.89474307747 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "37e6d98b7de31d4414788ed96e3a0efa85a4e2f9",
+          "message": "build: fix github workflow benchmarks (#238)\n\n* Checking that bench can run in CI.\r\n\r\n* Adding file display\r\n\r\n* Trying to set rpath.\r\n\r\n* Tweak again.\r\n\r\n* Hmmm...\r\n\r\n* Trying...",
+          "timestamp": "2023-02-25T17:24:37-05:00",
+          "tree_id": "0d39059976adb6cd33a04916d8e0847a3d06382e",
+          "url": "https://github.com/ada-url/ada/commit/37e6d98b7de31d4414788ed96e3a0efa85a4e2f9"
+        },
+        "date": 1677364056728,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL_With_Copy",
+            "value": 5502.130290995072,
+            "unit": "ns/iter",
+            "extra": "iterations: 127906\ncpu: 5488.282019608149 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_With_Move",
+            "value": 4607.663317591242,
+            "unit": "ns/iter",
+            "extra": "iterations: 149494\ncpu: 4603.074370877763 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 11728.748869523635,
+            "unit": "ns/iter",
+            "extra": "iterations: 57719\ncpu: 11727.493546319232 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 8372.485978595778,
+            "unit": "ns/iter",
+            "extra": "iterations: 82695\ncpu: 8371.94751798779 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_ServoUrl",
+            "value": 14233.739312506908,
+            "unit": "ns/iter",
+            "extra": "iterations: 50386\ncpu: 14232.183543047668 ns\nthreads: 1"
           }
         ]
       }
