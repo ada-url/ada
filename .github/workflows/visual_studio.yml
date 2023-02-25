@@ -1,6 +1,15 @@
 name: VS17-CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  content: read
 
 jobs:
   ci:
@@ -25,6 +34,5 @@ jobs:
     - name: Build Release
       run: cmake --build build --config Release --verbose
     - name: Run Release tests
-      run: |
-        cd build
-        ctest -C Release   --output-on-failure
+      working-directory: build
+      run: ctest -C Release   --output-on-failure
