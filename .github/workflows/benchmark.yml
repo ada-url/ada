@@ -32,7 +32,7 @@ jobs:
         run: cmake --build build -j=2
 
       - name: Run default benchmark
-        run: sudo build/benchmarks/bench --benchmark_format=json | tee default_benchmark_result.json
+        run: cd build && sudo benchmarks/bench --benchmark_format=json | tee ../default_benchmark_result.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@c3efd4d54319dbc90622069cc273cba59b46abbf # v1.15.0
         with:
@@ -47,7 +47,7 @@ jobs:
           alert-comment-cc-users: '@anonrig @lemire'
 
       - name: Run WPT benchmark
-        run: sudo build/benchmarks/wpt_bench tests/wpt/urltestdata.json --benchmark_format=json | tee wpt_benchmark_result.json
+        run: cd build && sudo benchmarks/wpt_bench tests/wpt/urltestdata.json --benchmark_format=json | tee ../wpt_benchmark_result.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@c3efd4d54319dbc90622069cc273cba59b46abbf # v1.15.0
         with:
@@ -62,7 +62,7 @@ jobs:
           alert-comment-cc-users: '@anonrig @lemire'
 
       - name: Run BBC benchmark
-        run: sudo build/benchmarks/bbc_bench --benchmark_format=json | tee bbc_benchmark_result.json
+        run: cd build && sudo benchmarks/bbc_bench --benchmark_format=json | tee ../bbc_benchmark_result.json
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@c3efd4d54319dbc90622069cc273cba59b46abbf # v1.15.0
         with:
