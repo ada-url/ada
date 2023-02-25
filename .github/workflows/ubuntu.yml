@@ -35,4 +35,4 @@ jobs:
       - name: Display files
         run: find build
       - name: Run default benchmark
-        run: build/benchmarks/bench
+        run: LD_LIBRARY_PATH=$LD_LIBRARY_PATH:build/benchmarks/ build/benchmarks/bench
