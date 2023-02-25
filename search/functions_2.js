@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['encode_5fjson_244',['encode_json',['../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad',1,'ada::helpers']]]
+  ['encode_5fjson_248',['encode_json',['../d7/d6c/namespaceada_1_1helpers.html#a73e5d4035440d10f8f5cb93b1ba92cad',1,'ada::helpers']]]
 ];
