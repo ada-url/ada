@@ -437,14 +437,91 @@ namespace ada::helpers {
     while (!url.path.empty() && url.path.back() == ' ') { url.path.resize(url.path.size()-1); }
   }
 
-  ada_really_inline size_t find_authority_delimiter(bool is_special, std::string_view view) noexcept {
-    size_t location = 0;
-    for (; location < view.size(); ++location) {
-      if (view[location] == '@' || view[location] == '/' || view[location] == '?' || (is_special && view[location] == '\\')) {
-        break;
+  ada_really_inline size_t find_authority_delimiter_special(std::string_view view) noexcept {
+    auto has_zero_byte = [](uint64_t v) {
+      return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
+    };
+    auto index_of_first_set_byte = [](uint64_t v) {
+      return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
+    };
+    auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+    size_t i = 0;
+    uint64_t mask1 = broadcast('@');
+    uint64_t mask2 = broadcast('/');
+    uint64_t mask3 = broadcast('?');
+    uint64_t mask4 = broadcast('\\');
+
+    for (; i + 7 < view.size(); i += 8) {
+      uint64_t word{};
+      memcpy(&word, view.data() + i, sizeof(word));
+      word = swap_bytes_if_big_endian(word);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor3 = word ^ mask3;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3) | has_zero_byte(xor4);
+      if (is_match) {
+        return i + index_of_first_set_byte(is_match);
       }
     }
-    return location < view.size() ? location : view.size();
+
+    if (i < view.size()) {
+      uint64_t word{};
+      memcpy(&word, view.data() + i, view.size() - i);
+      word = swap_bytes_if_big_endian(word);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor3 = word ^ mask3;
+      uint64_t xor4 = word ^ mask4;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3) | has_zero_byte(xor4);
+      if (is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+
+    return view.size();
+  }
+
+  ada_really_inline size_t find_authority_delimiter(std::string_view view) noexcept {
+    auto has_zero_byte = [](uint64_t v) {
+      return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
+    };
+    auto index_of_first_set_byte = [](uint64_t v) {
+      return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
+    };
+    auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+    size_t i = 0;
+    uint64_t mask1 = broadcast('@');
+    uint64_t mask2 = broadcast('/');
+    uint64_t mask3 = broadcast('?');
+
+    for (; i + 7 < view.size(); i += 8) {
+      uint64_t word{};
+      memcpy(&word, view.data() + i, sizeof(word));
+      word = swap_bytes_if_big_endian(word);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor3 = word ^ mask3;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);
+      if (is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+
+    if (i < view.size()) {
+      uint64_t word{};
+      memcpy(&word, view.data() + i, view.size() - i);
+      word = swap_bytes_if_big_endian(word);
+      uint64_t xor1 = word ^ mask1;
+      uint64_t xor2 = word ^ mask2;
+      uint64_t xor3 = word ^ mask3;
+      uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);
+      if (is_match) {
+        return i + index_of_first_set_byte(is_match);
+      }
+    }
+
+    return view.size();
   }
 } // namespace ada::helpers
 

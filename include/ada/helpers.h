@@ -90,9 +90,14 @@ namespace ada::helpers {
   ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept;
   
   /**
+  * Finds the delimiter of a view in authority state.
+  */
+  ada_really_inline size_t find_authority_delimiter_special(std::string_view view) noexcept;
+
+  /**
    * Finds the delimiter of a view in authority state.
    */
-  ada_really_inline size_t find_authority_delimiter(bool is_special, std::string_view view) noexcept;
+  ada_really_inline size_t find_authority_delimiter(std::string_view view) noexcept;
 
 } // namespace ada::helpers
 
