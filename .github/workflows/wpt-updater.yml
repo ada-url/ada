@@ -12,13 +12,13 @@ jobs:
   issue:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
         with:
           persist-credentials: false
       - name: Fetch tests
         run: tools/update-wpt.sh
       - name: Open pull request
-        uses: gr2m/create-or-update-pull-request-action@v1
+        uses: gr2m/create-or-update-pull-request-action@df20b2c073090271599a08c55ae26e0c3522b329 # v1.9.2
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
