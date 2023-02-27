@@ -28,9 +28,14 @@ Please describe the expected behavior.
 
 Please describe the current behavior.
 
-### Screenshots
+### System Information
 
-If possible, attach screenshots that may help clarify the problem.
+Please provide information about your environment such as operating system and version, CPU specs, and any other env information you think is relevant/useful. This can help us identify issues that may be specific to certain configurations. Example:
+
+- CPU: AMD Ryzen 7 5800X
+- Operating System: Ubuntu 20.04 LTS
+- Endianness: Big Endian 
+- Others: ...
 
 ### Additional Information
 
