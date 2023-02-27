@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677539784466,
+  "lastUpdate": 1677539789516,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -4852,6 +4852,54 @@ window.BENCHMARK_DATA = {
             "value": 14426.21370286431,
             "unit": "ns/iter",
             "extra": "iterations: 48530\ncpu: 14425.060787141972 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vanessamoraes@ufrj.br",
+            "name": "Vanessa Moraes",
+            "username": "vanemoraess"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2c3549b96f8623ef613a995954f713de0e062904",
+          "message": "docs: add template for issues (#245)\n\n* contribute: adds template for issues\r\n\r\n* contribute: System info section added",
+          "timestamp": "2023-02-27T18:13:49-05:00",
+          "tree_id": "effd0e2b4c205c2f29cbaedd679f3a6b3e666b71",
+          "url": "https://github.com/ada-url/ada/commit/2c3549b96f8623ef613a995954f713de0e062904"
+        },
+        "date": 1677539789102,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 3557.01367721762,
+            "unit": "ns/iter",
+            "extra": "iterations: 197043\ncpu: 3554.471866546896 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 9935.787180032645,
+            "unit": "ns/iter",
+            "extra": "iterations: 70515\ncpu: 9925.48252144934 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5992.149373084743,
+            "unit": "ns/iter",
+            "extra": "iterations: 117799\ncpu: 5985.2910466133 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_ServoUrl",
+            "value": 14479.525441243595,
+            "unit": "ns/iter",
+            "extra": "iterations: 48386\ncpu: 14463.586574629026 ns\nthreads: 1"
           }
         ]
       }
