@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['implementation_2ecpp_228',['implementation.cpp',['../d8/df6/implementation_8cpp.html',1,'']]],
-  ['implementation_2eh_229',['implementation.h',['../dd/d6b/implementation_8h.html',1,'']]]
+  ['implementation_2ecpp_230',['implementation.cpp',['../d8/df6/implementation_8cpp.html',1,'']]],
+  ['implementation_2eh_231',['implementation.h',['../dd/d6b/implementation_8h.html',1,'']]],
+  ['issue_2dtemplate_2emd_232',['issue-template.md',['../da/d39/issue-template_8md.html',1,'']]]
 ];

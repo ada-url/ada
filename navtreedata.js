@@ -25,19 +25,20 @@
 var NAVTREE =
 [
   [ "Ada", "index.html", [
-    [ "Requirements", "index.html#autotoc_md4", null ],
-    [ "Usage", "index.html#autotoc_md5", [
-      [ "Examples", "index.html#autotoc_md6", null ],
-      [ "CMake dependency", "index.html#autotoc_md7", null ]
+    [ "Requirements", "index.html#autotoc_md14", null ],
+    [ "Usage", "index.html#autotoc_md15", [
+      [ "Examples", "index.html#autotoc_md16", null ],
+      [ "CMake dependency", "index.html#autotoc_md17", null ]
     ] ],
-    [ "Contributing", "index.html#autotoc_md8", [
-      [ "Building", "index.html#autotoc_md9", null ],
-      [ "Installing ICU", "index.html#autotoc_md10", null ],
-      [ "Amalgamation", "index.html#autotoc_md11", null ]
+    [ "Contributing", "index.html#autotoc_md18", [
+      [ "Building", "index.html#autotoc_md19", null ],
+      [ "Installing ICU", "index.html#autotoc_md20", null ],
+      [ "Amalgamation", "index.html#autotoc_md21", null ]
     ] ],
+    [ "🐛 Report for Ada-url", "d1/dac/md_contribute_issue_template.html", null ],
     [ "Release Document", "d0/d4a/md_docs_RELEASE.html", [
-      [ "Preparation", "d0/d4a/md_docs_RELEASE.html#autotoc_md1", null ],
-      [ "Release", "d0/d4a/md_docs_RELEASE.html#autotoc_md2", null ]
+      [ "Preparation", "d0/d4a/md_docs_RELEASE.html#autotoc_md11", null ],
+      [ "Release", "d0/d4a/md_docs_RELEASE.html#autotoc_md12", null ]
     ] ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
@@ -72,7 +73,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"da/d84/serializers_8cpp.html#a3807c277d4c9ad2c8f2fa252e790edf4"
+"da/d69/character__sets-inl_8h.html#a2a5253f4fefdf61c146c4daf9a3633b9"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

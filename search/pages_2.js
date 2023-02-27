@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['extensions_0',['Extensions',['../da/d27/md_docs_theme_docs_extensions.html',1,'']]]
+  ['🐛_20report_20for_20ada_2durl_416',['🐛 Report for Ada-url',['../d1/dac/md_contribute_issue_template.html',1,'']]]
 ];
