@@ -45,7 +45,7 @@ inline standard_url to_standard_url_with_copy(ada::url* url) {
   return u;
 }
 
-template <bool with_copy>
+template <bool with_copy = false>
 static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t numbers_of_parameters = 0;
@@ -110,11 +110,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 
-auto BasicBench_AdaURL_With_Copy = BasicBench_AdaURL<true>;
-auto BasicBench_AdaURL_With_Move = BasicBench_AdaURL<false>;
-// This illustrates the significant cost of copying strings...!!!
-BENCHMARK(BasicBench_AdaURL_With_Copy);
-BENCHMARK(BasicBench_AdaURL_With_Move);
+BENCHMARK(BasicBench_AdaURL);
 
 
 
