@@ -35,6 +35,7 @@ const char *PERCENT_ENCODING_JSON = WPT_DATA_DIR "percent-encoding.json";
 const char *SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
 const char *ADA_SETTERS_TESTS_JSON = WPT_DATA_DIR "ada_extra_setters_tests.json";
 const char *TOASCII_JSON = WPT_DATA_DIR "toascii.json";
+const char *IDNA_TEST_V2 = WPT_DATA_DIR "IdnaTestV2.json";
 const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
 const char *ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
 const char *VERIFYDNSLENGTH_TESTS_JSON = WPT_DATA_DIR "verifydnslength_tests.json";
@@ -283,6 +284,61 @@ bool toascii_encoding() {
   TEST_SUCCEED()
 }
 
+bool idna_test_v2_to_ascii() {
+    TEST_START();
+    ondemand::parser parser;
+
+    RUN_TEST(file_exists(IDNA_TEST_V2));
+
+    padded_string json = padded_string::load(IDNA_TEST_V2);
+    std::cout << "  loaded " << IDNA_TEST_V2 << " (" << json.size() << " kB)"
+              << std::endl;
+
+    ondemand::document doc = parser.iterate(json);
+    for (auto element : doc.get_array()) {
+        if (element.type() == ondemand::json_type::string) {
+            continue;
+        }
+
+        ondemand::object object = element.get_object();
+        auto json_string = std::string(std::string_view(simdjson::to_json_string(object)));
+
+        try {
+            auto comment = object["comment"];
+            if (comment) {
+                std::cout << "   comment: " << comment.get_string() << std::endl;
+            }
+        } catch (simdjson::simdjson_error ignored) {}
+
+        std::string_view input = object["input"].get_string();
+
+        std::optional<std::string> output;
+        ada::unicode::to_ascii(output, input, false, input.find('%'));
+
+        auto expected_output = object["output"];
+
+        if (expected_output.is_null()) {
+            TEST_ASSERT(
+              output.has_value(), 
+              false, 
+              "\n  Test case: " + json_string + 
+              "\n  Got output: " + output.value_or("")
+            );
+
+        } else if (expected_output.type() == ondemand::json_type::string) {
+            std::string_view str_expected_output = expected_output.get_string();
+            TEST_ASSERT(
+              str_expected_output,
+              output.value_or(""),
+              "\n  Test case: " + json_string +
+              "\n  Got output: " + output.value_or("")
+            );
+        }
+    }
+
+    TEST_SUCCEED();
+}
+
 bool urltestdata_encoding(const char* source) {
 
   TEST_START()
@@ -450,12 +506,29 @@ int main(int argc, char** argv) {
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = percent_encoding();
   }
+
 #if ADA_HAS_ICU
   name = "toascii_encoding";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = toascii_encoding();
   }
+
+  name = "idna_test_v2_to_ascii";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = idna_test_v2_to_ascii();
+  }
+
+  name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
+  }
+
+  name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
+  }
 #endif // ADA_HAS_ICU
+
   name = "setters_tests_encoding("+std::string(SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
@@ -470,16 +543,7 @@ int main(int argc, char** argv) {
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
-#if ADA_HAS_ICU
-  name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
-  if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
-  }
-  name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
-  if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
-  }
-#endif
+
   name = "verifydnslength_tests("+std::string(VERIFYDNSLENGTH_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
     results[name] = verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
