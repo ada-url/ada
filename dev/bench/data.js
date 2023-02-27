@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677539780634,
+  "lastUpdate": 1677539784466,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -3158,6 +3158,42 @@ window.BENCHMARK_DATA = {
             "value": 441304.51042325445,
             "unit": "ns/iter",
             "extra": "iterations: 1583\ncpu: 441294.2514213518 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "vanessamoraes@ufrj.br",
+            "name": "Vanessa Moraes",
+            "username": "vanemoraess"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2c3549b96f8623ef613a995954f713de0e062904",
+          "message": "docs: add template for issues (#245)\n\n* contribute: adds template for issues\r\n\r\n* contribute: System info section added",
+          "timestamp": "2023-02-27T18:13:49-05:00",
+          "tree_id": "effd0e2b4c205c2f29cbaedd679f3a6b3e666b71",
+          "url": "https://github.com/ada-url/ada/commit/2c3549b96f8623ef613a995954f713de0e062904"
+        },
+        "date": 1677539783978,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 388958.76391983696,
+            "unit": "ns/iter",
+            "extra": "iterations: 1796\ncpu: 388899.44320712704 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 440408.7102272629,
+            "unit": "ns/iter",
+            "extra": "iterations: 1584\ncpu: 440361.9949494948 ns\nthreads: 1"
           }
         ]
       }
