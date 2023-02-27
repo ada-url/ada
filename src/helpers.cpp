@@ -324,6 +324,16 @@ namespace ada::helpers {
     bool trivial_path =
         (special ? (accumulator == 0) : ((accumulator & 0b11111101) == 0)) &&
         (type != ada::scheme::type::FILE);
+    if(accumulator == 4) {
+      // '4' means that we have at least one dot, but nothing that requires
+      // percent encoding or decoding. The only part that is not trivial is
+      // that we may have single dots and double dots path segments.
+      // If we have such segments, then we either have a path that begins
+      // with '.' (easy to check), or we have the sequence './'.
+      // Note: input cannot be empty, it must at least contain one character ('.')
+      // Note: we know that '\' is not present.
+      if(input[0] != '.' || input.find("./") == std::string_view::npos) { trivial_path = true; }
+    }
     if (trivial_path) {
       ada_log("parse_path trivial");
       path += '/';
