@@ -332,7 +332,7 @@ namespace ada::helpers {
       // with '.' (easy to check), or we have the sequence './'.
       // Note: input cannot be empty, it must at least contain one character ('.')
       // Note: we know that '\' is not present.
-      if(input[0] != '.' || input.find("./") == std::string_view::npos) { trivial_path = true; }
+      if(input[0] != '.' && input.find("/.") == std::string_view::npos) { trivial_path = true; }
     }
     if (trivial_path) {
       ada_log("parse_path trivial");
