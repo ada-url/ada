@@ -27,6 +27,7 @@
  * and all code points greater than U+007E (~).
  *
  * Thus '%' is allowed as a path character in a URL.
+ *
  * Under many operating systems, including common Linux distributions and macos,
  * both file names path%.c and path%25.c are allowed as one can easily check.
  *
@@ -36,21 +37,43 @@
  * touch path%25.c
  * ls path*
  *
- * Thus it is unclear why Node wants the path /some/path%.c to become the path /some/path%25.c.
+ * You can distinguish between the two in path if you use percent encoding: path%25.c and path%2525.c.
  *
  * Which path names are legal typically does not just depend on the operating system, it also depends
  * critical on the file system.
  */
 bool check_path_setters() {
+    // It seems that the spec allows '%' without two Hex next to it, as long as it is not part
+    // of a setter.
+    ada::result url_direct1 = ada::parse("file:///some/path%.c");
+    if(url_direct1->get_href() != "file:///some/path%.c") { return false; }
+
+    // This is the equivalent:
+    ada::result url_direct2 = ada::parse("file:///some/path%25.c");
+    if(url_direct2->get_href() != "file:///some/path%25.c") { return false; }
+
+    // Are url_direct1 and url_direct2 the same URL?
+
+
+
     ada::result url = ada::parse("file://");
-    url->set_pathname("/foo#1");
-    std::cout << url->get_href() << std::endl;
+    if(!url->set_pathname("/foo#1")) { return false; }
     if(url->get_href() != "file:///foo%231") { return false; }
-    // expected: file:///foo%231
-    url->set_pathname("/some/path%.c");
-    // node claims that it should be: file:///some/path%25.c
-    std::cout << url->get_href() << std::endl;
-    if(url->get_href() != "/some/path%.c") { return false; }
+
+    url->set_pathname("/some/path%25.c");
+    if(url->get_href() != "file:///some/path%25.c") {
+        std::cerr << url->get_href() << std::endl;
+        return false;
+    }
+
+    /**
+     * https://url.spec.whatwg.org/#path-state
+     * If c is U+0025 (%) and remaining does not start with two ASCII hex digits, invalid-URL-unit validation error.
+     */
+    if(url->set_pathname("/some/path%.c")) {
+        std::cerr << "A percent character in 'set_pathname' should be followed by two ASCII hex digits." << std::endl;
+        return false;
+    }
 
     return true;
 }
