@@ -20,6 +20,11 @@
  * new URL('/some/path%.c', 'file:');    // Incorrect: file:///some/path%.c
  * pathToFileURL('/some/path%.c');       // Correct:   file:///some/path%25.c (POSIX)
  *
+ * It is unclear why node states that 'file:///some/path%.c' is incorrect. Any path part of URL should
+ * be percent decoded prior to intepreting it as a path. Yet both /some/path%.c and /some/path%25.c
+ * should, after percent decoding, become /some/path%.c. Maybe the intention is that the path are to be
+ * treated verbatim?
+ *
  * For reference, the path percent-encode set is:
  *
  * U+0020 SPACE, U+0022 ("), U+0023 (#), U+003C (<), and U+003E (>), U+003F (?), U+0060 (`), U+007B ({), and U+007D (}).
@@ -27,6 +32,8 @@
  * and all code points greater than U+007E (~).
  *
  * Thus '%' is allowed as a path character in a URL.
+ * 
+ * What does the reference to POSIX means?
  *
  * Under many operating systems, including common Linux distributions and macos,
  * both file names path%.c and path%25.c are allowed as one can easily check.
@@ -69,12 +76,18 @@ bool check_path_setters() {
     /**
      * https://url.spec.whatwg.org/#path-state
      * If c is U+0025 (%) and remaining does not start with two ASCII hex digits, invalid-URL-unit validation error.
+     * A validation error indicates a mismatch between input and valid input. User agents, especially conformance checkers, 
+     * are encouraged to report them somewhere.
+     * A validation error does not mean that the parser terminates. Termination of a parser is always stated explicitly, 
+     * e.g., through a return statement.
      */
     if(url->set_pathname("/some/path%.c")) {
         std::cerr << "A percent character in 'set_pathname' should be followed by two ASCII hex digits." << std::endl;
+    }
+    if(url->get_href() != "file:///some/path%.c") {
+        std::cerr << url->get_href() << std::endl;
         return false;
     }
-
     return true;
 }
 
