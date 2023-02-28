@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677554544525,
+  "lastUpdate": 1677554549390,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -5380,6 +5380,54 @@ window.BENCHMARK_DATA = {
             "value": 16692.02640311313,
             "unit": "ns/iter",
             "extra": "iterations: 41889\ncpu: 16691.441667263487 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "b736c12f4ec9837f140f0ec4b4ae8fd90a02cc06",
+          "message": "docs: update issue link",
+          "timestamp": "2023-02-27T22:15:56-05:00",
+          "tree_id": "82007b3e9b7236686b04004fcac5db97e4d3a652",
+          "url": "https://github.com/ada-url/ada/commit/b736c12f4ec9837f140f0ec4b4ae8fd90a02cc06"
+        },
+        "date": 1677554549047,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 3628.285771505586,
+            "unit": "ns/iter",
+            "extra": "iterations: 192241\ncpu: 3625.9882127121678 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 9792.288312671899,
+            "unit": "ns/iter",
+            "extra": "iterations: 71308\ncpu: 9791.961631233524 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 5913.712873643461,
+            "unit": "ns/iter",
+            "extra": "iterations: 117659\ncpu: 5912.873643325204 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_ServoUrl",
+            "value": 16693.361228434802,
+            "unit": "ns/iter",
+            "extra": "iterations: 41907\ncpu: 16691.865320829456 ns\nthreads: 1"
           }
         ]
       }
