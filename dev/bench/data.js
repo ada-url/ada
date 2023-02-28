@@ -26,13 +26,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5686.493233913206,
-            "unit": "ns/iter",
-            "extra": "iterations: 123114\ncpu: 5681.549620676771 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5087.639563618437,
             "unit": "ns/iter",
             "extra": "iterations: 137586\ncpu: 5085.016644135305 ns\nthreads: 1"
@@ -68,13 +62,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5586.974346551826,
-            "unit": "ns/iter",
-            "extra": "iterations: 125909\ncpu: 5560.019537920245 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4966.7905585058825,
             "unit": "ns/iter",
             "extra": "iterations: 141037\ncpu: 4965.177932032021 ns\nthreads: 1"
@@ -110,13 +98,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5724.150492711014,
-            "unit": "ns/iter",
-            "extra": "iterations: 122790\ncpu: 5714.175421451258 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5047.842158705638,
             "unit": "ns/iter",
             "extra": "iterations: 138861\ncpu: 5047.815441340621 ns\nthreads: 1"
@@ -152,13 +134,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6619.065555233762,
-            "unit": "ns/iter",
-            "extra": "iterations: 107009\ncpu: 6610.265491687616 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5945.917891644002,
             "unit": "ns/iter",
             "extra": "iterations: 117077\ncpu: 5944.143597803155 ns\nthreads: 1"
@@ -194,13 +170,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5563.701284506246,
-            "unit": "ns/iter",
-            "extra": "iterations: 125340\ncpu: 5560.802616882081 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5058.412243224585,
             "unit": "ns/iter",
             "extra": "iterations: 139032\ncpu: 5057.823378790494 ns\nthreads: 1"
@@ -236,13 +206,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5514.310466215153,
-            "unit": "ns/iter",
-            "extra": "iterations: 126980\ncpu: 5508.976216727044 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4989.796376266055,
             "unit": "ns/iter",
             "extra": "iterations: 140794\ncpu: 4989.243859823572 ns\nthreads: 1"
@@ -278,13 +242,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5617.365567100059,
-            "unit": "ns/iter",
-            "extra": "iterations: 124352\ncpu: 5616.446860524961 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5065.630833720639,
             "unit": "ns/iter",
             "extra": "iterations: 137648\ncpu: 5065.270835754969 ns\nthreads: 1"
@@ -326,13 +284,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5550.845048253529,
-            "unit": "ns/iter",
-            "extra": "iterations: 125794\ncpu: 5549.321907245178 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4911.865390687006,
             "unit": "ns/iter",
             "extra": "iterations: 142531\ncpu: 4910.957616237872 ns\nthreads: 1"
@@ -374,13 +326,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 7803.667046313168,
-            "unit": "ns/iter",
-            "extra": "iterations: 91313\ncpu: 7792.823584812679 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 6950.948872718227,
             "unit": "ns/iter",
             "extra": "iterations: 100729\ncpu: 6949.900227342672 ns\nthreads: 1"
@@ -422,13 +368,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5532.317701181968,
-            "unit": "ns/iter",
-            "extra": "iterations: 126726\ncpu: 5521.126682764389 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4903.892395258661,
             "unit": "ns/iter",
             "extra": "iterations: 142661\ncpu: 4903.294523380602 ns\nthreads: 1"
@@ -470,13 +410,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6558.639029855596,
-            "unit": "ns/iter",
-            "extra": "iterations: 106211\ncpu: 6558.380017135702 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5952.399836184676,
             "unit": "ns/iter",
             "extra": "iterations: 118426\ncpu: 5952.235995473968 ns\nthreads: 1"
@@ -518,13 +452,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5543.414760626768,
-            "unit": "ns/iter",
-            "extra": "iterations: 126309\ncpu: 5538.5000277098225 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4933.342075393224,
             "unit": "ns/iter",
             "extra": "iterations: 141843\ncpu: 4932.692483943516 ns\nthreads: 1"
@@ -566,13 +494,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5555.258017028608,
-            "unit": "ns/iter",
-            "extra": "iterations: 125670\ncpu: 5554.102808944061 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4985.658462520907,
             "unit": "ns/iter",
             "extra": "iterations: 140945\ncpu: 4971.767710809183 ns\nthreads: 1"
@@ -614,13 +536,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5836.147586378988,
-            "unit": "ns/iter",
-            "extra": "iterations: 120255\ncpu: 5816.673734979834 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5176.178137022763,
             "unit": "ns/iter",
             "extra": "iterations: 135160\ncpu: 5175.75910032554 ns\nthreads: 1"
@@ -662,13 +578,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5776.111384853606,
-            "unit": "ns/iter",
-            "extra": "iterations: 121363\ncpu: 5739.872119179652 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5173.409084883553,
             "unit": "ns/iter",
             "extra": "iterations: 135786\ncpu: 5165.777031505457 ns\nthreads: 1"
@@ -710,13 +620,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5853.388487332066,
-            "unit": "ns/iter",
-            "extra": "iterations: 118843\ncpu: 5852.206692863694 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5209.575353463316,
             "unit": "ns/iter",
             "extra": "iterations: 134526\ncpu: 5208.41844699166 ns\nthreads: 1"
@@ -758,13 +662,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5869.858068384381,
-            "unit": "ns/iter",
-            "extra": "iterations: 120086\ncpu: 5820.920007328082 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5157.574167902049,
             "unit": "ns/iter",
             "extra": "iterations: 135591\ncpu: 5147.829870714132 ns\nthreads: 1"
@@ -806,13 +704,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6831.679517228269,
-            "unit": "ns/iter",
-            "extra": "iterations: 111357\ncpu: 6819.671866160187 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5773.371026488464,
             "unit": "ns/iter",
             "extra": "iterations: 106801\ncpu: 5772.871040533329 ns\nthreads: 1"
@@ -854,13 +746,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5860.516632988746,
-            "unit": "ns/iter",
-            "extra": "iterations: 119762\ncpu: 5845.599605885005 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5181.054189270216,
             "unit": "ns/iter",
             "extra": "iterations: 135119\ncpu: 5180.225578934123 ns\nthreads: 1"
@@ -902,13 +788,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5855.097347577914,
-            "unit": "ns/iter",
-            "extra": "iterations: 119438\ncpu: 5853.720758887457 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5219.292581518394,
             "unit": "ns/iter",
             "extra": "iterations: 134448\ncpu: 5218.897268832559 ns\nthreads: 1"
@@ -950,13 +830,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6242.709058894192,
-            "unit": "ns/iter",
-            "extra": "iterations: 107905\ncpu: 6241.440155692508 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5713.840121160044,
             "unit": "ns/iter",
             "extra": "iterations: 118521\ncpu: 5711.9742492891555 ns\nthreads: 1"
@@ -998,13 +872,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5858.894313026432,
-            "unit": "ns/iter",
-            "extra": "iterations: 119466\ncpu: 5856.354109118913 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5253.391217235151,
             "unit": "ns/iter",
             "extra": "iterations: 133261\ncpu: 5252.6087902687195 ns\nthreads: 1"
@@ -1046,13 +914,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5875.403807564811,
-            "unit": "ns/iter",
-            "extra": "iterations: 118606\ncpu: 5868.986391919464 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5277.0046322532635,
             "unit": "ns/iter",
             "extra": "iterations: 132333\ncpu: 5274.973740488011 ns\nthreads: 1"
@@ -1094,13 +956,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5942.971755212013,
-            "unit": "ns/iter",
-            "extra": "iterations: 117473\ncpu: 5941.163501400323 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5262.442247025467,
             "unit": "ns/iter",
             "extra": "iterations: 133136\ncpu: 5257.242218483356 ns\nthreads: 1"
@@ -1142,13 +998,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5812.9752395047535,
-            "unit": "ns/iter",
-            "extra": "iterations: 121605\ncpu: 5803.068952756877 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5190.436298757515,
             "unit": "ns/iter",
             "extra": "iterations: 134236\ncpu: 5188.728805983491 ns\nthreads: 1"
@@ -1190,13 +1040,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6006.148538241339,
-            "unit": "ns/iter",
-            "extra": "iterations: 117256\ncpu: 5979.219826703964 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5410.632882673608,
             "unit": "ns/iter",
             "extra": "iterations: 129144\ncpu: 5409.954004831815 ns\nthreads: 1"
@@ -1238,13 +1082,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5767.628720415899,
-            "unit": "ns/iter",
-            "extra": "iterations: 121391\ncpu: 5761.610827820843 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5220.394555487012,
             "unit": "ns/iter",
             "extra": "iterations: 133933\ncpu: 5218.883322258144 ns\nthreads: 1"
@@ -1286,13 +1124,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5783.284634653697,
-            "unit": "ns/iter",
-            "extra": "iterations: 117765\ncpu: 5763.206385598438 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5203.510060145733,
             "unit": "ns/iter",
             "extra": "iterations: 134839\ncpu: 5198.9899064810625 ns\nthreads: 1"
@@ -1334,13 +1166,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5372.804912221584,
-            "unit": "ns/iter",
-            "extra": "iterations: 130613\ncpu: 5355.963801459274 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4722.124057485867,
             "unit": "ns/iter",
             "extra": "iterations: 148141\ncpu: 4721.660445116477 ns\nthreads: 1"
@@ -1382,13 +1208,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5363.556995928857,
-            "unit": "ns/iter",
-            "extra": "iterations: 130676\ncpu: 5357.93259665126 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4735.752529998343,
             "unit": "ns/iter",
             "extra": "iterations: 147925\ncpu: 4734.850092952511 ns\nthreads: 1"
@@ -1430,13 +1250,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6226.551511429003,
-            "unit": "ns/iter",
-            "extra": "iterations: 113965\ncpu: 6215.341552230948 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5562.4256921642345,
             "unit": "ns/iter",
             "extra": "iterations: 123345\ncpu: 5561.917386193199 ns\nthreads: 1"
@@ -1478,13 +1292,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5365.7766224926645,
-            "unit": "ns/iter",
-            "extra": "iterations: 129261\ncpu: 5358.548982291643 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4723.277221307089,
             "unit": "ns/iter",
             "extra": "iterations: 148156\ncpu: 4723.212694727181 ns\nthreads: 1"
@@ -1526,13 +1334,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5502.130290995072,
-            "unit": "ns/iter",
-            "extra": "iterations: 127906\ncpu: 5488.282019608149 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4607.663317591242,
             "unit": "ns/iter",
             "extra": "iterations: 149494\ncpu: 4603.074370877763 ns\nthreads: 1"
@@ -1580,13 +1382,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 4967.288156601101,
-            "unit": "ns/iter",
-            "extra": "iterations: 140382\ncpu: 4965.930104999216 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4328.891063008402,
             "unit": "ns/iter",
             "extra": "iterations: 161598\ncpu: 4328.660008168417 ns\nthreads: 1"
@@ -1634,13 +1430,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 4717.153777916186,
-            "unit": "ns/iter",
-            "extra": "iterations: 147674\ncpu: 4717.027371101209 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4144.468004833045,
             "unit": "ns/iter",
             "extra": "iterations: 168838\ncpu: 4144.29986140561 ns\nthreads: 1"
@@ -1688,13 +1478,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5628.224017289124,
-            "unit": "ns/iter",
-            "extra": "iterations: 122620\ncpu: 5617.978306964607 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4938.494742812461,
             "unit": "ns/iter",
             "extra": "iterations: 141045\ncpu: 4938.151653727535 ns\nthreads: 1"
@@ -3726,13 +3510,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 4964.06151005605,
-            "unit": "ns/iter",
-            "extra": "iterations: 141359\ncpu: 4943.8776448616645 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4407.812970171966,
             "unit": "ns/iter",
             "extra": "iterations: 159782\ncpu: 4387.2495024470845 ns\nthreads: 1"
@@ -3768,13 +3546,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5175.749533314557,
-            "unit": "ns/iter",
-            "extra": "iterations: 136066\ncpu: 5140.942630782121 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4372.83780015863,
             "unit": "ns/iter",
             "extra": "iterations: 159957\ncpu: 4372.316310008316 ns\nthreads: 1"
@@ -3810,13 +3582,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5042.3353321896775,
-            "unit": "ns/iter",
-            "extra": "iterations: 138746\ncpu: 5040.907845991957 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4397.329471666179,
             "unit": "ns/iter",
             "extra": "iterations: 159085\ncpu: 4396.822453405412 ns\nthreads: 1"
@@ -3852,13 +3618,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6363.542909173747,
-            "unit": "ns/iter",
-            "extra": "iterations: 109825\ncpu: 6361.508763942636 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5243.548915292798,
             "unit": "ns/iter",
             "extra": "iterations: 132893\ncpu: 5242.060153657452 ns\nthreads: 1"
@@ -3894,13 +3654,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5076.989920743696,
-            "unit": "ns/iter",
-            "extra": "iterations: 137907\ncpu: 5076.629902760556 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4361.5785199623215,
             "unit": "ns/iter",
             "extra": "iterations: 160577\ncpu: 4359.635564246436 ns\nthreads: 1"
@@ -3936,13 +3690,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5060.141967227267,
-            "unit": "ns/iter",
-            "extra": "iterations: 139018\ncpu: 5045.528636579435 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4412.440221634599,
             "unit": "ns/iter",
             "extra": "iterations: 158820\ncpu: 4409.736808966124 ns\nthreads: 1"
@@ -3978,13 +3726,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5116.034864829229,
-            "unit": "ns/iter",
-            "extra": "iterations: 136642\ncpu: 5109.402672677508 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4544.309959838404,
             "unit": "ns/iter",
             "extra": "iterations: 153878\ncpu: 4543.976396885845 ns\nthreads: 1"
@@ -4026,13 +3768,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5026.716565763714,
-            "unit": "ns/iter",
-            "extra": "iterations: 139408\ncpu: 5020.862504303914 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4423.923798869983,
             "unit": "ns/iter",
             "extra": "iterations: 158226\ncpu: 4423.649716228686 ns\nthreads: 1"
@@ -4074,13 +3810,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6955.6005595343595,
-            "unit": "ns/iter",
-            "extra": "iterations: 95794\ncpu: 6949.686827985052 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 6109.414344202628,
             "unit": "ns/iter",
             "extra": "iterations: 116507\ncpu: 6093.732565425254 ns\nthreads: 1"
@@ -4122,13 +3852,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5063.065811360034,
-            "unit": "ns/iter",
-            "extra": "iterations: 138274\ncpu: 5062.409418979707 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4442.60551023654,
             "unit": "ns/iter",
             "extra": "iterations: 157525\ncpu: 4442.43580384066 ns\nthreads: 1"
@@ -4170,13 +3894,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6125.644375884445,
-            "unit": "ns/iter",
-            "extra": "iterations: 113769\ncpu: 6124.805526988898 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5293.6091028864075,
             "unit": "ns/iter",
             "extra": "iterations: 132068\ncpu: 5292.690886513007 ns\nthreads: 1"
@@ -4218,13 +3936,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5060.3898988879455,
-            "unit": "ns/iter",
-            "extra": "iterations: 138559\ncpu: 5044.18695285041 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4450.6142585514635,
             "unit": "ns/iter",
             "extra": "iterations: 157253\ncpu: 4450.0079489739455 ns\nthreads: 1"
@@ -4266,13 +3978,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5096.201493619469,
-            "unit": "ns/iter",
-            "extra": "iterations: 137920\ncpu: 5088.0916473317875 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4466.751382413545,
             "unit": "ns/iter",
             "extra": "iterations: 156791\ncpu: 4466.406235051758 ns\nthreads: 1"
@@ -4314,13 +4020,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5188.976638710551,
-            "unit": "ns/iter",
-            "extra": "iterations: 134496\ncpu: 5185.612955032121 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4623.4247886468675,
             "unit": "ns/iter",
             "extra": "iterations: 151287\ncpu: 4622.737578245322 ns\nthreads: 1"
@@ -4362,13 +4062,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5301.8111701520165,
-            "unit": "ns/iter",
-            "extra": "iterations: 131547\ncpu: 5289.837092446046 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4697.737237943081,
             "unit": "ns/iter",
             "extra": "iterations: 148918\ncpu: 4696.408090358453 ns\nthreads: 1"
@@ -4410,13 +4104,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5181.956594100584,
-            "unit": "ns/iter",
-            "extra": "iterations: 134590\ncpu: 5181.68957574857 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4624.643852643289,
             "unit": "ns/iter",
             "extra": "iterations: 151252\ncpu: 4622.164335017058 ns\nthreads: 1"
@@ -4458,13 +4146,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5293.6700461874825,
-            "unit": "ns/iter",
-            "extra": "iterations: 132070\ncpu: 5292.887105322936 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4691.713281140157,
             "unit": "ns/iter",
             "extra": "iterations: 149317\ncpu: 4688.086420166493 ns\nthreads: 1"
@@ -4506,13 +4188,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5546.11650572573,
-            "unit": "ns/iter",
-            "extra": "iterations: 111428\ncpu: 5543.947661270058 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5095.055550000041,
             "unit": "ns/iter",
             "extra": "iterations: 100000\ncpu: 5094.718 ns\nthreads: 1"
@@ -4554,13 +4230,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5205.50907200415,
-            "unit": "ns/iter",
-            "extra": "iterations: 134645\ncpu: 5202.256303613205 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4652.130430473139,
             "unit": "ns/iter",
             "extra": "iterations: 151345\ncpu: 4626.539363705441 ns\nthreads: 1"
@@ -4602,13 +4272,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5204.666636997513,
-            "unit": "ns/iter",
-            "extra": "iterations: 134820\ncpu: 5201.367749592048 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4627.0783877547065,
             "unit": "ns/iter",
             "extra": "iterations: 151044\ncpu: 4626.828606233945 ns\nthreads: 1"
@@ -4650,13 +4314,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5647.14548140367,
-            "unit": "ns/iter",
-            "extra": "iterations: 125913\ncpu: 5645.957923328012 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5033.867686737371,
             "unit": "ns/iter",
             "extra": "iterations: 144173\ncpu: 5033.290560645891 ns\nthreads: 1"
@@ -4698,13 +4356,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5217.37586624642,
-            "unit": "ns/iter",
-            "extra": "iterations: 132901\ncpu: 5216.5965643599375 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4607.840322750496,
             "unit": "ns/iter",
             "extra": "iterations: 151944\ncpu: 4607.606091718002 ns\nthreads: 1"
@@ -4746,13 +4398,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5223.517238800831,
-            "unit": "ns/iter",
-            "extra": "iterations: 133739\ncpu: 5219.044556935523 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4602.845522456729,
             "unit": "ns/iter",
             "extra": "iterations: 151802\ncpu: 4602.559913571627 ns\nthreads: 1"
@@ -4794,13 +4440,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5290.563946622144,
-            "unit": "ns/iter",
-            "extra": "iterations: 124471\ncpu: 5287.536855974484 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4602.0596728509345,
             "unit": "ns/iter",
             "extra": "iterations: 152163\ncpu: 4601.328838153821 ns\nthreads: 1"
@@ -4842,13 +4482,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5382.813514716281,
-            "unit": "ns/iter",
-            "extra": "iterations: 130332\ncpu: 5366.212442071019 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4802.171993629634,
             "unit": "ns/iter",
             "extra": "iterations: 145674\ncpu: 4801.801968779604 ns\nthreads: 1"
@@ -4890,13 +4524,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5440.267062616201,
-            "unit": "ns/iter",
-            "extra": "iterations: 127794\ncpu: 5434.337292830649 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4861.473100380569,
             "unit": "ns/iter",
             "extra": "iterations: 144779\ncpu: 4841.550915533329 ns\nthreads: 1"
@@ -4938,13 +4566,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5366.511593847485,
-            "unit": "ns/iter",
-            "extra": "iterations: 130414\ncpu: 5366.231386200868 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4782.388948893907,
             "unit": "ns/iter",
             "extra": "iterations: 146284\ncpu: 4782.091001066418 ns\nthreads: 1"
@@ -4986,13 +4608,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5349.054153302086,
-            "unit": "ns/iter",
-            "extra": "iterations: 131257\ncpu: 5329.947355188676 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4686.057409897732,
             "unit": "ns/iter",
             "extra": "iterations: 148720\ncpu: 4683.486417428726 ns\nthreads: 1"
@@ -5034,13 +4650,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5312.30583636915,
-            "unit": "ns/iter",
-            "extra": "iterations: 131760\ncpu: 5296.741803278689 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4754.086164256887,
             "unit": "ns/iter",
             "extra": "iterations: 147184\ncpu: 4753.921621915426 ns\nthreads: 1"
@@ -5082,13 +4692,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5313.997945049148,
-            "unit": "ns/iter",
-            "extra": "iterations: 131390\ncpu: 5313.966055255347 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4753.132435976782,
             "unit": "ns/iter",
             "extra": "iterations: 147173\ncpu: 4753.0158385029845 ns\nthreads: 1"
@@ -5130,13 +4734,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 6191.00404822214,
-            "unit": "ns/iter",
-            "extra": "iterations: 112148\ncpu: 6188.809430395549 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 5501.753155669336,
             "unit": "ns/iter",
             "extra": "iterations: 128895\ncpu: 5501.473292214594 ns\nthreads: 1"
@@ -5178,13 +4776,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5295.061138386481,
-            "unit": "ns/iter",
-            "extra": "iterations: 131783\ncpu: 5292.4823383896255 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4779.619269465399,
             "unit": "ns/iter",
             "extra": "iterations: 146605\ncpu: 4779.250366631425 ns\nthreads: 1"
@@ -5226,13 +4818,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 4755.103525845711,
-            "unit": "ns/iter",
-            "extra": "iterations: 147142\ncpu: 4751.796903671283 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4104.435514895538,
             "unit": "ns/iter",
             "extra": "iterations: 170520\ncpu: 4101.570490265072 ns\nthreads: 1"
@@ -5280,13 +4866,7 @@ window.BENCHMARK_DATA = {
         "tool": "googlecpp",
         "benches": [
           {
-            "name": "BasicBench_AdaURL_With_Copy",
-            "value": 5809.109373036041,
-            "unit": "ns/iter",
-            "extra": "iterations: 119353\ncpu: 5790.2700392952 ns\nthreads: 1"
-          },
-          {
-            "name": "BasicBench_AdaURL_With_Move",
+            "name": "BasicBench_AdaURL",
             "value": 4874.493268324953,
             "unit": "ns/iter",
             "extra": "iterations: 144392\ncpu: 4873.2935342678265 ns\nthreads: 1"
