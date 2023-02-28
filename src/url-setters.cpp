@@ -76,7 +76,7 @@ namespace ada {
 
   bool url::set_pathname(const std::string_view input) {
     if (has_opaque_path) { return false; }
-    path = "";
+    path.clear();
     return parse_path(input);
   }
 
