@@ -18,7 +18,7 @@ jobs:
       - name: Fetch tests
         run: tools/update-wpt.sh
       - name: Open pull request
-        uses: gr2m/create-or-update-pull-request-action@df20b2c073090271599a08c55ae26e0c3522b329 # v1.9.2
+        uses: gr2m/create-or-update-pull-request-action@1.9.2
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
