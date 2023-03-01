@@ -81,14 +81,14 @@ namespace ada {
     url_components out{};
 
     // protocol ends with ':'. for example: "https:"
-    out.protocol_end = get_scheme().size();
+    out.protocol_end = uint32_t(get_scheme().size());
 
     if (host.has_value()) {
 
       out.host_start = out.protocol_end + 2;
 
       if (includes_credentials()) {
-        out.username_end = out.protocol_end + 2 + username.size();
+        out.username_end = uint32_t(out.protocol_end + 2 + username.size());
 
         out.host_start += username.size();
 
@@ -97,25 +97,25 @@ namespace ada {
         }
       }
 
-      out.host_end = out.host_start + host.value().size() - 1;
+      out.host_end = uint32_t(out.host_start + host.value().size() - 1);
     }
 
-    out.port = port;
     out.pathname_start = out.host_end;
 
     if (port.has_value()) {
+      out.port = out.host_end;
       out.pathname_start += std::to_string(port.value()).size();
     }
 
     if (query.has_value()) {
-      out.search_start = out.pathname_start + get_pathname().size();
+      out.search_start = uint32_t(out.pathname_start + get_pathname().size());
     }
 
     if (fragment.has_value()) {
-      if (out.search_start.has_value()) {
-        out.hash_start = out.search_start.value() + get_search().size();
+      if (out.search_start != ada::url_components::omitted) {
+        out.hash_start = uint32_t(out.search_start + get_search().size());
       } else {
-        out.hash_start = out.pathname_start + get_pathname().size();
+        out.hash_start = uint32_t(out.pathname_start + get_pathname().size());
       }
     }
 
