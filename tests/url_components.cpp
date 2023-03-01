@@ -160,6 +160,7 @@ int main(int argc, char** argv) {
     results[name] = urltestdata_encoding(URLTESTDATA_JSON);
   }
 #endif
+  (void) all_tests;
   std::cout << std::endl;
   std::cout << "==============="<< std::endl;
   std::cout << "Final report: "<< std::endl;
