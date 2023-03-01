@@ -17,6 +17,7 @@
 #include "ada/state.h"
 #include "ada/unicode.h"
 #include "ada/url-inl.h"
+#include "ada/url_components.h"
 
 // Public API
 #include "ada/ada_version.h"
