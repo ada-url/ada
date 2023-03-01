@@ -28,4 +28,4 @@ jobs:
           author: "WPT Updater <yagiz@nizipli.com>"
           path: "tests/wpt"
           commit-message: "test: update web platform tests"
-          reviewers: lemire, anonrig
+          reviewers: lemire # anonrig can'be added since github token belongs to him.
