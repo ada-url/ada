@@ -132,6 +132,13 @@ bool urltestdata_encoding(const char* source) {
           TEST_ASSERT(href.substr(username_start, url.username.size()), url.get_username(), "username mismatch");
           TEST_ASSERT(out.username_end, username_end, "username_end mismatch");
         }
+
+        if (!url.password.empty()) {
+          size_t password_start = out.username_end + 2;
+          size_t password_end = password_start + url.password.size() - 1;
+          TEST_ASSERT(href.substr(password_start, url.password.size()), url.get_password(), "username mismatch");
+          TEST_ASSERT(out.host_start, password_end + 1, "host_start mismatch");
+        }
       }
     }
   }
