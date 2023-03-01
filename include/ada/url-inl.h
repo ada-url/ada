@@ -110,7 +110,7 @@ namespace ada {
       34349738368, 34349738368, 34349738368, 34349738368, 38554705664,
       38554705664, 38554705664, 41949672960, 41949672960, 41949672960,
       42949672960, 42949672960};
-    return (x + table[int_log2(x)]) >> 32;
+    return int((x + table[int_log2(x)]) >> 32);
   }
 
   [[nodiscard]] ada_really_inline ada::url_components url::get_components() noexcept {
