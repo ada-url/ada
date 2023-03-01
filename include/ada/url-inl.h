@@ -10,6 +10,9 @@
 #include "ada/url_components.h"
 #include <optional>
 #include <string>
+#if ADA_REGULAR_VISUAL_STUDIO
+#include <intrin.h>
+#endif // ADA_REGULAR_VISUAL_STUDIO
 
 namespace ada {
   [[nodiscard]] ada_really_inline bool url::includes_credentials() const noexcept {
@@ -77,6 +80,39 @@ namespace ada {
     return out << u.to_string();
   }
 
+  // number of 'leading zeroes'.
+  inline int leading_zeroes(uint32_t input_num) {
+#if ADA_REGULAR_VISUAL_STUDIO
+    unsigned long leading_zero(0);
+    unsigned long in(input_num);
+    return _BitScanReverse(&leading_zero, in) ? int(31 - leading_zero) : 32;
+#else
+    return __builtin_clz(input_num);
+#endif// ADA_REGULAR_VISUAL_STUDIO
+  }
+
+  // integer logarithm of x (ceil(log2(x)))
+  inline int int_log2(uint32_t x) {
+    return 31 - leading_zeroes(x | 1);
+  }
+
+  // faster than std::to_string(x).size().
+  inline int fast_digit_count(uint32_t x) {
+    // Compiles to very few instructions. Note that the
+    // table is static and thus effectively a constant.
+    // We leave it inside the function because it is meaningless
+    // outside of it (this comes at no performance cost).
+    const static uint64_t table[] = {
+      4294967296,  8589934582,  8589934582,  8589934582,  12884901788,
+      12884901788, 12884901788, 17179868184, 17179868184, 17179868184,
+      21474826480, 21474826480, 21474826480, 21474826480, 25769703776,
+      25769703776, 25769703776, 30063771072, 30063771072, 30063771072,
+      34349738368, 34349738368, 34349738368, 34349738368, 38554705664,
+      38554705664, 38554705664, 41949672960, 41949672960, 41949672960,
+      42949672960, 42949672960};
+    return (x + table[int_log2(x)]) >> 32;
+  }
+
   [[nodiscard]] ada_really_inline ada::url_components url::get_components() noexcept {
     url_components out{};
 
@@ -104,7 +140,7 @@ namespace ada {
 
     if (port.has_value()) {
       out.port = out.host_end;
-      out.pathname_start += std::to_string(port.value()).size();
+      out.pathname_start += fast_digit_count(port.value());
     }
 
     if (query.has_value()) {
