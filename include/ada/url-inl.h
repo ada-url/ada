@@ -126,10 +126,10 @@ namespace ada {
       if (includes_credentials()) {
         out.username_end = uint32_t(out.protocol_end + 2 + username.size());
 
-        out.host_start += username.size();
+        out.host_start += uint32_t(username.size());
 
         if (!password.empty()) {
-          out.host_start += password.size();
+          out.host_start += uint32_t(password.size());
         }
       }
 
