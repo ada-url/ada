@@ -105,8 +105,6 @@ namespace ada {
     if (port.has_value()) {
       out.port = out.host_end;
       out.pathname_start += std::to_string(port.value()).size();
-    } else {
-      out.port = ada::url_components::omitted;
     }
 
     if (query.has_value()) {
