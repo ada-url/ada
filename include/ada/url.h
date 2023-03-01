@@ -11,6 +11,7 @@
 #include "ada/serializers.h"
 #include "ada/unicode.h"
 #include "ada/log.h"
+#include "ada/url_components.h"
 
 #include <algorithm>
 #include <charconv>
@@ -348,6 +349,25 @@ namespace ada {
      * Returns a JSON string representation of this URL.
      */
     std::string to_string() const;
+
+    /**
+     * Useful for implementing efficient serialization for the URL.
+     *
+     * https://user@pass:example.com:1234/foo/bar?baz#quux
+     *      |      |    |          | ^^^^|       |   |
+     *      |      |    |          | |   |       |   `----- hash_start
+     *      |      |    |          | |   |       `--------- search_start
+     *      |      |    |          | |   `----------------- pathname_start
+     *      |      |    |          | `--------------------- port
+     *      |      |    |          `----------------------- host_end
+     *      |      |    `---------------------------------- host_start
+     *      |      `--------------------------------------- username_end
+     *      `---------------------------------------------- protocol_end
+     *
+     * Inspired after servo/url
+     * @see https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
+     */
+    [[nodiscard]] ada_really_inline ada::url_components get_components() noexcept;
 
   private:
 

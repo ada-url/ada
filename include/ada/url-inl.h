@@ -7,6 +7,9 @@
 
 #include "ada/checkers.h"
 #include "ada/url.h"
+#include "ada/url_components.h"
+#include <optional>
+#include <string>
 
 namespace ada {
   [[nodiscard]] ada_really_inline bool url::includes_credentials() const noexcept {
@@ -73,6 +76,52 @@ namespace ada {
   inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
     return out << u.to_string();
   }
+
+  [[nodiscard]] ada_really_inline ada::url_components url::get_components() noexcept {
+    url_components out{};
+
+    // protocol ends with ':'. for example: "https:"
+    out.protocol_end = get_scheme().size();
+
+    if (host.has_value()) {
+
+      out.host_start = out.protocol_end + 2;
+
+      if (includes_credentials()) {
+        out.username_end = out.protocol_end + 2 + username.size();
+
+        out.host_start += username.size();
+
+        if (!password.empty()) {
+          out.host_start += password.size();
+        }
+      }
+
+      out.host_end = out.host_start + host.value().size() - 1;
+    }
+
+    out.port = port;
+    out.pathname_start = out.host_end;
+
+    if (port.has_value()) {
+      out.pathname_start += std::to_string(port.value()).size();
+    }
+
+    if (query.has_value()) {
+      out.search_start = out.pathname_start + get_pathname().size();
+    }
+
+    if (fragment.has_value()) {
+      if (out.search_start.has_value()) {
+        out.hash_start = out.search_start.value() + get_search().size();
+      } else {
+        out.hash_start = out.pathname_start + get_pathname().size();
+      }
+    }
+
+    return out;
+  }
+
 } // namespace ada
 
 #endif // ADA_URL_H
