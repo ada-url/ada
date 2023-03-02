@@ -114,45 +114,57 @@ namespace ada {
   }
 
   [[nodiscard]] ada_really_inline ada::url_components url::get_components() noexcept {
+    size_t url_delimiter_count = std::count(path.begin(), path.end(), '/');
     url_components out{};
 
     // protocol ends with ':'. for example: "https:"
     out.protocol_end = uint32_t(get_scheme().size());
 
-    if (host.has_value()) {
+    // Trailing index is always the next character of the current one.
+    size_t trailing_index = out.protocol_end + 1;
 
-      out.host_start = out.protocol_end + 2;
+    if (host.has_value()) {
+      // 2 characters for "//" and 1 character for starting index
+      out.host_start = out.protocol_end + 3;
 
       if (includes_credentials()) {
-        out.username_end = uint32_t(out.protocol_end + 2 + username.size());
+        out.username_end = uint32_t(out.host_start + username.size() - 1);
 
-        out.host_start += uint32_t(username.size()) + 1;
+        out.host_start += uint32_t(username.size() + 1);
 
         if (!password.empty()) {
-          out.host_start += uint32_t(password.size()) + 1;
+          out.host_start += uint32_t(password.size() + 1);
         }
       }
 
-      out.host_end = uint32_t(out.host_start + host.value().size() - 1);
+      out.host_end = uint32_t(out.host_start + host.value().size()) - 1;
+      trailing_index = out.host_end + 1;
+    } else if (!has_opaque_path && url_delimiter_count > 1 && path.length() >= 2 && path[0] == '/' && path[1] == '/') {
+      // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
+      // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
+      trailing_index = out.protocol_end + 3;
+    } else {
+      trailing_index = out.protocol_end + 1;
     }
 
-    out.pathname_start = out.host_end;
-
     if (port.has_value()) {
-      out.port = out.host_end;
-      out.pathname_start += fast_digit_count(port.value());
+      out.port = port.value();
+      trailing_index += fast_digit_count(port.value()) + 1; // Port omits ':'
+    }
+
+    if (!path.empty()) {
+      out.pathname_start = uint32_t(trailing_index);
+      trailing_index += path.size();
     }
 
     if (query.has_value()) {
-      out.search_start = uint32_t(out.pathname_start + get_pathname().size());
+      out.search_start = uint32_t(trailing_index);
+      trailing_index += get_search().size();
+      if (get_search().size() == 0) { trailing_index++; }
     }
 
     if (fragment.has_value()) {
-      if (out.search_start != ada::url_components::omitted) {
-        out.hash_start = uint32_t(out.search_start + get_search().size());
-      } else {
-        out.hash_start = uint32_t(out.pathname_start + get_pathname().size());
-      }
+      out.hash_start = uint32_t(trailing_index);
     }
 
     return out;

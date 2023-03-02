@@ -121,23 +121,42 @@ bool urltestdata_encoding(const char* source) {
 
       if (object["failure"].get(failure)) {
         auto url = input_url.value();
-        auto out = input_url->get_components();
-        auto href = input_url->get_href();
+        auto out = url.get_components();
+        auto href = url.get_href();
 
-        TEST_ASSERT(out.protocol_end, url.get_protocol().size() - 1, "protocol_end mismatch");
+        TEST_ASSERT(out.protocol_end, url.get_protocol().size() - 1, "protocol_end mismatch " + out.to_string());
 
         if (!url.username.empty()) {
           size_t username_start = href.find(url.username);
           size_t username_end = username_start + url.username.size() - 1;
-          TEST_ASSERT(href.substr(username_start, url.username.size()), url.get_username(), "username mismatch");
-          TEST_ASSERT(out.username_end, username_end, "username_end mismatch");
+          TEST_ASSERT(href.substr(username_start, url.username.size()), url.get_username(), "username mismatch " + out.to_string());
+          TEST_ASSERT(out.username_end, username_end, "username_end mismatch " + out.to_string());
         }
 
         if (!url.password.empty()) {
           size_t password_start = out.username_end + 2;
           size_t password_end = password_start + url.password.size() - 1;
-          TEST_ASSERT(href.substr(password_start, url.password.size()), url.get_password(), "username mismatch");
-          TEST_ASSERT(out.host_start, password_end + 1, "host_start mismatch");
+          TEST_ASSERT(href.substr(password_start, url.password.size()), url.get_password(), "password mismatch " + out.to_string());
+        }
+
+        TEST_ASSERT(href.substr(out.host_start, url.get_hostname().size()), url.get_hostname(), "hostname mismatch " + out.to_string());
+
+        if (url.port.has_value()) {
+          TEST_ASSERT(out.port, url.port.value(), "port mismatch " + out.to_string());
+        } else {
+          TEST_ASSERT(out.port, ada::url_components::omitted, "port should have been omitted " + out.to_string());
+        }
+
+        if (url.get_pathname().length() > 0) {
+          TEST_ASSERT(href.substr(out.pathname_start, url.get_pathname().size()), url.get_pathname(), "pathname mismatch " + out.to_string());
+        }
+
+        if (url.get_search().length() > 0) {
+          TEST_ASSERT(href.substr(out.search_start, url.get_search().size()), url.get_search(), "search mismatch " + out.to_string());
+        }
+
+        if (url.fragment.has_value()) {
+          TEST_ASSERT(href.substr(out.hash_start, url.get_hash().size()), url.get_hash(), "hash mismatch " + out.to_string());//}
         }
       }
     }
