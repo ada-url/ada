@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677791583177,
+  "lastUpdate": 1677791586671,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -3614,6 +3614,42 @@ window.BENCHMARK_DATA = {
             "value": 508821.5679999735,
             "unit": "ns/iter",
             "extra": "iterations: 1000\ncpu: 508798.70000000007 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9a267c03c7504afc6d3d09308f135b55c3c391a1",
+          "message": "Update apple_arm_events.h",
+          "timestamp": "2023-03-02T16:09:54-05:00",
+          "tree_id": "c41ef85d53754d123b6aadb706c01f9d9653e106",
+          "url": "https://github.com/ada-url/ada/commit/9a267c03c7504afc6d3d09308f135b55c3c391a1"
+        },
+        "date": 1677791585943,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 571748.7371252653,
+            "unit": "ns/iter",
+            "extra": "iterations: 1301\ncpu: 570538.7394312068 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 620101.5606585615,
+            "unit": "ns/iter",
+            "extra": "iterations: 1154\ncpu: 619193.5875216638 ns\nthreads: 1"
           }
         ]
       }
