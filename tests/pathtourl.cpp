@@ -81,13 +81,17 @@ bool check_path_setters() {
      * A validation error does not mean that the parser terminates. Termination of a parser is always stated explicitly, 
      * e.g., through a return statement.
      */
-    if(url->set_pathname("/some/path%.c")) {
-        std::cerr << "A percent character in 'set_pathname' should be followed by two ASCII hex digits." << std::endl;
-    }
+    url->set_pathname("/some/path%.c");
     if(url->get_href() != "file:///some/path%.c") {
         std::cerr << url->get_href() << std::endl;
         return false;
     }
+    url->set_pathname("/base/Some%20File.js");
+    if(url->get_href() != "file:///base/Some%20File.js") {
+        std::cerr << url->get_href() << std::endl;
+        return false;
+    }
+    std::cout << "Ok." << std::endl;
     return true;
 }
 
