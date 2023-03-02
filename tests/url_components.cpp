@@ -135,7 +135,6 @@ bool urltestdata_encoding(const char* source) {
 
         if (!url.password.empty()) {
           size_t password_start = out.username_end + 2;
-          size_t password_end = password_start + url.password.size() - 1;
           TEST_ASSERT(href.substr(password_start, url.password.size()), url.get_password(), "password mismatch " + out.to_string());
         }
 
