@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677707772823,
+  "lastUpdate": 1677791583177,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -1932,6 +1932,54 @@ window.BENCHMARK_DATA = {
             "value": 12630.248437556793,
             "unit": "ns/iter",
             "extra": "iterations: 55362\ncpu: 12629.49134785593 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "daniel@lemire.me",
+            "name": "Daniel Lemire",
+            "username": "lemire"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9a267c03c7504afc6d3d09308f135b55c3c391a1",
+          "message": "Update apple_arm_events.h",
+          "timestamp": "2023-03-02T16:09:54-05:00",
+          "tree_id": "c41ef85d53754d123b6aadb706c01f9d9653e106",
+          "url": "https://github.com/ada-url/ada/commit/9a267c03c7504afc6d3d09308f135b55c3c391a1"
+        },
+        "date": 1677791581658,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 4907.234597066241,
+            "unit": "ns/iter",
+            "extra": "iterations: 131647\ncpu: 4867.006464256687 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 12375.980394587516,
+            "unit": "ns/iter",
+            "extra": "iterations: 56464\ncpu: 12373.47690563899 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 8640.042075495194,
+            "unit": "ns/iter",
+            "extra": "iterations: 81330\ncpu: 8638.39788515923 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_ServoUrl",
+            "value": 14853.64644898119,
+            "unit": "ns/iter",
+            "extra": "iterations: 47071\ncpu: 14850.447196787822 ns\nthreads: 1"
           }
         ]
       }
