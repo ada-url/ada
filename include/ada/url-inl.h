@@ -134,6 +134,8 @@ namespace ada {
         if (!password.empty()) {
           out.host_start += uint32_t(password.size() + 1);
         }
+      } else {
+        out.username_end = out.host_start;
       }
 
       out.host_end = uint32_t(out.host_start + host.value().size()) - 1;

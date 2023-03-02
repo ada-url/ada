@@ -31,7 +31,7 @@ namespace ada {
      * cannot exceed 4 GB.
      */
     uint32_t protocol_end{0};
-    uint32_t username_end{omitted};
+    uint32_t username_end{0};
     uint32_t host_start{0};
     uint32_t host_end{0};
     uint32_t port{omitted};
