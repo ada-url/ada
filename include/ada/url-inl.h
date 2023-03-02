@@ -114,7 +114,6 @@ namespace ada {
   }
 
   [[nodiscard]] ada_really_inline ada::url_components url::get_components() noexcept {
-    size_t url_delimiter_count = std::count(path.begin(), path.end(), '/');
     url_components out{};
 
     // protocol ends with ':'. for example: "https:"
@@ -139,12 +138,19 @@ namespace ada {
 
       out.host_end = uint32_t(out.host_start + host.value().size()) - 1;
       trailing_index = out.host_end + 1;
-    } else if (!has_opaque_path && url_delimiter_count > 1 && path.length() >= 2 && path[0] == '/' && path[1] == '/') {
-      // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
-      // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
-      trailing_index = out.protocol_end + 3;
     } else {
-      trailing_index = out.protocol_end + 1;
+      out.host_start = out.protocol_end + 1;
+      out.host_end = out.protocol_end + 1;
+
+      size_t url_delimiter_count = std::count(path.begin(), path.end(), '/');
+
+      if (!has_opaque_path && url_delimiter_count > 1 && path.length() >= 2 && path[0] == '/' && path[1] == '/') {
+        // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
+        // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
+        trailing_index = out.protocol_end + 3;
+      } else {
+        trailing_index = out.protocol_end + 1;
+      }
     }
 
     if (port.has_value()) {
@@ -155,6 +161,8 @@ namespace ada {
     if (!path.empty()) {
       out.pathname_start = uint32_t(trailing_index);
       trailing_index += path.size();
+    } else {
+      out.pathname_start = uint32_t(trailing_index);
     }
 
     if (query.has_value()) {
