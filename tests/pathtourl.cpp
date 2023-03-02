@@ -91,6 +91,29 @@ bool check_path_setters() {
         std::cerr << url->get_href() << std::endl;
         return false;
     }
+    std::cout << url->get_pathname() <<std::endl;
+
+    url->set_pathname("/base/Some%2520File.js");
+    if(url->get_href() != "file:///base/Some%2520File.js") {
+        std::cerr << url->get_href() << std::endl;
+        return false;
+    }
+    std::cout << url->get_pathname() <<std::endl;
+
+    url->set_pathname("/base/love?.js");
+    if(url->get_href() != "file:///base/love%3F.js") {
+        std::cerr << url->get_href() << std::endl;
+        return false;
+    }
+    std::cout << url->get_pathname() <<std::endl;
+
+    url->set_pathname("/base/love#.js");
+    if(url->get_href() != "file:///base/love%23.js") {
+        std::cerr << url->get_href() << std::endl;
+        return false;
+    }
+    std::cout << url->get_pathname() <<std::endl;
+
     std::cout << "Ok." << std::endl;
     return true;
 }
