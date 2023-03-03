@@ -52,7 +52,12 @@ std::vector<std::string> split_string(const std::string& str) {
   auto result = std::vector<std::string>{};
   auto ss = std::stringstream{str};
   for (std::string line; std::getline(ss, line, '\n');) {
-    result.push_back(line);
+    std::string_view view = line;
+    // Some parsers like boost/url will refuse to parse a URL with trailing
+    // whitespace.
+    while(!view.empty() && std::isspace(view.back())) { view.remove_suffix(1); }
+    while(!view.empty() && std::isspace(view.front())) { view.remove_prefix(1); }
+    if(!view.empty()) { result.emplace_back(view); }
   }
   return result;
 }

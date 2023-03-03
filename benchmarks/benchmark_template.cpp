@@ -1,3 +1,8 @@
+/**
+ * The main benchmark is to take an input string, and convert it into a
+ * normalized URL (or 'href').
+ */
+
 size_t count_ada_invalid() {
   size_t how_many = 0;
   for(std::string& url_string : url_examples) {
@@ -7,72 +12,28 @@ size_t count_ada_invalid() {
   return how_many;
 }
 
-/**
- * The task for the parsers is to fill in this struct.
- */
-struct standard_url {
-  int port;
-  std::string scheme;
-  std::string username;
-  std::string password;
-  std::string host;
-  std::string query;
-  std::string fragment;
-  std::string path;
-  std::string href;
+enum {
+  JUST_PARSE = 1,
+  PARSE_AND_HREF = 0
 };
 
-// container where the parsers write their results.
-std::vector<standard_url> url_container;
-
-
-inline standard_url to_standard_url(ada::url* url) {
-  // Important: below we *move* the strings, we do not copy them.
-  standard_url u;
-  u.port = url->port.has_value() ? url->port.value() : -1;
-  u.scheme = url->get_scheme();
-  u.username = std::move(url->username);
-  u.password = std::move(url->password);
-  if(url->host.has_value()) { u.host = std::move(*url->host); }
-  u.path = std::move(url->path);
-  if(url->fragment.has_value()) { u.fragment = std::move(*url->fragment); }
-  if(url->query.has_value()) { u.query = std::move(*url->query); }
-  return u;
-}
-
-
-inline standard_url to_standard_url_with_copy(ada::url* url) {
-  standard_url u;
-  u.port = url->port.has_value() ? url->port.value() : -1;
-  u.scheme = url->get_scheme();
-  u.username = url->username;
-  u.password = url->password;
-  if(url->host.has_value()) { u.host = *url->host; }
-  u.path = url->path;
-  if(url->fragment.has_value()) { u.fragment = *url->fragment; }
-  if(url->query.has_value()) { u.query = *url->query; }
-  return u;
-}
-
-template <bool with_copy = false>
+template <bool just_parse = PARSE_AND_HREF>
 static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
-  volatile size_t numbers_of_parameters = 0;
-  url_container.reserve(std::size(url_examples));
+  volatile size_t success = 0;
+  volatile size_t href_size = 0;
+
 
   for (auto _ : state) {
-    url_container.clear();
     for(std::string& url_string : url_examples) {
       auto url = ada::parse(url_string);
       if(url) {
-        if(with_copy) {
-          url_container.emplace_back(to_standard_url_with_copy(&*url));
-        } else {
-          url_container.emplace_back(to_standard_url(&*url));
+        success++;
+        if(!just_parse) {
+          href_size += url->get_href().size();
         }
       }
     }
-    numbers_of_parameters += url_container.size();
   }
   if(collector.has_events()) {
 
@@ -80,18 +41,15 @@ static void BasicBench_AdaURL(benchmark::State& state) {
     for(size_t i = 0 ; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
-      url_container.clear();
       for(std::string& url_string : url_examples) {
         auto url = ada::parse(url_string);
         if(url) {
-          if(with_copy) {
-            url_container.emplace_back(to_standard_url_with_copy(&*url));
-          } else {
-            url_container.emplace_back(to_standard_url(&*url));
+          success++;
+          if(!just_parse) {
+            href_size += url->get_href().size();
           }
         }
       }
-      numbers_of_parameters += url_container.size();
       std::atomic_thread_fence(std::memory_order_release);
       event_count allocate_count = collector.end();
       aggregate << allocate_count;
@@ -105,7 +63,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
     state.counters["ns/url"] = aggregate.best.elapsed_ns() / std::size(url_examples);
     state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
   }
-  (void)numbers_of_parameters;
+  (void)success;
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
@@ -120,63 +78,50 @@ static void BasicBench_AdaURL(benchmark::State& state) {
 }
 
 BENCHMARK(BasicBench_AdaURL);
+auto BasicBench_AdaURL_just_parse = BasicBench_AdaURL<JUST_PARSE>;
+BENCHMARK(BasicBench_AdaURL_just_parse);
 
 
 
 
 #if ADA_url_whatwg_ENABLED
-
-
-inline standard_url to_standard_url(whatwg::url* url) {
-  // It might be possible to do better performance-wise.
-  standard_url u;
-  u.port = url->port_int();
-  u.scheme = url->protocol();
-  u.username = url->username();
-  u.password = url->password();
-  u.host = url->host();
-  u.path = url->pathname();
-  u.fragment = url->hash();
-  u.query = url->search();
-  return u;
-}
 size_t count_whatwg_invalid() {
   size_t how_many = 0;
   for(std::string& url_string : url_examples) {
      whatwg::url url;
     if (!whatwg::success(url.parse(url_string, nullptr))) {
-      url_container.emplace_back(to_standard_url(&url));
+      how_many++;
     }
   }
   return how_many;
 }
+
+template <bool just_parse = PARSE_AND_HREF>
 static void BasicBench_whatwg(benchmark::State& state) {
   // volatile to prevent optimizations.
-  volatile size_t numbers_of_parameters = 0;
-  url_container.reserve(std::size(url_examples));
+  volatile size_t success = 0;
+  volatile size_t href_size = 0;
   for (auto _ : state) {
-    url_container.clear();
     for(std::string& url_string : url_examples) {
         whatwg::url url;
         if (whatwg::success(url.parse(url_string, nullptr))) {
-          url_container.emplace_back(to_standard_url(&url));
+          success++;
+          if(!just_parse) { href_size += url.href().size(); }
         }
     }
-    numbers_of_parameters += url_container.size();
   }
   if(collector.has_events()) {
     event_aggregate aggregate{};
     for(size_t i = 0 ; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
-      url_container.clear();
       for(std::string& url_string : url_examples) {
         whatwg::url url;
         if (whatwg::success(url.parse(url_string, nullptr))) {
-          url_container.emplace_back(to_standard_url(&url));
+          success++;
+          if(!just_parse) { href_size += url.href().size(); }
         }
       }
-      numbers_of_parameters += url_container.size();
       std::atomic_thread_fence(std::memory_order_release);
       event_count allocate_count = collector.end();
       aggregate << allocate_count;
@@ -190,7 +135,8 @@ static void BasicBench_whatwg(benchmark::State& state) {
     state.counters["ns/url"] = aggregate.best.elapsed_ns() / std::size(url_examples);
     state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
   }
-  (void)numbers_of_parameters;
+  (void)success;
+  (void)href_size;
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
@@ -204,55 +150,16 @@ static void BasicBench_whatwg(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_whatwg);
+// There is no need for BasicBench_whatwg_just_parse because whatwg appears to provide
+// the href at a minimal cost, probably because it is already materialized.
+// auto BasicBench_whatwg_just_parse = BasicBench_whatwg<JUST_PARSE>;
+// BENCHMARK(BasicBench_whatwg_just_parse);
+
 #endif // ADA_url_whatwg_ENABLED
 
 #if ADA_CURL_ENABLED
 #include <curl/curl.h>
 
-
-inline standard_url to_standard_url(CURLU *url) {
-  standard_url u;
-  CURLUcode rc;
-  char *buffer;
-  rc = curl_url_get(url, CURLUPART_SCHEME, &buffer, 0);
-  if(rc == 0) {
-      u.scheme = buffer;
-      curl_free(buffer);
-  }
-  rc = curl_url_get(url, CURLUPART_HOST, &buffer, 0);
-  if(rc == 0) {
-      u.host = buffer;
-      curl_free(buffer);
-  }
-  rc = curl_url_get(url, CURLUPART_PATH, &buffer, 0);
-  if(rc == 0) {
-      u.path = buffer;
-      curl_free(buffer);
-  }
-  rc = curl_url_get(url, CURLUPART_QUERY, &buffer, 0);
-  if(rc == 0) {
-      u.query = buffer;
-      curl_free(buffer);
-  }
-  rc = curl_url_get(url, CURLUPART_FRAGMENT, &buffer, 0);
-  if(rc == 0) {
-      u.fragment = buffer;
-      curl_free(buffer);
-  }
-  rc = curl_url_get(url, CURLUPART_USER, &buffer, 0);
-  if(rc == 0) {
-      u.username = buffer;
-      curl_free(buffer);
-  }
-  rc = curl_url_get(url, CURLUPART_PORT, &buffer, 0);
-  if(rc == 0) {
-      u.port = atoi(buffer);
-      curl_free(buffer);
-  } else {
-    u.port = -1;
-  }
-  return u;
-}
 
 size_t count_curl_invalid() {
   size_t how_many = 0;
@@ -267,19 +174,30 @@ size_t count_curl_invalid() {
 }
 
 // curl follows RFC3986+
+template <bool just_parse = false>
 static void BasicBench_CURL(benchmark::State& state) {
   // volatile to prevent optimizations.
-  volatile size_t numbers_of_parameters = 0;
-  url_container.reserve(std::size(url_examples));
+  volatile size_t success = 0;
+  volatile size_t href_size = 0;
+
   CURLU *url = curl_url();
   for (auto _ : state) {
-    url_container.clear();
     for(std::string& url_string : url_examples) {
       CURLUcode rc = curl_url_set(url, CURLUPART_URL, url_string.c_str(), 0);
       // Returns a CURLUcode error value, which is (0) if everything went fine.
-      if(rc == 0) { url_container.emplace_back(to_standard_url(url)); }
+      if(rc == 0) {
+        success++;
+        if(!just_parse) {
+          char *buffer;
+          // When asked to return the full URL, curl_url_get will return a normalized and possibly cleaned up version of what was previously parsed.
+          rc = curl_url_get(url, CURLUPART_URL, &buffer, 0);
+          if(rc == 0) {
+            href_size += strlen(buffer);
+            curl_free(buffer);
+          }
+        }
+      }
     }
-    numbers_of_parameters += url_container.size();
   }
   if(collector.has_events()) {
 
@@ -287,13 +205,18 @@ static void BasicBench_CURL(benchmark::State& state) {
     for(size_t i = 0 ; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
-      url_container.clear();
       for(std::string& url_string : url_examples) {
         CURLUcode rc = curl_url_set(url, CURLUPART_URL, url_string.c_str(), 0);
         // Returns a CURLUcode error value, which is (0) if everything went fine.
-        if(rc == 0) { url_container.emplace_back(to_standard_url(url)); }
+        if(!just_parse) {
+          char *buffer;
+          rc = curl_url_get(url, CURLUPART_URL, &buffer, 0);
+          if(rc == 0) {
+            href_size += strlen(buffer);
+            curl_free(buffer);
+          }
+        }
       }
-      numbers_of_parameters += url_container.size();
       std::atomic_thread_fence(std::memory_order_release);
       event_count allocate_count = collector.end();
       aggregate << allocate_count;
@@ -307,6 +230,7 @@ static void BasicBench_CURL(benchmark::State& state) {
     state.counters["ns/url"] = aggregate.best.elapsed_ns() / std::size(url_examples);
     state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
   }
+  (void)success;
   curl_url_cleanup(url);
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
@@ -321,6 +245,9 @@ static void BasicBench_CURL(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_CURL);
+// 'just parsing' is faster with curl, but maybe not so important for us.
+// auto BasicBench_CURL_just_parse = BasicBench_CURL<JUST_PARSE>;
+// BENCHMARK(BasicBench_CURL_just_parse);
 #endif
 
 
@@ -329,55 +256,50 @@ BENCHMARK(BasicBench_CURL);
 using namespace boost::urls;
 
 
-inline standard_url to_standard_url(boost::urls::url_view* url) {
-  standard_url u;
-  u.port = url->port_number();
-  u.scheme = url->scheme();
-  u.username = url->encoded_user();
-  u.password = url->encoded_password();
-  u.host = url->encoded_host();   
-  u.path = url->encoded_path();
-  if (u.path.empty()) {
-    u.path = "/";
-  }
-  u.fragment = url->encoded_fragment();
-  u.query = url->encoded_query();
-  return u;
-}
-
 size_t count_boosturl_invalid() {
   size_t how_many = 0;
   for(std::string& url_string : url_examples) {
-    result<url_view> uv = parse_uri(url_string);
-    if(!uv.has_value()) { how_many++; }
+    try {
+      url u(url_string);
+      u.normalize();
+    } catch(...) {
+      how_many++;
+    }
   }
   return how_many;
 }
 
 // Boost URL follows RFC3986
+template <bool just_parse = false>
 static void BasicBench_BoostURL(benchmark::State& state) {
   // volatile to prevent optimizations.
-  volatile size_t numbers_of_parameters = 0;
-  url_container.reserve(std::size(url_examples));
+  volatile size_t success = 0;
+  volatile size_t href_size = 0;
+
   for (auto _ : state) {
-    url_container.clear();
     for(std::string& url_string : url_examples) {
-        result<url_view> uv = parse_uri(url_string);
-        if(uv.has_value()) { url_container.emplace_back(to_standard_url(&uv.value())); }
+        try {
+          url u(url_string);
+          u.normalize();
+          success++;
+          if(!just_parse) { href_size += u.buffer().size(); }
+        } catch(...) {}
     }
-    numbers_of_parameters += url_container.size();
   }
   if(collector.has_events()) {
     event_aggregate aggregate{};
     for(size_t i = 0 ; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
-      url_container.clear();
       for(std::string& url_string : url_examples) {
-        result<url_view> uv = parse_uri(url_string);
-        if(uv.has_value()) { url_container.emplace_back(to_standard_url(&uv.value())); }
+        try {
+          url u(url_string);
+          u.normalize();
+          success++;
+          if(!just_parse) { href_size += u.buffer().size(); }
+        } catch(...) {}
+
       }
-      numbers_of_parameters += url_container.size();
       std::atomic_thread_fence(std::memory_order_release);
       event_count allocate_count = collector.end();
       aggregate << allocate_count;
@@ -391,7 +313,9 @@ static void BasicBench_BoostURL(benchmark::State& state) {
     state.counters["ns/url"] = aggregate.best.elapsed_ns() / std::size(url_examples);
     state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
   }
-  (void)numbers_of_parameters;
+  (void)success;
+  (void)href_size;
+
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
@@ -405,10 +329,13 @@ static void BasicBench_BoostURL(benchmark::State& state) {
           benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_BoostURL);
+// There is no need for 'just_parse' because BoostURL materializes the href.
+// auto BasicBench_BoostURL_just_parse = BasicBench_BoostURL<JUST_PARSE>;
+// BENCHMARK(BasicBench_BoostURL_just_parse);
 #endif // ADA_BOOST_ENABLED
 
 #if ADA_VARIOUS_COMPETITION_ENABLED
-static void BasicBench_uriparser(benchmark::State& state) {
+static void BasicBench_uriparser_just_parse(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile bool is_valid = true;
   const char * errorPos;
@@ -455,11 +382,11 @@ static void BasicBench_uriparser(benchmark::State& state) {
 	        double(std::size(url_examples)),
           benchmark::Counter::kIsIterationInvariantRate);
 }
-BENCHMARK(BasicBench_uriparser);
+BENCHMARK(BasicBench_uriparser_just_parse);
 #endif // ADA_VARIOUS_COMPETITION_ENABLED
 
 #if ADA_VARIOUS_COMPETITION_ENABLED
-static void BasicBench_urlparser(benchmark::State& state) {
+static void BasicBench_urlparser_just_parse(benchmark::State& state) {
   // volatile to prevent optimizations.
   for (auto _ : state) {
     for(std::string& url_string : url_examples) {
@@ -500,11 +427,11 @@ static void BasicBench_urlparser(benchmark::State& state) {
 	        double(std::size(url_examples)),
           benchmark::Counter::kIsIterationInvariantRate);
 }
-BENCHMARK(BasicBench_urlparser);
+BENCHMARK(BasicBench_urlparser_just_parse);
 #endif // ADA_VARIOUS_COMPETITION_ENABLED
 
 #if ADA_VARIOUS_COMPETITION_ENABLED
-static void BasicBench_http_parser(benchmark::State& state) {
+static void BasicBench_http_parser_just_parse(benchmark::State& state) {
   volatile bool is_valid{true};
   struct http_parser_url u;
   http_parser_url_init(&u);
@@ -549,7 +476,7 @@ static void BasicBench_http_parser(benchmark::State& state) {
 	        double(std::size(url_examples)),
           benchmark::Counter::kIsIterationInvariantRate);
 }
-BENCHMARK(BasicBench_http_parser);
+BENCHMARK(BasicBench_http_parser_just_parse);
 #endif // ADA_VARIOUS_COMPETITION_ENABLED
 
 
@@ -571,18 +498,18 @@ size_t count_rust_invalid() {
 static void BasicBench_ServoUrl(benchmark::State& state) {
   // Other benchmarks copy the 'standard url' to a structure.
   // We try to mimick the effect.
-  std::vector<servo_url::Url*> rust_url_container;
-  rust_url_container.reserve(std::size(url_examples));
+  volatile size_t success = 0;
 
   for (auto _ : state) {
-    while(!rust_url_container.empty()) {
-      servo_url::free_url(rust_url_container.back());
-      rust_url_container.pop_back();
-    }
     for(std::string& url_string : url_examples) {
       // benchmark::DoNotOptimize is unnecessary and potentially misleading.
-      servo_url::Url * url = servo_url::parse_url(url_string.c_str(), url_string.length());
-      rust_url_container.push_back(url);
+      const char * url_href = servo_url::parse_url_to_href(url_string.c_str(), url_string.length());
+      if(url_href) {
+        // if you'd like you could print it: printf("%s\n", url_href);
+        success++;
+        servo_url::free_string(url_href);
+      }
+
     }
   }
   if(collector.has_events()) {
@@ -590,24 +517,18 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
     for(size_t i = 0 ; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
-      // mimicks a clear()
-      while(!rust_url_container.empty()) {
-        servo_url::free_url(rust_url_container.back());
-        rust_url_container.pop_back();
-      }
       for(std::string& url_string : url_examples) {
-        servo_url::Url * url = servo_url::parse_url(url_string.c_str(), url_string.length());
-        rust_url_container.push_back(url);
+        const char * url_href = servo_url::parse_url_to_href(url_string.c_str(), url_string.length());
+        if(url_href) {
+          success++;
+          servo_url::free_string(url_href);
+        }
       }
       std::atomic_thread_fence(std::memory_order_release);
       event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
-    // let us not leak memory:
-    while(!rust_url_container.empty()) {
-      servo_url::free_url(rust_url_container.back());
-      rust_url_container.pop_back();
-    }
+    (void)success;
     state.counters["cycles/url"] = aggregate.best.cycles() / std::size(url_examples);
     state.counters["instructions/url"] = aggregate.best.instructions() / std::size(url_examples);
     state.counters["instructions/cycle"] = aggregate.best.instructions() / aggregate.best.cycles();
@@ -675,21 +596,24 @@ int main(int argc, char **argv) {
     if(collector.has_events()) {
       benchmark::AddCustomContext("performance counters", "Enabled");
     }
-    std::cout << "------------------------------\n";
-    std::cout << "ada---count of bad URLs       " << std::to_string(ada_bad_url) << "\n";
+    std::stringstream badcounts;
+    badcounts << "---------------------\n";
+    badcounts << "ada---count of bad URLs       " << std::to_string(ada_bad_url) << "\n";
 #if defined(ADA_RUST_VERSION)
-    std::cout << "servo/url---count of bad URLs " << std::to_string(servo_bad_url) << "\n";
+    badcounts << "servo/url---count of bad URLs " << std::to_string(servo_bad_url) << "\n";
 #endif
 #if ADA_url_whatwg_ENABLED
-    std::cout << "whatwg---count of bad URLs    " << std::to_string(whatwg_bad_url) << "\n";
+    badcounts << "whatwg---count of bad URLs    " << std::to_string(whatwg_bad_url) << "\n";
 #endif
 #if ADA_CURL_ENABLED
-    std::cout << "curl---count of bad URLs      " << std::to_string(curl_bad_url) << "\n";
+    badcounts << "curl---count of bad URLs      " << std::to_string(curl_bad_url) << "\n";
 #endif
 #if ADA_BOOST_ENABLED
-    std::cout << "boost-url---count of bad URLs " << std::to_string(boost_bad_url) << "\n";
+    badcounts << "boost-url---count of bad URLs " << std::to_string(boost_bad_url) << "\n";
 #endif
-    std::cout << "------------------------------\n";
+    badcounts << "-------------------------------\n";
+    benchmark::AddCustomContext("bad urls", badcounts.str());
+
     if(size_t(url_examples_bytes) > 1000000 ) { N = 10; }
 
     benchmark::Initialize(&argc, argv);
