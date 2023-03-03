@@ -9,5 +9,6 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     [ "unicode.cpp", "dd/d9c/unicode_8cpp.html", "dd/d9c/unicode_8cpp" ],
     [ "url-getters.cpp", "d5/d25/url-getters_8cpp.html", null ],
     [ "url-setters.cpp", "d5/dee/url-setters_8cpp.html", null ],
-    [ "url.cpp", "d6/d0e/url_8cpp.html", null ]
+    [ "url.cpp", "d6/d0e/url_8cpp.html", null ],
+    [ "url_components.cpp", "de/d5a/url__components_8cpp.html", null ]
 ];

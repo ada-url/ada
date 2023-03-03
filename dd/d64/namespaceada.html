@@ -153,6 +153,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html">url</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic URL struct.  <a href="../../dd/d03/structada_1_1url.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d43/structada_1_1url__components.html">url_components</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -217,6 +219,12 @@ Functions</h2></td></tr>
 <tr class="separator:a3b7cc372b3ac372722c850ca149215d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e483bbc60c5905f8885c2dc134a30ed"><td class="memItemLeft" align="right" valign="top">std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed">operator&lt;&lt;</a> (std::ostream &amp;out, const <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;u)</td></tr>
 <tr class="separator:a4e483bbc60c5905f8885c2dc134a30ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3523b62ab70cad55a737d62a80cd3c56"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a3523b62ab70cad55a737d62a80cd3c56">leading_zeroes</a> (uint32_t input_num)</td></tr>
+<tr class="separator:a3523b62ab70cad55a737d62a80cd3c56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec45755d91a93c6071026955dcf95545"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#aec45755d91a93c6071026955dcf95545">int_log2</a> (uint32_t x)</td></tr>
+<tr class="separator:aec45755d91a93c6071026955dcf95545"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2decbe2f9f841b0b1a1405dd7ff05b48"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a2decbe2f9f841b0b1a1405dd7ff05b48">fast_digit_count</a> (uint32_t x)</td></tr>
+<tr class="separator:a2decbe2f9f841b0b1a1405dd7ff05b48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
 <a id="a3d60d994682b227af774a12e6302a80a"></a>
@@ -363,6 +371,38 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="a2decbe2f9f841b0b1a1405dd7ff05b48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2decbe2f9f841b0b1a1405dd7ff05b48">&#9670;&nbsp;</a></span>fast_digit_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ada::fast_digit_count </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>x</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00100">100</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#aec45755d91a93c6071026955dcf95545">int_log2()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#ac0e2af710f62f3ede7d2b74a30f59953">ada::url::get_components()</a>.</p>
+
+</div>
+</div>
 <a id="a4796e4f266c83d76b490d423c8336a70"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4796e4f266c83d76b490d423c8336a70">&#9670;&nbsp;</a></span>href_from_file()</h2>
 
@@ -383,6 +423,68 @@ Functions</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00021">21</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573faa91172408b4da5f073ceca3f39e9acf9">ada::scheme::FILE</a>, <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#af6a43ab73c2b1e20f81de57b18e1f388">ada::unicode::has_tabs_or_newline()</a>, and <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#afe80bc0093fc27eceb0102b13207261e">ada::helpers::remove_ascii_tab_or_newline()</a>.</p>
+
+</div>
+</div>
+<a id="aec45755d91a93c6071026955dcf95545"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec45755d91a93c6071026955dcf95545">&#9670;&nbsp;</a></span>int_log2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ada::int_log2 </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>x</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00095">95</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#a3523b62ab70cad55a737d62a80cd3c56">leading_zeroes()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d64/namespaceada.html#a2decbe2f9f841b0b1a1405dd7ff05b48">fast_digit_count()</a>.</p>
+
+</div>
+</div>
+<a id="a3523b62ab70cad55a737d62a80cd3c56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3523b62ab70cad55a737d62a80cd3c56">&#9670;&nbsp;</a></span>leading_zeroes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ada::leading_zeroes </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>input_num</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00084">84</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d64/namespaceada.html#aec45755d91a93c6071026955dcf95545">int_log2()</a>.</p>
 
 </div>
 </div>
@@ -420,7 +522,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00073">73</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00079">79</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="../../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2">ada::url::to_string()</a>.</p>
 

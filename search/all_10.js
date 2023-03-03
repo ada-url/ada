@@ -1,16 +1,10 @@
 var searchData=
 [
-  ['unicode_2ecpp_189',['unicode.cpp',['../dd/d9c/unicode_8cpp.html',1,'']]],
-  ['unicode_2eh_190',['unicode.h',['../dd/d90/unicode_8h.html',1,'']]],
-  ['unreachable_191',['unreachable',['../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d',1,'ada']]],
-  ['url_192',['url',['../dd/d03/structada_1_1url.html',1,'ada::url'],['../dd/d03/structada_1_1url.html#a842ca2e00db267baba8f0b5a08d7a130',1,'ada::url::url()=default'],['../dd/d03/structada_1_1url.html#a7c686183f4195f5059993e97e64fd537',1,'ada::url::url(const url &amp;u)=default'],['../dd/d03/structada_1_1url.html#a17a7a9b5775703722bfc70dd192aeab1',1,'ada::url::url(url &amp;&amp;u) noexcept=default']]],
-  ['url_2dgetters_2ecpp_193',['url-getters.cpp',['../d5/d25/url-getters_8cpp.html',1,'']]],
-  ['url_2dinl_2eh_194',['url-inl.h',['../df/ddc/url-inl_8h.html',1,'']]],
-  ['url_2dsetters_2ecpp_195',['url-setters.cpp',['../d5/dee/url-setters_8cpp.html',1,'']]],
-  ['url_2ecpp_196',['url.cpp',['../d6/d0e/url_8cpp.html',1,'']]],
-  ['url_2eh_197',['url.h',['../df/db8/url_8h.html',1,'']]],
-  ['userinfo_5fpercent_5fencode_198',['USERINFO_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da',1,'ada::character_sets']]],
-  ['utf8_199',['UTF8',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1',1,'ada']]],
-  ['utf_5f16be_200',['UTF_16BE',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84',1,'ada']]],
-  ['utf_5f16le_201',['UTF_16LE',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240',1,'ada']]]
+  ['table_5fis_5fdouble_5fdot_5fpath_5fsegment_193',['table_is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f',1,'ada::unicode']]],
+  ['to_5fascii_194',['to_ascii',['../d2/dc3/namespaceada_1_1unicode.html#ac8772e2727fff9bbb4c12bc68040f3b8',1,'ada::unicode']]],
+  ['to_5flower_195',['to_lower',['../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b',1,'ada::checkers']]],
+  ['to_5flower_5fascii_196',['to_lower_ascii',['../d2/dc3/namespaceada_1_1unicode.html#ab9b70de07868ab60794c3079aa4db46f',1,'ada::unicode']]],
+  ['to_5fstring_197',['to_string',['../dd/d03/structada_1_1url.html#acfed28dc37726668c70832008d9caea2',1,'ada::url::to_string()'],['../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7',1,'ada::to_string(encoding_type type)'],['../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6',1,'ada::to_string(ada::state s)']]],
+  ['trim_5fc0_5fwhitespace_198',['trim_c0_whitespace',['../d7/d6c/namespaceada_1_1helpers.html#a7e7a930166b3365d93acd6c42620f45b',1,'ada::helpers']]],
+  ['type_199',['type',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573f',1,'ada::scheme']]]
 ];

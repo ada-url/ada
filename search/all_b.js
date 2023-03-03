@@ -1,17 +1,7 @@
 var searchData=
 [
-  ['parse_130',['parse',['../dd/d64/namespaceada.html#af8b1caee49e93f9811a7a5cf4a19ac25',1,'ada']]],
-  ['parse_5furl_131',['parse_url',['../d6/da3/namespaceada_1_1parser.html#a1a503ff487bdc385b2c4c49aee09ce14',1,'ada::parser']]],
-  ['parser_2ecpp_132',['parser.cpp',['../dc/ddd/parser_8cpp.html',1,'']]],
-  ['parser_2eh_133',['parser.h',['../d5/d36/parser_8h.html',1,'']]],
-  ['path_134',['PATH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5ffb5f0d0de78321df46fc7c93ca64a3',1,'ada']]],
-  ['path_5for_5fauthority_135',['PATH_OR_AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574afb111d1dc7e43a21ed9dcb1c618a6f88',1,'ada']]],
-  ['path_5fpercent_5fencode_136',['PATH_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a781f16c18f4d1b11603443cd039e33db',1,'ada::character_sets']]],
-  ['path_5fsignature_137',['path_signature',['../d3/dbe/namespaceada_1_1checkers.html#a3a1950cb3b0e363c38dae086285194ea',1,'ada::checkers']]],
-  ['path_5fsignature_5ftable_138',['path_signature_table',['../d3/dbe/namespaceada_1_1checkers.html#a228548ec9f967976482088d2e29e132d',1,'ada::checkers']]],
-  ['path_5fstart_139',['PATH_START',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aba05134b69d52ab8a9c703362ee02fa4',1,'ada']]],
-  ['percent_5fdecode_140',['percent_decode',['../d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a',1,'ada::unicode']]],
-  ['percent_5fencode_141',['percent_encode',['../d2/dc3/namespaceada_1_1unicode.html#a1c564a30bc61d41abd97cc6b8be084ff',1,'ada::unicode::percent_encode(const std::string_view input, const uint8_t character_set[])'],['../d2/dc3/namespaceada_1_1unicode.html#ab23d66383793f477b4f89f1d4cfd6bf9',1,'ada::unicode::percent_encode(const std::string_view input, const uint8_t character_set[], std::string &amp;out)']]],
-  ['port_142',['PORT',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5',1,'ada']]],
-  ['prune_5ffragment_143',['prune_fragment',['../d7/d6c/namespaceada_1_1helpers.html#a27195c97e4ce5f8bf9187e5b24a478ba',1,'ada::helpers']]]
+  ['omitted_133',['omitted',['../d3/d43/structada_1_1url__components.html#a3982f73506207bc84cb2f058524f77c3',1,'ada::url_components']]],
+  ['opaque_5fpath_134',['OPAQUE_PATH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd',1,'ada']]],
+  ['operator_3c_3c_135',['operator&lt;&lt;',['../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed',1,'ada']]],
+  ['operator_3d_136',['operator=',['../dd/d03/structada_1_1url.html#a1b4a3d63a032bfb8592a2251ea7bd9f9',1,'ada::url::operator=(url &amp;&amp;u) noexcept=default'],['../dd/d03/structada_1_1url.html#a5b9014ee57227d8083ffc5516cc96fe0',1,'ada::url::operator=(const url &amp;u)=default'],['../d3/d43/structada_1_1url__components.html#a3cf2c5d966f2262ea250d7e02254df4d',1,'ada::url_components::operator=(url_components &amp;&amp;u) noexcept=default'],['../d3/d43/structada_1_1url__components.html#a58072b6b11a1eff045af783aab062bb1',1,'ada::url_components::operator=(const url_components &amp;u)=default']]]
 ];

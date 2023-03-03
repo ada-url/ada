@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['_7eurl_205',['~url',['../dd/d03/structada_1_1url.html#a8b4168f1ec6093bc26203738fde2b45b',1,'ada::url']]]
+  ['ws_218',['WS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fa1b6522b40511ec15ca60df3eb3858df2',1,'ada::scheme']]],
+  ['wss_219',['WSS',['../d2/d63/namespaceada_1_1scheme.html#a24b77d0ac8839a9b414a7de9a444573fac48a95c337aa2775b07339cf74cf903d',1,'ada::scheme']]]
 ];

@@ -4,6 +4,7 @@ var structada_1_1url =
     [ "url", "dd/d03/structada_1_1url.html#a7c686183f4195f5059993e97e64fd537", null ],
     [ "url", "dd/d03/structada_1_1url.html#a17a7a9b5775703722bfc70dd192aeab1", null ],
     [ "~url", "dd/d03/structada_1_1url.html#a8b4168f1ec6093bc26203738fde2b45b", null ],
+    [ "get_components", "dd/d03/structada_1_1url.html#ac0e2af710f62f3ede7d2b74a30f59953", null ],
     [ "get_hash", "dd/d03/structada_1_1url.html#a8c833c2d7549b00de6fa11252d6a5f09", null ],
     [ "get_host", "dd/d03/structada_1_1url.html#a8b54b08041a460995f5c7c950e224294", null ],
     [ "get_hostname", "dd/d03/structada_1_1url.html#aa4f23a030f0adb5301962fd5b5e68f86", null ],

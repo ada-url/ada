@@ -1,5 +1,6 @@
 var helpers_8h =
 [
+    [ "encode_json", "d1/d98/helpers_8h.html#a73e5d4035440d10f8f5cb93b1ba92cad", null ],
     [ "find_authority_delimiter", "d1/d98/helpers_8h.html#af6529a9eb620b959cdec2d7ee81559eb", null ],
     [ "find_authority_delimiter_special", "d1/d98/helpers_8h.html#a88b90a38c83fb5caac56301e07d8ff27", null ],
     [ "get_host_delimiter_location", "d1/d98/helpers_8h.html#a3f2c8f0eaf1e6d60e3c3e8bc6d6bf5e5", null ],

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['path_5fpercent_5fencode_337',['PATH_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a781f16c18f4d1b11603443cd039e33db',1,'ada::character_sets']]],
-  ['path_5fsignature_5ftable_338',['path_signature_table',['../d3/dbe/namespaceada_1_1checkers.html#a228548ec9f967976482088d2e29e132d',1,'ada::checkers']]]
+  ['omitted_364',['omitted',['../d3/d43/structada_1_1url__components.html#a3982f73506207bc84cb2f058524f77c3',1,'ada::url_components']]]
 ];

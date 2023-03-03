@@ -75,6 +75,7 @@ var namespaceada =
       [ "table_is_double_dot_path_segment", "d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f", null ]
     ] ],
     [ "url", "dd/d03/structada_1_1url.html", "dd/d03/structada_1_1url" ],
+    [ "url_components", "d3/d43/structada_1_1url__components.html", "d3/d43/structada_1_1url__components" ],
     [ "result", "dd/d64/namespaceada.html#a3d60d994682b227af774a12e6302a80a", null ],
     [ "encoding_type", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b", [
       [ "UTF8", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1", null ],
@@ -106,7 +107,10 @@ var namespaceada =
       [ "OPAQUE_PATH", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd", null ],
       [ "PORT", "dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5", null ]
     ] ],
+    [ "fast_digit_count", "dd/d64/namespaceada.html#a2decbe2f9f841b0b1a1405dd7ff05b48", null ],
     [ "href_from_file", "dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70", null ],
+    [ "int_log2", "dd/d64/namespaceada.html#aec45755d91a93c6071026955dcf95545", null ],
+    [ "leading_zeroes", "dd/d64/namespaceada.html#a3523b62ab70cad55a737d62a80cd3c56", null ],
     [ "operator<<", "dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed", null ],
     [ "parse", "dd/d64/namespaceada.html#af8b1caee49e93f9811a7a5cf4a19ac25", null ],
     [ "to_string", "dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6", null ],

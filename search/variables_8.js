@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['userinfo_5fpercent_5fencode_343',['USERINFO_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da',1,'ada::character_sets']]]
+  ['table_5fis_5fdouble_5fdot_5fpath_5fsegment_374',['table_is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f',1,'ada::unicode']]]
 ];
