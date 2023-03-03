@@ -76,5 +76,7 @@ struct href_aggregator {
 
   std::string buffer;
 };
+
 } // namespace ada::parser
+
 #endif // ADA_HREF_AGGREGATOR_H
