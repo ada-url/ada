@@ -16,6 +16,8 @@ std::string examples[] = {
     "connect_timeout=10&application_name=myapp"
 };
 
+void init_data() {}
+
 double examples_bytes = []() -> double {
   size_t bytes{0};
   for(std::string& url_string : examples) { bytes += url_string.size(); }

@@ -1,3 +1,12 @@
+size_t count_ada_invalid() {
+  size_t how_many = 0;
+  for(std::string& url_string : url_examples) {
+    auto url = ada::parse(url_string);
+    if(!url) { how_many++; }
+  }
+  return how_many;
+}
+
 /**
  * The task for the parsers is to fill in this struct.
  */
@@ -131,7 +140,16 @@ inline standard_url to_standard_url(whatwg::url* url) {
   u.query = url->search();
   return u;
 }
-
+size_t count_whatwg_invalid() {
+  size_t how_many = 0;
+  for(std::string& url_string : url_examples) {
+     whatwg::url url;
+    if (!whatwg::success(url.parse(url_string, nullptr))) {
+      url_container.emplace_back(to_standard_url(&url));
+    }
+  }
+  return how_many;
+}
 static void BasicBench_whatwg(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t numbers_of_parameters = 0;
@@ -197,43 +215,55 @@ inline standard_url to_standard_url(CURLU *url) {
   CURLUcode rc;
   char *buffer;
   rc = curl_url_get(url, CURLUPART_SCHEME, &buffer, 0);
-  if(!rc) {
+  if(rc == 0) {
       u.scheme = buffer;
       curl_free(buffer);
   }
   rc = curl_url_get(url, CURLUPART_HOST, &buffer, 0);
-  if(!rc) {
+  if(rc == 0) {
       u.host = buffer;
       curl_free(buffer);
   }
   rc = curl_url_get(url, CURLUPART_PATH, &buffer, 0);
-  if(!rc) {
+  if(rc == 0) {
       u.path = buffer;
       curl_free(buffer);
   }
   rc = curl_url_get(url, CURLUPART_QUERY, &buffer, 0);
-  if(!rc) {
+  if(rc == 0) {
       u.query = buffer;
       curl_free(buffer);
   }
   rc = curl_url_get(url, CURLUPART_FRAGMENT, &buffer, 0);
-  if(!rc) {
+  if(rc == 0) {
       u.fragment = buffer;
       curl_free(buffer);
   }
   rc = curl_url_get(url, CURLUPART_USER, &buffer, 0);
-  if(!rc) {
+  if(rc == 0) {
       u.username = buffer;
       curl_free(buffer);
   }
   rc = curl_url_get(url, CURLUPART_PORT, &buffer, 0);
-  if(!rc) {
+  if(rc == 0) {
       u.port = atoi(buffer);
       curl_free(buffer);
   } else {
     u.port = -1;
   }
   return u;
+}
+
+size_t count_curl_invalid() {
+  size_t how_many = 0;
+  CURLU *url = curl_url();
+  for(std::string& url_string : url_examples) {
+    CURLUcode rc = curl_url_set(url, CURLUPART_URL, url_string.c_str(), 0);
+    // Returns a CURLUcode error value, which is (0) if everything went fine.
+    if(rc != 0) { how_many++; }
+  }
+  curl_url_cleanup(url);
+  return how_many;
 }
 
 // curl follows RFC3986+
@@ -246,7 +276,8 @@ static void BasicBench_CURL(benchmark::State& state) {
     url_container.clear();
     for(std::string& url_string : url_examples) {
       CURLUcode rc = curl_url_set(url, CURLUPART_URL, url_string.c_str(), 0);
-      if(rc) { url_container.emplace_back(to_standard_url(url)); }
+      // Returns a CURLUcode error value, which is (0) if everything went fine.
+      if(rc == 0) { url_container.emplace_back(to_standard_url(url)); }
     }
     numbers_of_parameters += url_container.size();
   }
@@ -259,7 +290,8 @@ static void BasicBench_CURL(benchmark::State& state) {
       url_container.clear();
       for(std::string& url_string : url_examples) {
         CURLUcode rc = curl_url_set(url, CURLUPART_URL, url_string.c_str(), 0);
-        if(rc) { url_container.emplace_back(to_standard_url(url)); }
+        // Returns a CURLUcode error value, which is (0) if everything went fine.
+        if(rc == 0) { url_container.emplace_back(to_standard_url(url)); }
       }
       numbers_of_parameters += url_container.size();
       std::atomic_thread_fence(std::memory_order_release);
@@ -275,7 +307,7 @@ static void BasicBench_CURL(benchmark::State& state) {
     state.counters["ns/url"] = aggregate.best.elapsed_ns() / std::size(url_examples);
     state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
   }
-  curl_free(url);
+  curl_url_cleanup(url);
   state.counters["time/byte"] = benchmark::Counter(
 	        url_examples_bytes,
           benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
@@ -311,6 +343,15 @@ inline standard_url to_standard_url(boost::urls::url_view* url) {
   u.fragment = url->encoded_fragment();
   u.query = url->encoded_query();
   return u;
+}
+
+size_t count_boosturl_invalid() {
+  size_t how_many = 0;
+  for(std::string& url_string : url_examples) {
+    result<url_view> uv = parse_uri(url_string);
+    if(!uv.has_value()) { how_many++; }
+  }
+  return how_many;
 }
 
 // Boost URL follows RFC3986
@@ -511,46 +552,18 @@ static void BasicBench_http_parser(benchmark::State& state) {
 BENCHMARK(BasicBench_http_parser);
 #endif // ADA_VARIOUS_COMPETITION_ENABLED
 
-int main(int argc, char **argv) {
-    benchmark::AddCustomContext("ada spec", "Ada follows whatwg/url");
-#if defined(ADA_RUST_VERSION)
-    benchmark::AddCustomContext("rust version ", ADA_RUST_VERSION);
-#endif
-#if ADA_CURL_ENABLED
-    // the curl dependency will depend on the system.
-    benchmark::AddCustomContext("curl version ", LIBCURL_VERSION);
-    benchmark::AddCustomContext("curl spec", "Curl follows RFC3986, not whatwg/url");
-#else
-    benchmark::AddCustomContext("curl ", "OMITTED");
-#endif
-#if ADA_BOOST_ENABLED
-    benchmark::AddCustomContext("boost-url spec", "Boost URL follows RFC3986, not whatwg/url");
-#endif
-#if (__APPLE__ &&  __aarch64__) || defined(__linux__)
-    if(!collector.has_events()) {
-      benchmark::AddCustomContext("performance counters", "No privileged access (sudo may help).");
-    }
-#else
-    if(!collector.has_events()) {
-      benchmark::AddCustomContext("performance counters", "Unsupported system.");
-    }
-#endif
-    benchmark::AddCustomContext("input bytes", std::to_string(size_t(url_examples_bytes)));
-    benchmark::AddCustomContext("number of URLs", std::to_string(std::size(url_examples)));
-    benchmark::AddCustomContext("bytes/URL", std::to_string(url_examples_bytes/std::size(url_examples)));
-#if ADA_VARIOUS_COMPETITION_ENABLED
-    benchmark::AddCustomContext("WARNING", "BasicBench_urlparser and BasicBench_uriparser do not use a normalized task.");
-#endif
-    if(collector.has_events()) {
-      benchmark::AddCustomContext("performance counters", "Enabled");
-    }
-    benchmark::Initialize(&argc, argv);
-    benchmark::RunSpecifiedBenchmarks();
-    benchmark::Shutdown();
-}
 
 #if defined(ADA_RUST_VERSION)
 #include "competitors/servo-url/servo_url.h"
+size_t count_rust_invalid() {
+  size_t how_many = 0;
+  for(std::string& url_string : url_examples) {
+    servo_url::Url * url = servo_url::parse_url(url_string.c_str(), url_string.length());
+    servo_url::free_url(url);
+    if(!url) { how_many++; }
+  }
+  return how_many;
+}
 
 // Emilio from Mozilla recommended that using an opaque-pointer will improve the performance
 // of this benchmark. It has indeed improved but with the cost of validating the output.
@@ -619,3 +632,67 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
 }
 BENCHMARK(BasicBench_ServoUrl);
 #endif // ADA_RUST
+
+
+int main(int argc, char **argv) {
+    init_data();
+    benchmark::AddCustomContext("ada spec", "Ada follows whatwg/url");
+    size_t ada_bad_url = count_ada_invalid();
+#if ADA_url_whatwg_ENABLED
+    size_t whatwg_bad_url = count_whatwg_invalid();
+#endif
+#if defined(ADA_RUST_VERSION)
+    benchmark::AddCustomContext("rust version ", ADA_RUST_VERSION);
+    size_t servo_bad_url = count_rust_invalid();
+#endif
+#if ADA_CURL_ENABLED
+    // the curl dependency will depend on the system.
+    benchmark::AddCustomContext("curl version ", LIBCURL_VERSION);
+    benchmark::AddCustomContext("curl spec", "Curl follows RFC3986, not whatwg/url");
+    size_t curl_bad_url = count_curl_invalid();
+#else
+    benchmark::AddCustomContext("curl ", "OMITTED");
+#endif
+#if ADA_BOOST_ENABLED
+    benchmark::AddCustomContext("boost-url spec", "Boost URL follows RFC3986, not whatwg/url");
+    size_t boost_bad_url = count_boosturl_invalid();
+#endif
+#if (__APPLE__ &&  __aarch64__) || defined(__linux__)
+    if(!collector.has_events()) {
+      benchmark::AddCustomContext("performance counters", "No privileged access (sudo may help).");
+    }
+#else
+    if(!collector.has_events()) {
+      benchmark::AddCustomContext("performance counters", "Unsupported system.");
+    }
+#endif
+    benchmark::AddCustomContext("input bytes", std::to_string(size_t(url_examples_bytes)));
+    benchmark::AddCustomContext("number of URLs", std::to_string(std::size(url_examples)));
+    benchmark::AddCustomContext("bytes/URL", std::to_string(url_examples_bytes/std::size(url_examples)));
+#if ADA_VARIOUS_COMPETITION_ENABLED
+    benchmark::AddCustomContext("WARNING", "BasicBench_urlparser and BasicBench_uriparser do not use a normalized task.");
+#endif
+    if(collector.has_events()) {
+      benchmark::AddCustomContext("performance counters", "Enabled");
+    }
+    std::cout << "------------------------------\n";
+    std::cout << "ada---count of bad URLs       " << std::to_string(ada_bad_url) << "\n";
+#if defined(ADA_RUST_VERSION)
+    std::cout << "servo/url---count of bad URLs " << std::to_string(servo_bad_url) << "\n";
+#endif
+#if ADA_url_whatwg_ENABLED
+    std::cout << "whatwg---count of bad URLs    " << std::to_string(whatwg_bad_url) << "\n";
+#endif
+#if ADA_CURL_ENABLED
+    std::cout << "curl---count of bad URLs      " << std::to_string(curl_bad_url) << "\n";
+#endif
+#if ADA_BOOST_ENABLED
+    std::cout << "boost-url---count of bad URLs " << std::to_string(boost_bad_url) << "\n";
+#endif
+    std::cout << "------------------------------\n";
+    if(size_t(url_examples_bytes) > 1000000 ) { N = 10; }
+
+    benchmark::Initialize(&argc, argv);
+    benchmark::RunSpecifiedBenchmarks();
+    benchmark::Shutdown();
+}
