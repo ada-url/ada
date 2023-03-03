@@ -23,7 +23,7 @@ namespace ada {
       }
 
       output += get_host();
-    } else if (!has_opaque_path && path.find('/', 1) != std::string_view::npos && checkers::begins_with(path, "//")) {
+    } else if (!has_opaque_path && checkers::begins_with(path, "//")) {
       // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
       // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
       output += "/.";
