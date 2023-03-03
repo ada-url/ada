@@ -1,20 +1,7 @@
 #include "benchmark_header.h"
-#include <filesystem>
-
 #include "simdjson.h"
 
 using namespace simdjson;
-
-bool file_exists(const char *filename) {
-  namespace fs = std::filesystem;
-  std::filesystem::path f{filename};
-  if (std::filesystem::exists(filename)) {
-    return true;
-  } else {
-    std::cout << "  file missing: " << filename << std::endl;
-    return false;
-  }
-}
 
 double url_examples_bytes{};
 
