@@ -17,7 +17,5 @@ var dir_34d9464866e8421e4e78493bdf5982a5 =
     [ "unicode.h", "dd/d90/unicode_8h.html", "dd/d90/unicode_8h" ],
     [ "url-inl.h", "df/ddc/url-inl_8h.html", "df/ddc/url-inl_8h" ],
     [ "url.h", "df/db8/url_8h.html", "df/db8/url_8h" ],
-    [ "url_components.h", "d3/d2a/url__components_8h.html", [
-      [ "url_components", "d3/d43/structada_1_1url__components.html", "d3/d43/structada_1_1url__components" ]
-    ] ]
+    [ "url_components.h", "d3/d2a/url__components_8h.html", "d3/d2a/url__components_8h" ]
 ];
