@@ -120,7 +120,7 @@ namespace ada {
     out.protocol_end = uint32_t(get_scheme().size());
 
     // Trailing index is always the next character of the current one.
-    size_t trailing_index = out.protocol_end + 1;
+    size_t running_index = out.protocol_end + 1;
 
     if (host.has_value()) {
       // 2 characters for "//" and 1 character for starting index
@@ -139,8 +139,9 @@ namespace ada {
       }
 
       out.host_end = uint32_t(out.host_start + host.value().size()) - 1;
-      trailing_index = out.host_end + 1;
+      running_index = out.host_end + 1;
     } else {
+      // Update host start and end date to the same index, since it does not exist.
       out.host_start = out.protocol_end + 1;
       out.host_end = out.protocol_end + 1;
 
@@ -149,32 +150,31 @@ namespace ada {
       if (!has_opaque_path && url_delimiter_count > 1 && path.length() >= 2 && path[0] == '/' && path[1] == '/') {
         // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
         // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
-        trailing_index = out.protocol_end + 3;
+        running_index = out.protocol_end + 3;
       } else {
-        trailing_index = out.protocol_end + 1;
+        running_index = out.protocol_end + 1;
       }
     }
 
     if (port.has_value()) {
-      out.port = port.value();
-      trailing_index += fast_digit_count(port.value()) + 1; // Port omits ':'
+      out.port = *port;
+      running_index += fast_digit_count(*port) + 1; // Port omits ':'
     }
 
+    out.pathname_start = uint32_t(running_index);
+
     if (!path.empty()) {
-      out.pathname_start = uint32_t(trailing_index);
-      trailing_index += path.size();
-    } else {
-      out.pathname_start = uint32_t(trailing_index);
+      running_index += path.size();
     }
 
     if (query.has_value()) {
-      out.search_start = uint32_t(trailing_index);
-      trailing_index += get_search().size();
-      if (get_search().size() == 0) { trailing_index++; }
+      out.search_start = uint32_t(running_index);
+      running_index += get_search().size();
+      if (get_search().size() == 0) { running_index++; }
     }
 
     if (fragment.has_value()) {
-      out.hash_start = uint32_t(trailing_index);
+      out.hash_start = uint32_t(running_index);
     }
 
     return out;
