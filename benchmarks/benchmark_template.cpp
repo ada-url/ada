@@ -1,3 +1,8 @@
+/**
+ * The main benchmark is to take an input string, and convert it into a
+ * normalized URL (or 'href').
+ */
+
 size_t count_ada_invalid() {
   size_t how_many = 0;
   for(std::string& url_string : url_examples) {
@@ -80,21 +85,6 @@ BENCHMARK(BasicBench_AdaURL_just_parse);
 
 
 #if ADA_url_whatwg_ENABLED
-
-
-/*inline standard_url to_standard_url(whatwg::url* url) {
-  // It might be possible to do better performance-wise.
-  standard_url u;
-  u.port = url->port_int();
-  u.scheme = url->protocol();
-  u.username = url->username();
-  u.password = url->password();
-  u.host = url->host();
-  u.path = url->pathname();
-  u.fragment = url->hash();
-  u.query = url->search();
-  return u;
-}*/
 size_t count_whatwg_invalid() {
   size_t how_many = 0;
   for(std::string& url_string : url_examples) {
