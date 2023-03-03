@@ -11,8 +11,8 @@
 #include <string_view>
 
 namespace ada::parser {
-
-  url parse_url(std::string_view user_input,
+  template <class result_type>
+  result_type parse_url(std::string_view user_input,
                 const ada::url* base_url,
                 ada::encoding_type encoding) {
     ada_log("ada::parser::parse_url('", user_input,
@@ -20,7 +20,7 @@ namespace ada::parser {
      ",", ada::to_string(encoding), ")");
 
     ada::state state = ada::state::SCHEME_START;
-    ada::url url = ada::url();
+    result_type url{};
 
     // We refuse to parse URL strings that exceed 4GB. Such strings are almost
     // surely the result of a bug or are otherwise a security concern.
@@ -50,8 +50,8 @@ namespace ada::parser {
     // Optimization opportunity. Most websites do not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
     if(fragment.has_value()) {
-      url.fragment = unicode::percent_encode(*fragment,
-                                             ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+      url.set_fragment(unicode::percent_encode(*fragment,
+                                             ada::character_sets::FRAGMENT_PERCENT_ENCODE));
     }
 
     // Here url_data no longer has its fragment.
@@ -644,5 +644,12 @@ namespace ada::parser {
     ada_log("returning ", url.to_string());
     return url;
   }
+
+  template url parse_url<url>(std::string_view user_input,
+                const ada::url* base_url = nullptr,
+                ada::encoding_type encoding = ada::encoding_type::UTF8);
+  template href_aggregator parse_url<href_aggregator>(std::string_view user_input,
+                const ada::url* base_url = nullptr,
+                ada::encoding_type encoding = ada::encoding_type::UTF8);
 
 } // namespace ada::parser

@@ -13,7 +13,7 @@ namespace ada {
     if(encoding != encoding_type::UTF8) {
       // @todo Add support for non UTF8 input
     }
-    ada::url u = ada::parser::parse_url(input, base_url, encoding);
+    ada::url u = ada::parser::parse_url<ada::url>(input, base_url, encoding);
     if(!u.is_valid) { return tl::unexpected(errors::generic_error); }
     return u;
   }

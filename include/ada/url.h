@@ -368,6 +368,13 @@ namespace ada {
      * @see https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
      */
     [[nodiscard]] ada_really_inline ada::url_components get_components() noexcept;
+    
+    /**
+     * Set the specified value as the fragment of this URL.
+     * The string is not processed, this is a direct assignment.
+     */
+    void set_fragment(std::string&& p) { fragment = p; }
+    void set_fragment(std::string_view p) { fragment = p; }
 
   private:
 
