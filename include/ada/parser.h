@@ -19,6 +19,9 @@
  */
 namespace ada::parser {
 
+  // TODO: parse_url should not take a onst ada::url* base_url, instead it should take
+  // in a pointer to a more abstract class that can provide the basis for what we need.
+
   /**
    * Parses a url.
    */
