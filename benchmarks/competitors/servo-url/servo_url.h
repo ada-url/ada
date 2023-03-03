@@ -22,6 +22,10 @@ Url *parse_url(const char *raw_input, size_t raw_input_length);
 
 void free_url(Url *raw);
 
+
+const char *parse_url_to_href(const char *raw_input, size_t raw_input_length);
+
+void free_string(const char *);
 } // extern "C"
 
 } // namespace servo_url
