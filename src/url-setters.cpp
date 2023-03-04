@@ -5,6 +5,7 @@
 #include "ada.h"
 #include "ada/checkers-inl.h"
 #include "ada/helpers.h"
+#include "ada/url_basic.h"
 
 #include <optional>
 #include <string>
@@ -53,7 +54,6 @@ namespace ada {
     new_value = input[0] == '#' ? input.substr(1) : input;
     helpers::remove_ascii_tab_or_newline(new_value);
     fragment = unicode::percent_encode(new_value, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
-    return;
   }
 
   void url::set_search(const std::string_view input) {
