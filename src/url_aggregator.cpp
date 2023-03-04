@@ -23,11 +23,6 @@ bool url_aggregator::set_href(const std::string_view input) {
   return false;
 }
 
-void url_aggregator::set_hash(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-}
-
 bool url_aggregator::set_port(const std::string_view input) {
   // TODO: Implement this
   void (input.size());
@@ -105,6 +100,11 @@ bool set_protocol(const std::string_view input) {
 [[nodiscard]] std::string url_aggregator::get_search() const noexcept {
   // TODO: Implement this
   return buffer;
+}
+
+void url_aggregator::update_base_fragment(const std::string_view input) {
+  // TODO: Implement this
+  void(input.size());
 }
 
 } // namespace ada

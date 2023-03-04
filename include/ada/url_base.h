@@ -27,7 +27,10 @@ namespace ada {
     bool set_username(const std::string_view input);
     bool set_password(const std::string_view input);
     bool set_href(const std::string_view input);
+
+    /** @see https://url.spec.whatwg.org/#dom-url-hash */
     void set_hash(const std::string_view input);
+
     bool set_port(const std::string_view input);
     void set_search(const std::string_view input);
     bool set_pathname(const std::string_view input);
@@ -45,6 +48,20 @@ namespace ada {
     [[nodiscard]] std::string get_hostname() const noexcept;
     [[nodiscard]] std::string get_pathname() const noexcept;
     [[nodiscard]] std::string get_search() const noexcept;
+
+    /**
+     * @private
+     *
+     * This function takes already processed input. No need to process it again.
+     * Just use this to update the internal state of the class inhering the base.
+     *
+     * For example;
+     * - ada::url should update 'std::optional<std::string> fragment'
+     * - ada::url_aggregator should update 'components.hash_start'
+     *
+     * @param input
+     */
+    void update_base_fragment(std::optional<std::string> input);
 
   };
 
