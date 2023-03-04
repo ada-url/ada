@@ -182,7 +182,7 @@ endif(Boost_FOUND)
 
 # We want the check whether Rust is available before trying to build a crate.
 set(Rust_FIND_QUIETLY ON) # No need to alarm the user if rust is not available.
-import_dependency(corrosion corrosion-rs/corrosion v0.3.3)
+import_dependency(corrosion corrosion-rs/corrosion v0.3.4)
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
 
 if(RUST_FOUND)

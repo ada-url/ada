@@ -11,26 +11,25 @@ namespace ada {
 
   [[nodiscard]] std::string url::get_href() const noexcept {
     std::string output = get_protocol();
-    size_t url_delimiter_count = std::count(path.begin(), path.end(), '/');
 
     if (host.has_value()) {
       output += "//";
       if (includes_credentials()) {
-        output += get_username();
-        if (!get_password().empty()) {
+        output += username;
+        if (!password.empty()) {
           output += ":" + get_password();
         }
         output += "@";
       }
 
       output += get_host();
-    } else if (!has_opaque_path && url_delimiter_count > 1 && path.length() >= 2 && path[0] == '/' && path[1] == '/') {
+    } else if (!has_opaque_path && checkers::begins_with(path, "//")) {
       // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
       // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
       output += "/.";
     }
 
-    output += get_pathname() 
+    output += path
            // If query is non-null, then set this’s query object’s list to the result of parsing query.
            + (query.has_value() ? "?" + query.value() : "")
            // If  url’s fragment is non-null, then append U+0023 (#), followed by url’s fragment, to output.
