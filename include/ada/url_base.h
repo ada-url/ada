@@ -1,9 +1,9 @@
 /**
- * @file url_basic.h
+ * @file url_base.h
  * @brief Declaration for the basic URL definitions
  */
-#ifndef ADA_URL_BASIC_H
-#define ADA_URL_BASIC_H
+#ifndef ADA_URL_BASE_H
+#define ADA_URL_BASE_H
 
 #include "ada/common_defs.h"
 #include "ada/url_components.h"
@@ -15,9 +15,9 @@ namespace ada {
   /**
    * @private
    */
-  struct url_basic {
+  struct url_base {
 
-    virtual ~url_basic() = default;
+    virtual ~url_base() = default;
 
     bool set_username(const std::string_view input);
     bool set_password(const std::string_view input);

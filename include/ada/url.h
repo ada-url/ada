@@ -12,7 +12,7 @@
 #include "ada/unicode.h"
 #include "ada/log.h"
 #include "ada/url_components.h"
-#include "ada/url_basic.h"
+#include "ada/url_base.h"
 
 #include <algorithm>
 #include <charconv>
@@ -29,7 +29,7 @@ namespace ada {
    * A URL is a struct that represents a universal identifier.
    * @see https://url.spec.whatwg.org/#url-representation
    */
-  struct url: virtual url_basic {
+  struct url: virtual url_base {
 
     url() = default;
     url(const url &u) = default;
