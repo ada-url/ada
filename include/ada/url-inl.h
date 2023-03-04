@@ -145,9 +145,7 @@ namespace ada {
       out.host_start = out.protocol_end + 1;
       out.host_end = out.protocol_end + 1;
 
-      size_t url_delimiter_count = std::count(path.begin(), path.end(), '/');
-
-      if (!has_opaque_path && url_delimiter_count > 1 && path.length() >= 2 && path[0] == '/' && path[1] == '/') {
+      if (!has_opaque_path && checkers::begins_with(path, "//")) {
         // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
         // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
         running_index = out.protocol_end + 3;
