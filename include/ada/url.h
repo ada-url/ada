@@ -148,11 +148,6 @@ namespace ada {
     bool set_port(const std::string_view input);
 
     /**
-     * @see https://url.spec.whatwg.org/#dom-url-hash
-     */
-    void set_hash(const std::string_view input);
-
-    /**
      * This function always succeeds.
      * @see https://url.spec.whatwg.org/#dom-url-search
      */
@@ -365,6 +360,9 @@ namespace ada {
      * @see https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
      */
     [[nodiscard]] ada_really_inline ada::url_components get_components() noexcept;
+
+    /** @private */
+    void update_base_fragment(const std::string_view input);
 
   private:
 

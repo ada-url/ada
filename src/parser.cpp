@@ -48,9 +48,9 @@ namespace ada::parser {
 
     // Optimization opportunity. Most websites do not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
-    if(fragment.has_value()) {
-      url.fragment = unicode::percent_encode(*fragment,
-                                             ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+    if (fragment.has_value()) {
+      url.update_base_fragment(unicode::percent_encode(*fragment,
+                                             ada::character_sets::FRAGMENT_PERCENT_ENCODE));
     }
 
     // Here url_data no longer has its fragment.

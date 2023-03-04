@@ -38,11 +38,6 @@ namespace ada {
     bool set_href(const std::string_view input);
 
     /**
-     * @see https://url.spec.whatwg.org/#dom-url-hash
-     */
-    void set_hash(const std::string_view input);
-
-    /**
      * @return Returns true on success.
      * @see https://url.spec.whatwg.org/#dom-url-port
      */
@@ -144,6 +139,9 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-search
      */
     [[nodiscard]] std::string get_search() const noexcept;
+
+    /** @private */
+    void update_base_fragment(const std::string_view input);
 
   };
 
