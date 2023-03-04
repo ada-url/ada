@@ -12,6 +12,7 @@
 #include "ada/unicode.h"
 #include "ada/log.h"
 #include "ada/url_components.h"
+#include "ada/url_basic.h"
 
 #include <algorithm>
 #include <charconv>
@@ -28,7 +29,8 @@ namespace ada {
    * A URL is a struct that represents a universal identifier.
    * @see https://url.spec.whatwg.org/#url-representation
    */
-  struct url {
+  struct url: virtual url_basic {
+
     url() = default;
     url(const url &u) = default;
     url(url &&u) noexcept = default;
@@ -146,7 +148,6 @@ namespace ada {
     bool set_port(const std::string_view input);
 
     /**
-     * This function always succeeds.
      * @see https://url.spec.whatwg.org/#dom-url-hash
      */
     void set_hash(const std::string_view input);
