@@ -19,6 +19,12 @@
 namespace ada::helpers {
 
   /**
+   * @private
+   */
+  template <typename out_iter>
+  void encode_json(std::string_view view, out_iter out);
+
+  /**
    * This function is used to prune a fragment from a url, and returning the removed string if input has fragment.
    *
    * @details prune_fragment seeks the first '#' and returns everything after it as a

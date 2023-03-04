@@ -11,6 +11,15 @@ target_link_libraries(bench PRIVATE ada)
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
+# Benchdata
+import_dependency(url-dataset ada-url/url-dataset 9749b92c13e970e70409948fa862461191504ccc)
+add_executable(benchdata bench.cpp)
+target_link_libraries(benchdata PRIVATE ada)
+target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
+target_compile_definitions(benchdata PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
+
+
 # BBC Bench
 add_executable(bbc_bench bbc_bench.cpp)
 target_link_libraries(bbc_bench PRIVATE ada)
@@ -33,6 +42,7 @@ import_dependency(google_benchmarks google/benchmark f91b6b4)
 add_dependency(google_benchmarks)
 target_link_libraries(wpt_bench PRIVATE benchmark::benchmark)
 target_link_libraries(bench PRIVATE benchmark::benchmark)
+target_link_libraries(benchdata PRIVATE benchmark::benchmark)
 target_link_libraries(bbc_bench PRIVATE benchmark::benchmark)
 target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
 
@@ -54,14 +64,17 @@ if(ICU_FOUND)
 
 
     target_link_libraries(bench PRIVATE url_whatwg_lib)
+    target_link_libraries(benchdata PRIVATE url_whatwg_lib)
     target_link_libraries(bbc_bench PRIVATE url_whatwg_lib)
     target_link_libraries(wpt_bench PRIVATE url_whatwg_lib)
 
     target_include_directories(bench PUBLIC "${url_whatwg_SOURCE_DIR}")
+    target_include_directories(benchdata PUBLIC "${url_whatwg_SOURCE_DIR}")
     target_include_directories(bbc_bench PUBLIC "${url_whatwg_SOURCE_DIR}")
     target_include_directories(wpt_bench PUBLIC "${url_whatwg_SOURCE_DIR}")
 
     target_compile_definitions(bench PRIVATE ADA_url_whatwg_ENABLED=1)
+    target_compile_definitions(benchdata PRIVATE ADA_url_whatwg_ENABLED=1)
     target_compile_definitions(bbc_bench PRIVATE ADA_url_whatwg_ENABLED=1)
     target_compile_definitions(wpt_bench PRIVATE ADA_url_whatwg_ENABLED=1)
 
@@ -106,12 +119,15 @@ if(CURL_FOUND)
         include_directories(${CURL_INCLUDE_DIRS})
         if(NOT CURL_LIBRARIES)
             target_link_libraries(bench PRIVATE CURL::libcurl)
+            target_link_libraries(benchdata PRIVATE CURL::libcurl)
             target_link_libraries(bbc_bench PRIVATE CURL::libcurl)
         else()
             target_link_libraries(bench PRIVATE ${CURL_LIBRARIES})
+            target_link_libraries(benchdata PRIVATE ${CURL_LIBRARIES})
             target_link_libraries(bbc_bench PRIVATE ${CURL_LIBRARIES})
         endif()
         target_compile_definitions(bench PRIVATE ADA_CURL_ENABLED=1)
+        target_compile_definitions(benchdata PRIVATE ADA_CURL_ENABLED=1)
         target_compile_definitions(bbc_bench PRIVATE ADA_CURL_ENABLED=1)
     endif()
 else(CURL_FOUND)
@@ -149,6 +165,10 @@ if(Boost_FOUND)
     target_link_libraries(bench PRIVATE boost_url)
     target_compile_definitions(bench PRIVATE ADA_BOOST_ENABLED=1)
 
+    target_link_libraries(benchdata PRIVATE Boost::system)
+    target_link_libraries(benchdata PRIVATE boost_url)
+    target_compile_definitions(benchdata PRIVATE ADA_BOOST_ENABLED=1)
+
     target_link_libraries(bbc_bench PRIVATE Boost::system)
     target_link_libraries(bbc_bench PRIVATE boost_url)
     target_compile_definitions(bbc_bench PRIVATE ADA_BOOST_ENABLED=1)
@@ -162,7 +182,7 @@ endif(Boost_FOUND)
 
 # We want the check whether Rust is available before trying to build a crate.
 set(Rust_FIND_QUIETLY ON) # No need to alarm the user if rust is not available.
-import_dependency(corrosion corrosion-rs/corrosion v0.3.3)
+import_dependency(corrosion corrosion-rs/corrosion v0.3.4)
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
 
 if(RUST_FOUND)
@@ -170,12 +190,12 @@ if(RUST_FOUND)
   add_dependency(corrosion)
   # Important: we want to build in release mode!
   corrosion_import_crate(MANIFEST_PATH "competitors/servo-url/Cargo.toml" PROFILE release)
-  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(CMAKE_BUILD_RPATH "${CMAKE_BINARY_DIR}")
-  endif()
 
   target_link_libraries(bench PRIVATE servo-url)
   target_compile_definitions(bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+
+  target_link_libraries(benchdata PRIVATE servo-url)
+  target_compile_definitions(benchdata PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
   target_link_libraries(bbc_bench PRIVATE servo-url)
   target_compile_definitions(bbc_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")

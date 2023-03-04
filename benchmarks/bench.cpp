@@ -3,7 +3,7 @@
 /**
  * Realistic URL examples collected on the actual web.
  */
-std::string url_examples[] = {
+std::string url_examples_default[] = {
     "https://www.google.com/"
     "webhp?hl=en&amp;ictx=2&amp;sa=X&amp;ved=0ahUKEwil_"
     "oSxzJj8AhVtEFkFHTHnCGQQPQgI",
@@ -23,11 +23,40 @@ std::string url_examples[] = {
     "http://[2606:4700:4700::1111]", // ipv6
 };
 
+std::vector<std::string> url_examples;
+
 double url_examples_bytes =  []() -> double {
     size_t bytes{0};
     for(std::string& url_string : url_examples) { bytes += url_string.size(); }
     return double(bytes);
   }();
 
+size_t init_data() {
+  // compute the number of bytes.
+  auto compute =  []() -> double {
+    size_t bytes{0};
+    for(std::string& url_string : url_examples) { bytes += url_string.size(); }
+    return double(bytes);
+  };
+#ifndef ADA_URL_FILE
+  for(const std::string& s : url_examples_default) {
+    url_examples.emplace_back(s);
+  }
+  url_examples_bytes = compute();
+  return url_examples.size();
+#else
 
+  if (!file_exists(ADA_URL_FILE)) {
+    std::cout << "File not found !" << ADA_URL_FILE << std::endl;
+    for(const std::string& s : url_examples_default) {
+      url_examples.emplace_back(s);
+    }
+  } else {
+    std::cout << "Loading " << ADA_URL_FILE << std::endl;
+    url_examples = split_string(read_file(ADA_URL_FILE));
+  }
+  url_examples_bytes = compute();
+  return url_examples.size();
+#endif
+}
 #include "benchmark_template.cpp"
