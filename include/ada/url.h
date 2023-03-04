@@ -222,11 +222,6 @@ namespace ada {
     [[nodiscard]] bool has_valid_domain() const noexcept;
 
     /**
-     * Used for returning the validity from the result of the URL parser.
-     */
-    bool is_valid{true};
-
-    /**
      * A URL has an opaque path if its path is a string.
      */
     bool has_opaque_path{false};
