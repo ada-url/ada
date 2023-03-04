@@ -291,6 +291,7 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
     [[nodiscard]] inline std::string_view get_scheme() const noexcept;
+
     /**
      * Set the scheme for this URL. The provided scheme should be a valid
      * scheme string, be lower-cased, not contain spaces or tabs. It should
