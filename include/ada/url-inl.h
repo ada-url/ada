@@ -178,6 +178,10 @@ namespace ada {
     return out;
   }
 
+  void url::update_base_fragment(const std::string_view input) {
+    fragment = input;
+  }
+
 } // namespace ada
 
 #endif // ADA_URL_H
