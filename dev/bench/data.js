@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677893513618,
+  "lastUpdate": 1677893517353,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -3758,6 +3758,42 @@ window.BENCHMARK_DATA = {
             "value": 620101.5606585615,
             "unit": "ns/iter",
             "extra": "iterations: 1154\ncpu: 619193.5875216638 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "26c7f8238520e87bfbc11c6af794bb2fd0d27031",
+          "message": " perf: improve href getter performance (#257)\n\n* build: update corrosion to v0.3.4\r\n\r\n* perf: improve href getter performance\r\n\r\n* perf: simplify href getter more",
+          "timestamp": "2023-03-03T20:28:47-05:00",
+          "tree_id": "b2a347ccf05e757963e0ad6cb40c99d13fd79812",
+          "url": "https://github.com/ada-url/ada/commit/26c7f8238520e87bfbc11c6af794bb2fd0d27031"
+        },
+        "date": 1677893516587,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 532015.6208954987,
+            "unit": "ns/iter",
+            "extra": "iterations: 1340\ncpu: 530250.1492537314 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 603064.6582064319,
+            "unit": "ns/iter",
+            "extra": "iterations: 1182\ncpu: 602981.3874788494 ns\nthreads: 1"
           }
         ]
       }
