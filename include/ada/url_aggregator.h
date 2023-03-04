@@ -6,7 +6,7 @@
 #define ADA_URL_AGGREGATOR_H
 
 #include "ada/common_defs.h"
-#include "ada/url_basic.h"
+#include "ada/url_base.h"
 #include "ada/url_components.h"
 
 #include <string>
@@ -14,7 +14,7 @@
 
 namespace ada {
 
-  struct url_aggregator: virtual url_basic {
+  struct url_aggregator: virtual url_base{
 
     std::string buffer{};
 

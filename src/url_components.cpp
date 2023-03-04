@@ -2,7 +2,6 @@
 #include "ada/helpers.h"
 
 #include <numeric>
-#include <algorithm>
 #include <string>
 
 namespace ada {
