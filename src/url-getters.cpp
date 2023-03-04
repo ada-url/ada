@@ -47,7 +47,7 @@ namespace ada {
 
     if (get_scheme() == "blob") {
       if (path.length() > 0) {
-        url path_result = ada::parser::parse_url(get_pathname());
+        url path_result = ada::parser::parse_url<url>(get_pathname());
         if (path_result.is_valid) {
           if (path_result.is_special()) {
             return path_result.get_protocol() + "//" + path_result.get_host();

@@ -19,6 +19,11 @@ namespace ada {
 
     virtual ~url_base() = default;
 
+    /**
+     * Used for returning the validity from the result of the URL parser.
+     */
+    bool is_valid{true};
+
     bool set_username(const std::string_view input);
     bool set_password(const std::string_view input);
     bool set_href(const std::string_view input);

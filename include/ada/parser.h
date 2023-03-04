@@ -22,7 +22,7 @@ namespace ada::parser {
   /**
    * Parses a url.
    */
-  template <class result_type = url>
+  template <class result_type = ada::url>
   result_type parse_url(std::string_view user_input,
                         const ada::url* base_url = nullptr,
                         ada::encoding_type encoding = ada::encoding_type::UTF8);
