@@ -12,13 +12,34 @@
 
 namespace ada {
 
+  /**
+   * @private
+   */
   struct url_basic {
 
     virtual ~url_basic() = default;
 
+    bool set_username(const std::string_view input);
+    bool set_password(const std::string_view input);
+    bool set_href(const std::string_view input);
     void set_hash(const std::string_view input);
+    bool set_port(const std::string_view input);
+    void set_search(const std::string_view input);
+    bool set_pathname(const std::string_view input);
+    bool set_host(const std::string_view input);
+    bool set_hostname(const std::string_view input);
+    bool set_protocol(const std::string_view input);
 
     [[nodiscard]] ada_really_inline ada::url_components get_components() noexcept;
+
+    [[nodiscard]] std::string get_origin() const noexcept;
+    [[nodiscard]] std::string get_password() const noexcept;
+    [[nodiscard]] std::string get_port() const noexcept;
+    [[nodiscard]] std::string get_hash() const noexcept;
+    [[nodiscard]] std::string get_host() const noexcept;
+    [[nodiscard]] std::string get_hostname() const noexcept;
+    [[nodiscard]] std::string get_pathname() const noexcept;
+    [[nodiscard]] std::string get_search() const noexcept;
 
   };
 
