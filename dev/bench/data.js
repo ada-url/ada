@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677877958869,
+  "lastUpdate": 1677893513618,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -2034,6 +2034,60 @@ window.BENCHMARK_DATA = {
             "value": 12278.118586929553,
             "unit": "ns/iter",
             "extra": "iterations: 56954\ncpu: 12278.078800435436 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "26c7f8238520e87bfbc11c6af794bb2fd0d27031",
+          "message": " perf: improve href getter performance (#257)\n\n* build: update corrosion to v0.3.4\r\n\r\n* perf: improve href getter performance\r\n\r\n* perf: simplify href getter more",
+          "timestamp": "2023-03-03T20:28:47-05:00",
+          "tree_id": "b2a347ccf05e757963e0ad6cb40c99d13fd79812",
+          "url": "https://github.com/ada-url/ada/commit/26c7f8238520e87bfbc11c6af794bb2fd0d27031"
+        },
+        "date": 1677893511934,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 7485.160695047864,
+            "unit": "ns/iter",
+            "extra": "iterations: 93749\ncpu: 7471.565563366011 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_just_parse",
+            "value": 4393.786162531397,
+            "unit": "ns/iter",
+            "extra": "iterations: 158714\ncpu: 4392.842471363586 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 10043.649869196657,
+            "unit": "ns/iter",
+            "extra": "iterations: 68423\ncpu: 10041.380822238132 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 26484.293437136523,
+            "unit": "ns/iter",
+            "extra": "iterations: 27488\ncpu: 26478.226862630967 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_ServoUrl",
+            "value": 15351.11048304272,
+            "unit": "ns/iter",
+            "extra": "iterations: 46704\ncpu: 15348.443388146616 ns\nthreads: 1"
           }
         ]
       }
