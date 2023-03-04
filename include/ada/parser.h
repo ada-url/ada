@@ -9,6 +9,7 @@
 #include "ada/url.h"
 #include "ada/encoding_type.h"
 #include "ada/expected.h"
+#include "ada/url_aggregator.h"
 #include <optional>
 #include <string_view>
 
@@ -21,9 +22,18 @@ namespace ada::parser {
   /**
    * Parses a url.
    */
-  url parse_url(std::string_view user_input,
-                const ada::url* base_url = nullptr,
-                ada::encoding_type encoding = ada::encoding_type::UTF8);
+  template <class result_type = url>
+  result_type parse_url(std::string_view user_input,
+                        const ada::url* base_url = nullptr,
+                        ada::encoding_type encoding = ada::encoding_type::UTF8);
+
+  extern template url_aggregator parse_url<url_aggregator>(std::string_view user_input,
+                                                           const ada::url* base_url = nullptr,
+                                                           ada::encoding_type encoding = ada::encoding_type::UTF8);
+
+  extern template url parse_url<url>(std::string_view user_input,
+                                     const ada::url* base_url = nullptr,
+                                     ada::encoding_type encoding = ada::encoding_type::UTF8);
 
 } // namespace ada
 

@@ -12,15 +12,16 @@
 
 namespace ada::parser {
 
-  url parse_url(std::string_view user_input,
-                const ada::url* base_url,
-                ada::encoding_type encoding) {
+  template <class result_type>
+  result_type parse_url(std::string_view user_input,
+                        const ada::url* base_url,
+                        ada::encoding_type encoding) {
     ada_log("ada::parser::parse_url('", user_input,
      "' [", user_input.size()," bytes],", (base_url != nullptr ? base_url->to_string() : "null"),
      ",", ada::to_string(encoding), ")");
 
     ada::state state = ada::state::SCHEME_START;
-    ada::url url = ada::url();
+    result_type url{};
 
     // We refuse to parse URL strings that exceed 4GB. Such strings are almost
     // surely the result of a bug or are otherwise a security concern.
