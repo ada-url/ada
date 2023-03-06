@@ -314,7 +314,7 @@ namespace ada::helpers {
 
 
   ada_really_inline bool parse_prepared_path(std::string_view input, ada::scheme::type type, std::string& path) {
-    ada_log("parse_path ", input);
+    ada_log("parse_prepared_path ", input);
     uint8_t accumulator = checkers::path_signature(input);
     // Let us first detect a trivial case.
     // If it is special, we check that we have no dot, no %,  no \ and no
@@ -347,7 +347,7 @@ namespace ada::helpers {
     bool fast_path = (special && (accumulator & 0b11111011) == 0) &&
                     (type != ada::scheme::type::FILE);
     if (fast_path) {
-      ada_log("parse_path fast");
+      ada_log("parse_prepared_path fast");
       // Here we don't need to worry about \ or percent encoding.
       // We also do not have a file protocol. We might have dots, however,
       // but dots must as appear as '.', and they cannot be encoded because
