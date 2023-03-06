@@ -182,6 +182,26 @@ namespace ada {
     fragment = input;
   }
 
+  void url::update_base_search(std::optional<std::string> input) {
+    query = input;
+  }
+
+  void url::update_base_pathname(const std::string_view input) {
+    path = input;
+  }
+
+  bool url::base_fragment_has_value() const {
+    return fragment.has_value();
+  }
+
+  bool url::base_search_has_value() const {
+    return query.has_value();
+  }
+
+  bool url::base_port_has_value() const {
+    return port.has_value();
+  }
+
 } // namespace ada
 
 #endif // ADA_URL_H
