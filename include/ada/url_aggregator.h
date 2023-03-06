@@ -45,11 +45,8 @@ namespace ada {
     [[nodiscard]] std::string get_search() const noexcept;
     [[nodiscard]] std::string get_protocol() const noexcept;
 
-    [[nodiscard]] ada_really_inline bool is_special() const noexcept;
-    [[nodiscard]] inline uint16_t get_special_port() const;
     [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
     [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
-    [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
 
     /** @private */
     void update_base_hash(std::optional<std::string> input);
