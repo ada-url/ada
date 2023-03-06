@@ -49,7 +49,7 @@ namespace ada::parser {
     // Optimization opportunity. Most websites do not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
     if (fragment.has_value()) {
-      url.update_base_fragment(unicode::percent_encode(*fragment,
+      url.update_base_hash(unicode::percent_encode(*fragment,
                                              ada::character_sets::FRAGMENT_PERCENT_ENCODE));
     }
 
@@ -91,13 +91,13 @@ namespace ada::parser {
             ada_log("SCHEME the scheme is ", url.get_scheme());
 
             // If url’s scheme is "file", then:
-            if (url.get_scheme_type() == ada::scheme::type::FILE) {
+            if (url.type == ada::scheme::type::FILE) {
               // Set state to file state.
               state = ada::state::FILE;
             }
             // Otherwise, if url is special, base is non-null, and base’s scheme is url’s scheme:
             // Note: Doing base_url->scheme is unsafe if base_url != nullptr is false.
-            else if (url.is_special() && base_url != nullptr && base_url->get_scheme_type() == url.get_scheme_type()) {
+            else if (url.is_special() && base_url != nullptr && base_url->type == url.type) {
               // Set state to special relative or authority state.
               state = ada::state::SPECIAL_RELATIVE_OR_AUTHORITY;
             }
@@ -137,7 +137,7 @@ namespace ada::parser {
           // Otherwise, if base has an opaque path and c is U+0023 (#),
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // url’s fragment to the empty string, and set state to fragment state.
-          else if (base_url->has_opaque_path && url.fragment.has_value() && input_position == input_size) {
+          else if (base_url->has_opaque_path && url.base_fragment_has_value() && input_position == input_size) {
             ada_log("NO_SCHEME opaque base with fragment");
             url.copy_scheme(*base_url);
             url.update_base_pathname(base_url->path);
@@ -146,7 +146,7 @@ namespace ada::parser {
             return url;
           }
           // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
-          else if (base_url->get_scheme_type() != ada::scheme::type::FILE) {
+          else if (base_url->type != ada::scheme::type::FILE) {
             ada_log("NO_SCHEME non-file relative path");
             state = ada::state::RELATIVE_SCHEME;
           }
@@ -289,7 +289,7 @@ namespace ada::parser {
               url.update_base_search(std::nullopt);
 
               // Shorten url’s path.
-              helpers::shorten_path(url.path, url.get_scheme_type());
+              helpers::shorten_path(url.path, url.type);
 
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
@@ -359,7 +359,7 @@ namespace ada::parser {
           // - url is not special
           // - url’s scheme is "ws" or "wss"
           if (encoding != ada::encoding_type::UTF8) {
-            if (!url.is_special() || url.get_scheme_type() == ada::scheme::type::WS || url.get_scheme_type() == ada::scheme::type::WSS) {
+            if (!url.is_special() || url.type == ada::scheme::type::WS || url.type == ada::scheme::type::WSS) {
               // then set encoding to UTF-8.
               encoding = ada::encoding_type::UTF8;
             }
@@ -390,7 +390,7 @@ namespace ada::parser {
             // Let host be the result of host parsing buffer with url is not special.
             ada_log("HOST parsing ", host_view);
             if(!url.parse_host(host_view)) { return url; }
-            ada_log("HOST parsing results in ", url.host.has_value() ? "none" : url.host.value());
+            ada_log("HOST parsing results in ", url.base_hostname_has_value() ? "none" : url.host.value());
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
             input_position++;
@@ -497,7 +497,7 @@ namespace ada::parser {
           } else {
             input_position = input_size + 1;
           }
-          if(!helpers::parse_prepared_path(view, url.get_scheme_type(), url.path)) { return url; }
+          if(!helpers::parse_prepared_path(view, url.type, url.path)) { return url; }
           break;
         }
         case ada::state::FILE_SLASH: {
@@ -514,7 +514,7 @@ namespace ada::parser {
             // If base is non-null and base’s scheme is "file", then:
             // Note: it is unsafe to do base_url->scheme unless you know that
             // base_url_has_value() is true.
-            if (base_url != nullptr && base_url->get_scheme_type() == ada::scheme::type::FILE) {
+            if (base_url != nullptr && base_url->type == ada::scheme::type::FILE) {
               // Set url’s host to base’s host.
               url.host = base_url->host;
 
@@ -564,7 +564,7 @@ namespace ada::parser {
             if(!url.parse_host(file_host_buffer)) { return url; }
 
             // If host is "localhost", then set host to the empty string.
-            if (url.host.has_value() && url.host.value() == "localhost") {
+            if (url.base_hostname_has_value() && url.host.value() == "localhost") {
               url.host = "";
             }
 
@@ -591,7 +591,7 @@ namespace ada::parser {
             state = ada::state::FILE_SLASH;
           }
           // Otherwise, if base is non-null and base’s scheme is "file":
-          else if (base_url != nullptr && base_url->get_scheme_type() == ada::scheme::type::FILE) {
+          else if (base_url != nullptr && base_url->type == ada::scheme::type::FILE) {
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
             ada_log("FILE base non-null");
             url.host = base_url->host;
@@ -611,7 +611,7 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
               if (!checkers::is_windows_drive_letter(file_view)) {
-                helpers::shorten_path(url.path, url.get_scheme_type());
+                helpers::shorten_path(url.path, url.type);
               }
               // Otherwise:
               else {

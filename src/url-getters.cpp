@@ -40,7 +40,7 @@ namespace ada {
   [[nodiscard]] std::string url::get_origin() const noexcept {
     if (is_special()) {
       // Return a new opaque origin.
-      if (get_scheme_type() == scheme::FILE) { return "null"; }
+      if (type == scheme::FILE) { return "null"; }
 
       return get_protocol() + "//" + get_host();
     }
