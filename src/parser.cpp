@@ -141,9 +141,9 @@ namespace ada::parser {
           else if (base_url->has_opaque_path && url.fragment.has_value() && input_position == input_size) {
             ada_log("NO_SCHEME opaque base with fragment");
             url.copy_scheme(*base_url);
-            url.path = base_url->path;
+            url.update_base_pathname(base_url->path);
             url.has_opaque_path = base_url->has_opaque_path;
-            url.query = base_url->query;
+            url.update_base_search(base_url->query);
             return url;
           }
           // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
@@ -276,9 +276,9 @@ namespace ada::parser {
             url.password = base_url->password;
             url.host = base_url->host;
             url.port = base_url->port;
-            url.path = base_url->path;
+            url.update_base_pathname(base_url->path);
             url.has_opaque_path = base_url->has_opaque_path;
-            url.query = base_url->query;
+            url.update_base_search(base_url->query);
 
             // If c is U+003F (?), then set url’s query to the empty string, and state to query state.
             if ((input_position != input_size) && (url_data[input_position] == '?')) {
@@ -287,7 +287,7 @@ namespace ada::parser {
             // Otherwise, if c is not the EOF code point:
             else if (input_position != input_size) {
               // Set url’s query to null.
-              url.query = std::nullopt;
+              url.update_base_search(std::nullopt);
 
               // Shorten url’s path.
               helpers::shorten_path(url.path, url.get_scheme_type());
@@ -373,7 +373,7 @@ namespace ada::parser {
 
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          url.query = ada::unicode::percent_encode(helpers::substring(url_data, input_position), query_percent_encode_set);
+          url.update_base_search(ada::unicode::percent_encode(helpers::substring(url_data, input_position), query_percent_encode_set));
 
           return url;
         }
@@ -434,7 +434,7 @@ namespace ada::parser {
             input_position = input_size + 1;
           }
           url.has_opaque_path = true;
-          url.path = unicode::percent_encode(view, character_sets::C0_CONTROL_PERCENT_ENCODE);
+          url.update_base_pathname(unicode::percent_encode(view, character_sets::C0_CONTROL_PERCENT_ENCODE));
           break;
         }
         case ada::state::PORT: {
@@ -456,7 +456,7 @@ namespace ada::parser {
 
             // Optimization: Avoiding going into PATH state improves the performance of urls ending with /.
             if (input_position == input_size) {
-              url.path = "/";
+              url.update_base_pathname("/");
               return url;
             }
             // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
@@ -596,9 +596,9 @@ namespace ada::parser {
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
             ada_log("FILE base non-null");
             url.host = base_url->host;
-            url.path = base_url->path;
+            url.update_base_pathname(base_url->path);
             url.has_opaque_path = base_url->has_opaque_path;
-            url.query = base_url->query;
+            url.update_base_search(base_url->query);
 
             // If c is U+003F (?), then set url’s query to the empty string and state to query state.
             if (input_position != input_size && url_data[input_position] == '?') {
@@ -607,7 +607,7 @@ namespace ada::parser {
             // Otherwise, if c is not the EOF code point:
             else if (input_position != input_size) {
               // Set url’s query to null.
-              url.query = std::nullopt;
+              url.update_base_search(std::nullopt);
 
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.

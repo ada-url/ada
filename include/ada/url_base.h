@@ -24,6 +24,11 @@ namespace ada {
      */
     bool is_valid{true};
 
+    /**
+     * A URL has an opaque path if its path is a string.
+     */
+    bool has_opaque_path{false};
+
     /** @see https://url.spec.whatwg.org/#dom-url-username */
     bool set_username(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-password */
@@ -124,8 +129,18 @@ namespace ada {
      *
      * @param input
      */
-    void update_base_fragment(std::optional<std::string> input);
+    void update_base_hash(std::optional<std::string> input);
+    /** @private */
+    void update_base_search(std::optional<std::string> input);
+    /** @private */
+    void update_base_pathname(const std::string_view input);
 
+    /** @private */
+    bool base_fragment_has_value() const;
+    /** @private */
+    bool base_search_has_value() const;
+    /** @private */
+    bool base_port_has_value() const;
   };
 
 } // namespace ada

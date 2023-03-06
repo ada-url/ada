@@ -46,6 +46,16 @@ namespace ada {
 
     /** @private */
     void update_base_fragment(const std::string_view input);
+    /** @private */
+    void update_base_search(std::optional<std::string> input);
+    /** @private */
+    void update_base_pathname(const std::string_view input);
+    /** @private */
+    bool base_fragment_has_value() const;
+    /** @private */
+    bool base_search_has_value() const;
+    /** @private */
+    bool base_port_has_value() const;
 
   };
 
