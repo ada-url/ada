@@ -351,17 +351,15 @@ bool urltestdata_encoding(const char* source) {
         TEST_ASSERT(input_url->get_hostname(), hostname, "Hostname " + element_string + input_url->to_string());
 
         std::string_view port = object["port"];
-        std::string expected_port = (input_url->port.has_value()) ? std::to_string(input_url->port.value()) : "";
-        TEST_ASSERT(expected_port, port, "Port " + element_string);
+        TEST_ASSERT(input_url->get_port(), port, "Port " + element_string);
 
         std::string_view pathname{};
         if (!object["pathname"].get_string().get(pathname)) {
-          std::cout <<"pathname " << pathname<<std::endl;
-          TEST_ASSERT(input_url->path, pathname, "Pathname " + element_string + input_url->to_string());
+          TEST_ASSERT(input_url->get_pathname(), pathname, "Pathname " + element_string + input_url->to_string());
         }
         std::string_view query;
         if (!object["query"].get(query)) {
-          TEST_ASSERT(input_url->query.value_or(""), query, "Query " + element_string + input_url->to_string());
+          TEST_ASSERT(input_url->get_search(), query, "Query " + element_string + input_url->to_string());
         }
 
         std::string_view hash = object["hash"];

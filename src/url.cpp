@@ -502,13 +502,13 @@ namespace ada {
     answer.append("\",\n");
     answer.append("\t\"opaque path\":");
     answer.append((has_opaque_path ? "true" : "false"));
-    if(query.has_value()) {
+    if(base_search_has_value()) {
       answer.append(",\n");
       answer.append("\t\"query\":\"");
       helpers::encode_json(query.value(), back);
       answer.append("\"");
     }
-    if(fragment.has_value()) {
+    if(base_fragment_has_value()) {
       answer.append(",\n");
       answer.append("\t\"fragment\":\"");
       helpers::encode_json(fragment.value(), back);

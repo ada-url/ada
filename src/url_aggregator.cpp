@@ -114,16 +114,6 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   return buffer.substr(components.search_start, ending_index);
 }
 
-void url_aggregator::update_base_fragment(const std::string_view input) {
-  if (components.hash_start != url_components::omitted) {
-    buffer.resize(components.hash_start);
-  }
-
-  components.hash_start = uint32_t(buffer.size());
-  buffer += "#";
-  buffer.append(input);
-}
-
 [[nodiscard]] ada_really_inline ada::url_components url_aggregator::get_components() noexcept {
   return components;
 }
