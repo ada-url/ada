@@ -372,12 +372,11 @@ bool urltestdata_encoding(const char* source) {
 
         std::string_view pathname{};
         if (!object["pathname"].get_string().get(pathname)) {
-          std::cout <<"pathname " << pathname<<std::endl;
-          TEST_ASSERT(input_url->path, pathname, "Pathname " + element_string + input_url->to_string());
+          TEST_ASSERT(input_url->get_pathname(), pathname, "Pathname " + element_string + input_url->to_string());
         }
         std::string_view query;
         if (!object["query"].get(query)) {
-          TEST_ASSERT(input_url->query.value_or(""), query, "Query " + element_string + input_url->to_string());
+          TEST_ASSERT(input_url->get_search(), query, "Query " + element_string + input_url->to_string());
         }
 
         std::string_view hash;

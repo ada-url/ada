@@ -45,7 +45,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       auto url = ada::parse(url_strings.first, base_ptr);
       if (url) {
         numbers_of_parameters +=
-            url->path.size() + (url->query.has_value() ? url->query->size() : 0) +
+            url->path.size() + (url->base_search_has_value() ? url->query->size() : 0) +
             url->get_scheme().size() + url->host->size();
       }
     }
@@ -67,7 +67,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
         if (url) {
           numbers_of_parameters +=
               url->path.size() +
-              (url->query.has_value() ? url->query->size() : 0) +
+              (url->base_search_has_value() ? url->query->size() : 0) +
               url->get_scheme().size() +
               (url->host.has_value() ? url->host->size() : 0);
         }

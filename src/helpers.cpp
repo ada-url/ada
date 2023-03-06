@@ -440,11 +440,14 @@ namespace ada::helpers {
     }
   }
 
-  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url& url) noexcept {
+  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url_base& url) noexcept {
     if (!url.has_opaque_path) return;
-    if (url.fragment.has_value()) return;
-    if (url.query.has_value()) return;
-    while (!url.path.empty() && url.path.back() == ' ') { url.path.resize(url.path.size()-1); }
+    if (url.base_fragment_has_value()) return;
+    if (url.base_search_has_value()) return;
+
+    std::string path = url.get_pathname();
+    while (!path.empty() && path.back() == ' ') { path.resize(path.size() - 1); }
+    url.update_base_pathname(path);
   }
 
   ada_really_inline size_t find_authority_delimiter_special(std::string_view view) noexcept {

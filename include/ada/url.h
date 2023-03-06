@@ -112,17 +112,25 @@ namespace ada {
      */
     bool set_host_or_hostname(std::string_view input, bool override_hostname);
 
+    /** @private */
+    void update_base_fragment(const std::string_view input);
+    /** @private */
+    void update_base_search(std::optional<std::string> input);
+    /** @private */
+    void update_base_pathname(const std::string_view input);
+    /** @private */
+    bool base_fragment_has_value() const;
+    /** @private */
+    bool base_search_has_value() const;
+    /** @private */
+    bool base_port_has_value() const;
+
     /**
      * Returns true if this URL has a valid domain as per RFC 1034 and
      * corresponding specifications. Among other things, it requires
      * that the domain string has fewer than 255 octets.
      */
     [[nodiscard]] bool has_valid_domain() const noexcept;
-
-    /**
-     * A URL has an opaque path if its path is a string.
-     */
-    bool has_opaque_path{false};
 
     /**
      * A URL includes credentials if its username or password is not the empty string.
@@ -246,9 +254,6 @@ namespace ada {
     std::string to_string() const;
 
     [[nodiscard]] ada_really_inline ada::url_components get_components() noexcept;
-
-    /** @private */
-    void update_base_fragment(const std::string_view input);
 
   private:
 
