@@ -17,6 +17,7 @@
 #include "ada/state.h"
 #include "ada/unicode.h"
 #include "ada/url_base.h"
+#include "ada/url_base-inl.h"
 #include "ada/url-inl.h"
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
