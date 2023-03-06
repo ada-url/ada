@@ -8,6 +8,7 @@
 #include "ada/common_defs.h"
 #include "ada/url.h"
 #include "ada/state.h"
+#include "ada/url_base.h"
 
 #include <string_view>
 #include <optional>
@@ -83,7 +84,7 @@ namespace ada::helpers {
   /**
    * @see https://url.spec.whatwg.org/#potentially-strip-trailing-spaces-from-an-opaque-path
    */
-  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url& url) noexcept;
+  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url_base& url) noexcept;
 
   /**
    * Reverse the order of the bytes.
