@@ -7,6 +7,7 @@
 
 #include "ada/common_defs.h"
 #include "ada/url_components.h"
+#include "scheme.h"
 
 #include <string_view>
 
@@ -28,6 +29,11 @@ namespace ada {
      * A URL has an opaque path if its path is a string.
      */
     bool has_opaque_path{false};
+
+    /**
+     * @private
+     */
+    ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
     /** @see https://url.spec.whatwg.org/#dom-url-username */
     bool set_username(const std::string_view input);
@@ -118,6 +124,38 @@ namespace ada {
     [[nodiscard]] std::string get_protocol() const noexcept;
 
     /**
+     * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
+     */
+    [[nodiscard]] ada_really_inline bool is_special() const noexcept;
+
+    /**
+     * @private
+     *
+     * Return the 'special port' if the URL is special and not 'file'.
+     * Returns 0 otherwise.
+     */
+    [[nodiscard]] inline uint16_t get_special_port() const;
+
+    /**
+     * @private
+     *
+     * Get the default port if the url's scheme has one, returns 0 otherwise.
+     */
+    [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
+
+    /**
+     * A URL includes credentials if its username or password is not the empty string.
+     */
+    [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
+
+    /**
+     * @private
+     *
+     * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
+     */
+    [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
+
+    /**
      * @private
      *
      * This function takes already processed input. No need to process it again.
@@ -136,12 +174,15 @@ namespace ada {
     void update_base_pathname(const std::string_view input);
 
     /** @private */
+    bool base_hostname_has_value() const;
+    /** @private */
     bool base_fragment_has_value() const;
     /** @private */
     bool base_search_has_value() const;
     /** @private */
     bool base_port_has_value() const;
-  };
+
+  }; // url_base
 
 } // namespace ada
 
