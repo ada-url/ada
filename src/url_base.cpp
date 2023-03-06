@@ -1,11 +1,11 @@
 #include "ada.h"
+#include "ada/url_base.h"
 
 namespace ada {
 
   bool url_base::set_hash(const std::string_view input) {
     if (input.empty()) {
       update_base_fragment(std::nullopt);
-      fragment = std::nullopt;
       helpers::strip_trailing_spaces_from_opaque_path(*this);
       return;
     }

@@ -1,6 +1,7 @@
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
 
+#include <string>
 #include <string_view>
 
 namespace ada {
@@ -67,29 +68,35 @@ bool set_protocol(const std::string_view input) {
   return "null";
 }
 
+[[nodiscard]] std::string url_aggregator::get_username() const noexcept {
+  // TODO: Implement this
+  return buffer;
+}
+
 [[nodiscard]] std::string url_aggregator::get_password() const noexcept {
   // TODO: Implement this
   return buffer;
 }
 
 [[nodiscard]] std::string url_aggregator::get_port() const noexcept {
-  // TODO: Implement this
-  return buffer;
+  if (components.port == url_components::omitted) { return ""; }
+  return std::to_string(components.port);
 }
 
 [[nodiscard]] std::string url_aggregator::get_hash() const noexcept {
-  // TODO: Implement this
-  return buffer;
+  if (components.hash_start == url_components::omitted) {
+    return "";
+  }
+  return buffer.substr(components.hash_start);
 }
 
 [[nodiscard]] std::string url_aggregator::get_host() const noexcept {
-  // TODO: Implement this
-  return buffer;
+  return buffer.substr(components.host_start, components.host_end);
 }
 
 [[nodiscard]] std::string url_aggregator::get_hostname() const noexcept {
-  // TODO: Implement this
-  return buffer;
+  std::string suffix = components.port == url_components::omitted ? "" : ":" + std::to_string(components.port);
+  return get_host() + suffix;
 }
 
 [[nodiscard]] std::string url_aggregator::get_pathname() const noexcept {
@@ -98,13 +105,19 @@ bool set_protocol(const std::string_view input) {
 }
 
 [[nodiscard]] std::string url_aggregator::get_search() const noexcept {
-  // TODO: Implement this
-  return buffer;
+  if (components.search_start == url_components::omitted) { return ""; }
+  if (components.hash_start == url_components::omitted) { return buffer.substr(components.search_start, components.hash_start); }
+  return buffer.substr(components.search_start);
 }
 
 void url_aggregator::update_base_fragment(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
+  if (components.hash_start != url_components::omitted) {
+    buffer.resize(components.hash_start);
+  }
+
+  components.hash_start = uint32_t(buffer.size());
+  buffer += "#";
+  buffer.append(input);
 }
 
 } // namespace ada

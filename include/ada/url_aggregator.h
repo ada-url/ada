@@ -14,7 +14,7 @@
 
 namespace ada {
 
-  struct url_aggregator: virtual url_base{
+  struct url_aggregator: virtual url_base {
 
     std::string buffer{};
 
@@ -97,6 +97,12 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#concept-url-origin
      */
     [[nodiscard]] std::string get_origin() const noexcept;
+
+    /**
+     * The username getter steps are to return this’s URL’s username.
+     * @see https://url.spec.whatwg.org/#dom-url-username
+     */
+    [[nodiscard]] std::string get_username() const noexcept;
 
     /**
      * The password getter steps are to return this’s URL’s password.
