@@ -7,42 +7,6 @@
 #include <string>
 
 namespace ada {
-  ada_really_inline bool url::parse_path(std::string_view input) {
-    ada_log("parse_path ", input);
-    std::string tmp_buffer;
-    std::string_view internal_input;
-    if(unicode::has_tabs_or_newline(input)) {
-      tmp_buffer = input;
-      // Optimization opportunity: Instead of copying and then pruning, we could just directly
-      // build the string from user_input.
-      helpers::remove_ascii_tab_or_newline(tmp_buffer);
-      internal_input = tmp_buffer;
-    } else {
-      internal_input = input;
-    }
-
-    // If url is special, then:
-    if (is_special()) {
-      if(internal_input.empty()) {
-        path = "/";
-      } else if((internal_input[0] == '/') ||(internal_input[0] == '\\')){
-        return helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      } else {
-        return helpers::parse_prepared_path(internal_input, type, path);
-      }
-    } else if (!internal_input.empty()) {
-      if(internal_input[0] == '/') {
-        return helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      } else {
-        return helpers::parse_prepared_path(internal_input, type, path);
-      }
-    } else {
-      if(!host.has_value()) {
-        path = "/";
-      }
-    }
-    return true;
-  }
 
   bool url::parse_opaque_host(std::string_view input) {
     ada_log("parse_opaque_host ", input, "[", input.size(), " bytes]");

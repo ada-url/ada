@@ -193,20 +193,6 @@ namespace ada {
 
     /**
      * @private
-     *
-     * Parse the path from the provided input.
-     * Return true on success. Control characters not
-     * trimmed from the ends (they should have
-     * been removed if needed).
-     *
-     * The input is expected to be UTF-8.
-     *
-     * @see https://url.spec.whatwg.org/
-     */
-    [[nodiscard]] ada_really_inline bool parse_path(const std::string_view input);
-
-    /**
-     * @private
      */
     template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);

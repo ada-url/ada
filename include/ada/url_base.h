@@ -181,6 +181,19 @@ namespace ada {
     /** @private */
     virtual bool base_port_has_value() const = 0;
 
+
+    private:
+      /**
+       * @private
+       *
+       * Parse the path from the provided input.
+       * Return true on success. Control characters not trimmed from the ends (they should have
+       * been removed if needed). The input is expected to be UTF-8.
+       *
+       * @see https://url.spec.whatwg.org/
+       */
+      ada_really_inline bool parse_path(std::string_view input);
+
   }; // url_base
 
 } // namespace ada
