@@ -95,7 +95,6 @@ namespace ada {
 
     bool set_username(const std::string_view input);
     bool set_password(const std::string_view input);
-    void set_hash(const std::string_view input);
     bool set_href(const std::string_view input);
     bool set_port(const std::string_view input);
     void set_search(const std::string_view input);
