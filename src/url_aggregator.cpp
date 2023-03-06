@@ -63,6 +63,10 @@ bool set_protocol(const std::string_view input) {
   return components;
 }
 
+[[nodiscard]] std::string url_aggregator::get_href() const noexcept {
+  return buffer;
+}
+
 [[nodiscard]] std::string url_aggregator::get_origin() const noexcept {
   // TODO: Implement this
   return "null";
