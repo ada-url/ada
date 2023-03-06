@@ -42,7 +42,7 @@ namespace ada {
     /** @see https://url.spec.whatwg.org/#dom-url-href */
     virtual bool set_href(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-hash */
-    virtual void set_hash(const std::string_view input) = 0;
+    void set_hash(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-port */
     virtual bool set_port(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-search */
