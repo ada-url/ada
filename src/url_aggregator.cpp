@@ -47,20 +47,16 @@ bool url_aggregator::set_host(const std::string_view input) {
   return false;
 }
 
-bool set_hostname(const std::string_view input) {
+bool url_aggregator::set_hostname(const std::string_view input) {
   // TODO: Implement this
   void(input.size());
   return false;
 }
 
-bool set_protocol(const std::string_view input) {
+bool url_aggregator::set_protocol(const std::string_view input) {
   // TODO: Implement this
   void(input.size());
   return false;
-}
-
-[[nodiscard]] ada_really_inline ada::url_components url_aggregator::get_components() noexcept {
-  return components;
 }
 
 [[nodiscard]] std::string url_aggregator::get_href() const noexcept {
@@ -126,6 +122,10 @@ void url_aggregator::update_base_fragment(const std::string_view input) {
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
   buffer.append(input);
+}
+
+[[nodiscard]] ada_really_inline ada::url_components url_aggregator::get_components() noexcept {
+  return components;
 }
 
 } // namespace ada
