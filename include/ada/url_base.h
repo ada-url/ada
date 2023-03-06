@@ -48,7 +48,7 @@ namespace ada {
     /** @see https://url.spec.whatwg.org/#dom-url-search */
     virtual void set_search(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-search */
-    virtual bool set_pathname(const std::string_view input) = 0;
+    bool set_pathname(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-host */
     virtual bool set_host(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-hostname */
