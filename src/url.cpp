@@ -26,15 +26,15 @@ namespace ada {
       if(internal_input.empty()) {
         path = "/";
       } else if((internal_input[0] == '/') ||(internal_input[0] == '\\')){
-        return helpers::parse_prepared_path(internal_input.substr(1), get_scheme_type(), path);
+        return helpers::parse_prepared_path(internal_input.substr(1), type, path);
       } else {
-        return helpers::parse_prepared_path(internal_input, get_scheme_type(), path);
+        return helpers::parse_prepared_path(internal_input, type, path);
       }
     } else if (!internal_input.empty()) {
       if(internal_input[0] == '/') {
-        return helpers::parse_prepared_path(internal_input.substr(1), get_scheme_type(), path);
+        return helpers::parse_prepared_path(internal_input.substr(1), type, path);
       } else {
-        return helpers::parse_prepared_path(internal_input, get_scheme_type(), path);
+        return helpers::parse_prepared_path(internal_input, type, path);
       }
     } else {
       if(!host.has_value()) {
@@ -406,7 +406,7 @@ namespace ada {
 
         // If url’s scheme is "file" and its host is an empty host, then return.
         // An empty host is the empty string.
-        if (get_scheme_type() == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
+        if (type == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
           return true;
         }
       }
@@ -446,7 +446,7 @@ namespace ada {
 
         // If url’s scheme is "file" and its host is an empty host, then return.
         // An empty host is the empty string.
-        if (get_scheme_type() == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
+        if (type == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
           return true;
         }
       }
