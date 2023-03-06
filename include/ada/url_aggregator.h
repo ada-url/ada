@@ -23,6 +23,7 @@ namespace ada {
     bool set_username(const std::string_view input);
     bool set_password(const std::string_view input);
     bool set_href(const std::string_view input);
+    bool set_hash(const std::string_view input);
     bool set_port(const std::string_view input);
     void set_search(const std::string_view input);
     bool set_pathname(const std::string_view input);
@@ -44,12 +45,20 @@ namespace ada {
     [[nodiscard]] std::string get_search() const noexcept;
     [[nodiscard]] std::string get_protocol() const noexcept;
 
+    [[nodiscard]] ada_really_inline bool is_special() const noexcept;
+    [[nodiscard]] inline uint16_t get_special_port() const;
+    [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
+    [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
+    [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
+
     /** @private */
-    void update_base_fragment(const std::string_view input);
+    void update_base_hash(const std::string_view input);
     /** @private */
     void update_base_search(std::optional<std::string> input);
     /** @private */
     void update_base_pathname(const std::string_view input);
+    /** @private */
+    bool base_hostname_has_value() const;
     /** @private */
     bool base_fragment_has_value() const;
     /** @private */
@@ -57,7 +66,7 @@ namespace ada {
     /** @private */
     bool base_port_has_value() const;
 
-  };
+  }; // url_aggregator
 
 } // namespace ada
 

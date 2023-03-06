@@ -18,18 +18,6 @@ namespace ada {
   [[nodiscard]] ada_really_inline bool url::includes_credentials() const noexcept {
     return !username.empty() || !password.empty();
   }
-  [[nodiscard]] ada_really_inline bool url::is_special() const noexcept {
-    return type != ada::scheme::NOT_SPECIAL;
-  }
-  [[nodiscard]] inline uint16_t url::get_special_port() const {
-    return ada::scheme::get_special_port(type);
-  }
-  [[nodiscard]] ada_really_inline ada::scheme::type url::get_scheme_type() const noexcept {
-    return type;
-  }
-  [[nodiscard]] ada_really_inline uint16_t url::scheme_default_port() const noexcept {
-    return scheme::get_special_port(type);
-  }
   [[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
     return !host.has_value() || host.value().empty() || type == ada::scheme::type::FILE;
   }
@@ -178,7 +166,7 @@ namespace ada {
     return out;
   }
 
-  void url::update_base_fragment(const std::string_view input) {
+  void url::update_base_hash(const std::string_view input) {
     fragment = input;
   }
 
@@ -200,6 +188,10 @@ namespace ada {
 
   bool url::base_port_has_value() const {
     return port.has_value();
+  }
+
+  bool url::base_hostname_has_value() const {
+    return host.has_value();
   }
 
 } // namespace ada

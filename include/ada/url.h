@@ -96,12 +96,19 @@ namespace ada {
     bool set_username(const std::string_view input);
     bool set_password(const std::string_view input);
     bool set_href(const std::string_view input);
+    bool set_hash(const std::string_view input);
     bool set_port(const std::string_view input);
     void set_search(const std::string_view input);
     bool set_pathname(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
     bool set_protocol(const std::string_view input);
+
+    [[nodiscard]] ada_really_inline bool is_special() const noexcept;
+    [[nodiscard]] inline uint16_t get_special_port() const;
+    [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
+    [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
+    [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
 
     /**
      * @private
@@ -113,11 +120,13 @@ namespace ada {
     bool set_host_or_hostname(std::string_view input, bool override_hostname);
 
     /** @private */
-    void update_base_fragment(const std::string_view input);
+    void update_base_hash(const std::string_view input);
     /** @private */
     void update_base_search(std::optional<std::string> input);
     /** @private */
     void update_base_pathname(const std::string_view input);
+    /** @private */
+    bool base_hostname_has_value() const;
     /** @private */
     bool base_fragment_has_value() const;
     /** @private */
@@ -131,47 +140,6 @@ namespace ada {
      * that the domain string has fewer than 255 octets.
      */
     [[nodiscard]] bool has_valid_domain() const noexcept;
-
-    /**
-     * A URL includes credentials if its username or password is not the empty string.
-     */
-    [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
-
-    /**
-     * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
-     */
-    [[nodiscard]] ada_really_inline bool is_special() const noexcept;
-
-    /**
-     * @private
-     *
-     * Return the 'special port' if the URL is special and not 'file'.
-     * Returns 0 otherwise.
-     */
-    [[nodiscard]] inline uint16_t get_special_port() const;
-
-    /**
-     * @private
-     *
-     * Return the scheme type. Note that it is faster to do
-     * get_scheme_type() == ada::scheme::type::FILE than to do
-     * get_scheme() == "file", since the former is a direct integer comparison,
-     * while the other involves a (cheap) string test.
-     */
-    [[nodiscard]] ada_really_inline ada::scheme::type get_scheme_type() const noexcept;
-
-    /**
-     * @private
-     *
-     * Get the default port if the url's scheme has one, returns 0 otherwise.
-     */
-    [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
-    /**
-     * @private
-     *
-     * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
-     */
-    [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
     /**
      * @private
@@ -280,11 +248,6 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
      */
     [[nodiscard]] bool parse_opaque_host(std::string_view input);
-
-    /**
-     * @private
-     */
-    ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
     /**
      * @private

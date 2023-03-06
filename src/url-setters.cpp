@@ -77,7 +77,7 @@ namespace ada {
     std::string_view new_host(_host);
 
     // If url's scheme is "file", then set state to file host state, instead of host state.
-    if (get_scheme_type() != ada::scheme::type::FILE) {
+    if (type != ada::scheme::type::FILE) {
       std::string_view host_view(_host.data(), _host.length());
       auto [location,found_colon] = helpers::get_host_delimiter_location(is_special(), host_view);
 

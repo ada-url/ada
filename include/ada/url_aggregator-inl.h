@@ -7,10 +7,11 @@
 
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
+#include "ada/scheme.h"
 
 namespace ada {
 
-void url_aggregator::update_base_fragment(const std::string_view input) {
+void url_aggregator::update_base_hash(const std::string_view input) {
   if (components.hash_start != url_components::omitted) {
     buffer.resize(components.hash_start);
   }
@@ -52,6 +53,10 @@ bool url_aggregator::base_search_has_value() const {
 
 bool url_aggregator::base_port_has_value() const {
   return components.port != url_components::omitted;
+}
+
+bool url_aggregator::base_hostname_has_value() const {
+  return components.host_start != components.host_end;
 }
 
 }
