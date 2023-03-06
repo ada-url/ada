@@ -104,14 +104,18 @@ bool set_protocol(const std::string_view input) {
 }
 
 [[nodiscard]] std::string url_aggregator::get_pathname() const noexcept {
-  // TODO: Implement this
-  return buffer;
+  if (components.pathname_start == url_components::omitted) { return ""; }
+  auto ending_index = std::string_view::npos;
+  if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
+  else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
+  return buffer.substr(components.pathname_start, ending_index);
 }
 
 [[nodiscard]] std::string url_aggregator::get_search() const noexcept {
   if (components.search_start == url_components::omitted) { return ""; }
-  if (components.hash_start == url_components::omitted) { return buffer.substr(components.search_start, components.hash_start); }
-  return buffer.substr(components.search_start);
+  auto ending_index = std::string_view::npos;
+  if (components.hash_start == url_components::omitted) { ending_index = components.hash_start; }
+  return buffer.substr(components.search_start, ending_index);
 }
 
 void url_aggregator::update_base_fragment(const std::string_view input) {
