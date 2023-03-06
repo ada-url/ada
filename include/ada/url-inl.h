@@ -166,7 +166,7 @@ namespace ada {
     return out;
   }
 
-  void url::update_base_hash(const std::string_view input) {
+  void url::update_base_hash(std::optional<std::string> input) {
     fragment = input;
   }
 

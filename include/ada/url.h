@@ -29,7 +29,7 @@ namespace ada {
    * A URL is a struct that represents a universal identifier.
    * @see https://url.spec.whatwg.org/#url-representation
    */
-  struct url: virtual url_base {
+  struct url: url_base {
 
     url() = default;
     url(const url &u) = default;
@@ -95,8 +95,8 @@ namespace ada {
 
     bool set_username(const std::string_view input);
     bool set_password(const std::string_view input);
+    void set_hash(const std::string_view input);
     bool set_href(const std::string_view input);
-    bool set_hash(const std::string_view input);
     bool set_port(const std::string_view input);
     void set_search(const std::string_view input);
     bool set_pathname(const std::string_view input);
@@ -120,7 +120,7 @@ namespace ada {
     bool set_host_or_hostname(std::string_view input, bool override_hostname);
 
     /** @private */
-    void update_base_hash(const std::string_view input);
+    void update_base_hash(std::optional<std::string> input);
     /** @private */
     void update_base_search(std::optional<std::string> input);
     /** @private */

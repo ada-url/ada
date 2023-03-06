@@ -14,7 +14,7 @@
 
 namespace ada {
 
-  struct url_aggregator: virtual url_base {
+  struct url_aggregator: url_base {
 
     std::string buffer{};
 
@@ -22,8 +22,8 @@ namespace ada {
 
     bool set_username(const std::string_view input);
     bool set_password(const std::string_view input);
+    void set_hash(const std::string_view input);
     bool set_href(const std::string_view input);
-    bool set_hash(const std::string_view input);
     bool set_port(const std::string_view input);
     void set_search(const std::string_view input);
     bool set_pathname(const std::string_view input);
@@ -52,7 +52,7 @@ namespace ada {
     [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
 
     /** @private */
-    void update_base_hash(const std::string_view input);
+    void update_base_hash(std::optional<std::string> input);
     /** @private */
     void update_base_search(std::optional<std::string> input);
     /** @private */
