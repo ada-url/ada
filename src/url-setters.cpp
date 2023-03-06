@@ -59,12 +59,6 @@ namespace ada {
     query = ada::unicode::percent_encode(std::string_view(new_value), query_percent_encode_set);
   }
 
-  bool url::set_pathname(const std::string_view input) {
-    if (has_opaque_path) { return false; }
-    path = "";
-    return parse_path(input);
-  }
-
   bool url::set_host_or_hostname(const std::string_view input, bool override_hostname) {
     if (has_opaque_path) { return false; }
 

@@ -16,4 +16,11 @@ void url_base::set_hash(const std::string_view input) {
   update_base_hash(unicode::percent_encode(new_value, ada::character_sets::FRAGMENT_PERCENT_ENCODE));
 }
 
+bool url_base::set_pathname(const std::string_view input) {
+  if (has_opaque_path) { return false; }
+  update_base_pathname("");
+  // TODO: Add parse_path bindings
+  return parse_path(input);
+}
+
 } // namespace ada
