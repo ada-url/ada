@@ -104,11 +104,8 @@ namespace ada {
     bool set_hostname(const std::string_view input);
     bool set_protocol(const std::string_view input);
 
-    [[nodiscard]] ada_really_inline bool is_special() const noexcept;
-    [[nodiscard]] inline uint16_t get_special_port() const;
     [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
     [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
-    [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
 
     /**
      * @private
