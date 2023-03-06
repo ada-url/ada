@@ -36,25 +36,25 @@ namespace ada {
     ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
     /** @see https://url.spec.whatwg.org/#dom-url-username */
-    bool set_username(const std::string_view input);
+    virtual bool set_username(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-password */
-    bool set_password(const std::string_view input);
+    virtual bool set_password(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-href */
-    bool set_href(const std::string_view input);
+    virtual bool set_href(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-hash */
-    void set_hash(const std::string_view input);
+    virtual void set_hash(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-port */
-    bool set_port(const std::string_view input);
+    virtual bool set_port(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-search */
-    void set_search(const std::string_view input);
+    virtual void set_search(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-search */
-    bool set_pathname(const std::string_view input);
+    virtual bool set_pathname(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-host */
-    bool set_host(const std::string_view input);
+    virtual bool set_host(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-hostname */
-    bool set_hostname(const std::string_view input);
+    virtual bool set_hostname(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-protocol */
-    bool set_protocol(const std::string_view input);
+    virtual bool set_protocol(const std::string_view input) = 0;
 
     /**
      * Useful for implementing efficient serialization for the URL.
@@ -73,55 +73,55 @@ namespace ada {
      * Inspired after servo/url
      * @see https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
      */
-    [[nodiscard]] ada_really_inline ada::url_components get_components() noexcept;
+    [[nodiscard]] virtual ada_really_inline ada::url_components get_components() noexcept = 0;
 
     /**
      * The origin getter steps are to return the serialization of this’s URL’s origin. [HTML]
      * @see https://url.spec.whatwg.org/#concept-url-origin
      */
-    [[nodiscard]] std::string get_origin() const noexcept;
+    [[nodiscard]] virtual std::string get_origin() const noexcept = 0;
     /**
      * @see https://url.spec.whatwg.org/#dom-url-href
      * @see https://url.spec.whatwg.org/#concept-url-serializer
      */
-    [[nodiscard]] std::string get_href() const noexcept;
+    [[nodiscard]] virtual std::string get_href() const noexcept = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-username */
-    [[nodiscard]] std::string get_username() const noexcept;
+    [[nodiscard]] virtual std::string get_username() const noexcept = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-password */
-    [[nodiscard]] std::string get_password() const noexcept;
+    [[nodiscard]] virtual std::string get_password() const noexcept = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-port */
-    [[nodiscard]] std::string get_port() const noexcept;
+    [[nodiscard]] virtual std::string get_port() const noexcept = 0;
     /**
      * Return U+0023 (#), followed by this’s URL’s fragment.
      * @see https://url.spec.whatwg.org/#dom-url-hash
      */
-    [[nodiscard]] std::string get_hash() const noexcept;
+    [[nodiscard]] virtual std::string get_hash() const noexcept = 0;
     /**
      * Return url’s host, serialized, followed by U+003A (:) and url’s port, serialized.
      * @see https://url.spec.whatwg.org/#dom-url-host
      */
-    [[nodiscard]] std::string get_host() const noexcept;
+    [[nodiscard]] virtual std::string get_host() const noexcept = 0;
     /**
      * Return this’s URL’s host, serialized.
      * @see https://url.spec.whatwg.org/#dom-url-hostname
      */
-    [[nodiscard]] std::string get_hostname() const noexcept;
+    [[nodiscard]] virtual std::string get_hostname() const noexcept = 0;
     /**
      * The pathname getter steps are to return the result of URL path serializing this’s URL.
      * @see https://url.spec.whatwg.org/#dom-url-pathname
      */
-    [[nodiscard]] std::string get_pathname() const noexcept;
+    [[nodiscard]] virtual std::string get_pathname() const noexcept = 0;
     /**
      * Return U+003F (?), followed by this’s URL’s query.
      * @see https://url.spec.whatwg.org/#dom-url-search
      */
-    [[nodiscard]] std::string get_search() const noexcept;
+    [[nodiscard]] virtual std::string get_search() const noexcept = 0;
 
     /**
      * The protocol getter steps are to return this’s URL’s scheme, followed by U+003A (:).
      * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
-    [[nodiscard]] std::string get_protocol() const noexcept;
+    [[nodiscard]] virtual std::string get_protocol() const noexcept = 0;
 
     /**
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
@@ -146,14 +146,14 @@ namespace ada {
     /**
      * A URL includes credentials if its username or password is not the empty string.
      */
-    [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
+    [[nodiscard]] virtual ada_really_inline bool includes_credentials() const noexcept = 0;
 
     /**
      * @private
      *
      * A URL cannot have a username/password/port if its host is null or the empty string, or its scheme is "file".
      */
-    [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
+    [[nodiscard]] virtual inline bool cannot_have_credentials_or_port() const = 0;
 
     /**
      * @private
@@ -167,20 +167,19 @@ namespace ada {
      *
      * @param input
      */
-    void update_base_hash(std::optional<std::string> input);
+    virtual void update_base_hash(std::optional<std::string> input) = 0;
     /** @private */
-    void update_base_search(std::optional<std::string> input);
+    virtual void update_base_search(std::optional<std::string> input) = 0;
     /** @private */
-    void update_base_pathname(const std::string_view input);
-
+    virtual void update_base_pathname(const std::string_view input) = 0;
     /** @private */
-    bool base_hostname_has_value() const;
+    virtual bool base_hostname_has_value() const = 0;
     /** @private */
-    bool base_fragment_has_value() const;
+    virtual bool base_fragment_has_value() const = 0;
     /** @private */
-    bool base_search_has_value() const;
+    virtual bool base_search_has_value() const = 0;
     /** @private */
-    bool base_port_has_value() const;
+    virtual bool base_port_has_value() const = 0;
 
   }; // url_base
 
