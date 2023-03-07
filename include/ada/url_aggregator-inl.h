@@ -48,6 +48,16 @@ void url_aggregator::update_base_pathname(const std::string_view input) {
   void(input.size());
 }
 
+void url_aggregator::update_base_username(const std::string_view input) {
+  // TODO: Implement this
+  void(input.size());
+}
+
+void url_aggregator::update_base_password(const std::string_view input) {
+  // TODO: Implement this
+  void(input.size());
+}
+
 bool url_aggregator::base_fragment_has_value() const {
   return components.hash_start != url_components::omitted;
 }

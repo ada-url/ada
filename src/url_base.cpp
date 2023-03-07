@@ -22,6 +22,18 @@ bool url_base::set_pathname(const std::string_view input) {
   return parse_path(input);
 }
 
+bool url_base::set_username(const std::string_view input) {
+  if (cannot_have_credentials_or_port()) { return false; }
+  update_base_username(ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE));
+  return true;
+}
+
+bool url_base::set_password(const std::string_view input) {
+  if (cannot_have_credentials_or_port()) { return false; }
+  update_base_password(ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE));
+  return true;
+}
+
 ada_really_inline bool url_base::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string tmp_buffer;

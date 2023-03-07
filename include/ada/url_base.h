@@ -36,9 +36,9 @@ namespace ada {
     ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
     /** @see https://url.spec.whatwg.org/#dom-url-username */
-    virtual bool set_username(const std::string_view input) = 0;
+    bool set_username(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-password */
-    virtual bool set_password(const std::string_view input) = 0;
+    bool set_password(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-href */
     virtual bool set_href(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-hash */
@@ -172,6 +172,10 @@ namespace ada {
     virtual void update_base_search(std::optional<std::string> input) = 0;
     /** @private */
     virtual void update_base_pathname(const std::string_view input) = 0;
+    /** @private */
+    virtual void update_base_username(const std::string_view input) = 0;
+    /** @private */
+    virtual void update_base_password(const std::string_view input) = 0;
     /** @private */
     virtual bool base_hostname_has_value() const = 0;
     /** @private */

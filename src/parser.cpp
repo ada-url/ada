@@ -272,8 +272,8 @@ namespace ada::parser {
             ada_log("RELATIVE_SCHEME otherwise");
             // Set url’s username to base’s username, url’s password to base’s password, url’s host to base’s host,
             // url’s port to base’s port, url’s path to a clone of base’s path, and url’s query to base’s query.
-            url.username = base_url->username;
-            url.password = base_url->password;
+            url.update_base_username(base_url->username);
+            url.update_base_password(base_url->password);
             url.host = base_url->host;
             url.port = base_url->port;
             url.update_base_pathname(base_url->path);
@@ -319,8 +319,8 @@ namespace ada::parser {
           // - url’s port to base’s port,
           // - state to path state, and then, decrease pointer by 1.
           else {
-            url.username = base_url->username;
-            url.password = base_url->password;
+            url.update_base_username(base_url->username);
+            url.update_base_password(base_url->password);
             url.host = base_url->host;
             url.port = base_url->port;
             state = ada::state::PATH;
