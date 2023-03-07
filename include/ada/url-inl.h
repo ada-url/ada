@@ -166,7 +166,7 @@ namespace ada {
     return out;
   }
 
-  void url::update_base_hash(std::optional<std::string> input) {
+  void url::update_base_hash(std::string_view input) {
     fragment = input;
   }
 
@@ -192,6 +192,10 @@ namespace ada {
 
   std::optional<uint32_t> url::retrieve_base_port() {
     return port;
+  }
+
+  void url::clear_base_hash() {
+    fragment = std::nullopt;
   }
 
   bool url::base_fragment_has_value() const {
