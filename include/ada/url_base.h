@@ -44,7 +44,7 @@ namespace ada {
     /** @see https://url.spec.whatwg.org/#dom-url-hash */
     void set_hash(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-port */
-    virtual bool set_port(const std::string_view input) = 0;
+    bool set_port(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-search */
     void set_search(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-search */
@@ -176,6 +176,8 @@ namespace ada {
     virtual void update_base_username(const std::string_view input) = 0;
     /** @private */
     virtual void update_base_password(const std::string_view input) = 0;
+    /** @private */
+    virtual void update_base_port(std::optional<uint32_t> input) = 0;
     /** @private */
     virtual bool base_hostname_has_value() const = 0;
     /** @private */

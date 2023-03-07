@@ -186,6 +186,10 @@ namespace ada {
     password = input;
   }
 
+  void url::update_base_port(std::optional<uint32_t> input) {
+    port = input;
+  }
+
   bool url::base_fragment_has_value() const {
     return fragment.has_value();
   }

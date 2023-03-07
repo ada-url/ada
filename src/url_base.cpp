@@ -52,6 +52,25 @@ void url_base::set_search(const std::string_view input) {
   update_base_search(ada::unicode::percent_encode(std::string_view(new_value), query_percent_encode_set));
 }
 
+bool url_base::set_port(const std::string_view input) {
+  if (cannot_have_credentials_or_port()) { return false; }
+  std::string trimmed(input);
+  helpers::remove_ascii_tab_or_newline(trimmed);
+  if (trimmed.empty()) { update_base_port(std::nullopt); return true; }
+  // Input should not start with control characters.
+  if (ada::unicode::is_c0_control_or_space(trimmed.front())) { return false; }
+  // Input should contain at least one ascii digit.
+  if (input.find_first_of("0123456789") == std::string_view::npos) { return false; }
+
+  // Revert changes if parse_port fails.
+  std::optional<uint16_t> previous_port = port;
+  parse_port(trimmed);
+  if (is_valid) { return true; }
+  update_base_port(previous_port);
+  is_valid = true;
+  return false;
+}
+
 ada_really_inline bool url_base::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string tmp_buffer;
