@@ -274,7 +274,7 @@ namespace ada::parser {
             url.update_base_username(base_url->username);
             url.update_base_password(base_url->password);
             url.host = base_url->host;
-            url.port = base_url->port;
+            url.update_base_port(base_url->port);
             url.update_base_pathname(base_url->path);
             url.has_opaque_path = base_url->has_opaque_path;
             url.update_base_search(base_url->query);
@@ -321,7 +321,7 @@ namespace ada::parser {
             url.update_base_username(base_url->username);
             url.update_base_password(base_url->password);
             url.host = base_url->host;
-            url.port = base_url->port;
+            url.update_base_port(base_url->port);
             state = ada::state::PATH;
             break;
           }
