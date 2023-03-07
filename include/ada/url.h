@@ -143,18 +143,6 @@ namespace ada {
     /**
      * @private
      *
-     * Parse a port (16-bit decimal digit) from the provided input.
-     * We assume that the input does not contain spaces or tabs
-     * within the ASCII digits.
-     * It returns how many bytes were consumed when a number is successfully parsed.
-     * @return On failure, it returns zero.
-     * @see https://url.spec.whatwg.org/#host-parsing
-     */
-    ada_really_inline size_t parse_port(std::string_view view, bool check_trailing_content = false) noexcept;
-
-    /**
-     * @private
-     *
      * Parse the host from the provided input. We assume that
      * the input does not contain spaces or tabs. Control
      * characters and spaces are not trimmed (they should have
