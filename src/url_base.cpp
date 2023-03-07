@@ -5,7 +5,7 @@ namespace ada {
 
 void url_base::set_hash(const std::string_view input) {
   if (input.empty()) {
-    update_base_hash(std::nullopt);
+    clear_base_hash();
     helpers::strip_trailing_spaces_from_opaque_path(*this);
     return;
   }
