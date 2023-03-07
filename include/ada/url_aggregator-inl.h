@@ -13,19 +13,11 @@
 
 namespace ada {
 
-void url_aggregator::update_base_hash(std::optional<std::string> input) {
-  if (components.hash_start != url_components::omitted) {
-    buffer.resize(components.hash_start);
-  }
-
-  if (!input.has_value()) {
-    components.hash_start = url_components::omitted;
-    return;
-  }
-
+void url_aggregator::update_base_hash(std::string_view input) {
+  buffer.resize(components.hash_start);
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
-  buffer.append(input.value());
+  buffer.append(input);
 }
 
 void url_aggregator::update_base_search(std::optional<std::string> input) {
@@ -69,6 +61,11 @@ std::optional<uint32_t> url_aggregator::retrieve_base_port() {
     return std::nullopt;
   }
   return components.port;
+}
+
+void url_aggregator::clear_base_hash() {
+  components.hash_start = url_components::omitted;
+  buffer.resize(components.hash_start);
 }
 
 bool url_aggregator::base_fragment_has_value() const {

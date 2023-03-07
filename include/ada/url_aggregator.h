@@ -42,7 +42,7 @@ namespace ada {
     [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
     /** @private */
-    void update_base_hash(std::optional<std::string> input);
+    void update_base_hash(std::string_view input);
     /** @private */
     void update_base_search(std::optional<std::string> input);
     /** @private */
@@ -55,6 +55,8 @@ namespace ada {
     void update_base_port(std::optional<uint32_t> input);
     /** @private */
     std::optional<uint32_t> retrieve_base_port();
+    /** @private */
+    void clear_base_hash();
     /** @private */
     bool base_hostname_has_value() const;
     /** @private */

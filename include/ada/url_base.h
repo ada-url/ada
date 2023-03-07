@@ -167,7 +167,7 @@ namespace ada {
      *
      * @param input
      */
-    virtual void update_base_hash(std::optional<std::string> input) = 0;
+    virtual void update_base_hash(std::string_view input) = 0;
     /** @private */
     virtual void update_base_search(std::optional<std::string> input) = 0;
     /** @private */
@@ -180,6 +180,8 @@ namespace ada {
     virtual void update_base_port(std::optional<uint32_t> input) = 0;
     /** @private */
     virtual std::optional<uint32_t> retrieve_base_port() = 0;
+    /** @private */
+    virtual void clear_base_hash() = 0;
     /** @private */
     virtual bool base_hostname_has_value() const = 0;
     /** @private */
