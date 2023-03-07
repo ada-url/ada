@@ -23,7 +23,6 @@ namespace ada {
     bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
-    bool set_protocol(const std::string_view input);
 
     [[nodiscard]] ada_really_inline ada::url_components get_components() noexcept;
 

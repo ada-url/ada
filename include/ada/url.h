@@ -96,7 +96,6 @@ namespace ada {
     bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
-    bool set_protocol(const std::string_view input);
 
     [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
     [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
