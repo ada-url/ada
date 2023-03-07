@@ -40,7 +40,7 @@ namespace ada {
     /** @see https://url.spec.whatwg.org/#dom-url-password */
     bool set_password(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-href */
-    virtual bool set_href(const std::string_view input) = 0;
+    bool set_href(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-hash */
     void set_hash(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-port */
@@ -95,6 +95,7 @@ namespace ada {
      * Return U+0023 (#), followed by this’s URL’s fragment.
      * @see https://url.spec.whatwg.org/#dom-url-hash
      */
+
     [[nodiscard]] virtual std::string get_hash() const noexcept = 0;
     /**
      * Return url’s host, serialized, followed by U+003A (:) and url’s port, serialized.
@@ -155,6 +156,37 @@ namespace ada {
      */
     [[nodiscard]] virtual inline bool cannot_have_credentials_or_port() const = 0;
 
+    /** @private */
+    template <bool has_state_override = false>
+    [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
+
+    /**
+     * @private
+     * Take the scheme from another URL. The scheme string is moved from the provided url.
+     */
+    inline void copy_scheme(ada::url_base&& u) noexcept;
+
+    /**
+     * @private
+     * Take the scheme from another URL. The scheme string is copied from the provided url.
+     */
+    inline void copy_scheme(const ada::url_base& u);
+
+    /**
+     * @private
+     *
+     * Return a string representing the scheme. Note that get_scheme_type() should often be used instead.
+     * @see https://url.spec.whatwg.org/#dom-url-protocol
+     */
+    [[nodiscard]] inline std::string_view get_scheme() const noexcept;
+
+    /**
+     * Set the scheme for this URL. The provided scheme should be a valid
+     * scheme string, be lower-cased, not contain spaces or tabs. It should
+     * have no spurious trailing or leading content.
+     */
+    inline void set_scheme(std::string&& new_scheme) noexcept;
+
     /**
      * @private
      *
@@ -203,6 +235,19 @@ namespace ada {
        * @see https://url.spec.whatwg.org/
        */
       ada_really_inline bool parse_path(std::string_view input);
+
+      /**
+       * @private
+       *
+       * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
+       * URL for further processing after parsing. It is initially the empty string.
+       * We only set non_special_scheme when the scheme is non-special, otherwise we avoid constructing
+       * string.
+       *
+       * Special schemes are stored in ada::scheme::details::is_special_list so we typically do not need
+       * to store them in each url instance.
+       */
+      std::string non_special_scheme{};
 
   }; // url_base
 
