@@ -55,6 +55,8 @@ namespace ada {
     /** @private */
     void update_base_port(std::optional<uint32_t> input);
     /** @private */
+    std::optional<uint32_t> retrieve_base_port();
+    /** @private */
     bool base_hostname_has_value() const;
     /** @private */
     bool base_fragment_has_value() const;
