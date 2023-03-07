@@ -10,25 +10,6 @@
 
 namespace ada {
 
-  bool url::set_port(const std::string_view input) {
-    if (cannot_have_credentials_or_port()) { return false; }
-    std::string trimmed(input);
-    helpers::remove_ascii_tab_or_newline(trimmed);
-    if (trimmed.empty()) { port = std::nullopt; return true; }
-    // Input should not start with control characters.
-    if (ada::unicode::is_c0_control_or_space(trimmed.front())) { return false; }
-    // Input should contain at least one ascii digit.
-    if (input.find_first_of("0123456789") == std::string_view::npos) { return false; }
-
-    // Revert changes if parse_port fails.
-    std::optional<uint16_t> previous_port = port;
-    parse_port(trimmed);
-    if (is_valid) { return true; }
-    port = previous_port;
-    is_valid = true;
-    return false;
-  }
-
   bool url::set_host_or_hostname(const std::string_view input, bool override_hostname) {
     if (has_opaque_path) { return false; }
 
