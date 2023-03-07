@@ -190,6 +190,10 @@ namespace ada {
     port = input;
   }
 
+  std::optional<uint32_t> url::retrieve_base_port() {
+    return port;
+  }
+
   bool url::base_fragment_has_value() const {
     return fragment.has_value();
   }
