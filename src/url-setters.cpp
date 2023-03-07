@@ -50,7 +50,7 @@ namespace ada {
       bool succeeded = parse_host(host_view);
       if (!succeeded) {
         host = previous_host;
-        port = previous_port;
+        update_base_port(previous_port);
       }
       return succeeded;
     }
@@ -66,7 +66,7 @@ namespace ada {
       // Let host be the result of host parsing buffer with url is not special.
       if (!parse_host(new_host)) {
         host = previous_host;
-        port = previous_port;
+        update_base_port(previous_port);
         return false;
       }
 
@@ -111,7 +111,7 @@ namespace ada {
       username = out->username;
       password = out->password;
       host = out->host;
-      port = out->port;
+      update_base_port(out->retrieve_base_port());
       path = out->path;
       query = out->query;
       fragment = out->fragment;
