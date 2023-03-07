@@ -9,6 +9,8 @@
 #include "ada/url_components.h"
 #include "ada/scheme.h"
 
+#include <optional>
+
 namespace ada {
 
 void url_aggregator::update_base_hash(std::optional<std::string> input) {
@@ -60,6 +62,13 @@ void url_aggregator::update_base_password(const std::string_view input) {
 
 void url_aggregator::update_base_port(std::optional<uint32_t> input) {
   components.port = input.value_or(url_components::omitted);
+}
+
+std::optional<uint32_t> url_aggregator::retrieve_base_port() {
+  if (components.port == url_components::omitted) {
+    return std::nullopt;
+  }
+  return components.port;
 }
 
 bool url_aggregator::base_fragment_has_value() const {

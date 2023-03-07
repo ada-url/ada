@@ -179,6 +179,8 @@ namespace ada {
     /** @private */
     virtual void update_base_port(std::optional<uint32_t> input) = 0;
     /** @private */
+    virtual std::optional<uint32_t> retrieve_base_port() = 0;
+    /** @private */
     virtual bool base_hostname_has_value() const = 0;
     /** @private */
     virtual bool base_fragment_has_value() const = 0;
