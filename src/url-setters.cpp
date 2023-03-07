@@ -86,24 +86,6 @@ namespace ada {
     return set_host_or_hostname(input, true);
   }
 
-  bool url::set_protocol(const std::string_view input) {
-    std::string view(input);
-    helpers::remove_ascii_tab_or_newline(view);
-    if (view.empty()) { return true; }
-
-    // Schemes should start with alpha values.
-    if (!checkers::is_alpha(view[0])) { return false; }
-
-    view.append(":");
-
-    std::string::iterator pointer = std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
-
-    if (pointer != view.end() && *pointer == ':') {
-      return parse_scheme<true>(std::string_view(view.data(), pointer - view.begin()));
-    }
-    return false;
-  }
-
   bool url::set_href(const std::string_view input) {
     ada::result out = ada::parse(input);
 
