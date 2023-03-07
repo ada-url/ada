@@ -34,6 +34,24 @@ bool url_base::set_password(const std::string_view input) {
   return true;
 }
 
+void url_base::set_search(const std::string_view input) {
+  if (input.empty()) {
+    update_base_search(std::nullopt);
+    helpers::strip_trailing_spaces_from_opaque_path(*this);
+    return;
+  }
+
+  std::string new_value;
+  new_value = input[0] == '?' ? input.substr(1) : input;
+  helpers::remove_ascii_tab_or_newline(new_value);
+
+  auto query_percent_encode_set = is_special() ?
+    ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
+    ada::character_sets::QUERY_PERCENT_ENCODE;
+
+  update_base_search(ada::unicode::percent_encode(std::string_view(new_value), query_percent_encode_set));
+}
+
 ada_really_inline bool url_base::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string tmp_buffer;
