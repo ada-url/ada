@@ -178,6 +178,14 @@ namespace ada {
     path = input;
   }
 
+  void url::update_base_username(const std::string_view input) {
+    username = input;
+  }
+
+  void url::update_base_password(const std::string_view input) {
+    password = input;
+  }
+
   bool url::base_fragment_has_value() const {
     return fragment.has_value();
   }

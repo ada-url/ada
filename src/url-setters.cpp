@@ -10,18 +10,6 @@
 
 namespace ada {
 
-  bool url::set_username(const std::string_view input) {
-    if (cannot_have_credentials_or_port()) { return false; }
-    username = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
-    return true;
-  }
-
-  bool url::set_password(const std::string_view input) {
-    if (cannot_have_credentials_or_port()) { return false; }
-    password = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
-    return true;
-  }
-
   bool url::set_port(const std::string_view input) {
     if (cannot_have_credentials_or_port()) { return false; }
     std::string trimmed(input);
