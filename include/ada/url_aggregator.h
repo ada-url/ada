@@ -22,7 +22,6 @@ namespace ada {
 
     bool set_href(const std::string_view input);
     bool set_port(const std::string_view input);
-    void set_search(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
     bool set_protocol(const std::string_view input);
