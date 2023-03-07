@@ -20,8 +20,6 @@ namespace ada {
 
     url_components components;
 
-    bool set_username(const std::string_view input);
-    bool set_password(const std::string_view input);
     bool set_href(const std::string_view input);
     bool set_port(const std::string_view input);
     void set_search(const std::string_view input);
@@ -52,6 +50,10 @@ namespace ada {
     void update_base_search(std::optional<std::string> input);
     /** @private */
     void update_base_pathname(const std::string_view input);
+    /** @private */
+    void update_base_username(const std::string_view input);
+    /** @private */
+    void update_base_password(const std::string_view input);
     /** @private */
     bool base_hostname_has_value() const;
     /** @private */
