@@ -43,26 +43,6 @@ namespace ada {
     }
     return consumed;
   }
-  [[nodiscard]] inline std::string_view url::get_scheme() const noexcept {
-    if(is_special()) { return ada::scheme::details::is_special_list[type]; }
-    // We only move the 'scheme' if it is non-special.
-    return non_special_scheme;
-  }
-  inline void url::set_scheme(std::string&& new_scheme) noexcept {
-    type = ada::scheme::get_scheme_type(new_scheme);
-    // We only move the 'scheme' if it is non-special.
-    if(!is_special()) {
-      non_special_scheme = new_scheme;
-    }
-  }
-  inline void url::copy_scheme(ada::url&& u) noexcept {
-    non_special_scheme = u.non_special_scheme;
-    type = u.type;
-  }
-  inline void url::copy_scheme(const ada::url& u) {
-    non_special_scheme = u.non_special_scheme;
-    type = u.type;
-  }
 
   inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
     return out << u.to_string();
