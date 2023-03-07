@@ -93,7 +93,6 @@ namespace ada {
     [[nodiscard]] std::string get_search() const noexcept;
     [[nodiscard]] std::string get_protocol() const noexcept;
 
-    bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
 
@@ -156,37 +155,6 @@ namespace ada {
     /**
      * @private
      *
-     * Return a string representing the scheme. Note that get_scheme_type() should often be used instead.
-     * @see https://url.spec.whatwg.org/#dom-url-protocol
-     */
-    [[nodiscard]] inline std::string_view get_scheme() const noexcept;
-
-    /**
-     * Set the scheme for this URL. The provided scheme should be a valid
-     * scheme string, be lower-cased, not contain spaces or tabs. It should
-     * have no spurious trailing or leading content.
-     */
-    inline void set_scheme(std::string&& new_scheme) noexcept;
-
-    /**
-     * @private
-     *
-     * Take the scheme from another URL. The scheme string is moved from the
-     * provided url.
-     */
-    inline void copy_scheme(ada::url&& u) noexcept;
-
-    /**
-     * @private
-     *
-     * Take the scheme from another URL. The scheme string is copied from the
-     * provided url.
-     */
-    inline void copy_scheme(const ada::url& u);
-
-    /**
-     * @private
-     *
      * Parse the host from the provided input. We assume that
      * the input does not contain spaces or tabs. Control
      * characters and spaces are not trimmed (they should have
@@ -195,12 +163,6 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#host-parsing
      */
     [[nodiscard]] ada_really_inline bool parse_host(std::string_view input);
-
-    /**
-     * @private
-     */
-    template <bool has_state_override = false>
-    [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
 
     /**
      * Returns a JSON string representation of this URL.
@@ -234,19 +196,6 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
      */
     [[nodiscard]] bool parse_opaque_host(std::string_view input);
-
-    /**
-     * @private
-     *
-     * A URL’s scheme is an ASCII string that identifies the type of URL and can be used to dispatch a
-     * URL for further processing after parsing. It is initially the empty string.
-     * We only set non_special_scheme when the scheme is non-special, otherwise we avoid constructing
-     * string.
-     *
-     * Special schemes are stored in ada::scheme::details::is_special_list so we typically do not need
-     * to store them in each url instance.
-     */
-    std::string non_special_scheme{};
 
   }; // struct url
 

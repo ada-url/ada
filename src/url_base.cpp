@@ -89,6 +89,25 @@ bool url_base::set_protocol(const std::string_view input) {
   return false;
 }
 
+bool url_base::set_href(const std::string_view input) {
+  ada::result out = ada::parse(input);
+
+  if (out) {
+    username = out->username;
+    password = out->password;
+    host = out->host;
+    update_base_port(out->retrieve_base_port());
+    path = out->path;
+    query = out->query;
+    fragment = out->fragment;
+    type = out->type;
+    non_special_scheme = out->non_special_scheme;
+    has_opaque_path = out->has_opaque_path;
+  }
+
+  return out.has_value();
+}
+
 ada_really_inline bool url_base::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string tmp_buffer;
@@ -123,6 +142,77 @@ ada_really_inline bool url_base::parse_path(std::string_view input) {
       update_base_pathname("/");
     }
   }
+  return true;
+}
+
+template <bool has_state_override>
+ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
+  auto parsed_type = ada::scheme::get_scheme_type(input);
+  bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
+  /**
+   * In the common case, we will immediately recognize a special scheme (e.g., http, https),
+   * in which case, we can go really fast.
+   **/
+  if(is_input_special) { // fast path!!!
+    if (has_state_override) {
+      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+      if (is_special() != is_input_special) { return true; }
+
+      // If url includes credentials or has a non-null port, and buffer is "file", then return.
+      if ((includes_credentials() || port.has_value()) && parsed_type == ada::scheme::type::FILE) { return true; }
+
+      // If url’s scheme is "file" and its host is an empty host, then return.
+      // An empty host is the empty string.
+      if (type == ada::scheme::type::FILE && host.has_value() && host.value().empty()) { return true; }
+    }
+
+    type = parsed_type;
+
+    if (has_state_override) {
+      // This is uncommon.
+      uint16_t urls_scheme_port = get_special_port();
+
+      if (urls_scheme_port) {
+        // If url’s port is url’s scheme’s default port, then set url’s port to null.
+        if (port.has_value() && *port == urls_scheme_port) {
+          port = std::nullopt;
+        }
+      }
+    }
+  } else { // slow path
+    std::string _buffer = std::string(input);
+    // Next function is only valid if the input is ASCII and returns false
+    // otherwise, but it seems that we always have ascii content so we do not need
+    // to check the return value.
+
+    if (has_state_override) {
+      // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
+      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+      if (is_special() != ada::scheme::is_special(_buffer)) { return true; }
+
+      // If url includes credentials or has a non-null port, and buffer is "file", then return.
+      if ((includes_credentials() || port.has_value()) && _buffer == "file") { return true; }
+
+      // If url’s scheme is "file" and its host is an empty host, then return.
+      // An empty host is the empty string.
+      if (type == ada::scheme::type::FILE && host.has_value() && host.value().empty()) { return true; }
+    }
+
+    set_scheme(std::move(_buffer));
+
+    if (has_state_override) {
+      // This is uncommon.
+      uint16_t urls_scheme_port = get_special_port();
+
+      if (urls_scheme_port) {
+        // If url’s port is url’s scheme’s default port, then set url’s port to null.
+        if (port.has_value() && *port == urls_scheme_port) {
+          port = std::nullopt;
+        }
+      }
+    }
+  }
+
   return true;
 }
 
