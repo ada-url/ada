@@ -54,7 +54,7 @@ namespace ada {
     /** @see https://url.spec.whatwg.org/#dom-url-hostname */
     virtual bool set_hostname(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-protocol */
-    virtual bool set_protocol(const std::string_view input) = 0;
+    bool set_protocol(const std::string_view input);
 
     /**
      * Useful for implementing efficient serialization for the URL.

@@ -71,6 +71,24 @@ bool url_base::set_port(const std::string_view input) {
   return false;
 }
 
+bool url_base::set_protocol(const std::string_view input) {
+  std::string view(input);
+  helpers::remove_ascii_tab_or_newline(view);
+  if (view.empty()) { return true; }
+
+  // Schemes should start with alpha values.
+  if (!checkers::is_alpha(view[0])) { return false; }
+
+  view.append(":");
+
+  std::string::iterator pointer = std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
+
+  if (pointer != view.end() && *pointer == ':') {
+    return parse_scheme<true>(std::string_view(view.data(), pointer - view.begin()));
+  }
+  return false;
+}
+
 ada_really_inline bool url_base::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string tmp_buffer;
