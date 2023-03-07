@@ -1,5 +1,6 @@
 #include "ada.h"
 #include "ada/helpers.h"
+#include <optional>
 
 namespace ada {
 
@@ -90,6 +91,7 @@ bool url_base::set_protocol(const std::string_view input) {
 }
 
 bool url_base::set_href(const std::string_view input) {
+  // TODO: Moving this to indiviual classes (url_aggregator and url) might improve the performance.
   ada::result out = ada::parse(input);
 
   if (out) {
@@ -126,7 +128,7 @@ ada_really_inline bool url_base::parse_path(std::string_view input) {
   if (is_special()) {
     if(internal_input.empty()) {
       update_base_pathname("/");
-    } else if((internal_input[0] == '/') ||(internal_input[0] == '\\')){
+    } else if((internal_input[0] == '/') || (internal_input[0] == '\\')){
       return helpers::parse_prepared_path(internal_input.substr(1), type, path);
     } else {
       return helpers::parse_prepared_path(internal_input, type, path);
@@ -137,10 +139,8 @@ ada_really_inline bool url_base::parse_path(std::string_view input) {
     } else {
       return helpers::parse_prepared_path(internal_input, type, path);
     }
-  } else {
-    if(!base_hostname_has_value()) {
-      update_base_pathname("/");
-    }
+  } else if (!base_hostname_has_value()) {
+    update_base_pathname("/");
   }
   return true;
 }
@@ -159,11 +159,11 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
       if (is_special() != is_input_special) { return true; }
 
       // If url includes credentials or has a non-null port, and buffer is "file", then return.
-      if ((includes_credentials() || port.has_value()) && parsed_type == ada::scheme::type::FILE) { return true; }
+      if ((includes_credentials() || base_port_has_value()) && parsed_type == ada::scheme::type::FILE) { return true; }
 
       // If url’s scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
-      if (type == ada::scheme::type::FILE && host.has_value() && host.value().empty()) { return true; }
+      if (type == ada::scheme::type::FILE && base_hostname_has_value() && host.value().empty()) { return true; }
     }
 
     type = parsed_type;
@@ -174,8 +174,8 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
 
       if (urls_scheme_port) {
         // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (port.has_value() && *port == urls_scheme_port) {
-          port = std::nullopt;
+        if (base_port_has_value() && retrieve_base_port().value() == urls_scheme_port) {
+          update_base_port(std::nullopt);
         }
       }
     }
@@ -191,11 +191,11 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
       if (is_special() != ada::scheme::is_special(_buffer)) { return true; }
 
       // If url includes credentials or has a non-null port, and buffer is "file", then return.
-      if ((includes_credentials() || port.has_value()) && _buffer == "file") { return true; }
+      if ((includes_credentials() || base_port_has_value()) && _buffer == "file") { return true; }
 
       // If url’s scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
-      if (type == ada::scheme::type::FILE && host.has_value() && host.value().empty()) { return true; }
+      if (type == ada::scheme::type::FILE && base_hostname_has_value() && host.value().empty()) { return true; }
     }
 
     set_scheme(std::move(_buffer));
@@ -206,8 +206,8 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
 
       if (urls_scheme_port) {
         // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (port.has_value() && *port == urls_scheme_port) {
-          port = std::nullopt;
+        if (base_port_has_value() && retrieve_base_port().value() == urls_scheme_port) {
+          update_base_port(std::nullopt);
         }
       }
     }
