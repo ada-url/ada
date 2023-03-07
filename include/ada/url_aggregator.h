@@ -16,6 +16,13 @@ namespace ada {
 
   struct url_aggregator: url_base {
 
+    url_aggregator() = default;
+    url_aggregator(const url_aggregator &u) = default;
+    url_aggregator(url_aggregator &&u) noexcept = default;
+    url_aggregator &operator=(url_aggregator &&u) noexcept = default;
+    url_aggregator &operator=(const url_aggregator &u) = default;
+    ADA_ATTRIBUTE_NOINLINE ~url_aggregator() = default;
+
     std::string buffer{};
 
     url_components components;
