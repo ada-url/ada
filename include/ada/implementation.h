@@ -8,17 +8,20 @@
 #include <string>
 #include <optional>
 
+#include "ada/parser.h"
 #include "ada/common_defs.h"
 #include "ada/encoding_type.h"
 #include "ada/url.h"
 #include "ada/state.h"
+#include "ada/url_aggregator.h"
 
 namespace ada {
   enum class errors {
     generic_error
   };
 
-  using result = tl::expected<ada::url,ada::errors>;
+  template <class result_type = ada::url>
+  using result = tl::expected<result_type, ada::errors>;
 
   /**
    * The URL parser takes a scalar value string input, with an optional null or base URL base (default null)
@@ -29,9 +32,19 @@ namespace ada {
    * @param encoding encoding (default to UTF-8)
    * @return a parsed URL.
    */
-  ada_warn_unused ada::result parse(std::string_view input,
-                                 const ada::url* base_url = nullptr,
-                                 ada::encoding_type encoding = ada::encoding_type::UTF8);
+  template <class result_type = ada::url>
+  ada_warn_unused ada::result<result_type> parse(std::string_view input,
+                                                 const ada::url* base_url = nullptr,
+                                                 ada::encoding_type encoding = ada::encoding_type::UTF8);
+
+  extern template ada::result<ada::url> parse(std::string_view input,
+                                              const ada::url* base_url = nullptr,
+                                              ada::encoding_type encoding = ada::encoding_type::UTF8);
+
+  extern template ada::result<ada::url_aggregator> parse<url_aggregator>(std::string_view input,
+                                                                         const ada::url* base_url = nullptr,
+                                                                         ada::encoding_type encoding = ada::encoding_type::UTF8);
+
   /**
    * Computes a href string from a file path.
    * @return a href string (starts with file:://)

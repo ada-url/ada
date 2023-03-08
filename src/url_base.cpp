@@ -90,26 +90,6 @@ bool url_base::set_protocol(const std::string_view input) {
   return false;
 }
 
-bool url_base::set_href(const std::string_view input) {
-  // TODO: Moving this to indiviual classes (url_aggregator and url) might improve the performance.
-  ada::result out = ada::parse(input);
-
-  if (out) {
-    username = out->username;
-    password = out->password;
-    host = out->host;
-    update_base_port(out->retrieve_base_port());
-    path = out->path;
-    query = out->query;
-    fragment = out->fragment;
-    type = out->type;
-    non_special_scheme = out->non_special_scheme;
-    has_opaque_path = out->has_opaque_path;
-  }
-
-  return out.has_value();
-}
-
 ada_really_inline bool url_base::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string tmp_buffer;

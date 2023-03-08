@@ -3,6 +3,7 @@
 #include "ada/unicode.h"
 #include "ada/url-inl.h"
 #include "ada/log.h"
+#include "ada/parser.h"
 
 #include <limits>
 #include <optional>
@@ -643,13 +644,5 @@ namespace ada::parser {
     ada_log("returning ", url.to_string());
     return url;
   }
-
-  template url parse_url<url>(std::string_view user_input,
-                               const ada::url* base_url = nullptr,
-                               ada::encoding_type encoding = ada::encoding_type::UTF8);
-
-  template url_aggregator parse_url<url_aggregator>(std::string_view user_input,
-                                                     const ada::url* base_url = nullptr,
-                                                     ada::encoding_type encoding = ada::encoding_type::UTF8);
 
 } // namespace ada::parser

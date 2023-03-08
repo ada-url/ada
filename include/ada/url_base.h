@@ -40,7 +40,7 @@ namespace ada {
     /** @see https://url.spec.whatwg.org/#dom-url-password */
     bool set_password(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-href */
-    bool set_href(const std::string_view input);
+    virtual bool set_href(const std::string_view input) = 0;
     /** @see https://url.spec.whatwg.org/#dom-url-hash */
     void set_hash(const std::string_view input);
     /** @see https://url.spec.whatwg.org/#dom-url-port */

@@ -27,6 +27,7 @@ namespace ada {
 
     url_components components;
 
+    bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
 

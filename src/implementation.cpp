@@ -7,13 +7,14 @@
 
 namespace ada {
 
-  ada_warn_unused tl::expected<ada::url, ada::errors> parse(std::string_view input,
-                                                            const ada::url* base_url,
-                                                            ada::encoding_type encoding) {
+  template <class result_type>
+  ada_warn_unused tl::expected<result_type, ada::errors> parse(std::string_view input,
+                                                               const ada::url* base_url,
+                                                               ada::encoding_type encoding) {
     if(encoding != encoding_type::UTF8) {
       // @todo Add support for non UTF8 input
     }
-    ada::url u = ada::parser::parse_url<ada::url>(input, base_url, encoding);
+    result_type u = ada::parser::parse_url<result_type>(input, base_url, encoding);
     if(!u.is_valid) { return tl::unexpected(errors::generic_error); }
     return u;
   }

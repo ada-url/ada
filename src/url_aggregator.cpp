@@ -1,44 +1,23 @@
+#include "ada.h"
+#include "ada/implementation.h"
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
+#include "ada/url_aggregator-inl.h"
+#include "ada/parser.h"
 
 #include <string>
 #include <string_view>
 
 namespace ada {
 
-bool url_aggregator::set_username(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
-}
-
-bool url_aggregator::set_password(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
-}
-
 bool url_aggregator::set_href(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
-}
+  ada::result<url_aggregator> out = ada::parse<url_aggregator>(input);
 
-bool url_aggregator::set_port(const std::string_view input) {
-  // TODO: Implement this
-  void (input.size());
-  return false;
-}
+  if (out) {
+    components = out->get_components();
+  }
 
-void url_aggregator::set_search(const std::string_view input) {
-  // TOOD: Implement this
-  void(input.size());
-}
-
-bool url_aggregator::set_pathname(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
+  return out.has_value();
 }
 
 bool url_aggregator::set_host(const std::string_view input) {
@@ -48,12 +27,6 @@ bool url_aggregator::set_host(const std::string_view input) {
 }
 
 bool url_aggregator::set_hostname(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
-}
-
-bool url_aggregator::set_protocol(const std::string_view input) {
   // TODO: Implement this
   void(input.size());
   return false;

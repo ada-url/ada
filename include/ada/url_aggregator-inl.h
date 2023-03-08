@@ -84,6 +84,16 @@ bool url_aggregator::base_hostname_has_value() const {
   return components.host_start != components.host_end;
 }
 
+ada_really_inline bool url_aggregator::includes_credentials() const noexcept {
+  // TODO: Implement this
+  return false;
+}
+
+inline bool url_aggregator::cannot_have_credentials_or_port() const {
+  // TODO: Implement this
+  return false;
+}
+
 }
 
 #endif // ADA_URL_AGGREGATOR_INL_H

@@ -86,4 +86,22 @@ namespace ada {
     return set_host_or_hostname(input, true);
   }
 
+  bool url::set_href(const std::string_view input) {
+    ada::result<ada::url> out = ada::parse(input);
+
+    if (out) {
+      username = out->username;
+      password = out->password;
+      host = out->host;
+      update_base_port(out->retrieve_base_port());
+      path = out->path;
+      query = out->query;
+      fragment = out->fragment;
+      set_scheme(std::string(out->get_scheme()));
+      has_opaque_path = out->has_opaque_path;
+    }
+
+    return out.has_value();
+  }
+
 } // namespace ada

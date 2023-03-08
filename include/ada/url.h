@@ -93,6 +93,7 @@ namespace ada {
     [[nodiscard]] std::string get_search() const noexcept;
     [[nodiscard]] std::string get_protocol() const noexcept;
 
+    bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
 
