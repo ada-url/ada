@@ -100,6 +100,10 @@ Ada uses cmake as a build system. It's recommended you to run the following comm
 
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
 
+Project can also be built via docker using default docker file of repository with following commands.
+
+`docker build -t ada-builder . && docker run --rm -it -v ${PWD}:/repo ada-builder`
+
 ### Installing ICU
 
 For macOS, you may install it with [brew](https://brew.sh) using `brew install icu4c`. Linux users may install ICU according to the their distribution: under Ubuntu, the command is `apt-get install -y libicu-dev`.
