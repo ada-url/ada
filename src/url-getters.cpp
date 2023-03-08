@@ -3,6 +3,7 @@
  * Includes all the getters of `ada::url`
  */
 #include "ada.h"
+#include "ada/implementation.h"
 
 #include <algorithm>
 #include <string>
@@ -47,10 +48,10 @@ namespace ada {
 
     if (get_scheme() == "blob") {
       if (path.length() > 0) {
-        url path_result = ada::parser::parse_url<url>(get_pathname());
-        if (path_result.is_valid) {
-          if (path_result.is_special()) {
-            return path_result.get_protocol() + "//" + path_result.get_host();
+        ada::result<ada::url> path_result = ada::parse<ada::url>(get_pathname());
+        if (path_result) {
+          if (path_result->is_special()) {
+            return path_result->get_protocol() + "//" + path_result->get_host();
           }
         }
       }

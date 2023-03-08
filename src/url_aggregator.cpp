@@ -1,41 +1,24 @@
+#include "ada.h"
+#include "ada/implementation.h"
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
+#include "ada/url_aggregator-inl.h"
+#include "ada/parser.h"
 
 #include <string>
 #include <string_view>
 
 namespace ada {
 
-bool url_aggregator::set_username(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
-}
-
-bool url_aggregator::set_password(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
-}
-
 bool url_aggregator::set_href(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
-}
+//  ada::result<url_aggregator> out = ada::parse<url_aggregator>(input);
+//
+//  if (out) {
+//    components = out->get_components();
+//    // TODO: Update private attributes as well.
+//  }
 
-bool url_aggregator::set_port(const std::string_view input) {
-  // TODO: Implement this
-  void (input.size());
-  return false;
-}
-
-void url_aggregator::set_search(const std::string_view input) {
-  // TOOD: Implement this
-  void(input.size());
-}
-
-bool url_aggregator::set_pathname(const std::string_view input) {
+//  return out.has_value();
   // TODO: Implement this
   void(input.size());
   return false;
@@ -48,12 +31,6 @@ bool url_aggregator::set_host(const std::string_view input) {
 }
 
 bool url_aggregator::set_hostname(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
-  return false;
-}
-
-bool url_aggregator::set_protocol(const std::string_view input) {
   // TODO: Implement this
   void(input.size());
   return false;
@@ -112,6 +89,10 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   auto ending_index = std::string_view::npos;
   if (components.hash_start == url_components::omitted) { ending_index = components.hash_start; }
   return buffer.substr(components.search_start, ending_index);
+}
+
+[[nodiscard]] std::string url_aggregator::get_protocol() const noexcept {
+  return buffer.substr(0, components.protocol_end);
 }
 
 [[nodiscard]] ada_really_inline ada::url_components url_aggregator::get_components() noexcept {
