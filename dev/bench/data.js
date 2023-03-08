@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678281408600,
+  "lastUpdate": 1678281412907,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -3938,6 +3938,42 @@ window.BENCHMARK_DATA = {
             "value": 486246.05489924306,
             "unit": "ns/iter",
             "extra": "iterations: 1439\ncpu: 486171.6469770675 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "WPT Updater",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "f26058db69fd723caf1abaa8a645d00b3e591627",
+          "message": "test: update web platform tests",
+          "timestamp": "2023-03-08T08:14:02-05:00",
+          "tree_id": "8204faec2b7b70269485f64ee13ff8a742d6fccc",
+          "url": "https://github.com/ada-url/ada/commit/f26058db69fd723caf1abaa8a645d00b3e591627"
+        },
+        "date": 1678281412156,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 395334.26798867603,
+            "unit": "ns/iter",
+            "extra": "iterations: 1765\ncpu: 395306.06232294615 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 438519.05256572063,
+            "unit": "ns/iter",
+            "extra": "iterations: 1598\ncpu: 438446.4330413016 ns\nthreads: 1"
           }
         ]
       }
