@@ -87,13 +87,13 @@ namespace ada {
   }
 
   bool url::set_href(const std::string_view input) {
-    ada::result<ada::url> out = ada::parse(input);
+    ada::result<ada::url> out = ada::parse<ada::url>(input);
 
     if (out) {
       username = out->username;
       password = out->password;
       host = out->host;
-      update_base_port(out->retrieve_base_port());
+      port = out->port;
       path = out->path;
       query = out->query;
       fragment = out->fragment;
