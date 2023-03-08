@@ -15,7 +15,13 @@ else()
     execute_process(
       COMMAND ${PYTHON_EXECUTABLE} ${LINT_AND_FORMAT_SCRIPT_PATH} check
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      RESULT_VARIABLE clang_check_result
     )
+
+    if(clang_check_result)
+      message(FATAL_ERROR "Clang-format check failed with error code ${clang_check_result}")
+    endif()
+
   else()
     set(LINT_AND_FORMAT_SCRIPT_PATH ${CMAKE_SOURCE_DIR}/tools/lint_and_format.py)
     message(STATUS "Formatting code with clang-format...")
