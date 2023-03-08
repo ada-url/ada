@@ -90,26 +90,6 @@ bool url_base::set_protocol(const std::string_view input) {
   return false;
 }
 
-bool url_base::set_href(const std::string_view input) {
-  // TODO: Moving this to indiviual classes (url_aggregator and url) might improve the performance.
-  ada::result out = ada::parse(input);
-
-  if (out) {
-    username = out->username;
-    password = out->password;
-    host = out->host;
-    update_base_port(out->retrieve_base_port());
-    path = out->path;
-    query = out->query;
-    fragment = out->fragment;
-    type = out->type;
-    non_special_scheme = out->non_special_scheme;
-    has_opaque_path = out->has_opaque_path;
-  }
-
-  return out.has_value();
-}
-
 ada_really_inline bool url_base::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string tmp_buffer;
@@ -124,20 +104,38 @@ ada_really_inline bool url_base::parse_path(std::string_view input) {
     internal_input = input;
   }
 
+  std::string path = retrieve_base_pathname();
+
   // If url is special, then:
   if (is_special()) {
     if(internal_input.empty()) {
       update_base_pathname("/");
     } else if((internal_input[0] == '/') || (internal_input[0] == '\\')){
-      return helpers::parse_prepared_path(internal_input.substr(1), type, path);
+      if (helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
     } else {
-      return helpers::parse_prepared_path(internal_input, type, path);
+      if (helpers::parse_prepared_path(internal_input, type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
     }
   } else if (!internal_input.empty()) {
     if(internal_input[0] == '/') {
-      return helpers::parse_prepared_path(internal_input.substr(1), type, path);
+      if (helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
     } else {
-      return helpers::parse_prepared_path(internal_input, type, path);
+      if (helpers::parse_prepared_path(internal_input, type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
     }
   } else if (!base_hostname_has_value()) {
     update_base_pathname("/");
@@ -163,7 +161,7 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
 
       // If url’s scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
-      if (type == ada::scheme::type::FILE && base_hostname_has_value() && host.value().empty()) { return true; }
+      if (type == ada::scheme::type::FILE && base_hostname_has_value() && get_hostname().empty()) { return true; }
     }
 
     type = parsed_type;
@@ -195,7 +193,7 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
 
       // If url’s scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
-      if (type == ada::scheme::type::FILE && base_hostname_has_value() && host.value().empty()) { return true; }
+      if (type == ada::scheme::type::FILE && base_hostname_has_value() && get_hostname().empty()) { return true; }
     }
 
     set_scheme(std::move(_buffer));

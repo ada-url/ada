@@ -153,6 +153,10 @@ namespace ada {
     return port;
   }
 
+  std::string url::retrieve_base_pathname() {
+    return path;
+  }
+
   void url::clear_base_hash() {
     fragment = std::nullopt;
   }
