@@ -37,11 +37,11 @@ namespace ada {
                                                  const ada::url* base_url = nullptr,
                                                  ada::encoding_type encoding = ada::encoding_type::UTF8);
 
-  extern template ada::result<ada::url> parse(std::string_view input,
+  extern template ada::result<url> parse<url>(std::string_view input,
                                               const ada::url* base_url = nullptr,
                                               ada::encoding_type encoding = ada::encoding_type::UTF8);
 
-  extern template ada::result<ada::url_aggregator> parse<url_aggregator>(std::string_view input,
+  extern template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input,
                                                                          const ada::url* base_url = nullptr,
                                                                          ada::encoding_type encoding = ada::encoding_type::UTF8);
 

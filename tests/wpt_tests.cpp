@@ -21,7 +21,7 @@ ada::result<ada::url> ada_parse(std::string_view view,const ada::url* base = nul
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]" << std::endl;
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
-  return ada::parse(std::string_view(buffer.get(), view.size()), base);
+  return ada::parse<ada::url>(std::string_view(buffer.get(), view.size()), base);
 }
 
 #include "simdjson.h"
@@ -252,7 +252,7 @@ bool toascii_encoding() {
 
       // The following code replicates `toascii.window.js` from web-platform tests.
       // @see https://github.com/web-platform-tests/wpt/blob/master/url/toascii.window.js
-      ada::result current = ada::parse("https://" + std::string(input) + "/x");
+      ada::result<ada::url> current = ada::parse<ada::url>("https://" + std::string(input) + "/x");
 
       if (expected_output.type() == ondemand::json_type::string) {
         std::string_view stringified_output = expected_output.get_string();
@@ -265,7 +265,7 @@ bool toascii_encoding() {
       }
 
       // Test setters for host and hostname values.
-      ada::result setter = ada::parse("https://x/x");
+      ada::result<ada::url> setter = ada::parse("https://x/x");
       TEST_ASSERT(setter->set_host(input), !expected_output.is_null(), "set_host return value. " + element_string);
       TEST_ASSERT(setter->set_hostname(input), !expected_output.is_null(), "set_hostname return value. " + element_string);
 
@@ -312,7 +312,7 @@ bool urltestdata_encoding(const char* source) {
       }
       std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
       std::string_view base;
-      ada::result  base_url;
+      ada::result<ada::url> base_url;
       if (!object["base"].get(base)) {
         std::cout << "base=" << base << std::endl;
         base_url = ada_parse(base);
@@ -327,7 +327,7 @@ bool urltestdata_encoding(const char* source) {
         }
       }
       bool failure = false;
-      ada::result input_url = (!object["base"].get(base)) ?
+      ada::result<ada::url> input_url = (!object["base"].get(base)) ?
       ada_parse(input, &*base_url)
       : ada_parse(input);
       if (!object["failure"].get(failure) && failure == true) {
@@ -418,7 +418,7 @@ bool verifydnslength_tests(const char* source) {
       std::string_view input = object["input"].get_string();
       std::string message = std::string(object["message"].get_string().value());
       bool failure = object["failure"].get_bool().value();
-      ada::result input_url = ada_parse(input);
+      ada::result<ada::url> input_url = ada_parse(input);
       std::cout << input << " should " << (failure ? "fail" : "succeed")
         << " and it " << (input_url->has_valid_domain() ? "succeeds" : "fails")
         << (!failure == input_url->has_valid_domain() ? " OK" : " ERROR" ) << std::endl;

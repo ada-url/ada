@@ -161,7 +161,7 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
 
       // If url’s scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
-      if (type == ada::scheme::type::FILE && base_hostname_has_value() && host.value().empty()) { return true; }
+      if (type == ada::scheme::type::FILE && base_hostname_has_value() && get_hostname().empty()) { return true; }
     }
 
     type = parsed_type;
@@ -193,7 +193,7 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
 
       // If url’s scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
-      if (type == ada::scheme::type::FILE && base_hostname_has_value() && host.value().empty()) { return true; }
+      if (type == ada::scheme::type::FILE && base_hostname_has_value() && get_hostname().empty()) { return true; }
     }
 
     set_scheme(std::move(_buffer));
