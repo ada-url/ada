@@ -63,6 +63,8 @@ namespace ada {
     /** @private */
     std::optional<uint32_t> retrieve_base_port();
     /** @private */
+    std::string retrieve_base_pathname();
+    /** @private */
     void clear_base_hash();
     /** @private */
     bool base_hostname_has_value() const;

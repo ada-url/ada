@@ -63,6 +63,13 @@ std::optional<uint32_t> url_aggregator::retrieve_base_port() {
   return components.port;
 }
 
+std::string url_aggregator::retrieve_base_pathname() {
+  size_t ending = std::string_view::npos;
+  if (base_search_has_value()) { ending = components.search_start; }
+  else if (base_fragment_has_value()) { ending = components.hash_start; }
+  return buffer.substr(components.pathname_start, ending);
+}
+
 void url_aggregator::clear_base_hash() {
   components.hash_start = url_components::omitted;
   buffer.resize(components.hash_start);

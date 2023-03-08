@@ -104,20 +104,38 @@ ada_really_inline bool url_base::parse_path(std::string_view input) {
     internal_input = input;
   }
 
+  std::string path = retrieve_base_pathname();
+
   // If url is special, then:
   if (is_special()) {
     if(internal_input.empty()) {
       update_base_pathname("/");
     } else if((internal_input[0] == '/') || (internal_input[0] == '\\')){
-      return helpers::parse_prepared_path(internal_input.substr(1), type, path);
+      if (helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
     } else {
-      return helpers::parse_prepared_path(internal_input, type, path);
+      if (helpers::parse_prepared_path(internal_input, type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
     }
   } else if (!internal_input.empty()) {
     if(internal_input[0] == '/') {
-      return helpers::parse_prepared_path(internal_input.substr(1), type, path);
+      if (helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
     } else {
-      return helpers::parse_prepared_path(internal_input, type, path);
+      if (helpers::parse_prepared_path(internal_input, type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
     }
   } else if (!base_hostname_has_value()) {
     update_base_pathname("/");

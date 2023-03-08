@@ -17,7 +17,7 @@ std::set<std::string> bad_domains = {"http://./", "http://../", "http://foo.09..
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-ada::result ada_parse(std::string_view view,const ada::url* base = nullptr) {
+ada::result<ada::url> ada_parse(std::string_view view,const ada::url* base = nullptr) {
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]" << std::endl;
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
