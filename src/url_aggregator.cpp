@@ -15,6 +15,7 @@ bool url_aggregator::set_href(const std::string_view input) {
 
   if (out) {
     components = out->get_components();
+    // TODO: Update private attributes as well.
   }
 
   return out.has_value();
