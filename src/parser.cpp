@@ -6,7 +6,7 @@
 #include "ada/log.h"
 
 #include <iostream>
-
+#include <limits>
 #include <optional>
 #include <string_view>
 
@@ -21,6 +21,10 @@ namespace ada::parser {
 
     ada::state state = ada::state::SCHEME_START;
     ada::url url = ada::url();
+
+    // We refuse to parse URL strings that exceed 4GB. Such strings are almost
+    // surely the result of a bug or are otherwise a security concern.
+    if(user_input.size()  >= std::string_view::size_type(std::numeric_limits<uint32_t>::max)) { url.is_valid = false; }
 
     // If we are provided with an invalid base, or the optional_url was invalid,
     // we must return.
