@@ -195,6 +195,8 @@ Building</h2>
 <li><b>Test</b>: <code>ctest --output-on-failure --test-dir build</code></li>
 </ul>
 <p>Windows users need additional flags to specify the build configuration, e.g. <code>--config Release</code>.</p>
+<p>Project can also be built via docker using default docker file of repository with following commands.</p>
+<p><code>docker build -t ada-builder . &amp;&amp; docker run --rm -it -v ${PWD}:/repo ada-builder</code></p>
 <h2><a class="anchor" id="autotoc_md10"></a>
 Installing ICU</h2>
 <p>For macOS, you may install it with <a href="https://brew.sh">brew</a> using <code>brew install icu4c</code>. Linux users may install ICU according to the their distribution: under Ubuntu, the command is <code>apt-get install -y libicu-dev</code>.</p>
