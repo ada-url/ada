@@ -27,6 +27,7 @@ namespace ada {
 
     url_components components;
 
+    bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
 
@@ -61,6 +62,8 @@ namespace ada {
     void update_base_port(std::optional<uint32_t> input);
     /** @private */
     std::optional<uint32_t> retrieve_base_port();
+    /** @private */
+    std::string retrieve_base_pathname();
     /** @private */
     void clear_base_hash();
     /** @private */
