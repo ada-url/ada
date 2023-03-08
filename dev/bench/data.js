@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1678281620954,
+  "lastUpdate": 1678281625409,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -4028,6 +4028,42 @@ window.BENCHMARK_DATA = {
             "value": 438519.05256572063,
             "unit": "ns/iter",
             "extra": "iterations: 1598\ncpu: 438446.4330413016 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33915699+OkanPinar@users.noreply.github.com",
+            "name": "okanpin",
+            "username": "OkanPinar"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c10cac90e0d3536018f0579712d42419b106d4c4",
+          "message": "docs: add build via docker support (#254)",
+          "timestamp": "2023-03-08T08:15:12-05:00",
+          "tree_id": "d384a4ec6a5e2a2ae4c4046d8a9cbcef6f4ce175",
+          "url": "https://github.com/ada-url/ada/commit/c10cac90e0d3536018f0579712d42419b106d4c4"
+        },
+        "date": 1678281624618,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 396777.0169875557,
+            "unit": "ns/iter",
+            "extra": "iterations: 1766\ncpu: 396039.0147225367 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 438339.42894910986,
+            "unit": "ns/iter",
+            "extra": "iterations: 1513\ncpu: 438285.9881031065 ns\nthreads: 1"
           }
         ]
       }
