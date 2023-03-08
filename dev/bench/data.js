@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1677894929150,
+  "lastUpdate": 1678281408600,
   "repoUrl": "https://github.com/ada-url/ada",
   "entries": {
     "Benchmark": [
@@ -2142,6 +2142,60 @@ window.BENCHMARK_DATA = {
             "value": 12599.400541027942,
             "unit": "ns/iter",
             "extra": "iterations: 55450\ncpu: 12598.515779981959 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yagiz@nizipli.com",
+            "name": "WPT Updater",
+            "username": "anonrig"
+          },
+          "committer": {
+            "email": "yagiz@nizipli.com",
+            "name": "Yagiz Nizipli",
+            "username": "anonrig"
+          },
+          "distinct": true,
+          "id": "f26058db69fd723caf1abaa8a645d00b3e591627",
+          "message": "test: update web platform tests",
+          "timestamp": "2023-03-08T08:14:02-05:00",
+          "tree_id": "8204faec2b7b70269485f64ee13ff8a742d6fccc",
+          "url": "https://github.com/ada-url/ada/commit/f26058db69fd723caf1abaa8a645d00b3e591627"
+        },
+        "date": 1678281406978,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "BasicBench_AdaURL",
+            "value": 6010.307202660103,
+            "unit": "ns/iter",
+            "extra": "iterations: 116096\ncpu: 6009.35605016538 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_AdaURL_just_parse",
+            "value": 3563.3999393418007,
+            "unit": "ns/iter",
+            "extra": "iterations: 197830\ncpu: 3539.8493656169426 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_whatwg",
+            "value": 8946.35507752423,
+            "unit": "ns/iter",
+            "extra": "iterations: 78749\ncpu: 8882.769305007047 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_CURL",
+            "value": 20829.261411036994,
+            "unit": "ns/iter",
+            "extra": "iterations: 33564\ncpu: 20828.003217733294 ns\nthreads: 1"
+          },
+          {
+            "name": "BasicBench_ServoUrl",
+            "value": 12321.176417768565,
+            "unit": "ns/iter",
+            "extra": "iterations: 56797\ncpu: 12320.4535450816 ns\nthreads: 1"
           }
         ]
       }
