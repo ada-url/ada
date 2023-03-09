@@ -110,31 +110,31 @@ namespace ada {
     bool set_host_or_hostname(std::string_view input, bool override_hostname);
 
     /** @private */
-    void update_base_hash(std::string_view input);
+    inline void update_base_hash(std::string_view input);
     /** @private */
-    void update_base_search(std::optional<std::string> input);
+    inline void update_base_search(std::optional<std::string> input);
     /** @private */
-    void update_base_pathname(const std::string_view input);
+    inline void update_base_pathname(const std::string_view input);
     /** @private */
-    void update_base_username(const std::string_view input);
+    inline void update_base_username(const std::string_view input);
     /** @private */
-    void update_base_password(const std::string_view input);
+    inline void update_base_password(const std::string_view input);
     /** @private */
-    void update_base_port(std::optional<uint32_t> input);
+    inline void update_base_port(std::optional<uint32_t> input);
     /** @private */
-    std::optional<uint32_t> retrieve_base_port();
+    inline std::optional<uint32_t> retrieve_base_port();
     /** @private */
-    std::string retrieve_base_pathname();
+    inline std::string retrieve_base_pathname();
     /** @private */
-    void clear_base_hash();
+    inline void clear_base_hash();
     /** @private */
-    bool base_hostname_has_value() const;
+    inline bool base_hostname_has_value() const;
     /** @private */
-    bool base_fragment_has_value() const;
+    inline bool base_fragment_has_value() const;
     /** @private */
-    bool base_search_has_value() const;
+    inline bool base_search_has_value() const;
     /** @private */
-    bool base_port_has_value() const;
+    inline bool base_port_has_value() const;
 
     /**
      * Returns true if this URL has a valid domain as per RFC 1034 and

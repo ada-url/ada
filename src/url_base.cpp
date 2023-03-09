@@ -182,6 +182,7 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
     // Next function is only valid if the input is ASCII and returns false
     // otherwise, but it seems that we always have ascii content so we do not need
     // to check the return value.
+    unicode::to_lower_ascii(_buffer.data(), _buffer.size());
 
     if (has_state_override) {
       // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
