@@ -3,8 +3,9 @@ find_program(PYTHON_EXECUTABLE python3 python)
 if(NOT PYTHON_EXECUTABLE)
   message(WARNING "Python not found. Skipping lint and format checks.")
 else()
+  set(LINT_AND_FORMAT_SCRIPT_PATH ${CMAKE_SOURCE_DIR}/tools/lint_and_format.py)
+  
   if(DEFINED ENV{LINT_AND_FORMAT_CHECK})
-    set(LINT_AND_FORMAT_SCRIPT_PATH ${CMAKE_SOURCE_DIR}/tools/lint_and_format.py)
     message(STATUS "Checking code with clang-format...")
     execute_process(
       COMMAND ${PYTHON_EXECUTABLE} ${LINT_AND_FORMAT_SCRIPT_PATH} check
@@ -17,11 +18,12 @@ else()
     endif()
 
   else()
-    set(LINT_AND_FORMAT_SCRIPT_PATH ${CMAKE_SOURCE_DIR}/tools/lint_and_format.py)
-    message(STATUS "Formatting code with clang-format...")
-    execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} ${LINT_AND_FORMAT_SCRIPT_PATH} format
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    )
+    if(DEFINED ENV{FORMAT_ENABLED})
+      message(STATUS "Formatting code with clang-format...")
+      execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} ${LINT_AND_FORMAT_SCRIPT_PATH} format
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      )
+    endif()
   endif()
 endif()
