@@ -13,14 +13,14 @@
 
 namespace ada {
 
-void url_aggregator::update_base_hash(std::string_view input) {
+inline void url_aggregator::update_base_hash(std::string_view input) {
   buffer.resize(components.hash_start);
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
   buffer.append(input);
 }
 
-void url_aggregator::update_base_search(std::optional<std::string> input) {
+inline void url_aggregator::update_base_search(std::optional<std::string> input) {
   bool has_hash = components.hash_start != url_components::omitted;
 
   if (has_hash) {
@@ -37,57 +37,57 @@ void url_aggregator::update_base_search(std::optional<std::string> input) {
   }
 }
 
-void url_aggregator::update_base_pathname(const std::string_view input) {
+inline void url_aggregator::update_base_pathname(const std::string_view input) {
   // TODO: Implement this
   void(input.size());
 }
 
-void url_aggregator::update_base_username(const std::string_view input) {
+inline void url_aggregator::update_base_username(const std::string_view input) {
   // TODO: Implement this
   void(input.size());
 }
 
-void url_aggregator::update_base_password(const std::string_view input) {
+inline void url_aggregator::update_base_password(const std::string_view input) {
   // TODO: Implement this
   void(input.size());
 }
 
-void url_aggregator::update_base_port(std::optional<uint32_t> input) {
+inline void url_aggregator::update_base_port(std::optional<uint32_t> input) {
   components.port = input.value_or(url_components::omitted);
 }
 
-std::optional<uint32_t> url_aggregator::retrieve_base_port() {
+inline std::optional<uint32_t> url_aggregator::retrieve_base_port() {
   if (components.port == url_components::omitted) {
     return std::nullopt;
   }
   return components.port;
 }
 
-std::string url_aggregator::retrieve_base_pathname() {
+inline std::string url_aggregator::retrieve_base_pathname() {
   size_t ending = std::string_view::npos;
   if (base_search_has_value()) { ending = components.search_start; }
   else if (base_fragment_has_value()) { ending = components.hash_start; }
   return buffer.substr(components.pathname_start, ending);
 }
 
-void url_aggregator::clear_base_hash() {
+inline void url_aggregator::clear_base_hash() {
   components.hash_start = url_components::omitted;
   buffer.resize(components.hash_start);
 }
 
-bool url_aggregator::base_fragment_has_value() const {
+inline bool url_aggregator::base_fragment_has_value() const {
   return components.hash_start != url_components::omitted;
 }
 
-bool url_aggregator::base_search_has_value() const {
+inline bool url_aggregator::base_search_has_value() const {
   return components.search_start != url_components::omitted;
 }
 
-bool url_aggregator::base_port_has_value() const {
+inline bool url_aggregator::base_port_has_value() const {
   return components.port != url_components::omitted;
 }
 
-bool url_aggregator::base_hostname_has_value() const {
+inline bool url_aggregator::base_hostname_has_value() const {
   return components.host_start != components.host_end;
 }
 
