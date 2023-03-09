@@ -52,11 +52,11 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
   void(input.size());
 }
 
-inline void url_aggregator::update_base_port(std::optional<uint32_t> input) {
+inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
   components.port = input.value_or(url_components::omitted);
 }
 
-inline std::optional<uint32_t> url_aggregator::retrieve_base_port() {
+inline std::optional<uint16_t> url_aggregator::retrieve_base_port() {
   if (components.port == url_components::omitted) {
     return std::nullopt;
   }

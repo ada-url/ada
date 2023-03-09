@@ -60,7 +60,7 @@ namespace ada {
      * @private
      * A URL’s port is either null or a 16-bit unsigned integer that identifies a networking port. It is initially null.
      */
-    std::optional<uint32_t> port{};
+    std::optional<uint16_t> port{};
 
     /**
      * @private
@@ -120,9 +120,9 @@ namespace ada {
     /** @private */
     inline void update_base_password(const std::string_view input);
     /** @private */
-    inline void update_base_port(std::optional<uint32_t> input);
+    inline void update_base_port(std::optional<uint16_t> input);
     /** @private */
-    inline std::optional<uint32_t> retrieve_base_port();
+    inline std::optional<uint16_t> retrieve_base_port();
     /** @private */
     inline std::string retrieve_base_pathname();
     /** @private */

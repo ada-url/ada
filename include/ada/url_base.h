@@ -221,9 +221,9 @@ namespace ada {
     /** @private */
     virtual void update_base_password(const std::string_view input) = 0;
     /** @private */
-    virtual void update_base_port(std::optional<uint32_t> input) = 0;
+    virtual void update_base_port(std::optional<uint16_t> input) = 0;
     /** @private */
-    virtual std::optional<uint32_t> retrieve_base_port() = 0;
+    virtual std::optional<uint16_t> retrieve_base_port() = 0;
     /** @private */
     virtual std::string retrieve_base_pathname() = 0;
     /** @private */

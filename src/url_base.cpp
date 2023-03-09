@@ -64,7 +64,7 @@ bool url_base::set_port(const std::string_view input) {
   if (input.find_first_of("0123456789") == std::string_view::npos) { return false; }
 
   // Revert changes if parse_port fails.
-  std::optional<uint32_t> previous_port = retrieve_base_port();
+  std::optional<uint16_t> previous_port = retrieve_base_port();
   parse_port(trimmed);
   if (is_valid) { return true; }
   update_base_port(previous_port);
