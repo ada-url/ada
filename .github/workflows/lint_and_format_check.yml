@@ -1,4 +1,4 @@
-name: Lint and Format Check (Ubuntu 22.04)
+name: Lint and Format Check (Ubuntu Latest)
 
 on:
   push:
