@@ -37,7 +37,7 @@ inline void url_base::copy_scheme(ada::url_base&& u) noexcept {
   non_special_scheme = u.non_special_scheme;
   type = u.type;
 }
-inline void url_base::copy_scheme(const ada::url_base& u) {
+inline void url_base::copy_scheme(const ada::url_base& u) noexcept {
   non_special_scheme = u.non_special_scheme;
   type = u.type;
 }
