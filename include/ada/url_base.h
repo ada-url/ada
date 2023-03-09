@@ -182,7 +182,7 @@ namespace ada {
      * @private
      * Take the scheme from another URL. The scheme string is copied from the provided url.
      */
-    inline void copy_scheme(const ada::url_base& u);
+    inline void copy_scheme(const ada::url_base& u) noexcept;
 
     /**
      * @private
