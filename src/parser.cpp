@@ -14,9 +14,7 @@
 namespace ada::parser {
 
   template <class result_type>
-  result_type parse_url(std::string_view user_input,
-                        const ada::url* base_url,
-                        ada::encoding_type encoding) {
+  result_type parse_url(std::string_view user_input, const ada::url* base_url) {
     // We can specialize the implementation per type.
     // Important: result_type_is_ada_url is evaluated at *compile time*. This means
     // that doing if constexpr(result_type_is_ada_url) { something } else { something else }
@@ -28,7 +26,7 @@ namespace ada::parser {
 
     ada_log("ada::parser::parse_url('", user_input,
      "' [", user_input.size()," bytes],", (base_url != nullptr ? base_url->to_string() : "null"),
-     ",", ada::to_string(encoding), ")");
+     ")");
 
     ada::state state = ada::state::SCHEME_START;
     result_type url{};
@@ -390,15 +388,6 @@ namespace ada::parser {
         }
         case ada::state::QUERY: {
           ada_log("QUERY ", helpers::substring(url_data, input_position));
-          // If encoding is not UTF-8 and one of the following is true:
-          // - url is not special
-          // - url’s scheme is "ws" or "wss"
-          if (encoding != ada::encoding_type::UTF8) {
-            if (!url.is_special() || url.type == ada::scheme::type::WS || url.type == ada::scheme::type::WSS) {
-              // then set encoding to UTF-8.
-              encoding = ada::encoding_type::UTF8;
-            }
-          }
           // Let queryPercentEncodeSet be the special-query percent-encode set if url is special;
           // otherwise the query percent-encode set.
           auto query_percent_encode_set = url.is_special() ?
@@ -726,10 +715,6 @@ namespace ada::parser {
     return url;
   }
 
-  template url parse_url<url>(std::string_view user_input,
-                 const ada::url* base_url = nullptr,
-                 ada::encoding_type encoding = ada::encoding_type::UTF8);
-  template url_aggregator parse_url<url_aggregator>(std::string_view user_input,
-                 const ada::url* base_url = nullptr,
-                 ada::encoding_type encoding = ada::encoding_type::UTF8);
+  template url parse_url<url>(std::string_view user_input, const ada::url* base_url = nullptr);
+  template url_aggregator parse_url<url_aggregator>(std::string_view user_input, const ada::url* base_url = nullptr);
 } // namespace ada::parser
