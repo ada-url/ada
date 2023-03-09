@@ -10,6 +10,8 @@
 #include "ada.h"
 #include "ada/character_sets-inl.h"
 #include "ada/parser.h"
+#include "ada/url.h"
+#include "ada/url_aggregator.h"
 
 // We think that these examples have bad domains.
 std::set<std::string> bad_domains = {"http://./", "http://../", "http://foo.09.."};
@@ -17,12 +19,16 @@ std::set<std::string> bad_domains = {"http://./", "http://../", "http://foo.09..
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-ada::result<ada::url> ada_parse(std::string_view view,const ada::url* base = nullptr) {
+template<class result_type = ada::url>
+ada::result<result_type> ada_parse(std::string_view view, const result_type* base = nullptr) {
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]" << std::endl;
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
-  return ada::parse<ada::url>(std::string_view(buffer.get(), view.size()), base);
+  return ada::parse<result_type>(std::string_view(buffer.get(), view.size()), base);
 }
+
+template ada::result<ada::url> ada_parse(std::string_view view, const ada::url* base = nullptr);
+template ada::result<ada::url_aggregator> ada_parse(std::string_view view, const ada::url_aggregator* base = nullptr);
 
 #include "simdjson.h"
 
@@ -155,7 +161,7 @@ bool setters_tests_encoding(const char *source) {
         std::cout << "    comment: " << comment << std::endl;
       }
 
-      auto base = ada_parse(href);
+      ada::result<ada::url> base = ada_parse<ada::url>(href);
       TEST_ASSERT(base.has_value(), true, "Base url parsing should have succeeded")
 
       std::cout << "      " << href << std::endl;
@@ -315,7 +321,7 @@ bool urltestdata_encoding(const char* source) {
       ada::result<ada::url> base_url;
       if (!object["base"].get(base)) {
         std::cout << "base=" << base << std::endl;
-        base_url = ada_parse(base);
+        base_url = ada_parse<ada::url>(base);
         if(!base_url) {
           bool failure = false;
           if (!object["failure"].get(failure) && failure == true) {
@@ -327,9 +333,7 @@ bool urltestdata_encoding(const char* source) {
         }
       }
       bool failure = false;
-      ada::result<ada::url> input_url = (!object["base"].get(base)) ?
-      ada_parse(input, &*base_url)
-      : ada_parse(input);
+      ada::result<ada::url> input_url = (!object["base"].get(base)) ? ada_parse<ada::url>(input, &*base_url) : ada_parse<ada::url>(input);
       if (!object["failure"].get(failure) && failure == true) {
         TEST_ASSERT(input_url.has_value(), !failure, "Should not have succeeded " + element_string + input_url->to_string());
       } else {
@@ -418,7 +422,7 @@ bool verifydnslength_tests(const char* source) {
       std::string_view input = object["input"].get_string();
       std::string message = std::string(object["message"].get_string().value());
       bool failure = object["failure"].get_bool().value();
-      ada::result<ada::url> input_url = ada_parse(input);
+      ada::result<ada::url> input_url = ada_parse<ada::url>(input);
       std::cout << input << " should " << (failure ? "fail" : "succeed")
         << " and it " << (input_url->has_valid_domain() ? "succeeds" : "fails")
         << (!failure == input_url->has_valid_domain() ? " OK" : " ERROR" ) << std::endl;
