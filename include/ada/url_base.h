@@ -237,6 +237,10 @@ namespace ada {
     /** @private */
     virtual bool base_port_has_value() const = 0;
 
+    /**
+    * Returns a JSON string representation of this URL.
+    */
+    virtual std::string to_string() const = 0;
 
     private:
       /**
