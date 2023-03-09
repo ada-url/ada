@@ -1,4 +1,5 @@
 #include "ada.h"
+#include "ada/checkers.h"
 #include "ada/helpers.h"
 #include <optional>
 
@@ -213,6 +214,11 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
   }
 
   return true;
+}
+
+[[nodiscard]] bool url_base::has_valid_domain() const noexcept {
+  if(!base_hostname_has_value()) { return false; }
+  return checkers::verify_dns_length(get_host());
 }
 
 } // namespace ada

@@ -397,9 +397,4 @@ namespace ada {
     return answer;
   }
 
-  [[nodiscard]] bool url::has_valid_domain() const noexcept {
-    if(!host.has_value()) { return false; }
-    return checkers::verify_dns_length(host.value());
-  }
-
 } // namespace ada

@@ -130,6 +130,7 @@ bool percent_encoding() {
   TEST_SUCCEED()
 }
 
+template<class result_type = ada::url>
 bool setters_tests_encoding(const char *source) {
   TEST_START()
   ondemand::parser parser;
@@ -161,7 +162,7 @@ bool setters_tests_encoding(const char *source) {
         std::cout << "    comment: " << comment << std::endl;
       }
 
-      ada::result<ada::url> base = ada_parse<ada::url>(href);
+      ada::result<result_type> base = ada_parse<result_type>(href);
       TEST_ASSERT(base.has_value(), true, "Base url parsing should have succeeded")
 
       std::cout << "      " << href << std::endl;
@@ -235,6 +236,7 @@ bool setters_tests_encoding(const char *source) {
   TEST_SUCCEED()
 }
 
+template <class result_type = ada::url>
 bool toascii_encoding() {
   TEST_START()
   ondemand::parser parser;
@@ -258,7 +260,7 @@ bool toascii_encoding() {
 
       // The following code replicates `toascii.window.js` from web-platform tests.
       // @see https://github.com/web-platform-tests/wpt/blob/master/url/toascii.window.js
-      ada::result<ada::url> current = ada::parse<ada::url>("https://" + std::string(input) + "/x");
+      ada::result<result_type> current = ada::parse<result_type>("https://" + std::string(input) + "/x");
 
       if (expected_output.type() == ondemand::json_type::string) {
         std::string_view stringified_output = expected_output.get_string();
@@ -271,7 +273,7 @@ bool toascii_encoding() {
       }
 
       // Test setters for host and hostname values.
-      ada::result<ada::url> setter = ada::parse("https://x/x");
+      ada::result<result_type> setter = ada::parse<result_type>("https://x/x");
       TEST_ASSERT(setter->set_host(input), !expected_output.is_null(), "set_host return value. " + element_string);
       TEST_ASSERT(setter->set_hostname(input), !expected_output.is_null(), "set_hostname return value. " + element_string);
 
@@ -289,8 +291,11 @@ bool toascii_encoding() {
   TEST_SUCCEED()
 }
 
-bool urltestdata_encoding(const char* source) {
+template bool toascii_encoding<ada::url>();
+template bool toascii_encoding<ada::url_aggregator>();
 
+template <class result_type = ada::url>
+bool urltestdata_encoding(const char* source) {
   TEST_START()
   ondemand::parser parser;
   size_t counter{};
@@ -318,10 +323,10 @@ bool urltestdata_encoding(const char* source) {
       }
       std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
       std::string_view base;
-      ada::result<ada::url> base_url;
+      ada::result<result_type> base_url;
       if (!object["base"].get(base)) {
         std::cout << "base=" << base << std::endl;
-        base_url = ada_parse<ada::url>(base);
+        base_url = ada_parse<result_type>(base);
         if(!base_url) {
           bool failure = false;
           if (!object["failure"].get(failure) && failure == true) {
@@ -333,7 +338,7 @@ bool urltestdata_encoding(const char* source) {
         }
       }
       bool failure = false;
-      ada::result<ada::url> input_url = (!object["base"].get(base)) ? ada_parse<ada::url>(input, &*base_url) : ada_parse<ada::url>(input);
+      ada::result<result_type> input_url = (!object["base"].get(base)) ? ada_parse<result_type>(input, &*base_url) : ada_parse<result_type>(input);
       if (!object["failure"].get(failure) && failure == true) {
         TEST_ASSERT(input_url.has_value(), !failure, "Should not have succeeded " + element_string + input_url->to_string());
       } else {
@@ -402,6 +407,9 @@ bool urltestdata_encoding(const char* source) {
   TEST_SUCCEED()
 }
 
+template bool urltestdata_encoding<ada::url>(const char* source);
+template bool urltestdata_encoding<ada::url_aggregator>(const char* source);
+
 bool verifydnslength_tests(const char* source) {
   TEST_START()
   size_t counter{};
@@ -458,28 +466,50 @@ int main(int argc, char** argv) {
     results[name] = toascii_encoding();
   }
 #endif // ADA_HAS_ICU
-  name = "setters_tests_encoding("+std::string(SETTERS_TESTS_JSON)+")";
+  name = "setters_tests_encoding<ada::url>("+std::string(SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = setters_tests_encoding(SETTERS_TESTS_JSON);
+    results[name] = setters_tests_encoding<ada::url>(SETTERS_TESTS_JSON);
 #if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // !ADA_HAS_ICU
   }
-  name = "setters_tests_encoding("+std::string(ADA_SETTERS_TESTS_JSON)+")";
+  name = "setters_tests_encoding<ada::url>("+std::string(ADA_SETTERS_TESTS_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = setters_tests_encoding(ADA_SETTERS_TESTS_JSON);
+    results[name] = setters_tests_encoding<ada::url>(ADA_SETTERS_TESTS_JSON);
+#if !ADA_HAS_ICU
+    results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
+#endif // _WIN32
+  }
+  name = "setters_tests_encoding<ada::url_aggregator>("+std::string(SETTERS_TESTS_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = setters_tests_encoding<ada::url_aggregator>(SETTERS_TESTS_JSON);
+#if !ADA_HAS_ICU
+    results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
+#endif // !ADA_HAS_ICU
+  }
+  name = "setters_tests_encoding<ada::url_aggregator>("+std::string(ADA_SETTERS_TESTS_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = setters_tests_encoding<ada::url_aggregator>(ADA_SETTERS_TESTS_JSON);
 #if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
 #if ADA_HAS_ICU
-  name = "urltestdata_encoding("+std::string(ADA_URLTESTDATA_JSON)+")";
+  name = "urltestdata_encoding<ada::url>("+std::string(ADA_URLTESTDATA_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding(ADA_URLTESTDATA_JSON);
+    results[name] = urltestdata_encoding<ada::url>(ADA_URLTESTDATA_JSON);
   }
-  name = "urltestdata_encoding("+std::string(URLTESTDATA_JSON)+")";
+  name = "urltestdata_encoding<ada::url>("+std::string(URLTESTDATA_JSON)+")";
   if(all_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
+    results[name] = urltestdata_encoding<ada::url>(URLTESTDATA_JSON);
+  }
+  name = "urltestdata_encoding<ada::url_aggregator>("+std::string(ADA_URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding<ada::url_aggregator>(ADA_URLTESTDATA_JSON);
+  }
+  name = "urltestdata_encoding<ada::url_aggregator>("+std::string(URLTESTDATA_JSON)+")";
+  if(all_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding<ada::url_aggregator>(URLTESTDATA_JSON);
   }
 #endif
   name = "verifydnslength_tests("+std::string(VERIFYDNSLENGTH_TESTS_JSON)+")";

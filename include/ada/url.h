@@ -137,13 +137,6 @@ namespace ada {
     inline bool base_port_has_value() const;
 
     /**
-     * Returns true if this URL has a valid domain as per RFC 1034 and
-     * corresponding specifications. Among other things, it requires
-     * that the domain string has fewer than 255 octets.
-     */
-    [[nodiscard]] bool has_valid_domain() const noexcept;
-
-    /**
      * @private
      *
      * Parse the host from the provided input. We assume that

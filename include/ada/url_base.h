@@ -238,6 +238,13 @@ namespace ada {
     virtual bool base_port_has_value() const = 0;
 
     /**
+     * Returns true if this URL has a valid domain as per RFC 1034 and
+     * corresponding specifications. Among other things, it requires
+     * that the domain string has fewer than 255 octets.
+     */
+    [[nodiscard]] bool has_valid_domain() const noexcept;
+
+    /**
     * Returns a JSON string representation of this URL.
     */
     virtual std::string to_string() const = 0;
