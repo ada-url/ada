@@ -149,11 +149,11 @@ namespace ada {
     port = input;
   }
 
-  inline std::optional<uint16_t> url::retrieve_base_port() {
+  inline std::optional<uint16_t> url::retrieve_base_port() const {
     return port;
   }
 
-  inline std::string url::retrieve_base_pathname() {
+  inline std::string url::retrieve_base_pathname() const {
     return path;
   }
 
