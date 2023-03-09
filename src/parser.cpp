@@ -5,6 +5,8 @@
 #include "ada/log.h"
 #include "ada/parser.h"
 
+#include <numeric>
+
 namespace ada::parser {
 
   template <class result_type>
