@@ -24,8 +24,8 @@ namespace ada {
   using result = tl::expected<result_type, ada::errors>;
 
   /**
-   * The URL parser takes a scalar value string input, with an optional null or base URL base (default null)
-   * and an optional encoding encoding (default UTF-8).
+   * The URL parser takes a scalar value string input, with an optional null or base URL base (default null).
+   * The parser assumes the input has an UTF-8 encoding.
    *
    * @param input the string input to analyze.
    * @param base_url the optional string input to use as a base url.
