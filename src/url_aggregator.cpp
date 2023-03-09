@@ -1,4 +1,5 @@
 #include "ada.h"
+#include "ada/checkers-inl.h"
 #include "ada/implementation.h"
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
@@ -37,19 +38,20 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return buffer;
 }
 
-[[nodiscard]] std::string url_aggregator::get_origin() const noexcept {
-  // TODO: Implement this
-  return "null";
-}
-
 [[nodiscard]] std::string url_aggregator::get_username() const noexcept {
-  // TODO: Implement this
-  return buffer;
+  bool has_authority = checkers::begins_with(buffer.substr(components.protocol_end, 3), "://");
+  if (has_authority && components.username_end > components.protocol_end + 3) {
+    return buffer.substr(components.protocol_end + 3, components.username_end);
+  }
+  return "";
 }
 
 [[nodiscard]] std::string url_aggregator::get_password() const noexcept {
-  // TODO: Implement this
-  return buffer;
+  bool has_authority = checkers::begins_with(buffer.substr(components.protocol_end, 3), "://");
+  if (has_authority && components.username_end != buffer.length() && buffer[components.username_end] == ':') {
+    return buffer.substr(components.username_end + 1, components.host_start - 1);
+  }
+  return "";
 }
 
 [[nodiscard]] std::string url_aggregator::get_port() const noexcept {
@@ -82,7 +84,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 [[nodiscard]] std::string url_aggregator::get_search() const noexcept {
   if (components.search_start == url_components::omitted) { return ""; }
   auto ending_index = std::string_view::npos;
-  if (components.hash_start == url_components::omitted) { ending_index = components.hash_start; }
+  if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   return buffer.substr(components.search_start, ending_index);
 }
 

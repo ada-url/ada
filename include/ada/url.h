@@ -81,7 +81,6 @@ namespace ada {
      */
     std::optional<std::string> fragment{};
 
-    [[nodiscard]] std::string get_origin() const noexcept;
     [[nodiscard]] std::string get_href() const noexcept;
     [[nodiscard]] std::string get_username() const noexcept;
     [[nodiscard]] std::string get_password() const noexcept;

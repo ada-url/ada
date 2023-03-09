@@ -79,7 +79,7 @@ namespace ada {
      * The origin getter steps are to return the serialization of this’s URL’s origin. [HTML]
      * @see https://url.spec.whatwg.org/#concept-url-origin
      */
-    [[nodiscard]] virtual std::string get_origin() const noexcept = 0;
+    [[nodiscard]] std::string get_origin() const noexcept;
     /**
      * @see https://url.spec.whatwg.org/#dom-url-href
      * @see https://url.spec.whatwg.org/#concept-url-serializer

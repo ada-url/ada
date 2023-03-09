@@ -221,4 +221,28 @@ ada_really_inline bool url_base::parse_scheme(const std::string_view input) {
   return checkers::verify_dns_length(get_host());
 }
 
+[[nodiscard]] std::string url_base::get_origin() const noexcept {
+  if (is_special()) {
+    // Return a new opaque origin.
+    if (type == scheme::FILE) { return "null"; }
+
+    return get_protocol() + "//" + get_host();
+  }
+
+  if (get_scheme() == "blob") {
+    std::string path = retrieve_base_pathname();
+    if (path.length() > 0) {
+      ada::result<ada::url> path_result = ada::parse<ada::url>(path);
+      if (path_result) {
+        if (path_result->is_special()) {
+          return path_result->get_protocol() + "//" + path_result->get_host();
+        }
+      }
+    }
+  }
+
+  // Return a new opaque origin.
+  return "null";
+}
+
 } // namespace ada
