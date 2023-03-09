@@ -155,9 +155,6 @@ namespace ada {
      */
     [[nodiscard]] ada_really_inline bool parse_host(std::string_view input);
 
-    /**
-     * Returns a JSON string representation of this URL.
-     */
     std::string to_string() const;
 
     [[nodiscard]] ada_really_inline ada::url_components get_components() noexcept;
