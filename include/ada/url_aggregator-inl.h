@@ -56,14 +56,14 @@ inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
   components.port = input.value_or(url_components::omitted);
 }
 
-inline std::optional<uint16_t> url_aggregator::retrieve_base_port() {
+inline std::optional<uint16_t> url_aggregator::retrieve_base_port() const {
   if (components.port == url_components::omitted) {
     return std::nullopt;
   }
   return components.port;
 }
 
-inline std::string url_aggregator::retrieve_base_pathname() {
+inline std::string url_aggregator::retrieve_base_pathname() const {
   size_t ending = std::string_view::npos;
   if (base_search_has_value()) { ending = components.search_start; }
   else if (base_fragment_has_value()) { ending = components.hash_start; }

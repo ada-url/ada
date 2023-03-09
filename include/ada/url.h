@@ -122,9 +122,9 @@ namespace ada {
     /** @private */
     inline void update_base_port(std::optional<uint16_t> input);
     /** @private */
-    inline std::optional<uint16_t> retrieve_base_port();
+    inline std::optional<uint16_t> retrieve_base_port() const;
     /** @private */
-    inline std::string retrieve_base_pathname();
+    inline std::string retrieve_base_pathname() const;
     /** @private */
     inline void clear_base_hash();
     /** @private */

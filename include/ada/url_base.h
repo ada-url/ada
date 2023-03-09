@@ -223,9 +223,9 @@ namespace ada {
     /** @private */
     virtual void update_base_port(std::optional<uint16_t> input) = 0;
     /** @private */
-    virtual std::optional<uint16_t> retrieve_base_port() = 0;
+    virtual std::optional<uint16_t> retrieve_base_port() const = 0;
     /** @private */
-    virtual std::string retrieve_base_pathname() = 0;
+    virtual std::string retrieve_base_pathname() const = 0;
     /** @private */
     virtual void clear_base_hash() = 0;
     /** @private */

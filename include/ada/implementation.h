@@ -32,10 +32,10 @@ namespace ada {
    * @return a parsed URL.
    */
   template <class result_type = ada::url>
-  ada_warn_unused ada::result<result_type> parse(std::string_view input, const ada::url* base_url = nullptr);
+  ada_warn_unused ada::result<result_type> parse(std::string_view input, const result_type* base_url = nullptr);
 
-  extern template ada::result<url> parse<url>(std::string_view input, const ada::url* base_url);
-  extern template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input, const ada::url* base_url);
+  extern template ada::result<url> parse<url>(std::string_view input, const url* base_url);
+  extern template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input, const url_aggregator* base_url);
 
   /**
    * Computes a href string from a file path.
