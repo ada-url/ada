@@ -50,7 +50,7 @@ def clang_check(file_path: str) -> None:
 
 def clang_format(file_path: str) -> None:
     diff_output = subprocess.check_output(
-        ["clang-format", "-output-replacements-xml", file_path], stderr=subprocess.STDOUT,
+        ["clang-format", "-output-replacements-xml", "-style=file", file_path], stderr=subprocess.STDOUT,
     )
 
     if b"<replacement " in diff_output:
