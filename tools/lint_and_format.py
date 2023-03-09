@@ -26,7 +26,7 @@ ROOT_DIR = (
     .decode("utf-8")
 )
 
-exclude_dirs = ('.git', '.cache', 'build')
+exclude_dirs = ('.git', '.cache', 'build', 'dependencies', 'docs')
 file_list = [os.path.join(dirpath, filename)
              for dirpath, _, filenames in os.walk(ROOT_DIR)
              for filename in filenames
@@ -37,7 +37,7 @@ file_list = [os.path.join(dirpath, filename)
 def clang_check(file_path: str) -> None:
     try:
         diff_output = subprocess.check_output(
-            ["clang-format", "-output-replacements-xml", file_path], stderr=subprocess.STDOUT,
+            ["clang-format", "-output-replacements-xml", "-style=file", file_path], stderr=subprocess.STDOUT,
         )
         if b"<replacement " in diff_output:
             print(f"Error: {file_path} needs formatting")
@@ -56,7 +56,7 @@ def clang_format(file_path: str) -> None:
     if b"<replacement " in diff_output:
         print(f"Formatting: {file_path}")
         try:
-            subprocess.check_call(["clang-format", "-i", file_path])
+            subprocess.check_call(["clang-format", "-i", "-style=file", file_path])
         except subprocess.CalledProcessError as error:
             print(f'Error: {error.output.decode("utf-8")}')
             sys.exit(1)
