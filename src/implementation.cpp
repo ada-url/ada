@@ -4,18 +4,19 @@
 #include "ada/common_defs.h"
 #include "ada/parser.h"
 #include "ada/url.h"
+#include "ada/url_aggregator.h"
 
 namespace ada {
 
   template <class result_type>
-  ada_warn_unused tl::expected<result_type, ada::errors> parse(std::string_view input, const ada::url* base_url) {
+  ada_warn_unused tl::expected<result_type, ada::errors> parse(std::string_view input, const result_type* base_url) {
     result_type u = ada::parser::parse_url<result_type>(input, base_url);
     if(!u.is_valid) { return tl::unexpected(errors::generic_error); }
     return u;
   }
 
-  template ada::result<url> parse<url>(std::string_view input, const ada::url* base_url = nullptr);
-  template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input, const ada::url* base_url = nullptr);
+  template ada::result<url> parse<url>(std::string_view input, const url* base_url = nullptr);
+  template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input, const url_aggregator* base_url = nullptr);
 
   std::string href_from_file(std::string_view input) {
     // This is going to be much faster than constructing a URL.
