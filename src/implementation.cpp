@@ -8,24 +8,14 @@
 namespace ada {
 
   template <class result_type>
-  ada_warn_unused tl::expected<result_type, ada::errors> parse(std::string_view input,
-                                                               const ada::url* base_url,
-                                                               ada::encoding_type encoding) {
-    if(encoding != encoding_type::UTF8) {
-      // @todo Add support for non UTF8 input
-    }
-    result_type u = ada::parser::parse_url<result_type>(input, base_url, encoding);
+  ada_warn_unused tl::expected<result_type, ada::errors> parse(std::string_view input, const ada::url* base_url) {
+    result_type u = ada::parser::parse_url<result_type>(input, base_url);
     if(!u.is_valid) { return tl::unexpected(errors::generic_error); }
     return u;
   }
 
-  template ada::result<url> parse<url>(std::string_view input,
-                                              const ada::url* base_url = nullptr,
-                                              ada::encoding_type encoding = ada::encoding_type::UTF8);
-
-  template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input,
-                                                                         const ada::url* base_url = nullptr,
-                                                                         ada::encoding_type encoding = ada::encoding_type::UTF8);
+  template ada::result<url> parse<url>(std::string_view input, const ada::url* base_url = nullptr);
+  template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input, const ada::url* base_url = nullptr);
 
   std::string href_from_file(std::string_view input) {
     // This is going to be much faster than constructing a URL.

@@ -23,17 +23,10 @@ namespace ada::parser {
    * Parses a url.
    */
   template <class result_type = ada::url>
-  result_type parse_url(std::string_view user_input,
-                        const ada::url* base_url = nullptr,
-                        ada::encoding_type encoding = ada::encoding_type::UTF8);
+  result_type parse_url(std::string_view user_input,  const ada::url* base_url = nullptr);
 
-  extern template url_aggregator parse_url<url_aggregator>(std::string_view user_input,
-                                                           const ada::url* base_url,
-                                                           ada::encoding_type encoding);
-
-  extern template url parse_url<url>(std::string_view user_input,
-                                     const ada::url* base_url,
-                                     ada::encoding_type encoding);
+  extern template url_aggregator parse_url<url_aggregator>(std::string_view user_input, const ada::url* base_url);
+  extern template url parse_url<url>(std::string_view user_input, const ada::url* base_url);
 
 } // namespace ada
 
