@@ -28,12 +28,12 @@ namespace ada::parser {
                         ada::encoding_type encoding = ada::encoding_type::UTF8);
 
   extern template url_aggregator parse_url<url_aggregator>(std::string_view user_input,
-                                                           const ada::url* base_url = nullptr,
-                                                           ada::encoding_type encoding = ada::encoding_type::UTF8);
+                                                           const ada::url* base_url,
+                                                           ada::encoding_type encoding);
 
   extern template url parse_url<url>(std::string_view user_input,
-                                     const ada::url* base_url = nullptr,
-                                     ada::encoding_type encoding = ada::encoding_type::UTF8);
+                                     const ada::url* base_url,
+                                     ada::encoding_type encoding);
 
 } // namespace ada
 

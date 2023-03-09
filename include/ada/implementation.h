@@ -38,12 +38,12 @@ namespace ada {
                                                  ada::encoding_type encoding = ada::encoding_type::UTF8);
 
   extern template ada::result<url> parse<url>(std::string_view input,
-                                              const ada::url* base_url = nullptr,
-                                              ada::encoding_type encoding = ada::encoding_type::UTF8);
+                                              const ada::url* base_url,
+                                              ada::encoding_type encoding);
 
   extern template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input,
-                                                                         const ada::url* base_url = nullptr,
-                                                                         ada::encoding_type encoding = ada::encoding_type::UTF8);
+                                                                         const ada::url* base_url,
+                                                                         ada::encoding_type encoding);
 
   /**
    * Computes a href string from a file path.

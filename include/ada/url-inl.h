@@ -145,11 +145,11 @@ namespace ada {
     password = input;
   }
 
-  inline void url::update_base_port(std::optional<uint32_t> input) {
+  inline void url::update_base_port(std::optional<uint16_t> input) {
     port = input;
   }
 
-  inline std::optional<uint32_t> url::retrieve_base_port() {
+  inline std::optional<uint16_t> url::retrieve_base_port() {
     return port;
   }
 
