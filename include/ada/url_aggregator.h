@@ -75,6 +75,8 @@ namespace ada {
     /** @private */
     inline bool base_port_has_value() const;
 
+    std::string to_string() const;
+
   }; // url_aggregator
 
 } // namespace ada

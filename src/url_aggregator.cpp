@@ -99,4 +99,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return components;
 }
 
+std::string ada::url_aggregator::to_string() const {
+  return components.to_string();
+}
+
 } // namespace ada
