@@ -21,11 +21,11 @@ namespace ada {
     url_aggregator(url_aggregator &&u) noexcept = default;
     url_aggregator &operator=(url_aggregator &&u) noexcept = default;
     url_aggregator &operator=(const url_aggregator &u) = default;
-    ADA_ATTRIBUTE_NOINLINE ~url_aggregator() = default;
+    ~url_aggregator() = default;
 
     std::string buffer{};
 
-    url_components components;
+    url_components components{};
 
     bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);

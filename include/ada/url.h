@@ -36,7 +36,7 @@ namespace ada {
     url(url &&u) noexcept = default;
     url &operator=(url &&u) noexcept = default;
     url &operator=(const url &u) = default;
-    ADA_ATTRIBUTE_NOINLINE ~url() = default;
+    ~url() = default;
 
     /**
      * @private
