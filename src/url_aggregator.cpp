@@ -11,17 +11,14 @@
 namespace ada {
 
 bool url_aggregator::set_href(const std::string_view input) {
-//  ada::result<url_aggregator> out = ada::parse<url_aggregator>(input);
-//
-//  if (out) {
-//    components = out->get_components();
-//    // TODO: Update private attributes as well.
-//  }
+  ada::result<url_aggregator> out = ada::parse<url_aggregator>(input);
 
-//  return out.has_value();
-  // TODO: Implement this
-  void(input.size());
-  return false;
+  if (out) {
+    components = out->get_components();
+    copy_scheme(*out);
+  }
+
+  return out.has_value();
 }
 
 bool url_aggregator::set_host(const std::string_view input) {
@@ -61,9 +58,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string url_aggregator::get_hash() const noexcept {
-  if (components.hash_start == url_components::omitted) {
-    return "";
-  }
+  if (components.hash_start == url_components::omitted) { return ""; }
   return buffer.substr(components.hash_start);
 }
 
