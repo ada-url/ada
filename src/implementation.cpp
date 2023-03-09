@@ -19,6 +19,14 @@ namespace ada {
     return u;
   }
 
+  template ada::result<url> parse<url>(std::string_view input,
+                                              const ada::url* base_url = nullptr,
+                                              ada::encoding_type encoding = ada::encoding_type::UTF8);
+
+  template ada::result<url_aggregator> parse<url_aggregator>(std::string_view input,
+                                                                         const ada::url* base_url = nullptr,
+                                                                         ada::encoding_type encoding = ada::encoding_type::UTF8);
+
   std::string href_from_file(std::string_view input) {
     // This is going to be much faster than constructing a URL.
     std::string tmp_buffer;

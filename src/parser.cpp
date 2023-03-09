@@ -9,12 +9,23 @@
 #include <optional>
 #include <string_view>
 
+
+
 namespace ada::parser {
 
   template <class result_type>
   result_type parse_url(std::string_view user_input,
                         const ada::url* base_url,
                         ada::encoding_type encoding) {
+    // We can specialize the implementation per type.
+    // Important: result_type_is_ada_url is evaluated at *compile time*. This means
+    // that doing if constexpr(result_type_is_ada_url) { something } else { something else }
+    // is free (at runtime).
+    // This means that ada::url_aggregator and ada::url **do not have to support the exact same API**.
+    constexpr bool result_type_is_ada_url = std::is_same<ada::url, result_type>::value;
+    constexpr bool result_type_is_ada_url_aggregator = std::is_same<ada::url_aggregator, result_type>::value;
+    static_assert(result_type_is_ada_url || result_type_is_ada_url_aggregator); // We don't support anything else for now.
+
     ada_log("ada::parser::parse_url('", user_input,
      "' [", user_input.size()," bytes],", (base_url != nullptr ? base_url->to_string() : "null"),
      ",", ada::to_string(encoding), ")");
@@ -183,9 +194,9 @@ namespace ada::parser {
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
                 if (password_token_seen) {
-                  url.password += "%40";
+                  if constexpr (result_type_is_ada_url) { url.password += "%40"; } else { /* TODO */}
                 } else {
-                  url.username += "%40";
+                  if constexpr (result_type_is_ada_url) { url.username += "%40"; } else { /* TODO */}
                 }
               }
 
@@ -196,14 +207,26 @@ namespace ada::parser {
                 password_token_seen = password_token_location != std::string_view::npos;
 
                 if (!password_token_seen) {
-                  url.username += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+                  if constexpr(result_type_is_ada_url) {
+                    url.username += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+                  } else {
+                    // TODO
+                  }
                 } else {
-                  url.username += unicode::percent_encode(authority_view.substr(0,password_token_location), character_sets::USERINFO_PERCENT_ENCODE);
-                  url.password += unicode::percent_encode(authority_view.substr(password_token_location+1), character_sets::USERINFO_PERCENT_ENCODE);
+                  if constexpr(result_type_is_ada_url) {
+                    url.username += unicode::percent_encode(authority_view.substr(0,password_token_location), character_sets::USERINFO_PERCENT_ENCODE);
+                    url.password += unicode::percent_encode(authority_view.substr(password_token_location+1), character_sets::USERINFO_PERCENT_ENCODE);
+                  } else {
+                    // TODO
+                  }
                 }
               }
               else {
-                url.password += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+                if constexpr (result_type_is_ada_url) {
+                  url.password += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+                } else {
+                  // TODO
+                }
               }
             }
             // Otherwise, if one of the following is true:
@@ -274,7 +297,11 @@ namespace ada::parser {
             // url’s port to base’s port, url’s path to a clone of base’s path, and url’s query to base’s query.
             url.update_base_username(base_url->username);
             url.update_base_password(base_url->password);
-            url.host = base_url->host;
+            if constexpr (result_type_is_ada_url) {
+              url.host = base_url->host;
+            } else  {
+              // TODO
+            }
             url.update_base_port(base_url->port);
             url.update_base_pathname(base_url->path);
             url.has_opaque_path = base_url->has_opaque_path;
@@ -288,10 +315,12 @@ namespace ada::parser {
             else if (input_position != input_size) {
               // Set url’s query to null.
               url.update_base_search(std::nullopt);
-
-              // Shorten url’s path.
-              helpers::shorten_path(url.path, url.type);
-
+              if constexpr (result_type_is_ada_url) {
+                // Shorten url’s path.
+                helpers::shorten_path(url.path, url.type);
+              } else {
+                // TODO
+              }
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
               break;
@@ -321,7 +350,11 @@ namespace ada::parser {
           else {
             url.update_base_username(base_url->username);
             url.update_base_password(base_url->password);
-            url.host = base_url->host;
+            if constexpr (result_type_is_ada_url) {
+              url.host = base_url->host;
+            } else {
+              // TODO
+            }
             url.update_base_port(base_url->port);
             state = ada::state::PATH;
             break;
@@ -390,8 +423,12 @@ namespace ada::parser {
             // If buffer is the empty string, validation error, return failure.
             // Let host be the result of host parsing buffer with url is not special.
             ada_log("HOST parsing ", host_view);
-            if(!url.parse_host(host_view)) { return url; }
-            ada_log("HOST parsing results in ", url.base_hostname_has_value() ? "none" : url.host.value());
+            if constexpr (result_type_is_ada_url) {
+              if(!url.parse_host(host_view)) { return url; }
+              ada_log("HOST parsing results in ", url.base_hostname_has_value() ? "none" : url.host.value());
+            } else {
+              // TODO
+            }
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
             input_position++;
@@ -411,9 +448,17 @@ namespace ada::parser {
 
             // Let host be the result of host parsing host_view with url is not special.
             if (host_view.empty()) {
-              url.host = "";
+              if constexpr (result_type_is_ada_url) {
+                url.host = "";
+              } else {
+                // TODO
+              }
             } else {
-              if(!url.parse_host(host_view)) { return url; }
+              if constexpr(result_type_is_ada_url) {
+                if(!url.parse_host(host_view)) { return url; }
+              } else {
+                // TODO
+              }
             }
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
@@ -498,7 +543,11 @@ namespace ada::parser {
           } else {
             input_position = input_size + 1;
           }
-          if(!helpers::parse_prepared_path(view, url.type, url.path)) { return url; }
+          if constexpr (result_type_is_ada_url) {
+            if(!helpers::parse_prepared_path(view, url.type, url.path)) { return url; }
+          } else {
+            // TODO
+          }
           break;
         }
         case ada::state::FILE_SLASH: {
@@ -517,8 +566,11 @@ namespace ada::parser {
             // base_url_has_value() is true.
             if (base_url != nullptr && base_url->type == ada::scheme::type::FILE) {
               // Set url’s host to base’s host.
-              url.host = base_url->host;
-
+              if constexpr (result_type_is_ada_url) {
+                url.host = base_url->host;
+              } else {
+                // TODO
+              }
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
               // then append base’s path[0] to url’s path.
@@ -531,8 +583,12 @@ namespace ada::parser {
                     first_base_url_path.remove_suffix(first_base_url_path.size() - loc);
                   }
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
-                    url.path += '/';
-                    url.path += first_base_url_path;
+                    if constexpr (result_type_is_ada_url) {
+                      url.path += '/';
+                      url.path += first_base_url_path;
+                    } else {
+                      // TODO
+                    }
                   }
                 }
               }
@@ -555,18 +611,25 @@ namespace ada::parser {
             state = ada::state::PATH;
           } else if (file_host_buffer.empty()) {
             // Set url’s host to the empty string.
-            url.host = "";
+            if constexpr (result_type_is_ada_url) {
+              url.host = "";
+            } else {
+              // TODO
+            }
             // Set state to path start state.
             state = ada::state::PATH_START;
           } else {
             size_t consumed_bytes = file_host_buffer.size();
             input_position += consumed_bytes;
             // Let host be the result of host parsing buffer with url is not special.
-            if(!url.parse_host(file_host_buffer)) { return url; }
-
-            // If host is "localhost", then set host to the empty string.
-            if (url.base_hostname_has_value() && url.host.value() == "localhost") {
-              url.host = "";
+            if constexpr (result_type_is_ada_url) {
+              if(!url.parse_host(file_host_buffer)) { return url; }
+              // If host is "localhost", then set host to the empty string.
+              if (url.base_hostname_has_value() && url.host.value() == "localhost") {
+                url.host = "";
+              }
+            } else {
+              // TODO
             }
 
             // Set buffer to the empty string and state to path start state.
@@ -581,10 +644,12 @@ namespace ada::parser {
 
           // Set url’s scheme to "file".
           url.set_scheme("file");
-
-          // Set url’s host to the empty string.
-          url.host = "";
-
+          if constexpr (result_type_is_ada_url) {
+            // Set url’s host to the empty string.
+            url.host = "";
+          } else {
+            // TODO
+          }
           // If c is U+002F (/) or U+005C (\), then:
           if (input_position != input_size && (url_data[input_position] == '/' || url_data[input_position] == '\\')) {
             ada_log("FILE c is U+002F or U+005C");
@@ -595,7 +660,11 @@ namespace ada::parser {
           else if (base_url != nullptr && base_url->type == ada::scheme::type::FILE) {
             // Set url’s host to base’s host, url’s path to a clone of base’s path, and url’s query to base’s query.
             ada_log("FILE base non-null");
-            url.host = base_url->host;
+            if constexpr (result_type_is_ada_url) {
+              url.host = base_url->host;
+            } else {
+              // TODO
+            }
             url.update_base_pathname(base_url->path);
             url.has_opaque_path = base_url->has_opaque_path;
             url.update_base_search(base_url->query);
@@ -612,12 +681,20 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
               if (!checkers::is_windows_drive_letter(file_view)) {
-                helpers::shorten_path(url.path, url.type);
+                if constexpr (result_type_is_ada_url) {
+                  helpers::shorten_path(url.path, url.type);
+                } else {
+                  // TODO
+                }
               }
               // Otherwise:
               else {
                 // Set url’s path to an empty list.
-                url.path.clear();
+                if constexpr (result_type_is_ada_url) {
+                  url.path.clear();
+                } else {
+                  // TODO
+                }
                 url.has_opaque_path = true;
               }
 
@@ -640,7 +717,11 @@ namespace ada::parser {
           ada::unreachable();
       }
     }
-    ada_log("returning ", url.to_string());
+    if constexpr (result_type_is_ada_url) {
+      ada_log("returning ", url.to_string());
+    } else {
+      // TODO
+    }
     return url;
   }
 

@@ -36,7 +36,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
   for (auto _ : state) {
     for (const std::pair<std::string, std::string> &url_strings :
          url_examples) {
-      ada::result base;
+      ada::result<ada::url> base;
       ada::url* base_ptr = nullptr;
       if(!url_strings.second.empty()) {
         base = ada::parse(url_strings.second);
@@ -57,7 +57,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       collector.start();
       for (const std::pair<std::string, std::string> &url_strings :
            url_examples) {
-        ada::result base;
+        ada::result<ada::url> base;
         ada::url* base_ptr = nullptr;
         if(!url_strings.second.empty()) {
             base = ada::parse(url_strings.second);

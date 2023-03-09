@@ -125,55 +125,55 @@ namespace ada {
     return out;
   }
 
-  void url::update_base_hash(std::string_view input) {
+  inline void url::update_base_hash(std::string_view input) {
     fragment = input;
   }
 
-  void url::update_base_search(std::optional<std::string> input) {
+  inline void url::update_base_search(std::optional<std::string> input) {
     query = input;
   }
 
-  void url::update_base_pathname(const std::string_view input) {
+  inline void url::update_base_pathname(const std::string_view input) {
     path = input;
   }
 
-  void url::update_base_username(const std::string_view input) {
+  inline void url::update_base_username(const std::string_view input) {
     username = input;
   }
 
-  void url::update_base_password(const std::string_view input) {
+  inline void url::update_base_password(const std::string_view input) {
     password = input;
   }
 
-  void url::update_base_port(std::optional<uint32_t> input) {
+  inline void url::update_base_port(std::optional<uint32_t> input) {
     port = input;
   }
 
-  std::optional<uint32_t> url::retrieve_base_port() {
+  inline std::optional<uint32_t> url::retrieve_base_port() {
     return port;
   }
 
-  std::string url::retrieve_base_pathname() {
+  inline std::string url::retrieve_base_pathname() {
     return path;
   }
 
-  void url::clear_base_hash() {
+  inline void url::clear_base_hash() {
     fragment = std::nullopt;
   }
 
-  bool url::base_fragment_has_value() const {
+  inline bool url::base_fragment_has_value() const {
     return fragment.has_value();
   }
 
-  bool url::base_search_has_value() const {
+  inline bool url::base_search_has_value() const {
     return query.has_value();
   }
 
-  bool url::base_port_has_value() const {
+  inline bool url::base_port_has_value() const {
     return port.has_value();
   }
 
-  bool url::base_hostname_has_value() const {
+  inline bool url::base_hostname_has_value() const {
     return host.has_value();
   }
 
