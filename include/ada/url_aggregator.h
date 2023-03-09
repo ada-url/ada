@@ -59,9 +59,9 @@ namespace ada {
     /** @private */
     inline void update_base_password(const std::string_view input);
     /** @private */
-    inline void update_base_port(std::optional<uint32_t> input);
+    inline void update_base_port(std::optional<uint16_t> input);
     /** @private */
-    inline std::optional<uint32_t> retrieve_base_port();
+    inline std::optional<uint16_t> retrieve_base_port();
     /** @private */
     inline std::string retrieve_base_pathname();
     /** @private */
