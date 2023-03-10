@@ -23,10 +23,15 @@
 
 namespace ada {
 /**
- * @brief Generic URL struct.
+ * @brief Generic URL struct reliant on std::string instantiation.
  *
  * @details To disambiguate from a valid URL string it can also be referred to
  * as a URL record. A URL is a struct that represents a universal identifier.
+ * Unlike the url_aggregator, the ada::url represents the different components
+ * of a parsed URL as independent std::string instances. This makes the structure
+ * heavier and more reliant on memory allocations. When getting components from the
+ * parsed URL, a new std::string is typically constructed.
+ *
  * @see https://url.spec.whatwg.org/#url-representation
  */
 struct url : url_base {
@@ -97,7 +102,7 @@ struct url : url_base {
   /** @private */
   inline void update_base_password(const std::string_view input);
   /** @private */
-  inline void update_base_port(std::optional<uint16_t> input);
+  inline void update_base_port(std::optional<uint16_t> input) override;
   /** @private */
   inline std::optional<uint16_t> retrieve_base_port() const;
   /** @private */
@@ -152,7 +157,7 @@ struct url : url_base {
   /**
    * Returns a JSON string representation of this URL.
    */
-  std::string to_string() const;
+  std::string to_string() const override;
 
   /**
    * @see https://url.spec.whatwg.org/#dom-url-href
@@ -163,13 +168,15 @@ struct url : url_base {
   /**
    * The origin getter steps are to return the serialization of this’s URL’s
    * origin. [HTML]
+   * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#concept-url-origin
    */
-  [[nodiscard]] std::string get_origin() const noexcept;
+  [[nodiscard]] std::string get_origin() const noexcept override;
 
   /**
    * The protocol getter steps are to return this’s URL’s scheme, followed by
    * U+003A (:).
+   * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
   [[nodiscard]] std::string get_protocol() const noexcept;
@@ -177,12 +184,14 @@ struct url : url_base {
   /**
    * Return url’s host, serialized, followed by U+003A (:) and url’s port,
    * serialized.
+   * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
   [[nodiscard]] std::string get_host() const noexcept;
 
   /**
    * Return this’s URL’s host, serialized.
+   * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
    */
   [[nodiscard]] std::string get_hostname() const noexcept;
@@ -190,21 +199,24 @@ struct url : url_base {
   /**
    * The pathname getter steps are to return the result of URL path serializing
    * this’s URL.
+   * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
   [[nodiscard]] std::string get_pathname() const noexcept;
 
   /**
    * Return U+003F (?), followed by this’s URL’s query.
+   * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
   [[nodiscard]] std::string get_search() const noexcept;
 
   /**
    * The username getter steps are to return this’s URL’s username.
+   * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  [[nodiscard]] std::string get_username() const noexcept;
+  [[nodiscard]] const std::string& get_username() const noexcept;
 
   /**
    * @return Returns true on successful operation.
@@ -276,48 +288,30 @@ struct url : url_base {
 
   /**
    * The password getter steps are to return this’s URL’s password.
+   * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  [[nodiscard]] std::string get_password() const noexcept;
+  [[nodiscard]] const std::string& get_password() const noexcept;
 
   /**
    * Return this’s URL’s port, serialized.
+   * @return a newly constructed string representing the port.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
   [[nodiscard]] std::string get_port() const noexcept;
 
   /**
    * Return U+0023 (#), followed by this’s URL’s fragment.
+   * @return a newly constructed string representing the hash.
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
   [[nodiscard]] std::string get_hash() const noexcept;
-
-  /**
-   * Used for returning the validity from the result of the URL parser.
-   */
-  bool is_valid{true};
-
-  /**
-   * A URL has an opaque path if its path is a string.
-   */
-  bool has_opaque_path{false};
 
   /**
    * A URL includes credentials if its username or password is not the empty
    * string.
    */
   [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
-
-  /**
-   * @private
-   *
-   * Return the scheme type. Note that it is faster to do
-   * get_scheme_type() == ada::scheme::type::FILE than to do
-   * get_scheme() == "file", since the former is a direct integer comparison,
-   * while the other involves a (cheap) string test.
-   */
-  [[nodiscard]] ada_really_inline ada::scheme::type
-  get_scheme_type() const noexcept;
 
   /**
    * @private
@@ -392,6 +386,9 @@ struct url : url_base {
    *      `---------------------------------------------- protocol_end
    *
    * Inspired after servo/url
+   *
+   * @return a newly constructed component.
+   *
    * @see
    * https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
    */

@@ -87,11 +87,11 @@ namespace ada {
     return (!query.has_value() || (query.value().empty())) ? "" : "?" + query.value();
   }
 
-  [[nodiscard]] std::string url::get_username() const noexcept {
+  [[nodiscard]] const std::string& url::get_username() const noexcept {
     return username;
   }
 
-  [[nodiscard]] std::string url::get_password() const noexcept {
+  [[nodiscard]] const std::string& url::get_password() const noexcept {
     return password;
   }
 

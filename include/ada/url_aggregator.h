@@ -13,7 +13,14 @@
 #include <string_view>
 
 namespace ada {
-
+  /**
+   * @brief Lightweight URL struct.
+   *
+   * @details The url_aggregator class aims to minimize temporary memory allocation
+   * while representing a parsed URL.
+   * Internally, it contains a single normalized URL (the href), and it
+   * makes available the components, mostly using std::string_view.
+   */
   struct url_aggregator: url_base {
 
     url_aggregator() = default;
@@ -23,30 +30,106 @@ namespace ada {
     url_aggregator &operator=(const url_aggregator &u) = default;
     ~url_aggregator() = default;
 
-    std::string buffer{};
-
-    url_components components{};
-
     bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
     inline void set_scheme(std::string_view new_scheme) noexcept;
-
     inline void copy_scheme(const url_aggregator& u) noexcept;
 
-    [[nodiscard]] std::string get_origin() const noexcept;
+    /**
+     * The origin getter steps are to return the serialization of this’s URL’s
+     * origin. [HTML]
+     * @return a newly allocated string.
+     * @see https://url.spec.whatwg.org/#concept-url-origin
+     */
+    [[nodiscard]] std::string get_origin() const noexcept override;
+    /**
+     * Return the normalized string.
+     * This function does not allocate memory.
+     * It is highly efficient.
+     * @return a constant reference to the underlying normalized URL.
+     * @see https://url.spec.whatwg.org/#dom-url-href
+     * @see https://url.spec.whatwg.org/#concept-url-serializer
+     */
     [[nodiscard]] const std::string& get_href() const noexcept;
+    /**
+     * The username getter steps are to return this’s URL’s username.
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view.
+     * @see https://url.spec.whatwg.org/#dom-url-username
+     */
     [[nodiscard]] std::string_view get_username() const noexcept;
+    /**
+     * The password getter steps are to return this’s URL’s password.
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view.
+     * @see https://url.spec.whatwg.org/#dom-url-password
+     */
     [[nodiscard]] std::string_view get_password() const noexcept;
+    /**
+     * Return this’s URL’s port, serialized.
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view.
+     * @see https://url.spec.whatwg.org/#dom-url-port
+     */
     [[nodiscard]] std::string_view get_port() const noexcept;
+    /**
+     * Return U+0023 (#), followed by this’s URL’s fragment.
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view..
+     * @see https://url.spec.whatwg.org/#dom-url-hash
+     */
     [[nodiscard]] std::string_view get_hash() const noexcept;
+    /**
+     * Return url’s host, serialized, followed by U+003A (:) and url’s port,
+     * serialized.
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view.
+     * @see https://url.spec.whatwg.org/#dom-url-host
+     */
     [[nodiscard]] std::string_view get_host() const noexcept;
+    /**
+     * Return this’s URL’s host, serialized.
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view.
+     * @see https://url.spec.whatwg.org/#dom-url-hostname
+     */
     [[nodiscard]] std::string_view get_hostname() const noexcept;
-    [[nodiscard]] std::string_view get_pathname() const noexcept;
-    [[nodiscard]] std::string_view get_search() const noexcept;
-    [[nodiscard]] std::string_view get_protocol() const noexcept;
 
+    /**
+     * The pathname getter steps are to return the result of URL path serializing
+     * this’s URL.
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view.
+     * @see https://url.spec.whatwg.org/#dom-url-pathname
+     */
+    [[nodiscard]] std::string_view get_pathname() const noexcept;
+    /**
+     * Return U+003F (?), followed by this’s URL’s query.
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view.
+     * @see https://url.spec.whatwg.org/#dom-url-search
+     */
+    [[nodiscard]] std::string_view get_search() const noexcept;
+    /**
+     * The protocol getter steps are to return this’s URL’s scheme, followed by
+     * U+003A (:).
+     * This function does not allocate memory.
+     * @return a lightweight std::string_view.
+     * @see https://url.spec.whatwg.org/#dom-url-protocol
+     */
+    [[nodiscard]] std::string_view get_protocol() const noexcept;
+    /**
+     * A URL includes credentials if its username or password is not the empty
+     * string.
+     */
     [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
+    /**
+     * @private
+     *
+     * A URL cannot have a username/password/port if its host is null or the empty
+     * string, or its scheme is "file".
+     */
     [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
     /** @private */
@@ -60,7 +143,7 @@ namespace ada {
     /** @private */
     inline void update_base_password(const std::string_view input);
     /** @private */
-    inline void update_base_port(std::optional<uint16_t> input);
+    inline void update_base_port(std::optional<uint16_t> input) override;
     /** @private */
     inline std::optional<uint16_t> retrieve_base_port() const;
     /** @private */
@@ -94,10 +177,19 @@ namespace ada {
      *      `---------------------------------------------- protocol_end
      *
      * Inspired after servo/url
+     *
+     * @return a constant reference to the underlying component attribute.
+     *
      * @see https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
      */
     [[nodiscard]] ada_really_inline const ada::url_components& get_components() const noexcept;
-    std::string to_string() const;
+    /**
+     * Returns a string representation of this URL.
+     */
+    std::string to_string() const override;
+    private:
+    std::string buffer{};
+    url_components components{};
 
   }; // url_aggregator
 

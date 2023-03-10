@@ -40,24 +40,37 @@ inline int leading_zeroes(uint32_t input_num) {
 #endif // ADA_REGULAR_VISUAL_STUDIO
 }
 
-// integer logarithm of x (ceil(log2(x)))
-inline int int_log2(uint32_t x) { return 31 - leading_zeroes(x | 1); }
+/**
+ * fast_digit_count has internal linkage.
+ */
+namespace {
+  /**
+  * @private
+  * integer logarithm of x (ceil(log2(x)))
+  * Only used by url::get_components() via fast_digit_count.
+  */
+  inline int int_log2(uint32_t x) { return 31 - leading_zeroes(x | 1); }
 
-// faster than std::to_string(x).size().
-inline int fast_digit_count(uint32_t x) {
-  // Compiles to very few instructions. Note that the
-  // table is static and thus effectively a constant.
-  // We leave it inside the function because it is meaningless
-  // outside of it (this comes at no performance cost).
-  const static uint64_t table[] = {
-      4294967296,  8589934582,  8589934582,  8589934582,  12884901788,
-      12884901788, 12884901788, 17179868184, 17179868184, 17179868184,
-      21474826480, 21474826480, 21474826480, 21474826480, 25769703776,
-      25769703776, 25769703776, 30063771072, 30063771072, 30063771072,
-      34349738368, 34349738368, 34349738368, 34349738368, 38554705664,
-      38554705664, 38554705664, 41949672960, 41949672960, 41949672960,
-      42949672960, 42949672960};
-  return int((x + table[int_log2(x)]) >> 32);
+  /**
+  * @private
+  * faster than std::to_string(x).size().
+  * Only used by url::get_components().
+  */
+  inline int fast_digit_count(uint32_t x) {
+    // Compiles to very few instructions. Note that the
+    // table is static and thus effectively a constant.
+    // We leave it inside the function because it is meaningless
+    // outside of it (this comes at no performance cost).
+    const static uint64_t table[] = {
+        4294967296,  8589934582,  8589934582,  8589934582,  12884901788,
+        12884901788, 12884901788, 17179868184, 17179868184, 17179868184,
+        21474826480, 21474826480, 21474826480, 21474826480, 25769703776,
+        25769703776, 25769703776, 30063771072, 30063771072, 30063771072,
+        34349738368, 34349738368, 34349738368, 34349738368, 38554705664,
+        38554705664, 38554705664, 41949672960, 41949672960, 41949672960,
+        42949672960, 42949672960};
+    return int((x + table[int_log2(x)]) >> 32);
+  }
 }
 
 [[nodiscard]] ada_really_inline ada::url_components
