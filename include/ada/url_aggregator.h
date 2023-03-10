@@ -200,9 +200,10 @@ namespace ada {
      * Returns a string representation of this URL.
      */
     std::string to_string() const override;
+
     private:
-    std::string buffer{};
-    url_components components{};
+      std::string buffer{};
+      url_components components{};
 
   }; // url_aggregator
 
