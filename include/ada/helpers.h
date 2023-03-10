@@ -14,6 +14,7 @@
 #include <optional>
 
 /**
+ * @private
  * @namespace ada::helpers
  * @brief Includes the definitions for helper functions
  */
@@ -26,6 +27,7 @@ namespace ada::helpers {
   void encode_json(std::string_view view, out_iter out);
 
   /**
+   * @private
    * This function is used to prune a fragment from a url, and returning the removed string if input has fragment.
    *
    * @details prune_fragment seeks the first '#' and returns everything after it as a
@@ -38,6 +40,7 @@ namespace ada::helpers {
   ada_really_inline std::optional<std::string_view> prune_fragment(std::string_view& input) noexcept;
 
   /**
+   * @private
    * Defined by the URL specification, shorten a URLs paths.
    * @see https://url.spec.whatwg.org/#shorten-a-urls-path
    */
@@ -59,17 +62,20 @@ namespace ada::helpers {
   ada_really_inline bool parse_prepared_path(const std::string_view input, ada::scheme::type type, std::string& path);
 
   /**
+   * @private
    * Remove and mutate all ASCII tab or newline characters from an input.
    */
   ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept;
 
   /**
+   * @private
    * Return the substring from input going from index pos to the end. If pos > input.size(),
    * it returns an empty string_view. This function cannot throw.
    */
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept;
 
   /**
+   * @private
    * Return the substring from input going from index pos1 to the pos2.
    */
   ada_really_inline std::string_view substring(const std::string& input, size_t pos1, size_t pos2) noexcept {
@@ -77,12 +83,14 @@ namespace ada::helpers {
   }
 
   /**
+   * @private
    * Modify the string_view so that it has the new size pos, assuming that pos <= input.size().
    * This function cannot throw.
    */
   ada_really_inline void resize(std::string_view& input, size_t pos) noexcept;
 
   /**
+   * @private
    * Returns a host's delimiter location depending on the state of the instance, and 
    * whether a colon was found outside brackets.
    * Used by the host parser.
@@ -90,32 +98,38 @@ namespace ada::helpers {
   ada_really_inline std::pair<size_t,bool> get_host_delimiter_location(const bool is_special, std::string_view& view) noexcept;
 
   /**
+   * @private
    * Removes leading and trailing C0 control and whitespace characters from string.
    */
   ada_really_inline void trim_c0_whitespace(std::string_view& input) noexcept;
 
   /**
+   * @private
    * @see https://url.spec.whatwg.org/#potentially-strip-trailing-spaces-from-an-opaque-path
    */
   template <class url_type>
   ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) noexcept;
 
   /**
+   * @private
    * Reverse the order of the bytes.
    */
   ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept;
 
   /**
+   * @private
    * Reverse the order of the bytes but only if the system is big endian
    */
   ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept;
   
   /**
-  * Finds the delimiter of a view in authority state.
-  */
+   * @private
+   * Finds the delimiter of a view in authority state.
+   */
   ada_really_inline size_t find_authority_delimiter_special(std::string_view view) noexcept;
 
   /**
+   * @private
    * Finds the delimiter of a view in authority state.
    */
   ada_really_inline size_t find_authority_delimiter(std::string_view view) noexcept;
