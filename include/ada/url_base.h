@@ -61,6 +61,13 @@ namespace ada {
     [[nodiscard]] virtual std::string get_origin() const noexcept = 0;
 
     /**
+     * Returns true if this URL has a valid domain as per RFC 1034 and
+     * corresponding specifications. Among other things, it requires
+     * that the domain string has fewer than 255 octets.
+     */
+    [[nodiscard]] virtual bool has_valid_domain() const noexcept = 0;
+
+    /**
      * @private
      *
      * Return the 'special port' if the URL is special and not 'file'.
@@ -94,6 +101,7 @@ namespace ada {
 
     /** @private */
     virtual void update_base_port(std::optional<uint16_t> input) = 0;
+
   }; // url_base
 
 } // namespace ada
