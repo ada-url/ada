@@ -93,13 +93,13 @@ inline bool url_aggregator::base_hostname_has_value() const {
 }
 
 ada_really_inline bool url_aggregator::includes_credentials() const noexcept {
-  // TODO: Implement this
+  if (components.username_end > components.protocol_end + 3) { return true; }
+  if (buffer[components.username_end] == ':' && components.username_end + 1 < components.host_start) { return true; }
   return false;
 }
 
 inline bool url_aggregator::cannot_have_credentials_or_port() const {
-  // TODO: Implement this
-  return false;
+  return type == ada::scheme::type::FILE || components.host_start == components.host_end;
 }
 
 [[nodiscard]] ada_really_inline const ada::url_components& url_aggregator::get_components() const noexcept {
