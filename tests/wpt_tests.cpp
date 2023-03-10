@@ -28,8 +28,8 @@ ada::result<result_type> ada_parse(std::string_view view, const result_type* bas
   return ada::parse<result_type>(std::string_view(buffer.get(), view.size()), base);
 }
 
-template ada::result<ada::url> ada_parse(std::string_view view, const ada::url* base = nullptr);
-template ada::result<ada::url_aggregator> ada_parse(std::string_view view, const ada::url_aggregator* base = nullptr);
+template ada::result<ada::url> ada_parse(std::string_view view, const ada::url* base);
+template ada::result<ada::url_aggregator> ada_parse(std::string_view view, const ada::url_aggregator* base);
 
 #include "simdjson.h"
 
