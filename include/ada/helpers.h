@@ -70,6 +70,19 @@ namespace ada::helpers {
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept;
 
   /**
+   * Return the substring from input going from index pos1 to the pos2.
+   */
+  ada_really_inline std::string_view substring(const std::string& input, size_t pos1, size_t pos2) noexcept {
+    return std::string_view(input.data() + pos1, pos2 - pos1);
+  }
+
+  /**
+   * Modify the string_view so that it has the new size pos, assuming that pos <= input.size().
+   * This function cannot throw.
+   */
+  ada_really_inline void resize(std::string_view& input, size_t pos) noexcept;
+
+  /**
    * Returns a host's delimiter location depending on the state of the instance, and 
    * whether a colon was found outside brackets.
    * Used by the host parser.
@@ -84,7 +97,8 @@ namespace ada::helpers {
   /**
    * @see https://url.spec.whatwg.org/#potentially-strip-trailing-spaces-from-an-opaque-path
    */
-  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url_base& url) noexcept;
+  template <class url_type>
+  ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) noexcept;
 
   /**
    * Reverse the order of the bytes.
@@ -105,6 +119,37 @@ namespace ada::helpers {
    * Finds the delimiter of a view in authority state.
    */
   ada_really_inline size_t find_authority_delimiter(std::string_view view) noexcept;
+
+
+
+
+ /**
+  * @private
+  */
+  template<typename T, typename... Args>
+  inline void inner_concat(std::string& buffer, T t) {
+    buffer.append(t);
+  }
+
+  /**
+   * @private
+   */
+  template<typename T, typename... Args>
+  inline void inner_concat(std::string& buffer, T t, Args... args) {
+    buffer.append(t);
+    return inner_concat(buffer, args...);
+  }
+
+  /**
+   * Concatenate the arguments and return a string.
+   * @returns a string
+   */
+  template<typename... Args>
+  std::string concat(Args... args) {
+    std::string answer;
+    inner_concat(answer, args...);
+    return answer;
+  }
 
 } // namespace ada::helpers
 
