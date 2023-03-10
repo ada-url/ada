@@ -101,7 +101,11 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
 }
 
 inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
-  uint32_t new_difference = uint32_t(new_scheme.size() + 1) - components.protocol_end - 1;
+  uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end;
+
+  // Optimization opportunity: Get rid of this branch
+  if (new_scheme.back() != ':') { new_difference += 1; }
+
   type = ada::scheme::get_scheme_type(new_scheme);
   buffer.erase(0, components.protocol_end);
   buffer.insert(0, helpers::concat(new_scheme, ":"));
