@@ -3,6 +3,7 @@
 #include "ada/checkers.h"
 #include "ada/helpers.h"
 #include "ada/implementation.h"
+#include "ada/scheme.h"
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
@@ -14,24 +15,125 @@
 namespace ada {
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme(const std::string_view input) {
-  (void)input;
-  // TODO: implement
+  auto parsed_type = ada::scheme::get_scheme_type(input);
+  bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
+  /**
+   * In the common case, we will immediately recognize a special scheme (e.g., http, https),
+   * in which case, we can go really fast.
+   **/
+  if(is_input_special) { // fast path!!!
+    if (has_state_override) {
+      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+      if (is_special() != is_input_special) { return true; }
+
+      // If url includes credentials or has a non-null port, and buffer is "file", then return.
+      if ((includes_credentials() || components.port != url_components::omitted) && parsed_type == ada::scheme::type::FILE) { return true; }
+
+      // If url’s scheme is "file" and its host is an empty host, then return. An empty host is the empty string.
+      if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
+    }
+
+    type = parsed_type;
+
+    if (has_state_override) {
+      // This is uncommon.
+      uint16_t urls_scheme_port = get_special_port();
+
+      if (urls_scheme_port) {
+        // If url’s port is url’s scheme’s default port, then set url’s port to null.
+        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
+      }
+    }
+  } else { // slow path
+    std::string _buffer = std::string(input);
+    // Next function is only valid if the input is ASCII and returns false
+    // otherwise, but it seems that we always have ascii content so we do not need
+    // to check the return value.
+    unicode::to_lower_ascii(_buffer.data(), _buffer.size());
+
+    if (has_state_override) {
+      // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
+      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+      if (is_special() != ada::scheme::is_special(_buffer)) { return true; }
+
+      // If url includes credentials or has a non-null port, and buffer is "file", then return.
+      if ((includes_credentials() || components.port != url_components::omitted) && _buffer == "file") {
+        return true;
+      }
+
+      // If url’s scheme is "file" and its host is an empty host, then return.
+      // An empty host is the empty string.
+      if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
+    }
+
+    set_scheme(std::move(_buffer));
+
+    if (has_state_override) {
+      // This is uncommon.
+      uint16_t urls_scheme_port = get_special_port();
+
+      if (urls_scheme_port) {
+        // If url’s port is url’s scheme’s default port, then set url’s port to null.
+        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
+      }
+    }
+  }
   return true;
 }
 
 inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
-  (void)u;
-  // TODO: implement
+  uint32_t new_difference = u.components.protocol_end - components.protocol_end;
+  type = u.type;
+  buffer.erase(0, components.protocol_end);
+  buffer.insert(0, u.buffer.substr(0, components.protocol_end));
+  components.protocol_end = u.components.protocol_end;
+
+  // No need to update the components
+  if (new_difference == 0) { return; }
+
+  // Update the rest of the components.
+  components.username_end += new_difference;
+  components.host_start += new_difference;
+  components.host_end += new_difference;
+  components.pathname_start += new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
 }
 
 inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
-  (void)new_scheme;
-  // TODO: implement
+  uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end - 1;
+  type = ada::scheme::get_scheme_type(new_scheme);
+  buffer.erase(0, components.protocol_end);
+  buffer.insert(0, new_scheme);
+  components.protocol_end = uint32_t(new_scheme.size());
+
+  // No need to update the components
+  if (new_difference == 0) { return; }
+
+  // Update the rest of the components.
+  components.username_end += new_difference;
+  components.host_start += new_difference;
+  components.host_end += new_difference;
+  components.pathname_start += new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
 }
 
 bool url_aggregator::set_protocol(const std::string_view input) {
-  (void) input;
-  // TODO: Implement
+  std::string view(input);
+  helpers::remove_ascii_tab_or_newline(view);
+  if (view.empty()) { return true; }
+
+  // Schemes should start with alpha values.
+  if (!checkers::is_alpha(view[0])) { return false; }
+
+  view.append(":");
+
+  std::string::iterator pointer = std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
+
+  if (pointer != view.end() && *pointer == ':') {
+    return parse_scheme<true>(std::string_view(view.data(), pointer - view.begin()));
+  }
   return false;
 }
 
@@ -146,7 +248,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_password() const noexcept {
-  if (has_authority() && components.username_end != buffer.length() && buffer[components.username_end] == ':') {
+  if (has_authority() && components.username_end != buffer.size() && buffer[components.username_end] == ':') {
     return helpers::substring(buffer, components.username_end + 1, components.host_start - 1);
   }
   return "";
