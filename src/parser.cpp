@@ -95,7 +95,7 @@ namespace ada::parser {
           if ((input_position != input_size) && (url_data[input_position] == ':')) {
             ada_log("SCHEME the scheme should be ", url_data.substr(0,input_position));
             if(!url.parse_scheme(url_data.substr(0,input_position))) { return url; }
-            ada_log("SCHEME the scheme is ", url.get_scheme());
+            ada_log("SCHEME the scheme is ", url.get_protocol());
 
             // If url’s scheme is "file", then:
             if (url.type == ada::scheme::type::FILE) {
@@ -428,7 +428,7 @@ namespace ada::parser {
             ada_log("HOST parsing ", host_view);
             if constexpr (result_type_is_ada_url) {
               if(!url.parse_host(host_view)) { return url; }
-              ada_log("HOST parsing results in ", url.base_hostname_has_value() ? "none" : url.host.value());
+              ada_log("HOST parsing results in ", url.host.value_or("none"));
             } else {
               // TODO
             }
