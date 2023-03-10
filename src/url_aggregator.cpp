@@ -33,7 +33,7 @@ template <bool has_state_override>
       if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
     }
 
-    type = parsed_type;
+    set_scheme(input);
 
     if (has_state_override) {
       // This is uncommon.
@@ -101,11 +101,11 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
 }
 
 inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
-  uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end - 1;
+  uint32_t new_difference = uint32_t(new_scheme.size() + 1) - components.protocol_end - 1;
   type = ada::scheme::get_scheme_type(new_scheme);
   buffer.erase(0, components.protocol_end);
-  buffer.insert(0, new_scheme);
-  components.protocol_end = uint32_t(new_scheme.size());
+  buffer.insert(0, helpers::concat(new_scheme, ":"));
+  components.protocol_end = uint32_t(new_scheme.size() + 1);
 
   // No need to update the components
   if (new_difference == 0) { return; }
