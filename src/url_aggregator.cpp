@@ -36,9 +36,24 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 }
 
 bool url_aggregator::set_username(const std::string_view input) {
-  (void) input;
-  // TODO: Implement
-  return false;
+  if (cannot_have_credentials_or_port()) { return false; }
+  size_t username_start = components.protocol_end + 3;
+  size_t username_length = components.username_end - username_start;
+  buffer.erase(username_start, components.username_end);
+
+  std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
+  buffer.append(encoded_input, username_start);
+
+  size_t new_difference = encoded_input.size() - username_length;
+  if (new_difference == 0) { return true; }
+
+  components.host_start += new_difference;
+  components.host_end += new_difference;
+  components.pathname_start += new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+
+  return true;
 }
 
 bool url_aggregator::set_password(const std::string_view input) {
