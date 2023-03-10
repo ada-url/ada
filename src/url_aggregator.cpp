@@ -244,7 +244,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
   if (get_protocol() == "blob:") {
     std::string_view path = retrieve_base_pathname();
-    if (path.length() > 0) {
+    if (path.size() > 0) {
       ada::result<ada::url> path_result = ada::parse<ada::url>(path);
       if (path_result) {
         if (path_result->is_special()) {
@@ -311,7 +311,48 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 std::string ada::url_aggregator::to_string() const {
-  return components.to_string();
+  std::string answer;
+  auto back = std::back_insert_iterator(answer);
+  answer.append("{\n");
+
+  answer.append("\t\"buffer\":\"");
+  helpers::encode_json(buffer, back);
+  answer.append("\",\n");
+
+  answer.append("\t\"protocol_end\":\"");
+  helpers::encode_json(std::to_string(components.protocol_end), back);
+  answer.append("\",\n");
+
+  answer.append("\t\"username_end\":\"");
+  helpers::encode_json(std::to_string(components.username_end), back);
+  answer.append("\",\n");
+
+  answer.append("\t\"host_start\":\"");
+  helpers::encode_json(std::to_string(components.host_start), back);
+  answer.append("\",\n");
+
+  answer.append("\t\"host_end\":\"");
+  helpers::encode_json(std::to_string(components.host_end), back);
+  answer.append("\",\n");
+
+  answer.append("\t\"port\":\"");
+  helpers::encode_json(std::to_string(components.port), back);
+  answer.append("\",\n");
+
+  answer.append("\t\"pathname_start\":\"");
+  helpers::encode_json(std::to_string(components.pathname_start), back);
+  answer.append("\",\n");
+
+  answer.append("\t\"search_start\":\"");
+  helpers::encode_json(std::to_string(components.search_start), back);
+  answer.append("\",\n");
+
+  answer.append("\t\"hash_start\":\"");
+  helpers::encode_json(std::to_string(components.hash_start), back);
+  answer.append("\",\n");
+
+  answer.append("\n}");
+  return answer;
 }
 
 [[nodiscard]] bool url_aggregator::has_valid_domain() const noexcept {
