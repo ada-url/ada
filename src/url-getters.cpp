@@ -4,6 +4,7 @@
  */
 #include "ada.h"
 #include "ada/implementation.h"
+#include "ada/helpers.h"
 
 #include <algorithm>
 #include <string>
@@ -42,8 +43,7 @@ namespace ada {
     if (is_special()) {
       // Return a new opaque origin.
       if (type == scheme::FILE) { return "null"; }
-
-      return get_protocol() + "//" + get_host();
+      return ada::helpers::concat(get_protocol(), "//", get_host());
     }
 
     if (get_scheme() == "blob") {
@@ -51,7 +51,7 @@ namespace ada {
         ada::result<ada::url> path_result = ada::parse<ada::url>(get_pathname());
         if (path_result) {
           if (path_result->is_special()) {
-            return path_result->get_protocol() + "//" + path_result->get_host();
+            return ada::helpers::concat(path_result->get_protocol(), "//", path_result->get_host());
           }
         }
       }

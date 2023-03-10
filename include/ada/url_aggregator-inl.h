@@ -20,7 +20,7 @@ inline void url_aggregator::update_base_hash(std::string_view input) {
   buffer.append(input);
 }
 
-inline void url_aggregator::update_base_search(std::optional<std::string> input) {
+inline void url_aggregator::update_base_search(std::optional<std::string_view> input) {
   bool has_hash = components.hash_start != url_components::omitted;
 
   if (has_hash) {
@@ -63,11 +63,11 @@ inline std::optional<uint16_t> url_aggregator::retrieve_base_port() const {
   return components.port;
 }
 
-inline std::string url_aggregator::retrieve_base_pathname() const {
-  size_t ending = std::string_view::npos;
+inline std::string_view url_aggregator::retrieve_base_pathname() const {
+  size_t ending = buffer.size();
   if (base_search_has_value()) { ending = components.search_start; }
   else if (base_fragment_has_value()) { ending = components.hash_start; }
-  return buffer.substr(components.pathname_start, ending);
+  return helpers::substring(buffer, components.pathname_start, ending);
 }
 
 inline void url_aggregator::clear_base_hash() {
@@ -99,6 +99,10 @@ ada_really_inline bool url_aggregator::includes_credentials() const noexcept {
 inline bool url_aggregator::cannot_have_credentials_or_port() const {
   // TODO: Implement this
   return false;
+}
+
+[[nodiscard]] ada_really_inline const ada::url_components& url_aggregator::get_components() const noexcept {
+  return components;
 }
 
 }

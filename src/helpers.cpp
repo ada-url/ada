@@ -95,6 +95,10 @@ namespace ada::helpers {
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 
+  ada_really_inline void resize(std::string_view& input, size_t pos) noexcept {
+    input.remove_suffix(input.size() - pos);
+  }
+
   // Reverse the byte order.
   ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept {
     // performance: this often compiles to a single instruction (e.g., bswap)
@@ -440,13 +444,14 @@ namespace ada::helpers {
     }
   }
 
-  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url_base& url) noexcept {
+  template <class url_type>
+  ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) noexcept {
     if (!url.has_opaque_path) return;
     if (url.base_fragment_has_value()) return;
     if (url.base_search_has_value()) return;
 
-    std::string path = url.retrieve_base_pathname();
-    while (!path.empty() && path.back() == ' ') { path.resize(path.size() - 1); }
+    std::string_view path = url.retrieve_base_pathname();
+    while (!path.empty() && path.back() == ' ') { path.remove_suffix(1); }
     url.update_base_pathname(path);
   }
 

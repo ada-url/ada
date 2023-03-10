@@ -8,6 +8,28 @@
 
 namespace ada {
 
+  ada_really_inline size_t url::parse_port(std::string_view view, bool check_trailing_content) noexcept {
+    ada_log("parse_port('", view, "') ", view.size());
+    uint16_t parsed_port{};
+    auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
+    if(r.ec == std::errc::result_out_of_range) {
+      ada_log("parse_port: std::errc::result_out_of_range");
+      is_valid = false;
+      return 0;
+    }
+    ada_log("parse_port: ", parsed_port);
+    const size_t consumed = size_t(r.ptr - view.data());
+    ada_log("parse_port: consumed ", consumed);
+    if(check_trailing_content) {
+      is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
+    }
+    ada_log("parse_port: is_valid = ", is_valid);
+    if(is_valid) {
+      port = (r.ec == std::errc() && scheme_default_port() != parsed_port) ?
+        std::optional<uint16_t>(parsed_port) : std::nullopt;
+    }
+    return consumed;
+  }
   bool url::parse_opaque_host(std::string_view input) {
     ada_log("parse_opaque_host ", input, "[", input.size(), " bytes]");
     if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
@@ -286,6 +308,91 @@ namespace ada {
     return true;
   }
 
+  template <bool has_state_override>
+  ada_really_inline bool url::parse_scheme(const std::string_view input) {
+    auto parsed_type = ada::scheme::get_scheme_type(input);
+    bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
+    /**
+     * In the common case, we will immediately recognize a special scheme (e.g., http, https),
+     * in which case, we can go really fast.
+     **/
+    if(is_input_special) { // fast path!!!
+      if (has_state_override) {
+        // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+        if (is_special() != is_input_special) {
+          return true;
+        }
+
+        // If url includes credentials or has a non-null port, and buffer is "file", then return.
+        if ((includes_credentials() || port.has_value()) && parsed_type == ada::scheme::type::FILE) {
+          return true;
+        }
+
+        // If url’s scheme is "file" and its host is an empty host, then return.
+        // An empty host is the empty string.
+        if (type == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
+          return true;
+        }
+      }
+
+      type = parsed_type;
+
+      if (has_state_override) {
+        // This is uncommon.
+        uint16_t urls_scheme_port = get_special_port();
+
+        if (urls_scheme_port) {
+          // If url’s port is url’s scheme’s default port, then set url’s port to null.
+          if (port.has_value() && *port == urls_scheme_port) {
+            port = std::nullopt;
+          }
+        }
+      }
+    } else { // slow path
+      std::string _buffer = std::string(input);
+      // Next function is only valid if the input is ASCII and returns false
+      // otherwise, but it seems that we always have ascii content so we do not need
+      // to check the return value.
+      //bool is_ascii =
+      unicode::to_lower_ascii(_buffer.data(), _buffer.size());
+
+      if (has_state_override) {
+        // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
+        // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+        if (is_special() != ada::scheme::is_special(_buffer)) {
+          return true;
+        }
+
+        // If url includes credentials or has a non-null port, and buffer is "file", then return.
+        if ((includes_credentials() || port.has_value()) && _buffer == "file") {
+          return true;
+        }
+
+        // If url’s scheme is "file" and its host is an empty host, then return.
+        // An empty host is the empty string.
+        if (type == ada::scheme::type::FILE && host.has_value() && host.value().empty()) {
+          return true;
+        }
+      }
+
+      set_scheme(std::move(_buffer));
+
+      if (has_state_override) {
+        // This is uncommon.
+        uint16_t urls_scheme_port = get_special_port();
+
+        if (urls_scheme_port) {
+          // If url’s port is url’s scheme’s default port, then set url’s port to null.
+          if (port.has_value() && *port == urls_scheme_port) {
+            port = std::nullopt;
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
   ada_really_inline bool url::parse_host(std::string_view input) {
     ada_log("parse_host ", input, "[", input.size(), " bytes]");
     if(input.empty()) { return is_valid = false; } // technically unnecessary.
@@ -345,6 +452,44 @@ namespace ada {
       return parse_ipv4(host.value());
     }
 
+    return true;
+  }
+
+
+  ada_really_inline bool url::parse_path(std::string_view input) {
+    ada_log("parse_path ", input);
+    std::string tmp_buffer;
+    std::string_view internal_input;
+    if(unicode::has_tabs_or_newline(input)) {
+      tmp_buffer = input;
+      // Optimization opportunity: Instead of copying and then pruning, we could just directly
+      // build the string from user_input.
+      helpers::remove_ascii_tab_or_newline(tmp_buffer);
+      internal_input = tmp_buffer;
+    } else {
+      internal_input = input;
+    }
+
+    // If url is special, then:
+    if (is_special()) {
+      if(internal_input.empty()) {
+        path = "/";
+      } else if((internal_input[0] == '/') ||(internal_input[0] == '\\')){
+        return helpers::parse_prepared_path(internal_input.substr(1), type, path);
+      } else {
+        return helpers::parse_prepared_path(internal_input, type, path);
+      }
+    } else if (!internal_input.empty()) {
+      if(internal_input[0] == '/') {
+        return helpers::parse_prepared_path(internal_input.substr(1), type, path);
+      } else {
+        return helpers::parse_prepared_path(internal_input, type, path);
+      }
+    } else {
+      if(!host.has_value()) {
+        path = "/";
+      }
+    }
     return true;
   }
 

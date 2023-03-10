@@ -579,10 +579,10 @@ namespace ada::parser {
               // then append base’s path[0] to url’s path.
               if (!base_url->retrieve_base_pathname().empty()) {
                 if (!checkers::is_windows_drive_letter(helpers::substring(url_data, input_position))) {
-                  std::string first_base_url_path = base_url->retrieve_base_pathname().substr(1);
+                  std::string_view first_base_url_path = base_url->retrieve_base_pathname().substr(1);
                   size_t loc = first_base_url_path.find('/');
                   if(loc != std::string_view::npos) {
-                    first_base_url_path.resize(loc);
+                    helpers::resize(first_base_url_path,loc);
                   }
                   if (checkers::is_normalized_windows_drive_letter(first_base_url_path)) {
                     if constexpr (result_type_is_ada_url) {
