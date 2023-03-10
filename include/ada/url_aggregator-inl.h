@@ -5,6 +5,7 @@
 #ifndef ADA_URL_AGGREGATOR_INL_H
 #define ADA_URL_AGGREGATOR_INL_H
 
+#include "ada/helpers.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
 #include "ada/scheme.h"
@@ -103,6 +104,10 @@ inline bool url_aggregator::cannot_have_credentials_or_port() const {
 
 [[nodiscard]] ada_really_inline const ada::url_components& url_aggregator::get_components() const noexcept {
   return components;
+}
+
+inline bool ada::url_aggregator::has_authority() const noexcept {
+  return (components.protocol_end + 3 <= buffer.size()) && helpers::substring(buffer, components.protocol_end, components.protocol_end + 3) == "://";
 }
 
 }

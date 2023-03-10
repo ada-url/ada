@@ -41,8 +41,9 @@ bool url_aggregator::set_username(const std::string_view input) {
   size_t username_length = components.username_end - username_start;
   buffer.erase(username_start, components.username_end);
 
+  // Optimization opportunity: Avoid temporary string creation
   std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
-  buffer.append(encoded_input, username_start);
+  buffer.insert(username_start, encoded_input);
 
   size_t new_difference = encoded_input.size() - username_length;
   if (new_difference == 0) { return true; }
@@ -138,16 +139,14 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_username() const noexcept {
-  bool has_authority = checkers::begins_with(buffer.substr(components.protocol_end, 3), "://");
-  if (has_authority && components.username_end > components.protocol_end + 3) {
+  if (has_authority() && components.username_end > components.protocol_end + 3) {
     return helpers::substring(buffer, components.protocol_end + 3, components.username_end);
   }
   return "";
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_password() const noexcept {
-  bool has_authority = checkers::begins_with(buffer.substr(components.protocol_end, 3), "://");
-  if (has_authority && components.username_end != buffer.length() && buffer[components.username_end] == ':') {
+  if (has_authority() && components.username_end != buffer.length() && buffer[components.username_end] == ':') {
     return helpers::substring(buffer, components.username_end + 1, components.host_start - 1);
   }
   return "";
