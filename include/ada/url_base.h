@@ -17,6 +17,8 @@ namespace ada {
    * A url_base contains a few attributes: is_valid, has_opaque_path and type.
    * All non-trivial implementation details are in derived classes such as
    * ada::url and ada::url_aggregator.
+   *
+   * It is an abstract class that cannot be instantiated directly.
    */
   struct url_base {
 
@@ -49,6 +51,14 @@ namespace ada {
      * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
      */
     [[nodiscard]] ada_really_inline bool is_special() const noexcept;
+
+    /**
+     * The origin getter steps are to return the serialization of this’s URL’s
+     * origin. [HTML]
+     * @return a newly allocated string.
+     * @see https://url.spec.whatwg.org/#concept-url-origin
+     */
+    [[nodiscard]] virtual std::string get_origin() const noexcept = 0;
 
     /**
      * @private
