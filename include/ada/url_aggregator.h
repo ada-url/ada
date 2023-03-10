@@ -46,6 +46,9 @@ namespace ada {
 
     [[nodiscard]] bool has_valid_domain() const noexcept override;
 
+    /** @private */
+    inline bool has_authority() const noexcept;
+
     /**
      * The origin getter steps are to return the serialization of this’s URL’s
      * origin. [HTML]
