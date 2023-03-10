@@ -242,7 +242,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
     return helpers::concat(get_protocol(), "//", get_host());
   }
 
-  if (checkers::begins_with(get_protocol(), "blob")) {
+  if (get_protocol() == "blob:") {
     std::string_view path = retrieve_base_pathname();
     if (path.length() > 0) {
       ada::result<ada::url> path_result = ada::parse<ada::url>(path);
