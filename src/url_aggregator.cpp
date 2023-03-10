@@ -193,8 +193,10 @@ bool url_aggregator::set_href(const std::string_view input) {
   ada::result<url_aggregator> out = ada::parse<url_aggregator>(input);
 
   if (out) {
+    // TODO: Figure out why the following line puts test to never finish.
+//    buffer = out->buffer;
     components = out->get_components();
-    copy_scheme(*out);
+    type = out->type;
   }
 
   return out.has_value();
