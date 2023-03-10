@@ -13,6 +13,7 @@
 #include <string_view>
 
 namespace ada {
+
   /**
    * @brief Lightweight URL struct.
    *
@@ -33,8 +34,17 @@ namespace ada {
     bool set_href(const std::string_view input);
     bool set_host(const std::string_view input);
     bool set_hostname(const std::string_view input);
+    bool set_protocol(const std::string_view input);
+    bool set_username(const std::string_view input);
+    bool set_password(const std::string_view input);
+    bool set_port(const std::string_view input);
+    bool set_pathname(const std::string_view input);
+    bool set_search(const std::string_view input);
+    bool set_hash(const std::string_view input);
     inline void set_scheme(std::string_view new_scheme) noexcept;
     inline void copy_scheme(const url_aggregator& u) noexcept;
+
+    [[nodiscard]] bool has_valid_domain() const noexcept override;
 
     /**
      * The origin getter steps are to return the serialization of this’s URL’s
