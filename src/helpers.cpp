@@ -407,7 +407,7 @@ namespace ada::helpers {
         // path_buffer is either path_view or it might point at a percent encoded temporary file.
         std::string_view path_buffer =
          (needs_percent_encoding
-           && ada::unicode::percent_encode(path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp)) ?
+           && ada::unicode::percent_encode<false>(path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp)) ?
           path_buffer_tmp :
           path_view;
         if (unicode::is_double_dot_path_segment(path_buffer)) {

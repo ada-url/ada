@@ -18,7 +18,7 @@ inline void url_aggregator::update_base_hash(std::string_view input) {
   buffer.resize(components.hash_start);
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
-  buffer.append(input);
+  unicode::percent_encode<true>(input,ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
 }
 
 inline void url_aggregator::update_base_search(std::optional<std::string_view> input) {
