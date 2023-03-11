@@ -18,8 +18,15 @@ jobs:
       - uses: actions/checkout@v3 
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
+
+      - name: Install clang-format
+        run: |
+          apt update && apt install clang-format-15 -y
+          ln -s /usr/bin/clang-format-15 /usr/bin/clang-format
+
       - name: Build with Lint and Format Check
-        run: cmake -B build && cmake --build build
+        run: |
+          cmake -B build && cmake --build build
         env:
           CXX: clang++-14
           LINT_AND_FORMAT_CHECK: true

@@ -18,7 +18,15 @@ parser.add_argument(
     default=[".cpp", ".cc", ".c", ".h", ".hpp"],
     help="List of file extensions to check or format (default: .cpp .cc .c .h .hpp)",
 )
+parser.add_argument(
+    "--clangf-version",
+    "-v",
+    default="15",
+    help="Clang-format version",
+)
+
 args = parser.parse_args()
+
 
 ROOT_DIR = (
     subprocess.check_output(["git", "rev-parse", "--show-toplevel"])
@@ -61,6 +69,22 @@ def clang_format(file_path: str) -> None:
             print(f'Error: {error.output.decode("utf-8")}')
             sys.exit(1)
 
+
+def clang_format_verify():
+    version_output = subprocess.check_output(
+        ["clang-format", "--version"], stderr=subprocess.STDOUT,
+    ).decode("utf-8").split(" ")
+    if "version" in version_output :
+        return version_output[version_output.index("version") + 1]
+
+    return ""
+
+
+clang_format_version = clang_format_verify()
+
+if args.clangf_version not in clang_format_version:
+    print(f'Wrong clang-format version. Expected: {args.clangf_version}, Given: {clang_format_version}')
+    sys.exit(1)
 
 for file_path in file_list:
     if args.operation == "check":
