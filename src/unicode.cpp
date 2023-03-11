@@ -320,14 +320,14 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
     return result;
   }
 
-
+  template <bool append>
   bool percent_encode(const std::string_view input, const uint8_t character_set[], std::string &out) {
     auto pointer = std::find_if(input.begin(), input.end(), [character_set](const char c) {
       return character_sets::bit_at(character_set, c);
     });
     // Optimization: Don't iterate if percent encode is not required
     if (pointer == input.end()) { return false; }
-    out.clear();
+    if(!append) { out.clear(); }
     out.append(input.data(), std::distance(input.begin(), pointer));
 
     for (;pointer != input.end(); pointer++) {
