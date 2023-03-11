@@ -206,7 +206,10 @@ void url_aggregator::set_hash(const std::string_view input) {
   }
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
-  buffer.append(unicode::percent_encode(new_value, ada::character_sets::FRAGMENT_PERCENT_ENCODE));
+  // The following requires us to create a temporary string:
+  // buffer.append(unicode::percent_encode(new_value, ada::character_sets::FRAGMENT_PERCENT_ENCODE));
+  // better to just append:
+  unicode::percent_encode<true>(new_value, ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
 }
 
 bool url_aggregator::set_href(const std::string_view input) {
@@ -248,7 +251,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
   if (get_protocol() == "blob:") {
     std::string_view path = retrieve_base_pathname();
-    if (path.size() > 0) {
+    if (!path.empty()) {
       ada::result<ada::url> path_result = ada::parse<ada::url>(path);
       if (path_result) {
         if (path_result->is_special()) {

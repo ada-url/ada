@@ -143,7 +143,9 @@ url::get_components() const noexcept {
   return out;
 }
 
-inline void url::update_base_hash(std::string_view input) { fragment = input; }
+inline void url::update_base_hash(std::string_view input) {
+  fragment = unicode::percent_encode(input, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+}
 
 inline void url::update_base_search(std::optional<std::string> input) {
   query = input;
