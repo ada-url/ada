@@ -18,7 +18,36 @@ inline void url_aggregator::update_base_hash(std::string_view input) {
   buffer.resize(components.hash_start);
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
+  buffer += input; // assume already percent encoded
+}
+
+inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
+  buffer.resize(components.hash_start);
+  components.hash_start = uint32_t(buffer.size());
+  buffer += "#";
   unicode::percent_encode<true>(input,ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
+}
+
+inline void url_aggregator::update_base_search(std::string_view input) {
+  bool has_hash = components.hash_start != url_components::omitted;
+  if (has_hash) {
+    // TODO: Implement this.
+  } else {
+    buffer.resize(components.search_start);
+    buffer += "?";
+    buffer += input;
+  }
+}
+
+inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
+  bool has_hash = components.hash_start != url_components::omitted;
+  if (has_hash) {
+    // TODO: Implement this.
+  } else {
+    buffer.resize(components.search_start);
+    buffer += "?";
+    unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
+  }
 }
 
 inline void url_aggregator::update_base_search(std::optional<std::string_view> input) {
@@ -31,7 +60,7 @@ inline void url_aggregator::update_base_search(std::optional<std::string_view> i
 
     if (input.has_value()) {
       buffer += "?";
-      buffer.append(input.value());
+      buffer += input.value();
     } else {
       components.search_start = url_components::omitted;
     }
