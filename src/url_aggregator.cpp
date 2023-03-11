@@ -151,7 +151,7 @@ bool url_aggregator::set_username(const std::string_view input) {
   std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
   buffer.insert(username_start, encoded_input);
 
-  size_t new_difference = encoded_input.size() - username_length;
+  uint32_t new_difference = uint32_t(encoded_input.size() - username_length);
   if (new_difference == 0) { return true; }
 
   components.host_start += new_difference;
