@@ -11,6 +11,8 @@ set(ADA_LIB_SOVERSION "1" CACHE STRING "ada library soversion")
 
 include(GNUInstallDirs)
 
+include (cmake/clang-format.cmake)
+
 include(CTest)
 include(cmake/ada-flags.cmake)
 
