@@ -61,7 +61,7 @@ namespace ada::parser {
       //                                       ada::character_sets::FRAGMENT_PERCENT_ENCODE));
       // This is much better as we pass a std::string_view, which opens up optimization
       // opportunities.
-      url.update_base_hash(*fragment);
+      url.update_unencoded_base_hash(*fragment);
     }
 
     // Here url_data no longer has its fragment.
@@ -326,7 +326,7 @@ namespace ada::parser {
             // Otherwise, if c is not the EOF code point:
             else if (input_position != input_size) {
               // Set url’s query to null.
-              url.update_base_search(std::nullopt);
+              url.update_base_search(std::nullopt); ///////// why don't we have a simple 'remove_search?', it would be faster and simpler!!!!!!
               if constexpr (result_type_is_ada_url) {
                 // Shorten url’s path.
                 helpers::shorten_path(url.path, url.type);
@@ -412,8 +412,10 @@ namespace ada::parser {
 
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          url.update_base_search(ada::unicode::percent_encode(helpers::substring(url_data, input_position), query_percent_encode_set));
-
+          // The following is not good since we create a temporary string:
+          // url.update_base_search(ada::unicode::percent_encode(helpers::substring(url_data, input_position), query_percent_encode_set));
+          url.update_base_search(helpers::substring(url_data, input_position), query_percent_encode_set);
+          // passing a std::string_view opens up optimizations opportunities!!!
           return url;
         }
         case ada::state::HOST: {
@@ -485,6 +487,11 @@ namespace ada::parser {
             input_position = input_size + 1;
           }
           url.has_opaque_path = true;
+          /***
+          * This is not good. unicode::percent_encode(view, character_sets::C0_CONTROL_PERCENT_ENCODE) will
+          * create a temporary string, and then we pass a std::string_view to update_base_pathname which
+          * may then be converted back into a string.
+          ***/
           url.update_base_pathname(unicode::percent_encode(view, character_sets::C0_CONTROL_PERCENT_ENCODE));
           break;
         }
@@ -683,7 +690,7 @@ namespace ada::parser {
             // Otherwise, if c is not the EOF code point:
             else if (input_position != input_size) {
               // Set url’s query to null.
-              url.update_base_search(std::nullopt);
+              url.update_base_search(std::nullopt); // This is not good: we should have a simple function to remove the base
 
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
