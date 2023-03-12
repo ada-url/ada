@@ -5,6 +5,8 @@
 #ifndef ADA_URL_AGGREGATOR_INL_H
 #define ADA_URL_AGGREGATOR_INL_H
 
+#include "ada/character_sets.h"
+#include "ada/character_sets-inl.h"
 #include "ada/helpers.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
@@ -37,6 +39,17 @@ inline void url_aggregator::update_base_search(std::string_view input) {
     buffer += "?";
     buffer += input;
   }
+}
+
+inline void url_aggregator::update_base_hostname(std::string_view input) {
+  size_t current_length = components.host_end - components.host_start;
+  size_t new_difference = input.size() - current_length;
+  buffer.erase(components.host_start, components.host_end);
+  buffer.insert(components.host_start, input);
+  components.host_end = components.host_start + uint32_t(input.size());
+  components.pathname_start -= new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start -= new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= new_difference; }
 }
 
 inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
@@ -103,6 +116,15 @@ inline std::string_view url_aggregator::retrieve_base_pathname() const {
 inline void url_aggregator::clear_base_hash() {
   components.hash_start = url_components::omitted;
   buffer.resize(components.hash_start);
+}
+
+inline void url_aggregator::clear_base_hostname() {
+  size_t length = components.host_end - components.host_start;
+  if (length == 0) { return; }
+  buffer.erase(components.host_start, components.host_end);
+  components.pathname_start -= length;
+  if (components.search_start != url_components::omitted) { components.search_start -= length; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= length; }
 }
 
 inline bool url_aggregator::base_fragment_has_value() const {

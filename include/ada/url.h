@@ -22,6 +22,7 @@
 #include <string_view>
 
 namespace ada {
+
 /**
  * @brief Generic URL struct reliant on std::string instantiation.
  *
@@ -285,7 +286,8 @@ struct url : url_base {
    * Return true on success.
    * @see https://url.spec.whatwg.org/#hostname-state
    */
-  bool set_host_or_hostname(std::string_view input, bool override_hostname);
+  template <bool override_hostname = false>
+  bool set_host_or_hostname(std::string_view input);
 
   /**
    * The password getter steps are to return this’s URL’s password.
@@ -433,6 +435,7 @@ private:
    * typically do not need to store them in each url instance.
    */
   std::string non_special_scheme{};
+
 }; // struct url
 
 inline std::ostream &operator<<(std::ostream &out, const ada::url &u);

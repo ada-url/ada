@@ -10,7 +10,8 @@
 
 namespace ada {
 
-  bool url::set_host_or_hostname(const std::string_view input, bool override_hostname) {
+  template <bool override_hostname>
+  bool url::set_host_or_hostname(const std::string_view input) {
     if (has_opaque_path) { return false; }
 
     std::optional<std::string> previous_host = host;
@@ -79,11 +80,11 @@ namespace ada {
   }
 
   bool url::set_host(const std::string_view input) {
-    return set_host_or_hostname(input, false);
+    return set_host_or_hostname<false>(input);
   }
 
   bool url::set_hostname(const std::string_view input) {
-    return set_host_or_hostname(input, true);
+    return set_host_or_hostname<true>(input);
   }
 
   bool url::set_username(const std::string_view input) {
