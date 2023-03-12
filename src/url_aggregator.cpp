@@ -262,6 +262,7 @@ void url_aggregator::set_hash(const std::string_view input) {
 bool url_aggregator::set_href(const std::string_view input) {
   ada_log("url_aggregator::set_href ", input, "[", input.size(), " bytes]");
   ada::result<url_aggregator> out = ada::parse<url_aggregator>(input);
+  ada_log("url_aggregator::set_href, success :", out.has_value());
 
   if (out) {
      ada_log("url_aggregator::set_href, parsed ", out->to_string());
@@ -493,6 +494,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 std::string ada::url_aggregator::to_string() const {
+  ada_log("url_aggregator::to_string buffer:", buffer, "[", buffer.size(), " bytes]");
+
   std::string answer;
   auto back = std::back_insert_iterator(answer);
   answer.append("{\n");
