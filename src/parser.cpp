@@ -417,7 +417,7 @@ namespace ada::parser {
           // url.update_base_search(ada::unicode::percent_encode(helpers::substring(url_data, input_position), query_percent_encode_set));
           url.update_base_search(helpers::substring(url_data, input_position), query_percent_encode_set);
           // passing a std::string_view opens up optimizations opportunities!!!
-          ada_log("QUERY update_base_search completed");
+          ada_log("QUERY update_base_search completed ");
           return url;
         }
         case ada::state::HOST: {

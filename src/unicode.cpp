@@ -324,8 +324,6 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
   bool percent_encode(const std::string_view input, const uint8_t character_set[], std::string &out) {
     ada_log("percent_encode ", input, " to output string while ", append ? "appending" : "overwriting");
     auto pointer = std::find_if(input.begin(), input.end(), [character_set](const char c) {
-          ada_log("percent_encode checking " );
-
       return character_sets::bit_at(character_set, c);
     });
     ada_log("percent_encode done checking, moved to ", std::distance(input.begin(), pointer));
