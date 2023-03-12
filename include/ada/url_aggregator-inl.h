@@ -11,6 +11,7 @@
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
 #include "ada/scheme.h"
+#include "ada/log.h"
 
 #include <optional>
 
@@ -42,6 +43,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 }
 
 inline void url_aggregator::update_base_hostname(std::string_view input) {
+  ada_log("url_aggregator::update_base_hostname", input);
   bool has_double_dash_in_url = components.host_start > components.protocol_end;
   size_t current_length = components.host_end - components.host_start;
   size_t new_difference = input.size() - current_length;
@@ -49,18 +51,18 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
   // `//` initially to the buffer, since it depends on the hostname existance.
   if (!has_double_dash_in_url) {
-    buffer.insert(0, "//");
+    buffer.insert(components.host_start, "//");
     new_difference += 2;
-    components.host_start = components.protocol_end + 2;
+    components.host_start += 2;
   } else {
     buffer.erase(components.host_start, components.host_end);
   }
 
   buffer.insert(components.host_start, input);
   components.host_end = components.host_start + uint32_t(input.size());
-  components.pathname_start -= new_difference;
-  if (components.search_start != url_components::omitted) { components.search_start -= new_difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start -= new_difference; }
+  components.pathname_start += new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
 }
 
 inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
@@ -130,7 +132,8 @@ inline void url_aggregator::clear_base_hash() {
 }
 
 inline void url_aggregator::clear_base_hostname() {
-  bool has_double_dash_in_url = components.host_start > components.protocol_end && components.protocol_end > 0;
+  ada_log("url_aggregator::clear_base_hostname");
+  bool has_double_dash_in_url = components.host_start > components.protocol_end;
   size_t length = components.host_start - components.host_end;
 
   // Remove `//` in the URL when clearing the hostname
