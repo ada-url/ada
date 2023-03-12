@@ -6,6 +6,45 @@
 
 namespace ada {
 
+  std::pair<bool,uint32_t> url_components::check_offset_consistency() const noexcept {
+    // TODO: These conditions can be made more strict.
+    uint32_t index = 0;
+    if(protocol_end != url_components::omitted) {
+      if(protocol_end < index) { return {false,0}; }
+      index = protocol_end;
+    }
+    if(username_end != url_components::omitted) {
+      // TODO:
+      // This should be username_end <= index
+      // unless we allow an empty username????
+      if(username_end < index) { return {false,0}; }
+      index = username_end;
+    }
+    if(host_start != url_components::omitted) {
+      if(host_start < index) { return {false,0}; }
+      index = host_start;
+    }
+    if(port != url_components::omitted) {
+      if(port > 0xffff) { return {false,0}; }
+      uint32_t port_length = helpers::fast_digit_count(port) + 1;
+      if(index + port_length < index) { return {false,0}; }
+      index += port_length;
+    }
+    if(pathname_start != url_components::omitted) {
+      if(pathname_start < index) { return {false,0}; }
+      index = pathname_start;
+    }
+    if(search_start != url_components::omitted) {
+      if(search_start < index) { return {false,0}; }
+      index = search_start;
+    }
+    if(hash_start != url_components::omitted) {
+      if(hash_start < index) { return {false,0}; }
+      index = hash_start;
+    }
+    return {true, index};
+  }
+
   std::string url_components::to_string() const {
     std::string answer;
     auto back = std::back_insert_iterator(answer);
