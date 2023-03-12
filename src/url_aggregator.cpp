@@ -260,20 +260,20 @@ void url_aggregator::set_hash(const std::string_view input) {
 }
 
 bool url_aggregator::set_href(const std::string_view input) {
+  ada_log("url_aggregator::set_href ", input, "[", input.size(), " bytes]");
   ada::result<url_aggregator> out = ada::parse<url_aggregator>(input);
 
   if (out) {
+     ada_log("url_aggregator::set_href, parsed ", out->to_string());
     // TODO: Figure out why the following line puts test to never finish.
-//    buffer = out->buffer;
-    components = out->get_components();
-    type = out->type;
+    *this = *out;
   }
 
   return out.has_value();
 }
 
 ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
-  ada_log("parse_host ", input, "[", input.size(), " bytes]");
+  ada_log("url_aggregator:parse_host ", input, "[", input.size(), " bytes]");
   if(input.empty()) { return is_valid = false; } // technically unnecessary.
   // If input starts with U+005B ([), then:
   if (input[0] == '[') {
