@@ -6,7 +6,6 @@
 #include <memory>
 #include <map>
 #include <set>
-#include <sstream>
 
 #include "ada.h"
 #include "ada/character_sets-inl.h"
@@ -46,8 +45,6 @@ const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
 const char *ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
 const char *VERIFYDNSLENGTH_TESTS_JSON = WPT_DATA_DIR "verifydnslength_tests.json";
 
-std::stringstream error_buffer;
-
 #define TEST_START()                                                           \
   do {                                                                         \
     std::cout << "> Running " << __func__ << " ..." << std::endl;              \
@@ -61,7 +58,6 @@ std::stringstream error_buffer;
 #define TEST_FAIL(MESSAGE)                                                     \
   do {                                                                         \
     std::cerr << "FAIL: " << (MESSAGE) << std::endl;                           \
-    error_buffer   << "FAIL: " << (MESSAGE) << std::endl;                      \
     return false;                                                              \
   } while (0);
 #define TEST_SUCCEED()                                                         \
@@ -72,7 +68,6 @@ std::stringstream error_buffer;
   do {                                                                         \
     if (LHS != RHS)  {                                                         \
       std::cerr << "Mismatch: '" << LHS << "' - '" << RHS << "'" << std::endl; \
-      error_buffer << "Mismatch: '" << LHS << "' - '" << RHS << "'" << std::endl; \
       TEST_FAIL(MESSAGE);                                                      \
     }                                                                          \
   } while (0);                                                                 \
@@ -84,8 +79,7 @@ bool file_exists(const char *filename) {
     std::cout << "  file found: " << filename << std::endl;
     return true;
   } else {
-    std::cerr << "  file missing: " << filename << std::endl;
-    error_buffer << "  file missing: " << filename << std::endl;
+    std::cout << "  file missing: " << filename << std::endl;
     return false;
   }
 }
@@ -170,6 +164,12 @@ bool setters_tests_encoding(const char *source) {
 
       ada::result<result_type> base = ada_parse<result_type>(href);
       TEST_ASSERT(base.has_value(), true, "Base url parsing should have succeeded")
+      if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
+        if(!base->validate()) {
+          std::cerr << "Your parsed URL is impossible: " <<  base->to_string() << std::endl;
+          TEST_FAIL("Impossible URL");
+        }
+      }
 
       std::cout << "      " << href << std::endl;
 
@@ -236,6 +236,12 @@ bool setters_tests_encoding(const char *source) {
         base->set_href(new_value);
         TEST_ASSERT(base->set_href(new_value), true, "set_href should return true");
         TEST_ASSERT(base->get_href(), expected, "Href " + element_string + base->to_string());
+      }
+      if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
+        if(!base->validate()) {
+          std::cerr << "Your parsed URL is impossible: " <<  base->to_string() << std::endl;
+          TEST_FAIL("Impossible URL");
+        }
       }
     }
   }
@@ -320,9 +326,10 @@ bool urltestdata_encoding(const char* source) {
       std::string element_string = std::string(std::string_view(object.raw_json()));
       object.reset();
 
+      auto input_element = object["input"];
       std::string_view input{};
       bool allow_replacement_characters = true;
-      if (object["input"].get_string(allow_replacement_characters).get(input)) {
+      if (input_element.get_string(allow_replacement_characters).get(input)) {
         std::cout << "I could not parse " << element_string << std::endl;
         return false;
       }
@@ -338,7 +345,7 @@ bool urltestdata_encoding(const char* source) {
             // We are good. Failure was expected.
             continue; // We can't proceed any further.
           } else {
-            TEST_ASSERT(base_url.has_value(), true, "Based should not have failed " + element_string);
+            TEST_ASSERT(base_url.has_value(), true, "Based should not have failred " + element_string);
           }
         }
       }
@@ -348,36 +355,32 @@ bool urltestdata_encoding(const char* source) {
         TEST_ASSERT(input_url.has_value(), !failure, "Should not have succeeded " + element_string + input_url->to_string());
       } else {
         TEST_ASSERT(input_url.has_value(), true, "Should not have failed " + element_string + input_url->to_string());
-        std::string_view protocol;
-        if(!object["protocol"].get_string().get(protocol)) {
-          TEST_ASSERT(input_url->get_protocol(), protocol, "Protocol " + element_string + input_url->to_string());
+        // Next we test the 'to_string' method.
+        std::string parsed_url_json = input_url->to_string();
+        //
+        if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
+          if(!input_url->validate()) {
+            std::cerr << "Your parsed URL is impossible: " << parsed_url_json << std::endl;
+            TEST_FAIL("Impossible URL");
+          }
         }
+        std::string_view protocol = object["protocol"];
+        TEST_ASSERT(input_url->get_protocol(), protocol, "Protocol " + element_string + input_url->to_string());
 
-        std::string_view username;
-        if(!object["username"].get_string().get(username)) {
-          TEST_ASSERT(input_url->get_username(), username, "Username " + element_string + input_url->to_string());
-        }
+        std::string_view username = object["username"];
+        TEST_ASSERT(input_url->get_username(), username, "Username " + element_string + input_url->to_string());
 
-        std::string_view password;
-        if(!object["password"].get_string().get(password)) {
-          TEST_ASSERT(input_url->get_password(), password, "Password " + element_string + input_url->to_string());
-        }
+        std::string_view password = object["password"];
+        TEST_ASSERT(input_url->get_password(), password, "Password " + element_string + input_url->to_string());
 
-        std::string_view host;
-        if(!object["host"].get_string().get(host)) {
-          TEST_ASSERT(input_url->get_host(), host, "Hostname " + element_string + input_url->to_string());
-        }
+        std::string_view host = object["host"];
+        TEST_ASSERT(input_url->get_host(), host, "Hostname " + element_string + input_url->to_string());
 
-        std::string_view hostname;
-        if(!object["hostname"].get_string().get(hostname)){
-          TEST_ASSERT(input_url->get_hostname(), hostname, "Hostname " + element_string + input_url->to_string());
-        }
+        std::string_view hostname = object["hostname"];
+        TEST_ASSERT(input_url->get_hostname(), hostname, "Hostname " + element_string + input_url->to_string());
 
-        std::string_view port;
-        if(!object["port"].get_string().get(port)) {
-          std::string expected_port = (input_url->port.has_value()) ? std::to_string(input_url->port.value()) : "";
-          TEST_ASSERT(expected_port, port, "Port " + element_string);
-        }
+        std::string_view port = object["port"];
+        TEST_ASSERT(input_url->get_port(), port, "Port " + element_string);
 
         std::string_view pathname{};
         if (!object["pathname"].get_string().get(pathname)) {
@@ -388,15 +391,11 @@ bool urltestdata_encoding(const char* source) {
           TEST_ASSERT(input_url->get_search(), query, "Query " + element_string + input_url->to_string());
         }
 
-        std::string_view hash;
-        if(!object["hash"].get_string().get(hash)) {
-          TEST_ASSERT(input_url->get_hash(), hash, "Hash/Fragment " + element_string + input_url->to_string());
-        }
+        std::string_view hash = object["hash"];
+        TEST_ASSERT(input_url->get_hash(), hash, "Hash/Fragment " + element_string + input_url->to_string());
 
-        std::string_view href;
-        if(!object["href"].get_string().get(href)) {
-          TEST_ASSERT(input_url->get_href(), href, "href " + element_string + input_url->to_string());
-        }
+        std::string_view href = object["href"];
+        TEST_ASSERT(input_url->get_href(), href, "href " + element_string + input_url->to_string());
 
         std::string_view origin;
         if(!object["origin"].get(origin)) {
@@ -405,8 +404,7 @@ bool urltestdata_encoding(const char* source) {
         if(bad_domains.find(std::string(input)) != bad_domains.end()) {
           TEST_ASSERT(input_url->has_valid_domain(), false, "Bad domain " + element_string + input_url->to_string());
         }
-        // Next we test the 'to_string' method.
-        std::string parsed_url_json = input_url->to_string();
+
         // We need padding.
         simdjson::padded_string padded_url_json = parsed_url_json;
         // We need a second parser.
@@ -434,8 +432,7 @@ bool urltestdata_encoding(const char* source) {
           TEST_ASSERT(json_recovered_scheme, protocol.substr(0,protocol.size()-1), "JSON protocol " + element_string + parsed_url_json);
         }
         // We could test more fields.
-        TEST_ASSERT(json_recovered_scheme, protocol.substr(0,protocol.size()-1), "JSON protocol " + element_string + parsed_url_json);
-        TEST_ASSERT(json_recovered_path, pathname, "JSON Path " + element_string + parsed_url_json);
+
         counter++;
       }
     }
@@ -582,10 +579,6 @@ int main(int argc, char** argv) {
     std::cout << "WPT tests are ok." << std::endl;
     return EXIT_SUCCESS;
   } else {
-    std::cerr << " ================== " << std::endl;
-    std::cerr << " Summary of errors: " << std::endl;
-    std::cerr << error_buffer.str() << std::endl;
-    std::cerr << " ================== " << std::endl;
     return EXIT_FAILURE;
   }
 }
