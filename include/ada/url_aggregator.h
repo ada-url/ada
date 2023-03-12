@@ -219,8 +219,14 @@ namespace ada {
      * Returns a string representation of this URL.
      */
     std::string to_string() const override;
+    /**
+     * Verifies that the parsed URL could be valid. Useful for debugging purposes.
+     * @return true if the URL is valid, otherwise return true of the offsets are possible.
+     */
+    bool validate() const noexcept;
 
     private:
+
       /** @private */
       std::string buffer{};
 
