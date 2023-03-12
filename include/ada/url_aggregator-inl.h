@@ -43,7 +43,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 }
 
 inline void url_aggregator::update_base_hostname(std::string_view input) {
-  ada_log("url_aggregator::update_base_hostname", input);
+  ada_log("url_aggregator::update_base_hostname ", input);
   bool has_double_dash_in_url = components.host_start > components.protocol_end;
   size_t current_length = components.host_end - components.host_start;
   size_t new_difference = input.size() - current_length;
@@ -94,14 +94,14 @@ inline void url_aggregator::update_base_search(std::optional<std::string_view> i
 }
 
 inline void url_aggregator::update_base_pathname(const std::string_view input) {
-  size_t starting_index = components.pathname_start;
-  size_t ending_index = std::string_view::npos;
+  ada_log("url_aggregator::update_base_pathname ", input, " ", to_string());
+  uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
 
-  size_t difference = input.size() - ending_index - starting_index;
-  buffer.erase(starting_index, ending_index);
-  buffer.insert(starting_index, input);
+  uint32_t difference = uint32_t(input.size()) - (ending_index - components.pathname_start);
+  buffer.erase(components.pathname_start, ending_index);
+  buffer.insert(components.pathname_start, input);
 
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
@@ -141,15 +141,13 @@ inline void url_aggregator::clear_base_hash() {
 }
 
 inline void url_aggregator::clear_base_pathname() {
-  size_t starting_index = components.pathname_start;
-  size_t ending_index = std::string_view::npos;
+  uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
-  size_t difference = ending_index - starting_index;
-
-  buffer.erase(components.pathname_start, difference);
-  if (components.search_start != url_components::omitted) { components.search_start -= difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start -= difference; }
+  uint32_t pathname_length = components.pathname_start - ending_index;
+  buffer.erase(components.pathname_start, pathname_length);
+  if (components.search_start != url_components::omitted) { components.search_start += pathname_length; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += pathname_length; }
 }
 
 inline void url_aggregator::clear_base_hostname() {
