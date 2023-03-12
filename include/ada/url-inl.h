@@ -141,6 +141,10 @@ url::get_components() const noexcept {
   return out;
 }
 
+inline void url::update_base_hostname(std::string_view input) {
+  host = input;
+}
+
 inline void url::update_base_hash(std::string_view input) {
   fragment = input; // here we assume that the content was *already* percent encoded.
 }
