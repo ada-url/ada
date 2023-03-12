@@ -16,13 +16,11 @@
 #endif // ADA_REGULAR_VISUAL_STUDIO
 
 namespace ada {
-[[nodiscard]] ada_really_inline bool
-url::includes_credentials() const noexcept {
+[[nodiscard]] ada_really_inline bool url::includes_credentials() const noexcept {
   return !username.empty() || !password.empty();
 }
 [[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
-  return !host.has_value() || host.value().empty() ||
-         type == ada::scheme::type::FILE;
+  return !host.has_value() || host.value().empty() || type == ada::scheme::type::FILE;
 }
 
 inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
@@ -181,6 +179,8 @@ inline std::string_view url::retrieve_base_pathname() const { return path; }
 inline void url::clear_base_hash() { fragment = std::nullopt; }
 
 inline void url::clear_base_hostname() { host = std::nullopt; }
+
+inline void url::clear_base_pathname() { path = ""; }
 
 inline bool url::base_fragment_has_value() const {
   return fragment.has_value();

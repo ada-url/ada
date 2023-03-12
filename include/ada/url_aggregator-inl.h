@@ -94,8 +94,17 @@ inline void url_aggregator::update_base_search(std::optional<std::string_view> i
 }
 
 inline void url_aggregator::update_base_pathname(const std::string_view input) {
-  // TODO: Implement this
-  void(input.size());
+  size_t starting_index = components.pathname_start;
+  size_t ending_index = std::string_view::npos;
+  if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
+  else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
+
+  size_t difference = input.size() - ending_index - starting_index;
+  buffer.erase(starting_index, ending_index);
+  buffer.insert(starting_index, input);
+
+  if (components.search_start != url_components::omitted) { components.search_start += difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
 }
 
 inline void url_aggregator::update_base_username(const std::string_view input) {
@@ -129,6 +138,18 @@ inline std::string_view url_aggregator::retrieve_base_pathname() const {
 inline void url_aggregator::clear_base_hash() {
   components.hash_start = url_components::omitted;
   buffer.resize(components.hash_start);
+}
+
+inline void url_aggregator::clear_base_pathname() {
+  size_t starting_index = components.pathname_start;
+  size_t ending_index = std::string_view::npos;
+  if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
+  else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
+  size_t difference = ending_index - starting_index;
+
+  buffer.erase(components.pathname_start, difference);
+  if (components.search_start != url_components::omitted) { components.search_start -= difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= difference; }
 }
 
 inline void url_aggregator::clear_base_hostname() {
