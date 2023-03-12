@@ -102,6 +102,9 @@ namespace ada {
     /** @private */
     virtual void update_base_port(std::optional<uint16_t> input) = 0;
 
+    /** @private */
+    virtual inline void clear_base_hostname() = 0;
+
   }; // url_base
 
 } // namespace ada

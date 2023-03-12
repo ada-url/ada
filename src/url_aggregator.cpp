@@ -263,7 +263,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
       ada_log("parse_host fast path ipv4");
       return parse_ipv4(get_hostname());
     }
-    ada_log("parse_host fast path ", *host);
+    ada_log("parse_host fast path ", get_hostname());
     return true;
   }
   ada_log("parse_host calling to_ascii");
@@ -759,7 +759,7 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
   }
   // TODO: Optimization opportunity: Get rid of unnecessary string creation.
   update_base_hostname(ada::serializers::ipv6(address));
-  ada_log("parse_ipv6 ", *host);
+  ada_log("parse_ipv6 ", get_hostname());
   return true;
 }
 

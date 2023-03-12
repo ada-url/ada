@@ -180,6 +180,8 @@ inline std::string_view url::retrieve_base_pathname() const { return path; }
 
 inline void url::clear_base_hash() { fragment = std::nullopt; }
 
+inline void url::clear_base_hostname() { host = std::nullopt; }
+
 inline bool url::base_fragment_has_value() const {
   return fragment.has_value();
 }
