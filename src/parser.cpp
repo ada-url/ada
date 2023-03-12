@@ -450,7 +450,7 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing host_view with url is not special.
-            if (host_view.empty()) { url.clear_base_hostname(); }
+            if (host_view.empty()) { url.update_base_hostname(""); }
             else if(!url.parse_host(host_view)) { return url; }
 
             // Set url’s host to host, and state to path start state.
