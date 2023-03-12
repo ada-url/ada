@@ -322,14 +322,23 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
 
   template <bool append>
   bool percent_encode(const std::string_view input, const uint8_t character_set[], std::string &out) {
+    ada_log("percent_encode ", input, " to output string while ", append ? "appending" : "overwriting");
     auto pointer = std::find_if(input.begin(), input.end(), [character_set](const char c) {
+          ada_log("percent_encode checking " );
+
       return character_sets::bit_at(character_set, c);
     });
-    // Optimization: Don't iterate if percent encode is not required
-    if (pointer == input.end()) { return false; }
-    if(!append) { out.clear(); }
-    out.append(input.data(), std::distance(input.begin(), pointer));
+    ada_log("percent_encode done checking, moved to ", std::distance(input.begin(), pointer));
 
+    // Optimization: Don't iterate if percent encode is not required
+    if (pointer == input.end()) {
+      ada_log("percent_encode encoding not needed.");
+      return false;
+    }
+    if(!append) { out.clear(); }
+    ada_log("percent_encode appending ", std::distance(input.begin(), pointer), " bytes");
+    out.append(input.data(), std::distance(input.begin(), pointer));
+    ada_log("percent_encode processing ", std::distance(pointer, input.end()), " bytes");
     for (;pointer != input.end(); pointer++) {
       if (character_sets::bit_at(character_set, *pointer)) {
         out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
