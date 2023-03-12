@@ -80,7 +80,7 @@ namespace ada::unicode {
    * Checks if the input is a forbidden doamin code point.
    * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
    */
-  ada_really_inline constexpr bool is_forbidden_domain_code_point(const char c) noexcept;
+  bool is_forbidden_domain_code_point(const char c) noexcept;
 
   /**
    * Checks if the input is alphanumeric, '+', '-' or '.'

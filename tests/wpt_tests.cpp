@@ -8,6 +8,7 @@
 #include <set>
 
 #include "ada.h"
+#include "ada/unicode.h"
 
 
 // We think that these examples have bad domains.
@@ -317,6 +318,9 @@ bool idna_test_v2_to_ascii() {
         auto expected_output = object["output"];
         auto given_output = output.has_value() ? output.value() : "";
         
+
+        // TODO: The reason of the following is that is_forbidden_domain_code_point check is outside of to_ascii.
+        // We need to fix this when we get rid of ICU. 
         if (given_output.size()) {
           if (std::any_of(given_output.begin(), given_output.end(), ada::unicode::is_forbidden_domain_code_point)) {
             given_output.clear();
