@@ -431,12 +431,8 @@ namespace ada::parser {
             // If buffer is the empty string, validation error, return failure.
             // Let host be the result of host parsing buffer with url is not special.
             ada_log("HOST parsing ", host_view);
-            if constexpr (result_type_is_ada_url) {
-              if(!url.parse_host(host_view)) { return url; }
-              ada_log("HOST parsing results in ", url.host.value_or("none"));
-            } else {
-              // TODO
-            }
+            if(!url.parse_host(host_view)) { return url; }
+            ada_log("HOST parsing results in ", url.get_hostname());
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;
             input_position++;
@@ -447,7 +443,6 @@ namespace ada::parser {
           // The get_host_delimiter_location function either brings us to
           // the colon outside of the bracket, or to one of those characters.
           else {
-
             // If url is special and host_view is the empty string, validation error, return failure.
             if (url.is_special() && host_view.empty()) {
               url.is_valid = false;
@@ -455,19 +450,9 @@ namespace ada::parser {
             }
 
             // Let host be the result of host parsing host_view with url is not special.
-            if (host_view.empty()) {
-              if constexpr (result_type_is_ada_url) {
-                url.host = "";
-              } else {
-                // TODO
-              }
-            } else {
-              if constexpr(result_type_is_ada_url) {
-                if(!url.parse_host(host_view)) { return url; }
-              } else {
-                // TODO
-              }
-            }
+            if (host_view.empty()) { url.clear_base_hostname(); }
+            else if(!url.parse_host(host_view)) { return url; }
+
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
           }
