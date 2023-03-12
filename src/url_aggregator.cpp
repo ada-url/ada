@@ -275,7 +275,6 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   }
 
   if(std::any_of(host.value().begin(), host.value().end(), ada::unicode::is_forbidden_domain_code_point)) {
-    clear_base_hostname();
     return is_valid = false;
   }
 
@@ -284,6 +283,8 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
     ada_log("parse_host got ipv4", *host);
     return parse_ipv4(host.value());
   }
+
+  update_base_hostname(host.value());
 
   return true;
 }
