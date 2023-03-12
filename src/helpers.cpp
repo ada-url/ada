@@ -543,6 +543,7 @@ namespace ada::helpers {
 
     return view.size();
   }
+
 } // namespace ada::helpers
 
 namespace ada {

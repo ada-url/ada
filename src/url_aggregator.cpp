@@ -87,12 +87,14 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   buffer.erase(0, components.protocol_end);
   buffer.insert(0, u.buffer.substr(0, components.protocol_end));
   components.protocol_end = u.components.protocol_end;
-
   // No need to update the components
   if (new_difference == 0) { return; }
 
   // Update the rest of the components.
+  // TODO: why is the next line not guarded?
+  //if(components.username_end != url_components::omitted) {
   components.username_end += new_difference;
+  //}
   components.host_start += new_difference;
   components.host_end += new_difference;
   components.pathname_start += new_difference;
@@ -159,7 +161,6 @@ bool url_aggregator::set_username(const std::string_view input) {
   components.pathname_start += new_difference;
   if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
-
   return true;
 }
 
@@ -331,7 +332,6 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   }
 
   update_base_hostname(host.value());
-
   return true;
 }
 
@@ -834,6 +834,12 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   // TODO: Optimization opportunity: Get rid of this string creation.
   update_base_hostname(ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE));
   return true;
+}
+
+bool url_aggregator::validate() const noexcept {
+  if(!is_valid) { return true; }
+  auto [ok, minlength] = components.check_offset_consistency();
+  return (ok && buffer.size() >= minlength);
 }
 
 } // namespace ada

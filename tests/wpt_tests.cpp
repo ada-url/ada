@@ -164,6 +164,12 @@ bool setters_tests_encoding(const char *source) {
 
       ada::result<result_type> base = ada_parse<result_type>(href);
       TEST_ASSERT(base.has_value(), true, "Base url parsing should have succeeded")
+      if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
+        if(!base->validate()) {
+          std::cerr << "Your parsed URL is impossible: " <<  base->to_string() << std::endl;
+          TEST_FAIL("Impossible URL");
+        }
+      }
 
       std::cout << "      " << href << std::endl;
 
@@ -230,6 +236,12 @@ bool setters_tests_encoding(const char *source) {
         base->set_href(new_value);
         TEST_ASSERT(base->set_href(new_value), true, "set_href should return true");
         TEST_ASSERT(base->get_href(), expected, "Href " + element_string + base->to_string());
+      }
+      if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
+        if(!base->validate()) {
+          std::cerr << "Your parsed URL is impossible: " <<  base->to_string() << std::endl;
+          TEST_FAIL("Impossible URL");
+        }
       }
     }
   }
@@ -343,7 +355,15 @@ bool urltestdata_encoding(const char* source) {
         TEST_ASSERT(input_url.has_value(), !failure, "Should not have succeeded " + element_string + input_url->to_string());
       } else {
         TEST_ASSERT(input_url.has_value(), true, "Should not have failed " + element_string + input_url->to_string());
-
+        // Next we test the 'to_string' method.
+        std::string parsed_url_json = input_url->to_string();
+        //
+        if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
+          if(!input_url->validate()) {
+            std::cerr << "Your parsed URL is impossible: " << parsed_url_json << std::endl;
+            TEST_FAIL("Impossible URL");
+          }
+        }
         std::string_view protocol = object["protocol"];
         TEST_ASSERT(input_url->get_protocol(), protocol, "Protocol " + element_string + input_url->to_string());
 
@@ -384,8 +404,7 @@ bool urltestdata_encoding(const char* source) {
         if(bad_domains.find(std::string(input)) != bad_domains.end()) {
           TEST_ASSERT(input_url->has_valid_domain(), false, "Bad domain " + element_string + input_url->to_string());
         }
-        // Next we test the 'to_string' method.
-        std::string parsed_url_json = input_url->to_string();
+
         // We need padding.
         simdjson::padded_string padded_url_json = parsed_url_json;
         // We need a second parser.
