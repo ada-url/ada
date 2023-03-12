@@ -176,9 +176,55 @@ bool url_aggregator::set_port(const std::string_view input) {
 }
 
 bool url_aggregator::set_pathname(const std::string_view input) {
-  (void) input;
-  // TODO: Implement
-  return false;
+  if (has_opaque_path) { return false; }
+  clear_base_pathname();
+  return parse_path(input);
+}
+
+ada_really_inline bool url_aggregator::parse_path(std::string_view input) {
+  ada_log("parse_path ", input);
+  std::string tmp_buffer;
+  std::string_view internal_input;
+  if(unicode::has_tabs_or_newline(input)) {
+    tmp_buffer = input;
+    // Optimization opportunity: Instead of copying and then pruning, we could just directly
+    // build the string from user_input.
+    helpers::remove_ascii_tab_or_newline(tmp_buffer);
+    internal_input = tmp_buffer;
+  } else {
+    internal_input = input;
+  }
+
+  // If url is special, then:
+  if (is_special()) {
+    std::string path{};
+    if(internal_input.empty()) {
+      update_base_pathname("/");
+    } else if((internal_input[0] == '/') || (internal_input[0] == '\\')){
+      if (helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
+      return false;
+    } else if (helpers::parse_prepared_path(internal_input, type, path)) {
+      update_base_pathname(path);
+      return true;
+    }
+    return false;
+  } else if (!internal_input.empty()) {
+    std::string path{};
+    if(internal_input[0] == '/' && helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
+      update_base_pathname(path);
+      return true;
+    } else if (helpers::parse_prepared_path(internal_input, type, path)) {
+      update_base_pathname(path);
+      return true;
+    }
+    return false;
+  } else if(!base_hostname_has_value()) {
+    update_base_pathname("/");
+  }
+  return true;
 }
 
 bool url_aggregator::set_search(const std::string_view input) {
@@ -381,10 +427,10 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   if (get_protocol() == "blob:") {
     std::string_view path = retrieve_base_pathname();
     if (!path.empty()) {
-      ada::result<ada::url> path_result = ada::parse<ada::url>(path);
-      if (path_result) {
-        if (path_result->is_special()) {
-          return path_result->get_protocol() + "//" + path_result->get_host();
+      ada::result<ada::url> out = ada::parse<ada::url>(path);
+      if (out) {
+        if (out->is_special()) {
+          return out->get_protocol() + "//" + out->get_host();
         }
       }
     }
