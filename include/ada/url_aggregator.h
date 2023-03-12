@@ -181,6 +181,8 @@ namespace ada {
     /** @private */
     inline void clear_base_hostname() override;
     /** @private */
+    inline void clear_base_pathname() override;
+    /** @private */
     inline bool base_hostname_has_value() const;
     /** @private */
     inline bool base_fragment_has_value() const;
@@ -248,6 +250,9 @@ namespace ada {
        * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
        */
       [[nodiscard]] bool parse_opaque_host(std::string_view input);
+
+      /** @private */
+      ada_really_inline bool parse_path(std::string_view input);
 
   }; // url_aggregator
 

@@ -455,7 +455,6 @@ namespace ada {
     return true;
   }
 
-
   ada_really_inline bool url::parse_path(std::string_view input) {
     ada_log("parse_path ", input);
     std::string tmp_buffer;

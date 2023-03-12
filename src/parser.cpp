@@ -431,7 +431,7 @@ namespace ada::parser {
             // If buffer is the empty string, validation error, return failure.
             // Let host be the result of host parsing buffer with url is not special.
             ada_log("HOST parsing ", host_view);
-            if(!url.parse_host(host_view)) { return url; }
+            if (!url.parse_host(host_view)) { return url; }
             ada_log("HOST parsing results in ", url.get_hostname());
             // Set url’s host to host, buffer to the empty string, and state to port state.
             state = ada::state::PORT;

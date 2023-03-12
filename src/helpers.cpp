@@ -1,4 +1,6 @@
 #include "ada.h"
+#include "ada/checkers-inl.h"
+#include "ada/checkers.h"
 #include "ada/common_defs.h" // make sure ADA_IS_BIG_ENDIAN gets defined.
 #include "ada/unicode.h"
 #include "ada/scheme.h"

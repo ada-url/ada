@@ -119,6 +119,8 @@ struct url : url_base {
   /** @private */
   inline void clear_base_hostname() override;
   /** @private */
+  inline void clear_base_pathname() override;
+  /** @private */
   inline bool base_hostname_has_value() const;
   /** @private */
   inline bool base_fragment_has_value() const;
