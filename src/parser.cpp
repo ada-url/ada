@@ -76,6 +76,7 @@ namespace ada::parser {
     // Otherwise, increase pointer by 1 and continue with the state machine.
     // We never decrement input_position.
     while(input_position <= input_size) {
+      ada_log("In parsing at ", input_position, " out of ", input_size, " in state ", ada::to_string(state));
       switch (state) {
         case ada::state::SCHEME_START: {
           ada_log("SCHEME_START ", helpers::substring(url_data, input_position));
@@ -407,7 +408,7 @@ namespace ada::parser {
           ada_log("QUERY ", helpers::substring(url_data, input_position));
           // Let queryPercentEncodeSet be the special-query percent-encode set if url is special;
           // otherwise the query percent-encode set.
-          auto query_percent_encode_set = url.is_special() ?
+          const uint8_t* query_percent_encode_set = url.is_special() ?
                                 ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE :
                                 ada::character_sets::QUERY_PERCENT_ENCODE;
 
@@ -417,6 +418,7 @@ namespace ada::parser {
           // url.update_base_search(ada::unicode::percent_encode(helpers::substring(url_data, input_position), query_percent_encode_set));
           url.update_base_search(helpers::substring(url_data, input_position), query_percent_encode_set);
           // passing a std::string_view opens up optimizations opportunities!!!
+          ada_log("QUERY update_base_search completed");
           return url;
         }
         case ada::state::HOST: {
