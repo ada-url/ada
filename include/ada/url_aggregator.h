@@ -146,9 +146,18 @@ namespace ada {
     [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
     /** @private */
+    template <bool override_hostname = false>
+    bool set_host_or_hostname(const std::string_view input);
+
+    /** @private */
+    ada_really_inline bool parse_host(std::string_view input);
+
+    /** @private */
     inline void update_base_hash(std::string_view input);
     /** @private */
     inline void update_unencoded_base_hash(std::string_view input);
+    /** @private */
+    inline void update_base_hostname(std::string_view input);
     /** @private */
     inline void update_base_search(std::string_view input);
     /** @private */
@@ -169,6 +178,8 @@ namespace ada {
     inline std::string_view retrieve_base_pathname() const;
     /** @private */
     inline void clear_base_hash();
+    /** @private */
+    inline void clear_base_hostname();
     /** @private */
     inline bool base_hostname_has_value() const;
     /** @private */
@@ -208,8 +219,35 @@ namespace ada {
     std::string to_string() const override;
 
     private:
+      /** @private */
       std::string buffer{};
+
+      /** @private */
       url_components components{};
+
+      /**
+       * @private
+       *
+       * Return true on success.
+       * @see https://url.spec.whatwg.org/#concept-ipv4-parser
+       */
+      [[nodiscard]] bool parse_ipv4(std::string_view input);
+
+      /**
+       * @private
+       *
+       * Return true on success.
+       * @see https://url.spec.whatwg.org/#concept-ipv6-parser
+       */
+      [[nodiscard]] bool parse_ipv6(std::string_view input);
+
+      /**
+       * @private
+       *
+       * Return true on success.
+       * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
+       */
+      [[nodiscard]] bool parse_opaque_host(std::string_view input);
 
   }; // url_aggregator
 
