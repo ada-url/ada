@@ -3,6 +3,7 @@
 #include "ada/common_defs.h"
 
 #include <algorithm>
+#include <cassert>
 #if ADA_HAS_ICU
 // We are good.
 #else
