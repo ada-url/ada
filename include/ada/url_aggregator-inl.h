@@ -48,8 +48,8 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 inline void url_aggregator::update_base_hostname(std::string_view input) {
   ada_log("url_aggregator::update_base_hostname ", input);
   bool has_double_dash_in_url = components.host_start > components.protocol_end;
-  size_t current_length = components.host_end - components.host_start;
-  size_t new_difference = input.size() - current_length;
+  uint32_t current_length = components.host_end - components.host_start;
+  uint32_t new_difference = uint32_t(input.size() - current_length);
 
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
   // `//` initially to the buffer, since it depends on the hostname existance.
@@ -165,7 +165,7 @@ inline void url_aggregator::clear_base_pathname() {
 inline void url_aggregator::clear_base_hostname() {
   ada_log("url_aggregator::clear_base_hostname");
   bool has_double_dash_in_url = components.host_start > components.protocol_end;
-  size_t length = components.host_start - components.host_end;
+  uint32_t length = components.host_start - components.host_end;
 
   // Remove `//` in the URL when clearing the hostname
   if (has_double_dash_in_url) {
