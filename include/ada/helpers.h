@@ -184,7 +184,7 @@ namespace ada::helpers {
    * @return digit count
    */
   inline int fast_digit_count(uint32_t x) noexcept {
-    auto int_log2 = [](uint32_t x) -> int { return 31 - ada::helpers::leading_zeroes(x | 1);  };
+    auto int_log2 = [](uint32_t z) -> int { return 31 - ada::helpers::leading_zeroes(z | 1);  };
     // Compiles to very few instructions. Note that the
     // table is static and thus effectively a constant.
     // We leave it inside the function because it is meaningless
