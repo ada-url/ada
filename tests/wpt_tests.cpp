@@ -391,14 +391,29 @@ bool urltestdata_encoding(const char* source) {
         // We need a second parser.
         ondemand::parser urlparser;
         ondemand::document parsed_doc = urlparser.iterate(padded_url_json);
+        std::cout << "serialized JSON = " << padded_url_json << std::endl;
         ondemand::object parsed_object = parsed_doc.get_object();
-        std::string_view json_recovered_path = parsed_object["path"];
+        std::string_view json_recovered_path;
+        if(parsed_object["path"].get_string().get(json_recovered_path)) {
+          std::cerr << "The serialized url instance does not provide a 'path' key or the JSON is invalid." << std::endl;
+          if(std::is_same<ada::url, result_type>::value) {
+            TEST_FAIL("path key missing from serialized JSON");
+          }
+        } else {
+          TEST_ASSERT(json_recovered_path, pathname, "JSON Path " + element_string + parsed_url_json);
+        }
 
-        std::string_view json_recovered_scheme = parsed_object["scheme"];
+        std::string_view json_recovered_scheme;
+        if(parsed_object["scheme"].get_string().get(json_recovered_scheme)) {
+          std::cerr << "The serialized url instance does not provide a 'scheme' key or the JSON is invalid." << std::endl;
+          if(std::is_same<ada::url, result_type>::value) {
+            TEST_FAIL("scheme key missing from serialized JSON");
+          }
+        } else {
+          TEST_ASSERT(json_recovered_scheme, protocol.substr(0,protocol.size()-1), "JSON protocol " + element_string + parsed_url_json);
+        }
         // We could test more fields.
-        TEST_ASSERT(json_recovered_scheme, protocol.substr(0,protocol.size()-1), "JSON protocol " + element_string + parsed_url_json);
 
-        TEST_ASSERT(json_recovered_path, pathname, "JSON Path " + element_string + parsed_url_json);
         counter++;
       }
     }

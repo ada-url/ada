@@ -501,6 +501,21 @@ std::string ada::url_aggregator::to_string() const {
   helpers::encode_json(buffer, back);
   answer.append("\",\n");
 
+  /**
+   * We could add other fields such as those:
+   *
+   *  answer.append("\t\"path\":\"");
+   *  helpers::encode_json(get_pathname(), back);
+   *  answer.append("\",\n");
+   *
+   *  answer.append("\t\"scheme\":\"");
+   *  helpers::encode_json(get_protocol(), back);
+   *  answer.append("\",\n");
+   *
+   * For the end user, they are probably more interesting and useful.
+   */
+
+
   answer.append("\t\"protocol_end\":\"");
   helpers::encode_json(std::to_string(components.protocol_end), back);
   answer.append("\",\n");
@@ -531,7 +546,7 @@ std::string ada::url_aggregator::to_string() const {
 
   answer.append("\t\"hash_start\":\"");
   helpers::encode_json(std::to_string(components.hash_start), back);
-  answer.append("\",\n");
+  answer.append("\"\n");
 
   answer.append("\n}");
   return answer;
