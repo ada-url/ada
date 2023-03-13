@@ -159,14 +159,70 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
 
 inline void url_aggregator::update_base_username(const std::string_view input) {
   ada_log("url_aggregator::update_base_username ", input);
-  // TODO: Implement this
-  void(input.size());
+  uint32_t username_start = components.protocol_end + 3;
+  uint32_t username_length = components.username_end - username_start;
+  buffer.erase(username_start, components.username_end);
+  buffer.insert(username_start, input);
+
+  uint32_t new_difference = uint32_t(input.size() - username_length);
+  components.username_end += new_difference;
+  components.host_start += new_difference;
+  components.host_end += new_difference;
+  components.pathname_start += new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+}
+
+inline void url_aggregator::append_base_username(const std::string_view input) {
+  ada_log("url_aggregator::append_base_username ", input);
+  size_t username_starting_index = components.protocol_end;
+  size_t input_size = input.size();
+
+  if (has_authority()) {
+    buffer.insert(username_starting_index, input);
+  } else {
+    buffer.insert(username_starting_index, helpers::concat("//", input));
+    input_size += 2;
+  }
+
+  components.username_end += input_size;
+
+  if (buffer[input_size + components.host_start] != '@') {
+    buffer.insert(input_size + components.host_start, "@");
+    input_size++;
+  }
+
+  components.host_start += input_size;
+  components.host_end += input_size;
+  components.pathname_start += input_size;
+  if (components.search_start != url_components::omitted) { components.search_start += input_size; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
 }
 
 inline void url_aggregator::update_base_password(const std::string_view input) {
   ada_log("url_aggregator::update_base_password ", input);
   // TODO: Implement this
   void(input.size());
+}
+
+inline void url_aggregator::append_base_password(const std::string_view input) {
+  ada_log("url_aggregator::append_base_password ", input, " ", to_string());
+  size_t password_starting_index = components.username_end;
+//  size_t input_size = input.size();
+
+  // TODO: Handle edge case where if you set password first, and username later
+
+  buffer.insert(password_starting_index, input);
+
+//  if (buffer[input_size + components.host_start] != '@') {
+//    buffer.insert(input_size + components.host_start, "@");
+//    input_size++;
+//  }
+//  components.host_start += input_size;
+//  components.host_end += input_size;
+//  components.pathname_start += input_size;
+//  if (components.search_start != url_components::omitted) { components.search_start += input_size; }
+//  if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
 }
 
 inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {

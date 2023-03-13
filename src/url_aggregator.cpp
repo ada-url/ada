@@ -576,9 +576,8 @@ std::string ada::url_aggregator::to_string() const {
 
   answer.append("\t\"hash_start\":\"");
   helpers::encode_json(std::to_string(components.hash_start), back);
-  answer.append("\"\n");
+  answer.append("\"\n}");
 
-  answer.append("\n}");
   return answer;
 }
 

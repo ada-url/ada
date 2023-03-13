@@ -213,14 +213,15 @@ namespace ada::parser {
                   if constexpr(result_type_is_ada_url) {
                     url.username += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
                   } else {
-                    // TODO
+                    url.append_base_username(unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE));
                   }
                 } else {
                   if constexpr(result_type_is_ada_url) {
                     url.username += unicode::percent_encode(authority_view.substr(0,password_token_location), character_sets::USERINFO_PERCENT_ENCODE);
                     url.password += unicode::percent_encode(authority_view.substr(password_token_location+1), character_sets::USERINFO_PERCENT_ENCODE);
                   } else {
-                    // TODO
+                    url.append_base_username(unicode::percent_encode(authority_view.substr(0,password_token_location), character_sets::USERINFO_PERCENT_ENCODE));
+                    url.append_base_password(unicode::percent_encode(authority_view.substr(password_token_location+1), character_sets::USERINFO_PERCENT_ENCODE));
                   }
                 }
               }
@@ -228,7 +229,7 @@ namespace ada::parser {
                 if constexpr (result_type_is_ada_url) {
                   url.password += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
                 } else {
-                  // TODO
+                  url.append_base_password(unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE));
                 }
               }
             }

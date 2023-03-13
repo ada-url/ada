@@ -165,7 +165,11 @@ namespace ada {
     /** @private */
     inline void update_base_username(const std::string_view input);
     /** @private */
+    inline void append_base_username(const std::string_view input);
+    /** @private */
     inline void update_base_password(const std::string_view input);
+    /** @private */
+    inline void append_base_password(const std::string_view input);
     /** @private */
     inline void update_base_port(std::optional<uint16_t> input) override;
     /** @private */
