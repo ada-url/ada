@@ -44,7 +44,7 @@ std::string url_examples[] = {
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-ada::result ada_parse(std::string_view view) {
+ada::result<ada::url> ada_parse(std::string_view view) {
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
   return ada::parse(std::string_view(buffer.get(), view.size()));

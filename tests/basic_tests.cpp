@@ -33,7 +33,7 @@
 
 bool set_host_should_return_false_sometimes() {
     TEST_START()
-    ada::result r = ada::parse("mailto:a@b.com");
+    ada::result<ada::url> r = ada::parse("mailto:a@b.com");
     bool b = r->set_host("something");
     TEST_ASSERT(b, false, "set_host should return false")
     TEST_SUCCEED() 
@@ -41,7 +41,7 @@ bool set_host_should_return_false_sometimes() {
 
 bool set_host_should_return_true_sometimes() {
     TEST_START()
-    ada::result r = ada::parse("https://www.google.com");
+    ada::result<ada::url> r = ada::parse("https://www.google.com");
     bool b = r->set_host("something");
     TEST_ASSERT(b, true, "set_host should return true")
     TEST_SUCCEED() 
@@ -50,7 +50,7 @@ bool set_host_should_return_true_sometimes() {
 
 bool set_hostname_should_return_false_sometimes() {
     TEST_START()
-    ada::result r = ada::parse("mailto:a@b.com");
+    ada::result<ada::url> r = ada::parse("mailto:a@b.com");
     bool b = r->set_hostname("something");
     TEST_ASSERT(b, false, "set_hostname should return false")
     TEST_SUCCEED() 
@@ -58,7 +58,7 @@ bool set_hostname_should_return_false_sometimes() {
 
 bool set_hostname_should_return_true_sometimes() {
     TEST_START()
-    ada::result r = ada::parse("https://www.google.com");
+    ada::result<ada::url> r = ada::parse("https://www.google.com");
     bool b = r->set_hostname("something");
     TEST_ASSERT(b, true, "set_hostname should return true")
     TEST_SUCCEED() 
@@ -66,14 +66,14 @@ bool set_hostname_should_return_true_sometimes() {
 
 bool readme1() {
     TEST_START()
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url> url = ada::parse("https://www.google.com");
     TEST_ASSERT(bool(url), true, "URL is valid")
     TEST_SUCCEED() 
 }
 
 bool readme2() {
     TEST_START()
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url> url = ada::parse("https://www.google.com");
     url->set_username("username");
     url->set_password("password");
     TEST_ASSERT(url->get_href(), "https://username:password@www.google.com/", "href returned bad result")
@@ -82,7 +82,7 @@ bool readme2() {
 
 bool readme3() {
     TEST_START()
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url> url = ada::parse("https://www.google.com");
     url->set_protocol("wss");
     TEST_ASSERT(url->get_protocol(), "wss:", "get_protocol returned bad result")
     TEST_ASSERT(url->get_href(), "wss://www.google.com/", "get_href returned bad result")
@@ -92,7 +92,7 @@ bool readme3() {
 
 bool readme4() {
     TEST_START()
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url> url = ada::parse("https://www.google.com");
     url->set_host("github.com");
     TEST_ASSERT(url->get_host(), "github.com", "get_host returned bad result")
     TEST_SUCCEED() 
@@ -100,7 +100,7 @@ bool readme4() {
 
 bool readme5() {
     TEST_START()
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url> url = ada::parse("https://www.google.com");
     url->set_port("8080");
     TEST_ASSERT(url->get_port(), "8080", "get_port returned bad result")
     TEST_SUCCEED() 
@@ -108,7 +108,7 @@ bool readme5() {
 
 bool readme6() {
     TEST_START()
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url> url = ada::parse("https://www.google.com");
     url->set_pathname("/my-super-long-path");
     TEST_ASSERT(url->get_pathname(), "/my-super-long-path", "get_pathname returned bad result")
     TEST_SUCCEED() 
@@ -116,7 +116,7 @@ bool readme6() {
 
 bool readme7() {
     TEST_START()
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url> url = ada::parse("https://www.google.com");
     url->set_search("target=self");
     TEST_ASSERT(url->get_search(), "?target=self", "get_pathname returned bad result");
     TEST_SUCCEED() 
@@ -124,7 +124,7 @@ bool readme7() {
 
 bool readme8() {
     TEST_START()
-    ada::result url = ada::parse("https://www.google.com");
+    ada::result<ada::url> url = ada::parse("https://www.google.com");
     url->set_hash("is-this-the-real-life");
     TEST_ASSERT(url->get_hash(), "#is-this-the-real-life", "get_hash returned bad result");
     TEST_SUCCEED() 

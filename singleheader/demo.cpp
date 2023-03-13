@@ -3,7 +3,7 @@
 #include <iostream>
 
 int main(int , char *[]) {
-  auto url = ada::parse("https://www.google.com");
+  auto url = ada::parse<ada::url>("https://www.google.com");
   if(!url) { std::cout << "failure" << std::endl; return EXIT_FAILURE; }
   url->set_protocol("http");
   std::cout << url->get_protocol() << std::endl;

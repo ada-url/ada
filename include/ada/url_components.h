@@ -53,6 +53,18 @@ namespace ada {
     uint32_t hash_start{omitted};
 
     /**
+     * Check the following conditions:
+     * protocol_end < username_end < ... < hash_start,
+     * expect when a value is omitted. It also computes
+     * a lower bound on  the possible string length that may match these
+     * offsets.
+     * @return true in the first component if the offset values are
+     *  consistent with a possible URL string, and if so return
+     *  a lower bound on the URL string length as the second component.
+     */
+    std::pair<bool,uint32_t> check_offset_consistency() const noexcept;
+
+    /**
      * @private
      * Converts a url_components to JSON stringified version.
      */

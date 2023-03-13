@@ -3,6 +3,8 @@
  * Includes all the getters of `ada::url`
  */
 #include "ada.h"
+#include "ada/implementation.h"
+#include "ada/helpers.h"
 
 #include <algorithm>
 #include <string>
@@ -40,17 +42,16 @@ namespace ada {
   [[nodiscard]] std::string url::get_origin() const noexcept {
     if (is_special()) {
       // Return a new opaque origin.
-      if (get_scheme_type() == scheme::FILE) { return "null"; }
-
-      return get_protocol() + "//" + get_host();
+      if (type == scheme::FILE) { return "null"; }
+      return ada::helpers::concat(get_protocol(), "//", get_host());
     }
 
     if (get_scheme() == "blob") {
       if (path.length() > 0) {
-        url path_result = ada::parser::parse_url(get_pathname());
-        if (path_result.is_valid) {
-          if (path_result.is_special()) {
-            return path_result.get_protocol() + "//" + path_result.get_host();
+        ada::result<ada::url> path_result = ada::parse<ada::url>(get_pathname());
+        if (path_result) {
+          if (path_result->is_special()) {
+            return ada::helpers::concat(path_result->get_protocol(), "//", path_result->get_host());
           }
         }
       }
@@ -86,11 +87,11 @@ namespace ada {
     return (!query.has_value() || (query.value().empty())) ? "" : "?" + query.value();
   }
 
-  [[nodiscard]] std::string url::get_username() const noexcept {
+  [[nodiscard]] const std::string& url::get_username() const noexcept {
     return username;
   }
 
-  [[nodiscard]] std::string url::get_password() const noexcept {
+  [[nodiscard]] const std::string& url::get_password() const noexcept {
     return password;
   }
 

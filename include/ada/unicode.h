@@ -147,9 +147,12 @@ namespace ada::unicode {
 
   /**
    * Returns true if percent encoding was needed, in which case, we store
-   * the percent-encoded content in 'out'. Otherwise, out is left unchanged.
+   * the percent-encoded content in 'out'. If the boolean 'append' is set to
+   * true, the content is appended to 'out'.
+   * If percent encoding is not needed, out is left unchanged.
    * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
    */
+  template <bool append>
   bool percent_encode(const std::string_view input, const uint8_t character_set[], std::string& out);
 
   /**

@@ -1,4 +1,6 @@
 #include "ada.h"
+#include "ada/checkers-inl.h"
+#include "ada/checkers.h"
 #include "ada/common_defs.h" // make sure ADA_IS_BIG_ENDIAN gets defined.
 #include "ada/unicode.h"
 #include "ada/scheme.h"
@@ -93,6 +95,10 @@ namespace ada::helpers {
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept {
     ada_log("substring(", input, " [", input.size() ,"bytes],", pos, ")");
     return pos > input.size() ? std::string_view() : input.substr(pos);
+  }
+
+  ada_really_inline void resize(std::string_view& input, size_t pos) noexcept {
+    input.remove_suffix(input.size() - pos);
   }
 
   // Reverse the byte order.
@@ -314,7 +320,7 @@ namespace ada::helpers {
 
 
   ada_really_inline bool parse_prepared_path(std::string_view input, ada::scheme::type type, std::string& path) {
-    ada_log("parse_path ", input);
+    ada_log("parse_prepared_path ", input);
     uint8_t accumulator = checkers::path_signature(input);
     // Let us first detect a trivial case.
     // If it is special, we check that we have no dot, no %,  no \ and no
@@ -347,7 +353,7 @@ namespace ada::helpers {
     bool fast_path = (special && (accumulator & 0b11111011) == 0) &&
                     (type != ada::scheme::type::FILE);
     if (fast_path) {
-      ada_log("parse_path fast");
+      ada_log("parse_prepared_path fast");
       // Here we don't need to worry about \ or percent encoding.
       // We also do not have a file protocol. We might have dots, however,
       // but dots must as appear as '.', and they cannot be encoded because
@@ -403,7 +409,7 @@ namespace ada::helpers {
         // path_buffer is either path_view or it might point at a percent encoded temporary file.
         std::string_view path_buffer =
          (needs_percent_encoding
-           && ada::unicode::percent_encode(path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp)) ?
+           && ada::unicode::percent_encode<false>(path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp)) ?
           path_buffer_tmp :
           path_view;
         if (unicode::is_double_dot_path_segment(path_buffer)) {
@@ -440,11 +446,15 @@ namespace ada::helpers {
     }
   }
 
-  ada_really_inline void strip_trailing_spaces_from_opaque_path(ada::url& url) noexcept {
+  template <class url_type>
+  ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) noexcept {
     if (!url.has_opaque_path) return;
-    if (url.fragment.has_value()) return;
-    if (url.query.has_value()) return;
-    while (!url.path.empty() && url.path.back() == ' ') { url.path.resize(url.path.size()-1); }
+    if (url.base_fragment_has_value()) return;
+    if (url.base_search_has_value()) return;
+
+    std::string_view path = url.retrieve_base_pathname();
+    while (!path.empty() && path.back() == ' ') { path.remove_suffix(1); }
+    url.update_base_pathname(path);
   }
 
   ada_really_inline size_t find_authority_delimiter_special(std::string_view view) noexcept {
@@ -533,6 +543,7 @@ namespace ada::helpers {
 
     return view.size();
   }
+
 } // namespace ada::helpers
 
 namespace ada {

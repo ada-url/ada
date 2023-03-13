@@ -22,8 +22,12 @@ namespace ada::scheme {
    * Using strings to represent a scheme type is not ideal because
    * checking for types involves string comparisons. It is faster to use
    * a simple integer.
+   * In C++11, we are allowed to specify the underlying type of the enum.
+   * We pick an 8-bit integer (which allows up to 256 types). Specifying the
+   * type of the enum may help integration with other systems if the type
+   * variable is exposed (since its value will not depend on the compiler).
    */
-  enum type {
+  enum type : uint8_t {
     HTTP = 0,
     NOT_SPECIAL = 1,
     HTTPS = 2,

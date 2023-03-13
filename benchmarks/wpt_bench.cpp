@@ -36,7 +36,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
   for (auto _ : state) {
     for (const std::pair<std::string, std::string> &url_strings :
          url_examples) {
-      ada::result base;
+      ada::result<ada::url> base;
       ada::url* base_ptr = nullptr;
       if(!url_strings.second.empty()) {
         base = ada::parse(url_strings.second);
@@ -45,7 +45,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       auto url = ada::parse(url_strings.first, base_ptr);
       if (url) {
         numbers_of_parameters +=
-            url->path.size() + (url->query.has_value() ? url->query->size() : 0) +
+            url->path.size() + (url->base_search_has_value() ? url->query->size() : 0) +
             url->get_scheme().size() + url->host->size();
       }
     }
@@ -57,7 +57,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       collector.start();
       for (const std::pair<std::string, std::string> &url_strings :
            url_examples) {
-        ada::result base;
+        ada::result<ada::url> base;
         ada::url* base_ptr = nullptr;
         if(!url_strings.second.empty()) {
             base = ada::parse(url_strings.second);
@@ -67,7 +67,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
         if (url) {
           numbers_of_parameters +=
               url->path.size() +
-              (url->query.has_value() ? url->query->size() : 0) +
+              (url->base_search_has_value() ? url->query->size() : 0) +
               url->get_scheme().size() +
               (url->host.has_value() ? url->host->size() : 0);
         }

@@ -18,7 +18,7 @@ std::set<std::string> bad_domains = {"http://./", "http://../", "http://foo.09..
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-ada::result ada_parse(std::string_view view,const ada::url* base = nullptr) {
+ada::result<ada::url> ada_parse(std::string_view view,const ada::url* base = nullptr) {
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]" << std::endl;
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
@@ -102,7 +102,7 @@ bool urltestdata_encoding(const char* source) {
       }
       std::cout << "input='" << input << "' [" << input.size() << " bytes]" << std::endl;
       std::string_view base;
-      ada::result  base_url;
+      ada::result<ada::url> base_url;
       if (!object["base"].get(base)) {
         std::cout << "base=" << base << std::endl;
         base_url = ada_parse(base);
@@ -117,7 +117,7 @@ bool urltestdata_encoding(const char* source) {
         }
       }
       bool failure = false;
-      ada::result input_url = (!object["base"].get(base)) ? ada_parse(input, &*base_url) : ada_parse(input);
+      ada::result<ada::url> input_url = (!object["base"].get(base)) ? ada_parse(input, &*base_url) : ada_parse(input);
 
       if (object["failure"].get(failure)) {
         auto url = input_url.value();
