@@ -14,16 +14,15 @@
 #include "ada/log.h"
 
 #include <optional>
+#include <string_view>
 
 namespace ada {
 
 inline void url_aggregator::update_base_hash(std::string_view input) {
   ada_log("url_aggregator::update_base_hash ", input, " components.hash_start = ", components.hash_start);
-  if(components.hash_start == url_components::omitted) {
-    std::cerr << "a check for url_components::omitted is missing.\n";
-    abort();
+  if(components.hash_start != url_components::omitted) {
+    buffer.resize(components.hash_start);
   }
-  buffer.resize(components.hash_start);
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
   buffer += input; // assume already percent encoded
@@ -31,11 +30,9 @@ inline void url_aggregator::update_base_hash(std::string_view input) {
 
 inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   ada_log("url_aggregator::update_unencoded_base_hash ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size(), " bytes] components.hash_start = ", components.hash_start);
-  if (components.hash_start == url_components::omitted) {
-    std::cerr << "a check for url_components::omitted is missing.\n";
-    abort();
+  if (components.hash_start != url_components::omitted) {
+    buffer.resize(components.hash_start);
   }
-  buffer.resize(components.hash_start);
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
   unicode::percent_encode<true>(input,ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
