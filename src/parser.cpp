@@ -720,11 +720,7 @@ namespace ada::parser {
           ada::unreachable();
       }
     }
-    if constexpr (result_type_is_ada_url) {
-      ada_log("returning ", url.to_string());
-    } else {
-      // TODO
-    }
+    ada_log("returning ", url.to_string());
     return url;
   }
 
