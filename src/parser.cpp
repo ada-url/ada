@@ -686,7 +686,11 @@ namespace ada::parser {
                 if constexpr (result_type_is_ada_url) {
                   helpers::shorten_path(url.path, url.type);
                 } else {
-                  // TODO
+                  std::string path = std::string(url.get_pathname());
+                  // TODO: Optimization opportunity. No need to create a ref to std::string
+                  if (helpers::shorten_path(path, url.type)) {
+                    url.update_base_pathname(path);
+                  }
                 }
               }
               // Otherwise:
@@ -695,7 +699,7 @@ namespace ada::parser {
                 if constexpr (result_type_is_ada_url) {
                   url.path.clear();
                 } else {
-                  url.update_base_pathname("");
+                  url.clear_base_pathname();
                 }
                 url.has_opaque_path = true;
               }
