@@ -329,6 +329,7 @@ namespace ada::parser {
                 helpers::shorten_path(url.path, url.type);
               } else {
                 std::string path = std::string(url.get_pathname());
+                // TODO: Optimization opportunity. No need to create a ref to std::string
                 if (helpers::shorten_path(path, url.type)) {
                   url.update_base_pathname(path);
                 }
