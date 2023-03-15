@@ -1,4 +1,5 @@
 #include "ada.h"
+#include "ada/common_defs.h"
 #include "ada/character_sets-inl.h"
 #include "ada/unicode.h"
 #include "ada/url-inl.h"
@@ -413,10 +414,7 @@ namespace ada::parser {
 
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          // The following is not good since we create a temporary string:
-          // url.update_base_search(ada::unicode::percent_encode(helpers::substring(url_data, input_position), query_percent_encode_set));
           url.update_base_search(helpers::substring(url_data, input_position), query_percent_encode_set);
-          // passing a std::string_view opens up optimizations opportunities!!!
           ada_log("QUERY update_base_search completed ");
           return url;
         }

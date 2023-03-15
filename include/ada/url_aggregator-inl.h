@@ -71,18 +71,20 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 }
 
 inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
-  ada_log("url_aggregator::update_base_search ", input, " with encoding parameter");
+  ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string());
 
   // Make sure search is deleted and hash_start index is correct.
-  if (components.search_start == url_components::omitted) {
-    components.search_start = components.pathname_start + uint32_t(get_pathname().size());
-  } else {
+  if (components.search_start != url_components::omitted) {
     uint32_t search_end = uint32_t(buffer.size());
     if (components.hash_start != url_components::omitted) {
       search_end = components.hash_start;
       components.hash_start = components.search_start;
     }
-    buffer.erase(components.search_start, search_end - components.search_start - components.search_start);
+    buffer.erase(components.search_start, search_end - components.search_start);
+  } else {
+    uint32_t pathname_ends = uint32_t(buffer.size());
+    if (components.hash_start != url_components::omitted) { pathname_ends = components.hash_start; }
+    components.search_start = pathname_ends;
   }
 
   buffer.insert(components.search_start, "?");
@@ -107,8 +109,8 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   buffer.erase(components.pathname_start, current_length);
   buffer.insert(components.pathname_start, input);
 
-  if (components.search_start != url_components::omitted) { components.search_start -= difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start -= difference; }
+  if (components.search_start != url_components::omitted) { components.search_start += difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
 }
 
 inline void url_aggregator::append_base_pathname(const std::string_view input) {
