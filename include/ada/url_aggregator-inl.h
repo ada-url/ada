@@ -185,8 +185,8 @@ inline std::optional<uint16_t> url_aggregator::retrieve_base_port() const {
 inline std::string_view url_aggregator::retrieve_base_pathname() const {
   ada_log("url_aggregator::retrieve_base_pathname");
   size_t ending = buffer.size();
-  if (base_search_has_value()) { ending = components.search_start; }
-  else if (base_fragment_has_value()) { ending = components.hash_start; }
+  if (components.search_start != url_components::omitted) { ending = components.search_start; }
+  else if (components.hash_start != url_components::omitted) { ending = components.hash_start; }
   return helpers::substring(buffer, components.pathname_start, ending);
 }
 
@@ -239,11 +239,6 @@ inline bool url_aggregator::base_fragment_has_value() const {
 inline bool url_aggregator::base_search_has_value() const {
   ada_log("url_aggregator::base_search_has_value");
   return components.search_start != url_components::omitted;
-}
-
-inline bool url_aggregator::base_hostname_has_value() const {
-  ada_log("url_aggregator::base_hostname_has_value");
-  return components.host_start != components.host_end;
 }
 
 ada_really_inline bool url_aggregator::includes_credentials() const noexcept {

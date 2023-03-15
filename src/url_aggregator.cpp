@@ -243,7 +243,7 @@ ada_really_inline bool url_aggregator::parse_path(std::string_view input) {
       return true;
     }
     return false;
-  } else if(!base_hostname_has_value()) {
+  } else if(components.host_start == components.host_end) {
     update_base_pathname("/");
   }
   return true;
@@ -425,7 +425,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     }
 
     // If host is "localhost", then set host to the empty string.
-    if (base_hostname_has_value() && get_hostname() == "localhost") {
+    if (helpers::substring(buffer, components.host_start, components.host_end) == "localhost") {
       clear_base_hostname();
     }
   }
@@ -584,7 +584,7 @@ std::string ada::url_aggregator::to_string() const {
 }
 
 [[nodiscard]] bool url_aggregator::has_valid_domain() const noexcept {
-  // TODO: if(!base_hostname_has_value()) { return false; }
+  if (components.host_start == components.host_end) { return false; }
   return checkers::verify_dns_length(get_hostname());
 }
 

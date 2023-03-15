@@ -625,7 +625,7 @@ namespace ada::parser {
             if constexpr (result_type_is_ada_url) {
               if(!url.parse_host(file_host_buffer)) { return url; }
               // If host is "localhost", then set host to the empty string.
-              if (url.base_hostname_has_value() && url.host.value() == "localhost") {
+              if (url.host.has_value() && url.host.value() == "localhost") {
                 url.host = "";
               }
             } else {

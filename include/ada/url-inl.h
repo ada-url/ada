@@ -148,8 +148,6 @@ inline bool url::base_fragment_has_value() const {
 
 inline bool url::base_search_has_value() const { return query.has_value(); }
 
-inline bool url::base_hostname_has_value() const { return host.has_value(); }
-
 inline void url::set_scheme(std::string &&new_scheme) noexcept {
   type = ada::scheme::get_scheme_type(new_scheme);
   // We only move the 'scheme' if it is non-special.
