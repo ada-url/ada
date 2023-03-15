@@ -189,8 +189,6 @@ namespace ada {
     /** @private */
     inline bool base_search_has_value() const;
     /** @private */
-    inline bool base_port_has_value() const;
-    /** @private */
     template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
 

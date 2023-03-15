@@ -126,8 +126,6 @@ struct url : url_base {
   inline bool base_fragment_has_value() const;
   /** @private */
   inline bool base_search_has_value() const;
-  /** @private */
-  inline bool base_port_has_value() const;
 
   [[nodiscard]] bool has_valid_domain() const noexcept override;
 

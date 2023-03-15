@@ -241,11 +241,6 @@ inline bool url_aggregator::base_search_has_value() const {
   return components.search_start != url_components::omitted;
 }
 
-inline bool url_aggregator::base_port_has_value() const {
-  ada_log("url_aggregator::base_port_has_value");
-  return components.port != url_components::omitted;
-}
-
 inline bool url_aggregator::base_hostname_has_value() const {
   ada_log("url_aggregator::base_hostname_has_value");
   return components.host_start != components.host_end;
