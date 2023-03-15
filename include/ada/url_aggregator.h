@@ -39,7 +39,7 @@ namespace ada {
     bool set_password(const std::string_view input);
     bool set_port(const std::string_view input);
     bool set_pathname(const std::string_view input);
-    bool set_search(const std::string_view input);
+    void set_search(const std::string_view input);
     void set_hash(const std::string_view input);
     inline void set_scheme(std::string_view new_scheme) noexcept;
     inline void copy_scheme(const url_aggregator& u) noexcept;
