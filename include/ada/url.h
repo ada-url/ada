@@ -93,8 +93,6 @@ struct url : url_base {
   std::optional<std::string> fragment{};
 
   /** @private */
-  inline void update_base_hash(std::string_view input);
-  /** @private */
   inline void update_unencoded_base_hash(std::string_view input);
   /** @private */
   inline void update_base_hostname(std::string_view input);

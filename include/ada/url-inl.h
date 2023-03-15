@@ -103,9 +103,6 @@ inline void url::update_base_hostname(std::string_view input) {
   host = input;
 }
 
-inline void url::update_base_hash(std::string_view input) {
-  fragment = input; // here we assume that the content was *already* percent encoded.
-}
 inline void url::update_unencoded_base_hash(std::string_view input) {
   // We do the percent encoding
   fragment = unicode::percent_encode(input, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
@@ -114,6 +111,7 @@ inline void url::update_unencoded_base_hash(std::string_view input) {
 inline void url::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
   query = ada::unicode::percent_encode(input, query_percent_encode_set);
 }
+
 inline void url::update_base_search(std::optional<std::string> input) {
   query = input;
 }

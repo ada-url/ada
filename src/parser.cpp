@@ -56,11 +56,6 @@ namespace ada::parser {
     // Optimization opportunity. Most websites do not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
     if (fragment.has_value()) {
-      // This is not good because it creates a temporary string:
-      // url.update_base_hash(unicode::percent_encode(*fragment,
-      //                                       ada::character_sets::FRAGMENT_PERCENT_ENCODE));
-      // This is much better as we pass a std::string_view, which opens up optimization
-      // opportunities.
       url.update_unencoded_base_hash(*fragment);
     }
 

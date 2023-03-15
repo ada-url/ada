@@ -19,15 +19,6 @@
 
 namespace ada {
 
-inline void url_aggregator::update_base_hash(std::string_view input) {
-  ada_log("url_aggregator::update_base_hash ", input, " components.hash_start = ", components.hash_start);
-  if(components.hash_start != url_components::omitted) {
-    buffer.resize(components.hash_start);
-  }
-  components.hash_start = uint32_t(buffer.size());
-  buffer += helpers::concat("#", input); // assume already percent encoded
-}
-
 inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   ada_log("url_aggregator::update_unencoded_base_hash ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size(), " bytes] components.hash_start = ", components.hash_start);
   if (components.hash_start != url_components::omitted) {
