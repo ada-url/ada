@@ -328,7 +328,10 @@ namespace ada::parser {
                 // Shorten url’s path.
                 helpers::shorten_path(url.path, url.type);
               } else {
-                // TODO
+                std::string path = std::string(url.get_pathname());
+                if (helpers::shorten_path(path, url.type)) {
+                  url.update_base_pathname(path);
+                }
               }
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
@@ -542,7 +545,9 @@ namespace ada::parser {
           if constexpr (result_type_is_ada_url) {
             if(!helpers::parse_prepared_path(view, url.type, url.path)) { return url; }
           } else {
-            // TODO
+            std::string path = std::string(url.get_pathname());
+            if(!helpers::parse_prepared_path(view, url.type, path)) { return url; }
+            url.update_base_pathname(path);
           }
           break;
         }

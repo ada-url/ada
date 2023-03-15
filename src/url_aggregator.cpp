@@ -83,11 +83,13 @@ template <bool has_state_override>
 }
 
 inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
+  ada_log("url_aggregator::copy_scheme ", u.buffer);
   uint32_t new_difference = u.components.protocol_end - components.protocol_end;
   type = u.type;
   buffer.erase(0, components.protocol_end);
-  buffer.insert(0, u.buffer.substr(0, components.protocol_end));
+  buffer.insert(0, u.get_protocol());
   components.protocol_end = u.components.protocol_end;
+
   // No need to update the components
   if (new_difference == 0) { return; }
 
@@ -101,6 +103,7 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
 }
 
 inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
+  ada_log("url_aggregator::set_scheme ", new_scheme);
   uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end;
 
   // Optimization opportunity: Get rid of this branch
@@ -124,6 +127,7 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
 }
 
 bool url_aggregator::set_protocol(const std::string_view input) {
+  ada_log("url_aggregator::set_protocol ", input);
   std::string view(input);
   helpers::remove_ascii_tab_or_newline(view);
   if (view.empty()) { return true; }
@@ -142,6 +146,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 }
 
 bool url_aggregator::set_username(const std::string_view input) {
+  ada_log("url_aggregator::set_username ", input);
   if (cannot_have_credentials_or_port()) { return false; }
   size_t username_start = components.protocol_end + 3;
   size_t username_length = components.username_end - username_start;
@@ -163,12 +168,14 @@ bool url_aggregator::set_username(const std::string_view input) {
 }
 
 bool url_aggregator::set_password(const std::string_view input) {
+  ada_log("url_aggregator::set_password ", input);
   (void) input;
   // TODO: Implement
   return false;
 }
 
 bool url_aggregator::set_port(const std::string_view input) {
+  ada_log("url_aggregator::set_port ", input);
   if (cannot_have_credentials_or_port()) { return false; }
   std::string trimmed(input);
   helpers::remove_ascii_tab_or_newline(trimmed);
@@ -188,13 +195,14 @@ bool url_aggregator::set_port(const std::string_view input) {
 }
 
 bool url_aggregator::set_pathname(const std::string_view input) {
+  ada_log("url_aggregator::set_pathname ", input);
   if (has_opaque_path) { return false; }
   clear_base_pathname();
   return parse_path(input);
 }
 
 ada_really_inline bool url_aggregator::parse_path(std::string_view input) {
-  ada_log("parse_path ", input);
+  ada_log("url_aggregator::parse_path ", input);
   std::string tmp_buffer;
   std::string_view internal_input;
   if(unicode::has_tabs_or_newline(input)) {
@@ -212,15 +220,17 @@ ada_really_inline bool url_aggregator::parse_path(std::string_view input) {
     std::string path{};
     if(internal_input.empty()) {
       update_base_pathname("/");
+      return true;
     } else if((internal_input[0] == '/') || (internal_input[0] == '\\')){
       if (helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
         update_base_pathname(path);
         return true;
       }
-      return false;
-    } else if (helpers::parse_prepared_path(internal_input, type, path)) {
-      update_base_pathname(path);
-      return true;
+    } else {
+      if (helpers::parse_prepared_path(internal_input, type, path)) {
+        update_base_pathname(path);
+        return true;
+      }
     }
     return false;
   } else if (!internal_input.empty()) {

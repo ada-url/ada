@@ -32,19 +32,16 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
 
 inline void url_aggregator::update_base_hostname(std::string_view input) {
   ada_log("url_aggregator::update_base_hostname ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size()," bytes]");
-  bool has_double_dash_in_url = components.host_start > components.protocol_end;
   uint32_t current_length = components.host_end - components.host_start;
   uint32_t new_difference = uint32_t(input.size() - current_length);
 
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
   // `//` initially to the buffer, since it depends on the hostname existance.
-  if (!has_double_dash_in_url) {
-    ada_log("url_aggregator::update_base_hostname  inserting // at ", components.host_start, " in ", buffer);
+  if (!has_authority()) {
+    ada_log("url_aggregator::update_base_hostname inserting // at ", components.host_start, " ", to_string());
     buffer.insert(components.host_start, "//");
     new_difference += 2;
     components.host_start += 2;
-  } else {
-    ada_log("url_aggregator::update_base_hostname  deleting from ", components.host_start, " to ", components.host_end);
   }
   ada_log("url_aggregator::update_base_hostname  inserting ", input, " at index ", components.host_start, " in ", buffer);
   buffer.insert(components.host_start, input);
@@ -105,12 +102,13 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
 
-  uint32_t difference = uint32_t(input.size()) - (ending_index - components.pathname_start);
-  buffer.erase(components.pathname_start, ending_index - components.pathname_start);
+  uint32_t current_length = ending_index - components.pathname_start;
+  uint32_t difference = uint32_t(input.size()) - current_length;
+  buffer.erase(components.pathname_start, current_length);
   buffer.insert(components.pathname_start, input);
 
-  if (components.search_start != url_components::omitted) { components.search_start += difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+  if (components.search_start != url_components::omitted) { components.search_start -= difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= difference; }
 }
 
 inline void url_aggregator::append_base_pathname(const std::string_view input) {
