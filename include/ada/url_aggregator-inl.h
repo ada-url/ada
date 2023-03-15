@@ -8,10 +8,13 @@
 #include "ada/character_sets.h"
 #include "ada/character_sets-inl.h"
 #include "ada/helpers.h"
+#include "ada/unicode.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
 #include "ada/scheme.h"
 #include "ada/log.h"
+#include "url_aggregator.h"
+#include "url_components.h"
 
 #include <optional>
 #include <string_view>
@@ -24,8 +27,7 @@ inline void url_aggregator::update_base_hash(std::string_view input) {
     buffer.resize(components.hash_start);
   }
   components.hash_start = uint32_t(buffer.size());
-  buffer += "#";
-  buffer += input; // assume already percent encoded
+  buffer += helpers::concat("#", input); // assume already percent encoded
 }
 
 inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
@@ -37,23 +39,6 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   buffer += "#";
   unicode::percent_encode<true>(input,ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
   ada_log("url_aggregator::update_unencoded_base_hash final buffer is '", buffer, "' [", buffer.size(), " bytes]");
-}
-
-inline void url_aggregator::update_base_search(std::string_view input) {
-  ada_log("url_aggregator::update_base_search ", input);
-  bool has_hash = components.hash_start != url_components::omitted;
-  if (has_hash) {
-    // TODO: Implement this.
-  } else {
-    ada_log("url_aggregator::update_base_search components.search_start = ", components.search_start);
-    if(components.search_start == url_components::omitted) {
-      std::cerr << "a check for url_components::omitted is missing.\n";
-      abort();
-    }
-    buffer.resize(components.search_start);
-    buffer += "?";
-    buffer += input;
-  }
 }
 
 inline void url_aggregator::update_base_hostname(std::string_view input) {
@@ -80,43 +65,48 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
   if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
 }
 
-inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
-  ada_log("url_aggregator::update_base_search ", input, " with encoding parameter");
-  bool has_hash = components.hash_start != url_components::omitted;
-  if (has_hash) {
-    // TODO: Implement this.
-  } else {
-    ada_log("url_aggregator::update_base_search components.search_start = ", components.search_start);
-    if(components.search_start == url_components::omitted) {
-      std::cerr << "a check for url_components::omitted is missing.\n";
-      abort();
+inline void url_aggregator::update_base_search(std::string_view input) {
+  ada_log("url_aggregator::update_base_search ", input);
+
+  // Make sure search is deleted and hash_start index is correct.
+  if (components.search_start != url_components::omitted) {
+    uint32_t search_end = uint32_t(buffer.size());
+    if (components.hash_start != url_components::omitted) {
+      search_end = components.hash_start;
+      components.hash_start = components.search_start;
     }
-    buffer.resize(components.search_start);
-    buffer += "?";
-    unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
+    buffer.erase(components.search_start, search_end - components.search_start);
   }
+
+  uint32_t input_size = uint32_t(input.size() + 1); // add `?` prefix
+  components.search_start = components.pathname_start + uint32_t(get_pathname().length());
+  buffer.insert(components.search_start, helpers::concat("?", input));
+  if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
 }
 
-inline void url_aggregator::update_base_search(std::optional<std::string_view> input) {
-  ada_log("url_aggregator::update_base_search with optional");
-  bool has_hash = components.hash_start != url_components::omitted;
+inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
+  ada_log("url_aggregator::update_base_search ", input, " with encoding parameter");
 
-  if (has_hash) {
-    // TODO: Implement this.
+  // Make sure search is deleted and hash_start index is correct.
+  if (components.search_start == url_components::omitted) {
+    components.search_start = components.pathname_start + uint32_t(get_pathname().size());
   } else {
-    ada_log("url_aggregator::update_base_search components.search_start = ", components.search_start);
-    if(components.search_start == url_components::omitted) {
-      std::cerr << "a check for url_components::omitted is missing.\n";
-      abort();
+    uint32_t search_end = uint32_t(buffer.size());
+    if (components.hash_start != url_components::omitted) {
+      search_end = components.hash_start;
+      components.hash_start = components.search_start;
     }
-    buffer.resize(components.search_start);
+    buffer.erase(components.search_start, search_end - components.search_start - components.search_start);
+  }
 
-    if (input.has_value()) {
-      buffer += "?";
-      buffer += input.value();
-    } else {
-      components.search_start = url_components::omitted;
-    }
+  buffer.insert(components.search_start, "?");
+
+  if (components.hash_start == url_components::omitted) {
+    unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
+  } else {
+    std::string encoded = unicode::percent_encode(input, query_percent_encode_set);
+    buffer.insert(components.search_start + 1, encoded);
+    components.hash_start += uint32_t(encoded.size() + 1); // Do not forget `?`
   }
 }
 
@@ -167,14 +157,25 @@ inline std::string_view url_aggregator::retrieve_base_pathname() const {
   return helpers::substring(buffer, components.pathname_start, ending);
 }
 
+inline void url_aggregator::clear_base_search() {
+  if (components.hash_start == url_components::omitted) {
+    if (components.search_start != url_components::omitted) {
+      buffer.resize(components.search_start);
+      components.search_start = url_components::omitted;
+    }
+  } else {
+    uint32_t length = components.hash_start - components.search_start;
+    components.hash_start -= length;
+    buffer.erase(components.search_start, length);
+  }
+}
+
 inline void url_aggregator::clear_base_hash() {
   ada_log("url_aggregator::clear_base_hash components.hash_start=", components.hash_start);
-  components.hash_start = url_components::omitted;
-  if(components.hash_start == url_components::omitted) {
-    std::cerr << "a check for url_components::omitted is missing.\n";
-    abort();
+  if (components.hash_start != url_components::omitted) {
+    buffer.resize(components.hash_start);
+    components.hash_start = url_components::omitted;
   }
-  buffer.resize(components.hash_start);
 }
 
 inline void url_aggregator::clear_base_pathname() {

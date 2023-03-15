@@ -144,6 +144,8 @@ inline void url::clear_base_hostname() { host = std::nullopt; }
 
 inline void url::clear_base_pathname() { path = ""; }
 
+inline void url::clear_base_search() { query = std::nullopt; }
+
 inline bool url::base_fragment_has_value() const {
   return fragment.has_value();
 }

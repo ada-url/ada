@@ -475,8 +475,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept {
-  if (components.pathname_start == url_components::omitted) { return ""; }
-  auto ending_index = buffer.size();
+  size_t ending_index = buffer.size();
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   return helpers::substring(buffer, components.pathname_start, ending_index);
@@ -484,7 +483,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_search() const noexcept {
   if (components.search_start == url_components::omitted) { return ""; }
-  auto ending_index = buffer.size();
+  size_t ending_index = buffer.size();
   if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   return helpers::substring(buffer, components.search_start, ending_index);
 }

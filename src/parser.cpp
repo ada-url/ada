@@ -328,7 +328,7 @@ namespace ada::parser {
             // Otherwise, if c is not the EOF code point:
             else if (input_position != input_size) {
               // Set url’s query to null.
-              url.update_base_search(std::nullopt); ///////// why don't we have a simple 'remove_search?', it would be faster and simpler!!!!!!
+              url.clear_base_search();
               if constexpr (result_type_is_ada_url) {
                 // Shorten url’s path.
                 helpers::shorten_path(url.path, url.type);
@@ -678,7 +678,7 @@ namespace ada::parser {
             // Otherwise, if c is not the EOF code point:
             else if (input_position != input_size) {
               // Set url’s query to null.
-              url.update_base_search(std::nullopt); // This is not good: we should have a simple function to remove the base
+              url.clear_base_search();
 
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.

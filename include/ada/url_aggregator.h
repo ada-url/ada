@@ -163,8 +163,6 @@ namespace ada {
     /** @private */
     inline void update_base_search(std::string_view input, const uint8_t* query_percent_encode_set);
     /** @private */
-    inline void update_base_search(std::optional<std::string_view> input);
-    /** @private */
     inline void update_base_pathname(const std::string_view input);
     /** @private */
     inline void update_base_username(const std::string_view input);
@@ -182,6 +180,8 @@ namespace ada {
     inline void clear_base_hostname() override;
     /** @private */
     inline void clear_base_pathname() override;
+    /** @private */
+    inline void clear_base_search() override;
     /** @private */
     inline bool base_hostname_has_value() const;
     /** @private */
