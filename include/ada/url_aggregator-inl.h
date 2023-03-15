@@ -117,7 +117,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
 
   uint32_t difference = uint32_t(input.size()) - (ending_index - components.pathname_start);
-  buffer.erase(components.pathname_start, ending_index);
+  buffer.erase(components.pathname_start, ending_index - components.pathname_start);
   buffer.insert(components.pathname_start, input);
 
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
@@ -164,17 +164,8 @@ inline void url_aggregator::clear_base_search() {
       components.search_start = url_components::omitted;
     }
   } else {
-    uint32_t length = components.hash_start - components.search_start;
-    components.hash_start -= length;
-    buffer.erase(components.search_start, length);
-  }
-}
-
-inline void url_aggregator::clear_base_hash() {
-  ada_log("url_aggregator::clear_base_hash components.hash_start=", components.hash_start);
-  if (components.hash_start != url_components::omitted) {
-    buffer.resize(components.hash_start);
-    components.hash_start = url_components::omitted;
+    components.hash_start = components.search_start;
+    buffer.erase(components.search_start, components.hash_start - components.search_start);
   }
 }
 
@@ -200,7 +191,7 @@ inline void url_aggregator::clear_base_hostname() {
     components.host_start -= 2;
   }
   if (length == 0 && !has_double_dash_in_url) { return; }
-  buffer.erase(components.host_start, components.host_end);
+  buffer.erase(components.host_start, components.host_end - components.host_start);
   components.host_end = components.host_start;
   components.pathname_start += length;
   if (components.search_start != url_components::omitted) { components.search_start += length; }
