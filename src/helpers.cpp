@@ -93,7 +93,6 @@ namespace ada::helpers {
   }
 
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept {
-    ada_log("substring(", input, " [", input.size() ,"bytes],", pos, ")");
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 

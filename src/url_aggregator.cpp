@@ -15,6 +15,7 @@
 namespace ada {
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme(const std::string_view input) {
+  ada_log("url_aggregator::parse_scheme ", input);
   auto parsed_type = ada::scheme::get_scheme_type(input);
   bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
   /**
@@ -239,6 +240,7 @@ ada_really_inline bool url_aggregator::parse_path(std::string_view input) {
 }
 
 void url_aggregator::set_search(const std::string_view input) {
+  ada_log("url_aggregator::set_search ", input);
   if (input.empty()) {
     clear_base_search();
     helpers::strip_trailing_spaces_from_opaque_path(*this);
@@ -257,6 +259,7 @@ void url_aggregator::set_search(const std::string_view input) {
 }
 
 void url_aggregator::set_hash(const std::string_view input) {
+  ada_log("url_aggregator::set_hash ", input);
   if (input.empty()) {
     if (components.hash_start != url_components::omitted) {
       buffer.resize(components.hash_start);
@@ -351,6 +354,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
 
 template <bool override_hostname>
 bool url_aggregator::set_host_or_hostname(const std::string_view input) {
+  ada_log("url_aggregator::set_host_or_hostname ", input);
   if (has_opaque_path) { return false; }
 
   std::string_view previous_host = get_hostname();
@@ -419,10 +423,12 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 }
 
 bool url_aggregator::set_host(const std::string_view input) {
+  ada_log("url_aggregator::set_host ", input);
   return set_host_or_hostname<false>(input);
 }
 
 bool url_aggregator::set_hostname(const std::string_view input) {
+  ada_log("url_aggregator::set_hostname ", input);
   return set_host_or_hostname<true>(input);
 }
 
