@@ -175,6 +175,8 @@ namespace ada {
     /** @private */
     inline std::string_view retrieve_base_pathname() const;
     /** @private */
+    inline void clear_base_port();
+    /** @private */
     inline void clear_base_hostname() override;
     /** @private */
     inline void clear_base_pathname() override;

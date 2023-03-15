@@ -138,8 +138,38 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 }
 
 inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
-  ada_log("url_aggregator::update_base_port ");
-  components.port = input.value_or(url_components::omitted);
+  ada_log("url_aggregator::update_base_port");
+
+  if (!input.has_value()) {
+    clear_base_port();
+    return;
+  }
+
+  std::string value = helpers::concat(":", std::to_string(input.value()));
+  uint32_t difference = uint32_t(value.size());
+
+  if (components.port != url_components::omitted) {
+    difference -= components.pathname_start - components.host_end;
+    buffer.erase(components.host_end, components.pathname_start - components.host_end);
+  }
+
+  buffer.insert(components.host_end, value);
+  components.pathname_start += difference;
+  if (components.search_start != url_components::omitted) { components.search_start += difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+  components.port = input.value();
+}
+
+inline void url_aggregator::clear_base_port() {
+  ada_log("url_aggregator::clear_base_port");
+
+  if (components.port == url_components::omitted) { return; }
+  uint32_t length = components.pathname_start - components.host_end;
+  buffer.erase(components.host_end, length);
+  components.pathname_start -= length;
+  if (components.search_start != url_components::omitted) { components.search_start -= length; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= length; }
+  components.port = url_components::omitted;
 }
 
 inline std::optional<uint16_t> url_aggregator::retrieve_base_port() const {
