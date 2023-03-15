@@ -547,6 +547,7 @@ namespace ada::parser {
             if(!helpers::parse_prepared_path(view, url.type, url.path)) { return url; }
           } else {
             std::string path = std::string(url.get_pathname());
+            // TODO: Optimization opportunity: No need to create a ref to a new std::string here.
             if(!helpers::parse_prepared_path(view, url.type, path)) { return url; }
             url.update_base_pathname(path);
           }
