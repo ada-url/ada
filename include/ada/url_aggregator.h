@@ -169,6 +169,8 @@ namespace ada {
     /** @private */
     inline void update_base_port(std::optional<uint16_t> input) override;
     /** @private */
+    inline void append_base_pathname(const std::string_view input);
+    /** @private */
     inline std::optional<uint16_t> retrieve_base_port() const;
     /** @private */
     inline std::string_view retrieve_base_pathname() const;

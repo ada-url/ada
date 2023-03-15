@@ -582,7 +582,7 @@ namespace ada::parser {
                       url.path += '/';
                       url.path += first_base_url_path;
                     } else {
-                      // TODO
+                      url.append_base_pathname(helpers::concat("/", first_base_url_path));
                     }
                   }
                 }

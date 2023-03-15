@@ -113,6 +113,18 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
 }
 
+inline void url_aggregator::append_base_pathname(const std::string_view input) {
+  ada_log("url_aggregator::append_base_pathname ", input, " ", to_string());
+  uint32_t ending_index = uint32_t(buffer.size());
+  if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
+  else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
+  buffer.insert(ending_index, input);
+
+  uint32_t difference = uint32_t(input.size());
+  if (components.search_start != url_components::omitted) { components.search_start += difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+}
+
 inline void url_aggregator::update_base_username(const std::string_view input) {
   ada_log("url_aggregator::update_base_username ", input);
   // TODO: Implement this
