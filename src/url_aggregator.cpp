@@ -91,10 +91,7 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   if (new_difference == 0) { return; }
 
   // Update the rest of the components.
-  // TODO: why is the next line not guarded?
-  //if(components.username_end != url_components::omitted) {
   components.username_end += new_difference;
-  //}
   components.host_start += new_difference;
   components.host_end += new_difference;
   components.pathname_start += new_difference;
