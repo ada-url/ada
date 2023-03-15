@@ -696,7 +696,7 @@ namespace ada::parser {
                 if constexpr (result_type_is_ada_url) {
                   url.path.clear();
                 } else {
-                  // TODO
+                  url.update_base_pathname("");
                 }
                 url.has_opaque_path = true;
               }
