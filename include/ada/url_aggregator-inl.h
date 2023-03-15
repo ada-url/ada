@@ -26,7 +26,8 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   }
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
-  unicode::percent_encode<true>(input,ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
+  bool encoding_required = unicode::percent_encode<true>(input,ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
+  if (!encoding_required) { buffer.append(input); }
   ada_log("url_aggregator::update_unencoded_base_hash final buffer is '", buffer, "' [", buffer.size(), " bytes]");
 }
 
@@ -90,7 +91,8 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
   buffer.insert(components.search_start, "?");
 
   if (components.hash_start == url_components::omitted) {
-    unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
+    bool encoding_required = unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
+    if (!encoding_required) { buffer.append(input); }
   } else {
     std::string encoded = unicode::percent_encode(input, query_percent_encode_set);
     buffer.insert(components.search_start + 1, encoded);
