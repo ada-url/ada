@@ -489,7 +489,10 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept {
+  // If this’s URL’s fragment is either null or the empty string, then return the empty string.
+  // Return U+0023 (#), followed by this’s URL’s fragment.
   if (components.hash_start == url_components::omitted) { return ""; }
+  if (buffer.size() - components.hash_start <= 1) { return ""; }
   return helpers::substring(buffer, components.hash_start);
 }
 
