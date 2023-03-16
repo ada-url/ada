@@ -56,7 +56,8 @@ namespace ada::parser {
 
     // Optimization opportunity. Most websites do not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
-    // We add it last.
+    // We add it last so that an implementation like ada::url_aggregator
+    // can append it last to its internal buffer, thus improving performance.
 
     // Here url_data no longer has its fragment.
     // We are going to access the data from url_data (it is immutable).

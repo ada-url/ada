@@ -135,7 +135,6 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   uint32_t difference = uint32_t(input.size()) - current_length;
   if(components.pathname_start == buffer.size()) { // common case
     buffer.append(input);
-    return;
   } else {
     buffer.erase(components.pathname_start, current_length);
     buffer.insert(components.pathname_start, input);
