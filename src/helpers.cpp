@@ -68,21 +68,24 @@ namespace ada::helpers {
     return fragment;
   }
 
-  ada_really_inline void shorten_path(std::string& path, ada::scheme::type type) noexcept {
+  ada_really_inline bool shorten_path(std::string& path, ada::scheme::type type) noexcept {
     size_t first_delimiter = path.find_first_of('/', 1);
 
     // Let path be url’s path.
     // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized Windows drive letter, then return.
     if (type == ada::scheme::type::FILE && first_delimiter == std::string_view::npos) {
       if (checkers::is_normalized_windows_drive_letter(std::string_view(path.data() + 1, first_delimiter - 1))) {
-        return;
+        return false;
       }
     }
 
     // Remove path’s last item, if any.
     if (!path.empty()) {
       path.erase(path.rfind('/'));
+      return true;
     }
+
+    return false;
   }
 
   ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept {
@@ -93,7 +96,6 @@ namespace ada::helpers {
   }
 
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept {
-    ada_log("substring(", input, " [", input.size() ,"bytes],", pos, ")");
     return pos > input.size() ? std::string_view() : input.substr(pos);
   }
 

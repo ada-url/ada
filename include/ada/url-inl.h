@@ -103,9 +103,6 @@ inline void url::update_base_hostname(std::string_view input) {
   host = input;
 }
 
-inline void url::update_base_hash(std::string_view input) {
-  fragment = input; // here we assume that the content was *already* percent encoded.
-}
 inline void url::update_unencoded_base_hash(std::string_view input) {
   // We do the percent encoding
   fragment = unicode::percent_encode(input, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
@@ -114,6 +111,7 @@ inline void url::update_unencoded_base_hash(std::string_view input) {
 inline void url::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
   query = ada::unicode::percent_encode(input, query_percent_encode_set);
 }
+
 inline void url::update_base_search(std::optional<std::string> input) {
   query = input;
 }
@@ -138,21 +136,17 @@ inline std::optional<uint16_t> url::retrieve_base_port() const { return port; }
 
 inline std::string_view url::retrieve_base_pathname() const { return path; }
 
-inline void url::clear_base_hash() { fragment = std::nullopt; }
-
 inline void url::clear_base_hostname() { host = std::nullopt; }
 
 inline void url::clear_base_pathname() { path = ""; }
+
+inline void url::clear_base_search() { query = std::nullopt; }
 
 inline bool url::base_fragment_has_value() const {
   return fragment.has_value();
 }
 
 inline bool url::base_search_has_value() const { return query.has_value(); }
-
-inline bool url::base_port_has_value() const { return port.has_value(); }
-
-inline bool url::base_hostname_has_value() const { return host.has_value(); }
 
 inline void url::set_scheme(std::string &&new_scheme) noexcept {
   type = ada::scheme::get_scheme_type(new_scheme);

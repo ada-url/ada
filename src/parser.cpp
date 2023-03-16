@@ -1,4 +1,5 @@
 #include "ada.h"
+#include "ada/common_defs.h"
 #include "ada/character_sets-inl.h"
 #include "ada/unicode.h"
 #include "ada/url-inl.h"
@@ -56,11 +57,6 @@ namespace ada::parser {
     // Optimization opportunity. Most websites do not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
     if (fragment.has_value()) {
-      // This is not good because it creates a temporary string:
-      // url.update_base_hash(unicode::percent_encode(*fragment,
-      //                                       ada::character_sets::FRAGMENT_PERCENT_ENCODE));
-      // This is much better as we pass a std::string_view, which opens up optimization
-      // opportunities.
       url.update_unencoded_base_hash(*fragment);
     }
 
@@ -328,12 +324,16 @@ namespace ada::parser {
             // Otherwise, if c is not the EOF code point:
             else if (input_position != input_size) {
               // Set url’s query to null.
-              url.update_base_search(std::nullopt); ///////// why don't we have a simple 'remove_search?', it would be faster and simpler!!!!!!
+              url.clear_base_search();
               if constexpr (result_type_is_ada_url) {
                 // Shorten url’s path.
                 helpers::shorten_path(url.path, url.type);
               } else {
-                // TODO
+                std::string path = std::string(url.get_pathname());
+                // TODO: Optimization opportunity. No need to create a ref to std::string
+                if (helpers::shorten_path(path, url.type)) {
+                  url.update_base_pathname(path);
+                }
               }
               // Set state to path state and decrease pointer by 1.
               state = ada::state::PATH;
@@ -414,10 +414,7 @@ namespace ada::parser {
 
           // Percent-encode after encoding, with encoding, buffer, and queryPercentEncodeSet,
           // and append the result to url’s query.
-          // The following is not good since we create a temporary string:
-          // url.update_base_search(ada::unicode::percent_encode(helpers::substring(url_data, input_position), query_percent_encode_set));
           url.update_base_search(helpers::substring(url_data, input_position), query_percent_encode_set);
-          // passing a std::string_view opens up optimizations opportunities!!!
           ada_log("QUERY update_base_search completed ");
           return url;
         }
@@ -547,7 +544,10 @@ namespace ada::parser {
           if constexpr (result_type_is_ada_url) {
             if(!helpers::parse_prepared_path(view, url.type, url.path)) { return url; }
           } else {
-            // TODO
+            std::string path = std::string(url.get_pathname());
+            // TODO: Optimization opportunity: No need to create a ref to a new std::string here.
+            if(!helpers::parse_prepared_path(view, url.type, path)) { return url; }
+            url.update_base_pathname(path);
           }
           break;
         }
@@ -587,7 +587,7 @@ namespace ada::parser {
                       url.path += '/';
                       url.path += first_base_url_path;
                     } else {
-                      // TODO
+                      url.append_base_pathname(helpers::concat("/", first_base_url_path));
                     }
                   }
                 }
@@ -625,7 +625,7 @@ namespace ada::parser {
             if constexpr (result_type_is_ada_url) {
               if(!url.parse_host(file_host_buffer)) { return url; }
               // If host is "localhost", then set host to the empty string.
-              if (url.base_hostname_has_value() && url.host.value() == "localhost") {
+              if (url.host.has_value() && url.host.value() == "localhost") {
                 url.host = "";
               }
             } else {
@@ -678,7 +678,7 @@ namespace ada::parser {
             // Otherwise, if c is not the EOF code point:
             else if (input_position != input_size) {
               // Set url’s query to null.
-              url.update_base_search(std::nullopt); // This is not good: we should have a simple function to remove the base
+              url.clear_base_search();
 
               // If the code point substring from pointer to the end of input does not start with a
               // Windows drive letter, then shorten url’s path.
@@ -686,7 +686,11 @@ namespace ada::parser {
                 if constexpr (result_type_is_ada_url) {
                   helpers::shorten_path(url.path, url.type);
                 } else {
-                  // TODO
+                  std::string path = std::string(url.get_pathname());
+                  // TODO: Optimization opportunity. No need to create a ref to std::string
+                  if (helpers::shorten_path(path, url.type)) {
+                    url.update_base_pathname(path);
+                  }
                 }
               }
               // Otherwise:
@@ -695,7 +699,7 @@ namespace ada::parser {
                 if constexpr (result_type_is_ada_url) {
                   url.path.clear();
                 } else {
-                  // TODO
+                  url.clear_base_pathname();
                 }
                 url.has_opaque_path = true;
               }
@@ -719,11 +723,7 @@ namespace ada::parser {
           ada::unreachable();
       }
     }
-    if constexpr (result_type_is_ada_url) {
-      ada_log("returning ", url.to_string());
-    } else {
-      // TODO
-    }
+    ada_log("returning ", url.to_string());
     return url;
   }
 

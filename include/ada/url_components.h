@@ -44,6 +44,10 @@ namespace ada {
      *      `---------------------------------------------- protocol_end
      */
     uint32_t protocol_end{0};
+    /**
+     * Username end is not `omitted` by default to make username and password getters
+     * less costly to implement.
+     */
     uint32_t username_end{0};
     uint32_t host_start{0};
     uint32_t host_end{0};

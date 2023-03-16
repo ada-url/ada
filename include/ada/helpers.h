@@ -43,8 +43,9 @@ namespace ada::helpers {
    * @private
    * Defined by the URL specification, shorten a URLs paths.
    * @see https://url.spec.whatwg.org/#shorten-a-urls-path
+   * @returns Returns true if path is shortened.
    */
-  ada_really_inline void shorten_path(std::string& path, ada::scheme::type type) noexcept;
+  ada_really_inline bool shorten_path(std::string& path, ada::scheme::type type) noexcept;
 
 
  /**
