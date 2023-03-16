@@ -17,7 +17,7 @@ enum {
   PARSE_AND_HREF = 0
 };
 
-template <bool just_parse = PARSE_AND_HREF>
+template <bool just_parse = PARSE_AND_HREF, class result_type = ada::url>
 static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;
@@ -26,10 +26,10 @@ static void BasicBench_AdaURL(benchmark::State& state) {
 
   for (auto _ : state) {
     for(std::string& url_string : url_examples) {
-      auto url = ada::parse(url_string);
+      ada::result<result_type> url = ada::parse<result_type>(url_string);
       if(url) {
         success++;
-        if(!just_parse) {
+        if constexpr (!just_parse) {
           href_size += url->get_href().size();
         }
       }
@@ -42,10 +42,10 @@ static void BasicBench_AdaURL(benchmark::State& state) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
       for(std::string& url_string : url_examples) {
-        auto url = ada::parse(url_string);
+        ada::result<result_type> url = ada::parse<result_type>(url_string);
         if(url) {
           success++;
-          if(!just_parse) {
+          if constexpr (!just_parse) {
             href_size += url->get_href().size();
           }
         }
@@ -80,8 +80,10 @@ static void BasicBench_AdaURL(benchmark::State& state) {
 BENCHMARK(BasicBench_AdaURL);
 auto BasicBench_AdaURL_just_parse = BasicBench_AdaURL<JUST_PARSE>;
 BENCHMARK(BasicBench_AdaURL_just_parse);
-
-
+auto BasicBench_AdaURL_aggregator = BasicBench_AdaURL<PARSE_AND_HREF,ada::url_aggregator>;
+BENCHMARK(BasicBench_AdaURL_aggregator);
+auto BasicBench_AdaURL_aggregator_just_parse = BasicBench_AdaURL<JUST_PARSE,ada::url_aggregator>;
+BENCHMARK(BasicBench_AdaURL_aggregator_just_parse);
 
 
 #if ADA_url_whatwg_ENABLED
