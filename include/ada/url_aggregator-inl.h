@@ -89,7 +89,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
   if(buffer.size() == components.search_start) { // common case
     buffer.append("?"); // TODO: in many instances, the '?' is part of the input and we could do as single append.
     buffer.append(input);
-  } else { // slowe case (uncommon)
+  } else { // slow case (uncommon)
     buffer.insert(components.search_start, "?");
     buffer.insert(components.search_start+1, input);
   }
