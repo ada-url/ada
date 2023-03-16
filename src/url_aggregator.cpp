@@ -485,7 +485,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_port() const noexcept {
   if (components.port == url_components::omitted) { return ""; }
-  return helpers::substring(buffer, components.host_end, components.pathname_start);
+  return helpers::substring(buffer, components.host_end + 1, components.pathname_start);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept {
@@ -503,7 +503,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept {
-  size_t ending_index = buffer.size();
+  uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   return helpers::substring(buffer, components.pathname_start, ending_index);

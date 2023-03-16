@@ -73,6 +73,11 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
 inline void url_aggregator::update_base_search(std::string_view input) {
   ada_log("url_aggregator::update_base_search ", input);
 
+  if (input.empty()) {
+    clear_base_search();
+    return;
+  }
+
   // Make sure search is deleted and hash_start index is correct.
   if (components.search_start != url_components::omitted) {
     uint32_t search_end = uint32_t(buffer.size());
@@ -98,6 +103,11 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 
 inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
   ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string());
+
+  if (input.empty()) {
+    clear_base_search();
+    return;
+  }
 
   // Make sure search is deleted and hash_start index is correct.
   if (components.search_start != url_components::omitted) {
@@ -175,8 +185,11 @@ inline void url_aggregator::update_base_username(const std::string_view input) {
 
 inline void url_aggregator::append_base_username(const std::string_view input) {
   ada_log("url_aggregator::append_base_username ", input);
-  size_t username_starting_index = components.protocol_end;
-  size_t input_size = input.size();
+  // If input is empty, do nothing.
+  if (input.empty()) { return; }
+
+  uint32_t username_starting_index = components.protocol_end;
+  uint32_t input_size = uint32_t(input.size());
 
   if (has_authority()) {
     buffer.insert(username_starting_index, input);
@@ -207,13 +220,16 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 
 inline void url_aggregator::append_base_password(const std::string_view input) {
   ada_log("url_aggregator::append_base_password ", input, " ", to_string());
+
+  // If input is empty, do nothing.
+  if (input.empty()) { return; }
+
   bool has_password = buffer[components.username_end] == ':';
   uint32_t difference = uint32_t(input.size());
 
   if (has_password) {
     uint32_t password_end = components.host_start - 2; // For "@"
     buffer.insert(password_end, input);
-
   } else {
     difference++; // Increment for ":"
     buffer.insert(components.username_end, ":");
@@ -279,15 +295,16 @@ inline std::string_view url_aggregator::retrieve_base_pathname() const {
 }
 
 inline void url_aggregator::clear_base_search() {
+  if (components.search_start == url_components::omitted) { return; }
+
   if (components.hash_start == url_components::omitted) {
-    if (components.search_start != url_components::omitted) {
-      buffer.resize(components.search_start);
-      components.search_start = url_components::omitted;
-    }
+    buffer.resize(components.search_start);
   } else {
     components.hash_start = components.search_start;
     buffer.erase(components.search_start, components.hash_start - components.search_start);
   }
+
+  components.search_start = url_components::omitted;
 }
 
 inline void url_aggregator::clear_base_pathname() {
