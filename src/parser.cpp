@@ -196,9 +196,11 @@ namespace ada::parser {
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
                 if (password_token_seen) {
-                  if constexpr (result_type_is_ada_url) { url.password += "%40"; } else { /* TODO */}
+                  if constexpr (result_type_is_ada_url) { url.password += "%40"; }
+                  else { url.append_base_password("%40"); }
                 } else {
-                  if constexpr (result_type_is_ada_url) { url.username += "%40"; } else { /* TODO */}
+                  if constexpr (result_type_is_ada_url) { url.username += "%40"; }
+                  else { url.append_base_username("%40"); }
                 }
               }
 
@@ -212,14 +214,15 @@ namespace ada::parser {
                   if constexpr(result_type_is_ada_url) {
                     url.username += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
                   } else {
-                    // TODO
+                    url.append_base_username(unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE));
                   }
                 } else {
                   if constexpr(result_type_is_ada_url) {
                     url.username += unicode::percent_encode(authority_view.substr(0,password_token_location), character_sets::USERINFO_PERCENT_ENCODE);
                     url.password += unicode::percent_encode(authority_view.substr(password_token_location+1), character_sets::USERINFO_PERCENT_ENCODE);
                   } else {
-                    // TODO
+                    url.append_base_username(unicode::percent_encode(authority_view.substr(0,password_token_location), character_sets::USERINFO_PERCENT_ENCODE));
+                    url.append_base_password(unicode::percent_encode(authority_view.substr(password_token_location+1), character_sets::USERINFO_PERCENT_ENCODE));
                   }
                 }
               }
@@ -227,7 +230,7 @@ namespace ada::parser {
                 if constexpr (result_type_is_ada_url) {
                   url.password += unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE);
                 } else {
-                  // TODO
+                  url.append_base_password(unicode::percent_encode(authority_view, character_sets::USERINFO_PERCENT_ENCODE));
                 }
               }
             }
@@ -574,7 +577,8 @@ namespace ada::parser {
               if constexpr (result_type_is_ada_url) {
                 url.host = base_url->host;
               } else {
-                // TODO
+                // TODO: Optimization opportunity.
+                url.set_host(url.get_host());
               }
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
@@ -626,14 +630,17 @@ namespace ada::parser {
             size_t consumed_bytes = file_host_buffer.size();
             input_position += consumed_bytes;
             // Let host be the result of host parsing buffer with url is not special.
+            if(!url.parse_host(file_host_buffer)) { return url; }
+
             if constexpr (result_type_is_ada_url) {
-              if(!url.parse_host(file_host_buffer)) { return url; }
               // If host is "localhost", then set host to the empty string.
               if (url.host.has_value() && url.host.value() == "localhost") {
                 url.host = "";
               }
             } else {
-              // TODO
+              if (url.get_hostname() == "localhost") {
+                url.update_base_hostname("");
+              }
             }
 
             // Set buffer to the empty string and state to path start state.
@@ -652,7 +659,7 @@ namespace ada::parser {
             // Set url’s host to the empty string.
             url.host = "";
           } else {
-            // TODO
+            url.update_base_hostname("");
           }
           // If c is U+002F (/) or U+005C (\), then:
           if (input_position != input_size && (url_data[input_position] == '/' || url_data[input_position] == '\\')) {

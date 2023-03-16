@@ -470,8 +470,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_username() const noexcept {
-  if (has_authority() && components.username_end > components.protocol_end + 3) {
-    return helpers::substring(buffer, components.protocol_end + 3, components.username_end);
+  if (has_authority() && components.username_end > components.protocol_end + 2) {
+    return helpers::substring(buffer, components.protocol_end + 2, components.username_end);
   }
   return "";
 }
@@ -485,34 +485,40 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_port() const noexcept {
   if (components.port == url_components::omitted) { return ""; }
-  return helpers::substring(buffer, components.host_end, components.pathname_start);
+  return helpers::substring(buffer, components.host_end + 1, components.pathname_start);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept {
+  // If this’s URL’s fragment is either null or the empty string, then return the empty string.
+  // Return U+0023 (#), followed by this’s URL’s fragment.
   if (components.hash_start == url_components::omitted) { return ""; }
+  if (buffer.size() - components.hash_start <= 1) { return ""; }
   return helpers::substring(buffer, components.hash_start);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_host() const noexcept {
-  return helpers::substring(buffer, components.host_start, components.host_end);
-}
-
-[[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept {
-  if(components.port == url_components::omitted) { return get_host(); }
+  if(components.port == url_components::omitted) { return get_hostname(); }
   return helpers::substring(buffer, components.host_start, components.pathname_start);
 }
 
+[[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept {
+  return helpers::substring(buffer, components.host_start, components.host_end);
+}
+
 [[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept {
-  size_t ending_index = buffer.size();
+  uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   return helpers::substring(buffer, components.pathname_start, ending_index);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_search() const noexcept {
+  // If this’s URL’s query is either null or the empty string, then return the empty string.
+  // Return U+003F (?), followed by this’s URL’s query.
   if (components.search_start == url_components::omitted) { return ""; }
-  size_t ending_index = buffer.size();
+  uint32_t ending_index = uint32_t(buffer.size());
   if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
+  if (ending_index - components.search_start <= 1) { return ""; }
   return helpers::substring(buffer, components.search_start, ending_index);
 }
 
@@ -576,9 +582,8 @@ std::string ada::url_aggregator::to_string() const {
 
   answer.append("\t\"hash_start\":\"");
   helpers::encode_json(std::to_string(components.hash_start), back);
-  answer.append("\"\n");
+  answer.append("\"\n}");
 
-  answer.append("\n}");
   return answer;
 }
 
