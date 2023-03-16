@@ -374,7 +374,7 @@ bool urltestdata_encoding(const char* source) {
         TEST_ASSERT(input_url->get_password(), password, "Password " + element_string + input_url->to_string());
 
         std::string_view host = object["host"];
-        TEST_ASSERT(input_url->get_host(), host, "Hostname " + element_string + input_url->to_string());
+        TEST_ASSERT(input_url->get_host(), host, "Host " + element_string + input_url->to_string());
 
         std::string_view hostname = object["hostname"];
         TEST_ASSERT(input_url->get_hostname(), hostname, "Hostname " + element_string + input_url->to_string());
@@ -414,8 +414,8 @@ bool urltestdata_encoding(const char* source) {
         ondemand::object parsed_object = parsed_doc.get_object();
         std::string_view json_recovered_path;
         if(parsed_object["path"].get_string().get(json_recovered_path)) {
-          std::cerr << "The serialized url instance does not provide a 'path' key or the JSON is invalid." << std::endl;
           if(std::is_same<ada::url, result_type>::value) {
+            std::cerr << "The serialized url instance does not provide a 'path' key or the JSON is invalid." << std::endl;
             TEST_FAIL("path key missing from serialized JSON");
           }
         } else {
@@ -424,8 +424,8 @@ bool urltestdata_encoding(const char* source) {
 
         std::string_view json_recovered_scheme;
         if(parsed_object["scheme"].get_string().get(json_recovered_scheme)) {
-          std::cerr << "The serialized url instance does not provide a 'scheme' key or the JSON is invalid." << std::endl;
           if(std::is_same<ada::url, result_type>::value) {
+            std::cerr << "The serialized url instance does not provide a 'scheme' key or the JSON is invalid." << std::endl;
             TEST_FAIL("scheme key missing from serialized JSON");
           }
         } else {
