@@ -139,7 +139,7 @@ struct url : url_base {
    *
    * @see https://url.spec.whatwg.org/
    */
-  [[nodiscard]] ada_really_inline bool parse_path(const std::string_view input);
+  ada_really_inline void parse_path(const std::string_view input);
 
   /**
    * Set the scheme for this URL. The provided scheme should be a valid
