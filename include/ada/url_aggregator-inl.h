@@ -207,22 +207,24 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 
 inline void url_aggregator::append_base_password(const std::string_view input) {
   ada_log("url_aggregator::append_base_password ", input, " ", to_string());
-  size_t password_starting_index = components.username_end;
-//  size_t input_size = input.size();
+  bool has_password = buffer[components.username_end] == ':';
+  uint32_t difference = uint32_t(input.size());
 
-  // TODO: Handle edge case where if you set password first, and username later
+  if (has_password) {
+    uint32_t password_end = components.host_start - 2; // For "@"
+    buffer.insert(password_end, input);
 
-  buffer.insert(password_starting_index, input);
+  } else {
+    difference++; // Increment for ":"
+    buffer.insert(components.username_end, ":");
+    buffer.insert(components.username_end + 1, input);
+  }
 
-//  if (buffer[input_size + components.host_start] != '@') {
-//    buffer.insert(input_size + components.host_start, "@");
-//    input_size++;
-//  }
-//  components.host_start += input_size;
-//  components.host_end += input_size;
-//  components.pathname_start += input_size;
-//  if (components.search_start != url_components::omitted) { components.search_start += input_size; }
-//  if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
+  components.host_start += difference;
+  components.host_end += difference;
+  components.pathname_start += difference;
+  if (components.search_start != url_components::omitted) { components.search_start += difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
 }
 
 inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
