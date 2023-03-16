@@ -494,12 +494,12 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_host() const noexcept {
-  return helpers::substring(buffer, components.host_start, components.host_end);
+  if(components.port == url_components::omitted) { return get_hostname(); }
+  return helpers::substring(buffer, components.host_start, components.pathname_start);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept {
-  if(components.port == url_components::omitted) { return get_host(); }
-  return helpers::substring(buffer, components.host_start, components.pathname_start);
+  return helpers::substring(buffer, components.host_start, components.host_end);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept {
