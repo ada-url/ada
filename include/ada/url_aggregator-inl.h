@@ -41,10 +41,11 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
   uint32_t input_size = uint32_t(input.size());
   uint32_t current_length = components.host_end - components.host_start;
   uint32_t new_difference = 0;
-
+  // The common case is current_length == 0.
   buffer.erase(components.host_start, current_length);
 
   if (input.empty()) {
+    // This is uncommon!
     buffer.erase(components.host_start, current_length);
     components.host_end = components.host_start;
     components.pathname_start -= current_length;
@@ -52,6 +53,7 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
     if (components.hash_start != url_components::omitted) { components.hash_start -= current_length; }
   } else {
     new_difference = input_size - current_length;
+    // The common case is components.host_start == buffer.size().
     buffer.insert(components.host_start, input);
   }
 
@@ -70,7 +72,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
   }
 
   // Make sure search is deleted and hash_start index is correct.
-  if (components.search_start != url_components::omitted) {
+  if (components.search_start != url_components::omitted) { // Uncommon path
     uint32_t search_end = uint32_t(buffer.size());
     if (components.hash_start != url_components::omitted) {
       search_end = components.hash_start;
@@ -81,6 +83,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 
   uint32_t input_size = uint32_t(input.size() + 1); // add `?` prefix
   components.search_start = components.pathname_start + uint32_t(get_pathname().length());
+  // The common case here is components.search_start == buffer.size().
   buffer.insert(components.search_start, helpers::concat("?", input));
   if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
 }
@@ -89,7 +92,7 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
   ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string());
 
   // Make sure search is deleted and hash_start index is correct.
-  if (components.search_start != url_components::omitted) {
+  if (components.search_start != url_components::omitted) { // uncommon path
     uint32_t search_end = uint32_t(buffer.size());
     if (components.hash_start != url_components::omitted) {
       search_end = components.hash_start;
@@ -101,14 +104,14 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
     if (components.hash_start != url_components::omitted) { search_ends = components.hash_start; }
     components.search_start = search_ends;
   }
-
+  // The common case is components.search_start == buffer.size().
   buffer.insert(components.search_start, "?");
 
-  if (components.hash_start == url_components::omitted) {
+  if (components.hash_start == url_components::omitted) { // common case
     bool encoding_required = unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
     // When encoding_required is false, then buffer is left unchanged, and percent encoding was not deemed required.
     if (!encoding_required) { buffer.append(input); }
-  } else {
+  } else { // slow path
     std::string encoded = unicode::percent_encode(input, query_percent_encode_set);
     buffer.insert(components.search_start + 1, encoded);
     components.hash_start += uint32_t(encoded.size() + 1); // Do not forget `?`
@@ -124,7 +127,9 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
 
   uint32_t current_length = ending_index - components.pathname_start;
   uint32_t difference = uint32_t(input.size()) - current_length;
+  // The common case is current_length == 0.
   buffer.erase(components.pathname_start, current_length);
+  // The common case is components.pathname_start == buffer.size() so this is effectively an append.
   buffer.insert(components.pathname_start, input);
 
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
@@ -230,7 +235,8 @@ inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
     clear_base_port();
     return;
   }
-
+  // calling std::to_string(input.value()) is unfortunate given that the port
+  // value is probably already available as a string.
   std::string value = helpers::concat(":", std::to_string(input.value()));
   uint32_t difference = uint32_t(value.size());
 
@@ -351,7 +357,9 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
   // `//` initially to the buffer, since it depends on the hostname existance.
   if (has_authority()) { return; }
-
+  // Performance: the common case is components.protocol_end == buffer.size()
+  // Optimization opportunity: in many cases, the "//" is part of the input and the
+  // insert could be fused with another insert.
   buffer.insert(components.protocol_end, "//");
   components.username_end += 2;
   components.host_start += 2;
