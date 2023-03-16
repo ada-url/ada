@@ -105,11 +105,6 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
   ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string());
 
-  if (input.empty()) {
-    clear_base_search();
-    return;
-  }
-
   // Make sure search is deleted and hash_start index is correct.
   if (components.search_start != url_components::omitted) {
     uint32_t search_end = uint32_t(buffer.size());
