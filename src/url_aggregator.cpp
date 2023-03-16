@@ -513,9 +513,12 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_search() const noexcept {
+  // If this’s URL’s query is either null or the empty string, then return the empty string.
+  // Return U+003F (?), followed by this’s URL’s query.
   if (components.search_start == url_components::omitted) { return ""; }
-  size_t ending_index = buffer.size();
+  uint32_t ending_index = uint32_t(buffer.size());
   if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
+  if (ending_index - components.search_start <= 1) { return ""; }
   return helpers::substring(buffer, components.search_start, ending_index);
 }
 
