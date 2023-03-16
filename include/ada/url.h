@@ -93,8 +93,6 @@ struct url : url_base {
   std::optional<std::string> fragment{};
 
   /** @private */
-  inline void update_base_hash(std::string_view input);
-  /** @private */
   inline void update_unencoded_base_hash(std::string_view input);
   /** @private */
   inline void update_base_hostname(std::string_view input);
@@ -117,19 +115,15 @@ struct url : url_base {
   /** @private */
   inline std::string_view retrieve_base_pathname() const;
   /** @private */
-  inline void clear_base_hash();
-  /** @private */
   inline void clear_base_hostname() override;
   /** @private */
   inline void clear_base_pathname() override;
   /** @private */
-  inline bool base_hostname_has_value() const;
+  inline void clear_base_search() override;
   /** @private */
   inline bool base_fragment_has_value() const;
   /** @private */
   inline bool base_search_has_value() const;
-  /** @private */
-  inline bool base_port_has_value() const;
 
   [[nodiscard]] bool has_valid_domain() const noexcept override;
 

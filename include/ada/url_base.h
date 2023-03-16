@@ -108,6 +108,9 @@ namespace ada {
     /** @private */
     virtual inline void clear_base_pathname() = 0;
 
+    /** @private */
+    virtual inline void clear_base_search() = 0;
+
   }; // url_base
 
 } // namespace ada
