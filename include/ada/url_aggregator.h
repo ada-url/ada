@@ -165,7 +165,11 @@ namespace ada {
     /** @private */
     inline void update_base_username(const std::string_view input);
     /** @private */
+    inline void append_base_username(const std::string_view input);
+    /** @private */
     inline void update_base_password(const std::string_view input);
+    /** @private */
+    inline void append_base_password(const std::string_view input);
     /** @private */
     inline void update_base_port(std::optional<uint16_t> input) override;
     /** @private */
@@ -215,11 +219,15 @@ namespace ada {
      * Returns a string representation of this URL.
      */
     std::string to_string() const override;
+
     /**
      * Verifies that the parsed URL could be valid. Useful for debugging purposes.
      * @return true if the URL is valid, otherwise return true of the offsets are possible.
      */
     bool validate() const noexcept;
+
+    /** @private */
+    inline void add_authority_slashes_if_needed() noexcept;
 
     private:
 
