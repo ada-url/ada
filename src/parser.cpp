@@ -578,7 +578,8 @@ namespace ada::parser {
               if constexpr (result_type_is_ada_url) {
                 url.host = base_url->host;
               } else {
-                // TODO
+                // TODO: Optimization opportunity.
+                url.set_host(url.get_host());
               }
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
@@ -630,14 +631,17 @@ namespace ada::parser {
             size_t consumed_bytes = file_host_buffer.size();
             input_position += consumed_bytes;
             // Let host be the result of host parsing buffer with url is not special.
+            if(!url.parse_host(file_host_buffer)) { return url; }
+
             if constexpr (result_type_is_ada_url) {
-              if(!url.parse_host(file_host_buffer)) { return url; }
               // If host is "localhost", then set host to the empty string.
               if (url.host.has_value() && url.host.value() == "localhost") {
                 url.host = "";
               }
             } else {
-              // TODO
+              if (url.get_hostname() == "localhost") {
+                url.update_base_hostname("");
+              }
             }
 
             // Set buffer to the empty string and state to path start state.
@@ -656,7 +660,7 @@ namespace ada::parser {
             // Set url’s host to the empty string.
             url.host = "";
           } else {
-            // TODO
+            url.update_base_hostname("");
           }
           // If c is U+002F (/) or U+005C (\), then:
           if (input_position != input_size && (url_data[input_position] == '/' || url_data[input_position] == '\\')) {

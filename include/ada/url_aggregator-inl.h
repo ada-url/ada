@@ -38,12 +38,24 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
 
   add_authority_slashes_if_needed();
 
+  uint32_t input_size = uint32_t(input.size());
   uint32_t current_length = components.host_end - components.host_start;
-  uint32_t new_difference = uint32_t(input.size() - current_length);
+  uint32_t new_difference = 0;
 
-  ada_log("url_aggregator::update_base_hostname  inserting ", input, " at index ", components.host_start, " in ", buffer);
-  buffer.insert(components.host_start, input);
-  components.host_end = components.host_start + uint32_t(input.size());
+  buffer.erase(components.host_start, current_length);
+
+  if (input.empty()) {
+    buffer.erase(components.host_start, current_length);
+    components.host_end = components.host_start;
+    components.pathname_start -= current_length;
+    if (components.search_start != url_components::omitted) { components.search_start -= current_length; }
+    if (components.hash_start != url_components::omitted) { components.hash_start -= current_length; }
+  } else {
+    new_difference = input_size - current_length;
+    buffer.insert(components.host_start, input);
+  }
+
+  components.host_end += new_difference;
   components.pathname_start += new_difference;
   if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
