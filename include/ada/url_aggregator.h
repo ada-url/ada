@@ -39,7 +39,7 @@ namespace ada {
     bool set_password(const std::string_view input);
     bool set_port(const std::string_view input);
     bool set_pathname(const std::string_view input);
-    bool set_search(const std::string_view input);
+    void set_search(const std::string_view input);
     void set_hash(const std::string_view input);
     inline void set_scheme(std::string_view new_scheme) noexcept;
     inline void copy_scheme(const url_aggregator& u) noexcept;
@@ -153,8 +153,6 @@ namespace ada {
     ada_really_inline bool parse_host(std::string_view input);
 
     /** @private */
-    inline void update_base_hash(std::string_view input);
-    /** @private */
     inline void update_unencoded_base_hash(std::string_view input);
     /** @private */
     inline void update_base_hostname(std::string_view input);
@@ -162,8 +160,6 @@ namespace ada {
     inline void update_base_search(std::string_view input);
     /** @private */
     inline void update_base_search(std::string_view input, const uint8_t* query_percent_encode_set);
-    /** @private */
-    inline void update_base_search(std::optional<std::string_view> input);
     /** @private */
     inline void update_base_pathname(const std::string_view input);
     /** @private */
@@ -173,23 +169,23 @@ namespace ada {
     /** @private */
     inline void update_base_port(std::optional<uint16_t> input) override;
     /** @private */
+    inline void append_base_pathname(const std::string_view input);
+    /** @private */
     inline std::optional<uint16_t> retrieve_base_port() const;
     /** @private */
     inline std::string_view retrieve_base_pathname() const;
     /** @private */
-    inline void clear_base_hash();
+    inline void clear_base_port();
     /** @private */
     inline void clear_base_hostname() override;
     /** @private */
     inline void clear_base_pathname() override;
     /** @private */
-    inline bool base_hostname_has_value() const;
+    inline void clear_base_search() override;
     /** @private */
     inline bool base_fragment_has_value() const;
     /** @private */
     inline bool base_search_has_value() const;
-    /** @private */
-    inline bool base_port_has_value() const;
     /** @private */
     template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
