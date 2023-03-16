@@ -197,9 +197,11 @@ namespace ada::parser {
               // If atSignSeen is true, then prepend "%40" to buffer.
               if (at_sign_seen) {
                 if (password_token_seen) {
-                  if constexpr (result_type_is_ada_url) { url.password += "%40"; } else { /* TODO */}
+                  if constexpr (result_type_is_ada_url) { url.password += "%40"; }
+                  else { url.append_base_password("%40"); }
                 } else {
-                  if constexpr (result_type_is_ada_url) { url.username += "%40"; } else { /* TODO */}
+                  if constexpr (result_type_is_ada_url) { url.username += "%40"; }
+                  else { url.append_base_password("%40"); }
                 }
               }
 
