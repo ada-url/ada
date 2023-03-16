@@ -198,10 +198,11 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   ada_log("url_aggregator::set_pathname ", input);
   if (has_opaque_path) { return false; }
   clear_base_pathname();
-  return parse_path(input);
+  parse_path(input);
+  return true;
 }
 
-ada_really_inline bool url_aggregator::parse_path(std::string_view input) {
+ada_really_inline void url_aggregator::parse_path(std::string_view input) {
   ada_log("url_aggregator::parse_path ", input);
   std::string tmp_buffer;
   std::string_view internal_input;
@@ -220,33 +221,31 @@ ada_really_inline bool url_aggregator::parse_path(std::string_view input) {
     std::string path{};
     if(internal_input.empty()) {
       update_base_pathname("/");
-      return true;
-    } else if((internal_input[0] == '/') || (internal_input[0] == '\\')){
-      if (helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
-        update_base_pathname(path);
-        return true;
-      }
+      return;
+    } else if((internal_input[0] == '/') || (internal_input[0] == '\\')) {
+      helpers::parse_prepared_path(internal_input.substr(1), type, path);
+      update_base_pathname(path);
+      return;
     } else {
-      if (helpers::parse_prepared_path(internal_input, type, path)) {
-        update_base_pathname(path);
-        return true;
-      }
+      helpers::parse_prepared_path(internal_input, type, path);
+      update_base_pathname(path);
+      return;
     }
-    return false;
   } else if (!internal_input.empty()) {
     std::string path{};
-    if(internal_input[0] == '/' && helpers::parse_prepared_path(internal_input.substr(1), type, path)) {
+    if(internal_input[0] == '/') {
+      helpers::parse_prepared_path(internal_input.substr(1), type, path);
       update_base_pathname(path);
-      return true;
-    } else if (helpers::parse_prepared_path(internal_input, type, path)) {
+      return;
+    } else {
+      helpers::parse_prepared_path(internal_input, type, path);
       update_base_pathname(path);
-      return true;
+      return;
     }
-    return false;
   } else if(components.host_start == components.host_end) {
     update_base_pathname("/");
   }
-  return true;
+  return;
 }
 
 void url_aggregator::set_search(const std::string_view input) {
@@ -595,7 +594,6 @@ bool url_aggregator::parse_ipv4(std::string_view input) {
   }
   size_t digit_count{0};
   int pure_decimal_count = 0; // entries that are decimal
-  std::string_view original_input = input; // we might use this if pure_decimal_count == 4.
   uint64_t ipv4{0};
   // we could unroll for better performance?
   for(;(digit_count < 4) && !(input.empty()); digit_count++) {
@@ -637,11 +635,14 @@ bool url_aggregator::parse_ipv4(std::string_view input) {
   }
   if((digit_count != 4) || (!input.empty())) { return is_valid = false; }
 final:
+  ada_log("url_aggregator::parse_ipv4 completed ", get_href(), " host: ", get_host());
+
   // We could also check r.ptr to see where the parsing ended.
   if(pure_decimal_count == 4) {
-    update_base_hostname(original_input); // The original input was already all decimal and we validated it.
+    // The original input was already all decimal and we validated it. So we don't need to do anything.
   } else {
     // Optimization opportunity: Get rid of unnecessary string return in ipv4 serializer.
+    // TODO: This is likely a bug because it goes back update_base_hostname, not what we want to do.
     update_base_hostname(ada::serializers::ipv4(ipv4)); // We have to reserialize the address.
   }
   return true;
@@ -850,6 +851,7 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
     return is_valid = false;
   }
   // TODO: Optimization opportunity: Get rid of unnecessary string creation.
+  // TODO: This is likely a bug because it goes back update_base_hostname, not what we want to do.
   update_base_hostname(ada::serializers::ipv6(address));
   ada_log("parse_ipv6 ", get_hostname());
   return true;

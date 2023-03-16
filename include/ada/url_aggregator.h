@@ -254,7 +254,7 @@ namespace ada {
       [[nodiscard]] bool parse_opaque_host(std::string_view input);
 
       /** @private */
-      ada_really_inline bool parse_path(std::string_view input);
+      ada_really_inline void parse_path(std::string_view input);
 
   }; // url_aggregator
 

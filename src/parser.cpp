@@ -56,9 +56,7 @@ namespace ada::parser {
 
     // Optimization opportunity. Most websites do not have fragment.
     std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
-    if (fragment.has_value()) {
-      url.update_unencoded_base_hash(*fragment);
-    }
+    // We add it last.
 
     // Here url_data no longer has its fragment.
     // We are going to access the data from url_data (it is immutable).
@@ -146,7 +144,7 @@ namespace ada::parser {
           // Otherwise, if base has an opaque path and c is U+0023 (#),
           // set url’s scheme to base’s scheme, url’s path to base’s path, url’s query to base’s query,
           // and set state to fragment state.
-          else if (base_url->has_opaque_path && url.base_fragment_has_value() && input_position == input_size) {
+          else if (base_url->has_opaque_path && fragment.has_value() && input_position == input_size) {
             ada_log("NO_SCHEME opaque base with fragment");
             url.copy_scheme(*base_url);
             url.has_opaque_path = base_url->has_opaque_path;
@@ -158,7 +156,7 @@ namespace ada::parser {
               url.update_base_pathname(base_url->get_pathname());
               url.update_base_search(base_url->get_search());
             }
-
+            url.update_unencoded_base_hash(*fragment);
             return url;
           }
           // Otherwise, if base’s scheme is not "file", set state to relative state and decrease pointer by 1.
@@ -245,7 +243,10 @@ namespace ada::parser {
               state = ada::state::HOST;
               break;
             }
-            if(end_of_authority == input_size) { return url; }
+            if(end_of_authority == input_size) {
+              if (fragment.has_value()) { url.update_unencoded_base_hash(*fragment); }
+              return url;
+            }
             input_position = end_of_authority + 1;
           } while(true);
 
@@ -416,6 +417,7 @@ namespace ada::parser {
           // and append the result to url’s query.
           url.update_base_search(helpers::substring(url_data, input_position), query_percent_encode_set);
           ada_log("QUERY update_base_search completed ");
+          if (fragment.has_value()) { url.update_unencoded_base_hash(*fragment); }
           return url;
         }
         case ada::state::HOST: {
@@ -448,10 +450,11 @@ namespace ada::parser {
               url.is_valid = false;
               return url;
             }
-
+            ada_log("HOST parsing ", host_view, " href=", url.get_href());
             // Let host be the result of host parsing host_view with url is not special.
             if (host_view.empty()) { url.update_base_hostname(""); }
             else if(!url.parse_host(host_view)) { return url; }
+            ada_log("HOST parsing results in ", url.get_hostname(), " href=", url.get_href());
 
             // Set url’s host to host, and state to path start state.
             state = ada::state::PATH_START;
@@ -500,6 +503,7 @@ namespace ada::parser {
             // Optimization: Avoiding going into PATH state improves the performance of urls ending with /.
             if (input_position == input_size) {
               url.update_base_pathname("/");
+              if (fragment.has_value()) { url.update_unencoded_base_hash(*fragment); }
               return url;
             }
             // If c is neither U+002F (/) nor U+005C (\), then decrease pointer by 1.
@@ -542,11 +546,11 @@ namespace ada::parser {
             input_position = input_size + 1;
           }
           if constexpr (result_type_is_ada_url) {
-            if(!helpers::parse_prepared_path(view, url.type, url.path)) { return url; }
+            helpers::parse_prepared_path(view, url.type, url.path);
           } else {
             std::string path = std::string(url.get_pathname());
             // TODO: Optimization opportunity: No need to create a ref to a new std::string here.
-            if(!helpers::parse_prepared_path(view, url.type, path)) { return url; }
+            helpers::parse_prepared_path(view, url.type, path);
             url.update_base_pathname(path);
           }
           break;
@@ -724,6 +728,7 @@ namespace ada::parser {
       }
     }
     ada_log("returning ", url.to_string());
+    if (fragment.has_value()) { url.update_unencoded_base_hash(*fragment); }
     return url;
   }
 

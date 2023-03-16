@@ -455,7 +455,7 @@ namespace ada {
     return true;
   }
 
-  ada_really_inline bool url::parse_path(std::string_view input) {
+  ada_really_inline void url::parse_path(std::string_view input) {
     ada_log("parse_path ", input);
     std::string tmp_buffer;
     std::string_view internal_input;
@@ -474,22 +474,26 @@ namespace ada {
       if(internal_input.empty()) {
         path = "/";
       } else if((internal_input[0] == '/') ||(internal_input[0] == '\\')){
-        return helpers::parse_prepared_path(internal_input.substr(1), type, path);
+        helpers::parse_prepared_path(internal_input.substr(1), type, path);
+        return;
       } else {
-        return helpers::parse_prepared_path(internal_input, type, path);
+        helpers::parse_prepared_path(internal_input, type, path);
+        return;
       }
     } else if (!internal_input.empty()) {
       if(internal_input[0] == '/') {
-        return helpers::parse_prepared_path(internal_input.substr(1), type, path);
+        helpers::parse_prepared_path(internal_input.substr(1), type, path);
+        return;
       } else {
-        return helpers::parse_prepared_path(internal_input, type, path);
+        helpers::parse_prepared_path(internal_input, type, path);
+        return;
       }
     } else {
       if(!host.has_value()) {
         path = "/";
       }
     }
-    return true;
+    return;
   }
 
   std::string url::to_string() const {

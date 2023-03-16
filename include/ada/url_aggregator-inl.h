@@ -36,17 +36,34 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
   ada_log("url_aggregator::update_base_hostname ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size()," bytes]");
   uint32_t current_length = components.host_end - components.host_start;
   uint32_t new_difference = uint32_t(input.size() - current_length);
-
-  // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
-  // `//` initially to the buffer, since it depends on the hostname existance.
-  if (!has_authority()) {
-    ada_log("url_aggregator::update_base_hostname inserting // at ", components.host_start, " ", to_string());
-    buffer.insert(components.host_start, "//");
-    new_difference += 2;
-    components.host_start += 2;
+  // The code duplication is unfortunate but it appears to give a small performance boost
+  // in the common case.
+  if(components.host_start == buffer.size()) { // common case
+    // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
+    // `//` initially to the buffer, since it depends on the hostname existance.
+    if (!has_authority()) {
+      ada_log("url_aggregator::update_base_hostname append // at ", components.host_start, " ", to_string());
+      buffer.append("//");
+      new_difference += 2;
+      components.host_start += 2;
+    }
+    // TODO: in a lot of cases, the input strings had //input so we could so one single append which would
+    // be about twice as fast?
+    ada_log("url_aggregator::update_base_hostname  appending ", input, " at index ", components.host_start, " in ", buffer);
+    buffer.append(input);
+  } else { // slow case
+    // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
+    // `//` initially to the buffer, since it depends on the hostname existance.
+    if (!has_authority()) {
+      ada_log("url_aggregator::update_base_hostname append // at ", components.host_start, " ", to_string());
+      buffer.insert(components.host_start, "//");
+      new_difference += 2;
+      components.host_start += 2;
+    }
+    // TODO: in a lot of cases, the input strings had //input so we could so one single append
+    ada_log("url_aggregator::update_base_hostname  inserting ", input, " at index ", components.host_start, " in ", buffer);
+    buffer.insert(components.host_start, input);
   }
-  ada_log("url_aggregator::update_base_hostname  inserting ", input, " at index ", components.host_start, " in ", buffer);
-  buffer.insert(components.host_start, input);
   components.host_end = components.host_start + uint32_t(input.size());
   components.pathname_start += new_difference;
   if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
@@ -67,8 +84,15 @@ inline void url_aggregator::update_base_search(std::string_view input) {
   }
 
   uint32_t input_size = uint32_t(input.size() + 1); // add `?` prefix
+  // TODO: doing get_pathname().length() might be inefficient.
   components.search_start = components.pathname_start + uint32_t(get_pathname().length());
-  buffer.insert(components.search_start, helpers::concat("?", input));
+  if(buffer.size() == components.search_start) { // common case
+    buffer.append("?"); // TODO: in many instances, the '?' is part of the input and we could do as single append.
+    buffer.append(input);
+  } else { // slowe case (uncommon)
+    buffer.insert(components.search_start, "?");
+    buffer.insert(components.search_start+1, input);
+  }
   if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
 }
 
@@ -88,14 +112,13 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
     if (components.hash_start != url_components::omitted) { pathname_ends = components.hash_start; }
     components.search_start = pathname_ends;
   }
-
-  buffer.insert(components.search_start, "?");
-
   if (components.hash_start == url_components::omitted) {
+    buffer.append("?");
     bool encoding_required = unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
     // When encoding_required is false, then buffer is left unchanged, and percent encoding was not deemed required.
     if (!encoding_required) { buffer.append(input); }
   } else {
+    buffer.insert(components.search_start, "?");
     std::string encoded = unicode::percent_encode(input, query_percent_encode_set);
     buffer.insert(components.search_start + 1, encoded);
     components.hash_start += uint32_t(encoded.size() + 1); // Do not forget `?`
@@ -110,11 +133,17 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
 
   uint32_t current_length = ending_index - components.pathname_start;
   uint32_t difference = uint32_t(input.size()) - current_length;
-  buffer.erase(components.pathname_start, current_length);
-  buffer.insert(components.pathname_start, input);
+  if(components.pathname_start == buffer.size()) { // common case
+    buffer.append(input);
+    return;
+  } else {
+    buffer.erase(components.pathname_start, current_length);
+    buffer.insert(components.pathname_start, input);
+    if (components.search_start != url_components::omitted) { components.search_start += difference; }
+    if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+  }
 
-  if (components.search_start != url_components::omitted) { components.search_start += difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+
 }
 
 inline void url_aggregator::append_base_pathname(const std::string_view input) {
