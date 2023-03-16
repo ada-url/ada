@@ -374,7 +374,7 @@ bool urltestdata_encoding(const char* source) {
         TEST_ASSERT(input_url->get_password(), password, "Password " + element_string + input_url->to_string());
 
         std::string_view host = object["host"];
-        TEST_ASSERT(input_url->get_host(), host, "Hostname " + element_string + input_url->to_string());
+        TEST_ASSERT(input_url->get_host(), host, "Host " + element_string + input_url->to_string());
 
         std::string_view hostname = object["hostname"];
         TEST_ASSERT(input_url->get_hostname(), hostname, "Hostname " + element_string + input_url->to_string());
