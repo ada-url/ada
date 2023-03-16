@@ -470,8 +470,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_username() const noexcept {
-  if (has_authority() && components.username_end > components.protocol_end + 3) {
-    return helpers::substring(buffer, components.protocol_end + 3, components.username_end);
+  if (has_authority() && components.username_end > components.protocol_end + 2) {
+    return helpers::substring(buffer, components.protocol_end + 2, components.username_end);
   }
   return "";
 }
