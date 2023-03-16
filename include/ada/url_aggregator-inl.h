@@ -114,9 +114,9 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
     }
     buffer.erase(components.search_start, search_end - components.search_start);
   } else {
-    uint32_t pathname_ends = uint32_t(buffer.size());
-    if (components.hash_start != url_components::omitted) { pathname_ends = components.hash_start; }
-    components.search_start = pathname_ends;
+    uint32_t search_ends = uint32_t(buffer.size());
+    if (components.hash_start != url_components::omitted) { search_ends = components.hash_start; }
+    components.search_start = search_ends;
   }
   if (components.hash_start == url_components::omitted) {
     buffer.append("?");
