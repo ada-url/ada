@@ -63,6 +63,13 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
   if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
 }
 
+ada_really_inline uint32_t url_aggregator::get_pathname_length() const noexcept {
+  uint32_t ending_index = uint32_t(buffer.size());
+  if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
+  else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
+  return ending_index - components.pathname_start;
+}
+
 inline void url_aggregator::update_base_search(std::string_view input) {
   ada_log("url_aggregator::update_base_search ", input);
 
@@ -82,7 +89,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
   }
 
   uint32_t input_size = uint32_t(input.size() + 1); // add `?` prefix
-  components.search_start = components.pathname_start + uint32_t(get_pathname().length());
+  components.search_start = components.pathname_start + get_pathname_length();
   // The common case here is components.search_start == buffer.size().
   buffer.insert(components.search_start, helpers::concat("?", input));
   if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
