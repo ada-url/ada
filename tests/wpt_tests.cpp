@@ -541,7 +541,7 @@ int main(int argc, char** argv) {
     results[name] = urltestdata_encoding<ada::url>(URLTESTDATA_JSON);
   }
   name = "urltestdata_encoding<ada::url_aggregator>("+std::string(ADA_URLTESTDATA_JSON)+")";
-  if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding<ada::url_aggregator>(ADA_URLTESTDATA_JSON);
   }
   name = "urltestdata_encoding<ada::url_aggregator>("+std::string(URLTESTDATA_JSON)+")";
