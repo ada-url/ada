@@ -184,10 +184,13 @@ endif(Boost_FOUND)
 set(Rust_FIND_QUIETLY ON) # No need to alarm the user if rust is not available.
 import_dependency(corrosion corrosion-rs/corrosion v0.3.4)
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
-add_dependency(corrosion)
+
 
 if(RUST_FOUND)
   message(STATUS "Rust found: " ${Rust_VERSION} )
+  # Important: we only want to include corrosion *if* rust is available.
+  # Otherwise, it is impossible to run ada benchmarks without rust.
+  add_dependency(corrosion)
   # Important: we want to build in release mode!
   corrosion_import_crate(MANIFEST_PATH "competitors/servo-url/Cargo.toml" NO_LINKER_OVERRIDE PROFILE release)
 
