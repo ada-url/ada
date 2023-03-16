@@ -296,8 +296,8 @@ inline void url_aggregator::clear_base_search() {
   if (components.hash_start == url_components::omitted) {
     buffer.resize(components.search_start);
   } else {
-    components.hash_start = components.search_start;
     buffer.erase(components.search_start, components.hash_start - components.search_start);
+    components.hash_start = components.search_start;
   }
 
   components.search_start = url_components::omitted;
