@@ -35,36 +35,14 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
 
 inline void url_aggregator::update_base_hostname(std::string_view input) {
   ada_log("url_aggregator::update_base_hostname ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size()," bytes]");
+
+  add_authority_slashes_if_needed();
+
   uint32_t current_length = components.host_end - components.host_start;
   uint32_t new_difference = uint32_t(input.size() - current_length);
-  // The code duplication is unfortunate but it appears to give a small performance boost
-  // in the common case.
-  if(components.host_start == buffer.size()) { // common case
-    // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
-    // `//` initially to the buffer, since it depends on the hostname existance.
-    if (!has_authority()) {
-      ada_log("url_aggregator::update_base_hostname append // at ", components.host_start, " ", to_string());
-      buffer.append("//");
-      new_difference += 2;
-      components.host_start += 2;
-    }
-    // TODO: in a lot of cases, the input strings had //input so we could so one single append which would
-    // be about twice as fast?
-    ada_log("url_aggregator::update_base_hostname  appending ", input, " at index ", components.host_start, " in ", buffer);
-    buffer.append(input);
-  } else { // slow case
-    // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
-    // `//` initially to the buffer, since it depends on the hostname existance.
-    if (!has_authority()) {
-      ada_log("url_aggregator::update_base_hostname append // at ", components.host_start, " ", to_string());
-      buffer.insert(components.host_start, "//");
-      new_difference += 2;
-      components.host_start += 2;
-    }
-    // TODO: in a lot of cases, the input strings had //input so we could so one single append
-    ada_log("url_aggregator::update_base_hostname  inserting ", input, " at index ", components.host_start, " in ", buffer);
-    buffer.insert(components.host_start, input);
-  }
+
+  ada_log("url_aggregator::update_base_hostname  inserting ", input, " at index ", components.host_start, " in ", buffer);
+  buffer.insert(components.host_start, input);
   components.host_end = components.host_start + uint32_t(input.size());
   components.pathname_start += new_difference;
   if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
@@ -90,15 +68,8 @@ inline void url_aggregator::update_base_search(std::string_view input) {
   }
 
   uint32_t input_size = uint32_t(input.size() + 1); // add `?` prefix
-  // TODO: doing get_pathname().length() might be inefficient.
   components.search_start = components.pathname_start + uint32_t(get_pathname().length());
-  if(buffer.size() == components.search_start) { // common case
-    buffer.append("?"); // TODO: in many instances, the '?' is part of the input and we could do as single append.
-    buffer.append(input);
-  } else { // slow case (uncommon)
-    buffer.insert(components.search_start, "?");
-    buffer.insert(components.search_start+1, input);
-  }
+  buffer.insert(components.search_start, helpers::concat("?", input));
   if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
 }
 
@@ -118,13 +89,14 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
     if (components.hash_start != url_components::omitted) { search_ends = components.hash_start; }
     components.search_start = search_ends;
   }
+
+  buffer.insert(components.search_start, "?");
+
   if (components.hash_start == url_components::omitted) {
-    buffer.append("?");
     bool encoding_required = unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
     // When encoding_required is false, then buffer is left unchanged, and percent encoding was not deemed required.
     if (!encoding_required) { buffer.append(input); }
   } else {
-    buffer.insert(components.search_start, "?");
     std::string encoded = unicode::percent_encode(input, query_percent_encode_set);
     buffer.insert(components.search_start + 1, encoded);
     components.hash_start += uint32_t(encoded.size() + 1); // Do not forget `?`
@@ -133,22 +105,18 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
 
 inline void url_aggregator::update_base_pathname(const std::string_view input) {
   ada_log("url_aggregator::update_base_pathname ", input, " ", to_string());
+
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
 
   uint32_t current_length = ending_index - components.pathname_start;
   uint32_t difference = uint32_t(input.size()) - current_length;
-  if(components.pathname_start == buffer.size()) { // common case
-    buffer.append(input);
-  } else {
-    buffer.erase(components.pathname_start, current_length);
-    buffer.insert(components.pathname_start, input);
-    if (components.search_start != url_components::omitted) { components.search_start += difference; }
-    if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
-  }
+  buffer.erase(components.pathname_start, current_length);
+  buffer.insert(components.pathname_start, input);
 
-
+  if (components.search_start != url_components::omitted) { components.search_start += difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
 }
 
 inline void url_aggregator::append_base_pathname(const std::string_view input) {
@@ -164,34 +132,39 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
 }
 
 inline void url_aggregator::update_base_username(const std::string_view input) {
-  ada_log("url_aggregator::update_base_username ", input);
-  uint32_t username_start = components.protocol_end + 3;
-  uint32_t username_length = components.username_end - username_start;
-  buffer.erase(username_start, components.username_end);
-  buffer.insert(username_start, input);
+  ada_log("url_aggregator::update_base_username ", input, " ", to_string());
 
-  uint32_t new_difference = uint32_t(input.size() - username_length);
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+  add_authority_slashes_if_needed();
+
+  uint32_t input_size = uint32_t(input.size());
+  uint32_t username_start = components.protocol_end + 2;
+  uint32_t difference = input_size;
+
+  if (username_start == components.username_end) {
+    buffer.insert(username_start, input);
+  } else {
+    buffer.erase(username_start, components.username_end);
+    buffer.insert(username_start, input);
+    difference -= components.username_end - username_start;
+  }
+
+  components.username_end += difference;
+  components.host_start += difference;
+  components.host_end += difference;
+  components.pathname_start += difference;
+  if (components.search_start != url_components::omitted) { components.search_start += difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
 }
 
 inline void url_aggregator::append_base_username(const std::string_view input) {
   ada_log("url_aggregator::append_base_username ", input);
+
   // If input is empty, do nothing.
   if (input.empty()) { return; }
 
+  add_authority_slashes_if_needed();
+
   uint32_t difference = uint32_t(input.size());
-
-  if (!has_authority()) {
-    buffer.insert(components.protocol_end, "//");
-    components.username_end += 2;
-    difference += 2;
-  }
-
   buffer.insert(components.username_end, input);
   components.username_end += uint32_t(input.size());
 
@@ -343,7 +316,7 @@ inline bool url_aggregator::base_search_has_value() const {
 
 ada_really_inline bool url_aggregator::includes_credentials() const noexcept {
   ada_log("url_aggregator::includes_credentials");
-  if (components.username_end > components.protocol_end + 3) { return true; }
+  if (has_authority()) { return true; }
   if (buffer[components.username_end] == ':' && components.username_end + 1 < components.host_start) { return true; }
   return false;
 }
@@ -359,7 +332,21 @@ inline bool url_aggregator::cannot_have_credentials_or_port() const {
 
 inline bool ada::url_aggregator::has_authority() const noexcept {
   ada_log("url_aggregator::has_authority");
-  return (components.protocol_end + 3 <= buffer.size()) && helpers::substring(buffer, components.protocol_end, components.protocol_end + 3) == "://";
+  return (components.protocol_end + 2 <= buffer.size()) && helpers::substring(buffer, components.protocol_end, components.protocol_end + 2) == "//";
+}
+
+inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
+  // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
+  // `//` initially to the buffer, since it depends on the hostname existance.
+  if (has_authority()) { return; }
+
+  buffer.insert(components.protocol_end, "//");
+  components.username_end += 2;
+  components.host_start += 2;
+  components.host_end += 2;
+  components.pathname_start += 2;
+  if (components.search_start != url_components::omitted) { components.search_start += 2; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += 2; }
 }
 
 }
