@@ -201,7 +201,7 @@ namespace ada::parser {
                   else { url.append_base_password("%40"); }
                 } else {
                   if constexpr (result_type_is_ada_url) { url.username += "%40"; }
-                  else { url.append_base_password("%40"); }
+                  else { url.append_base_username("%40"); }
                 }
               }
 

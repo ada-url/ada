@@ -184,28 +184,27 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
   // If input is empty, do nothing.
   if (input.empty()) { return; }
 
-  uint32_t username_starting_index = components.protocol_end;
-  uint32_t input_size = uint32_t(input.size());
+  uint32_t difference = uint32_t(input.size());
 
-  if (has_authority()) {
-    buffer.insert(username_starting_index, input);
-  } else {
-    buffer.insert(username_starting_index, helpers::concat("//", input));
-    input_size += 2;
+  if (!has_authority()) {
+    buffer.insert(components.protocol_end, "//");
+    components.username_end += 2;
+    difference += 2;
   }
 
-  components.username_end += input_size;
+  buffer.insert(components.username_end, input);
+  components.username_end += uint32_t(input.size());
 
-  if (buffer[input_size + components.host_start] != '@') {
-    buffer.insert(input_size + components.host_start, "@");
-    input_size++;
+  if (buffer[components.username_end] != '@') {
+    buffer.insert(components.username_end, "@");
+    difference++;
   }
 
-  components.host_start += input_size;
-  components.host_end += input_size;
-  components.pathname_start += input_size;
-  if (components.search_start != url_components::omitted) { components.search_start += input_size; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
+  components.host_start += difference;
+  components.host_end += difference;
+  components.pathname_start += difference;
+  if (components.search_start != url_components::omitted) { components.search_start += difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
 }
 
 inline void url_aggregator::update_base_password(const std::string_view input) {
