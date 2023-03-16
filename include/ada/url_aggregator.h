@@ -108,7 +108,6 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-hostname
      */
     [[nodiscard]] std::string_view get_hostname() const noexcept;
-
     /**
      * The pathname getter steps are to return the result of URL path serializing
      * this’s URL.
@@ -117,6 +116,12 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-pathname
      */
     [[nodiscard]] std::string_view get_pathname() const noexcept;
+    /**
+     * Compute the pathname length in bytes witout instantiating a view or a string.
+     * @return size of the pathname in bytes
+     * @see https://url.spec.whatwg.org/#dom-url-pathname
+     */
+    ada_really_inline uint32_t get_pathname_length() const noexcept;
     /**
      * Return U+003F (?), followed by this’s URL’s query.
      * This function does not allocate memory.

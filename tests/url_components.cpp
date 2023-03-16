@@ -146,8 +146,8 @@ bool urltestdata_encoding(const char* source) {
           TEST_ASSERT(out.port, ada::url_components::omitted, "port should have been omitted " + out.to_string());
         }
 
-        if (url.get_pathname().length() > 0) {
-          TEST_ASSERT(href.substr(out.pathname_start, url.get_pathname().size()), url.get_pathname(), "pathname mismatch " + out.to_string());
+        if (url.get_pathname_length() > 0) {
+          TEST_ASSERT(href.substr(out.pathname_start, url.get_pathname_length()), url.get_pathname(), "pathname mismatch " + out.to_string());
         }
 
         if (url.get_search().length() > 0) {
