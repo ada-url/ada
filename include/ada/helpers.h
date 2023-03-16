@@ -57,10 +57,9 @@ namespace ada::helpers {
   *
   * The input is expected to be UTF-8.
   *
-  * @return true on success.
   * @see https://url.spec.whatwg.org/
   */
-  ada_really_inline bool parse_prepared_path(const std::string_view input, ada::scheme::type type, std::string& path);
+  ada_really_inline void parse_prepared_path(const std::string_view input, ada::scheme::type type, std::string& path);
 
   /**
    * @private

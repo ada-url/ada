@@ -321,7 +321,7 @@ namespace ada::helpers {
   }
 
 
-  ada_really_inline bool parse_prepared_path(std::string_view input, ada::scheme::type type, std::string& path) {
+  ada_really_inline void parse_prepared_path(std::string_view input, ada::scheme::type type, std::string& path) {
     ada_log("parse_prepared_path ", input);
     uint8_t accumulator = checkers::path_signature(input);
     // Let us first detect a trivial case.
@@ -346,7 +346,7 @@ namespace ada::helpers {
       ada_log("parse_path trivial");
       path += '/';
       path += input;
-      return true;
+      return;
     }
     // We are going to need to look a bit at the path, but let us see if we can
     // ignore percent encoding *and* backslashes *and* percent characters.
@@ -369,19 +369,19 @@ namespace ada::helpers {
           std::string_view path_view = input.substr(previous_location);
           if (path_view == "..") { // The path ends with ..
             // e.g., if you receive ".." with an empty path, you go to "/".
-            if(path.empty()) { path = '/'; return true; }
+            if(path.empty()) { path = '/'; return; }
             // Fast case where we have nothing to do:
-            if(path.back() == '/') { return true; }
+            if(path.back() == '/') { return; }
             // If you have the path "/joe/myfriend",
             // then you delete 'myfriend'.
             path.resize(path.rfind('/') + 1);
-            return true;
+            return;
           }
           path += '/';
           if (path_view != ".") {
             path.append(path_view);
           }
-          return true;
+          return;
         } else {
           // This is a non-final segment.
           std::string_view path_view = input.substr(previous_location, new_location - previous_location);
@@ -442,7 +442,7 @@ namespace ada::helpers {
           }
         }
         if (location == std::string_view::npos) {
-          return true;
+          return;
         }
       } while (true);
     }

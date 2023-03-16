@@ -153,7 +153,8 @@ namespace ada {
   bool url::set_pathname(const std::string_view input) {
     if (has_opaque_path) { return false; }
     path = "";
-    return parse_path(input);
+    parse_path(input);
+    return true;
   }
 
   bool url::set_protocol(const std::string_view input) {
