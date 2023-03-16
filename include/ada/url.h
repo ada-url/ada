@@ -204,7 +204,7 @@ struct url : url_base {
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  [[nodiscard]] std::string get_pathname() const noexcept;
+  [[nodiscard]] const std::string& get_pathname() const noexcept;
 
   /**
    * Compute the pathname length in bytes witout instantiating a view or a string.
