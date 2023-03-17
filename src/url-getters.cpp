@@ -10,35 +10,6 @@
 #include <string>
 
 namespace ada {
-
-  [[nodiscard]] std::string url::get_href() const noexcept {
-    std::string output = get_protocol();
-
-    if (host.has_value()) {
-      output += "//";
-      if (includes_credentials()) {
-        output += username;
-        if (!password.empty()) {
-          output += ":" + get_password();
-        }
-        output += "@";
-      }
-
-      output += get_host();
-    } else if (!has_opaque_path && checkers::begins_with(path, "//")) {
-      // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
-      // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
-      output += "/.";
-    }
-
-    output += path
-           // If query is non-null, then set this’s query object’s list to the result of parsing query.
-           + (query.has_value() ? "?" + query.value() : "")
-           // If  url’s fragment is non-null, then append U+0023 (#), followed by url’s fragment, to output.
-           + (fragment.has_value() ? "#" + fragment.value() : "");
-    return output;
-  }
-
   [[nodiscard]] std::string url::get_origin() const noexcept {
     if (is_special()) {
       // Return a new opaque origin.
@@ -70,7 +41,10 @@ namespace ada {
     // If url’s port is null, return url’s host, serialized.
     // Return url’s host, serialized, followed by U+003A (:) and url’s port, serialized.
     if (!host.has_value()) { return ""; }
-    return host.value() + (port.has_value() ? ":" + get_port() : "");
+    if(port.has_value()) {
+      return host.value() + ":" + get_port();
+    }
+    return host.value();
   }
 
   [[nodiscard]] std::string url::get_hostname() const noexcept {
