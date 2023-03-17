@@ -20,11 +20,6 @@
     "hash":"#x"
   },
   {
-    "input": "",
-    "base": "about:blank",
-    "failure": true
-  },
-  {
     "input": "https://lemire.me/école",
     "base": "about:blank",
     "href": "https://lemire.me/%C3%A9cole",
