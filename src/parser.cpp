@@ -136,8 +136,7 @@ namespace ada::parser {
         case ada::state::NO_SCHEME: {
           ada_log("NO_SCHEME ", helpers::substring(url_data, input_position));
           // If base is null, or base has an opaque path and c is not U+0023 (#), validation error, return failure.
-          // SCHEME state updates the state to NO_SCHEME and validates url_data is not empty.
-          if (base_url == nullptr || (base_url->has_opaque_path && url_data[input_position] != '#')) {
+          if (base_url == nullptr || (base_url->has_opaque_path && !fragment.has_value())) {
             ada_log("NO_SCHEME validation error");
             url.is_valid = false;
             return url;
