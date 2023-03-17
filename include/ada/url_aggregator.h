@@ -204,6 +204,12 @@ namespace ada {
     /** @private */
     inline bool base_search_has_value() const;
     /** @private */
+    inline bool has_non_empty_username() const;
+    /** @private */
+    inline bool has_non_empty_password() const;
+    /** @private */
+    inline bool has_password() const;
+    /** @private */
     template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
 
