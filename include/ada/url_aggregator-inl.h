@@ -160,28 +160,28 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
 }
 
 inline void url_aggregator::update_base_username(const std::string_view input) {
-  ada_log("url_aggregator::update_base_username ", input, " ", to_string());
+  ada_log("url_aggregator::update_base_username '", input, "' ", to_string());
 
   add_authority_slashes_if_needed();
 
-  uint32_t input_size = uint32_t(input.size());
   uint32_t username_start = components.protocol_end + 2;
-  uint32_t difference = input_size;
+  uint32_t diff = uint32_t(input.size());
 
   if (username_start == components.username_end) {
     buffer.insert(username_start, input);
   } else {
-    buffer.erase(username_start, components.username_end);
+    uint32_t current_length = components.username_end - username_start;
+    buffer.erase(username_start, current_length);
     buffer.insert(username_start, input);
-    difference -= components.username_end - username_start;
+    diff -= current_length;
   }
 
-  components.username_end += difference;
-  components.host_start += difference;
-  components.host_end += difference;
-  components.pathname_start += difference;
-  if (components.search_start != url_components::omitted) { components.search_start += difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+  components.username_end += diff;
+  components.host_start += diff;
+  components.host_end += diff;
+  components.pathname_start += diff;
+  if (components.search_start != url_components::omitted) { components.search_start += diff; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += diff; }
 }
 
 inline void url_aggregator::append_base_username(const std::string_view input) {
@@ -210,7 +210,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
 
 inline void url_aggregator::clear_base_password() {
   ada_log("url_aggregator::clear_base_password ", to_string());
-  if (buffer[components.username_end] != ':') { return; }
+  if (!has_password()) { return; }
 
   uint32_t diff = components.host_start - components.username_end;
   buffer.erase(components.username_end, diff);
@@ -231,10 +231,10 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
     return;
   }
 
-  bool has_password = buffer[components.username_end] == ':';
+  bool password_exists = has_password();
   uint32_t difference = uint32_t(input.size());
 
-  if (has_password) {
+  if (password_exists) {
     uint32_t password_end = components.host_start;
     if (components.host_start != components.host_end) { password_end--; }
     uint32_t current_length = password_end - components.username_end + 1;
@@ -247,7 +247,7 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 
   buffer.insert(components.username_end + 1, input);
 
-  if (!has_password) {
+  if (buffer[components.username_end + difference] != '@') {
     // Add "@" after username and before components.host_start
     buffer.insert(components.username_end + difference, "@");
     difference++;
@@ -268,10 +268,9 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
   // If input is empty, do nothing.
   if (input.empty()) { return; }
 
-  bool has_password = buffer[components.username_end] == ':';
   uint32_t difference = uint32_t(input.size());
 
-  if (has_password) {
+  if (has_password()) {
     uint32_t password_end = components.host_start;
     if (components.host_start != components.host_end) { password_end--; }
     buffer.insert(password_end, input);
@@ -366,15 +365,15 @@ inline void url_aggregator::clear_base_pathname() {
 
 inline void url_aggregator::clear_base_hostname() {
   ada_log("url_aggregator::clear_base_hostname");
-  bool has_double_dash_in_url = components.host_start > components.protocol_end;
   uint32_t length = components.host_start - components.host_end;
 
   // Remove `//` in the URL when clearing the hostname
-  if (has_double_dash_in_url) {
+  if (has_authority()) {
     length -= 2;
     components.host_start -= 2;
+  } else if (length == 0) {
+    return;
   }
-  if (length == 0 && !has_double_dash_in_url) { return; }
   buffer.erase(components.host_start, components.host_end - components.host_start);
   components.host_end = components.host_start;
   components.pathname_start += length;
@@ -393,14 +392,12 @@ inline bool url_aggregator::base_search_has_value() const {
 }
 
 ada_really_inline bool url_aggregator::includes_credentials() const noexcept {
-  ada_log("url_aggregator::includes_credentials");
-  if (has_authority()) { return true; }
-  if (buffer[components.username_end] == ':' && components.username_end + 1 < components.host_start) { return true; }
-  return false;
+  ada_log("url_aggregator::includes_credentials ", to_string(), " returns ", has_non_empty_username() || has_non_empty_password());
+  return has_non_empty_username() || has_non_empty_password();
 }
 
 inline bool url_aggregator::cannot_have_credentials_or_port() const {
-  ada_log("url_aggregator::cannot_have_credentials_or_port");
+  ada_log("url_aggregator::cannot_have_credentials_or_port ", to_string());
   return type == ada::scheme::type::FILE || components.host_start == components.host_end;
 }
 
@@ -431,6 +428,22 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
 
 std::string& ada::url_aggregator::get_buffer() noexcept {
   return buffer;
+}
+
+inline bool url_aggregator::has_non_empty_username() const {
+  ada_log("url_aggregator::has_non_empty_username ");
+  return has_authority() && components.username_end - components.protocol_end - 2 > 0;
+}
+
+inline bool url_aggregator::has_non_empty_password() const {
+  ada_log("url_aggregator::has_non_empty_password ", to_string(), " returns ", has_password() && components.host_start - 1 - components.username_end > 0);
+  return has_password() && components.host_start - 1 - components.username_end > 0;
+}
+
+inline bool url_aggregator::has_password() const {
+  ada_log("url_aggregator::has_password ", to_string());
+  // This function does not care about the length of the password
+  return buffer.size() > components.username_end && buffer[components.username_end] == ':';
 }
 
 }
