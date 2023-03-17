@@ -179,7 +179,7 @@ inline void url::copy_scheme(const ada::url &u) {
 }
 
 
-[[nodiscard]] inline std::string url::get_href() const noexcept {
+[[nodiscard]] ada_really_inline std::string url::get_href() const noexcept {
   std::string output = get_protocol();
 
   if (host.has_value()) {
