@@ -6,6 +6,20 @@
     "failure": true
   },
   {
+    "input": "#x",
+    "base": "about:blank",
+    "href": "about:blank#x",
+    "protocol":"about:",
+    "username": "",
+    "password": "",
+    "pathname":"blank",
+    "search": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "hash":"#x"
+  },
+  {
     "input": "https://lemire.me/école",
     "base": "about:blank",
     "href": "https://lemire.me/%C3%A9cole",
