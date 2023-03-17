@@ -240,6 +240,12 @@ namespace ada {
     /** @private */
     inline void add_authority_slashes_if_needed() noexcept;
 
+    /**
+     * @private
+     * To optimize performance, you may indicate how much memory to allocate within this instance.
+     */
+    inline void reserve(uint32_t capacity);
+
     /** @private */
     inline std::string& get_buffer() noexcept;
 
