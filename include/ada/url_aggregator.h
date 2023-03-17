@@ -117,6 +117,12 @@ namespace ada {
      */
     [[nodiscard]] std::string_view get_pathname() const noexcept;
     /**
+     * Returns true if neither the search, nor the hash nor the pathname
+     * have been set.
+     * @return true if the buffer is ready to receive the path.
+     */
+    [[nodiscard]] ada_really_inline bool is_at_path()  const noexcept;
+    /**
      * Compute the pathname length in bytes witout instantiating a view or a string.
      * @return size of the pathname in bytes
      * @see https://url.spec.whatwg.org/#dom-url-pathname
@@ -234,8 +240,10 @@ namespace ada {
     /** @private */
     inline void add_authority_slashes_if_needed() noexcept;
 
-    private:
+    /** @private */
+    inline std::string& get_buffer() noexcept;
 
+    private:
       /** @private */
       std::string buffer{};
 

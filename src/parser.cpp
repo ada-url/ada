@@ -551,10 +551,13 @@ namespace ada::parser {
           if constexpr (result_type_is_ada_url) {
             helpers::parse_prepared_path(view, url.type, url.path);
           } else {
-            std::string path = std::string(url.get_pathname());
-            // TODO: Optimization opportunity: No need to create a ref to a new std::string here.
-            helpers::parse_prepared_path(view, url.type, path);
-            url.update_base_pathname(path);
+            if(url.is_at_path()) { // common case
+              helpers::parse_prepared_path(view, url.type, url.get_buffer());
+            } else { // slow case
+              std::string path = std::string(url.get_pathname());
+              helpers::parse_prepared_path(view, url.type, path);
+              url.update_base_pathname(path);
+            }
           }
           break;
         }

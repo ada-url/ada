@@ -70,6 +70,10 @@ ada_really_inline uint32_t url_aggregator::get_pathname_length() const noexcept 
   return ending_index - components.pathname_start;
 }
 
+[[nodiscard]] ada_really_inline bool url_aggregator::is_at_path()  const noexcept {
+  return buffer.size() == components.pathname_start;
+}
+
 inline void url_aggregator::update_base_search(std::string_view input) {
   ada_log("url_aggregator::update_base_search ", input);
 
@@ -374,6 +378,10 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
   components.pathname_start += 2;
   if (components.search_start != url_components::omitted) { components.search_start += 2; }
   if (components.hash_start != url_components::omitted) { components.hash_start += 2; }
+}
+
+std::string& ada::url_aggregator::get_buffer() noexcept {
+  return buffer;
 }
 
 }
