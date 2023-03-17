@@ -25,6 +25,30 @@ ada::result url = ada::parse("https://www.google.com");
 if(url) { /* URL is valid */ }
 ```
 
+After calling 'parse', you *must* check that the result is valid before
+accessing it when you are not sure that it will succeed. The following
+code is unsafe:
+
+```cpp
+ada::result url = ada::parse("some bad url");
+url->get_href();
+```
+
+You should do...
+
+```cpp
+ada::result url = ada::parse("some bad url");
+if(url) {
+  // next line is now safe:
+  url->get_href();
+} else {
+  // report a parsing failure
+}
+```
+
+For simplicity, in the examples below, we skip the check because
+we know that parsing succeeds.
+
 - Get/Update credentials
 
 ```cpp
