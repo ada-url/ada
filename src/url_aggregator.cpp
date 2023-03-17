@@ -146,32 +146,21 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 }
 
 bool url_aggregator::set_username(const std::string_view input) {
-  ada_log("url_aggregator::set_username ", input);
+  ada_log("url_aggregator::set_username '", input, "' ");
   if (cannot_have_credentials_or_port()) { return false; }
-  size_t username_start = components.protocol_end + 3;
-  size_t username_length = components.username_end - username_start;
-  buffer.erase(username_start, components.username_end);
-
   // Optimization opportunity: Avoid temporary string creation
   std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
-  buffer.insert(username_start, encoded_input);
-
-  uint32_t new_difference = uint32_t(encoded_input.size() - username_length);
-  if (new_difference == 0) { return true; }
-
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+  update_base_username(encoded_input);
   return true;
 }
 
 bool url_aggregator::set_password(const std::string_view input) {
-  ada_log("url_aggregator::set_password ", input);
-  (void) input;
-  // TODO: Implement
-  return false;
+  ada_log("url_aggregator::set_password '", input, "'");
+  if (cannot_have_credentials_or_port()) { return false; }
+  // Optimization opportunity: Avoid temporary string creation
+  std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
+  update_base_password(encoded_input);
+  return true;
 }
 
 bool url_aggregator::set_port(const std::string_view input) {
