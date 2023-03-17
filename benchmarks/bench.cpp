@@ -31,32 +31,38 @@ double url_examples_bytes =  []() -> double {
     return double(bytes);
   }();
 
-size_t init_data() {
+#ifdef ADA_URL_FILE
+const char* default_file = ADA_URL_FILE;
+#else
+const char* default_file = nullptr;
+#endif
+
+
+size_t init_data(const char* input = default_file) {
   // compute the number of bytes.
   auto compute =  []() -> double {
     size_t bytes{0};
     for(std::string& url_string : url_examples) { bytes += url_string.size(); }
     return double(bytes);
   };
-#ifndef ADA_URL_FILE
-  for(const std::string& s : url_examples_default) {
-    url_examples.emplace_back(s);
+  if(input == nullptr) {
+    for(const std::string& s : url_examples_default) {
+      url_examples.emplace_back(s);
+    }
+    url_examples_bytes = compute();
+    return url_examples.size();
   }
-  url_examples_bytes = compute();
-  return url_examples.size();
-#else
 
-  if (!file_exists(ADA_URL_FILE)) {
-    std::cout << "File not found !" << ADA_URL_FILE << std::endl;
+  if (!file_exists(input)) {
+    std::cout << "File not found !" << input << std::endl;
     for(const std::string& s : url_examples_default) {
       url_examples.emplace_back(s);
     }
   } else {
-    std::cout << "Loading " << ADA_URL_FILE << std::endl;
-    url_examples = split_string(read_file(ADA_URL_FILE));
+    std::cout << "Loading " << input << std::endl;
+    url_examples = split_string(read_file(input));
   }
   url_examples_bytes = compute();
   return url_examples.size();
-#endif
 }
 #include "benchmark_template.cpp"
