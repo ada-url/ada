@@ -558,7 +558,11 @@ BENCHMARK(BasicBench_ServoUrl);
 
 
 int main(int argc, char **argv) {
-    init_data();
+    if(argc > 1 && file_exists(argv[1])) {
+      init_data(argv[1]);
+    } else {
+      init_data();
+    }
     benchmark::AddCustomContext("ada spec", "Ada follows whatwg/url");
     size_t ada_bad_url = count_ada_invalid();
 #if ADA_url_whatwg_ENABLED
