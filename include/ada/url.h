@@ -165,7 +165,7 @@ struct url : url_base {
    * @see https://url.spec.whatwg.org/#dom-url-href
    * @see https://url.spec.whatwg.org/#concept-url-serializer
    */
-  [[nodiscard]] std::string get_href() const noexcept;
+  [[nodiscard]] ada_really_inline std::string get_href() const noexcept;
 
   /**
    * The origin getter steps are to return the serialization of this’s URL’s

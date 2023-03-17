@@ -7,16 +7,13 @@
 namespace ada {
 
   std::pair<bool,uint32_t> url_components::check_offset_consistency() const noexcept {
-    // TODO: These conditions can be made more strict.
+    // These conditions can be made more strict.
     uint32_t index = 0;
     if(protocol_end != url_components::omitted) {
       if(protocol_end < index) { return {false,0}; }
       index = protocol_end;
     }
     if(username_end != url_components::omitted) {
-      // TODO:
-      // This should be username_end <= index
-      // unless we allow an empty username????
       if(username_end < index) { return {false,0}; }
       index = username_end;
     }
