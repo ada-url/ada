@@ -171,6 +171,24 @@ bool nodejs4() {
   TEST_SUCCEED()
 }
 
+bool empty_url() {
+  TEST_START()
+  auto url = ada::parse("");
+  if(url) {
+    TEST_FAIL("Should not succeed on base-less empty URL.");
+  }
+  TEST_SUCCEED()
+}
+
+bool just_hash() {
+  TEST_START()
+  auto url = ada::parse("#x");
+  if(url) {
+    TEST_FAIL("Should not succeed on base-less hash url.");
+  }
+  TEST_SUCCEED()
+}
+
 int main() {
 #if ADA_HAS_ICU
   std::cout << "We are using ICU."<< std::endl;
@@ -182,7 +200,8 @@ int main() {
 #else
   std::cout << "You have litte-endian system."<< std::endl;
 #endif
-  bool success = set_host_should_return_false_sometimes()
+  bool success = just_hash() && empty_url()
+     && set_host_should_return_false_sometimes()
      && set_host_should_return_true_sometimes()
      && set_hostname_should_return_false_sometimes()
      && set_hostname_should_return_true_sometimes()
