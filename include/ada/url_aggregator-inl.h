@@ -45,12 +45,7 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
   buffer.erase(components.host_start, current_length);
 
   if (input.empty()) {
-    // This is uncommon!
-    buffer.erase(components.host_start, current_length);
-    components.host_end = components.host_start;
-    components.pathname_start -= current_length;
-    if (components.search_start != url_components::omitted) { components.search_start -= current_length; }
-    if (components.hash_start != url_components::omitted) { components.hash_start -= current_length; }
+    new_difference -= current_length;
   } else {
     new_difference = input_size - current_length;
     // The common case is components.host_start == buffer.size().
