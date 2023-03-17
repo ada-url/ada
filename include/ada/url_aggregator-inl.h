@@ -380,6 +380,10 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
   if (components.hash_start != url_components::omitted) { components.hash_start += 2; }
 }
 
+inline void ada::url_aggregator::reserve(uint32_t capacity) {
+  buffer.reserve(capacity);
+}
+
 std::string& ada::url_aggregator::get_buffer() noexcept {
   return buffer;
 }
