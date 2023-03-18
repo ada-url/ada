@@ -328,11 +328,16 @@ namespace ada::helpers {
     // If it is special, we check that we have no dot, no %,  no \ and no
     // character needing percent encoding. Otherwise, we check that we have no %,
     // no dot, and no character needing percent encoding.
+    constexpr uint8_t need_encoding = 1;
+    constexpr uint8_t backslash_char = 2;
+    constexpr uint8_t dot_char = 4;
+    constexpr uint8_t percent_char = 8;
     bool special = type != ada::scheme::NOT_SPECIAL;
+    bool may_need_slow_file_handling = (type == ada::scheme::type::FILE && checkers::is_windows_drive_letter(input));
     bool trivial_path =
-        (special ? (accumulator == 0) : ((accumulator & 0b11111101) == 0)) &&
-        (type != ada::scheme::type::FILE);
-    if(accumulator == 4) {
+        (special ? (accumulator == 0) : ((accumulator & (need_encoding|dot_char|percent_char)) == 0)) &&
+        (!may_need_slow_file_handling);
+    if(accumulator == dot_char && !may_need_slow_file_handling) {
       // '4' means that we have at least one dot, but nothing that requires
       // percent encoding or decoding. The only part that is not trivial is
       // that we may have single dots and double dots path segments.
@@ -340,7 +345,15 @@ namespace ada::helpers {
       // with '.' (easy to check), or we have the sequence './'.
       // Note: input cannot be empty, it must at least contain one character ('.')
       // Note: we know that '\' is not present.
-      if(input[0] != '.' && input.find("/.") == std::string_view::npos) { trivial_path = true; }
+      if(input[0] != '.') {
+        size_t slashdot = input.find("/.");
+        if(slashdot == std::string_view::npos) {// common case
+          trivial_path = true;
+        } else { // uncommon
+          // only three cases matter: /./, /.. or a final /
+          trivial_path =  ! (slashdot + 2 == input.size() || input[slashdot + 2] == '.' || input[slashdot + 2] == '/');
+        }
+      }
     }
     if (trivial_path) {
       ada_log("parse_path trivial");
@@ -352,7 +365,7 @@ namespace ada::helpers {
     // ignore percent encoding *and* backslashes *and* percent characters.
     // Except for the trivial case, this is likely to capture 99% of paths out
     // there.
-    bool fast_path = (special && (accumulator & 0b11111011) == 0) &&
+    bool fast_path = (special && (accumulator & (need_encoding|backslash_char|percent_char)) == 0) &&
                     (type != ada::scheme::type::FILE);
     if (fast_path) {
       ada_log("parse_prepared_path fast");
