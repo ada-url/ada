@@ -477,6 +477,9 @@ bool verifydnslength_tests(const char* source) {
 }
 
 int main(int argc, char** argv) {
+  // The project runs all tests until the end. The STOP_ON_FAILURE stops the tests with the first
+  // failure.
+  bool stop_on_failure = (getenv ("STOP_ON_FAILURE") != nullptr);
   bool all_ada_url_tests{true};
   bool all_ada_url_aggregator_tests{false}; // while we are working, let us be careful.
   bool other_tests{true};
@@ -493,19 +496,43 @@ int main(int argc, char** argv) {
 
   std::map<std::string, bool> results;
   std::string name;
+
+  name = "urltestdata_encoding<ada::url>("+std::string(ADA_URLTESTDATA_JSON)+")";
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding<ada::url>(ADA_URLTESTDATA_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
+  }
+  name = "urltestdata_encoding<ada::url>("+std::string(URLTESTDATA_JSON)+")";
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding<ada::url>(URLTESTDATA_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
+  }
+  name = "urltestdata_encoding<ada::url_aggregator>("+std::string(ADA_URLTESTDATA_JSON)+")";
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding<ada::url_aggregator>(ADA_URLTESTDATA_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
+  }
+  name = "urltestdata_encoding<ada::url_aggregator>("+std::string(URLTESTDATA_JSON)+")";
+  if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
+    results[name] = urltestdata_encoding<ada::url_aggregator>(URLTESTDATA_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
+  }
   name = "percent_encoding";
   if(all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = percent_encoding();
+    if(stop_on_failure && !results[name]) { exit(-1); }
   }
 #if ADA_HAS_ICU
   name = "toascii_encoding";
   if(all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = toascii_encoding();
+    if(stop_on_failure && !results[name]) { exit(-1); }
   }
 #endif // ADA_HAS_ICU
   name = "setters_tests_encoding<ada::url>("+std::string(SETTERS_TESTS_JSON)+")";
   if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url>(SETTERS_TESTS_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // !ADA_HAS_ICU
@@ -513,6 +540,7 @@ int main(int argc, char** argv) {
   name = "setters_tests_encoding<ada::url>("+std::string(ADA_SETTERS_TESTS_JSON)+")";
   if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url>(ADA_SETTERS_TESTS_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
@@ -520,6 +548,7 @@ int main(int argc, char** argv) {
   name = "setters_tests_encoding<ada::url_aggregator>("+std::string(SETTERS_TESTS_JSON)+")";
   if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url_aggregator>(SETTERS_TESTS_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // !ADA_HAS_ICU
@@ -527,31 +556,17 @@ int main(int argc, char** argv) {
   name = "setters_tests_encoding<ada::url_aggregator>("+std::string(ADA_SETTERS_TESTS_JSON)+")";
   if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url_aggregator>(ADA_SETTERS_TESTS_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU
     results[name] = true; // we pretend. The setters fail under Windows due to IDN issues.
 #endif // _WIN32
   }
 #if ADA_HAS_ICU
-  name = "urltestdata_encoding<ada::url>("+std::string(ADA_URLTESTDATA_JSON)+")";
-  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding<ada::url>(ADA_URLTESTDATA_JSON);
-  }
-  name = "urltestdata_encoding<ada::url>("+std::string(URLTESTDATA_JSON)+")";
-  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding<ada::url>(URLTESTDATA_JSON);
-  }
-  name = "urltestdata_encoding<ada::url_aggregator>("+std::string(ADA_URLTESTDATA_JSON)+")";
-  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding<ada::url_aggregator>(ADA_URLTESTDATA_JSON);
-  }
-  name = "urltestdata_encoding<ada::url_aggregator>("+std::string(URLTESTDATA_JSON)+")";
-  if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding<ada::url_aggregator>(URLTESTDATA_JSON);
-  }
 #endif
   name = "verifydnslength_tests("+std::string(VERIFYDNSLENGTH_TESTS_JSON)+")";
   if(other_tests || name.find(filter) != std::string::npos) {
     results[name] = verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
+    if(stop_on_failure && !results[name]) { exit(-1); }
   }
   std::cout << std::endl;
   std::cout << "==============="<< std::endl;
