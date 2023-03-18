@@ -43,6 +43,12 @@ namespace ada::checkers {
   static_assert(path_signature_table[uint8_t('#')] == 1);
   static_assert(path_signature_table[uint8_t('<')] == 1);
   static_assert(path_signature_table[uint8_t('>')] == 1);
+  static_assert(path_signature_table[uint8_t('\\')] == 2);
+  static_assert(path_signature_table[uint8_t('.')] == 4);
+  static_assert(path_signature_table[uint8_t('%')] == 8);
+
+
+
   //
   static_assert(path_signature_table[0] == 1);
   static_assert(path_signature_table[31] == 1);
