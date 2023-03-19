@@ -189,11 +189,14 @@ namespace ada {
     /** @private */
     inline void append_base_password(const std::string_view input);
     /** @private */
+    // TODO: Remove this function when we have a better way of merging set_port values in url_base
     inline void update_base_port(std::optional<uint16_t> input) override;
+    /** @private */
+    inline void update_base_port_aggregator(uint32_t input);
     /** @private */
     inline void append_base_pathname(const std::string_view input);
     /** @private */
-    inline std::optional<uint16_t> retrieve_base_port() const;
+    inline uint32_t retrieve_base_port() const;
     /** @private */
     inline std::string_view retrieve_base_pathname() const;
     /** @private */

@@ -311,6 +311,19 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
 #endif // ADA_DEVELOPMENT_CHECKS
 }
 
+inline void url_aggregator::update_base_port_aggregator(uint32_t input) {
+  // This function is only required because when down casting to uint16_t
+  // url_components::omitted changes, because it is the maximum value of uint32_t.
+  // Therefore, there is no way of detecting if optional input has a value, but uin32_t omitted
+  // value.
+  if (input == url_components::omitted) {
+    clear_base_port();
+    return;
+  }
+
+  update_base_port(uint16_t(input));
+}
+
 inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
   ada_log("url_aggregator::update_base_port");
 
@@ -347,11 +360,8 @@ inline void url_aggregator::clear_base_port() {
   components.port = url_components::omitted;
 }
 
-inline std::optional<uint16_t> url_aggregator::retrieve_base_port() const {
+inline uint32_t url_aggregator::retrieve_base_port() const {
   ada_log("url_aggregator::retrieve_base_port");
-  if (components.port == url_components::omitted) {
-    return std::nullopt;
-  }
   return components.port;
 }
 

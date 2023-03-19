@@ -636,7 +636,7 @@ namespace ada::parser {
             if constexpr (result_type_is_ada_url) {
               url.host = "";
             } else {
-              // TODO
+              url.update_base_hostname("");
             }
             // Set state to path start state.
             state = ada::state::PATH_START;
