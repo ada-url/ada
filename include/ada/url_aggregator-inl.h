@@ -479,7 +479,7 @@ inline bool url_aggregator::has_non_empty_password() const {
 inline bool url_aggregator::has_password() const {
   ada_log("url_aggregator::has_password");
   // This function does not care about the length of the password
-  return buffer.size() > components.username_end && buffer[components.username_end] == ':';
+  return components.username_end < components.host_start;
 }
 
 }
