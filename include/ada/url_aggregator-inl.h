@@ -144,6 +144,11 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
 
 inline void url_aggregator::append_base_pathname(const std::string_view input) {
   ada_log("url_aggregator::append_base_pathname ", input, " ", to_string());
+#if ADA_DEVELOPMENT_CHECKS
+  // computing the expected password.
+  std::string path_expected = std::string(get_pathname());
+  path_expected.append(input);
+#endif // ADA_DEVELOPMENT_CHECKS
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
@@ -152,6 +157,10 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
   uint32_t difference = uint32_t(input.size());
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+#if ADA_DEVELOPMENT_CHECKS
+  std::string path_after = std::string(get_pathname());
+  ADA_ASSERT_EQUAL(path_expected, path_after, "append_base_pathname problem after inserting "+std::string(input));
+#endif // ADA_DEVELOPMENT_CHECKS
 }
 
 inline void url_aggregator::update_base_username(const std::string_view input) {
@@ -181,7 +190,11 @@ inline void url_aggregator::update_base_username(const std::string_view input) {
 
 inline void url_aggregator::append_base_username(const std::string_view input) {
   ada_log("url_aggregator::append_base_username ", input);
-
+#if ADA_DEVELOPMENT_CHECKS
+  // computing the expected password.
+  std::string username_expected = std::string(get_username());
+  username_expected.append(input);
+#endif // ADA_DEVELOPMENT_CHECKS
   add_authority_slashes_if_needed();
 
   // If input is empty, do nothing.
@@ -201,6 +214,10 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
   components.pathname_start += difference;
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+#if ADA_DEVELOPMENT_CHECKS
+  std::string username_after = std::string(get_username());
+  ADA_ASSERT_EQUAL(username_expected, username_after, "append_base_username problem after inserting "+std::string(input));
+#endif // ADA_DEVELOPMENT_CHECKS
 }
 
 inline void url_aggregator::clear_base_password() {
@@ -257,14 +274,16 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 
 inline void url_aggregator::append_base_password(const std::string_view input) {
   ada_log("url_aggregator::append_base_password ", input, " ", to_string());
-
+#if ADA_DEVELOPMENT_CHECKS
+  // computing the expected password.
+  std::string password_expected = std::string(get_password());
+  password_expected.append(input);
+#endif // ADA_DEVELOPMENT_CHECKS
   add_authority_slashes_if_needed();
 
   // If input is empty, do nothing.
   if (input.empty()) { return; }
-
   uint32_t difference = uint32_t(input.size());
-
   if (has_password()) {
     uint32_t password_end = components.host_start;
     if (components.host_start != components.host_end) { password_end--; }
@@ -274,12 +293,15 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
     buffer.insert(components.username_end, ":");
     buffer.insert(components.username_end + 1, input);
   }
-
   components.host_start += difference;
   components.host_end += difference;
   components.pathname_start += difference;
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+#if ADA_DEVELOPMENT_CHECKS
+  std::string password_after = std::string(get_password());
+  ADA_ASSERT_EQUAL(password_expected, password_after, "append_base_password problem after inserting "+std::string(input));
+#endif // ADA_DEVELOPMENT_CHECKS
 }
 
 inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
@@ -387,12 +409,12 @@ inline bool url_aggregator::base_search_has_value() const {
 }
 
 ada_really_inline bool url_aggregator::includes_credentials() const noexcept {
-  ada_log("url_aggregator::includes_credentials ", to_string(), " returns ", has_non_empty_username() || has_non_empty_password());
+  ada_log("url_aggregator::includes_credentials returns ", has_non_empty_username() || has_non_empty_password());
   return has_non_empty_username() || has_non_empty_password();
 }
 
 inline bool url_aggregator::cannot_have_credentials_or_port() const {
-  ada_log("url_aggregator::cannot_have_credentials_or_port ", to_string());
+  ada_log("url_aggregator::cannot_have_credentials_or_port ");
   return type == ada::scheme::type::FILE || components.host_start == components.host_end;
 }
 
@@ -435,12 +457,12 @@ inline bool url_aggregator::has_non_empty_username() const {
 }
 
 inline bool url_aggregator::has_non_empty_password() const {
-  ada_log("url_aggregator::has_non_empty_password ", to_string(), " returns ", has_password() && components.host_start - 1 - components.username_end > 0);
+  ada_log("url_aggregator::has_non_empty_password returns ", has_password() && components.host_start - 1 - components.username_end > 0);
   return has_password() && components.host_start - 1 - components.username_end > 0;
 }
 
 inline bool url_aggregator::has_password() const {
-  ada_log("url_aggregator::has_password ", to_string());
+  ada_log("url_aggregator::has_password ");
   // This function does not care about the length of the password
   return buffer.size() > components.username_end && buffer[components.username_end] == ':';
 }

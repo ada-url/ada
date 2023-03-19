@@ -191,8 +191,14 @@ namespace ada::parser {
           }
           bool at_sign_seen{false};
           bool password_token_seen{false};
+          /**
+          * We expect something of the sort...
+          * https://user@pass:example.com:1234/foo/bar?baz#quux
+          * --------^
+          */
           do {
             std::string_view view = helpers::substring(url_data, input_position);
+            // The delimiters are @, /, ? \\.
             size_t location = url.is_special() ? helpers::find_authority_delimiter_special(view) : helpers::find_authority_delimiter(view);
             std::string_view authority_view(view.data(), location);
             size_t end_of_authority = input_position + authority_view.size();

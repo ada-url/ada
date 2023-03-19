@@ -506,6 +506,9 @@ namespace ada {
     answer.append("\t\"scheme\":\"");
     helpers::encode_json(get_scheme(), back);
     answer.append("\",\n");
+    answer.append("\t\"protocol\":\"");
+    helpers::encode_json(get_protocol(), back);
+    answer.append("\",\n");
     if(includes_credentials()) {
       answer.append("\t\"username\":\"");
       helpers::encode_json(username, back);

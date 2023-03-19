@@ -459,6 +459,23 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_username() const noexcept {
+  /**
+   * The username, if it exists, starts at protocol_end+3 (inclusively) and
+   * ends at username_end (non-included). Yet the code below does not seem
+   * to agree?
+   */
+  /**
+   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   *      |      |    |          | ^^^^|       |   |
+   *      |      |    |          | |   |       |   `----- hash_start
+   *      |      |    |          | |   |       `--------- search_start
+   *      |      |    |          | |   `----------------- pathname_start
+   *      |      |    |          | `--------------------- port
+   *      |      |    |          `----------------------- host_end
+   *      |      |    `---------------------------------- host_start
+   *      |      `--------------------------------------- username_end
+   *      `---------------------------------------------- protocol_end
+   */
   if (has_authority() && components.username_end > components.protocol_end + 2) {
     return helpers::substring(buffer, components.protocol_end + 2, components.username_end);
   }
@@ -466,10 +483,53 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_password() const noexcept {
+  /**
+   * The password, if it exists, starts at username_end+1 (inclusively) and
+   * ends at host_start (non-included).
+   */
+  /**
+   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   *      |      |    |          | ^^^^|       |   |
+   *      |      |    |          | |   |       |   `----- hash_start
+   *      |      |    |          | |   |       `--------- search_start
+   *      |      |    |          | |   `----------------- pathname_start
+   *      |      |    |          | `--------------------- port
+   *      |      |    |          `----------------------- host_end
+   *      |      |    `---------------------------------- host_start
+   *      |      `--------------------------------------- username_end
+   *      `---------------------------------------------- protocol_end
+   */
   if (has_authority() && components.username_end != buffer.size() && buffer[components.username_end] == ':') {
+    /**
+     * If we true the guideline above, then this is wrong, it should be
+     * helpers::substring(buffer, components.username_end + 1, components.host_start);
+     */
     return helpers::substring(buffer, components.username_end + 1, components.host_start - 1);
   }
   return "";
+}
+
+[[nodiscard]] uint32_t url_aggregator::get_password_length() const noexcept {
+  /**
+   * The password, length should be host_start-(username_end+1), yet somehow
+   * it differs?
+   */
+  /**
+   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   *      |      |    |          | ^^^^|       |   |
+   *      |      |    |          | |   |       |   `----- hash_start
+   *      |      |    |          | |   |       `--------- search_start
+   *      |      |    |          | |   `----------------- pathname_start
+   *      |      |    |          | `--------------------- port
+   *      |      |    |          `----------------------- host_end
+   *      |      |    `---------------------------------- host_start
+   *      |      `--------------------------------------- username_end
+   *      `---------------------------------------------- protocol_end
+   */
+  if (has_authority() && components.username_end != buffer.size() && buffer[components.username_end] == ':') {
+    return (components.username_end + 1) - (components.host_start - 1);
+  }
+  return 0;
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_port() const noexcept {
@@ -486,6 +546,22 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_host() const noexcept {
+  /**
+   * The convention seems to indicate from host_start (excluded) to
+   * host_end (included). The code does not agree.
+   */
+  /**
+   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   *      |      |    |          | ^^^^|       |   |
+   *      |      |    |          | |   |       |   `----- hash_start
+   *      |      |    |          | |   |       `--------- search_start
+   *      |      |    |          | |   `----------------- pathname_start
+   *      |      |    |          | `--------------------- port
+   *      |      |    |          `----------------------- host_end
+   *      |      |    `---------------------------------- host_start
+   *      |      `--------------------------------------- username_end
+   *      `---------------------------------------------- protocol_end
+   */
   if(components.port == url_components::omitted) { return get_hostname(); }
   return helpers::substring(buffer, components.host_start, components.pathname_start);
 }
@@ -514,7 +590,12 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 [[nodiscard]] std::string_view url_aggregator::get_protocol() const noexcept {
   return helpers::substring(buffer, 0, components.protocol_end);
 }
-
+[[nodiscard]] std::string_view url_aggregator::get_scheme() const noexcept {
+  if(components.protocol_end > 0) {
+    return helpers::substring(buffer, 0, components.protocol_end - 1);
+  }
+  return std::string_view();
+}
 std::string ada::url_aggregator::to_string() const {
   ada_log("url_aggregator::to_string buffer:", buffer, "[", buffer.size(), " bytes]");
 
@@ -526,52 +607,87 @@ std::string ada::url_aggregator::to_string() const {
   helpers::encode_json(buffer, back);
   answer.append("\",\n");
 
-  /**
-   * We could add other fields such as those:
-   *
-   *  answer.append("\t\"path\":\"");
-   *  helpers::encode_json(get_pathname(), back);
-   *  answer.append("\",\n");
-   *
-   *  answer.append("\t\"scheme\":\"");
-   *  helpers::encode_json(get_protocol(), back);
-   *  answer.append("\",\n");
-   *
-   * For the end user, they are probably more interesting and useful.
-   */
 
-
-  answer.append("\t\"protocol_end\":\"");
-  helpers::encode_json(std::to_string(components.protocol_end), back);
+  answer.append("\t\"scheme\":\"");
+  helpers::encode_json(get_scheme(), back);
   answer.append("\",\n");
 
-  answer.append("\t\"username_end\":\"");
-  helpers::encode_json(std::to_string(components.username_end), back);
+  answer.append("\t\"protocol\":\"");
+  helpers::encode_json(get_protocol(), back);
   answer.append("\",\n");
 
-  answer.append("\t\"host_start\":\"");
-  helpers::encode_json(std::to_string(components.host_start), back);
+  if(includes_credentials()) {
+    answer.append("\t\"username\":\"");
+    helpers::encode_json(get_username(), back);
+    answer.append("\",\n");
+    answer.append("\t\"password\":\"");
+    helpers::encode_json(get_password(), back);
+    answer.append("\",\n");
+  }
+
+  answer.append("\t\"host\":\"");
+  helpers::encode_json(get_host(), back);
   answer.append("\",\n");
 
-  answer.append("\t\"host_end\":\"");
-  helpers::encode_json(std::to_string(components.host_end), back);
+  answer.append("\t\"path\":\"");
+  helpers::encode_json(get_pathname(), back);
   answer.append("\",\n");
+  answer.append("\t\"opaque path\":");
+  answer.append((has_opaque_path ? "true" : "false"));
+  answer.append(",\n");
 
-  answer.append("\t\"port\":\"");
-  helpers::encode_json(std::to_string(components.port), back);
-  answer.append("\",\n");
+  if(base_search_has_value()) {
+    answer.append("\t\"query\":\"");
+    helpers::encode_json(get_search(), back);
+    answer.append("\",");
+  }
+  if(base_fragment_has_value()) {
+    answer.append(",\n");
+    answer.append("\t\"fragment\":\"");
+    helpers::encode_json(get_hash(), back);
+    answer.append("\",");
+  }
 
-  answer.append("\t\"pathname_start\":\"");
-  helpers::encode_json(std::to_string(components.pathname_start), back);
-  answer.append("\",\n");
+  auto convert_offset_to_string = [](uint32_t offset) -> std::string {
+    if(offset == url_components::omitted) {
+      return "null";
+    } else {
+      return std::to_string(offset);
+    }
+  };
 
-  answer.append("\t\"search_start\":\"");
-  helpers::encode_json(std::to_string(components.search_start), back);
-  answer.append("\",\n");
+  answer.append("\t\"protocol_end\":");
+  answer.append(convert_offset_to_string(components.protocol_end));
+  answer.append(",\n");
 
-  answer.append("\t\"hash_start\":\"");
-  helpers::encode_json(std::to_string(components.hash_start), back);
-  answer.append("\"\n}");
+  answer.append("\t\"username_end\":");
+  answer.append(convert_offset_to_string(components.username_end));
+  answer.append(",\n");
+
+  answer.append("\t\"host_start\":");
+  answer.append(convert_offset_to_string(components.host_start));
+  answer.append(",\n");
+
+  answer.append("\t\"host_end\":");
+  answer.append(convert_offset_to_string(components.host_end));
+  answer.append(",\n");
+
+
+  answer.append("\t\"port\":");
+  answer.append(convert_offset_to_string(components.port));
+  answer.append(",\n");
+
+  answer.append("\t\"pathname_start\":");
+  answer.append(convert_offset_to_string(components.pathname_start));
+  answer.append(",\n");
+
+  answer.append("\t\"search_start\":");
+  answer.append(convert_offset_to_string(components.search_start));
+  answer.append(",\n");
+
+  answer.append("\t\"hash_start\":");
+  answer.append(convert_offset_to_string(components.hash_start));
+  answer.append("\n}");
 
   return answer;
 }
