@@ -263,14 +263,16 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
   }
 
   buffer.insert(components.username_end + 1, input);
+  components.host_start += difference;
 
-  if (buffer[components.username_end + difference] != '@') {
+  // The following line is required to add "@" to hostname. When updating password if hostname
+  // does not start with "@", it is "update_base_password"s responsability to set it.
+  if (buffer[components.host_start] != '@') {
     // Add "@" after username and before components.host_start
-    buffer.insert(components.username_end + difference, "@");
+    buffer.insert(components.host_start, "@");
     difference++;
   }
 
-  components.host_start += difference;
   components.host_end += difference;
   components.pathname_start += difference;
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
