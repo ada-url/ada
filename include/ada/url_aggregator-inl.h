@@ -36,21 +36,25 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
 inline void url_aggregator::update_base_hostname(std::string_view input) {
   ada_log("url_aggregator::update_base_hostname ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size()," bytes]");
 
+  // This next line is required for when parsing a URL like `foo://`
   add_authority_slashes_if_needed();
 
+  bool has_credential = includes_credentials();
   uint32_t input_size = uint32_t(input.size());
   uint32_t current_length = components.host_end - components.host_start;
-  uint32_t new_difference = 0;
+  uint32_t new_difference = 0 - current_length;
   // The common case is current_length == 0.
   buffer.erase(components.host_start, current_length);
 
-  if (input.empty()) {
-    new_difference -= current_length;
-  } else {
-    new_difference = input_size - current_length;
-    // The common case is components.host_start == buffer.size().
-    buffer.insert(components.host_start, input);
+  uint32_t host_start = components.host_start;
+  new_difference += input_size;
+  // The common case is components.host_start == buffer.size().
+  if (has_credential) {
+    new_difference++;
+    buffer.insert(host_start, "@");
+    host_start += 1;
   }
+  buffer.insert(host_start, input);
 
   components.host_end += new_difference;
   components.pathname_start += new_difference;
@@ -204,13 +208,13 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
   uint32_t difference = uint32_t(input.size());
   buffer.insert(components.username_end, input);
   components.username_end += uint32_t(input.size());
+  components.host_start += difference;
 
-  if (buffer[components.username_end] != '@') {
-    buffer.insert(components.username_end, "@");
+  if (buffer[components.host_start] != '@' && components.host_start != components.host_end) {
+    buffer.insert(components.host_start, "@");
     difference++;
   }
 
-  components.host_start += difference;
   components.host_end += difference;
   components.pathname_start += difference;
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
@@ -287,7 +291,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
   uint32_t difference = uint32_t(input.size());
   if (has_password()) {
     uint32_t password_end = components.host_start;
-    if (components.host_start != components.host_end) { password_end--; }
+    if (buffer[password_end] == '@') { password_end--; }
     buffer.insert(password_end, input);
   } else {
     difference++; // Increment for ":"
@@ -376,28 +380,27 @@ inline void url_aggregator::clear_base_pathname() {
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
-  uint32_t pathname_length = components.pathname_start - ending_index;
+  uint32_t pathname_length = ending_index - components.pathname_start;
   buffer.erase(components.pathname_start, pathname_length);
-  if (components.search_start != url_components::omitted) { components.search_start += pathname_length; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += pathname_length; }
+  if (components.search_start != url_components::omitted) { components.search_start -= pathname_length; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= pathname_length; }
 }
 
 inline void url_aggregator::clear_base_hostname() {
   ada_log("url_aggregator::clear_base_hostname");
-  uint32_t length = components.host_start - components.host_end;
+  uint32_t hostname_length = components.host_end - components.host_start;
+  uint32_t start = components.host_start;
 
-  // Remove `//` in the URL when clearing the hostname
-  if (has_authority()) {
-    length -= 2;
-    components.host_start -= 2;
-  } else if (length == 0) {
-    return;
+  // If hostname starts with "@", we should not remove that character.
+  if (hostname_length > 0 && buffer[start] == '@') {
+    start++;
+    hostname_length--;
   }
-  buffer.erase(components.host_start, components.host_end - components.host_start);
-  components.host_end = components.host_start;
-  components.pathname_start += length;
-  if (components.search_start != url_components::omitted) { components.search_start += length; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += length; }
+  buffer.erase(start, hostname_length);
+  components.host_end = start;
+  components.pathname_start += hostname_length;
+  if (components.search_start != url_components::omitted) { components.search_start += hostname_length; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += hostname_length; }
 }
 
 inline bool url_aggregator::base_fragment_has_value() const {
@@ -430,7 +433,7 @@ inline bool ada::url_aggregator::has_authority() const noexcept {
 }
 
 inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
-  ada_log("url_aggregator::add_authority_slashes_if_needed ", to_string());
+  ada_log("url_aggregator::add_authority_slashes_if_needed");
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
   // `//` initially to the buffer, since it depends on the hostname existance.
   if (has_authority()) { return; }
@@ -473,13 +476,13 @@ inline bool url_aggregator::has_non_empty_username() const {
 
 inline bool url_aggregator::has_non_empty_password() const {
   ada_log("url_aggregator::has_non_empty_password");
-  return components.host_start - components.username_end + 1 > 0;
+  return components.host_start - components.username_end > 0;
 }
 
 inline bool url_aggregator::has_password() const {
   ada_log("url_aggregator::has_password");
   // This function does not care about the length of the password
-  return components.username_end < components.host_start;
+  return buffer.size() > components.username_end && buffer[components.username_end] == ':';
 }
 
 }
