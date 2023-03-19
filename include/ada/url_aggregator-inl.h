@@ -59,13 +59,14 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
 }
 
 ada_really_inline uint32_t url_aggregator::get_pathname_length() const noexcept {
+  ada_log("url_aggregator::get_pathname_length");
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   return ending_index - components.pathname_start;
 }
 
-[[nodiscard]] ada_really_inline bool url_aggregator::is_at_path()  const noexcept {
+[[nodiscard]] ada_really_inline bool url_aggregator::is_at_path() const noexcept {
   return buffer.size() == components.pathname_start;
 }
 
@@ -357,6 +358,7 @@ inline std::string_view url_aggregator::retrieve_base_pathname() const {
 }
 
 inline void url_aggregator::clear_base_search() {
+  ada_log("url_aggregator::clear_base_search");
   if (components.search_start == url_components::omitted) { return; }
 
   if (components.hash_start == url_components::omitted) {
@@ -409,12 +411,12 @@ inline bool url_aggregator::base_search_has_value() const {
 }
 
 ada_really_inline bool url_aggregator::includes_credentials() const noexcept {
-  ada_log("url_aggregator::includes_credentials returns ", has_non_empty_username() || has_non_empty_password());
+  ada_log("url_aggregator::includes_credentials");
   return has_non_empty_username() || has_non_empty_password();
 }
 
 inline bool url_aggregator::cannot_have_credentials_or_port() const {
-  ada_log("url_aggregator::cannot_have_credentials_or_port ");
+  ada_log("url_aggregator::cannot_have_credentials_or_port");
   return type == ada::scheme::type::FILE || components.host_start == components.host_end;
 }
 
@@ -428,6 +430,7 @@ inline bool ada::url_aggregator::has_authority() const noexcept {
 }
 
 inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
+  ada_log("url_aggregator::add_authority_slashes_if_needed ", to_string());
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter to insert
   // `//` initially to the buffer, since it depends on the hostname existance.
   if (has_authority()) { return; }
@@ -453,16 +456,28 @@ std::string& ada::url_aggregator::get_buffer() noexcept {
 
 inline bool url_aggregator::has_non_empty_username() const {
   ada_log("url_aggregator::has_non_empty_username ");
-  return has_authority() && components.username_end - components.protocol_end - 2 > 0;
+  /**
+   * https://user:pass@example.com:1234/foo/bar?baz#quux
+   *      |      |    |          | ^^^^|       |   |
+   *      |      |    |          | |   |       |   `----- hash_start
+   *      |      |    |          | |   |       `--------- search_start
+   *      |      |    |          | |   `----------------- pathname_start
+   *      |      |    |          | `--------------------- port
+   *      |      |    |          `----------------------- host_end
+   *      |      |    `---------------------------------- host_start
+   *      |      `--------------------------------------- username_end
+   *      `---------------------------------------------- protocol_end
+   */
+  return components.protocol_end + 2 < components.username_end;
 }
 
 inline bool url_aggregator::has_non_empty_password() const {
-  ada_log("url_aggregator::has_non_empty_password returns ", has_password() && components.host_start - 1 - components.username_end > 0);
-  return has_password() && components.host_start - 1 - components.username_end > 0;
+  ada_log("url_aggregator::has_non_empty_password");
+  return components.host_start - components.username_end + 1 > 0;
 }
 
 inline bool url_aggregator::has_password() const {
-  ada_log("url_aggregator::has_password ");
+  ada_log("url_aggregator::has_password");
   // This function does not care about the length of the password
   return buffer.size() > components.username_end && buffer[components.username_end] == ':';
 }

@@ -42,7 +42,7 @@ namespace ada {
     /**
      * Return the scheme type. Note that it is faster to do
      * get_scheme_type() == ada::scheme::type::FILE than to do
-     * get_scheme() == "file", since the former is a direct integer comparison,
+     * get_protocol() == "file:", since the former is a direct integer comparison,
      * while the other involves a (cheap) string test.
      */
     [[nodiscard]] ada_really_inline ada::scheme::type get_scheme_type() const noexcept;
