@@ -373,6 +373,10 @@ inline void url_aggregator::clear_base_search() {
   }
 
   components.search_start = url_components::omitted;
+
+#if ADA_DEVELOPMENT_CHECKS
+  ADA_ASSERT_EQUAL(get_search(), "", "search should have been cleared on buffer=" + buffer + " with " + components.to_string());
+#endif
 }
 
 inline void url_aggregator::clear_base_pathname() {
@@ -384,6 +388,9 @@ inline void url_aggregator::clear_base_pathname() {
   buffer.erase(components.pathname_start, pathname_length);
   if (components.search_start != url_components::omitted) { components.search_start -= pathname_length; }
   if (components.hash_start != url_components::omitted) { components.hash_start -= pathname_length; }
+#if ADA_DEVELOPMENT_CHECKS
+  ADA_ASSERT_EQUAL(get_pathname(), "", "pathname should have been cleared on buffer=" + buffer + " with " + components.to_string());
+#endif
 }
 
 inline void url_aggregator::clear_base_hostname() {
@@ -398,9 +405,13 @@ inline void url_aggregator::clear_base_hostname() {
   }
   buffer.erase(start, hostname_length);
   components.host_end = start;
-  components.pathname_start += hostname_length;
-  if (components.search_start != url_components::omitted) { components.search_start += hostname_length; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += hostname_length; }
+  components.pathname_start -= hostname_length;
+  if (components.search_start != url_components::omitted) { components.search_start -= hostname_length; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= hostname_length; }
+
+#if ADA_DEVELOPMENT_CHECKS
+  ADA_ASSERT_EQUAL(get_hostname(), "", "hostname should have been cleared on buffer=" + buffer + " with " + components.to_string());
+#endif
 }
 
 inline bool url_aggregator::base_fragment_has_value() const {
