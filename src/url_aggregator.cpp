@@ -431,10 +431,12 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] const std::string& url_aggregator::get_href() const noexcept {
+  ada_log("url_aggregator::get_href");
   return buffer;
 }
 
 [[nodiscard]] std::string url_aggregator::get_origin() const noexcept {
+  ada_log("url_aggregator::get_origin");
   if (is_special()) {
     // Return a new opaque origin.
     if (type == scheme::FILE) { return "null"; }
@@ -459,13 +461,9 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_username() const noexcept {
+  ada_log("url_aggregator::get_username");
   /**
-   * The username, if it exists, starts at protocol_end+3 (inclusively) and
-   * ends at username_end (non-included). Yet the code below does not seem
-   * to agree?
-   */
-  /**
-   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   * https://user:pass@example.com:1234/foo/bar?baz#quux
    *      |      |    |          | ^^^^|       |   |
    *      |      |    |          | |   |       |   `----- hash_start
    *      |      |    |          | |   |       `--------- search_start
@@ -476,19 +474,16 @@ bool url_aggregator::set_hostname(const std::string_view input) {
    *      |      `--------------------------------------- username_end
    *      `---------------------------------------------- protocol_end
    */
-  if (has_authority() && components.username_end > components.protocol_end + 2) {
+  if (components.protocol_end + 2 < components.username_end) {
     return helpers::substring(buffer, components.protocol_end + 2, components.username_end);
   }
   return "";
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_password() const noexcept {
+  ada_log("url_aggregator::get_password");
   /**
-   * The password, if it exists, starts at username_end+1 (inclusively) and
-   * ends at host_start (non-included).
-   */
-  /**
-   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   * https://user:pass@example.com:1234/foo/bar?baz#quux
    *      |      |    |          | ^^^^|       |   |
    *      |      |    |          | |   |       |   `----- hash_start
    *      |      |    |          | |   |       `--------- search_start
@@ -499,23 +494,16 @@ bool url_aggregator::set_hostname(const std::string_view input) {
    *      |      `--------------------------------------- username_end
    *      `---------------------------------------------- protocol_end
    */
-  if (has_authority() && components.username_end != buffer.size() && buffer[components.username_end] == ':') {
-    /**
-     * If we true the guideline above, then this is wrong, it should be
-     * helpers::substring(buffer, components.username_end + 1, components.host_start);
-     */
-    return helpers::substring(buffer, components.username_end + 1, components.host_start - 1);
+  if (buffer.size() > components.username_end && buffer[components.username_end] == ':') {
+    return helpers::substring(buffer, components.username_end + 1, components.host_start);
   }
   return "";
 }
 
 [[nodiscard]] uint32_t url_aggregator::get_password_length() const noexcept {
+  ada_log("url_aggregator::get_password_length");
   /**
-   * The password, length should be host_start-(username_end+1), yet somehow
-   * it differs?
-   */
-  /**
-   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   * https://user:pass@example.com:1234/foo/bar?baz#quux
    *      |      |    |          | ^^^^|       |   |
    *      |      |    |          | |   |       |   `----- hash_start
    *      |      |    |          | |   |       `--------- search_start
@@ -526,18 +514,20 @@ bool url_aggregator::set_hostname(const std::string_view input) {
    *      |      `--------------------------------------- username_end
    *      `---------------------------------------------- protocol_end
    */
-  if (has_authority() && components.username_end != buffer.size() && buffer[components.username_end] == ':') {
-    return (components.username_end + 1) - (components.host_start - 1);
+  if (components.username_end + 1 < components.host_start) {
+    return components.host_start - components.username_end + 1;
   }
   return 0;
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_port() const noexcept {
+  ada_log("url_aggregator::get_port");
   if (components.port == url_components::omitted) { return ""; }
   return helpers::substring(buffer, components.host_end + 1, components.pathname_start);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept {
+  ada_log("url_aggregator::get_hash");
   // If this’s URL’s fragment is either null or the empty string, then return the empty string.
   // Return U+0023 (#), followed by this’s URL’s fragment.
   if (components.hash_start == url_components::omitted) { return ""; }
@@ -546,12 +536,9 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_host() const noexcept {
+  ada_log("url_aggregator::get_host");
   /**
-   * The convention seems to indicate from host_start (excluded) to
-   * host_end (included). The code does not agree.
-   */
-  /**
-   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   * https://user:pass@example.com:1234/foo/bar?baz#quux
    *      |      |    |          | ^^^^|       |   |
    *      |      |    |          | |   |       |   `----- hash_start
    *      |      |    |          | |   |       `--------- search_start
@@ -562,15 +549,18 @@ bool url_aggregator::set_hostname(const std::string_view input) {
    *      |      `--------------------------------------- username_end
    *      `---------------------------------------------- protocol_end
    */
-  if(components.port == url_components::omitted) { return get_hostname(); }
-  return helpers::substring(buffer, components.host_start, components.pathname_start);
+  size_t start = components.host_start;
+  if (buffer.size() > components.host_start && buffer[components.host_start] == '@') { start++; }
+  return helpers::substring(buffer, start, components.pathname_start);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept {
+  ada_log("url_aggregator::get_hostname");
   return helpers::substring(buffer, components.host_start, components.host_end);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept {
+  ada_log("url_aggregator::get_pathname");
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
@@ -578,6 +568,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_search() const noexcept {
+  ada_log("url_aggregator::get_search");
   // If this’s URL’s query is either null or the empty string, then return the empty string.
   // Return U+003F (?), followed by this’s URL’s query.
   if (components.search_start == url_components::omitted) { return ""; }
@@ -588,14 +579,10 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_protocol() const noexcept {
+  ada_log("url_aggregator::get_protocol");
   return helpers::substring(buffer, 0, components.protocol_end);
 }
-[[nodiscard]] std::string_view url_aggregator::get_scheme() const noexcept {
-  if(components.protocol_end > 0) {
-    return helpers::substring(buffer, 0, components.protocol_end - 1);
-  }
-  return std::string_view();
-}
+
 std::string ada::url_aggregator::to_string() const {
   ada_log("url_aggregator::to_string buffer:", buffer, "[", buffer.size(), " bytes]");
 
@@ -605,11 +592,6 @@ std::string ada::url_aggregator::to_string() const {
 
   answer.append("\t\"buffer\":\"");
   helpers::encode_json(buffer, back);
-  answer.append("\",\n");
-
-
-  answer.append("\t\"scheme\":\"");
-  helpers::encode_json(get_scheme(), back);
   answer.append("\",\n");
 
   answer.append("\t\"protocol\":\"");
@@ -639,13 +621,12 @@ std::string ada::url_aggregator::to_string() const {
   if(base_search_has_value()) {
     answer.append("\t\"query\":\"");
     helpers::encode_json(get_search(), back);
-    answer.append("\",");
+    answer.append("\",\n");
   }
   if(base_fragment_has_value()) {
-    answer.append(",\n");
     answer.append("\t\"fragment\":\"");
     helpers::encode_json(get_hash(), back);
-    answer.append("\",");
+    answer.append("\",\n");
   }
 
   auto convert_offset_to_string = [](uint32_t offset) -> std::string {
@@ -671,7 +652,6 @@ std::string ada::url_aggregator::to_string() const {
   answer.append("\t\"host_end\":");
   answer.append(convert_offset_to_string(components.host_end));
   answer.append(",\n");
-
 
   answer.append("\t\"port\":");
   answer.append(convert_offset_to_string(components.port));

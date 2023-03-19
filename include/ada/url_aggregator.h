@@ -148,18 +148,13 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
     [[nodiscard]] std::string_view get_protocol() const noexcept;
-    /**
-     * Return this’s URL’s scheme.
-     * This function does not allocate memory.
-     * @return a lightweight std::string_view.
-     */
-    [[nodiscard]] std::string_view get_scheme() const noexcept;
 
     /**
      * A URL includes credentials if its username or password is not the empty
      * string.
      */
     [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
+
     /**
      * @private
      *
@@ -228,7 +223,7 @@ namespace ada {
     /**
      * Useful for implementing efficient serialization for the URL.
      *
-     * https://user@pass:example.com:1234/foo/bar?baz#quux
+     * https://user:pass@example.com:1234/foo/bar?baz#quux
      *      |      |    |          | ^^^^|       |   |
      *      |      |    |          | |   |       |   `----- hash_start
      *      |      |    |          | |   |       `--------- search_start

@@ -193,7 +193,7 @@ namespace ada::parser {
           bool password_token_seen{false};
           /**
           * We expect something of the sort...
-          * https://user@pass:example.com:1234/foo/bar?baz#quux
+          * https://user:pass@example.com:1234/foo/bar?baz#quux
           * --------^
           */
           do {
