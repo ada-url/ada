@@ -175,10 +175,10 @@ bool url_aggregator::set_port(const std::string_view input) {
   if (input.find_first_of("0123456789") == std::string_view::npos) { return false; }
 
   // Revert changes if parse_port fails.
-  std::optional<uint16_t> previous_port = retrieve_base_port();
+  uint32_t previous_port = components.port;
   parse_port(trimmed);
   if (is_valid) { return true; }
-  update_base_port(previous_port);
+  update_base_port_aggregator(previous_port);
   is_valid = true;
   return false;
 }
@@ -398,7 +398,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     bool succeeded = parse_host(host_view);
     if (!succeeded) {
       update_base_hostname(previous_host);
-      update_base_port(previous_port);
+      update_base_port_aggregator(previous_port);
     }
     return succeeded;
   }
@@ -414,7 +414,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // Let host be the result of host parsing buffer with url is not special.
     if (!parse_host(new_host)) {
       update_base_hostname(previous_host);
-      update_base_port(previous_port);
+      update_base_port_aggregator(previous_port);
       return false;
     }
 

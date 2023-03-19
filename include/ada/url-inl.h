@@ -136,8 +136,6 @@ inline void url::update_base_port(std::optional<uint16_t> input) {
   port = input;
 }
 
-inline std::optional<uint16_t> url::retrieve_base_port() const { return port; }
-
 inline std::string_view url::retrieve_base_pathname() const { return path; }
 
 inline void url::clear_base_hostname() { host = std::nullopt; }

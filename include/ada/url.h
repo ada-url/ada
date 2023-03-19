@@ -111,8 +111,6 @@ struct url : url_base {
   /** @private */
   inline void update_base_port(std::optional<uint16_t> input) override;
   /** @private */
-  inline std::optional<uint16_t> retrieve_base_port() const;
-  /** @private */
   inline std::string_view retrieve_base_pathname() const;
   /** @private */
   inline void clear_base_hostname() override;
