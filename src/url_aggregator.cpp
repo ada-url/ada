@@ -193,6 +193,12 @@ bool url_aggregator::set_pathname(const std::string_view input) {
 
 ada_really_inline void url_aggregator::parse_path(std::string_view input) {
   ada_log("url_aggregator::parse_path ", input);
+
+  // The next line is required for parsing URLs like "file:/c:/foo/bar.html" where
+  // There isn't any hostname but protocol with a pathname. Therefore, the responsability of
+  // adding "//" might belong to pathname setter.
+  add_authority_slashes_if_needed();
+
   std::string tmp_buffer;
   std::string_view internal_input;
   if(unicode::has_tabs_or_newline(input)) {
@@ -495,6 +501,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
    *      `---------------------------------------------- protocol_end
    */
   if (buffer.size() > components.username_end && buffer[components.username_end] == ':') {
+    size_t ending_index = components.host_start;
+    if (buffer[ending_index] == '@') { ending_index--; }
     return helpers::substring(buffer, components.username_end + 1, components.host_start);
   }
   return "";
@@ -556,7 +564,9 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept {
   ada_log("url_aggregator::get_hostname");
-  return helpers::substring(buffer, components.host_start, components.host_end);
+  size_t start = components.host_start;
+  if (buffer.size() > components.host_start && buffer[components.host_start] == '@') { start++; }
+  return helpers::substring(buffer, start, components.host_end);
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept {
