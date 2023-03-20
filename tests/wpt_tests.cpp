@@ -566,7 +566,7 @@ int main(int argc, char** argv) {
 #endif // _WIN32
   }
   name = "setters_tests_encoding<ada::url_aggregator>("+std::string(SETTERS_TESTS_JSON)+")";
-  if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url_aggregator>(SETTERS_TESTS_JSON);
     if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU

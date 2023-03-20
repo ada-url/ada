@@ -193,12 +193,7 @@ bool url_aggregator::set_pathname(const std::string_view input) {
 
 ada_really_inline void url_aggregator::parse_path(std::string_view input) {
   ada_log("url_aggregator::parse_path ", input);
-
-  // The next line is required for parsing URLs like "file:/c:/foo/bar.html" where
-  // There isn't any hostname but protocol with a pathname. Therefore, the responsability of
-  // adding "//" might belong to pathname setter.
-  add_authority_slashes_if_needed();
-
+  
   std::string tmp_buffer;
   std::string_view internal_input;
   if(unicode::has_tabs_or_newline(input)) {
@@ -237,8 +232,12 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
       update_base_pathname(path);
       return;
     }
-  } else if(components.host_start == components.host_end) {
-    update_base_pathname("/");
+  } else {
+    // Non-special URLs with an empty host can have their paths erased
+    // Path-only URLs cannot have their paths erased
+    if(components.host_start == components.host_end && !has_authority()) {
+      update_base_pathname("/");
+    }
   }
   return;
 }
