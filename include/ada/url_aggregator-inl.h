@@ -39,20 +39,18 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
   // This next line is required for when parsing a URL like `foo://`
   add_authority_slashes_if_needed();
 
-  bool has_credential = includes_credentials();
-  uint32_t input_size = uint32_t(input.size());
+  bool has_credential = buffer.size() > components.host_start && buffer[components.host_start] == '@';
   uint32_t current_length = components.host_end - components.host_start;
-  uint32_t new_difference = 0 - current_length;
+  uint32_t new_difference = uint32_t(input.size()) - current_length;
   // The common case is current_length == 0.
   buffer.erase(components.host_start, current_length);
 
   uint32_t host_start = components.host_start;
-  new_difference += input_size;
   // The common case is components.host_start == buffer.size().
   if (has_credential) {
-    new_difference++;
     buffer.insert(host_start, "@");
-    host_start += 1;
+    host_start++;
+    new_difference++;
   }
   buffer.insert(host_start, input);
 
