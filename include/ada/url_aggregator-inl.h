@@ -127,7 +127,7 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
 }
 
 inline void url_aggregator::update_base_pathname(const std::string_view input) {
-  ada_log("url_aggregator::update_base_pathname ", input, " ", to_string());
+  ada_log("url_aggregator::update_base_pathname ", input);
 
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
@@ -382,8 +382,8 @@ inline void url_aggregator::clear_base_pathname() {
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   uint32_t pathname_length = ending_index - components.pathname_start;
   buffer.erase(components.pathname_start, pathname_length);
-  if (components.search_start != url_components::omitted) { components.search_start -= pathname_length; }
-  if (components.hash_start != url_components::omitted) { components.hash_start -= pathname_length; }
+  if (components.search_start != url_components::omitted) { components.search_start = components.pathname_start; }
+  if (components.hash_start != url_components::omitted) { components.hash_start = components.pathname_start; }
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_pathname(), "", "pathname should have been cleared on buffer=" + buffer + " with " + components.to_string());
 #endif
