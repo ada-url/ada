@@ -468,8 +468,8 @@ namespace ada::helpers {
     if (url.base_fragment_has_value()) return;
     if (url.base_search_has_value()) return;
 
-    std::string_view path = url.retrieve_base_pathname();
-    while (!path.empty() && path.back() == ' ') { path.remove_suffix(1); }
+    auto path = std::string(url.retrieve_base_pathname());
+    while (!path.empty() && path.back() == ' ') { path.resize(path.size() - 1); }
     url.update_base_pathname(path);
   }
 
