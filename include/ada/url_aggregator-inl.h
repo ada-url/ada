@@ -89,10 +89,17 @@ inline void url_aggregator::update_base_search(std::string_view input) {
     buffer.erase(components.search_start, search_end - components.search_start);
   }
 
-  uint32_t input_size = uint32_t(input.size() + 1); // add `?` prefix
+  uint32_t input_size = uint32_t(input.size());
   components.search_start = components.pathname_start + get_pathname_length();
   // The common case here is components.search_start == buffer.size().
-  buffer.insert(components.search_start, helpers::concat("?", input));
+
+  if (input[0] != '?') {
+    // If input does not start with "?", we need to add it.
+    buffer.insert(components.search_start, helpers::concat("?", input));
+    input_size++;
+  } else {
+    buffer.insert(components.search_start, input);
+  }
   if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
 }
 
@@ -184,6 +191,13 @@ inline void url_aggregator::update_base_username(const std::string_view input) {
 
   components.username_end += diff;
   components.host_start += diff;
+
+  // Add missing "@" to host start.
+  if (!input.empty() && buffer[components.host_start] != '@') {
+    buffer.insert(components.host_start, "@");
+    diff++;
+  }
+
   components.host_end += diff;
   components.pathname_start += diff;
   if (components.search_start != url_components::omitted) { components.search_start += diff; }
@@ -263,9 +277,8 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
   components.host_start += difference;
 
   // The following line is required to add "@" to hostname. When updating password if hostname
-  // does not start with "@", it is "update_base_password"s responsability to set it.
+  // does not start with "@", it is "update_base_password"s responsibility to set it.
   if (buffer[components.host_start] != '@') {
-    // Add "@" after username and before components.host_start
     buffer.insert(components.host_start, "@");
     difference++;
   }
@@ -287,17 +300,24 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
 
   // If input is empty, do nothing.
   if (input.empty()) { return; }
+
   uint32_t difference = uint32_t(input.size());
   if (has_password()) {
-    uint32_t password_end = components.host_start;
-    if (buffer[password_end] == '@') { password_end--; }
-    buffer.insert(password_end, input);
+    buffer.insert(components.host_start, input);
   } else {
     difference++; // Increment for ":"
     buffer.insert(components.username_end, ":");
     buffer.insert(components.username_end + 1, input);
   }
   components.host_start += difference;
+
+  // The following line is required to add "@" to hostname. When updating password if hostname
+  // does not start with "@", it is "append_base_password"s responsibility to set it.
+  if (buffer[components.host_start] != '@') {
+    buffer.insert(components.host_start, "@");
+    difference++;
+  }
+
   components.host_end += difference;
   components.pathname_start += difference;
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
