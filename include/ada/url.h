@@ -109,7 +109,7 @@ struct url : url_base {
   /** @private */
   inline void update_base_password(const std::string_view input);
   /** @private */
-  inline void update_base_port(std::optional<uint16_t> input) override;
+  inline void update_base_port(std::optional<uint16_t> input);
   /** @private */
   inline std::string_view retrieve_base_pathname() const;
   /** @private */

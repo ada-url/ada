@@ -30,6 +30,7 @@ namespace ada {
     }
     return consumed;
   }
+  
   bool url::parse_opaque_host(std::string_view input) {
     ada_log("parse_opaque_host ", input, "[", input.size(), " bytes]");
     if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {

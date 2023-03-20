@@ -748,7 +748,6 @@ namespace ada::parser {
           ada::unreachable();
       }
     }
-    ada_log("returning ", url.to_string());
     if (fragment.has_value()) { url.update_unencoded_base_hash(*fragment); }
     return url;
   }
