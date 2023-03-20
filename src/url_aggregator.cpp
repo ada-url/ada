@@ -361,7 +361,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   ada_log("url_aggregator::set_host_or_hostname ", input);
   if (has_opaque_path) { return false; }
 
-  std::string_view previous_host = get_hostname();
+  std::string previous_host = std::string(get_hostname());
   uint32_t previous_port = components.port;
 
   size_t host_end_pos = input.find('#');
