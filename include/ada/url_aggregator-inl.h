@@ -33,7 +33,7 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   ada_log("url_aggregator::update_unencoded_base_hash final buffer is '", buffer, "' [", buffer.size(), " bytes]");
 }
 
-inline void url_aggregator::update_base_hostname(std::string_view input) {
+inline void url_aggregator::update_base_hostname(const std::string_view input) {
   ada_log("url_aggregator::update_base_hostname ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size()," bytes]");
 
   // This next line is required for when parsing a URL like `foo://`
@@ -53,7 +53,6 @@ inline void url_aggregator::update_base_hostname(std::string_view input) {
     new_difference++;
   }
   buffer.insert(host_start, input);
-
   components.host_end += new_difference;
   components.pathname_start += new_difference;
   if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
