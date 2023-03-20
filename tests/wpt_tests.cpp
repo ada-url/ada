@@ -229,7 +229,7 @@ bool setters_tests_encoding(const char *source) {
 
         std::string_view expected_pathname;
         if (!element["expected"]["pathname"].get(expected_pathname)) {
-          TEST_ASSERT(base->get_pathname(), expected_pathname, "Pathname " + element_string);
+          TEST_ASSERT(base->get_pathname(), expected_pathname, "Pathname " + element_string + base->to_string());
         }
       }
       else if (category == "hash") {

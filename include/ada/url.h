@@ -113,15 +113,13 @@ struct url : url_base {
   /** @private */
   inline std::string_view retrieve_base_pathname() const;
   /** @private */
-  inline void clear_base_hostname() override;
-  /** @private */
   inline void clear_base_pathname() override;
   /** @private */
   inline void clear_base_search() override;
   /** @private */
-  inline bool base_fragment_has_value() const;
+  inline bool base_fragment_has_value() const override;
   /** @private */
-  inline bool base_search_has_value() const;
+  inline bool base_search_has_value() const override;
 
   [[nodiscard]] bool has_valid_domain() const noexcept override;
 
@@ -329,19 +327,9 @@ struct url : url_base {
    */
   [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
-  /**
-   * @private
-   *
-   * Parse a port (16-bit decimal digit) from the provided input.
-   * We assume that the input does not contain spaces or tabs
-   * within the ASCII digits.
-   * It returns how many bytes were consumed when a number is successfully
-   * parsed.
-   * @return On failure, it returns zero.
-   * @see https://url.spec.whatwg.org/#host-parsing
-   */
+  /** @private */
   ada_really_inline size_t parse_port(
-      std::string_view view, bool check_trailing_content = false) noexcept;
+      std::string_view view, bool check_trailing_content = false) noexcept override;
 
   /**
    * @private

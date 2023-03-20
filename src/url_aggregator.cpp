@@ -454,10 +454,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
     std::string_view path = retrieve_base_pathname();
     if (!path.empty()) {
       ada::result<ada::url> out = ada::parse<ada::url>(path);
-      if (out) {
-        if (out->is_special()) {
-          return out->get_protocol() + "//" + out->get_host();
-        }
+      if (out && out->is_special()) {
+        return out->get_protocol() + "//" + out->get_host();
       }
     }
   }
@@ -628,12 +626,12 @@ std::string ada::url_aggregator::to_string() const {
   answer.append((has_opaque_path ? "true" : "false"));
   answer.append(",\n");
 
-  if(base_search_has_value()) {
+  if(components.search_start != url_components::omitted) {
     answer.append("\t\"query\":\"");
     helpers::encode_json(get_search(), back);
     answer.append("\",\n");
   }
-  if(base_fragment_has_value()) {
+  if(components.hash_start != url_components::omitted) {
     answer.append("\t\"fragment\":\"");
     helpers::encode_json(get_hash(), back);
     answer.append("\",\n");
@@ -749,6 +747,7 @@ final:
 }
 
 bool url_aggregator::parse_ipv6(std::string_view input) {
+  // TODO: Find a way to merge parse_ipv6 with url.cpp implementation.
   ada_log("parse_ipv6 ", input, "[", input.size(), " bytes]");
 
   if (input.empty()) { return is_valid = false; }

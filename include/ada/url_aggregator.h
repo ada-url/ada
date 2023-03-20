@@ -199,7 +199,7 @@ namespace ada {
     /** @private */
     inline void clear_base_port();
     /** @private */
-    inline void clear_base_hostname() override;
+    inline void clear_base_hostname();
     /** @private */
     inline void clear_base_pathname() override;
     /** @private */
@@ -207,9 +207,9 @@ namespace ada {
     /** @private */
     inline void clear_base_password();
     /** @private */
-    inline bool base_fragment_has_value() const;
+    inline bool base_fragment_has_value() const override;
     /** @private */
-    inline bool base_search_has_value() const;
+    inline bool base_search_has_value() const override;
     /** @private */
     inline bool has_non_empty_username() const;
     /** @private */
@@ -264,19 +264,9 @@ namespace ada {
     /** @private */
     inline std::string& get_buffer() noexcept;
 
-    /**
-     * @private
-     *
-     * Parse a port (16-bit decimal digit) from the provided input.
-     * We assume that the input does not contain spaces or tabs
-     * within the ASCII digits.
-     * It returns how many bytes were consumed when a number is successfully
-     * parsed.
-     * @return On failure, it returns zero.
-     * @see https://url.spec.whatwg.org/#host-parsing
-     */
+    /** @private */
     ada_really_inline size_t parse_port(
-        std::string_view view, bool check_trailing_content = false) noexcept;
+        std::string_view view, bool check_trailing_content = false) noexcept override;
 
     private:
       /** @private */
