@@ -189,10 +189,7 @@ namespace ada {
     /** @private */
     inline void append_base_password(const std::string_view input);
     /** @private */
-    // TODO: Remove this function when we have a better way of merging set_port values in url_base
-    inline void update_base_port(std::optional<uint16_t> input) override;
-    /** @private */
-    inline void update_base_port_aggregator(uint32_t input);
+    inline void update_base_port(uint32_t input);
     /** @private */
     inline void append_base_pathname(const std::string_view input);
     /** @private */
@@ -266,6 +263,20 @@ namespace ada {
 
     /** @private */
     inline std::string& get_buffer() noexcept;
+
+    /**
+     * @private
+     *
+     * Parse a port (16-bit decimal digit) from the provided input.
+     * We assume that the input does not contain spaces or tabs
+     * within the ASCII digits.
+     * It returns how many bytes were consumed when a number is successfully
+     * parsed.
+     * @return On failure, it returns zero.
+     * @see https://url.spec.whatwg.org/#host-parsing
+     */
+    ada_really_inline size_t parse_port(
+        std::string_view view, bool check_trailing_content = false) noexcept;
 
     private:
       /** @private */

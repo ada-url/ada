@@ -83,24 +83,9 @@ namespace ada {
     [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
 
     /**
-     * @private
-     *
-     * Parse a port (16-bit decimal digit) from the provided input.
-     * We assume that the input does not contain spaces or tabs
-     * within the ASCII digits.
-     * It returns how many bytes were consumed when a number is successfully parsed.
-     * @return On failure, it returns zero.
-     * @see https://url.spec.whatwg.org/#host-parsing
-     */
-    ada_really_inline size_t parse_port(std::string_view view, bool check_trailing_content = false) noexcept;
-
-    /**
     * Returns a JSON string representation of this URL.
     */
     virtual std::string to_string() const = 0;
-
-    /** @private */
-    virtual void update_base_port(std::optional<uint16_t> input) = 0;
 
     /** @private */
     virtual inline void clear_base_hostname() = 0;

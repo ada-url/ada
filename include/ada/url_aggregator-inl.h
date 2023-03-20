@@ -311,29 +311,16 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
 #endif // ADA_DEVELOPMENT_CHECKS
 }
 
-inline void url_aggregator::update_base_port_aggregator(uint32_t input) {
-  // This function is only required because when down casting to uint16_t
-  // url_components::omitted changes, because it is the maximum value of uint32_t.
-  // Therefore, there is no way of detecting if optional input has a value, but uin32_t omitted
-  // value.
-  if (input == url_components::omitted) {
-    clear_base_port();
-    return;
-  }
-
-  update_base_port(uint16_t(input));
-}
-
-inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
+inline void url_aggregator::update_base_port(uint32_t input) {
   ada_log("url_aggregator::update_base_port");
 
-  if (!input.has_value()) {
+  if (input == url_components::omitted) {
     clear_base_port();
     return;
   }
   // calling std::to_string(input.value()) is unfortunate given that the port
   // value is probably already available as a string.
-  std::string value = helpers::concat(":", std::to_string(input.value()));
+  std::string value = helpers::concat(":", std::to_string(input));
   uint32_t difference = uint32_t(value.size());
 
   if (components.port != url_components::omitted) {
@@ -345,7 +332,7 @@ inline void url_aggregator::update_base_port(std::optional<uint16_t> input) {
   components.pathname_start += difference;
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
-  components.port = input.value();
+  components.port = input;
 }
 
 inline void url_aggregator::clear_base_port() {
