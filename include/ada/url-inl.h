@@ -36,44 +36,46 @@ url::get_components() const noexcept {
   url_components out{};
 
   // protocol ends with ':'. for example: "https:"
-  out.protocol_end = uint32_t(get_scheme().size());
+  out.protocol_end = uint32_t(get_protocol().size());
 
   // Trailing index is always the next character of the current one.
-  size_t running_index = out.protocol_end + 1;
+  size_t running_index = out.protocol_end;
 
   if (host.has_value()) {
     // 2 characters for "//" and 1 character for starting index
-    out.host_start = out.protocol_end + 3;
+    out.host_start = out.protocol_end + 2;
 
     if (includes_credentials()) {
-      out.username_end = uint32_t(out.host_start + username.size() - 1);
+      out.username_end = uint32_t(out.host_start + username.size());
 
-      out.host_start += uint32_t(username.size() + 1);
+      out.host_start += uint32_t(username.size());
 
       if (!password.empty()) {
         out.host_start += uint32_t(password.size() + 1);
       }
+
+      out.host_end = uint32_t(out.host_start + host.value().size());
     } else {
       out.username_end = out.host_start;
-      // TODO: why is this not just...?
-      // out.username_end = url_components::omitted;
+
+      // Host does not start with "@" if it does not include credentials.
+      out.host_end = uint32_t(out.host_start + host.value().size()) - 1;
     }
 
-    out.host_end = uint32_t(out.host_start + host.value().size()) - 1;
     running_index = out.host_end + 1;
   } else {
     // Update host start and end date to the same index, since it does not
     // exist.
-    out.host_start = out.protocol_end + 1;
-    out.host_end = out.protocol_end + 1;
+    out.host_start = out.protocol_end;
+    out.host_end = out.host_start;
 
     if (!has_opaque_path && checkers::begins_with(path, "//")) {
       // If url’s host is null, url does not have an opaque path, url’s path’s
       // size is greater than 1, and url’s path[0] is the empty string, then
       // append U+002F (/) followed by U+002E (.) to output.
-      running_index = out.protocol_end + 3;
+      running_index = out.protocol_end + 2;
     } else {
-      running_index = out.protocol_end + 1;
+      running_index = out.protocol_end;
     }
   }
 

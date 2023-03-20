@@ -360,12 +360,9 @@ struct url : url_base {
    */
   [[nodiscard]] ada_really_inline bool parse_host(std::string_view input);
 
-  /**
-   * @private
-   */
+  /** @private */
   template <bool has_state_override = false>
-  [[nodiscard]] ada_really_inline bool
-  parse_scheme(const std::string_view input);
+  [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
 
   /**
    * Useful for implementing efficient serialization for the URL.
@@ -388,8 +385,7 @@ struct url : url_base {
    * @see
    * https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
    */
-  [[nodiscard]] ada_really_inline ada::url_components
-  get_components() const noexcept;
+  [[nodiscard]] ada_really_inline ada::url_components get_components() const noexcept;
 
 private:
   /**
