@@ -1,5 +1,6 @@
 #include "ada.h"
 #include "ada/helpers.h"
+#include "ada/url_components.h"
 
 #include <numeric>
 #include <string>
@@ -21,36 +22,40 @@ namespace ada {
     */
     // These conditions can be made more strict.
     uint32_t index = 0;
-    if(protocol_end != url_components::omitted) {
-      if(protocol_end < index) { return false; }
-      index = protocol_end;
-    }
-    if(username_end != url_components::omitted) {
-      if(username_end < index) { return false; }
-      index = username_end;
-    }
-    if(host_start != url_components::omitted) {
-      if(host_start < index) { return false; }
-      index = host_start;
-    }
+
+    if (protocol_end == url_components::omitted) { return false; }
+    if (protocol_end < index) { return false; }
+    index = protocol_end;
+
+    if (username_end == url_components::omitted) { return false; }
+    if (username_end < index) { return false; }
+    index = username_end;
+
+    if (host_start == url_components::omitted) { return false; }
+    if (host_start < index) { return false; }
+    index = host_start;
+
     if(port != url_components::omitted) {
       if(port > 0xffff) { return false; }
       uint32_t port_length = helpers::fast_digit_count(port) + 1;
       if(index + port_length < index) { return false; }
       index += port_length;
     }
-    if(pathname_start != url_components::omitted) {
-      if(pathname_start < index) { return false; }
-      index = pathname_start;
-    }
-    if(search_start != url_components::omitted) {
-      if(search_start < index) { return false; }
+
+    if (pathname_start == url_components::omitted) { return false; }
+    if (pathname_start < index) { return false; }
+    index = pathname_start;
+
+    if (search_start != url_components::omitted) {
+      if (search_start < index) { return false; }
       index = search_start;
     }
-    if(hash_start != url_components::omitted) {
-      if(hash_start < index) { return false; }
+
+    if (hash_start != url_components::omitted) {
+      if (hash_start < index) { return false; }
       index = hash_start;
     }
+
     return true;
   }
 
