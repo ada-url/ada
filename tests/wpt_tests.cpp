@@ -223,7 +223,7 @@ bool setters_tests_encoding(const char *source) {
 
         std::string_view expected_pathname;
         if (!element["expected"]["pathname"].get(expected_pathname)) {
-          TEST_ASSERT(base->get_pathname(), expected_pathname, "Pathname " + element_string);
+          TEST_ASSERT(base->get_pathname(), expected_pathname, "Pathname " + element_string + base->to_string());
         }
       }
       else if (category == "hash") {
@@ -530,7 +530,7 @@ int main(int argc, char** argv) {
   }
 #endif // ADA_HAS_ICU
   name = "setters_tests_encoding<ada::url>("+std::string(SETTERS_TESTS_JSON)+")";
-  if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url>(SETTERS_TESTS_JSON);
     if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU
@@ -538,7 +538,7 @@ int main(int argc, char** argv) {
 #endif // !ADA_HAS_ICU
   }
   name = "setters_tests_encoding<ada::url>("+std::string(ADA_SETTERS_TESTS_JSON)+")";
-  if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url>(ADA_SETTERS_TESTS_JSON);
     if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU
@@ -546,7 +546,7 @@ int main(int argc, char** argv) {
 #endif // _WIN32
   }
   name = "setters_tests_encoding<ada::url_aggregator>("+std::string(SETTERS_TESTS_JSON)+")";
-  if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url_aggregator>(SETTERS_TESTS_JSON);
     if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU
@@ -554,7 +554,7 @@ int main(int argc, char** argv) {
 #endif // !ADA_HAS_ICU
   }
   name = "setters_tests_encoding<ada::url_aggregator>("+std::string(ADA_SETTERS_TESTS_JSON)+")";
-  if(all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
+  if(all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = setters_tests_encoding<ada::url_aggregator>(ADA_SETTERS_TESTS_JSON);
     if(stop_on_failure && !results[name]) { exit(-1); }
 #if !ADA_HAS_ICU

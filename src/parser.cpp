@@ -191,8 +191,14 @@ namespace ada::parser {
           }
           bool at_sign_seen{false};
           bool password_token_seen{false};
+          /**
+          * We expect something of the sort...
+          * https://user:pass@example.com:1234/foo/bar?baz#quux
+          * --------^
+          */
           do {
             std::string_view view = helpers::substring(url_data, input_position);
+            // The delimiters are @, /, ? \\.
             size_t location = url.is_special() ? helpers::find_authority_delimiter_special(view) : helpers::find_authority_delimiter(view);
             std::string_view authority_view(view.data(), location);
             size_t end_of_authority = input_position + authority_view.size();
@@ -556,13 +562,14 @@ namespace ada::parser {
           if constexpr (result_type_is_ada_url) {
             helpers::parse_prepared_path(view, url.type, url.path);
           } else {
-            if(url.is_at_path()) { // common case
-              helpers::parse_prepared_path(view, url.type, url.get_buffer());
-            } else { // slow case
-              std::string path = std::string(url.get_pathname());
-              helpers::parse_prepared_path(view, url.type, path);
-              url.update_base_pathname(path);
-            }
+            // TODO: Add back the common case optimization. It is causing an error with
+            // the following test case "file:///c|////foo/bar.html"
+//            if(url.is_at_path()) { // common case
+//              helpers::parse_prepared_path(view, url.type, url.get_buffer());
+//            } else { // slow case
+            std::string path = std::string(url.get_pathname());
+            helpers::parse_prepared_path(view, url.type, path);
+            url.update_base_pathname(path);
           }
           break;
         }
@@ -630,7 +637,7 @@ namespace ada::parser {
             if constexpr (result_type_is_ada_url) {
               url.host = "";
             } else {
-              // TODO
+              url.update_base_hostname("");
             }
             // Set state to path start state.
             state = ada::state::PATH_START;
@@ -742,7 +749,6 @@ namespace ada::parser {
           ada::unreachable();
       }
     }
-    ada_log("returning ", url.to_string());
     if (fragment.has_value()) { url.update_unencoded_base_hash(*fragment); }
     return url;
   }
