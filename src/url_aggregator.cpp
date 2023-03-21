@@ -17,6 +17,7 @@ template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme(const std::string_view input) {
   ada_log("url_aggregator::parse_scheme ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   auto parsed_type = ada::scheme::get_scheme_type(input);
   bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
   /**
@@ -134,6 +135,8 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
 
 bool url_aggregator::set_protocol(const std::string_view input) {
   ada_log("url_aggregator::set_protocol ", input);
+  ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   std::string view(input);
   helpers::remove_ascii_tab_or_newline(view);
   if (view.empty()) { return true; }
@@ -154,6 +157,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 bool url_aggregator::set_username(const std::string_view input) {
   ada_log("url_aggregator::set_username '", input, "' ");
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (cannot_have_credentials_or_port()) { return false; }
   // Optimization opportunity: Avoid temporary string creation
   std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
@@ -165,6 +169,7 @@ bool url_aggregator::set_username(const std::string_view input) {
 bool url_aggregator::set_password(const std::string_view input) {
   ada_log("url_aggregator::set_password '", input, "'");
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (cannot_have_credentials_or_port()) { return false; }
   // Optimization opportunity: Avoid temporary string creation
   std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
@@ -176,6 +181,7 @@ bool url_aggregator::set_password(const std::string_view input) {
 bool url_aggregator::set_port(const std::string_view input) {
   ada_log("url_aggregator::set_port ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (cannot_have_credentials_or_port()) { return false; }
   std::string trimmed(input);
   helpers::remove_ascii_tab_or_newline(trimmed);
@@ -198,6 +204,7 @@ bool url_aggregator::set_port(const std::string_view input) {
 bool url_aggregator::set_pathname(const std::string_view input) {
   ada_log("url_aggregator::set_pathname ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (has_opaque_path) { return false; }
   clear_base_pathname();
   parse_path(input);
@@ -208,6 +215,7 @@ bool url_aggregator::set_pathname(const std::string_view input) {
 ada_really_inline void url_aggregator::parse_path(std::string_view input) {
   ada_log("url_aggregator::parse_path ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   std::string tmp_buffer;
   std::string_view internal_input;
   if(unicode::has_tabs_or_newline(input)) {
@@ -260,6 +268,7 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
 void url_aggregator::set_search(const std::string_view input) {
   ada_log("url_aggregator::set_search ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (input.empty()) {
     clear_base_search();
     helpers::strip_trailing_spaces_from_opaque_path(*this);
@@ -281,6 +290,7 @@ void url_aggregator::set_search(const std::string_view input) {
 void url_aggregator::set_hash(const std::string_view input) {
   ada_log("url_aggregator::set_hash ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (input.empty()) {
     if (components.hash_start != url_components::omitted) {
       buffer.resize(components.hash_start);
@@ -298,6 +308,7 @@ void url_aggregator::set_hash(const std::string_view input) {
 }
 
 bool url_aggregator::set_href(const std::string_view input) {
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   ada_log("url_aggregator::set_href ", input, "[", input.size(), " bytes]");
   ada::result<url_aggregator> out = ada::parse<url_aggregator>(input);
   ada_log("url_aggregator::set_href, success :", out.has_value());
@@ -314,6 +325,7 @@ bool url_aggregator::set_href(const std::string_view input) {
 ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   ada_log("url_aggregator:parse_host ", input, "[", input.size(), " bytes]");
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if(input.empty()) { return is_valid = false; } // technically unnecessary.
   // If input starts with U+005B ([), then:
   if (input[0] == '[') {
@@ -380,6 +392,7 @@ template <bool override_hostname>
 bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   ada_log("url_aggregator::set_host_or_hostname ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (has_opaque_path) { return false; }
 
   std::string previous_host = std::string(get_hostname());
@@ -451,12 +464,14 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 bool url_aggregator::set_host(const std::string_view input) {
   ada_log("url_aggregator::set_host ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<false>(input);
 }
 
 bool url_aggregator::set_hostname(const std::string_view input) {
   ada_log("url_aggregator::set_hostname ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<true>(input);
 }
 
@@ -593,7 +608,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 }
 
 [[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept {
-  ada_log("url_aggregator::get_pathname");
+  ada_log("url_aggregator::get_pathname pathname_start = ", components.pathname_start, " buffer.size() = ", buffer.size(), " components.search_start = ", components.search_start, " components.hash_start = ", components.hash_start);
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
@@ -711,7 +726,7 @@ std::string ada::url_aggregator::to_string() const {
 }
 
 bool url_aggregator::parse_ipv4(std::string_view input) {
-  ada_log("parse_ipv4 ", input, "[", input.size(), " bytes]");
+  ada_log("parse_ipv4 ", input, "[", input.size(), " bytes], overlaps with buffer: ", helpers::overlaps(input, buffer) ? "yes" : "no");
   ADA_ASSERT_TRUE(validate());
   if(input.back()=='.') {
     input.remove_suffix(1);
@@ -777,7 +792,7 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
   // TODO: Find a way to merge parse_ipv6 with url.cpp implementation.
   ada_log("parse_ipv6 ", input, "[", input.size(), " bytes]");
   ADA_ASSERT_TRUE(validate());
-
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (input.empty()) { return is_valid = false; }
   // Let address be a new IPv6 address whose IPv6 pieces are all 0.
   std::array<uint16_t, 8> address{};
@@ -988,6 +1003,7 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
 bool url_aggregator::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, "[", input.size(), " bytes]");
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
     return is_valid = false;
   }
@@ -1002,6 +1018,9 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
 std::string url_aggregator::to_diagram() const {
   std::string answer;
   answer.append(buffer);
+  answer.append(" [");
+  answer.append(std::to_string(buffer.size()));
+  answer.append(" bytes]");
   answer.append("\n");
   // first line
   std::string line1;
@@ -1051,7 +1070,8 @@ std::string url_aggregator::to_diagram() const {
     for(size_t i = components.search_start + 1; i < line3.size(); i++) {
       line3[i] = '-';
     }
-    line3.append(" search_start");
+    line3.append(" search_start ");
+    line3.append(std::to_string(components.search_start));
   }
   answer.append(line3);
   answer.append("\n");
@@ -1063,7 +1083,8 @@ std::string url_aggregator::to_diagram() const {
     for(size_t i = components.pathname_start + 1; i < line4.size(); i++) {
       line4[i] = '-';
     }
-    line4.append(" pathname_start");
+    line4.append(" pathname_start ");
+    line4.append(std::to_string(components.pathname_start));
   }
   answer.append(line4);
   answer.append("\n");
@@ -1076,7 +1097,8 @@ std::string url_aggregator::to_diagram() const {
     for(size_t i = components.host_end + 1; i < line5.size(); i++) {
       line5[i] = '-';
     }
-    line5.append(" host_end");
+    line5.append(" host_end ");
+    line5.append(std::to_string(components.host_end));
   }
   answer.append(line5);
   answer.append("\n");
@@ -1089,7 +1111,8 @@ std::string url_aggregator::to_diagram() const {
     for(size_t i = components.host_start + 1; i < line6.size(); i++) {
       line6[i] = '-';
     }
-    line6.append(" host_start");
+    line6.append(" host_start ");
+    line6.append(std::to_string(components.host_start));
   }
   answer.append(line6);
   answer.append("\n");
@@ -1102,7 +1125,8 @@ std::string url_aggregator::to_diagram() const {
     for(size_t i = components.username_end + 1; i < line7.size(); i++) {
       line7[i] = '-';
     }
-    line7.append(" username_end");
+    line7.append(" username_end ");
+    line7.append(std::to_string(components.username_end));
   }
   answer.append(line7);
   answer.append("\n");
@@ -1115,17 +1139,40 @@ std::string url_aggregator::to_diagram() const {
     for(size_t i = components.protocol_end + 1; i < line8.size(); i++) {
       line8[i] = '-';
     }
-    line8.append(" protocol_end");
+    line8.append(" protocol_end ");
+    line8.append(std::to_string(components.protocol_end));
   }
   answer.append(line8);
   answer.append("\n");
+
+  if(components.hash_start == url_components::omitted) {
+    answer.append("note: hash omitted\n");
+  }
+  if(components.search_start == url_components::omitted) {
+    answer.append("note: search omitted\n");
+  }
+  if(components.protocol_end > buffer.size()) {
+    answer.append("warning: protocol_end overflows\n");
+  }
+  if(components.username_end > buffer.size()) {
+    answer.append("warning: username_end overflows\n");
+  }
+  if(components.host_start > buffer.size()) {
+    answer.append("warning: host_start overflows\n");
+  }
+  if(components.host_end > buffer.size()) {
+    answer.append("warning: host_end overflows\n");
+  }
+  if(components.pathname_start > buffer.size()) {
+    answer.append("warning: pathname_start overflows\n");
+  }
   return answer;
 }
 
 bool url_aggregator::validate() const noexcept {
   if(!is_valid) { return true; }
   if(!components.check_offset_consistency()) {
-    ada_log("url_aggregator::validate inconsistent components ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate inconsistent components \n", to_diagram());
     return false;
   }
   // We have a credible components struct, but let us investivate more
@@ -1143,57 +1190,57 @@ bool url_aggregator::validate() const noexcept {
    *       `--------------------------------------------- protocol_end
    */
   if(components.protocol_end == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted protocol_end ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate omitted protocol_end \n", to_diagram());
     return false;
   }
   if(components.username_end == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted username_end ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate omitted username_end \n", to_diagram());
     return false;
   }
   if(components.host_start == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted host_start ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate omitted host_start \n", to_diagram());
     return false;
   }
   if(components.host_end == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted host_end ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate omitted host_end \n", to_diagram());
     return false;
   }
   if(components.pathname_start == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted pathname_start ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate omitted pathname_start \n", to_diagram());
     return false;
   }
 
   if(components.protocol_end > buffer.size()) {
-    ada_log("url_aggregator::validate protocol_end overflow ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate protocol_end overflow \n", to_diagram());
     return false;
   }
   if(components.username_end > buffer.size()) {
-    ada_log("url_aggregator::validate username_end overflow ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate username_end overflow \n", to_diagram());
     return false;
   }
   if(components.host_start > buffer.size()) {
-    ada_log("url_aggregator::validate host_start overflow ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate host_start overflow \n", to_diagram());
     return false;
   }
   if(components.host_end > buffer.size()) {
-    ada_log("url_aggregator::validate host_end overflow ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate host_end overflow \n", to_diagram());
     return false;
   }
   if(components.pathname_start > buffer.size()) {
-    ada_log("url_aggregator::validate pathname_start overflow ", to_string(), "\n", to_diagram());
+    ada_log("url_aggregator::validate pathname_start overflow \n", to_diagram());
     return false;
   }
 
   if(components.protocol_end > 0) {
     if(buffer[components.protocol_end-1] != ':') {
-      ada_log("url_aggregator::validate missing : at the end of the protocol ", to_string(), "\n", to_diagram());
+      ada_log("url_aggregator::validate missing : at the end of the protocol \n", to_diagram());
       return false;
     }
   }
 
   if(components.username_end != buffer.size() && components.username_end > components.protocol_end + 2) {
     if(buffer[components.username_end] != ':' && buffer[components.username_end] != '@') {
-      ada_log("url_aggregator::validate missing : or @ at the end of the username ", to_string(), "\n", to_diagram());
+      ada_log("url_aggregator::validate missing : or @ at the end of the username \n", to_diagram());
       return false;
     }
   }
@@ -1202,31 +1249,31 @@ bool url_aggregator::validate() const noexcept {
 
     if(components.host_start > components.username_end) {
       if(buffer[components.host_start] != '@') {
-        ada_log("url_aggregator::validate missing @ at the end of the password ", to_string(), "\n", to_diagram());
+        ada_log("url_aggregator::validate missing @ at the end of the password \n", to_diagram());
         return false;
       }
     } else if(components.host_start == components.username_end && components.host_end > components.host_start) {
       if(components.host_start == components.protocol_end + 2) {
         if(buffer[components.protocol_end] != '/' || buffer[components.protocol_end+1] != '/') {
-          ada_log("url_aggregator::validate missing // between protocol and host ", to_string(), "\n", to_diagram());
+          ada_log("url_aggregator::validate missing // between protocol and host \n", to_diagram());
           return false;
         }
       } else {
         if(components.host_start > components.protocol_end && buffer[components.host_start] != '@') {
-          ada_log("url_aggregator::validate missing @ at the end of the username ", to_string(), "\n", to_diagram());
+          ada_log("url_aggregator::validate missing @ at the end of the username \n", to_diagram());
           return false;
         }
       }
     } else {
       if(components.host_end != components.host_start) {
-        ada_log("url_aggregator::validate expected omitted host ", to_string(), "\n", to_diagram());
+        ada_log("url_aggregator::validate expected omitted host \n", to_diagram());
         return false;
       }
     }
   }
   if(components.host_end != buffer.size() && components.pathname_start > components.host_end) {
     if(buffer[components.host_end] != ':') {
-      ada_log("url_aggregator::validate missing : at the port ", to_string(), "\n", to_diagram());
+      ada_log("url_aggregator::validate missing : at the port \n", to_diagram());
       return false;
     }
   }
@@ -1235,19 +1282,19 @@ bool url_aggregator::validate() const noexcept {
       && components.pathname_start < components.hash_start
       && !has_opaque_path) {
     if(buffer[components.pathname_start] != '/') {
-      ada_log("url_aggregator::validate missing / at the path ", to_string(), "\n", to_diagram());
+      ada_log("url_aggregator::validate missing / at the path \n", to_diagram());
       return false;
     }
   }
   if(components.search_start != url_components::omitted) {
     if(buffer[components.search_start] != '?') {
-      ada_log("url_aggregator::validate missing ? at the search ", to_string(), "\n", to_diagram());
+      ada_log("url_aggregator::validate missing ? at the search \n", to_diagram());
       return false;
     }
   }
   if(components.hash_start != url_components::omitted) {
     if(buffer[components.hash_start] != '#') {
-      ada_log("url_aggregator::validate missing # at the hash ", to_string(), "\n", to_diagram());
+      ada_log("url_aggregator::validate missing # at the hash \n", to_diagram());
       return false;
     }
   }
@@ -1280,4 +1327,156 @@ ada_really_inline size_t url_aggregator::parse_port(std::string_view view, bool 
   return consumed;
 }
 
+
+inline void url_aggregator::consume_prepared_path(std::string_view input) {
+    ada_log("url_aggregator::consume_prepared_path ", input);
+    /***
+     * This is largely duplicated code from helpers::parse_prepared_path, which is unfortunate.
+     * This particular function is nearly identical, except that it is a method on url_aggregator.
+     * The idea is that the trivial path (which is very common) merely appends to the buffer.
+     * This is the same trivial path as with helpers::parse_prepared_path, except that we have
+     * the additional check for is_at_path(). Otherwise, we grab a copy of the current
+     * path and we modify it, and then insert it back into the buffer.
+     */
+    uint8_t accumulator = checkers::path_signature(input);
+    // Let us first detect a trivial case.
+    // If it is special, we check that we have no dot, no %,  no \ and no
+    // character needing percent encoding. Otherwise, we check that we have no %,
+    // no dot, and no character needing percent encoding.
+    constexpr uint8_t need_encoding = 1;
+    constexpr uint8_t backslash_char = 2;
+    constexpr uint8_t dot_char = 4;
+    constexpr uint8_t percent_char = 8;
+    bool special = type != ada::scheme::NOT_SPECIAL;
+    bool may_need_slow_file_handling = (type == ada::scheme::type::FILE && checkers::is_windows_drive_letter(input));
+    bool trivial_path =
+        (special ? (accumulator == 0) : ((accumulator & (need_encoding|dot_char|percent_char)) == 0)) &&
+        (!may_need_slow_file_handling);
+    if(accumulator == dot_char && !may_need_slow_file_handling) {
+      // '4' means that we have at least one dot, but nothing that requires
+      // percent encoding or decoding. The only part that is not trivial is
+      // that we may have single dots and double dots path segments.
+      // If we have such segments, then we either have a path that begins
+      // with '.' (easy to check), or we have the sequence './'.
+      // Note: input cannot be empty, it must at least contain one character ('.')
+      // Note: we know that '\' is not present.
+      if(input[0] != '.') {
+        size_t slashdot = input.find("/.");
+        if(slashdot == std::string_view::npos) {// common case
+          trivial_path = true;
+        } else { // uncommon
+          // only three cases matter: /./, /.. or a final /
+          trivial_path =  ! (slashdot + 2 == input.size() || input[slashdot + 2] == '.' || input[slashdot + 2] == '/');
+        }
+      }
+    }
+    if (trivial_path && is_at_path()) {
+      ada_log("parse_path trivial");
+      buffer += '/';
+      buffer += input;
+      return;
+    }
+    std::string path = std::string(get_pathname());
+    // We are going to need to look a bit at the path, but let us see if we can
+    // ignore percent encoding *and* backslashes *and* percent characters.
+    // Except for the trivial case, this is likely to capture 99% of paths out
+    // there.
+    bool fast_path = (special && (accumulator & (need_encoding|backslash_char|percent_char)) == 0) &&
+                    (type != ada::scheme::type::FILE);
+    if (fast_path) {
+      ada_log("parse_prepared_path fast");
+      // Here we don't need to worry about \ or percent encoding.
+      // We also do not have a file protocol. We might have dots, however,
+      // but dots must as appear as '.', and they cannot be encoded because
+      // the symbol '%' is not present.
+      size_t previous_location = 0; // We start at 0.
+      do {
+        size_t new_location = input.find('/', previous_location);
+        //std::string_view path_view = input;
+        // We process the last segment separately:
+        if (new_location == std::string_view::npos) {
+          std::string_view path_view = input.substr(previous_location);
+          if (path_view == "..") { // The path ends with ..
+            // e.g., if you receive ".." with an empty path, you go to "/".
+            if(path.empty()) { path = '/'; update_base_pathname(path); return; }
+            // Fast case where we have nothing to do:
+            if(path.back() == '/') { update_base_pathname(path); return; }
+            // If you have the path "/joe/myfriend",
+            // then you delete 'myfriend'.
+            path.resize(path.rfind('/') + 1);
+            update_base_pathname(path);
+            return;
+          }
+          path += '/';
+          if (path_view != ".") {
+            path.append(path_view);
+          }
+          update_base_pathname(path);
+          return;
+        } else {
+          // This is a non-final segment.
+          std::string_view path_view = input.substr(previous_location, new_location - previous_location);
+          previous_location = new_location + 1;
+          if (path_view == "..") {
+            if(!path.empty()) { path.erase(path.rfind('/')); }
+          } else if (path_view != ".") {
+            path += '/';
+            path.append(path_view);
+          }
+        }
+      } while (true);
+    } else {
+      ada_log("parse_path slow");
+      // we have reached the general case
+      bool needs_percent_encoding = (accumulator & 1);
+      std::string path_buffer_tmp;
+      do {
+        size_t location = (special && (accumulator & 2))
+                              ? input.find_first_of("/\\")
+                              : input.find('/');
+        std::string_view path_view = input;
+        if (location != std::string_view::npos) {
+          path_view.remove_suffix(path_view.size() - location);
+          input.remove_prefix(location + 1);
+        }
+        // path_buffer is either path_view or it might point at a percent encoded temporary file.
+        std::string_view path_buffer =
+         (needs_percent_encoding
+           && ada::unicode::percent_encode<false>(path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp)) ?
+          path_buffer_tmp :
+          path_view;
+        if (unicode::is_double_dot_path_segment(path_buffer)) {
+          helpers::shorten_path(path, type);
+          if (location == std::string_view::npos) {
+            path += '/';
+          }
+        } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+                  (location == std::string_view::npos)) {
+          path += '/';
+        }
+        // Otherwise, if path_buffer is not a single-dot path segment, then:
+        else if (!unicode::is_single_dot_path_segment(path_buffer)) {
+          // If url’s scheme is "file", url’s path is empty, and path_buffer is a
+          // Windows drive letter, then replace the second code point in
+          // path_buffer with U+003A (:).
+          if (type == ada::scheme::type::FILE && path.empty() &&
+              checkers::is_windows_drive_letter(path_buffer)) {
+            path += '/';
+            path += path_buffer[0];
+            path += ':';
+            path_buffer.remove_prefix(2);
+            path.append(path_buffer);
+          } else {
+            // Append path_buffer to url’s path.
+            path += '/';
+            path.append(path_buffer);
+          }
+        }
+        if (location == std::string_view::npos) {
+          update_base_pathname(path);
+          return;
+        }
+      } while (true);
+    }
+}
 } // namespace ada

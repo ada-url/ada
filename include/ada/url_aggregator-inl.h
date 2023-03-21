@@ -22,6 +22,7 @@ namespace ada {
 inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   ada_log("url_aggregator::update_unencoded_base_hash ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size(), " bytes] components.hash_start = ", components.hash_start);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (components.hash_start != url_components::omitted) {
     buffer.resize(components.hash_start);
   }
@@ -37,6 +38,7 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
 inline void url_aggregator::update_base_hostname(const std::string_view input) {
   ada_log("url_aggregator::update_base_hostname ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size()," bytes]");
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   // This next line is required for when parsing a URL like `foo://`
   add_authority_slashes_if_needed();
 
@@ -76,6 +78,7 @@ ada_really_inline uint32_t url_aggregator::get_pathname_length() const noexcept 
 inline void url_aggregator::update_base_search(std::string_view input) {
   ada_log("url_aggregator::update_base_search ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (input.empty()) {
     clear_base_search();
     return;
@@ -109,6 +112,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
   ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   // Make sure search is deleted and hash_start index is correct.
   if (components.search_start != url_components::omitted) { // uncommon path
     uint32_t search_end = uint32_t(buffer.size());
@@ -138,7 +142,8 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
 }
 
 inline void url_aggregator::update_base_pathname(const std::string_view input) {
-  ada_log("url_aggregator::update_base_pathname ", input);
+  ada_log("url_aggregator::update_base_pathname '", input, "' [", input.size(), " bytes] \n", to_diagram());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   ADA_ASSERT_TRUE(validate());
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
@@ -150,15 +155,16 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   buffer.erase(components.pathname_start, current_length);
   // The common case is components.pathname_start == buffer.size() so this is effectively an append.
   buffer.insert(components.pathname_start, input);
-
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+  ada_log("url_aggregator::update_base_pathname end '", input, "' [", input.size(), " bytes] \n", to_diagram());
   ADA_ASSERT_TRUE(validate());
 }
 
 inline void url_aggregator::append_base_pathname(const std::string_view input) {
   ada_log("url_aggregator::append_base_pathname ", input, " ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
   std::string path_expected = std::string(get_pathname());
@@ -182,6 +188,7 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
 inline void url_aggregator::update_base_username(const std::string_view input) {
   ada_log("url_aggregator::update_base_username '", input, "' ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   add_authority_slashes_if_needed();
 
   uint32_t username_start = components.protocol_end + 2;
@@ -215,6 +222,7 @@ inline void url_aggregator::update_base_username(const std::string_view input) {
 inline void url_aggregator::append_base_username(const std::string_view input) {
   ada_log("url_aggregator::append_base_username ", input);
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
   std::string username_expected = std::string(get_username());
@@ -262,6 +270,8 @@ inline void url_aggregator::clear_base_password() {
 
 inline void url_aggregator::update_base_password(const std::string_view input) {
   ada_log("url_aggregator::update_base_password ", input);
+  ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 
   add_authority_slashes_if_needed();
 
@@ -304,6 +314,7 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 inline void url_aggregator::append_base_password(const std::string_view input) {
   ada_log("url_aggregator::append_base_password ", input, " ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
   std::string password_expected = std::string(get_password());
