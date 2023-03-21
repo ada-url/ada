@@ -33,15 +33,15 @@ namespace ada {
      * cannot exceed 4 GB.
      *
      * https://user:pass@example.com:1234/foo/bar?baz#quux
-     *      |      |    |          | ^^^^|       |   |
-     *      |      |    |          | |   |       |   `----- hash_start
-     *      |      |    |          | |   |       `--------- search_start
-     *      |      |    |          | |   `----------------- pathname_start
-     *      |      |    |          | `--------------------- port
-     *      |      |    |          `----------------------- host_end
-     *      |      |    `---------------------------------- host_start
-     *      |      `--------------------------------------- username_end
-     *      `---------------------------------------------- protocol_end
+     *       |     |    |          | ^^^^|       |   |
+     *       |     |    |          | |   |       |   `----- hash_start
+     *       |     |    |          | |   |       `--------- search_start
+     *       |     |    |          | |   `----------------- pathname_start
+     *       |     |    |          | `--------------------- port
+     *       |     |    |          `----------------------- host_end
+     *       |     |    `---------------------------------- host_start
+     *       |     `--------------------------------------- username_end
+     *       `--------------------------------------------- protocol_end
      */
     uint32_t protocol_end{0};
     /**
@@ -62,11 +62,10 @@ namespace ada {
      * expect when a value is omitted. It also computes
      * a lower bound on  the possible string length that may match these
      * offsets.
-     * @return true in the first component if the offset values are
-     *  consistent with a possible URL string, and if so return
-     *  a lower bound on the URL string length as the second component.
+     * @return true if the offset values are
+     *  consistent with a possible URL string
      */
-    std::pair<bool,uint32_t> check_offset_consistency() const noexcept;
+    bool check_offset_consistency() const noexcept;
 
     /**
      * @private
