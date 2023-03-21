@@ -16,6 +16,7 @@ namespace ada {
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme(const std::string_view input) {
   ada_log("url_aggregator::parse_scheme ", input);
+  ADA_ASSERT_TRUE(validate());
   auto parsed_type = ada::scheme::get_scheme_type(input);
   bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
   /**
@@ -79,11 +80,13 @@ template <bool has_state_override>
       }
     }
   }
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   ada_log("url_aggregator::copy_scheme ", u.buffer);
+  ADA_ASSERT_TRUE(validate());
   uint32_t new_difference = u.components.protocol_end - components.protocol_end;
   type = u.type;
   buffer.erase(0, components.protocol_end);
@@ -100,10 +103,12 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   components.pathname_start += new_difference;
   if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+  ADA_ASSERT_TRUE(validate());
 }
 
 inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
   ada_log("url_aggregator::set_scheme ", new_scheme);
+  ADA_ASSERT_TRUE(validate());
   uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end;
 
   // Optimization opportunity: Get rid of this branch
@@ -124,6 +129,7 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
   components.pathname_start += new_difference;
   if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+  ADA_ASSERT_TRUE(validate());
 }
 
 bool url_aggregator::set_protocol(const std::string_view input) {
@@ -147,24 +153,29 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 
 bool url_aggregator::set_username(const std::string_view input) {
   ada_log("url_aggregator::set_username '", input, "' ");
+  ADA_ASSERT_TRUE(validate());
   if (cannot_have_credentials_or_port()) { return false; }
   // Optimization opportunity: Avoid temporary string creation
   std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
   update_base_username(encoded_input);
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 bool url_aggregator::set_password(const std::string_view input) {
   ada_log("url_aggregator::set_password '", input, "'");
+  ADA_ASSERT_TRUE(validate());
   if (cannot_have_credentials_or_port()) { return false; }
   // Optimization opportunity: Avoid temporary string creation
   std::string encoded_input = ada::unicode::percent_encode(input, character_sets::USERINFO_PERCENT_ENCODE);
   update_base_password(encoded_input);
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 bool url_aggregator::set_port(const std::string_view input) {
   ada_log("url_aggregator::set_port ", input);
+  ADA_ASSERT_TRUE(validate());
   if (cannot_have_credentials_or_port()) { return false; }
   std::string trimmed(input);
   helpers::remove_ascii_tab_or_newline(trimmed);
@@ -180,20 +191,23 @@ bool url_aggregator::set_port(const std::string_view input) {
   if (is_valid) { return true; }
   update_base_port(previous_port);
   is_valid = true;
+  ADA_ASSERT_TRUE(validate());
   return false;
 }
 
 bool url_aggregator::set_pathname(const std::string_view input) {
   ada_log("url_aggregator::set_pathname ", input);
+  ADA_ASSERT_TRUE(validate());
   if (has_opaque_path) { return false; }
   clear_base_pathname();
   parse_path(input);
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 ada_really_inline void url_aggregator::parse_path(std::string_view input) {
   ada_log("url_aggregator::parse_path ", input);
-  
+  ADA_ASSERT_TRUE(validate());
   std::string tmp_buffer;
   std::string_view internal_input;
   if(unicode::has_tabs_or_newline(input)) {
@@ -239,11 +253,13 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
       update_base_pathname("/");
     }
   }
+  ADA_ASSERT_TRUE(validate());
   return;
 }
 
 void url_aggregator::set_search(const std::string_view input) {
   ada_log("url_aggregator::set_search ", input);
+  ADA_ASSERT_TRUE(validate());
   if (input.empty()) {
     clear_base_search();
     helpers::strip_trailing_spaces_from_opaque_path(*this);
@@ -259,10 +275,12 @@ void url_aggregator::set_search(const std::string_view input) {
     ada::character_sets::QUERY_PERCENT_ENCODE;
 
   update_base_search(new_value, query_percent_encode_set);
+  ADA_ASSERT_TRUE(validate());
 }
 
 void url_aggregator::set_hash(const std::string_view input) {
   ada_log("url_aggregator::set_hash ", input);
+  ADA_ASSERT_TRUE(validate());
   if (input.empty()) {
     if (components.hash_start != url_components::omitted) {
       buffer.resize(components.hash_start);
@@ -276,6 +294,7 @@ void url_aggregator::set_hash(const std::string_view input) {
   new_value = input[0] == '#' ? input.substr(1) : input;
   helpers::remove_ascii_tab_or_newline(new_value);
   update_unencoded_base_hash(new_value);
+  ADA_ASSERT_TRUE(validate());
 }
 
 bool url_aggregator::set_href(const std::string_view input) {
@@ -294,6 +313,7 @@ bool url_aggregator::set_href(const std::string_view input) {
 
 ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   ada_log("url_aggregator:parse_host ", input, "[", input.size(), " bytes]");
+  ADA_ASSERT_TRUE(validate());
   if(input.empty()) { return is_valid = false; } // technically unnecessary.
   // If input starts with U+005B ([), then:
   if (input[0] == '[') {
@@ -352,12 +372,14 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   }
 
   update_base_hostname(host.value());
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 template <bool override_hostname>
 bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   ada_log("url_aggregator::set_host_or_hostname ", input);
+  ADA_ASSERT_TRUE(validate());
   if (has_opaque_path) { return false; }
 
   std::string previous_host = std::string(get_hostname());
@@ -422,16 +444,19 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
       clear_base_hostname();
     }
   }
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 bool url_aggregator::set_host(const std::string_view input) {
   ada_log("url_aggregator::set_host ", input);
+  ADA_ASSERT_TRUE(validate());
   return set_host_or_hostname<false>(input);
 }
 
 bool url_aggregator::set_hostname(const std::string_view input) {
   ada_log("url_aggregator::set_hostname ", input);
+  ADA_ASSERT_TRUE(validate());
   return set_host_or_hostname<true>(input);
 }
 
@@ -562,6 +587,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 [[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept {
   ada_log("url_aggregator::get_hostname");
   size_t start = components.host_start;
+  // So host_start is not where the host_start begins.
   if (buffer.size() > components.host_start && buffer[components.host_start] == '@') { start++; }
   return helpers::substring(buffer, start, components.host_end);
 }
@@ -686,6 +712,7 @@ std::string ada::url_aggregator::to_string() const {
 
 bool url_aggregator::parse_ipv4(std::string_view input) {
   ada_log("parse_ipv4 ", input, "[", input.size(), " bytes]");
+  ADA_ASSERT_TRUE(validate());
   if(input.back()=='.') {
     input.remove_suffix(1);
   }
@@ -742,12 +769,14 @@ final:
     // TODO: This is likely a bug because it goes back update_base_hostname, not what we want to do.
     update_base_hostname(ada::serializers::ipv4(ipv4)); // We have to reserialize the address.
   }
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 bool url_aggregator::parse_ipv6(std::string_view input) {
   // TODO: Find a way to merge parse_ipv6 with url.cpp implementation.
   ada_log("parse_ipv6 ", input, "[", input.size(), " bytes]");
+  ADA_ASSERT_TRUE(validate());
 
   if (input.empty()) { return is_valid = false; }
   // Let address be a new IPv6 address whose IPv6 pieces are all 0.
@@ -952,11 +981,13 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
   // TODO: This is likely a bug because it goes back update_base_hostname, not what we want to do.
   update_base_hostname(ada::serializers::ipv6(address));
   ada_log("parse_ipv6 ", get_hostname());
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 bool url_aggregator::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, "[", input.size(), " bytes]");
+  ADA_ASSERT_TRUE(validate());
   if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
     return is_valid = false;
   }
@@ -964,13 +995,131 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   // Return the result of running UTF-8 percent-encode on input using the C0 control percent-encode set.
   // TODO: Optimization opportunity: Get rid of this string creation.
   update_base_hostname(ada::unicode::percent_encode(input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE));
+  ADA_ASSERT_TRUE(validate());
   return true;
 }
 
 bool url_aggregator::validate() const noexcept {
   if(!is_valid) { return true; }
-  auto [ok, minlength] = components.check_offset_consistency();
-  return (ok && buffer.size() >= minlength);
+  if(!components.check_offset_consistency()) {
+    ada_log("url_aggregator::validate inconsistent components ", to_string());
+    return false;
+  }
+  // We have a credible components struct, but let us investivate more
+  // carefully:
+  /**
+   * https://user@pass:example.com:1234/foo/bar?baz#quux
+   *       |     |    |          | ^^^^|       |   |
+   *       |     |    |          | |   |       |   `----- hash_start
+   *       |     |    |          | |   |       `--------- search_start
+   *       |     |    |          | |   `----------------- pathname_start
+   *       |     |    |          | `--------------------- port
+   *       |     |    |          `----------------------- host_end
+   *       |     |    `---------------------------------- host_start
+   *       |     `--------------------------------------- username_end
+   *       `---------------------------------------------- protocol_end
+   */
+  if(components.protocol_end == url_components::omitted) {
+    ada_log("url_aggregator::validate omitted protocol_end ", to_string());
+    return false;
+  }
+  if(components.username_end == url_components::omitted) {
+    ada_log("url_aggregator::validate omitted username_end ", to_string());
+    return false;
+  }
+  if(components.host_start == url_components::omitted) {
+    ada_log("url_aggregator::validate omitted host_start ", to_string());
+    return false;
+  }
+  if(components.host_end == url_components::omitted) {
+    ada_log("url_aggregator::validate omitted host_end ", to_string());
+    return false;
+  }
+  if(components.pathname_start == url_components::omitted) {
+    ada_log("url_aggregator::validate omitted pathname_start ", to_string());
+    return false;
+  }
+
+  if(components.protocol_end > buffer.size()) {
+    ada_log("url_aggregator::validate protocol_end overflow ", to_string());
+    return false;
+  }
+  if(components.username_end > buffer.size()) {
+    ada_log("url_aggregator::validate username_end overflow ", to_string());
+    return false;
+  }
+  if(components.host_start > buffer.size()) {
+    ada_log("url_aggregator::validate host_start overflow ", to_string());
+    return false;
+  }
+  if(components.host_end > buffer.size()) {
+    ada_log("url_aggregator::validate host_end overflow ", to_string());
+    return false;
+  }
+  if(components.pathname_start > buffer.size()) {
+    ada_log("url_aggregator::validate pathname_start overflow ", to_string());
+    return false;
+  }
+
+  if(components.protocol_end > 0) {
+    if(buffer[components.protocol_end-1] != ':') {
+      ada_log("url_aggregator::validate missing : at the end of the protocol ", to_string());
+      return false;
+    }
+  }
+  if(components.username_end != buffer.size() && components.username_end > components.protocol_end + 2) {
+    if(buffer[components.username_end] != ':' && buffer[components.username_end] != '@') {
+      ada_log("url_aggregator::validate missing : or @ at the end of the username ", to_string());
+      return false;
+    }
+  }
+  if(components.host_start != buffer.size()) {
+    if(components.host_start > components.username_end) {
+      if(buffer[components.host_start] != '@') {
+        ada_log("url_aggregator::validate missing @ at the end of the password ", to_string());
+        return false;
+      }
+    } else if(components.host_start == components.username_end && components.host_end > components.host_start) {
+      // This would work if components.host_start was the start of the host, but it appears that it is not.
+      //if(buffer[components.host_start] != '/') {
+      //  ada_log("url_aggregator::validate missing / at host start ", to_string());
+      //  return false;
+      //}
+    } else {
+      if(components.host_end != components.host_start) {
+        ada_log("url_aggregator::validate expected omitted host ", to_string());
+        return false;
+      }
+    }
+  }
+  if(components.host_end != buffer.size() && components.pathname_start > components.host_end) {
+    if(buffer[components.host_end] != ':') {
+      ada_log("url_aggregator::validate missing : at the port ", to_string());
+      return false;
+    }
+  }
+  if(components.pathname_start != buffer.size() 
+      && components.pathname_start < components.search_start 
+      && components.pathname_start < components.hash_start 
+      && !has_opaque_path) {
+    if(buffer[components.pathname_start] != '/') {
+      ada_log("url_aggregator::validate missing / at the path ", to_string());
+      return false;
+    }
+  }
+  if(components.search_start != url_components::omitted) {
+    if(buffer[components.search_start] != '?') {
+      ada_log("url_aggregator::validate missing ? at the search ", to_string());
+      return false;
+    }
+  }
+  if(components.hash_start != url_components::omitted) {
+    if(buffer[components.hash_start] != '#') {
+      ada_log("url_aggregator::validate missing # at the hash ", to_string());
+      return false;
+    }
+  }
+  return true;
 }
 
 ada_really_inline size_t url_aggregator::parse_port(std::string_view view, bool check_trailing_content) noexcept {
