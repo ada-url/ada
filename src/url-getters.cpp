@@ -17,13 +17,11 @@ namespace ada {
       return ada::helpers::concat(get_protocol(), "//", get_host());
     }
 
-    if (get_scheme() == "blob") {
-      if (path.length() > 0) {
-        ada::result<ada::url> path_result = ada::parse<ada::url>(get_pathname());
-        if (path_result) {
-          if (path_result->is_special()) {
-            return ada::helpers::concat(path_result->get_protocol(), "//", path_result->get_host());
-          }
+    if (non_special_scheme == "blob") {
+      if (!path.empty()) {
+        auto result = ada::parse<ada::url>(path);
+        if (result && result->is_special()) {
+          return ada::helpers::concat(result->get_protocol(), "//", result->get_host());
         }
       }
     }

@@ -30,6 +30,7 @@ namespace ada {
     }
     return consumed;
   }
+  
   bool url::parse_opaque_host(std::string_view input) {
     ada_log("parse_opaque_host ", input, "[", input.size(), " bytes]");
     if (std::any_of(input.begin(), input.end(), ada::unicode::is_forbidden_host_code_point)) {
@@ -506,6 +507,9 @@ namespace ada {
     answer.append("\t\"scheme\":\"");
     helpers::encode_json(get_scheme(), back);
     answer.append("\",\n");
+    answer.append("\t\"protocol\":\"");
+    helpers::encode_json(get_protocol(), back);
+    answer.append("\",\n");
     if(includes_credentials()) {
       answer.append("\t\"username\":\"");
       helpers::encode_json(username, back);
@@ -535,7 +539,7 @@ namespace ada {
       helpers::encode_json(query.value(), back);
       answer.append("\"");
     }
-    if(base_fragment_has_value()) {
+    if(fragment.has_value()) {
       answer.append(",\n");
       answer.append("\t\"fragment\":\"");
       helpers::encode_json(fragment.value(), back);

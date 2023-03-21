@@ -32,7 +32,7 @@ namespace ada {
      * By using 32-bit integers, we implicitly assume that the URL string
      * cannot exceed 4 GB.
      *
-     * https://user@pass:example.com:1234/foo/bar?baz#quux
+     * https://user:pass@example.com:1234/foo/bar?baz#quux
      *      |      |    |          | ^^^^|       |   |
      *      |      |    |          | |   |       |   `----- hash_start
      *      |      |    |          | |   |       `--------- search_start

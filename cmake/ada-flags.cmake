@@ -1,4 +1,5 @@
 option(ADA_LOGGING "verbose output (useful for debugging)" OFF)
+option(ADA_DEVELOPMENT_CHECKS "development checks (useful for debugging)" OFF)
 option(ADA_SANITIZE "Sanitize addresses" OFF)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   option(ADA_SANITIZE_BOUNDS_STRICT "Sanitize bounds (strict): only for GCC" OFF)
