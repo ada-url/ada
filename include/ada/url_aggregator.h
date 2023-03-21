@@ -245,6 +245,10 @@ namespace ada {
      * Returns a string representation of this URL.
      */
     std::string to_string() const override;
+    /**
+     * Returns a string diagram of this URL.
+     */
+    std::string to_diagram() const;
 
     /**
      * Verifies that the parsed URL could be valid. Useful for debugging purposes.

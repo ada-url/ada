@@ -999,10 +999,133 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   return true;
 }
 
+std::string url_aggregator::to_diagram() const {
+  std::string answer;
+  answer.append(buffer);
+  answer.append("\n");
+  // first line
+  std::string line1;
+  line1.resize(buffer.size(), ' ');
+  if(components.hash_start != url_components::omitted) {
+    line1[components.hash_start] = '|';
+  }
+  if(components.search_start != url_components::omitted) {
+    line1[components.search_start] = '|';
+  }
+  if(components.pathname_start != buffer.size()) {
+    line1[components.pathname_start] = '|';
+  }
+  if(components.host_end != buffer.size()) {
+    line1[components.host_end] = '|';
+  }
+  if(components.host_start != buffer.size()) {
+    line1[components.host_start] = '|';
+  }
+  if(components.username_end != buffer.size()) {
+    line1[components.username_end] = '|';
+  }
+  if(components.protocol_end != buffer.size()) {
+    line1[components.protocol_end] = '|';
+  }
+  answer.append(line1);
+  answer.append("\n");
+
+  std::string line2 = line1;
+  if(components.hash_start != url_components::omitted) {
+    line2[components.hash_start] = '`';
+    line1[components.hash_start] = ' ';
+
+    for(size_t i = components.hash_start + 1; i < line2.size(); i++) {
+      line2[i] = '-';
+    }
+    line2.append(" hash_start");
+  }
+  answer.append(line2);
+  answer.append("\n");
+
+  std::string line3 = line1;
+  if(components.search_start != url_components::omitted) {
+    line3[components.search_start] = '`';
+    line1[components.search_start] = ' ';
+
+    for(size_t i = components.search_start + 1; i < line3.size(); i++) {
+      line3[i] = '-';
+    }
+    line3.append(" search_start");
+  }
+  answer.append(line3);
+  answer.append("\n");
+
+  std::string line4 = line1;
+  if(components.pathname_start != buffer.size()) {
+    line4[components.pathname_start] = '`';
+    line1[components.pathname_start] = ' ';
+    for(size_t i = components.pathname_start + 1; i < line4.size(); i++) {
+      line4[i] = '-';
+    }
+    line4.append(" pathname_start");
+  }
+  answer.append(line4);
+  answer.append("\n");
+
+  std::string line5 = line1;
+  if(components.host_end != buffer.size()) {
+    line5[components.host_end] = '`';
+    line1[components.host_end] = ' ';
+
+    for(size_t i = components.host_end + 1; i < line5.size(); i++) {
+      line5[i] = '-';
+    }
+    line5.append(" host_end");
+  }
+  answer.append(line5);
+  answer.append("\n");
+
+  std::string line6 = line1;
+  if(components.host_start != buffer.size()) {
+    line6[components.host_start] = '`';
+    line1[components.host_start] = ' ';
+
+    for(size_t i = components.host_start + 1; i < line6.size(); i++) {
+      line6[i] = '-';
+    }
+    line6.append(" host_start");
+  }
+  answer.append(line6);
+  answer.append("\n");
+
+  std::string line7 = line1;
+  if(components.username_end != buffer.size()) {
+    line7[components.username_end] = '`';
+    line1[components.username_end] = ' ';
+
+    for(size_t i = components.username_end + 1; i < line7.size(); i++) {
+      line7[i] = '-';
+    }
+    line7.append(" username_end");
+  }
+  answer.append(line7);
+  answer.append("\n");
+
+  std::string line8 = line1;
+  if(components.protocol_end != buffer.size()) {
+    line8[components.protocol_end] = '`';
+    line1[components.protocol_end] = ' ';
+
+    for(size_t i = components.protocol_end + 1; i < line8.size(); i++) {
+      line8[i] = '-';
+    }
+    line8.append(" protocol_end");
+  }
+  answer.append(line8);
+  answer.append("\n");
+  return answer;
+}
+
 bool url_aggregator::validate() const noexcept {
   if(!is_valid) { return true; }
   if(!components.check_offset_consistency()) {
-    ada_log("url_aggregator::validate inconsistent components ", to_string());
+    ada_log("url_aggregator::validate inconsistent components ", to_string(), "\n", to_diagram());
     return false;
   }
   // We have a credible components struct, but let us investivate more
@@ -1020,103 +1143,111 @@ bool url_aggregator::validate() const noexcept {
    *       `--------------------------------------------- protocol_end
    */
   if(components.protocol_end == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted protocol_end ", to_string());
+    ada_log("url_aggregator::validate omitted protocol_end ", to_string(), "\n", to_diagram());
     return false;
   }
   if(components.username_end == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted username_end ", to_string());
+    ada_log("url_aggregator::validate omitted username_end ", to_string(), "\n", to_diagram());
     return false;
   }
   if(components.host_start == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted host_start ", to_string());
+    ada_log("url_aggregator::validate omitted host_start ", to_string(), "\n", to_diagram());
     return false;
   }
   if(components.host_end == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted host_end ", to_string());
+    ada_log("url_aggregator::validate omitted host_end ", to_string(), "\n", to_diagram());
     return false;
   }
   if(components.pathname_start == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted pathname_start ", to_string());
+    ada_log("url_aggregator::validate omitted pathname_start ", to_string(), "\n", to_diagram());
     return false;
   }
 
   if(components.protocol_end > buffer.size()) {
-    ada_log("url_aggregator::validate protocol_end overflow ", to_string());
+    ada_log("url_aggregator::validate protocol_end overflow ", to_string(), "\n", to_diagram());
     return false;
   }
   if(components.username_end > buffer.size()) {
-    ada_log("url_aggregator::validate username_end overflow ", to_string());
+    ada_log("url_aggregator::validate username_end overflow ", to_string(), "\n", to_diagram());
     return false;
   }
   if(components.host_start > buffer.size()) {
-    ada_log("url_aggregator::validate host_start overflow ", to_string());
+    ada_log("url_aggregator::validate host_start overflow ", to_string(), "\n", to_diagram());
     return false;
   }
   if(components.host_end > buffer.size()) {
-    ada_log("url_aggregator::validate host_end overflow ", to_string());
+    ada_log("url_aggregator::validate host_end overflow ", to_string(), "\n", to_diagram());
     return false;
   }
   if(components.pathname_start > buffer.size()) {
-    ada_log("url_aggregator::validate pathname_start overflow ", to_string());
+    ada_log("url_aggregator::validate pathname_start overflow ", to_string(), "\n", to_diagram());
     return false;
   }
 
   if(components.protocol_end > 0) {
     if(buffer[components.protocol_end-1] != ':') {
-      ada_log("url_aggregator::validate missing : at the end of the protocol ", to_string());
+      ada_log("url_aggregator::validate missing : at the end of the protocol ", to_string(), "\n", to_diagram());
       return false;
     }
   }
+
   if(components.username_end != buffer.size() && components.username_end > components.protocol_end + 2) {
     if(buffer[components.username_end] != ':' && buffer[components.username_end] != '@') {
-      ada_log("url_aggregator::validate missing : or @ at the end of the username ", to_string());
+      ada_log("url_aggregator::validate missing : or @ at the end of the username ", to_string(), "\n", to_diagram());
       return false;
     }
   }
   if(components.host_start != buffer.size()) {
+
+
     if(components.host_start > components.username_end) {
       if(buffer[components.host_start] != '@') {
-        ada_log("url_aggregator::validate missing @ at the end of the password ", to_string());
+        ada_log("url_aggregator::validate missing @ at the end of the password ", to_string(), "\n", to_diagram());
         return false;
       }
     } else if(components.host_start == components.username_end && components.host_end > components.host_start) {
-      // TODO:
-      // This would work if components.host_start was the start of the host, but it appears that it is not.
-      //if(buffer[components.host_start] != '/') {
-      //  ada_log("url_aggregator::validate missing / at host start ", to_string());
-      //  return false;
-      //}
+      if(components.host_start == components.protocol_end + 2) {
+        if(buffer[components.protocol_end] != '/' || buffer[components.protocol_end+1] != '/') {
+          ada_log("url_aggregator::validate missing // between protocol and host ", to_string(), "\n", to_diagram());
+          return false;
+        }
+      } else {
+        if(components.host_start > components.protocol_end && buffer[components.host_start] != '@') {
+          ada_log("url_aggregator::validate missing @ at the end of the username ", to_string(), "\n", to_diagram());
+          return false;
+        }
+      }
     } else {
       if(components.host_end != components.host_start) {
-        ada_log("url_aggregator::validate expected omitted host ", to_string());
+        ada_log("url_aggregator::validate expected omitted host ", to_string(), "\n", to_diagram());
         return false;
       }
     }
   }
   if(components.host_end != buffer.size() && components.pathname_start > components.host_end) {
     if(buffer[components.host_end] != ':') {
-      ada_log("url_aggregator::validate missing : at the port ", to_string());
+      ada_log("url_aggregator::validate missing : at the port ", to_string(), "\n", to_diagram());
       return false;
     }
   }
-  if(components.pathname_start != buffer.size() 
-      && components.pathname_start < components.search_start 
-      && components.pathname_start < components.hash_start 
+  if(components.pathname_start != buffer.size()
+      && components.pathname_start < components.search_start
+      && components.pathname_start < components.hash_start
       && !has_opaque_path) {
     if(buffer[components.pathname_start] != '/') {
-      ada_log("url_aggregator::validate missing / at the path ", to_string());
+      ada_log("url_aggregator::validate missing / at the path ", to_string(), "\n", to_diagram());
       return false;
     }
   }
   if(components.search_start != url_components::omitted) {
     if(buffer[components.search_start] != '?') {
-      ada_log("url_aggregator::validate missing ? at the search ", to_string());
+      ada_log("url_aggregator::validate missing ? at the search ", to_string(), "\n", to_diagram());
       return false;
     }
   }
   if(components.hash_start != url_components::omitted) {
     if(buffer[components.hash_start] != '#') {
-      ada_log("url_aggregator::validate missing # at the hash ", to_string());
+      ada_log("url_aggregator::validate missing # at the hash ", to_string(), "\n", to_diagram());
       return false;
     }
   }
