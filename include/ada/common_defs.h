@@ -245,6 +245,9 @@ namespace ada {
 #endif // _MSC_VER
 #endif // SIMDJSON_DEVELOPMENT_CHECKS
 
+
+#define ADA_STR(x) #x
+
 #if ADA_DEVELOPMENT_CHECKS
 #define ADA_REQUIRE(EXPR) { if(!(EXPR) { abort(); }) }
 
@@ -260,15 +263,16 @@ namespace ada {
       ADA_FAIL(MESSAGE);                                                      \
     }                                                                          \
   } while (0);
-#define ADA_ASSERT_TRUE(COND, MESSAGE)                                         \
+#define ADA_ASSERT_TRUE(COND)                                                  \
   do {                                                                         \
     if (!(COND))  {                                                            \
-      ADA_FAIL(MESSAGE);                                              \
+      std::cerr << "Assert at " << __LINE__ << " of " << __FILE__ << std::endl; \
+      ADA_FAIL(ADA_STR(COND));                                                 \
     }                                                                          \
   } while (0);
 #else
 #define ADA_FAIL(MESSAGE)
 #define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)
-#define ADA_ASSERT_TRUE(COND, MESSAGE)
+#define ADA_ASSERT_TRUE(COND)
 #endif
 #endif // ADA_COMMON_DEFS_H
