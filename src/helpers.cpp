@@ -484,6 +484,11 @@ namespace ada::helpers {
     }
   }
 
+  bool overlaps(std::string_view input1, const std::string& input2) noexcept {
+    ada_log("helpers::overlaps check if string_view '",input1, "' [",input1.size()," bytes] is part of string '", input2, "' [",input2.size()," bytes]");
+    return !input1.empty() && !input2.empty() && input1.data() >= input2.data() && input1.data() < input2.data() + input2.size();
+  }
+
   template <class url_type>
   ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) noexcept {
     ada_log("helpers::strip_trailing_spaces_from_opaque_path");

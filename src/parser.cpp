@@ -322,7 +322,11 @@ namespace ada::parser {
               url.path = base_url->path;
               url.query = base_url->query;
             } else  {
+              // TODO: This is likely not correct. There is a difference between having an empty username
+              // and not having a username.
               url.update_base_username(base_url->get_username());
+              // TODO: This is likely not correct. There is a difference between having an empty password
+              // and not having a password.
               url.update_base_password(base_url->get_password());
               url.set_hostname(base_url->get_hostname());
   	          url.update_base_port(base_url->retrieve_base_port());
@@ -346,7 +350,7 @@ namespace ada::parser {
               } else {
                 std::string_view path = url.get_pathname();
                 if (helpers::shorten_path(path, url.type)) {
-                  url.update_base_pathname(path);
+                  url.update_base_pathname(std::string(path));
                 }
               }
               // Set state to path state and decrease pointer by 1.
@@ -382,7 +386,11 @@ namespace ada::parser {
               url.host = base_url->host;
               url.port = base_url->port;
             } else {
+              // TODO: This is likely not correct. There is a difference between having an empty username
+              // and not having a username.
               url.update_base_username(base_url->get_username());
+              // TODO: This is likely not correct. There is a difference between having an empty password
+              // and not having a password.
               url.update_base_password(base_url->get_password());
               url.set_hostname(base_url->get_hostname());
               url.update_base_port(base_url->retrieve_base_port());
@@ -561,13 +569,8 @@ namespace ada::parser {
           if constexpr (result_type_is_ada_url) {
             helpers::parse_prepared_path(view, url.type, url.path);
           } else {
-            if(url.is_at_path()) { // common case
-              helpers::parse_prepared_path(view, url.type, url.get_buffer());
-            } else { // slow case
-              std::string path = std::string(url.get_pathname());
-              helpers::parse_prepared_path(view, url.type, path);
-              url.update_base_pathname(path);
-            }
+            url.consume_prepared_path(view);
+            ADA_ASSERT_TRUE(url.validate());
           }
           break;
         }
@@ -712,7 +715,7 @@ namespace ada::parser {
                 } else {
                   std::string_view path = url.get_pathname();
                   if (helpers::shorten_path(path, url.type)) {
-                    url.update_base_pathname(path);
+                    url.update_base_pathname(std::string(path));
                   }
                 }
               }

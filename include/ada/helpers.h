@@ -83,6 +83,12 @@ namespace ada::helpers {
 
   /**
    * @private
+   * Returns true if the string_view points within the string.
+   */
+  bool overlaps(std::string_view input1, const std::string& input2) noexcept;
+
+  /**
+   * @private
    * Return the substring from input going from index pos1 to the pos2 (non included).
    * The length of the substring is pos2 - pos1.
    */
