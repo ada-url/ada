@@ -217,6 +217,8 @@ namespace ada {
     /** @private */
     inline bool has_password() const;
     /** @private */
+    inline void consume_prepared_path(std::string_view input);
+    /** @private */
     template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
 

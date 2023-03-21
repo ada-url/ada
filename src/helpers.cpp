@@ -88,6 +88,29 @@ namespace ada::helpers {
     return false;
   }
 
+  ada_really_inline bool shorten_path(std::string_view& path, ada::scheme::type type) noexcept {
+    size_t first_delimiter = path.find_first_of('/', 1);
+
+    // Let path be url’s path.
+    // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized Windows drive letter, then return.
+    if (type == ada::scheme::type::FILE && first_delimiter == std::string_view::npos) {
+      if (checkers::is_normalized_windows_drive_letter(std::string_view(path.data() + 1, first_delimiter - 1))) {
+        return false;
+      }
+    }
+
+    // Remove path’s last item, if any.
+    if (!path.empty()) {
+      size_t slash_loc = path.rfind('/');
+      if(slash_loc != std::string_view::npos) {
+        path.remove_suffix(path.size() - slash_loc);
+      }
+      return true;
+    }
+
+    return false;
+  }
+
   ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept {
     // if this ever becomes a performance issue, we could use an approach similar to has_tabs_or_newline
     input.erase(std::remove_if(input.begin(), input.end(), [](char c) {
@@ -459,6 +482,11 @@ namespace ada::helpers {
         }
       } while (true);
     }
+  }
+
+  bool overlaps(std::string_view input1, const std::string& input2) noexcept {
+    ada_log("helpers::overlaps check if string_view '",input1, "' [",input1.size()," bytes] is part of string '", input2, "' [",input2.size()," bytes]");
+    return !input1.empty() && !input2.empty() && input1.data() >= input2.data() && input1.data() < input2.data() + input2.size();
   }
 
   template <class url_type>
