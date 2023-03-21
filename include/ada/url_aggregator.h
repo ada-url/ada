@@ -129,6 +129,11 @@ namespace ada {
      */
     ada_really_inline uint32_t get_pathname_length() const noexcept;
     /**
+     * Compute the password length in bytes witout instantiating a view or a string.
+     * @return size of the password in bytes
+     */
+    [[nodiscard]] uint32_t get_password_length() const noexcept;
+    /**
      * Return U+003F (?), followed by this’s URL’s query.
      * This function does not allocate memory.
      * @return a lightweight std::string_view.
@@ -143,11 +148,13 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-protocol
      */
     [[nodiscard]] std::string_view get_protocol() const noexcept;
+
     /**
      * A URL includes credentials if its username or password is not the empty
      * string.
      */
     [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
+
     /**
      * @private
      *
@@ -182,17 +189,17 @@ namespace ada {
     /** @private */
     inline void append_base_password(const std::string_view input);
     /** @private */
-    inline void update_base_port(std::optional<uint16_t> input) override;
+    inline void update_base_port(uint32_t input);
     /** @private */
     inline void append_base_pathname(const std::string_view input);
     /** @private */
-    inline std::optional<uint16_t> retrieve_base_port() const;
+    inline uint32_t retrieve_base_port() const;
     /** @private */
     inline std::string_view retrieve_base_pathname() const;
     /** @private */
     inline void clear_base_port();
     /** @private */
-    inline void clear_base_hostname() override;
+    inline void clear_base_hostname();
     /** @private */
     inline void clear_base_pathname() override;
     /** @private */
@@ -200,9 +207,9 @@ namespace ada {
     /** @private */
     inline void clear_base_password();
     /** @private */
-    inline bool base_fragment_has_value() const;
+    inline bool base_fragment_has_value() const override;
     /** @private */
-    inline bool base_search_has_value() const;
+    inline bool base_search_has_value() const override;
     /** @private */
     inline bool has_non_empty_username() const;
     /** @private */
@@ -216,7 +223,7 @@ namespace ada {
     /**
      * Useful for implementing efficient serialization for the URL.
      *
-     * https://user@pass:example.com:1234/foo/bar?baz#quux
+     * https://user:pass@example.com:1234/foo/bar?baz#quux
      *      |      |    |          | ^^^^|       |   |
      *      |      |    |          | |   |       |   `----- hash_start
      *      |      |    |          | |   |       `--------- search_start
@@ -256,6 +263,10 @@ namespace ada {
 
     /** @private */
     inline std::string& get_buffer() noexcept;
+
+    /** @private */
+    ada_really_inline size_t parse_port(
+        std::string_view view, bool check_trailing_content = false) noexcept override;
 
     private:
       /** @private */

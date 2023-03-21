@@ -463,12 +463,13 @@ namespace ada::helpers {
 
   template <class url_type>
   ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) noexcept {
+    ada_log("helpers::strip_trailing_spaces_from_opaque_path");
     if (!url.has_opaque_path) return;
     if (url.base_fragment_has_value()) return;
     if (url.base_search_has_value()) return;
 
-    std::string_view path = url.retrieve_base_pathname();
-    while (!path.empty() && path.back() == ' ') { path.remove_suffix(1); }
+    auto path = std::string(url.retrieve_base_pathname());
+    while (!path.empty() && path.back() == ' ') { path.resize(path.size() - 1); }
     url.update_base_pathname(path);
   }
 

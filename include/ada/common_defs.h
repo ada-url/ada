@@ -220,4 +220,55 @@ namespace ada {
 
 #define ADA_WINDOWS_TO_ASCII_FALLBACK 0 // we never use anything but ICU. No fallback.
 
+// Unless the programmer has already set ADA_DEVELOPMENT_CHECKS,
+// we want to set it under debug builds. We detect a debug build
+// under Visual Studio when the _DEBUG macro is set. Under the other
+// compilers, we use the fact that they define __OPTIMIZE__ whenever
+// they allow optimizations.
+// It is possible that this could miss some cases where ADA_DEVELOPMENT_CHECKS
+// is helpful, but the programmer can set the macro ADA_DEVELOPMENT_CHECKS.
+// It could also wrongly set ADA_DEVELOPMENT_CHECKS (e.g., if the programmer
+// sets _DEBUG in a release build under Visual Studio, or if some compiler fails to
+// set the __OPTIMIZE__ macro).
+#if !defined(ADA_DEVELOPMENT_CHECKS) && !defined(NDEBUG)
+#ifdef _MSC_VER
+// Visual Studio seems to set _DEBUG for debug builds.
+#ifdef _DEBUG
+#define ADA_DEVELOPMENT_CHECKS 1
+#endif // _DEBUG
+#else // _MSC_VER
+// All other compilers appear to set __OPTIMIZE__ to a positive integer
+// when the compiler is optimizing.
+#ifndef __OPTIMIZE__
+#define ADA_DEVELOPMENT_CHECKS 1
+#endif // __OPTIMIZE__
+#endif // _MSC_VER
+#endif // SIMDJSON_DEVELOPMENT_CHECKS
+
+#if ADA_DEVELOPMENT_CHECKS
+#define ADA_REQUIRE(EXPR) { if(!(EXPR) { abort(); }) }
+
+#define ADA_FAIL(MESSAGE)                                                      \
+  do {                                                                         \
+    std::cerr << "FAIL: " << (MESSAGE) << std::endl;                           \
+    abort();                                                                   \
+  } while (0);
+#define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)                                    \
+  do {                                                                         \
+    if (LHS != RHS)  {                                                         \
+      std::cerr << "Mismatch: '" << LHS << "' - '" << RHS << "'" << std::endl; \
+      ADA_FAIL(MESSAGE);                                                      \
+    }                                                                          \
+  } while (0);
+#define ADA_ASSERT_TRUE(COND, MESSAGE)                                         \
+  do {                                                                         \
+    if (!(COND))  {                                                            \
+      ADA_FAIL(MESSAGE);                                              \
+    }                                                                          \
+  } while (0);
+#else
+#define ADA_FAIL(MESSAGE)
+#define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)
+#define ADA_ASSERT_TRUE(COND, MESSAGE)
+#endif
 #endif // ADA_COMMON_DEFS_H

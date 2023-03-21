@@ -124,21 +124,24 @@ bool urltestdata_encoding(const char* source) {
         auto out = url.get_components();
         auto href = url.get_href();
 
-        TEST_ASSERT(out.protocol_end, url.get_protocol().size() - 1, "protocol_end mismatch " + out.to_string());
+        TEST_ASSERT(href.substr(0, out.protocol_end), url.get_protocol(), "protocol_end mismatch " + out.to_string());
 
         if (!url.username.empty()) {
           size_t username_start = href.find(url.username);
-          size_t username_end = username_start + url.username.size() - 1;
           TEST_ASSERT(href.substr(username_start, url.username.size()), url.get_username(), "username mismatch " + out.to_string());
-          TEST_ASSERT(out.username_end, username_end, "username_end mismatch " + out.to_string());
         }
 
         if (!url.password.empty()) {
-          size_t password_start = out.username_end + 2;
+          size_t password_start = out.username_end + 1;
           TEST_ASSERT(href.substr(password_start, url.password.size()), url.get_password(), "password mismatch " + out.to_string());
         }
 
-        TEST_ASSERT(href.substr(out.host_start, url.get_hostname().size()), url.get_hostname(), "hostname mismatch " + out.to_string());
+        size_t host_start = out.host_start;
+        if (url.includes_credentials()) {
+          TEST_ASSERT(url.get_href()[out.host_start], '@', "hostname should start with @");
+          host_start++;
+        }
+        TEST_ASSERT(href.substr(host_start, url.get_hostname().size()), url.get_hostname(), "hostname mismatch " + out.to_string());
 
         if (url.port.has_value()) {
           TEST_ASSERT(out.port, url.port.value(), "port mismatch " + out.to_string());
@@ -147,7 +150,10 @@ bool urltestdata_encoding(const char* source) {
         }
 
         if (url.get_pathname_length() > 0) {
-          TEST_ASSERT(href.substr(out.pathname_start, url.get_pathname_length()), url.get_pathname(), "pathname mismatch " + out.to_string());
+          size_t pathname_end = std::string::npos;
+          if (out.search_start != ada::url_components::omitted) { pathname_end = out.search_start; }
+          else if (out.hash_start != ada::url_components::omitted) { pathname_end = out.hash_start; }
+          TEST_ASSERT(href.substr(out.pathname_start, pathname_end - out.pathname_start), url.get_pathname(), "pathname mismatch " + out.to_string() + " " + url.get_href());
         }
 
         if (url.get_search().length() > 0) {
