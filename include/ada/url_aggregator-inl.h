@@ -107,7 +107,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 }
 
 inline void url_aggregator::update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]) {
-  ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string());
+  ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
   // Make sure search is deleted and hash_start index is correct.
   if (components.search_start != url_components::omitted) { // uncommon path
@@ -157,7 +157,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
 }
 
 inline void url_aggregator::append_base_pathname(const std::string_view input) {
-  ada_log("url_aggregator::append_base_pathname ", input, " ", to_string());
+  ada_log("url_aggregator::append_base_pathname ", input, " ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
@@ -180,7 +180,7 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
 }
 
 inline void url_aggregator::update_base_username(const std::string_view input) {
-  ada_log("url_aggregator::update_base_username '", input, "' ", to_string());
+  ada_log("url_aggregator::update_base_username '", input, "' ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
   add_authority_slashes_if_needed();
 
@@ -247,7 +247,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
 }
 
 inline void url_aggregator::clear_base_password() {
-  ada_log("url_aggregator::clear_base_password ", to_string());
+  ada_log("url_aggregator::clear_base_password ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
   if (!has_password()) { return; }
 
@@ -302,7 +302,7 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 }
 
 inline void url_aggregator::append_base_password(const std::string_view input) {
-  ada_log("url_aggregator::append_base_password ", input, " ", to_string());
+  ada_log("url_aggregator::append_base_password ", input, " ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
@@ -408,7 +408,7 @@ inline void url_aggregator::clear_base_search() {
   components.search_start = url_components::omitted;
 
 #if ADA_DEVELOPMENT_CHECKS
-  ADA_ASSERT_EQUAL(get_search(), "", "search should have been cleared on buffer=" + buffer + " with " + components.to_string());
+  ADA_ASSERT_EQUAL(get_search(), "", "search should have been cleared on buffer=" + buffer + " with " + components.to_string() + "\n" + to_diagram());
 #endif
   ADA_ASSERT_TRUE(validate());
 }
@@ -425,7 +425,7 @@ inline void url_aggregator::clear_base_pathname() {
   if (components.hash_start != url_components::omitted) { components.hash_start -= pathname_length; }
   ada_log("url_aggregator::clear_base_pathname completed, running checks...");
 #if ADA_DEVELOPMENT_CHECKS
-  ADA_ASSERT_EQUAL(get_pathname(), "", "pathname should have been cleared on buffer=" + buffer + " with " + components.to_string());
+  ADA_ASSERT_EQUAL(get_pathname(), "", "pathname should have been cleared on buffer=" + buffer + " with " + components.to_string() + "\n" + to_diagram());
 #endif
   ADA_ASSERT_TRUE(validate());
   ada_log("url_aggregator::clear_base_pathname completed, running checks... ok");
@@ -449,7 +449,7 @@ inline void url_aggregator::clear_base_hostname() {
   if (components.hash_start != url_components::omitted) { components.hash_start -= hostname_length; }
 
 #if ADA_DEVELOPMENT_CHECKS
-  ADA_ASSERT_EQUAL(get_hostname(), "", "hostname should have been cleared on buffer=" + buffer + " with " + components.to_string());
+  ADA_ASSERT_EQUAL(get_hostname(), "", "hostname should have been cleared on buffer=" + buffer + " with " + components.to_string() + "\n" + to_diagram());
 #endif
   ADA_ASSERT_TRUE(validate());
 }
