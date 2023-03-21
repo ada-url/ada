@@ -344,8 +344,7 @@ namespace ada::parser {
                 // Shorten url’s path.
                 helpers::shorten_path(url.path, url.type);
               } else {
-                std::string path = std::string(url.get_pathname());
-                // TODO: Optimization opportunity. No need to create a ref to std::string
+                std::string_view path = url.get_pathname();
                 if (helpers::shorten_path(path, url.type)) {
                   url.update_base_pathname(path);
                 }
@@ -562,14 +561,13 @@ namespace ada::parser {
           if constexpr (result_type_is_ada_url) {
             helpers::parse_prepared_path(view, url.type, url.path);
           } else {
-            // TODO: Add back the common case optimization. It is causing an error with
-            // the following test case "file:///c|////foo/bar.html"
-//            if(url.is_at_path()) { // common case
-//              helpers::parse_prepared_path(view, url.type, url.get_buffer());
-//            } else { // slow case
-            std::string path = std::string(url.get_pathname());
-            helpers::parse_prepared_path(view, url.type, path);
-            url.update_base_pathname(path);
+            if(url.is_at_path()) { // common case
+              helpers::parse_prepared_path(view, url.type, url.get_buffer());
+            } else { // slow case
+              std::string path = std::string(url.get_pathname());
+              helpers::parse_prepared_path(view, url.type, path);
+              url.update_base_pathname(path);
+            }
           }
           break;
         }
@@ -712,8 +710,7 @@ namespace ada::parser {
                 if constexpr (result_type_is_ada_url) {
                   helpers::shorten_path(url.path, url.type);
                 } else {
-                  std::string path = std::string(url.get_pathname());
-                  // TODO: Optimization opportunity. No need to create a ref to std::string
+                  std::string_view path = url.get_pathname();
                   if (helpers::shorten_path(path, url.type)) {
                     url.update_base_pathname(path);
                   }
