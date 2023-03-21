@@ -223,16 +223,16 @@ namespace ada {
     /**
      * Useful for implementing efficient serialization for the URL.
      *
-     * https://user:pass@example.com:1234/foo/bar?baz#quux
-     *      |      |    |          | ^^^^|       |   |
-     *      |      |    |          | |   |       |   `----- hash_start
-     *      |      |    |          | |   |       `--------- search_start
-     *      |      |    |          | |   `----------------- pathname_start
-     *      |      |    |          | `--------------------- port
-     *      |      |    |          `----------------------- host_end
-     *      |      |    `---------------------------------- host_start
-     *      |      `--------------------------------------- username_end
-     *      `---------------------------------------------- protocol_end
+   * https://user:pass@example.com:1234/foo/bar?baz#quux
+   *       |     |    |          | ^^^^|       |   |
+   *       |     |    |          | |   |       |   `----- hash_start
+   *       |     |    |          | |   |       `--------- search_start
+   *       |     |    |          | |   `----------------- pathname_start
+   *       |     |    |          | `--------------------- port
+   *       |     |    |          `----------------------- host_end
+   *       |     |    `---------------------------------- host_start
+   *       |     `--------------------------------------- username_end
+   *       `--------------------------------------------- protocol_end
      *
      * Inspired after servo/url
      *
