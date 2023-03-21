@@ -47,6 +47,13 @@ namespace ada::helpers {
    */
   ada_really_inline bool shorten_path(std::string& path, ada::scheme::type type) noexcept;
 
+  /**
+   * @private
+   * Defined by the URL specification, shorten a URLs paths.
+   * @see https://url.spec.whatwg.org/#shorten-a-urls-path
+   * @returns Returns true if path is shortened.
+   */
+  ada_really_inline bool shorten_path(std::string_view& path, ada::scheme::type type) noexcept;
 
  /**
   * @private
@@ -73,6 +80,12 @@ namespace ada::helpers {
    * it returns an empty string_view. This function cannot throw.
    */
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept;
+
+  /**
+   * @private
+   * Returns true if the string_view points within the string.
+   */
+  bool overlaps(std::string_view input1, const std::string& input2) noexcept;
 
   /**
    * @private

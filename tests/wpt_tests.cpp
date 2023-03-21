@@ -174,6 +174,8 @@ bool setters_tests_encoding(const char *source) {
         if(!base->validate()) {
           std::cerr << "Your parsed URL is impossible: " <<  base->to_string() << std::endl;
           TEST_FAIL("Impossible URL");
+        } else {
+          element_string += "\n" + base->to_diagram() + "\n";
         }
       }
 
@@ -361,14 +363,12 @@ bool urltestdata_encoding(const char* source) {
       } else {
         TEST_ASSERT(input_url.has_value(), true, "Should not have failed " + element_string + input_url->to_string());
         // Next we test the 'to_string' method.
-        std::string parsed_url_json = input_url->to_string();
-        //
         if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
           if(!input_url->validate()) {
-            std::cerr << "Your parsed URL result is invalid: " << parsed_url_json << std::endl;
             TEST_FAIL("Invalid parsed URL (bug)");
           }
         }
+        std::string parsed_url_json = input_url->to_string();
         std::string_view protocol;
         if(!object["protocol"].get_string().get(protocol)) {
           TEST_ASSERT(input_url->get_protocol(), protocol, "Protocol " + element_string + input_url->to_string());
