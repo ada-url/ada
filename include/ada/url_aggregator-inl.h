@@ -549,6 +549,12 @@ inline bool url_aggregator::has_password() const {
   return buffer.size() > components.username_end && buffer[components.username_end] == ':';
 }
 
+inline bool url_aggregator::has_port() const noexcept {
+  ada_log("url_aggregator::has_port");
+  return components.pathname_start != components.host_end;
+}
+
+
 }
 
 #endif // ADA_URL_AGGREGATOR_INL_H

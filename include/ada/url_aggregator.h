@@ -216,6 +216,8 @@ namespace ada {
     inline bool has_non_empty_password() const;
     /** @private */
     inline bool has_password() const;
+    /** @return true if the URL has a (non default) port */
+    inline bool has_port() const noexcept;
     /** @private */
     inline void consume_prepared_path(std::string_view input);
     /** @private */
@@ -225,16 +227,16 @@ namespace ada {
     /**
      * Useful for implementing efficient serialization for the URL.
      *
-   * https://user:pass@example.com:1234/foo/bar?baz#quux
-   *       |     |    |          | ^^^^|       |   |
-   *       |     |    |          | |   |       |   `----- hash_start
-   *       |     |    |          | |   |       `--------- search_start
-   *       |     |    |          | |   `----------------- pathname_start
-   *       |     |    |          | `--------------------- port
-   *       |     |    |          `----------------------- host_end
-   *       |     |    `---------------------------------- host_start
-   *       |     `--------------------------------------- username_end
-   *       `--------------------------------------------- protocol_end
+     * https://user:pass@example.com:1234/foo/bar?baz#quux
+     *       |     |    |          | ^^^^|       |   |
+     *       |     |    |          | |   |       |   `----- hash_start
+     *       |     |    |          | |   |       `--------- search_start
+     *       |     |    |          | |   `----------------- pathname_start
+     *       |     |    |          | `--------------------- port
+     *       |     |    |          `----------------------- host_end
+     *       |     |    `---------------------------------- host_start
+     *       |     `--------------------------------------- username_end
+     *       `--------------------------------------------- protocol_end
      *
      * Inspired after servo/url
      *
