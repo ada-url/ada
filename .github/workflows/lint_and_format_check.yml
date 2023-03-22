@@ -1,0 +1,32 @@
+name: Lint and Format Check (Ubuntu Latest)
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+permissions:
+  contents: read
+
+jobs:
+  ubuntu-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3 
+      - name: Install ICU
+        run: sudo apt-get install -y libicu-dev pkg-config
+
+      - name: Install clang-format
+        run: |
+          sudo apt update && sudo apt install clang-format-15 -y
+          sudo ln -sf /usr/bin/clang-format-15 /usr/bin/clang-format
+
+      - name: Build with Lint and Format Check
+        run: |
+          cmake -B build && cmake --build build
+        env:
+          CXX: clang++-14
+          LINT_AND_FORMAT_CHECK: true
