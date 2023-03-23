@@ -196,7 +196,7 @@ bool empty_host_dash_dash_path() {
   if(!url) {
     TEST_FAIL("Should succeed");
   }
-  TEST_ASSERT(url->has_opaque_path, false, "host is not opaque");
+  TEST_ASSERT(url->has_opaque_path, false, "path is not opaque");
   TEST_ASSERT(url->get_href(), "something:/.//", "href should stay unchanged");
   TEST_ASSERT(url->get_pathname(), "//", "path name should be //")
   TEST_ASSERT(url->get_hostname(), "", "host should be empty")
