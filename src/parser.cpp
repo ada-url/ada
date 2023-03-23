@@ -322,16 +322,9 @@ namespace ada::parser {
               url.path = base_url->path;
               url.query = base_url->query;
             } else  {
-              if(base_url->has_non_empty_username()) {
-                url.update_base_username(base_url->get_username());
-              }
-              if(base_url->has_non_empty_password()) {
-                url.update_base_password(base_url->get_password());
-              }
-              if(base_url->has_authority()) {
-                url.set_hostname(base_url->get_hostname());
-                url.update_base_port(base_url->retrieve_base_port());
-              }
+              url.update_base_authority(base_url->get_buffer(), base_url->get_components());
+              url.set_hostname(base_url->get_hostname());
+  	          url.update_base_port(base_url->retrieve_base_port());
               url.update_base_pathname(base_url->get_pathname());
               url.update_base_search(base_url->get_search());
             }
@@ -388,16 +381,9 @@ namespace ada::parser {
               url.host = base_url->host;
               url.port = base_url->port;
             } else {
-              if(base_url->has_non_empty_username()) {
-                url.update_base_username(base_url->get_username());
-              }
-              if(base_url->has_non_empty_password()) {
-                url.update_base_password(base_url->get_password());
-              }
-              if(base_url->has_authority()) {
-                url.set_hostname(base_url->get_hostname());
-                url.update_base_port(base_url->retrieve_base_port());
-              }
+              url.update_base_authority(base_url->get_buffer(), base_url->get_components());
+              url.set_hostname(base_url->get_hostname());
+              url.update_base_port(base_url->retrieve_base_port());
             }
             state = ada::state::PATH;
             break;
