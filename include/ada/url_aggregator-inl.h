@@ -570,10 +570,6 @@ inline void ada::url_aggregator::reserve(uint32_t capacity) {
   buffer.reserve(capacity);
 }
 
-const std::string& ada::url_aggregator::get_buffer() const noexcept {
-  return buffer;
-}
-
 inline bool url_aggregator::has_non_empty_username() const {
   ada_log("url_aggregator::has_non_empty_username ");
   /**
@@ -608,6 +604,34 @@ inline bool url_aggregator::has_port() const noexcept {
 }
 
 
+
+inline std::string_view url_aggregator::get_href() const noexcept {
+  ada_log("url_aggregator::get_href");
+  return buffer;
+}
+
+ada_really_inline size_t url::parse_port(std::string_view view, bool check_trailing_content) noexcept {
+  ada_log("parse_port('", view, "') ", view.size());
+  uint16_t parsed_port{};
+  auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
+  if(r.ec == std::errc::result_out_of_range) {
+    ada_log("parse_port: std::errc::result_out_of_range");
+    is_valid = false;
+    return 0;
+  }
+  ada_log("parse_port: ", parsed_port);
+  const size_t consumed = size_t(r.ptr - view.data());
+  ada_log("parse_port: consumed ", consumed);
+  if(check_trailing_content) {
+    is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
+  }
+  ada_log("parse_port: is_valid = ", is_valid);
+  if(is_valid) {
+    port = (r.ec == std::errc() && scheme_default_port() != parsed_port) ?
+      std::optional<uint16_t>(parsed_port) : std::nullopt;
+  }
+  return consumed;
+}
 }
 
 #endif // ADA_URL_AGGREGATOR_INL_H
