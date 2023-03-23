@@ -1195,9 +1195,8 @@ bool url_aggregator::validate() const noexcept {
       return false;
     }
   }
+
   if(components.host_start != buffer.size()) {
-
-
     if(components.host_start > components.username_end) {
       if(buffer[components.host_start] != '@') {
         ada_log("url_aggregator::validate missing @ at the end of the password \n", to_diagram());
@@ -1249,6 +1248,7 @@ bool url_aggregator::validate() const noexcept {
       return false;
     }
   }
+
   return true;
 }
 

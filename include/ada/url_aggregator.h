@@ -171,6 +171,8 @@ namespace ada {
     ada_really_inline bool parse_host(std::string_view input);
 
     /** @private */
+    inline void update_base_authority(std::string_view base_buffer, const ada::url_components& base);
+    /** @private */
     inline void update_unencoded_base_hash(std::string_view input);
     /** @private */
     inline void update_base_hostname(std::string_view input);
@@ -270,7 +272,7 @@ namespace ada {
     inline void reserve(uint32_t capacity);
 
     /** @private */
-    inline std::string& get_buffer() noexcept;
+    inline const std::string& get_buffer() const noexcept;
 
     /** @private */
     ada_really_inline size_t parse_port(

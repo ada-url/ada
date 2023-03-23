@@ -7,6 +7,7 @@
 
 #include "ada/character_sets.h"
 #include "ada/character_sets-inl.h"
+#include "ada/checkers-inl.h"
 #include "ada/helpers.h"
 #include "ada/unicode.h"
 #include "ada/url_aggregator.h"
@@ -18,6 +19,57 @@
 #include <string_view>
 
 namespace ada {
+
+inline void url_aggregator::update_base_authority(std::string_view base_buffer, const ada::url_components& base) {
+  std::string_view input = base_buffer.substr(base.protocol_end, base.host_start - base.protocol_end);
+  ada_log("url_aggregator::update_base_authority ", input);
+
+  bool input_starts_with_dash = checkers::begins_with(input, "//");
+  uint32_t diff = components.host_start - components.protocol_end;
+
+  buffer.erase(components.protocol_end, components.host_start - components.protocol_end);
+  components.username_end = components.protocol_end;
+
+  if (input_starts_with_dash) {
+    input.remove_prefix(2);
+    diff += 2; // add "//"
+    buffer.insert(components.protocol_end, "//");
+    components.username_end += 2;
+  }
+
+  size_t password_delimiter = input.find(':');
+
+  // Check if input contains both username and password by checking the delimiter: ":"
+  // A typical input that contains authority would be "user:pass"
+  if (password_delimiter != std::string_view::npos) {
+    // Insert both username and password
+    std::string_view username = input.substr(0, password_delimiter);
+    std::string_view password = input.substr(password_delimiter + 1);
+
+    buffer.insert(components.protocol_end + diff, username);
+    diff += uint32_t(username.size());
+    buffer.insert(components.protocol_end + diff, ":");
+    components.username_end = components.protocol_end + diff;
+    buffer.insert(components.protocol_end + diff + 1, password);
+    diff += uint32_t(password.size()) + 1;
+  } else if (!input.empty()) {
+    // Insert only username
+    buffer.insert(components.protocol_end + diff, input);
+    components.username_end = components.protocol_end + diff + uint32_t(input.size());
+    diff += uint32_t(input.size());
+  }
+
+  components.host_start += diff;
+
+  if (buffer.size() > base.host_start && buffer[base.host_start] != '@') {
+    buffer.insert(components.host_start, "@");
+    diff++;
+  }
+  components.host_end += diff;
+  components.pathname_start += diff;
+  if (components.search_start != url_components::omitted) { components.search_start += diff; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += diff; }
+}
 
 inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   ada_log("url_aggregator::update_unencoded_base_hash ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size(), " bytes] components.hash_start = ", components.hash_start);
@@ -39,10 +91,11 @@ inline void url_aggregator::update_base_hostname(const std::string_view input) {
   ada_log("url_aggregator::update_base_hostname ", input, " [", input.size(), " bytes], buffer is '", buffer, "' [", buffer.size()," bytes]");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
+
   // This next line is required for when parsing a URL like `foo://`
   add_authority_slashes_if_needed();
 
-  bool has_credential = buffer.size() > components.host_start && buffer[components.host_start] == '@';
+  bool has_credential = components.protocol_end + 2 < components.host_start;
   uint32_t current_length = components.host_end - components.host_start;
   uint32_t new_difference = uint32_t(input.size()) - current_length;
   // The common case is current_length == 0.
@@ -445,7 +498,7 @@ inline void url_aggregator::clear_base_pathname() {
 inline void url_aggregator::clear_base_hostname() {
   ada_log("url_aggregator::clear_base_hostname");
   ADA_ASSERT_TRUE(validate());
-  add_authority_slashes_if_needed();
+
   uint32_t hostname_length = components.host_end - components.host_start;
   uint32_t start = components.host_start;
 
@@ -517,7 +570,7 @@ inline void ada::url_aggregator::reserve(uint32_t capacity) {
   buffer.reserve(capacity);
 }
 
-std::string& ada::url_aggregator::get_buffer() noexcept {
+const std::string& ada::url_aggregator::get_buffer() const noexcept {
   return buffer;
 }
 
