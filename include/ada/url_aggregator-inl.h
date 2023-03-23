@@ -493,14 +493,14 @@ inline void url_aggregator::clear_base_pathname() {
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   uint32_t pathname_length = ending_index - components.pathname_start;
   buffer.erase(components.pathname_start, pathname_length);
-  if (components.search_start != url_components::omitted) { components.search_start -= pathname_length; }
-  if (components.hash_start != url_components::omitted) { components.hash_start -= pathname_length; }
+  uint32_t difference = pathname_length;
   if(components.pathname_start == components.host_end + 2 && buffer[components.host_end] == '/' && buffer[components.host_end + 1] == '.') {
     components.pathname_start -= 2;
     buffer.erase(components.host_end, 2);
-    if (components.search_start != url_components::omitted) { components.search_start -= 2; }
-    if (components.hash_start != url_components::omitted) { components.hash_start -= 2; }
+    difference += 2;
   }
+  if (components.search_start != url_components::omitted) { components.search_start -= difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= difference; }
   ada_log("url_aggregator::clear_base_pathname completed, running checks...");
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_pathname(), "", "pathname should have been cleared on buffer=" + buffer + " with " + components.to_string() + "\n" + to_diagram());
@@ -613,12 +613,9 @@ inline bool url_aggregator::has_password() const {
 }
 
 inline bool url_aggregator::has_empty_hostname() const noexcept {
-  // This is sadly unreasonably expensive!!!
-  if(buffer.size() == components.host_start) { return true; }
-  uint32_t start = components.host_start;
-  // So host_start is not where the host begins.
-  if (buffer[components.host_start] == '@') { start++; }
-  return start == components.host_end;
+  if(components.host_start == components.host_end) { return true; }
+  if (components.host_end > components.host_start + 1) { return false; }
+  return buffer[components.host_start] == '@';
 }
 
 inline bool url_aggregator::has_port() const noexcept {
