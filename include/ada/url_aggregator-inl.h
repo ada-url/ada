@@ -445,6 +445,7 @@ inline void url_aggregator::clear_base_pathname() {
 inline void url_aggregator::clear_base_hostname() {
   ada_log("url_aggregator::clear_base_hostname");
   ADA_ASSERT_TRUE(validate());
+  add_authority_slashes_if_needed();
   uint32_t hostname_length = components.host_end - components.host_start;
   uint32_t start = components.host_start;
 
@@ -458,7 +459,6 @@ inline void url_aggregator::clear_base_hostname() {
   components.pathname_start -= hostname_length;
   if (components.search_start != url_components::omitted) { components.search_start -= hostname_length; }
   if (components.hash_start != url_components::omitted) { components.hash_start -= hostname_length; }
-
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_hostname(), "", "hostname should have been cleared on buffer=" + buffer + " with " + components.to_string() + "\n" + to_diagram());
 #endif
@@ -548,6 +548,12 @@ inline bool url_aggregator::has_password() const {
   // This function does not care about the length of the password
   return buffer.size() > components.username_end && buffer[components.username_end] == ':';
 }
+
+inline bool url_aggregator::has_port() const noexcept {
+  ada_log("url_aggregator::has_port");
+  return components.pathname_start != components.host_end;
+}
+
 
 }
 
