@@ -145,7 +145,6 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   ada_log("url_aggregator::update_base_pathname '", input, "' [", input.size(), " bytes] \n", to_diagram());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   ADA_ASSERT_TRUE(validate());
-
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) { ending_index = components.search_start; }
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
@@ -154,12 +153,14 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   uint32_t difference = uint32_t(input.size()) - current_length;
   // The common case is current_length == 0.
   buffer.erase(components.pathname_start, current_length);
-  // next line is very uncommon.
+  // next line is very uncommon and we should seek to optimize it accordingly.
   if(has_empty_hostname() && !has_opaque_path && input.size()>1) {
     // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
     // then append U+002F (/) followed by U+002E (.) to output.
     buffer.insert(components.pathname_start, "/.");
     components.pathname_start += 2;
+    if (components.search_start != url_components::omitted) { components.search_start += 2; }
+    if (components.hash_start != url_components::omitted) { components.hash_start += 2; }
   }
   // The common case is components.pathname_start == buffer.size() so this is effectively an append.
   buffer.insert(components.pathname_start, input);
@@ -442,6 +443,12 @@ inline void url_aggregator::clear_base_pathname() {
   buffer.erase(components.pathname_start, pathname_length);
   if (components.search_start != url_components::omitted) { components.search_start -= pathname_length; }
   if (components.hash_start != url_components::omitted) { components.hash_start -= pathname_length; }
+  if(components.pathname_start == components.host_end + 2 && buffer[components.host_end] == '/' && buffer[components.host_end + 1] == '.') {
+    components.pathname_start -= 2;
+    buffer.erase(components.host_end, 2);
+    if (components.search_start != url_components::omitted) { components.search_start -= 2; }
+    if (components.hash_start != url_components::omitted) { components.hash_start -= 2; }
+  }
   ada_log("url_aggregator::clear_base_pathname completed, running checks...");
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_pathname(), "", "pathname should have been cleared on buffer=" + buffer + " with " + components.to_string() + "\n" + to_diagram());
@@ -558,6 +565,7 @@ inline bool url_aggregator::has_password() const {
 }
 
 inline bool url_aggregator::has_empty_hostname() const noexcept {
+  // This is sadly unreasonably expensive!!!
   if(buffer.size() == components.host_start) { return true; }
   uint32_t start = components.host_start;
   // So host_start is not where the host begins.

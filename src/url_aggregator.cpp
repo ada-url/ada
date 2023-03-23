@@ -596,6 +596,9 @@ bool url_aggregator::set_hostname(const std::string_view input) {
    */
   size_t start = components.host_start;
   if (buffer.size() > components.host_start && buffer[components.host_start] == '@') { start++; }
+  // if we have an empty host, then the space between components.host_end and
+  // components.pathname_start may be occupied by /.
+  if(start == components.host_end) { return std::string_view(); }
   return helpers::substring(buffer, start, components.pathname_start);
 }
 
