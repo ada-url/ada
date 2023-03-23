@@ -330,9 +330,7 @@ namespace ada::parser {
               }
               if(base_url->has_authority()) {
                 url.set_hostname(base_url->get_hostname());
-                if(base_url->has_port())  {
-                  url.update_base_port(base_url->retrieve_base_port());
-                }
+                url.update_base_port(base_url->retrieve_base_port());
               }
               url.update_base_pathname(base_url->get_pathname());
               url.update_base_search(base_url->get_search());
@@ -398,9 +396,7 @@ namespace ada::parser {
               }
               if(base_url->has_authority()) {
                 url.set_hostname(base_url->get_hostname());
-                if(base_url->has_port()) {
-                  url.update_base_port(base_url->retrieve_base_port());
-                }
+                url.update_base_port(base_url->retrieve_base_port());
               }
             }
             state = ada::state::PATH;

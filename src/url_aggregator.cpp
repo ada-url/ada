@@ -426,7 +426,6 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // Let host be the result of host parsing host_view with url is not special.
     if (host_view.empty()) {
       clear_base_hostname();
-      add_authority_slashes_if_needed();
       return true;
     }
 
@@ -444,8 +443,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   if (new_host.empty()) {
     // Set url’s host to the empty string.
     clear_base_hostname();
-  }
-  else {
+  } else {
     // Let host be the result of host parsing buffer with url is not special.
     if (!parse_host(new_host)) {
       update_base_hostname(previous_host);
