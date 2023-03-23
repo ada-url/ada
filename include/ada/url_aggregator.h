@@ -64,7 +64,7 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#dom-url-href
      * @see https://url.spec.whatwg.org/#concept-url-serializer
      */
-    [[nodiscard]] const std::string& get_href() const noexcept;
+    inline std::string_view get_href() const noexcept;
     /**
      * The username getter steps are to return this’s URL’s username.
      * This function does not allocate memory.
@@ -270,9 +270,6 @@ namespace ada {
      * To optimize performance, you may indicate how much memory to allocate within this instance.
      */
     inline void reserve(uint32_t capacity);
-
-    /** @private */
-    inline const std::string& get_buffer() const noexcept;
 
     /** @private */
     ada_really_inline size_t parse_port(
