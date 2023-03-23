@@ -322,7 +322,7 @@ namespace ada::parser {
               url.path = base_url->path;
               url.query = base_url->query;
             } else  {
-              url.update_base_authority(base_url->get_buffer(), base_url->get_components());
+              url.update_base_authority(base_url->get_href(), base_url->get_components());
               url.set_hostname(base_url->get_hostname());
   	          url.update_base_port(base_url->retrieve_base_port());
               url.update_base_pathname(base_url->get_pathname());
@@ -381,7 +381,7 @@ namespace ada::parser {
               url.host = base_url->host;
               url.port = base_url->port;
             } else {
-              url.update_base_authority(base_url->get_buffer(), base_url->get_components());
+              url.update_base_authority(base_url->get_href(), base_url->get_components());
               url.set_hostname(base_url->get_hostname());
               url.update_base_port(base_url->retrieve_base_port());
             }

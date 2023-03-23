@@ -94,7 +94,7 @@ namespace ada {
      * @see https://url.spec.whatwg.org/#host-parsing
      */
     virtual ada_really_inline size_t parse_port(
-      std::string_view view, bool check_trailing_content = false) noexcept = 0;;
+      std::string_view view, bool check_trailing_content = false) noexcept = 0;
 
     /**
     * Returns a JSON string representation of this URL.

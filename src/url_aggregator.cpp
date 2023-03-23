@@ -474,11 +474,6 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return set_host_or_hostname<true>(input);
 }
 
-[[nodiscard]] const std::string& url_aggregator::get_href() const noexcept {
-  ada_log("url_aggregator::get_href");
-  return buffer;
-}
-
 [[nodiscard]] std::string url_aggregator::get_origin() const noexcept {
   ada_log("url_aggregator::get_origin");
   if (is_special()) {
