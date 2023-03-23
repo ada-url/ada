@@ -322,12 +322,7 @@ namespace ada::parser {
               url.path = base_url->path;
               url.query = base_url->query;
             } else  {
-              // TODO: This is likely not correct. There is a difference between having an empty username
-              // and not having a username.
-              url.update_base_username(base_url->get_username());
-              // TODO: This is likely not correct. There is a difference between having an empty password
-              // and not having a password.
-              url.update_base_password(base_url->get_password());
+              url.update_base_authority(base_url->get_href(), base_url->get_components());
               url.set_hostname(base_url->get_hostname());
   	          url.update_base_port(base_url->retrieve_base_port());
               url.update_base_pathname(base_url->get_pathname());
@@ -386,12 +381,7 @@ namespace ada::parser {
               url.host = base_url->host;
               url.port = base_url->port;
             } else {
-              // TODO: This is likely not correct. There is a difference between having an empty username
-              // and not having a username.
-              url.update_base_username(base_url->get_username());
-              // TODO: This is likely not correct. There is a difference between having an empty password
-              // and not having a password.
-              url.update_base_password(base_url->get_password());
+              url.update_base_authority(base_url->get_href(), base_url->get_components());
               url.set_hostname(base_url->get_hostname());
               url.update_base_port(base_url->retrieve_base_port());
             }
@@ -594,7 +584,7 @@ namespace ada::parser {
                 url.host = base_url->host;
               } else {
                 // TODO: Optimization opportunity.
-                url.set_host(url.get_host());
+                url.set_host(base_url->get_host());
               }
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,

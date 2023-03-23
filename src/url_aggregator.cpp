@@ -443,8 +443,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   if (new_host.empty()) {
     // Set url’s host to the empty string.
     clear_base_hostname();
-  }
-  else {
+  } else {
     // Let host be the result of host parsing buffer with url is not special.
     if (!parse_host(new_host)) {
       update_base_hostname(previous_host);
@@ -462,22 +461,17 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 }
 
 bool url_aggregator::set_host(const std::string_view input) {
-  ada_log("url_aggregator::set_host ", input);
+  ada_log("url_aggregator::set_host '", input, "'");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<false>(input);
 }
 
 bool url_aggregator::set_hostname(const std::string_view input) {
-  ada_log("url_aggregator::set_hostname ", input);
+  ada_log("url_aggregator::set_hostname '", input, "'");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<true>(input);
-}
-
-[[nodiscard]] const std::string& url_aggregator::get_href() const noexcept {
-  ada_log("url_aggregator::get_href");
-  return buffer;
 }
 
 [[nodiscard]] std::string url_aggregator::get_origin() const noexcept {
@@ -505,19 +499,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_username() const noexcept {
   ada_log("url_aggregator::get_username");
-  /**
-   * https://user:pass@example.com:1234/foo/bar?baz#quux
-   *       |     |    |          | ^^^^|       |   |
-   *       |     |    |          | |   |       |   `----- hash_start
-   *       |     |    |          | |   |       `--------- search_start
-   *       |     |    |          | |   `----------------- pathname_start
-   *       |     |    |          | `--------------------- port
-   *       |     |    |          `----------------------- host_end
-   *       |     |    `---------------------------------- host_start
-   *       |     `--------------------------------------- username_end
-   *       `--------------------------------------------- protocol_end
-   */
-  if (components.protocol_end + 2 < components.username_end) {
+  if (has_non_empty_username()) {
     return helpers::substring(buffer, components.protocol_end + 2, components.username_end);
   }
   return "";
@@ -525,21 +507,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_password() const noexcept {
   ada_log("url_aggregator::get_password");
-  /**
-   * https://user:pass@example.com:1234/foo/bar?baz#quux
-   *       |     |    |          | ^^^^|       |   |
-   *       |     |    |          | |   |       |   `----- hash_start
-   *       |     |    |          | |   |       `--------- search_start
-   *       |     |    |          | |   `----------------- pathname_start
-   *       |     |    |          | `--------------------- port
-   *       |     |    |          `----------------------- host_end
-   *       |     |    `---------------------------------- host_start
-   *       |     `--------------------------------------- username_end
-   *       `--------------------------------------------- protocol_end
-   */
-  if (buffer.size() > components.username_end && buffer[components.username_end] == ':') {
-    size_t ending_index = components.host_start;
-    if (buffer[ending_index] == '@') { ending_index--; }
+  if (has_non_empty_password()) {
     return helpers::substring(buffer, components.username_end + 1, components.host_start);
   }
   return "";
@@ -547,18 +515,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] uint32_t url_aggregator::get_password_length() const noexcept {
   ada_log("url_aggregator::get_password_length");
-  /**
-   * https://user:pass@example.com:1234/foo/bar?baz#quux
-   *       |     |    |          | ^^^^|       |   |
-   *       |     |    |          | |   |       |   `----- hash_start
-   *       |     |    |          | |   |       `--------- search_start
-   *       |     |    |          | |   `----------------- pathname_start
-   *       |     |    |          | `--------------------- port
-   *       |     |    |          `----------------------- host_end
-   *       |     |    `---------------------------------- host_start
-   *       |     `--------------------------------------- username_end
-   *       `--------------------------------------------- protocol_end
-   */
+  ADA_ASSERT_TRUE(has_password());
   if (components.username_end + 1 < components.host_start) {
     return components.host_start - components.username_end + 1;
   }
@@ -582,18 +539,6 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_host() const noexcept {
   ada_log("url_aggregator::get_host");
-  /**
-   * https://user:pass@example.com:1234/foo/bar?baz#quux
-   *       |     |    |          | ^^^^|       |   |
-   *       |     |    |          | |   |       |   `----- hash_start
-   *       |     |    |          | |   |       `--------- search_start
-   *       |     |    |          | |   `----------------- pathname_start
-   *       |     |    |          | `--------------------- port
-   *       |     |    |          `----------------------- host_end
-   *       |     |    `---------------------------------- host_start
-   *       |     `--------------------------------------- username_end
-   *       `--------------------------------------------- protocol_end
-   */
   size_t start = components.host_start;
   if (buffer.size() > components.host_start && buffer[components.host_start] == '@') { start++; }
   // if we have an empty host, then the space between components.host_end and
@@ -731,7 +676,8 @@ std::string ada::url_aggregator::to_string() const {
 bool url_aggregator::parse_ipv4(std::string_view input) {
   ada_log("parse_ipv4 ", input, "[", input.size(), " bytes], overlaps with buffer: ", helpers::overlaps(input, buffer) ? "yes" : "no");
   ADA_ASSERT_TRUE(validate());
-  if(input.back()=='.') {
+  const bool trailing_dot = (input.back() == '.');
+  if(trailing_dot) {
     input.remove_suffix(1);
   }
   size_t digit_count{0};
@@ -780,7 +726,7 @@ final:
   ada_log("url_aggregator::parse_ipv4 completed ", get_href(), " host: ", get_host());
 
   // We could also check r.ptr to see where the parsing ended.
-  if(pure_decimal_count == 4) {
+  if(pure_decimal_count == 4 && !trailing_dot) {
     // The original input was already all decimal and we validated it. So we don't need to do anything.
   } else {
     // Optimization opportunity: Get rid of unnecessary string return in ipv4 serializer.
@@ -1247,9 +1193,8 @@ bool url_aggregator::validate() const noexcept {
       return false;
     }
   }
+
   if(components.host_start != buffer.size()) {
-
-
     if(components.host_start > components.username_end) {
       if(buffer[components.host_start] != '@') {
         ada_log("url_aggregator::validate missing @ at the end of the password \n", to_diagram());
@@ -1307,6 +1252,7 @@ bool url_aggregator::validate() const noexcept {
       return false;
     }
   }
+
   return true;
 }
 
