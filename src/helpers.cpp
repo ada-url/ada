@@ -119,10 +119,14 @@ namespace ada::helpers {
   }
 
   ada_really_inline std::string_view substring(std::string_view input, size_t pos) noexcept {
-    return pos > input.size() ? std::string_view() : input.substr(pos);
+    ADA_ASSERT_TRUE(pos <= input.size());
+    // The following is safer but uneeded if we have the above line:
+    // return pos > input.size() ? std::string_view() : input.substr(pos);
+    return input.substr(pos);
   }
 
   ada_really_inline void resize(std::string_view& input, size_t pos) noexcept {
+    ADA_ASSERT_TRUE(pos <= input.size());
     input.remove_suffix(input.size() - pos);
   }
 
