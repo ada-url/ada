@@ -212,8 +212,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
     // then append U+002F (/) followed by U+002E (.) to output.
     buffer.insert(components.pathname_start, "/.");
     components.pathname_start += 2;
-    if (components.search_start != url_components::omitted) { components.search_start += 2; }
-    if (components.hash_start != url_components::omitted) { components.hash_start += 2; }
+    difference += 2;
   }
   // The common case is components.pathname_start == buffer.size() so this is effectively an append.
   buffer.insert(components.pathname_start, input);
