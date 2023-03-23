@@ -1272,7 +1272,13 @@ bool url_aggregator::validate() const noexcept {
     }
   }
   if(components.host_end != buffer.size() && components.pathname_start > components.host_end) {
-    if(buffer[components.host_end] != ':') {
+    if(components.pathname_start == components.host_end + 2 && buffer[components.host_end] == '/'  && buffer[components.host_end + 1] == '.') {
+      // if we have padding with /., then we need to have / and another character
+      if(components.pathname_start + 1 >= buffer.size() || buffer[components.pathname_start] != '/') {
+        ada_log("url_aggregator::validate expected the path to begin with / with something else after \n", to_diagram());
+        return false;
+      }
+    } else if(buffer[components.host_end] != ':') {
       ada_log("url_aggregator::validate missing : at the port \n", to_diagram());
       return false;
     }

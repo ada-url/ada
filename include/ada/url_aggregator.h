@@ -48,7 +48,8 @@ namespace ada {
 
     /** @private */
     inline bool has_authority() const noexcept;
-
+    /** @private */
+    inline bool has_empty_hostname() const noexcept;
     /**
      * The origin getter steps are to return the serialization of this’s URL’s
      * origin. [HTML]

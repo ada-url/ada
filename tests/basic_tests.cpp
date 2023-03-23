@@ -189,6 +189,17 @@ bool just_hash() {
   TEST_SUCCEED()
 }
 
+bool empty_host_dash_dash_path() {
+  TEST_START()
+  auto url = ada::parse<ada::url_aggregator>("something:/.//");
+  if(!url) {
+    TEST_FAIL("Should succeed");
+  }
+  TEST_ASSERT(url->get_href(), "something:/.//", "href should stay unchanged");
+  TEST_ASSERT(url->get_pathname(), "//", "path name should be //")
+  TEST_ASSERT(url->get_hostname(), "", "host should be empty")
+  TEST_SUCCEED()
+}
 int main() {
 #if ADA_HAS_ICU
   std::cout << "We are using ICU."<< std::endl;
@@ -200,7 +211,8 @@ int main() {
 #else
   std::cout << "You have litte-endian system."<< std::endl;
 #endif
-  bool success = just_hash() && empty_url()
+  bool success = empty_host_dash_dash_path()
+     && just_hash() && empty_url()
      && set_host_should_return_false_sometimes()
      && set_host_should_return_true_sometimes()
      && set_hostname_should_return_false_sometimes()
