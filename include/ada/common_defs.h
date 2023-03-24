@@ -266,7 +266,7 @@ namespace ada {
 #define ADA_ASSERT_TRUE(COND)                                                  \
   do {                                                                         \
     if (!(COND))  {                                                            \
-      std::cerr << "Assert at " << __LINE__ << " of " << __FILE__ << std::endl; \
+      std::cerr << "Assert at line " << __LINE__ << " of file " << __FILE__ << std::endl; \
       ADA_FAIL(ADA_STR(COND));                                                 \
     }                                                                          \
   } while (0);
