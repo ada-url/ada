@@ -1274,33 +1274,6 @@ void url_aggregator::delete_dash_dot() {
 }
 
 
-ada_really_inline size_t url_aggregator::parse_port(std::string_view view, bool check_trailing_content) noexcept {
-  ada_log("url_aggregator::parse_port('", view, "') ", view.size());
-  uint16_t parsed_port{};
-  auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
-  if(r.ec == std::errc::result_out_of_range) {
-    ada_log("parse_port: std::errc::result_out_of_range");
-    is_valid = false;
-    return 0;
-  }
-  ada_log("parse_port: ", parsed_port);
-  const size_t consumed = size_t(r.ptr - view.data());
-  ada_log("parse_port: consumed ", consumed);
-  if(check_trailing_content) {
-    is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
-  }
-  ada_log("parse_port: is_valid = ", is_valid);
-  if(is_valid) {
-    if (r.ec == std::errc() && scheme_default_port() != parsed_port) {
-      update_base_port(parsed_port);
-    } else {
-      clear_base_port();
-    }
-  }
-  return consumed;
-}
-
-
 inline void url_aggregator::consume_prepared_path(std::string_view input) {
     ada_log("url_aggregator::consume_prepared_path ", input);
     /***
