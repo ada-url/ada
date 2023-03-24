@@ -126,6 +126,7 @@ ada_really_inline uint32_t url_aggregator::get_pathname_length() const noexcept 
 }
 
 [[nodiscard]] ada_really_inline bool url_aggregator::is_at_path() const noexcept {
+  if (components.search_start != url_components::omitted || components.hash_start != url_components::omitted) { return false; }
   return buffer.size() == components.pathname_start;
 }
 
