@@ -141,12 +141,12 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 
   // Make sure search is deleted and hash_start index is correct.
   if (components.search_start != url_components::omitted) { // Uncommon path
-    uint32_t search_end = uint32_t(buffer.size());
     if (components.hash_start != url_components::omitted) {
-      search_end = components.hash_start;
+      buffer.erase(components.search_start, components.hash_start - components.search_start);
       components.hash_start = components.search_start;
+    } else {
+      buffer.erase(components.search_start);
     }
-    buffer.erase(components.search_start, search_end - components.search_start);
   }
 
   uint32_t input_size = uint32_t(input.size());
