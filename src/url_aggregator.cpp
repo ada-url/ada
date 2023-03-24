@@ -1221,9 +1221,8 @@ bool url_aggregator::validate() const noexcept {
   }
   if(components.host_end != buffer.size() && components.pathname_start > components.host_end) {
     if(components.pathname_start == components.host_end + 2 && buffer[components.host_end] == '/'  && buffer[components.host_end + 1] == '.') {
-      // if we have padding with /., then we need to have / and another character
-      if(components.pathname_start + 1 >= buffer.size() || buffer[components.pathname_start] != '/') {
-        ada_log("url_aggregator::validate expected the path to begin with / with something else after \n", to_diagram());
+      if(components.pathname_start + 1 >= buffer.size() || buffer[components.pathname_start] != '/' || buffer[components.pathname_start+1] != '/') {
+        ada_log("url_aggregator::validate expected the path to begin with // \n", to_diagram());
         return false;
       }
     } else if(buffer[components.host_end] != ':') {
@@ -1256,8 +1255,21 @@ bool url_aggregator::validate() const noexcept {
   return true;
 }
 
+void url_aggregator::delete_dash_dot() {
+  ada_log("url_aggregator::delete_dash_dot");
+  ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(has_dash_dot());
+  buffer.erase(components.host_end, 2);
+  components.pathname_start -= 2;
+  if (components.search_start != url_components::omitted) { components.search_start -= 2; }
+  if (components.hash_start != url_components::omitted) { components.hash_start -= 2; }
+  ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!has_dash_dot());
+}
+
+
 ada_really_inline size_t url_aggregator::parse_port(std::string_view view, bool check_trailing_content) noexcept {
-  ada_log("parse_port('", view, "') ", view.size());
+  ada_log("url_aggregator::parse_port('", view, "') ", view.size());
   uint16_t parsed_port{};
   auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
   if(r.ec == std::errc::result_out_of_range) {

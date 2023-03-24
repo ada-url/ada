@@ -22,7 +22,13 @@ namespace ada {
 [[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
   return !host.has_value() || host.value().empty() || type == ada::scheme::type::FILE;
 }
-
+[[nodiscard]] inline bool url::has_hostname() const noexcept {
+  return host.has_value();
+}
+[[nodiscard]] inline bool url::has_empty_hostname() const noexcept {
+  if(!host.has_value()) { return false; }
+  return host.value().empty();
+}
 inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
   return out << u.to_string();
 }

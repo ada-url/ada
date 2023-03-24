@@ -48,8 +48,8 @@ namespace ada {
 
     /** @private */
     inline bool has_authority() const noexcept;
-    /** @private */
-    inline bool has_empty_hostname() const noexcept;
+    /** @return true if it has an host but it is the empty string */
+    [[nodiscard]] inline bool has_empty_hostname() const noexcept;
     /**
      * The origin getter steps are to return the serialization of this’s URL’s
      * origin. [HTML]
@@ -98,6 +98,8 @@ namespace ada {
      * Return url’s host, serialized, followed by U+003A (:) and url’s port,
      * serialized.
      * This function does not allocate memory.
+     * When there is no host, this function returns the empty view.
+     * @see has_hostname()
      * @return a lightweight std::string_view.
      * @see https://url.spec.whatwg.org/#dom-url-host
      */
@@ -105,6 +107,8 @@ namespace ada {
     /**
      * Return this’s URL’s host, serialized.
      * This function does not allocate memory.
+     * When there is no host, this function returns the empty view.
+     * @see has_hostname()
      * @return a lightweight std::string_view.
      * @see https://url.spec.whatwg.org/#dom-url-hostname
      */
@@ -214,13 +218,19 @@ namespace ada {
     /** @private */
     inline bool base_search_has_value() const override;
     /** @private */
-    inline bool has_non_empty_username() const;
+    inline bool has_dash_dot() const noexcept;
     /** @private */
-    inline bool has_non_empty_password() const;
+    void delete_dash_dot();
     /** @private */
-    inline bool has_password() const;
+    [[nodiscard]] inline bool has_non_empty_username() const;
+    /** @private */
+    [[nodiscard]] inline bool has_non_empty_password() const;
+    /** @private */
+    [[nodiscard]] inline bool has_password() const;
     /** @return true if the URL has a (non default) port */
-    inline bool has_port() const noexcept;
+    [[nodiscard]] inline bool has_port() const noexcept;
+    /** @return true if the URL has host */
+    [[nodiscard]] inline bool has_hostname() const noexcept;
     /** @private */
     inline void consume_prepared_path(std::string_view input);
     /** @private */
