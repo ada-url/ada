@@ -581,6 +581,9 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 std::string ada::url_aggregator::to_string() const {
   ada_log("url_aggregator::to_string buffer:", buffer, "[", buffer.size(), " bytes]");
+  if (!is_valid) {
+    return "null";
+  }
 
   std::string answer;
   auto back = std::back_insert_iterator(answer);
@@ -965,6 +968,9 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
 }
 
 std::string url_aggregator::to_diagram() const {
+  if (!is_valid) {
+    return "invalid";
+  }
   std::string answer;
   answer.append(buffer);
   answer.append(" [");

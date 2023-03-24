@@ -36,6 +36,15 @@ bool set_host_should_return_false_sometimes() {
     ada::result<ada::url> r = ada::parse("mailto:a@b.com");
     bool b = r->set_host("something");
     TEST_ASSERT(b, false, "set_host should return false")
+    //
+    auto r2 = ada::parse<ada::url>("mailto:a@b.com");
+    bool b2 = r2->set_host("something");
+    TEST_ASSERT(b2, false, "set_host should return false")
+    TEST_SUCCEED() 
+}
+
+bool set_host_should_return_false_sometimes2() {
+    TEST_START()
     TEST_SUCCEED() 
 }
 
