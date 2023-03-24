@@ -36,6 +36,15 @@ bool set_host_should_return_false_sometimes() {
     ada::result<ada::url> r = ada::parse("mailto:a@b.com");
     bool b = r->set_host("something");
     TEST_ASSERT(b, false, "set_host should return false")
+    //
+    auto r2 = ada::parse<ada::url>("mailto:a@b.com");
+    bool b2 = r2->set_host("something");
+    TEST_ASSERT(b2, false, "set_host should return false")
+    TEST_SUCCEED() 
+}
+
+bool set_host_should_return_false_sometimes2() {
+    TEST_START()
     TEST_SUCCEED() 
 }
 
@@ -189,6 +198,64 @@ bool just_hash() {
   TEST_SUCCEED()
 }
 
+template <class result>
+bool empty_host_dash_dash_path() {
+  TEST_START()
+  auto url = ada::parse<result>("something:/.//");
+  if(!url) {
+    TEST_FAIL("Should succeed");
+  }
+  TEST_ASSERT(url->has_opaque_path, false, "path is not opaque");
+  TEST_ASSERT(url->get_href(), "something:/.//", "href should stay unchanged");
+  TEST_ASSERT(url->get_pathname(), "//", "path name should be //")
+  TEST_ASSERT(url->get_hostname(), "", "host should be empty")
+  TEST_SUCCEED()
+}
+
+
+template <class result>
+bool confusing_mess() {
+  TEST_START()
+  auto base_url = ada::parse<result>("http://example.org/foo/bar");
+  if(!base_url) {
+    TEST_FAIL("Should succeed");
+  }
+  auto url = ada::parse<result>("http://::@c@d:2", &*base_url);
+  if(!url) {
+    TEST_FAIL("Should succeed");
+  }
+  TEST_ASSERT(url->has_opaque_path, false, "path is not opaque");
+  TEST_ASSERT(url->get_hostname(), "d", "bad hostname")
+  TEST_ASSERT(url->get_host(), "d:2", "bad host")
+  TEST_ASSERT(url->get_pathname(), "/", "bad path")
+  TEST_ASSERT(url->get_href(), "http://:%3A%40c@d:2/", "bad href");
+  TEST_ASSERT(url->get_origin(), "http://d:2", "bad origin")
+
+
+  TEST_SUCCEED()
+}
+
+template <class result>
+bool standard_file() {
+  TEST_START()
+  auto url = ada::parse<result>("file:///tmp/mock/path");
+  if(!url) {
+    TEST_FAIL("Should succeed");
+  }
+  std::cout << url->to_string() << std::endl;
+  TEST_ASSERT(url->has_hostname(), true, "path is not opaque");
+  TEST_ASSERT(url->has_empty_hostname(), true, "path is not opaque");
+  TEST_ASSERT(url->has_opaque_path, false, "path is not opaque");
+  TEST_ASSERT(url->get_pathname(), "/tmp/mock/path", "path name should be /tmp/mock/path")
+  TEST_ASSERT(url->get_hostname(), "", "host should be empty")
+  TEST_ASSERT(url->get_host(), "", "host should be empty")
+  TEST_ASSERT(url->get_href(), "file:///tmp/mock/path", "href should stay unchanged");
+  TEST_SUCCEED()
+}
+
+
+
+
 int main() {
 #if ADA_HAS_ICU
   std::cout << "We are using ICU."<< std::endl;
@@ -200,7 +267,13 @@ int main() {
 #else
   std::cout << "You have litte-endian system."<< std::endl;
 #endif
-  bool success = just_hash() && empty_url()
+  bool success = confusing_mess<ada::url>()
+     && confusing_mess<ada::url_aggregator>()
+     && standard_file<ada::url_aggregator>()
+     && standard_file<ada::url>()
+     && empty_host_dash_dash_path<ada::url_aggregator>()
+     && empty_host_dash_dash_path<ada::url>()
+     && just_hash() && empty_url()
      && set_host_should_return_false_sometimes()
      && set_host_should_return_true_sometimes()
      && set_hostname_should_return_false_sometimes()
