@@ -147,12 +147,12 @@ inline void url_aggregator::update_base_search(std::string_view input) {
     } else {
       buffer.erase(components.search_start);
     }
+  } else {
+    components.search_start = components.pathname_start + get_pathname_length();
   }
 
-  uint32_t input_size = uint32_t(input.size());
-  components.search_start = components.pathname_start + get_pathname_length();
+  uint32_t input_size = 0;
   // The common case here is components.search_start == buffer.size().
-
   if (input[0] != '?') {
     // If input does not start with "?", we need to add it.
     buffer.insert(components.search_start, helpers::concat("?", input));
@@ -160,7 +160,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
   } else {
     buffer.insert(components.search_start, input);
   }
-  if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += input_size + uint32_t(input.size()); }
   ADA_ASSERT_TRUE(validate());
 }
 
