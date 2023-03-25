@@ -46,10 +46,6 @@ namespace ada {
 
     [[nodiscard]] bool has_valid_domain() const noexcept override;
 
-    /** @private */
-    inline bool has_authority() const noexcept;
-    /** @return true if it has an host but it is the empty string */
-    [[nodiscard]] inline bool has_empty_hostname() const noexcept;
     /**
      * The origin getter steps are to return the serialization of this’s URL’s
      * origin. [HTML]
@@ -221,12 +217,14 @@ namespace ada {
     inline bool has_dash_dot() const noexcept;
     /** @private */
     void delete_dash_dot();
+    /** @return true if it has an host but it is the empty string */
+    [[nodiscard]] inline bool has_empty_hostname() const noexcept;
     /** @private */
-    [[nodiscard]] inline bool has_non_empty_username() const;
+    [[nodiscard]] inline bool has_non_empty_username() const noexcept;
     /** @private */
-    [[nodiscard]] inline bool has_non_empty_password() const;
+    [[nodiscard]] inline bool has_non_empty_password() const noexcept;
     /** @private */
-    [[nodiscard]] inline bool has_password() const;
+    [[nodiscard]] inline bool has_password() const noexcept;
     /** @return true if the URL has a (non default) port */
     [[nodiscard]] inline bool has_port() const noexcept;
     /** @return true if the URL has host */
@@ -236,6 +234,8 @@ namespace ada {
     /** @private */
     template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
+    /** @private */
+    inline bool has_authority() const noexcept;
 
     /**
      * Useful for implementing efficient serialization for the URL.
