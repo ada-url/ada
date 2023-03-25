@@ -305,7 +305,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
 
   uint32_t difference = uint32_t(input.size());
   buffer.insert(components.username_end, input);
-  components.username_end += uint32_t(input.size());
+  components.username_end += difference;
   components.host_start += difference;
 
   if (buffer[components.host_start] != '@' && components.host_start != components.host_end) {
