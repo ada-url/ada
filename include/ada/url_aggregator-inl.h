@@ -569,7 +569,7 @@ inline bool url_aggregator::cannot_have_credentials_or_port() const {
   ada_log("url_aggregator::has_authority");
   // Performance: instead of doing this potentially expensive check, we could have
   // a boolean in the struct.
-  return (components.protocol_end + 2 <= buffer.size()) && helpers::substring(buffer, components.protocol_end, components.protocol_end + 2) == "//";
+  return components.protocol_end + 2 <= components.host_start && helpers::substring(buffer, components.protocol_end, components.protocol_end + 2) == "//";
 }
 
 [[nodiscard]] inline bool ada::url_aggregator::has_hostname() const noexcept {
