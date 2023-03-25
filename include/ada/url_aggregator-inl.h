@@ -632,6 +632,8 @@ inline bool url_aggregator::has_port() const noexcept {
 }
 
 inline bool url_aggregator::has_dash_dot() const noexcept  {
+  // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
+  // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
   ada_log("url_aggregator::has_dash_dot");
   // Performance: instead of doing this potentially expensive check, we could just
   // have a boolean value in the structure.
@@ -643,7 +645,7 @@ inline bool url_aggregator::has_dash_dot() const noexcept  {
     ADA_ASSERT_TRUE(buffer[components.pathname_start+1] == '/');
   }
 #endif
-  return components.pathname_start == components.host_end + 2 && components.pathname_start + 1 < buffer.size();
+  return !has_opaque_path && components.pathname_start == components.host_end + 2 && components.pathname_start + 1 < buffer.size();
 }
 
 inline std::string_view url_aggregator::get_href() const noexcept {
