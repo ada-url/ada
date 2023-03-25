@@ -139,28 +139,30 @@ inline void url_aggregator::update_base_search(std::string_view input) {
     return;
   }
 
-  // Make sure search is deleted and hash_start index is correct.
-  if (components.search_start != url_components::omitted) { // Uncommon path
-    if (components.hash_start != url_components::omitted) {
+  if (input[0] == '?') { input.remove_prefix(1); }
+
+  if (components.hash_start == url_components::omitted) {
+    if (components.search_start == url_components::omitted) {
+      components.search_start = uint32_t(buffer.size());
+      buffer += "?";
+    } else {
+      buffer.resize(components.search_start + 1);
+    }
+
+    buffer.append(input);
+  } else {
+    if (components.search_start == url_components::omitted) {
+      components.search_start = components.hash_start;
+    } else {
       buffer.erase(components.search_start, components.hash_start - components.search_start);
       components.hash_start = components.search_start;
-    } else {
-      buffer.erase(components.search_start);
     }
-  } else {
-    components.search_start = components.pathname_start + get_pathname_length();
+
+    buffer.insert(components.search_start, "?");
+    buffer.insert(components.search_start + 1, input);
+    components.hash_start += uint32_t(input.size() + 1); // Do not forget `?`
   }
 
-  uint32_t input_size = 0;
-  // The common case here is components.search_start == buffer.size().
-  if (input[0] != '?') {
-    // If input does not start with "?", we need to add it.
-    buffer.insert(components.search_start, helpers::concat("?", input));
-    input_size++;
-  } else {
-    buffer.insert(components.search_start, input);
-  }
-  if (components.hash_start != url_components::omitted) { components.hash_start += input_size + uint32_t(input.size()); }
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -168,31 +170,33 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
   ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  // Make sure search is deleted and hash_start index is correct.
-  if (components.search_start != url_components::omitted) { // uncommon path
-    uint32_t search_end = uint32_t(buffer.size());
-    if (components.hash_start != url_components::omitted) {
-      search_end = components.hash_start;
-      components.hash_start = components.search_start;
-    }
-    buffer.erase(components.search_start, search_end - components.search_start);
-  } else {
-    uint32_t search_ends = uint32_t(buffer.size());
-    if (components.hash_start != url_components::omitted) { search_ends = components.hash_start; }
-    components.search_start = search_ends;
-  }
-  // The common case is components.search_start == buffer.size().
-  buffer.insert(components.search_start, "?");
 
-  if (components.hash_start == url_components::omitted) { // common case
+  if (components.hash_start == url_components::omitted) {
+    if (components.search_start == url_components::omitted) {
+      components.search_start = uint32_t(buffer.size());
+      buffer += "?";
+    } else {
+      buffer.resize(components.search_start + 1);
+    }
+
     bool encoding_required = unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
     // When encoding_required is false, then buffer is left unchanged, and percent encoding was not deemed required.
     if (!encoding_required) { buffer.append(input); }
-  } else { // slow path
+  } else {
+    if (components.search_start == url_components::omitted) {
+      components.search_start = components.hash_start;
+    } else {
+      buffer.erase(components.search_start, components.hash_start - components.search_start);
+      components.hash_start = components.search_start;
+    }
+
+    buffer.insert(components.search_start, "?");
+
     std::string encoded = unicode::percent_encode(input, query_percent_encode_set);
     buffer.insert(components.search_start + 1, encoded);
     components.hash_start += uint32_t(encoded.size() + 1); // Do not forget `?`
   }
+
   ADA_ASSERT_TRUE(validate());
 }
 
