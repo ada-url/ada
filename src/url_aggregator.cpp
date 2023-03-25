@@ -230,29 +230,18 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
 
   // If url is special, then:
   if (is_special()) {
-    std::string path{};
     if(internal_input.empty()) {
       update_base_pathname("/");
-      return;
     } else if((internal_input[0] == '/') || (internal_input[0] == '\\')) {
-      helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      update_base_pathname(path);
-      return;
+      consume_prepared_path(internal_input.substr(1));
     } else {
-      helpers::parse_prepared_path(internal_input, type, path);
-      update_base_pathname(path);
-      return;
+      consume_prepared_path(internal_input);
     }
   } else if (!internal_input.empty()) {
-    std::string path{};
     if(internal_input[0] == '/') {
-      helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      update_base_pathname(path);
-      return;
+      consume_prepared_path(internal_input.substr(1));
     } else {
-      helpers::parse_prepared_path(internal_input, type, path);
-      update_base_pathname(path);
-      return;
+      consume_prepared_path(internal_input);
     }
   } else {
     // Non-special URLs with an empty host can have their paths erased
@@ -262,7 +251,6 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
     }
   }
   ADA_ASSERT_TRUE(validate());
-  return;
 }
 
 void url_aggregator::set_search(const std::string_view input) {
