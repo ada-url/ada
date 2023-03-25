@@ -424,12 +424,10 @@ bool urltestdata_encoding(const char *source) {
                 ? ada_parse<result_type>(input, &*base_url)
                 : ada_parse<result_type>(input);
         if (!object["failure"].get(failure) && failure == true) {
-          printf("Expected failure\n");
           TEST_ASSERT(input_url.has_value(), !failure,
                       "Should not have succeeded " + element_string +
                           input_url->to_string());
         } else {
-          printf("Expected success\n");
           TEST_ASSERT(input_url.has_value(), true,
                       "Should not have failed " + element_string);
           // Next we test the 'to_string' method.
