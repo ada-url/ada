@@ -126,7 +126,6 @@ ada_really_inline uint32_t url_aggregator::get_pathname_length() const noexcept 
 }
 
 [[nodiscard]] ada_really_inline bool url_aggregator::is_at_path() const noexcept {
-  if (components.search_start != url_components::omitted || components.hash_start != url_components::omitted) { return false; }
   return buffer.size() == components.pathname_start;
 }
 
@@ -216,7 +215,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   // The common case is current_length == 0.
   buffer.erase(components.pathname_start, current_length);
   // next line is very uncommon and we should seek to optimize it accordingly.
-  if(begins_with_dashdash && !has_hostname() && !has_opaque_path) {
+  if (begins_with_dashdash && !has_opaque_path && !has_hostname()) {
     // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
     // then append U+002F (/) followed by U+002E (.) to output.
     buffer.insert(components.pathname_start, "/.");
@@ -245,9 +244,8 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   buffer.insert(ending_index, input);
 
-  uint32_t difference = uint32_t(input.size());
-  if (components.search_start != url_components::omitted) { components.search_start += difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+  if (components.search_start != url_components::omitted) { components.search_start += uint32_t(input.size()); }
+  if (components.hash_start != url_components::omitted) { components.hash_start += uint32_t(input.size()); }
 #if ADA_DEVELOPMENT_CHECKS
   std::string path_after = std::string(get_pathname());
   ADA_ASSERT_EQUAL(path_expected, path_after, "append_base_pathname problem after inserting "+std::string(input));
