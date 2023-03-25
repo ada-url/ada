@@ -600,39 +600,26 @@ inline void ada::url_aggregator::reserve(uint32_t capacity) {
   buffer.reserve(capacity);
 }
 
-inline bool url_aggregator::has_non_empty_username() const {
-  ada_log("url_aggregator::has_non_empty_username ");
-  /**
-   * https://user:pass@example.com:1234/foo/bar?baz#quux
-   *       |     |    |          | ^^^^|       |   |
-   *       |     |    |          | |   |       |   `----- hash_start
-   *       |     |    |          | |   |       `--------- search_start
-   *       |     |    |          | |   `----------------- pathname_start
-   *       |     |    |          | `--------------------- port
-   *       |     |    |          `----------------------- host_end
-   *       |     |    `---------------------------------- host_start
-   *       |     `--------------------------------------- username_end
-   *       `--------------------------------------------- protocol_end
-   */
+inline bool url_aggregator::has_non_empty_username() const noexcept {
+  ada_log("url_aggregator::has_non_empty_username");
   return components.protocol_end + 2 < components.username_end;
 }
 
-inline bool url_aggregator::has_non_empty_password() const {
+inline bool url_aggregator::has_non_empty_password() const noexcept {
   ada_log("url_aggregator::has_non_empty_password");
   return components.host_start - components.username_end > 0;
 }
 
-inline bool url_aggregator::has_password() const {
+inline bool url_aggregator::has_password() const noexcept {
   ada_log("url_aggregator::has_password");
   // This function does not care about the length of the password
-  return buffer.size() > components.username_end && buffer[components.username_end] == ':';
+  return components.host_start > components.username_end && buffer[components.username_end] == ':';
 }
 
 inline bool url_aggregator::has_empty_hostname() const noexcept {
-  if(!has_hostname()) { return false; }
   if(components.host_start == components.host_end) { return true; }
   if (components.host_end > components.host_start + 1) { return false; }
-  return buffer[components.host_start] == '@';
+  return components.username_end != components.host_start;
 }
 
 inline bool url_aggregator::has_port() const noexcept {
@@ -652,14 +639,13 @@ inline bool url_aggregator::has_dash_dot() const noexcept  {
     ADA_ASSERT_TRUE(buffer[components.pathname_start+1] == '/');
   }
 #endif
-  return components.pathname_start + 1 < buffer.size() && components.pathname_start == components.host_end + 2;
+  return components.pathname_start == components.host_end + 2 && components.pathname_start + 1 < buffer.size();
 }
 
 inline std::string_view url_aggregator::get_href() const noexcept {
   ada_log("url_aggregator::get_href");
   return buffer;
 }
-
 
 ada_really_inline size_t url_aggregator::parse_port(std::string_view view, bool check_trailing_content) noexcept {
   ada_log("url_aggregator::parse_port('", view, "') ", view.size());
