@@ -99,7 +99,12 @@ namespace ada::parser {
           // Otherwise, if c is U+003A (:), then:
           if ((input_position != input_size) && (url_data[input_position] == ':')) {
             ada_log("SCHEME the scheme should be ", url_data.substr(0,input_position));
-            if(!url.parse_scheme(url_data.substr(0,input_position))) { return url; }
+            if constexpr (result_type_is_ada_url) {
+              if(!url.parse_scheme(url_data.substr(0,input_position))) { return url; }
+            } else {
+              // we pass the colon along instead of painfully adding it back.
+              if(!url.parse_scheme_with_colon(url_data.substr(0,input_position+1))) { return url; }
+            }
             ada_log("SCHEME the scheme is ", url.get_protocol());
 
             // If url’s scheme is "file", then:
@@ -659,8 +664,7 @@ namespace ada::parser {
           ada_log("FILE ", helpers::substring(url_data, input_position));
           std::string_view file_view = helpers::substring(url_data, input_position);
 
-          // Set url’s scheme to "file".
-          url.set_scheme("file");
+          url.set_file_protocol();
           if constexpr (result_type_is_ada_url) {
             // Set url’s host to the empty string.
             url.host = "";

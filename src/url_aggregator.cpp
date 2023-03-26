@@ -69,7 +69,83 @@ template <bool has_state_override>
       if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
     }
 
-    set_scheme(std::move(_buffer));
+    set_scheme(_buffer);
+
+    if (has_state_override) {
+      // This is uncommon.
+      uint16_t urls_scheme_port = get_special_port();
+
+      if (urls_scheme_port) {
+        // If url’s port is url’s scheme’s default port, then set url’s port to null.
+        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
+      }
+    }
+  }
+  ADA_ASSERT_TRUE(validate());
+  return true;
+}
+
+
+template <bool has_state_override>
+[[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(const std::string_view input_with_colon) {
+  ada_log("url_aggregator::parse_scheme_with_colon ", input_with_colon);
+  ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input_with_colon, buffer));
+  std::string_view input{input_with_colon};
+  input.remove_suffix(1);
+  auto parsed_type = ada::scheme::get_scheme_type(input);
+  bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
+  /**
+   * In the common case, we will immediately recognize a special scheme (e.g., http, https),
+   * in which case, we can go really fast.
+   **/
+  if(is_input_special) { // fast path!!!
+    if (has_state_override) {
+      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+      if (is_special() != is_input_special) { return true; }
+
+      // If url includes credentials or has a non-null port, and buffer is "file", then return.
+      if ((includes_credentials() || components.port != url_components::omitted) && parsed_type == ada::scheme::type::FILE) { return true; }
+
+      // If url’s scheme is "file" and its host is an empty host, then return. An empty host is the empty string.
+      if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
+    }
+
+    type = parsed_type;
+    set_scheme_fast(input_with_colon);
+
+    if (has_state_override) {
+      // This is uncommon.
+      uint16_t urls_scheme_port = get_special_port();
+
+      if (urls_scheme_port) {
+        // If url’s port is url’s scheme’s default port, then set url’s port to null.
+        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
+      }
+    }
+  } else { // slow path
+    std::string _buffer = std::string(input);
+    // Next function is only valid if the input is ASCII and returns false
+    // otherwise, but it seems that we always have ascii content so we do not need
+    // to check the return value.
+    unicode::to_lower_ascii(_buffer.data(), _buffer.size());
+
+    if (has_state_override) {
+      // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
+      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
+      if (is_special() != ada::scheme::is_special(_buffer)) { return true; }
+
+      // If url includes credentials or has a non-null port, and buffer is "file", then return.
+      if ((includes_credentials() || components.port != url_components::omitted) && _buffer == "file") {
+        return true;
+      }
+
+      // If url’s scheme is "file" and its host is an empty host, then return.
+      // An empty host is the empty string.
+      if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
+    }
+
+    set_scheme(_buffer);
 
     if (has_state_override) {
       // This is uncommon.
@@ -107,21 +183,45 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   ADA_ASSERT_TRUE(validate());
 }
 
+inline void url_aggregator::set_scheme_fast(std::string_view new_scheme_with_colon) noexcept {
+  ada_log("url_aggregator::set_scheme_fast ", new_scheme_with_colon);
+  ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!new_scheme_with_colon.empty() && new_scheme_with_colon.back() == ':');
+  uint32_t new_difference = uint32_t(new_scheme_with_colon.size()) - components.protocol_end;
+
+  if(buffer.empty()) {
+    buffer.append(new_scheme_with_colon);
+  } else {
+    buffer.erase(0, components.protocol_end);
+    buffer.insert(0, new_scheme_with_colon);
+  }
+  components.protocol_end = uint32_t(new_scheme_with_colon.size());
+
+  // Update the rest of the components.
+  components.username_end += new_difference;
+  components.host_start += new_difference;
+  components.host_end += new_difference;
+  components.pathname_start += new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+  ADA_ASSERT_TRUE(validate());
+}
+
+
 inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
   ada_log("url_aggregator::set_scheme ", new_scheme);
   ADA_ASSERT_TRUE(validate());
-  uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end;
-
-  // Optimization opportunity: Get rid of this branch
-  if (new_scheme.back() != ':') { new_difference += 1; }
+  ADA_ASSERT_TRUE(new_scheme.empty() || new_scheme.back() != ':');
+  uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end + 1;
 
   type = ada::scheme::get_scheme_type(new_scheme);
-  buffer.erase(0, components.protocol_end);
-  buffer.insert(0, helpers::concat(new_scheme, ":"));
+  if(buffer.empty()) {
+    buffer.append(helpers::concat(new_scheme, ":"));
+  } else {
+    buffer.erase(0, components.protocol_end);
+    buffer.insert(0, helpers::concat(new_scheme, ":"));
+  }
   components.protocol_end = uint32_t(new_scheme.size() + 1);
-
-  // No need to update the components
-  if (new_difference == 0) { return; }
 
   // Update the rest of the components.
   components.username_end += new_difference;

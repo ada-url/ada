@@ -42,12 +42,17 @@ namespace ada {
     void set_search(const std::string_view input);
     void set_hash(const std::string_view input);
     inline void set_scheme(std::string_view new_scheme) noexcept;
+    /** @private */
+    inline void set_scheme_fast(std::string_view new_scheme_with_colon) noexcept;
+
     inline void copy_scheme(const url_aggregator& u) noexcept;
 
     [[nodiscard]] bool has_valid_domain() const noexcept override;
 
     /** @private */
     inline bool has_authority() const noexcept;
+    /** @private set this URL's type to file */
+    inline void set_file_protocol();
     /** @return true if it has an host but it is the empty string */
     [[nodiscard]] inline bool has_empty_hostname() const noexcept;
     /**
@@ -236,7 +241,8 @@ namespace ada {
     /** @private */
     template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
-
+    template <bool has_state_override = false>
+    [[nodiscard]] ada_really_inline bool parse_scheme_with_colon(const std::string_view input);
     /**
      * Useful for implementing efficient serialization for the URL.
      *

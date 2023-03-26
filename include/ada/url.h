@@ -120,6 +120,8 @@ struct url : url_base {
   inline bool base_fragment_has_value() const override;
   /** @private */
   inline bool base_search_has_value() const override;
+  /** @private set this URL's type to file */
+  inline void set_file_protocol();
   /** @return true if the URL has host */
   [[nodiscard]] inline bool has_hostname() const noexcept;
   /** @return true if it has an host but it is the empty string */

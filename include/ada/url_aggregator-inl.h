@@ -685,6 +685,31 @@ ada_really_inline size_t url_aggregator::parse_port(std::string_view view, bool 
   return consumed;
 }
 
+inline void url_aggregator::set_file_protocol() {
+  ada_log("url_aggregator::set_file_protocol ");
+  ADA_ASSERT_TRUE(validate());
+  type =  ada::scheme::type::FILE;
+  uint32_t new_difference = 5 - components.protocol_end;
+
+  if(buffer.empty()) {
+    buffer.append("file:");
+  } else {
+    buffer.erase(0, components.protocol_end);
+    buffer.insert(0, "file:");
+  }
+  components.protocol_end = 5;
+
+  // Update the rest of the components.
+  components.username_end += new_difference;
+  components.host_start += new_difference;
+  components.host_end += new_difference;
+  components.pathname_start += new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+  ADA_ASSERT_TRUE(validate());
+}
+
+
 }
 
 #endif // ADA_URL_AGGREGATOR_INL_H
