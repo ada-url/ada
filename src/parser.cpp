@@ -37,12 +37,6 @@ namespace ada::parser {
     // we must return.
     if(base_url != nullptr) { url.is_valid &= base_url->is_valid; }
     if(!url.is_valid) { return url; }
-    if constexpr (result_type_is_ada_url_aggregator) {
-      // Most of the time, we just need user_input.size().
-      // In some instances, we may need more.
-      uint32_t reserve_capacity = uint32_t(user_input.size()) + 256;
-      url.reserve(reserve_capacity);
-    }
     std::string tmp_buffer;
     std::string_view internal_input;
     if(unicode::has_tabs_or_newline(user_input)) {
@@ -664,7 +658,7 @@ namespace ada::parser {
           ada_log("FILE ", helpers::substring(url_data, input_position));
           std::string_view file_view = helpers::substring(url_data, input_position);
 
-          url.set_file_protocol();
+          url.set_protocol_as_file();
           if constexpr (result_type_is_ada_url) {
             // Set url’s host to the empty string.
             url.host = "";

@@ -42,8 +42,8 @@ namespace ada {
     void set_search(const std::string_view input);
     void set_hash(const std::string_view input);
     inline void set_scheme(std::string_view new_scheme) noexcept;
-    /** @private */
-    inline void set_scheme_fast(std::string_view new_scheme_with_colon) noexcept;
+    /** @private fast function to set the scheme from a view with a colon in the buffer, does not change type */
+    inline void set_scheme_from_view_with_colon(std::string_view new_scheme_with_colon) noexcept;
 
     inline void copy_scheme(const url_aggregator& u) noexcept;
 
@@ -52,9 +52,7 @@ namespace ada {
     /** @private */
     inline bool has_authority() const noexcept;
     /** @private set this URL's type to file */
-    inline void set_file_protocol();
-    /** @return true if it has an host but it is the empty string */
-    [[nodiscard]] inline bool has_empty_hostname() const noexcept;
+    inline void set_protocol_as_file();
     /**
      * The origin getter steps are to return the serialization of this’s URL’s
      * origin. [HTML]
@@ -226,12 +224,14 @@ namespace ada {
     inline bool has_dash_dot() const noexcept;
     /** @private */
     void delete_dash_dot();
+    /** @return true if it has an host but it is the empty string */
+    [[nodiscard]] inline bool has_empty_hostname() const noexcept;
     /** @private */
-    [[nodiscard]] inline bool has_non_empty_username() const;
+    [[nodiscard]] inline bool has_non_empty_username() const noexcept;
     /** @private */
-    [[nodiscard]] inline bool has_non_empty_password() const;
+    [[nodiscard]] inline bool has_non_empty_password() const noexcept;
     /** @private */
-    [[nodiscard]] inline bool has_password() const;
+    [[nodiscard]] inline bool has_password() const noexcept;
     /** @return true if the URL has a (non default) port */
     [[nodiscard]] inline bool has_port() const noexcept;
     /** @return true if the URL has host */
@@ -240,9 +240,8 @@ namespace ada {
     inline void consume_prepared_path(std::string_view input);
     /** @private */
     template <bool has_state_override = false>
-    [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
-    template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme_with_colon(const std::string_view input);
+
     /**
      * Useful for implementing efficient serialization for the URL.
      *

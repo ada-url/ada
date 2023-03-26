@@ -14,79 +14,6 @@
 
 namespace ada {
 template <bool has_state_override>
-[[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme(const std::string_view input) {
-  ada_log("url_aggregator::parse_scheme ", input);
-  ADA_ASSERT_TRUE(validate());
-  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  auto parsed_type = ada::scheme::get_scheme_type(input);
-  bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
-  /**
-   * In the common case, we will immediately recognize a special scheme (e.g., http, https),
-   * in which case, we can go really fast.
-   **/
-  if(is_input_special) { // fast path!!!
-    if (has_state_override) {
-      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
-      if (is_special() != is_input_special) { return true; }
-
-      // If url includes credentials or has a non-null port, and buffer is "file", then return.
-      if ((includes_credentials() || components.port != url_components::omitted) && parsed_type == ada::scheme::type::FILE) { return true; }
-
-      // If url’s scheme is "file" and its host is an empty host, then return. An empty host is the empty string.
-      if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
-    }
-
-    set_scheme(input);
-
-    if (has_state_override) {
-      // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
-
-      if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
-      }
-    }
-  } else { // slow path
-    std::string _buffer = std::string(input);
-    // Next function is only valid if the input is ASCII and returns false
-    // otherwise, but it seems that we always have ascii content so we do not need
-    // to check the return value.
-    unicode::to_lower_ascii(_buffer.data(), _buffer.size());
-
-    if (has_state_override) {
-      // If url’s scheme is a special scheme and buffer is not a special scheme, then return.
-      // If url’s scheme is not a special scheme and buffer is a special scheme, then return.
-      if (is_special() != ada::scheme::is_special(_buffer)) { return true; }
-
-      // If url includes credentials or has a non-null port, and buffer is "file", then return.
-      if ((includes_credentials() || components.port != url_components::omitted) && _buffer == "file") {
-        return true;
-      }
-
-      // If url’s scheme is "file" and its host is an empty host, then return.
-      // An empty host is the empty string.
-      if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
-    }
-
-    set_scheme(_buffer);
-
-    if (has_state_override) {
-      // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
-
-      if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
-      }
-    }
-  }
-  ADA_ASSERT_TRUE(validate());
-  return true;
-}
-
-
-template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(const std::string_view input_with_colon) {
   ada_log("url_aggregator::parse_scheme_with_colon ", input_with_colon);
   ADA_ASSERT_TRUE(validate());
@@ -112,16 +39,14 @@ template <bool has_state_override>
     }
 
     type = parsed_type;
-    set_scheme_fast(input_with_colon);
+    set_scheme_from_view_with_colon(input_with_colon);
 
     if (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
-      if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
-      }
+      // If url’s port is url’s scheme’s default port, then set url’s port to null.
+      if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
     }
   } else { // slow path
     std::string _buffer = std::string(input);
@@ -151,10 +76,8 @@ template <bool has_state_override>
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
-      if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
-      }
+      // If url’s port is url’s scheme’s default port, then set url’s port to null.
+      if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
     }
   }
   ADA_ASSERT_TRUE(validate());
@@ -164,6 +87,7 @@ template <bool has_state_override>
 inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   ada_log("url_aggregator::copy_scheme ", u.buffer);
   ADA_ASSERT_TRUE(validate());
+  // next line could overflow but unsigned arithmetic has well-defined overflows.
   uint32_t new_difference = u.components.protocol_end - components.protocol_end;
   type = u.type;
   buffer.erase(0, components.protocol_end);
@@ -183,10 +107,11 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void url_aggregator::set_scheme_fast(std::string_view new_scheme_with_colon) noexcept {
-  ada_log("url_aggregator::set_scheme_fast ", new_scheme_with_colon);
+inline void url_aggregator::set_scheme_from_view_with_colon(std::string_view new_scheme_with_colon) noexcept {
+  ada_log("url_aggregator::set_scheme_from_view_with_colon ", new_scheme_with_colon);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!new_scheme_with_colon.empty() && new_scheme_with_colon.back() == ':');
+  // next line could overflow but unsigned arithmetic has well-defined overflows.
   uint32_t new_difference = uint32_t(new_scheme_with_colon.size()) - components.protocol_end;
 
   if(buffer.empty()) {
@@ -195,7 +120,7 @@ inline void url_aggregator::set_scheme_fast(std::string_view new_scheme_with_col
     buffer.erase(0, components.protocol_end);
     buffer.insert(0, new_scheme_with_colon);
   }
-  components.protocol_end = uint32_t(new_scheme_with_colon.size());
+  components.protocol_end += new_difference;
 
   // Update the rest of the components.
   components.username_end += new_difference;
@@ -212,6 +137,7 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
   ada_log("url_aggregator::set_scheme ", new_scheme);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(new_scheme.empty() || new_scheme.back() != ':');
+  // next line could overflow but unsigned arithmetic has well-defined overflows.
   uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end + 1;
 
   type = ada::scheme::get_scheme_type(new_scheme);
@@ -249,7 +175,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   std::string::iterator pointer = std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
-    return parse_scheme<true>(std::string_view(view.data(), pointer - view.begin()));
+    return parse_scheme_with_colon<true>(std::string_view(view.data(), pointer - view.begin() + 1));
   }
   return false;
 }
@@ -330,29 +256,18 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
 
   // If url is special, then:
   if (is_special()) {
-    std::string path{};
     if(internal_input.empty()) {
       update_base_pathname("/");
-      return;
     } else if((internal_input[0] == '/') || (internal_input[0] == '\\')) {
-      helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      update_base_pathname(path);
-      return;
+      consume_prepared_path(internal_input.substr(1));
     } else {
-      helpers::parse_prepared_path(internal_input, type, path);
-      update_base_pathname(path);
-      return;
+      consume_prepared_path(internal_input);
     }
   } else if (!internal_input.empty()) {
-    std::string path{};
     if(internal_input[0] == '/') {
-      helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      update_base_pathname(path);
-      return;
+      consume_prepared_path(internal_input.substr(1));
     } else {
-      helpers::parse_prepared_path(internal_input, type, path);
-      update_base_pathname(path);
-      return;
+      consume_prepared_path(internal_input);
     }
   } else {
     // Non-special URLs with an empty host can have their paths erased
@@ -362,7 +277,6 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
     }
   }
   ADA_ASSERT_TRUE(validate());
-  return;
 }
 
 void url_aggregator::set_search(const std::string_view input) {
@@ -1113,9 +1027,10 @@ std::string url_aggregator::to_diagram() const {
       line2[i] = '-';
     }
     line2.append(" hash_start");
+    answer.append(line2);
+    answer.append("\n");
   }
-  answer.append(line2);
-  answer.append("\n");
+
 
   std::string line3 = line1;
   if(components.search_start != url_components::omitted) {
@@ -1127,9 +1042,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line3.append(" search_start ");
     line3.append(std::to_string(components.search_start));
+    answer.append(line3);
+    answer.append("\n");
   }
-  answer.append(line3);
-  answer.append("\n");
+
 
   std::string line4 = line1;
   if(components.pathname_start != buffer.size()) {
@@ -1140,9 +1056,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line4.append(" pathname_start ");
     line4.append(std::to_string(components.pathname_start));
+    answer.append(line4);
+    answer.append("\n");
   }
-  answer.append(line4);
-  answer.append("\n");
+
 
   std::string line5 = line1;
   if(components.host_end != buffer.size()) {
@@ -1154,9 +1071,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line5.append(" host_end ");
     line5.append(std::to_string(components.host_end));
+    answer.append(line5);
+    answer.append("\n");
   }
-  answer.append(line5);
-  answer.append("\n");
+
 
   std::string line6 = line1;
   if(components.host_start != buffer.size()) {
@@ -1168,9 +1086,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line6.append(" host_start ");
     line6.append(std::to_string(components.host_start));
+    answer.append(line6);
+    answer.append("\n");
   }
-  answer.append(line6);
-  answer.append("\n");
+
 
   std::string line7 = line1;
   if(components.username_end != buffer.size()) {
@@ -1182,9 +1101,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line7.append(" username_end ");
     line7.append(std::to_string(components.username_end));
+    answer.append(line7);
+    answer.append("\n");
   }
-  answer.append(line7);
-  answer.append("\n");
+
 
   std::string line8 = line1;
   if(components.protocol_end != buffer.size()) {
@@ -1196,9 +1116,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line8.append(" protocol_end ");
     line8.append(std::to_string(components.protocol_end));
+    answer.append(line8);
+    answer.append("\n");
   }
-  answer.append(line8);
-  answer.append("\n");
+
 
   if(components.hash_start == url_components::omitted) {
     answer.append("note: hash omitted\n");

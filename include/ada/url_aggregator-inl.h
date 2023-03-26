@@ -97,6 +97,7 @@ inline void url_aggregator::update_base_hostname(const std::string_view input) {
 
   bool has_credential = components.protocol_end + 2 < components.host_start;
   uint32_t current_length = components.host_end - components.host_start;
+  // next line could overflow but unsigned arithmetic has well-defined overflows.
   uint32_t new_difference = uint32_t(input.size()) - current_length;
   // The common case is current_length == 0.
   buffer.erase(components.host_start, current_length);
@@ -137,28 +138,30 @@ inline void url_aggregator::update_base_search(std::string_view input) {
     return;
   }
 
-  // Make sure search is deleted and hash_start index is correct.
-  if (components.search_start != url_components::omitted) { // Uncommon path
-    uint32_t search_end = uint32_t(buffer.size());
-    if (components.hash_start != url_components::omitted) {
-      search_end = components.hash_start;
+  if (input[0] == '?') { input.remove_prefix(1); }
+
+  if (components.hash_start == url_components::omitted) {
+    if (components.search_start == url_components::omitted) {
+      components.search_start = uint32_t(buffer.size());
+      buffer += "?";
+    } else {
+      buffer.resize(components.search_start + 1);
+    }
+
+    buffer.append(input);
+  } else {
+    if (components.search_start == url_components::omitted) {
+      components.search_start = components.hash_start;
+    } else {
+      buffer.erase(components.search_start, components.hash_start - components.search_start);
       components.hash_start = components.search_start;
     }
-    buffer.erase(components.search_start, search_end - components.search_start);
+
+    buffer.insert(components.search_start, "?");
+    buffer.insert(components.search_start + 1, input);
+    components.hash_start += uint32_t(input.size() + 1); // Do not forget `?`
   }
 
-  uint32_t input_size = uint32_t(input.size());
-  components.search_start = components.pathname_start + get_pathname_length();
-  // The common case here is components.search_start == buffer.size().
-
-  if (input[0] != '?') {
-    // If input does not start with "?", we need to add it.
-    buffer.insert(components.search_start, helpers::concat("?", input));
-    input_size++;
-  } else {
-    buffer.insert(components.search_start, input);
-  }
-  if (components.hash_start != url_components::omitted) { components.hash_start += input_size; }
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -166,31 +169,33 @@ inline void url_aggregator::update_base_search(std::string_view input, const uin
   ada_log("url_aggregator::update_base_search ", input, " with encoding parameter ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  // Make sure search is deleted and hash_start index is correct.
-  if (components.search_start != url_components::omitted) { // uncommon path
-    uint32_t search_end = uint32_t(buffer.size());
-    if (components.hash_start != url_components::omitted) {
-      search_end = components.hash_start;
-      components.hash_start = components.search_start;
-    }
-    buffer.erase(components.search_start, search_end - components.search_start);
-  } else {
-    uint32_t search_ends = uint32_t(buffer.size());
-    if (components.hash_start != url_components::omitted) { search_ends = components.hash_start; }
-    components.search_start = search_ends;
-  }
-  // The common case is components.search_start == buffer.size().
-  buffer.insert(components.search_start, "?");
 
-  if (components.hash_start == url_components::omitted) { // common case
+  if (components.hash_start == url_components::omitted) {
+    if (components.search_start == url_components::omitted) {
+      components.search_start = uint32_t(buffer.size());
+      buffer += "?";
+    } else {
+      buffer.resize(components.search_start + 1);
+    }
+
     bool encoding_required = unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
     // When encoding_required is false, then buffer is left unchanged, and percent encoding was not deemed required.
     if (!encoding_required) { buffer.append(input); }
-  } else { // slow path
+  } else {
+    if (components.search_start == url_components::omitted) {
+      components.search_start = components.hash_start;
+    } else {
+      buffer.erase(components.search_start, components.hash_start - components.search_start);
+      components.hash_start = components.search_start;
+    }
+
+    buffer.insert(components.search_start, "?");
+
     std::string encoded = unicode::percent_encode(input, query_percent_encode_set);
     buffer.insert(components.search_start + 1, encoded);
     components.hash_start += uint32_t(encoded.size() + 1); // Do not forget `?`
   }
+
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -210,7 +215,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   // The common case is current_length == 0.
   buffer.erase(components.pathname_start, current_length);
   // next line is very uncommon and we should seek to optimize it accordingly.
-  if(begins_with_dashdash && !has_hostname() && !has_opaque_path) {
+  if (begins_with_dashdash && !has_opaque_path && !has_hostname()) {
     // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
     // then append U+002F (/) followed by U+002E (.) to output.
     buffer.insert(components.pathname_start, "/.");
@@ -239,9 +244,8 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
   else if (components.hash_start != url_components::omitted) { ending_index = components.hash_start; }
   buffer.insert(ending_index, input);
 
-  uint32_t difference = uint32_t(input.size());
-  if (components.search_start != url_components::omitted) { components.search_start += difference; }
-  if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
+  if (components.search_start != url_components::omitted) { components.search_start += uint32_t(input.size()); }
+  if (components.hash_start != url_components::omitted) { components.hash_start += uint32_t(input.size()); }
 #if ADA_DEVELOPMENT_CHECKS
   std::string path_after = std::string(get_pathname());
   ADA_ASSERT_EQUAL(path_expected, path_after, "append_base_pathname problem after inserting "+std::string(input));
@@ -299,7 +303,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
 
   uint32_t difference = uint32_t(input.size());
   buffer.insert(components.username_end, input);
-  components.username_end += uint32_t(input.size());
+  components.username_end += difference;
   components.host_start += difference;
 
   if (buffer[components.host_start] != '@' && components.host_start != components.host_end) {
@@ -567,7 +571,7 @@ inline bool url_aggregator::cannot_have_credentials_or_port() const {
   ada_log("url_aggregator::has_authority");
   // Performance: instead of doing this potentially expensive check, we could have
   // a boolean in the struct.
-  return (components.protocol_end + 2 <= buffer.size()) && helpers::substring(buffer, components.protocol_end, components.protocol_end + 2) == "//";
+  return components.protocol_end + 2 <= components.host_start && helpers::substring(buffer, components.protocol_end, components.protocol_end + 2) == "//";
 }
 
 [[nodiscard]] inline bool ada::url_aggregator::has_hostname() const noexcept {
@@ -598,39 +602,26 @@ inline void ada::url_aggregator::reserve(uint32_t capacity) {
   buffer.reserve(capacity);
 }
 
-inline bool url_aggregator::has_non_empty_username() const {
-  ada_log("url_aggregator::has_non_empty_username ");
-  /**
-   * https://user:pass@example.com:1234/foo/bar?baz#quux
-   *       |     |    |          | ^^^^|       |   |
-   *       |     |    |          | |   |       |   `----- hash_start
-   *       |     |    |          | |   |       `--------- search_start
-   *       |     |    |          | |   `----------------- pathname_start
-   *       |     |    |          | `--------------------- port
-   *       |     |    |          `----------------------- host_end
-   *       |     |    `---------------------------------- host_start
-   *       |     `--------------------------------------- username_end
-   *       `--------------------------------------------- protocol_end
-   */
+inline bool url_aggregator::has_non_empty_username() const noexcept {
+  ada_log("url_aggregator::has_non_empty_username");
   return components.protocol_end + 2 < components.username_end;
 }
 
-inline bool url_aggregator::has_non_empty_password() const {
+inline bool url_aggregator::has_non_empty_password() const noexcept {
   ada_log("url_aggregator::has_non_empty_password");
   return components.host_start - components.username_end > 0;
 }
 
-inline bool url_aggregator::has_password() const {
+inline bool url_aggregator::has_password() const noexcept {
   ada_log("url_aggregator::has_password");
   // This function does not care about the length of the password
-  return buffer.size() > components.username_end && buffer[components.username_end] == ':';
+  return components.host_start > components.username_end && buffer[components.username_end] == ':';
 }
 
 inline bool url_aggregator::has_empty_hostname() const noexcept {
-  if(!has_hostname()) { return false; }
   if(components.host_start == components.host_end) { return true; }
   if (components.host_end > components.host_start + 1) { return false; }
-  return buffer[components.host_start] == '@';
+  return components.username_end != components.host_start;
 }
 
 inline bool url_aggregator::has_port() const noexcept {
@@ -639,6 +630,8 @@ inline bool url_aggregator::has_port() const noexcept {
 }
 
 inline bool url_aggregator::has_dash_dot() const noexcept  {
+  // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
+  // and url’s path[0] is the empty string, then append U+002F (/) followed by U+002E (.) to output.
   ada_log("url_aggregator::has_dash_dot");
   // Performance: instead of doing this potentially expensive check, we could just
   // have a boolean value in the structure.
@@ -650,14 +643,13 @@ inline bool url_aggregator::has_dash_dot() const noexcept  {
     ADA_ASSERT_TRUE(buffer[components.pathname_start+1] == '/');
   }
 #endif
-  return components.pathname_start + 1 < buffer.size() && components.pathname_start == components.host_end + 2;
+  return !has_opaque_path && components.pathname_start == components.host_end + 2 && components.pathname_start + 1 < buffer.size();
 }
 
 inline std::string_view url_aggregator::get_href() const noexcept {
   ada_log("url_aggregator::get_href");
   return buffer;
 }
-
 
 ada_really_inline size_t url_aggregator::parse_port(std::string_view view, bool check_trailing_content) noexcept {
   ada_log("url_aggregator::parse_port('", view, "') ", view.size());
@@ -685,10 +677,11 @@ ada_really_inline size_t url_aggregator::parse_port(std::string_view view, bool 
   return consumed;
 }
 
-inline void url_aggregator::set_file_protocol() {
-  ada_log("url_aggregator::set_file_protocol ");
+inline void url_aggregator::set_protocol_as_file() {
+  ada_log("url_aggregator::set_protocol_as_file ");
   ADA_ASSERT_TRUE(validate());
   type =  ada::scheme::type::FILE;
+  // next line could overflow but unsigned arithmetic has well-defined overflows.
   uint32_t new_difference = 5 - components.protocol_end;
 
   if(buffer.empty()) {
