@@ -14,10 +14,12 @@
 
 namespace ada {
 template <bool has_state_override>
-[[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme(const std::string_view input) {
-  ada_log("url_aggregator::parse_scheme ", input);
+[[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(const std::string_view input_with_colon) {
+  ada_log("url_aggregator::parse_scheme_with_colon ", input_with_colon);
   ADA_ASSERT_TRUE(validate());
-  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
+  ADA_ASSERT_TRUE(!helpers::overlaps(input_with_colon, buffer));
+  std::string_view input{input_with_colon};
+  input.remove_suffix(1);
   auto parsed_type = ada::scheme::get_scheme_type(input);
   bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
   /**
@@ -36,16 +38,15 @@ template <bool has_state_override>
       if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
     }
 
-    set_scheme(input);
+    type = parsed_type;
+    set_scheme_from_view_with_colon(input_with_colon);
 
     if (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
-      if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
-      }
+      // If url’s port is url’s scheme’s default port, then set url’s port to null.
+      if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
     }
   } else { // slow path
     std::string _buffer = std::string(input);
@@ -69,16 +70,14 @@ template <bool has_state_override>
       if (type == ada::scheme::type::FILE && components.host_start == components.host_end) { return true; }
     }
 
-    set_scheme(std::move(_buffer));
+    set_scheme(_buffer);
 
     if (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
-      if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to null.
-        if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
-      }
+      // If url’s port is url’s scheme’s default port, then set url’s port to null.
+      if (components.port == urls_scheme_port) { components.port = url_components::omitted; }
     }
   }
   ADA_ASSERT_TRUE(validate());
@@ -88,6 +87,7 @@ template <bool has_state_override>
 inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   ada_log("url_aggregator::copy_scheme ", u.buffer);
   ADA_ASSERT_TRUE(validate());
+  // next line could overflow but unsigned arithmetic has well-defined overflows.
   uint32_t new_difference = u.components.protocol_end - components.protocol_end;
   type = u.type;
   buffer.erase(0, components.protocol_end);
@@ -107,21 +107,47 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   ADA_ASSERT_TRUE(validate());
 }
 
+inline void url_aggregator::set_scheme_from_view_with_colon(std::string_view new_scheme_with_colon) noexcept {
+  ada_log("url_aggregator::set_scheme_from_view_with_colon ", new_scheme_with_colon);
+  ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!new_scheme_with_colon.empty() && new_scheme_with_colon.back() == ':');
+  // next line could overflow but unsigned arithmetic has well-defined overflows.
+  uint32_t new_difference = uint32_t(new_scheme_with_colon.size()) - components.protocol_end;
+
+  if(buffer.empty()) {
+    buffer.append(new_scheme_with_colon);
+  } else {
+    buffer.erase(0, components.protocol_end);
+    buffer.insert(0, new_scheme_with_colon);
+  }
+  components.protocol_end += new_difference;
+
+  // Update the rest of the components.
+  components.username_end += new_difference;
+  components.host_start += new_difference;
+  components.host_end += new_difference;
+  components.pathname_start += new_difference;
+  if (components.search_start != url_components::omitted) { components.search_start += new_difference; }
+  if (components.hash_start != url_components::omitted) { components.hash_start += new_difference; }
+  ADA_ASSERT_TRUE(validate());
+}
+
+
 inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
   ada_log("url_aggregator::set_scheme ", new_scheme);
   ADA_ASSERT_TRUE(validate());
-  uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end;
-
-  // Optimization opportunity: Get rid of this branch
-  if (new_scheme.back() != ':') { new_difference += 1; }
+  ADA_ASSERT_TRUE(new_scheme.empty() || new_scheme.back() != ':');
+  // next line could overflow but unsigned arithmetic has well-defined overflows.
+  uint32_t new_difference = uint32_t(new_scheme.size()) - components.protocol_end + 1;
 
   type = ada::scheme::get_scheme_type(new_scheme);
-  buffer.erase(0, components.protocol_end);
-  buffer.insert(0, helpers::concat(new_scheme, ":"));
+  if(buffer.empty()) {
+    buffer.append(helpers::concat(new_scheme, ":"));
+  } else {
+    buffer.erase(0, components.protocol_end);
+    buffer.insert(0, helpers::concat(new_scheme, ":"));
+  }
   components.protocol_end = uint32_t(new_scheme.size() + 1);
-
-  // No need to update the components
-  if (new_difference == 0) { return; }
 
   // Update the rest of the components.
   components.username_end += new_difference;
@@ -149,7 +175,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   std::string::iterator pointer = std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
-    return parse_scheme<true>(std::string_view(view.data(), pointer - view.begin()));
+    return parse_scheme_with_colon<true>(std::string_view(view.data(), pointer - view.begin() + 1));
   }
   return false;
 }
@@ -1001,9 +1027,10 @@ std::string url_aggregator::to_diagram() const {
       line2[i] = '-';
     }
     line2.append(" hash_start");
+    answer.append(line2);
+    answer.append("\n");
   }
-  answer.append(line2);
-  answer.append("\n");
+
 
   std::string line3 = line1;
   if(components.search_start != url_components::omitted) {
@@ -1015,9 +1042,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line3.append(" search_start ");
     line3.append(std::to_string(components.search_start));
+    answer.append(line3);
+    answer.append("\n");
   }
-  answer.append(line3);
-  answer.append("\n");
+
 
   std::string line4 = line1;
   if(components.pathname_start != buffer.size()) {
@@ -1028,9 +1056,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line4.append(" pathname_start ");
     line4.append(std::to_string(components.pathname_start));
+    answer.append(line4);
+    answer.append("\n");
   }
-  answer.append(line4);
-  answer.append("\n");
+
 
   std::string line5 = line1;
   if(components.host_end != buffer.size()) {
@@ -1042,9 +1071,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line5.append(" host_end ");
     line5.append(std::to_string(components.host_end));
+    answer.append(line5);
+    answer.append("\n");
   }
-  answer.append(line5);
-  answer.append("\n");
+
 
   std::string line6 = line1;
   if(components.host_start != buffer.size()) {
@@ -1056,9 +1086,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line6.append(" host_start ");
     line6.append(std::to_string(components.host_start));
+    answer.append(line6);
+    answer.append("\n");
   }
-  answer.append(line6);
-  answer.append("\n");
+
 
   std::string line7 = line1;
   if(components.username_end != buffer.size()) {
@@ -1070,9 +1101,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line7.append(" username_end ");
     line7.append(std::to_string(components.username_end));
+    answer.append(line7);
+    answer.append("\n");
   }
-  answer.append(line7);
-  answer.append("\n");
+
 
   std::string line8 = line1;
   if(components.protocol_end != buffer.size()) {
@@ -1084,9 +1116,10 @@ std::string url_aggregator::to_diagram() const {
     }
     line8.append(" protocol_end ");
     line8.append(std::to_string(components.protocol_end));
+    answer.append(line8);
+    answer.append("\n");
   }
-  answer.append(line8);
-  answer.append("\n");
+
 
   if(components.hash_start == url_components::omitted) {
     answer.append("note: hash omitted\n");
