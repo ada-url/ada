@@ -37,6 +37,22 @@ namespace ada::parser {
     // we must return.
     if(base_url != nullptr) { url.is_valid &= base_url->is_valid; }
     if(!url.is_valid) { return url; }
+    if constexpr (result_type_is_ada_url_aggregator) {
+      // Most of the time, we just need user_input.size().
+      // In some instances, we may need a bit more.
+      ///////////////////////////
+      // This is *very* important. This line should be removed
+      // hastily. There are principled reasons why reserve is important
+      // for performance. If you have a benchmark with small inputs,
+      // it may not matter, but in other instances, it could.
+      ////
+      // This rounds up to the next power of two.
+      uint32_t reserve_capacity = (0xFFFFFFFF >> helpers::leading_zeroes(uint32_t(user_input.size()))) + 1;
+      url.reserve(reserve_capacity);
+      //
+      //
+      //
+    }
     std::string tmp_buffer;
     std::string_view internal_input;
     if(unicode::has_tabs_or_newline(user_input)) {
