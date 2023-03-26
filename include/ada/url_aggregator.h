@@ -42,10 +42,17 @@ namespace ada {
     void set_search(const std::string_view input);
     void set_hash(const std::string_view input);
     inline void set_scheme(std::string_view new_scheme) noexcept;
+    /** @private fast function to set the scheme from a view with a colon in the buffer, does not change type */
+    inline void set_scheme_from_view_with_colon(std::string_view new_scheme_with_colon) noexcept;
+
     inline void copy_scheme(const url_aggregator& u) noexcept;
 
     [[nodiscard]] bool has_valid_domain() const noexcept override;
 
+    /** @private */
+    inline bool has_authority() const noexcept;
+    /** @private set this URL's type to file */
+    inline void set_protocol_as_file();
     /**
      * The origin getter steps are to return the serialization of this’s URL’s
      * origin. [HTML]
@@ -233,9 +240,7 @@ namespace ada {
     inline void consume_prepared_path(std::string_view input);
     /** @private */
     template <bool has_state_override = false>
-    [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
-    /** @private */
-    inline bool has_authority() const noexcept;
+    [[nodiscard]] ada_really_inline bool parse_scheme_with_colon(const std::string_view input);
 
     /**
      * Useful for implementing efficient serialization for the URL.

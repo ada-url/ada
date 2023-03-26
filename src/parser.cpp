@@ -37,6 +37,22 @@ namespace ada::parser {
     // we must return.
     if(base_url != nullptr) { url.is_valid &= base_url->is_valid; }
     if(!url.is_valid) { return url; }
+    if constexpr (result_type_is_ada_url_aggregator) {
+      // Most of the time, we just need user_input.size().
+      // In some instances, we may need a bit more.
+      ///////////////////////////
+      // This is *very* important. This line should be removed
+      // hastily. There are principled reasons why reserve is important
+      // for performance. If you have a benchmark with small inputs,
+      // it may not matter, but in other instances, it could.
+      ////
+      // This rounds up to the next power of two.
+      uint32_t reserve_capacity = (0xFFFFFFFF >> helpers::leading_zeroes(uint32_t(user_input.size()))) + 1;
+      url.reserve(reserve_capacity);
+      //
+      //
+      //
+    }
     std::string tmp_buffer;
     std::string_view internal_input;
     if(unicode::has_tabs_or_newline(user_input)) {
@@ -93,7 +109,12 @@ namespace ada::parser {
           // Otherwise, if c is U+003A (:), then:
           if ((input_position != input_size) && (url_data[input_position] == ':')) {
             ada_log("SCHEME the scheme should be ", url_data.substr(0,input_position));
-            if(!url.parse_scheme(url_data.substr(0,input_position))) { return url; }
+            if constexpr (result_type_is_ada_url) {
+              if(!url.parse_scheme(url_data.substr(0,input_position))) { return url; }
+            } else {
+              // we pass the colon along instead of painfully adding it back.
+              if(!url.parse_scheme_with_colon(url_data.substr(0,input_position+1))) { return url; }
+            }
             ada_log("SCHEME the scheme is ", url.get_protocol());
 
             // If url’s scheme is "file", then:
@@ -653,8 +674,7 @@ namespace ada::parser {
           ada_log("FILE ", helpers::substring(url_data, input_position));
           std::string_view file_view = helpers::substring(url_data, input_position);
 
-          // Set url’s scheme to "file".
-          url.set_scheme("file");
+          url.set_protocol_as_file();
           if constexpr (result_type_is_ada_url) {
             // Set url’s host to the empty string.
             url.host = "";

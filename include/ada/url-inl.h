@@ -154,6 +154,8 @@ inline bool url::base_fragment_has_value() const { return fragment.has_value(); 
 
 inline bool url::base_search_has_value() const { return query.has_value(); }
 
+inline void url::set_protocol_as_file() { type =  ada::scheme::type::FILE; }
+
 inline void url::set_scheme(std::string &&new_scheme) noexcept {
   type = ada::scheme::get_scheme_type(new_scheme);
   // We only move the 'scheme' if it is non-special.
