@@ -215,7 +215,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   // The common case is current_length == 0.
   buffer.erase(components.pathname_start, current_length);
   // next line is very uncommon and we should seek to optimize it accordingly.
-  if (begins_with_dashdash && !has_opaque_path && !has_hostname()) {
+  if (begins_with_dashdash && !has_opaque_path && !has_authority()) {
     // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
     // then append U+002F (/) followed by U+002E (.) to output.
     buffer.insert(components.pathname_start, "/.");
@@ -519,8 +519,8 @@ inline void url_aggregator::clear_base_pathname() {
 inline void url_aggregator::clear_base_hostname() {
   ada_log("url_aggregator::clear_base_hostname");
   ADA_ASSERT_TRUE(validate());
-  if(!has_hostname()) { return; }
-  ADA_ASSERT_TRUE(has_hostname());
+  if(!has_authority()) { return; }
+  ADA_ASSERT_TRUE(has_authority());
 
   uint32_t hostname_length = components.host_end - components.host_start;
   uint32_t start = components.host_start;
@@ -538,7 +538,7 @@ inline void url_aggregator::clear_base_hostname() {
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_hostname(), "", "hostname should have been cleared on buffer=" + buffer + " with " + components.to_string() + "\n" + to_diagram());
 #endif
-  ADA_ASSERT_TRUE(has_hostname());
+  ADA_ASSERT_TRUE(has_authority());
   ADA_ASSERT_TRUE(has_empty_hostname());
   ADA_ASSERT_TRUE(validate());
 }
@@ -572,11 +572,6 @@ inline bool url_aggregator::cannot_have_credentials_or_port() const {
   // Performance: instead of doing this potentially expensive check, we could have
   // a boolean in the struct.
   return components.protocol_end + 2 <= components.host_start && helpers::substring(buffer, components.protocol_end, components.protocol_end + 2) == "//";
-}
-
-[[nodiscard]] inline bool ada::url_aggregator::has_hostname() const noexcept {
-  ada_log("url_aggregator::has_hostname");
-  return has_authority(); // same concept
 }
 
 inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {

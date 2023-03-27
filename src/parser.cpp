@@ -31,7 +31,7 @@ namespace ada::parser {
 
     // We refuse to parse URL strings that exceed 4GB. Such strings are almost
     // surely the result of a bug or are otherwise a security concern.
-    if(user_input.size()  >= std::string_view::size_type(std::numeric_limits<uint32_t>::max)) { url.is_valid = false; }
+    if(user_input.size() >= std::string_view::size_type(std::numeric_limits<uint32_t>::max)) { url.is_valid = false; }
 
     // If we are provided with an invalid base, or the optional_url was invalid,
     // we must return.
