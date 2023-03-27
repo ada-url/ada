@@ -501,11 +501,7 @@ namespace ada::parser {
             input_position = input_size + 1;
           }
           url.has_opaque_path = true;
-          /***
-          * This is not good. unicode::percent_encode(view, character_sets::C0_CONTROL_PERCENT_ENCODE) will
-          * create a temporary string, and then we pass a std::string_view to update_base_pathname which
-          * may then be converted back into a string.
-          ***/
+          // This is a really unlikely scenario in real world. We should not seek to optimize it.
           url.update_base_pathname(unicode::percent_encode(view, character_sets::C0_CONTROL_PERCENT_ENCODE));
           break;
         }
