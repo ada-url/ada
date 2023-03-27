@@ -39,15 +39,6 @@ struct url_base {
   ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
   /**
-   * Return the scheme type. Note that it is faster to do
-   * get_scheme_type() == ada::scheme::type::FILE than to do
-   * get_protocol() == "file:", since the former is a direct integer comparison,
-   * while the other involves a (cheap) string test.
-   */
-  [[nodiscard]] ada_really_inline ada::scheme::type get_scheme_type()
-      const noexcept;
-
-  /**
    * A URL is special if its scheme is a special scheme. A URL is not special if
    * its scheme is not a special scheme.
    */

@@ -21,11 +21,6 @@
 
 namespace ada {
 
-[[nodiscard]] ada_really_inline ada::scheme::type url_base::get_scheme_type()
-    const noexcept {
-  return type;
-}
-
 [[nodiscard]] ada_really_inline bool url_base::is_special() const noexcept {
   return type != ada::scheme::NOT_SPECIAL;
 }
