@@ -231,6 +231,9 @@ namespace ada {
     template <bool has_state_override = false>
     [[nodiscard]] ada_really_inline bool parse_scheme_with_colon(const std::string_view input);
 
+    /** @private */
+    ada_really_inline uint32_t replace_and_resize(uint32_t start, uint32_t end, std::string_view input);
+
     /**
      * Useful for implementing efficient serialization for the URL.
      *
