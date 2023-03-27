@@ -34,8 +34,8 @@ ada::result<result_type> ada_parse(std::string_view view,
 
 template ada::result<ada::url> ada_parse(std::string_view view,
                                          const ada::url *base);
-template ada::result<ada::url_aggregator>
-ada_parse(std::string_view view, const ada::url_aggregator *base);
+template ada::result<ada::url_aggregator> ada_parse(
+    std::string_view view, const ada::url_aggregator *base);
 
 #include "simdjson.h"
 
@@ -56,25 +56,25 @@ const char *VERIFYDNSLENGTH_TESTS_JSON =
 
 std::stringstream error_buffer;
 
-#define TEST_START()                                                           \
-  do {                                                                         \
-    std::cout << "> Running " << __func__ << " ..." << std::endl;              \
+#define TEST_START()                                              \
+  do {                                                            \
+    std::cout << "> Running " << __func__ << " ..." << std::endl; \
   } while (0);
-#define RUN_TEST(ACTUAL)                                                       \
-  do {                                                                         \
-    if (!(ACTUAL)) {                                                           \
-      return false;                                                            \
-    }                                                                          \
+#define RUN_TEST(ACTUAL) \
+  do {                   \
+    if (!(ACTUAL)) {     \
+      return false;      \
+    }                    \
   } while (0);
-#define TEST_FAIL(MESSAGE)                                                     \
-  do {                                                                         \
-    std::cerr << "FAIL: " << (MESSAGE) << std::endl;                           \
-    error_buffer << "FAIL: " << (MESSAGE) << std::endl;                        \
-    return false;                                                              \
+#define TEST_FAIL(MESSAGE)                              \
+  do {                                                  \
+    std::cerr << "FAIL: " << (MESSAGE) << std::endl;    \
+    error_buffer << "FAIL: " << (MESSAGE) << std::endl; \
+    return false;                                       \
   } while (0);
-#define TEST_SUCCEED()                                                         \
-  do {                                                                         \
-    return true;                                                               \
+#define TEST_SUCCEED() \
+  do {                 \
+    return true;       \
   } while (0);
 #define TEST_ASSERT(LHS, RHS, MESSAGE)                                         \
   do {                                                                         \
@@ -287,7 +287,8 @@ bool setters_tests_encoding(const char *source) {
   TEST_SUCCEED()
 }
 
-template <class result_type = ada::url> bool toascii_encoding() {
+template <class result_type = ada::url>
+bool toascii_encoding() {
   TEST_START()
   ondemand::parser parser;
 
@@ -321,9 +322,9 @@ template <class result_type = ada::url> bool toascii_encoding() {
           std::string_view stringified_output = expected_output.get_string();
           TEST_ASSERT(current->get_host(), stringified_output,
                       "Host should have been equal. From: " + element_string);
-          TEST_ASSERT(current->get_hostname(), stringified_output,
-                      "Hostname should have been equal. From: " +
-                          element_string);
+          TEST_ASSERT(
+              current->get_hostname(), stringified_output,
+              "Hostname should have been equal. From: " + element_string);
           TEST_ASSERT(current->get_pathname(), "/x",
                       "Shouldn't have updated pathname");
           TEST_ASSERT(current->get_href(),
@@ -346,16 +347,16 @@ template <class result_type = ada::url> bool toascii_encoding() {
           std::string_view stringified_output = expected_output.get_string();
           TEST_ASSERT(setter->get_host(), stringified_output,
                       "Host should have been equal. From: " + element_string);
-          TEST_ASSERT(setter->get_hostname(), stringified_output,
-                      "Hostname should have been equal. From: " +
-                          element_string);
+          TEST_ASSERT(
+              setter->get_hostname(), stringified_output,
+              "Hostname should have been equal. From: " + element_string);
         } else if (expected_output.is_null()) {
           // host and hostname should not be updated if the input is invalid.
           TEST_ASSERT(setter->get_host(), "x",
                       "Host should have been equal. From: " + element_string);
-          TEST_ASSERT(setter->get_hostname(), "x",
-                      "Hostname should have been equal. From: " +
-                          element_string);
+          TEST_ASSERT(
+              setter->get_hostname(), "x",
+              "Hostname should have been equal. From: " + element_string);
         }
       }
     }
@@ -411,7 +412,7 @@ bool urltestdata_encoding(const char *source) {
             bool failure = false;
             if (!object["failure"].get(failure) && failure == true) {
               // We are good. Failure was expected.
-              continue; // We can't proceed any further.
+              continue;  // We can't proceed any further.
             } else {
               TEST_ASSERT(base_url.has_value(), true,
                           "Base should not have failed " + element_string);
@@ -488,9 +489,9 @@ bool urltestdata_encoding(const char *source) {
 
           std::string_view hash;
           if (!object["hash"].get_string().get(hash)) {
-            TEST_ASSERT(input_url->get_hash(), hash,
-                        "Hash/Fragment " + element_string +
-                            input_url->to_string());
+            TEST_ASSERT(
+                input_url->get_hash(), hash,
+                "Hash/Fragment " + element_string + input_url->to_string());
           }
 
           std::string_view href;
@@ -505,9 +506,9 @@ bool urltestdata_encoding(const char *source) {
                         "Origin " + element_string + input_url->to_string());
           }
           if (bad_domains.find(std::string(input)) != bad_domains.end()) {
-            TEST_ASSERT(input_url->has_valid_domain(), false,
-                        "Bad domain " + element_string +
-                            input_url->to_string());
+            TEST_ASSERT(
+                input_url->has_valid_domain(), false,
+                "Bad domain " + element_string + input_url->to_string());
           }
 
           // We need padding.
@@ -620,8 +621,8 @@ int main(int argc, char **argv) {
     results[name] = urltestdata_encoding<ada::url>(ADA_URLTESTDATA_JSON);
 #if !ADA_HAS_ICU
     results[name] =
-        true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif        // !ADA_HAS_ICU
+        true;  // we pretend. The setters fail under Windows due to IDN issues.
+#endif         // !ADA_HAS_ICU
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
@@ -632,8 +633,8 @@ int main(int argc, char **argv) {
     results[name] = urltestdata_encoding<ada::url>(URLTESTDATA_JSON);
 #if !ADA_HAS_ICU
     results[name] =
-        true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif        // !ADA_HAS_ICU
+        true;  // we pretend. The setters fail under Windows due to IDN issues.
+#endif         // !ADA_HAS_ICU
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
@@ -645,8 +646,8 @@ int main(int argc, char **argv) {
         urltestdata_encoding<ada::url_aggregator>(ADA_URLTESTDATA_JSON);
 #if !ADA_HAS_ICU
     results[name] =
-        true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif        // !ADA_HAS_ICU
+        true;  // we pretend. The setters fail under Windows due to IDN issues.
+#endif         // !ADA_HAS_ICU
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
@@ -660,8 +661,8 @@ int main(int argc, char **argv) {
     }
 #if !ADA_HAS_ICU
     results[name] =
-        true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif        // _WIN32
+        true;  // we pretend. The setters fail under Windows due to IDN issues.
+#endif         // _WIN32
   }
   name = "percent_encoding";
   if (all_ada_url_tests || name.find(filter) != std::string::npos) {
@@ -678,7 +679,7 @@ int main(int argc, char **argv) {
       exit(-1);
     }
   }
-#endif // ADA_HAS_ICU
+#endif  // ADA_HAS_ICU
   name = "setters_tests_encoding<ada::url>(" + std::string(SETTERS_TESTS_JSON) +
          ")";
   if (all_ada_url_tests || name.find(filter) != std::string::npos) {
@@ -688,8 +689,8 @@ int main(int argc, char **argv) {
     }
 #if !ADA_HAS_ICU
     results[name] =
-        true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif        // !ADA_HAS_ICU
+        true;  // we pretend. The setters fail under Windows due to IDN issues.
+#endif         // !ADA_HAS_ICU
   }
   name = "setters_tests_encoding<ada::url>(" +
          std::string(ADA_SETTERS_TESTS_JSON) + ")";
@@ -700,8 +701,8 @@ int main(int argc, char **argv) {
     }
 #if !ADA_HAS_ICU
     results[name] =
-        true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif        // _WIN32
+        true;  // we pretend. The setters fail under Windows due to IDN issues.
+#endif         // _WIN32
   }
   name = "setters_tests_encoding<ada::url_aggregator>(" +
          std::string(SETTERS_TESTS_JSON) + ")";
@@ -713,8 +714,8 @@ int main(int argc, char **argv) {
     }
 #if !ADA_HAS_ICU
     results[name] =
-        true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif        // !ADA_HAS_ICU
+        true;  // we pretend. The setters fail under Windows due to IDN issues.
+#endif         // !ADA_HAS_ICU
   }
   name = "setters_tests_encoding<ada::url_aggregator>(" +
          std::string(ADA_SETTERS_TESTS_JSON) + ")";
@@ -726,8 +727,8 @@ int main(int argc, char **argv) {
     }
 #if !ADA_HAS_ICU
     results[name] =
-        true; // we pretend. The setters fail under Windows due to IDN issues.
-#endif        // _WIN32
+        true;  // we pretend. The setters fail under Windows due to IDN issues.
+#endif         // _WIN32
   }
 #if ADA_HAS_ICU
 #endif

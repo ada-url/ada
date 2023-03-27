@@ -10,23 +10,23 @@
 
 namespace ada {
 
-  /**
-   * This specification defines three encodings with the same names as encoding schemes defined
-   * in the Unicode standard: UTF-8, UTF-16LE, and UTF-16BE.
-   *
-   * @see https://encoding.spec.whatwg.org/#encodings
-   */
-  enum class encoding_type {
-    UTF8,
-    UTF_16LE,
-    UTF_16BE,
-  };
+/**
+ * This specification defines three encodings with the same names as encoding
+ * schemes defined in the Unicode standard: UTF-8, UTF-16LE, and UTF-16BE.
+ *
+ * @see https://encoding.spec.whatwg.org/#encodings
+ */
+enum class encoding_type {
+  UTF8,
+  UTF_16LE,
+  UTF_16BE,
+};
 
-  /**
-   * Convert a encoding_type to string.
-   */
-  ada_warn_unused std::string to_string(encoding_type type);
+/**
+ * Convert a encoding_type to string.
+ */
+ada_warn_unused std::string to_string(encoding_type type);
 
-} // ada namespace
+}  // namespace ada
 
-#endif // ADA_ENCODING_TYPE_H
+#endif  // ADA_ENCODING_TYPE_H

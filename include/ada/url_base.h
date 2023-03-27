@@ -13,108 +13,109 @@
 
 namespace ada {
 
+/**
+ * A url_base contains a few attributes: is_valid, has_opaque_path and type.
+ * All non-trivial implementation details are in derived classes such as
+ * ada::url and ada::url_aggregator.
+ *
+ * It is an abstract class that cannot be instantiated directly.
+ */
+struct url_base {
+  virtual ~url_base() = default;
+
   /**
-   * A url_base contains a few attributes: is_valid, has_opaque_path and type.
-   * All non-trivial implementation details are in derived classes such as
-   * ada::url and ada::url_aggregator.
-   *
-   * It is an abstract class that cannot be instantiated directly.
+   * Used for returning the validity from the result of the URL parser.
    */
-  struct url_base {
+  bool is_valid{true};
 
-    virtual ~url_base() = default;
+  /**
+   * A URL has an opaque path if its path is a string.
+   */
+  bool has_opaque_path{false};
 
-    /**
-     * Used for returning the validity from the result of the URL parser.
-     */
-    bool is_valid{true};
+  /**
+   * @private
+   */
+  ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
-    /**
-     * A URL has an opaque path if its path is a string.
-     */
-    bool has_opaque_path{false};
+  /**
+   * Return the scheme type. Note that it is faster to do
+   * get_scheme_type() == ada::scheme::type::FILE than to do
+   * get_protocol() == "file:", since the former is a direct integer comparison,
+   * while the other involves a (cheap) string test.
+   */
+  [[nodiscard]] ada_really_inline ada::scheme::type get_scheme_type()
+      const noexcept;
 
-    /**
-     * @private
-     */
-    ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
+  /**
+   * A URL is special if its scheme is a special scheme. A URL is not special if
+   * its scheme is not a special scheme.
+   */
+  [[nodiscard]] ada_really_inline bool is_special() const noexcept;
 
-    /**
-     * Return the scheme type. Note that it is faster to do
-     * get_scheme_type() == ada::scheme::type::FILE than to do
-     * get_protocol() == "file:", since the former is a direct integer comparison,
-     * while the other involves a (cheap) string test.
-     */
-    [[nodiscard]] ada_really_inline ada::scheme::type get_scheme_type() const noexcept;
+  /**
+   * The origin getter steps are to return the serialization of this’s URL’s
+   * origin. [HTML]
+   * @return a newly allocated string.
+   * @see https://url.spec.whatwg.org/#concept-url-origin
+   */
+  [[nodiscard]] virtual std::string get_origin() const noexcept = 0;
 
-    /**
-     * A URL is special if its scheme is a special scheme. A URL is not special if its scheme is not a special scheme.
-     */
-    [[nodiscard]] ada_really_inline bool is_special() const noexcept;
+  /**
+   * Returns true if this URL has a valid domain as per RFC 1034 and
+   * corresponding specifications. Among other things, it requires
+   * that the domain string has fewer than 255 octets.
+   */
+  [[nodiscard]] virtual bool has_valid_domain() const noexcept = 0;
 
-    /**
-     * The origin getter steps are to return the serialization of this’s URL’s
-     * origin. [HTML]
-     * @return a newly allocated string.
-     * @see https://url.spec.whatwg.org/#concept-url-origin
-     */
-    [[nodiscard]] virtual std::string get_origin() const noexcept = 0;
+  /**
+   * @private
+   *
+   * Return the 'special port' if the URL is special and not 'file'.
+   * Returns 0 otherwise.
+   */
+  [[nodiscard]] inline uint16_t get_special_port() const noexcept;
 
-    /**
-     * Returns true if this URL has a valid domain as per RFC 1034 and
-     * corresponding specifications. Among other things, it requires
-     * that the domain string has fewer than 255 octets.
-     */
-    [[nodiscard]] virtual bool has_valid_domain() const noexcept = 0;
+  /**
+   * @private
+   *
+   * Get the default port if the url's scheme has one, returns 0 otherwise.
+   */
+  [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
 
-    /**
-     * @private
-     *
-     * Return the 'special port' if the URL is special and not 'file'.
-     * Returns 0 otherwise.
-     */
-    [[nodiscard]] inline uint16_t get_special_port() const noexcept;
-
-    /**
-     * @private
-     *
-     * Get the default port if the url's scheme has one, returns 0 otherwise.
-     */
-    [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
-
-    /**
-     * @private
-     *
-     * Parse a port (16-bit decimal digit) from the provided input.
-     * We assume that the input does not contain spaces or tabs
-     * within the ASCII digits.
-     * It returns how many bytes were consumed when a number is successfully
-     * parsed.
-     * @return On failure, it returns zero.
-     * @see https://url.spec.whatwg.org/#host-parsing
-     */
-    virtual ada_really_inline size_t parse_port(
+  /**
+   * @private
+   *
+   * Parse a port (16-bit decimal digit) from the provided input.
+   * We assume that the input does not contain spaces or tabs
+   * within the ASCII digits.
+   * It returns how many bytes were consumed when a number is successfully
+   * parsed.
+   * @return On failure, it returns zero.
+   * @see https://url.spec.whatwg.org/#host-parsing
+   */
+  virtual ada_really_inline size_t parse_port(
       std::string_view view, bool check_trailing_content = false) noexcept = 0;
 
-    /**
-    * Returns a JSON string representation of this URL.
-    */
-    virtual std::string to_string() const = 0;
+  /**
+   * Returns a JSON string representation of this URL.
+   */
+  virtual std::string to_string() const = 0;
 
-    /** @private */
-    virtual inline void clear_base_pathname() = 0;
+  /** @private */
+  virtual inline void clear_base_pathname() = 0;
 
-    /** @private */
-    virtual inline void clear_base_search() = 0;
+  /** @private */
+  virtual inline void clear_base_search() = 0;
 
-    /** @private */
-    virtual inline bool base_fragment_has_value() const = 0;
+  /** @private */
+  virtual inline bool base_fragment_has_value() const = 0;
 
-    /** @private */
-    virtual inline bool base_search_has_value() const = 0;
+  /** @private */
+  virtual inline bool base_search_has_value() const = 0;
 
-  }; // url_base
+};  // url_base
 
-} // namespace ada
+}  // namespace ada
 
 #endif

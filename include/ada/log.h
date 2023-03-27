@@ -22,33 +22,20 @@ namespace ada {
 template <typename T>
 ada_really_inline void inner_log([[maybe_unused]] T t) {
 #if ADA_LOGGING
-    std::cout << t << std::endl;
+  std::cout << t << std::endl;
 #endif
 }
-
 
 /**
  * Private function used for logging messages.
  * @private
  */
-template<typename T, typename... Args>
-ada_really_inline void inner_log([[maybe_unused]] T t, [[maybe_unused]] Args... args) {
+template <typename T, typename... Args>
+ada_really_inline void inner_log([[maybe_unused]] T t,
+                                 [[maybe_unused]] Args... args) {
 #if ADA_LOGGING
-    std::cout << t;
-    inner_log(args...) ;
-#endif
-}
-
-
-/**
- * Log a message.
- * @private
- */
-template<typename T, typename... Args>
-ada_really_inline void log([[maybe_unused]] T t, [[maybe_unused]] Args... args) {
-#if ADA_LOGGING
-    std::cout << "ADA_LOG: " << t;
-    inner_log(args...) ;
+  std::cout << t;
+  inner_log(args...);
 #endif
 }
 
@@ -56,24 +43,37 @@ ada_really_inline void log([[maybe_unused]] T t, [[maybe_unused]] Args... args) 
  * Log a message.
  * @private
  */
-template<typename T>
+template <typename T, typename... Args>
+ada_really_inline void log([[maybe_unused]] T t,
+                           [[maybe_unused]] Args... args) {
+#if ADA_LOGGING
+  std::cout << "ADA_LOG: " << t;
+  inner_log(args...);
+#endif
+}
+
+/**
+ * Log a message.
+ * @private
+ */
+template <typename T>
 ada_really_inline void log([[maybe_unused]] T t) {
 #if ADA_LOGGING
-    std::cout << "ADA_LOG: " <<  t << std::endl;
+  std::cout << "ADA_LOG: " << t << std::endl;
 #endif
-
 }
-}
+}  // namespace ada
 
 #if ADA_LOGGING
 
 #ifndef ada_log
-#define ada_log(...) do { \
+#define ada_log(...)       \
+  do {                     \
     ada::log(__VA_ARGS__); \
-} while(0)
-#endif // ada_log
+  } while (0)
+#endif  // ada_log
 #else
 #define ada_log(...)
-#endif // ADA_LOGGING
+#endif  // ADA_LOGGING
 
-#endif // ADA_LOG_H
+#endif  // ADA_LOG_H

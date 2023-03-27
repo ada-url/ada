@@ -29,14 +29,13 @@ namespace ada {
  * @details To disambiguate from a valid URL string it can also be referred to
  * as a URL record. A URL is a struct that represents a universal identifier.
  * Unlike the url_aggregator, the ada::url represents the different components
- * of a parsed URL as independent std::string instances. This makes the structure
- * heavier and more reliant on memory allocations. When getting components from the
- * parsed URL, a new std::string is typically constructed.
+ * of a parsed URL as independent std::string instances. This makes the
+ * structure heavier and more reliant on memory allocations. When getting
+ * components from the parsed URL, a new std::string is typically constructed.
  *
  * @see https://url.spec.whatwg.org/#url-representation
  */
 struct url : url_base {
-
   url() = default;
   url(const url &u) = default;
   url(url &&u) noexcept = default;
@@ -99,7 +98,8 @@ struct url : url_base {
   /** @private */
   inline void update_base_search(std::string_view input);
   /** @private */
-  inline void update_base_search(std::string_view input, const uint8_t query_percent_encode_set[]);
+  inline void update_base_search(std::string_view input,
+                                 const uint8_t query_percent_encode_set[]);
   /** @private */
   inline void update_base_search(std::optional<std::string> input);
   /** @private */
@@ -206,7 +206,8 @@ struct url : url_base {
   [[nodiscard]] const std::string_view get_pathname() const noexcept;
 
   /**
-   * Compute the pathname length in bytes witout instantiating a view or a string.
+   * Compute the pathname length in bytes witout instantiating a view or a
+   * string.
    * @return size of the pathname in bytes
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
@@ -224,7 +225,7 @@ struct url : url_base {
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  [[nodiscard]] const std::string& get_username() const noexcept;
+  [[nodiscard]] const std::string &get_username() const noexcept;
 
   /**
    * @return Returns true on successful operation.
@@ -300,7 +301,7 @@ struct url : url_base {
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  [[nodiscard]] const std::string& get_password() const noexcept;
+  [[nodiscard]] const std::string &get_password() const noexcept;
 
   /**
    * Return this’s URL’s port, serialized.
@@ -331,8 +332,9 @@ struct url : url_base {
   [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
   /** @private */
-  ada_really_inline size_t parse_port(
-      std::string_view view, bool check_trailing_content = false) noexcept override;
+  ada_really_inline size_t
+  parse_port(std::string_view view,
+             bool check_trailing_content = false) noexcept override;
 
   /**
    * @private
@@ -356,7 +358,8 @@ struct url : url_base {
 
   /** @private */
   template <bool has_state_override = false>
-  [[nodiscard]] ada_really_inline bool parse_scheme(const std::string_view input);
+  [[nodiscard]] ada_really_inline bool parse_scheme(
+      const std::string_view input);
 
   /**
    * Useful for implementing efficient serialization for the URL.
@@ -379,9 +382,10 @@ struct url : url_base {
    * @see
    * https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
    */
-  [[nodiscard]] ada_really_inline ada::url_components get_components() const noexcept;
+  [[nodiscard]] ada_really_inline ada::url_components get_components()
+      const noexcept;
 
-private:
+ private:
   /**
    * @private
    *
@@ -419,9 +423,9 @@ private:
    */
   std::string non_special_scheme{};
 
-}; // struct url
+};  // struct url
 
 inline std::ostream &operator<<(std::ostream &out, const ada::url &u);
-} // namespace ada
+}  // namespace ada
 
-#endif // ADA_URL_H
+#endif  // ADA_URL_H
