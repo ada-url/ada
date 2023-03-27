@@ -602,9 +602,9 @@ namespace ada::parser {
               // If the code point substring from pointer to the end of input does not start with
               // a Windows drive letter and base’s path[0] is a normalized Windows drive letter,
               // then append base’s path[0] to url’s path.
-              if (!base_url->retrieve_base_pathname().empty()) {
+              if (!base_url->get_pathname().empty()) {
                 if (!checkers::is_windows_drive_letter(helpers::substring(url_data, input_position))) {
-                  std::string_view first_base_url_path = base_url->retrieve_base_pathname().substr(1);
+                  std::string_view first_base_url_path = base_url->get_pathname().substr(1);
                   size_t loc = first_base_url_path.find('/');
                   if(loc != std::string_view::npos) {
                     helpers::resize(first_base_url_path,loc);
@@ -696,7 +696,7 @@ namespace ada::parser {
             } else {
               // TODO: Get rid of set_hostname and replace it with update_base_hostname
               url.set_hostname(base_url->get_hostname());
-              url.update_base_pathname(base_url->retrieve_base_pathname());
+              url.update_base_pathname(base_url->get_pathname());
               url.update_base_search(base_url->get_search());
             }
             url.has_opaque_path = base_url->has_opaque_path;

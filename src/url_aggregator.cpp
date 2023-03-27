@@ -498,7 +498,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   }
 
   if (get_protocol() == "blob:") {
-    std::string_view path = retrieve_base_pathname();
+    std::string_view path = get_pathname();
     if (!path.empty()) {
       auto out = ada::parse<ada::url_aggregator>(path);
       if (out && out->is_special()) {
