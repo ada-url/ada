@@ -500,9 +500,9 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   if (get_protocol() == "blob:") {
     std::string_view path = retrieve_base_pathname();
     if (!path.empty()) {
-      ada::result<ada::url> out = ada::parse<ada::url>(path);
+      auto out = ada::parse<ada::url_aggregator>(path);
       if (out && out->is_special()) {
-        return out->get_protocol() + "//" + out->get_host();
+        return helpers::concat(out->get_protocol(), "//", out->get_host());
       }
     }
   }

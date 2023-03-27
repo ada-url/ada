@@ -171,15 +171,6 @@ inline void url::copy_scheme(const ada::url &u) {
   type = u.type;
 }
 
-[[nodiscard]] inline std::string_view url::get_scheme() const noexcept {
-  if (is_special()) {
-    return ada::scheme::details::is_special_list[type];
-  }
-  // We only move the 'scheme' if it is non-special.
-  return non_special_scheme;
-}
-
-
 [[nodiscard]] ada_really_inline std::string url::get_href() const noexcept {
   std::string output = get_protocol();
 

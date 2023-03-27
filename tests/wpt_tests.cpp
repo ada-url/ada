@@ -529,21 +529,6 @@ bool urltestdata_encoding(const char *source) {
             TEST_ASSERT(json_recovered_path, pathname,
                         "JSON Path " + element_string + parsed_url_json);
           }
-
-          std::string_view json_recovered_scheme;
-          if (parsed_object["scheme"].get_string().get(json_recovered_scheme)) {
-            if constexpr (std::is_same<ada::url, result_type>::value) {
-              std::cerr << "The serialized url instance does not provide a "
-                           "'scheme' key or the JSON is invalid."
-                        << std::endl;
-              TEST_FAIL("scheme key missing from serialized JSON");
-            }
-          } else {
-            TEST_ASSERT(json_recovered_scheme,
-                        protocol.substr(0, protocol.size() - 1),
-                        "JSON protocol " + element_string + parsed_url_json);
-          }
-          // We could test more fields.
           counter++;
         }
       }

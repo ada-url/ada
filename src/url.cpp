@@ -481,9 +481,6 @@ namespace ada {
     std::string answer;
     auto back = std::back_insert_iterator(answer);
     answer.append("{\n");
-    answer.append("\t\"scheme\":\"");
-    helpers::encode_json(get_scheme(), back);
-    answer.append("\",\n");
     answer.append("\t\"protocol\":\"");
     helpers::encode_json(get_protocol(), back);
     answer.append("\",\n");
