@@ -215,27 +215,22 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   ada_log("url_aggregator::update_base_pathname '", input, "' [", input.size(), " bytes] \n", to_diagram());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   ADA_ASSERT_TRUE(validate());
+
   const bool begins_with_dashdash = checkers::begins_with(input, "//");
-  // uncommon branch:
   if(!begins_with_dashdash && has_dash_dot()) {
     ada_log("url_aggregator::update_base_pathname has /.: \n", to_diagram());
     // We must delete the ./
     delete_dash_dot();
   }
-  uint32_t current_length = get_pathname_length();
-  uint32_t difference = uint32_t(input.size()) - current_length;
-  // The common case is current_length == 0.
-  buffer.erase(components.pathname_start, current_length);
-  // next line is very uncommon and we should seek to optimize it accordingly.
-  if (begins_with_dashdash && !has_opaque_path && !has_authority()) {
+
+  if (begins_with_dashdash && !has_opaque_path && !has_authority() && !has_dash_dot()) {
     // If url’s host is null, url does not have an opaque path, url’s path’s size is greater than 1,
     // then append U+002F (/) followed by U+002E (.) to output.
     buffer.insert(components.pathname_start, "/.");
     components.pathname_start += 2;
-    difference += 2;
   }
-  // The common case is components.pathname_start == buffer.size() so this is effectively an append.
-  buffer.insert(components.pathname_start, input);
+
+  uint32_t difference = replace_and_resize(components.pathname_start, components.pathname_start + get_pathname_length(), input);
   if (components.search_start != url_components::omitted) { components.search_start += difference; }
   if (components.hash_start != url_components::omitted) { components.hash_start += difference; }
   ada_log("url_aggregator::update_base_pathname end '", input, "' [", input.size(), " bytes] \n", to_diagram());
