@@ -141,8 +141,6 @@ inline void url::update_base_port(std::optional<uint16_t> input) {
   port = input;
 }
 
-inline std::string_view url::retrieve_base_pathname() const { return path; }
-
 inline void url::clear_base_pathname() { path = ""; }
 
 inline void url::clear_base_search() { query = std::nullopt; }

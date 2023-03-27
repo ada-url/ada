@@ -464,14 +464,6 @@ inline uint32_t url_aggregator::retrieve_base_port() const {
   return components.port;
 }
 
-inline std::string_view url_aggregator::retrieve_base_pathname() const {
-  ada_log("url_aggregator::retrieve_base_pathname");
-  size_t ending = buffer.size();
-  if (components.search_start != url_components::omitted) { ending = components.search_start; }
-  else if (components.hash_start != url_components::omitted) { ending = components.hash_start; }
-  return helpers::substring(buffer, components.pathname_start, ending);
-}
-
 inline void url_aggregator::clear_base_search() {
   ada_log("url_aggregator::clear_base_search");
   ADA_ASSERT_TRUE(validate());

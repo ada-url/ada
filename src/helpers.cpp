@@ -500,7 +500,7 @@ namespace ada::helpers {
     if (url.base_fragment_has_value()) return;
     if (url.base_search_has_value()) return;
 
-    auto path = std::string(url.retrieve_base_pathname());
+    auto path = std::string(url.get_pathname());
     while (!path.empty() && path.back() == ' ') { path.resize(path.size() - 1); }
     url.update_base_pathname(path);
   }
