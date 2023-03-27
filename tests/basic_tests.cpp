@@ -255,7 +255,6 @@ bool standard_file() {
     TEST_FAIL("Should succeed");
   }
   std::cout << url->to_string() << std::endl;
-  TEST_ASSERT(url->has_hostname(), true, "path is not opaque");
   TEST_ASSERT(url->has_empty_hostname(), true, "path is not opaque");
   TEST_ASSERT(url->has_opaque_path, false, "path is not opaque");
   TEST_ASSERT(url->get_pathname(), "/tmp/mock/path", "path name should be /tmp/mock/path")

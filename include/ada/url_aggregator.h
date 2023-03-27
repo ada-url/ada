@@ -102,7 +102,6 @@ namespace ada {
      * serialized.
      * This function does not allocate memory.
      * When there is no host, this function returns the empty view.
-     * @see has_hostname()
      * @return a lightweight std::string_view.
      * @see https://url.spec.whatwg.org/#dom-url-host
      */
@@ -111,7 +110,6 @@ namespace ada {
      * Return this’s URL’s host, serialized.
      * This function does not allocate memory.
      * When there is no host, this function returns the empty view.
-     * @see has_hostname()
      * @return a lightweight std::string_view.
      * @see https://url.spec.whatwg.org/#dom-url-hostname
      */
@@ -234,8 +232,6 @@ namespace ada {
     [[nodiscard]] inline bool has_password() const noexcept;
     /** @return true if the URL has a (non default) port */
     [[nodiscard]] inline bool has_port() const noexcept;
-    /** @return true if the URL has host */
-    [[nodiscard]] inline bool has_hostname() const noexcept;
     /** @private */
     inline void consume_prepared_path(std::string_view input);
     /** @private */

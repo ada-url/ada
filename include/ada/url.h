@@ -122,8 +122,6 @@ struct url : url_base {
   inline bool base_search_has_value() const override;
   /** @private set this URL's type to file */
   inline void set_protocol_as_file();
-  /** @return true if the URL has host */
-  [[nodiscard]] inline bool has_hostname() const noexcept;
   /** @return true if it has an host but it is the empty string */
   [[nodiscard]] inline bool has_empty_hostname() const noexcept;
   [[nodiscard]] bool has_valid_domain() const noexcept override;
@@ -188,7 +186,6 @@ struct url : url_base {
    * Return url’s host, serialized, followed by U+003A (:) and url’s port,
    * serialized.
    * When there is no host, this function returns the empty string.
-   * @see has_hostname()
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
@@ -197,7 +194,6 @@ struct url : url_base {
   /**
    * Return this’s URL’s host, serialized.
    * When there is no host, this function returns the empty string.
-   * @see has_hostname()
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
    */
