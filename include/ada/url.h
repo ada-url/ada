@@ -339,15 +339,6 @@ struct url : url_base {
   /**
    * @private
    *
-   * Return a string representing the scheme. Note that get_scheme_type() should
-   * often be used instead.
-   * @see https://url.spec.whatwg.org/#dom-url-protocol
-   */
-  [[nodiscard]] inline std::string_view get_scheme() const noexcept;
-
-  /**
-   * @private
-   *
    * Take the scheme from another URL. The scheme string is copied from the
    * provided url.
    */

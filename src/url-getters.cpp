@@ -31,7 +31,11 @@ namespace ada {
   }
 
   [[nodiscard]] std::string url::get_protocol() const noexcept {
-    return std::string(get_scheme()) + ":";
+    if (is_special()) {
+      return helpers::concat(ada::scheme::details::is_special_list[type], ":");
+    }
+    // We only move the 'scheme' if it is non-special.
+    return helpers::concat(non_special_scheme, ":");
   }
 
   [[nodiscard]] std::string url::get_host() const noexcept {
