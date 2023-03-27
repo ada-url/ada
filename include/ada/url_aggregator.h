@@ -135,11 +135,6 @@ namespace ada {
      */
     ada_really_inline uint32_t get_pathname_length() const noexcept;
     /**
-     * Compute the password length in bytes witout instantiating a view or a string.
-     * @return size of the password in bytes
-     */
-    [[nodiscard]] uint32_t get_password_length() const noexcept;
-    /**
      * Return U+003F (?), followed by this’s URL’s query.
      * This function does not allocate memory.
      * @return a lightweight std::string_view.

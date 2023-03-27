@@ -527,15 +527,6 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return "";
 }
 
-[[nodiscard]] uint32_t url_aggregator::get_password_length() const noexcept {
-  ada_log("url_aggregator::get_password_length");
-  ADA_ASSERT_TRUE(has_password());
-  if (components.username_end + 1 < components.host_start) {
-    return components.host_start - components.username_end + 1;
-  }
-  return 0;
-}
-
 [[nodiscard]] std::string_view url_aggregator::get_port() const noexcept {
   ada_log("url_aggregator::get_port");
   if (components.port == url_components::omitted) { return ""; }
