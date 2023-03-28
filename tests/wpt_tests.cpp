@@ -14,7 +14,6 @@
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
 
-
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
@@ -97,7 +96,6 @@ bool file_exists(const char *filename) {
   }
 }
 
-
 bool idna_test_v2_to_ascii() {
   TEST_START();
   ondemand::parser parser;
@@ -111,46 +109,41 @@ bool idna_test_v2_to_ascii() {
   ondemand::document doc = parser.iterate(json);
   try {
     for (auto element : doc.get_array()) {
-        if (element.type() == ondemand::json_type::string) {
-            continue;
+      if (element.type() == ondemand::json_type::string) {
+        continue;
+      }
+
+      ondemand::object object = element.get_object();
+      auto json_string =
+          std::string(std::string_view(simdjson::to_json_string(object)));
+
+      try {
+        auto comment = object["comment"];
+        if (comment) {
+          std::cout << "   comment: " << comment.get_string() << std::endl;
         }
+      } catch (simdjson::simdjson_error ignored) {
+      }
 
-        ondemand::object object = element.get_object();
-        auto json_string = std::string(std::string_view(simdjson::to_json_string(object)));
+      std::string_view input = object["input"].get_string();
 
-        try {
-            auto comment = object["comment"];
-            if (comment) {
-                std::cout << "   comment: " << comment.get_string() << std::endl;
-            }
-        } catch (simdjson::simdjson_error ignored) {}
+      std::optional<std::string> output;
+      ada::unicode::to_ascii(output, input, false, input.find('%'));
 
-        std::string_view input = object["input"].get_string();
+      auto expected_output = object["output"];
+      auto given_output = output.has_value() ? output.value() : "";
 
-        std::optional<std::string> output;
-        ada::unicode::to_ascii(output, input, false, input.find('%'));
+      if (expected_output.is_null()) {
+        TEST_ASSERT(given_output, "",
+                    "\n  Test case: " + json_string +
+                        "\n  Got output: " + given_output);
 
-        auto expected_output = object["output"];
-        auto given_output = output.has_value() ? output.value() : "";
-
-
-        if (expected_output.is_null()) {
-            TEST_ASSERT(
-              given_output,
-              "",
-              "\n  Test case: " + json_string +
-              "\n  Got output: " + given_output
-            );
-
-        } else if (expected_output.type() == ondemand::json_type::string) {
-            std::string_view str_expected_output = expected_output.get_string();
-            TEST_ASSERT(
-              str_expected_output,
-              given_output,
-              "\n  Test case: " + json_string +
-              "\n  Got output: " + given_output
-            );
-        }
+      } else if (expected_output.type() == ondemand::json_type::string) {
+        std::string_view str_expected_output = expected_output.get_string();
+        TEST_ASSERT(str_expected_output, given_output,
+                    "\n  Test case: " + json_string +
+                        "\n  Got output: " + given_output);
+      }
     }
   } catch (simdjson::simdjson_error &error) {
     std::cerr << "JSON error: " << error.what() << " near "
