@@ -50,7 +50,8 @@ namespace ada::unicode {
  * script.
  *
  * The resulting strings should not exceed 255 octets according to RFC 1035
- * section 2.3.4. ICU checks for label size and domain size, but these errors are ignored.
+ * section 2.3.4. ICU checks for label size and domain size, but these errors
+ * are ignored.
  *
  * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
  *

@@ -9,11 +9,15 @@ Ada is a fast and spec-compliant URL parser written in C++.
 Specification for URL parser can be found from the
 [WHATWG](https://url.spec.whatwg.org/#url-parsing) website.
 
+The Ada library passes the full range of tests from the specification,
+across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
+supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
+
 ## Requirements
 
 - A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
 
-The project is otherwise self-contained and has no dependency.
+The project is otherwise self-contained and it has no dependency.
 
 ## Usage
 
