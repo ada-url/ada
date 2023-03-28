@@ -23,7 +23,7 @@ The project is otherwise self-contained and it has no dependency.
 
 Ada supports two types of URL instances, `ada:url` and `ada:url_aggregator`. The usage is
 the same in either case: we have an parsing function template `ada::parse` which can return
-either a result of type `ada::result<ada:url_aggregator>` or of type `ada::result<ada:url_aggregator>`
+either a result of type `ada::result<ada:url>` or of type `ada::result<ada:url_aggregator>`
 depending on your needs. The `ada:url_aggregator` class is smaller and it is backed by a precomputed
 serialized URL string. The `ada:url` class is made of several separate strings for the various
 components (path, host, and so forth).
