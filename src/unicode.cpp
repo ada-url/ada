@@ -2,25 +2,11 @@
 #include "ada/character_sets-inl.h"
 #include "ada/common_defs.h"
 
+ADA_PUSH_DISABLE_ALL_WARNINGS
+#include "ada_idna.cpp"
+ADA_POP_DISABLE_WARNINGS
+
 #include <algorithm>
-#if ADA_HAS_ICU
-// We are good.
-#else
-
-#if defined(_WIN32) && ADA_WINDOWS_TO_ASCII_FALLBACK
-
-#ifndef __wtypes_h__
-#include <wtypes.h>
-#endif  // __wtypes_h__
-
-#ifndef __WINDEF_
-#include <windef.h>
-#endif  // __WINDEF_
-
-#include <winnls.h>
-#endif  // defined(_WIN32) && ADA_WINDOWS_TO_ASCII_FALLBACK
-
-#endif  // ADA_HAS_ICU
 
 namespace ada::unicode {
 
@@ -388,219 +374,19 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
 }
 
 bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
-              const bool be_strict, size_t first_percent) {
+              size_t first_percent) {
   std::string percent_decoded_buffer;
   std::string_view input = plain;
   if (first_percent != std::string_view::npos) {
     percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
     input = percent_decoded_buffer;
   }
-#if ADA_HAS_ICU
-  out = std::string(255, 0);
-
-  UErrorCode status = U_ZERO_ERROR;
-  uint32_t options =
-      UIDNA_CHECK_BIDI | UIDNA_CHECK_CONTEXTJ | UIDNA_NONTRANSITIONAL_TO_ASCII;
-
-  if (be_strict) {
-    options |= UIDNA_USE_STD3_RULES;
-  }
-
-  UIDNA* uidna = uidna_openUTS46(options, &status);
-  if (U_FAILURE(status)) {
+  // input is a non-empty UTF-8 string, must be percent decoded
+  std::string idna_ascii = ada::idna::to_ascii(input);
+  if (idna_ascii.empty()) {
     return false;
   }
-
-  UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-  // RFC 1035 section 2.3.4.
-  // The domain  name must be at most 255 octets.
-  // It cannot contain a label longer than 63 octets.
-  // Thus we should never need more than 255 octets, if we
-  // do the domain name is in error.
-  int32_t length =
-      uidna_nameToASCII_UTF8(uidna, input.data(), int32_t(input.length()),
-                             out.value().data(), 255, &info, &status);
-
-  if (status == U_BUFFER_OVERFLOW_ERROR) {
-    status = U_ZERO_ERROR;
-    out.value().resize(length);
-    // When be_strict is true, this should not be allowed!
-    length =
-        uidna_nameToASCII_UTF8(uidna, input.data(), int32_t(input.length()),
-                               out.value().data(), length, &info, &status);
-  }
-
-  // A label contains hyphen-minus ('-') in the third and fourth positions.
-  info.errors &= ~UIDNA_ERROR_HYPHEN_3_4;
-  // A label starts with a hyphen-minus ('-').
-  info.errors &= ~UIDNA_ERROR_LEADING_HYPHEN;
-  // A label ends with a hyphen-minus ('-').
-  info.errors &= ~UIDNA_ERROR_TRAILING_HYPHEN;
-
-  if (!be_strict) {  // This seems to violate RFC 1035 section 2.3.4.
-    // A non-final domain name label (or the whole domain name) is empty.
-    info.errors &= ~UIDNA_ERROR_EMPTY_LABEL;
-    // A domain name label is longer than 63 bytes.
-    info.errors &= ~UIDNA_ERROR_LABEL_TOO_LONG;
-    // A domain name is longer than 255 bytes in its storage form.
-    info.errors &= ~UIDNA_ERROR_DOMAIN_NAME_TOO_LONG;
-  }
-
-  uidna_close(uidna);
-
-  if (U_FAILURE(status) || info.errors != 0 || length == 0) {
-    out = std::nullopt;
-    return false;
-  }
-  out.value().resize(length);  // we possibly want to call :shrink_to_fit
-                               // otherwise we use 255 bytes.
-  out.value().shrink_to_fit();
-#elif defined(_WIN32) && ADA_WINDOWS_TO_ASCII_FALLBACK
-  (void)be_strict;  // unused.
-  // Fallback on the system if ICU is not available.
-  // Windows function assumes UTF-16.
-  std::unique_ptr<char16_t[]> buffer(new char16_t[input.size()]);
-  auto convert = [](const char* buf, size_t len, char16_t* utf16_output) {
-    const uint8_t* data = reinterpret_cast<const uint8_t*>(buf);
-    size_t pos = 0;
-    char16_t* start{utf16_output};
-    while (pos < len) {
-      // try to convert the next block of 16 ASCII bytes
-      if (pos + 16 <= len) {  // if it is safe to read 16 more bytes, check that
-                              // they are ascii
-        uint64_t v1;
-        ::memcpy(&v1, data + pos, sizeof(uint64_t));
-        uint64_t v2;
-        ::memcpy(&v2, data + pos + sizeof(uint64_t), sizeof(uint64_t));
-        uint64_t v{v1 | v2};
-        if ((v & 0x8080808080808080) == 0) {
-          size_t final_pos = pos + 16;
-          while (pos < final_pos) {
-            *utf16_output++ = char16_t(buf[pos]);
-            pos++;
-          }
-          continue;
-        }
-      }
-      uint8_t leading_byte = data[pos];  // leading byte
-      if (leading_byte < 0b10000000) {
-        // converting one ASCII byte !!!
-        *utf16_output++ = char16_t(leading_byte);
-        pos++;
-      } else if ((leading_byte & 0b11100000) == 0b11000000) {
-        // We have a two-byte UTF-8, it should become
-        // a single UTF-16 word.
-        if (pos + 1 >= len) {
-          return 0;
-        }  // minimal bound checking
-        if ((data[pos + 1] & 0b11000000) != 0b10000000) {
-          return 0;
-        }
-        // range check
-        uint32_t code_point =
-            (leading_byte & 0b00011111) << 6 | (data[pos + 1] & 0b00111111);
-        if (code_point < 0x80 || 0x7ff < code_point) {
-          return 0;
-        }
-        *utf16_output++ = char16_t(code_point);
-        pos += 2;
-      } else if ((leading_byte & 0b11110000) == 0b11100000) {
-        // We have a three-byte UTF-8, it should become
-        // a single UTF-16 word.
-        if (pos + 2 >= len) {
-          return 0;
-        }  // minimal bound checking
-
-        if ((data[pos + 1] & 0b11000000) != 0b10000000) {
-          return 0;
-        }
-        if ((data[pos + 2] & 0b11000000) != 0b10000000) {
-          return 0;
-        }
-        // range check
-        uint32_t code_point = (leading_byte & 0b00001111) << 12 |
-                              (data[pos + 1] & 0b00111111) << 6 |
-                              (data[pos + 2] & 0b00111111);
-        if (code_point < 0x800 || 0xffff < code_point ||
-            (0xd7ff < code_point && code_point < 0xe000)) {
-          return 0;
-        }
-        *utf16_output++ = char16_t(code_point);
-        pos += 3;
-      } else if ((leading_byte & 0b11111000) == 0b11110000) {  // 0b11110000
-        // we have a 4-byte UTF-8 word.
-        if (pos + 3 >= len) {
-          return 0;
-        }  // minimal bound checking
-        if ((data[pos + 1] & 0b11000000) != 0b10000000) {
-          return 0;
-        }
-        if ((data[pos + 2] & 0b11000000) != 0b10000000) {
-          return 0;
-        }
-        if ((data[pos + 3] & 0b11000000) != 0b10000000) {
-          return 0;
-        }
-
-        // range check
-        uint32_t code_point = (leading_byte & 0b00000111) << 18 |
-                              (data[pos + 1] & 0b00111111) << 12 |
-                              (data[pos + 2] & 0b00111111) << 6 |
-                              (data[pos + 3] & 0b00111111);
-        if (code_point <= 0xffff || 0x10ffff < code_point) {
-          return 0;
-        }
-        code_point -= 0x10000;
-        uint16_t high_surrogate = uint16_t(0xD800 + (code_point >> 10));
-        uint16_t low_surrogate = uint16_t(0xDC00 + (code_point & 0x3FF));
-        *utf16_output++ = char16_t(high_surrogate);
-        *utf16_output++ = char16_t(low_surrogate);
-        pos += 4;
-      } else {
-        return 0;
-      }
-    }
-    return int(utf16_output - start);
-  };
-  size_t codepoints = convert(input.data(), input.size(), buffer.get());
-  if (codepoints == 0) {
-    out = std::nullopt;
-    return false;
-  }
-  int required_buffer_size = IdnToAscii(
-      IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints, NULL, 0);
-
-  if (required_buffer_size == 0) {
-    out = std::nullopt;
-    return false;
-  }
-
-  out = std::string(required_buffer_size, 0);
-  std::unique_ptr<char16_t[]> ascii_buffer(new char16_t[required_buffer_size]);
-
-  required_buffer_size =
-      IdnToAscii(IDN_ALLOW_UNASSIGNED, (LPCWSTR)buffer.get(), codepoints,
-                 (LPWSTR)ascii_buffer.get(), required_buffer_size);
-  if (required_buffer_size == 0) {
-    out = std::nullopt;
-    return false;
-  }
-  // This will not validate the punycode, so let us work it in reverse.
-  int test_reverse =
-      IdnToUnicode(IDN_ALLOW_UNASSIGNED, (LPCWSTR)ascii_buffer.get(),
-                   required_buffer_size, NULL, 0);
-  if (test_reverse == 0) {
-    out = std::nullopt;
-    return false;
-  }
-  out = std::string(required_buffer_size, 0);
-  for (size_t i = 0; i < required_buffer_size; i++) {
-    (*out)[i] = char(ascii_buffer.get()[i]);
-  }
-#else
-  (void)be_strict;  // unused.
-  out = input;      // We cannot do much more for now.
-#endif
+  out = std::move(idna_ascii);
   return true;
 }
 

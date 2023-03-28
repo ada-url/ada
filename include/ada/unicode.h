@@ -50,14 +50,14 @@ namespace ada::unicode {
  * script.
  *
  * The resulting strings should not exceed 255 octets according to RFC 1035
- * section 2.3.4. ICU checks for label size and domain size, but if we pass
- * "be_strict = false", these errors are ignored.
+ * section 2.3.4. ICU checks for label size and domain size, but these errors
+ * are ignored.
  *
  * @see https://url.spec.whatwg.org/#concept-domain-to-ascii
  *
  */
 bool to_ascii(std::optional<std::string>& out, std::string_view plain,
-              bool be_strict, size_t first_percent);
+              size_t first_percent);
 
 /**
  * Checks if the input has tab or newline characters.

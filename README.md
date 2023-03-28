@@ -9,10 +9,15 @@ Ada is a fast and spec-compliant URL parser written in C++.
 Specification for URL parser can be found from the
 [WHATWG](https://url.spec.whatwg.org/#url-parsing) website.
 
+The Ada library passes the full range of tests from the specification,
+across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
+supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
+
 ## Requirements
 
 - A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
-- We use [ICU](https://icu.unicode.org) when it is available.
+
+The project is otherwise self-contained and it has no dependency.
 
 ## Usage
 
@@ -131,13 +136,9 @@ Ada uses cmake as a build system. It's recommended you to run the following comm
 
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
 
-Project can also be built via docker using default docker file of repository with following commands.
+The project can also be built via docker using default docker file of repository with following commands.
 
 `docker build -t ada-builder . && docker run --rm -it -v ${PWD}:/repo ada-builder`
-
-### Installing ICU
-
-For macOS, you may install it with [brew](https://brew.sh) using `brew install icu4c`. Linux users may install ICU according to the their distribution: under Ubuntu, the command is `apt-get install -y libicu-dev`.
 
 ### Amalgamation
 
