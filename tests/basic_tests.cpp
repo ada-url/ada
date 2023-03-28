@@ -273,10 +273,25 @@ bool standard_file() {
 }
 
 template <class result>
+bool default_port_should_be_removed() {
+  TEST_START()
+  auto url = ada::parse<result>("http://www.google.com:443");
+  if (!url) {
+    TEST_FAIL("Should succeed");
+  }
+  url->set_protocol("https");
+  std::cout << url->to_string() << std::endl;
+  TEST_ASSERT(url->get_port(), "", "protocol must be empty");
+  TEST_ASSERT(url->get_host(), "www.google.com",
+              "host should not include :443");
+  TEST_SUCCEED()
+}
+
+template <class result>
 bool all_tests() {
   return confusing_mess<result>() && standard_file<result>() &&
          empty_host_dash_dash_path<result>() && just_hash<result>() &&
-         empty_url<result>() &&
+         empty_url<result>() && default_port_should_be_removed<result>() &&
          set_host_should_return_false_sometimes<result>() &&
          set_host_should_return_true_sometimes<result>() &&
          set_hostname_should_return_false_sometimes<result>() &&
