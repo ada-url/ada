@@ -10,6 +10,7 @@
 #include "ada/checkers-inl.h"
 #include "ada/helpers.h"
 #include "ada/unicode.h"
+#include "ada/unicode-inl.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
 #include "ada/scheme.h"
@@ -239,17 +240,17 @@ inline void url_aggregator::update_base_search(
     }
 
     buffer.insert(components.search_start, "?");
-    std::string encoded;
-    bool encoding_required =
-        unicode::percent_encode<true>(input, query_percent_encode_set, encoded);
-    // When encoding_required is false, then buffer is left unchanged, and
-    // percent encoding was not deemed required.
-    if (encoding_required) {
-      buffer.insert(components.search_start + 1, encoded);
-      components.hash_start += uint32_t(encoded.size() + 1);  // Do not forget `?`
-    } else {
+    size_t idx =
+        ada::unicode::percent_encode_index(input, query_percent_encode_set);
+    if (idx == input.size()) {
       buffer.insert(components.search_start + 1, input);
       components.hash_start += uint32_t(input.size() + 1);  // Do not forget `?`
+    } else {
+      std::string encoded =
+          ada::unicode::percent_encode(input, query_percent_encode_set, idx);
+      buffer.insert(components.search_start + 1, encoded);
+      components.hash_start +=
+          uint32_t(encoded.size() + 1);  // Do not forget `?`
     }
   }
 

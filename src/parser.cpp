@@ -423,8 +423,14 @@ result_type parse_url(std::string_view user_input,
           } else {
             url.update_base_authority(base_url->get_href(),
                                       base_url->get_components());
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
+            //////////////////////////
+            // TODO: Large optimization opportunity.
+            //////////////////////////
+            // This is likely several times too expensive. In base_url, we
+            // already have a fully validated hostname. We are now exporting it
+            // as a string_view and reparsing it as if it were a whole new
+            // candidate hostname.
+            ///////////////////////////////
             url.set_hostname(base_url->get_hostname());
             url.update_base_port(base_url->retrieve_base_port());
             url.update_base_pathname(base_url->get_pathname());
@@ -491,8 +497,14 @@ result_type parse_url(std::string_view user_input,
           } else {
             url.update_base_authority(base_url->get_href(),
                                       base_url->get_components());
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
+            //////////////////////////
+            // TODO: Large optimization opportunity.
+            //////////////////////////
+            // This is likely several times too expensive. In base_url, we
+            // already have a fully validated hostname. We are now exporting it
+            // as a string_view and reparsing it as if it were a whole new
+            // candidate hostname.
+            ///////////////////////////////
             url.set_hostname(base_url->get_hostname());
             url.update_base_port(base_url->retrieve_base_port());
           }
@@ -728,7 +740,14 @@ result_type parse_url(std::string_view user_input,
             if constexpr (result_type_is_ada_url) {
               url.host = base_url->host;
             } else {
-              // TODO: Optimization opportunity.
+              //////////////////////////
+              // TODO: Large optimization opportunity.
+              //////////////////////////
+              // This is likely several times too expensive. In base_url, we
+              // already have a fully validated host. We are now exporting it as
+              // a string_view and reparsing it as if it were a whole new
+              // candidate host.
+              ///////////////////////////////
               url.set_host(base_url->get_host());
             }
             // If the code point substring from pointer to the end of input does
@@ -841,8 +860,14 @@ result_type parse_url(std::string_view user_input,
             url.path = base_url->path;
             url.query = base_url->query;
           } else {
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
+            //////////////////////////
+            // TODO: Large optimization opportunity.
+            //////////////////////////
+            // This is likely several times too expensive. In base_url, we
+            // already have a fully validated hostname. We are now exporting it
+            // as a string_view and reparsing it as if it were a whole new
+            // candidate hostname.
+            ///////////////////////////////
             url.set_hostname(base_url->get_hostname());
             url.update_base_pathname(base_url->get_pathname());
             url.update_base_search(base_url->get_search());

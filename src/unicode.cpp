@@ -339,6 +339,21 @@ std::string percent_encode(const std::string_view input,
   return result;
 }
 
+std::string percent_encode(const std::string_view input,
+                           const uint8_t character_set[], size_t index) {
+  std::string out;
+  out.append(input.data(), index);
+  auto pointer = input.begin() + index;
+  for (; pointer != input.end(); pointer++) {
+    if (character_sets::bit_at(character_set, *pointer)) {
+      out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
+    } else {
+      out += *pointer;
+    }
+  }
+  return out;
+}
+
 template <bool append>
 bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {

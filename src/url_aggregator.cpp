@@ -4,6 +4,7 @@
 #include "ada/helpers.h"
 #include "ada/implementation.h"
 #include "ada/scheme.h"
+#include "ada/unicode-inl.h"
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
@@ -242,10 +243,14 @@ bool url_aggregator::set_username(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  // Optimization opportunity: Avoid temporary string creation
-  std::string encoded_input = ada::unicode::percent_encode(
+  size_t idx = ada::unicode::percent_encode_index(
       input, character_sets::USERINFO_PERCENT_ENCODE);
-  update_base_username(encoded_input);
+  if (idx == input.size()) {
+    update_base_username(input);
+  } else {
+    update_base_username(ada::unicode::percent_encode(
+        input, character_sets::USERINFO_PERCENT_ENCODE, idx));
+  }
   ADA_ASSERT_TRUE(validate());
   return true;
 }
@@ -257,10 +262,14 @@ bool url_aggregator::set_password(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  // Optimization opportunity: Avoid temporary string creation
-  std::string encoded_input = ada::unicode::percent_encode(
+  size_t idx = ada::unicode::percent_encode_index(
       input, character_sets::USERINFO_PERCENT_ENCODE);
-  update_base_password(encoded_input);
+  if (idx == input.size()) {
+    update_base_password(input);
+  } else {
+    update_base_password(ada::unicode::percent_encode(
+        input, character_sets::USERINFO_PERCENT_ENCODE, idx));
+  }
   ADA_ASSERT_TRUE(validate());
   return true;
 }
@@ -1143,15 +1152,13 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   // Return the result of running UTF-8 percent-encode on input using the C0
   // control percent-encode set.
 
-  std::string encoded;
-  bool encoding_required =
-        unicode::percent_encode<true>(input,  ada::character_sets::C0_CONTROL_PERCENT_ENCODE, encoded);
-  // When encoding_required is false, then encoded is left unchanged, and
-  // percent encoding was not deemed required.
-  if (encoding_required) {
-    update_base_hostname(encoded);
-  } else {
+  size_t idx = ada::unicode::percent_encode_index(
+      input, character_sets::C0_CONTROL_PERCENT_ENCODE);
+  if (idx == input.size()) {
     update_base_hostname(input);
+  } else {
+    update_base_hostname(ada::unicode::percent_encode(
+        input, character_sets::C0_CONTROL_PERCENT_ENCODE, idx));
   }
   ADA_ASSERT_TRUE(validate());
   return true;

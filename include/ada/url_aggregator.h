@@ -212,6 +212,8 @@ struct url_aggregator : url_base {
   /** @private */
   inline void clear_base_password();
   /** @private */
+  inline void copy_host(const ada::url_aggregator *other);
+  /** @private */
   inline bool base_fragment_has_value() const override;
   /** @private */
   inline bool base_search_has_value() const override;
