@@ -373,18 +373,17 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
   return true;
 }
 
-
-bool to_ascii(std::optional<std::string>& out, const std::string_view plain, const bool be_strict, size_t first_percent) {
+bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
+              size_t first_percent) {
   std::string percent_decoded_buffer;
   std::string_view input = plain;
-  if(first_percent != std::string_view::npos) {
+  if (first_percent != std::string_view::npos) {
     percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
     input = percent_decoded_buffer;
   }
-  (void) be_strict;
   // input is a non-empty UTF-8 string, must be percent decoded
   std::string idna_ascii = ada::idna::to_ascii(input);
-  if(idna_ascii.empty()) {
+  if (idna_ascii.empty()) {
     return false;
   }
   out = std::move(idna_ascii);

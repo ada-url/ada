@@ -1,9 +1,10 @@
 /* auto-generated on 2023-03-27 13:47:27 -0400. Do not edit! */
-// dofile: invoked with prepath=/Users/dlemire/CVS/github/idna/src, filename=idna.cpp
+// dofile: invoked with prepath=/Users/dlemire/CVS/github/idna/src,
+// filename=idna.cpp
 /* begin file src/idna.cpp */
-// dofile: invoked with prepath=/Users/dlemire/CVS/github/idna/src, filename=unicode_transcoding.cpp
+// dofile: invoked with prepath=/Users/dlemire/CVS/github/idna/src,
+// filename=unicode_transcoding.cpp
 /* begin file src/unicode_transcoding.cpp */
-
 
 #include <cstdint>
 #include <cstring>
@@ -200,14 +201,16 @@ size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output) {
 }
 }  // namespace ada::idna
 /* end file src/unicode_transcoding.cpp */
-// dofile: invoked with prepath=/Users/dlemire/CVS/github/idna/src, filename=mapping.cpp
+// dofile: invoked with prepath=/Users/dlemire/CVS/github/idna/src,
+// filename=mapping.cpp
 /* begin file src/mapping.cpp */
 
 #include <algorithm>
 #include <array>
 #include <string>
 
-// dofile: invoked with prepath=/Users/dlemire/CVS/github/idna/src, filename=mapping_tables.cpp
+// dofile: invoked with prepath=/Users/dlemire/CVS/github/idna/src,
+// filename=mapping_tables.cpp
 /* begin file src/mapping_tables.cpp */
 // IDNA  15.0.0
 

@@ -461,7 +461,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   }
   ada_log("parse_host calling to_ascii");
   std::optional<std::string> host = std::string(get_hostname());
-  is_valid = ada::unicode::to_ascii(host, input, false, input.find('%'));
+  is_valid = ada::unicode::to_ascii(host, input, input.find('%'));
   if (!is_valid) {
     ada_log("parse_host to_ascii returns false");
     return is_valid = false;

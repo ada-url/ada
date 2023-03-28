@@ -128,7 +128,7 @@ bool idna_test_v2_to_ascii() {
       std::string_view input = object["input"].get_string();
 
       std::optional<std::string> output;
-      ada::unicode::to_ascii(output, input, false, input.find('%'));
+      ada::unicode::to_ascii(output, input, input.find('%'));
 
       auto expected_output = object["output"];
       auto given_output = output.has_value() ? output.value() : "";
@@ -362,7 +362,7 @@ bool toascii_encoding() {
 
         std::string_view input = object["input"];
         std::optional<std::string> output;
-        ada::unicode::to_ascii(output, input, false, input.find('%'));
+        ada::unicode::to_ascii(output, input, input.find('%'));
         auto expected_output = object["output"];
 
         // The following code replicates `toascii.window.js` from web-platform
