@@ -42,11 +42,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <dlfcn.h>          // for dlopen() and dlsym()
-#include <mach/mach_time.h> // for mach_absolute_time()
-#include <sys/kdebug.h>     // for kdebug trace decode
-#include <sys/sysctl.h>     // for sysctl()
-#include <unistd.h>         // for usleep()
+#include <dlfcn.h>           // for dlopen() and dlsym()
+#include <mach/mach_time.h>  // for mach_absolute_time()
+#include <sys/kdebug.h>      // for kdebug trace decode
+#include <sys/sysctl.h>      // for sysctl()
+#include <unistd.h>          // for usleep()
 
 struct performance_counters {
   double cycles;
@@ -58,7 +58,9 @@ struct performance_counters {
   performance_counters(double c, double b, double m, double i)
       : cycles(c), branches(b), missed_branches(m), instructions(i) {}
   performance_counters(double init)
-      : cycles(init), branches(init), missed_branches(init),
+      : cycles(init),
+        branches(init),
+        missed_branches(init),
         instructions(init) {}
 
   inline performance_counters &operator-=(const performance_counters &other) {
@@ -127,17 +129,17 @@ typedef size_t usize;
 #define KPC_CLASS_RAWPMU (3)
 
 // Cross-platform class mask constants.
-#define KPC_CLASS_FIXED_MASK (1u << KPC_CLASS_FIXED)               // 1
-#define KPC_CLASS_CONFIGURABLE_MASK (1u << KPC_CLASS_CONFIGURABLE) // 2
-#define KPC_CLASS_POWER_MASK (1u << KPC_CLASS_POWER)               // 4
-#define KPC_CLASS_RAWPMU_MASK (1u << KPC_CLASS_RAWPMU)             // 8
+#define KPC_CLASS_FIXED_MASK (1u << KPC_CLASS_FIXED)                // 1
+#define KPC_CLASS_CONFIGURABLE_MASK (1u << KPC_CLASS_CONFIGURABLE)  // 2
+#define KPC_CLASS_POWER_MASK (1u << KPC_CLASS_POWER)                // 4
+#define KPC_CLASS_RAWPMU_MASK (1u << KPC_CLASS_RAWPMU)              // 8
 
 // PMU version constants.
-#define KPC_PMU_ERROR (0)     // Error
-#define KPC_PMU_INTEL_V3 (1)  // Intel
-#define KPC_PMU_ARM_APPLE (2) // ARM64
-#define KPC_PMU_INTEL_V2 (3)  // Old Intel
-#define KPC_PMU_ARM_V2 (4)    // Old ARM
+#define KPC_PMU_ERROR (0)      // Error
+#define KPC_PMU_INTEL_V3 (1)   // Intel
+#define KPC_PMU_ARM_APPLE (2)  // ARM64
+#define KPC_PMU_INTEL_V2 (3)   // Old Intel
+#define KPC_PMU_ARM_V2 (4)     // Old ARM
 
 // The maximum number of counters we could read from every class in one go.
 // ARMV7: FIXED: 1, CONFIGURABLE: 4
@@ -357,8 +359,7 @@ static u64 (*kperf_tick_frequency)(void);
 
 /// Get lightweight PET mode (not in kperf.framework).
 static int kperf_lightweight_pet_get(u32 *enabled) {
-  if (!enabled)
-    return -1;
+  if (!enabled) return -1;
   usize size = 4;
   return sysctlbyname("kperf.lightweight_pet", enabled, &size, NULL, 0);
 }
@@ -382,11 +383,11 @@ static int kperf_lightweight_pet_set(u32 enabled) {
 
 /// KPEP event (size: 48/28 bytes on 64/32 bit OS)
 typedef struct kpep_event {
-  const char *name; ///< Unique name of a event, such as "INST_RETIRED.ANY".
-  const char *description; ///< Description for this event.
-  const char *errata;      ///< Errata, currently NULL.
-  const char *alias;       ///< Alias name, such as "Instructions", "Cycles".
-  const char *fallback;    ///< Fallback event name for fixed counter.
+  const char *name;  ///< Unique name of a event, such as "INST_RETIRED.ANY".
+  const char *description;  ///< Description for this event.
+  const char *errata;       ///< Errata, currently NULL.
+  const char *alias;        ///< Alias name, such as "Instructions", "Cycles".
+  const char *fallback;     ///< Fallback event name for fixed counter.
   u32 mask;
   u8 number;
   u8 umask;
@@ -396,25 +397,25 @@ typedef struct kpep_event {
 
 /// KPEP database (size: 144/80 bytes on 64/32 bit OS)
 typedef struct kpep_db {
-  const char *name;           ///< Database name, such as "haswell".
-  const char *cpu_id;         ///< Plist name, such as "cpu_7_8_10b282dc".
-  const char *marketing_name; ///< Marketing name, such as "Intel Haswell".
-  void *plist_data;           ///< Plist data (CFDataRef), currently NULL.
-  void *event_map; ///< All events (CFDict<CFSTR(event_name), kpep_event *>).
+  const char *name;            ///< Database name, such as "haswell".
+  const char *cpu_id;          ///< Plist name, such as "cpu_7_8_10b282dc".
+  const char *marketing_name;  ///< Marketing name, such as "Intel Haswell".
+  void *plist_data;            ///< Plist data (CFDataRef), currently NULL.
+  void *event_map;  ///< All events (CFDict<CFSTR(event_name), kpep_event *>).
   kpep_event
-      *event_arr; ///< Event struct buffer (sizeof(kpep_event) * events_count).
-  kpep_event **fixed_event_arr; ///< Fixed counter events (sizeof(kpep_event *)
-                                ///< * fixed_counter_count)
-  void *alias_map; ///< All aliases (CFDict<CFSTR(event_name), kpep_event *>).
+      *event_arr;  ///< Event struct buffer (sizeof(kpep_event) * events_count).
+  kpep_event **fixed_event_arr;  ///< Fixed counter events (sizeof(kpep_event *)
+                                 ///< * fixed_counter_count)
+  void *alias_map;  ///< All aliases (CFDict<CFSTR(event_name), kpep_event *>).
   usize reserved_1;
   usize reserved_2;
   usize reserved_3;
-  usize event_count; ///< All events count.
+  usize event_count;  ///< All events count.
   usize alias_count;
   usize fixed_counter_count;
   usize config_counter_count;
   usize power_counter_count;
-  u32 archtecture; ///< see `KPEP CPU archtecture constants` above.
+  u32 archtecture;  ///< see `KPEP CPU archtecture constants` above.
   u32 fixed_counter_bits;
   u32 config_counter_bits;
   u32 power_counter_bits;
@@ -423,14 +424,14 @@ typedef struct kpep_db {
 /// KPEP config (size: 80/44 bytes on 64/32 bit OS)
 typedef struct kpep_config {
   kpep_db *db;
-  kpep_event **ev_arr; ///< (sizeof(kpep_event *) * counter_count), init NULL
-  usize *ev_map;       ///< (sizeof(usize *) * counter_count), init 0
-  usize *ev_idx;       ///< (sizeof(usize *) * counter_count), init -1
-  u32 *flags;          ///< (sizeof(u32 *) * counter_count), init 0
-  u64 *kpc_periods;    ///< (sizeof(u64 *) * counter_count), init 0
-  usize event_count;   /// kpep_config_events_count()
+  kpep_event **ev_arr;  ///< (sizeof(kpep_event *) * counter_count), init NULL
+  usize *ev_map;        ///< (sizeof(usize *) * counter_count), init 0
+  usize *ev_idx;        ///< (sizeof(usize *) * counter_count), init -1
+  u32 *flags;           ///< (sizeof(u32 *) * counter_count), init 0
+  u64 *kpc_periods;     ///< (sizeof(u64 *) * counter_count), init 0
+  usize event_count;    /// kpep_config_events_count()
   usize counter_count;
-  u32 classes; ///< See `class mask constants` above.
+  u32 classes;  ///< See `class mask constants` above.
   u32 config_counter;
   u32 power_counter;
   u32 reserved;
@@ -614,9 +615,9 @@ typedef struct {
 } lib_symbol;
 
 #define lib_nelems(x) (sizeof(x) / sizeof((x)[0]))
-#define lib_symbol_def(name)                                                   \
-  {                                                                            \
-#name, (void **)&name                                                      \
+#define lib_symbol_def(name) \
+  {                          \
+#name, (void **)&name    \
   }
 
 static const lib_symbol lib_symbols_kperf[] = {
@@ -683,7 +684,7 @@ static const lib_symbol lib_symbols_kperfdata[] = {
 };
 
 #define lib_path_kperf "/System/Library/PrivateFrameworks/kperf.framework/kperf"
-#define lib_path_kperfdata                                                     \
+#define lib_path_kperfdata \
   "/System/Library/PrivateFrameworks/kperfdata.framework/kperfdata"
 
 static bool lib_inited = false;
@@ -696,10 +697,8 @@ static void *lib_handle_kperfdata = NULL;
 static void lib_deinit(void) {
   lib_inited = false;
   lib_has_err = false;
-  if (lib_handle_kperf)
-    dlclose(lib_handle_kperf);
-  if (lib_handle_kperfdata)
-    dlclose(lib_handle_kperfdata);
+  if (lib_handle_kperf) dlclose(lib_handle_kperf);
+  if (lib_handle_kperfdata) dlclose(lib_handle_kperfdata);
   lib_handle_kperf = NULL;
   lib_handle_kperfdata = NULL;
   for (usize i = 0; i < lib_nelems(lib_symbols_kperf); i++) {
@@ -713,16 +712,15 @@ static void lib_deinit(void) {
 }
 
 static bool lib_init(void) {
-#define return_err()                                                           \
-  do {                                                                         \
-    lib_deinit();                                                              \
-    lib_inited = true;                                                         \
-    lib_has_err = true;                                                        \
-    return false;                                                              \
+#define return_err()    \
+  do {                  \
+    lib_deinit();       \
+    lib_inited = true;  \
+    lib_has_err = true; \
+    return false;       \
   } while (false)
 
-  if (lib_inited)
-    return !lib_has_err;
+  if (lib_inited) return !lib_has_err;
 
   // load dynamic library
   lib_handle_kperf = dlopen(lib_path_kperf, RTLD_LAZY);
@@ -874,8 +872,7 @@ static int kdebug_trace_enable(bool enable) {
 /// Retrieve trace buffer information from kernel.
 /// @return 0 on success.
 static int kdebug_get_bufinfo(kbufinfo_t *info) {
-  if (!info)
-    return -1;
+  if (!info) return -1;
   int mib[3] = {CTL_KERN, KERN_KDEBUG, KERN_KDGETBUF};
   size_t needed = sizeof(kbufinfo_t);
   return sysctl(mib, 3, info, &needed, NULL, 0);
@@ -887,18 +884,15 @@ static int kdebug_get_bufinfo(kbufinfo_t *info) {
 /// @param count Number of trace entries (kd_buf) obtained.
 /// @return 0 on success.
 static int kdebug_trace_read(void *buf, usize len, usize *count) {
-  if (count)
-    *count = 0;
-  if (!buf || !len)
-    return -1;
+  if (count) *count = 0;
+  if (!buf || !len) return -1;
 
   // Note: the input and output units are not the same.
   // input: bytes
   // output: number of kd_buf
   int mib[3] = {CTL_KERN, KERN_KDEBUG, KERN_KDREADTR};
   int ret = sysctl(mib, 3, buf, &len, NULL, 0);
-  if (ret != 0)
-    return ret;
+  if (ret != 0) return ret;
   *count = len;
   return 0;
 }
@@ -908,13 +902,11 @@ static int kdebug_trace_read(void *buf, usize len, usize *count) {
 /// @param suc set true if new buffers filled.
 /// @return 0 on success.
 static int kdebug_wait(usize timeout_ms, bool *suc) {
-  if (timeout_ms == 0)
-    return -1;
+  if (timeout_ms == 0) return -1;
   int mib[3] = {CTL_KERN, KERN_KDEBUG, KERN_KDBUFWAIT};
   usize val = timeout_ms;
   int ret = sysctl(mib, 3, NULL, &val, NULL, 0);
-  if (suc)
-    *suc = !!val;
+  if (suc) *suc = !!val;
   return ret;
 }
 
@@ -924,43 +916,42 @@ static int kdebug_wait(usize timeout_ms, bool *suc) {
 
 #define EVENT_NAME_MAX 8
 typedef struct {
-  const char *alias;                 /// name for print
-  const char *names[EVENT_NAME_MAX]; /// name from pmc db
+  const char *alias;                  /// name for print
+  const char *names[EVENT_NAME_MAX];  /// name from pmc db
 } event_alias;
 
 /// Event names from /usr/share/kpep/<name>.plist
 static const event_alias profile_events[] = {
     {"cycles",
      {
-         "FIXED_CYCLES", // Apple A7-A15
-         "CPU_CLK_UNHALTED.THREAD", // Intel Core 1th-10th
-         "CPU_CLK_UNHALTED.CORE",   // Intel Yonah, Merom
+         "FIXED_CYCLES",             // Apple A7-A15
+         "CPU_CLK_UNHALTED.THREAD",  // Intel Core 1th-10th
+         "CPU_CLK_UNHALTED.CORE",    // Intel Yonah, Merom
      }},
     {"instructions",
      {
-         "FIXED_INSTRUCTIONS", // Apple A7-A15
-         "INST_RETIRED.ANY" // Intel Yonah, Merom, Core 1th-10th
+         "FIXED_INSTRUCTIONS",  // Apple A7-A15
+         "INST_RETIRED.ANY"     // Intel Yonah, Merom, Core 1th-10th
      }},
     {"branches",
      {
-         "INST_BRANCH",                  // Apple A7-A15
-         "BR_INST_RETIRED.ALL_BRANCHES", // Intel Core 1th-10th
-         "INST_RETIRED.ANY",             // Intel Yonah, Merom
+         "INST_BRANCH",                   // Apple A7-A15
+         "BR_INST_RETIRED.ALL_BRANCHES",  // Intel Core 1th-10th
+         "INST_RETIRED.ANY",              // Intel Yonah, Merom
      }},
     {"branch-misses",
      {
-         "BRANCH_MISPRED_NONSPEC",       // Apple A7-A15, since iOS 15, macOS 12
-         "BRANCH_MISPREDICT",            // Apple A7-A14
-         "BR_MISP_RETIRED.ALL_BRANCHES", // Intel Core 2th-10th
-         "BR_INST_RETIRED.MISPRED",      // Intel Yonah, Merom
+         "BRANCH_MISPRED_NONSPEC",  // Apple A7-A15, since iOS 15, macOS 12
+         "BRANCH_MISPREDICT",       // Apple A7-A14
+         "BR_MISP_RETIRED.ALL_BRANCHES",  // Intel Core 2th-10th
+         "BR_INST_RETIRED.MISPRED",       // Intel Yonah, Merom
      }},
 };
 
 static kpep_event *get_event(kpep_db *db, const event_alias *alias) {
   for (usize j = 0; j < EVENT_NAME_MAX; j++) {
     const char *name = alias->names[j];
-    if (!name)
-      break;
+    if (!name) break;
     kpep_event *ev = NULL;
     if (kpep_db_event(db, name, &ev) == 0) {
       return ev;
@@ -1099,7 +1090,6 @@ struct AppleEvents {
     // get counters before
     if ((ret = kpc_get_thread_counters(0, KPC_MAX_COUNTERS, counters_0))) {
       if (!warned) {
-
         printf("Failed get thread counters before: %d.\n", ret);
         warned = true;
       }

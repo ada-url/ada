@@ -18,18 +18,21 @@ std::string url_examples_default[] = {
     "41Gc3C8UysL.css?AUIClients/AmazonGatewayAuiAssets",
     "https://www.reddit.com/?after=t3_zvz1ze",
     "https://www.reddit.com/login/?dest=https%3A%2F%2Fwww.reddit.com%2F",
-    "postgresql://other:9818274x1!!@localhost:5432/otherdb?connect_timeout=10&application_name=myapp",
-    "http://192.168.1.1", // ipv4
-    "http://[2606:4700:4700::1111]", // ipv6
+    "postgresql://other:9818274x1!!@localhost:5432/"
+    "otherdb?connect_timeout=10&application_name=myapp",
+    "http://192.168.1.1",             // ipv4
+    "http://[2606:4700:4700::1111]",  // ipv6
 };
 
 std::vector<std::string> url_examples;
 
-double url_examples_bytes =  []() -> double {
-    size_t bytes{0};
-    for(std::string& url_string : url_examples) { bytes += url_string.size(); }
-    return double(bytes);
-  }();
+double url_examples_bytes = []() -> double {
+  size_t bytes{0};
+  for (std::string& url_string : url_examples) {
+    bytes += url_string.size();
+  }
+  return double(bytes);
+}();
 
 #ifdef ADA_URL_FILE
 const char* default_file = ADA_URL_FILE;
@@ -37,16 +40,17 @@ const char* default_file = ADA_URL_FILE;
 const char* default_file = nullptr;
 #endif
 
-
 size_t init_data(const char* input = default_file) {
   // compute the number of bytes.
-  auto compute =  []() -> double {
+  auto compute = []() -> double {
     size_t bytes{0};
-    for(std::string& url_string : url_examples) { bytes += url_string.size(); }
+    for (std::string& url_string : url_examples) {
+      bytes += url_string.size();
+    }
     return double(bytes);
   };
-  if(input == nullptr) {
-    for(const std::string& s : url_examples_default) {
+  if (input == nullptr) {
+    for (const std::string& s : url_examples_default) {
       url_examples.emplace_back(s);
     }
     url_examples_bytes = compute();
@@ -55,7 +59,7 @@ size_t init_data(const char* input = default_file) {
 
   if (!file_exists(input)) {
     std::cout << "File not found !" << input << std::endl;
-    for(const std::string& s : url_examples_default) {
+    for (const std::string& s : url_examples_default) {
       url_examples.emplace_back(s);
     }
   } else {

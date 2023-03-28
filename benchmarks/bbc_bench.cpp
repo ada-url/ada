@@ -25,9 +25,9 @@ std::string url_examples[] = {
 
 void init_data(const char* v = nullptr) {}
 
-double url_examples_bytes = []() -> double  {
+double url_examples_bytes = []() -> double {
   size_t bytes{0};
-  for (std::string &url_string : url_examples) {
+  for (std::string& url_string : url_examples) {
     bytes += url_string.size();
   }
   return double(bytes);

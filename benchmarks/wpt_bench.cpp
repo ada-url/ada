@@ -19,9 +19,12 @@ size_t init_data(const char *source) {
   for (auto element : doc.get_array()) {
     if (element.type() == ondemand::json_type::object) {
       std::string_view input;
-      if(element["input"].get_string(true).get(input) != simdjson::SUCCESS) { printf("missing input.\n"); }
+      if (element["input"].get_string(true).get(input) != simdjson::SUCCESS) {
+        printf("missing input.\n");
+      }
       std::string_view base;
-      if(element["base"].get_string(true).get(base) != simdjson::SUCCESS) {}
+      if (element["base"].get_string(true).get(base) != simdjson::SUCCESS) {
+      }
       url_examples.push_back({std::string(input), std::string(base)});
       url_examples_bytes += input.size() + base.size();
     }
@@ -37,15 +40,20 @@ static void BasicBench_AdaURL(benchmark::State &state) {
     for (const std::pair<std::string, std::string> &url_strings :
          url_examples) {
       ada::result<ada::url> base;
-      ada::url* base_ptr = nullptr;
-      if(!url_strings.second.empty()) {
+      ada::url *base_ptr = nullptr;
+      if (!url_strings.second.empty()) {
         base = ada::parse(url_strings.second);
-        if(base) { base_ptr = &*base; } else { continue; }
+        if (base) {
+          base_ptr = &*base;
+        } else {
+          continue;
+        }
       }
       auto url = ada::parse(url_strings.first, base_ptr);
       if (url) {
         numbers_of_parameters +=
-            url->path.size() + (url->base_search_has_value() ? url->query->size() : 0) +
+            url->path.size() +
+            (url->base_search_has_value() ? url->query->size() : 0) +
             url->get_protocol().size() + url->host->size();
       }
     }
@@ -58,10 +66,14 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       for (const std::pair<std::string, std::string> &url_strings :
            url_examples) {
         ada::result<ada::url> base;
-        ada::url* base_ptr = nullptr;
-        if(!url_strings.second.empty()) {
-            base = ada::parse(url_strings.second);
-            if(base) { base_ptr = &*base; } else { continue; }
+        ada::url *base_ptr = nullptr;
+        if (!url_strings.second.empty()) {
+          base = ada::parse(url_strings.second);
+          if (base) {
+            base_ptr = &*base;
+          } else {
+            continue;
+          }
         }
         auto url = ada::parse(url_strings.first, base_ptr);
         if (url) {
@@ -107,8 +119,6 @@ static void BasicBench_AdaURL(benchmark::State &state) {
 }
 BENCHMARK(BasicBench_AdaURL);
 
-
-
 #if ADA_url_whatwg_ENABLED
 
 #include <src/url.h>
@@ -119,14 +129,14 @@ static void BasicBench_whatwg(benchmark::State &state) {
     for (const std::pair<std::string, std::string> &url_strings :
          url_examples) {
       whatwg::url base;
-      whatwg::url* base_ptr = nullptr;
-      if(!url_strings.second.empty()) {
-        if(whatwg::success(base.parse(url_strings.second, nullptr))) {
+      whatwg::url *base_ptr = nullptr;
+      if (!url_strings.second.empty()) {
+        if (whatwg::success(base.parse(url_strings.second, nullptr))) {
           base_ptr = &base;
         }
       }
       whatwg::url url;
-      if(whatwg::success(url.parse(url_strings.first, base_ptr))) {
+      if (whatwg::success(url.parse(url_strings.first, base_ptr))) {
         success++;
       }
     }
@@ -139,14 +149,14 @@ static void BasicBench_whatwg(benchmark::State &state) {
       for (const std::pair<std::string, std::string> &url_strings :
            url_examples) {
         whatwg::url base;
-        whatwg::url* base_ptr = nullptr;
-        if(!url_strings.second.empty()) {
-          if(whatwg::success(base.parse(url_strings.second, nullptr))) {
+        whatwg::url *base_ptr = nullptr;
+        if (!url_strings.second.empty()) {
+          if (whatwg::success(base.parse(url_strings.second, nullptr))) {
             base_ptr = &base;
           }
         }
         whatwg::url url;
-        if(whatwg::success(url.parse(url_strings.first, base_ptr))) {
+        if (whatwg::success(url.parse(url_strings.first, base_ptr))) {
           success++;
         }
       }
@@ -185,7 +195,7 @@ static void BasicBench_whatwg(benchmark::State &state) {
                          benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(BasicBench_whatwg);
-#endif // ADA_url_whatwg_ENABLED
+#endif  // ADA_url_whatwg_ENABLED
 
 int main(int argc, char **argv) {
   if (argc == 1 || !init_data(argv[1])) {
@@ -198,7 +208,7 @@ int main(int argc, char **argv) {
     return EXIT_SUCCESS;
   }
 #if defined(ADA_RUST_VERSION)
-    benchmark::AddCustomContext("rust version ", ADA_RUST_VERSION);
+  benchmark::AddCustomContext("rust version ", ADA_RUST_VERSION);
 #endif
 #if (__APPLE__ && __aarch64__) || defined(__linux__)
   if (!collector.has_events()) {

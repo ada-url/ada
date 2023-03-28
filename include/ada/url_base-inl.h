@@ -17,13 +17,9 @@
 #include <string>
 #if ADA_REGULAR_VISUAL_STUDIO
 #include <intrin.h>
-#endif // ADA_REGULAR_VISUAL_STUDIO
+#endif  // ADA_REGULAR_VISUAL_STUDIO
 
 namespace ada {
-
-[[nodiscard]] ada_really_inline ada::scheme::type url_base::get_scheme_type() const noexcept {
-  return type;
-}
 
 [[nodiscard]] ada_really_inline bool url_base::is_special() const noexcept {
   return type != ada::scheme::NOT_SPECIAL;
@@ -33,10 +29,11 @@ namespace ada {
   return ada::scheme::get_special_port(type);
 }
 
-[[nodiscard]] ada_really_inline uint16_t url_base::scheme_default_port() const noexcept {
+[[nodiscard]] ada_really_inline uint16_t
+url_base::scheme_default_port() const noexcept {
   return scheme::get_special_port(type);
 }
 
-} // namespace ada
+}  // namespace ada
 
-#endif // ADA_URL_BASE_INL_H
+#endif  // ADA_URL_BASE_INL_H

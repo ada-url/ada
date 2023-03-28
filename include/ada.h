@@ -27,4 +27,4 @@
 #include "ada/ada_version.h"
 #include "ada/implementation.h"
 
-#endif // ADA_H
+#endif  // ADA_H

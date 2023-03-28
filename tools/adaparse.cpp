@@ -17,13 +17,16 @@
  *       "fragment":"fddfds"
  * }
  **/
-int main(int argc, char**argv) {
-    if(argc<2) {
-        std::cout << "use a URL as a parameter." << std::endl;
-        return EXIT_SUCCESS;
-    }
-    auto url = ada::parse(argv[1]);
-    if(!url) { std::cerr << "Invalid." << std::endl; return EXIT_FAILURE; }
-    std::cout << *url << std::endl;
+int main(int argc, char** argv) {
+  if (argc < 2) {
+    std::cout << "use a URL as a parameter." << std::endl;
     return EXIT_SUCCESS;
+  }
+  auto url = ada::parse(argv[1]);
+  if (!url) {
+    std::cerr << "Invalid." << std::endl;
+    return EXIT_FAILURE;
+  }
+  std::cout << *url << std::endl;
+  return EXIT_SUCCESS;
 }

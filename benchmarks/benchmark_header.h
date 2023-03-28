@@ -21,8 +21,7 @@ size_t N = 1000;
 
 #include <benchmark/benchmark.h>
 
-
-bool file_exists(const char *filename) {
+bool file_exists(const char* filename) {
   namespace fs = std::filesystem;
   std::filesystem::path f{filename};
   if (std::filesystem::exists(filename)) {
@@ -32,8 +31,6 @@ bool file_exists(const char *filename) {
     return false;
   }
 }
-
-
 
 std::string read_file(std::string filename) {
   constexpr auto read_size = std::size_t(4096);
@@ -55,9 +52,15 @@ std::vector<std::string> split_string(const std::string& str) {
     std::string_view view = line;
     // Some parsers like boost/url will refuse to parse a URL with trailing
     // whitespace.
-    while(!view.empty() && std::isspace(view.back())) { view.remove_suffix(1); }
-    while(!view.empty() && std::isspace(view.front())) { view.remove_prefix(1); }
-    if(!view.empty()) { result.emplace_back(view); }
+    while (!view.empty() && std::isspace(view.back())) {
+      view.remove_suffix(1);
+    }
+    while (!view.empty() && std::isspace(view.front())) {
+      view.remove_prefix(1);
+    }
+    if (!view.empty()) {
+      result.emplace_back(view);
+    }
   }
   return result;
 }

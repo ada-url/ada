@@ -11,37 +11,37 @@
 
 namespace ada {
 
-  /**
-   * @see https://url.spec.whatwg.org/#url-parsing
-   */
-  enum class state {
-    AUTHORITY,
-    SCHEME_START,
-    SCHEME,
-    HOST,
-    NO_SCHEME,
-    FRAGMENT,
-    RELATIVE_SCHEME,
-    RELATIVE_SLASH,
-    FILE,
-    FILE_HOST,
-    FILE_SLASH,
-    PATH_OR_AUTHORITY,
-    SPECIAL_AUTHORITY_IGNORE_SLASHES,
-    SPECIAL_AUTHORITY_SLASHES,
-    SPECIAL_RELATIVE_OR_AUTHORITY,
-    QUERY,
-    PATH,
-    PATH_START,
-    OPAQUE_PATH,
-    PORT,
-  };
+/**
+ * @see https://url.spec.whatwg.org/#url-parsing
+ */
+enum class state {
+  AUTHORITY,
+  SCHEME_START,
+  SCHEME,
+  HOST,
+  NO_SCHEME,
+  FRAGMENT,
+  RELATIVE_SCHEME,
+  RELATIVE_SLASH,
+  FILE,
+  FILE_HOST,
+  FILE_SLASH,
+  PATH_OR_AUTHORITY,
+  SPECIAL_AUTHORITY_IGNORE_SLASHES,
+  SPECIAL_AUTHORITY_SLASHES,
+  SPECIAL_RELATIVE_OR_AUTHORITY,
+  QUERY,
+  PATH,
+  PATH_START,
+  OPAQUE_PATH,
+  PORT,
+};
 
-  /**
-   * Stringify a URL state machine state.
-   */
-  ada_warn_unused std::string to_string(ada::state s);
+/**
+ * Stringify a URL state machine state.
+ */
+ada_warn_unused std::string to_string(ada::state s);
 
-} // ada namespace
+}  // namespace ada
 
-#endif // ADA_STATE_H
+#endif  // ADA_STATE_H
