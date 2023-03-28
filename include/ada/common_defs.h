@@ -115,14 +115,14 @@
   ADA_PRAGMA(GCC diagnostic ignored #WARNING)
 #if defined(ADA_CLANG_VISUAL_STUDIO)
 #define ADA_DISABLE_UNDESIRED_WARNINGS \
-  ADA_DISABLE_GCC_WARNING(-Wmicrosoft - include)
+  ADA_DISABLE_GCC_WARNING(-Wmicrosoft-include)
 #else
 #define ADA_DISABLE_UNDESIRED_WARNINGS
 #endif
 #define ADA_DISABLE_DEPRECATED_WARNING \
-  ADA_DISABLE_GCC_WARNING(-Wdeprecated - declarations)
+  ADA_DISABLE_GCC_WARNING(-Wdeprecated-declarations)
 #define ADA_DISABLE_STRICT_OVERFLOW_WARNING \
-  ADA_DISABLE_GCC_WARNING(-Wstrict - overflow)
+  ADA_DISABLE_GCC_WARNING(-Wstrict-overflow)
 #define ADA_POP_DISABLE_WARNINGS _Pragma("GCC diagnostic pop")
 
 #endif  // MSC_VER

@@ -16,7 +16,8 @@ size_t count_ada_invalid() {
 
 enum { JUST_PARSE = 1, PARSE_AND_HREF = 0 };
 
-template <bool just_parse = PARSE_AND_HREF, class result_type = ada::url_aggregator>
+template <bool just_parse = PARSE_AND_HREF,
+          class result_type = ada::url_aggregator>
 static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;

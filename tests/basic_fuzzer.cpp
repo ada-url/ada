@@ -125,12 +125,16 @@ int main() {
   std::cout << "You have litte-endian system." << std::endl;
 #endif
   std::cout << "Running basic fuzzer.\n";
-  std::cout << "[fancy]  Executed " << fancy_fuzz<ada::url>(100000) << " mutations.\n";
-  std::cout << "[simple] Executed " << simple_fuzz<ada::url>(40000) << " mutations.\n";
+  std::cout << "[fancy]  Executed " << fancy_fuzz<ada::url>(100000)
+            << " mutations.\n";
+  std::cout << "[simple] Executed " << simple_fuzz<ada::url>(40000)
+            << " mutations.\n";
   std::cout << "[roller] Executed " << roller_fuzz<ada::url>(40000)
             << " correct cases.\n";
-  std::cout << "[fancy]  Executed " << fancy_fuzz<ada::url_aggregator>(100000) << " mutations.\n";
-  std::cout << "[simple] Executed " << simple_fuzz<ada::url_aggregator>(40000) << " mutations.\n";
+  std::cout << "[fancy]  Executed " << fancy_fuzz<ada::url_aggregator>(100000)
+            << " mutations.\n";
+  std::cout << "[simple] Executed " << simple_fuzz<ada::url_aggregator>(40000)
+            << " mutations.\n";
   std::cout << "[roller] Executed " << roller_fuzz<ada::url_aggregator>(40000)
             << " correct cases.\n";
   return EXIT_SUCCESS;
