@@ -216,7 +216,7 @@ bool url::set_protocol(const std::string_view input) {
 }
 
 bool url::set_href(const std::string_view input) {
-  ada::result<ada::url> out = ada::parse(input);
+  ada::result<ada::url> out = ada::parse<ada::url>(input);
 
   if (out) {
     username = out->username;

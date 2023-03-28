@@ -21,7 +21,7 @@ std::set<std::string> bad_domains = {"http://./", "http://../",
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-template <class result_type = ada::url>
+template <class result_type = ada::url_aggregator>
 ada::result<result_type> ada_parse(std::string_view view,
                                    const result_type *base = nullptr) {
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]"
@@ -154,7 +154,7 @@ bool percent_encoding() {
   TEST_SUCCEED()
 }
 
-template <class result_type = ada::url>
+template <class result_type = ada::url_aggregator>
 bool setters_tests_encoding(const char *source) {
   TEST_START()
   ondemand::parser parser;
@@ -287,7 +287,7 @@ bool setters_tests_encoding(const char *source) {
   TEST_SUCCEED()
 }
 
-template <class result_type = ada::url>
+template <class result_type = ada::url_aggregator>
 bool toascii_encoding() {
   TEST_START()
   ondemand::parser parser;
@@ -371,7 +371,7 @@ bool toascii_encoding() {
 template bool toascii_encoding<ada::url>();
 template bool toascii_encoding<ada::url_aggregator>();
 
-template <class result_type = ada::url>
+template <class result_type = ada::url_aggregator>
 bool urltestdata_encoding(const char *source) {
   TEST_START()
   ondemand::parser parser;

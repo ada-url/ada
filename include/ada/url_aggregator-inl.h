@@ -856,6 +856,9 @@ inline void url_aggregator::set_protocol_as_file() {
   ADA_ASSERT_TRUE(validate());
 }
 
+inline std::ostream &operator<<(std::ostream &out, const ada::url_aggregator &u) {
+  return out << u.to_string();
+}
 }  // namespace ada
 
 #endif  // ADA_URL_AGGREGATOR_INL_H

@@ -19,7 +19,7 @@
 namespace ada {
 enum class errors { generic_error };
 
-template <class result_type = ada::url>
+template <class result_type = ada::url_aggregator>
 using result = tl::expected<result_type, ada::errors>;
 
 /**
@@ -31,7 +31,7 @@ using result = tl::expected<result_type, ada::errors>;
  * @param base_url the optional string input to use as a base url.
  * @return a parsed URL.
  */
-template <class result_type = ada::url>
+template <class result_type = ada::url_aggregator>
 ada_warn_unused ada::result<result_type> parse(
     std::string_view input, const result_type* base_url = nullptr);
 

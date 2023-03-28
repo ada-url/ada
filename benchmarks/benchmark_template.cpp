@@ -16,7 +16,7 @@ size_t count_ada_invalid() {
 
 enum { JUST_PARSE = 1, PARSE_AND_HREF = 0 };
 
-template <bool just_parse = PARSE_AND_HREF, class result_type = ada::url>
+template <bool just_parse = PARSE_AND_HREF, class result_type = ada::url_aggregator>
 static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;
@@ -82,12 +82,13 @@ static void BasicBench_AdaURL(benchmark::State& state) {
                          benchmark::Counter::kIsIterationInvariantRate);
 }
 
-BENCHMARK(BasicBench_AdaURL);
-auto BasicBench_AdaURL_just_parse = BasicBench_AdaURL<JUST_PARSE>;
+auto BasicBench_AdaURL_href = BasicBench_AdaURL<PARSE_AND_HREF, ada::url>;
+BENCHMARK(BasicBench_AdaURL_href);
+auto BasicBench_AdaURL_just_parse = BasicBench_AdaURL<JUST_PARSE, ada::url>;
 BENCHMARK(BasicBench_AdaURL_just_parse);
-auto BasicBench_AdaURL_aggregator =
+auto BasicBench_AdaURL_aggregator_href =
     BasicBench_AdaURL<PARSE_AND_HREF, ada::url_aggregator>;
-BENCHMARK(BasicBench_AdaURL_aggregator);
+BENCHMARK(BasicBench_AdaURL_aggregator_href);
 auto BasicBench_AdaURL_aggregator_just_parse =
     BasicBench_AdaURL<JUST_PARSE, ada::url_aggregator>;
 BENCHMARK(BasicBench_AdaURL_aggregator_just_parse);

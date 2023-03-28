@@ -330,6 +330,7 @@ struct url_aggregator : url_base {
 
 };  // url_aggregator
 
+inline std::ostream &operator<<(std::ostream &out, const ada::url &u);
 }  // namespace ada
 
 #endif

@@ -18,7 +18,7 @@ Specification for URL parser can be found from the
 
 Ada supports two types of URL instances, `ada:url` and `ada:url_aggregator`. The usage is
 the same in either case: we have an parsing function template `ada::parse` which can return
-either a result of type `ada::result<ada:url>` or of type `ada::result<ada:url_aggregator>`
+either a result of type `ada::result<ada:url_aggregator>` or of type `ada::result<ada:url_aggregator>`
 depending on your needs. The `ada:url_aggregator` class is smaller and it is backed by a precomputed
 serialized URL string. The `ada:url` class is made of several separate strings for the various
 components (path, host, and so forth).
@@ -28,7 +28,7 @@ components (path, host, and so forth).
 - Parse and validate a URL
 
 ```cpp
-ada::result<ada:url> url = ada::parse("https://www.google.com");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
 if(url) { /* URL is valid */ }
 ```
 
@@ -37,14 +37,14 @@ accessing it when you are not sure that it will succeed. The following
 code is unsafe:
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("some bad url");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("some bad url");
 url->get_href();
 ```
 
 You should do...
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("some bad url");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("some bad url");
 if(url) {
   // next line is now safe:
   url->get_href();
@@ -59,7 +59,7 @@ we know that parsing succeeds.
 - Get/Update credentials
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("https://www.google.com");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
 url->set_username("username");
 url->set_password("password");
 // ada->get_href() will return "https://username:password@www.google.com/"
@@ -68,7 +68,7 @@ url->set_password("password");
 - Get/Update Protocol
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("https://www.google.com");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
 url->set_protocol("wss");
 // url->get_protocol() will return "wss:"
 // url->get_href() will return "wss://www.google.com/"
@@ -77,7 +77,7 @@ url->set_protocol("wss");
 - Get/Update host
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("https://www.google.com");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
 url->set_host("github.com");
 // url->get_host() will return "github.com"
 // you can use `url.set_hostname` depending on your usage.
@@ -86,7 +86,7 @@ url->set_host("github.com");
 - Get/Update port
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("https://www.google.com");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
 url->set_port("8080");
 // url->get_port() will return "8080"
 ```
@@ -94,7 +94,7 @@ url->set_port("8080");
 - Get/Update pathname
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("https://www.google.com");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
 url->set_pathname("/my-super-long-path")
 // url->get_pathname() will return "/my-super-long-path"
 ```
@@ -102,7 +102,7 @@ url->set_pathname("/my-super-long-path")
 - Get/Update search/query
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("https://www.google.com");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
 url->set_search("target=self");
 // url->get_search() will return "?target=self"
 ```
@@ -110,7 +110,7 @@ url->set_search("target=self");
 - Get/Update hash/fragment
 
 ```cpp
-ada::result<ada:url> url = ada::parse<ada:url>("https://www.google.com");
+ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
 url->set_hash("is-this-the-real-life");
 // url->get_hash() will return "#is-this-the-real-life"
 ```
