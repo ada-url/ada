@@ -1142,9 +1142,17 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
 
   // Return the result of running UTF-8 percent-encode on input using the C0
   // control percent-encode set.
-  // TODO: Optimization opportunity: Get rid of this string creation.
-  update_base_hostname(ada::unicode::percent_encode(
-      input, ada::character_sets::C0_CONTROL_PERCENT_ENCODE));
+
+  std::string encoded;
+  bool encoding_required =
+        unicode::percent_encode<true>(input,  ada::character_sets::C0_CONTROL_PERCENT_ENCODE, encoded);
+  // When encoding_required is false, then encoded is left unchanged, and
+  // percent encoding was not deemed required.
+  if (encoding_required) {
+    update_base_hostname(encoded);
+  } else {
+    update_base_hostname(input);
+  }
   ADA_ASSERT_TRUE(validate());
   return true;
 }

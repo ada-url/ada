@@ -239,11 +239,18 @@ inline void url_aggregator::update_base_search(
     }
 
     buffer.insert(components.search_start, "?");
-
-    std::string encoded =
-        unicode::percent_encode(input, query_percent_encode_set);
-    buffer.insert(components.search_start + 1, encoded);
-    components.hash_start += uint32_t(encoded.size() + 1);  // Do not forget `?`
+    std::string encoded;
+    bool encoding_required =
+        unicode::percent_encode<true>(input, query_percent_encode_set, encoded);
+    // When encoding_required is false, then buffer is left unchanged, and
+    // percent encoding was not deemed required.
+    if (encoding_required) {
+      buffer.insert(components.search_start + 1, encoded);
+      components.hash_start += uint32_t(encoded.size() + 1);  // Do not forget `?`
+    } else {
+      buffer.insert(components.search_start + 1, input);
+      components.hash_start += uint32_t(input.size() + 1);  // Do not forget `?`
+    }
   }
 
   ADA_ASSERT_TRUE(validate());
