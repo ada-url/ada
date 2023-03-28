@@ -99,30 +99,30 @@
 // here as necessary
 #define ADA_PUSH_DISABLE_ALL_WARNINGS               \
   ADA_PUSH_DISABLE_WARNINGS                         \
-  ADA_DISABLE_GCC_WARNING(-Weffc++)                 \
-  ADA_DISABLE_GCC_WARNING(-Wall)                    \
-  ADA_DISABLE_GCC_WARNING(-Wconversion)             \
-  ADA_DISABLE_GCC_WARNING(-Wextra)                  \
-  ADA_DISABLE_GCC_WARNING(-Wattributes)             \
-  ADA_DISABLE_GCC_WARNING(-Wimplicit-fallthrough)   \
-  ADA_DISABLE_GCC_WARNING(-Wnon-virtual-dtor)       \
-  ADA_DISABLE_GCC_WARNING(-Wreturn-type)            \
-  ADA_DISABLE_GCC_WARNING(-Wshadow)                 \
-  ADA_DISABLE_GCC_WARNING(-Wunused-parameter)       \
-  ADA_DISABLE_GCC_WARNING(-Wunused-variable)
+  ADA_DISABLE_GCC_WARNING("-Weffc++")               \
+  ADA_DISABLE_GCC_WARNING("-Wall")                  \
+  ADA_DISABLE_GCC_WARNING("-Wconversion")           \
+  ADA_DISABLE_GCC_WARNING("-Wextra")                \
+  ADA_DISABLE_GCC_WARNING("-Wattributes")           \
+  ADA_DISABLE_GCC_WARNING("-Wimplicit-fallthrough") \
+  ADA_DISABLE_GCC_WARNING("-Wnon-virtual-dtor")     \
+  ADA_DISABLE_GCC_WARNING("-Wreturn-type")          \
+  ADA_DISABLE_GCC_WARNING("-Wshadow")               \
+  ADA_DISABLE_GCC_WARNING("-Wunused-parameter")     \
+  ADA_DISABLE_GCC_WARNING("-Wunused-variable")
 #define ADA_PRAGMA(P) _Pragma(#P)
 #define ADA_DISABLE_GCC_WARNING(WARNING) \
-  ADA_PRAGMA(GCC diagnostic ignored #WARNING)
+  ADA_PRAGMA(GCC diagnostic ignored WARNING)
 #if defined(ADA_CLANG_VISUAL_STUDIO)
 #define ADA_DISABLE_UNDESIRED_WARNINGS \
-  ADA_DISABLE_GCC_WARNING(-Wmicrosoft-include)
+  ADA_DISABLE_GCC_WARNING("-Wmicrosoft-include")
 #else
 #define ADA_DISABLE_UNDESIRED_WARNINGS
 #endif
 #define ADA_DISABLE_DEPRECATED_WARNING \
-  ADA_DISABLE_GCC_WARNING(-Wdeprecated-declarations)
+  ADA_DISABLE_GCC_WARNING("-Wdeprecated-declarations")
 #define ADA_DISABLE_STRICT_OVERFLOW_WARNING \
-  ADA_DISABLE_GCC_WARNING(-Wstrict-overflow)
+  ADA_DISABLE_GCC_WARNING("-Wstrict-overflow")
 #define ADA_POP_DISABLE_WARNINGS _Pragma("GCC diagnostic pop")
 
 #endif  // MSC_VER
