@@ -6,6 +6,7 @@
 #define ADA_UNICODE_H
 
 #include "ada/common_defs.h"
+#include "ada_idna.h"
 
 #include <string>
 #include <optional>
@@ -58,6 +59,11 @@ namespace ada::unicode {
  */
 bool to_ascii(std::optional<std::string>& out, std::string_view plain,
               size_t first_percent);
+
+/**
+ * @see https://www.unicode.org/reports/tr46/#ToUnicode
+ */
+std::string to_unicode(std::string_view input);
 
 /**
  * Checks if the input has tab or newline characters.
