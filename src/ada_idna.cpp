@@ -2,7 +2,6 @@
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 
-
 #include <cstdint>
 #include <cstring>
 namespace ada::idna {
