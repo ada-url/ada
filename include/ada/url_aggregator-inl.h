@@ -428,8 +428,15 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 
   add_authority_slashes_if_needed();
 
+  // TODO: Optimization opportunity. Merge the following removal functions.
   if (input.empty()) {
     clear_base_password();
+
+    // Remove username too, if it is empty.
+    if (!has_non_empty_username()) {
+      update_base_username("");
+    }
+
     return;
   }
 
