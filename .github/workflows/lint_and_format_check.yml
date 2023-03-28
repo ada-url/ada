@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install ICU
-        run: sudo apt-get install -y libicu-dev pkg-config
 
       - name: Install clang-format
         run: |
