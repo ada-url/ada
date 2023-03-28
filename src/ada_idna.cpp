@@ -1,7 +1,5 @@
-/* auto-generated on 2023-03-28 09:08:05 -0400. Do not edit! */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=idna.cpp
+/* auto-generated on 2023-03-28 11:03:13 -0400. Do not edit! */
 /* begin file src/idna.cpp */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=unicode_transcoding.cpp
 /* begin file src/unicode_transcoding.cpp */
 
 
@@ -200,14 +198,12 @@ size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output) {
 }
 }  // namespace ada::idna
 /* end file src/unicode_transcoding.cpp */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=mapping.cpp
 /* begin file src/mapping.cpp */
 
 #include <algorithm>
 #include <array>
 #include <string>
 
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=mapping_tables.cpp
 /* begin file src/mapping_tables.cpp */
 // IDNA  15.0.0
 
@@ -2729,10 +2725,8 @@ std::u32string map(std::u32string_view input) {
 }
 }  // namespace ada::idna
 /* end file src/mapping.cpp */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=normalization.cpp
 /* begin file src/normalization.cpp */
 
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=unilib/uninorms.h
 /* begin file src/unilib/uninorms.h */
 // This file is part of UniLib <http://github.com/ufal/unilib/>.
 //
@@ -2789,7 +2783,6 @@ class uninorms {
 }  // namespace unilib
 }  // namespace ufal
 /* end file src/unilib/uninorms.h */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=unilib/uninorms.cpp
 /* begin file src/unilib/uninorms.cpp */
 // This file is part of UniLib <http://github.com/ufal/unilib/>.
 //
@@ -7897,7 +7890,6 @@ void normalize(std::u32string& input) {
 
 }  // namespace ada::idna
 /* end file src/normalization.cpp */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=punycode.cpp
 /* begin file src/punycode.cpp */
 
 #include <cstdint>
@@ -8119,7 +8111,6 @@ bool utf32_to_punycode(std::u32string_view input, std::string &out) {
 
 }  // namespace ada::idna
 /* end file src/punycode.cpp */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=validity.cpp
 /* begin file src/validity.cpp */
 
 #include <algorithm>
@@ -9453,7 +9444,6 @@ bool is_label_valid(const std::u32string_view label) {
 
 }  // namespace ada::idna
 /* end file src/validity.cpp */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=to_ascii.cpp
 /* begin file src/to_ascii.cpp */
 
 #include <algorithm>
@@ -9671,7 +9661,6 @@ std::string to_ascii(std::string_view ut8_string) {
 }
 }  // namespace ada::idna
 /* end file src/to_ascii.cpp */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/src, filename=to_unicode.cpp
 /* begin file src/to_unicode.cpp */
 
 #include <algorithm>

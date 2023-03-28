@@ -1,10 +1,8 @@
-/* auto-generated on 2023-03-28 09:08:05 -0400. Do not edit! */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/include, filename=idna.h
+/* auto-generated on 2023-03-28 11:03:13 -0400. Do not edit! */
 /* begin file include/idna.h */
 #ifndef ADA_IDNA_H
 #define ADA_IDNA_H
 
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/include, filename=ada/idna/unicode_transcoding.h
 /* begin file include/ada/idna/unicode_transcoding.h */
 #ifndef ADA_IDNA_UNICODE_TRANSCODING_H
 #define ADA_IDNA_UNICODE_TRANSCODING_H
@@ -26,7 +24,6 @@ size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output);
 
 #endif  // ADA_IDNA_UNICODE_TRANSCODING_H
 /* end file include/ada/idna/unicode_transcoding.h */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/include, filename=ada/idna/mapping.h
 /* begin file include/ada/idna/mapping.h */
 #ifndef ADA_IDNA_MAPPING_H
 #define ADA_IDNA_MAPPING_H
@@ -46,7 +43,6 @@ std::u32string map(std::u32string_view input);
 
 #endif
 /* end file include/ada/idna/mapping.h */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/include, filename=ada/idna/normalization.h
 /* begin file include/ada/idna/normalization.h */
 #ifndef ADA_IDNA_NORMALIZATION_H
 #define ADA_IDNA_NORMALIZATION_H
@@ -61,7 +57,6 @@ void normalize(std::u32string& input);
 }  // namespace ada::idna
 #endif
 /* end file include/ada/idna/normalization.h */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/include, filename=ada/idna/punycode.h
 /* begin file include/ada/idna/punycode.h */
 #ifndef ADA_IDNA_PUNYCODE_H
 #define ADA_IDNA_PUNYCODE_H
@@ -78,7 +73,6 @@ bool utf32_to_punycode(std::u32string_view input, std::string& out);
 
 #endif  // ADA_IDNA_PUNYCODE_H
 /* end file include/ada/idna/punycode.h */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/include, filename=ada/idna/validity.h
 /* begin file include/ada/idna/validity.h */
 #ifndef ADA_IDNA_VALIDITY_H
 #define ADA_IDNA_VALIDITY_H
@@ -97,7 +91,6 @@ bool is_label_valid(const std::u32string_view label);
 
 #endif  // ADA_IDNA_VALIDITY_H
 /* end file include/ada/idna/validity.h */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/include, filename=ada/idna/to_ascii.h
 /* begin file include/ada/idna/to_ascii.h */
 #ifndef ADA_IDNA_TO_ASCII_H
 #define ADA_IDNA_TO_ASCII_H
@@ -127,7 +120,6 @@ std::string from_ascii_to_ascii(std::string_view ut8_string);
 
 #endif  // ADA_IDNA_TO_ASCII_H
 /* end file include/ada/idna/to_ascii.h */
-// dofile: invoked with prepath=/Users/yagiz/Developer/idna/include, filename=ada/idna/to_unicode.h
 /* begin file include/ada/idna/to_unicode.h */
 
 #ifndef ADA_IDNA_TO_UNICODE_H
