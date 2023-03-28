@@ -28,13 +28,13 @@ depending on your needs. The `ada:url_aggregator` class is smaller and it is bac
 serialized URL string. The `ada:url` class is made of several separate strings for the various
 components (path, host, and so forth).
 
-### Examples
+### Parsing & Validation
 
 - Parse and validate a URL
 
 ```cpp
-ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
-if(url) { /* URL is valid */ }
+ada::result<ada::url_aggregator> url = ada::parse<ada:url_aggregator>("https://www.google.com");
+if (url) { /* URL is valid */ }
 ```
 
 After calling 'parse', you *must* check that the result is valid before
@@ -60,6 +60,8 @@ if(url) {
 
 For simplicity, in the examples below, we skip the check because
 we know that parsing succeeds.
+
+### Examples
 
 - Get/Update credentials
 
@@ -123,7 +125,8 @@ url->set_hash("is-this-the-real-life");
 
 ### CMake dependency
 
-See the file `tests/installation/CMakeLists.txt` for an example of how you might use ada from your own CMake project, after having installed ada on your system.
+See the file `tests/installation/CMakeLists.txt` for an example of how you might use ada from your own
+CMake project, after having installed ada on your system.
 
 ## Contributing
 
@@ -142,4 +145,5 @@ The project can also be built via docker using default docker file of repository
 
 ### Amalgamation
 
-You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) by typing executing the Python 3 script `singleheader/amalgamate.py`. By default, the files are created in the `singleheader` directory.
+You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) by typing executing the Python
+3 script `singleheader/amalgamate.py`. By default, the files are created in the `singleheader` directory.
