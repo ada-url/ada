@@ -67,7 +67,6 @@ def doinclude(fid, file, line, origin):
         print(line, file=fid)
 
 def dofile(fid, prepath, filename):
-    print(f"// dofile: invoked with prepath={prepath}, filename={filename}",file=fid)
     file = os.path.join(prepath, filename)
     RELFILE = os.path.relpath(file, PROJECTPATH)
     # Last lines are always ignored. Files should end by an empty lines.
