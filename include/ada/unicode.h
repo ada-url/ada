@@ -6,7 +6,7 @@
 #define ADA_UNICODE_H
 
 #include "ada/common_defs.h"
-#include "ada_idna.h"
+#include "ada/ada_idna.h"
 
 #include <string>
 #include <optional>

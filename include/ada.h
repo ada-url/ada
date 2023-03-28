@@ -5,8 +5,7 @@
 #ifndef ADA_H
 #define ADA_H
 
-#include "ada_idna.h"
-
+#include "ada/ada_idna.h"
 #include "ada/character_sets-inl.h"
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
