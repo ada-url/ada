@@ -32,17 +32,18 @@ size_t init_data(const char *source) {
   return url_examples.size();
 }
 
+template <class result>
 static void BasicBench_AdaURL(benchmark::State &state) {
   // volatile to prevent optimizations.
-  volatile size_t numbers_of_parameters = 0;
+  volatile size_t href_size = 0;
 
   for (auto _ : state) {
     for (const std::pair<std::string, std::string> &url_strings :
          url_examples) {
-      ada::result<ada::url> base;
-      ada::url *base_ptr = nullptr;
+      ada::result<result> base;
+      result *base_ptr = nullptr;
       if (!url_strings.second.empty()) {
-        base = ada::parse(url_strings.second);
+        base = ada::parse<result>(url_strings.second);
         if (base) {
           base_ptr = &*base;
         } else {
@@ -51,10 +52,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       }
       auto url = ada::parse(url_strings.first, base_ptr);
       if (url) {
-        numbers_of_parameters +=
-            url->path.size() +
-            (url->base_search_has_value() ? url->query->size() : 0) +
-            url->get_protocol().size() + url->host->size();
+        href_size += url->get_href().size();
       }
     }
   }
@@ -65,10 +63,10 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       collector.start();
       for (const std::pair<std::string, std::string> &url_strings :
            url_examples) {
-        ada::result<ada::url> base;
-        ada::url *base_ptr = nullptr;
+        ada::result<result> base;
+        result *base_ptr = nullptr;
         if (!url_strings.second.empty()) {
-          base = ada::parse(url_strings.second);
+          base = ada::parse<result>(url_strings.second);
           if (base) {
             base_ptr = &*base;
           } else {
@@ -77,11 +75,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
         }
         auto url = ada::parse(url_strings.first, base_ptr);
         if (url) {
-          numbers_of_parameters +=
-              url->path.size() +
-              (url->base_search_has_value() ? url->query->size() : 0) +
-              url->get_protocol().size() +
-              (url->host.has_value() ? url->host->size() : 0);
+          href_size += url->get_href().size();
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
@@ -117,7 +111,10 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       benchmark::Counter(double(std::size(url_examples)),
                          benchmark::Counter::kIsIterationInvariantRate);
 }
-BENCHMARK(BasicBench_AdaURL);
+auto BasicBench_AdaURL_url = BasicBench_AdaURL<ada::url>;
+BENCHMARK(BasicBench_AdaURL_url);
+auto BasicBench_AdaURL_url_aggregator = BasicBench_AdaURL<ada::url_aggregator>;
+BENCHMARK(BasicBench_AdaURL_url_aggregator);
 
 #if ADA_url_whatwg_ENABLED
 

@@ -23,7 +23,7 @@ namespace ada::parser {
 /**
  * Parses a url.
  */
-template <typename result_type = ada::url>
+template <typename result_type = ada::url_aggregator>
 result_type parse_url(std::string_view user_input,
                       const result_type* base_url = nullptr);
 

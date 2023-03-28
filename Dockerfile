@@ -5,8 +5,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     clang \
     clang-tools \
-    cmake \
-    libicu-dev
+    cmake
 
 WORKDIR /repo
 

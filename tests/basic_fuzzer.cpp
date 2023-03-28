@@ -44,18 +44,20 @@ std::string url_examples[] = {
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
-ada::result<ada::url> ada_parse(std::string_view view) {
+template <class result>
+ada::result<result> ada_parse(std::string_view view) {
   std::unique_ptr<char[]> buffer(new char[view.size()]);
   memcpy(buffer.get(), view.data(), view.size());
-  return ada::parse(std::string_view(buffer.get(), view.size()));
+  return ada::parse<result>(std::string_view(buffer.get(), view.size()));
 }
 
+template <class result>
 size_t fancy_fuzz(size_t N, size_t seed = 0) {
   size_t counter = seed;
   for (size_t trial = 0; trial < N; trial++) {
     std::string copy =
         url_examples[(seed++) % (sizeof(url_examples) / sizeof(std::string))];
-    auto url = ada::parse(copy);
+    auto url = ada::parse<result>(copy);
     while (url) {
       // mutate the string.
       int k = ((321321 * counter++) % 3);
@@ -74,27 +76,29 @@ size_t fancy_fuzz(size_t N, size_t seed = 0) {
         default:
           break;
       }
-      url = ada_parse(copy);
+      url = ada_parse<result>(copy);
     }
   }
   return counter;
 }
 
+template <class result>
 size_t simple_fuzz(size_t N, size_t seed = 0) {
   size_t counter = seed;
   for (size_t trial = 0; trial < N; trial++) {
     std::string copy =
         url_examples[(seed++) % (sizeof(url_examples) / sizeof(std::string))];
-    auto url = ada::parse(copy);
+    auto url = ada::parse<result>(copy);
     while (url) {
       // mutate the string.
       copy[(13134 * counter++) % copy.size()] = char(counter++ * 71117);
-      url = ada_parse(copy);
+      url = ada_parse<result>(copy);
     }
   }
   return counter;
 }
 
+template <class result>
 size_t roller_fuzz(size_t N) {
   size_t valid{};
 
@@ -103,7 +107,7 @@ size_t roller_fuzz(size_t N) {
       char orig = copy[index];
       for (unsigned int value = 0; value < 255; value++) {
         copy[index] = char(value);
-        auto url = ada_parse(copy);
+        auto url = ada_parse<result>(copy);
         if (url) {
           valid++;
         }
@@ -121,9 +125,17 @@ int main() {
   std::cout << "You have litte-endian system." << std::endl;
 #endif
   std::cout << "Running basic fuzzer.\n";
-  std::cout << "[fancy]  Executed " << fancy_fuzz(100000) << " mutations.\n";
-  std::cout << "[simple] Executed " << simple_fuzz(40000) << " mutations.\n";
-  std::cout << "[roller] Executed " << roller_fuzz(40000)
+  std::cout << "[fancy]  Executed " << fancy_fuzz<ada::url>(100000)
+            << " mutations.\n";
+  std::cout << "[simple] Executed " << simple_fuzz<ada::url>(40000)
+            << " mutations.\n";
+  std::cout << "[roller] Executed " << roller_fuzz<ada::url>(40000)
+            << " correct cases.\n";
+  std::cout << "[fancy]  Executed " << fancy_fuzz<ada::url_aggregator>(100000)
+            << " mutations.\n";
+  std::cout << "[simple] Executed " << simple_fuzz<ada::url_aggregator>(40000)
+            << " mutations.\n";
+  std::cout << "[roller] Executed " << roller_fuzz<ada::url_aggregator>(40000)
             << " correct cases.\n";
   return EXIT_SUCCESS;
 }

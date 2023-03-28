@@ -1,6 +1,7 @@
 #include "ada.h"
 #include "ada/character_sets-inl.h"
 #include "ada/common_defs.h"
+#include "ada/unicode.h"
 
 ADA_PUSH_DISABLE_ALL_WARNINGS
 #include "ada_idna.cpp"
@@ -388,6 +389,10 @@ bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
   }
   out = std::move(idna_ascii);
   return true;
+}
+
+std::string to_unicode(std::string_view input) {
+  return ada::idna::to_unicode(input);
 }
 
 }  // namespace ada::unicode
