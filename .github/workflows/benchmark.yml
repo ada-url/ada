@@ -1,4 +1,5 @@
 name: Benchmark
+
 on:
   push:
     branches:
@@ -6,20 +7,20 @@ on:
 
 permissions:
   contents: write
-  deployments: write
+  pull-requests: read
 
 jobs:
   benchmarks:
     name: Run benchmarks
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Install curl
         run: sudo apt-get install -y libcurl4-openssl-dev
       - name: Install boost
-        uses: MarkusJx/install-boost@v2.4.1
+        uses: MarkusJx/install-boost@d175e516e6d321b68ff67afecf7da5e7c53c16f7 # v2.4.3
         with:
           boost_version: 1.81.0
       - name: Setup Ninja
@@ -31,9 +32,9 @@ jobs:
         run: cmake --build build -j=2
 
       - name: Run default benchmark
-        run: sudo build/benchmarks/bench --benchmark_format=json | tee default_benchmark_result.json
+        run: cd build && sudo benchmarks/bench --benchmark_format=json | tee ../default_benchmark_result.json
       - name: Store benchmark result
-        uses: benchmark-action/github-action-benchmark@v1
+        uses: benchmark-action/github-action-benchmark@c3efd4d54319dbc90622069cc273cba59b46abbf # v1.15.0
         with:
           name: Benchmark
           tool: 'googlecpp'
@@ -46,9 +47,9 @@ jobs:
           alert-comment-cc-users: '@anonrig @lemire'
 
       - name: Run WPT benchmark
-        run: sudo build/benchmarks/wpt_bench tests/wpt/urltestdata.json --benchmark_format=json | tee wpt_benchmark_result.json
+        run: cd build && sudo benchmarks/wpt_bench tests/wpt/urltestdata.json --benchmark_format=json | tee ../wpt_benchmark_result.json
       - name: Store benchmark result
-        uses: benchmark-action/github-action-benchmark@v1
+        uses: benchmark-action/github-action-benchmark@c3efd4d54319dbc90622069cc273cba59b46abbf # v1.15.0
         with:
           name: Web Platform Tests
           tool: 'googlecpp'
@@ -61,9 +62,9 @@ jobs:
           alert-comment-cc-users: '@anonrig @lemire'
 
       - name: Run BBC benchmark
-        run: sudo build/benchmarks/bbc_bench --benchmark_format=json | tee bbc_benchmark_result.json
+        run: cd build && sudo benchmarks/bbc_bench --benchmark_format=json | tee ../bbc_benchmark_result.json
       - name: Store benchmark result
-        uses: benchmark-action/github-action-benchmark@v1
+        uses: benchmark-action/github-action-benchmark@c3efd4d54319dbc90622069cc273cba59b46abbf # v1.15.0
         with:
           name: BBC URLs
           tool: 'googlecpp'

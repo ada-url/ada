@@ -1,12 +1,9 @@
 name: Ubuntu 20.04
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
+
+permissions:
+  contents: read
 
 jobs:
   ubuntu-build:
@@ -19,9 +16,7 @@ jobs:
         shared: [ON, OFF]
         cxx: [g++-9, clang++-10]
     steps:
-      - uses: actions/checkout@v3
-      - name: Clear the cache
-        run: rm -r -f dependencies
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Setup Ninja

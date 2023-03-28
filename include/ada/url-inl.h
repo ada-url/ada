@@ -7,72 +7,231 @@
 
 #include "ada/checkers.h"
 #include "ada/url.h"
+#include "ada/url_components.h"
+
+#include <optional>
+#include <string>
+#if ADA_REGULAR_VISUAL_STUDIO
+#include <intrin.h>
+#endif  // ADA_REGULAR_VISUAL_STUDIO
 
 namespace ada {
-  [[nodiscard]] ada_really_inline bool url::includes_credentials() const noexcept {
-    return !username.empty() || !password.empty();
+[[nodiscard]] ada_really_inline bool url::includes_credentials()
+    const noexcept {
+  return !username.empty() || !password.empty();
+}
+[[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
+  return !host.has_value() || host.value().empty() ||
+         type == ada::scheme::type::FILE;
+}
+[[nodiscard]] inline bool url::has_empty_hostname() const noexcept {
+  if (!host.has_value()) {
+    return false;
   }
-  [[nodiscard]] ada_really_inline bool url::is_special() const noexcept {
-    return type != ada::scheme::NOT_SPECIAL;
-  }
-  [[nodiscard]] inline uint16_t url::get_special_port() const {
-    return ada::scheme::get_special_port(type);
-  }
-  [[nodiscard]] ada_really_inline ada::scheme::type url::get_scheme_type() const noexcept {
-    return type;
-  }
-  [[nodiscard]] ada_really_inline uint16_t url::scheme_default_port() const noexcept {
-    return scheme::get_special_port(type);
-  }
-  [[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
-    return !host.has_value() || host.value().empty() || type == ada::scheme::type::FILE;
-  }
-  ada_really_inline size_t url::parse_port(std::string_view view, bool check_trailing_content) noexcept {
-    ada_log("parse_port('", view, "') ", view.size());
-    uint16_t parsed_port{};
-    auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
-    if(r.ec == std::errc::result_out_of_range) {
-      ada_log("parse_port: std::errc::result_out_of_range");
-      is_valid = false;
-      return 0;
+  return host.value().empty();
+}
+inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
+  return out << u.to_string();
+}
+
+size_t url::get_pathname_length() const noexcept { return path.size(); }
+
+[[nodiscard]] ada_really_inline ada::url_components url::get_components()
+    const noexcept {
+  url_components out{};
+
+  // protocol ends with ':'. for example: "https:"
+  out.protocol_end = uint32_t(get_protocol().size());
+
+  // Trailing index is always the next character of the current one.
+  size_t running_index = out.protocol_end;
+
+  if (host.has_value()) {
+    // 2 characters for "//" and 1 character for starting index
+    out.host_start = out.protocol_end + 2;
+
+    if (includes_credentials()) {
+      out.username_end = uint32_t(out.host_start + username.size());
+
+      out.host_start += uint32_t(username.size());
+
+      if (!password.empty()) {
+        out.host_start += uint32_t(password.size() + 1);
+      }
+
+      out.host_end = uint32_t(out.host_start + host.value().size());
+    } else {
+      out.username_end = out.host_start;
+
+      // Host does not start with "@" if it does not include credentials.
+      out.host_end = uint32_t(out.host_start + host.value().size()) - 1;
     }
-    ada_log("parse_port: ", parsed_port);
-    const size_t consumed = size_t(r.ptr - view.data());
-    ada_log("parse_port: consumed ", consumed);
-    if(check_trailing_content) {
-      is_valid &= (consumed == view.size() || view[consumed] == '/' || view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
+
+    running_index = out.host_end + 1;
+  } else {
+    // Update host start and end date to the same index, since it does not
+    // exist.
+    out.host_start = out.protocol_end;
+    out.host_end = out.host_start;
+
+    if (!has_opaque_path && checkers::begins_with(path, "//")) {
+      // If url’s host is null, url does not have an opaque path, url’s path’s
+      // size is greater than 1, and url’s path[0] is the empty string, then
+      // append U+002F (/) followed by U+002E (.) to output.
+      running_index = out.protocol_end + 2;
+    } else {
+      running_index = out.protocol_end;
     }
-    ada_log("parse_port: is_valid = ", is_valid);
-    if(is_valid) {
-      port = (r.ec == std::errc() && scheme_default_port() != parsed_port) ?
-        std::optional<uint16_t>(parsed_port) : std::nullopt;
-    }
-    return consumed;
-  }
-  [[nodiscard]] inline std::string_view url::get_scheme() const noexcept {
-    if(is_special()) { return ada::scheme::details::is_special_list[type]; }
-    // We only move the 'scheme' if it is non-special.
-    return non_special_scheme;
-  }
-  inline void url::set_scheme(std::string&& new_scheme) noexcept {
-    type = ada::scheme::get_scheme_type(new_scheme);
-    // We only move the 'scheme' if it is non-special.
-    if(!is_special()) {
-      non_special_scheme = new_scheme;
-    }
-  }
-  inline void url::copy_scheme(ada::url&& u) noexcept {
-    non_special_scheme = u.non_special_scheme;
-    type = u.type;
-  }
-  inline void url::copy_scheme(const ada::url& u) {
-    non_special_scheme = u.non_special_scheme;
-    type = u.type;
   }
 
-  inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
-    return out << u.to_string();
+  if (port.has_value()) {
+    out.port = *port;
+    running_index += helpers::fast_digit_count(*port) + 1;  // Port omits ':'
   }
-} // namespace ada
 
-#endif // ADA_URL_H
+  out.pathname_start = uint32_t(running_index);
+
+  if (!path.empty()) {
+    running_index += path.size();
+  }
+
+  if (query.has_value()) {
+    out.search_start = uint32_t(running_index);
+    running_index += get_search().size();
+    if (get_search().size() == 0) {
+      running_index++;
+    }
+  }
+
+  if (fragment.has_value()) {
+    out.hash_start = uint32_t(running_index);
+  }
+
+  return out;
+}
+
+inline void url::update_base_hostname(std::string_view input) { host = input; }
+
+inline void url::update_unencoded_base_hash(std::string_view input) {
+  // We do the percent encoding
+  fragment = unicode::percent_encode(
+      input, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+}
+
+inline void url::update_base_search(std::string_view input,
+                                    const uint8_t query_percent_encode_set[]) {
+  query = ada::unicode::percent_encode(input, query_percent_encode_set);
+}
+
+inline void url::update_base_search(std::optional<std::string> input) {
+  query = input;
+}
+
+inline void url::update_base_pathname(const std::string_view input) {
+  path = input;
+}
+
+inline void url::update_base_username(const std::string_view input) {
+  username = input;
+}
+
+inline void url::update_base_password(const std::string_view input) {
+  password = input;
+}
+
+inline void url::update_base_port(std::optional<uint16_t> input) {
+  port = input;
+}
+
+inline void url::clear_base_pathname() { path = ""; }
+
+inline void url::clear_base_search() { query = std::nullopt; }
+
+inline bool url::base_fragment_has_value() const {
+  return fragment.has_value();
+}
+
+inline bool url::base_search_has_value() const { return query.has_value(); }
+
+inline void url::set_protocol_as_file() { type = ada::scheme::type::FILE; }
+
+inline void url::set_scheme(std::string &&new_scheme) noexcept {
+  type = ada::scheme::get_scheme_type(new_scheme);
+  // We only move the 'scheme' if it is non-special.
+  if (!is_special()) {
+    non_special_scheme = new_scheme;
+  }
+}
+
+inline void url::copy_scheme(ada::url &&u) noexcept {
+  non_special_scheme = u.non_special_scheme;
+  type = u.type;
+}
+
+inline void url::copy_scheme(const ada::url &u) {
+  non_special_scheme = u.non_special_scheme;
+  type = u.type;
+}
+
+[[nodiscard]] ada_really_inline std::string url::get_href() const noexcept {
+  std::string output = get_protocol();
+
+  if (host.has_value()) {
+    output += "//";
+    if (includes_credentials()) {
+      output += username;
+      if (!password.empty()) {
+        output += ":" + get_password();
+      }
+      output += "@";
+    }
+    output += host.value();
+    if (port.has_value()) {
+      output += ":" + get_port();
+    }
+  } else if (!has_opaque_path && checkers::begins_with(path, "//")) {
+    // If url’s host is null, url does not have an opaque path, url’s path’s
+    // size is greater than 1, and url’s path[0] is the empty string, then
+    // append U+002F (/) followed by U+002E (.) to output.
+    output += "/.";
+  }
+  output += path;
+  if (query.has_value()) {
+    output += "?" + query.value();
+  }
+  if (fragment.has_value()) {
+    output += "#" + fragment.value();
+  }
+  return output;
+}
+
+ada_really_inline size_t url::parse_port(std::string_view view,
+                                         bool check_trailing_content) noexcept {
+  ada_log("parse_port('", view, "') ", view.size());
+  uint16_t parsed_port{};
+  auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
+  if (r.ec == std::errc::result_out_of_range) {
+    ada_log("parse_port: std::errc::result_out_of_range");
+    is_valid = false;
+    return 0;
+  }
+  ada_log("parse_port: ", parsed_port);
+  const size_t consumed = size_t(r.ptr - view.data());
+  ada_log("parse_port: consumed ", consumed);
+  if (check_trailing_content) {
+    is_valid &=
+        (consumed == view.size() || view[consumed] == '/' ||
+         view[consumed] == '?' || (is_special() && view[consumed] == '\\'));
+  }
+  ada_log("parse_port: is_valid = ", is_valid);
+  if (is_valid) {
+    port = (r.ec == std::errc() && scheme_default_port() != parsed_port)
+               ? std::optional<uint16_t>(parsed_port)
+               : std::nullopt;
+  }
+  return consumed;
+}
+
+}  // namespace ada
+
+#endif  // ADA_URL_H

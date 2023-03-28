@@ -17,3 +17,6 @@ benchmark_result.json
 singleheader/ada.h
 singleheader/ada.cpp
 singleheader/singleheader.zip
+
+benchmarks/competitors/servo-url/debug
+benchmarks/competitors/servo-url/target

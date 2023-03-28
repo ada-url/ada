@@ -5,11 +5,14 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+permissions:
+  contents: read
+
 jobs:
   issue:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
         with:
           persist-credentials: false
       - name: Fetch tests
@@ -22,8 +25,7 @@ jobs:
           title: "Update web platform tests"
           body: "This is an automated pull request for updating the WPT"
           branch: "automatic-update-wpt"
-          author: "wpt-updater"
+          author: "WPT Updater <yagiz@nizipli.com>"
           path: "tests/wpt"
           commit-message: "test: update web platform tests"
-          reviewers: lemire, anonrig
-          auto-merge: rebase
+          reviewers: lemire # anonrig can'be added since github token belongs to him.

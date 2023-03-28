@@ -16,10 +16,15 @@
 #include "ada/serializers.h"
 #include "ada/state.h"
 #include "ada/unicode.h"
+#include "ada/url_base.h"
+#include "ada/url_base-inl.h"
 #include "ada/url-inl.h"
+#include "ada/url_components.h"
+#include "ada/url_aggregator.h"
+#include "ada/url_aggregator-inl.h"
 
 // Public API
 #include "ada/ada_version.h"
 #include "ada/implementation.h"
 
-#endif // ADA_H
+#endif  // ADA_H

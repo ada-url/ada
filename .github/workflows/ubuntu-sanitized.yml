@@ -1,12 +1,9 @@
 name: Ubuntu 22.04 (GCC 12 SANITIZED)
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
+
+permissions:
+  contents: read
 
 jobs:
   ubuntu-build:
@@ -18,13 +15,13 @@ jobs:
       matrix:
         shared: [ON, OFF]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
       - name: Install ICU
         run: sudo apt-get install -y libicu-dev pkg-config
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare
-        run: cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        run: cmake -DADA_SANITIZE=ON -DADA_DEVELOPMENT_CHECKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
         env:
           CXX: g++-12
       - name: Build
