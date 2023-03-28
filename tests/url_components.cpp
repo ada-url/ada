@@ -214,22 +214,15 @@ int main(int argc, char** argv) {
   std::map<std::string, bool> results;
   std::string name;
 
-#if ADA_HAS_ICU
   name = "urltestdata_encoding(" + std::string(URLTESTDATA_JSON) + ")";
   if (all_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding(URLTESTDATA_JSON);
   }
-#endif
   (void)all_tests;
   std::cout << std::endl;
   std::cout << "===============" << std::endl;
   std::cout << "Final report: " << std::endl;
   std::cout << "===============" << std::endl;
-#if ADA_HAS_ICU
-  std::cout << "We are using ICU." << std::endl;
-#else
-  std::cout << "We are not using ICU." << std::endl;
-#endif
 #if ADA_IS_BIG_ENDIAN
   std::cout << "You have big-endian system." << std::endl;
 #else

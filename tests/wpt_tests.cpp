@@ -14,10 +14,6 @@
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
 
-// We think that these examples have bad domains.
-std::set<std::string> bad_domains = {"http://./", "http://../",
-                                     "http://foo.09.."};
-
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
 // an out-of-bound access.
@@ -49,6 +45,7 @@ const char *SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
 const char *ADA_SETTERS_TESTS_JSON =
     WPT_DATA_DIR "ada_extra_setters_tests.json";
 const char *TOASCII_JSON = WPT_DATA_DIR "toascii.json";
+const char *IDNA_TEST_V2 = WPT_DATA_DIR "IdnaTestV2.json";
 const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
 const char *ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
 const char *VERIFYDNSLENGTH_TESTS_JSON =
@@ -97,6 +94,63 @@ bool file_exists(const char *filename) {
     error_buffer << "  file missing: " << filename << std::endl;
     return false;
   }
+}
+
+bool idna_test_v2_to_ascii() {
+  TEST_START();
+  ondemand::parser parser;
+
+  RUN_TEST(file_exists(IDNA_TEST_V2));
+
+  padded_string json = padded_string::load(IDNA_TEST_V2);
+  std::cout << "  loaded " << IDNA_TEST_V2 << " (" << json.size() << " kB)"
+            << std::endl;
+
+  ondemand::document doc = parser.iterate(json);
+  try {
+    for (auto element : doc.get_array()) {
+      if (element.type() == ondemand::json_type::string) {
+        continue;
+      }
+
+      ondemand::object object = element.get_object();
+      auto json_string =
+          std::string(std::string_view(simdjson::to_json_string(object)));
+
+      try {
+        auto comment = object["comment"];
+        if (comment) {
+          std::cout << "   comment: " << comment.get_string() << std::endl;
+        }
+      } catch (simdjson::simdjson_error ignored) {
+      }
+
+      std::string_view input = object["input"].get_string();
+
+      std::optional<std::string> output;
+      ada::unicode::to_ascii(output, input, input.find('%'));
+
+      auto expected_output = object["output"];
+      auto given_output = output.has_value() ? output.value() : "";
+
+      if (expected_output.is_null()) {
+        TEST_ASSERT(given_output, "",
+                    "\n  Test case: " + json_string +
+                        "\n  Got output: " + given_output);
+
+      } else if (expected_output.type() == ondemand::json_type::string) {
+        std::string_view str_expected_output = expected_output.get_string();
+        TEST_ASSERT(str_expected_output, given_output,
+                    "\n  Test case: " + json_string +
+                        "\n  Got output: " + given_output);
+      }
+    }
+  } catch (simdjson::simdjson_error &error) {
+    std::cerr << "JSON error: " << error.what() << " near "
+              << doc.current_location() << " in " << TOASCII_JSON << std::endl;
+    return false;
+  }
+  TEST_SUCCEED();
 }
 
 bool percent_encoding() {
@@ -308,7 +362,7 @@ bool toascii_encoding() {
 
         std::string_view input = object["input"];
         std::optional<std::string> output;
-        ada::unicode::to_ascii(output, input, false, input.find('%'));
+        ada::unicode::to_ascii(output, input, input.find('%'));
         auto expected_output = object["output"];
 
         // The following code replicates `toascii.window.js` from web-platform
@@ -505,12 +559,6 @@ bool urltestdata_encoding(const char *source) {
             TEST_ASSERT(input_url->get_origin(), origin,
                         "Origin " + element_string + input_url->to_string());
           }
-          if (bad_domains.find(std::string(input)) != bad_domains.end()) {
-            TEST_ASSERT(
-                input_url->has_valid_domain(), false,
-                "Bad domain " + element_string + input_url->to_string());
-          }
-
           // We need padding.
           simdjson::padded_string padded_url_json = parsed_url_json;
           // We need a second parser.
@@ -615,14 +663,17 @@ int main(int argc, char **argv) {
   std::map<std::string, bool> results;
   std::string name;
 
+  name = "idna_test_v2_to_ascii";
+  if (all_ada_url_tests || name.find(filter) != std::string::npos) {
+    results[name] = idna_test_v2_to_ascii();
+    if (stop_on_failure && !results[name]) {
+      exit(-1);
+    }
+  }
   name = "urltestdata_encoding<ada::url>(" + std::string(ADA_URLTESTDATA_JSON) +
          ")";
   if (all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding<ada::url>(ADA_URLTESTDATA_JSON);
-#if !ADA_HAS_ICU
-    results[name] =
-        true;  // we pretend. The setters fail under Windows due to IDN issues.
-#endif         // !ADA_HAS_ICU
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
@@ -631,10 +682,6 @@ int main(int argc, char **argv) {
       "urltestdata_encoding<ada::url>(" + std::string(URLTESTDATA_JSON) + ")";
   if (all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = urltestdata_encoding<ada::url>(URLTESTDATA_JSON);
-#if !ADA_HAS_ICU
-    results[name] =
-        true;  // we pretend. The setters fail under Windows due to IDN issues.
-#endif         // !ADA_HAS_ICU
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
@@ -644,10 +691,6 @@ int main(int argc, char **argv) {
   if (all_ada_url_aggregator_tests || name.find(filter) != std::string::npos) {
     results[name] =
         urltestdata_encoding<ada::url_aggregator>(ADA_URLTESTDATA_JSON);
-#if !ADA_HAS_ICU
-    results[name] =
-        true;  // we pretend. The setters fail under Windows due to IDN issues.
-#endif         // !ADA_HAS_ICU
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
@@ -659,10 +702,6 @@ int main(int argc, char **argv) {
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
-#if !ADA_HAS_ICU
-    results[name] =
-        true;  // we pretend. The setters fail under Windows due to IDN issues.
-#endif         // _WIN32
   }
   name = "percent_encoding";
   if (all_ada_url_tests || name.find(filter) != std::string::npos) {
@@ -671,7 +710,6 @@ int main(int argc, char **argv) {
       exit(-1);
     }
   }
-#if ADA_HAS_ICU
   name = "toascii_encoding";
   if (all_ada_url_tests || name.find(filter) != std::string::npos) {
     results[name] = toascii_encoding();
@@ -679,7 +717,6 @@ int main(int argc, char **argv) {
       exit(-1);
     }
   }
-#endif  // ADA_HAS_ICU
   name = "setters_tests_encoding<ada::url>(" + std::string(SETTERS_TESTS_JSON) +
          ")";
   if (all_ada_url_tests || name.find(filter) != std::string::npos) {
@@ -687,10 +724,6 @@ int main(int argc, char **argv) {
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
-#if !ADA_HAS_ICU
-    results[name] =
-        true;  // we pretend. The setters fail under Windows due to IDN issues.
-#endif         // !ADA_HAS_ICU
   }
   name = "setters_tests_encoding<ada::url>(" +
          std::string(ADA_SETTERS_TESTS_JSON) + ")";
@@ -699,10 +732,6 @@ int main(int argc, char **argv) {
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
-#if !ADA_HAS_ICU
-    results[name] =
-        true;  // we pretend. The setters fail under Windows due to IDN issues.
-#endif         // _WIN32
   }
   name = "setters_tests_encoding<ada::url_aggregator>(" +
          std::string(SETTERS_TESTS_JSON) + ")";
@@ -712,10 +741,6 @@ int main(int argc, char **argv) {
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
-#if !ADA_HAS_ICU
-    results[name] =
-        true;  // we pretend. The setters fail under Windows due to IDN issues.
-#endif         // !ADA_HAS_ICU
   }
   name = "setters_tests_encoding<ada::url_aggregator>(" +
          std::string(ADA_SETTERS_TESTS_JSON) + ")";
@@ -725,13 +750,7 @@ int main(int argc, char **argv) {
     if (stop_on_failure && !results[name]) {
       exit(-1);
     }
-#if !ADA_HAS_ICU
-    results[name] =
-        true;  // we pretend. The setters fail under Windows due to IDN issues.
-#endif         // _WIN32
   }
-#if ADA_HAS_ICU
-#endif
   name =
       "verifydnslength_tests(" + std::string(VERIFYDNSLENGTH_TESTS_JSON) + ")";
   if (other_tests || name.find(filter) != std::string::npos) {
@@ -744,11 +763,6 @@ int main(int argc, char **argv) {
   std::cout << "===============" << std::endl;
   std::cout << "Final report: " << std::endl;
   std::cout << "===============" << std::endl;
-#if ADA_HAS_ICU
-  std::cout << "We are using ICU." << std::endl;
-#else
-  std::cout << "We are not using ICU." << std::endl;
-#endif
 #if ADA_IS_BIG_ENDIAN
   std::cout << "You have big-endian system." << std::endl;
 #else
