@@ -61,7 +61,7 @@ template <bool has_state_override>
       // If url’s port is url’s scheme’s default port, then set url’s port to
       // null.
       if (components.port == urls_scheme_port) {
-        components.port = url_components::omitted;
+        clear_base_port();
       }
     }
   } else {  // slow path
@@ -104,7 +104,7 @@ template <bool has_state_override>
       // If url’s port is url’s scheme’s default port, then set url’s port to
       // null.
       if (components.port == urls_scheme_port) {
-        components.port = url_components::omitted;
+        clear_base_port();
       }
     }
   }
