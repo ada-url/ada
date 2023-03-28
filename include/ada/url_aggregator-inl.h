@@ -323,27 +323,26 @@ inline void url_aggregator::update_base_username(const std::string_view input) {
           "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
+
   add_authority_slashes_if_needed();
 
-  uint32_t username_start = components.protocol_end + 2;
-  uint32_t diff = uint32_t(input.size());
-
-  if (username_start == components.username_end) {
-    buffer.insert(username_start, input);
-  } else {
-    uint32_t current_length = components.username_end - username_start;
-    buffer.erase(username_start, current_length);
-    buffer.insert(username_start, input);
-    diff -= current_length;
-  }
+  bool has_password = has_non_empty_password();
+  bool host_starts_with_at = buffer.size() > components.host_start &&
+                             buffer[components.host_start] == '@';
+  uint32_t diff = replace_and_resize(components.protocol_end + 2,
+                                     components.username_end, input);
 
   components.username_end += diff;
   components.host_start += diff;
 
-  // Add missing "@" to host start.
-  if (!input.empty() && buffer[components.host_start] != '@') {
+  if (!input.empty() && !host_starts_with_at) {
     buffer.insert(components.host_start, "@");
     diff++;
+  } else if (input.empty() && host_starts_with_at && !has_password) {
+    // Input is empty, there is no password, and we need to remove "@" from
+    // hostname
+    buffer.erase(components.host_start, 1);
+    diff--;
   }
 
   components.host_end += diff;
