@@ -37,6 +37,5 @@ jobs:
           files: |
             singleheader/ada.cpp
             singleheader/ada.h
-          generate_release_notes: true
           prerelease: false
           draft: false
