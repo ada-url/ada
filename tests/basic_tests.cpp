@@ -334,12 +334,27 @@ bool remove_password_with_empty_username() {
 }
 
 template <class result>
+bool should_remove_dash_dot() {
+  TEST_START()
+  auto url = ada::parse<result>("non-spec:/.//p");
+  if (!url) {
+    TEST_FAIL("Should succeed");
+  }
+  url->set_hostname("h");
+  std::cout << url->to_string() << std::endl;
+  TEST_ASSERT(url->get_pathname(), "//p", "should remove /. from pathname");
+  TEST_ASSERT(url->get_href(), "non-spec://h//p", "href should not include /.");
+  TEST_SUCCEED()
+}
+
+template <class result>
 bool all_tests() {
   return confusing_mess<result>() && standard_file<result>() &&
          empty_host_dash_dash_path<result>() && just_hash<result>() &&
          empty_url<result>() && default_port_should_be_removed<result>() &&
          remove_username<result>() && remove_password<result>() &&
          remove_password_with_empty_username<result>() &&
+         should_remove_dash_dot<result>() &&
          set_host_should_return_false_sometimes<result>() &&
          set_host_should_return_true_sometimes<result>() &&
          set_hostname_should_return_false_sometimes<result>() &&
