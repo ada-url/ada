@@ -341,11 +341,14 @@ bool should_remove_dash_dot() {
     TEST_FAIL("Should succeed");
   }
 
-  TEST_ASSERT(url->has_empty_hostname(), false, " non-spec:/.//p has no hostname, not an empty one")
+  TEST_ASSERT(url->has_empty_hostname(), false,
+              " non-spec:/.//p has no hostname, not an empty one")
   TEST_ASSERT(url->has_hostname(), false, " non-spec:/.//p has no hostname")
   url->set_hostname("h");
   TEST_ASSERT(url->has_hostname(), true, " we now have a hostname")
-  TEST_ASSERT(url->has_empty_hostname(), false, " after calling set_hostname(\"h\"), we should not have an empty hostname")
+  TEST_ASSERT(url->has_empty_hostname(), false,
+              " after calling set_hostname(\"h\"), we should not have an empty "
+              "hostname")
   TEST_ASSERT(url->get_pathname(), "//p", "should remove /. from pathname");
   TEST_ASSERT(url->get_href(), "non-spec://h//p", "href should not include /.");
   TEST_SUCCEED()
@@ -359,11 +362,14 @@ bool should_remove_dash_dot_with_empty_hostname() {
     TEST_FAIL("Should succeed");
   }
   TEST_ASSERT(url->get_pathname(), "//p", "should remove /. from pathname");
-  TEST_ASSERT(url->has_empty_hostname(), false, " non-spec:/.//p has no hostname, not an empty one")
+  TEST_ASSERT(url->has_empty_hostname(), false,
+              " non-spec:/.//p has no hostname, not an empty one")
   TEST_ASSERT(url->has_hostname(), false, " non-spec:/.//p has no hostname")
   url->set_hostname("");
   TEST_ASSERT(url->has_hostname(), true, " we now have a hostname")
-  TEST_ASSERT(url->has_empty_hostname(), true, " after calling set_hostname(\"\"), we should have an empty hostname")
+  TEST_ASSERT(
+      url->has_empty_hostname(), true,
+      " after calling set_hostname(\"\"), we should have an empty hostname")
   TEST_ASSERT(url->get_pathname(), "//p", "should remove /. from pathname");
   TEST_ASSERT(url->get_href(), "non-spec:////p", "href should not include /.");
   TEST_SUCCEED()
