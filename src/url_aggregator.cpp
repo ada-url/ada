@@ -308,6 +308,11 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   }
   clear_base_pathname();
   parse_path(input);
+  if (checkers::begins_with(input, "//") && !has_authority() &&
+      !has_dash_dot()) {
+    buffer.insert(components.pathname_start, "/.");
+    components.pathname_start += 2;
+  }
   ADA_ASSERT_TRUE(validate());
   return true;
 }
