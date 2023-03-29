@@ -30,6 +30,9 @@ namespace ada {
   }
   return host.value().empty();
 }
+[[nodiscard]] inline bool url::has_hostname() const noexcept {
+  return host.has_value();
+}
 inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
   return out << u.to_string();
 }

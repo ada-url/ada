@@ -122,6 +122,8 @@ struct url : url_base {
   inline void set_protocol_as_file();
   /** @return true if it has an host but it is the empty string */
   [[nodiscard]] inline bool has_empty_hostname() const noexcept;
+  /** @return true if it has a host (included an empty host) */
+  [[nodiscard]] inline bool has_hostname() const noexcept;
   [[nodiscard]] bool has_valid_domain() const noexcept override;
 
   /**

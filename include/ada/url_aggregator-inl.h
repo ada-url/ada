@@ -792,6 +792,9 @@ inline bool url_aggregator::has_password() const noexcept {
 }
 
 inline bool url_aggregator::has_empty_hostname() const noexcept {
+  if (!has_hostname()) {
+    return false;
+  }
   if (components.host_start == components.host_end) {
     return true;
   }
@@ -799,6 +802,10 @@ inline bool url_aggregator::has_empty_hostname() const noexcept {
     return false;
   }
   return components.username_end != components.host_start;
+}
+
+inline bool url_aggregator::has_hostname() const noexcept {
+  return has_authority();
 }
 
 inline bool url_aggregator::has_port() const noexcept {

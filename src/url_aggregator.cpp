@@ -550,10 +550,9 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
     // Let host be the result of host parsing host_view with url is not special.
     if (host_view.empty()) {
-      clear_base_hostname();
-      // This is a super edge case. Setting an empty hostname to a example
-      // URL: "non-spec:/.//p" should remove "/." and add authority slashes.
-      if (!has_authority() && has_dash_dot()) {
+      if (has_hostname()) {
+        clear_base_hostname();  // easy!
+      } else if (has_dash_dot()) {
         add_authority_slashes_if_needed();
         delete_dash_dot();
       }
