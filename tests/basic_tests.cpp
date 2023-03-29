@@ -390,6 +390,23 @@ bool should_add_dash_dot_on_pathname() {
 }
 
 template <class result>
+bool should_update_password_correctly() {
+  TEST_START()
+  auto url = ada::parse<result>(
+      "https://username:password@host:8000/path?query#fragment");
+  if (!url) {
+    TEST_FAIL("Should succeed");
+  }
+  TEST_ASSERT(url->set_password("test"), true, "should have succeeded");
+  std::cout << url->to_string() << std::endl;
+  TEST_ASSERT(url->get_password(), "test", "should be equal");
+  TEST_ASSERT(url->get_href(),
+              "https://username:test@host:8000/path?query#fragment",
+              "href should be equal");
+  TEST_SUCCEED()
+}
+
+template <class result>
 bool all_tests() {
   return confusing_mess<result>() && standard_file<result>() &&
          empty_host_dash_dash_path<result>() && just_hash<result>() &&
@@ -399,6 +416,7 @@ bool all_tests() {
          should_remove_dash_dot<result>() &&
          should_remove_dash_dot_with_empty_hostname<result>() &&
          should_add_dash_dot_on_pathname<result>() &&
+         should_update_password_correctly<result>() &&
          set_host_should_return_false_sometimes<result>() &&
          set_host_should_return_true_sometimes<result>() &&
          set_hostname_should_return_false_sometimes<result>() &&

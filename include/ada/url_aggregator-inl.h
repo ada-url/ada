@@ -444,11 +444,8 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
   uint32_t difference = uint32_t(input.size());
 
   if (password_exists) {
-    uint32_t password_end = components.host_start;
-    if (components.host_start != components.host_end) {
-      password_end--;
-    }
-    uint32_t current_length = password_end - components.username_end + 1;
+    uint32_t current_length =
+        components.host_start - components.username_end - 1;
     buffer.erase(components.username_end + 1, current_length);
     difference -= current_length;
   } else {
