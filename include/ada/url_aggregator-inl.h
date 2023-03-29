@@ -615,7 +615,6 @@ inline void url_aggregator::clear_base_search() {
   ADA_ASSERT_TRUE(validate());
 }
 
-
 inline void url_aggregator::clear_base_hash() {
   ada_log("url_aggregator::clear_base_hash");
   ADA_ASSERT_TRUE(validate());
