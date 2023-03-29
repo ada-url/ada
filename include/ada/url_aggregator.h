@@ -203,7 +203,8 @@ struct url_aggregator : url_base {
   inline uint32_t retrieve_base_port() const;
   /** @private */
   inline void clear_base_port();
-  /** @private */
+  /** @private if there is no hostname, then this function does nothing, if
+   * there is, we make it empty */
   inline void clear_base_hostname();
   /** @private */
   inline void clear_base_pathname() override;
@@ -221,6 +222,8 @@ struct url_aggregator : url_base {
   void delete_dash_dot();
   /** @return true if it has an host but it is the empty string */
   [[nodiscard]] inline bool has_empty_hostname() const noexcept;
+  /** @return true if it has a host (included an empty host) */
+  [[nodiscard]] inline bool has_hostname() const noexcept;
   /** @private */
   [[nodiscard]] inline bool has_non_empty_username() const noexcept;
   /** @private */
