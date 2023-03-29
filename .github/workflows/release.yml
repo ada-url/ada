@@ -40,10 +40,6 @@ jobs:
           files: |
             singleheader/ada.cpp
             singleheader/ada.h
-<<<<<<< Updated upstream
-          generate_release_notes: true
-=======
             singleheader/singleheader.zip
->>>>>>> Stashed changes
           prerelease: false
           draft: false
