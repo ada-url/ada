@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Amalgamation
-        run: cd singleheader && ./amalgamate.py
+        run: ./singleheader/amalgamate.py
 
       - name: Create Release && Upload Assets
         uses: softprops/action-gh-release@v1
