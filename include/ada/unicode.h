@@ -164,7 +164,13 @@ std::string percent_decode(const std::string_view input, size_t first_percent);
  */
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]);
-
+/**
+ * Returns a percent-encoded string version of input, while starting the percent
+ * encoding at the provided index.
+ * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
+ */
+std::string percent_encode(const std::string_view input,
+                           const uint8_t character_set[], size_t index);
 /**
  * Returns true if percent encoding was needed, in which case, we store
  * the percent-encoded content in 'out'. If the boolean 'append' is set to
@@ -175,7 +181,12 @@ std::string percent_encode(const std::string_view input,
 template <bool append>
 bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out);
-
+/**
+ * Returns the index at which percent encoding should start, or (equivalently),
+ * the length of the prefix that does not require percent encoding.
+ */
+ada_really_inline size_t percent_encode_index(const std::string_view input,
+                                              const uint8_t character_set[]);
 /**
  * Lowers the string in-place, assuming that the content is ASCII.
  * Return true if the content was ASCII.

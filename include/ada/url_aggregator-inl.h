@@ -10,6 +10,7 @@
 #include "ada/checkers-inl.h"
 #include "ada/helpers.h"
 #include "ada/unicode.h"
+#include "ada/unicode-inl.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
 #include "ada/scheme.h"
@@ -239,11 +240,22 @@ inline void url_aggregator::update_base_search(
     }
 
     buffer.insert(components.search_start, "?");
-
-    std::string encoded =
-        unicode::percent_encode(input, query_percent_encode_set);
-    buffer.insert(components.search_start + 1, encoded);
-    components.hash_start += uint32_t(encoded.size() + 1);  // Do not forget `?`
+    size_t idx =
+        ada::unicode::percent_encode_index(input, query_percent_encode_set);
+    if (idx == input.size()) {
+      buffer.insert(components.search_start + 1, input);
+      components.hash_start += uint32_t(input.size() + 1);  // Do not forget `?`
+    } else {
+      buffer.insert(components.search_start + 1, input, 0, idx);
+      input.remove_prefix(idx);
+      // We only create a temporary string if we need percent encoding and
+      // we attempt to create as small a temporary string as we can.
+      std::string encoded =
+          ada::unicode::percent_encode(input, query_percent_encode_set);
+      buffer.insert(components.search_start + idx + 1, encoded);
+      components.hash_start +=
+          uint32_t(encoded.size() + idx + 1);  // Do not forget `?`
+    }
   }
 
   ADA_ASSERT_TRUE(validate());
@@ -598,6 +610,24 @@ inline void url_aggregator::clear_base_search() {
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_search(), "",
                    "search should have been cleared on buffer=" + buffer +
+                       " with " + components.to_string() + "\n" + to_diagram());
+#endif
+  ADA_ASSERT_TRUE(validate());
+}
+
+
+inline void url_aggregator::clear_base_hash() {
+  ada_log("url_aggregator::clear_base_hash");
+  ADA_ASSERT_TRUE(validate());
+  if (components.hash_start == url_components::omitted) {
+    return;
+  }
+  buffer.resize(components.hash_start);
+  components.hash_start = url_components::omitted;
+
+#if ADA_DEVELOPMENT_CHECKS
+  ADA_ASSERT_EQUAL(get_hash(), "",
+                   "hash should have been cleared on buffer=" + buffer +
                        " with " + components.to_string() + "\n" + to_diagram());
 #endif
   ADA_ASSERT_TRUE(validate());

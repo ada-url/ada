@@ -205,6 +205,8 @@ struct url_aggregator : url_base {
   inline void clear_base_port();
   /** @private */
   inline void clear_base_hostname();
+/** @private */
+  inline void clear_base_hash();
   /** @private */
   inline void clear_base_pathname() override;
   /** @private */
@@ -293,7 +295,6 @@ struct url_aggregator : url_base {
   ada_really_inline size_t
   parse_port(std::string_view view,
              bool check_trailing_content = false) noexcept override;
-
  private:
   /** @private */
   std::string buffer{};
