@@ -32,7 +32,7 @@ jobs:
           ./singleheader/amalgamate.py 
           zip singleheader.zip ada.cpp ada.h
 
-      - name: Create Release && Upload Assets
+      - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         with:
           files: |
