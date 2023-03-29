@@ -206,6 +206,8 @@ struct url_aggregator : url_base {
   /** @private */
   inline void clear_base_hostname();
   /** @private */
+  inline void clear_base_hash();
+  /** @private */
   inline void clear_base_pathname() override;
   /** @private */
   inline void clear_base_search() override;

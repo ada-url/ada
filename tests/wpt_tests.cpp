@@ -770,7 +770,7 @@ int main(int argc, char **argv) {
 #endif
   bool one_failed = false;
   for (auto [s, b] : results) {
-    std::cout << std::left << std::setw(60) << std::setfill('.') << s << ": "
+    std::cout << std::left << std::setw(80) << std::setfill('.') << s << ": "
               << (b ? "SUCCEEDED" : "FAILED") << std::endl;
     if (!b) {
       one_failed = true;
