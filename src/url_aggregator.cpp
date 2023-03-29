@@ -542,6 +542,9 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     if (!succeeded) {
       update_base_hostname(previous_host);
       update_base_port(previous_port);
+    } else if (has_dash_dot()) {
+      // Should remove dash_dot from pathname
+      delete_dash_dot();
     }
     return succeeded;
   }
