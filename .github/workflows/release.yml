@@ -39,6 +39,5 @@ jobs:
             singleheader/ada.cpp
             singleheader/ada.h
             singleheader/singleheader.zip
-          generate_release_notes: true
           prerelease: false
           draft: false
