@@ -35,8 +35,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./singleheader/ada.cpp
-            ./singleheader/ada.h
+            singleheader/ada.cpp
+            singleheader/ada.h
           generate_release_notes: true
           prerelease: false
           draft: false
