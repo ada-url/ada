@@ -36,26 +36,11 @@ jobs:
             "path": "./singleheader",
             "name": "ada.h",
             "content_type": "text/plain"
-          },
-          {
-            "path": "./",
-            "name": "ada_source_code.zip",
-            "content_type": "application/zip"
-          },
-          {
-            "path": "./",
-            "name": "ada_source_code.tar.gz",
-            "content_type": "application/gzip"
-          },
+          }
         ]
         
     steps:
       - uses: actions/checkout@v3
-      - name: Generate compressed Assets
-        run: | 
-          tar -czvf ada_source_code.tar.gz .
-          zip -r ada_source_code.zip . -x "*.tar.gz"
-
       - name: Amalgamation
         run: cd singleheader && ./amalgamate.py
 
