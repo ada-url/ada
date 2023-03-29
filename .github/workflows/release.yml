@@ -25,42 +25,18 @@ jobs:
     if: ${{ needs.build-and-test.result == 'success' }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      ASSETS: |
-        [
-          {
-            "path": "./singleheader",
-            "name": "ada.cpp",
-            "content_type": "text/plain"
-          },
-          {
-            "path": "./singleheader",
-            "name": "ada.h",
-            "content_type": "text/plain"
-          }
-        ]
         
     steps:
       - uses: actions/checkout@v3
       - name: Amalgamation
         run: cd singleheader && ./amalgamate.py
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create Release && Upload Assets
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: |
-            Release ${{ github.ref }}
-          draft: false
+          files: |
+            ./singleheader/ada.cpp
+            ./singleheader/ada.h
+          generate_release_notes: true
           prerelease: false
-
-      - name: Upload Assets
-        id: upload-release-assets
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ item.path }}
-          asset_name: ${{ item.name }}
-          asset_content_type: ${{ item.content_type }}
-        loop: ${{ fromJson(env.ASSETS) }}
+          draft: false
