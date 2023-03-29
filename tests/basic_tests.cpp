@@ -348,6 +348,20 @@ bool should_remove_dash_dot() {
 }
 
 template <class result>
+bool should_add_dash_dot_on_pathname() {
+  TEST_START()
+  auto url = ada::parse<result>("non-spec:/");
+  if (!url) {
+    TEST_FAIL("Should succeed");
+  }
+  url->set_pathname("//p");
+  std::cout << url->to_string() << std::endl;
+  TEST_ASSERT(url->get_pathname(), "//p", "should be equal");
+  TEST_ASSERT(url->get_href(), "non-spec:/.//p", "href should contain /.");
+  TEST_SUCCEED()
+}
+
+template <class result>
 bool all_tests() {
   return confusing_mess<result>() && standard_file<result>() &&
          empty_host_dash_dash_path<result>() && just_hash<result>() &&
@@ -355,6 +369,7 @@ bool all_tests() {
          remove_username<result>() && remove_password<result>() &&
          remove_password_with_empty_username<result>() &&
          should_remove_dash_dot<result>() &&
+         should_add_dash_dot_on_pathname<result>() &&
          set_host_should_return_false_sometimes<result>() &&
          set_host_should_return_true_sometimes<result>() &&
          set_hostname_should_return_false_sometimes<result>() &&
