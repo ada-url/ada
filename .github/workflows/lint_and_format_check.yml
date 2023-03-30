@@ -19,12 +19,12 @@ jobs:
 
       - name: Install clang-format
         run: |
-          sudo apt update && sudo apt install clang-format-15 -y
-          sudo ln -sf /usr/bin/clang-format-15 /usr/bin/clang-format
+          sudo apt update && sudo apt install clang-format-16 -y
+          sudo ln -sf /usr/bin/clang-format-16 /usr/bin/clang-format
 
       - name: Build with Lint and Format Check
         run: |
           cmake -B build && cmake --build build
         env:
-          CXX: clang++-14
+          CXX: clang++-16
           LINT_AND_FORMAT_CHECK: true
