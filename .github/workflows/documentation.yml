@@ -14,18 +14,14 @@ permissions:
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-      - name: Install Doxygen
-        run: sudo apt-get install doxygen graphviz -y
       - name: Install theme
         run: ./tools/prepare-doxygen.sh
-      - name: Generate Doxygen Documentation
-        run: doxygen ./doxygen
+      - uses: mattnotmitt/doxygen-action@edge
+        with:
+          doxyfile-path: './doxygen'
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@bd8c6b06eba6b3d25d72b7a1767993c0aeee42e7 # v3.9.2
         with:
