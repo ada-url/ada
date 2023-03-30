@@ -25,19 +25,15 @@
 var NAVTREE =
 [
   [ "Ada", "index.html", [
-    [ "Requirements", "index.html#autotoc_md4", null ],
-    [ "Usage", "index.html#autotoc_md5", [
-      [ "Parsing & Validation", "index.html#autotoc_md6", null ],
-      [ "Examples", "index.html#autotoc_md7", null ],
-      [ "CMake dependency", "index.html#autotoc_md8", null ]
+    [ "Requirements", "index.html#autotoc_md1", null ],
+    [ "Usage", "index.html#autotoc_md2", [
+      [ "Parsing & Validation", "index.html#autotoc_md3", null ],
+      [ "Examples", "index.html#autotoc_md4", null ],
+      [ "CMake dependency", "index.html#autotoc_md5", null ]
     ] ],
-    [ "Contributing", "index.html#autotoc_md9", [
-      [ "Building", "index.html#autotoc_md10", null ],
-      [ "Amalgamation", "index.html#autotoc_md11", null ]
-    ] ],
-    [ "Release Document", "d0/d4a/md_docs_RELEASE.html", [
-      [ "Preparation", "d0/d4a/md_docs_RELEASE.html#autotoc_md1", null ],
-      [ "Release", "d0/d4a/md_docs_RELEASE.html#autotoc_md2", null ]
+    [ "Contributing", "index.html#autotoc_md6", [
+      [ "Building", "index.html#autotoc_md7", null ],
+      [ "Amalgamation", "index.html#autotoc_md8", null ]
     ] ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
@@ -73,9 +69,9 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"d6/da3/namespaceada_1_1parser.html",
-"db/d2e/ada__idna_8cpp.html#ad39325463bccb5615ad4aafb3f45ddd6",
-"dd/d9c/unicode_8cpp.html#ab9b70de07868ab60794c3079aa4db46f"
+"d6/da3/namespaceada_1_1parser.html#ae218eecdf660d5149f20464a90730915",
+"db/d2e/ada__idna_8cpp.html#af593f5293a356a9fc9bb3878a96b3eae",
+"dd/d9c/unicode_8cpp.html#ad649ab6ed074b809af2eceaaa0c787db"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
