@@ -19,8 +19,8 @@ jobs:
 
       - name: Install clang-format
         run: |
-          sudo apt update && sudo apt install clang-format-14 -y
-          sudo ln -sf /usr/bin/clang-format-14 /usr/bin/clang-format
+          sudo apt update && sudo apt install clang-format-15 -y
+          sudo ln -sf /usr/bin/clang-format-15 /usr/bin/clang-format
 
       - name: Build with Lint and Format Check
         run: |
