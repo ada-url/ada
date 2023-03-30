@@ -13,7 +13,9 @@
 namespace ada {
 
 /**
- * We design the url_components struct so that it is as small
+ * @brief URL Component representations using offsets.
+ *
+ * @details We design the url_components struct so that it is as small
  * and simple as possible. This version uses 32 bytes.
  *
  * This struct is used to extract components from a single 'href'.

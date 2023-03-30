@@ -14,7 +14,9 @@
 namespace ada {
 
 /**
- * A url_base contains a few attributes: is_valid, has_opaque_path and type.
+ * @brief Base class of URL implementations
+ *
+ * @details A url_base contains a few attributes: is_valid, has_opaque_path and type.
  * All non-trivial implementation details are in derived classes such as
  * ada::url and ada::url_aggregator.
  *
