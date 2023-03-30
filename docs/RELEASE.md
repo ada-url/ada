@@ -7,7 +7,7 @@ following documents:
 
 - [CmakeLists.txt](../CmakeLists.txt)
 - [Doxygen](../doxygen)
-- [ada-version.h](../include/ada/ada_version.h)
+- [ada_version.h](../include/ada/ada_version.h)
 
 ## Release
 

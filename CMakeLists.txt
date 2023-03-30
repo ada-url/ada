@@ -6,7 +6,7 @@ project(ada
   VERSION 1.0.4
 )
 
-set(ADA_LIB_VERSION "1.0.4" CACHE STRING "ada library version")
+set(ADA_LIB_VERSION "2.0.0" CACHE STRING "ada library version")
 set(ADA_LIB_SOVERSION "1" CACHE STRING "ada library soversion")
 
 include(GNUInstallDirs)
