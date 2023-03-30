@@ -616,9 +616,7 @@ typedef struct {
 
 #define lib_nelems(x) (sizeof(x) / sizeof((x)[0]))
 #define lib_symbol_def(name) \
-  {                          \
-#name, (void **)&name    \
-  }
+  { #name, (void **)&name }
 
 static const lib_symbol lib_symbols_kperf[] = {
     lib_symbol_def(kpc_pmu_version),
