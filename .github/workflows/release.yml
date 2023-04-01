@@ -31,6 +31,12 @@ jobs:
         run: |
           ./singleheader/amalgamate.py 
           zip singleheader.zip ada.cpp ada.h
+      
+      - name: Release script test
+        run: |
+          cd tools/release && \
+          pip3 install -r requirements.txt && \
+          ./release.py
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
