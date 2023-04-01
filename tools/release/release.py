@@ -2,6 +2,29 @@
 
 from github import Github
 import os
+import re
+
+
+def is_valid_tag(tag):
+    tag_regex = r'^v\d+\.\d+\.\d+$'
+    return bool(re.match(tag_regex, tag))
+
+
+def create_release(tag, notes):
+    if not is_valid_tag(tag):
+        raise Exception(f"Invalid tag: {tag}")
+
+    try:
+        repo.create_git_release(
+            tag=tag,
+            name=tag,
+            message=notes,
+            draft=False,
+            prerelease=False
+        )
+
+    except Exception as e:
+        raise Exception(f"Error creating release/tag {tag}: {str(e)}")
 
 
 def get_release_merged_pulls(repository, last_release):
