@@ -13,8 +13,7 @@ def get_release_merged_pulls(repository, last_release):
     ]
 
 
-def get_new_contributors(repository):
-    last_release = get_last_release(repository)
+def get_new_contributors(repository, last_release):
     merged_pulls = [
         pull
         for pull in repository.get_pulls(state="closed")
@@ -45,8 +44,7 @@ def get_last_release(repository):
     return last_release
 
 
-def whats_changed(repository):
-    last_release = get_last_release(repository)
+def whats_changed(repository, last_release):
     release_merged_pulls = get_release_merged_pulls(repository, last_release)
     release_changes = ""
     for pull in release_merged_pulls:
@@ -66,6 +64,7 @@ if __name__ == "__main__":
 
     g = Github(github_token)
     repo = g.get_repo(repo_name)
+    lr = get_last_release(repo)
 
-    changes = whats_changed(repo)
-    nc = get_new_contributors(repo)
+    changes = whats_changed(repo, lr)
+    nc = get_new_contributors(repo, lr)
