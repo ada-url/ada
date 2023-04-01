@@ -11,6 +11,12 @@
 
 namespace ada::parser {
 
+// https://stackoverflow.com/questions/8357240/how-to-automatically-convert-strongly-typed-enum-into-int
+template <typename E>
+constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept {
+  return static_cast<typename std::underlying_type<E>::type>(e);
+}
+
 template <class result_type>
 result_type parse_url(std::string_view user_input,
                       const result_type* base_url) {
@@ -100,11 +106,24 @@ result_type parse_url(std::string_view user_input,
   // If after a run pointer points to the EOF code point, go to the next step.
   // Otherwise, increase pointer by 1 and continue with the state machine.
   // We never decrement input_position.
+
+  static const void* const ADA_STATE_DISPATCH_TABLE[] = {
+#define DISPATCH_ADA_STATE(state) &&case_##state,
+      ADA_STATE_LIST(DISPATCH_ADA_STATE)
+#undef DISPATCH_ADA_STATE
+  };
+#define SWITCH(state)                                                 \
+  do {                                                                \
+    ada_log("In parsing at ", input_position, " out of ", input_size, \
+            " in state ", ada::to_string(state));                     \
+    goto* ADA_STATE_DISPATCH_TABLE[state];                            \
+  } while (0);
+#define CASE(state) case_##state
+#define BREAK(state) SWITCH(state)
+
   while (input_position <= input_size) {
-    ada_log("In parsing at ", input_position, " out of ", input_size,
-            " in state ", ada::to_string(state));
-    switch (state) {
-      case ada::state::SCHEME_START: {
+    SWITCH(to_underlying(state)) {
+      CASE(SCHEME_START) : {
         ada_log("SCHEME_START ", helpers::substring(url_data, input_position));
         // If c is an ASCII alpha, append c, lowercased, to buffer, and set
         // state to scheme state.
@@ -119,7 +138,7 @@ result_type parse_url(std::string_view user_input,
         }
         break;
       }
-      case ada::state::SCHEME: {
+      CASE(SCHEME) : {
         ada_log("SCHEME ", helpers::substring(url_data, input_position));
         // If c is an ASCII alphanumeric, U+002B (+), U+002D (-), or U+002E (.),
         // append c, lowercased, to buffer.
@@ -187,7 +206,7 @@ result_type parse_url(std::string_view user_input,
         input_position++;
         break;
       }
-      case ada::state::NO_SCHEME: {
+      CASE(NO_SCHEME) : {
         ada_log("NO_SCHEME ", helpers::substring(url_data, input_position));
         // If base is null, or base has an opaque path and c is not U+0023 (#),
         // validation error, return failure.
@@ -229,7 +248,7 @@ result_type parse_url(std::string_view user_input,
         }
         break;
       }
-      case ada::state::AUTHORITY: {
+      CASE(AUTHORITY) : {
         ada_log("AUTHORITY ", helpers::substring(url_data, input_position));
         // most URLs have no @. Having no @ tells us that we don't have to worry
         // about AUTHORITY. Of course, we could have @ and still not have to
@@ -350,7 +369,7 @@ result_type parse_url(std::string_view user_input,
 
         break;
       }
-      case ada::state::SPECIAL_RELATIVE_OR_AUTHORITY: {
+      CASE(SPECIAL_RELATIVE_OR_AUTHORITY) : {
         ada_log("SPECIAL_RELATIVE_OR_AUTHORITY ",
                 helpers::substring(url_data, input_position));
 
@@ -369,7 +388,7 @@ result_type parse_url(std::string_view user_input,
 
         break;
       }
-      case ada::state::PATH_OR_AUTHORITY: {
+      CASE(PATH_OR_AUTHORITY) : {
         ada_log("PATH_OR_AUTHORITY ",
                 helpers::substring(url_data, input_position));
 
@@ -385,7 +404,7 @@ result_type parse_url(std::string_view user_input,
 
         break;
       }
-      case ada::state::RELATIVE_SCHEME: {
+      CASE(RELATIVE_SCHEME) : {
         ada_log("RELATIVE_SCHEME ",
                 helpers::substring(url_data, input_position));
 
@@ -460,7 +479,7 @@ result_type parse_url(std::string_view user_input,
         input_position++;
         break;
       }
-      case ada::state::RELATIVE_SLASH: {
+      CASE(RELATIVE_SLASH) : {
         ada_log("RELATIVE_SLASH ",
                 helpers::substring(url_data, input_position));
 
@@ -503,7 +522,7 @@ result_type parse_url(std::string_view user_input,
         input_position++;
         break;
       }
-      case ada::state::SPECIAL_AUTHORITY_SLASHES: {
+      CASE(SPECIAL_AUTHORITY_SLASHES) : {
         ada_log("SPECIAL_AUTHORITY_SLASHES ",
                 helpers::substring(url_data, input_position));
 
@@ -515,10 +534,8 @@ result_type parse_url(std::string_view user_input,
         if (ada::checkers::begins_with(view, "//")) {
           input_position += 2;
         }
-
-        [[fallthrough]];
       }
-      case ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES: {
+      CASE(SPECIAL_AUTHORITY_IGNORE_SLASHES) : {
         ada_log("SPECIAL_AUTHORITY_IGNORE_SLASHES ",
                 helpers::substring(url_data, input_position));
 
@@ -533,7 +550,7 @@ result_type parse_url(std::string_view user_input,
 
         break;
       }
-      case ada::state::QUERY: {
+      CASE(QUERY) : {
         ada_log("QUERY ", helpers::substring(url_data, input_position));
         // Let queryPercentEncodeSet be the special-query percent-encode set if
         // url is special; otherwise the query percent-encode set.
@@ -551,7 +568,7 @@ result_type parse_url(std::string_view user_input,
         }
         return url;
       }
-      case ada::state::HOST: {
+      CASE(HOST) : {
         ada_log("HOST ", helpers::substring(url_data, input_position));
 
         std::string_view host_view =
@@ -607,7 +624,7 @@ result_type parse_url(std::string_view user_input,
 
         break;
       }
-      case ada::state::OPAQUE_PATH: {
+      CASE(OPAQUE_PATH) : {
         ada_log("OPAQUE_PATH ", helpers::substring(url_data, input_position));
         std::string_view view = helpers::substring(url_data, input_position);
         // If c is U+003F (?), then set url’s query to the empty string and
@@ -627,7 +644,7 @@ result_type parse_url(std::string_view user_input,
             view, character_sets::C0_CONTROL_PERCENT_ENCODE));
         break;
       }
-      case ada::state::PORT: {
+      CASE(PORT) : {
         ada_log("PORT ", helpers::substring(url_data, input_position));
         std::string_view port_view =
             helpers::substring(url_data, input_position);
@@ -637,9 +654,8 @@ result_type parse_url(std::string_view user_input,
           return url;
         }
         state = state::PATH_START;
-        [[fallthrough]];
       }
-      case ada::state::PATH_START: {
+      CASE(PATH_START) : {
         ada_log("PATH_START ", helpers::substring(url_data, input_position));
 
         // If url is special, then:
@@ -684,7 +700,7 @@ result_type parse_url(std::string_view user_input,
         input_position++;
         break;
       }
-      case ada::state::PATH: {
+      CASE(PATH) : {
         std::string_view view = helpers::substring(url_data, input_position);
         ada_log("PATH ", helpers::substring(url_data, input_position));
 
@@ -706,7 +722,7 @@ result_type parse_url(std::string_view user_input,
         }
         break;
       }
-      case ada::state::FILE_SLASH: {
+      CASE(FILE_SLASH) : {
         ada_log("FILE_SLASH ", helpers::substring(url_data, input_position));
 
         // If c is U+002F (/) or U+005C (\), then:
@@ -764,7 +780,7 @@ result_type parse_url(std::string_view user_input,
 
         break;
       }
-      case ada::state::FILE_HOST: {
+      CASE(FILE_HOST) : {
         std::string_view view = helpers::substring(url_data, input_position);
         ada_log("FILE_HOST ", helpers::substring(url_data, input_position));
 
@@ -810,7 +826,7 @@ result_type parse_url(std::string_view user_input,
 
         break;
       }
-      case ada::state::FILE: {
+      CASE(FILE) : {
         ada_log("FILE ", helpers::substring(url_data, input_position));
         std::string_view file_view =
             helpers::substring(url_data, input_position);
@@ -897,10 +913,14 @@ result_type parse_url(std::string_view user_input,
         input_position++;
         break;
       }
-      default:
-        ada::unreachable();
+      CASE(FRAGMENT) : { ada::unreachable(); }
     }
   }
+
+#undef SWITCH
+#undef CASE
+#undef BREAK
+
   if (fragment.has_value()) {
     url.update_unencoded_base_hash(*fragment);
   }

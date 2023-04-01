@@ -11,31 +11,34 @@
 
 namespace ada {
 
+#define ADA_STATE_LIST(V)             \
+  V(AUTHORITY)                        \
+  V(SCHEME_START)                     \
+  V(SCHEME)                           \
+  V(HOST)                             \
+  V(NO_SCHEME)                        \
+  V(FRAGMENT)                         \
+  V(RELATIVE_SCHEME)                  \
+  V(RELATIVE_SLASH)                   \
+  V(FILE)                             \
+  V(FILE_HOST)                        \
+  V(FILE_SLASH)                       \
+  V(PATH_OR_AUTHORITY)                \
+  V(SPECIAL_AUTHORITY_IGNORE_SLASHES) \
+  V(SPECIAL_AUTHORITY_SLASHES)        \
+  V(SPECIAL_RELATIVE_OR_AUTHORITY)    \
+  V(QUERY)                            \
+  V(PATH)                             \
+  V(PATH_START)                       \
+  V(OPAQUE_PATH)                      \
+  V(PORT)
 /**
  * @see https://url.spec.whatwg.org/#url-parsing
  */
-enum class state {
-  AUTHORITY,
-  SCHEME_START,
-  SCHEME,
-  HOST,
-  NO_SCHEME,
-  FRAGMENT,
-  RELATIVE_SCHEME,
-  RELATIVE_SLASH,
-  FILE,
-  FILE_HOST,
-  FILE_SLASH,
-  PATH_OR_AUTHORITY,
-  SPECIAL_AUTHORITY_IGNORE_SLASHES,
-  SPECIAL_AUTHORITY_SLASHES,
-  SPECIAL_RELATIVE_OR_AUTHORITY,
-  QUERY,
-  PATH,
-  PATH_START,
-  OPAQUE_PATH,
-  PORT,
-};
+
+#define ENUM_ADA_STATE(state) state,
+enum class state { ADA_STATE_LIST(ENUM_ADA_STATE) };
+#undef ENUM_ADA_STATE
 
 /**
  * Stringify a URL state machine state.
