@@ -122,10 +122,8 @@ def test_get_new_contributors():
     assert new_contributors == {"new_contr_1", "new_contr_2"}
 
 
-
-
 def test_is_valid_tag():
-    assert release.is_valid_tag("v1.0.0") is True, "This should fail"
+    assert release.is_valid_tag("v1.0.0") is True
     assert release.is_valid_tag("v1.1.1") is True
 
     assert release.is_valid_tag("v0") is False
