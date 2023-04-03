@@ -6,21 +6,17 @@ import re
 
 
 def is_valid_tag(tag):
-    tag_regex = r'^v\d+\.\d+\.\d+$'
+    tag_regex = r"^v\d+\.\d+\.\d+$"
     return bool(re.match(tag_regex, tag))
 
 
-def create_release(tag, notes):
+def create_release(repository, tag, notes):
     if not is_valid_tag(tag):
         raise Exception(f"Invalid tag: {tag}")
 
     try:
-        repo.create_git_release(
-            tag=tag,
-            name=tag,
-            message=notes,
-            draft=False,
-            prerelease=False
+        repository.create_git_release(
+            tag=tag, name=tag, message=notes, draft=False, prerelease=False
         )
 
     except Exception as e:
@@ -29,11 +25,13 @@ def create_release(tag, notes):
 
 def get_release_merged_pulls(repository, last_release):
     pulls = repository.get_pulls(state="closed")
-    return [
-        pull
-        for pull in pulls
-        if pull.merged and pull.merged_at > last_release.created_at
-    ]
+    return set(
+        [
+            pull
+            for pull in pulls
+            if pull.merged and pull.merged_at > last_release.created_at
+        ]
+    )
 
 
 def get_new_contributors(repository, last_release):
@@ -62,32 +60,68 @@ def get_last_release(repository):
 
     last_release = repository
     if len(sorted_releases) >= 2:
-        last_release = sorted_releases[1]
+        last_release = sorted_releases[0]
 
     return last_release
 
 
-def whats_changed(repository, last_release):
+def whats_changed_md(repository, last_release):
     release_merged_pulls = get_release_merged_pulls(repository, last_release)
-    release_changes = ""
+    whats_changed = set()
     for pull in release_merged_pulls:
-        release_changes += f"{pull.title} by @{pull.user.login} in #{pull.number}\n"
+        whats_changed.add(f"* {pull.title} by @{pull.user.login} in #{pull.number}")
 
-    release_changes += "\n"
-    return changes
+    return whats_changed
+
+
+def new_contributors_md(repository, last_release):
+    new_contributors = get_new_contributors(repository, last_release)
+    release_merged_pulls = get_release_merged_pulls(repository, last_release)
+
+    contributors_md = set()
+    for contributor in new_contributors:
+        first_contribution = min(
+            [pull for pull in release_merged_pulls if pull.user.login == contributor],
+            key=lambda pull: pull.merged_at,
+            default=None,
+        )
+        if first_contribution:
+            contributors_md.add(
+                f"* @{contributor} made their first contribution in #{first_contribution.number}"
+            )
+
+    return contributors_md
+
+
+def full_changelog_md(repo_name, last_tag, next_tag):
+    return f"#### Full Changelog: [{last_tag}...{next_tag}]({repo_name}/compare/{last_tag}...{next_tag})"
 
 
 if __name__ == "__main__":
     repo_name = os.environ["GITHUB_REPOSITORY"]
     github_token = os.environ["GITHUB_TOKEN"]
-    if not repo_name or not github_token:
+    next_tag = os.environ["NEXT_RELEASE_TAG"]
+    if not repo_name or not github_token or not next_tag:
         raise Exception(
-            f"Bad environment variables. Invalid GITHUB_REPOSITORY or GITHUB_TOKEN"
+            f"Bad environment variables. Invalid GITHUB_REPOSITORY, GITHUB_TOKEN or NEXT_RELEASE_TAG"
         )
 
     g = Github(github_token)
     repo = g.get_repo(repo_name)
-    lr = get_last_release(repo)
+    last_tag = get_last_release(repo)
 
-    changes = whats_changed(repo, lr)
-    nc = get_new_contributors(repo, lr)
+    notes = "## What's Changed\n"
+    whats_changed = whats_changed_md(repo, last_tag)
+    for change in whats_changed:
+        notes += f"{change}\n"
+
+    new_contributors = get_new_contributors(repo, last_tag)
+    if len(new_contributors):
+        notes += "## New Contributors\n"
+        for contributor in new_contributors:
+            notes += f"{contributor}\n"
+
+    change_log = full_changelog_md(repo_name, last_tag, next_tag)
+    notes += change_log
+
+    create_release(repo, next_tag, notes)
