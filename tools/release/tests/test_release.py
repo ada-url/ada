@@ -1,4 +1,4 @@
-import release
+from .. import release
 from datetime import datetime
 from collections import namedtuple
 
