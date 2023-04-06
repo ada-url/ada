@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-
-from github import Github
-import os
 import re
 
 
@@ -129,13 +125,3 @@ def contruct_release_notes(repository, next_tag_name):
 
     notes += full_changelog
     return notes
-
-
-if __name__ == "__main__":
-    repo_name = os.environ["GITHUB_REPOSITORY"]
-    github_token = os.environ["GITHUB_TOKEN"]
-    next_tag = os.environ["NEXT_RELEASE_TAG"]
-    if not repo_name or not github_token or not next_tag:
-        raise Exception(
-            f"Bad environment variables. Invalid GITHUB_REPOSITORY, GITHUB_TOKEN or NEXT_RELEASE_TAG"
-        )

@@ -1,50 +1,22 @@
 #!/usr/bin/env python3
 
-import fileinput
-import re
+import os
+import lib.versions as update_versions
+from lib.release import is_valid_tag
 
 
-def update_cmakelists_version(new_version, file_path):
-    inside_project = False
-    with fileinput.FileInput(file_path, inplace=True) as cmakelists:
-        for line in cmakelists:
-            if "set(ADA_LIB_VERSION" in line:
-                line = re.sub(r"[0-9]+\.[0-9]+\.[0-9]+", new_version, line)
+WORK_DIR = os.path.dirname(os.path.abspath(__file__)).replace("/tools/release", "")
 
-            if "project(" in line:
-                inside_project = True
-            if inside_project:
-                if "VERSION" in line:
-                    line = re.sub(r"[0-9]+\.[0-9]+\.[0-9]+", new_version, line)
-                    inside_project = False
-            print(line, end="")
+ADA_VERSION_H = f"{WORK_DIR}/include/ada/ada_version.h"
+DOXYGEN = f"{WORK_DIR}/doxygen"
+CMAKE_LISTS = f"{WORK_DIR}/CMakeLists.txt"
 
+NEXT_TAG = os.environ["NEXT_RELEASE_TAG"]
+if not NEXT_TAG or not is_valid_tag(NEXT_TAG):
+    raise Exception(
+        f"Bad environment variables. Invalid NEXT_RELEASE_TAG {NEXT_TAG}."
+    )
 
-def update_ada_version_h(new_version, file_path):
-    new_version_list = new_version.split(".")
-    with fileinput.FileInput(file_path, inplace=True) as ada_version_h:
-        inside_enum = False
-        for line in ada_version_h:
-            if "#define ADA_VERSION" in line:
-                line = f'#define ADA_VERSION "{new_version}"\n'
-
-            if "enum {" in line:
-                inside_enum = True
-            if inside_enum:
-                if line.strip().startswith("ADA_VERSION_MAJOR"):
-                    line = re.sub(r"\d+", new_version_list[0], line)
-                elif line.strip().startswith("ADA_VERSION_MINOR"):
-                    line = re.sub(r"\d+", new_version_list[1], line)
-                elif line.strip().startswith("ADA_VERSION_REVISION"):
-                    line = re.sub(r"\d+", new_version_list[2], line)
-
-            print(line, end="")
-
-
-def update_doxygen_version(new_version, file_path):
-    with fileinput.FileInput(file_path, inplace=True) as doxygen:
-        for line in doxygen:
-            if line.strip().startswith("PROJECT_NUMBER         ="):
-                line = f'PROJECT_NUMBER         = "{new_version}"\n'
-
-            print(line, end="")
+update_versions.update_ada_version_h(NEXT_TAG, ADA_VERSION_H)
+update_versions.update_doxygen_version(NEXT_TAG, DOXYGEN)
+update_versions.update_cmakelists_version(NEXT_TAG, CMAKE_LISTS)
