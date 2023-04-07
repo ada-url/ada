@@ -36,7 +36,7 @@ jobs:
       - name: Run tests
         run: pytest --versbose -vv
 
-  ada-update-versions:
+  release:
     needs: release-script-test
     runs-on: ubuntu-latest
     if: ${{ needs.release-script-test.result == 'success' }}
@@ -51,13 +51,20 @@ jobs:
           key: venv-${{ hashFiles('tools/release/requirements.txt') }}
       - name: Prepare environment for the Release script
         run: . ./tools/release/venv/bin/activate
+        
       - name: Update versions
-      - run: ./tools/release/update_versions.py
+        run: ./tools/release/update_versions.py
 
       - name: Ada Build
         run: cmake -B build && cmake --build build
       - name: Ada Test
         run: ctest --output-on-failure --test-dir build
+      
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Amalgamation
+        run: |
+          deactivate # Release script
+          ./singleheader/amalgamate.py && zip singleheader.zip ./singleheader/ada.cpp ./singleheader/ada.h
 
       - name: Push updates for new release
         run: |
@@ -71,29 +78,7 @@ jobs:
           git commit -m "New Release: ${{ env.NEXT_RELEASE_TAG }}"
           git push origin HEAD:${{ github.head_ref }}
 
-  release:
-    needs: ada-update-versions
-    runs-on: ubuntu-latest
-    if: ${{ needs.ada-update-versions.result == 'success' }}
-    steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-      - name: Restore Python venv (Release script) from cache
-        uses: actions/cache@v3
-        with:
-          path: ./tools/release/venv
-          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
-      
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-      - name: Amalgamation
-        run: |
-<<<<<<< Updated upstream
-          ./singleheader/amalgamate.py 
-          zip singleheader.zip ada.cpp ada.h
-=======
-          ./singleheader/amalgamate.py && zip singleheader.zip ./singleheader/ada.cpp ./singleheader/ada.h
->>>>>>> Stashed changes
-      
-      - name: Prepare environment for the Release script
-        run: . ./tools/release/venv/bin/activate
       - name: "Create Release"
-        run: ./tools/release/create_release.py
+        run: |
+          . ./tools/release/venv/bin/activate
+          ./tools/release/create_release.py
