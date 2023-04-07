@@ -1,8 +1,11 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        description: "Tag for the next release. Ex.: v5.0.0"
 
 permissions:
   contents: write
@@ -14,6 +17,13 @@ jobs:
       CXX: clang++-14
     steps:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      
+      # - name: Release Script Prepare
+      # - run: cd ./tools/release && pip install -r requirements.txt
+      # - name: Release Script Test
+      # - run: cd ./
+      # - name: Update Versions
+      # - run: ./tools/release/update_versions.py
       - name: Build
         run: cmake -B build && cmake --build build
       - name: Test
@@ -32,11 +42,11 @@ jobs:
           ./singleheader/amalgamate.py 
           zip singleheader.zip ada.cpp ada.h
       
-      - name: Release script test
-        run: |
-          cd tools/release && \
-          pip3 install -r requirements.txt && \
-          ./release.py
+      # - name: Release script test
+      #   run: |
+      #     cd tools/release && \
+      #     pip3 install -r requirements.txt && \
+      #     ./release.py
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
@@ -45,5 +55,3 @@ jobs:
             singleheader/ada.cpp
             singleheader/ada.h
             singleheader/singleheader.zip
-          prerelease: false
-          draft: false
