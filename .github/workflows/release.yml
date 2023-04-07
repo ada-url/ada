@@ -51,8 +51,9 @@ jobs:
           key: venv-${{ hashFiles('tools/release/requirements.txt') }}
       - name: Prepare environment for the Release script
         run: . ./tools/release/venv/bin/activate
+        
       - name: Update versions
-      - run: ./tools/release/update_versions.py
+        run: ./tools/release/update_versions.py
 
       - name: Ada Build
         run: cmake -B build && cmake --build build
