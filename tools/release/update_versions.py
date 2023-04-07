@@ -17,6 +17,8 @@ if not NEXT_TAG or not is_valid_tag(NEXT_TAG):
         f"Bad environment variables. Invalid NEXT_RELEASE_TAG {NEXT_TAG}."
     )
 
+NEXT_TAG = NEXT_TAG[1:] # from v1.0.0 to 1.0.0
+
 update_versions.update_ada_version_h(NEXT_TAG, ADA_VERSION_H)
 update_versions.update_doxygen_version(NEXT_TAG, DOXYGEN)
 update_versions.update_cmakelists_version(NEXT_TAG, CMAKE_LISTS)
