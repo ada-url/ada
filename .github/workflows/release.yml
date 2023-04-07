@@ -63,7 +63,6 @@ jobs:
       - name: Ada Test
         run: ctest --output-on-failure --test-dir build
       
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
       - name: Amalgamation
         run: |
           ./singleheader/amalgamate.py && zip singleheader.zip ./singleheader/ada.cpp ./singleheader/ada.h
@@ -73,12 +72,10 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-          git status
-
           git add doxygen include/ada/ada_version.h CMakeLists.txt
 
           git commit -m "New Release: ${{ env.NEXT_RELEASE_TAG }}"
-          git push origin HEAD:${{ github.head_ref }}
+          git push
 
       - name: "Create Release"
         run: |
