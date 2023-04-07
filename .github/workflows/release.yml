@@ -36,7 +36,7 @@ jobs:
       - name: Run tests
         run: |
           . ./venv/bin/activate
-          pytest --versbose -vv
+          pytest -v
 
   release:
     needs: release-script-test
@@ -51,11 +51,11 @@ jobs:
         with:
           path: ./tools/release/venv
           key: venv-${{ hashFiles('tools/release/requirements.txt') }}
-      - name: Prepare environment for the Release script
-        run: . ./tools/release/venv/bin/activate
         
       - name: Update versions
-        run: ./tools/release/update_versions.py
+        run: |
+          . ./tools/release/venv/bin/activate
+          ./tools/release/update_versions.py
 
       - name: Ada Build
         run: cmake -B build && cmake --build build
@@ -65,7 +65,6 @@ jobs:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
       - name: Amalgamation
         run: |
-          deactivate # Release script
           ./singleheader/amalgamate.py && zip singleheader.zip ./singleheader/ada.cpp ./singleheader/ada.h
 
       - name: Push updates for new release
