@@ -26,7 +26,7 @@ jobs:
       - name: Cache Python venv
         uses: actions/cache@v3
         with:
-          path: ./venv
+          path: ./tools/release/venv
           key: venv-${{ hashFiles('tools/release/requirements.txt') }}
       - name: Install dependencies
         run: |
