@@ -51,6 +51,7 @@ jobs:
         with:
           path: ./tools/release/venv
           key: venv-${{ hashFiles('tools/release/requirements.txt') }}
+          restore-keys: venv-${{ hashFiles('tools/release/requirements.txt') }}
         
       - name: Update versions
         run: |
