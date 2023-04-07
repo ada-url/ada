@@ -1,2 +1,3 @@
 PyGithub
-black
+pytest
+pytest-mock
