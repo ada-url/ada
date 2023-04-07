@@ -7,51 +7,88 @@ on:
         type: string
         description: "Tag for the next release. Ex.: v5.0.0"
 
+env:
+  NEXT_RELEASE_TAG: ${{ github.event.inputs.tag }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 permissions:
   contents: write
 
 jobs:
-  build-and-test:
+  release-script-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cd ./tools/release
+
+    steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Cache Python venv
+        uses: actions/cache@v3
+        with:
+          path: ./venv
+          key: venv-${{ hashFiles('requirements.txt') }}
+      - name: Install dependencies
+        run: |
+          python3 -m venv venv
+          . ./venv/bin/activate
+          pip install -r requirements.txt
+      - name: Run tests
+        run: pytest --versbose -vv
+
+  ada-update-versions:
+    needs: release-script-test
+    runs-on: ubuntu-latest
+    if: ${{ needs.release-script-test.result == 'success' }}
     env:
       CXX: clang++-14
     steps:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-      
-      # - name: Release Script Prepare
-      # - run: cd ./tools/release && pip install -r requirements.txt
-      # - name: Release Script Test
-      # - run: cd ./
-      # - name: Update Versions
-      # - run: ./tools/release/update_versions.py
-      - name: Build
+      - name: Restore Python venv (Release script) from cache
+        uses: actions/cache@v3
+        with:
+          path: ./tools/release/venv
+          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
+      - name: Prepare environment for the Release script
+        run: . ./tools/release/venv/bin/activate
+      - name: Update versions
+      - run: ./tools/release/update_versions.py
+
+      - name: Ada Build
         run: cmake -B build && cmake --build build
-      - name: Test
+      - name: Ada Test
         run: ctest --output-on-failure --test-dir build
+
+      - name: Push updates for new release
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+          git add ./doxygen \
+                  ./include/ada/ada_version.h \
+                  ./CMakeLists.txt
+
+          git commit -m "New Release: ${{ env.NEXT_RELEASE_TAG }}"
+          git push origin HEAD:${{ github.head_ref }}
+
   release:
-    needs: build-and-test
+    needs: ada-update-versions
     runs-on: ubuntu-latest
-    if: ${{ needs.build-and-test.result == 'success' }}
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+    if: ${{ needs.ada-update-versions.result == 'success' }}
     steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Restore Python venv (Release script) from cache
+        uses: actions/cache@v3
+        with:
+          path: ./tools/release/venv
+          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
+      
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
       - name: Amalgamation
         run: |
-          ./singleheader/amalgamate.py 
-          zip singleheader.zip ./singleheader/ada.cpp ./singleheader/ada.h
+          ./singleheader/amalgamate.py && zip singleheader.zip ./singleheader/ada.cpp ./singleheader/ada.h
       
-      # - name: Release script test
-      #   run: |
-      #     cd tools/release && \
-      #     pip3 install -r requirements.txt && \
-      #     ./release.py
-
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            singleheader/ada.cpp
-            singleheader/ada.h
-            singleheader/singleheader.zip
+      - name: Prepare environment for the Release script
+        run: . ./tools/release/venv/bin/activate
+      - name: "Create Release"
+        run: ./tools/release/create_release.py

@@ -20,3 +20,8 @@ repo = g.get_repo(REPO_NAME)
 release_notes = release.contruct_release_notes(repo, NEXT_TAG)
 
 release.create_release(repo, NEXT_TAG, release_notes)
+
+release = repo.get_release(NEXT_TAG)
+release.upload_asset("singleheader/ada.cpp")
+release.upload_asset("singleheader/ada.h")
+release.upload_asset("singleheader/singleheader.zip")
