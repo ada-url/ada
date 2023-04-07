@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./venv
-          key: venv-${{ hashFiles('requirements.txt') }}
+          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
       - name: Install dependencies
         run: |
           python3 -m venv venv
