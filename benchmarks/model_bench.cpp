@@ -5,7 +5,6 @@
 #include <fstream>
 #include <filesystem>
 
-
 #include "ada.h"
 #include "performancecounters/event_counter.h"
 event_collector collector;
@@ -54,8 +53,6 @@ std::vector<std::string> split_string(const std::string& str) {
   return result;
 }
 
-
-
 struct stat_numbers {
   std::string url_string{};
   ada::url_components components{};
@@ -64,36 +61,35 @@ struct stat_numbers {
 };
 
 template <class result_type = ada::url_aggregator>
-std::vector<stat_numbers> collect_values(const std::vector<std::string>& url_examples, size_t trials) {
-    std::vector<stat_numbers> numbers(url_examples.size());
-    for(size_t i = 0; i < url_examples.size(); i++) {
-        numbers[i].url_string = url_examples[i];
-        ada::result<result_type> url = ada::parse<result_type>(url_examples[i]);
-        if(url) {
-            numbers[i].is_valid = true;
-            numbers[i].components = url->get_components();
-        } else {
-            numbers[i].is_valid = false;
-        }
+std::vector<stat_numbers> collect_values(
+    const std::vector<std::string>& url_examples, size_t trials) {
+  std::vector<stat_numbers> numbers(url_examples.size());
+  for (size_t i = 0; i < url_examples.size(); i++) {
+    numbers[i].url_string = url_examples[i];
+    ada::result<result_type> url = ada::parse<result_type>(url_examples[i]);
+    if (url) {
+      numbers[i].is_valid = true;
+      numbers[i].components = url->get_components();
+    } else {
+      numbers[i].is_valid = false;
     }
-    volatile size_t href_size = 0;
-    for(size_t i = 0; i < trials; i++) {
-        for (stat_numbers& n : numbers) {
-            std::atomic_thread_fence(std::memory_order_acquire);
-            collector.start();
-            ada::result<result_type> url = ada::parse<result_type>(n.url_string);
-            if(url) {
-              href_size += url->get_href().size();
-            }
-            std::atomic_thread_fence(std::memory_order_release);
-            event_count allocate_count = collector.end();
-            n.counters << allocate_count;
-        }
+  }
+  volatile size_t href_size = 0;
+  for (size_t i = 0; i < trials; i++) {
+    for (stat_numbers& n : numbers) {
+      std::atomic_thread_fence(std::memory_order_acquire);
+      collector.start();
+      ada::result<result_type> url = ada::parse<result_type>(n.url_string);
+      if (url) {
+        href_size += url->get_href().size();
+      }
+      std::atomic_thread_fence(std::memory_order_release);
+      event_count allocate_count = collector.end();
+      n.counters << allocate_count;
     }
-    return numbers;
+  }
+  return numbers;
 }
-
-
 
 #ifdef ADA_URL_FILE
 const char* default_file = ADA_URL_FILE;
@@ -117,47 +113,96 @@ std::vector<std::string> init_data(const char* input = default_file) {
   return input_urls;
 }
 
-void print(const stat_numbers & n) {
-  std::cout << n.url_string.size() << "\t\t";
-  std::cout <<  n.counters.best.elapsed_ns() << "\t\t" << n.counters.elapsed_ns() << "\t\t";
-  std::cout <<  n.counters.best.cycles() << "\t\t" << n.counters.cycles() << "\t\t";
-  std::cout <<  n.counters.best.instructions() << "\t\t" << n.counters.instructions() << "\t\t";       
+void print(const stat_numbers& n) {
+  std::cout << n.url_string.size() << ",\t\t";
+  std::cout << n.counters.best.cycles() << ",\t\t"
+            << size_t(n.counters.cycles()) << ",\t\t";
+  std::cout << n.counters.best.instructions() << ",\t\t"
+            << n.counters.instructions() << ",\t\t";
+
+  // hash size
+  uint32_t end = n.url_string.size();
+  if (n.components.hash_start != ada::url_components::omitted) {
+    end = n.components.hash_start;
+    std::cout << (n.url_string.size() - n.components.hash_start) << ",\t\t";
+  } else {
+    std::cout << 0 << ",\t\t";
+  }
+  // search size
+  if (n.components.search_start != ada::url_components::omitted) {
+    std::cout << (end - n.components.search_start) << ",\t\t";
+    end = n.components.search_start;
+  } else {
+    std::cout << 0 << ",\t\t";
+  }
+  // path size
+  std::cout << (end - n.components.pathname_start) << ",\t\t";
+  end = n.components.pathname_start;
+  // port size
+  std::cout << (end - n.components.host_end) << ",\t\t";
+  end = n.components.host_end;
+  // host size
+  std::cout << (end - n.components.host_start) << ",\t\t";
+  end = n.components.host_start;
+  // user/pass size
+  std::cout << (end - n.components.protocol_end) << ",\t\t";
+  end = n.components.protocol_end;
+  // protocol type
+  ada::result<ada::url_aggregator> url =
+      ada::parse<ada::url_aggregator>(n.url_string);
+  if (url) {
+    std::cout << int(url->type);
+  } else {
+    std::cout << -1;
+  }
 }
 void print(const std::vector<stat_numbers> numbers) {
-  std::cout << "input_size\t";
-  std::cout <<   "best_elapsed_ns\tmean_elapsed_ns\t";
-  std::cout <<  "best_cycles\tmean_cycles\t";
-  std::cout <<  "best_instr\tmean_instr\t";
-                 std::cout << std::endl;
+  std::cout << "input_size,\t";
 
+  std::cout << "best_cycles,\tmean_cycles,\t";
+  std::cout << "best_instr,\tmean_instr,\t";
+  std::cout << "hash_size,\tsearch_size,\tpath_size,\tport_size,\thost_size,"
+               "\tcredential,\tprotocol";
 
-    for(const stat_numbers & n : numbers) {
-        print(n);
-        std::cout << std::endl;
-    }
+  std::cout << std::endl;
+
+  for (const stat_numbers& n : numbers) {
+    print(n);
+    std::cout << std::endl;
+  }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   std::vector<std::string> input_urls;
-  if(argc == 1) {
+  if (argc == 1) {
     input_urls = init_data();
   } else {
     input_urls = init_data(argv[1]);
   }
   if (input_urls.empty()) {
-    std::cout
-        << "pass the path to a file containing a list of URL (one per line) as a parameter."
-        << std::endl;
+    std::cout << "pass the path to a file containing a list of URL (one per "
+                 "line) as a parameter."
+              << std::endl;
     return EXIT_FAILURE;
   }
   if (!collector.has_events()) {
-    std::cout << "We require access to performance counters. (Try sudo.)" << std::endl;
+    std::cout << "We require access to performance counters. (Try sudo.)"
+              << std::endl;
     return EXIT_FAILURE;
   }
   std::string empty;
   // We always start with a null URL for calibration.
   input_urls.insert(input_urls.begin(), empty);
+  bool use_ada_url = (getenv("USE_URL") != nullptr);
+  size_t trials = 30;
+  std::cout << "# trials " << trials << std::endl;
+  if(use_ada_url) {
+    std::cout << "# ada::url"<< std::endl;
+    print(collect_values<ada::url>(input_urls, trials));
+  } else {
+    std::cout << "# ada::url_aggregator"<< std::endl;
+    print(collect_values<ada::url_aggregator>(input_urls, trials));
+  }
 
-  print(collect_values<ada::url_aggregator>(input_urls, 30));
   return EXIT_SUCCESS;
 }
