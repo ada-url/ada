@@ -118,6 +118,7 @@ struct event_collector {
 #endif
 
   inline void start() {
+    start_clock = std::chrono::steady_clock::now();
 #if defined(__linux)
     linux_events.start();
 #elif __APPLE__ && __aarch64__
@@ -125,10 +126,8 @@ struct event_collector {
       diff = apple_events.get_counters();
     }
 #endif
-    start_clock = std::chrono::steady_clock::now();
   }
   inline event_count& end() {
-    const auto end_clock = std::chrono::steady_clock::now();
 #if defined(__linux)
     linux_events.end(count.event_counts);
 #elif __APPLE__ && __aarch64__
@@ -142,6 +141,7 @@ struct event_collector {
     count.event_counts[3] = 0;
     count.event_counts[4] = diff.branches;
 #endif
+    const auto end_clock = std::chrono::steady_clock::now();
     count.elapsed = end_clock - start_clock;
     return count;
   }

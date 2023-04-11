@@ -155,9 +155,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   std::string empty;
-  input_urls.insert(input_urls.begin(), empty);
-  input_urls.insert(input_urls.begin(), empty);
-  input_urls.insert(input_urls.begin(), empty);
+  // We always start with a null URL for calibration.
   input_urls.insert(input_urls.begin(), empty);
 
   print(collect_values<ada::url_aggregator>(input_urls, 30));
