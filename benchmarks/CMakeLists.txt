@@ -21,10 +21,12 @@ target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_
 target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 target_compile_definitions(benchdata PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
 
-# model bench
-add_executable(model_bench model_bench.cpp)
-target_link_libraries(model_bench PRIVATE ada)
-target_compile_definitions(model_bench PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    # model bench
+    add_executable(model_bench model_bench.cpp)
+    target_link_libraries(model_bench PRIVATE ada)
+    target_compile_definitions(model_bench PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
+endif()
 
 # BBC Bench
 add_executable(bbc_bench bbc_bench.cpp)
