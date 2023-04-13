@@ -137,7 +137,7 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
     return is_forbidden_domain_code_point_table[uint8_t(c)];
   }
 
-  ada_really_inline constexpr bool contains_forbidden_domain_code_point(char * input, size_t length) noexcept {
+  ada_really_inline constexpr bool contains_forbidden_domain_code_point(const char * input, size_t length) noexcept {
     size_t i = 0;
     uint8_t accumulator{};
     for(; i + 4 <= length; i+=4) {
