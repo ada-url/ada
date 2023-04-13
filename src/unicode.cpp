@@ -131,7 +131,7 @@ ada_really_inline constexpr bool is_forbidden_domain_code_point(
 }
 
 ada_really_inline constexpr bool contains_forbidden_domain_code_point(
-    char* input, size_t length) noexcept {
+    const char* input, size_t length) noexcept {
   size_t i = 0;
   uint8_t accumulator{};
   for (; i + 4 <= length; i += 4) {
