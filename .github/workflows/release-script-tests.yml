@@ -1,0 +1,30 @@
+name: Release Script Tests
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+permissions:
+  contents: write
+
+env:
+  NEXT_RELEASE_TAG: v1.0.0 # just for testing
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release-script-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./tools/release
+
+    steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Install dependencies
+        run: pip3 install -r requirements.txt
+      - name: Run tests
+        run: pytest -v
