@@ -55,10 +55,25 @@ std::vector<std::string> split_string(const std::string& str) {
 
 struct stat_numbers {
   std::string url_string{};
+  std::string href{};
   ada::url_components components{};
   event_aggregate counters{};
   bool is_valid = true;
+  bool has_port = false;
+  bool has_authority = false;
+  bool has_fragment = false;
+  bool has_search = false;
 };
+
+size_t count_ascii_bytes(const std::string& s) {
+  size_t counter = 0;
+  for(uint8_t c : s) {
+    if (c < 128) {
+      counter++;
+    }
+  }
+  return counter;
+}
 
 template <class result_type = ada::url_aggregator>
 std::vector<stat_numbers> collect_values(
@@ -69,7 +84,12 @@ std::vector<stat_numbers> collect_values(
     ada::result<result_type> url = ada::parse<result_type>(url_examples[i]);
     if (url) {
       numbers[i].is_valid = true;
+      numbers[i].href = url->get_href();
       numbers[i].components = url->get_components();
+      numbers[i].has_port = url->has_port();
+      numbers[i].has_authority = url->has_authority();
+      numbers[i].has_fragment = url->base_fragment_has_value();
+      numbers[i].has_search = url->base_search_has_value();
     } else {
       numbers[i].is_valid = false;
     }
@@ -119,12 +139,13 @@ void print(const stat_numbers& n) {
             << size_t(n.counters.cycles()) << ",\t\t";
   std::cout << n.counters.best.instructions() << ",\t\t"
             << n.counters.instructions() << ",\t\t";
-
   // hash size
-  uint32_t end = n.url_string.size();
+
+  std::cout << n.href.size() << ",\t\t";
+  size_t end = n.href.size();
   if (n.components.hash_start != ada::url_components::omitted) {
+    std::cout << (end - n.components.hash_start) << ",\t\t";
     end = n.components.hash_start;
-    std::cout << (n.url_string.size() - n.components.hash_start) << ",\t\t";
   } else {
     std::cout << 0 << ",\t\t";
   }
@@ -155,15 +176,21 @@ void print(const stat_numbers& n) {
   } else {
     std::cout << -1;
   }
+  std::cout  << ",\t\t";
+  std::cout << n.has_port << ",\t\t";
+  std::cout << n.has_authority << ",\t\t";
+  std::cout << n.has_fragment << ",\t\t";
+  std::cout << n.has_search << ",\t\t";
+  std::cout << count_ascii_bytes(n.url_string);
+
+
 }
 void print(const std::vector<stat_numbers> numbers) {
   std::cout << "input_size,\t";
-
   std::cout << "best_cycles,\tmean_cycles,\t";
   std::cout << "best_instr,\tmean_instr,\t";
-  std::cout << "hash_size,\tsearch_size,\tpath_size,\tport_size,\thost_size,"
-               "\tcredential,\tprotocol";
-
+  std::cout << "href_size,\thash_size,\tsearch_size,\tpath_size,\tport_size,\thost_size,"
+               "\tcredential,\tprotocol,\thas_port,\thas_authority,\thas_fragment,\thas_search,\tascii_bytes";
   std::cout << std::endl;
 
   for (const stat_numbers& n : numbers) {
