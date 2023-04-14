@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  ubuntu-build:
+  lint-and-format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
