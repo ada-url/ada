@@ -15,7 +15,7 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
   uint64_t broadcast_80 = broadcast(0x80);
   uint64_t broadcast_Ap = broadcast(128 - 'A');
-  uint64_t broadcast_Zp = broadcast(128 - 'Z');
+  uint64_t broadcast_Zp = broadcast(128 - 'Z' - 1);
   uint64_t non_ascii = 0;
   size_t i = 0;
 
