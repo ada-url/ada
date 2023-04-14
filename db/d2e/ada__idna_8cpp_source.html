@@ -2738,7 +2738,7 @@ $(document).ready(function(){initNavTree('db/d2e/ada__idna_8cpp_source.html','..
 <div class="line"><a id="l02635" name="l02635"></a><span class="lineno"> 2635</span>  <span class="keyword">auto</span> broadcast = [](uint8_t v) -&gt; uint64_t { <span class="keywordflow">return</span> 0x101010101010101 * v; };</div>
 <div class="line"><a id="l02636" name="l02636"></a><span class="lineno"> 2636</span>  uint64_t broadcast_80 = broadcast(0x80);</div>
 <div class="line"><a id="l02637" name="l02637"></a><span class="lineno"> 2637</span>  uint64_t broadcast_Ap = broadcast(128 - <span class="charliteral">&#39;A&#39;</span>);</div>
-<div class="line"><a id="l02638" name="l02638"></a><span class="lineno"> 2638</span>  uint64_t broadcast_Zp = broadcast(128 - <span class="charliteral">&#39;Z&#39;</span>);</div>
+<div class="line"><a id="l02638" name="l02638"></a><span class="lineno"> 2638</span>  uint64_t broadcast_Zp = broadcast(128 - <span class="charliteral">&#39;Z&#39;</span> - 1);</div>
 <div class="line"><a id="l02639" name="l02639"></a><span class="lineno"> 2639</span>  <span class="keywordtype">size_t</span> i = 0;</div>
 <div class="line"><a id="l02640" name="l02640"></a><span class="lineno"> 2640</span> </div>
 <div class="line"><a id="l02641" name="l02641"></a><span class="lineno"> 2641</span>  uint64_t runner{0};</div>
@@ -2760,7 +2760,7 @@ $(document).ready(function(){initNavTree('db/d2e/ada__idna_8cpp_source.html','..
 <div class="line"><a id="l02657" name="l02657"></a><span class="lineno"> 2657</span>  <span class="keyword">auto</span> broadcast = [](uint8_t v) -&gt; uint64_t { <span class="keywordflow">return</span> 0x101010101010101 * v; };</div>
 <div class="line"><a id="l02658" name="l02658"></a><span class="lineno"> 2658</span>  uint64_t broadcast_80 = broadcast(0x80);</div>
 <div class="line"><a id="l02659" name="l02659"></a><span class="lineno"> 2659</span>  uint64_t broadcast_Ap = broadcast(128 - <span class="charliteral">&#39;A&#39;</span>);</div>
-<div class="line"><a id="l02660" name="l02660"></a><span class="lineno"> 2660</span>  uint64_t broadcast_Zp = broadcast(128 - <span class="charliteral">&#39;Z&#39;</span>);</div>
+<div class="line"><a id="l02660" name="l02660"></a><span class="lineno"> 2660</span>  uint64_t broadcast_Zp = broadcast(128 - <span class="charliteral">&#39;Z&#39;</span> - 1);</div>
 <div class="line"><a id="l02661" name="l02661"></a><span class="lineno"> 2661</span>  <span class="keywordtype">size_t</span> i = 0;</div>
 <div class="line"><a id="l02662" name="l02662"></a><span class="lineno"> 2662</span> </div>
 <div class="line"><a id="l02663" name="l02663"></a><span class="lineno"> 2663</span>  <span class="keywordflow">for</span> (; i + 7 &lt; length; i += 8) {</div>
