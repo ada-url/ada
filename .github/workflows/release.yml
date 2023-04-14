@@ -65,7 +65,7 @@ jobs:
       
       - name: Amalgamation
         run: |
-          ./singleheader/amalgamate.py && zip singleheader.zip ./singleheader/ada.cpp ./singleheader/ada.h
+          ./singleheader/amalgamate.py
 
       - name: Push updates for new release
         run: |
