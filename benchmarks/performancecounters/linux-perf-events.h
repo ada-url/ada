@@ -64,7 +64,7 @@ class LinuxEvents {
     }
   }
 
-  inline void start() {
+  __attribute__((always_inline)) inline void start() {
     if (fd != -1) {
       if (ioctl(fd, PERF_EVENT_IOC_RESET, PERF_IOC_FLAG_GROUP) == -1) {
         report_error("ioctl(PERF_EVENT_IOC_RESET)");
@@ -76,7 +76,7 @@ class LinuxEvents {
     }
   }
 
-  inline void end(std::vector<unsigned long long> &results) {
+  __attribute__((always_inline)) inline void end(std::vector<unsigned long long> &results) {
     if (fd != -1) {
       if (ioctl(fd, PERF_EVENT_IOC_DISABLE, PERF_IOC_FLAG_GROUP) == -1) {
         report_error("ioctl(PERF_EVENT_IOC_DISABLE)");

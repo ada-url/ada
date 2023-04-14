@@ -51,7 +51,7 @@ struct url_aggregator : url_base {
   [[nodiscard]] bool has_valid_domain() const noexcept override;
 
   /** @private */
-  inline bool has_authority() const noexcept;
+  [[nodiscard]] inline bool has_authority() const noexcept;
   /** @private set this URL's type to file */
   inline void set_protocol_as_file();
   /**

@@ -90,7 +90,8 @@ struct url : url_base {
    * is initially null.
    */
   std::optional<std::string> fragment{};
-
+  /** @return true if the URL has a (non default) port */
+  [[nodiscard]] inline bool has_port() const noexcept;
   /** @private */
   inline void update_unencoded_base_hash(std::string_view input);
   /** @private */
