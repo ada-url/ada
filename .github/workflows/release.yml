@@ -31,11 +31,11 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m venv venv
-          . ./venv/bin/activate
+          source ./venv/bin/activate
           pip install -r requirements.txt
       - name: Run tests
         run: |
-          . ./venv/bin/activate
+          source ./venv/bin/activate
           pytest -v
 
   release:
@@ -55,7 +55,7 @@ jobs:
         
       - name: Update versions
         run: |
-          . ./tools/release/venv/bin/activate
+          source ./tools/release/venv/bin/activate
           ./tools/release/update_versions.py
 
       - name: Ada Build
@@ -79,5 +79,5 @@ jobs:
 
       - name: "Create Release"
         run: |
-          . ./tools/release/venv/bin/activate
+          source ./tools/release/venv/bin/activate
           ./tools/release/create_release.py
