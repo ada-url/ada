@@ -11,10 +11,6 @@ on:
 permissions:
   contents: write
 
-env:
-  NEXT_RELEASE_TAG: v1.0.0 # just for testing
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
   release-script-test:
     runs-on: ubuntu-latest
