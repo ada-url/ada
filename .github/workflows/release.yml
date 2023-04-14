@@ -5,6 +5,7 @@ on:
     inputs:
       tag:
         type: string
+        required: true
         description: "Tag for the next release. Ex.: v5.0.0"
 
 env:
