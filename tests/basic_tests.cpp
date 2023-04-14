@@ -300,7 +300,6 @@ bool test_amazon() {
   TEST_SUCCEED()
 }
 
-
 template <class result>
 bool remove_username() {
   TEST_START()
