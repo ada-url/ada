@@ -495,43 +495,43 @@ bool urltestdata_encoding(const char *source) {
           if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
             std::cout << "\n====\n" + input_url->to_diagram() + "\n====\n";
           }
-          std::string_view protocol = object["protocol"].get_string().value();
+          std::string_view protocol = object["protocol"].get_string();
           TEST_ASSERT(input_url->get_protocol(), protocol,
                       "Protocol " + element_string + input_url->to_string());
 
-          std::string_view username = object["username"].get_string().value();
+          std::string_view username = object["username"].get_string();
           TEST_ASSERT(input_url->get_username(), username,
                       "Username " + element_string + input_url->to_string());
 
-          std::string_view password = object["password"].get_string().value();
+          std::string_view password = object["password"].get_string();
           TEST_ASSERT(input_url->get_password(), password,
                       "Password " + element_string + input_url->to_string());
 
-          std::string_view host = object["host"].get_string().value();
+          std::string_view host = object["host"].get_string();
           TEST_ASSERT(input_url->get_host(), host,
                       "Host " + element_string + input_url->to_string());
 
-          std::string_view hostname = object["hostname"].get_string().value();
+          std::string_view hostname = object["hostname"].get_string();
           TEST_ASSERT(input_url->get_hostname(), hostname,
                       "Hostname " + element_string + input_url->to_string());
 
-          std::string_view port = object["port"].get_string().value();
+          std::string_view port = object["port"].get_string();
           TEST_ASSERT(input_url->get_port(), port, "Port " + element_string);
 
-          std::string_view pathname = object["pathname"].get_string().value();
+          std::string_view pathname = object["pathname"].get_string();
           TEST_ASSERT(input_url->get_pathname(), pathname,
                       "Pathname " + element_string + input_url->to_string());
 
-          std::string_view search = object["search"].get_string().value();
+          std::string_view search = object["search"].get_string();
           TEST_ASSERT(input_url->get_search(), search,
                       "Search " + element_string + input_url->to_string());
 
-          std::string_view hash = object["hash"].get_string().value();
+          std::string_view hash = object["hash"].get_string();
           TEST_ASSERT(
               input_url->get_hash(), hash,
               "Hash/Fragment " + element_string + input_url->to_string());
 
-          std::string_view href = object["href"].get_string().value();
+          std::string_view href = object["href"].get_string();
           TEST_ASSERT(input_url->get_href(), href,
                       "href " + element_string + input_url->to_string());
 
