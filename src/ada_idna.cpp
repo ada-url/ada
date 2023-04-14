@@ -2635,7 +2635,7 @@ bool ascii_has_upper_case(char* input, size_t length) {
   auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
   uint64_t broadcast_80 = broadcast(0x80);
   uint64_t broadcast_Ap = broadcast(128 - 'A');
-  uint64_t broadcast_Zp = broadcast(128 - 'Z');
+  uint64_t broadcast_Zp = broadcast(128 - 'Z' - 1);
   size_t i = 0;
 
   uint64_t runner{0};
@@ -2657,7 +2657,7 @@ void ascii_map(char* input, size_t length) {
   auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
   uint64_t broadcast_80 = broadcast(0x80);
   uint64_t broadcast_Ap = broadcast(128 - 'A');
-  uint64_t broadcast_Zp = broadcast(128 - 'Z');
+  uint64_t broadcast_Zp = broadcast(128 - 'Z' - 1);
   size_t i = 0;
 
   for (; i + 7 < length; i += 8) {

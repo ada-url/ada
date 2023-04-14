@@ -288,6 +288,20 @@ bool default_port_should_be_removed() {
 }
 
 template <class result>
+bool test_amazon() {
+  TEST_START()
+  auto url = ada::parse<result>("HTTP://AMAZON.COM");
+  if (!url) {
+    TEST_FAIL("Should succeed");
+  }
+
+  TEST_ASSERT(url->get_href(), "http://amazon.com/",
+              "should be all lower case");
+  TEST_SUCCEED()
+}
+
+
+template <class result>
 bool remove_username() {
   TEST_START()
   auto url = ada::parse<result>("http://me@example.net");
@@ -424,7 +438,7 @@ bool all_tests() {
          readme1<result>() && readme2<result>() && readme3<result>() &&
          readme4<result>() && readme5<result>() && readme6<result>() &&
          readme7<result>() && nodejs1<result>() && nodejs2<result>() &&
-         nodejs3<result>() && nodejs4<result>();
+         nodejs3<result>() && nodejs4<result>() && test_amazon<result>();
 }
 
 int main() {
