@@ -146,6 +146,44 @@ ada_really_inline constexpr bool contains_forbidden_domain_code_point(
   return accumulator;
 }
 
+constexpr static uint8_t is_forbidden_domain_code_point_table_or_upper[] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+static_assert(sizeof(is_forbidden_domain_code_point_table_or_upper) == 256);
+static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('A')] == 2);
+static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('Z')] == 2);
+
+ada_really_inline constexpr bool contains_forbidden_domain_code_point_or_upper(
+    const char* input, size_t length) noexcept {
+  size_t i = 0;
+  uint8_t accumulator{};
+  for (; i + 4 <= length; i += 4) {
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i])];
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 1])];
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 2])];
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 3])];
+  }
+  for (; i < length; i++) {
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i])];
+  }
+  return accumulator;
+}
+
 static_assert(unicode::is_forbidden_domain_code_point('%'));
 static_assert(unicode::is_forbidden_domain_code_point('\x7f'));
 static_assert(unicode::is_forbidden_domain_code_point('\0'));
