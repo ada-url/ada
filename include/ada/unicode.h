@@ -82,10 +82,19 @@ ada_really_inline constexpr bool is_forbidden_host_code_point(
     const char c) noexcept;
 
 /**
- * Checks if the input is a forbidden domain code point.
+ * Checks if the input contains a forbidden domain code point.
  * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
  */
 ada_really_inline constexpr bool contains_forbidden_domain_code_point(
+    const char* input, size_t length) noexcept;
+
+/**
+ * Checks if the input contains a forbidden domain code point in which case
+ * the first bit is set to 1. If the input contains an upper case ASCII letter,
+ * then the second bit is set to 1.
+ * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
+ */
+ada_really_inline constexpr bool contains_forbidden_domain_code_point_or_upper(
     const char* input, size_t length) noexcept;
 
 /**
