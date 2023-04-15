@@ -33,7 +33,8 @@ var NAVTREE =
     ] ],
     [ "Contributing", "index.html#autotoc_md6", [
       [ "Building", "index.html#autotoc_md7", null ],
-      [ "Amalgamation", "index.html#autotoc_md8", null ]
+      [ "Amalgamation", "index.html#autotoc_md8", null ],
+      [ "License", "index.html#autotoc_md9", null ]
     ] ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
