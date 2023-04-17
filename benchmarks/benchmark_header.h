@@ -27,7 +27,6 @@ bool file_exists(const char* filename) {
   if (std::filesystem::exists(filename)) {
     return true;
   } else {
-    std::cout << "  file missing: " << filename << std::endl;
     return false;
   }
 }

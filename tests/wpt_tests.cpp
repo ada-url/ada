@@ -495,70 +495,54 @@ bool urltestdata_encoding(const char *source) {
           if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
             std::cout << "\n====\n" + input_url->to_diagram() + "\n====\n";
           }
-          std::string_view protocol;
-          if (!object["protocol"].get_string().get(protocol)) {
-            TEST_ASSERT(input_url->get_protocol(), protocol,
-                        "Protocol " + element_string + input_url->to_string());
-          }
+          std::string_view protocol = object["protocol"].get_string();
+          TEST_ASSERT(input_url->get_protocol(), protocol,
+                      "Protocol " + element_string + input_url->to_string());
 
-          std::string_view username;
-          if (!object["username"].get_string().get(username)) {
-            TEST_ASSERT(input_url->get_username(), username,
-                        "Username " + element_string + input_url->to_string());
-          }
+          std::string_view username = object["username"].get_string();
+          TEST_ASSERT(input_url->get_username(), username,
+                      "Username " + element_string + input_url->to_string());
 
-          std::string_view password;
-          if (!object["password"].get_string().get(password)) {
-            TEST_ASSERT(input_url->get_password(), password,
-                        "Password " + element_string + input_url->to_string());
-          }
+          std::string_view password = object["password"].get_string();
+          TEST_ASSERT(input_url->get_password(), password,
+                      "Password " + element_string + input_url->to_string());
 
-          std::string_view host;
-          if (!object["host"].get_string().get(host)) {
-            TEST_ASSERT(input_url->get_host(), host,
-                        "Hostname " + element_string + input_url->to_string());
-          }
+          std::string_view host = object["host"].get_string();
+          TEST_ASSERT(input_url->get_host(), host,
+                      "Host " + element_string + input_url->to_string());
 
-          std::string_view hostname;
-          if (!object["hostname"].get_string().get(hostname)) {
-            TEST_ASSERT(input_url->get_hostname(), hostname,
-                        "Hostname " + element_string + input_url->to_string());
-          }
+          std::string_view hostname = object["hostname"].get_string();
+          TEST_ASSERT(input_url->get_hostname(), hostname,
+                      "Hostname " + element_string + input_url->to_string());
 
-          std::string_view port;
-          if (!object["port"].get_string().get(port)) {
-            TEST_ASSERT(input_url->get_port(), port, "Port " + element_string);
-          }
+          std::string_view port = object["port"].get_string();
+          TEST_ASSERT(input_url->get_port(), port, "Port " + element_string);
 
-          std::string_view pathname{};
-          if (!object["pathname"].get_string().get(pathname)) {
-            TEST_ASSERT(input_url->get_pathname(), pathname,
-                        "Pathname " + element_string + input_url->to_string());
-          }
-          std::string_view query;
-          if (!object["query"].get(query)) {
-            TEST_ASSERT(input_url->get_search(), query,
-                        "Query " + element_string + input_url->to_string());
-          }
+          std::string_view pathname = object["pathname"].get_string();
+          TEST_ASSERT(input_url->get_pathname(), pathname,
+                      "Pathname " + element_string + input_url->to_string());
 
-          std::string_view hash;
-          if (!object["hash"].get_string().get(hash)) {
-            TEST_ASSERT(
-                input_url->get_hash(), hash,
-                "Hash/Fragment " + element_string + input_url->to_string());
-          }
+          std::string_view search = object["search"].get_string();
+          TEST_ASSERT(input_url->get_search(), search,
+                      "Search " + element_string + input_url->to_string());
 
-          std::string_view href;
-          if (!object["href"].get_string().get(href)) {
-            TEST_ASSERT(input_url->get_href(), href,
-                        "href " + element_string + input_url->to_string());
-          }
+          std::string_view hash = object["hash"].get_string();
+          TEST_ASSERT(
+              input_url->get_hash(), hash,
+              "Hash/Fragment " + element_string + input_url->to_string());
 
+          std::string_view href = object["href"].get_string();
+          TEST_ASSERT(input_url->get_href(), href,
+                      "href " + element_string + input_url->to_string());
+
+          // The origin key may be missing. In that case, the API’s origin
+          // attribute is not tested.
           std::string_view origin;
           if (!object["origin"].get(origin)) {
             TEST_ASSERT(input_url->get_origin(), origin,
                         "Origin " + element_string + input_url->to_string());
           }
+
           // We need padding.
           simdjson::padded_string padded_url_json = parsed_url_json;
           // We need a second parser.

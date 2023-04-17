@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+        description: "Tag for the next release. Ex.: v5.0.0"
+
+env:
+  NEXT_RELEASE_TAG: ${{ github.event.inputs.tag }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: write
+
+jobs:
+  release-script-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./tools/release
+
+    steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Cache Python venv
+        uses: actions/cache@v3
+        with:
+          path: ./tools/release/venv
+          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
+      - name: Install dependencies
+        run: |
+          python3 -m venv venv
+          source ./venv/bin/activate
+          pip install -r requirements.txt
+      - name: Run tests
+        run: |
+          source ./venv/bin/activate
+          pytest -v
+
+  release:
+    needs: release-script-test
+    runs-on: ubuntu-latest
+    if: ${{ needs.release-script-test.result == 'success' }}
+    env:
+      CXX: clang++-14
+    steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Restore Python venv (Release script) from cache
+        uses: actions/cache@v3
+        with:
+          path: ./tools/release/venv
+          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
+          restore-keys: venv-${{ hashFiles('tools/release/requirements.txt') }}
+        
+      - name: Update versions
+        run: |
+          source ./tools/release/venv/bin/activate
+          ./tools/release/update_versions.py
+
+      - name: Ada Build
+        run: cmake -B build && cmake --build build
+      - name: Ada Test
+        run: ctest --output-on-failure --test-dir build
+      
+      - name: Amalgamation
+        run: |
+          ./singleheader/amalgamate.py
+
+      - name: Push updates for new release
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+          git add doxygen include/ada/ada_version.h CMakeLists.txt
+
+          git commit -m "New Release: ${{ env.NEXT_RELEASE_TAG }}"
+          git push
+
+      - name: "Create Release"
+        run: |
+          source ./tools/release/venv/bin/activate
+          ./tools/release/create_release.py

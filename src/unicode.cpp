@@ -15,7 +15,7 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
   uint64_t broadcast_80 = broadcast(0x80);
   uint64_t broadcast_Ap = broadcast(128 - 'A');
-  uint64_t broadcast_Zp = broadcast(128 - 'Z');
+  uint64_t broadcast_Zp = broadcast(128 - 'Z' - 1);
   uint64_t non_ascii = 0;
   size_t i = 0;
 
@@ -131,7 +131,7 @@ ada_really_inline constexpr bool is_forbidden_domain_code_point(
 }
 
 ada_really_inline constexpr bool contains_forbidden_domain_code_point(
-    char* input, size_t length) noexcept {
+    const char* input, size_t length) noexcept {
   size_t i = 0;
   uint8_t accumulator{};
   for (; i + 4 <= length; i += 4) {
@@ -142,6 +142,44 @@ ada_really_inline constexpr bool contains_forbidden_domain_code_point(
   }
   for (; i < length; i++) {
     accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i])];
+  }
+  return accumulator;
+}
+
+constexpr static uint8_t is_forbidden_domain_code_point_table_or_upper[] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+static_assert(sizeof(is_forbidden_domain_code_point_table_or_upper) == 256);
+static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('A')] == 2);
+static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('Z')] == 2);
+
+ada_really_inline constexpr bool contains_forbidden_domain_code_point_or_upper(
+    const char* input, size_t length) noexcept {
+  size_t i = 0;
+  uint8_t accumulator{};
+  for (; i + 4 <= length; i += 4) {
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i])];
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 1])];
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 2])];
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 3])];
+  }
+  for (; i < length; i++) {
+    accumulator |=
+        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i])];
   }
   return accumulator;
 }
