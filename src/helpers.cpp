@@ -105,10 +105,10 @@ ada_really_inline bool shorten_path(std::string& path,
   // Let path be url’s path.
   // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
-  if (type == ada::scheme::type::FILE &&
+  if (!path.empty() && type == ada::scheme::type::FILE &&
       first_delimiter == std::string_view::npos) {
     if (checkers::is_normalized_windows_drive_letter(
-            std::string_view(path.data() + 1, first_delimiter - 1))) {
+            std::string_view(path.data() + 1, path.length() - 1))) {
       return false;
     }
   }
