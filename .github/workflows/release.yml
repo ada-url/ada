@@ -14,6 +14,7 @@ env:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   release-script-test:
@@ -68,15 +69,15 @@ jobs:
         run: |
           ./singleheader/amalgamate.py
 
-      - name: Push updates for new release
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-
-          git add doxygen include/ada/ada_version.h CMakeLists.txt
-
-          git commit -m "New Release: ${{ env.NEXT_RELEASE_TAG }}"
-          git push
+      - name: Create PR with code updates for new release
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "chore: release ${{ env.NEXT_RELEASE_TAG }}"
+          branch: "release/${{ env.NEXT_RELEASE_TAG }}"
+          title: "chore: release ${{ env.NEXT_RELEASE_TAG }}"
+          token: ${{ env.GITHUB_TOKEN }}
+          body: |
+            This pull PR updates the source code version to ${{ env.NEXT_RELEASE_TAG }}.
 
       - name: "Create Release"
         run: |
