@@ -106,9 +106,9 @@ ada_really_inline bool shorten_path(std::string& path,
   // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
   if (type == ada::scheme::type::FILE &&
-      first_delimiter == std::string_view::npos) {
+      first_delimiter == std::string_view::npos && !path.empty()) {
     if (checkers::is_normalized_windows_drive_letter(
-            std::string_view(path.data() + 1, first_delimiter - 1))) {
+            helpers::substring(path, 1))) {
       return false;
     }
   }
@@ -130,9 +130,9 @@ ada_really_inline bool shorten_path(std::string_view& path,
   // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
   if (type == ada::scheme::type::FILE &&
-      first_delimiter == std::string_view::npos) {
+      first_delimiter == std::string_view::npos && !path.empty()) {
     if (checkers::is_normalized_windows_drive_letter(
-            std::string_view(path.data() + 1, first_delimiter - 1))) {
+            helpers::substring(path, 1))) {
       return false;
     }
   }
