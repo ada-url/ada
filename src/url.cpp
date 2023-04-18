@@ -568,10 +568,10 @@ std::string url::to_string() const {
     helpers::encode_json(query.value(), back);
     answer.append("\"");
   }
-  if (fragment.has_value()) {
+  if (hash.has_value()) {
     answer.append(",\n");
-    answer.append("\t\"fragment\":\"");
-    helpers::encode_json(fragment.value(), back);
+    answer.append("\t\"hash\":\"");
+    helpers::encode_json(hash.value(), back);
     answer.append("\"");
   }
   answer.append("\n}");

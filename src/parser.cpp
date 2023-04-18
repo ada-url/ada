@@ -85,7 +85,7 @@ result_type parse_url(std::string_view user_input,
   helpers::trim_c0_whitespace(url_data);
 
   // Optimization opportunity. Most websites do not have fragment.
-  std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
+  std::optional<std::string_view> fragment = helpers::prune_hash(url_data);
   // We add it last so that an implementation like ada::url_aggregator
   // can append it last to its internal buffer, thus improving performance.
 

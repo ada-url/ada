@@ -184,7 +184,7 @@ bool urltestdata_encoding(const char* source) {
                       url.get_search(), "search mismatch " + out.to_string());
         }
 
-        if (url.fragment.has_value()) {
+        if (url.get_hash().length() > 0) {
           TEST_ASSERT(href.substr(out.hash_start, url.get_hash().size()),
                       url.get_hash(), "hash mismatch " + out.to_string());  //}
         }

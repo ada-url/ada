@@ -84,7 +84,7 @@ ada_unused std::string get_state(ada::state s) {
   }
 }
 
-ada_really_inline std::optional<std::string_view> prune_fragment(
+ada_really_inline std::optional<std::string_view> prune_hash(
     std::string_view& input) noexcept {
   // compiles down to 20--30 instructions including a class to memchr (C
   // function). this function should be quite fast.
@@ -92,10 +92,10 @@ ada_really_inline std::optional<std::string_view> prune_fragment(
   if (location_of_first == std::string_view::npos) {
     return std::nullopt;
   }
-  std::string_view fragment = input;
-  fragment.remove_prefix(location_of_first + 1);
+  std::string_view hash = input;
+  hash.remove_prefix(location_of_first + 1);
   input.remove_suffix(input.size() - location_of_first);
-  return fragment;
+  return hash;
 }
 
 ada_really_inline bool shorten_path(std::string& path,

@@ -85,9 +85,8 @@ namespace ada {
 [[nodiscard]] std::string url::get_hash() const noexcept {
   // If this’s URL’s fragment is either null or the empty string, then return
   // the empty string. Return U+0023 (#), followed by this’s URL’s fragment.
-  return (!fragment.has_value() || (fragment.value().empty()))
-             ? ""
-             : "#" + fragment.value();
+  return (!hash.has_value() || (hash.value().empty())) ? ""
+                                                       : "#" + hash.value();
 }
 
 }  // namespace ada

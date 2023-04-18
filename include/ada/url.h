@@ -89,7 +89,7 @@ struct url : url_base {
    * further processing on the resource the URL’s other components identify. It
    * is initially null.
    */
-  std::optional<std::string> fragment{};
+  std::optional<std::string> hash{};
 
   /** @private */
   inline void update_unencoded_base_hash(std::string_view input);
