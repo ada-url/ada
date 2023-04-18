@@ -70,7 +70,6 @@ struct url_components {
   bool check_offset_consistency() const noexcept;
 
   /**
-   * @private
    * Converts a url_components to JSON stringified version.
    */
   std::string to_string() const;
