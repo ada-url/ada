@@ -202,22 +202,22 @@ struct url_aggregator : url_base {
   /** @private */
   inline uint32_t retrieve_base_port() const;
   /** @private */
-  inline void clear_base_port();
+  inline void clear_port();
   /** @private if there is no hostname, then this function does nothing, if
    * there is, we make it empty */
-  inline void clear_base_hostname();
+  inline void clear_hostname();
   /** @private */
-  inline void clear_base_hash();
+  inline void clear_hash();
   /** @private */
-  inline void clear_base_pathname() override;
+  inline void clear_pathname() override;
   /** @private */
-  inline void clear_base_search() override;
+  inline void clear_search() override;
   /** @private */
-  inline void clear_base_password();
+  inline void clear_password();
   /** @private */
-  inline bool base_fragment_has_value() const override;
+  inline bool has_hash() const override;
   /** @private */
-  inline bool base_search_has_value() const override;
+  inline bool has_search() const override;
   /** @private */
   inline bool has_dash_dot() const noexcept;
   /** @private */

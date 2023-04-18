@@ -62,7 +62,7 @@ template <bool has_state_override>
       // If url’s port is url’s scheme’s default port, then set url’s port to
       // null.
       if (components.port == urls_scheme_port) {
-        clear_base_port();
+        clear_port();
       }
     }
   } else {  // slow path
@@ -105,7 +105,7 @@ template <bool has_state_override>
       // If url’s port is url’s scheme’s default port, then set url’s port to
       // null.
       if (components.port == urls_scheme_port) {
-        clear_base_port();
+        clear_port();
       }
     }
   }
@@ -286,7 +286,7 @@ bool url_aggregator::set_port(const std::string_view input) {
   std::string trimmed(input);
   helpers::remove_ascii_tab_or_newline(trimmed);
   if (trimmed.empty()) {
-    clear_base_port();
+    clear_port();
     return true;
   }
   // Input should not start with control characters.
@@ -317,7 +317,7 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   if (has_opaque_path) {
     return false;
   }
-  clear_base_pathname();
+  clear_pathname();
   parse_path(input);
   if (checkers::begins_with(input, "//") && !has_authority() &&
       !has_dash_dot()) {
@@ -374,7 +374,7 @@ void url_aggregator::set_search(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (input.empty()) {
-    clear_base_search();
+    clear_search();
     helpers::strip_trailing_spaces_from_opaque_path(*this);
     return;
   }
@@ -578,7 +578,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // Let host be the result of host parsing host_view with url is not special.
     if (host_view.empty()) {
       if (has_hostname()) {
-        clear_base_hostname();  // easy!
+        clear_hostname();  // easy!
       } else if (has_dash_dot()) {
         add_authority_slashes_if_needed();
         delete_dash_dot();
@@ -604,7 +604,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
   if (new_host.empty()) {
     // Set url’s host to the empty string.
-    clear_base_hostname();
+    clear_hostname();
   } else {
     // Let host be the result of host parsing buffer with url is not special.
     if (!parse_host(new_host)) {
@@ -616,7 +616,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // If host is "localhost", then set host to the empty string.
     if (helpers::substring(buffer, components.host_start,
                            components.host_end) == "localhost") {
-      clear_base_hostname();
+      clear_hostname();
     }
   }
   ADA_ASSERT_TRUE(validate());

@@ -174,7 +174,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (input.empty()) {
-    clear_base_search();
+    clear_search();
     return;
   }
 
@@ -412,9 +412,8 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void url_aggregator::clear_base_password() {
-  ada_log("url_aggregator::clear_base_password ", to_string(), "\n",
-          to_diagram());
+inline void url_aggregator::clear_password() {
+  ada_log("url_aggregator::clear_password ", to_string(), "\n", to_diagram());
   ADA_ASSERT_TRUE(validate());
   if (!has_password()) {
     return;
@@ -442,7 +441,7 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
 
   // TODO: Optimization opportunity. Merge the following removal functions.
   if (input.empty()) {
-    clear_base_password();
+    clear_password();
 
     // Remove username too, if it is empty.
     if (!has_non_empty_username()) {
@@ -543,7 +542,7 @@ inline void url_aggregator::update_base_port(uint32_t input) {
   ada_log("url_aggregator::update_base_port");
   ADA_ASSERT_TRUE(validate());
   if (input == url_components::omitted) {
-    clear_base_port();
+    clear_port();
     return;
   }
   // calling std::to_string(input.value()) is unfortunate given that the port
@@ -569,8 +568,8 @@ inline void url_aggregator::update_base_port(uint32_t input) {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void url_aggregator::clear_base_port() {
-  ada_log("url_aggregator::clear_base_port");
+inline void url_aggregator::clear_port() {
+  ada_log("url_aggregator::clear_port");
   ADA_ASSERT_TRUE(validate());
   if (components.port == url_components::omitted) {
     return;
@@ -593,8 +592,8 @@ inline uint32_t url_aggregator::retrieve_base_port() const {
   return components.port;
 }
 
-inline void url_aggregator::clear_base_search() {
-  ada_log("url_aggregator::clear_base_search");
+inline void url_aggregator::clear_search() {
+  ada_log("url_aggregator::clear_search");
   ADA_ASSERT_TRUE(validate());
   if (components.search_start == url_components::omitted) {
     return;
@@ -618,8 +617,8 @@ inline void url_aggregator::clear_base_search() {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void url_aggregator::clear_base_hash() {
-  ada_log("url_aggregator::clear_base_hash");
+inline void url_aggregator::clear_hash() {
+  ada_log("url_aggregator::clear_hash");
   ADA_ASSERT_TRUE(validate());
   if (components.hash_start == url_components::omitted) {
     return;
@@ -635,8 +634,8 @@ inline void url_aggregator::clear_base_hash() {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void url_aggregator::clear_base_pathname() {
-  ada_log("url_aggregator::clear_base_pathname");
+inline void url_aggregator::clear_pathname() {
+  ada_log("url_aggregator::clear_pathname");
   ADA_ASSERT_TRUE(validate());
   uint32_t ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) {
@@ -660,19 +659,18 @@ inline void url_aggregator::clear_base_pathname() {
   if (components.hash_start != url_components::omitted) {
     components.hash_start -= difference;
   }
-  ada_log("url_aggregator::clear_base_pathname completed, running checks...");
+  ada_log("url_aggregator::clear_pathname completed, running checks...");
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_pathname(), "",
                    "pathname should have been cleared on buffer=" + buffer +
                        " with " + components.to_string() + "\n" + to_diagram());
 #endif
   ADA_ASSERT_TRUE(validate());
-  ada_log(
-      "url_aggregator::clear_base_pathname completed, running checks... ok");
+  ada_log("url_aggregator::clear_pathname completed, running checks... ok");
 }
 
-inline void url_aggregator::clear_base_hostname() {
-  ada_log("url_aggregator::clear_base_hostname");
+inline void url_aggregator::clear_hostname() {
+  ada_log("url_aggregator::clear_hostname");
   ADA_ASSERT_TRUE(validate());
   if (!has_authority()) {
     return;
@@ -706,13 +704,13 @@ inline void url_aggregator::clear_base_hostname() {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline bool url_aggregator::base_fragment_has_value() const {
-  ada_log("url_aggregator::base_fragment_has_value");
+inline bool url_aggregator::has_hash() const {
+  ada_log("url_aggregator::has_hash");
   return components.hash_start != url_components::omitted;
 }
 
-inline bool url_aggregator::base_search_has_value() const {
-  ada_log("url_aggregator::base_search_has_value");
+inline bool url_aggregator::has_search() const {
+  ada_log("url_aggregator::has_search");
   return components.search_start != url_components::omitted;
 }
 
@@ -859,7 +857,7 @@ ada_really_inline size_t url_aggregator::parse_port(
     if (r.ec == std::errc() && scheme_default_port() != parsed_port) {
       update_base_port(parsed_port);
     } else {
-      clear_base_port();
+      clear_port();
     }
   }
   return consumed;

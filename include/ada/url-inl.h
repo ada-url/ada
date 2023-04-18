@@ -146,15 +146,13 @@ inline void url::update_base_port(std::optional<uint16_t> input) {
   port = input;
 }
 
-inline void url::clear_base_pathname() { path = ""; }
+inline void url::clear_pathname() { path.clear(); }
 
-inline void url::clear_base_search() { query = std::nullopt; }
+inline void url::clear_search() { query = std::nullopt; }
 
-inline bool url::base_fragment_has_value() const {
-  return fragment.has_value();
-}
+inline bool url::has_hash() const { return fragment.has_value(); }
 
-inline bool url::base_search_has_value() const { return query.has_value(); }
+inline bool url::has_search() const { return query.has_value(); }
 
 inline void url::set_protocol_as_file() { type = ada::scheme::type::FILE; }
 

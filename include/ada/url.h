@@ -111,13 +111,13 @@ struct url : url_base {
   /** @private */
   inline void update_base_port(std::optional<uint16_t> input);
   /** @private */
-  inline void clear_base_pathname() override;
+  inline void clear_pathname() override;
   /** @private */
-  inline void clear_base_search() override;
+  inline void clear_search() override;
   /** @private */
-  inline bool base_fragment_has_value() const override;
+  inline bool has_hash() const override;
   /** @private */
-  inline bool base_search_has_value() const override;
+  inline bool has_search() const override;
   /** @private set this URL's type to file */
   inline void set_protocol_as_file();
   /** @return true if it has an host but it is the empty string */
