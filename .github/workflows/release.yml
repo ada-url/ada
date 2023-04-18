@@ -74,7 +74,7 @@ jobs:
           commit-message: "New Release: ${{ env.NEXT_RELEASE_TAG }}"
           branch: "release/${{ env.NEXT_RELEASE_TAG }}"
           title: "New Release: ${{ env.NEXT_RELEASE_TAG }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ env.GITHUB_TOKEN }}
           body: |
             This pull PR updates the source code version to ${{ env.NEXT_RELEASE_TAG }}.
 
