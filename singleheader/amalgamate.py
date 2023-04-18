@@ -3,6 +3,7 @@
 # Creates the amalgamated source files.
 #
 
+import zipfile
 import sys
 import os.path
 import subprocess
@@ -18,9 +19,6 @@ SCRIPTPATH = os.path.dirname(os.path.abspath(sys.argv[0]))
 PROJECTPATH = os.path.dirname(SCRIPTPATH)
 print(f"SCRIPTPATH={SCRIPTPATH} PROJECTPATH={PROJECTPATH}")
 
-
-print("We are about to amalgamate all ada files into one source file.")
-print("See https://www.sqlite.org/amalgamation.html and https://en.wikipedia.org/wiki/Single_Compilation_Unit for rationale.")
 if "AMALGAMATE_SOURCE_PATH" not in os.environ:
     AMALGAMATE_SOURCE_PATH = os.path.join(PROJECTPATH, "src")
 else:
@@ -71,7 +69,7 @@ def dofile(fid, prepath, filename):
     RELFILE = os.path.relpath(file, PROJECTPATH)
     # Last lines are always ignored. Files should end by an empty lines.
     print(f"/* begin file {RELFILE} */", file=fid)
-    includepattern = re.compile('\s*#\s*include "(.*)"')
+    includepattern = re.compile('\\s*#\\s*include "(.*)"')
     with open(file, 'r') as fid2:
         for line in fid2:
             line = line.rstrip('\n')
@@ -84,7 +82,7 @@ def dofile(fid, prepath, filename):
 
                 if includedfile.startswith('../'):
                     includedfile = includedfile[2:]
-                # we explicitly include ada headers, one time each 
+                # we explicitly include ada headers, one time each
                 doinclude(fid, includedfile, line, filename)
             else:
                 print(line, file=fid)
@@ -132,7 +130,6 @@ if SCRIPTPATH != AMALGAMATE_OUTPUT_PATH:
   shutil.copy2(os.path.join(SCRIPTPATH,"demo.cpp"),AMALGAMATE_OUTPUT_PATH)
   shutil.copy2(os.path.join(SCRIPTPATH,"README.md"),AMALGAMATE_OUTPUT_PATH)
 
-import zipfile
 zf = zipfile.ZipFile(os.path.join(AMALGAMATE_OUTPUT_PATH,'singleheader.zip'), 'w', zipfile.ZIP_DEFLATED)
 zf.write(os.path.join(AMALGAMATE_OUTPUT_PATH,"ada.cpp"), "ada.cpp")
 zf.write(os.path.join(AMALGAMATE_OUTPUT_PATH,"ada.h"), "ada.h")

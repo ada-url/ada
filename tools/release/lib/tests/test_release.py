@@ -211,7 +211,7 @@ def test_contruct_release_notes():
     notes = release.contruct_release_notes(repo_stub, "v3.0.0")
     assert (
         notes
-        == "## What's Changed\n"
+        == "## What's changed\n"
         + "* Feature 2 by @new_contr_1 in https://github.com/ada-url/ada/pull/12\n"
         + "* Refactoring by @new_contr_2 in https://github.com/ada-url/ada/pull/15\n"
         + "* Feature 10 by @contr_2 in https://github.com/ada-url/ada/pull/22\n"

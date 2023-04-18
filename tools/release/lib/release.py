@@ -110,7 +110,7 @@ def contruct_release_notes(repository, next_tag_name):
         repository.full_name, last_tag.title, next_tag_name
     )
 
-    notes = "## What's Changed\n"
+    notes = "## What's changed\n"
     for changes in whats_changed:
         notes += changes + "\n"
 

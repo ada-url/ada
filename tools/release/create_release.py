@@ -11,7 +11,7 @@ REPO_NAME = os.environ["GITHUB_REPOSITORY"]
 TOKEN = os.environ["GITHUB_TOKEN"]
 if not NEXT_TAG or not REPO_NAME or not TOKEN:
     raise Exception(
-        f"Bad environment variables. Invalid GITHUB_REPOSITORY, GITHUB_TOKEN or NEXT_RELEASE_TAG"
+        "Bad environment variables. Invalid GITHUB_REPOSITORY, GITHUB_TOKEN or NEXT_RELEASE_TAG"
     )
 
 g = Github(TOKEN)

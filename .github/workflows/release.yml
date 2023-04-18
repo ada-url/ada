@@ -75,7 +75,7 @@ jobs:
 
           git add doxygen include/ada/ada_version.h CMakeLists.txt
 
-          git commit -m "New Release: ${{ env.NEXT_RELEASE_TAG }}"
+          git commit -m "chore: release ${{ env.NEXT_RELEASE_TAG }}"
           git push
 
       - name: "Create Release"
