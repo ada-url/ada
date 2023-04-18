@@ -255,5 +255,19 @@
     "pathname": "/%22quoted%22",
     "search": "",
     "hash": ""
+  },
+  {
+    "input": "../package.json",
+    "base": "file:///Users/package.json",
+    "href": "file:///",
+    "protocol": "file:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "/",
+    "search": "",
+    "hash": ""
   }
 ]
