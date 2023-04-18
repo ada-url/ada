@@ -5,13 +5,12 @@ on:
     types: [closed]
 
 jobs:
-  build:
+  release-create:
     runs-on: ubuntu-latest
     if: >
       github.event.pull_request.merged == true &&
       github.event.pull_request.base.ref == 'main' &&
-      startsWith(github.event.pull_request.head.ref, 'release/v') &&
-      github.event.pull_request.user.login == github.actor
+      startsWith(github.event.pull_request.head.ref, 'release/v')
       
     env:
       NEXT_RELEASE_TAG: ${{ github.event.pull_request.head.ref }}
