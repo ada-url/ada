@@ -13,6 +13,7 @@
 #include "ada/unicode.h"
 #include "ada/url_base.h"
 #include "ada/url_components.h"
+#include "ada/parser.h"
 
 #include <algorithm>
 #include <charconv>
@@ -43,83 +44,6 @@ struct url : url_base {
   url &operator=(const url &u) = default;
   ~url() = default;
 
-  /**
-   * @private
-   * A URL’s username is an ASCII string identifying a username. It is initially
-   * the empty string.
-   */
-  std::string username{};
-
-  /**
-   * @private
-   * A URL’s password is an ASCII string identifying a password. It is initially
-   * the empty string.
-   */
-  std::string password{};
-
-  /**
-   * @private
-   * A URL’s host is null or a host. It is initially null.
-   */
-  std::optional<std::string> host{};
-
-  /**
-   * @private
-   * A URL’s port is either null or a 16-bit unsigned integer that identifies a
-   * networking port. It is initially null.
-   */
-  std::optional<uint16_t> port{};
-
-  /**
-   * @private
-   * A URL’s path is either an ASCII string or a list of zero or more ASCII
-   * strings, usually identifying a location.
-   */
-  std::string path{};
-
-  /**
-   * @private
-   * A URL’s query is either null or an ASCII string. It is initially null.
-   */
-  std::optional<std::string> query{};
-
-  /**
-   * @private
-   * A URL’s fragment is either null or an ASCII string that can be used for
-   * further processing on the resource the URL’s other components identify. It
-   * is initially null.
-   */
-  std::optional<std::string> fragment{};
-
-  /** @private */
-  inline void update_unencoded_base_hash(std::string_view input);
-  /** @private */
-  inline void update_base_hostname(std::string_view input);
-  /** @private */
-  inline void update_base_search(std::string_view input);
-  /** @private */
-  inline void update_base_search(std::string_view input,
-                                 const uint8_t query_percent_encode_set[]);
-  /** @private */
-  inline void update_base_search(std::optional<std::string> input);
-  /** @private */
-  inline void update_base_pathname(const std::string_view input);
-  /** @private */
-  inline void update_base_username(const std::string_view input);
-  /** @private */
-  inline void update_base_password(const std::string_view input);
-  /** @private */
-  inline void update_base_port(std::optional<uint16_t> input);
-  /** @private */
-  inline void clear_base_pathname() override;
-  /** @private */
-  inline void clear_base_search() override;
-  /** @private */
-  inline bool base_fragment_has_value() const override;
-  /** @private */
-  inline bool base_search_has_value() const override;
-  /** @private set this URL's type to file */
-  inline void set_protocol_as_file();
   /** @return true if it has an host but it is the empty string */
   [[nodiscard]] inline bool has_empty_hostname() const noexcept;
   /** @return true if it has a host (included an empty host) */
@@ -325,6 +249,111 @@ struct url : url_base {
    */
   [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
 
+
+  /**
+   * Useful for implementing efficient serialization for the URL.
+   *
+   * https://user:pass@example.com:1234/foo/bar?baz#quux
+   *       |     |    |          | ^^^^|       |   |
+   *       |     |    |          | |   |       |   `----- hash_start
+   *       |     |    |          | |   |       `--------- search_start
+   *       |     |    |          | |   `----------------- pathname_start
+   *       |     |    |          | `--------------------- port
+   *       |     |    |          `----------------------- host_end
+   *       |     |    `---------------------------------- host_start
+   *       |     `--------------------------------------- username_end
+   *       `--------------------------------------------- protocol_end
+   *
+   * Inspired after servo/url
+   *
+   * @return a newly constructed component.
+   *
+   * @see
+   * https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
+   */
+  [[nodiscard]] ada_really_inline ada::url_components get_components()
+      const noexcept;
+
+ private:
+   friend ada::url ada::parser::parse_url<ada::url>(std::string_view, const ada::url*);
+
+  /**
+   * @private
+   * A URL’s username is an ASCII string identifying a username. It is initially
+   * the empty string.
+   */
+  std::string username{};
+
+  /**
+   * @private
+   * A URL’s password is an ASCII string identifying a password. It is initially
+   * the empty string.
+   */
+  std::string password{};
+
+  /**
+   * @private
+   * A URL’s host is null or a host. It is initially null.
+   */
+  std::optional<std::string> host{};
+
+  /**
+   * @private
+   * A URL’s port is either null or a 16-bit unsigned integer that identifies a
+   * networking port. It is initially null.
+   */
+  std::optional<uint16_t> port{};
+
+  /**
+   * @private
+   * A URL’s path is either an ASCII string or a list of zero or more ASCII
+   * strings, usually identifying a location.
+   */
+  std::string path{};
+
+  /**
+   * @private
+   * A URL’s query is either null or an ASCII string. It is initially null.
+   */
+  std::optional<std::string> query{};
+
+  /**
+   * @private
+   * A URL’s fragment is either null or an ASCII string that can be used for
+   * further processing on the resource the URL’s other components identify. It
+   * is initially null.
+   */
+  std::optional<std::string> fragment{};
+
+  /** @private */
+  inline void update_unencoded_base_hash(std::string_view input);
+  /** @private */
+  inline void update_base_hostname(std::string_view input);
+  /** @private */
+  inline void update_base_search(std::string_view input);
+  /** @private */
+  inline void update_base_search(std::string_view input,
+                                 const uint8_t query_percent_encode_set[]);
+  /** @private */
+  inline void update_base_search(std::optional<std::string> input);
+  /** @private */
+  inline void update_base_pathname(const std::string_view input);
+  /** @private */
+  inline void update_base_username(const std::string_view input);
+  /** @private */
+  inline void update_base_password(const std::string_view input);
+  /** @private */
+  inline void update_base_port(std::optional<uint16_t> input);
+  /** @private */
+  inline void clear_base_pathname() override;
+  /** @private */
+  inline void clear_base_search() override;
+  /** @private */
+  inline bool base_fragment_has_value() const override;
+  /** @private */
+  inline bool base_search_has_value() const override;
+  /** @private set this URL's type to file */
+  inline void set_protocol_as_file();
   /**
    * @private
    *
@@ -362,32 +391,6 @@ struct url : url_base {
   template <bool has_state_override = false>
   [[nodiscard]] ada_really_inline bool parse_scheme(
       const std::string_view input);
-
-  /**
-   * Useful for implementing efficient serialization for the URL.
-   *
-   * https://user:pass@example.com:1234/foo/bar?baz#quux
-   *       |     |    |          | ^^^^|       |   |
-   *       |     |    |          | |   |       |   `----- hash_start
-   *       |     |    |          | |   |       `--------- search_start
-   *       |     |    |          | |   `----------------- pathname_start
-   *       |     |    |          | `--------------------- port
-   *       |     |    |          `----------------------- host_end
-   *       |     |    `---------------------------------- host_start
-   *       |     `--------------------------------------- username_end
-   *       `--------------------------------------------- protocol_end
-   *
-   * Inspired after servo/url
-   *
-   * @return a newly constructed component.
-   *
-   * @see
-   * https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
-   */
-  [[nodiscard]] ada_really_inline ada::url_components get_components()
-      const noexcept;
-
- private:
   /**
    * @private
    *

@@ -8,12 +8,12 @@
 #include "ada/common_defs.h"
 #include "ada/url_base.h"
 #include "ada/url_components.h"
+#include "ada/parser.h"
 
 #include <string>
 #include <string_view>
 
 namespace ada {
-
 /**
  * @brief Lightweight URL struct.
  *
@@ -287,6 +287,13 @@ struct url_aggregator : url_base {
   /** @private */
   inline void add_authority_slashes_if_needed() noexcept;
 
+  /** @private */
+  ada_really_inline size_t
+  parse_port(std::string_view view,
+             bool check_trailing_content = false) noexcept override;
+
+ private:
+  friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(std::string_view, const ada::url_aggregator*);
   /**
    * @private
    * To optimize performance, you may indicate how much memory to allocate
@@ -294,12 +301,6 @@ struct url_aggregator : url_base {
    */
   inline void reserve(uint32_t capacity);
 
-  /** @private */
-  ada_really_inline size_t
-  parse_port(std::string_view view,
-             bool check_trailing_content = false) noexcept override;
-
- private:
   /** @private */
   std::string buffer{};
 
