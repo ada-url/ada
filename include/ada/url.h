@@ -388,6 +388,10 @@ struct url : url_base {
       const noexcept;
 
  private:
+  friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
+      std::string_view, const ada::url_aggregator *);
+  friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
+      ada::url &url) noexcept;
   /**
    * @private
    *
