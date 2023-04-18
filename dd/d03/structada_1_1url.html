@@ -146,8 +146,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a603d240f7f5dc42ebc9bbf9d25721d28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0ca7312c87ba04b6029137804fbae99"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#af0ca7312c87ba04b6029137804fbae99">has_valid_domain</a> () const noexcept override</td></tr>
 <tr class="separator:af0ca7312c87ba04b6029137804fbae99"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5402b0ef8016726b432152975304b42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#ab5402b0ef8016726b432152975304b42">set_scheme</a> (std::string &amp;&amp;new_scheme) noexcept</td></tr>
-<tr class="separator:ab5402b0ef8016726b432152975304b42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfb7b5e6efd80467c30c81e6e6a4651a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#adfb7b5e6efd80467c30c81e6e6a4651a">to_string</a> () const override</td></tr>
 <tr class="separator:adfb7b5e6efd80467c30c81e6e6a4651a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5500ad7f3289828e6bc654ebd0554bf4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#a5500ad7f3289828e6bc654ebd0554bf4">get_href</a> () const noexcept</td></tr>
@@ -212,6 +210,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
+<tr class="memitem:a2df764d8379699484c1c724502b757f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#a2df764d8379699484c1c724502b757f7">ada::parser::parse_url</a> (std::string_view, const <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> *)</td></tr>
+<tr class="separator:a2df764d8379699484c1c724502b757f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a490db078b24eaca0d12c874fcd741b69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">ada::url_aggregator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#a490db078b24eaca0d12c874fcd741b69">ada::parser::parse_url</a> (std::string_view, const <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">ada::url_aggregator</a> *)</td></tr>
 <tr class="separator:a490db078b24eaca0d12c874fcd741b69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2ca8de64a5ea1479ff05ff7a7f6efcc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#aa2ca8de64a5ea1479ff05ff7a7f6efcc">ada::helpers::strip_trailing_spaces_from_opaque_path</a> (<a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;<a class="el" href="../../dd/d03/structada_1_1url.html">url</a>) noexcept</td></tr>
@@ -1104,37 +1104,6 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="ab5402b0ef8016726b432152975304b42" name="ab5402b0ef8016726b432152975304b42"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab5402b0ef8016726b432152975304b42">&#9670;&#160;</a></span>set_scheme()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ada::url::set_scheme </td>
-          <td>(</td>
-          <td class="paramtype">std::string &amp;&amp;&#160;</td>
-          <td class="paramname"><em>new_scheme</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Set the scheme for this URL. The provided scheme should be a valid scheme string, be lower-cased, not contain spaces or tabs. It should have no spurious trailing or leading content. </p>
-
-<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00158">158</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#a5e6e7cb90bb372cd1554c6bebb944de6">ada::scheme::get_scheme_type()</a>.</p>
-
-</div>
-</div>
 <a id="a9a8f2b84b2298f2bfd26a13e80469bf1" name="a9a8f2b84b2298f2bfd26a13e80469bf1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9a8f2b84b2298f2bfd26a13e80469bf1">&#9670;&#160;</a></span>set_search()</h2>
 
@@ -1243,8 +1212,44 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a id="a2df764d8379699484c1c724502b757f7" name="a2df764d8379699484c1c724502b757f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2df764d8379699484c1c724502b757f7">&#9670;&#160;</a></span>ada::parser::parse_url <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a2b0835f0dceec1161ca5e13bfffdf598">ada::parser::parse_url</a> </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="../../dd/d03/structada_1_1url.html">ada::url</a> *&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a490db078b24eaca0d12c874fcd741b69" name="a490db078b24eaca0d12c874fcd741b69"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a490db078b24eaca0d12c874fcd741b69">&#9670;&#160;</a></span>ada::parser::parse_url</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a490db078b24eaca0d12c874fcd741b69">&#9670;&#160;</a></span>ada::parser::parse_url <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

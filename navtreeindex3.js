@@ -1,5 +1,11 @@
 var NAVTREEINDEX3 =
 {
+"dd/d9c/unicode_8cpp.html#a3e4e3fb4ee2ad78a184c9df98a8769cd":[5,0,1,7,6],
+"dd/d9c/unicode_8cpp.html#a4c9b166bb448c08ee75b0ecd63613572":[5,0,1,7,11],
+"dd/d9c/unicode_8cpp.html#a50281621924992b1070aba94a5b9ff96":[5,0,1,7,20],
+"dd/d9c/unicode_8cpp.html#a53d27f51f43b39082d50dcc92c0e1ee7":[5,0,1,7,7],
+"dd/d9c/unicode_8cpp.html#a689382365dca90506056bd529507e1d7":[5,0,1,7,10],
+"dd/d9c/unicode_8cpp.html#a7216c89ab4ae9363099bd6eda485257f":[5,0,1,7,21],
 "dd/d9c/unicode_8cpp.html#a7c997c07906bb9e6ce09e5bab8e8364f":[5,0,1,7,24],
 "dd/d9c/unicode_8cpp.html#a80fc8cdeb27824384b9228896d3666f0":[5,0,1,7,19],
 "dd/d9c/unicode_8cpp.html#a88bff92c3994ebce3d56fab5dd0ad6bc":[5,0,1,7,1],

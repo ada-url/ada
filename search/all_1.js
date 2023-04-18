@@ -62,7 +62,7 @@ var searchData=
   ['details_59',['details',['../d1/dfb/namespaceada_1_1scheme_1_1details.html',1,'ada::scheme']]],
   ['helpers_60',['helpers',['../d7/d6c/namespaceada_1_1helpers.html',1,'ada']]],
   ['idna_61',['idna',['../d5/ddb/namespaceada_1_1idna.html',1,'ada']]],
-  ['parse_5furl_62',['parse_url',['../dd/d03/structada_1_1url.html#a490db078b24eaca0d12c874fcd741b69',1,'ada::url::parse_url()'],['../d8/d3b/structada_1_1url__aggregator.html#a490db078b24eaca0d12c874fcd741b69',1,'ada::url_aggregator::parse_url()']]],
+  ['parse_5furl_62',['parse_url',['../dd/d03/structada_1_1url.html#a2df764d8379699484c1c724502b757f7',1,'ada::url::parse_url()'],['../dd/d03/structada_1_1url.html#a490db078b24eaca0d12c874fcd741b69',1,'ada::url::parse_url()'],['../d8/d3b/structada_1_1url__aggregator.html#a490db078b24eaca0d12c874fcd741b69',1,'ada::url_aggregator::parse_url()']]],
   ['parser_63',['parser',['../d6/da3/namespaceada_1_1parser.html',1,'ada']]],
   ['scheme_64',['scheme',['../d2/d63/namespaceada_1_1scheme.html',1,'ada']]],
   ['serializers_65',['serializers',['../d9/dea/namespaceada_1_1serializers.html',1,'ada']]],
