@@ -15,7 +15,7 @@
 namespace ada {
 struct url_aggregator;
 struct url;
-}
+}  // namespace ada
 /**
  * @namespace ada::parser
  * @brief Includes the definitions for supported parsers

@@ -293,7 +293,8 @@ struct url_aggregator : url_base {
              bool check_trailing_content = false) noexcept override;
 
  private:
-  friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(std::string_view, const ada::url_aggregator*);
+  friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
+      std::string_view, const ada::url_aggregator *);
   /**
    * @private
    * To optimize performance, you may indicate how much memory to allocate

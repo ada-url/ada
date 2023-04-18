@@ -14,6 +14,7 @@
 #include "ada/url_base.h"
 #include "ada/url_components.h"
 #include "ada/parser.h"
+#include "ada/helpers.h"
 
 #include <algorithm>
 #include <charconv>
@@ -249,7 +250,6 @@ struct url : url_base {
    */
   [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
 
-
   /**
    * Useful for implementing efficient serialization for the URL.
    *
@@ -275,8 +275,10 @@ struct url : url_base {
       const noexcept;
 
  private:
-   friend ada::url ada::parser::parse_url<ada::url>(std::string_view, const ada::url*);
-
+  friend ada::url ada::parser::parse_url<ada::url>(std::string_view,
+                                                   const ada::url *);
+  friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
+      ada::url &url) noexcept;
   /**
    * @private
    * A URL’s username is an ASCII string identifying a username. It is initially
