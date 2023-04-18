@@ -16,8 +16,7 @@
 #endif  // ADA_REGULAR_VISUAL_STUDIO
 
 namespace ada {
-[[nodiscard]] ada_really_inline bool url::includes_credentials()
-    const noexcept {
+[[nodiscard]] ada_really_inline bool url::has_credentials() const noexcept {
   return !username.empty() || !password.empty();
 }
 [[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
@@ -53,7 +52,7 @@ size_t url::get_pathname_length() const noexcept { return path.size(); }
     // 2 characters for "//" and 1 character for starting index
     out.host_start = out.protocol_end + 2;
 
-    if (includes_credentials()) {
+    if (has_credentials()) {
       out.username_end = uint32_t(out.host_start + username.size());
 
       out.host_start += uint32_t(username.size());
@@ -181,7 +180,7 @@ inline void url::copy_scheme(const ada::url &u) {
 
   if (host.has_value()) {
     output += "//";
-    if (includes_credentials()) {
+    if (has_credentials()) {
       output += username;
       if (!password.empty()) {
         output += ":" + get_password();

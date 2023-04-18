@@ -156,7 +156,7 @@ struct url_aggregator : url_base {
    * A URL includes credentials if its username or password is not the empty
    * string.
    */
-  [[nodiscard]] ada_really_inline bool includes_credentials() const noexcept;
+  [[nodiscard]] ada_really_inline bool has_credentials() const noexcept;
 
   /**
    * @private

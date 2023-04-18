@@ -342,7 +342,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
 
       // If url includes credentials or has a non-null port, and buffer is
       // "file", then return.
-      if ((includes_credentials() || port.has_value()) &&
+      if ((has_credentials() || port.has_value()) &&
           parsed_type == ada::scheme::type::FILE) {
         return true;
       }
@@ -387,7 +387,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
 
       // If url includes credentials or has a non-null port, and buffer is
       // "file", then return.
-      if ((includes_credentials() || port.has_value()) && _buffer == "file") {
+      if ((has_credentials() || port.has_value()) && _buffer == "file") {
         return true;
       }
 
@@ -539,7 +539,7 @@ std::string url::to_string() const {
   answer.append("\t\"protocol\":\"");
   helpers::encode_json(get_protocol(), back);
   answer.append("\",\n");
-  if (includes_credentials()) {
+  if (has_credentials()) {
     answer.append("\t\"username\":\"");
     helpers::encode_json(username, back);
     answer.append("\",\n");
