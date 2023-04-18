@@ -91,50 +91,11 @@ struct url : url_base {
    */
   std::optional<std::string> hash{};
 
-  /** @private */
-  inline void clear_pathname() override;
-  /** @private */
-  inline void clear_search() override;
-  /** @private */
-  inline bool has_hash() const override;
-  /** @private */
-  inline bool has_search() const override;
-  /** @private set this URL's type to file */
-  inline void set_protocol_as_file();
   /** @return true if it has an host but it is the empty string */
   [[nodiscard]] inline bool has_empty_hostname() const noexcept;
   /** @return true if it has a host (included an empty host) */
   [[nodiscard]] inline bool has_hostname() const noexcept;
   [[nodiscard]] bool has_valid_domain() const noexcept override;
-
-  /**
-   * @private
-   *
-   * Parse the path from the provided input.
-   * Return true on success. Control characters not
-   * trimmed from the ends (they should have
-   * been removed if needed).
-   *
-   * The input is expected to be UTF-8.
-   *
-   * @see https://url.spec.whatwg.org/
-   */
-  ada_really_inline void parse_path(const std::string_view input);
-
-  /**
-   * Set the scheme for this URL. The provided scheme should be a valid
-   * scheme string, be lower-cased, not contain spaces or tabs. It should
-   * have no spurious trailing or leading content.
-   */
-  inline void set_scheme(std::string &&new_scheme) noexcept;
-
-  /**
-   * @private
-   *
-   * Take the scheme from another URL. The scheme string is moved from the
-   * provided url.
-   */
-  inline void copy_scheme(ada::url &&u) noexcept;
 
   /**
    * Returns a JSON string representation of this URL.
@@ -270,16 +231,6 @@ struct url : url_base {
   bool set_href(const std::string_view input);
 
   /**
-   * @private
-   *
-   * Sets the host or hostname according to override condition.
-   * Return true on success.
-   * @see https://url.spec.whatwg.org/#hostname-state
-   */
-  template <bool override_hostname = false>
-  bool set_host_or_hostname(std::string_view input);
-
-  /**
    * The password getter steps are to return this’s URL’s password.
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-password
@@ -305,44 +256,6 @@ struct url : url_base {
    * string.
    */
   [[nodiscard]] ada_really_inline bool has_credentials() const noexcept;
-
-  /**
-   * @private
-   *
-   * A URL cannot have a username/password/port if its host is null or the empty
-   * string, or its scheme is "file".
-   */
-  [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
-
-  /** @private */
-  ada_really_inline size_t
-  parse_port(std::string_view view,
-             bool check_trailing_content = false) noexcept override;
-
-  /**
-   * @private
-   *
-   * Take the scheme from another URL. The scheme string is copied from the
-   * provided url.
-   */
-  inline void copy_scheme(const ada::url &u);
-
-  /**
-   * @private
-   *
-   * Parse the host from the provided input. We assume that
-   * the input does not contain spaces or tabs. Control
-   * characters and spaces are not trimmed (they should have
-   * been removed if needed).
-   * Return true on success.
-   * @see https://url.spec.whatwg.org/#host-parsing
-   */
-  [[nodiscard]] ada_really_inline bool parse_host(std::string_view input);
-
-  /** @private */
-  template <bool has_state_override = false>
-  [[nodiscard]] ada_really_inline bool parse_scheme(
-      const std::string_view input);
 
   /**
    * Useful for implementing efficient serialization for the URL.
@@ -376,53 +289,44 @@ struct url : url_base {
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
       ada::url &url) noexcept;
 
-  /** @private */
   inline void update_unencoded_base_hash(std::string_view input);
-  /** @private */
   inline void update_base_hostname(std::string_view input);
-  /** @private */
   inline void update_base_search(std::string_view input);
-  /** @private */
   inline void update_base_search(std::string_view input,
                                  const uint8_t query_percent_encode_set[]);
-  /** @private */
   inline void update_base_search(std::optional<std::string> input);
-  /** @private */
   inline void update_base_pathname(const std::string_view input);
-  /** @private */
   inline void update_base_username(const std::string_view input);
-  /** @private */
   inline void update_base_password(const std::string_view input);
-  /** @private */
   inline void update_base_port(std::optional<uint16_t> input);
 
   /**
-   * @private
-   *
+   * Sets the host or hostname according to override condition.
+   * Return true on success.
+   * @see https://url.spec.whatwg.org/#hostname-state
+   */
+  template <bool override_hostname = false>
+  bool set_host_or_hostname(std::string_view input);
+
+  /**
    * Return true on success.
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
   [[nodiscard]] bool parse_ipv4(std::string_view input);
 
   /**
-   * @private
-   *
    * Return true on success.
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
   [[nodiscard]] bool parse_ipv6(std::string_view input);
 
   /**
-   * @private
-   *
    * Return true on success.
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
   [[nodiscard]] bool parse_opaque_host(std::string_view input);
 
   /**
-   * @private
-   *
    * A URL’s scheme is an ASCII string that identifies the type of URL and can
    * be used to dispatch a URL for further processing after parsing. It is
    * initially the empty string. We only set non_special_scheme when the scheme
@@ -432,6 +336,67 @@ struct url : url_base {
    * typically do not need to store them in each url instance.
    */
   std::string non_special_scheme{};
+
+  /**
+   * A URL cannot have a username/password/port if its host is null or the empty
+   * string, or its scheme is "file".
+   */
+  [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
+
+  ada_really_inline size_t
+  parse_port(std::string_view view,
+             bool check_trailing_content = false) noexcept override;
+
+  /**
+   * Take the scheme from another URL. The scheme string is copied from the
+   * provided url.
+   */
+  inline void copy_scheme(const ada::url &u);
+
+  /**
+   * Parse the host from the provided input. We assume that
+   * the input does not contain spaces or tabs. Control
+   * characters and spaces are not trimmed (they should have
+   * been removed if needed).
+   * Return true on success.
+   * @see https://url.spec.whatwg.org/#host-parsing
+   */
+  [[nodiscard]] ada_really_inline bool parse_host(std::string_view input);
+
+  template <bool has_state_override = false>
+  [[nodiscard]] ada_really_inline bool parse_scheme(
+      const std::string_view input);
+
+  inline void clear_pathname() override;
+  inline void clear_search() override;
+  inline bool has_hash() const override;
+  inline bool has_search() const override;
+  inline void set_protocol_as_file();
+
+  /**
+   * Parse the path from the provided input.
+   * Return true on success. Control characters not
+   * trimmed from the ends (they should have
+   * been removed if needed).
+   *
+   * The input is expected to be UTF-8.
+   *
+   * @see https://url.spec.whatwg.org/
+   */
+  ada_really_inline void parse_path(const std::string_view input);
+
+  /**
+   * Set the scheme for this URL. The provided scheme should be a valid
+   * scheme string, be lower-cased, not contain spaces or tabs. It should
+   * have no spurious trailing or leading content.
+   */
+  inline void set_scheme(std::string &&new_scheme) noexcept;
+
+  /**
+   * Take the scheme from another URL. The scheme string is moved from the
+   * provided url.
+   */
+  inline void copy_scheme(ada::url &&u) noexcept;
 
 };  // struct url
 

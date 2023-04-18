@@ -40,20 +40,8 @@ struct url_aggregator : url_base {
   bool set_pathname(const std::string_view input);
   void set_search(const std::string_view input);
   void set_hash(const std::string_view input);
-  inline void set_scheme(std::string_view new_scheme) noexcept;
-  /** @private fast function to set the scheme from a view with a colon in the
-   * buffer, does not change type */
-  inline void set_scheme_from_view_with_colon(
-      std::string_view new_scheme_with_colon) noexcept;
-
-  inline void copy_scheme(const url_aggregator &u) noexcept;
 
   [[nodiscard]] bool has_valid_domain() const noexcept override;
-
-  /** @private */
-  inline bool has_authority() const noexcept;
-  /** @private set this URL's type to file */
-  inline void set_protocol_as_file();
   /**
    * The origin getter steps are to return the serialization of this’s URL’s
    * origin. [HTML]
@@ -124,12 +112,6 @@ struct url_aggregator : url_base {
    */
   [[nodiscard]] std::string_view get_pathname() const noexcept;
   /**
-   * Returns true if neither the search, nor the hash nor the pathname
-   * have been set.
-   * @return true if the buffer is ready to receive the path.
-   */
-  [[nodiscard]] ada_really_inline bool is_at_path() const noexcept;
-  /**
    * Compute the pathname length in bytes witout instantiating a view or a
    * string.
    * @return size of the pathname in bytes
@@ -157,93 +139,6 @@ struct url_aggregator : url_base {
    * string.
    */
   [[nodiscard]] ada_really_inline bool has_credentials() const noexcept;
-
-  /**
-   * @private
-   *
-   * A URL cannot have a username/password/port if its host is null or the empty
-   * string, or its scheme is "file".
-   */
-  [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
-
-  /** @private */
-  template <bool override_hostname = false>
-  bool set_host_or_hostname(const std::string_view input);
-
-  /** @private */
-  ada_really_inline bool parse_host(std::string_view input);
-
-  /** @private */
-  inline void update_base_authority(std::string_view base_buffer,
-                                    const ada::url_components &base);
-  /** @private */
-  inline void update_unencoded_base_hash(std::string_view input);
-  /** @private */
-  inline void update_base_hostname(std::string_view input);
-  /** @private */
-  inline void update_base_search(std::string_view input);
-  /** @private */
-  inline void update_base_search(std::string_view input,
-                                 const uint8_t *query_percent_encode_set);
-  /** @private */
-  inline void update_base_pathname(const std::string_view input);
-  /** @private */
-  inline void update_base_username(const std::string_view input);
-  /** @private */
-  inline void append_base_username(const std::string_view input);
-  /** @private */
-  inline void update_base_password(const std::string_view input);
-  /** @private */
-  inline void append_base_password(const std::string_view input);
-  /** @private */
-  inline void update_base_port(uint32_t input);
-  /** @private */
-  inline void append_base_pathname(const std::string_view input);
-  /** @private */
-  inline uint32_t retrieve_base_port() const;
-  /** @private */
-  inline void clear_port();
-  /** @private if there is no hostname, then this function does nothing, if
-   * there is, we make it empty */
-  inline void clear_hostname();
-  /** @private */
-  inline void clear_hash();
-  /** @private */
-  inline void clear_pathname() override;
-  /** @private */
-  inline void clear_search() override;
-  /** @private */
-  inline void clear_password();
-  /** @private */
-  inline bool has_hash() const override;
-  /** @private */
-  inline bool has_search() const override;
-  /** @private */
-  inline bool has_dash_dot() const noexcept;
-  /** @private */
-  void delete_dash_dot();
-  /** @return true if it has an host but it is the empty string */
-  [[nodiscard]] inline bool has_empty_hostname() const noexcept;
-  /** @return true if it has a host (included an empty host) */
-  [[nodiscard]] inline bool has_hostname() const noexcept;
-  /** @private */
-  [[nodiscard]] inline bool has_non_empty_username() const noexcept;
-  /** @private */
-  [[nodiscard]] inline bool has_non_empty_password() const noexcept;
-  /** @private */
-  [[nodiscard]] inline bool has_password() const noexcept;
-  /** @return true if the URL has a (non default) port */
-  [[nodiscard]] inline bool has_port() const noexcept;
-  /** @private */
-  inline void consume_prepared_path(std::string_view input);
-  /** @private */
-  template <bool has_state_override = false>
-  [[nodiscard]] ada_really_inline bool parse_scheme_with_colon(
-      const std::string_view input);
-
-  /** @private */
-  ada_really_inline uint32_t replace_and_resize(uint32_t start, uint32_t end,
-                                                std::string_view input);
 
   /**
    * Useful for implementing efficient serialization for the URL.
@@ -284,58 +179,116 @@ struct url_aggregator : url_base {
    */
   bool validate() const noexcept;
 
-  /** @private */
-  inline void add_authority_slashes_if_needed() noexcept;
-
-  /**
-   * @private
-   * To optimize performance, you may indicate how much memory to allocate
-   * within this instance.
-   */
-  inline void reserve(uint32_t capacity);
-
-  /** @private */
-  ada_really_inline size_t
-  parse_port(std::string_view view,
-             bool check_trailing_content = false) noexcept override;
+  /** @return true if it has an host but it is the empty string */
+  [[nodiscard]] inline bool has_empty_hostname() const noexcept;
+  /** @return true if it has a host (included an empty host) */
+  [[nodiscard]] inline bool has_hostname() const noexcept;
+  [[nodiscard]] inline bool has_non_empty_username() const noexcept;
+  [[nodiscard]] inline bool has_non_empty_password() const noexcept;
+  [[nodiscard]] inline bool has_password() const noexcept;
+  /** @return true if the URL has a (non default) port */
+  [[nodiscard]] inline bool has_port() const noexcept;
+  inline bool has_hash() const override;
+  inline bool has_search() const override;
 
  private:
   friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
       std::string_view, const ada::url_aggregator *);
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<
       ada::url_aggregator>(ada::url_aggregator &url) noexcept;
-  /** @private */
-  std::string buffer{};
 
-  /** @private */
+  std::string buffer{};
   url_components components{};
 
   /**
-   * @private
-   *
+   * Returns true if neither the search, nor the hash nor the pathname
+   * have been set.
+   * @return true if the buffer is ready to receive the path.
+   */
+  [[nodiscard]] ada_really_inline bool is_at_path() const noexcept;
+
+  inline void add_authority_slashes_if_needed() noexcept;
+
+  /**
+   * To optimize performance, you may indicate how much memory to allocate
+   * within this instance.
+   */
+  inline void reserve(uint32_t capacity);
+
+  ada_really_inline size_t
+  parse_port(std::string_view view,
+             bool check_trailing_content = false) noexcept override;
+
+  /**
    * Return true on success.
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
   [[nodiscard]] bool parse_ipv4(std::string_view input);
 
   /**
-   * @private
-   *
    * Return true on success.
    * @see https://url.spec.whatwg.org/#concept-ipv6-parser
    */
   [[nodiscard]] bool parse_ipv6(std::string_view input);
 
   /**
-   * @private
-   *
    * Return true on success.
    * @see https://url.spec.whatwg.org/#concept-opaque-host-parser
    */
   [[nodiscard]] bool parse_opaque_host(std::string_view input);
 
-  /** @private */
   ada_really_inline void parse_path(std::string_view input);
+
+  /**
+   * A URL cannot have a username/password/port if its host is null or the empty
+   * string, or its scheme is "file".
+   */
+  [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
+
+  template <bool override_hostname = false>
+  bool set_host_or_hostname(const std::string_view input);
+
+  ada_really_inline bool parse_host(std::string_view input);
+
+  inline void update_base_authority(std::string_view base_buffer,
+                                    const ada::url_components &base);
+  inline void update_unencoded_base_hash(std::string_view input);
+  inline void update_base_hostname(std::string_view input);
+  inline void update_base_search(std::string_view input);
+  inline void update_base_search(std::string_view input,
+                                 const uint8_t *query_percent_encode_set);
+  inline void update_base_pathname(const std::string_view input);
+  inline void update_base_username(const std::string_view input);
+  inline void append_base_username(const std::string_view input);
+  inline void update_base_password(const std::string_view input);
+  inline void append_base_password(const std::string_view input);
+  inline void update_base_port(uint32_t input);
+  inline void append_base_pathname(const std::string_view input);
+  inline uint32_t retrieve_base_port() const;
+  inline void clear_port();
+  inline void clear_hostname();
+  inline void clear_hash();
+  inline void clear_pathname() override;
+  inline void clear_search() override;
+  inline void clear_password();
+  inline bool has_dash_dot() const noexcept;
+  void delete_dash_dot();
+  inline void consume_prepared_path(std::string_view input);
+  template <bool has_state_override = false>
+  [[nodiscard]] ada_really_inline bool parse_scheme_with_colon(
+      const std::string_view input);
+  ada_really_inline uint32_t replace_and_resize(uint32_t start, uint32_t end,
+                                                std::string_view input);
+  inline bool has_authority() const noexcept;
+  inline void set_protocol_as_file();
+  inline void set_scheme(std::string_view new_scheme) noexcept;
+  /**
+   * Fast function to set the scheme from a view with a colon in the
+   * buffer, does not change type.
+   */
+  inline void set_scheme_from_view_with_colon(
+      std::string_view new_scheme_with_colon) noexcept;
+  inline void copy_scheme(const url_aggregator &u) noexcept;
 
 };  // url_aggregator
 
