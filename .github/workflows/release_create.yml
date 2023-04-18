@@ -5,13 +5,13 @@ on:
     types: [closed]
 
 jobs:
-  release-create:
+  create-release:
     runs-on: ubuntu-latest
     if: >
       github.event.pull_request.merged == true &&
       github.event.pull_request.base.ref == 'main' &&
       startsWith(github.event.pull_request.head.ref, 'release/v') &&
-      github.actor == 'github-actions[bot]'
+      github.event.pull_request.head.committer.email == 'noreply@github.com'
       
     env:
       NEXT_RELEASE_TAG: ${{ github.event.pull_request.head.ref }}
@@ -19,9 +19,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Make TAG available for jobs
+      - name: Extract Tag from branch name
         run: |
           NEXT_RELEASE_TAG=$(echo $NEXT_RELEASE_TAG | sed 's/^release\///')
           echo "NEXT_RELEASE_TAG=${NEXT_RELEASE_TAG}" >> $GITHUB_ENV
+      
       - name: Target Release Tag
         run: echo "New tag $NEXT_RELEASE_TAG"
+
+      # - name: Amalgamation
+      #   run: |
+      #     ./singleheader/amalgamate.py

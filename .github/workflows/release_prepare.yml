@@ -64,10 +64,7 @@ jobs:
         run: cmake -B build && cmake --build build
       - name: Ada Test
         run: ctest --output-on-failure --test-dir build
-      
-      - name: Amalgamation
-        run: |
-          ./singleheader/amalgamate.py
+    
 
       - name: Create PR with code updates for new release
         uses: peter-evans/create-pull-request@v5
