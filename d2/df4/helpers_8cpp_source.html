@@ -215,9 +215,9 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="comment">// If url’s scheme is &quot;file&quot;, path’s size is 1, and path[0] is a normalized</span></div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <span class="comment">// Windows drive letter, then return.</span></div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>      first_delimiter == std::string_view::npos) {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>      first_delimiter == std::string_view::npos &amp;&amp; !path.empty()) {</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">checkers::is_normalized_windows_drive_letter</a>(</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>            std::string_view(path.data() + 1, first_delimiter - 1))) {</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>            helpers::substring(path, 1))) {</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    }</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  }</div>
@@ -239,9 +239,9 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <span class="comment">// If url’s scheme is &quot;file&quot;, path’s size is 1, and path[0] is a normalized</span></div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  <span class="comment">// Windows drive letter, then return.</span></div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp;</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>      first_delimiter == std::string_view::npos) {</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>      first_delimiter == std::string_view::npos &amp;&amp; !path.empty()) {</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">checkers::is_normalized_windows_drive_letter</a>(</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>            std::string_view(path.data() + 1, first_delimiter - 1))) {</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>            helpers::substring(path, 1))) {</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    }</div>
 <div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  }</div>
