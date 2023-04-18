@@ -716,8 +716,8 @@ inline bool url_aggregator::base_search_has_value() const {
   return components.search_start != url_components::omitted;
 }
 
-ada_really_inline bool url_aggregator::includes_credentials() const noexcept {
-  ada_log("url_aggregator::includes_credentials");
+ada_really_inline bool url_aggregator::has_credentials() const noexcept {
+  ada_log("url_aggregator::has_credentials");
   return has_non_empty_username() || has_non_empty_password();
 }
 

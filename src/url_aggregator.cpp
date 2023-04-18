@@ -38,8 +38,7 @@ template <bool has_state_override>
 
       // If url includes credentials or has a non-null port, and buffer is
       // "file", then return.
-      if ((includes_credentials() ||
-           components.port != url_components::omitted) &&
+      if ((has_credentials() || components.port != url_components::omitted) &&
           parsed_type == ada::scheme::type::FILE) {
         return true;
       }
@@ -82,8 +81,7 @@ template <bool has_state_override>
 
       // If url includes credentials or has a non-null port, and buffer is
       // "file", then return.
-      if ((includes_credentials() ||
-           components.port != url_components::omitted) &&
+      if ((has_credentials() || components.port != url_components::omitted) &&
           _buffer == "file") {
         return true;
       }
@@ -570,7 +568,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // empty string, and either url includes credentials or url’s port is
     // non-null, return.
     else if (host_view.empty() &&
-             (is_special() || includes_credentials() ||
+             (is_special() || has_credentials() ||
               components.port != url_components::omitted)) {
       return false;
     }
@@ -783,7 +781,7 @@ std::string ada::url_aggregator::to_string() const {
   helpers::encode_json(get_protocol(), back);
   answer.append("\",\n");
 
-  if (includes_credentials()) {
+  if (has_credentials()) {
     answer.append("\t\"username\":\"");
     helpers::encode_json(get_username(), back);
     answer.append("\",\n");

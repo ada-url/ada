@@ -149,7 +149,7 @@ bool urltestdata_encoding(const char* source) {
         }
 
         size_t host_start = out.host_start;
-        if (url.includes_credentials()) {
+        if (url.has_credentials()) {
           TEST_ASSERT(url.get_href()[out.host_start], '@',
                       "hostname should start with @");
           host_start++;

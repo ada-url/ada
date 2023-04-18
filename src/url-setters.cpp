@@ -50,7 +50,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
     // empty string, and either url includes credentials or url’s port is
     // non-null, return.
     else if (host_view.empty() &&
-             (is_special() || includes_credentials() || port.has_value())) {
+             (is_special() || has_credentials() || port.has_value())) {
       return false;
     }
 
