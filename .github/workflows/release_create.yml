@@ -1,0 +1,26 @@
+name: Release Create Workflow 
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.ref =~ /^release\/v\d+\.\d+\.\d+$/ &&
+      github.event.pull_request.user.login == github.actor
+    env:
+      NEXT_RELEASE_TAG: ${{ github.event.pull_request.head.ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Make TAG available for jobs
+        run: |
+          NEXT_RELEASE_TAG=$(echo $NEXT_RELEASE_TAG | sed 's/^release\///')
+          echo "NEXT_RELEASE_TAG=${NEXT_RELEASE_TAG}" >> $GITHUB_ENV
+      - name: Target Release Tag
+        run: echo "New tag $NEXT_RELEASE_TAG"
