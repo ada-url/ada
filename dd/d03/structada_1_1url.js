@@ -34,5 +34,7 @@ var structada_1_1url =
     [ "set_scheme", "dd/d03/structada_1_1url.html#ab5402b0ef8016726b432152975304b42", null ],
     [ "set_search", "dd/d03/structada_1_1url.html#a9a8f2b84b2298f2bfd26a13e80469bf1", null ],
     [ "set_username", "dd/d03/structada_1_1url.html#ac707d72cbe701a619a7ddeafa0562590", null ],
-    [ "to_string", "dd/d03/structada_1_1url.html#adfb7b5e6efd80467c30c81e6e6a4651a", null ]
+    [ "to_string", "dd/d03/structada_1_1url.html#adfb7b5e6efd80467c30c81e6e6a4651a", null ],
+    [ "ada::helpers::strip_trailing_spaces_from_opaque_path", "dd/d03/structada_1_1url.html#aa2ca8de64a5ea1479ff05ff7a7f6efcc", null ],
+    [ "ada::parser::parse_url", "dd/d03/structada_1_1url.html#a490db078b24eaca0d12c874fcd741b69", null ]
 ];

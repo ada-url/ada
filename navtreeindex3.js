@@ -1,5 +1,13 @@
 var NAVTREEINDEX3 =
 {
+"dd/d9c/unicode_8cpp.html#a7c997c07906bb9e6ce09e5bab8e8364f":[5,0,1,7,24],
+"dd/d9c/unicode_8cpp.html#a80fc8cdeb27824384b9228896d3666f0":[5,0,1,7,19],
+"dd/d9c/unicode_8cpp.html#a88bff92c3994ebce3d56fab5dd0ad6bc":[5,0,1,7,1],
+"dd/d9c/unicode_8cpp.html#a88d50e8b3c242e8b7f45dc362b7a7c04":[5,0,1,7,16],
+"dd/d9c/unicode_8cpp.html#a8bb663e948c6b3a9793ddef424ba795e":[5,0,1,7,3],
+"dd/d9c/unicode_8cpp.html#a8e4d69a9364a662aa6b27afee0b33237":[5,0,1,7,0],
+"dd/d9c/unicode_8cpp.html#aa68997eae390658825c090597114213d":[5,0,1,7,23],
+"dd/d9c/unicode_8cpp.html#ab69353b882a97069e4b290be2b1097f2":[5,0,1,7,2],
 "dd/d9c/unicode_8cpp.html#ab8f1dfd5acdce0079d239a4f6b0f23e5":[5,0,1,7,17],
 "dd/d9c/unicode_8cpp.html#ab9b70de07868ab60794c3079aa4db46f":[5,0,1,7,18],
 "dd/d9c/unicode_8cpp.html#abdc1927baa2569e9a1396252d83bb482":[5,0,1,7,9],
@@ -24,6 +32,7 @@ var NAVTREEINDEX3 =
 "files.html":[5,0],
 "functions.html":[4,3,0],
 "functions_func.html":[4,3,1],
+"functions_rela.html":[4,3,3],
 "functions_vars.html":[4,3,2],
 "globals.html":[5,1,0],
 "globals_defs.html":[5,1,1],
