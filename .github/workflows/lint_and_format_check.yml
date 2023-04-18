@@ -23,7 +23,7 @@ jobs:
           CXX: clang++-14
           LINT_AND_FORMAT_CHECK: true
 
-      - uses: @chartboost/ruff-action@e18ae971ccee1b2d7bbef113930f00c670b78da4 // v1.0.0
+      - uses: @chartboost/ruff-action@v1
         name: Lint with Ruff
         with:
           version: 0.0.261
