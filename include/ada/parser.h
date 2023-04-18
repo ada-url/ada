@@ -6,13 +6,19 @@
 #define ADA_PARSER_H
 
 #include "ada/state.h"
-#include "ada/url.h"
 #include "ada/encoding_type.h"
 #include "ada/expected.h"
-#include "ada/url_aggregator.h"
 
 #include <optional>
 #include <string_view>
+
+/**
+ * @private
+ */
+namespace ada {
+struct url_aggregator;
+struct url;
+}  // namespace ada
 
 /**
  * @namespace ada::parser

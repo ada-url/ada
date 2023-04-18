@@ -300,6 +300,10 @@ struct url_aggregator : url_base {
              bool check_trailing_content = false) noexcept override;
 
  private:
+  friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
+      std::string_view, const ada::url_aggregator *);
+  friend void ada::helpers::strip_trailing_spaces_from_opaque_path<
+      ada::url_aggregator>(ada::url_aggregator &url) noexcept;
   /** @private */
   std::string buffer{};
 
