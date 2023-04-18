@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 project(ada
   DESCRIPTION "Fast spec-compliant URL parser"
   LANGUAGES C CXX
-  VERSION 4.5.0
+  VERSION 2.1.0
 )
 
-set(ADA_LIB_VERSION "4.5.0" CACHE STRING "ada library version")
+set(ADA_LIB_VERSION "2.1.0" CACHE STRING "ada library version")
 set(ADA_LIB_SOVERSION "1" CACHE STRING "ada library soversion")
 
 include(GNUInstallDirs)
@@ -24,7 +24,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
 
-if(BUILD_TESTING OR ADA_BENCHMARKS)
+# We use Google Benchmark, but it does not build under several 32-bit systems.
+if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
   include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
   import_dependency(simdjson simdjson/simdjson 0a3a00c95665cc1fda760e121ba8d442945ede13)
   add_dependency(simdjson)
