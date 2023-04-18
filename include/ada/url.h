@@ -92,25 +92,6 @@ struct url : url_base {
   std::optional<std::string> hash{};
 
   /** @private */
-  inline void update_unencoded_base_hash(std::string_view input);
-  /** @private */
-  inline void update_base_hostname(std::string_view input);
-  /** @private */
-  inline void update_base_search(std::string_view input);
-  /** @private */
-  inline void update_base_search(std::string_view input,
-                                 const uint8_t query_percent_encode_set[]);
-  /** @private */
-  inline void update_base_search(std::optional<std::string> input);
-  /** @private */
-  inline void update_base_pathname(const std::string_view input);
-  /** @private */
-  inline void update_base_username(const std::string_view input);
-  /** @private */
-  inline void update_base_password(const std::string_view input);
-  /** @private */
-  inline void update_base_port(std::optional<uint16_t> input);
-  /** @private */
   inline void clear_pathname() override;
   /** @private */
   inline void clear_search() override;
@@ -388,10 +369,33 @@ struct url : url_base {
       const noexcept;
 
  private:
+  friend ada::url ada::parser::parse_url<ada::url>(std::string_view,
+                                                   const ada::url *);
   friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
       std::string_view, const ada::url_aggregator *);
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
       ada::url &url) noexcept;
+
+  /** @private */
+  inline void update_unencoded_base_hash(std::string_view input);
+  /** @private */
+  inline void update_base_hostname(std::string_view input);
+  /** @private */
+  inline void update_base_search(std::string_view input);
+  /** @private */
+  inline void update_base_search(std::string_view input,
+                                 const uint8_t query_percent_encode_set[]);
+  /** @private */
+  inline void update_base_search(std::optional<std::string> input);
+  /** @private */
+  inline void update_base_pathname(const std::string_view input);
+  /** @private */
+  inline void update_base_username(const std::string_view input);
+  /** @private */
+  inline void update_base_password(const std::string_view input);
+  /** @private */
+  inline void update_base_port(std::optional<uint16_t> input);
+
   /**
    * @private
    *
