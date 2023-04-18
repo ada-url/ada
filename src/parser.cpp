@@ -85,7 +85,7 @@ result_type parse_url(std::string_view user_input,
   helpers::trim_c0_whitespace(url_data);
 
   // Optimization opportunity. Most websites do not have fragment.
-  std::optional<std::string_view> fragment = helpers::prune_fragment(url_data);
+  std::optional<std::string_view> fragment = helpers::prune_hash(url_data);
   // We add it last so that an implementation like ada::url_aggregator
   // can append it last to its internal buffer, thus improving performance.
 
@@ -442,7 +442,7 @@ result_type parse_url(std::string_view user_input,
           // Otherwise, if c is not the EOF code point:
           else if (input_position != input_size) {
             // Set url’s query to null.
-            url.clear_base_search();
+            url.clear_search();
             if constexpr (result_type_is_ada_url) {
               // Shorten url’s path.
               helpers::shorten_path(url.path, url.type);
@@ -857,7 +857,7 @@ result_type parse_url(std::string_view user_input,
           // Otherwise, if c is not the EOF code point:
           else if (input_position != input_size) {
             // Set url’s query to null.
-            url.clear_base_search();
+            url.clear_search();
 
             // If the code point substring from pointer to the end of input does
             // not start with a Windows drive letter, then shorten url’s path.
@@ -874,11 +874,7 @@ result_type parse_url(std::string_view user_input,
             // Otherwise:
             else {
               // Set url’s path to an empty list.
-              if constexpr (result_type_is_ada_url) {
-                url.path.clear();
-              } else {
-                url.clear_base_pathname();
-              }
+              url.clear_pathname();
               url.has_opaque_path = true;
             }
 

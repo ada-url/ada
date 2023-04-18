@@ -84,7 +84,7 @@ ada_unused std::string get_state(ada::state s) {
   }
 }
 
-ada_really_inline std::optional<std::string_view> prune_fragment(
+ada_really_inline std::optional<std::string_view> prune_hash(
     std::string_view& input) noexcept {
   // compiles down to 20--30 instructions including a class to memchr (C
   // function). this function should be quite fast.
@@ -92,10 +92,10 @@ ada_really_inline std::optional<std::string_view> prune_fragment(
   if (location_of_first == std::string_view::npos) {
     return std::nullopt;
   }
-  std::string_view fragment = input;
-  fragment.remove_prefix(location_of_first + 1);
+  std::string_view hash = input;
+  hash.remove_prefix(location_of_first + 1);
   input.remove_suffix(input.size() - location_of_first);
-  return fragment;
+  return hash;
 }
 
 ada_really_inline bool shorten_path(std::string& path,
@@ -581,8 +581,8 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(
     url_type& url) noexcept {
   ada_log("helpers::strip_trailing_spaces_from_opaque_path");
   if (!url.has_opaque_path) return;
-  if (url.base_fragment_has_value()) return;
-  if (url.base_search_has_value()) return;
+  if (url.has_hash()) return;
+  if (url.has_search()) return;
 
   auto path = std::string(url.get_pathname());
   while (!path.empty() && path.back() == ' ') {

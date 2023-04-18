@@ -562,16 +562,16 @@ std::string url::to_string() const {
   answer.append("\",\n");
   answer.append("\t\"opaque path\":");
   answer.append((has_opaque_path ? "true" : "false"));
-  if (base_search_has_value()) {
+  if (has_search()) {
     answer.append(",\n");
     answer.append("\t\"query\":\"");
     helpers::encode_json(query.value(), back);
     answer.append("\"");
   }
-  if (fragment.has_value()) {
+  if (hash.has_value()) {
     answer.append(",\n");
-    answer.append("\t\"fragment\":\"");
-    helpers::encode_json(fragment.value(), back);
+    answer.append("\t\"hash\":\"");
+    helpers::encode_json(hash.value(), back);
     answer.append("\"");
   }
   answer.append("\n}");

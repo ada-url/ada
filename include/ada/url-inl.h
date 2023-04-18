@@ -105,7 +105,7 @@ size_t url::get_pathname_length() const noexcept { return path.size(); }
     }
   }
 
-  if (fragment.has_value()) {
+  if (hash.has_value()) {
     out.hash_start = uint32_t(running_index);
   }
 
@@ -116,8 +116,8 @@ inline void url::update_base_hostname(std::string_view input) { host = input; }
 
 inline void url::update_unencoded_base_hash(std::string_view input) {
   // We do the percent encoding
-  fragment = unicode::percent_encode(
-      input, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+  hash = unicode::percent_encode(input,
+                                 ada::character_sets::FRAGMENT_PERCENT_ENCODE);
 }
 
 inline void url::update_base_search(std::string_view input,
@@ -145,15 +145,13 @@ inline void url::update_base_port(std::optional<uint16_t> input) {
   port = input;
 }
 
-inline void url::clear_base_pathname() { path = ""; }
+inline void url::clear_pathname() { path.clear(); }
 
-inline void url::clear_base_search() { query = std::nullopt; }
+inline void url::clear_search() { query = std::nullopt; }
 
-inline bool url::base_fragment_has_value() const {
-  return fragment.has_value();
-}
+inline bool url::has_hash() const { return hash.has_value(); }
 
-inline bool url::base_search_has_value() const { return query.has_value(); }
+inline bool url::has_search() const { return query.has_value(); }
 
 inline void url::set_protocol_as_file() { type = ada::scheme::type::FILE; }
 
@@ -201,8 +199,8 @@ inline void url::copy_scheme(const ada::url &u) {
   if (query.has_value()) {
     output += "?" + query.value();
   }
-  if (fragment.has_value()) {
-    output += "#" + fragment.value();
+  if (hash.has_value()) {
+    output += "#" + hash.value();
   }
   return output;
 }

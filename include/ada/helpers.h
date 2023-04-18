@@ -30,7 +30,7 @@ void encode_json(std::string_view view, out_iter out);
  * This function is used to prune a fragment from a url, and returning the
  * removed string if input has fragment.
  *
- * @details prune_fragment seeks the first '#' and returns everything after it
+ * @details prune_hash seeks the first '#' and returns everything after it
  * as a string_view, and modifies (in place) the input so that it points at
  * everything before the '#'. If no '#' is found, the input is left unchanged
  * and std::nullopt is returned.
@@ -38,7 +38,7 @@ void encode_json(std::string_view view, out_iter out);
  * @attention The function is non-allocating and it does not throw.
  * @returns Note that the returned string_view might be empty!
  */
-ada_really_inline std::optional<std::string_view> prune_fragment(
+ada_really_inline std::optional<std::string_view> prune_hash(
     std::string_view& input) noexcept;
 
 /**

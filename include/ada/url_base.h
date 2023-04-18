@@ -96,16 +96,16 @@ struct url_base {
   virtual std::string to_string() const = 0;
 
   /** @private */
-  virtual inline void clear_base_pathname() = 0;
+  virtual inline void clear_pathname() = 0;
 
   /** @private */
-  virtual inline void clear_base_search() = 0;
+  virtual inline void clear_search() = 0;
 
   /** @private */
-  virtual inline bool base_fragment_has_value() const = 0;
+  virtual inline bool has_hash() const = 0;
 
   /** @private */
-  virtual inline bool base_search_has_value() const = 0;
+  virtual inline bool has_search() const = 0;
 
 };  // url_base
 

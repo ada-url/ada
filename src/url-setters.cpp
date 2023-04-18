@@ -150,7 +150,7 @@ bool url::set_port(const std::string_view input) {
 
 void url::set_hash(const std::string_view input) {
   if (input.empty()) {
-    fragment = std::nullopt;
+    hash = std::nullopt;
     helpers::strip_trailing_spaces_from_opaque_path(*this);
     return;
   }
@@ -158,8 +158,8 @@ void url::set_hash(const std::string_view input) {
   std::string new_value;
   new_value = input[0] == '#' ? input.substr(1) : input;
   helpers::remove_ascii_tab_or_newline(new_value);
-  fragment = unicode::percent_encode(
-      new_value, ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+  hash = unicode::percent_encode(new_value,
+                                 ada::character_sets::FRAGMENT_PERCENT_ENCODE);
   return;
 }
 
@@ -225,7 +225,7 @@ bool url::set_href(const std::string_view input) {
     port = out->port;
     path = out->path;
     query = out->query;
-    fragment = out->fragment;
+    hash = out->hash;
     type = out->type;
     non_special_scheme = out->non_special_scheme;
     has_opaque_path = out->has_opaque_path;
