@@ -256,7 +256,7 @@ $(document).ready(function(){initNavTree('d5/dee/url-setters_8cpp_source.html','
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">  151</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d03/structada_1_1url.html#ac5f3e0abdb99b836f142f991ea1c4283">url::set_hash</a>(<span class="keyword">const</span> std::string_view input) {</div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  <span class="keywordflow">if</span> (input.empty()) {</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    fragment = std::nullopt;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    hash = std::nullopt;</div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    helpers::strip_trailing_spaces_from_opaque_path(*<span class="keyword">this</span>);</div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  }</div>
@@ -264,8 +264,8 @@ $(document).ready(function(){initNavTree('d5/dee/url-setters_8cpp_source.html','
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>  std::string new_value;</div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>  new_value = input[0] == <span class="charliteral">&#39;#&#39;</span> ? input.substr(1) : input;</div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  helpers::remove_ascii_tab_or_newline(new_value);</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  fragment = <a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#a1c564a30bc61d41abd97cc6b8be084ff">unicode::percent_encode</a>(</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>      new_value, <a class="code hl_variable" href="../../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67">ada::character_sets::FRAGMENT_PERCENT_ENCODE</a>);</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  hash = <a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#a1c564a30bc61d41abd97cc6b8be084ff">unicode::percent_encode</a>(new_value,</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>                                 <a class="code hl_variable" href="../../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67">ada::character_sets::FRAGMENT_PERCENT_ENCODE</a>);</div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>  <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>}</div>
 <div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
@@ -331,7 +331,7 @@ $(document).ready(function(){initNavTree('d5/dee/url-setters_8cpp_source.html','
 <div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    port = out-&gt;port;</div>
 <div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    path = out-&gt;path;</div>
 <div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    query = out-&gt;query;</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    fragment = out-&gt;fragment;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    hash = out-&gt;hash;</div>
 <div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    type = out-&gt;type;</div>
 <div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    non_special_scheme = out-&gt;non_special_scheme;</div>
 <div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <a class="code hl_variable" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">has_opaque_path</a> = out-&gt;has_opaque_path;</div>

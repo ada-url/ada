@@ -192,7 +192,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  helpers::trim_c0_whitespace(url_data);</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="comment">// Optimization opportunity. Most websites do not have fragment.</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  std::optional&lt;std::string_view&gt; fragment = helpers::prune_fragment(url_data);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  std::optional&lt;std::string_view&gt; fragment = helpers::prune_hash(url_data);</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="comment">// We add it last so that an implementation like ada::url_aggregator</span></div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="comment">// can append it last to its internal buffer, thus improving performance.</span></div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
@@ -544,7 +544,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>          <span class="comment">// Otherwise, if c is not the EOF code point:</span></div>
 <div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>          <span class="keywordflow">else</span> <span class="keywordflow">if</span> (input_position != input_size) {</div>
 <div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>            <span class="comment">// Set url’s query to null.</span></div>
-<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_base_search();</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_search();</div>
 <div class="line"><a id="l00446" name="l00446"></a><span class="lineno">  446</span>            <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
 <div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>              <span class="comment">// Shorten url’s path.</span></div>
 <div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>              helpers::shorten_path(<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.path, <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.type);</div>
@@ -959,7 +959,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>          <span class="comment">// Otherwise, if c is not the EOF code point:</span></div>
 <div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>          <span class="keywordflow">else</span> <span class="keywordflow">if</span> (input_position != input_size) {</div>
 <div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>            <span class="comment">// Set url’s query to null.</span></div>
-<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_base_search();</div>
+<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_search();</div>
 <div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span> </div>
 <div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>            <span class="comment">// If the code point substring from pointer to the end of input does</span></div>
 <div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>            <span class="comment">// not start with a Windows drive letter, then shorten url’s path.</span></div>
@@ -976,45 +976,41 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>            <span class="comment">// Otherwise:</span></div>
 <div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>            <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>              <span class="comment">// Set url’s path to an empty list.</span></div>
-<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>              <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
-<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>                <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.path.clear();</div>
-<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>              } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>                <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_base_pathname();</div>
-<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>              }</div>
-<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>              <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_variable" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">has_opaque_path</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>            }</div>
-<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span> </div>
-<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>            <span class="comment">// Set state to path state and decrease pointer by 1.</span></div>
-<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>            <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5ffb5f0d0de78321df46fc7c93ca64a3">ada::state::PATH</a>;</div>
-<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>            <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>          }</div>
-<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>        }</div>
-<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>        <span class="comment">// Otherwise, set state to path state, and decrease pointer by 1.</span></div>
-<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>          ada_log(<span class="stringliteral">&quot;FILE go to path&quot;</span>);</div>
-<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5ffb5f0d0de78321df46fc7c93ca64a3">ada::state::PATH</a>;</div>
-<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>          <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>        }</div>
-<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span> </div>
-<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>        input_position++;</div>
-<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>      }</div>
-<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>      <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>        <a class="code hl_function" href="../../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d">ada::unreachable</a>();</div>
-<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>    }</div>
-<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>  }</div>
-<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>  <span class="keywordflow">if</span> (fragment.has_value()) {</div>
-<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>    <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.update_unencoded_base_hash(*fragment);</div>
-<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>  }</div>
-<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>  <span class="keywordflow">return</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>;</div>
-<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>}</div>
-<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span> </div>
-<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span><span class="keyword">template</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a> <a class="code hl_function" href="../../d6/da3/namespaceada_1_1parser.html#a0abcc72d74b95df866bb5741a6802e40">parse_url&lt;url&gt;</a>(std::string_view user_input,</div>
-<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>                            <span class="keyword">const</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>* base_url = <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span><span class="keyword">template</span> <a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a> <a class="code hl_function" href="../../d6/da3/namespaceada_1_1parser.html#ae218eecdf660d5149f20464a90730915">parse_url&lt;url_aggregator&gt;</a>(</div>
-<div class="line"><a id="l00913" name="l00913"></a><span class="lineno">  913</span>    std::string_view user_input, <span class="keyword">const</span> <a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a>* base_url = <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00914" name="l00914"></a><span class="lineno">  914</span> </div>
-<div class="line"><a id="l00915" name="l00915"></a><span class="lineno">  915</span>}  <span class="comment">// namespace ada::parser</span></div>
+<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>              <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_pathname();</div>
+<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>              <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_variable" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">has_opaque_path</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>            }</div>
+<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span> </div>
+<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>            <span class="comment">// Set state to path state and decrease pointer by 1.</span></div>
+<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>            <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5ffb5f0d0de78321df46fc7c93ca64a3">ada::state::PATH</a>;</div>
+<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>          }</div>
+<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>        }</div>
+<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>        <span class="comment">// Otherwise, set state to path state, and decrease pointer by 1.</span></div>
+<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>        <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>          ada_log(<span class="stringliteral">&quot;FILE go to path&quot;</span>);</div>
+<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5ffb5f0d0de78321df46fc7c93ca64a3">ada::state::PATH</a>;</div>
+<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>          <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>        }</div>
+<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span> </div>
+<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>        input_position++;</div>
+<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>      }</div>
+<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>      <span class="keywordflow">default</span>:</div>
+<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>        <a class="code hl_function" href="../../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d">ada::unreachable</a>();</div>
+<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>    }</div>
+<div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>  }</div>
+<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>  <span class="keywordflow">if</span> (fragment.has_value()) {</div>
+<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span>    <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.update_unencoded_base_hash(*fragment);</div>
+<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>  }</div>
+<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>  <span class="keywordflow">return</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>;</div>
+<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>}</div>
+<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span> </div>
+<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span><span class="keyword">template</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a> <a class="code hl_function" href="../../d6/da3/namespaceada_1_1parser.html#a0abcc72d74b95df866bb5741a6802e40">parse_url&lt;url&gt;</a>(std::string_view user_input,</div>
+<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>                            <span class="keyword">const</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>* base_url = <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span><span class="keyword">template</span> <a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a> <a class="code hl_function" href="../../d6/da3/namespaceada_1_1parser.html#ae218eecdf660d5149f20464a90730915">parse_url&lt;url_aggregator&gt;</a>(</div>
+<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>    std::string_view user_input, <span class="keyword">const</span> <a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a>* base_url = <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span> </div>
+<div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>}  <span class="comment">// namespace ada::parser</span></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
 <div class="ttc" id="acharacter__sets-inl_8h_html"><div class="ttname"><a href="../../da/d69/character__sets-inl_8h.html">character_sets-inl.h</a></div><div class="ttdoc">Definitions of the character sets used by unicode functions.</div></div>
 <div class="ttc" id="acommon__defs_8h_html"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html">common_defs.h</a></div><div class="ttdoc">Common definitions for cross-platform compiler support.</div></div>
@@ -1067,7 +1063,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="ttc" id="astructada_1_1url_html"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html">ada::url</a></div><div class="ttdoc">Generic URL struct reliant on std::string instantiation.</div><div class="ttdef"><b>Definition:</b> <a href="../../df/db8/url_8h_source.html#l00038">url.h:38</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_a0427d8495d50e40e13215d7b7e36fa63"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a0427d8495d50e40e13215d7b7e36fa63">ada::url::set_hostname</a></div><div class="ttdeci">bool set_hostname(const std::string_view input)</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/dee/url-setters_8cpp_source.html#l00099">url-setters.cpp:99</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_a1000c2e4b931739729c00ce724275925"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a1000c2e4b931739729c00ce724275925">ada::url::get_pathname</a></div><div class="ttdeci">const std::string_view get_pathname() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d25/url-getters_8cpp_source.html#l00062">url-getters.cpp:62</a></div></div>
-<div class="ttc" id="astructada_1_1url_html_a5500ad7f3289828e6bc654ebd0554bf4"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a5500ad7f3289828e6bc654ebd0554bf4">ada::url::get_href</a></div><div class="ttdeci">ada_really_inline std::string get_href() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../df/ddc/url-inl_8h_source.html#l00178">url-inl.h:178</a></div></div>
+<div class="ttc" id="astructada_1_1url_html_a5500ad7f3289828e6bc654ebd0554bf4"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a5500ad7f3289828e6bc654ebd0554bf4">ada::url::get_href</a></div><div class="ttdeci">ada_really_inline std::string get_href() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../df/ddc/url-inl_8h_source.html#l00176">url-inl.h:176</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_a716bea9e0b8f60b16c97b5268458da7f"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a716bea9e0b8f60b16c97b5268458da7f">ada::url::set_host</a></div><div class="ttdeci">bool set_host(const std::string_view input)</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/dee/url-setters_8cpp_source.html#l00095">url-setters.cpp:95</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_aa4f23a030f0adb5301962fd5b5e68f86"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#aa4f23a030f0adb5301962fd5b5e68f86">ada::url::get_hostname</a></div><div class="ttdeci">std::string get_hostname() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d25/url-getters_8cpp_source.html#l00058">url-getters.cpp:58</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_aea51f25837108e049b0b9ea834b7eec1"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1">ada::url::get_protocol</a></div><div class="ttdeci">std::string get_protocol() const noexcept</div><div class="ttdef"><b>Definition:</b> <a href="../../d5/d25/url-getters_8cpp_source.html#l00036">url-getters.cpp:36</a></div></div>

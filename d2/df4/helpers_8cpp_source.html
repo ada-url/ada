@@ -193,7 +193,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  }</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>}</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> std::optional&lt;std::string_view&gt; prune_fragment(</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> std::optional&lt;std::string_view&gt; prune_hash(</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    std::string_view&amp; input) <span class="keyword">noexcept</span> {</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="comment">// compiles down to 20--30 instructions including a class to memchr (C</span></div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="comment">// function). this function should be quite fast.</span></div>
@@ -201,10 +201,10 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keywordflow">if</span> (location_of_first == std::string_view::npos) {</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordflow">return</span> std::nullopt;</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  }</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  std::string_view fragment = input;</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  fragment.remove_prefix(location_of_first + 1);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  std::string_view hash = input;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  hash.remove_prefix(location_of_first + 1);</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  input.remove_suffix(input.size() - location_of_first);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="keywordflow">return</span> fragment;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="keywordflow">return</span> hash;</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>}</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> shorten_path(std::string&amp; path,</div>
@@ -663,8 +663,8 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span>    url_type&amp; url) <span class="keyword">noexcept</span> {</div>
 <div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span>  ada_log(<span class="stringliteral">&quot;helpers::strip_trailing_spaces_from_opaque_path&quot;</span>);</div>
 <div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span>  <span class="keywordflow">if</span> (!url.has_opaque_path) <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span>  <span class="keywordflow">if</span> (url.base_fragment_has_value()) <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>  <span class="keywordflow">if</span> (url.base_search_has_value()) <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span>  <span class="keywordflow">if</span> (url.has_hash()) <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>  <span class="keywordflow">if</span> (url.has_search()) <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00586" name="l00586"></a><span class="lineno">  586</span> </div>
 <div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>  <span class="keyword">auto</span> path = std::string(url.get_pathname());</div>
 <div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>  <span class="keywordflow">while</span> (!path.empty() &amp;&amp; path.back() == <span class="charliteral">&#39; &#39;</span>) {</div>

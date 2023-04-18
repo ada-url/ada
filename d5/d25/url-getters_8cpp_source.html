@@ -191,12 +191,11 @@ $(document).ready(function(){initNavTree('d5/d25/url-getters_8cpp_source.html','
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#a8c833c2d7549b00de6fa11252d6a5f09">   85</a></span>[[nodiscard]] std::string <a class="code hl_function" href="../../dd/d03/structada_1_1url.html#a8c833c2d7549b00de6fa11252d6a5f09">url::get_hash</a>() const noexcept {</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="comment">// If this’s URL’s fragment is either null or the empty string, then return</span></div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="comment">// the empty string. Return U+0023 (#), followed by this’s URL’s fragment.</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keywordflow">return</span> (!fragment.has_value() || (fragment.value().empty()))</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>             ? <span class="stringliteral">&quot;&quot;</span></div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>             : <span class="stringliteral">&quot;#&quot;</span> + fragment.value();</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>}</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keywordflow">return</span> (!hash.has_value() || (hash.value().empty())) ? <span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                                                       : <span class="stringliteral">&quot;#&quot;</span> + hash.value();</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>}</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}  <span class="comment">// namespace ada</span></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
 <div class="ttc" id="ahelpers_8h_html"><div class="ttname"><a href="../../d1/d98/helpers_8h.html">helpers.h</a></div><div class="ttdoc">Definitions for helper functions used within Ada.</div></div>
 <div class="ttc" id="aimplementation_8h_html"><div class="ttname"><a href="../../dd/d6b/implementation_8h.html">implementation.h</a></div><div class="ttdoc">Definitions for user facing functions for parsing URL and it's components.</div></div>
