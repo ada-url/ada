@@ -165,7 +165,7 @@ bool urltestdata_encoding(const char* source) {
                       "port should have been omitted " + out.to_string());
         }
 
-        if (url.get_pathname_length() > 0) {
+        if (!url.get_pathname().empty()) {
           size_t pathname_end = std::string::npos;
           if (out.search_start != ada::url_components::omitted) {
             pathname_end = out.search_start;
@@ -179,12 +179,12 @@ bool urltestdata_encoding(const char* source) {
               "pathname mismatch " + out.to_string() + " " + url.get_href());
         }
 
-        if (url.get_search().length() > 0) {
+        if (!url.get_search().empty()) {
           TEST_ASSERT(href.substr(out.search_start, url.get_search().size()),
                       url.get_search(), "search mismatch " + out.to_string());
         }
 
-        if (url.get_hash().length() > 0) {
+        if (!url.get_hash().empty()) {
           TEST_ASSERT(href.substr(out.hash_start, url.get_hash().size()),
                       url.get_hash(), "hash mismatch " + out.to_string());  //}
         }
