@@ -5,14 +5,14 @@
 #ifndef ADA_ADA_VERSION_H
 #define ADA_ADA_VERSION_H
 
-#define ADA_VERSION "1.0.4"
+#define ADA_VERSION "4.5.0"
 
 namespace ada {
 
 enum {
-  ADA_VERSION_MAJOR = 1,
-  ADA_VERSION_MINOR = 0,
-  ADA_VERSION_REVISION = 4,
+  ADA_VERSION_MAJOR = 4,
+  ADA_VERSION_MINOR = 5,
+  ADA_VERSION_REVISION = 0,
 };
 
 }  // namespace ada

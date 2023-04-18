@@ -147,3 +147,4 @@ The project can also be built via docker using default docker file of repository
 
 You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) by typing executing the Python
 3 script `singleheader/amalgamate.py`. By default, the files are created in the `singleheader` directory.
+
