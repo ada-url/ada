@@ -20,7 +20,7 @@ jobs:
   release-script-test:
     uses: ./.github/workflows/release-script-tests.yml
 
-  release:
+  prepare-release-and-pull-request:
     needs: release-script-test
     runs-on: ubuntu-latest
     if: ${{ needs.release-script-test.result == 'success' }}
@@ -35,7 +35,7 @@ jobs:
           key: venv-${{ hashFiles('tools/release/requirements.txt') }}
           restore-keys: venv-${{ hashFiles('tools/release/requirements.txt') }}
         
-      - name: Update versions
+      - name: Update source code versions
         run: |
           source ./tools/release/venv/bin/activate
           ./tools/release/update_versions.py
@@ -53,4 +53,4 @@ jobs:
           title: "chore: release ${{ env.NEXT_RELEASE_TAG }}"
           token: ${{ env.GITHUB_TOKEN }}
           body: |
-            This pull PR updates the source code version to ${{ env.NEXT_RELEASE_TAG }}.
+            This pull PR updates the source code version to ${{ env.NEXT_RELEASE_TAG }}

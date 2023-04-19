@@ -7,6 +7,9 @@ on:
 permissions:
   contents: write
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   release-script-test:
     uses: ./.github/workflows/release-script-tests.yml
