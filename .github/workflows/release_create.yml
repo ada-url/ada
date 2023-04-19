@@ -5,9 +5,14 @@ on:
     types: [closed]
 
 jobs:
+  release-script-test:
+    uses: ./.github/workflows/release-script-tests.yml
+
   create-release:
+    needs: release-script-test
     runs-on: ubuntu-latest
     if: >
+      ${{ needs.release-script-test.result == 'success' }} &&
       github.event.pull_request.merged == true &&
       github.event.pull_request.base.ref == 'main' &&
       startsWith(github.event.pull_request.head.ref, 'release/v') 
@@ -16,13 +21,13 @@ jobs:
       NEXT_RELEASE_TAG: ${{ github.event.pull_request.head.ref }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
 
       - name: Extract Tag from branch name
         run: |
           NEXT_RELEASE_TAG=$(echo $NEXT_RELEASE_TAG | sed 's/^release\///')
           echo "NEXT_RELEASE_TAG=${NEXT_RELEASE_TAG}" >> $GITHUB_ENV
-      
+        
       - name: Target Release Tag
         run: echo "New tag $NEXT_RELEASE_TAG"
 

@@ -18,27 +18,7 @@ permissions:
 
 jobs:
   release-script-test:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./tools/release
-
-    steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-      - name: Cache Python venv
-        uses: actions/cache@v3
-        with:
-          path: ./tools/release/venv
-          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
-      - name: Install dependencies
-        run: |
-          python3 -m venv venv
-          source ./venv/bin/activate
-          pip install -r requirements.txt
-      - name: Run tests
-        run: |
-          source ./venv/bin/activate
-          pytest -v
+    uses: ./.github/workflows/release-script-tests.yml
 
   release:
     needs: release-script-test
@@ -64,7 +44,6 @@ jobs:
         run: cmake -B build && cmake --build build
       - name: Ada Test
         run: ctest --output-on-failure --test-dir build
-    
 
       - name: Create PR with code updates for new release
         uses: peter-evans/create-pull-request@v5

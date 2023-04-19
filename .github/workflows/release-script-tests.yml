@@ -1,6 +1,7 @@
 name: Release Script Tests
 
 on:
+  workflow_call:
   push:
     branches:
       - "*"
@@ -20,6 +21,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Cache Python venv
+        uses: actions/cache@v3
+        with:
+          path: ./tools/release/venv
+          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
       - name: Install dependencies
         run: pip3 install -r requirements.txt
       - name: Run tests
