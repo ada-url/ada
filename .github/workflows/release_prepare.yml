@@ -54,8 +54,3 @@ jobs:
           token: ${{ env.GITHUB_TOKEN }}
           body: |
             This pull PR updates the source code version to ${{ env.NEXT_RELEASE_TAG }}.
-
-      # - name: "Create Release"
-      #   run: |
-      #     source ./tools/release/venv/bin/activate
-      #     ./tools/release/create_release.py

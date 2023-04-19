@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [closed]
 
+permissions:
+  contents: write
+
 jobs:
   release-script-test:
     uses: ./.github/workflows/release-script-tests.yml
@@ -22,15 +25,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Restore Python venv (Release script) from cache
+        uses: actions/cache@v3
+        with:
+          path: ./tools/release/venv
+          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
+          restore-keys: venv-${{ hashFiles('tools/release/requirements.txt') }}
 
       - name: Extract Tag from branch name
         run: |
           NEXT_RELEASE_TAG=$(echo $NEXT_RELEASE_TAG | sed 's/^release\///')
           echo "NEXT_RELEASE_TAG=${NEXT_RELEASE_TAG}" >> $GITHUB_ENV
-        
-      - name: Target Release Tag
+
+      - name: Target release Tag
         run: echo "New tag $NEXT_RELEASE_TAG"
 
-      # - name: Amalgamation
-      #   run: |
-      #     ./singleheader/amalgamate.py
+      - name: Amalgamation
+        run: |
+          ./singleheader/amalgamate.py
+      
+      - name: "Create release"
+        run: |
+          source ./tools/release/venv/bin/activate
+          ./tools/release/create_release.py
