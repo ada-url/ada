@@ -142,6 +142,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6dd2390a9e5d23ede0526c4dc0d4412d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b2bd4004b758be98dbdd86497bdc9e4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#a1b2bd4004b758be98dbdd86497bdc9e4">has_empty_hostname</a> () const noexcept</td></tr>
 <tr class="separator:a1b2bd4004b758be98dbdd86497bdc9e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b45b42592bbee7b8878ec22827c6bcf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#a2b45b42592bbee7b8878ec22827c6bcf">has_port</a> () const noexcept</td></tr>
+<tr class="separator:a2b45b42592bbee7b8878ec22827c6bcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a603d240f7f5dc42ebc9bbf9d25721d28"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#a603d240f7f5dc42ebc9bbf9d25721d28">has_hostname</a> () const noexcept</td></tr>
 <tr class="separator:a603d240f7f5dc42ebc9bbf9d25721d28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0ca7312c87ba04b6029137804fbae99"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#af0ca7312c87ba04b6029137804fbae99">has_valid_domain</a> () const noexcept override</td></tr>
@@ -196,6 +198,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2c444d911356018a1e06f7dddddcd53a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a166c9ff1373a6c292ba887355bb8407f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <a class="el" href="../../d3/d43/structada_1_1url__components.html">ada::url_components</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#a166c9ff1373a6c292ba887355bb8407f">get_components</a> () const noexcept</td></tr>
 <tr class="separator:a166c9ff1373a6c292ba887355bb8407f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ae3ddc86f62e2003a53bb7febd04405"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#a3ae3ddc86f62e2003a53bb7febd04405">has_hash</a> () const noexcept override</td></tr>
+<tr class="separator:a3ae3ddc86f62e2003a53bb7febd04405"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb1751e62c4d2cb124108a3fb4c1618a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html#afb1751e62c4d2cb124108a3fb4c1618a">has_search</a> () const noexcept override</td></tr>
+<tr class="separator:afb1751e62c4d2cb124108a3fb4c1618a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_structada_1_1url__base"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_structada_1_1url__base')"><img src="../../closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="../../db/d75/structada_1_1url__base.html">ada::url_base</a></td></tr>
 <tr class="memitem:a199631ce6f8fe9849f2cca80f875b0c4 inherit pub_methods_structada_1_1url__base"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d75/structada_1_1url__base.html#a199631ce6f8fe9849f2cca80f875b0c4">~url_base</a> ()=default</td></tr>
 <tr class="separator:a199631ce6f8fe9849f2cca80f875b0c4 inherit pub_methods_structada_1_1url__base"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -363,7 +369,7 @@ Additional Inherited Members</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>a newly constructed component.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31">https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00041">41</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00045">45</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a867f628fcb4da6f36cd5e87d93cc3cbf">ada::checkers::begins_with()</a>, <a class="el" href="../../d7/d6c/namespaceada_1_1helpers.html#a32aaa683783ad16614972ffaa5525ac8">ada::helpers::fast_digit_count()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1">get_protocol()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a049adbb069b60b2157bb9f1b5d9d3f8b">get_search()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a2c444d911356018a1e06f7dddddcd53a">has_credentials()</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">ada::url_base::has_opaque_path</a>, and <a class="el" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">ada::url_components::protocol_end</a>.</p>
 
@@ -488,7 +494,7 @@ Additional Inherited Members</h2></td></tr>
 <dd>
 <a href="https://url.spec.whatwg.org/#concept-url-serializer">https://url.spec.whatwg.org/#concept-url-serializer</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00176">176</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00180">180</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a867f628fcb4da6f36cd5e87d93cc3cbf">ada::checkers::begins_with()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#abf05247468983609663574fcec0d2078">get_password()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#acef0e8c266e5586b15e2dcab5c7f566f">get_port()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1">get_protocol()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a2c444d911356018a1e06f7dddddcd53a">has_credentials()</a>, and <a class="el" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">ada::url_base::has_opaque_path</a>.</p>
 
@@ -616,7 +622,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Compute the pathname length in bytes witout instantiating a view or a string. </p><dl class="section return"><dt>Returns</dt><dd>size of the pathname in bytes </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-pathname">https://url.spec.whatwg.org/#dom-url-pathname</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00039">39</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00043">43</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
 
 </div>
 </div>
@@ -798,7 +804,37 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>true if it has an host but it is the empty string </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00026">26</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00030">30</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+
+</div>
+</div>
+<a id="a3ae3ddc86f62e2003a53bb7febd04405" name="a3ae3ddc86f62e2003a53bb7febd04405"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ae3ddc86f62e2003a53bb7febd04405">&#9670;&#160;</a></span>has_hash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ada::url::has_hash </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if the URL has a hash component </dd></dl>
+
+<p>Implements <a class="el" href="../../db/d75/structada_1_1url__base.html">ada::url_base</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00156">156</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
 
 </div>
 </div>
@@ -826,7 +862,67 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>true if it has a host (included an empty host) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00032">32</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00036">36</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+
+</div>
+</div>
+<a id="a2b45b42592bbee7b8878ec22827c6bcf" name="a2b45b42592bbee7b8878ec22827c6bcf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b45b42592bbee7b8878ec22827c6bcf">&#9670;&#160;</a></span>has_port()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> bool ada::url::has_port </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if the URL has a (non default) port </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00022">22</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+
+</div>
+</div>
+<a id="afb1751e62c4d2cb124108a3fb4c1618a" name="afb1751e62c4d2cb124108a3fb4c1618a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb1751e62c4d2cb124108a3fb4c1618a">&#9670;&#160;</a></span>has_search()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ada::url::has_search </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>true if the URL has a search component </dd></dl>
+
+<p>Implements <a class="el" href="../../db/d75/structada_1_1url__base.html">ada::url_base</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="../../df/ddc/url-inl_8h_source.html#l00158">158</a> of file <a class="el" href="../../df/ddc/url-inl_8h_source.html">url-inl.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#adfb7b5e6efd80467c30c81e6e6a4651a">to_string()</a>.</p>
 
 </div>
 </div>
@@ -1179,7 +1275,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d0e/url_8cpp_source.html#l00532">532</a> of file <a class="el" href="../../d6/d0e/url_8cpp_source.html">url.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1">get_protocol()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a2c444d911356018a1e06f7dddddcd53a">has_credentials()</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">ada::url_base::has_opaque_path</a>, and <a class="el" href="../../db/d75/structada_1_1url__base.html#a5b7742e4d4d63f7829dd1e510eba88b0">ada::url_base::is_valid</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1">get_protocol()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a2c444d911356018a1e06f7dddddcd53a">has_credentials()</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">ada::url_base::has_opaque_path</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#afb1751e62c4d2cb124108a3fb4c1618a">has_search()</a>, and <a class="el" href="../../db/d75/structada_1_1url__base.html#a5b7742e4d4d63f7829dd1e510eba88b0">ada::url_base::is_valid</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed">ada::operator&lt;&lt;()</a>.</p>
 
