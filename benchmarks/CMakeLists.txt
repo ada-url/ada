@@ -32,6 +32,15 @@ target_link_libraries(percent_encode PRIVATE ada)
 target_include_directories(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
+
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    # The model_bench program requires accurate/low-overhead performance counters.
+    # We only have such support under Linux.
+    add_executable(model_bench model_bench.cpp)
+    target_link_libraries(model_bench PRIVATE ada)
+    target_compile_definitions(model_bench PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
+endif()
+
 include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
 
 set_off(BENCHMARK_ENABLE_TESTING)

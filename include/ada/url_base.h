@@ -102,10 +102,10 @@ struct url_base {
   virtual inline void clear_search() = 0;
 
   /** @private */
-  virtual inline bool has_hash() const = 0;
+  virtual inline bool has_hash() const noexcept = 0;
 
   /** @private */
-  virtual inline bool has_search() const = 0;
+  virtual inline bool has_search() const noexcept = 0;
 
 };  // url_base
 
