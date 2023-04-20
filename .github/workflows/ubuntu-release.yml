@@ -1,0 +1,28 @@
+name: Ubuntu 22.04 (Release build)
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  ubuntu-release-build:
+    if: >-
+      ! contains(toJSON(github.event.commits.*.message), '[skip ci]') &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip github]')
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        cxx: [g++-12, clang++-14]
+    steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
+      - name: Prepare
+        run: cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -G Ninja -B build
+        env:
+          CXX: ${{matrix.cxx}}
+      - name: Build
+        run: cmake --build build -j=2
+      - name: Test
+        run: ctest --output-on-failure --test-dir build
