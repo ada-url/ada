@@ -704,12 +704,12 @@ inline void url_aggregator::clear_hostname() {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline bool url_aggregator::has_hash() const {
+[[nodiscard]] inline bool url_aggregator::has_hash() const noexcept {
   ada_log("url_aggregator::has_hash");
   return components.hash_start != url_components::omitted;
 }
 
-inline bool url_aggregator::has_search() const {
+[[nodiscard]] inline bool url_aggregator::has_search() const noexcept {
   ada_log("url_aggregator::has_search");
   return components.search_start != url_components::omitted;
 }

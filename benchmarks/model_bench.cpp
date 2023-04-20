@@ -87,9 +87,9 @@ std::vector<stat_numbers> collect_values(
       numbers[i].href = url->get_href();
       numbers[i].components = url->get_components();
       numbers[i].has_port = url->has_port();
-      numbers[i].has_credentials = url->includes_credentials();
-      numbers[i].has_fragment = url->base_fragment_has_value();
-      numbers[i].has_search = url->base_search_has_value();
+      numbers[i].has_credentials = url->has_credentials();
+      numbers[i].has_fragment = url->has_hash();
+      numbers[i].has_search = url->has_search();
     } else {
       numbers[i].is_valid = false;
     }

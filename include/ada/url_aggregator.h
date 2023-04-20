@@ -183,13 +183,18 @@ struct url_aggregator : url_base {
   [[nodiscard]] inline bool has_empty_hostname() const noexcept;
   /** @return true if it has a host (included an empty host) */
   [[nodiscard]] inline bool has_hostname() const noexcept;
+  /** @return true if the URL has a non-empty username */
   [[nodiscard]] inline bool has_non_empty_username() const noexcept;
+  /** @return true if the URL has a non-empty password */
   [[nodiscard]] inline bool has_non_empty_password() const noexcept;
-  [[nodiscard]] inline bool has_password() const noexcept;
   /** @return true if the URL has a (non default) port */
   [[nodiscard]] inline bool has_port() const noexcept;
-  inline bool has_hash() const override;
-  inline bool has_search() const override;
+  /** @return true if the URL has a password */
+  [[nodiscard]] inline bool has_password() const noexcept;
+  /** @return true if the URL has a hash component */
+  [[nodiscard]] inline bool has_hash() const noexcept override;
+  /** @return true if the URL has a search component */
+  [[nodiscard]] inline bool has_search() const noexcept override;
 
  private:
   friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
