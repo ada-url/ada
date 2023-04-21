@@ -20,6 +20,7 @@ function(add_cpp_test TEST_NAME)
   endif()
   if(ADA_SANITIZE_UNDEFINED)
     add_compile_options(-fsanitize=undefined -fno-sanitize-recover=all)
+    add_link_options(-fsanitize=undefined)
   endif()
   # Add the compile target
   if (ARGS_LIBRARY)
