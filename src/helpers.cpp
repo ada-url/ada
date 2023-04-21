@@ -210,7 +210,9 @@ ada_really_inline size_t find_next_host_delimiter_special(
   auto index_of_first_set_byte = [](uint64_t v) {
     return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
   };
-  auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+  auto broadcast = [](uint8_t v) -> uint64_t {
+    return 0x101010101010101ull * v;
+  };
   size_t i = location;
   uint64_t mask1 = broadcast(':');
   uint64_t mask2 = broadcast('/');
@@ -273,7 +275,9 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
   auto index_of_first_set_byte = [](uint64_t v) {
     return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
   };
-  auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+  auto broadcast = [](uint8_t v) -> uint64_t {
+    return 0x101010101010101ull * v;
+  };
   size_t i = location;
   uint64_t mask1 = broadcast(':');
   uint64_t mask2 = broadcast('/');
@@ -599,7 +603,9 @@ find_authority_delimiter_special(std::string_view view) noexcept {
   auto index_of_first_set_byte = [](uint64_t v) {
     return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
   };
-  auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+  auto broadcast = [](uint8_t v) -> uint64_t {
+    return 0x101010101010101ull * v;
+  };
   size_t i = 0;
   uint64_t mask1 = broadcast('@');
   uint64_t mask2 = broadcast('/');
@@ -647,7 +653,9 @@ find_authority_delimiter(std::string_view view) noexcept {
   auto index_of_first_set_byte = [](uint64_t v) {
     return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
   };
-  auto broadcast = [](uint8_t v) -> uint64_t { return 0x101010101010101 * v; };
+  auto broadcast = [](uint8_t v) -> uint64_t {
+    return 0x101010101010101ull * v;
+  };
   size_t i = 0;
   uint64_t mask1 = broadcast('@');
   uint64_t mask2 = broadcast('/');
