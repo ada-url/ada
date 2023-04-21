@@ -94,10 +94,10 @@ def test_get_last_release(mocker):
     last_release = release.get_last_release(repo_stub)
     assert last_release.created_at == datetime(2023, 4, 1)
 
-    # Should return the repo (in case there are no releases yet)
+    # Should return None (in case there are no releases yet)
     mocker.patch.object(repo_stub, "get_releases", return_value=[])
     last_release = release.get_last_release(repo_stub)
-    assert last_release.created_at == repo_stub.created_at
+    assert last_release == None
 
 
 def test_get_release_merged_pulls():
