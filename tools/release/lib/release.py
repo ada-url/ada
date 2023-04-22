@@ -2,7 +2,9 @@
 
 import re
 from typing import Optional, List, Set, Union, Type
-from github import PullRequest, GitRelease, Repository
+from github.PullRequest import PullRequest
+from github.GitRelease import GitRelease
+from github.Repository import Repository
 
 
 def is_valid_tag(tag: str) -> bool:
