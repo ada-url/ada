@@ -35,7 +35,8 @@ def get_sorted_merged_pulls(
     # Get merged pulls after last release
     if not last_release:
         return sorted(
-            (pull for pull in pulls if pull.merged), key=lambda pull: pull.merged_at
+            (pull for pull in pulls if pull.merged and not pull.title.startswith("chore: release")),
+            key=lambda pull: pull.merged_at
         )
 
     return sorted(
