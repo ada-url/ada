@@ -28,12 +28,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-      - name: Restore Python venv (Release script) from cache
-        uses: actions/cache@v3
-        with:
-          path: ./tools/release/venv
-          key: venv-${{ hashFiles('tools/release/requirements.txt') }}
-          restore-keys: venv-${{ hashFiles('tools/release/requirements.txt') }}
+      
+      - name: Install dependencies
+        run: pip3 install -r requirements.txt
 
       - name: Extract Tag from branch name
         run: |
@@ -44,10 +41,7 @@ jobs:
         run: echo "New tag $NEXT_RELEASE_TAG"
 
       - name: Amalgamation
-        run: |
-          ./singleheader/amalgamate.py
+        run: ./singleheader/amalgamate.py
       
       - name: "Create release"
-        run: |
-          source ./tools/release/venv/bin/activate
-          ./tools/release/create_release.py
+        run: ./tools/release/create_release.py
