@@ -35,8 +35,12 @@ def get_sorted_merged_pulls(
     # Get merged pulls after last release
     if not last_release:
         return sorted(
-            (pull for pull in pulls if pull.merged and not pull.title.startswith("chore: release")),
-            key=lambda pull: pull.merged_at
+            (
+                pull
+                for pull in pulls
+                if pull.merged and not pull.title.startswith("chore: release")
+            ),
+            key=lambda pull: pull.merged_at,
         )
 
     return sorted(
@@ -118,7 +122,7 @@ def multiple_contributors_mention_md(contributors: List[str]) -> str:
         contrib_by = (
             contrib_by[:last_comma].strip()
             + " and "
-            + contrib_by[last_comma + 1:].strip()
+            + contrib_by[last_comma + 1 :].strip()
         )
     return contrib_by
 
