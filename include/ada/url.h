@@ -93,6 +93,8 @@ struct url : url_base {
 
   /** @return true if it has an host but it is the empty string */
   [[nodiscard]] inline bool has_empty_hostname() const noexcept;
+  /** @return true if the URL has a (non default) port */
+  [[nodiscard]] inline bool has_port() const noexcept;
   /** @return true if it has a host (included an empty host) */
   [[nodiscard]] inline bool has_hostname() const noexcept;
   [[nodiscard]] bool has_valid_domain() const noexcept override;
@@ -280,7 +282,10 @@ struct url : url_base {
    */
   [[nodiscard]] ada_really_inline ada::url_components get_components()
       const noexcept;
-
+  /** @return true if the URL has a hash component */
+  [[nodiscard]] inline bool has_hash() const noexcept override;
+  /** @return true if the URL has a search component */
+  [[nodiscard]] inline bool has_search() const noexcept override;
  private:
   friend ada::url ada::parser::parse_url<ada::url>(std::string_view,
                                                    const ada::url *);
@@ -369,8 +374,6 @@ struct url : url_base {
 
   inline void clear_pathname() override;
   inline void clear_search() override;
-  inline bool has_hash() const override;
-  inline bool has_search() const override;
   inline void set_protocol_as_file();
 
   /**

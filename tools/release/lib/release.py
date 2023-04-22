@@ -199,7 +199,7 @@ def contruct_release_notes(repository: Repository, next_tag_name: str) -> str:
         repo_name, sorted_merged_pulls, new_contributors
     )
 
-    notes = "## What's Changed\n"
+    notes = "## What's changed\n"
     for changes in whats_changed:
         notes += changes + "\n"
 

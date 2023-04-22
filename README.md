@@ -128,6 +128,13 @@ url->set_hash("is-this-the-real-life");
 See the file `tests/installation/CMakeLists.txt` for an example of how you might use ada from your own
 CMake project, after having installed ada on your system.
 
+## Installation
+
+### Homebrew
+
+Ada is available through [Homebrew](https://formulae.brew.sh/formula/ada-url#default).
+You can install Ada using `brew install ada-url`.
+
 ## Contributing
 
 ### Building

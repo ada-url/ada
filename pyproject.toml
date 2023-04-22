@@ -1,0 +1,28 @@
+[tool.ruff]
+select = [
+  "C90",    # McCabe cyclomatic complexity
+  "E",      # pycodestyle
+  "F",      # Pyflakes
+  "ICN",    # flake8-import-conventions
+  "INT",    # flake8-gettext
+  "PLC",    # Pylint conventions
+  "PLE",    # Pylint errors
+  "PLR09",  # Pylint refactoring: max-args, max-branches, max returns, max-statements
+  "PYI",    # flake8-pyi
+  "RSE",    # flake8-raise
+  "RUF",    # Ruff-specific rules
+  "T10",    # flake8-debugger
+  "TCH",    # flake8-type-checking
+  "TID",    # flake8-tidy-imports
+  "W",      # pycodestyle
+  "YTT",    # flake8-2020
+]
+exclude = [
+  "docs",
+  "tests",
+]
+ignore = [
+  "E722"   # Do not use bare `except`
+]
+line-length = 120
+target-version = "py37"
