@@ -38,7 +38,9 @@ def get_sorted_merged_pulls(
             (
                 pull
                 for pull in pulls
-                if pull.merged and not pull.title.startswith("chore: release")
+                if pull.merged
+                and not pull.title.startswith("chore: release")
+                and not pull.user.login.startswith("github-actions")
             ),
             key=lambda pull: pull.merged_at,
         )
