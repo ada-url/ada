@@ -41,7 +41,7 @@ jobs:
         run: ctest --output-on-failure --test-dir build
 
       - name: Create PR with code updates for new release
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@f3a21bf3404eae73a97f65817ab35f351a1a63fe #v5.0.0
         with:
           commit-message: "chore: release ${{ env.NEXT_RELEASE_TAG }}"
           branch: "release/${{ env.NEXT_RELEASE_TAG }}"
