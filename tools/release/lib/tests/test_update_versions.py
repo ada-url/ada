@@ -9,14 +9,14 @@ def test_update_cmakelists_version():
 
     versions.update_cmakelists_version("2.0.0", sample_path)
 
-    with open(sample_path, 'r') as cmake:
+    with open(sample_path, "r") as cmake:
         given = cmake.read()
 
-    with open(sample_expected_path, 'r') as cmake_expected:
+    with open(sample_expected_path, "r") as cmake_expected:
         expected = cmake_expected.read()
 
     assert given == expected
-    versions.update_cmakelists_version("1.0.0", sample_path) # cleanup
+    versions.update_cmakelists_version("1.0.0", sample_path)  # cleanup
 
 
 def test_update_ada_version_h():
@@ -26,14 +26,14 @@ def test_update_ada_version_h():
 
     versions.update_ada_version_h("2.0.0", sample_path)
 
-    with open(sample_path, 'r') as ada_version_h:
+    with open(sample_path, "r") as ada_version_h:
         given = ada_version_h.read()
 
-    with open(sample_expected_path, 'r') as ada_version_h_expected:
+    with open(sample_expected_path, "r") as ada_version_h_expected:
         expected = ada_version_h_expected.read()
 
     assert given == expected
-    versions.update_ada_version_h("1.0.0", sample_path) # cleanup
+    versions.update_ada_version_h("1.0.0", sample_path)  # cleanup
 
 
 def test_update_doxygen_version():
@@ -43,11 +43,11 @@ def test_update_doxygen_version():
 
     versions.update_doxygen_version("2.0.0", sample_path)
 
-    with open(sample_path, 'r') as doxygen:
+    with open(sample_path, "r") as doxygen:
         given = doxygen.read()
 
-    with open(sample_expected_path, 'r') as doxygen_expected:
+    with open(sample_expected_path, "r") as doxygen_expected:
         expected = doxygen_expected.read()
 
     assert given == expected
-    versions.update_ada_version_h("1.0.0", sample_path) # cleanup
+    versions.update_ada_version_h("1.0.0", sample_path)  # cleanup

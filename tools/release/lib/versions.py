@@ -4,7 +4,7 @@ import fileinput
 import re
 
 
-def update_cmakelists_version(new_version, file_path):
+def update_cmakelists_version(new_version: str, file_path: str) -> None:
     inside_project = False
     with fileinput.FileInput(file_path, inplace=True) as cmakelists:
         for line in cmakelists:
@@ -20,7 +20,7 @@ def update_cmakelists_version(new_version, file_path):
             print(line, end="")
 
 
-def update_ada_version_h(new_version, file_path):
+def update_ada_version_h(new_version: str, file_path: str) -> None:
     new_version_list = new_version.split(".")
     with fileinput.FileInput(file_path, inplace=True) as ada_version_h:
         inside_enum = False
@@ -41,7 +41,7 @@ def update_ada_version_h(new_version, file_path):
             print(line, end="")
 
 
-def update_doxygen_version(new_version, file_path):
+def update_doxygen_version(new_version: str, file_path: str) -> None:
     with fileinput.FileInput(file_path, inplace=True) as doxygen:
         for line in doxygen:
             if line.strip().startswith("PROJECT_NUMBER         ="):

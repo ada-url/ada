@@ -3,10 +3,18 @@ from datetime import datetime
 from collections import namedtuple
 
 Release = namedtuple("Release", ["title", "created_at"])
-PullRequest = namedtuple(
-    "PullRequest", ["title", "number", "state", "merged", "merged_at", "user"]
-)
 User = namedtuple("User", ["login"])
+Commit = namedtuple("Commit", ["author", "commit"])
+CommitMessage = namedtuple("CommitMessage", ["message"])
+PullRequestTuple = namedtuple(
+    "PullRequest",
+    ["title", "number", "state", "merged", "merged_at", "user", "commits"],
+)
+
+
+class PullRequest(PullRequestTuple):
+    def get_commits(self):
+        return self.commits
 
 
 class RepoStub:
@@ -24,177 +32,405 @@ class RepoStub:
 
     @staticmethod
     def get_pulls(state="closed"):
-        return filter(
-            lambda pull: pull.state == state,
-            [
-                PullRequest(
-                    "Feature 1",
-                    10,
-                    "open",
-                    False,
-                    datetime(2023, 2, 2),
-                    User("contr_1"),
-                ),
-                PullRequest(
-                    "Refactoring 1",
-                    11,
-                    "closed",
-                    True,
-                    datetime(2023, 2, 3),
-                    User("contr_2"),
-                ),
-                PullRequest(
-                    "Feature 2",
-                    12,
-                    "closed",
-                    True,
-                    datetime(2023, 5, 4),
-                    User("new_contr_1"),
-                ),
-                PullRequest(
-                    "Feature 10",
-                    22,
-                    "closed",
-                    True,
-                    datetime(2023, 5, 11),
-                    User("contr_2"),
-                ),
-                PullRequest(
-                    "Feature 3",
-                    13,
-                    "closed",
-                    False,
-                    datetime(2023, 5, 9),
-                    User("contr_3"),
-                ),
-                PullRequest(
-                    "Refactoring",
-                    15,
-                    "closed",
-                    True,
-                    datetime(2023, 5, 10),
-                    User("new_contr_2"),
-                ),
-                PullRequest(
-                    "Feature 10",
-                    142,
-                    "open",
-                    False,
-                    datetime(2023, 5, 10),
-                    User("contr_3"),
-                ),
-            ],
+        return list(
+            filter(
+                lambda pull: pull.state == state,
+                [
+                    PullRequest(
+                        title="Feature 1",
+                        number=1,
+                        state="open",
+                        merged=False,
+                        merged_at=datetime(2023, 2, 2),
+                        user=User("contributor_1"),
+                        commits=[
+                            Commit(
+                                User("contributor_1"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("contributor_1"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("contributor_1"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("contributor_1"),
+                                CommitMessage("src: sample commit 4"),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 2",
+                        number=2,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 2, 1),
+                        user=User("contributor_2"),
+                        commits=[
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage(
+                                    "Co-authored-by: old_contrib_coauthor2 <the@email>"
+                                ),
+                            ),
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage("src: sample commit 4"),
+                            ),
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage(
+                                    "Co-authored-by: old_contrib_coauthor <the@email>"
+                                ),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 3",
+                        number=3,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 2, 2),
+                        user=User("contributor_3"),
+                        commits=[
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 4"),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 4",
+                        number=4,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 2, 3),
+                        user=User("contributor_4"),
+                        commits=[
+                            Commit(
+                                User("contributor_4"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("contributor_4"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("contributor_4"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("contributor_4"),
+                                CommitMessage("src: sample commit 4"),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 5",
+                        number=5,
+                        state="closed",
+                        merged=False,
+                        merged_at=datetime(2023, 2, 4),
+                        user=User("contributor_3"),
+                        commits=[
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 4"),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 6",
+                        number=12,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 2, 5),
+                        user=User("contributor_2"),
+                        commits=[
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("contributor_2"),
+                                CommitMessage("src: sample commit 4"),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 9",
+                        number=13,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 5, 2),
+                        user=User("new_contributor_2"),
+                        commits=[
+                            Commit(
+                                User("new_contributor_2"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("new_contributor_2"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("new_contributor_2"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("new_contributor_2"),
+                                CommitMessage("src: sample commit 4 "),
+                            ),
+                            Commit(
+                                User("new_contributor_2"),
+                                CommitMessage(
+                                    "Co-authored-by: new_contributor_coauthor1 <the@email>"
+                                ),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 7",
+                        number=14,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 5, 5),
+                        user=User("contributor_3"),
+                        commits=[
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage("src: sample commit 4 "),
+                            ),
+                            Commit(
+                                User("contributor_3"),
+                                CommitMessage(
+                                    "Co-authored-by: new_contributor_coauthor2 <the@email>"
+                                ),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 8",
+                        number=15,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 5, 1),
+                        user=User("new_contributor_1"),
+                        commits=[
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage("src: sample commit 3"),
+                            ),
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage(
+                                    "Co-authored-by: new_contributor_coauthor4 <the@email>"
+                                ),
+                            ),
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage("src: sample commit 4 "),
+                            ),
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage(
+                                    "Co-authored-by: new_contributor_coauthor3 <the@email>"
+                                ),
+                            ),
+                        ],
+                    ),
+                    PullRequest(
+                        title="Feature 11",
+                        number=16,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 5, 10),
+                        user=User("new_contributor_1"),
+                        commits=[
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                        ],
+                    ),
+                ],
+            )
         )
 
 
-def test_get_last_release(mocker):
-    repo_stub = RepoStub()
+def test_get_sorted_merged_pulls():
+    pulls = RepoStub.get_pulls(state="closed")
+    last_release = None
+
+    sorted_merged_pulls = release.get_sorted_merged_pulls(pulls, last_release)
+
+    # Should return all the merged pull requests since there is no previous release
+    assert sorted_merged_pulls == sorted(
+        [pull for pull in pulls if pull.merged], key=lambda pull: pull.merged_at
+    )
+
+
+def test_get_last_release():
+    releases = RepoStub.get_releases()
 
     # Should return the latest release
-    last_release = release.get_last_release(repo_stub)
+    last_release = release.get_last_release(releases)
     assert last_release.created_at == datetime(2023, 4, 1)
 
     # Should return None (in case there are no releases yet)
-    mocker.patch.object(repo_stub, "get_releases", return_value=[])
-    last_release = release.get_last_release(repo_stub)
+    last_release = release.get_last_release([])
     assert last_release == None
 
 
-def test_get_release_merged_pulls():
-    repo_stub = RepoStub()
-    last_release = release.get_last_release(repo_stub)
+def test_get_old_contributors():
+    last_release = release.get_last_release(RepoStub.get_releases())
 
-    # Should return the merged pull requests after the last release.
-    # In other words, the ones that will be entering the next release.
-    merged_pulls = release.get_release_merged_pulls(repo_stub, last_release)
-    assert merged_pulls == [
-        PullRequest(
-            "Feature 2",
-            12,
-            "closed",
-            True,
-            datetime(2023, 5, 4),
-            User("new_contr_1"),
-        ),
-        PullRequest(
-            "Refactoring",
-            15,
-            "closed",
-            True,
-            datetime(2023, 5, 10),
-            User("new_contr_2"),
-        ),
-        PullRequest(
-            "Feature 10",
-            22,
-            "closed",
-            True,
-            datetime(2023, 5, 11),
-            User("contr_2"),
-        ),
-    ]
+    old_contributors = release.get_old_contributors(RepoStub.get_pulls(), last_release)
+
+    # Should return contributors until last release, including co-authors
+    assert old_contributors == {
+        "contributor_2",
+        "contributor_3",
+        "contributor_4",
+        "old_contrib_coauthor",
+        "old_contrib_coauthor2",
+    }
 
 
 def test_get_new_contributors():
-    repo_stub = RepoStub()
-    last_release = release.get_last_release(repo_stub)
+    last_release = release.get_last_release(RepoStub.get_releases())
+    all_pulls = RepoStub.get_pulls()
 
-    # Should return a Set with only the new contributors since last release
-    new_contributors = release.get_new_contributors(repo_stub, last_release)
-    assert new_contributors == {
-        "new_contr_1": [
-            PullRequest(
-                "Feature 2",
-                12,
-                "closed",
-                True,
-                datetime(2023, 5, 4),
-                User("new_contr_1"),
-            )
-        ],
-        "new_contr_2": [
-            PullRequest(
-                "Refactoring",
-                15,
-                "closed",
-                True,
-                datetime(2023, 5, 10),
-                User("new_contr_2"),
-            )
-        ],
-    }
+    # merged pulls after last release
+    merged_pulls = release.get_sorted_merged_pulls(all_pulls, last_release)
+    old_contributors = release.get_old_contributors(all_pulls, last_release)
+
+    # Should return a List sorted in alphabetic order with only the new contributors since
+    # last release
+    new_contributors = release.get_new_contributors(old_contributors, merged_pulls)
+
+    assert new_contributors == [
+        "new_contributor_1",
+        "new_contributor_2",
+        "new_contributor_coauthor1",
+        "new_contributor_coauthor2",
+        "new_contributor_coauthor3",
+        "new_contributor_coauthor4",
+    ]
 
 
 def test_whats_changed_md():
     repo_stub = RepoStub()
-    last_release = release.get_last_release(repo_stub)
+    last_release = release.get_last_release(RepoStub.get_releases())
+    all_pulls = RepoStub.get_pulls()
+    # merged pulls after last release
+    merged_pulls = release.get_sorted_merged_pulls(all_pulls, last_release)
 
-    # Should return a set with the markdown lines containing the merged pull requests
-    # for the next release
-    whats_changed = release.whats_changed_md(repo_stub, last_release)
+    whats_changed = release.whats_changed_md(repo_stub.full_name, merged_pulls)
+
     assert whats_changed == [
-        "* Feature 2 by @new_contr_1 in https://github.com/ada-url/ada/pull/12",
-        "* Refactoring by @new_contr_2 in https://github.com/ada-url/ada/pull/15",
-        "* Feature 10 by @contr_2 in https://github.com/ada-url/ada/pull/22",
+        "* Feature 8 by @new_contributor_1, @new_contributor_coauthor3 and @new_contributor_coauthor4 in https://github.com/ada-url/ada/pull/15",
+        "* Feature 9 by @new_contributor_2 and @new_contributor_coauthor1 in https://github.com/ada-url/ada/pull/13",
+        "* Feature 7 by @contributor_3 and @new_contributor_coauthor2 in https://github.com/ada-url/ada/pull/14",
+        "* Feature 11 by @new_contributor_1 in https://github.com/ada-url/ada/pull/16",
     ]
 
 
 def test_new_contributors_md():
     repo_stub = RepoStub()
-    last_release = release.get_last_release(repo_stub)
+    last_release = release.get_last_release(RepoStub.get_releases())
+    all_pulls = RepoStub.get_pulls()
 
-    # Should return a set with the markdown lines containing the new contributors
-    # for the next release
-    new_contributors_md = release.new_contributors_md(repo_stub, last_release)
+    merged_pulls = release.get_sorted_merged_pulls(all_pulls, last_release)
+    old_contributors = release.get_old_contributors(all_pulls, last_release)
+    new_contributors = release.get_new_contributors(old_contributors, merged_pulls)
+
+    # Should return a markdown containing the new contributors and their first contribution
+    new_contributors_md = release.new_contributors_md(
+        repo_stub.full_name, merged_pulls, new_contributors
+    )
+
     assert new_contributors_md == [
-        "* @new_contr_1 made their first contribution in https://github.com/ada-url/ada/pull/12",
-        "* @new_contr_2 made their first contribution in https://github.com/ada-url/ada/pull/15",
+        "* @new_contributor_2 and @new_contributor_coauthor1 made their first contribution in https://github.com/ada-url/ada/pull/13",
+        "* @new_contributor_coauthor2 made their first contribution in https://github.com/ada-url/ada/pull/14",
+        "* @new_contributor_1, @new_contributor_coauthor3 and @new_contributor_coauthor4 made their first contribution in https://github.com/ada-url/ada/pull/15",
     ]
 
 
 def test_full_changelog_md():
     repo_stub = RepoStub()
-    last_tag = release.get_last_release(repo_stub)
+    last_tag = release.get_last_release(repo_stub.get_releases())
 
     full_changelog = release.full_changelog_md(
         repo_stub.full_name, last_tag.title, "v3.0.0"
@@ -204,6 +440,9 @@ def test_full_changelog_md():
         == "**Full Changelog**: https://github.com/ada-url/ada/compare/v1.0.3...v3.0.0"
     )
 
+    full_changelog = release.full_changelog_md(repo_stub.full_name, None, "v3.0.0")
+    assert full_changelog is None
+
 
 def test_contruct_release_notes():
     repo_stub = RepoStub()
@@ -212,13 +451,15 @@ def test_contruct_release_notes():
     assert (
         notes
         == "## What's Changed\n"
-        + "* Feature 2 by @new_contr_1 in https://github.com/ada-url/ada/pull/12\n"
-        + "* Refactoring by @new_contr_2 in https://github.com/ada-url/ada/pull/15\n"
-        + "* Feature 10 by @contr_2 in https://github.com/ada-url/ada/pull/22\n"
+        + "* Feature 8 by @new_contributor_1, @new_contributor_coauthor3 and @new_contributor_coauthor4 in https://github.com/ada-url/ada/pull/15\n"
+        + "* Feature 9 by @new_contributor_2 and @new_contributor_coauthor1 in https://github.com/ada-url/ada/pull/13\n"
+        + "* Feature 7 by @contributor_3 and @new_contributor_coauthor2 in https://github.com/ada-url/ada/pull/14\n"
+        + "* Feature 11 by @new_contributor_1 in https://github.com/ada-url/ada/pull/16\n"
         + "\n"
         + "## New Contributors\n"
-        + "* @new_contr_1 made their first contribution in https://github.com/ada-url/ada/pull/12\n"
-        + "* @new_contr_2 made their first contribution in https://github.com/ada-url/ada/pull/15\n"
+        + "* @new_contributor_2 and @new_contributor_coauthor1 made their first contribution in https://github.com/ada-url/ada/pull/13\n"
+        + "* @new_contributor_coauthor2 made their first contribution in https://github.com/ada-url/ada/pull/14\n"
+        + "* @new_contributor_1, @new_contributor_coauthor3 and @new_contributor_coauthor4 made their first contribution in https://github.com/ada-url/ada/pull/15\n"
         + "\n"
         + "**Full Changelog**: https://github.com/ada-url/ada/compare/v1.0.3...v3.0.0"
     )
@@ -232,3 +473,14 @@ def test_is_valid_tag():
     assert release.is_valid_tag("v1.0.0.0") is False
     assert release.is_valid_tag("1.0.0") is False
     assert release.is_valid_tag("1.0.1") is False
+
+
+def test_multiple_contributors_mention_md():
+    contributors = ["contrib1", "contrib2", "contrib3", "contrib4"]
+
+    md_contributors_mention = release.multiple_contributors_mention_md(contributors)
+    assert md_contributors_mention == "@contrib1, @contrib2, @contrib3 and @contrib4"
+
+    contributors = ["contrib1"]
+    md_contributors_mention = release.multiple_contributors_mention_md(contributors)
+    assert md_contributors_mention == "@contrib1"

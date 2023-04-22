@@ -1,3 +1,2 @@
 PyGithub
 pytest
-pytest-mock
