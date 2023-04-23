@@ -22,7 +22,7 @@ jobs:
       github.event.pull_request.merged == true &&
       github.event.pull_request.base.ref == 'main' &&
       startsWith(github.event.pull_request.head.ref, 'release/v') 
-      !startsWith(github.event.pull_request.user.login, 'github-actions')
+      startsWith(github.event.pull_request.user.login, 'github-actions')
       
     env:
       NEXT_RELEASE_TAG: ${{ github.event.pull_request.head.ref }}
