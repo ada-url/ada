@@ -324,6 +324,24 @@ class RepoStub:
                             ),
                         ],
                     ),
+                    PullRequest(
+                        title="chore: release v10.0.0",
+                        number=17,
+                        state="closed",
+                        merged=True,
+                        merged_at=datetime(2023, 5, 9),
+                        user=User("new_contributor_1"),
+                        commits=[
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage("src: sample commit 1"),
+                            ),
+                            Commit(
+                                User("new_contributor_1"),
+                                CommitMessage("src: sample commit 2"),
+                            ),
+                        ],
+                    ),
                 ],
             )
         )
@@ -337,7 +355,14 @@ def test_get_sorted_merged_pulls():
 
     # Should return all the merged pull requests since there is no previous release
     assert sorted_merged_pulls == sorted(
-        [pull for pull in pulls if pull.merged], key=lambda pull: pull.merged_at
+        [
+            pull
+            for pull in pulls
+            if pull.merged
+               and not pull.title.startswith("chore: release")
+               and not pull.user.login.startswith("github-actions")
+        ],
+        key=lambda pull: pull.merged_at,
     )
 
 

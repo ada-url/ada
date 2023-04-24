@@ -39,8 +39,8 @@ def get_sorted_merged_pulls(
                 pull
                 for pull in pulls
                 if pull.merged
-                and not pull.title.startswith("chore: release")
-                and not pull.user.login.startswith("github-actions")
+                   and not pull.title.startswith("chore: release")
+                   and not pull.user.login.startswith("github-actions")
             ),
             key=lambda pull: pull.merged_at,
         )
@@ -49,7 +49,10 @@ def get_sorted_merged_pulls(
         (
             pull
             for pull in pulls
-            if pull.merged and pull.merged_at > last_release.created_at
+            if pull.merged
+               and (pull.merged_at > last_release.created_at)
+               and not pull.title.startswith("chore: release")
+               and not pull.user.login.startswith("github-actions")
         ),
         key=lambda pull: pull.merged_at,
     )
@@ -124,7 +127,7 @@ def multiple_contributors_mention_md(contributors: List[str]) -> str:
         contrib_by = (
             contrib_by[:last_comma].strip()
             + " and "
-            + contrib_by[last_comma + 1 :].strip()
+            + contrib_by[last_comma + 1:].strip()
         )
     return contrib_by
 
