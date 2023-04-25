@@ -286,6 +286,7 @@ struct url : url_base {
   [[nodiscard]] inline bool has_hash() const noexcept override;
   /** @return true if the URL has a search component */
   [[nodiscard]] inline bool has_search() const noexcept override;
+
  private:
   friend ada::url ada::parser::parse_url<ada::url>(std::string_view,
                                                    const ada::url *);

@@ -19,8 +19,7 @@ namespace ada {
 [[nodiscard]] ada_really_inline bool url::has_credentials() const noexcept {
   return !username.empty() || !password.empty();
 }
-[[nodiscard]] ada_really_inline bool url::has_port()
-    const noexcept {
+[[nodiscard]] ada_really_inline bool url::has_port() const noexcept {
   return port.has_value();
 }
 [[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
@@ -153,9 +152,13 @@ inline void url::clear_pathname() { path.clear(); }
 
 inline void url::clear_search() { query = std::nullopt; }
 
-[[nodiscard]] inline bool url::has_hash() const noexcept { return hash.has_value(); }
+[[nodiscard]] inline bool url::has_hash() const noexcept {
+  return hash.has_value();
+}
 
-[[nodiscard]] inline bool url::has_search() const noexcept { return query.has_value(); }
+[[nodiscard]] inline bool url::has_search() const noexcept {
+  return query.has_value();
+}
 
 inline void url::set_protocol_as_file() { type = ada::scheme::type::FILE; }
 
