@@ -1,9 +1,10 @@
-/* auto-generated on 2023-03-28 11:03:13 -0400. Do not edit! */
+/* auto-generated on 2023-04-26 14:14:42 -0400. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 
 #include <cstdint>
 #include <cstring>
+
 namespace ada::idna {
 
 size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output) {
@@ -7885,9 +7886,10 @@ const char32_t uninorms::decomposition_data[] = {
 namespace ada::idna {
 
 void normalize(std::u32string& input) {
-  //    [Normalize](https://www.unicode.org/reports/tr46/#ProcessingStepNormalize).
-  //    Normalize
-  //     the domain_name string to Unicode Normalization Form C.
+  /**
+   * Normalize the domain_name string to Unicode Normalization Form C.
+   * @see https://www.unicode.org/reports/tr46/#ProcessingStepNormalize
+   */
   ufal::unilib::uninorms::nfc(input);
 }
 
@@ -8115,7 +8117,6 @@ bool utf32_to_punycode(std::u32string_view input, std::string &out) {
 }  // namespace ada::idna
 /* end file src/punycode.cpp */
 /* begin file src/validity.cpp */
-
 #include <algorithm>
 #include <string_view>
 
@@ -9503,18 +9504,18 @@ constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
 
 static_assert(sizeof(is_forbidden_domain_code_point_table) == 256);
 
-inline constexpr bool is_forbidden_domain_code_point(const char c) noexcept {
+inline bool is_forbidden_domain_code_point(const char c) noexcept {
   return is_forbidden_domain_code_point_table[uint8_t(c)];
 }
 
-// We return "" on error. For now.
-std::string from_ascii_to_ascii(std::string_view ut8_string) {
-  static const std::string error = "";
-  if (std::any_of(ut8_string.begin(), ut8_string.end(),
-                  is_forbidden_domain_code_point)) {
-    return error;
-  }
+bool contains_forbidden_domain_code_point(std::string_view view) {
+  return (
+      std::any_of(view.begin(), view.end(), is_forbidden_domain_code_point));
+}
 
+// We return "" on error.
+static std::string from_ascii_to_ascii(std::string_view ut8_string) {
+  static const std::string error = "";
   // copy and map
   // we could be more efficient by avoiding the copy when unnecessary.
   std::string mapped_string = std::string(ut8_string);
@@ -9568,7 +9569,7 @@ std::string from_ascii_to_ascii(std::string_view ut8_string) {
   return out;
 }
 
-// We return "" on error. For now.
+// We return "" on error.
 std::string to_ascii(std::string_view ut8_string) {
   if (is_ascii(ut8_string)) {
     return from_ascii_to_ascii(ut8_string);
@@ -9655,11 +9656,6 @@ std::string to_ascii(std::string_view ut8_string) {
       out.push_back('.');
     }
   }
-
-  if (std::any_of(out.begin(), out.end(), is_forbidden_domain_code_point)) {
-    return error;
-  }
-
   return out;
 }
 }  // namespace ada::idna
