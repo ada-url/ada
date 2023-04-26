@@ -10,12 +10,12 @@ def update_cmakelists_version(new_version: str, file_path: str) -> None:
         for line in cmakelists:
             if "set(ADA_LIB_VERSION" in line:
                 line = re.sub(r"[0-9]+\.[0-9]+\.[0-9]+", new_version, line)
-            if "set(ADA_LIB_SOVERSION" in line:
+            elif "set(ADA_LIB_SOVERSION" in line:
                 line = re.sub(r"[0-9]+", new_version.split(".")[0], line)
 
-            if "project(" in line:
+            elif "project(" in line:
                 inside_project = True
-            if inside_project:
+            elif inside_project:
                 if "VERSION" in line:
                     line = re.sub(r"[0-9]+\.[0-9]+\.[0-9]+", new_version, line)
                     inside_project = False
@@ -30,9 +30,9 @@ def update_ada_version_h(new_version: str, file_path: str) -> None:
             if "#define ADA_VERSION" in line:
                 line = f'#define ADA_VERSION "{new_version}"\n'
 
-            if "enum {" in line:
+            elif "enum {" in line:
                 inside_enum = True
-            if inside_enum:
+            elif inside_enum:
                 if line.strip().startswith("ADA_VERSION_MAJOR"):
                     line = re.sub(r"\d+", new_version_list[0], line)
                 elif line.strip().startswith("ADA_VERSION_MINOR"):
