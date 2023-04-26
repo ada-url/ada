@@ -75,7 +75,7 @@ def clang_format(file_path: str) -> None:
             sys.exit(1)
 
 
-def clang_format_verify():
+def clang_format_verify() -> str:
     version_output = subprocess.check_output(
         ["clang-format", "--version"], stderr=subprocess.STDOUT,
     ).decode("utf-8").split(" ")
