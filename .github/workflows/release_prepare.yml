@@ -1,0 +1,51 @@
+name: Release Prepare Workflow 
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+        description: "Tag for the next release. Ex.: v5.0.0"
+
+env:
+  NEXT_RELEASE_TAG: ${{ github.event.inputs.tag }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-script-test:
+    uses: ./.github/workflows/release-script-tests.yml
+
+  prepare-release-and-pull-request:
+    needs: release-script-test
+    runs-on: ubuntu-latest
+    if: ${{ needs.release-script-test.result == 'success' }}
+    env:
+      CXX: clang++-14
+    steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+  
+      - name: Install dependencies
+        run: pip3 install -r ./tools/release/requirements.txt
+        
+      - name: Update source code versions
+        run: ./tools/release/update_versions.py
+
+      - name: Ada Build
+        run: cmake -B build && cmake --build build
+      - name: Ada Test
+        run: ctest --output-on-failure --test-dir build
+
+      - name: Create PR with code updates for new release
+        uses: peter-evans/create-pull-request@f3a21bf3404eae73a97f65817ab35f351a1a63fe #v5.0.0
+        with:
+          commit-message: "chore: release ${{ env.NEXT_RELEASE_TAG }}"
+          branch: "release/${{ env.NEXT_RELEASE_TAG }}"
+          title: "chore: release ${{ env.NEXT_RELEASE_TAG }}"
+          token: ${{ env.GITHUB_TOKEN }}
+          body: |
+            This pull PR updates the source code version to ${{ env.NEXT_RELEASE_TAG }}

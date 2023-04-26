@@ -1,0 +1,48 @@
+name: Release Create Workflow 
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release-script-test:
+    uses: ./.github/workflows/release-script-tests.yml
+
+  create-release:
+    needs: release-script-test
+    runs-on: ubuntu-latest
+    if: >
+      ${{ needs.release-script-test.result == 'success' }} &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      startsWith(github.event.pull_request.head.ref, 'release/v') &&
+      startsWith(github.event.pull_request.user.login, 'github-actions')
+      
+    env:
+      NEXT_RELEASE_TAG: ${{ github.event.pull_request.head.ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      
+      - name: Install dependencies
+        run: pip3 install -r ./tools/release/requirements.txt
+
+      - name: Extract Tag from branch name
+        run: |
+          NEXT_RELEASE_TAG=$(echo $NEXT_RELEASE_TAG | sed 's/^release\///')
+          echo "NEXT_RELEASE_TAG=${NEXT_RELEASE_TAG}" >> $GITHUB_ENV
+
+      - name: Target release Tag
+        run: echo "New tag $NEXT_RELEASE_TAG"
+
+      - name: Amalgamation
+        run: ./singleheader/amalgamate.py
+      
+      - name: "Create release"
+        run: ./tools/release/create_release.py

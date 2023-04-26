@@ -1,6 +1,8 @@
 name: Release Script Tests
 
 on:
+  # workflow_call is used to indicate that a workflow can be called by another workflow. 
+  workflow_call:
   push:
     branches:
       - "*"
