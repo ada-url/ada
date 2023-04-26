@@ -168,6 +168,8 @@ Functions</h2></td></tr>
 <tr class="separator:a49fd6f959fb86c8f3099c7b6dc368836"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d88f623d0a7e056cc89920b20e13dde"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7d88f623d0a7e056cc89920b20e13dde">ada::idna::to_ascii</a> (std::string_view ut8_string)</td></tr>
 <tr class="separator:a7d88f623d0a7e056cc89920b20e13dde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7ad7c23c6223982a88d1f079a2e6e97"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#ac7ad7c23c6223982a88d1f079a2e6e97">ada::idna::contains_forbidden_domain_code_point</a> (std::string_view ascii_string)</td></tr>
+<tr class="separator:ac7ad7c23c6223982a88d1f079a2e6e97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c2540f9cd4a24cb907a6b10b90627c8"><td class="memItemLeft" align="right" valign="top">bool constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7c2540f9cd4a24cb907a6b10b90627c8">ada::idna::begins_with</a> (std::u32string_view view, std::u32string_view prefix)</td></tr>
 <tr class="separator:a7c2540f9cd4a24cb907a6b10b90627c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00305d8a94d9c0071748377660a25172"><td class="memItemLeft" align="right" valign="top">bool constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a00305d8a94d9c0071748377660a25172">ada::idna::begins_with</a> (std::string_view view, std::string_view prefix)</td></tr>
@@ -176,8 +178,6 @@ Functions</h2></td></tr>
 <tr class="separator:a66015ea551d99b27023cc184e74ba63d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a256324be086f84ee56e21f9bff4acacf"><td class="memItemLeft" align="right" valign="top">bool constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a256324be086f84ee56e21f9bff4acacf">ada::idna::is_ascii</a> (std::string_view view)</td></tr>
 <tr class="separator:a256324be086f84ee56e21f9bff4acacf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a390af32e12e73c42201c2e263fc9fba5"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a390af32e12e73c42201c2e263fc9fba5">ada::idna::from_ascii_to_ascii</a> (std::string_view ut8_string)</td></tr>
-<tr class="separator:a390af32e12e73c42201c2e263fc9fba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d9aecb5815cce8db291ed12d5d1774f"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7d9aecb5815cce8db291ed12d5d1774f">ada::idna::to_unicode</a> (std::string_view input)</td></tr>
 <tr class="separator:a7d9aecb5815cce8db291ed12d5d1774f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -210,7 +210,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00048">48</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00049">49</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
 
 </div>
 </div>
@@ -226,7 +226,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00062">62</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00064">64</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
 
 </div>
 </div>
@@ -242,7 +242,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00096">96</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00099">99</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
 
 </div>
 </div>
@@ -258,7 +258,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00126">126</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00137">137</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
 
 </div>
 </div>
@@ -290,7 +290,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00078">78</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d4c/ada__idna_8h_source.html#l00081">81</a> of file <a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada_idna.h</a>.</p>
 
 </div>
 </div>
