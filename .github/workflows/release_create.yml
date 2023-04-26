@@ -3,6 +3,8 @@ name: Release Create Workflow
 on:
   pull_request:
     types: [closed]
+  branches:
+    - "release/v**"
 
 permissions:
   contents: write

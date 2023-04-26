@@ -3,15 +3,20 @@ name: Release Script Tests
 on:
   # workflow_call is used to indicate that a workflow can be called by another workflow. 
   workflow_call:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   push:
     branches:
-      - "*"
-  pull_request:
-    branches:
-      - "*"
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   release-script-test:
