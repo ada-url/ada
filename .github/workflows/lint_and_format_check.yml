@@ -1,4 +1,4 @@
-name: Lint and Format Check (Ubuntu Latest)
+name: Lint and format
 
 on:
   pull_request:

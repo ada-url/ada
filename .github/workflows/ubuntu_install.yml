@@ -1,4 +1,4 @@
-name: Ubuntu 22.04 (installation only)
+name: Ubuntu 22.04 (Installation)
 
 on:
   pull_request:
