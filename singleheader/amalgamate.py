@@ -42,7 +42,7 @@ found_includes = []
 
 current_implementation=''
 
-def doinclude(fid, file, line, origin):
+def doinclude(fid: str, file: str, line: str, origin: str) -> None:
 
     p = os.path.join(AMALGAMATE_INCLUDE_PATH, file)
     pi = os.path.join(AMALGAMATE_SOURCE_PATH, file)
@@ -64,7 +64,7 @@ def doinclude(fid, file, line, origin):
         print("unrecognized:", file, " from ", line, " in ", origin)
         print(line, file=fid)
 
-def dofile(fid, prepath, filename):
+def dofile(fid: str, prepath: str, filename: str) -> None:
     file = os.path.join(prepath, filename)
     RELFILE = os.path.relpath(file, PROJECTPATH)
     # Last lines are always ignored. Files should end by an empty lines.
