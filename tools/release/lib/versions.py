@@ -10,6 +10,8 @@ def update_cmakelists_version(new_version: str, file_path: str) -> None:
         for line in cmakelists:
             if "set(ADA_LIB_VERSION" in line:
                 line = re.sub(r"[0-9]+\.[0-9]+\.[0-9]+", new_version, line)
+            if "set(ADA_LIB_SOVERSION" in line:
+                line = re.sub(r"[0-9]+", new_version.split(".")[0], line)
 
             if "project(" in line:
                 inside_project = True
