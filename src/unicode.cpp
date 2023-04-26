@@ -426,7 +426,8 @@ bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
   }
   // input is a non-empty UTF-8 string, must be percent decoded
   std::string idna_ascii = ada::idna::to_ascii(input);
-  if (idna_ascii.empty()) {
+  if (idna_ascii.empty() || contains_forbidden_domain_code_point(
+                                idna_ascii.data(), idna_ascii.size())) {
     return false;
   }
   out = std::move(idna_ascii);
