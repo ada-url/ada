@@ -7,4 +7,4 @@ project(ada
 )
 
 set(ADA_LIB_VERSION "2.0.0" CACHE STRING "ada library version")
-set(ADA_LIB_SOVERSION "1" CACHE STRING "ada library soversion")
+set(ADA_LIB_SOVERSION "2" CACHE STRING "ada library soversion")
