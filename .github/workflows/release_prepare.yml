@@ -1,4 +1,4 @@
-name: Release Prepare Workflow 
+name: Release Prepare 
 
 on:
   workflow_dispatch:
