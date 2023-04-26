@@ -13,6 +13,13 @@ on:
       - '**.md'
       - 'docs/**'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ubuntu-build:
     runs-on: ubuntu-latest

@@ -9,6 +9,10 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: wpt-updater
+  cancel-in-progress: true
+
 jobs:
   issue:
     runs-on: ubuntu-latest
