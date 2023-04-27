@@ -24,8 +24,8 @@ jobs:
         run: tools/update-wpt.sh
       - name: Open pull request
         uses: peter-evans/create-pull-request@f3a21bf3404eae73a97f65817ab35f351a1a63fe #v5.0.0
-        token: ${{ secrets.GITHUB_TOKEN }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "test: update web platform tests"
           branch: "automatic-update-wpt"
           title: "Update web platform tests"
