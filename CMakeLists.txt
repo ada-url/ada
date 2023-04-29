@@ -27,7 +27,7 @@ option(ADA_BENCHMARKS "Build benchmarks" OFF)
 # We use Google Benchmark, but it does not build under several 32-bit systems.
 if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
   include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
-  import_dependency(simdjson simdjson/simdjson 0a3a00c95665cc1fda760e121ba8d442945ede13)
+  import_dependency(simdjson simdjson/simdjson 14d927128ba14e13913fc0e7c2cf538790bd1622)
   add_dependency(simdjson)
 endif()
 
