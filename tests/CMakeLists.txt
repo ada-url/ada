@@ -11,14 +11,17 @@ link_libraries(ada)
 include(GoogleTest)
 
 add_cpp_test(wpt_tests)
-add_cpp_test(url_components )
+add_cpp_test(url_components)
 add_cpp_test(basic_fuzzer)
 add_cpp_test(from_file_tests)
 add_cpp_test(basic_tests)
 
 target_link_libraries(wpt_tests PRIVATE simdjson gtest)
-target_link_libraries(url_components PRIVATE simdjson gtest)
-target_link_libraries(basic_tests PRIVATE simdjson gtest)
+target_link_libraries(url_components PRIVATE simdjson gtest GTest::gtest_main)
+target_link_libraries(basic_tests PRIVATE simdjson gtest GTest::gtest_main)
+
+gtest_discover_tests(url_components)
+gtest_discover_tests(basic_tests)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)

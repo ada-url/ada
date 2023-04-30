@@ -42,11 +42,11 @@ bool file_exists(const char* filename) {
   }
 }
 
-void urltestdata_encoding(const char* source) {
+TEST(url_components, urltestdata_encoding) {
   ondemand::parser parser;
   size_t counter{};
-  ASSERT_TRUE(file_exists(source));
-  padded_string json = padded_string::load(source);
+  ASSERT_TRUE(file_exists(URLTESTDATA_JSON));
+  padded_string json = padded_string::load(URLTESTDATA_JSON);
   ondemand::document doc = parser.iterate(json);
   for (auto element : doc.get_array()) {
     if (element.type() == ondemand::json_type::string) {
@@ -145,5 +145,3 @@ void urltestdata_encoding(const char* source) {
   std::cout << "Tests executed = " << counter << std::endl;
   SUCCEED();
 }
-
-int main(int argc, char** argv) { urltestdata_encoding(URLTESTDATA_JSON); }

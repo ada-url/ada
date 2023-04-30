@@ -131,7 +131,7 @@ void percent_encoding() {
             input, ada::character_sets::QUERY_PERCENT_ENCODE);
         ondemand::object outputs = object["output"].get_object();
         std::string_view expected_view;
-        ASSERT_FALSE(!outputs["utf-8"].get(expected_view));
+        ASSERT_FALSE(outputs["utf-8"].get(expected_view));
         ASSERT_EQ(my_input_encoded, expected_view);
         counter++;
       }
