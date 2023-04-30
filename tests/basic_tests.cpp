@@ -326,11 +326,6 @@ void all_tests() {
 }
 
 int main() {
-#if ADA_IS_BIG_ENDIAN
-  std::cout << "You have big-endian system." << std::endl;
-#else
-  std::cout << "You have litte-endian system." << std::endl;
-#endif
   all_tests<ada::url>();
   all_tests<ada::url_aggregator>();
 }

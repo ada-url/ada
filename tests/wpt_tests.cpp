@@ -491,30 +491,6 @@ void verifydnslength_tests(const char *source) {
 }
 
 int main(int argc, char **argv) {
-  // The project runs all tests until the end. The STOP_ON_FAILURE stops the
-  // tests with the first failure.
-  bool stop_on_failure = (getenv("STOP_ON_FAILURE") != nullptr);
-  bool all_ada_url_tests{true};
-  bool all_ada_url_aggregator_tests{true};
-  bool other_tests{true};
-  std::string filter = "nonexistentstring";
-  if (argc > 1) {
-    all_ada_url_tests = false;
-    other_tests = false;
-    filter = argv[1];
-    std::cout << "Only running tests containing the substring '" << filter
-              << "'\n"
-              << std::endl;
-  } else {
-    std::cout << "You may pass a parameter to the wpt_tests executable to "
-                 "filter the tests, by substring matching."
-              << std::endl;
-  }
-  std::cout << "Running WPT tests.\n" << std::endl;
-
-  std::map<std::string, bool> results;
-  std::string name;
-
   idna_test_v2_to_ascii();
   urltestdata_encoding<ada::url>(URLTESTDATA_JSON);
   urltestdata_encoding<ada::url_aggregator>(URLTESTDATA_JSON);
@@ -527,32 +503,4 @@ int main(int argc, char **argv) {
   setters_tests_encoding<ada::url>(ADA_SETTERS_TESTS_JSON);
   setters_tests_encoding<ada::url_aggregator>(ADA_SETTERS_TESTS_JSON);
   verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
-
-  std::cout << std::endl;
-  std::cout << "===============" << std::endl;
-  std::cout << "Final report: " << std::endl;
-  std::cout << "===============" << std::endl;
-#if ADA_IS_BIG_ENDIAN
-  std::cout << "You have big-endian system." << std::endl;
-#else
-  std::cout << "You have litte-endian system." << std::endl;
-#endif
-  bool one_failed = false;
-  for (auto [s, b] : results) {
-    std::cout << std::left << std::setw(80) << std::setfill('.') << s << ": "
-              << (b ? "SUCCEEDED" : "FAILED") << std::endl;
-    if (!b) {
-      one_failed = true;
-    }
-  }
-  if (!one_failed) {
-    std::cout << "WPT tests are ok." << std::endl;
-    return EXIT_SUCCESS;
-  } else {
-    std::cerr << " ================== " << std::endl;
-    std::cerr << " Summary of errors: " << std::endl;
-    std::cerr << error_buffer.str() << std::endl;
-    std::cerr << " ================== " << std::endl;
-    return EXIT_FAILURE;
-  }
 }

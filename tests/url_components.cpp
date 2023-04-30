@@ -6,10 +6,17 @@
 #include <map>
 #include <set>
 
+#include "simdjson.h"
 #include "gtest/gtest.h"
 #include "ada.h"
-#include "ada/character_sets-inl.h"
 #include "ada/url_components.h"
+
+using namespace simdjson;
+
+#ifndef WPT_DATA_DIR
+#define WPT_DATA_DIR "wpt/"
+#endif
+const char* URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
 
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
@@ -22,15 +29,6 @@ ada::result<ada::url> ada_parse(std::string_view view,
   memcpy(buffer.get(), view.data(), view.size());
   return ada::parse(std::string_view(buffer.get(), view.size()), base);
 }
-
-#include "simdjson.h"
-
-using namespace simdjson;
-
-#ifndef WPT_DATA_DIR
-#define WPT_DATA_DIR "wpt/"
-#endif
-const char* URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
 
 bool file_exists(const char* filename) {
   namespace fs = std::filesystem;
@@ -148,48 +146,4 @@ void urltestdata_encoding(const char* source) {
   SUCCEED();
 }
 
-int main(int argc, char** argv) {
-  bool all_tests{true};
-  std::string filter;
-  if (argc > 1) {
-    all_tests = false;
-    filter = argv[1];
-    std::cout << "Only running tests containing the substring '" << filter
-              << "'\n"
-              << std::endl;
-  } else {
-    std::cout << "You may pass a parameter to the wpt_tests executable to "
-                 "filter the tests, by substring matching."
-              << std::endl;
-  }
-  std::cout << "Running WPT tests.\n" << std::endl;
-
-  std::map<std::string, bool> results;
-  std::string name;
-
-  urltestdata_encoding(URLTESTDATA_JSON);
-  (void)all_tests;
-  std::cout << std::endl;
-  std::cout << "===============" << std::endl;
-  std::cout << "Final report: " << std::endl;
-  std::cout << "===============" << std::endl;
-#if ADA_IS_BIG_ENDIAN
-  std::cout << "You have big-endian system." << std::endl;
-#else
-  std::cout << "You have litte-endian system." << std::endl;
-#endif
-  bool one_failed = false;
-  for (auto [s, b] : results) {
-    std::cout << std::left << std::setw(60) << std::setfill('.') << s << ": "
-              << (b ? "SUCCEEDED" : "FAILED") << std::endl;
-    if (!b) {
-      one_failed = true;
-    }
-  }
-  if (!one_failed) {
-    std::cout << "WPT tests are ok." << std::endl;
-    return EXIT_SUCCESS;
-  } else {
-    return EXIT_FAILURE;
-  }
-}
+int main(int argc, char** argv) { urltestdata_encoding(URLTESTDATA_JSON); }
