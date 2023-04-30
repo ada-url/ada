@@ -29,6 +29,8 @@ if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
   include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
   import_dependency(simdjson simdjson/simdjson 14d927128ba14e13913fc0e7c2cf538790bd1622)
   add_dependency(simdjson)
+  import_dependency(gtest google/googletest 797b0ad2a3a45608ecf5c67e6e289d377a3521ca)
+  add_dependency(gtest)
 endif()
 
 if (BUILD_TESTING)

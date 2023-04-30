@@ -2,19 +2,14 @@
 #include <cstring>
 #include <filesystem>
 #include <iostream>
-#include <string>
 #include <memory>
 #include <map>
 #include <set>
 
+#include "gtest/gtest.h"
 #include "ada.h"
 #include "ada/character_sets-inl.h"
-#include "ada/parser.h"
 #include "ada/url_components.h"
-
-// We think that these examples have bad domains.
-std::set<std::string> bad_domains = {"http://./", "http://../",
-                                     "http://foo.09.."};
 
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
@@ -37,33 +32,6 @@ using namespace simdjson;
 #endif
 const char* URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
 
-#define TEST_START()                                              \
-  do {                                                            \
-    std::cout << "> Running " << __func__ << " ..." << std::endl; \
-  } while (0);
-#define RUN_TEST(ACTUAL) \
-  do {                   \
-    if (!(ACTUAL)) {     \
-      return false;      \
-    }                    \
-  } while (0);
-#define TEST_FAIL(MESSAGE)                           \
-  do {                                               \
-    std::cerr << "FAIL: " << (MESSAGE) << std::endl; \
-    return false;                                    \
-  } while (0);
-#define TEST_SUCCEED() \
-  do {                 \
-    return true;       \
-  } while (0);
-#define TEST_ASSERT(LHS, RHS, MESSAGE)                                         \
-  do {                                                                         \
-    if (LHS != RHS) {                                                          \
-      std::cerr << "Mismatch: '" << LHS << "' - '" << RHS << "'" << std::endl; \
-      TEST_FAIL(MESSAGE);                                                      \
-    }                                                                          \
-  } while (0);
-
 bool file_exists(const char* filename) {
   namespace fs = std::filesystem;
   std::filesystem::path f{filename};
@@ -76,15 +44,11 @@ bool file_exists(const char* filename) {
   }
 }
 
-bool urltestdata_encoding(const char* source) {
-  TEST_START()
+void urltestdata_encoding(const char* source) {
   ondemand::parser parser;
   size_t counter{};
-
-  RUN_TEST(file_exists(source));
+  ASSERT_TRUE(file_exists(source));
   padded_string json = padded_string::load(source);
-  std::cout << "  loaded " << source << " (" << json.size() << " kB)"
-            << std::endl;
   ondemand::document doc = parser.iterate(json);
   for (auto element : doc.get_array()) {
     if (element.type() == ondemand::json_type::string) {
@@ -99,10 +63,8 @@ bool urltestdata_encoding(const char* source) {
       auto input_element = object["input"];
       std::string_view input{};
       bool allow_replacement_characters = true;
-      if (input_element.get_string(allow_replacement_characters).get(input)) {
-        std::cout << "I could not parse " << element_string << std::endl;
-        return false;
-      }
+      ASSERT_FALSE(
+          input_element.get_string(allow_replacement_characters).get(input));
       std::cout << "input='" << input << "' [" << input.size() << " bytes]"
                 << std::endl;
       std::string_view base;
@@ -116,8 +78,7 @@ bool urltestdata_encoding(const char* source) {
             // We are good. Failure was expected.
             continue;  // We can't proceed any further.
           } else {
-            TEST_ASSERT(base_url.has_value(), true,
-                        "Based should not have failred " + element_string);
+            ASSERT_TRUE(base_url.has_value());
           }
         }
       }
@@ -131,38 +92,32 @@ bool urltestdata_encoding(const char* source) {
         auto out = url.get_components();
         auto href = url.get_href();
 
-        TEST_ASSERT(href.substr(0, out.protocol_end), url.get_protocol(),
-                    "protocol_end mismatch " + out.to_string());
+        ASSERT_EQ(href.substr(0, out.protocol_end), url.get_protocol());
 
         if (!url.username.empty()) {
           size_t username_start = href.find(url.username);
-          TEST_ASSERT(href.substr(username_start, url.username.size()),
-                      url.get_username(),
-                      "username mismatch " + out.to_string());
+          ASSERT_EQ(href.substr(username_start, url.username.size()),
+                    url.get_username());
         }
 
         if (!url.password.empty()) {
           size_t password_start = out.username_end + 1;
-          TEST_ASSERT(href.substr(password_start, url.password.size()),
-                      url.get_password(),
-                      "password mismatch " + out.to_string());
+          ASSERT_EQ(href.substr(password_start, url.password.size()),
+                    url.get_password());
         }
 
         size_t host_start = out.host_start;
         if (url.has_credentials()) {
-          TEST_ASSERT(url.get_href()[out.host_start], '@',
-                      "hostname should start with @");
+          ASSERT_EQ(url.get_href()[out.host_start], '@');
           host_start++;
         }
-        TEST_ASSERT(href.substr(host_start, url.get_hostname().size()),
-                    url.get_hostname(), "hostname mismatch " + out.to_string());
+        ASSERT_EQ(href.substr(host_start, url.get_hostname().size()),
+                  url.get_hostname());
 
         if (url.port.has_value()) {
-          TEST_ASSERT(out.port, url.port.value(),
-                      "port mismatch " + out.to_string());
+          ASSERT_EQ(out.port, url.port.value());
         } else {
-          TEST_ASSERT(out.port, ada::url_components::omitted,
-                      "port should have been omitted " + out.to_string());
+          ASSERT_EQ(out.port, ada::url_components::omitted);
         }
 
         if (!url.get_pathname().empty()) {
@@ -172,27 +127,25 @@ bool urltestdata_encoding(const char* source) {
           } else if (out.hash_start != ada::url_components::omitted) {
             pathname_end = out.hash_start;
           }
-          TEST_ASSERT(
-              href.substr(out.pathname_start,
-                          pathname_end - out.pathname_start),
-              url.get_pathname(),
-              "pathname mismatch " + out.to_string() + " " + url.get_href());
+          ASSERT_EQ(href.substr(out.pathname_start,
+                                pathname_end - out.pathname_start),
+                    url.get_pathname());
         }
 
         if (!url.get_search().empty()) {
-          TEST_ASSERT(href.substr(out.search_start, url.get_search().size()),
-                      url.get_search(), "search mismatch " + out.to_string());
+          ASSERT_EQ(href.substr(out.search_start, url.get_search().size()),
+                    url.get_search());
         }
 
         if (!url.get_hash().empty()) {
-          TEST_ASSERT(href.substr(out.hash_start, url.get_hash().size()),
-                      url.get_hash(), "hash mismatch " + out.to_string());  //}
+          ASSERT_EQ(href.substr(out.hash_start, url.get_hash().size()),
+                    url.get_hash());
         }
       }
     }
   }
   std::cout << "Tests executed = " << counter << std::endl;
-  TEST_SUCCEED()
+  SUCCEED();
 }
 
 int main(int argc, char** argv) {
@@ -214,10 +167,7 @@ int main(int argc, char** argv) {
   std::map<std::string, bool> results;
   std::string name;
 
-  name = "urltestdata_encoding(" + std::string(URLTESTDATA_JSON) + ")";
-  if (all_tests || name.find(filter) != std::string::npos) {
-    results[name] = urltestdata_encoding(URLTESTDATA_JSON);
-  }
+  urltestdata_encoding(URLTESTDATA_JSON);
   (void)all_tests;
   std::cout << std::endl;
   std::cout << "===============" << std::endl;
