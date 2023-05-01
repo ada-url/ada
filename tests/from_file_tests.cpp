@@ -1,6 +1,7 @@
 #include "ada.h"
 #include <cstdlib>
 #include <iostream>
+#include "gtest/gtest.h"
 
 std::string long_way(std::string path) {
   ada::result<ada::url> base = ada::parse<ada::url>("file://");
@@ -8,18 +9,10 @@ std::string long_way(std::string path) {
   return base->get_href();
 }
 
-void test(std::string path) {
-  if (long_way(path) != ada::href_from_file(path)) {
-    std::cerr << "bug: " << path << std::endl;
-    exit(-1);
-  }
-}
-
-int main() {
-  for (std::string in :
+TEST(from_file_tests, basics) {
+  for (std::string path :
        {"", "fsfds", "C:\\\\blabala\\fdfds\\back.txt", "/home/user/txt.txt",
         "/%2e.bar", "/foo/%2e%2", "/foo/..bar", "foo\t%91"}) {
-    test(in);
+    ASSERT_TRUE(long_way(path) == ada::href_from_file(path));
   }
-  return EXIT_SUCCESS;
 }
