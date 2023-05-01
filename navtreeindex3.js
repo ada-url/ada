@@ -1,5 +1,8 @@
 var NAVTREEINDEX3 =
 {
+"dd/d90/unicode_8h.html#ab9b70de07868ab60794c3079aa4db46f":[6,0,0,0,16,19],
+"dd/d90/unicode_8h.html#abdc1927baa2569e9a1396252d83bb482":[6,0,0,0,16,9],
+"dd/d90/unicode_8h.html#acf371f0a0ee8c11dfaedb1963be2c57a":[6,0,0,0,16,13],
 "dd/d90/unicode_8h.html#ad649ab6ed074b809af2eceaaa0c787db":[6,0,0,0,16,12],
 "dd/d90/unicode_8h_source.html":[6,0,0,0,16],
 "dd/d9c/unicode_8cpp.html":[6,0,1,7],
