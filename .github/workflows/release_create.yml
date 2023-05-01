@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Check release conditions
         run: | 
-          echo "Conditions have met!"
+          echo "All conditions have been met!"
           
   release-script-test:
     needs: check-release-conditions
