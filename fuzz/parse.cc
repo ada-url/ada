@@ -27,4 +27,4 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   ada::can_parse(source, base_source);
 
   return 0;
-} // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+}  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
