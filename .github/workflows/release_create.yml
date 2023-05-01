@@ -14,10 +14,10 @@ env:
 jobs:
   check-release-conditions:
     runs-on: ubuntu-latest
-    if: >
-      ${{ github.event.pull_request.merged == 'true' }} && \
-      ${{ github.event.pull_request.base.ref == 'main' }} && \
-      ${{ startsWith(github.event.pull_request.head.ref, 'release/v') }} && \
+    if: |
+      ${{ github.event.pull_request.merged == 'true' }} && 
+      ${{ github.event.pull_request.base.ref == 'main' }} && 
+      ${{ startsWith(github.event.pull_request.head.ref, 'release/v') }} && 
       ${{ startsWith(github.event.pull_request.user.login, 'github-actions') }}
     steps:
       - name: Check release conditions
