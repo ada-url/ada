@@ -55,6 +55,12 @@ template <class T>
 struct wpt_tests_typed : testing::Test {};
 TYPED_TEST_SUITE(wpt_tests_typed, Types);
 
+template <class T>
+struct wpt_tests_parameterized : testing::TestWithParam<const char *> {
+  const char *source = GetParam();
+};
+TYPED_TEST_SUITE_P(wpt_tests_parameterized);
+
 std::stringstream error_buffer;
 
 bool file_exists(const char *filename) {
@@ -149,11 +155,10 @@ TEST(wpt_tests, percent_encoding) {
   SUCCEED();
 }
 
-template <class result_type = ada::url_aggregator>
-void setters_tests_encoding(const char *source) {
+TYPED_TEST_P(wpt_tests_parameterized, setters_tests_encoding) {
   ondemand::parser parser;
-  ASSERT_TRUE(file_exists(source));
-  padded_string json = padded_string::load(source);
+  ASSERT_TRUE(file_exists(this->source));
+  padded_string json = padded_string::load(this->source);
   ondemand::document doc = parser.iterate(json);
   try {
     ondemand::object main_object = doc.get_object();
@@ -180,16 +185,11 @@ void setters_tests_encoding(const char *source) {
           std::cout << "    comment: " << comment << std::endl;
         }
 
-        ada::result<result_type> base = ada_parse<result_type>(href);
+        auto base = ada_parse<TypeParam>(href);
         ASSERT_TRUE(base.has_value());
-        if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
-          if (!base->validate()) {
-            std::cerr << "Your parsed URL is impossible: " << base->to_string()
-                      << std::endl;
-            FAIL();
-          } else {
-            element_string += "\n" + base->to_diagram() + "\n";
-          }
+        if constexpr (std::is_same<ada::url_aggregator, TypeParam>::value) {
+          ASSERT_TRUE(base->validate());
+          element_string += "\n" + base->to_diagram() + "\n";
         }
 
         std::cout << "      " << href << std::endl;
@@ -249,18 +249,11 @@ void setters_tests_encoding(const char *source) {
           ASSERT_TRUE(base->set_href(new_value));
           ASSERT_EQ(base->get_href(), expected);
         }
-        if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
-          if (!base->validate()) {
-            std::cerr << "Your parsed URL is impossible: " << base->to_string()
-                      << std::endl;
-            FAIL();
-          }
-        }
       }
     }
   } catch (simdjson::simdjson_error &error) {
     std::cerr << "JSON error: " << error.what() << " near "
-              << doc.current_location() << " in " << source << std::endl;
+              << doc.current_location() << " in " << this->source << std::endl;
     FAIL();
   }
   SUCCEED();
@@ -327,12 +320,11 @@ TYPED_TEST(wpt_tests_typed, toascii_encoding) {
   SUCCEED();
 }
 
-template <class result_type = ada::url_aggregator>
-void urltestdata_encoding(const char *source) {
+TYPED_TEST_P(wpt_tests_parameterized, urltestdata_encoding) {
   ondemand::parser parser;
   size_t counter{};
-  ASSERT_TRUE(file_exists(source));
-  padded_string json = padded_string::load(source);
+  ASSERT_TRUE(file_exists(this->source));
+  padded_string json = padded_string::load(this->source);
   ondemand::document doc = parser.iterate(json);
   try {
     for (auto element : doc.get_array()) {
@@ -353,10 +345,10 @@ void urltestdata_encoding(const char *source) {
         std::cout << "input='" << input << "' [" << input.size() << " bytes]"
                   << std::endl;
         std::string_view base;
-        ada::result<result_type> base_url;
+        ada::result<TypeParam> base_url;
         if (!object["base"].get(base)) {
           std::cout << "base=" << base << std::endl;
-          base_url = ada_parse<result_type>(base);
+          base_url = ada_parse<TypeParam>(base);
           if (!base_url) {
             bool failure = false;
             if (!object["failure"].get(failure) && failure == true) {
@@ -368,20 +360,19 @@ void urltestdata_encoding(const char *source) {
           }
         }
         bool failure = false;
-        ada::result<result_type> input_url =
-            (!object["base"].get(base))
-                ? ada_parse<result_type>(input, &*base_url)
-                : ada_parse<result_type>(input);
+        auto input_url = (!object["base"].get(base))
+                             ? ada_parse<TypeParam>(input, &*base_url)
+                             : ada_parse<TypeParam>(input);
         if (!object["failure"].get(failure) && failure == true) {
           ASSERT_EQ(input_url.has_value(), !failure);
         } else {
           ASSERT_TRUE(input_url.has_value());
           // Next we test the 'to_string' method.
-          if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
+          if constexpr (std::is_same<ada::url_aggregator, TypeParam>::value) {
             ASSERT_TRUE(input_url->validate());
           }
           std::string parsed_url_json = input_url->to_string();
-          if constexpr (std::is_same<ada::url_aggregator, result_type>::value) {
+          if constexpr (std::is_same<ada::url_aggregator, TypeParam>::value) {
             std::cout << "\n====\n" + input_url->to_diagram() + "\n====\n";
           }
           std::string_view protocol = object["protocol"].get_string();
@@ -430,7 +421,7 @@ void urltestdata_encoding(const char *source) {
           ondemand::object parsed_object = parsed_doc.get_object();
           std::string_view json_recovered_path;
           if (parsed_object["path"].get_string().get(json_recovered_path)) {
-            if constexpr (std::is_same<ada::url, result_type>::value) {
+            if constexpr (std::is_same<ada::url, TypeParam>::value) {
               std::cerr << "The serialized url instance does not provide a "
                            "'path' key or the JSON is invalid."
                         << std::endl;
@@ -445,7 +436,7 @@ void urltestdata_encoding(const char *source) {
     }
   } catch (simdjson::simdjson_error &error) {
     std::cerr << "JSON error: " << error.what() << " near "
-              << doc.current_location() << " in " << source << std::endl;
+              << doc.current_location() << " in " << this->source << std::endl;
     FAIL();
   }
   std::cout << "Tests executed = " << counter << std::endl;
@@ -486,3 +477,8 @@ TEST(wpt_tests, verify_dns_length) {
   std::cout << "Tests executed = " << counter << std::endl;
   SUCCEED();
 }
+
+REGISTER_TYPED_TEST_SUITE_P(wpt_tests_parameterized, setters_tests_encoding,
+                            urltestdata_encoding);
+
+INSTANTIATE_TYPED_TEST_SUITE_P(Initialized, wpt_tests_parameterized, Types);
