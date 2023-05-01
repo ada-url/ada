@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <iostream>
@@ -51,6 +50,11 @@ const char *ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
 const char *VERIFYDNSLENGTH_TESTS_JSON =
     WPT_DATA_DIR "verifydnslength_tests.json";
 
+using Types = testing::Types<ada::url, ada::url_aggregator>;
+template <class T>
+struct wpt_tests_typed : testing::Test {};
+TYPED_TEST_SUITE(wpt_tests_typed, Types);
+
 std::stringstream error_buffer;
 
 bool file_exists(const char *filename) {
@@ -66,7 +70,7 @@ bool file_exists(const char *filename) {
   }
 }
 
-void idna_test_v2_to_ascii() {
+TEST(wpt_tests, idna_test_v2_to_ascii) {
   ondemand::parser parser;
   ASSERT_TRUE(file_exists(IDNA_TEST_V2));
   padded_string json = padded_string::load(IDNA_TEST_V2);
@@ -102,7 +106,7 @@ void idna_test_v2_to_ascii() {
   SUCCEED();
 }
 
-void percent_encoding() {
+TEST(wpt_tests, percent_encoding) {
   ondemand::parser parser;
   size_t counter{0};
 
@@ -262,8 +266,7 @@ void setters_tests_encoding(const char *source) {
   SUCCEED();
 }
 
-template <class result_type = ada::url_aggregator>
-void toascii_encoding() {
+TYPED_TEST(wpt_tests_typed, toascii_encoding) {
   ondemand::parser parser;
   ASSERT_TRUE(file_exists(TOASCII_JSON));
   padded_string json = padded_string::load(TOASCII_JSON);
@@ -286,8 +289,8 @@ void toascii_encoding() {
         // tests.
         // @see
         // https://github.com/web-platform-tests/wpt/blob/master/url/toascii.window.js
-        ada::result<result_type> current =
-            ada::parse<result_type>("https://" + std::string(input) + "/x");
+        auto current =
+            ada::parse<TypeParam>("https://" + std::string(input) + "/x");
 
         if (expected_output.type() == ondemand::json_type::string) {
           std::string_view stringified_output = expected_output.get_string();
@@ -301,8 +304,7 @@ void toascii_encoding() {
         }
 
         // Test setters for host and hostname values.
-        ada::result<result_type> setter =
-            ada::parse<result_type>("https://x/x");
+        auto setter = ada::parse<TypeParam>("https://x/x");
         ASSERT_EQ(setter->set_host(input), !expected_output.is_null());
         ASSERT_EQ(setter->set_hostname(input), !expected_output.is_null());
 
@@ -324,9 +326,6 @@ void toascii_encoding() {
   }
   SUCCEED();
 }
-
-template void toascii_encoding<ada::url>();
-template void toascii_encoding<ada::url_aggregator>();
 
 template <class result_type = ada::url_aggregator>
 void urltestdata_encoding(const char *source) {
@@ -453,10 +452,8 @@ void urltestdata_encoding(const char *source) {
   SUCCEED();
 }
 
-template void urltestdata_encoding<ada::url>(const char *source);
-template void urltestdata_encoding<ada::url_aggregator>(const char *source);
-
-void verifydnslength_tests(const char *source) {
+TEST(wpt_tests, verify_dns_length) {
+  const char *source = VERIFYDNSLENGTH_TESTS_JSON;
   size_t counter{};
   ondemand::parser parser;
   ASSERT_TRUE(file_exists(source));
@@ -488,19 +485,4 @@ void verifydnslength_tests(const char *source) {
   }
   std::cout << "Tests executed = " << counter << std::endl;
   SUCCEED();
-}
-
-int main(int argc, char **argv) {
-  idna_test_v2_to_ascii();
-  urltestdata_encoding<ada::url>(URLTESTDATA_JSON);
-  urltestdata_encoding<ada::url_aggregator>(URLTESTDATA_JSON);
-  urltestdata_encoding<ada::url>(ADA_URLTESTDATA_JSON);
-  urltestdata_encoding<ada::url_aggregator>(ADA_URLTESTDATA_JSON);
-  percent_encoding();
-  toascii_encoding();
-  setters_tests_encoding<ada::url>(SETTERS_TESTS_JSON);
-  setters_tests_encoding<ada::url_aggregator>(SETTERS_TESTS_JSON);
-  setters_tests_encoding<ada::url>(ADA_SETTERS_TESTS_JSON);
-  setters_tests_encoding<ada::url_aggregator>(ADA_SETTERS_TESTS_JSON);
-  verifydnslength_tests(VERIFYDNSLENGTH_TESTS_JSON);
 }
