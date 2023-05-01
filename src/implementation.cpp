@@ -46,6 +46,19 @@ std::string href_from_file(std::string_view input) {
   return "file://" + path;
 }
 
+bool can_parse(std::string_view input, std::string_view* base_input = nullptr) {
+  ada::result<ada::url_aggregator> base;
+  ada::url_aggregator* base_pointer = nullptr;
+  if (base_input != nullptr) {
+    base = ada::parse<url_aggregator>(*base_input);
+    if (!base) {
+      return false;
+    }
+    base_pointer = &base.value();
+  }
+  return ada::parse<url_aggregator>(input, base_pointer).has_value();
+}
+
 ada_warn_unused std::string to_string(ada::encoding_type type) {
   switch (type) {
     case ada::encoding_type::UTF8:
