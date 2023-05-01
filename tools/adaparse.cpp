@@ -3,6 +3,8 @@
 #include <string_view>
 #include <cxxopts.hpp>
 #include "ada.h"
+#include <unistd.h>
+
 /**
  * @private
  *
@@ -49,6 +51,20 @@ int main(int argc, char** argv) {
   options.parse_positional({"url"});
 
   auto result = options.parse(argc, argv);
+
+  if (!isatty(fileno(stdin))) {
+      std::string line;
+      while (std::getline(std::cin, line)) {
+          ada::result<ada::url_aggregator> url = ada::parse(line);
+          if (!url) {
+              std::cerr << "Invalid URL: " << line << std::endl;
+          } else {
+              std::cout << url->get_href() << std::endl;
+          }
+      }
+      return EXIT_SUCCESS;
+}
+
   // the first argument without an option name will be parsed into file
   if (result.count("help") || !result.count("url")) {
     std::cout << options.help() << std::endl;
