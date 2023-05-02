@@ -2,7 +2,11 @@
 #include <fmt/core.h>
 #include <cxxopts.hpp>
 #include "ada.h"
+#ifdef _MSC_VER
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 bool print_part(std::string_view get_part, const ada::url_aggregator& url) {
     if(get_part.size() == 3) {
@@ -104,8 +108,11 @@ int main(int argc, char** argv) {
   options.parse_positional({"url"});
 
   auto result = options.parse(argc, argv);
-
+#ifdef _MSC_VER
+  if (!_isatty(_fileno(stdin))) {
+#else
   if (!isatty(fileno(stdin))) {
+#endif
       std::string line;
       while (std::getline(std::cin, line)) {
           ada::result<ada::url_aggregator> url = ada::parse(line);
