@@ -83,31 +83,50 @@ int main(int argc, char** argv) {
   std::string get_part;
   if (result.count("get")) {
     get_part = result["get"].as<std::string>();
-    if (!get_part.empty()) {
-              // Define a type alias for the member function pointer
-              //using UrlGetter = std::string (ada::url_aggregator)();
 
-              std::map<std::string, std::string> getters;
+        std::map<std::string, std::string> getters;
+
+        // Initializing
+        getters["origin"] = url -> get_origin();
+        getters["protocol"] = url -> get_protocol();
+        getters["host"] = url -> get_host();
+        getters["hostname"] = url -> get_hostname();
+        getters["pathname"] = url -> get_pathname();
+        getters["search"] = url -> get_search();
+        getters["username"] = url -> get_username();
+        getters["password"] = url -> get_password();
+        getters["port"] = url -> get_port();
+        getters["hash"] = url -> get_hash();
+
+        std::cout << getters[get_part] << std::endl;
+
+        return EXIT_SUCCESS;
 
 
-              // Initializing
-              //its ugly but it works. 
-              getters["origin"] = url -> get_origin();
-              getters["protocol"] = url -> get_protocol();
-              getters["host"] = url -> get_host();
-              getters["hostname"] = url -> get_hostname();
-              getters["pathname"] = url -> get_pathname();
-              getters["search"] = url -> get_search();
-              getters["username"] = url -> get_username();
-              getters["password"] = url -> get_password();
-              getters["port"] = url -> get_port();
-              getters["hash"] = url -> get_hash();
-              
-              std::cout << getters[get_part] << std::endl;
+       };
 
-              return EXIT_SUCCESS;
+  std::string get_part;
+  if (result.count("get")) {
+    get_part = result["get"].as<std::string>();
 
-            };
+        std::map<std::string, std::string> getters;
+
+        // Initializing
+        getters["origin"] = url -> get_origin();
+        getters["protocol"] = url -> get_protocol();
+        getters["host"] = url -> get_host();
+        getters["hostname"] = url -> get_hostname();
+        getters["pathname"] = url -> get_pathname();
+        getters["search"] = url -> get_search();
+        getters["username"] = url -> get_username();
+        getters["password"] = url -> get_password();
+        getters["port"] = url -> get_port();
+        getters["hash"] = url -> get_hash();
+
+        std::cout << getters[get_part] << std::endl;
+
+        return EXIT_SUCCESS;
+
 
        };
 
