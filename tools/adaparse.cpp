@@ -1,6 +1,5 @@
 #include <cstdlib>
-#include <iostream>
-#include <string_view>
+#include <fmt/core.h>
 #include <cxxopts.hpp>
 #include "ada.h"
 #include <unistd.h>
@@ -60,9 +59,9 @@ int main(int argc, char** argv) {
       while (std::getline(std::cin, line)) {
           ada::result<ada::url_aggregator> url = ada::parse(line);
           if (!url) {
-              std::cerr << "Invalid URL: " << line << std::endl;
+              fmt::print(stderr, "Invalid URL: {}\n", line);
           } else {
-              std::cout << url->get_href() << std::endl;
+              fmt::print("{}\n", url->to_string());
           }
       }
       return EXIT_SUCCESS;
@@ -70,7 +69,7 @@ int main(int argc, char** argv) {
 
   // the first argument without an option name will be parsed into file
   if (result.count("help") || !result.count("url")) {
-    std::cout << options.help() << std::endl;
+    fmt::print(stderr, "{}\n", options.help());
     return EXIT_SUCCESS;
   }
 
@@ -111,13 +110,13 @@ int main(int argc, char** argv) {
 
 
   if (!url) {
-    std::cerr << "Invalid." << std::endl;
+    fmt::print(stderr, "Invalid URL: {}\n", url_string);
     return EXIT_FAILURE;
   }
   if (to_diagram) {
-    std::cout << url->to_diagram() << std::endl;
+    fmt::print("{}\n", url->to_diagram());
   } else {
-    std::cout << *url << std::endl;
+    fmt::print("{}\n", url->to_string());
   }
 
 
