@@ -47,7 +47,10 @@ int main(int argc, char** argv) {
   options.add_options()("d,diagram", "Print a diagram of the result",
                         cxxopts::value<bool>()->default_value("false"))(
       "u,url", "URL Parameter (required)", cxxopts::value<std::string>())(
-      "h,help", "Print usage");
+      "h,help", "Print usage")(
+      "g,get", "Get a specific part of the URL (e.g., 'origin', 'host', etc.)"
+      ,cxxopts::value<std::string>())
+      ;
   options.parse_positional({"url"});
 
   auto result = options.parse(argc, argv);
@@ -70,9 +73,50 @@ int main(int argc, char** argv) {
     std::cout << options.help() << std::endl;
     return EXIT_SUCCESS;
   }
+
   std::string url_string = result["url"].as<std::string>();
   bool to_diagram = result["diagram"].as<bool>();
+
+
   ada::result<ada::url_aggregator> url = ada::parse(url_string);
+
+  std::string get_part;
+  if (result.count("get")) {
+    get_part = result["get"].as<std::string>();
+    if (!get_part.empty()) {
+              // Define a type alias for the member function pointer
+              //using UrlGetter = std::string (ada::url_aggregator)();
+
+              std::map<std::string, std::string> getters;
+
+
+              // Initializing
+              //its ugly but it works. 
+              getters["origin"] = url -> get_origin();
+              getters["protocol"] = url -> get_protocol();
+              getters["host"] = url -> get_host();
+              getters["hostname"] = url -> get_hostname();
+              getters["pathname"] = url -> get_pathname();
+              getters["search"] = url -> get_search();
+              getters["username"] = url -> get_username();
+              getters["password"] = url -> get_password();
+              getters["port"] = url -> get_port();
+              getters["hash"] = url -> get_hash();
+              
+              std::cout << getters[get_part] << std::endl;
+
+              return EXIT_SUCCESS;
+
+            };
+
+       };
+
+        
+    
+
+  
+
+
   if (!url) {
     std::cerr << "Invalid." << std::endl;
     return EXIT_FAILURE;
@@ -82,5 +126,8 @@ int main(int argc, char** argv) {
   } else {
     std::cout << *url << std::endl;
   }
+
+
+
   return EXIT_SUCCESS;
 }
