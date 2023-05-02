@@ -123,7 +123,9 @@ var menudata={children:[
 {text:"File Members",url:"globals.html",children:[
 {text:"All",url:"globals.html",children:[
 {text:"_",url:"globals.html#index__5F"},
-{text:"a",url:"globals.html#index_a"}]},
+{text:"a",url:"globals.html#index_a"},
+{text:"l",url:"globals.html#index_l"}]},
+{text:"Functions",url:"globals_func.html"},
 {text:"Macros",url:"globals_defs.html",children:[
 {text:"_",url:"globals_defs.html#index__5F"},
 {text:"a",url:"globals_defs.html#index_a"}]}]}]}]}
