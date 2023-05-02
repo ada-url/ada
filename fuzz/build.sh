@@ -6,6 +6,7 @@ cmake -B build
 cmake --build build -j$(nproc)
 
 $CXX $CFLAGS $CXXFLAGS \
+     -std=c++17 \
      -I build/singleheader \
      -c fuzz/parse.cc -o parse.o
 
