@@ -1,10 +1,60 @@
 #include <cstdlib>
-#include <iostream>
-#include <string_view>
+#include <fmt/core.h>
 #include <cxxopts.hpp>
 #include "ada.h"
 #include <unistd.h>
 
+bool print_part(std::string_view get_part, const ada::url_aggregator& url) {
+    if(get_part.size() == 3) {
+        if(get_part[0] == 'h') {
+          if(get_part == "host") {
+            fmt::print("{}\n", url.get_host());
+            return true;
+          } else if(get_part == "hash") {
+            fmt::print("{}\n", url.get_hash());
+            return true;
+          }
+        } else if(get_part[0] == 'p') {
+          if(get_part == "port") {
+            fmt::print("{}\n", url.get_port());
+            return true;
+          }
+        }
+    } else if(get_part.size() == 4) {
+        if(get_part == "origin") {
+          fmt::print("{}\n", url.get_origin());
+          return true;
+        }
+        if(get_part == "search") {
+          fmt::print("{}\n", url.get_search());
+          return true;
+        }
+    } else if(get_part.size() == 5) {
+      if(get_part[0] == 'p') {
+        if(get_part == "protocol") {
+          fmt::print("{}\n", url.get_protocol());
+          return true;
+        }
+        if(get_part == "password") {
+          fmt::print("{}\n", url.get_password());
+          return true;
+        }
+        if(get_part == "pathname") {
+          fmt::print("{}\n", url.get_pathname());
+          return true;
+        }
+      } else if(get_part == "hostname") {
+          fmt::print("{}\n", url.get_hostname());
+          return true;
+
+      } else if(get_part == "username") {
+          fmt::print("{}\n", url.get_username());
+          return true;
+      }
+    }
+    fmt::print(stderr, "{}\n", url.get_username());
+    return false;
+}
 /**
  * @private
  *
@@ -60,9 +110,9 @@ int main(int argc, char** argv) {
       while (std::getline(std::cin, line)) {
           ada::result<ada::url_aggregator> url = ada::parse(line);
           if (!url) {
-              std::cerr << "Invalid URL: " << line << std::endl;
+              fmt::print(stderr, "Invalid URL: {}\n", line);
           } else {
-              std::cout << url->get_href() << std::endl;
+              fmt::print("{}\n", url->to_string());
           }
       }
       return EXIT_SUCCESS;
@@ -70,7 +120,7 @@ int main(int argc, char** argv) {
 
   // the first argument without an option name will be parsed into file
   if (result.count("help") || !result.count("url")) {
-    std::cout << options.help() << std::endl;
+    fmt::print(stderr, "{}\n", options.help());
     return EXIT_SUCCESS;
   }
 
@@ -79,45 +129,18 @@ int main(int argc, char** argv) {
 
 
   ada::result<ada::url_aggregator> url = ada::parse(url_string);
-
-  std::string get_part;
-  if (result.count("get")) {
-    get_part = result["get"].as<std::string>();
-
-        std::map<std::string, std::string> getters;
-
-        // Initializing
-        getters["origin"] = url -> get_origin();
-        getters["protocol"] = url -> get_protocol();
-        getters["host"] = url -> get_host();
-        getters["hostname"] = url -> get_hostname();
-        getters["pathname"] = url -> get_pathname();
-        getters["search"] = url -> get_search();
-        getters["username"] = url -> get_username();
-        getters["password"] = url -> get_password();
-        getters["port"] = url -> get_port();
-        getters["hash"] = url -> get_hash();
-
-        std::cout << getters[get_part] << std::endl;
-
-        return EXIT_SUCCESS;
-
-
-       };
-
-    
-
-  
-
-
   if (!url) {
-    std::cerr << "Invalid." << std::endl;
+    fmt::print(stderr, "Invalid URL: {}\n", url_string);
     return EXIT_FAILURE;
   }
+  if (result.count("get")) {
+    std::string get_part = result["get"].as<std::string>();
+    return print_part(get_part, url.value()) ? EXIT_SUCCESS : EXIT_FAILURE;
+  };
   if (to_diagram) {
-    std::cout << url->to_diagram() << std::endl;
+    fmt::print("{}\n", url->to_diagram());
   } else {
-    std::cout << *url << std::endl;
+    fmt::print("{}\n", url->to_string());
   }
 
 
