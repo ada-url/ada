@@ -3,8 +3,11 @@
 #include <string_view>
 #include <cxxopts.hpp>
 #include "ada.h"
+#ifdef _MSC_VER
+#include <io.h>
+#else
 #include <unistd.h>
-
+#endif
 /**
  * @private
  *
@@ -54,8 +57,11 @@ int main(int argc, char** argv) {
   options.parse_positional({"url"});
 
   auto result = options.parse(argc, argv);
-
+#ifdef _MSC_VER
+  if (!_isatty(_fileno(stdin))) {
+#else
   if (!isatty(fileno(stdin))) {
+#endif
       std::string line;
       while (std::getline(std::cin, line)) {
           ada::result<ada::url_aggregator> url = ada::parse(line);
