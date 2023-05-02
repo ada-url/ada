@@ -1,6 +1,7 @@
+#include <cstdlib>
 #include <chrono>
 #include <iostream>
-#include <string>
+#include <string_view>
 #include <sys/stat.h>
 #include <fmt/core.h>
 #include <cxxopts.hpp>
@@ -213,13 +214,6 @@ int main(int argc, char** argv) {
   } else {
     fmt::print("{}\n", url->to_string());
   }
-
-
-
-  
-
-  //fmt::print("speed {} GB/s\n",(total / double(end - start)); 
-// total should be size in bytes
 
   return EXIT_SUCCESS;
 }
