@@ -105,7 +105,51 @@ int main(int argc, char** argv) {
 
        };
 
-    
+    std::string set_part;
+if (result.count("set")) {
+  set_part = result["set"].as<std::string>();
+
+  std::string set_value;
+  if (result.count("value")) {
+    set_value = result["value"].as<std::string>();
+  } else {
+    std::cerr << "Error: No value provided for the setter." << std::endl;
+    return EXIT_FAILURE;
+  };
+
+/*
+  std::map<std::string, std::function<bool(ada::url*, const std::string)>> setters;
+
+  // Initializing
+  setters["host"] = &ada::url::set_host;
+  setters["hostname"] = &ada::url::set_hostname;
+  setters["pathname"] = &ada::url::set_pathname;
+  //setters["search"] = &ada::url::set_search;
+  setters["username"] = &ada::url::set_username;
+  setters["password"] = &ada::url::set_password;
+  setters["port"] = &ada::url::set_port;
+  //setters["hash"] = &ada::url::set_hash;
+  setters["protocol"] = &ada::url::set_protocol;
+  setters["href"] = &ada::url::set_href;*/
+
+
+
+ /* if (setters.find(set_part) != setters.end()) {
+  bool success = 1;//setters[set_part](url.get(), set_value);
+    if (success) {
+      std::cout << "Successfully set the " << set_part << " to: " << set_value << std::endl;
+    } else {
+      std::cerr << "Failed to set the " << set_part << " to: " << set_value << std::endl;
+      return EXIT_FAILURE;
+    }
+  } else {
+    std::cerr << "Error: Invalid setter name." << std::endl;
+    return EXIT_FAILURE;
+  }*/
+
+  return EXIT_SUCCESS;
+}
+
 
   
 
