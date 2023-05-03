@@ -16,6 +16,12 @@ TYPED_TEST(basic_tests, set_host_should_return_false_sometimes) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, empty_url_should_return_false) {
+  auto r = ada::parse<TypeParam>("");
+  ASSERT_FALSE(r);
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_host_should_return_true_sometimes) {
   auto r = ada::parse<TypeParam>("https://www.google.com");
   ASSERT_TRUE(r->set_host("something"));

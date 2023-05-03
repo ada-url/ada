@@ -36,13 +36,15 @@ result_type parse_url(std::string_view user_input,
 
   // We refuse to parse URL strings that exceed 4GB. Such strings are almost
   // surely the result of a bug or are otherwise a security concern.
+  // An empty URL is not a valid URL.
   if (user_input.size() >=
-      std::string_view::size_type(std::numeric_limits<uint32_t>::max)) {
+          std::string_view::size_type(std::numeric_limits<uint32_t>::max) ||
+      user_input.size() == 0) {
     url.is_valid = false;
   }
-
-  // If we are provided with an invalid base, or the optional_url was invalid,
-  // we must return.
+  // Going forward, user_input.size() is in [1,
+  // std::numeric_limits<uint32_t>::max). If we are provided with an invalid
+  // base, or the optional_url was invalid, we must return.
   if (base_url != nullptr) {
     url.is_valid &= base_url->is_valid;
   }
@@ -59,6 +61,8 @@ result_type parse_url(std::string_view user_input,
     // it may not matter, but in other instances, it could.
     ////
     // This rounds up to the next power of two.
+    // We know that user_input.size() is in [1,
+    // std::numeric_limits<uint32_t>::max).
     uint32_t reserve_capacity =
         (0xFFFFFFFF >> helpers::leading_zeroes(uint32_t(user_input.size()))) +
         1;
