@@ -40,7 +40,7 @@ result_type parse_url(std::string_view user_input,
       std::string_view::size_type(std::numeric_limits<uint32_t>::max)) {
     url.is_valid = false;
   }
-  // Going forward, user_input.size() is in [1,
+  // Going forward, user_input.size() is in [0,
   // std::numeric_limits<uint32_t>::max). If we are provided with an invalid
   // base, or the optional_url was invalid, we must return.
   if (base_url != nullptr) {
