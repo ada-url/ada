@@ -1,0 +1,16 @@
+./files/node_files.txt
+PIPED FILE COMPLICATED VERSION: speed 0.019965550938397872 GB/s
+There are 2552090 lines in the piped file.
+Total: 2552090 bytes.
+----------
+./files/linux_files.txt
+PIPED FILE COMPLICATED VERSION: speed 0.022322288489475074 GB/s
+There are 10124906 lines in the piped file.
+Total: 10124906 bytes.
+----------
+./others/userbait.txt
+PIPED FILE COMPLICATED VERSION: speed 0.022163762855074282 GB/s
+There are 709607 lines in the piped file.
+Total: 709607 bytes.
+----------
+./others/kasztp.txt
