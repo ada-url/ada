@@ -136,31 +136,39 @@ int piped_file_B(const cxxopts::ParseResult result,std::istream& input_stream) {
 }
 
 int piped_file(const cxxopts::ParseResult result, std::istream& input_stream) {
-      uint64_t start = nano();
-      size_t total_bytes = 0;
-
+      uint64_t before = nano();
+      size_t sum_of_lines = 0;
+      size_t lines = 0;
 
       std::string thisline;
       while (std::getline(input_stream, thisline)) {
-          total_bytes += thisline.size() + 1;  // Add 1 for the newline character
+          sum_of_lines += thisline.size() + 1;  // Add 1 for the newline character
+          lines++;
+
+          //ada part
           ada::result<ada::url_aggregator> url = ada::parse(thisline);
           if (!url) {
               std::cerr << "Invalid URL: " << thisline << std::endl;
           } else if (result.count("get")) {
-          std::string get_part = result["get"].as<std::string>();
-          print_part(get_part, url.value());
+            std::string get_part = result["get"].as<std::string>();
+            print_part(get_part, url.value());
           } else {
-              std::cout << url->get_href() << std::endl;
+            fmt::print("{} \n",  url->get_href());
           }
+          //ada part
+
+
       }
 
         //fmt::print("There are {} lines in the piped file.\n", total);
         if (result.count("benchmark")) {
-          uint64_t end = nano();
-          fmt::print("PIPED FILE SIMPLE VERSION: speed {} GB/s\n", (total_bytes / double(end - start)));
-          fmt::print("There are {} lines in the piped file.\n", total_bytes);
-          fmt::print("Total: {} bytes.\n", total_bytes);
-        }
+            uint64_t after = nano();
+            double giga = sum_of_lines / 1000000000.;
+            fmt::print("read {} bytes in {} ns using {} lines\n", sum_of_lines, (after - before), lines);
+            double seconds = (after - before) / 1000000000.;
+            double speed = giga / seconds;
+            fmt::print("{} GB/s" , speed);
+          }
 
       return EXIT_SUCCESS;
 }
@@ -202,6 +210,8 @@ int piped_file(const cxxopts::ParseResult result, std::istream& input_stream) {
  *      `-------------------------------- protocol_end 5
  **/
 int main(int argc, char** argv) {
+  std::ios::sync_with_stdio(false);
+
   cxxopts::Options options("adaparse",
                            "Command-line version of the Ada URL parser");
 
@@ -223,11 +233,14 @@ int main(int argc, char** argv) {
 #else
   if (!isatty(fileno(stdin))) {
 #endif
-  if (!result.count("alternate")) {
+  return piped_file(result,std::cin) ? EXIT_SUCCESS : EXIT_FAILURE;
+
+
+  /*if (!result.count("alternate")) {
     return piped_file(result,std::cin) ? EXIT_SUCCESS : EXIT_FAILURE;
   } else {
     return piped_file_B(result,std::cin) ? EXIT_SUCCESS : EXIT_FAILURE;
-  }
+  }*/
 
   }
   
