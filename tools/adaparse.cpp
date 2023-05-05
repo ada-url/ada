@@ -7,6 +7,7 @@
 #include <cxxopts.hpp>
 #include <fstream>
 #include "ada.h"
+#include "line_iterator.h"
 #ifdef _MSC_VER
 #include <io.h>
 #else
@@ -74,51 +75,70 @@ bool print_part(std::string_view get_part, const ada::url_aggregator& url) {
     return false;
 }
 
-
 int piped_file(const cxxopts::ParseResult result, std::istream& input_stream) {
-      uint64_t before = nano();
-      size_t sum_of_lines = 0;
-      size_t lines = 0;
+  constexpr size_t cache_length = 32768;
+  std::unique_ptr<char[]> cachebuffer(new char[cache_length]{});
+
+  uint64_t before = nano();
+
+  size_t howmany = 0;
+  size_t tr;
+  size_t offset = 0;
+  size_t lines = 0;
+  size_t total_bytes = 0;
+  size_t blocks = 0;
 
 
-      std::string get_part;
-      bool is_get = false;
-      if (result.count("get")) {
-            is_get = true;
-            get_part = result["get"].as<std::string>();
-      }
+  std::string get_part; 
+  bool get_flag;
+  if (result.count("get")) {
+
+    get_part = result["get"].as<std::string>();
+
+  while ((tr = read(0, cachebuffer.get() + offset, cache_length - offset))) {
+    howmany += tr; 
+    blocks++; 
+    size_t capacity = tr + offset; 
 
 
-      std::string thisline;
-      while (std::getline(input_stream, thisline)) {
-          sum_of_lines += thisline.size() + 1;  // Add 1 for the newline character
-          lines++;
+    line_iterator li(cachebuffer.get(), capacity); 
+    while (li.find_another_complete_line()) {
+      std::string_view line = li.grab_line(); 
 
-          //ada part
-          ada::result<ada::url_aggregator> url = ada::parse(thisline);
-          if (!url) {
-            fmt::print(stderr, "Invalid URL: {}\n", thisline);
-          } else if (is_get) {
-            print_part(get_part, url.value());
-          } else {
-            fmt::print("{} \n",  url->get_href());
-          }
-          //ada part
+      ada::result<ada::url_aggregator> url = ada::parse(line);
+      if (!url) {
+        printf("Invalid URL: %.*s\n", int(line.size()), line.data());         
+        
+        } else if (get_flag){
+        print_part(get_part, url.value());
+      } 
+      else {
+        fmt::print("{} \n",  url->get_href());
+        }
 
+      total_bytes += line.size() + 1;
+      lines++;
+    }
+    if ((offset = li.tail()) > 0) { 
+      memmove(cachebuffer.get(), cachebuffer.get() + capacity - offset, offset);
+    }
+  }
+  if (offset > 0) {
+      // have a line of length offset at cachebuffer.get()
+    lines++;
+    total_bytes += offset;
+  }
+  uint64_t after = nano();
+  double giga = howmany / 1000000000.;
 
-      }
+  fmt::print("read {} bytes in {} ns using {} lines, total_bytes is {} used {} loads\n", howmany, (after - before), lines, total_bytes, blocks);
 
-        //fmt::print("There are {} lines in the piped file.\n", total);
-        if (result.count("benchmark")) {
-            uint64_t after = nano();
-            double giga = sum_of_lines / 1000000000.;
-            fmt::print("read {} bytes in {} ns using {} lines\n", sum_of_lines, (after - before), lines);
-            double seconds = (after - before) / 1000000000.;
-            double speed = giga / seconds;
-            fmt::print("{} GB/s" , speed);
-          }
+  double seconds = (after - before) / 1000000000.;
+  double speed = giga / seconds;
+  fmt::print("{} GB/s" , speed);
 
-      return EXIT_SUCCESS;
+ return EXIT_SUCCESS;
+}
 }
 
 
@@ -157,6 +177,7 @@ int piped_file(const cxxopts::ParseResult result, std::istream& input_stream) {
  *      | `------------------------------ username_end 7
  *      `-------------------------------- protocol_end 5
  **/
+
 int main(int argc, char** argv) {
   std::ios::sync_with_stdio(false);
 
@@ -168,9 +189,8 @@ int main(int argc, char** argv) {
       "u,url", "URL Parameter (required)", cxxopts::value<std::string>())(
       "h,help", "Print usage")(
       "g,get", "Get a specific part of the URL (e.g., 'origin', 'host', etc.)",cxxopts::value<std::string>())(
-      "b,benchmark", "Run benchmark for piped file functions",cxxopts::value<bool>()->default_value("false") )(
+      "b,benchmark", "Run benchmark for piped file functions",cxxopts::value<bool>()->default_value("false") )
       //"p,path", "Takes in a path and process all the files within", cxxopts::value<std::string>())(
-      "a,alternate", "run alternate function for piped file", cxxopts::value<bool>()->default_value("false") )
       
       ;
   options.parse_positional({"url"});
@@ -182,13 +202,6 @@ int main(int argc, char** argv) {
   if (!isatty(fileno(stdin))) {
 #endif
   return piped_file(result,std::cin) ? EXIT_SUCCESS : EXIT_FAILURE;
-
-
-  /*if (!result.count("alternate")) {
-    return piped_file(result,std::cin) ? EXIT_SUCCESS : EXIT_FAILURE;
-  } else {
-    return piped_file_B(result,std::cin) ? EXIT_SUCCESS : EXIT_FAILURE;
-  }*/
 
   }
   
