@@ -28,103 +28,6 @@ depending on your needs. The `ada:url_aggregator` class is smaller and it is bac
 serialized URL string. The `ada:url` class is made of several separate strings for the various
 components (path, host, and so forth).
 
-### Command line options
-
-- Options:
-
-    -d, --diagram: Print a diagram of the result
-    -u, --url: URL Parameter (required)
-    -h, --help: Print usage
-    -g, --get: Get a specific part of the URL (e.g., 'origin', 'host', etc.)
-    -b, --benchmark: Run benchmark for piped file functions
-
-### Usage/Examples: 
-
-Well-formatted URL: 
-
-```bash 
-./buildbench/tools/adaparse "http://www.google.com"
-```
-Output: 
-
-```
-http://www.google.com
-```
-Ill-formatted URL: 
-
-```bash 
-./buildbench/tools/adaparse "h^tp:ws:/www.g00g.com"
-```
-Output: 
-
-```
-Invalid URL: h^tp:ws:/www.g00g.com
-```
-
-
-Diagram flag:
-
-```bash
- $ ./buildbench/tools/adaparse -d http://www.google.com/bal\?a\=\=11\#fddfds
- ```
-
-Output:
-
- ```
-  http://www.google.com/bal?a==11#fddfds [38 bytes]
-       | |             |   |     |
-       | |             |   |     `------ hash_start
-       | |             |   `------------ search_start 25
-       | |             `---------------- pathname_start 21
-       | |             `---------------- host_end 21
-       | `------------------------------ host_start 7
-       | `------------------------------ username_end 7
-       `-------------------------------- protocol_end 5
-```
-
-
-
-### Piping Example
-
-Ada can process URLs from piped input, making it easy to integrate with other command-line tools. Here's an example of how to pipe the output of another command into Ada:
-
-```bash
-cat "http://www.google.com/bal?a==11#fddfds" | ./buildbench/tools/adaparse
-```
-
-Output:
-```
-http://www.google.com/bal?a==11#fddfds
-```
-
-```bash
-cat "http://www.google.com/bal?a==11#fddfds" | ./buildbench/tools/adaparse -g host
-```
-
-Output:
-```
-www.google.com
-```
-
-The benchmark flag can be used to output the time it takes to process a piped file:
-
-```bash
-cat wikipedia_100k.txt | ./buildbench/tools/adaparse -b
-```
-
-```bash
-(---snip---)
-file:///opt 
-file:///Users 
-file:///Users/lemire 
-file:///Users/lemire/tmp 
-file:///Users/lemire/tmp/linuxdump 
-file:///Users/lemire/tmp/linuxdump/linuxfiles.txt 
-file:///.dockerenv 
-read 10124906 bytes in 3071328453 ns using 169312 lines
-0.003296588481153891 GB/s
-```
-
 
 
 
@@ -221,6 +124,114 @@ ada::result<ada:url_aggregator> url = ada::parse<ada:url_aggregator>("https://ww
 url->set_hash("is-this-the-real-life");
 // url->get_hash() will return "#is-this-the-real-life"
 ```
+
+### Command line options
+
+- Options:
+
+    -d, --diagram: Print a diagram of the result
+    -u, --url: URL Parameter (required)
+    -h, --help: Print usage
+    -g, --get: Get a specific part of the URL (e.g., 'origin', 'host', etc.)
+    -b, --benchmark: Run benchmark for piped file functions
+
+### Usage/Examples: 
+
+Well-formatted URL: 
+
+```bash 
+./buildbench/tools/adaparse "http://www.google.com"
+```
+Output: 
+
+```
+http://www.google.com
+```
+Ill-formatted URL: 
+
+```bash 
+./buildbench/tools/adaparse "h^tp:ws:/www.g00g.com"
+```
+Output: 
+
+```
+Invalid URL: h^tp:ws:/www.g00g.com
+```
+
+
+Diagram flag:
+
+```bash
+ $ ./buildbench/tools/adaparse -d http://www.google.com/bal\?a\=\=11\#fddfds
+ ```
+
+Output:
+
+ ```
+  http://www.google.com/bal?a==11#fddfds [38 bytes]
+       | |             |   |     |
+       | |             |   |     `------ hash_start
+       | |             |   `------------ search_start 25
+       | |             `---------------- pathname_start 21
+       | |             `---------------- host_end 21
+       | `------------------------------ host_start 7
+       | `------------------------------ username_end 7
+       `-------------------------------- protocol_end 5
+```
+
+
+
+### Piping Example
+
+Ada can process URLs from piped input, making it easy to integrate with other command-line tools. Here's an example of how to pipe the output of another command into Ada. 
+
+It is particularly useful when processing files: 
+
+```bash
+cat dragonball_url.txt | ./buildbench/tools/adaparse
+```
+
+Output:
+```
+http://www.goku.com
+http://www.vegeta.com
+http://www.gohan.com
+
+```
+
+It also supports the passing of arguments to each URL in said file: 
+
+```bash
+cat dragonball_url.txt  | ./buildbench/tools/adaparse -g host
+```
+
+Output:
+```
+www.goku.com
+www.vegeta.com
+www.gohan.com
+```
+
+The benchmark flag can be used to output the time it takes to process a piped file:
+
+```bash
+cat wikipedia_100k.txt | ./buildbench/tools/adaparse -b
+```
+
+```bash
+(---snip---)
+file:///opt 
+file:///Users 
+file:///Users/lemire 
+file:///Users/lemire/tmp 
+file:///Users/lemire/tmp/linuxdump 
+file:///Users/lemire/tmp/linuxdump/linuxfiles.txt 
+file:///.dockerenv 
+read 10124906 bytes in 3071328453 ns using 169312 lines
+0.003296588481153891 GB/s
+```
+
+
 
 
 ### CMake dependency
