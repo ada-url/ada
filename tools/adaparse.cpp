@@ -74,71 +74,20 @@ bool print_part(std::string_view get_part, const ada::url_aggregator& url) {
     return false;
 }
 
-// Define a function that takes an optional command line argument.
-int piped_file_B(const cxxopts::ParseResult result,std::istream& input_stream) {
-  uint64_t start = nano();
-  size_t lines = 0;
-  // allocate 512k buffer
-  size_t total = 0;
-  char *buf = (char *)malloc(1024 * 512);
-  size_t count = fread(buf, 1, 1024 * 512, stdin);
-  //size_t count = input_stream.read(buf + partial_size, 1024 * 512 - partial_size).gcount(); 
-  total += count;
-  ada::result<ada::url_aggregator> url;
-
-  while (count > 0) {
-    std::string_view whole(buf, count);
-    size_t t = whole.find('\n');
-    while (t != std::string_view::npos) {
-      std::string_view thisline = whole.substr(0, t);
-      lines++;
-      url = ada::parse(thisline);
-      if (!url) {
-        fmt::print(stderr, "Invalid URL: {}\n", thisline);
-      } else if (result.count("get")) {
-        std::string get_part = result["get"].as<std::string>();
-        print_part(get_part, url.value());
-      } else {
-        fmt::print("{}\n",url->get_href());
-      }
-      whole.remove_prefix(t + 1); // assume Linux/macos line endings
-      if (whole.empty()) {
-        t = 0;
-        break;
-      }
-      t = whole.find('\n');
-    }
-    if (t == std::string_view::npos) {
-      // we have a partial line
-      // copy it to the beginning of the buffer
-      // and read more data
-      size_t partial_size = whole.size();
-      memcpy(buf, whole.data(), partial_size);
-      count = fread(buf + partial_size, 1, 1024 * 512 - partial_size, stdin);
-      total += count;
-      count += partial_size;
-    } else {
-      count = fread(buf, 1, 1024 * 512, stdin);
-      total += count;
-    }
-  }
-  free(buf);
-
-  uint64_t end = nano();
-
-  if (result.count("benchmark")) {
-    fmt::print("PIPED FILE COMPLICATED VERSION: speed {} GB/s\n", (total / double(end - start)));
-    fmt::print("There are {} lines in the piped file.\n", total);
-    fmt::print("Total: {} bytes.\n", total);
-  }
-
-  return EXIT_SUCCESS;
-}
 
 int piped_file(const cxxopts::ParseResult result, std::istream& input_stream) {
       uint64_t before = nano();
       size_t sum_of_lines = 0;
       size_t lines = 0;
+
+
+      std::string get_part;
+      bool is_get = false;
+      if (result.count("get")) {
+            is_get = true;
+            get_part = result["get"].as<std::string>();
+      }
+
 
       std::string thisline;
       while (std::getline(input_stream, thisline)) {
@@ -148,9 +97,8 @@ int piped_file(const cxxopts::ParseResult result, std::istream& input_stream) {
           //ada part
           ada::result<ada::url_aggregator> url = ada::parse(thisline);
           if (!url) {
-              std::cerr << "Invalid URL: " << thisline << std::endl;
-          } else if (result.count("get")) {
-            std::string get_part = result["get"].as<std::string>();
+            fmt::print(stderr, "Invalid URL: {}\n", thisline);
+          } else if (is_get) {
             print_part(get_part, url.value());
           } else {
             fmt::print("{} \n",  url->get_href());
