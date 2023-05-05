@@ -132,7 +132,7 @@ url->set_hash("is-this-the-real-life");
     -d, --diagram: Print a diagram of the result
     -u, --url: URL Parameter (required)
     -h, --help: Print usage
-    -g, --get: Get a specific part of the URL (e.g., 'origin', 'host', etc.)
+    -g, --get: Get a specific part of the URL (e.g., 'origin', 'host', etc. as mentionned in the examples above)
     -b, --benchmark: Run benchmark for piped file functions
 
 ### Usage/Examples: 
@@ -147,6 +147,7 @@ Output:
 ```
 http://www.google.com
 ```
+
 Ill-formatted URL: 
 
 ```bash 
@@ -185,8 +186,6 @@ Output:
 
 Ada can process URLs from piped input, making it easy to integrate with other command-line tools. Here's an example of how to pipe the output of another command into Ada. 
 
-It is particularly useful when processing files: 
-
 ```bash
 cat dragonball_url.txt | ./buildbench/tools/adaparse
 ```
@@ -212,7 +211,7 @@ www.vegeta.com
 www.gohan.com
 ```
 
-The benchmark flag can be used to output the time it takes to process a piped file:
+The benchmark flag can be used to output the time it takes to process piped input:
 
 ```bash
 cat wikipedia_100k.txt | ./buildbench/tools/adaparse -b
