@@ -115,7 +115,10 @@ ada_really_inline bool shorten_path(std::string& path,
 
   // Remove path’s last item, if any.
   if (!path.empty()) {
-    path.erase(path.rfind('/'));
+    size_t last_delimiter = path.rfind('/');
+    if (last_delimiter != std::string::npos) {
+      path.erase(last_delimiter);
+    }
     return true;
   }
 
@@ -508,7 +511,10 @@ ada_really_inline void parse_prepared_path(std::string_view input,
         previous_location = new_location + 1;
         if (path_view == "..") {
           if (!path.empty()) {
-            path.erase(path.rfind('/'));
+            size_t last_delimiter = path.rfind('/');
+            if (last_delimiter != std::string::npos) {
+              path.erase(last_delimiter);
+            }
           }
         } else if (path_view != ".") {
           path += '/';

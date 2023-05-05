@@ -272,3 +272,13 @@ TYPED_TEST(basic_tests, should_update_password_correctly) {
             "https://username:test@host:8000/path?query#fragment");
   SUCCEED();
 }
+
+// https://github.com/nodejs/node/issues/47889
+TYPED_TEST(basic_tests, node_issue_47889) {
+  auto urlbase = ada::parse<TypeParam>("a:b");
+  ASSERT_TRUE(urlbase);
+  auto url = ada::parse<TypeParam>("..#", &*urlbase);
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href(), "a:b/#");
+  SUCCEED();
+}
