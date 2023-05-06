@@ -545,8 +545,7 @@ ada_really_inline void parse_prepared_path(std::string_view input,
               ? path_buffer_tmp
               : path_view;
       if (unicode::is_double_dot_path_segment(path_buffer)) {
-        helpers::shorten_path(path, type);
-        if (location == std::string_view::npos) {
+        if ((helpers::shorten_path(path, type) || special) && location == std::string_view::npos) {
           path += '/';
         }
       } else if (unicode::is_single_dot_path_segment(path_buffer) &&

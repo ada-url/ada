@@ -281,10 +281,15 @@ TYPED_TEST(basic_tests, node_issue_47889) {
   ASSERT_EQ(urlbase->get_pathname(), "b");
   ASSERT_TRUE(urlbase->has_opaque_path);
   ASSERT_TRUE(urlbase);
+  auto expected_url = ada::parse<TypeParam>("a:b#");
+  ASSERT_TRUE(expected_url);
+  ASSERT_TRUE(expected_url->has_opaque_path);
+  ASSERT_EQ(expected_url->get_href(), "a:b#");
+  ASSERT_EQ(expected_url->get_pathname(), "b");
   auto url = ada::parse<TypeParam>("..#", &*urlbase);
   ASSERT_TRUE(url);
   ASSERT_TRUE(url->has_opaque_path);
-  ASSERT_EQ(url->get_href(), "a:b/#");
-  ASSERT_EQ(url->get_pathname(), "b/");
+  ASSERT_EQ(url->get_href(), "a:b#");
+  ASSERT_EQ(url->get_pathname(), "b");
   SUCCEED();
 }
