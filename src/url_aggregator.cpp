@@ -1653,11 +1653,9 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
             input.substr(previous_location, new_location - previous_location);
         previous_location = new_location + 1;
         if (path_view == "..") {
-          if (!path.empty()) {
-            size_t last_delimiter = path.rfind('/');
-            if (last_delimiter != std::string::npos) {
-              path.erase(last_delimiter);
-            }
+          size_t last_delimiter = path.rfind('/');
+          if (last_delimiter != std::string::npos) {
+            path.erase(last_delimiter);
           }
         } else if (path_view != ".") {
           path += '/';
