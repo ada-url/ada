@@ -1653,8 +1653,9 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
             input.substr(previous_location, new_location - previous_location);
         previous_location = new_location + 1;
         if (path_view == "..") {
-          if (!path.empty()) {
-            path.erase(path.rfind('/'));
+          size_t last_delimiter = path.rfind('/');
+          if (last_delimiter != std::string::npos) {
+            path.erase(last_delimiter);
           }
         } else if (path_view != ".") {
           path += '/';
@@ -1685,8 +1686,8 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
               ? path_buffer_tmp
               : path_view;
       if (unicode::is_double_dot_path_segment(path_buffer)) {
-        helpers::shorten_path(path, type);
-        if (location == std::string_view::npos) {
+        if ((helpers::shorten_path(path, type) || special) &&
+            location == std::string_view::npos) {
           path += '/';
         }
       } else if (unicode::is_single_dot_path_segment(path_buffer) &&
