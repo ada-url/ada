@@ -1,12 +1,33 @@
 #!/bin/bash
 
+echo "Benchmarking piping function"
+
 # Set the number of trials
 num_trials=50
 
-wget https://github.com/ada-url/url-various-datasets/raw/main/top100/top100.txt
+if [ -f "linux_files.txt" ]; then
+    echo "linux_files.txt exists."
+else 
+    echo "downloading linux_files.txt."
+    curl https://raw.githubusercontent.com/ada-url/url-various-datasets/main/files/linux_files.txt -O
+fi
+
+if [ -f "wikipedia_100k.txt" ]; then
+    echo "wikipedia_100k.txt exists."
+else 
+    echo "downloading wikipedia_100k.txt."
+    curl https://raw.githubusercontent.com/ada-url/url-various-datasets/main/wikipedia/wikipedia_100k.txt -O
+fi
+
+if [ -f "top100.txt" ]; then
+    echo "top100.txt exists."
+else 
+    echo "downloading top100.txt."
+    curl https://raw.githubusercontent.com/ada-url/url-various-datasets/main/top100/top100.txt -O
+fi
 
 # File list to benchmark against
-files=("top100.txt") #"linux_files.txt" "wikipedia_100k.txt" 
+files=("top100.txt" "linux_files.txt" "wikipedia_100k.txt" )
 
 # Run the programs for the specified number of trials
 for file in "${files[@]}"; do

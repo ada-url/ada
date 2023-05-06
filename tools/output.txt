@@ -1,0 +1,1 @@
+By default, outputting to a file is disabled. Please enable -o flag (optionally with a path to activate it).
