@@ -118,8 +118,8 @@ ada_really_inline bool shorten_path(std::string& path,
     size_t last_delimiter = path.rfind('/');
     if (last_delimiter != std::string::npos) {
       path.erase(last_delimiter);
+      return true;
     }
-    return true;
   }
 
   return false;
@@ -145,8 +145,8 @@ ada_really_inline bool shorten_path(std::string_view& path,
     size_t slash_loc = path.rfind('/');
     if (slash_loc != std::string_view::npos) {
       path.remove_suffix(path.size() - slash_loc);
+      return true;
     }
-    return true;
   }
 
   return false;
