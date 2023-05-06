@@ -276,9 +276,15 @@ TYPED_TEST(basic_tests, should_update_password_correctly) {
 // https://github.com/nodejs/node/issues/47889
 TYPED_TEST(basic_tests, node_issue_47889) {
   auto urlbase = ada::parse<TypeParam>("a:b");
+  ASSERT_EQ(urlbase->get_href(), "a:b");
+  ASSERT_EQ(urlbase->get_protocol(), "a:");
+  ASSERT_EQ(urlbase->get_pathname(), "b");
+  ASSERT_TRUE(urlbase->has_opaque_path);
   ASSERT_TRUE(urlbase);
   auto url = ada::parse<TypeParam>("..#", &*urlbase);
   ASSERT_TRUE(url);
+  ASSERT_TRUE(url->has_opaque_path);
   ASSERT_EQ(url->get_href(), "a:b/#");
+  ASSERT_EQ(url->get_pathname(), "b/");
   SUCCEED();
 }
