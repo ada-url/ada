@@ -1738,72 +1738,73 @@ $(document).ready(function(){initNavTree('dd/dc8/url__aggregator_8cpp_source.htm
 <div class="line"><a id="l01653" name="l01653"></a><span class="lineno"> 1653</span>            input.substr(previous_location, new_location - previous_location);</div>
 <div class="line"><a id="l01654" name="l01654"></a><span class="lineno"> 1654</span>        previous_location = new_location + 1;</div>
 <div class="line"><a id="l01655" name="l01655"></a><span class="lineno"> 1655</span>        <span class="keywordflow">if</span> (path_view == <span class="stringliteral">&quot;..&quot;</span>) {</div>
-<div class="line"><a id="l01656" name="l01656"></a><span class="lineno"> 1656</span>          <span class="keywordflow">if</span> (!path.empty()) {</div>
-<div class="line"><a id="l01657" name="l01657"></a><span class="lineno"> 1657</span>            path.erase(path.rfind(<span class="charliteral">&#39;/&#39;</span>));</div>
-<div class="line"><a id="l01658" name="l01658"></a><span class="lineno"> 1658</span>          }</div>
-<div class="line"><a id="l01659" name="l01659"></a><span class="lineno"> 1659</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (path_view != <span class="stringliteral">&quot;.&quot;</span>) {</div>
-<div class="line"><a id="l01660" name="l01660"></a><span class="lineno"> 1660</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
-<div class="line"><a id="l01661" name="l01661"></a><span class="lineno"> 1661</span>          path.append(path_view);</div>
-<div class="line"><a id="l01662" name="l01662"></a><span class="lineno"> 1662</span>        }</div>
-<div class="line"><a id="l01663" name="l01663"></a><span class="lineno"> 1663</span>      }</div>
-<div class="line"><a id="l01664" name="l01664"></a><span class="lineno"> 1664</span>    } <span class="keywordflow">while</span> (<span class="keyword">true</span>);</div>
-<div class="line"><a id="l01665" name="l01665"></a><span class="lineno"> 1665</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01666" name="l01666"></a><span class="lineno"> 1666</span>    ada_log(<span class="stringliteral">&quot;parse_path slow&quot;</span>);</div>
-<div class="line"><a id="l01667" name="l01667"></a><span class="lineno"> 1667</span>    <span class="comment">// we have reached the general case</span></div>
-<div class="line"><a id="l01668" name="l01668"></a><span class="lineno"> 1668</span>    <span class="keywordtype">bool</span> needs_percent_encoding = (accumulator &amp; 1);</div>
-<div class="line"><a id="l01669" name="l01669"></a><span class="lineno"> 1669</span>    std::string path_buffer_tmp;</div>
-<div class="line"><a id="l01670" name="l01670"></a><span class="lineno"> 1670</span>    <span class="keywordflow">do</span> {</div>
-<div class="line"><a id="l01671" name="l01671"></a><span class="lineno"> 1671</span>      <span class="keywordtype">size_t</span> location = (special &amp;&amp; (accumulator &amp; 2))</div>
-<div class="line"><a id="l01672" name="l01672"></a><span class="lineno"> 1672</span>                            ? input.find_first_of(<span class="stringliteral">&quot;/\\&quot;</span>)</div>
-<div class="line"><a id="l01673" name="l01673"></a><span class="lineno"> 1673</span>                            : input.find(<span class="charliteral">&#39;/&#39;</span>);</div>
-<div class="line"><a id="l01674" name="l01674"></a><span class="lineno"> 1674</span>      std::string_view path_view = input;</div>
-<div class="line"><a id="l01675" name="l01675"></a><span class="lineno"> 1675</span>      <span class="keywordflow">if</span> (location != std::string_view::npos) {</div>
-<div class="line"><a id="l01676" name="l01676"></a><span class="lineno"> 1676</span>        path_view.remove_suffix(path_view.size() - location);</div>
-<div class="line"><a id="l01677" name="l01677"></a><span class="lineno"> 1677</span>        input.remove_prefix(location + 1);</div>
-<div class="line"><a id="l01678" name="l01678"></a><span class="lineno"> 1678</span>      }</div>
-<div class="line"><a id="l01679" name="l01679"></a><span class="lineno"> 1679</span>      <span class="comment">// path_buffer is either path_view or it might point at a percent encoded</span></div>
-<div class="line"><a id="l01680" name="l01680"></a><span class="lineno"> 1680</span>      <span class="comment">// temporary string.</span></div>
-<div class="line"><a id="l01681" name="l01681"></a><span class="lineno"> 1681</span>      std::string_view path_buffer =</div>
-<div class="line"><a id="l01682" name="l01682"></a><span class="lineno"> 1682</span>          (needs_percent_encoding &amp;&amp;</div>
-<div class="line"><a id="l01683" name="l01683"></a><span class="lineno"> 1683</span>           ada::unicode::percent_encode&lt;false&gt;(</div>
-<div class="line"><a id="l01684" name="l01684"></a><span class="lineno"> 1684</span>               path_view, <a class="code hl_variable" href="../../d7/d35/namespaceada_1_1character__sets.html#a781f16c18f4d1b11603443cd039e33db">character_sets::PATH_PERCENT_ENCODE</a>, path_buffer_tmp))</div>
-<div class="line"><a id="l01685" name="l01685"></a><span class="lineno"> 1685</span>              ? path_buffer_tmp</div>
-<div class="line"><a id="l01686" name="l01686"></a><span class="lineno"> 1686</span>              : path_view;</div>
-<div class="line"><a id="l01687" name="l01687"></a><span class="lineno"> 1687</span>      <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#a2a5c2e0ef11ea4d4fe564b7fb1fa1f16">unicode::is_double_dot_path_segment</a>(path_buffer)) {</div>
-<div class="line"><a id="l01688" name="l01688"></a><span class="lineno"> 1688</span>        helpers::shorten_path(path, type);</div>
-<div class="line"><a id="l01689" name="l01689"></a><span class="lineno"> 1689</span>        <span class="keywordflow">if</span> (location == std::string_view::npos) {</div>
-<div class="line"><a id="l01690" name="l01690"></a><span class="lineno"> 1690</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
-<div class="line"><a id="l01691" name="l01691"></a><span class="lineno"> 1691</span>        }</div>
-<div class="line"><a id="l01692" name="l01692"></a><span class="lineno"> 1692</span>      } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#ad649ab6ed074b809af2eceaaa0c787db">unicode::is_single_dot_path_segment</a>(path_buffer) &amp;&amp;</div>
-<div class="line"><a id="l01693" name="l01693"></a><span class="lineno"> 1693</span>                 (location == std::string_view::npos)) {</div>
-<div class="line"><a id="l01694" name="l01694"></a><span class="lineno"> 1694</span>        path += <span class="charliteral">&#39;/&#39;</span>;</div>
-<div class="line"><a id="l01695" name="l01695"></a><span class="lineno"> 1695</span>      }</div>
-<div class="line"><a id="l01696" name="l01696"></a><span class="lineno"> 1696</span>      <span class="comment">// Otherwise, if path_buffer is not a single-dot path segment, then:</span></div>
-<div class="line"><a id="l01697" name="l01697"></a><span class="lineno"> 1697</span>      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#ad649ab6ed074b809af2eceaaa0c787db">unicode::is_single_dot_path_segment</a>(path_buffer)) {</div>
-<div class="line"><a id="l01698" name="l01698"></a><span class="lineno"> 1698</span>        <span class="comment">// If url’s scheme is &quot;file&quot;, url’s path is empty, and path_buffer is a</span></div>
-<div class="line"><a id="l01699" name="l01699"></a><span class="lineno"> 1699</span>        <span class="comment">// Windows drive letter, then replace the second code point in</span></div>
-<div class="line"><a id="l01700" name="l01700"></a><span class="lineno"> 1700</span>        <span class="comment">// path_buffer with U+003A (:).</span></div>
-<div class="line"><a id="l01701" name="l01701"></a><span class="lineno"> 1701</span>        <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp; path.empty() &amp;&amp;</div>
-<div class="line"><a id="l01702" name="l01702"></a><span class="lineno"> 1702</span>            <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">checkers::is_windows_drive_letter</a>(path_buffer)) {</div>
-<div class="line"><a id="l01703" name="l01703"></a><span class="lineno"> 1703</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
-<div class="line"><a id="l01704" name="l01704"></a><span class="lineno"> 1704</span>          path += path_buffer[0];</div>
-<div class="line"><a id="l01705" name="l01705"></a><span class="lineno"> 1705</span>          path += <span class="charliteral">&#39;:&#39;</span>;</div>
-<div class="line"><a id="l01706" name="l01706"></a><span class="lineno"> 1706</span>          path_buffer.remove_prefix(2);</div>
-<div class="line"><a id="l01707" name="l01707"></a><span class="lineno"> 1707</span>          path.append(path_buffer);</div>
-<div class="line"><a id="l01708" name="l01708"></a><span class="lineno"> 1708</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l01709" name="l01709"></a><span class="lineno"> 1709</span>          <span class="comment">// Append path_buffer to url’s path.</span></div>
-<div class="line"><a id="l01710" name="l01710"></a><span class="lineno"> 1710</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
-<div class="line"><a id="l01711" name="l01711"></a><span class="lineno"> 1711</span>          path.append(path_buffer);</div>
-<div class="line"><a id="l01712" name="l01712"></a><span class="lineno"> 1712</span>        }</div>
-<div class="line"><a id="l01713" name="l01713"></a><span class="lineno"> 1713</span>      }</div>
-<div class="line"><a id="l01714" name="l01714"></a><span class="lineno"> 1714</span>      <span class="keywordflow">if</span> (location == std::string_view::npos) {</div>
-<div class="line"><a id="l01715" name="l01715"></a><span class="lineno"> 1715</span>        update_base_pathname(path);</div>
-<div class="line"><a id="l01716" name="l01716"></a><span class="lineno"> 1716</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l01717" name="l01717"></a><span class="lineno"> 1717</span>      }</div>
-<div class="line"><a id="l01718" name="l01718"></a><span class="lineno"> 1718</span>    } <span class="keywordflow">while</span> (<span class="keyword">true</span>);</div>
-<div class="line"><a id="l01719" name="l01719"></a><span class="lineno"> 1719</span>  }</div>
-<div class="line"><a id="l01720" name="l01720"></a><span class="lineno"> 1720</span>}</div>
-<div class="line"><a id="l01721" name="l01721"></a><span class="lineno"> 1721</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l01656" name="l01656"></a><span class="lineno"> 1656</span>          <span class="keywordtype">size_t</span> last_delimiter = path.rfind(<span class="charliteral">&#39;/&#39;</span>);</div>
+<div class="line"><a id="l01657" name="l01657"></a><span class="lineno"> 1657</span>          <span class="keywordflow">if</span> (last_delimiter != std::string::npos) {</div>
+<div class="line"><a id="l01658" name="l01658"></a><span class="lineno"> 1658</span>            path.erase(last_delimiter);</div>
+<div class="line"><a id="l01659" name="l01659"></a><span class="lineno"> 1659</span>          }</div>
+<div class="line"><a id="l01660" name="l01660"></a><span class="lineno"> 1660</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (path_view != <span class="stringliteral">&quot;.&quot;</span>) {</div>
+<div class="line"><a id="l01661" name="l01661"></a><span class="lineno"> 1661</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
+<div class="line"><a id="l01662" name="l01662"></a><span class="lineno"> 1662</span>          path.append(path_view);</div>
+<div class="line"><a id="l01663" name="l01663"></a><span class="lineno"> 1663</span>        }</div>
+<div class="line"><a id="l01664" name="l01664"></a><span class="lineno"> 1664</span>      }</div>
+<div class="line"><a id="l01665" name="l01665"></a><span class="lineno"> 1665</span>    } <span class="keywordflow">while</span> (<span class="keyword">true</span>);</div>
+<div class="line"><a id="l01666" name="l01666"></a><span class="lineno"> 1666</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01667" name="l01667"></a><span class="lineno"> 1667</span>    ada_log(<span class="stringliteral">&quot;parse_path slow&quot;</span>);</div>
+<div class="line"><a id="l01668" name="l01668"></a><span class="lineno"> 1668</span>    <span class="comment">// we have reached the general case</span></div>
+<div class="line"><a id="l01669" name="l01669"></a><span class="lineno"> 1669</span>    <span class="keywordtype">bool</span> needs_percent_encoding = (accumulator &amp; 1);</div>
+<div class="line"><a id="l01670" name="l01670"></a><span class="lineno"> 1670</span>    std::string path_buffer_tmp;</div>
+<div class="line"><a id="l01671" name="l01671"></a><span class="lineno"> 1671</span>    <span class="keywordflow">do</span> {</div>
+<div class="line"><a id="l01672" name="l01672"></a><span class="lineno"> 1672</span>      <span class="keywordtype">size_t</span> location = (special &amp;&amp; (accumulator &amp; 2))</div>
+<div class="line"><a id="l01673" name="l01673"></a><span class="lineno"> 1673</span>                            ? input.find_first_of(<span class="stringliteral">&quot;/\\&quot;</span>)</div>
+<div class="line"><a id="l01674" name="l01674"></a><span class="lineno"> 1674</span>                            : input.find(<span class="charliteral">&#39;/&#39;</span>);</div>
+<div class="line"><a id="l01675" name="l01675"></a><span class="lineno"> 1675</span>      std::string_view path_view = input;</div>
+<div class="line"><a id="l01676" name="l01676"></a><span class="lineno"> 1676</span>      <span class="keywordflow">if</span> (location != std::string_view::npos) {</div>
+<div class="line"><a id="l01677" name="l01677"></a><span class="lineno"> 1677</span>        path_view.remove_suffix(path_view.size() - location);</div>
+<div class="line"><a id="l01678" name="l01678"></a><span class="lineno"> 1678</span>        input.remove_prefix(location + 1);</div>
+<div class="line"><a id="l01679" name="l01679"></a><span class="lineno"> 1679</span>      }</div>
+<div class="line"><a id="l01680" name="l01680"></a><span class="lineno"> 1680</span>      <span class="comment">// path_buffer is either path_view or it might point at a percent encoded</span></div>
+<div class="line"><a id="l01681" name="l01681"></a><span class="lineno"> 1681</span>      <span class="comment">// temporary string.</span></div>
+<div class="line"><a id="l01682" name="l01682"></a><span class="lineno"> 1682</span>      std::string_view path_buffer =</div>
+<div class="line"><a id="l01683" name="l01683"></a><span class="lineno"> 1683</span>          (needs_percent_encoding &amp;&amp;</div>
+<div class="line"><a id="l01684" name="l01684"></a><span class="lineno"> 1684</span>           ada::unicode::percent_encode&lt;false&gt;(</div>
+<div class="line"><a id="l01685" name="l01685"></a><span class="lineno"> 1685</span>               path_view, <a class="code hl_variable" href="../../d7/d35/namespaceada_1_1character__sets.html#a781f16c18f4d1b11603443cd039e33db">character_sets::PATH_PERCENT_ENCODE</a>, path_buffer_tmp))</div>
+<div class="line"><a id="l01686" name="l01686"></a><span class="lineno"> 1686</span>              ? path_buffer_tmp</div>
+<div class="line"><a id="l01687" name="l01687"></a><span class="lineno"> 1687</span>              : path_view;</div>
+<div class="line"><a id="l01688" name="l01688"></a><span class="lineno"> 1688</span>      <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#a2a5c2e0ef11ea4d4fe564b7fb1fa1f16">unicode::is_double_dot_path_segment</a>(path_buffer)) {</div>
+<div class="line"><a id="l01689" name="l01689"></a><span class="lineno"> 1689</span>        <span class="keywordflow">if</span> ((helpers::shorten_path(path, type) || special) &amp;&amp;</div>
+<div class="line"><a id="l01690" name="l01690"></a><span class="lineno"> 1690</span>            location == std::string_view::npos) {</div>
+<div class="line"><a id="l01691" name="l01691"></a><span class="lineno"> 1691</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
+<div class="line"><a id="l01692" name="l01692"></a><span class="lineno"> 1692</span>        }</div>
+<div class="line"><a id="l01693" name="l01693"></a><span class="lineno"> 1693</span>      } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#ad649ab6ed074b809af2eceaaa0c787db">unicode::is_single_dot_path_segment</a>(path_buffer) &amp;&amp;</div>
+<div class="line"><a id="l01694" name="l01694"></a><span class="lineno"> 1694</span>                 (location == std::string_view::npos)) {</div>
+<div class="line"><a id="l01695" name="l01695"></a><span class="lineno"> 1695</span>        path += <span class="charliteral">&#39;/&#39;</span>;</div>
+<div class="line"><a id="l01696" name="l01696"></a><span class="lineno"> 1696</span>      }</div>
+<div class="line"><a id="l01697" name="l01697"></a><span class="lineno"> 1697</span>      <span class="comment">// Otherwise, if path_buffer is not a single-dot path segment, then:</span></div>
+<div class="line"><a id="l01698" name="l01698"></a><span class="lineno"> 1698</span>      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#ad649ab6ed074b809af2eceaaa0c787db">unicode::is_single_dot_path_segment</a>(path_buffer)) {</div>
+<div class="line"><a id="l01699" name="l01699"></a><span class="lineno"> 1699</span>        <span class="comment">// If url’s scheme is &quot;file&quot;, url’s path is empty, and path_buffer is a</span></div>
+<div class="line"><a id="l01700" name="l01700"></a><span class="lineno"> 1700</span>        <span class="comment">// Windows drive letter, then replace the second code point in</span></div>
+<div class="line"><a id="l01701" name="l01701"></a><span class="lineno"> 1701</span>        <span class="comment">// path_buffer with U+003A (:).</span></div>
+<div class="line"><a id="l01702" name="l01702"></a><span class="lineno"> 1702</span>        <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp; path.empty() &amp;&amp;</div>
+<div class="line"><a id="l01703" name="l01703"></a><span class="lineno"> 1703</span>            <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">checkers::is_windows_drive_letter</a>(path_buffer)) {</div>
+<div class="line"><a id="l01704" name="l01704"></a><span class="lineno"> 1704</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
+<div class="line"><a id="l01705" name="l01705"></a><span class="lineno"> 1705</span>          path += path_buffer[0];</div>
+<div class="line"><a id="l01706" name="l01706"></a><span class="lineno"> 1706</span>          path += <span class="charliteral">&#39;:&#39;</span>;</div>
+<div class="line"><a id="l01707" name="l01707"></a><span class="lineno"> 1707</span>          path_buffer.remove_prefix(2);</div>
+<div class="line"><a id="l01708" name="l01708"></a><span class="lineno"> 1708</span>          path.append(path_buffer);</div>
+<div class="line"><a id="l01709" name="l01709"></a><span class="lineno"> 1709</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l01710" name="l01710"></a><span class="lineno"> 1710</span>          <span class="comment">// Append path_buffer to url’s path.</span></div>
+<div class="line"><a id="l01711" name="l01711"></a><span class="lineno"> 1711</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
+<div class="line"><a id="l01712" name="l01712"></a><span class="lineno"> 1712</span>          path.append(path_buffer);</div>
+<div class="line"><a id="l01713" name="l01713"></a><span class="lineno"> 1713</span>        }</div>
+<div class="line"><a id="l01714" name="l01714"></a><span class="lineno"> 1714</span>      }</div>
+<div class="line"><a id="l01715" name="l01715"></a><span class="lineno"> 1715</span>      <span class="keywordflow">if</span> (location == std::string_view::npos) {</div>
+<div class="line"><a id="l01716" name="l01716"></a><span class="lineno"> 1716</span>        update_base_pathname(path);</div>
+<div class="line"><a id="l01717" name="l01717"></a><span class="lineno"> 1717</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l01718" name="l01718"></a><span class="lineno"> 1718</span>      }</div>
+<div class="line"><a id="l01719" name="l01719"></a><span class="lineno"> 1719</span>    } <span class="keywordflow">while</span> (<span class="keyword">true</span>);</div>
+<div class="line"><a id="l01720" name="l01720"></a><span class="lineno"> 1720</span>  }</div>
+<div class="line"><a id="l01721" name="l01721"></a><span class="lineno"> 1721</span>}</div>
+<div class="line"><a id="l01722" name="l01722"></a><span class="lineno"> 1722</span>}  <span class="comment">// namespace ada</span></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
 <div class="ttc" id="acheckers-inl_8h_html"><div class="ttname"><a href="../../d4/d46/checkers-inl_8h.html">checkers-inl.h</a></div><div class="ttdoc">Definitions for URL specific checkers used within Ada.</div></div>
 <div class="ttc" id="acheckers_8h_html"><div class="ttname"><a href="../../d4/dec/checkers_8h.html">checkers.h</a></div><div class="ttdoc">Declarations for URL specific checkers used within Ada.</div></div>
