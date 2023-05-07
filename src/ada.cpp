@@ -10,3 +10,4 @@
 #include "parser.cpp"
 #include "url_components.cpp"
 #include "url_aggregator.cpp"
+#include "ada_c.cpp"
