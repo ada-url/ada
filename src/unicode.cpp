@@ -238,6 +238,86 @@ static_assert(unicode::is_alnum_plus('1'));
 static_assert(unicode::is_alnum_plus('a'));
 static_assert(unicode::is_alnum_plus('b'));
 
+// https://tc39.es/ecma262/#prod-IdentifierStart
+// up to the extented ascii, with the regex /[$_\p{ID_Start}]/u
+constexpr static bool valid_identifier_start_table[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1};
+
+static_assert(sizeof(valid_identifier_start_table) == 256);
+
+ada_really_inline constexpr bool is_valid_identifier_start(
+    const char32_t c) noexcept {
+  if (c < 256) {
+    // extended ascii fast path
+    return valid_identifier_start_table[c];
+  }
+  // TODO: handle this
+  return false;
+}
+
+static_assert(unicode::is_valid_identifier_start('$'));
+static_assert(unicode::is_valid_identifier_start('_'));
+static_assert(unicode::is_valid_identifier_start('a'));
+static_assert(unicode::is_valid_identifier_start('z'));
+static_assert(unicode::is_valid_identifier_start('A'));
+static_assert(unicode::is_valid_identifier_start('Z'));
+static_assert(!unicode::is_valid_identifier_start('0'));
+static_assert(!unicode::is_valid_identifier_start('9'));
+static_assert(!unicode::is_valid_identifier_start('\n'));
+static_assert(!unicode::is_valid_identifier_start('\\'));
+static_assert(!unicode::is_valid_identifier_start('\''));
+static_assert(!unicode::is_valid_identifier_start('*'));
+static_assert(!unicode::is_valid_identifier_start('&'));
+
+constexpr static bool valid_identifier_part_table[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1};
+
+static_assert(sizeof(valid_identifier_part_table) == 256);
+
+ada_really_inline constexpr bool is_valid_identifier_part(
+    const char32_t c) noexcept {
+  if (c < 256) {
+    // extended ascii fast path
+    return valid_identifier_part_table[c];
+  }
+  // TODO: handle this
+  return false;
+}
+
+static_assert(unicode::is_valid_identifier_part('$'));
+static_assert(unicode::is_valid_identifier_part('_'));
+static_assert(unicode::is_valid_identifier_part('a'));
+static_assert(unicode::is_valid_identifier_part('z'));
+static_assert(unicode::is_valid_identifier_part('A'));
+static_assert(unicode::is_valid_identifier_part('Z'));
+static_assert(unicode::is_valid_identifier_part('0'));
+static_assert(unicode::is_valid_identifier_part('9'));
+static_assert(!unicode::is_valid_identifier_part('\n'));
+static_assert(!unicode::is_valid_identifier_part('\\'));
+static_assert(!unicode::is_valid_identifier_part('\''));
+static_assert(!unicode::is_valid_identifier_part('*'));
+static_assert(!unicode::is_valid_identifier_part('&'));
+
 ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
   return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') ||
          (c >= 'a' && c <= 'f');
