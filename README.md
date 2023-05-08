@@ -160,7 +160,7 @@ int main(int c, char *arg[] ) {
 ```
 
 When linking against the ada library from C++, be minding that ada requires access to the standard
-C++ library. E.g., you may need `-lc++` or the equivalent when compiling an executable.
+C++ library. E.g., you may link with the C++ compiler.
 
 ### CMake dependency
 

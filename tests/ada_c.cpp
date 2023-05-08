@@ -3,7 +3,9 @@
 extern "C" {
 #include "ada_c.h"
 }
-std::string convert_string(const ada_string& input) {
+
+template <typename T>
+std::string convert_string(const T& input) {
   printf("result %s \n", std::string(input.data, input.length).c_str());
   return std::string(input.data, input.length);
 }
@@ -28,9 +30,10 @@ TEST(ada_c, getters) {
 
   ASSERT_TRUE(ada_is_valid(url));
 
-  // TODO: Fix ada_get_origin returning invalid address.
-  //  ASSERT_EQ(convert_string(ada_get_origin(url)),
-  //  "https://www.google.com:8080");
+  ada_owned_string origin = ada_get_origin(url);
+  ASSERT_EQ(convert_string(origin),
+    "https://www.google.com:8080");
+  ada_free_owned_string(origin);
 
   ASSERT_EQ(convert_string(ada_get_href(url)),
             "https://username:password@www.google.com:8080/"

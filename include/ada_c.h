@@ -5,15 +5,21 @@
 #ifndef ADA_C_H
 #define ADA_C_H
 
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 
+// string that is owned by the ada_url instance
 typedef struct {
   const char* data;
   size_t length;
 } ada_string;
+
+// string that must be freed by the caller
+typedef struct {
+  const char* data;
+  size_t length;
+} ada_owned_string;
 
 typedef struct {
   uint32_t protocol_end;
@@ -41,7 +47,8 @@ bool ada_is_valid(ada_url result);
 
 // url_aggregator getters
 // if ada_is_valid(result)) is false, an empty string is returned
-ada_string ada_get_origin(ada_url result);
+ada_owned_string ada_get_origin(ada_url result);
+void ada_free_owned_string(ada_owned_string owned);
 ada_string ada_get_href(ada_url result);
 ada_string ada_get_username(ada_url result);
 ada_string ada_get_password(ada_url result);

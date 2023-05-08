@@ -12,11 +12,16 @@ struct ada_string {
   size_t length;
 };
 
+struct ada_owned_string {
+  const char* data;
+  size_t length;
+};
+
 ada_string ada_string_create(const char* data, size_t length) {
-     ada_string out{};
-     out.data = data;
-     out.length = length;
-     return out;
+  ada_string out{};
+  out.data = data;
+  out.length = length;
+  return out;
 }
 
 struct ada_url_components {
@@ -73,13 +78,26 @@ bool ada_is_valid(ada_url result) noexcept {
   return r.has_value();
 }
 
-ada_string ada_get_origin(ada_url result) noexcept {
+// caller must free the result with ada_free_owned_string
+ada_owned_string ada_get_origin(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
+  ada_owned_string owned;
   if (!r) {
-    return ada_string_create(NULL, 0);
+    owned.data = nullptr;
+    owned.length = 0;
+    return owned;
   }
   std::string out = r->get_origin();
-  return ada_string_create(out.data(), out.length());
+  owned.length = out.size();
+  owned.data = new char[owned.length];
+  memcpy((void*)owned.data, out.data(), owned.length);
+  return owned;
+}
+
+void ada_free_owned_string(ada_owned_string owned) noexcept {
+  delete[] owned.data;
+  owned.data = nullptr;
+  owned.length = 0;
 }
 
 ada_string ada_get_href(ada_url result) noexcept {
