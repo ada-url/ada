@@ -1,14 +1,16 @@
+// gest is a C++ library so we are in C++.
 #include "gtest/gtest.h"
-
-#include "ada.h"
-
+extern "C" {
+#include "ada_c.h"
+}
 std::string convert_string(const ada_string& input) {
   printf("result %s \n", std::string(input.data, input.length).c_str());
   return std::string(input.data, input.length);
 }
 
+
 TEST(ada_c, ada_parse) {
-  void* url = ada_parse(
+  ada_url url = ada_parse(
       "https://username:password@www.google.com:8080/"
       "pathname?query=true#hash-exists");
 
@@ -20,7 +22,7 @@ TEST(ada_c, ada_parse) {
 }
 
 TEST(ada_c, getters) {
-  void* url = ada_parse(
+  ada_url url = ada_parse(
       "https://username:password@www.google.com:8080/"
       "pathname?query=true#hash-exists");
 
@@ -49,7 +51,7 @@ TEST(ada_c, getters) {
 }
 
 TEST(ada_c, setters) {
-  void* url = ada_parse(
+  ada_url url = ada_parse(
       "https://username:password@www.google.com:8080/"
       "pathname?query=true#hash-exists");
 

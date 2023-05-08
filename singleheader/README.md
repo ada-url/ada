@@ -22,3 +22,14 @@ c++ -std=c++17 -o demo demo.cpp
 ```
 
 You may build and link using CMake (--target demo), because CMake can configure all the necessary flags.
+
+
+### C Demo
+
+You may also build a C executable.
+
+```
+c++ -c ada.cpp -std=c++17
+cc -o democ demo.c ada.o  -lc++
+./democ
+```

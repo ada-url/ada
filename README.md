@@ -9,6 +9,8 @@ Ada is a fast and spec-compliant URL parser written in C++.
 Specification for URL parser can be found from the
 [WHATWG](https://url.spec.whatwg.org/#url-parsing) website.
 
+We also include a C wrapper for portability.
+
 The Ada library passes the full range of tests from the specification,
 across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
 supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
@@ -122,6 +124,43 @@ url->set_hash("is-this-the-real-life");
 // url->get_hash() will return "#is-this-the-real-life"
 ```
 
+### C wrapper
+
+See the file `include/ada_c.h` for our C interface.
+
+```C
+#include "ada_c.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+static void ada_print(ada_string string) {
+  printf("%.*s\n", (int)string.length, string.data);
+}
+
+int main(int c, char *arg[] ) {
+  ada_url url = ada_parse("https://username:password@www.google.com:8080/"
+      "pathname?query=true#hash-exists");
+  if(!ada_is_valid(url)) { puts("failure"); return EXIT_FAILURE; }
+  ada_print(ada_get_href(url)); // prints https://username:password@host:8080/pathname?query=true#hash-exists
+  ada_print(ada_get_protocol(url)); // prints https:
+  ada_print(ada_get_username(url)); // prints username
+  ada_set_href(url, "https://www.yagiz.co");
+  if(!ada_is_valid(url)) { puts("failure"); return EXIT_FAILURE; }
+  ada_set_hash(url, "new-hash");
+  ada_set_hostname(url, "new-host");
+  ada_set_host(url, "changed-host:9090");
+  ada_set_pathname(url, "new-pathname");
+  ada_set_search(url, "new-search");
+  ada_set_protocol(url, "wss");
+  ada_print(ada_get_href(url)); // will print wss://changed-host:9090/new-pathname?new-search#new-hash
+  ada_free(url);
+  return EXIT_SUCCESS;
+}
+```
+
+When linking against the ada library from C++, be minding that ada requires access to the standard
+C++ library. E.g., you may need `-lc++` or the equivalent when compiling an executable.
 
 ### CMake dependency
 

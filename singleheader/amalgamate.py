@@ -128,11 +128,15 @@ amal_c.close()
 # copy the README and DEMOCPP
 if SCRIPTPATH != AMALGAMATE_OUTPUT_PATH:
   shutil.copy2(os.path.join(SCRIPTPATH,"demo.cpp"),AMALGAMATE_OUTPUT_PATH)
+  shutil.copy2(os.path.join(SCRIPTPATH,"demo.c"),AMALGAMATE_OUTPUT_PATH)
   shutil.copy2(os.path.join(SCRIPTPATH,"README.md"),AMALGAMATE_OUTPUT_PATH)
+
+shutil.copy2(os.path.join(AMALGAMATE_INCLUDE_PATH,"ada_c.h"),AMALGAMATE_OUTPUT_PATH)
 
 zf = zipfile.ZipFile(os.path.join(AMALGAMATE_OUTPUT_PATH,'singleheader.zip'), 'w', zipfile.ZIP_DEFLATED)
 zf.write(os.path.join(AMALGAMATE_OUTPUT_PATH,"ada.cpp"), "ada.cpp")
 zf.write(os.path.join(AMALGAMATE_OUTPUT_PATH,"ada.h"), "ada.h")
+zf.write(os.path.join(AMALGAMATE_INCLUDE_PATH,"ada_c.h"), "ada_c.h")
 
 
 print("Done with all files generation.")
