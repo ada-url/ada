@@ -75,7 +75,7 @@ if(NOT ADA_COVERAGE)
 endif()
 
 install(
-  FILES include/ada.h
+  FILES include/ada.h include/ada_c.h
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
   COMPONENT ada_development
 )
