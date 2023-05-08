@@ -30,9 +30,6 @@ depending on your needs. The `ada::url_aggregator` class is smaller and it is ba
 serialized URL string. The `ada::url` class is made of several separate strings for the various
 components (path, host, and so forth).
 
-
-
-
 ### Parsing & Validation
 
 - Parse and validate a URL
