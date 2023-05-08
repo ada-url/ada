@@ -1,0 +1,10 @@
+add_executable(adaparse adaparse.cpp line_iterator.h)
+target_link_libraries(adaparse PRIVATE ada)
+target_include_directories(adaparse PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+
+include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
+import_dependency(cxxopts jarro2783/cxxopts eb78730)
+add_dependency(cxxopts)
+import_dependency(fmt fmtlib/fmt a337011)
+add_dependency(fmt)
+target_link_libraries(adaparse PRIVATE cxxopts::cxxopts fmt::fmt)
