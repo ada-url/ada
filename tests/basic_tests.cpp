@@ -293,3 +293,14 @@ TYPED_TEST(basic_tests, node_issue_47889) {
   ASSERT_EQ(url->get_pathname(), "b");
   SUCCEED();
 }
+
+TEST(basic_tests, can_parse) {
+  ASSERT_TRUE(ada::can_parse("https://www.yagiz.co"));
+  std::string_view base = "https://yagiz.co";
+  ASSERT_TRUE(ada::can_parse("/hello", &base));
+
+  std::string_view invalid_base = "!!!!!!!1";
+  ASSERT_FALSE(ada::can_parse("/hello", &invalid_base));
+  ASSERT_FALSE(ada::can_parse("!!!"));
+  SUCCEED();
+}
