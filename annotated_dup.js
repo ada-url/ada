@@ -8,10 +8,5 @@ var annotated_dup =
       [ "url_aggregator", "d8/d3b/structada_1_1url__aggregator.html", "d8/d3b/structada_1_1url__aggregator" ],
       [ "url_base", "db/d75/structada_1_1url__base.html", "db/d75/structada_1_1url__base" ],
       [ "url_components", "d3/d43/structada_1_1url__components.html", "d3/d43/structada_1_1url__components" ]
-    ] ],
-    [ "ufal", "df/d7a/namespaceufal.html", [
-      [ "unilib", "d7/dda/namespaceufal_1_1unilib.html", [
-        [ "uninorms", "dd/d86/classufal_1_1unilib_1_1uninorms.html", "dd/d86/classufal_1_1unilib_1_1uninorms" ]
-      ] ]
     ] ]
 ];

@@ -1,6 +1,9 @@
 var searchData=
 [
   ['damp_0',['damp',['../d5/ddb/namespaceada_1_1idna.html#aa916f8c8a88981da489e29cd954047c5',1,'ada::idna']]],
-  ['dir_5ftable_1',['dir_table',['../d5/ddb/namespaceada_1_1idna.html#a750c9c5e17eb8805d72a7a64c652c60c',1,'ada::idna']]],
-  ['direct_2',['direct',['../d2/dec/structada_1_1idna_1_1directions.html#aad2b7582a81322479378bdb7eb152443',1,'ada::idna::directions']]]
+  ['decomposition_5fblock_1',['decomposition_block',['../d5/ddb/namespaceada_1_1idna.html#a2a8649da4131912025f71c76e5483c6e',1,'ada::idna']]],
+  ['decomposition_5fdata_2',['decomposition_data',['../d5/ddb/namespaceada_1_1idna.html#ab0f41d0b74696b2698bab08f36251526',1,'ada::idna']]],
+  ['decomposition_5findex_3',['decomposition_index',['../d5/ddb/namespaceada_1_1idna.html#a76ba8c375d368a14a5b009138b882859',1,'ada::idna']]],
+  ['dir_5ftable_4',['dir_table',['../d5/ddb/namespaceada_1_1idna.html#a750c9c5e17eb8805d72a7a64c652c60c',1,'ada::idna']]],
+  ['direct_5',['direct',['../d2/dec/structada_1_1idna_1_1directions.html#aad2b7582a81322479378bdb7eb152443',1,'ada::idna::directions']]]
 ];

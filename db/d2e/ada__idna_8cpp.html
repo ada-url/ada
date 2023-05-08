@@ -125,8 +125,6 @@ $(document).ready(function(){initNavTree('db/d2e/ada__idna_8cpp.html','../../');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d86/classufal_1_1unilib_1_1uninorms.html">ufal::unilib::uninorms</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dec/structada_1_1idna_1_1directions.html">ada::idna::directions</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -136,15 +134,13 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:d5/ddb/namespaceada_1_1idna"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html">ada::idna</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:df/d7a/namespaceufal"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d7a/namespaceufal.html">ufal</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:d7/dda/namespaceufal_1_1unilib"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/dda/namespaceufal_1_1unilib.html">ufal::unilib</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a3a25ba82c407ebffcbc7cae1f2b20098"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d2e/ada__idna_8cpp.html#a3a25ba82c407ebffcbc7cae1f2b20098">ADA_IDNA_TABLES_H</a></td></tr>
 <tr class="separator:a3a25ba82c407ebffcbc7cae1f2b20098"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e0cb8abb7a779921adaf54930dbdb07"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d2e/ada__idna_8cpp.html#a3e0cb8abb7a779921adaf54930dbdb07">ADA_IDNA_NORMALIZATION_TABLES_H</a></td></tr>
+<tr class="separator:a3e0cb8abb7a779921adaf54930dbdb07"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -200,6 +196,18 @@ Functions</h2></td></tr>
 <tr class="separator:a10ef8e085520b93791eef38bdabf5941"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc44ee8cb1484d14560236b659e12565"><td class="memItemLeft" align="right" valign="top">std::u32string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#acc44ee8cb1484d14560236b659e12565">ada::idna::map</a> (std::u32string_view input)</td></tr>
 <tr class="separator:acc44ee8cb1484d14560236b659e12565"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac50c30d0d051c6f5b6463cedd5eda8e1"><td class="memItemLeft" align="right" valign="top">std::pair&lt; bool, size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#ac50c30d0d051c6f5b6463cedd5eda8e1">ada::idna::compute_decomposition_length</a> (const std::u32string_view input) noexcept</td></tr>
+<tr class="separator:ac50c30d0d051c6f5b6463cedd5eda8e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1273085e8773bf04ccd97128cd3db1e0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a1273085e8773bf04ccd97128cd3db1e0">ada::idna::decompose</a> (std::u32string &amp;input, size_t additional_elements)</td></tr>
+<tr class="separator:a1273085e8773bf04ccd97128cd3db1e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c81c2acabc058ce6376560052072984"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a8c81c2acabc058ce6376560052072984">ada::idna::get_ccc</a> (char32_t c) noexcept</td></tr>
+<tr class="separator:a8c81c2acabc058ce6376560052072984"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50bfbde0795e1b69056b441b888f3514"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a50bfbde0795e1b69056b441b888f3514">ada::idna::sort_marks</a> (std::u32string &amp;input)</td></tr>
+<tr class="separator:a50bfbde0795e1b69056b441b888f3514"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28e25a08ef5ab3b8c5e25f77e9340566"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a28e25a08ef5ab3b8c5e25f77e9340566">ada::idna::decompose_nfc</a> (std::u32string &amp;input)</td></tr>
+<tr class="separator:a28e25a08ef5ab3b8c5e25f77e9340566"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03db2791270405a5c682305c18c5d1cf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a03db2791270405a5c682305c18c5d1cf">ada::idna::compose</a> (std::u32string &amp;input)</td></tr>
+<tr class="separator:a03db2791270405a5c682305c18c5d1cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66bd7d6170f3e06b968c739e40a35967"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a66bd7d6170f3e06b968c739e40a35967">ada::idna::normalize</a> (std::u32string &amp;input)</td></tr>
 <tr class="separator:a66bd7d6170f3e06b968c739e40a35967"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac48f13e12efe5af075e58ca8ed4690ae"><td class="memItemLeft" align="right" valign="top">static constexpr int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#ac48f13e12efe5af075e58ca8ed4690ae">ada::idna::char_to_digit_value</a> (char value)</td></tr>
@@ -247,6 +255,40 @@ Variables</h2></td></tr>
 <tr class="separator:ad39325463bccb5615ad4aafb3f45ddd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab19eab266847496402079e77f5ffa93"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#aab19eab266847496402079e77f5ffa93">ada::idna::table</a> [8000][2]</td></tr>
 <tr class="separator:aab19eab266847496402079e77f5ffa93"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76ba8c375d368a14a5b009138b882859"><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a76ba8c375d368a14a5b009138b882859">ada::idna::decomposition_index</a> [4352]</td></tr>
+<tr class="separator:a76ba8c375d368a14a5b009138b882859"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a8649da4131912025f71c76e5483c6e"><td class="memItemLeft" align="right" valign="top">const uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a2a8649da4131912025f71c76e5483c6e">ada::idna::decomposition_block</a> [67][257]</td></tr>
+<tr class="separator:a2a8649da4131912025f71c76e5483c6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0f41d0b74696b2698bab08f36251526"><td class="memItemLeft" align="right" valign="top">const char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#ab0f41d0b74696b2698bab08f36251526">ada::idna::decomposition_data</a> [9102]</td></tr>
+<tr class="separator:ab0f41d0b74696b2698bab08f36251526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43afa026d0aeb1a48e7ed8e2ca90d387"><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a43afa026d0aeb1a48e7ed8e2ca90d387">ada::idna::canonical_combining_class_index</a> [4352]</td></tr>
+<tr class="separator:a43afa026d0aeb1a48e7ed8e2ca90d387"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59287719010e9172d71163ba81d20d71"><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a59287719010e9172d71163ba81d20d71">ada::idna::canonical_combining_class_block</a> [67][256]</td></tr>
+<tr class="separator:a59287719010e9172d71163ba81d20d71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04152d08ff9b28a79096f98f9741ab8a"><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a04152d08ff9b28a79096f98f9741ab8a">ada::idna::composition_index</a> [4352]</td></tr>
+<tr class="separator:a04152d08ff9b28a79096f98f9741ab8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a9b9104fed112133289d3f67bb94b0a"><td class="memItemLeft" align="right" valign="top">const uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7a9b9104fed112133289d3f67bb94b0a">ada::idna::composition_block</a> [67][257]</td></tr>
+<tr class="separator:a7a9b9104fed112133289d3f67bb94b0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2504167b83ba3ae4819f5d250ec0806d"><td class="memItemLeft" align="right" valign="top">const char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a2504167b83ba3ae4819f5d250ec0806d">ada::idna::composition_data</a> [1883]</td></tr>
+<tr class="separator:a2504167b83ba3ae4819f5d250ec0806d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75ee37a3911b0ce4d2563842a654a920"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a75ee37a3911b0ce4d2563842a654a920">ada::idna::hangul_sbase</a> = 0xAC00</td></tr>
+<tr class="separator:a75ee37a3911b0ce4d2563842a654a920"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3c6519de00a8711290d24453721b0e7"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#ae3c6519de00a8711290d24453721b0e7">ada::idna::hangul_tbase</a> = 0x11A7</td></tr>
+<tr class="separator:ae3c6519de00a8711290d24453721b0e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f00835963b691723cdc2383bb362199"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7f00835963b691723cdc2383bb362199">ada::idna::hangul_vbase</a> = 0x1161</td></tr>
+<tr class="separator:a7f00835963b691723cdc2383bb362199"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4af64ef680c616c7ce410932d8474afa"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a4af64ef680c616c7ce410932d8474afa">ada::idna::hangul_lbase</a> = 0x1100</td></tr>
+<tr class="separator:a4af64ef680c616c7ce410932d8474afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b4fd5ad887b44c75b6961aab3698bdb"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a6b4fd5ad887b44c75b6961aab3698bdb">ada::idna::hangul_lcount</a> = 19</td></tr>
+<tr class="separator:a6b4fd5ad887b44c75b6961aab3698bdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4ec90e439aa4453a705d0e4e26d493d"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#ad4ec90e439aa4453a705d0e4e26d493d">ada::idna::hangul_vcount</a> = 21</td></tr>
+<tr class="separator:ad4ec90e439aa4453a705d0e4e26d493d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07dc07ec6be862cf01e910353dcb481e"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a07dc07ec6be862cf01e910353dcb481e">ada::idna::hangul_tcount</a> = 28</td></tr>
+<tr class="separator:a07dc07ec6be862cf01e910353dcb481e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d7c9bfeb83a88063623160ae2887574"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a3d7c9bfeb83a88063623160ae2887574">ada::idna::hangul_ncount</a> = hangul_vcount * hangul_tcount</td></tr>
+<tr class="separator:a3d7c9bfeb83a88063623160ae2887574"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d4de1059fd64ba439f93e082d39e49b"><td class="memItemLeft" align="right" valign="top">constexpr char32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a6d4de1059fd64ba439f93e082d39e49b">ada::idna::hangul_scount</a></td></tr>
+<tr class="separator:a6d4de1059fd64ba439f93e082d39e49b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d1e1182a7cae8b4c1063dbc7614f88f"><td class="memItemLeft" align="right" valign="top">constexpr int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a0d1e1182a7cae8b4c1063dbc7614f88f">ada::idna::base</a> = 36</td></tr>
 <tr class="separator:a0d1e1182a7cae8b4c1063dbc7614f88f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4137d2ecd3d2921846af696d6611aed9"><td class="memItemLeft" align="right" valign="top">constexpr int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a4137d2ecd3d2921846af696d6611aed9">ada::idna::tmin</a> = 1</td></tr>
@@ -267,6 +309,22 @@ Variables</h2></td></tr>
 <tr class="separator:a63497445165fe20b9ecc26c791f1de55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="a3e0cb8abb7a779921adaf54930dbdb07" name="a3e0cb8abb7a779921adaf54930dbdb07"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e0cb8abb7a779921adaf54930dbdb07">&#9670;&#160;</a></span>ADA_IDNA_NORMALIZATION_TABLES_H</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ADA_IDNA_NORMALIZATION_TABLES_H</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02738">2738</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+
+</div>
+</div>
 <a id="a3a25ba82c407ebffcbc7cae1f2b20098" name="a3a25ba82c407ebffcbc7cae1f2b20098"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3a25ba82c407ebffcbc7cae1f2b20098">&#9670;&#160;</a></span>ADA_IDNA_TABLES_H</h2>
 
