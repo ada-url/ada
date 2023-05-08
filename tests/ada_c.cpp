@@ -10,7 +10,6 @@ std::string convert_string(const T& input) {
   return std::string(input.data, input.length);
 }
 
-
 TEST(ada_c, ada_parse) {
   ada_url url = ada_parse(
       "https://username:password@www.google.com:8080/"
@@ -31,8 +30,7 @@ TEST(ada_c, getters) {
   ASSERT_TRUE(ada_is_valid(url));
 
   ada_owned_string origin = ada_get_origin(url);
-  ASSERT_EQ(convert_string(origin),
-    "https://www.google.com:8080");
+  ASSERT_EQ(convert_string(origin), "https://www.google.com:8080");
   ada_free_owned_string(origin);
 
   ASSERT_EQ(convert_string(ada_get_href(url)),
