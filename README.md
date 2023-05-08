@@ -162,6 +162,16 @@ int main(int c, char *arg[] ) {
 When linking against the ada library from C++, be minding that ada requires access to the standard
 C++ library. E.g., you may link with the C++ compiler.
 
+E.g., if you grab our single-header C++ files (`ada.cpp` and `ada.h`), as well as the C header (`ada_c.h`),
+you can often compile a C program (`demo.c`) as follows under Linux/macOS systems:
+
+```
+c++ -c ada.cpp -std=c++17
+cc -c demo.c
+c++ demo.o ada.o -o cdemo
+./cdemo
+```
+
 ### CMake dependency
 
 See the file `tests/installation/CMakeLists.txt` for an example of how you might use ada from your own
