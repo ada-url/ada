@@ -218,8 +218,8 @@ Functions</h2></td></tr>
 <tr class="separator:a157c96a61731a76b1c222eafad465828"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a803aed58b90d68562c44c76eaf5e9c90"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="../../dd/d64/namespaceada.html#a7f8335195119f1a7f35d14c06558748b">ada::result</a>&lt; <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a803aed58b90d68562c44c76eaf5e9c90">parse&lt; url_aggregator &gt;</a> (std::string_view input, const <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a> *base_url)</td></tr>
 <tr class="separator:a803aed58b90d68562c44c76eaf5e9c90"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f15164d054934114be3190de882ba0d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a2f15164d054934114be3190de882ba0d">can_parse</a> (std::string_view input, std::string_view *base_input)</td></tr>
-<tr class="separator:a2f15164d054934114be3190de882ba0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03693ff0509e3c177d242205bc8f2748"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748">can_parse</a> (std::string_view input, const std::string_view *base_input=nullptr)</td></tr>
+<tr class="separator:a03693ff0509e3c177d242205bc8f2748"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4796e4f266c83d76b490d423c8336a70"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">href_from_file</a> (std::string_view path)</td></tr>
 <tr class="separator:a4796e4f266c83d76b490d423c8336a70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b7cc372b3ac372722c850ca149215d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6">to_string</a> (<a class="el" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">ada::state</a> s)</td></tr>
@@ -379,8 +379,8 @@ template&lt;class result_type  = ada::url_aggregator&gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a2f15164d054934114be3190de882ba0d" name="a2f15164d054934114be3190de882ba0d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f15164d054934114be3190de882ba0d">&#9670;&#160;</a></span>can_parse()</h2>
+<a id="a03693ff0509e3c177d242205bc8f2748" name="a03693ff0509e3c177d242205bc8f2748"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03693ff0509e3c177d242205bc8f2748">&#9670;&#160;</a></span>can_parse()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -394,7 +394,7 @@ template&lt;class result_type  = ada::url_aggregator&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::string_view *&#160;</td>
+          <td class="paramtype">const std::string_view *&#160;</td>
           <td class="paramname"><em>base_input</em> = <code>nullptr</code>&#160;</td>
         </tr>
         <tr>
@@ -658,7 +658,7 @@ template&lt;class result_type  = ada::url_aggregator&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d64/namespaceada.html#a2f15164d054934114be3190de882ba0d">can_parse()</a>, and <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a5e27036840d5ac8aed44783dfbb9ab2a">ada::url_aggregator::set_href()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748">can_parse()</a>, and <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a5e27036840d5ac8aed44783dfbb9ab2a">ada::url_aggregator::set_href()</a>.</p>
 
 </div>
 </div>
