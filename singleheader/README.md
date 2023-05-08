@@ -30,6 +30,7 @@ You may also build a C executable.
 
 ```
 c++ -c ada.cpp -std=c++17
-cc -o democ demo.c ada.o  -lc++
-./democ
+cc -c demo.c
+c++ demo.o ada.o -o cdemo
+./cdemo
 ```
