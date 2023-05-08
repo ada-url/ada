@@ -96,9 +96,7 @@ size_t url::get_pathname_length() const noexcept { return path.size(); }
 
   out.pathname_start = uint32_t(running_index);
 
-  if (!path.empty()) {
-    running_index += path.size();
-  }
+  running_index += path.size();
 
   if (query.has_value()) {
     out.search_start = uint32_t(running_index);

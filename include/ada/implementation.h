@@ -44,7 +44,8 @@ extern template ada::result<url_aggregator> parse<url_aggregator>(
  * @see https://url.spec.whatwg.org/#dom-url-canparse
  * @return If URL can be parsed or not.
  */
-bool can_parse(std::string_view input, std::string_view* base_input);
+bool can_parse(std::string_view input,
+               const std::string_view* base_input = nullptr);
 
 /**
  * Computes a href string from a file path.

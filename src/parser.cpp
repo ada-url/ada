@@ -40,9 +40,9 @@ result_type parse_url(std::string_view user_input,
       std::string_view::size_type(std::numeric_limits<uint32_t>::max)) {
     url.is_valid = false;
   }
-
-  // If we are provided with an invalid base, or the optional_url was invalid,
-  // we must return.
+  // Going forward, user_input.size() is in [0,
+  // std::numeric_limits<uint32_t>::max). If we are provided with an invalid
+  // base, or the optional_url was invalid, we must return.
   if (base_url != nullptr) {
     url.is_valid &= base_url->is_valid;
   }
@@ -59,8 +59,11 @@ result_type parse_url(std::string_view user_input,
     // it may not matter, but in other instances, it could.
     ////
     // This rounds up to the next power of two.
+    // We know that user_input.size() is in [0,
+    // std::numeric_limits<uint32_t>::max).
     uint32_t reserve_capacity =
-        (0xFFFFFFFF >> helpers::leading_zeroes(uint32_t(user_input.size()))) +
+        (0xFFFFFFFF >>
+         helpers::leading_zeroes(uint32_t(1 | user_input.size()))) +
         1;
     url.reserve(reserve_capacity);
     //
@@ -418,6 +421,8 @@ result_type parse_url(std::string_view user_input,
             url.password = base_url->password;
             url.host = base_url->host;
             url.port = base_url->port;
+            // cloning the base path includes cloning the has_opaque_path flag
+            url.has_opaque_path = base_url->has_opaque_path;
             url.path = base_url->path;
             url.query = base_url->query;
           } else {
@@ -427,6 +432,8 @@ result_type parse_url(std::string_view user_input,
             // update_base_hostname
             url.set_hostname(base_url->get_hostname());
             url.update_base_port(base_url->retrieve_base_port());
+            // cloning the base path includes cloning the has_opaque_path flag
+            url.has_opaque_path = base_url->has_opaque_path;
             url.update_base_pathname(base_url->get_pathname());
             url.update_base_search(base_url->get_search());
           }
@@ -858,7 +865,6 @@ result_type parse_url(std::string_view user_input,
           else if (input_position != input_size) {
             // Set url’s query to null.
             url.clear_search();
-
             // If the code point substring from pointer to the end of input does
             // not start with a Windows drive letter, then shorten url’s path.
             if (!checkers::is_windows_drive_letter(file_view)) {

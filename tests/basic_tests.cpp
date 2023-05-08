@@ -16,6 +16,12 @@ TYPED_TEST(basic_tests, set_host_should_return_false_sometimes) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, empty_url_should_return_false) {
+  auto r = ada::parse<TypeParam>("");
+  ASSERT_FALSE(r);
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_host_should_return_true_sometimes) {
   auto r = ada::parse<TypeParam>("https://www.google.com");
   ASSERT_TRUE(r->set_host("something"));
@@ -264,5 +270,37 @@ TYPED_TEST(basic_tests, should_update_password_correctly) {
   ASSERT_EQ(url->get_password(), "test");
   ASSERT_EQ(url->get_href(),
             "https://username:test@host:8000/path?query#fragment");
+  SUCCEED();
+}
+
+// https://github.com/nodejs/node/issues/47889
+TYPED_TEST(basic_tests, node_issue_47889) {
+  auto urlbase = ada::parse<TypeParam>("a:b");
+  ASSERT_EQ(urlbase->get_href(), "a:b");
+  ASSERT_EQ(urlbase->get_protocol(), "a:");
+  ASSERT_EQ(urlbase->get_pathname(), "b");
+  ASSERT_TRUE(urlbase->has_opaque_path);
+  ASSERT_TRUE(urlbase);
+  auto expected_url = ada::parse<TypeParam>("a:b#");
+  ASSERT_TRUE(expected_url);
+  ASSERT_TRUE(expected_url->has_opaque_path);
+  ASSERT_EQ(expected_url->get_href(), "a:b#");
+  ASSERT_EQ(expected_url->get_pathname(), "b");
+  auto url = ada::parse<TypeParam>("..#", &*urlbase);
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->has_opaque_path);
+  ASSERT_EQ(url->get_href(), "a:b#");
+  ASSERT_EQ(url->get_pathname(), "b");
+  SUCCEED();
+}
+
+TEST(basic_tests, can_parse) {
+  ASSERT_TRUE(ada::can_parse("https://www.yagiz.co"));
+  std::string_view base = "https://yagiz.co";
+  ASSERT_TRUE(ada::can_parse("/hello", &base));
+
+  std::string_view invalid_base = "!!!!!!!1";
+  ASSERT_FALSE(ada::can_parse("/hello", &invalid_base));
+  ASSERT_FALSE(ada::can_parse("!!!"));
   SUCCEED();
 }
