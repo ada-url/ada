@@ -16,6 +16,7 @@ docs/theme
 benchmark_result.json
 
 singleheader/ada.h
+singleheader/ada_c.h
 singleheader/ada.cpp
 singleheader/singleheader.zip
 

@@ -208,5 +208,4 @@ You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) 
 
 This code is made available under the Apache License 2.0 as well as the MIT license. 
 
-Our tests include third-party code and data. The benchmarking code includes third-party code: 
-it is provided for research purposes only and not part of the library.
+Our tests include third-party code and data. The benchmarking code includes third-party code: it is provided for research purposes only and not part of the library.
