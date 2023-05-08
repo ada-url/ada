@@ -1,14 +1,18 @@
+// gest is a C++ library so we are in C++.
 #include "gtest/gtest.h"
+extern "C" {
+#include "ada_c.h"
+}
 
-#include "ada.h"
-
-std::string convert_string(const ada_string& input) {
+template <typename T>
+std::string convert_string(const T& input) {
   printf("result %s \n", std::string(input.data, input.length).c_str());
   return std::string(input.data, input.length);
 }
 
+
 TEST(ada_c, ada_parse) {
-  void* url = ada_parse(
+  ada_url url = ada_parse(
       "https://username:password@www.google.com:8080/"
       "pathname?query=true#hash-exists");
 
@@ -20,15 +24,16 @@ TEST(ada_c, ada_parse) {
 }
 
 TEST(ada_c, getters) {
-  void* url = ada_parse(
+  ada_url url = ada_parse(
       "https://username:password@www.google.com:8080/"
       "pathname?query=true#hash-exists");
 
   ASSERT_TRUE(ada_is_valid(url));
 
-  // TODO: Fix ada_get_origin returning invalid address.
-  //  ASSERT_EQ(convert_string(ada_get_origin(url)),
-  //  "https://www.google.com:8080");
+  ada_owned_string origin = ada_get_origin(url);
+  ASSERT_EQ(convert_string(origin),
+    "https://www.google.com:8080");
+  ada_free_owned_string(origin);
 
   ASSERT_EQ(convert_string(ada_get_href(url)),
             "https://username:password@www.google.com:8080/"
@@ -49,7 +54,7 @@ TEST(ada_c, getters) {
 }
 
 TEST(ada_c, setters) {
-  void* url = ada_parse(
+  ada_url url = ada_parse(
       "https://username:password@www.google.com:8080/"
       "pathname?query=true#hash-exists");
 

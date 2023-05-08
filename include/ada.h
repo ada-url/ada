@@ -27,6 +27,5 @@
 // Public API
 #include "ada/ada_version.h"
 #include "ada/implementation.h"
-#include "ada_c.h"
 
 #endif  // ADA_H

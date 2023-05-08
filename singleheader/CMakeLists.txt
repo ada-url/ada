@@ -4,7 +4,9 @@
 set(SINGLEHEADER_FILES
   ${CMAKE_CURRENT_BINARY_DIR}/ada.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/ada.h
+  ${CMAKE_CURRENT_BINARY_DIR}/ada_c.h
   ${CMAKE_CURRENT_BINARY_DIR}/demo.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/demo.c
   ${CMAKE_CURRENT_BINARY_DIR}/README.md
 )
 set_source_files_properties(${SINGLEHEADER_FILES} PROPERTIES GENERATED TRUE)
@@ -52,6 +54,11 @@ if (Python3_Interpreter_FOUND)
     target_link_libraries(demo ada-singleheader-include-source)
 
     add_test(demo demo)
+
+    add_executable(cdemo $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.c>)
+    target_link_libraries(cdemo ada)
+
+    add_test(cdemo cdemo)
   endif()
 else()
   MESSAGE( STATUS "Python not found, we are unable to test amalgamate.py." )
