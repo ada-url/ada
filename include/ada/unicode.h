@@ -201,6 +201,10 @@ ada_really_inline size_t percent_encode_index(const std::string_view input,
  * Return true if the content was ASCII.
  */
 constexpr bool to_lower_ascii(char* input, size_t length) noexcept;
+
+bool is_valid_identifier_part(const char32_t& c) noexcept;
+bool is_valid_identifier_start(const char32_t& c) noexcept;
+
 }  // namespace ada::unicode
 
 #endif  // ADA_UNICODE_H

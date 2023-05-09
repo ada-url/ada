@@ -1,12 +1,17 @@
 #ifndef ADA_URL_PATTERN_H
 #define ADA_URL_PATTERN_H
 
-#include <string_view>
-#include <optional>
+#include "ada/common_defs.h"
+
 #include <unordered_map>
 #include <array>
+#include <string_view>
+#include <optional>
 
 namespace ada {
+
+ada_really_inline bool is_valid_name_code_point(const char32_t& c,
+                                                bool is_first) noexcept;
 
 struct urlpattern_options {
   bool ignore_case = false;

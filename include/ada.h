@@ -23,6 +23,7 @@
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
+#include "ada/urlpattern.h"
 
 // Public API
 #include "ada/ada_version.h"
