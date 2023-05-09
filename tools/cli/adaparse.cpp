@@ -1,19 +1,7 @@
-#include <cstdlib>
 #include <chrono>
-#include <iostream>
-#include <string_view>
-#include <sys/stat.h>
-#include <fmt/core.h>
 #include <cxxopts.hpp>
 #include <fstream>
 #include <fmt/os.h>
-#include <cerrno>
-
-#include <fmt/os.h>
-#include <typeinfo>
-#include <iostream>
-#include <cxxabi.h>
-#include <memory>
 
 #include "ada.h"
 #include "line_iterator.h"
