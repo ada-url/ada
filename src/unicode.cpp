@@ -8,6 +8,7 @@ ADA_PUSH_DISABLE_ALL_WARNINGS
 ADA_POP_DISABLE_WARNINGS
 
 #include <algorithm>
+#include <bitset>
 
 namespace ada::unicode {
 
