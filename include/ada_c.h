@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+// This is a reference to ada::url_components::omitted
+// It represents "uint32_t(-1)"
+#define ada_url_omitted 0xffffffff
+
 // string that is owned by the ada_url instance
 typedef struct {
   const char* data;

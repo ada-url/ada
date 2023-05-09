@@ -120,3 +120,18 @@ TEST(ada_c, can_parse) {
   ASSERT_TRUE(ada_can_parse_with_base(path.data(), path.length(), input.data(),
                                       input.length()));
 }
+
+TEST(ada_c, ada_url_components) {
+  std::string input = "https://www.google.com";
+  ada_url url = ada_parse(input.data(), input.length());
+  const ada_url_components* components = ada_get_components(url);
+
+  ASSERT_EQ(components->protocol_end, 6);
+  ASSERT_EQ(components->port, ada_url_omitted);
+  ASSERT_EQ(components->search_start, ada_url_omitted);
+  ASSERT_EQ(components->hash_start, ada_url_omitted);
+
+  ada_free(url);
+
+  SUCCEED();
+}
