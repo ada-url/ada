@@ -8,3 +8,11 @@ add_dependency(cxxopts)
 import_dependency(fmt fmtlib/fmt a337011)
 add_dependency(fmt)
 target_link_libraries(adaparse PRIVATE cxxopts::cxxopts fmt::fmt)
+
+install(
+   TARGETS
+    adaparse
+   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
