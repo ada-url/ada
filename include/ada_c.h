@@ -36,19 +36,23 @@ typedef void* ada_url;
 
 // input should be a null terminated C string
 // you must call ada_free on the returned pointer
-ada_url ada_parse(const char* string);
+ada_url ada_parse(const char* input, size_t length);
+ada_url ada_parse_with_base(const char* input, size_t input_length,
+                            const char* base, size_t base_length);
 
 // input and base should be a null terminated C strings
-bool ada_can_parse(const char* input, const char* base);
+bool ada_can_parse(const char* input, size_t length);
+bool ada_can_parse_with_base(const char* input, size_t input_length,
+                             const char* base, size_t base_length);
 
 void ada_free(ada_url result);
+void ada_free_owned_string(ada_owned_string owned);
 
 bool ada_is_valid(ada_url result);
 
 // url_aggregator getters
 // if ada_is_valid(result)) is false, an empty string is returned
 ada_owned_string ada_get_origin(ada_url result);
-void ada_free_owned_string(ada_owned_string owned);
 ada_string ada_get_href(ada_url result);
 ada_string ada_get_username(ada_url result);
 ada_string ada_get_password(ada_url result);
@@ -63,16 +67,16 @@ ada_string ada_get_protocol(ada_url result);
 // url_aggregator setters
 // if ada_is_valid(result)) is false, the setters have no effect
 // input should be a null terminated C string
-bool ada_set_href(ada_url result, const char* input);
-bool ada_set_host(ada_url result, const char* input);
-bool ada_set_hostname(ada_url result, const char* input);
-bool ada_set_protocol(ada_url result, const char* input);
-bool ada_set_username(ada_url result, const char* input);
-bool ada_set_password(ada_url result, const char* input);
-bool ada_set_port(ada_url result, const char* input);
-bool ada_set_pathname(ada_url result, const char* input);
-void ada_set_search(ada_url result, const char* input);
-void ada_set_hash(ada_url result, const char* input);
+bool ada_set_href(ada_url result, const char* input, size_t length);
+bool ada_set_host(ada_url result, const char* input, size_t length);
+bool ada_set_hostname(ada_url result, const char* input, size_t length);
+bool ada_set_protocol(ada_url result, const char* input, size_t length);
+bool ada_set_username(ada_url result, const char* input, size_t length);
+bool ada_set_password(ada_url result, const char* input, size_t length);
+bool ada_set_port(ada_url result, const char* input, size_t length);
+bool ada_set_pathname(ada_url result, const char* input, size_t length);
+void ada_set_search(ada_url result, const char* input, size_t length);
+void ada_set_hash(ada_url result, const char* input, size_t length);
 
 // url_aggregator functions
 // if ada_is_valid(result) is false, functions below will return false
