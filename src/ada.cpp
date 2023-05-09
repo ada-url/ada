@@ -11,3 +11,4 @@
 #include "url_components.cpp"
 #include "url_aggregator.cpp"
 #include "urlpattern.cpp"
+#include "ada_c.cpp"

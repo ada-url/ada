@@ -4,7 +4,6 @@ import os
 import lib.versions as update_versions
 from lib.release import is_valid_tag
 
-
 WORK_DIR = os.path.dirname(os.path.abspath(__file__)).replace("/tools/release", "")
 
 ADA_VERSION_H = f"{WORK_DIR}/include/ada/ada_version.h"

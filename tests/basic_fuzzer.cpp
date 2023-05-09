@@ -1,4 +1,3 @@
-
 #include "ada.h"
 #include <iostream>
 #include <memory>

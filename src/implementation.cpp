@@ -46,7 +46,7 @@ std::string href_from_file(std::string_view input) {
   return "file://" + path;
 }
 
-bool can_parse(std::string_view input, std::string_view* base_input = nullptr) {
+bool can_parse(std::string_view input, const std::string_view* base_input) {
   ada::result<ada::url_aggregator> base;
   ada::url_aggregator* base_pointer = nullptr;
   if (base_input != nullptr) {

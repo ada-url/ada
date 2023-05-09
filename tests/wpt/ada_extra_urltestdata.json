@@ -255,5 +255,35 @@
     "pathname": "/%22quoted%22",
     "search": "",
     "hash": ""
+  },
+  {
+    "input": "a:b#",
+    "base": null,
+    "href": "a:b#",
+    "origin": null,
+    "protocol": "a:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "b",
+    "search": "",
+    "hash": ""
+  },
+  {
+    "input": "..#",
+    "base": "a:b",
+    "href": "a:b#",
+    "origin": null,
+    "protocol": "a:",
+    "username": "",
+    "password": "",
+    "host": "",
+    "hostname": "",
+    "port": "",
+    "pathname": "b",
+    "search": "",
+    "hash": ""
   }
 ]
