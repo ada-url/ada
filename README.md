@@ -16,7 +16,9 @@ across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
 supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
 
 
-Ada is fast. On a benchmark where we need to validate and normalize [thousands URLs found
+## Ada is fast. 
+
+On a benchmark where we need to validate and normalize [thousands URLs found
 on popular websites](https://github.com/ada-url/url-various-datasets/tree/main/top100), 
 we find that ada can be several times faster than popular competitors (system: Apple MacBook 2022
 with LLVM 14).
