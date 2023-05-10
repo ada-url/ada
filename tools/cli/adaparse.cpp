@@ -98,10 +98,19 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
   }
 
   // Get the file descriptor from the FILE * input_file
+#ifdef _MSC_VER
+  int input_fd = _fileno(input_file);
+#else
   int input_fd = fileno(input_file);
+#endif
 
+#ifdef _MSC_VER
+  while ((bytes_read_this_loop_iteration = _read(
+              input_fd, cachebuffer.get() + offset, (unsigned int)(cache_length - offset)))) {
+#else
   while ((bytes_read_this_loop_iteration = read(
               input_fd, cachebuffer.get() + offset, cache_length - offset))) {
+#endif
     total_bytes_read += bytes_read_this_loop_iteration;
     blocks++;
     size_t capacity = bytes_read_this_loop_iteration + offset;
