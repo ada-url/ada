@@ -25,20 +25,20 @@
 var NAVTREE =
 [
   [ "Ada", "index.html", [
-    [ "Requirements", "index.html#autotoc_md4", null ],
-    [ "Usage", "index.html#autotoc_md5", [
-      [ "Parsing & Validation", "index.html#autotoc_md6", null ],
-      [ "Examples", "index.html#autotoc_md7", null ],
-      [ "C wrapper", "index.html#autotoc_md8", null ],
-      [ "CMake dependency", "index.html#autotoc_md9", null ]
+    [ "Requirements", "index.html#autotoc_md5", null ],
+    [ "Usage", "index.html#autotoc_md6", [
+      [ "Parsing & Validation", "index.html#autotoc_md7", null ],
+      [ "Examples", "index.html#autotoc_md8", null ],
+      [ "C wrapper", "index.html#autotoc_md9", null ],
+      [ "CMake dependency", "index.html#autotoc_md10", null ]
     ] ],
-    [ "Installation", "index.html#autotoc_md10", [
-      [ "Homebrew", "index.html#autotoc_md11", null ]
+    [ "Installation", "index.html#autotoc_md11", [
+      [ "Homebrew", "index.html#autotoc_md12", null ]
     ] ],
-    [ "Contributing", "index.html#autotoc_md12", [
-      [ "Building", "index.html#autotoc_md13", null ],
-      [ "Amalgamation", "index.html#autotoc_md14", null ],
-      [ "License", "index.html#autotoc_md15", null ]
+    [ "Contributing", "index.html#autotoc_md13", [
+      [ "Building", "index.html#autotoc_md14", null ],
+      [ "Amalgamation", "index.html#autotoc_md15", null ],
+      [ "License", "index.html#autotoc_md16", null ]
     ] ],
     [ "Command line options", "db/d8a/md_docs_cli.html", null ],
     [ "Namespaces", "namespaces.html", [

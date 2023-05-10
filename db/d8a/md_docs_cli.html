@@ -122,15 +122,15 @@ $(document).ready(function(){initNavTree('db/d8a/md_docs_cli.html','../../'); in
 <h2><a class="anchor" id="autotoc_md1"></a>
 Usage/Examples:</h2>
 <p>Well-formatted URL:</p>
-<div class="fragment"><div class="line">./buildbench/tools/adaparse &quot;http://www.google.com&quot;</div>
+<div class="fragment"><div class="line">adaparse &quot;http://www.google.com&quot;</div>
 </div><!-- fragment --><p> Output:</p>
 <div class="fragment"><div class="line">http://www.google.com</div>
 </div><!-- fragment --><p>Ill-formatted URL:</p>
-<div class="fragment"><div class="line">./buildbench/tools/adaparse &quot;h^tp:ws:/www.g00g.com&quot;</div>
+<div class="fragment"><div class="line">adaparse &quot;h^tp:ws:/www.g00g.com&quot;</div>
 </div><!-- fragment --><p> Output:</p>
-<div class="fragment"><div class="line">Invalid URL: h^tp:ws:/www.g00g.com</div>
+<div class="fragment"><div class="line">Invalid URL:  h^tp:ws:/www.g00g.com</div>
 </div><!-- fragment --><p>Diagram flag:</p>
-<div class="fragment"><div class="line">$ ./buildbench/tools/adaparse -d http://www.google.com/bal\?a\=\=11\#fddfds</div>
+<div class="fragment"><div class="line">$ adaparse -d http://www.google.com/bal\?a\=\=11\#fddfds</div>
 </div><!-- fragment --><p>Output:</p>
 <div class="fragment"><div class="line">http://www.google.com/bal?a==11#fddfds [38 bytes]</div>
 <div class="line">     | |             |   |     |</div>
@@ -144,31 +144,38 @@ Usage/Examples:</h2>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md2"></a>
 Piping Example</h2>
 <p>Ada can process URLs from piped input, making it easy to integrate with other command-line tools. Here's an example of how to pipe the output of another command into Ada.</p>
-<div class="fragment"><div class="line">cat dragonball_url.txt | ./buildbench/tools/adaparse</div>
+<p>Given a list of URLs, one by line, we may query the normalized URL string (<code>href</code>) and detect any malformed URL:</p>
+<div class="fragment"><div class="line">cat dragonball_url.txt | adaparse --get href</div>
 </div><!-- fragment --><p>Output: </p><div class="fragment"><div class="line">http://www.goku.com</div>
 <div class="line">http://www.vegeta.com</div>
 <div class="line">http://www.gohan.com</div>
-</div><!-- fragment --><p>It also supports the passing of arguments to each URL in said file:</p>
-<div class="fragment"><div class="line">cat dragonball_url.txt  | ./buildbench/tools/adaparse -g host</div>
+</div><!-- fragment --><p>Our tool supports the passing of arguments to each URL in said file so that you can query for the hash, the host, the protocol, the port, the origin, the search, the password, the username, the pathname or the hostname:</p>
+<div class="fragment"><div class="line">cat dragonball_url.txt  | adaparse -g host</div>
 </div><!-- fragment --><p>Output: </p><div class="fragment"><div class="line">www.goku.com</div>
 <div class="line">www.vegeta.com</div>
 <div class="line">www.gohan.com</div>
-</div><!-- fragment --><p>The benchmark flag can be used to output the time it takes to process piped input:</p>
-<div class="fragment"><div class="line">cat wikipedia_100k.txt | ./buildbench/tools/adaparse -b</div>
-</div><!-- fragment --><div class="fragment"><div class="line">(---snip---)</div>
-<div class="line">file:///opt </div>
-<div class="line">file:///Users </div>
-<div class="line">file:///Users/lemire </div>
-<div class="line">file:///Users/lemire/tmp </div>
-<div class="line">file:///Users/lemire/tmp/linuxdump </div>
-<div class="line">file:///Users/lemire/tmp/linuxdump/linuxfiles.txt </div>
-<div class="line">file:///.dockerenv </div>
-<div class="line">read 10124906 bytes in 3071328453 ns using 169312 lines</div>
-<div class="line">0.003296588481153891 GB/s</div>
+</div><!-- fragment --><p>If you omit <code>-g</code>, it will only provide a list of invalid URLs. This might be useful if you want to valid quickly a list of URLs.</p>
+<p>The benchmark flag can be used to output the time it takes to process piped input:</p>
+<div class="fragment"><div class="line">cat wikipedia_100k.txt | adaparse -b</div>
+</div><!-- fragment --><div class="fragment"><div class="line">Invalid URL: 1968:_Die_Kinder_der_Diktatur</div>
+<div class="line">Invalid URL: 58957:_The_Bluegrass_Guitar_Collection</div>
+<div class="line">Invalid URL: 650luc:_Gangsta_Grillz</div>
+<div class="line">Invalid URL: Q4%3A57</div>
+<div class="line">Invalid URL: Q10%3A47</div>
+<div class="line">Invalid URL: Q5%3A45</div>
+<div class="line">Invalid URL: Q40%3A28</div>
+<div class="line">Invalid URL: 1:1_scale</div>
+<div class="line">Invalid URL: 1893:_A_World&#39;s_Fair_Mystery</div>
+<div class="line">Invalid URL: 12:51_(Krissy_%26_Ericka_song)</div>
+<div class="line">Invalid URL: 111:_A_Nelson_Number</div>
+<div class="line">Invalid URL: 7:00AM-8%3A00AM_(24_season_5)</div>
+<div class="line">Invalid URL: Q53%3A31</div>
+<div class="line">read 5209265 bytes in 32819917 ns using 100000 lines, used 160 loads</div>
+<div class="line">0.1587226744053009 GB/s</div>
 </div><!-- fragment --><p>There is an option to output to a file on disk:</p>
-<div class="fragment"><div class="line">cat wikipedia_100k.txt | ./buildbench/tools/adaparse -o wiki_output.txt</div>
+<div class="fragment"><div class="line">cat wikipedia_100k.txt | adaparse -o wiki_output.txt</div>
 </div><!-- fragment --><p>as well as read in from a file on disk without going through cat:</p>
-<div class="fragment"><div class="line">./buildbench/tools/adaparse -p wikipedia_top_100_txt</div>
+<div class="fragment"><div class="line">adaparse -p wikipedia_top_100_txt</div>
 </div><!-- fragment --><p>You may also combine different flags together. E.g. Say one wishes to extract only the host from URLs stored in wikipedia.txt and output it to the test_write.txt file:</p>
 <div class="fragment"><div class="line">/build/tools/adaparse&quot; -p wikipedia_top100.txt -o test_write.txt -g host -b</div>
 </div><!-- fragment --><p>Console output: </p><div class="fragment"><div class="line">read 5209265 bytes in 26737131 ns using 100000 lines, total_bytes is 5209265 used 160 loads</div>
@@ -185,6 +192,49 @@ Piping Example</h2>
 <div class="line">en.wikipedia.org</div>
 <div class="line">en.wikipedia.org</div>
 <div class="line">(---snip---)</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md3"></a>
+Performance</h2>
+<p>Our <code>adaparse</code> tool may outperform other popular alternatives. We offer a <a href="https://github.com/ada-url/url-various-datasets">collection of sets of URLs</a> for benchmarking purposes. The following results are on a MacBook Air 2022 (M2 processor) using LLVM 14. We compare against <a href="https://github.com/curl/trurl">trurl</a> version 0.6 (libcurl/7.87.0).</p>
+<details >
+<summary >
+</summary>
+<p>With the wikipedia_100k dataset, we get that adaparse can generate normalized URLs about three times faster than trurl.</p>
+<pre>
+$ time cat url-various-datasets/wikipedia/wikipedia_100k.txt| trurl --url-file - &amp;&gt; /dev/null   1
+cat url-various-datasets/wikipedia/wikipedia_100k.txt  0,00s user 0,01s system 3% cpu 0,179 total
+trurl --url-file - &amp;&gt; /dev/null  0,14s user 0,03s system 98% cpu 0,180 total
+
+
+$ time cat url-various-datasets/wikipedia/wikipedia_100k.txt| ./build/tools/cli/adaparse -g href &amp;&gt; /dev/null
+cat url-various-datasets/wikipedia/wikipedia_100k.txt  0,00s user 0,00s system 10% cpu 0,056 total
+./build/tools/cli/adaparse -g href &amp;&gt; /dev/null  0,05s user 0,00s system 93% cpu 0,055 total
+</pre> </details>
+<details >
+<summary >
+With the top100 dataset, the adaparse tool is twice as fast as the trurl.</summary>
+<pre>
+$ time cat url-various-datasets/top100/top100.txt| trurl --url-file - &amp;&gt; /dev/null              1
+cat url-various-datasets/top100/top100.txt  0,00s user 0,00s system 4% cpu 0,115 total
+trurl --url-file - &amp;&gt; /dev/null  0,09s user 0,02s system 97% cpu 0,113 total
+
+$ time cat url-various-datasets/top100/top100.txt| ./build/tools/cli/adaparse -g href &amp;&gt; /dev/null
+cat url-various-datasets/top100/top100.txt  0,00s user 0,01s system 11% cpu 0,062 total
+./build/tools/cli/adaparse -g href &amp;&gt; /dev/null  0,05s user 0,00s system 94% cpu 0,061 total
+</pre> </details>
+<p>The results will vary depending on your system. We invite you to run your own benchmarks.</p>
+<div class="fragment"><div class="line">gantt</div>
+<div class="line">    title Processing time (ms)</div>
+<div class="line">    dateFormat  X</div>
+<div class="line">    axisFormat %s</div>
+<div class="line"> </div>
+<div class="line">    section ada</div>
+<div class="line">    wikipedia_100k.txt   : 0, 55</div>
+<div class="line">    section ada</div>
+<div class="line">    top100   : 0, 61</div>
+<div class="line">    section trurl</div>
+<div class="line">    wikipedia_100k.txt   : 0, 180</div>
+<div class="line">    section trurl</div>
+<div class="line">    top100    : 0, 113</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

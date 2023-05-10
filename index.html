@@ -111,16 +111,16 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <p>Ada is a fast and spec-compliant URL parser written in C++. Specification for URL parser can be found from the <a href="https://url.spec.whatwg.org/#url-parsing">WHATWG</a> website.</p>
 <p>We also include a C wrapper for portability.</p>
 <p>The Ada library passes the full range of tests from the specification, across a wide range of platforms (e.g., Windows, Linux, macOS). It fully supports the relevant <a href="https://www.unicode.org/reports/tr46/#ToUnicode">Unicode Technical Standard</a>.</p>
-<h1><a class="anchor" id="autotoc_md4"></a>
+<h1><a class="anchor" id="autotoc_md5"></a>
 Requirements</h1>
 <ul>
 <li>A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.</li>
 </ul>
 <p>The project is otherwise self-contained and it has no dependency.</p>
-<h1><a class="anchor" id="autotoc_md5"></a>
+<h1><a class="anchor" id="autotoc_md6"></a>
 Usage</h1>
 <p>Ada supports two types of URL instances, <code><a class="el" href="dd/d03/structada_1_1url.html" title="Generic URL struct reliant on std::string instantiation.">ada::url</a></code> and <code><a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">ada::url_aggregator</a></code>. The usage is the same in either case: we have an parsing function template <code><a class="el" href="dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse</a></code> which can return either a result of type <code><a class="el" href="dd/d64/namespaceada.html#a7f8335195119f1a7f35d14c06558748b">ada::result</a>&lt;<a class="el" href="dd/d03/structada_1_1url.html" title="Generic URL struct reliant on std::string instantiation.">ada::url</a>&gt;</code> or of type <code><a class="el" href="dd/d64/namespaceada.html#a7f8335195119f1a7f35d14c06558748b">ada::result</a>&lt;<a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">ada::url_aggregator</a>&gt;</code> depending on your needs. The <code><a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">ada::url_aggregator</a></code> class is smaller and it is backed by a precomputed serialized URL string. The <code><a class="el" href="dd/d03/structada_1_1url.html" title="Generic URL struct reliant on std::string instantiation.">ada::url</a></code> class is made of several separate strings for the various components (path, host, and so forth).</p>
-<h2><a class="anchor" id="autotoc_md6"></a>
+<h2><a class="anchor" id="autotoc_md7"></a>
 Parsing &amp; Validation</h2>
 <ul>
 <li>Parse and validate a URL</li>
@@ -140,7 +140,7 @@ Parsing &amp; Validation</h2>
 <div class="line">  <span class="comment">// report a parsing failure</span></div>
 <div class="line">}</div>
 </div><!-- fragment --><p>For simplicity, in the examples below, we skip the check because we know that parsing succeeds.</p>
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="autotoc_md8"></a>
 Examples</h2>
 <ul>
 <li>Get/Update credentials</li>
@@ -188,7 +188,7 @@ Examples</h2>
 <div class="line">url-&gt;set_hash(<span class="stringliteral">&quot;is-this-the-real-life&quot;</span>);</div>
 <div class="line"><span class="comment">// url-&gt;get_hash() will return &quot;#is-this-the-real-life&quot;</span></div>
 </div><!-- fragment --><p> For more information about command-line options, please refer to the <a class="el" href="db/d8a/md_docs_cli.html">CLI documentation</a>. </p>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md9"></a>
 C wrapper</h2>
 <p>See the file <code><a class="el" href="df/d61/ada__c_8h.html" title="Includes the C definitions for Ada. This is a C file, not C++.">include/ada_c.h</a></code> for our C interface.</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="df/d61/ada__c_8h.html">ada_c.h</a>&quot;</span></div>
@@ -241,17 +241,17 @@ C wrapper</h2>
 <div class="line">cc -c demo.c</div>
 <div class="line">c++ demo.o ada.o -o cdemo</div>
 <div class="line">./cdemo</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md9"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md10"></a>
 CMake dependency</h2>
 <p>See the file <code>tests/installation/CMakeLists.txt</code> for an example of how you might use ada from your own CMake project, after having installed ada on your system.</p>
-<h1><a class="anchor" id="autotoc_md10"></a>
+<h1><a class="anchor" id="autotoc_md11"></a>
 Installation</h1>
-<h2><a class="anchor" id="autotoc_md11"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 Homebrew</h2>
 <p>Ada is available through <a href="https://formulae.brew.sh/formula/ada-url#default">Homebrew</a>. You can install Ada using <code>brew install ada-url</code>.</p>
-<h1><a class="anchor" id="autotoc_md12"></a>
+<h1><a class="anchor" id="autotoc_md13"></a>
 Contributing</h1>
-<h2><a class="anchor" id="autotoc_md13"></a>
+<h2><a class="anchor" id="autotoc_md14"></a>
 Building</h2>
 <p>Ada uses cmake as a build system. It's recommended you to run the following commands to build it locally.</p>
 <ul>
@@ -261,10 +261,10 @@ Building</h2>
 <p>Windows users need additional flags to specify the build configuration, e.g. <code>--config Release</code>.</p>
 <p>The project can also be built via docker using default docker file of repository with following commands.</p>
 <p><code>docker build -t ada-builder . &amp;&amp; docker run --rm -it -v ${PWD}:/repo ada-builder</code></p>
-<h2><a class="anchor" id="autotoc_md14"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 Amalgamation</h2>
 <p>You may amalgamate all source files into only two files (<code><a class="el" href="d0/da8/ada_8h.html" title="Includes all definitions for Ada.">ada.h</a></code> and <code><a class="el" href="d8/d50/ada_8cpp.html">ada.cpp</a></code>) by typing executing the Python 3 script <code>singleheader/amalgamate.py</code>. By default, the files are created in the <code>singleheader</code> directory.</p>
-<h2><a class="anchor" id="autotoc_md15"></a>
+<h2><a class="anchor" id="autotoc_md16"></a>
 License</h2>
 <p>This code is made available under the Apache License 2.0 as well as the MIT license.</p>
 <p>Our tests include third-party code and data. The benchmarking code includes third-party code: it is provided for research purposes only and not part of the library. </p>
