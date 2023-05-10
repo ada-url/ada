@@ -85,14 +85,9 @@ static void BasicBench_AdaURL(benchmark::State& state) {
 
 auto BasicBench_AdaURL_href = BasicBench_AdaURL<PARSE_AND_HREF, ada::url>;
 BENCHMARK(BasicBench_AdaURL_href);
-auto BasicBench_AdaURL_just_parse = BasicBench_AdaURL<JUST_PARSE, ada::url>;
-BENCHMARK(BasicBench_AdaURL_just_parse);
 auto BasicBench_AdaURL_aggregator_href =
     BasicBench_AdaURL<PARSE_AND_HREF, ada::url_aggregator>;
 BENCHMARK(BasicBench_AdaURL_aggregator_href);
-auto BasicBench_AdaURL_aggregator_just_parse =
-    BasicBench_AdaURL<JUST_PARSE, ada::url_aggregator>;
-BENCHMARK(BasicBench_AdaURL_aggregator_just_parse);
 
 #if ADA_url_whatwg_ENABLED
 size_t count_whatwg_invalid() {
