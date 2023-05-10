@@ -30,7 +30,7 @@ adaparse "h^tp:ws:/www.g00g.com"
 Output: 
 
 ```
-Invalid URL: h^tp:ws:/www.g00g.com
+Invalid URL:  h^tp:ws:/www.g00g.com
 ```
 
 
@@ -64,7 +64,7 @@ Given a list of URLs, one by line, we may query the normalized URL string (`href
 and detect any malformed URL:
 
 ```bash
-cat dragonball_url.txt | adaparse -get href
+cat dragonball_url.txt | adaparse --get href
 ```
 
 Output:
@@ -102,19 +102,19 @@ cat wikipedia_100k.txt | adaparse -b
 ```
 
 ```bash
-Invalid URL:1968:_Die_Kinder_der_Diktatur
-Invalid URL:58957:_The_Bluegrass_Guitar_Collection
-Invalid URL:650luc:_Gangsta_Grillz
-Invalid URL:Q4%3A57
-Invalid URL:Q10%3A47
-Invalid URL:Q5%3A45
-Invalid URL:Q40%3A28
-Invalid URL:1:1_scale
-Invalid URL:1893:_A_World's_Fair_Mystery
-Invalid URL:12:51_(Krissy_%26_Ericka_song)
-Invalid URL:111:_A_Nelson_Number
-Invalid URL:7:00AM-8%3A00AM_(24_season_5)
-Invalid URL:Q53%3A31
+Invalid URL: 1968:_Die_Kinder_der_Diktatur
+Invalid URL: 58957:_The_Bluegrass_Guitar_Collection
+Invalid URL: 650luc:_Gangsta_Grillz
+Invalid URL: Q4%3A57
+Invalid URL: Q10%3A47
+Invalid URL: Q5%3A45
+Invalid URL: Q40%3A28
+Invalid URL: 1:1_scale
+Invalid URL: 1893:_A_World's_Fair_Mystery
+Invalid URL: 12:51_(Krissy_%26_Ericka_song)
+Invalid URL: 111:_A_Nelson_Number
+Invalid URL: 7:00AM-8%3A00AM_(24_season_5)
+Invalid URL: Q53%3A31
 read 5209265 bytes in 32819917 ns using 100000 lines, used 160 loads
 0.1587226744053009 GB/s
 ```
@@ -164,14 +164,14 @@ en.wikipedia.org
 
 Our `adaparse` tool may outperform other popular alternatives. We offer a [collection of
 sets of URLs](https://github.com/ada-url/url-various-datasets) for benchmarking purposes.
-The following results are on a macBook Air 2022 (M2 processor) using LLVM 14. We
-compare against trurl version 0.6 (libcurl/7.87.0).
+The following results are on a MacBook Air 2022 (M2 processor) using LLVM 14. We
+compare against [trurl](https://github.com/curl/trurl) version 0.6 (libcurl/7.87.0).
 
-
-On the wikipedia_100k dataset, we get that adaparse can generate normalized URLs about three
-times faster than trurl:
-
-```
+```html
+<details><summary>Toggle me!
+With the wikipedia_100k dataset, we get that adaparse can generate normalized URLs about three
+times faster than trurl.</summary>
+<pre>
 $ time cat url-various-datasets/wikipedia/wikipedia_100k.txt| trurl --url-file - &> /dev/null   1
 cat url-various-datasets/wikipedia/wikipedia_100k.txt  0,00s user 0,01s system 3% cpu 0,179 total
 trurl --url-file - &> /dev/null  0,14s user 0,03s system 98% cpu 0,180 total
@@ -180,11 +180,13 @@ trurl --url-file - &> /dev/null  0,14s user 0,03s system 98% cpu 0,180 total
 $ time cat url-various-datasets/wikipedia/wikipedia_100k.txt| ./build/tools/cli/adaparse -g href &> /dev/null
 cat url-various-datasets/wikipedia/wikipedia_100k.txt  0,00s user 0,00s system 10% cpu 0,056 total
 ./build/tools/cli/adaparse -g href &> /dev/null  0,05s user 0,00s system 93% cpu 0,055 total
-````
-
-On the top100 dataset, the adaparse tool is twice as fast as the trurl:
-
+</pre>
+</details>
 ```
+
+```html
+<details><summary>With the top100 dataset, the adaparse tool is twice as fast as the trurl.</summary>
+<pre>
 $ time cat url-various-datasets/top100/top100.txt| trurl --url-file - &> /dev/null              1
 cat url-various-datasets/top100/top100.txt  0,00s user 0,00s system 4% cpu 0,115 total
 trurl --url-file - &> /dev/null  0,09s user 0,02s system 97% cpu 0,113 total
@@ -192,6 +194,25 @@ trurl --url-file - &> /dev/null  0,09s user 0,02s system 97% cpu 0,113 total
 $ time cat url-various-datasets/top100/top100.txt| ./build/tools/cli/adaparse -g href &> /dev/null
 cat url-various-datasets/top100/top100.txt  0,00s user 0,01s system 11% cpu 0,062 total
 ./build/tools/cli/adaparse -g href &> /dev/null  0,05s user 0,00s system 94% cpu 0,061 total
+</pre>
+</details>
 ```
 
+
 The results will vary depending on your system. We invite you to run your own benchmarks.
+
+```mermaid
+gantt
+    title Processing time (ms)
+    dateFormat  X
+    axisFormat %s
+
+    section ada
+    wikipedia_100k.txt   : 0, 55
+    section ada
+    top100   : 0, 61
+    section trurl
+    wikipedia_100k.txt   : 0, 180
+    section trurl
+    top100    : 0, 113
+```
