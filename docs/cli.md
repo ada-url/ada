@@ -167,7 +167,6 @@ sets of URLs](https://github.com/ada-url/url-various-datasets) for benchmarking 
 The following results are on a MacBook Air 2022 (M2 processor) using LLVM 14. We
 compare against [trurl](https://github.com/curl/trurl) version 0.6 (libcurl/7.87.0).
 
-```html
 <details><summary>Toggle me!
 With the wikipedia_100k dataset, we get that adaparse can generate normalized URLs about three
 times faster than trurl.</summary>
@@ -182,9 +181,7 @@ cat url-various-datasets/wikipedia/wikipedia_100k.txt  0,00s user 0,00s system 1
 ./build/tools/cli/adaparse -g href &> /dev/null  0,05s user 0,00s system 93% cpu 0,055 total
 </pre>
 </details>
-```
 
-```html
 <details><summary>With the top100 dataset, the adaparse tool is twice as fast as the trurl.</summary>
 <pre>
 $ time cat url-various-datasets/top100/top100.txt| trurl --url-file - &> /dev/null              1
@@ -196,7 +193,7 @@ cat url-various-datasets/top100/top100.txt  0,00s user 0,01s system 11% cpu 0,06
 ./build/tools/cli/adaparse -g href &> /dev/null  0,05s user 0,00s system 94% cpu 0,061 total
 </pre>
 </details>
-```
+
 
 
 The results will vary depending on your system. We invite you to run your own benchmarks.
