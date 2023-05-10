@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
   bool has_result = result.count("output");
 
   auto adaparse_print = [has_result, &out](const std::string& format_str,
-                                        auto&&... args) {
+                                           auto&&... args) {
     std::string formatted_str =
         fmt::format(format_str, std::forward<decltype(args)>(args)...);
     if (has_result) {
