@@ -123,7 +123,7 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
 
       ada::result<ada::url_aggregator> url = ada::parse(line);
       if (!url) {
-        fmt::print(stderr, "Error opening file: {}\n", strerror(err)); shit
+        adaparse_print("Invalid URL:{}\n", line);
       } else if (!get_part.empty()) {
         print_part(adaparse_print, get_part, url.value());
       }
