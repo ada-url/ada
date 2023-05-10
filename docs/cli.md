@@ -167,7 +167,7 @@ sets of URLs](https://github.com/ada-url/url-various-datasets) for benchmarking 
 The following results are on a MacBook Air 2022 (M2 processor) using LLVM 14. We
 compare against [trurl](https://github.com/curl/trurl) version 0.6 (libcurl/7.87.0).
 
-<details><summary>Toggle me!
+<details><summary>
 With the wikipedia_100k dataset, we get that adaparse can generate normalized URLs about three
 times faster than trurl.</summary>
 <pre>
