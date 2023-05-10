@@ -30,7 +30,7 @@ gantt
     dateFormat  X
     axisFormat %s
 
-    section ada (url-aggregator)
+    section ada
     188   : 0, 188
     section servo url
     664   : 0, 664
