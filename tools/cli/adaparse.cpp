@@ -145,7 +145,7 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
 
     double seconds = (after - before) / 1000000000.;
     double speed = giga / seconds;
-    fmt::print("{} GB/s", speed);
+    fmt::print("{} GB/s\n", speed);
   }
 
   return EXIT_SUCCESS;
