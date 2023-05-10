@@ -89,7 +89,6 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
   size_t bytes_read_this_loop_iteration;
   size_t offset = 0;
   size_t lines = 0;
-  size_t sum_of_lines_bytes = 0;
   size_t blocks = 0;
 
   std::string get_part;
