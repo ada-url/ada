@@ -25,21 +25,22 @@
 var NAVTREE =
 [
   [ "Ada", "index.html", [
-    [ "Requirements", "index.html#autotoc_md1", null ],
-    [ "Usage", "index.html#autotoc_md2", [
-      [ "Parsing & Validation", "index.html#autotoc_md3", null ],
-      [ "Examples", "index.html#autotoc_md4", null ],
-      [ "C wrapper", "index.html#autotoc_md5", null ],
-      [ "CMake dependency", "index.html#autotoc_md6", null ]
+    [ "Requirements", "index.html#autotoc_md4", null ],
+    [ "Usage", "index.html#autotoc_md5", [
+      [ "Parsing & Validation", "index.html#autotoc_md6", null ],
+      [ "Examples", "index.html#autotoc_md7", null ],
+      [ "C wrapper", "index.html#autotoc_md8", null ],
+      [ "CMake dependency", "index.html#autotoc_md9", null ]
     ] ],
-    [ "Installation", "index.html#autotoc_md7", [
-      [ "Homebrew", "index.html#autotoc_md8", null ]
+    [ "Installation", "index.html#autotoc_md10", [
+      [ "Homebrew", "index.html#autotoc_md11", null ]
     ] ],
-    [ "Contributing", "index.html#autotoc_md9", [
-      [ "Building", "index.html#autotoc_md10", null ],
-      [ "Amalgamation", "index.html#autotoc_md11", null ],
-      [ "License", "index.html#autotoc_md12", null ]
+    [ "Contributing", "index.html#autotoc_md12", [
+      [ "Building", "index.html#autotoc_md13", null ],
+      [ "Amalgamation", "index.html#autotoc_md14", null ],
+      [ "License", "index.html#autotoc_md15", null ]
     ] ],
+    [ "Command line options", "db/d8a/md_docs_cli.html", null ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
@@ -79,7 +80,7 @@ var NAVTREEINDEX =
 "annotated.html",
 "d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda96f4cb1c26cd9e6384d907f30d089c5a",
 "db/d2e/ada__idna_8cpp.html#a43afa026d0aeb1a48e7ed8e2ca90d387",
-"dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5839c72e828b49749aa4a8f390a8d097"
+"dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5662080872eece1e1ceeec5750198283"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
