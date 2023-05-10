@@ -105,8 +105,9 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
 #endif
 
 #ifdef _MSC_VER
-  while ((bytes_read_this_loop_iteration = _read(
-              input_fd, cachebuffer.get() + offset, (unsigned int)(cache_length - offset)))) {
+  while ((bytes_read_this_loop_iteration =
+              _read(input_fd, cachebuffer.get() + offset,
+                    (unsigned int)(cache_length - offset)))) {
 #else
   while ((bytes_read_this_loop_iteration = read(
               input_fd, cachebuffer.get() + offset, cache_length - offset))) {

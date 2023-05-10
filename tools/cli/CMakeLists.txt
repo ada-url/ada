@@ -10,7 +10,7 @@ add_dependency(fmt)
 target_link_libraries(adaparse PRIVATE cxxopts::cxxopts fmt::fmt)
 
 if(MSVC OR MINGW)
-  target_compile_definitions(adaparse PRIVATE _CRT_SECURE_NO_WARNINGS)
+  target_compile_definitions(adaparse PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
 install(
