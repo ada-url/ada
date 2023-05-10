@@ -22,7 +22,10 @@ bool print_part(Callable&& fmt_or_adaparse_print, std::string_view get_part,
                 const ada::url_aggregator& url) {
   if (get_part.size() == 4) {
     if (get_part[0] == 'h') {
-      if (get_part == "host") {
+      if (get_part == "href") {
+        fmt_or_adaparse_print("{}\n", url.get_href());
+        return true;
+      } else if (get_part == "host") {
         fmt_or_adaparse_print("{}\n", url.get_host());
         return true;
       } else if (get_part == "hash") {
@@ -90,7 +93,6 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
   size_t offset = 0;
   size_t lines = 0;
   size_t blocks = 0;
-
   std::string get_part;
   if (result.count("get")) {
     get_part = result["get"].as<std::string>();
@@ -121,15 +123,9 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
 
       ada::result<ada::url_aggregator> url = ada::parse(line);
       if (!url) {
-        adaparse_print("Invalid URL:{}\n", line);
-
-      } else if (result.count("get")) {
-        std::string get_part = result["get"].as<std::string>();
+        fmt::print(stderr, "Error opening file: {}\n", strerror(err)); shit
+      } else if (!get_part.empty()) {
         print_part(adaparse_print, get_part, url.value());
-      }
-
-      else {
-        adaparse_print("{}\n", url->get_href());
       }
 
       lines++;
@@ -140,6 +136,15 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
   }
   if (offset > 0) {
     // have a line of length offset at cachebuffer.get()
+    std::string_view line(cachebuffer.get(), offset);
+
+    ada::result<ada::url_aggregator> url = ada::parse(line);
+    if (!url) {
+      adaparse_print("Invalid URL:{}\n", line);
+    } else if (!get_part.empty()) {
+      print_part(adaparse_print, get_part, url.value());
+    }
+
     lines++;
   }
 
@@ -227,12 +232,13 @@ int main(int argc, char** argv) {
       : output_filename = result["output"].as<std::string>();
 
   auto out = fmt::output_file(output_filename);
+  bool has_result = result.count("output");
 
-  auto adaparse_print = [&result, &out](const std::string& format_str,
+  auto adaparse_print = [has_result, &out](const std::string& format_str,
                                         auto&&... args) {
     std::string formatted_str =
         fmt::format(format_str, std::forward<decltype(args)>(args)...);
-    if (result.count("output")) {
+    if (has_result) {
       out.print(formatted_str);
     } else {
       fmt::print("{}", formatted_str);
