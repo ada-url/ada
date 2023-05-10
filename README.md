@@ -123,7 +123,7 @@ ada::result<ada::url_aggregator> url = ada::parse<ada::url_aggregator>("https://
 url->set_hash("is-this-the-real-life");
 // url->get_hash() will return "#is-this-the-real-life"
 ```
-
+For more information about command-line options, please refer to the [CLI documentation](docs/cli.md).
 ### C wrapper
 
 See the file `include/ada_c.h` for our C interface.
