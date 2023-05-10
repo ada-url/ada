@@ -15,6 +15,27 @@ The Ada library passes the full range of tests from the specification,
 across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
 supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
 
+
+Ada is fast. On a benchmark where we need to validate and normalize [thousands URLs found
+on popular websites](https://github.com/ada-url/url-various-datasets/tree/main/top100), 
+we find that ada can be several times faster than popular competitors (system: Apple MacBook 2022
+with LLVM 14).
+
+
+```mermaid
+gantt
+    title Processing time (ns/URL) on top100.txt
+    dateFormat  X
+    axisFormat %s
+
+    section ada (url-aggregator)
+    188   : 0, 188
+    section servo url
+    664   : 0, 664
+    section CURL
+    1471   : 0, 1471
+```
+
 ## Requirements
 
 - A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
