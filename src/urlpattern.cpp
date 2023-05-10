@@ -7,7 +7,7 @@ namespace ada {
 ada_really_inline bool is_valid_name_code_point(const char32_t& c,
                                                 bool is_first) noexcept {
   return is_first ? unicode::is_valid_identifier_start(c)
-                  : ada::unicode::is_valid_identifier_part(c);
+                  : unicode::is_valid_identifier_part(c);
 }
 
 ada_really_inline bool is_ascii(char32_t c) { return c < 0x80; }
@@ -65,7 +65,7 @@ ada_really_inline std::forward_list<TOKEN> tokenize(std::string_view input,
       case '\\': {
         if (index == input_size - 1) {
           error_or_invalid("should scape something", index, index);
-          index++;
+          ++index;
         }
 
         tokens.push_front({TOKEN_TYPE::ESCAPED_CHAR, ++index, index});

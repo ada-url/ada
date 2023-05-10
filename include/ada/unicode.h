@@ -202,7 +202,20 @@ ada_really_inline size_t percent_encode_index(const std::string_view input,
  */
 constexpr bool to_lower_ascii(char* input, size_t length) noexcept;
 
+/**
+ * Returns true if the Unicode code point is a valid JavaScript identifier part
+ * (IdentifierPart). A JavaScript IdentifierPart is either an UnicodeIDContinue,
+ * $, <ZWNJ>, <ZWJ> or an UnicodeEscapeSequence.
+ * @see https://tc39.es/ecma262/#prod-IdentifierPart
+ */
 bool is_valid_identifier_part(const char32_t& c) noexcept;
+
+/**
+ * Returns true if the Unicode code point is a valid JavaScript identifier start
+ * (IdentifierStart). A JavaScript IdentifierStart is either an UnicodeIDStart,
+ * $, _ or an UnicodeEscapeSequence.
+ * @see https://tc39.es/ecma262/#prod-IdentifierStart
+ */
 bool is_valid_identifier_start(const char32_t& c) noexcept;
 
 }  // namespace ada::unicode
