@@ -55,7 +55,7 @@ components (path, host, and so forth).
 
 ### Parsing & Validation
 
-- Parse and validate a URL
+- Parse and validate a URL from an ASCII or UTF-8 string
 
 ```cpp
 ada::result<ada::url_aggregator> url = ada::parse<ada::url_aggregator>("https://www.google.com");
@@ -149,7 +149,7 @@ url->set_hash("is-this-the-real-life");
 For more information about command-line options, please refer to the [CLI documentation](docs/cli.md).
 ### C wrapper
 
-See the file `include/ada_c.h` for our C interface.
+See the file `include/ada_c.h` for our C interface. We expect ASCII or UTF-8 strings.
 
 ```C
 #include "ada_c.h"
