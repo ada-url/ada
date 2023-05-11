@@ -1,6 +1,6 @@
 ## adaparse
 
-The adaparse command tool takes URL strings from valid UTF-8 and it can validate, normalize or query them efficiently.
+The adaparse command tool takes URL strings (ASCII/UTF-8) and it validates, normalizes and queries them efficiently.
 
 ### Command line options
 
