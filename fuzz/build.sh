@@ -3,7 +3,7 @@
 cd $SRC/ada-url
 
 cmake -B build
-cmake --build build -j$(nproc)
+cmake --build build -j$(nproc) --target singleheader-files
 
 $CXX $CFLAGS $CXXFLAGS \
      -std=c++17 \
