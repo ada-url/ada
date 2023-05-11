@@ -37,7 +37,7 @@ Invalid URL:  h^tp:ws:/www.g00g.com
 Diagram flag:
 
 ```bash
- $ adaparse -d http://www.google.com/bal\?a\=\=11\#fddfds
+adaparse -d http://www.google.com/bal\?a\=\=11\#fddfds
  ```
 
 Output:
@@ -135,7 +135,7 @@ adaparse -p wikipedia_top_100_txt
 You may also combine different flags together. E.g. Say one wishes to extract only the host from URLs stored in wikipedia.txt and output it to the test_write.txt file:
 
 ```bash
-/build/tools/adaparse" -p wikipedia_top100.txt -o test_write.txt -g host -b
+adaparse" -p wikipedia_top100.txt -o test_write.txt -g host -b
 ```
 
 Console output:
@@ -171,12 +171,12 @@ compare against [trurl](https://github.com/curl/trurl) version 0.6 (libcurl/7.87
 With the wikipedia_100k dataset, we get that adaparse can generate normalized URLs about three
 times faster than trurl.</summary>
 <pre>
-$ time cat url-various-datasets/wikipedia/wikipedia_100k.txt| trurl --url-file - &> /dev/null   1
+time cat url-various-datasets/wikipedia/wikipedia_100k.txt| trurl --url-file - &> /dev/null   1
 cat url-various-datasets/wikipedia/wikipedia_100k.txt  0,00s user 0,01s system 3% cpu 0,179 total
 trurl --url-file - &> /dev/null  0,14s user 0,03s system 98% cpu 0,180 total
 
 
-$ time cat url-various-datasets/wikipedia/wikipedia_100k.txt| ./build/tools/cli/adaparse -g href &> /dev/null
+time cat url-various-datasets/wikipedia/wikipedia_100k.txt| ./build/tools/cli/adaparse -g href &> /dev/null
 cat url-various-datasets/wikipedia/wikipedia_100k.txt  0,00s user 0,00s system 10% cpu 0,056 total
 ./build/tools/cli/adaparse -g href &> /dev/null  0,05s user 0,00s system 93% cpu 0,055 total
 </pre>
@@ -184,11 +184,11 @@ cat url-various-datasets/wikipedia/wikipedia_100k.txt  0,00s user 0,00s system 1
 
 <details><summary>With the top100 dataset, the adaparse tool is twice as fast as the trurl.</summary>
 <pre>
-$ time cat url-various-datasets/top100/top100.txt| trurl --url-file - &> /dev/null              1
+time cat url-various-datasets/top100/top100.txt| trurl --url-file - &> /dev/null              1
 cat url-various-datasets/top100/top100.txt  0,00s user 0,00s system 4% cpu 0,115 total
 trurl --url-file - &> /dev/null  0,09s user 0,02s system 97% cpu 0,113 total
 
-$ time cat url-various-datasets/top100/top100.txt| ./build/tools/cli/adaparse -g href &> /dev/null
+time cat url-various-datasets/top100/top100.txt| ./build/tools/cli/adaparse -g href &> /dev/null
 cat url-various-datasets/top100/top100.txt  0,00s user 0,01s system 11% cpu 0,062 total
 ./build/tools/cli/adaparse -g href &> /dev/null  0,05s user 0,00s system 94% cpu 0,061 total
 </pre>
