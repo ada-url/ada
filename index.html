@@ -137,7 +137,7 @@ Usage</h1>
 <h2><a class="anchor" id="autotoc_md9"></a>
 Parsing &amp; Validation</h2>
 <ul>
-<li>Parse and validate a URL</li>
+<li>Parse and validate a URL from an ASCII or UTF-8 string</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code hl_typedef" href="dd/d64/namespaceada.html#a7f8335195119f1a7f35d14c06558748b">ada::result&lt;ada::url_aggregator&gt;</a> url = ada::parse&lt;ada::url_aggregator&gt;(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line"><span class="keywordflow">if</span> (url) { <span class="comment">/* URL is valid */</span> }</div>
@@ -204,7 +204,7 @@ Examples</h2>
 </div><!-- fragment --><p> For more information about command-line options, please refer to the <a class="el" href="db/d8a/md_docs_cli.html">CLI documentation</a>. </p>
 <h2><a class="anchor" id="autotoc_md11"></a>
 C wrapper</h2>
-<p>See the file <code><a class="el" href="df/d61/ada__c_8h.html" title="Includes the C definitions for Ada. This is a C file, not C++.">include/ada_c.h</a></code> for our C interface.</p>
+<p>See the file <code><a class="el" href="df/d61/ada__c_8h.html" title="Includes the C definitions for Ada. This is a C file, not C++.">include/ada_c.h</a></code> for our C interface. We expect ASCII or UTF-8 strings.</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="df/d61/ada__c_8h.html">ada_c.h</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
