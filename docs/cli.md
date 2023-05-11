@@ -1,3 +1,7 @@
+## adaparse
+
+The adaparse command tool takes URL strings from valid UTF-8 and it can validate, normalize or query them efficiently.
+
 ### Command line options
 
 - Options:
@@ -58,10 +62,7 @@ Output:
 
 ### Piping Example
 
-Ada can process URLs from piped input, making it easy to integrate with other command-line tools. Here's an example of how to pipe the output of another command into Ada.
-
-Given a list of URLs, one by line, we may query the normalized URL string (`href`)
-and detect any malformed URL:
+Ada can process URLs from piped input, making it easy to integrate with other command-line tools that produce ASCII or UTF-8 outputs. Here's an example of how to pipe the output of another command into Ada. Given a list of URLs, one by line, we may query the normalized URL string (`href`) and detect any malformed URL:
 
 ```bash
 cat dragonball_url.txt | adaparse --get href
