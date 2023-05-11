@@ -1,10 +1,16 @@
+#include <_ctype.h>
 #include "ada/unicode.h"
 #include "ada/urlpattern.h"
-#include <forward_list>
+
+#include <vector>
+#include <string_view>
+#include <type_traits>
+#include <typeinfo>
+#include <cassert>
 
 namespace ada {
 
-ada_really_inline bool is_valid_name_code_point(const char32_t& c,
+ada_really_inline bool is_valid_name_code_point(const char32_t &c,
                                                 bool is_first) noexcept {
   return is_first ? unicode::is_valid_identifier_start(c)
                   : unicode::is_valid_identifier_part(c);
@@ -33,10 +39,10 @@ struct TOKEN {
   size_t end;
 };
 
-ada_really_inline std::forward_list<TOKEN> tokenize(std::string_view input,
-                                                    POLICY policy) {
+ada_really_inline std::vector<TOKEN> tokenize(std::string_view input,
+                                              POLICY policy) {
   // Need to deal with Unicode points, so convert to std::u32string_view
-  std::forward_list<TOKEN> tokens{};
+  std::vector<TOKEN> tokens{};
   size_t input_size = input.size();
 
   // TODO: convert input to utf32
@@ -45,20 +51,20 @@ ada_really_inline std::forward_list<TOKEN> tokenize(std::string_view input,
     if (policy != POLICY::LENIENT) {
       throw std::invalid_argument(std::string(msg));
     }
-    tokens.push_front({TOKEN_TYPE::INVALID_CHAR, start, end});
+    tokens.push_back({TOKEN_TYPE::INVALID_CHAR, start, end});
   };
 
   size_t index = 0;
   while (index < input_size) {
     switch (input[index]) {
       case '*': {
-        tokens.push_front({TOKEN_TYPE::ASTERISK, index, index});
+        tokens.push_back({TOKEN_TYPE::ASTERISK, index, index});
         ++index;
         break;
       }
       case '+':
       case '?': {
-        tokens.push_front({TOKEN_TYPE::OTHER_MODIFIER, index, index});
+        tokens.push_back({TOKEN_TYPE::OTHER_MODIFIER, index, index});
         ++index;
         break;
       }
@@ -68,16 +74,16 @@ ada_really_inline std::forward_list<TOKEN> tokenize(std::string_view input,
           ++index;
         }
 
-        tokens.push_front({TOKEN_TYPE::ESCAPED_CHAR, ++index, index});
+        tokens.push_back({TOKEN_TYPE::ESCAPED_CHAR, ++index, index});
         break;
       }
       case '{': {
-        tokens.push_front({TOKEN_TYPE::OPEN, index, index});
+        tokens.push_back({TOKEN_TYPE::OPEN, index, index});
         ++index;
         break;
       }
       case '}': {
-        tokens.push_front({TOKEN_TYPE::CLOSE, index, index});
+        tokens.push_back({TOKEN_TYPE::CLOSE, index, index});
         ++index;
         break;
       }
@@ -102,7 +108,7 @@ ada_really_inline std::forward_list<TOKEN> tokenize(std::string_view input,
           continue;
         }
 
-        tokens.push_front({TOKEN_TYPE::NAME, start, end});
+        tokens.push_back({TOKEN_TYPE::NAME, start, end});
 
         index = end;
         break;
@@ -185,17 +191,42 @@ ada_really_inline std::forward_list<TOKEN> tokenize(std::string_view input,
             error_or_invalid("malformed regex", regexp, regexp);
           }
 
-          tokens.push_front({TOKEN_TYPE::REGEXP, regexp_start, regexp});
+          tokens.push_back({TOKEN_TYPE::REGEXP, regexp_start, regexp});
           index = regexp;
         }
       }
     }
 
-    tokens.push_front({TOKEN_TYPE::CHAR, index, index});
+    tokens.push_back({TOKEN_TYPE::CHAR, index, index});
   }
 
-  tokens.push_front({TOKEN_TYPE::END, index, index});
+  tokens.push_back({TOKEN_TYPE::END, index, index});
   return tokens;
 }
+
+// https://wicg.github.io/urlpattern/#constructor-string-parser
+ada_really_inline urlpattern_init string_parser(std::string_view input) {
+  // A constructor string parser has an associated token list, a token list,
+  // which must be set upon creation.
+  std::vector<TOKEN> token_list = tokenize(input, POLICY::LENIENT);
+  urlpattern_init result{};
+
+  size_t index = 0;
+  while(index < token_list.size()) {
+  
+  }
+
+  return result;
+}
+
+// The new URLPattern(input, baseURL, options) constructor steps are:
+// Run initialize given this, input, baseURL, and options.
+urlpattern::urlpattern(std::string_view input,
+                       std::optional<std::string_view> base_url,
+                       std::optional<urlpattern_options> &options) {}
+
+urlpattern<std::string_view>::urlpattern<>(
+    const std::string_view &input, const std::string_view base_url,
+    const std::optional<urlpattern_options> &options) {}
 
 }  // namespace ada

@@ -241,7 +241,7 @@ static_assert(unicode::is_alnum_plus('b'));
 
 // https://tc39.es/ecma262/#prod-IdentifierStart
 // up to the extented ascii, with the regex /[$_\p{ID_Start}]/u
-constexpr static bool valid_identifier_start_table[] = {
+constexpr static bool valid_id_start_table_ascii[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
@@ -254,7 +254,7 @@ constexpr static bool valid_identifier_start_table[] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1};
 
-static_assert(sizeof(valid_identifier_start_table) == 256);
+static_assert(sizeof(valid_id_start_table_ascii) == 256);
 
 // Valid IdentifierStart unicods points 256+
 // ranges obtained with the regex /[$_\p{ID_Start}]/u
@@ -2427,12 +2427,8 @@ static std::bitset<0x10FFFF> valid_id_start_mask_unicode =
 
 // https://wicg.github.io/urlpattern/#is-a-valid-name-code-point
 ada_really_inline bool is_valid_identifier_start(const char32_t& c) noexcept {
-  if (c < 256) {
-    // extended ascii fast path
-    return valid_identifier_start_table[c];
-  }
-  // 256+
-  return valid_id_start_mask_unicode[c];
+  return c < 256 ? /* extended ascii fast path */ valid_id_start_table_ascii[c]
+                 : valid_id_start_mask_unicode[c];
 }
 
 // Valid IdentifierPart unicods points 256+
@@ -4903,12 +4899,8 @@ static_assert(sizeof(valid_id_part_table_ascii) == 256);
 
 // https://wicg.github.io/urlpattern/#is-a-valid-name-code-point
 ada_really_inline bool is_valid_identifier_part(const char32_t& c) noexcept {
-  if (c < 256) {
-    // extended ascii fast path
-    return valid_id_part_table_ascii[c];
-  }
-  // 256+
-  return valid_id_part_mask_unicode[c];
+  return c < 256 ? /* extended ascii fast-path*/ valid_id_part_table_ascii[c]
+                 : valid_id_part_mask_unicode[c];
 }
 
 ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {

@@ -34,13 +34,7 @@ struct urlpattern_init {
   std::string_view base_url;
 };
 
-union input_union {
-  urlpattern_init init;
-  std::string_view str;
-};
-
-typedef input_union urlpattern_input;
-
+template <typename urlpattern_input>
 struct urlpattern_result {
   urlpattern_component_result protocol;
   urlpattern_component_result username;
@@ -54,18 +48,12 @@ struct urlpattern_result {
 };
 
 struct urlpattern {
-  urlpattern(urlpattern_input &input, std::string_view base_url,
+  // TODO: improve DX.. maybe create one constructor for each case and
+  // make them call the right/following constructors 'under the hood'
+  urlpattern(std::string_view input, std::optional<std::string_view> base_url,
              std::optional<urlpattern_options> &options);
-
-  urlpattern(std::optional<urlpattern_input> &input,
+  urlpattern(urlpattern_init &input,
              std::optional<urlpattern_options> &options);
-
-  bool test(std::optional<urlpattern_input> &input,
-            std::optional<std::string_view> base_url);
-
-  std::optional<urlpattern_result> exec(
-      std::optional<urlpattern_input> input,
-      std::optional<std::string_view> base_url);
 
   const std::string_view protocol;
   const std::string_view username;
