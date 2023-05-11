@@ -38,7 +38,7 @@ typedef struct {
 
 typedef void* ada_url;
 
-// input should be a null terminated C string
+// input should be a null terminated C string (ASCII or UTF-8)
 // you must call ada_free on the returned pointer
 ada_url ada_parse(const char* input, size_t length);
 ada_url ada_parse_with_base(const char* input, size_t input_length,
