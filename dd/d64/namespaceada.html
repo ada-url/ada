@@ -404,7 +404,7 @@ template&lt;class result_type  = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-canparse">https://url.spec.whatwg.org/#dom-url-canparse</a> </dd></dl>
+<p>Verifies whether the URL strings can be parsed. The function assumes that the inputs are valid ASCII or UTF-8 strings. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-canparse">https://url.spec.whatwg.org/#dom-url-canparse</a> </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>If URL can be parsed or not. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00049">49</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
@@ -430,7 +430,7 @@ template&lt;class result_type  = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Computes a href string from a file path. </p><dl class="section return"><dt>Returns</dt><dd>a href string (starts with <a href="file:://">file:://</a>) </dd></dl>
+<p>Computes a href string from a file path. The function assumes that the input is a valid ASCII or UTF-8 string. </p><dl class="section return"><dt>Returns</dt><dd>a href string (starts with <a href="file:://">file:://</a>) </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00026">26</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
@@ -545,11 +545,11 @@ template&lt;class result_type &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The URL parser takes a scalar value string input, with an optional null or base URL base (default null). The parser assumes the input has an UTF-8 encoding.</p>
+<p>The URL parser takes a scalar value string input, with an optional null or base URL base (default null). The parser assumes the input is a valid ASCII or UTF-8 string.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input</td><td>the string input to analyze. </td></tr>
-    <tr><td class="paramname">base_url</td><td>the optional string input to use as a base url. </td></tr>
+    <tr><td class="paramname">input</td><td>the string input to analyze (must be valid ASCII or UTF-8) </td></tr>
+    <tr><td class="paramname">base_url</td><td>the optional URL input to use as a base url. </td></tr>
   </table>
   </dd>
 </dl>
@@ -588,11 +588,11 @@ template&lt;class result_type  = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The URL parser takes a scalar value string input, with an optional null or base URL base (default null). The parser assumes the input has an UTF-8 encoding.</p>
+<p>The URL parser takes a scalar value string input, with an optional null or base URL base (default null). The parser assumes the input is a valid ASCII or UTF-8 string.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">input</td><td>the string input to analyze. </td></tr>
-    <tr><td class="paramname">base_url</td><td>the optional string input to use as a base url. </td></tr>
+    <tr><td class="paramname">input</td><td>the string input to analyze (must be valid ASCII or UTF-8) </td></tr>
+    <tr><td class="paramname">base_url</td><td>the optional URL input to use as a base url. </td></tr>
   </table>
   </dd>
 </dl>
