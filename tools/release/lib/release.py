@@ -13,7 +13,7 @@ def is_valid_tag(tag: str) -> bool:
 
 
 def create_release(
-    repository: Repository, tag: str, notes: str
+        repository: Repository, tag: str, notes: str
 ) -> Union[None, Type[Exception]]:
     if not is_valid_tag(tag):
         raise Exception(f"Invalid tag: {tag}")
@@ -29,9 +29,7 @@ def create_release(
         ) from exp
 
 
-def get_sorted_merged_pulls(
-    pulls: List[PullRequest], last_release: Optional[GitRelease]
-) -> List[PullRequest]:
+def get_sorted_merged_pulls(pulls: List[PullRequest], last_release: Optional[GitRelease]) -> List[PullRequest]:
     # Get merged pulls after last release
     if not last_release:
         return sorted(
@@ -39,6 +37,7 @@ def get_sorted_merged_pulls(
                 pull
                 for pull in pulls
                 if pull.merged
+                   and pull.base.ref == "main"
                    and not pull.title.startswith("chore: release")
                    and not pull.user.login.startswith("github-actions")
             ),
@@ -50,6 +49,7 @@ def get_sorted_merged_pulls(
             pull
             for pull in pulls
             if pull.merged
+               and pull.base.ref == "main"
                and (pull.merged_at > last_release.created_at)
                and not pull.title.startswith("chore: release")
                and not pull.user.login.startswith("github-actions")
@@ -73,7 +73,7 @@ def get_pr_contributors(pull_request: PullRequest) -> List[str]:
 
 
 def get_old_contributors(
-    pulls: List[PullRequest], last_release: Optional[GitRelease]
+        pulls: List[PullRequest], last_release: Optional[GitRelease]
 ) -> Set[str]:
     contributors = set()
     if last_release:
@@ -92,7 +92,7 @@ def get_old_contributors(
 
 
 def get_new_contributors(
-    old_contributors: List[str], merged_pulls: List[PullRequest]
+        old_contributors: List[str], merged_pulls: List[PullRequest]
 ) -> List[str]:
     new_contributors = set()
     for pull in merged_pulls:
@@ -125,9 +125,9 @@ def multiple_contributors_mention_md(contributors: List[str]) -> str:
         contrib_by = contrib_by[:-2]
         last_comma = contrib_by.rfind(", ")
         contrib_by = (
-            contrib_by[:last_comma].strip()
-            + " and "
-            + contrib_by[last_comma + 1:].strip()
+                contrib_by[:last_comma].strip()
+                + " and "
+                + contrib_by[last_comma + 1:].strip()
         )
     return contrib_by
 
@@ -146,7 +146,7 @@ def whats_changed_md(repo_full_name: str, merged_pulls: List[PullRequest]) -> Li
 
 
 def get_first_contribution(
-    merged_pulls: List[str], contributor: str
+        merged_pulls: List[str], contributor: str
 ) -> Optional[PullRequest]:
     for pull in merged_pulls:
         contrubutors = get_pr_contributors(pull)
@@ -158,7 +158,7 @@ def get_first_contribution(
 
 
 def new_contributors_md(
-    repo_full_name: str, merged_pulls: List[PullRequest], new_contributors: List[str]
+        repo_full_name: str, merged_pulls: List[PullRequest], new_contributors: List[str]
 ) -> List[str]:
     contributors_by_pr = {}
     contributors_md = []
@@ -186,7 +186,7 @@ def new_contributors_md(
 
 
 def full_changelog_md(
-    repository_name: str, last_tag_name: str, next_tag_name: str
+        repository_name: str, last_tag_name: str, next_tag_name: str
 ) -> Optional[str]:
     if not last_tag_name:
         return None
