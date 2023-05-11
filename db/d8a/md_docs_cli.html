@@ -224,19 +224,13 @@ cat url-various-datasets/top100/top100.txt  0,00s user 0,01s system 11% cpu 0,06
 ./build/tools/cli/adaparse -g href &amp;&gt; /dev/null  0,05s user 0,00s system 94% cpu 0,061 total
 </pre> </details>
 <p>The results will vary depending on your system. We invite you to run your own benchmarks.</p>
-<div class="fragment"><div class="line">gantt</div>
-<div class="line">    title Processing time (ms)</div>
-<div class="line">    dateFormat  X</div>
-<div class="line">    axisFormat %s</div>
+<div class="fragment"><div class="line">wikipedia 100k</div>
+<div class="line">  ada ▏   55 ms ███████▋</div>
+<div class="line">trurl ▏  180 ms █████████████████████████</div>
 <div class="line"> </div>
-<div class="line">    section ada</div>
-<div class="line">    wikipedia_100k.txt   : 0, 55</div>
-<div class="line">    section ada</div>
-<div class="line">    top100   : 0, 61</div>
-<div class="line">    section trurl</div>
-<div class="line">    wikipedia_100k.txt   : 0, 180</div>
-<div class="line">    section trurl</div>
-<div class="line">    top100    : 0, 113</div>
+<div class="line">top100</div>
+<div class="line">  ada ▏   61 ms █████████████▍</div>
+<div class="line">trurl ▏  113 ms █████████████████████████</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

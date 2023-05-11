@@ -114,17 +114,9 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <h1><a class="anchor" id="autotoc_md6"></a>
 Ada is fast.</h1>
 <p>On a benchmark where we need to validate and normalize <a href="https://github.com/ada-url/url-various-datasets/tree/main/top100">thousands URLs found on popular websites</a>, we find that ada can be several times faster than popular competitors (system: Apple MacBook 2022 with LLVM 14).</p>
-<div class="fragment"><div class="line">gantt</div>
-<div class="line">    title Processing time (ns/URL) on top100.txt</div>
-<div class="line">    dateFormat  X</div>
-<div class="line">    axisFormat %s</div>
-<div class="line"> </div>
-<div class="line">    section ada</div>
-<div class="line">    188   : 0, 188</div>
-<div class="line">    section servo url</div>
-<div class="line">    664   : 0, 664</div>
-<div class="line">    section CURL</div>
-<div class="line">    1471   : 0, 1471</div>
+<div class="fragment"><div class="line">      ada ▏  188 ns/URL ███▏</div>
+<div class="line">servo url ▏  664 ns/URL ███████████▎</div>
+<div class="line">     CURL ▏ 1471 ns/URL █████████████████████████</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md7"></a>
 Requirements</h1>
 <ul>
