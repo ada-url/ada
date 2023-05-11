@@ -199,18 +199,12 @@ cat url-various-datasets/top100/top100.txt  0,00s user 0,01s system 11% cpu 0,06
 
 The results will vary depending on your system. We invite you to run your own benchmarks.
 
-```mermaid
-gantt
-    title Processing time (ms)
-    dateFormat  X
-    axisFormat %s
+```
+wikipedia 100k
+  ada ▏   55 ms ███████▋
+trurl ▏  180 ms █████████████████████████
 
-    section ada
-    wikipedia_100k.txt   : 0, 55
-    section ada
-    top100   : 0, 61
-    section trurl
-    wikipedia_100k.txt   : 0, 180
-    section trurl
-    top100    : 0, 113
+top100
+  ada ▏   61 ms █████████████▍
+trurl ▏  113 ms █████████████████████████
 ```

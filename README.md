@@ -24,18 +24,10 @@ we find that ada can be several times faster than popular competitors (system: A
 with LLVM 14).
 
 
-```mermaid
-gantt
-    title Processing time (ns/URL) on top100.txt
-    dateFormat  X
-    axisFormat %s
-
-    section ada
-    188   : 0, 188
-    section servo url
-    664   : 0, 664
-    section CURL
-    1471   : 0, 1471
+```
+      ada ▏  188 ns/URL ███▏
+servo url ▏  664 ns/URL ███████████▎
+     CURL ▏ 1471 ns/URL █████████████████████████
 ```
 
 ## Requirements
