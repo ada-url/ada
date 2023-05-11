@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.6"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ada: Command line options</title>
+<title>Ada: adaparse</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -104,10 +104,13 @@ $(document).ready(function(){initNavTree('db/d8a/md_docs_cli.html','../../'); in
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Command line options </div></div>
+  <div class="headertitle"><div class="title">adaparse </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><ul>
+<div class="textblock"><p>The adaparse command tool takes URL strings from valid UTF-8 and it can validate, normalize or query them efficiently.</p>
+<h2><a class="anchor" id="autotoc_md1"></a>
+Command line options</h2>
+<ul>
 <li>Options:<ul>
 <li><code>-d</code>, <code>--diagram</code>: Print a diagram of the result</li>
 <li><code>-u</code>, <code>--url</code>: URL Parameter (required)</li>
@@ -119,7 +122,7 @@ $(document).ready(function(){initNavTree('db/d8a/md_docs_cli.html','../../'); in
 </ul>
 </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md1"></a>
+<h2><a class="anchor" id="autotoc_md2"></a>
 Usage/Examples:</h2>
 <p>Well-formatted URL:</p>
 <div class="fragment"><div class="line">adaparse &quot;http://www.google.com&quot;</div>
@@ -141,10 +144,9 @@ Usage/Examples:</h2>
 <div class="line">     | `------------------------------ host_start 7</div>
 <div class="line">     | `------------------------------ username_end 7</div>
 <div class="line">     `-------------------------------- protocol_end 5</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md2"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md3"></a>
 Piping Example</h2>
-<p>Ada can process URLs from piped input, making it easy to integrate with other command-line tools. Here's an example of how to pipe the output of another command into Ada.</p>
-<p>Given a list of URLs, one by line, we may query the normalized URL string (<code>href</code>) and detect any malformed URL:</p>
+<p>Ada can process URLs from piped input, making it easy to integrate with other command-line tools that produce ASCII or UTF-8 outputs. Here's an example of how to pipe the output of another command into Ada. Given a list of URLs, one by line, we may query the normalized URL string (<code>href</code>) and detect any malformed URL:</p>
 <div class="fragment"><div class="line">cat dragonball_url.txt | adaparse --get href</div>
 </div><!-- fragment --><p>Output: </p><div class="fragment"><div class="line">http://www.goku.com</div>
 <div class="line">http://www.vegeta.com</div>
@@ -192,7 +194,7 @@ Piping Example</h2>
 <div class="line">en.wikipedia.org</div>
 <div class="line">en.wikipedia.org</div>
 <div class="line">(---snip---)</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md3"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md4"></a>
 Performance</h2>
 <p>Our <code>adaparse</code> tool may outperform other popular alternatives. We offer a <a href="https://github.com/ada-url/url-various-datasets">collection of sets of URLs</a> for benchmarking purposes. The following results are on a MacBook Air 2022 (M2 processor) using LLVM 14. We compare against <a href="https://github.com/curl/trurl">trurl</a> version 0.6 (libcurl/7.87.0).</p>
 <details >
