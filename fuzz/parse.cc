@@ -7,8 +7,8 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   FuzzedDataProvider fdp(data, size);
-  std::string source = fdp.ConsumeRandomLengthString();
-  std::string base_source = fdp.ConsumeRandomLengthString();
+  std::string source = fdp.ConsumeRandomLengthString(256);
+  std::string base_source = fdp.ConsumeRandomLengthString(256);
 
   /**
    * ada::parse<ada::url>
@@ -16,7 +16,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   auto out_url = ada::parse<ada::url>(source);
 
   if (out_url) {
-    std::string input = fdp.ConsumeRandomLengthString();
+    std::string input = fdp.ConsumeRandomLengthString(256);
     out_url->set_protocol(input);
     out_url->set_username(input);
     out_url->set_password(input);
@@ -33,7 +33,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   auto out_aggregator = ada::parse<ada::url_aggregator>(source);
 
   if (out_aggregator) {
-    std::string input = fdp.ConsumeRandomLengthString();
+    std::string input = fdp.ConsumeRandomLengthString(256);
     out_aggregator->set_protocol(input);
     out_aggregator->set_username(input);
     out_aggregator->set_password(input);
