@@ -702,8 +702,11 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_host() const noexcept {
   ada_log("url_aggregator::get_host");
+  // Technically, we should check if there is a hostname, but
+  // the code below works even if there isn't.
+  // if(!has_hostname()) { return ""; }
   size_t start = components.host_start;
-  if (buffer.size() > components.host_start &&
+  if (components.host_end > components.host_start &&
       buffer[components.host_start] == '@') {
     start++;
   }
@@ -717,9 +720,12 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept {
   ada_log("url_aggregator::get_hostname");
+  // Technically, we should check if there is a hostname, but
+  // the code below works even if there isn't.
+  // if(!has_hostname()) { return ""; }
   size_t start = components.host_start;
   // So host_start is not where the host begins.
-  if (buffer.size() > components.host_start &&
+  if (components.host_end > components.host_start &&
       buffer[components.host_start] == '@') {
     start++;
   }
