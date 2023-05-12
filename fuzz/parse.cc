@@ -52,5 +52,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   ada::can_parse(source);
   ada::can_parse(source, &base_source_view);
 
+  /**
+   * ada::idna
+   */
+  ada::idna::to_ascii(source);
+  ada::idna::to_unicode(source);
+
   return 0;
 }  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
