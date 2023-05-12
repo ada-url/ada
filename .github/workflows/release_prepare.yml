@@ -12,15 +12,14 @@ env:
   NEXT_RELEASE_TAG: ${{ github.event.inputs.tag }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   release-script-test:
     uses: ./.github/workflows/release-script-tests.yml
 
   prepare-release-and-pull-request:
+    permissions:
+      contents: write
+      pull-requests: write
     needs: release-script-test
     runs-on: ubuntu-latest
     if: ${{ needs.release-script-test.result == 'success' }}

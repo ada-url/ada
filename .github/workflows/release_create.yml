@@ -4,9 +4,6 @@ on:
   pull_request:
     types: [closed]
 
-permissions:
-  contents: write
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -29,6 +26,8 @@ jobs:
     uses: ./.github/workflows/release-script-tests.yml
 
   create-release:
+    permissions:
+      contents: write
     needs: release-script-test
     runs-on: ubuntu-latest
     if: ${{ needs.release-script-test.result == 'success' }}
