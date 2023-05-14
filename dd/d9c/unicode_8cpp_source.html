@@ -168,7 +168,7 @@ $(document).ready(function(){initNavTree('dd/d9c/unicode_8cpp_source.html','../.
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                       vceqq_u8(word, mask3));</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  }</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keywordflow">if</span> (i &lt; user_input.size()) {</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    uint8_t buffer[16];</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    uint8_t buffer[16]{};</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    memcpy(buffer, user_input.data() + i, user_input.size() - i);</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    uint8x16_t word = vld1q_u8((<span class="keyword">const</span> uint8_t*)user_input.data() + i);</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    running = vorrq_u8(vorrq_u8(running, vorrq_u8(vceqq_u8(word, mask1),</div>
@@ -193,7 +193,7 @@ $(document).ready(function(){initNavTree('dd/d9c/unicode_8cpp_source.html','../.
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        _mm_cmpeq_epi8(word, mask3));</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  }</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="keywordflow">if</span> (i &lt; user_input.size()) {</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    uint8_t buffer[16];</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    uint8_t buffer[16]{};</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    memcpy(buffer, user_input.data() + i, user_input.size() - i);</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    __m128i word = _mm_loadu_si128((<span class="keyword">const</span> __m128i*)buffer);</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    running = _mm_or_si128(</div>
