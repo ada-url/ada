@@ -286,7 +286,9 @@ namespace ada {
   } while (0)
 #endif
 
-#if defined(__SSE2__) || defined(__x86_64__) || defined(__x86_64) || (defined(_M_AMD64) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP == 2))
+#if defined(__SSE2__) || defined(__x86_64__) || defined(__x86_64) || \
+    (defined(_M_AMD64) || defined(_M_X64) ||                         \
+     (defined(_M_IX86_FP) && _M_IX86_FP == 2))
 #define ADA_SSE2 1
 #endif
 
