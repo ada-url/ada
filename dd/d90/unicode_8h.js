@@ -3,7 +3,7 @@ var unicode_8h =
     [ "contains_forbidden_domain_code_point", "dd/d90/unicode_8h.html#a8e4d69a9364a662aa6b27afee0b33237", null ],
     [ "contains_forbidden_domain_code_point_or_upper", "dd/d90/unicode_8h.html#a88bff92c3994ebce3d56fab5dd0ad6bc", null ],
     [ "convert_hex_to_binary", "dd/d90/unicode_8h.html#ab69353b882a97069e4b290be2b1097f2", null ],
-    [ "has_tabs_or_newline", "dd/d90/unicode_8h.html#a8bb663e948c6b3a9793ddef424ba795e", null ],
+    [ "has_tabs_or_newline", "dd/d90/unicode_8h.html#ade8fed1cb2577dc6af5b9321a9fb3e00", null ],
     [ "is_alnum_plus", "dd/d90/unicode_8h.html#a34ca589b96e46ded7100f244fedd0c36", null ],
     [ "is_ascii_hex_digit", "dd/d90/unicode_8h.html#a155ee2ca17ce7bf9c57059d56dbf94da", null ],
     [ "is_ascii_tab_or_newline", "dd/d90/unicode_8h.html#a3e4e3fb4ee2ad78a184c9df98a8769cd", null ],
