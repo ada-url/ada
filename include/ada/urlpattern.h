@@ -13,7 +13,10 @@ namespace ada {
 ada_really_inline bool is_valid_name_code_point(const char32_t &c,
                                                 bool is_first) noexcept;
 
+// https://wicg.github.io/urlpattern/#options
 struct urlpattern_options {
+  std::string_view delimiter = "";
+  std::string_view prefix = "";
   bool ignore_case = false;
 };
 
