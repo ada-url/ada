@@ -285,4 +285,13 @@ namespace ada {
     if (!(COND)) __builtin_unreachable(); \
   } while (0)
 #endif
+
+#if defined(__SSE2__) || defined(__x86_64__) || defined(__x86_64) || (defined(_M_AMD64) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP == 2))
+#define ADA_SSE2 1
+#endif
+
+#if defined(__aarch64__) || defined(_M_ARM64)
+#define ADA_NEON 1
+#endif
+
 #endif  // ADA_COMMON_DEFS_H

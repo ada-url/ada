@@ -8,7 +8,9 @@ ADA_PUSH_DISABLE_ALL_WARNINGS
 ADA_POP_DISABLE_WARNINGS
 
 #include <algorithm>
-
+#if ADA_NEON
+#include <arm_neon.h>
+#endif
 namespace ada::unicode {
 
 constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
@@ -39,7 +41,27 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   }
   return non_ascii == 0;
 }
-
+#if ADA_NEON
+ada_really_inline bool has_tabs_or_newline(
+    std::string_view user_input) noexcept {
+  size_t i = 0;
+  uint8x16_t mask1 = vmovq_n_u8('\r');
+  uint8x16_t mask2 = vmovq_n_u8('\n');
+  uint8x16_t mask3 = vmovq_n_u8('\t');
+  uint8x16_t running{0};
+  for (; i + 15 < user_input.size(); i += 16) {
+    uint8x16_t word = vld1q_u8((const uint8_t*)user_input.data() + i);
+    running = vorrq_u8(vorrq_u8(running, vorrq_u8(vceqq_u8(word, mask1),vceqq_u8(word, mask2))), vceqq_u8(word, mask3));
+  }
+  if (i < user_input.size()) {
+    uint8_t buffer[16];
+    memcpy(buffer, user_input.data() + i, user_input.size() - i);
+    uint8x16_t word = vld1q_u8((const uint8_t*)user_input.data() + i);
+    running = vorrq_u8(vorrq_u8(running, vorrq_u8(vceqq_u8(word, mask1),vceqq_u8(word, mask2))), vceqq_u8(word, mask3));
+  }
+  return vmaxvq_u8(running) != 0;
+}
+#else
 ada_really_inline constexpr bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   auto has_zero_byte = [](uint64_t v) {
@@ -71,6 +93,7 @@ ada_really_inline constexpr bool has_tabs_or_newline(
   }
   return running;
 }
+#endif
 
 // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR,
 // U+0020 SPACE, U+0023 (#), U+002F (/), U+003A (:), U+003C (<), U+003E (>),
