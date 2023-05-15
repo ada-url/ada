@@ -3,38 +3,18 @@
 
 #include "ada/common_defs.h"
 
+#include "urlpattern_base.h"
+
 #include <unordered_map>
-#include <array>
 #include <string_view>
 #include <optional>
 
-namespace ada {
-
-ada_really_inline bool is_valid_name_code_point(const char32_t &c,
-                                                bool is_first) noexcept;
-
+namespace ada::urlpattern {
 // https://wicg.github.io/urlpattern/#options
-struct urlpattern_options {
-  std::string_view delimiter = "";
-  std::string_view prefix = "";
-  bool ignore_case = false;
-};
 
 struct urlpattern_component_result {
   std::string_view input;
   std::unordered_map<std::string_view, std::optional<std::string_view>> groups;
-};
-
-struct urlpattern_init {
-  std::string_view protocol;
-  std::string_view username;
-  std::string_view password;
-  std::string_view hostname;
-  std::string_view port;
-  std::string_view pathname;
-  std::string_view search;
-  std::string_view hash;
-  std::string_view base_url;
 };
 
 template <typename urlpattern_input>
@@ -68,6 +48,6 @@ struct urlpattern {
   const std::string_view hash;
 };
 
-}  // namespace ada
+}  // namespace ada::urlpattern
 
 #endif

@@ -23,6 +23,10 @@
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
+#include "ada/urlpattern_base.h"
+#include "ada/urlpattern_tokenizer.h"
+#include "ada/urlpattern_constructor_string_parser.h"
+#include "ada/urlpattern_pattern_parser.h"
 #include "ada/urlpattern.h"
 
 // Public API
