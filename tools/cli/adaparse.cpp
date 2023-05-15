@@ -52,20 +52,17 @@ bool print_part(Callable&& fmt_or_adaparse_print, std::string_view get_part,
       if (get_part == "protocol") {
         fmt_or_adaparse_print("{}\n", url.get_protocol());
         return true;
-      }
-      if (get_part == "password") {
+      } else if (get_part == "password") {
         fmt_or_adaparse_print("{}\n", url.get_password());
         return true;
-      }
-      if (get_part == "pathname") {
+      } else if (get_part == "pathname") {
         fmt_or_adaparse_print("{}\n", url.get_pathname());
         return true;
       }
+    } else if (get_part == "hostname") {
+      fmt_or_adaparse_print("{}\n", url.get_hostname());
+      return true;
     }
-  } else if (get_part == "hostname") {
-    fmt_or_adaparse_print("{}\n", url.get_hostname());
-    return true;
-
   } else if (get_part == "username") {
     fmt_or_adaparse_print("{}\n", url.get_username());
     return true;
@@ -88,12 +85,12 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
 
   uint64_t before = nano();
 
-  size_t total_bytes_read = 0;
-  size_t bytes_read_this_loop_iteration;
-  size_t offset = 0;
-  size_t lines = 0;
-  size_t blocks = 0;
-  std::string get_part;
+  size_t total_bytes_read{0};
+  size_t bytes_read_this_loop_iteration{0};
+  size_t offset{0};
+  size_t lines{0};
+  size_t blocks{0};
+  std::string get_part{};
   if (result.count("get")) {
     get_part = result["get"].as<std::string>();
   }
@@ -121,7 +118,7 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
     while (li.find_another_complete_line()) {
       std::string_view line = li.grab_line();
 
-      ada::result<ada::url_aggregator> url = ada::parse(line);
+      auto url = ada::parse<ada::url_aggregator>(line);
       if (!url) {
         adaparse_print("Invalid URL: {}\n", line);
       } else if (!get_part.empty()) {
@@ -138,7 +135,7 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
     // have a line of length offset at cachebuffer.get()
     std::string_view line(cachebuffer.get(), offset);
 
-    ada::result<ada::url_aggregator> url = ada::parse(line);
+    auto url = ada::parse<ada::url_aggregator>(line);
     if (!url) {
       adaparse_print("Invalid URL:{}\n", line);
     } else if (!get_part.empty()) {
@@ -207,30 +204,22 @@ int main(int argc, char** argv) {
   cxxopts::Options options("adaparse",
                            "Command-line version of the Ada URL parser");
 
-  options.add_options()("d,diagram", "Print a diagram of the result",
-                        cxxopts::value<bool>()->default_value("false"))(
-      "u,url", "URL Parameter (required)", cxxopts::value<std::string>())(
-      "h,help", "Print usage")(
-      "g,get", "Get a specific part of the URL (e.g., 'origin', 'host', etc.)",
-      cxxopts::value<std::string>())(
-      "b,benchmark", "Display chronometer for piped_file function",
-      cxxopts::value<bool>()->default_value("false"))(
-      "p,path", "Takes in a path to a file and process all the URL within",
-      cxxopts::value<std::string>())(
-      "o,output", "Takes in a path and outputs to a text file.",
-      cxxopts::value<std::string>()->default_value("__no_output__"))
+  // clang-format off
+  options.add_options()
+    ("d,diagram", "Print a diagram of the result", cxxopts::value<bool>()->default_value("false"))
+    ("u,url", "URL", cxxopts::value<std::string>())
+    ("g,get", "Get a specific part of the URL (e.g., 'origin', 'host', etc.)",  cxxopts::value<std::string>())
+    ("b,benchmark", "Display chronometer for piped_file function", cxxopts::value<bool>()->default_value("false"))
+    ("p,path", "Takes in a path to a file and process all the URL within", cxxopts::value<std::string>())
+    ("o,output", "Takes in a path and outputs to a text file.", cxxopts::value<std::string>()->default_value("/dev/null"))
+    ("h,help", "Print usage");
+  // clang-format on
 
-      ;
   options.parse_positional({"url"});
 
   auto result = options.parse(argc, argv);
 
   std::string output_filename = result["output"].as<std::string>();
-
-  result["output"].as<std::string>() == "__no_output__"
-      ? output_filename = "/dev/null"
-      : output_filename = result["output"].as<std::string>();
-
   auto out = fmt::output_file(output_filename);
   bool has_result = result.count("output");
 
@@ -255,15 +244,14 @@ int main(int argc, char** argv) {
   }
 
   if (result.count("path")) {
-    std::string filepath = result["path"].as<std::string>();
-    FILE* file = fopen(filepath.c_str(), "r");
+    auto file_path = result["path"].as<std::string>();
+    auto file = fopen(file_path.c_str(), "r");
     if (file) {
       piped_file(adaparse_print, result, file);
       fclose(file);
       return EXIT_SUCCESS;
     } else {
-      int err = errno;
-      fmt::print(stderr, "Error opening file: {}\n", strerror(err));
+      fmt::print(stderr, "Error opening file: {}\n", strerror(errno));
       return EXIT_FAILURE;
     }
   }
@@ -274,14 +262,15 @@ int main(int argc, char** argv) {
     return EXIT_SUCCESS;
   }
 
-  std::string url_string = result["url"].as<std::string>();
+  auto input_url = result["url"].as<std::string>();
   bool to_diagram = result["diagram"].as<bool>();
 
-  ada::result<ada::url_aggregator> url = ada::parse(url_string);
+  auto url = ada::parse<ada::url_aggregator>(input_url);
   if (!url) {
-    fmt::print(stderr, "Invalid URL: {}\n", url_string);
+    fmt::print(stderr, "Invalid URL: {}\n", input_url);
     return EXIT_FAILURE;
   }
+
   if (result.count("get")) {
     std::string get_part = result["get"].as<std::string>();
 
@@ -292,6 +281,7 @@ int main(int argc, char** argv) {
     return print_part(print_lambda, get_part, url.value()) ? EXIT_SUCCESS
                                                            : EXIT_FAILURE;
   };
+
   if (to_diagram) {
     fmt::print("{}\n", url->to_diagram());
   } else {
