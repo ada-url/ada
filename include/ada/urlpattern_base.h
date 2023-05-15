@@ -11,6 +11,12 @@ struct urlpattern_options {
   bool ignore_case = false;
 };
 
+struct u32urlpattern_options {
+  std::u32string_view delimiter = U"";
+  std::u32string_view prefix = U"";
+  bool ignore_case = false;
+};
+
 struct urlpattern_init {
   std::string_view protocol;
   std::string_view username;

@@ -42,9 +42,8 @@ ada_really_inline void tokenizer::add_token(TOKEN_TYPE type, size_t next_pos,
   index = next_pos;
 }
 
-ada_really_inline void tokenizer::process_tokenizing_error(std::string_view msg,
-                                                           size_t value_start,
-                                                           size_t value_end) {
+void tokenizer::process_tokenizing_error(std::string_view msg,
+                                         size_t value_start, size_t value_end) {
   if (policy != POLICY::LENIENT) {
     throw std::invalid_argument(std::string(msg));
   }
@@ -52,8 +51,8 @@ ada_really_inline void tokenizer::process_tokenizing_error(std::string_view msg,
   token_list.push_back({TOKEN_TYPE::INVALID_CHAR, value_start, value_end});
 }
 
-std::vector<token> tokenizer::tokenize(std::u32string_view _input,
-                                       ada::urlpattern::POLICY _policy) {
+std::vector<token> tokenize(std::u32string_view _input,
+                            ada::urlpattern::POLICY _policy) {
   // Let tokenizer be a new tokenizer.
   tokenizer t = tokenizer();
 
@@ -101,6 +100,7 @@ std::vector<token> tokenizer::tokenize(std::u32string_view _input,
         // Set name position to tokenizer’s next index.
         size_t name_start, name_position;
         name_position = t.next_index;
+        name_start = name_position;
 
         // While name position is less than tokenizer’s input's code point
         // length:

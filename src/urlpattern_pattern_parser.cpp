@@ -1,18 +1,19 @@
-#include "ada/urlpattern_pattern_parser.h"
 #include "ada/urlpattern_tokenizer.h"
+#include "ada/urlpattern_pattern_parser.h"
 
 namespace ada::urlpattern {
 
 ada_really_inline pattern_parser::pattern_parser(
     std::function<std::string_view(std::u32string_view)> &encoding,
-    std::string_view wildcard_regexp) {
+    std::u32string_view wildcard_regexp) {
   encoding_callback = encoding;
 
   segment_wildcard_regexp = wildcard_regexp;
 }
 
 // https://wicg.github.io/urlpattern/#escape-a-regexp-string
-ada_really_inline std::string escape_regexp_string(std::string_view input) {
+ada_really_inline std::u32string escape_regexp_string(
+    std::u32string_view input) {
   assert(ada::idna::is_ascii(input));
 
   //  // TODO: make it cheaper
@@ -22,15 +23,15 @@ ada_really_inline std::string escape_regexp_string(std::string_view input) {
   //  ada::idna::utf32_to_utf8(input.data(), input.size(),
   //  final_u8input.data());
 
-  std::string result = "";
+  std::u32string result = U"";
   size_t index = 0;
   while (index < input.size()) {
-    size_t pos = input.find_first_of(".+*?^${}()[]|/\\)");
+    size_t pos = input.find_first_of(U".+*?^${}()[]|/\\)");
     if (pos == std::string_view::npos) {
       result += input.substr(index, input.size());
       break;
     }
-    result.append(input.substr(index, pos)).append("\\");
+    result.append(input.substr(index, pos)).append(U"\\");
     result += input[pos];
     index = pos + 1;
   }
@@ -63,14 +64,14 @@ pattern_parser::maybe_add_part_from_pendind_fixed_value() {
 }
 
 // https://wicg.github.io/urlpattern/#generate-a-segment-wildcard-regexp
-ada_really_inline std::string generate_segment_wildcard_regexp(
-    urlpattern_options &options) {
+ada_really_inline std::u32string generate_segment_wildcard_regexp(
+    u32urlpattern_options &options) {
   // Let result be "[^".
-  std::string result = "[^";
+  std::u32string result = U"[^";
 
   // Append the result of running escape a regexp string given options’s
   // delimiter code point to the end of result.
-  result.append(escape_regexp_string(options.delimiter)).append("]+?");
+  result.append(escape_regexp_string(options.delimiter)).append(U"]+?");
 
   // Append "]+?" to the end of result.
   return result;
@@ -112,18 +113,19 @@ pattern_parser::try_to_consume_regexp_or_wildcard_token(
 
 // https://wicg.github.io/urlpattern/#parse-a-pattern-string
 ada_really_inline std::vector<part> pattern_parser::parse_pattern_string(
-    std::u32string_view input, urlpattern_options &options,
+    std::u32string_view input, u32urlpattern_options &options,
     std::function<std::string_view(std::u32string_view)> &encoding) {
   // Let parser be a new pattern parser whose encoding callback is encoding
   // callback and segment wildcard regexp is the result of running generate a
   // segment wildcard regexp given options.
 
-  std::string seg_wildcard_regexp = generate_segment_wildcard_regexp(options);
-  pattern_parser p = pattern_parser(encoding, seg_wildcard_regexp);
+  std::u32string seg_wildcard_regexp =
+      generate_segment_wildcard_regexp(options);
+  auto p = pattern_parser(encoding, seg_wildcard_regexp);
 
   // Set parser’s token list to the result of running tokenize given input and
   // "strict".
-  p.token_list = tokenizer::tokenize(input, POLICY::STRICT);
+  p.token_list = tokenize(input, POLICY::STRICT);
 
   // While parser’s index is less than parser’s token list's size:
   while (p.index < p.token_list.size()) {
@@ -165,6 +167,8 @@ ada_really_inline std::vector<part> pattern_parser::parse_pattern_string(
       p.maybe_add_part_from_pendind_fixed_value();
     }
   }
+
+  return p.part_list;
 }
 
 }  // namespace ada::urlpattern

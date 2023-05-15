@@ -12,6 +12,6 @@
 #include "url_aggregator.cpp"
 #include "urlpattern_tokenizer.cpp"
 #include "urlpattern_constructor_string_parser.cpp"
-#include "urlpattern_pattern_parser"
+#include "urlpattern_pattern_parser.cpp"
 #include "urlpattern.cpp"
 #include "ada_c.cpp"

@@ -1,7 +1,7 @@
 #include "ada/implementation.h"
 
-#include "ada/urlpattern_constructor_string_parser.h"
 #include "ada/urlpattern_tokenizer.h"
+#include "ada/urlpattern_constructor_string_parser.h"
 
 namespace ada::urlpattern {
 
@@ -32,16 +32,16 @@ ada_really_inline std::u32string_view canonicalize_protocol(
 // https://wicg.github.io/urlpattern/#compile-a-component
 ada_really_inline std::string_view compile_component(
     std::u32string_view input, std::function<std::u32string_view> &callback,
-    urlpattern_options &options) {
+    u32urlpattern_options &options) {
   // If input is null, then set input to "*".
-  if (input.empty()) input = "*";
+  if (input.empty()) input = U"*";
 }
 
 // https://wicg.github.io/urlpattern/#constructor-string-parser
 ada_really_inline constructor_string_parser::constructor_string_parser(
     std::u32string_view view) {
   input = view;
-  token_list = tokenizer::tokenize(view, POLICY::LENIENT);
+  token_list = tokenize(view, POLICY::LENIENT);
 }
 
 // https://wicg.github.io/urlpattern/#parse-a-constructor-string

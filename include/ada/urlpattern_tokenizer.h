@@ -39,14 +39,6 @@ struct tokenizer {
   size_t next_index = 0;
   char32_t code_point;
 
-  /**
-   * Tokenize is a step in the approach used by the URLPattern API for parsing
-   * patterns.
-   * @see https://wicg.github.io/urlpattern/#tokenize and
-   * https://wicg.github.io/urlpattern/#parsing-patterns
-   */
-  static std::vector<token> tokenize(std::u32string_view input, POLICY policy);
-
   // https://wicg.github.io/urlpattern/#seek-and-get-the-next-code-point
   ada_really_inline void seek_and_get_next_code_point();
 
@@ -61,10 +53,15 @@ struct tokenizer {
   ada_really_inline void process_tokenizing_error(std::string_view msg,
                                                   size_t value_start,
                                                   size_t value_end);
-
- private:
-  tokenizer();
 };
+
+/**
+ * Tokenize is a step in the approach used by the URLPattern API for parsing
+ * patterns.
+ * @see https://wicg.github.io/urlpattern/#tokenize and
+ * https://wicg.github.io/urlpattern/#parsing-patterns
+ */
+std::vector<token> tokenize(std::u32string_view input, POLICY policy);
 
 }  // namespace ada::urlpattern
 

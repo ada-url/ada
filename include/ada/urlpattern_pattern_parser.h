@@ -37,7 +37,7 @@ struct part {
 struct pattern_parser {
   // https://wicg.github.io/urlpattern/#parse-a-pattern-string
   static ada_really_inline std::vector<part> parse_pattern_string(
-      std::u32string_view input, urlpattern_options &options,
+      std::u32string_view input, u32urlpattern_options &options,
       std::function<std::string_view(std::u32string_view)> &encoding);
 
   // https://wicg.github.io/urlpattern/#try-to-consume-a-token
@@ -53,7 +53,7 @@ struct pattern_parser {
 
   std::vector<token> token_list;
   std::function<std::string_view(std::u32string_view)> encoding_callback;
-  std::string segment_wildcard_regexp;
+  std::u32string segment_wildcard_regexp;
   std::u32string pending_fixed_value{};
   size_t index = 0;
   size_t next_numeric_name = 0;
@@ -62,7 +62,7 @@ struct pattern_parser {
  private:
   ada_really_inline pattern_parser(
       std::function<std::string_view(std::u32string_view)> &encoding,
-      std::string_view wildcard_regexp);
+      std::u32string_view wildcard_regexp);
 };
 
 }  // namespace ada::urlpattern
