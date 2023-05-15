@@ -286,7 +286,7 @@ ada_really_inline token *constructor_string_parser::get_safe_token(
   size_t last_index = token_list.size() - 1;
   // 4. Let token be parser’s token list[last index].
   // 5. Assert: token’s type is "end".
-  assert(token_list[last_index] == TOKEN_TYPE::END);
+  assert(token_list[last_index].type == TOKEN_TYPE::END);
   return &token_list[last_index];
 }
 
