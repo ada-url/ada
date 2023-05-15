@@ -36,7 +36,7 @@ struct part {
 // https://wicg.github.io/urlpattern/#pattern-parser
 struct pattern_parser {
   // https://wicg.github.io/urlpattern/#parse-a-pattern-string
-  ada_really_inline std::vector<part> parse_pattern_string(
+  static ada_really_inline std::vector<part> parse_pattern_string(
       std::u32string_view input, urlpattern_options &options,
       std::function<std::string_view(std::u32string_view)> &encoding);
 

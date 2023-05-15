@@ -45,18 +45,23 @@ ada_really_inline constructor_string_parser::constructor_string_parser(
 }
 
 // https://wicg.github.io/urlpattern/#parse-a-constructor-string
-ada_really_inline void constructor_string_parser::parse() {
+ada_really_inline void constructor_string_parser::parse_contructor_string(
+    std::u32string_view input) {
+  // Let parser be a new constructor string parser whose input is input and
+  // token list is the result of running tokenize given input and "lenient".
+  auto p = constructor_string_parser(input);
+
   // 2. While parser’s token index is less than parser’s token list size:
-  while (token_index < token_list.size()) {
+  while (p.token_index < p.token_list.size()) {
     // Set parser’s token increment to 1.
-    token_increment = 1;
+    p.token_increment = 1;
     // If parser’s token list[parser’s token index]'s type is "end" then:
 
-    if (token_list[token_index].type == TOKEN_TYPE::END) {
-      if (state == PARSER_STATE::INIT) {
+    if (p.token_list[p.token_index].type == TOKEN_TYPE::END) {
+      if (p.state == PARSER_STATE::INIT) {
         // If parser’s state is "init":
         // Run rewind given parser.
-        rewind();
+        p.rewind();
 
         // We next determine at which component the relative pattern begins.
         // Relative pathnames are most common, but URLs and URLPattern
@@ -65,87 +70,87 @@ ada_really_inline void constructor_string_parser::parse() {
 
         // If the result of running is a hash prefix given parser is true, then
         // run change state given parser, "hash" and 1.
-        if (is_hash_prefix()) {
-          change_state(PARSER_STATE::HASH, 1);
-        } else if (is_search_prefix()) {
+        if (p.is_hash_prefix()) {
+          p.change_state(PARSER_STATE::HASH, 1);
+        } else if (p.is_search_prefix()) {
           // Else if the result of running is a search prefix given parser is
           // true
           // Run change state given parser, "search" and 1
           // Set parser’s result["hash"] to the empty string.
-          change_state(PARSER_STATE::SEARCH, 1);
-          result.hash = "";
+          p.change_state(PARSER_STATE::SEARCH, 1);
+          p.result.hash = "";
         } else {
           // Run change state given parser, "pathname" and 0.
-          change_state(PARSER_STATE::PATHNAME, 0);
+          p.change_state(PARSER_STATE::PATHNAME, 0);
           // Set parser’s result["search"] to the empty string.
-          result.search = "";
-          result.hash = "";
+          p.result.search = "";
+          p.result.hash = "";
         }
         // Increment parser’s token index by parser’s token increment.
-        token_index += token_increment;
+        p.token_index += p.token_increment;
         continue;
       }
 
-      if (state == PARSER_STATE::AUTHORITY) {
+      if (p.state == PARSER_STATE::AUTHORITY) {
         // If we reached the end of the string in the "authority" state, then we
         // failed to find an "@". Therefore there is no username or password.
 
         // Run rewind and set state given parser, and "hostname".
-        rewind_and_set_state(PARSER_STATE::HOSTNAME);
+        p.rewind_and_set_state(PARSER_STATE::HOSTNAME);
         // Increment parser’s token index by parser’s token increment.
-        token_index += token_increment;
+        p.token_index += p.token_increment;
 
         continue;
       }
 
       // Run change state given parser, "done" and 0.
-      change_state(PARSER_STATE::DONE, 0);
+      p.change_state(PARSER_STATE::DONE, 0);
       break;
     }
 
-    if (is_group_open()) {
+    if (p.is_group_open()) {
       // Increment parser’s group depth by 1.
-      ++group_depth;
+      ++p.group_depth;
       // Increment parser’s token index by parser’s token increment.
-      token_index += token_increment;
+      p.token_index += p.token_increment;
       continue;
     }
 
     // If parser’s group depth is greater than 0:
-    if (group_depth > 0) {
+    if (p.group_depth > 0) {
       // If the result of running is a group close given parser is true, then
       // decrement parser’s group depth by 1.
-      if (is_group_close()) {
-        --group_depth;
+      if (p.is_group_close()) {
+        --p.group_depth;
       } else {
         // Increment parser’s token index by parser’s token increment.
-        token_index += token_increment;
+        p.token_index += p.token_increment;
         continue;
       }
     }
 
     // Switch on parser’s state and run the associated steps:
-    switch (state) {
+    switch (p.state) {
       case PARSER_STATE::INIT: {
-        if (is_protocol_suffix()) {
+        if (p.is_protocol_suffix()) {
           // We found a protocol suffix, so this must be an absolute URLPattern
           // constructor string. Therefore initialize all component to the empty
           // string.
-          result.username = "";
-          result.password = "";
-          result.hostname = "";
-          result.port = "";
-          result.pathname = "";
-          result.search = "";
-          result.hash = "";
+          p.result.username = "";
+          p.result.password = "";
+          p.result.hostname = "";
+          p.result.port = "";
+          p.result.pathname = "";
+          p.result.search = "";
+          p.result.hash = "";
 
           // Run rewind and set state given parser and "protocol".
-          rewind_and_set_state(PARSER_STATE::PROTOCOL);
+          p.rewind_and_set_state(PARSER_STATE::PROTOCOL);
         }
         break;
       }
       case PARSER_STATE::PROTOCOL: {
-        if (is_protocol_suffix()) {
+        if (p.is_protocol_suffix()) {
         }
       }
     }

@@ -119,25 +119,28 @@ ada_really_inline std::vector<part> pattern_parser::parse_pattern_string(
   // segment wildcard regexp given options.
 
   std::string seg_wildcard_regexp = generate_segment_wildcard_regexp(options);
-  pattern_parser parser = pattern_parser(encoding, seg_wildcard_regexp);
+  pattern_parser p = pattern_parser(encoding, seg_wildcard_regexp);
 
   // Set parser’s token list to the result of running tokenize given input and
   // "strict".
-  token_list = tokenizer::tokenize(input, POLICY::STRICT);
+  p.token_list = tokenizer::tokenize(input, POLICY::STRICT);
+
   // While parser’s index is less than parser’s token list's size:
-  while (index < token_list.size()) {
+  while (p.index < p.token_list.size()) {
     // Let char token be the result of running try to consume a token given
     // parser and "char".
-    std::optional<token *> char_token = try_to_consume_token(TOKEN_TYPE::CHAR);
+    std::optional<token *> char_token =
+        p.try_to_consume_token(TOKEN_TYPE::CHAR);
 
     // Let name token be the result of running try to consume a token given
     // parser and "name".
-    std::optional<token *> name_token = try_to_consume_token(TOKEN_TYPE::NAME);
+    std::optional<token *> name_token =
+        p.try_to_consume_token(TOKEN_TYPE::NAME);
 
     // Let regexp or wildcard token be the result of running try to consume a
     // regexp or wildcard token given parser and name token.
     std::optional<token *> regexp_or_wildcard =
-        try_to_consume_regexp_or_wildcard_token(name_token);
+        p.try_to_consume_regexp_or_wildcard_token(name_token);
 
     // If name token is not null or regexp or wildcard token is not null:
     if (name_token.has_value() || regexp_or_wildcard.has_value()) {
@@ -153,13 +156,13 @@ ada_really_inline std::vector<part> pattern_parser::parse_pattern_string(
       // If prefix is not the empty string and not options’s prefix code point:
       if (!prefix.empty() && prefix != options.prefix) {
         // Append prefix to the end of parser’s pending fixed value.
-        pending_fixed_value.append(prefix);
+        p.pending_fixed_value.append(prefix);
         // Set prefix to the empty string.
         prefix.clear();
       }
 
       // Run maybe add a part from the pending fixed value given parser.
-      maybe_add_part_from_pendind_fixed_value();
+      p.maybe_add_part_from_pendind_fixed_value();
     }
   }
 }
