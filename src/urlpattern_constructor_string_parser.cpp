@@ -1,41 +1,11 @@
 #include "ada/implementation.h"
 
+#include <cassert>
+
 #include "ada/urlpattern_tokenizer.h"
 #include "ada/urlpattern_constructor_string_parser.h"
 
 namespace ada::urlpattern {
-
-// https://wicg.github.io/urlpattern/#canonicalize-a-protocol
-// TODO: maybe make it receive a utf8 string at this point already
-ada_really_inline std::u32string_view canonicalize_protocol(
-    std::u32string_view protocol) {
-  // If value is the empty string, return value.
-  if (protocol.empty()) return protocol;
-
-  // Let dummyURL be a new URL record.
-  // Let parseResult be the result of running the basic URL parser given value
-  // followed by "://dummy.test", with dummyURL as url.
-
-  // TODO: make it cheaper
-  std::u32string url = std::u32string(protocol) + U"://dummy.test";
-
-  auto utf8_size = ada::idna::utf8_length_from_utf32(url.data(), url.size());
-  std::string final_utf8_url(utf8_size, '\0');
-  ada::idna::utf32_to_utf8(url.data(), url.size(), final_utf8_url.data());
-
-  if (ada::can_parse(final_utf8_url)) {
-    return protocol;
-  }
-  throw std::invalid_argument("invalid protocol scheme");
-}
-
-// https://wicg.github.io/urlpattern/#compile-a-component
-ada_really_inline std::string_view compile_component(
-    std::u32string_view input, std::function<std::u32string_view> &callback,
-    u32urlpattern_options &options) {
-  // If input is null, then set input to "*".
-  if (input.empty()) input = U"*";
-}
 
 // https://wicg.github.io/urlpattern/#constructor-string-parser
 ada_really_inline constructor_string_parser::constructor_string_parser(
@@ -45,8 +15,7 @@ ada_really_inline constructor_string_parser::constructor_string_parser(
 }
 
 // https://wicg.github.io/urlpattern/#parse-a-constructor-string
-ada_really_inline void constructor_string_parser::parse_contructor_string(
-    std::u32string_view input) {
+void parse_contructor_string(std::u32string_view input) {
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
   auto p = constructor_string_parser(input);

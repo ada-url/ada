@@ -24,9 +24,7 @@ enum class PARSER_STATE : uint8_t {
 
 // https://wicg.github.io/urlpattern/#constructor-string-parser
 struct constructor_string_parser {
-  // https://wicg.github.io/urlpattern/#parse-a-constructor-string
-  static ada_really_inline void parse_contructor_string(
-      std::u32string_view input);
+  ada_really_inline constructor_string_parser(std::u32string_view input);
 
   // https://wicg.github.io/urlpattern/#change-state
   ada_really_inline void change_state(PARSER_STATE new_state, size_t skip);
@@ -74,10 +72,11 @@ struct constructor_string_parser {
   bool protocol_matches_special_scheme = false;
   urlpattern_init result = urlpattern_init();
   PARSER_STATE state = PARSER_STATE::INIT;
-
- private:
-  ada_really_inline constructor_string_parser(std::u32string_view input);
 };
+
+// https://wicg.github.io/urlpattern/#parse-a-constructor-string
+void parse_contructor_string(std::u32string_view input);
+
 }  // namespace ada::urlpattern
 
 #endif

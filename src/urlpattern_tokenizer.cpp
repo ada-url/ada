@@ -54,7 +54,7 @@ void tokenizer::process_tokenizing_error(std::string_view msg,
 std::vector<token> tokenize(std::u32string_view _input,
                             ada::urlpattern::POLICY _policy) {
   // Let tokenizer be a new tokenizer.
-  tokenizer t = tokenizer();
+  auto t = tokenizer();
 
   // Set tokenizer’s input to input.
   t.input = _input;

@@ -13,5 +13,7 @@
 #include "urlpattern_tokenizer.cpp"
 #include "urlpattern_constructor_string_parser.cpp"
 #include "urlpattern_pattern_parser.cpp"
+#include "urlpattern_internals.cpp"
+#include "urlpattern_canonicalization.cpp"
 #include "urlpattern.cpp"
 #include "ada_c.cpp"

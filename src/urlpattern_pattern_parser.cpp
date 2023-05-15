@@ -1,6 +1,8 @@
 #include "ada/urlpattern_tokenizer.h"
 #include "ada/urlpattern_pattern_parser.h"
 
+#include <cassert>
+
 namespace ada::urlpattern {
 
 ada_really_inline pattern_parser::pattern_parser(
@@ -112,7 +114,7 @@ pattern_parser::try_to_consume_regexp_or_wildcard_token(
 }
 
 // https://wicg.github.io/urlpattern/#parse-a-pattern-string
-ada_really_inline std::vector<part> pattern_parser::parse_pattern_string(
+std::vector<part> parse_pattern_string(
     std::u32string_view input, u32urlpattern_options &options,
     std::function<std::string_view(std::u32string_view)> &encoding) {
   // Let parser be a new pattern parser whose encoding callback is encoding
