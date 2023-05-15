@@ -2,8 +2,8 @@
 
 cd $SRC/ada-url
 
-cmake -B build
-cmake --build build -j$(nproc)
+mkdir build
+AMALGAMATE_OUTPUT_PATH=./build/singleheader python3 singleheader/amalgamate.py
 
 $CXX $CFLAGS $CXXFLAGS \
      -std=c++17 \

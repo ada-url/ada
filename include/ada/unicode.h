@@ -71,7 +71,7 @@ std::string to_unicode(std::string_view input);
  * @attention The has_tabs_or_newline function is a bottleneck and it is simple
  * enough that compilers like GCC can 'autovectorize it'.
  */
-ada_really_inline constexpr bool has_tabs_or_newline(
+ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept;
 
 /**

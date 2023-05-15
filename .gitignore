@@ -22,3 +22,6 @@ singleheader/singleheader.zip
 
 benchmarks/competitors/servo-url/debug
 benchmarks/competitors/servo-url/target
+
+#ignore VScode
+.vscode/

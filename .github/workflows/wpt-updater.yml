@@ -8,10 +8,6 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-permissions:
-  contents: write
-  pull-requests: write
-
 concurrency:
   group: wpt-updater
   cancel-in-progress: true
@@ -19,6 +15,9 @@ concurrency:
 jobs:
   issue:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
       - name: Fetch tests

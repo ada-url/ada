@@ -1,5 +1,5 @@
 # Ada
-![OpenSSF Scorecard Badge](https://api.securityscorecards.dev/projects/github.com/ada-url/ada/badge)
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7085/badge)](https://bestpractices.coreinfrastructure.org/projects/7085)
 [![Ubuntu 22.04](https://github.com/ada-url/ada/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/ada-url/ada/actions/workflows/ubuntu.yml)
 [![VS17-CI](https://github.com/ada-url/ada/actions/workflows/visual_studio.yml/badge.svg)](https://github.com/ada-url/ada/actions/workflows/visual_studio.yml)
 [![VS17-clang-CI](https://github.com/ada-url/ada/actions/workflows/visual_studio_clang.yml/badge.svg)](https://github.com/ada-url/ada/actions/workflows/visual_studio_clang.yml)
@@ -14,6 +14,21 @@ We also include a C wrapper for portability.
 The Ada library passes the full range of tests from the specification,
 across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
 supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
+
+
+## Ada is fast. 
+
+On a benchmark where we need to validate and normalize [thousands URLs found
+on popular websites](https://github.com/ada-url/url-various-datasets/tree/main/top100), 
+we find that ada can be several times faster than popular competitors (system: Apple MacBook 2022
+with LLVM 14).
+
+
+```
+      ada ▏  188 ns/URL ███▏
+servo url ▏  664 ns/URL ███████████▎
+     CURL ▏ 1471 ns/URL █████████████████████████
+```
 
 ## Requirements
 
@@ -32,7 +47,7 @@ components (path, host, and so forth).
 
 ### Parsing & Validation
 
-- Parse and validate a URL
+- Parse and validate a URL from an ASCII or UTF-8 string
 
 ```cpp
 ada::result<ada::url_aggregator> url = ada::parse<ada::url_aggregator>("https://www.google.com");
@@ -123,10 +138,10 @@ ada::result<ada::url_aggregator> url = ada::parse<ada::url_aggregator>("https://
 url->set_hash("is-this-the-real-life");
 // url->get_hash() will return "#is-this-the-real-life"
 ```
-
+For more information about command-line options, please refer to the [CLI documentation](docs/cli.md).
 ### C wrapper
 
-See the file `include/ada_c.h` for our C interface.
+See the file `include/ada_c.h` for our C interface. We expect ASCII or UTF-8 strings.
 
 ```C
 #include "ada_c.h"

@@ -8,6 +8,18 @@ template <class T>
 struct basic_tests : testing::Test {};
 TYPED_TEST_SUITE(basic_tests, Types);
 
+TYPED_TEST(basic_tests, insane_url) {
+  auto r = ada::parse<ada::url_aggregator>("e:@EEEEEEEEEE");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_protocol(), "e:");
+  ASSERT_EQ(r->get_username(), "");
+  ASSERT_EQ(r->get_password(), "");
+  ASSERT_EQ(r->get_hostname(), "");
+  ASSERT_EQ(r->get_port(), "");
+  ASSERT_EQ(r->get_pathname(), "@EEEEEEEEEE");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_host_should_return_false_sometimes) {
   auto r = ada::parse<TypeParam>("mailto:a@b.com");
   ASSERT_FALSE(r->set_host("something"));
