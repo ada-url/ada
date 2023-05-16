@@ -30,6 +30,11 @@ servo url ▏  664 ns/URL ███████████▎
      CURL ▏ 1471 ns/URL █████████████████████████
 ```
 
+Ada has improved the performance of the popular JavaScript environment Node.js:
+
+> Since Node.js 18, a new URL parser dependency was added to Node.js — Ada. This addition bumped the Node.js performance when parsing URLs to a new level. Some results could reach up to an improvement of **400%**. ([State of Node.js Performance 2023](https://blog.rafaelgss.dev/state-of-nodejs-performance-2023))
+
+
 ## Requirements
 
 - A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
