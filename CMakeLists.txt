@@ -66,8 +66,8 @@ if(NOT EMSCRIPTEN)
     message(STATUS "Big-endian system detected.")
   endif()
 endif()
-
-file(WRITE wasm.js "
+if(EMSCRIPTEN)
+  file(WRITE wasm.js "
  const child_process = require('child_process');
  const assert = require('assert');
  const test = require('node:test');
@@ -95,6 +95,7 @@ file(WRITE wasm.js "
    assert.deepStrictEqual(JSON.parse(stdout), expected);
  });
 ")
+endif(EMSCRIPTEN)
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
