@@ -63,14 +63,6 @@ set_target_properties(
   SOVERSION "${ADA_LIB_SOVERSION}"
   WINDOWS_EXPORT_ALL_SYMBOLS YES
 )
-if(NOT EMSCRIPTEN)
-  include (TestBigEndian)
-  TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
-  if(IS_BIG_ENDIAN)
-    message(STATUS "Big-endian system detected.")
-  endif()
-endif()
-
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
