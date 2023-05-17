@@ -11,5 +11,6 @@ var annotated_dup =
     ] ],
     [ "ada_owned_string", "df/d1e/structada__owned__string.html", "df/d1e/structada__owned__string" ],
     [ "ada_string", "d2/daa/structada__string.html", "d2/daa/structada__string" ],
-    [ "ada_url_components", "dc/d69/structada__url__components.html", "dc/d69/structada__url__components" ]
+    [ "ada_url_components", "dc/d69/structada__url__components.html", "dc/d69/structada__url__components" ],
+    [ "parse_result", "d8/d9f/structparse__result.html", "d8/d9f/structparse__result" ]
 ];

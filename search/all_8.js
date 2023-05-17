@@ -30,7 +30,8 @@ var searchData=
   ['host_27',['HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5',1,'ada']]],
   ['host_5fend_28',['host_end',['../dc/d69/structada__url__components.html#a09b0452389414b3788594b9b4b1aeec6',1,'ada_url_components::host_end()'],['../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b',1,'ada::url_components::host_end()']]],
   ['host_5fstart_29',['host_start',['../dc/d69/structada__url__components.html#afdbe58a41d73db4faa282654a172d376',1,'ada_url_components::host_start()'],['../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f',1,'ada::url_components::host_start()']]],
-  ['href_5ffrom_5ffile_30',['href_from_file',['../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70',1,'ada']]],
-  ['http_31',['HTTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c',1,'ada::scheme']]],
-  ['https_32',['HTTPS',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0',1,'ada::scheme']]]
+  ['href_30',['href',['../d8/d9f/structparse__result.html#a804b85c2f4dbb86aa765d89d15338063',1,'parse_result']]],
+  ['href_5ffrom_5ffile_31',['href_from_file',['../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70',1,'ada']]],
+  ['http_32',['HTTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c',1,'ada::scheme']]],
+  ['https_33',['HTTPS',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0',1,'ada::scheme']]]
 ];

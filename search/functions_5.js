@@ -1,21 +1,11 @@
 var searchData=
 [
-  ['get_5fccc_0',['get_ccc',['../d5/ddb/namespaceada_1_1idna.html#a8c81c2acabc058ce6376560052072984',1,'ada::idna']]],
-  ['get_5fcomponents_1',['get_components',['../d8/d3b/structada_1_1url__aggregator.html#a08540bbc7304fe5095636a323af607b6',1,'ada::url_aggregator::get_components()'],['../dd/d03/structada_1_1url.html#a166c9ff1373a6c292ba887355bb8407f',1,'ada::url::get_components()']]],
-  ['get_5fhash_2',['get_hash',['../d8/d3b/structada_1_1url__aggregator.html#aea861f52f8d72fb7507d713afa0ab605',1,'ada::url_aggregator::get_hash()'],['../dd/d03/structada_1_1url.html#a8c833c2d7549b00de6fa11252d6a5f09',1,'ada::url::get_hash() const noexcept']]],
-  ['get_5fhost_3',['get_host',['../dd/d03/structada_1_1url.html#a8b54b08041a460995f5c7c950e224294',1,'ada::url::get_host()'],['../d8/d3b/structada_1_1url__aggregator.html#a352d704d0c8555ab8543b4bc620ccb47',1,'ada::url_aggregator::get_host()']]],
-  ['get_5fhostname_4',['get_hostname',['../dd/d03/structada_1_1url.html#aa4f23a030f0adb5301962fd5b5e68f86',1,'ada::url::get_hostname()'],['../d8/d3b/structada_1_1url__aggregator.html#aa1c35656b839ff4623ae5647d4aca43c',1,'ada::url_aggregator::get_hostname()']]],
-  ['get_5fhref_5',['get_href',['../dd/d03/structada_1_1url.html#a5500ad7f3289828e6bc654ebd0554bf4',1,'ada::url::get_href()'],['../d8/d3b/structada_1_1url__aggregator.html#aaca2ba9c9d9f42e7c451b5bb919bbe65',1,'ada::url_aggregator::get_href()']]],
-  ['get_5finstance_6',['get_instance',['../dd/dd6/ada__c_8cpp.html#a5649d9beb5e8b4fcbb78d274d85c3b69',1,'ada_c.cpp']]],
-  ['get_5forigin_7',['get_origin',['../dd/d03/structada_1_1url.html#a97d8483c8a6b8f211a0fcbab05b0a071',1,'ada::url::get_origin()'],['../d8/d3b/structada_1_1url__aggregator.html#a891937aea42faa460493243648503836',1,'ada::url_aggregator::get_origin()'],['../db/d75/structada_1_1url__base.html#a874d2fc09624f92a89942bdccd101dd1',1,'ada::url_base::get_origin()']]],
-  ['get_5fpassword_8',['get_password',['../dd/d03/structada_1_1url.html#abf05247468983609663574fcec0d2078',1,'ada::url::get_password()'],['../d8/d3b/structada_1_1url__aggregator.html#ab7adcccecb7e4222b61a5d1efb73c639',1,'ada::url_aggregator::get_password() const noexcept']]],
-  ['get_5fpathname_9',['get_pathname',['../d8/d3b/structada_1_1url__aggregator.html#a051f7c25b73c53da8cf872f248dc5583',1,'ada::url_aggregator::get_pathname()'],['../dd/d03/structada_1_1url.html#a1000c2e4b931739729c00ce724275925',1,'ada::url::get_pathname()']]],
-  ['get_5fpathname_5flength_10',['get_pathname_length',['../d8/d3b/structada_1_1url__aggregator.html#aa3264f4885233ee5bdcdc5cfddd16305',1,'ada::url_aggregator::get_pathname_length()'],['../dd/d03/structada_1_1url.html#a4f5dae57d12a2c4461fed4242fb2e83d',1,'ada::url::get_pathname_length() const noexcept']]],
-  ['get_5fport_11',['get_port',['../dd/d03/structada_1_1url.html#acef0e8c266e5586b15e2dcab5c7f566f',1,'ada::url::get_port()'],['../d8/d3b/structada_1_1url__aggregator.html#a9d9f6b08f5243b5a3b00cba36ee837c1',1,'ada::url_aggregator::get_port()']]],
-  ['get_5fprotocol_12',['get_protocol',['../dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1',1,'ada::url::get_protocol()'],['../d8/d3b/structada_1_1url__aggregator.html#a8ccfcb7061bfbe197d83a7d72f92c05d',1,'ada::url_aggregator::get_protocol()']]],
-  ['get_5fscheme_5ftype_13',['get_scheme_type',['../d2/d63/namespaceada_1_1scheme.html#a5e6e7cb90bb372cd1554c6bebb944de6',1,'ada::scheme']]],
-  ['get_5fsearch_14',['get_search',['../dd/d03/structada_1_1url.html#a049adbb069b60b2157bb9f1b5d9d3f8b',1,'ada::url::get_search()'],['../d8/d3b/structada_1_1url__aggregator.html#a4baeaf75d4bfd519f8c02e44e7c7e1b4',1,'ada::url_aggregator::get_search()']]],
-  ['get_5fspecial_5fport_15',['get_special_port',['../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde',1,'ada::scheme::get_special_port(std::string_view scheme) noexcept'],['../d2/d63/namespaceada_1_1scheme.html#aba53560a51ae2f47d4295398c57c73ba',1,'ada::scheme::get_special_port(ada::scheme::type type) noexcept']]],
-  ['get_5fstate_16',['get_state',['../d7/d6c/namespaceada_1_1helpers.html#a6b55d7d7b1918e00a9a1eeb3c91b8f90',1,'ada::helpers']]],
-  ['get_5fusername_17',['get_username',['../dd/d03/structada_1_1url.html#ad19422277411a063cd02a35256412a13',1,'ada::url::get_username()'],['../d8/d3b/structada_1_1url__aggregator.html#a4f99d76aca41f9037e2a5a518e22503f',1,'ada::url_aggregator::get_username()']]]
+  ['fast_5fdigit_5fcount_0',['fast_digit_count',['../d7/d6c/namespaceada_1_1helpers.html#a32aaa683783ad16614972ffaa5525ac8',1,'ada::helpers']]],
+  ['find_5fdirection_1',['find_direction',['../d5/ddb/namespaceada_1_1idna.html#a705c21b2e695ed27a12de6e7419cb540',1,'ada::idna']]],
+  ['find_5flast_5fnot_5fof_5fnsm_2',['find_last_not_of_nsm',['../d5/ddb/namespaceada_1_1idna.html#aa39f46b87bed904cd88981b4531d475f',1,'ada::idna']]],
+  ['find_5flongest_5fsequence_5fof_5fipv6_5fpieces_3',['find_longest_sequence_of_ipv6_pieces',['../d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4',1,'ada::serializers']]],
+  ['find_5fnext_5fhost_5fdelimiter_4',['find_next_host_delimiter',['../d7/d6c/namespaceada_1_1helpers.html#a2a58f86cdd1531639773044c45320fa7',1,'ada::helpers']]],
+  ['find_5fnext_5fhost_5fdelimiter_5fspecial_5',['find_next_host_delimiter_special',['../d7/d6c/namespaceada_1_1helpers.html#a507c70c395c7a5a152cc214f7a335fe5',1,'ada::helpers']]],
+  ['find_5frange_5findex_6',['find_range_index',['../d5/ddb/namespaceada_1_1idna.html#a2544de17d530836df29f7c7311f97d5e',1,'ada::idna']]],
+  ['from_5fascii_5fto_5fascii_7',['from_ascii_to_ascii',['../d5/ddb/namespaceada_1_1idna.html#a939fc0c16e2a4fe433685bcd44ad9c75',1,'ada::idna']]]
 ];

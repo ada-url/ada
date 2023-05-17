@@ -347,7 +347,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>                        has_zero_byte(xor3) | has_zero_byte(xor4) |</div>
 <div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>                        has_zero_byte(xor5);</div>
 <div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <span class="keywordflow">if</span> (is_match) {</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>      <span class="keywordflow">return</span> i + index_of_first_set_byte(is_match);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>      <span class="keywordflow">return</span> size_t(i + index_of_first_set_byte(is_match));</div>
 <div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    }</div>
 <div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>  }</div>
 <div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>  <span class="keywordflow">if</span> (i &lt; view.size()) {</div>
@@ -365,7 +365,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>                        has_zero_byte(xor3) | has_zero_byte(xor4) |</div>
 <div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>                        has_zero_byte(xor5);</div>
 <div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    <span class="keywordflow">if</span> (is_match) {</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>      <span class="keywordflow">return</span> i + index_of_first_set_byte(is_match);</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>      <span class="keywordflow">return</span> size_t(i + index_of_first_set_byte(is_match));</div>
 <div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    }</div>
 <div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>  }</div>
 <div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>  <span class="keywordflow">return</span> view.size();</div>
@@ -409,7 +409,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |</div>
 <div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>                        has_zero_byte(xor4) | has_zero_byte(xor5);</div>
 <div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    <span class="keywordflow">if</span> (is_match) {</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>      <span class="keywordflow">return</span> i + index_of_first_set_byte(is_match);</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>      <span class="keywordflow">return</span> size_t(i + index_of_first_set_byte(is_match));</div>
 <div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    }</div>
 <div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>  }</div>
 <div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>  <span class="keywordflow">if</span> (i &lt; view.size()) {</div>
@@ -427,7 +427,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>    uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |</div>
 <div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>                        has_zero_byte(xor4) | has_zero_byte(xor5);</div>
 <div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>    <span class="keywordflow">if</span> (is_match) {</div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>      <span class="keywordflow">return</span> i + index_of_first_set_byte(is_match);</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>      <span class="keywordflow">return</span> size_t(i + index_of_first_set_byte(is_match));</div>
 <div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    }</div>
 <div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>  }</div>
 <div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>  <span class="keywordflow">return</span> view.size();</div>
@@ -707,7 +707,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span>    uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |</div>
 <div class="line"><a id="l00626" name="l00626"></a><span class="lineno">  626</span>                        has_zero_byte(xor3) | has_zero_byte(xor4);</div>
 <div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>    <span class="keywordflow">if</span> (is_match) {</div>
-<div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>      <span class="keywordflow">return</span> i + index_of_first_set_byte(is_match);</div>
+<div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>      <span class="keywordflow">return</span> size_t(i + index_of_first_set_byte(is_match));</div>
 <div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>    }</div>
 <div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span>  }</div>
 <div class="line"><a id="l00631" name="l00631"></a><span class="lineno">  631</span> </div>
@@ -722,7 +722,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>    uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |</div>
 <div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>                        has_zero_byte(xor3) | has_zero_byte(xor4);</div>
 <div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>    <span class="keywordflow">if</span> (is_match) {</div>
-<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>      <span class="keywordflow">return</span> i + index_of_first_set_byte(is_match);</div>
+<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>      <span class="keywordflow">return</span> size_t(i + index_of_first_set_byte(is_match));</div>
 <div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>    }</div>
 <div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>  }</div>
 <div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span> </div>
@@ -755,7 +755,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span>    uint64_t is_match =</div>
 <div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>        has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);</div>
 <div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>    <span class="keywordflow">if</span> (is_match) {</div>
-<div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>      <span class="keywordflow">return</span> i + index_of_first_set_byte(is_match);</div>
+<div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>      <span class="keywordflow">return</span> size_t(i + index_of_first_set_byte(is_match));</div>
 <div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>    }</div>
 <div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>  }</div>
 <div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span> </div>
@@ -769,7 +769,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span>    uint64_t is_match =</div>
 <div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>        has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);</div>
 <div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span>    <span class="keywordflow">if</span> (is_match) {</div>
-<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>      <span class="keywordflow">return</span> i + index_of_first_set_byte(is_match);</div>
+<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>      <span class="keywordflow">return</span> size_t(i + index_of_first_set_byte(is_match));</div>
 <div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>    }</div>
 <div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>  }</div>
 <div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span> </div>
