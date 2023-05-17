@@ -25,12 +25,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: mymindstorm/setup-emsdk@v11
+      - uses: mymindstorm/setup-emsdk@v12
       - name: Verify
         run: emcc -v
       - name: Checkout
         uses: actions/checkout@v2
       - name: Configure
-        uses: emcmake  cmake -B buildwasm
+        run: emcmake  cmake -B buildwasm
       - name: Build
-        uses: cmake --build buildwasm
+        run: cmake --build buildwasm
