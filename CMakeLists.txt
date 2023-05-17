@@ -20,7 +20,7 @@ set(ADA_SOURCE_DIR src)
 
 add_subdirectory(src)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
+# set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
 
