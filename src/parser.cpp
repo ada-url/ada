@@ -36,8 +36,7 @@ result_type parse_url(std::string_view user_input,
 
   // We refuse to parse URL strings that exceed 4GB. Such strings are almost
   // surely the result of a bug or are otherwise a security concern.
-  // std::numeric_limits<uint32_t>::max appears busted on some platforms (emscripten)
-  if (user_input.size() > 0xFFFFFFFF) {
+  if (user_input.size() > std::numeric_limits<uint32_t>::max()) {
     url.is_valid = false;
   }
   // Going forward, user_input.size() is in [0,
