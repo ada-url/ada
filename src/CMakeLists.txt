@@ -55,10 +55,6 @@ if(ADA_LOGGING)
   target_compile_definitions(ada PRIVATE ADA_LOGGING=1)
 endif()
 
-if(ADA_COMPILE_TO_WASM)
-  set_target_properties(ada PROPERTIES LINK_FLAGS    "-Os -s WASM=1--bind --no-entry")
-endif()
-
 if(MSVC AND BUILD_SHARED_LIBS)
   set(ADA_WINDOWS_DLL TRUE)
 endif()

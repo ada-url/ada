@@ -36,6 +36,11 @@ if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
   add_dependency(gtest)
 endif()
 
+if (BUILD_WASM_TEST AND ADA_COMPILE_TO_WASM)
+  message(STATUS "The wasm tests are enabled.")
+  add_subdirectory(tests-wasm)
+endif()
+
 if (BUILD_TESTING)
   message(STATUS "The tests are enabled.")
   add_subdirectory(tests)

@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: '18'
       - name: Prepare
-        run: emcmake cmake -D BUILD_TESTING=off -D ADA_BENCHMARKS=OFF -D ADA_COMPILE_TO_WASM=ON -B build
+        run: emcmake cmake -D BUILD_TESTING=off -D ADA_BENCHMARKS=OFF -D ADA_COMPILE_TO_WASM=ON -D BUILD_WASM_TEST=ON -B build
       - name: Build
         run: cmake --build build -j=2
       - name: Test
