@@ -20,7 +20,10 @@ set(ADA_SOURCE_DIR src)
 
 add_subdirectory(src)
 
-# set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
+
+if (NOT ADA_COMPILE_TO_WASM)
+  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
+endif()
 
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
 

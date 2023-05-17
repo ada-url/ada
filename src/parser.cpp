@@ -34,12 +34,16 @@ result_type parse_url(std::string_view user_input,
   ada::state state = ada::state::SCHEME_START;
   result_type url{};
 
+  #if ADA_COMPILE_TO_WASM
+  #else
   // We refuse to parse URL strings that exceed 4GB. Such strings are almost
   // surely the result of a bug or are otherwise a security concern.
-  // if (user_input.size() >=
-  //     std::string_view::size_type(std::numeric_limits<uint32_t>::max)) {
-  //   url.is_valid = false;
-  // }
+  if (user_input.size() >=
+      std::string_view::size_type(std::numeric_limits<uint32_t>::max)) {
+    url.is_valid = false;
+  }
+  #endif // ADA_COMPILE_TO_WASM
+
   // Going forward, user_input.size() is in [0,
   // std::numeric_limits<uint32_t>::max). If we are provided with an invalid
   // base, or the optional_url was invalid, we must return.

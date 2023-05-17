@@ -1,6 +1,7 @@
 option(ADA_LOGGING "verbose output (useful for debugging)" OFF)
 option(ADA_DEVELOPMENT_CHECKS "development checks (useful for debugging)" OFF)
 option(ADA_SANITIZE "Sanitize addresses" OFF)
+option(ADA_COMPILE_TO_WASM "Compile to Wasm" OFF)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   option(ADA_SANITIZE_BOUNDS_STRICT "Sanitize bounds (strict): only for GCC" OFF)
 endif()
@@ -43,7 +44,10 @@ if (NOT CMAKE_BUILD_TYPE)
   endif()
 endif()
 
-# set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake")
+if (NOT ADA_COMPILE_TO_WASM)
+  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake")
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 17)

@@ -55,6 +55,10 @@ if(ADA_LOGGING)
   target_compile_definitions(ada PRIVATE ADA_LOGGING=1)
 endif()
 
+if(ADA_COMPILE_TO_WASM)
+  target_compile_definitions(ada PRIVATE ADA_COMPILE_TO_WASM=1)
+endif()
+
 if(MSVC AND BUILD_SHARED_LIBS)
   set(ADA_WINDOWS_DLL TRUE)
 endif()
