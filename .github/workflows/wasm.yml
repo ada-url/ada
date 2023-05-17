@@ -1,0 +1,38 @@
+name: Wasm
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ubuntu-build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - uses: mymindstorm/setup-emsdk@v11
+      # setup nodejs
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Prepare
+        run: emcmake cmake -D BUILD_TESTING=off -D ADA_BENCHMARKS=OFF -D ADA_COMPILE_TO_WASM=ON -B build
+      - name: Build
+        run: cmake --build build -j=2
+      - name: Test
+        run: node ./tests/wasm.js
