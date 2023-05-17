@@ -33,23 +33,23 @@ if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
   add_dependency(gtest)
 endif()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND NOT EMSCRIPTEN)
   message(STATUS "The tests are enabled.")
   add_subdirectory(tests)
 else()
   if(is_top_project)
     message(STATUS "The tests are disabled.")
   endif()
-endif(BUILD_TESTING)
+endif(BUILD_TESTING AND NOT EMSCRIPTEN)
 
-If(ADA_BENCHMARKS)
+If(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
   message(STATUS "Ada benchmarks enabled.")
   add_subdirectory(benchmarks)
-else(ADA_BENCHMARKS)
+else(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
   if(is_top_project)
     message(STATUS "Ada benchmarks disabled. Set ADA_BENCHMARKS=ON to enable them.")
   endif()
-endif(ADA_BENCHMARKS)
+endif(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
 
 add_library(ada::ada ALIAS ada)
 
@@ -59,11 +59,12 @@ set_target_properties(
   SOVERSION "${ADA_LIB_SOVERSION}"
   WINDOWS_EXPORT_ALL_SYMBOLS YES
 )
-
-include (TestBigEndian)
-TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
-if(IS_BIG_ENDIAN)
-  message(STATUS "Big-endian system detected.")
+if(NOT EMSCRIPTEN)
+  include (TestBigEndian)
+  TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+  if(IS_BIG_ENDIAN)
+    message(STATUS "Big-endian system detected.")
+  endif()
 endif()
 
 include(CMakePackageConfigHelpers)

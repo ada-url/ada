@@ -1,0 +1,36 @@
+name: emscripten
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mymindstorm/setup-emsdk@v11
+      - name: Verify
+        run: emcc -v
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Configure
+        uses: emcmake  cmake -B buildwasm
+      - name: Build
+        uses: cmake --build buildwasm
