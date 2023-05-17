@@ -35,4 +35,4 @@ jobs:
       - name: Build
         run: cmake --build build -j=2
       - name: Test
-        run: node ./tests/wasm.js
+        run: node ./tests-wasm/wasm.js
