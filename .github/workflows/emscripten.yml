@@ -36,4 +36,4 @@ jobs:
       - name: Build
         run: cmake --build buildwasm
       - name: Test
-        run: ctest --tests-dir buildwasm
+        run: ctest --test-dir buildwasm
