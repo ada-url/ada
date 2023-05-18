@@ -223,7 +223,7 @@ static_assert(sizeof(is_forbidden_domain_code_point_table_or_upper) == 256);
 static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('A')] == 2);
 static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('Z')] == 2);
 
-ada_really_inline constexpr bool contains_forbidden_domain_code_point_or_upper(
+ada_really_inline constexpr uint8_t contains_forbidden_domain_code_point_or_upper(
     const char* input, size_t length) noexcept {
   size_t i = 0;
   uint8_t accumulator{};
