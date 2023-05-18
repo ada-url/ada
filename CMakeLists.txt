@@ -69,6 +69,9 @@ include(GNUInstallDirs)
 
 if(NOT ADA_COVERAGE AND NOT EMSCRIPTEN)
   add_subdirectory(singleheader)
+endif()
+
+if(ADA_TOOLS)
   add_subdirectory(tools)
 endif()
 
