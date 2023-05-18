@@ -128,8 +128,8 @@ Functions</h2></td></tr>
 <tr class="separator:a689382365dca90506056bd529507e1d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e4d69a9364a662aa6b27afee0b33237"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a8e4d69a9364a662aa6b27afee0b33237">contains_forbidden_domain_code_point</a> (const char *input, size_t length) noexcept</td></tr>
 <tr class="separator:a8e4d69a9364a662aa6b27afee0b33237"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88bff92c3994ebce3d56fab5dd0ad6bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a88bff92c3994ebce3d56fab5dd0ad6bc">contains_forbidden_domain_code_point_or_upper</a> (const char *input, size_t length) noexcept</td></tr>
-<tr class="separator:a88bff92c3994ebce3d56fab5dd0ad6bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0a6aef61e1b2117fd60ec4ba0ed9a8d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#aa0a6aef61e1b2117fd60ec4ba0ed9a8d">contains_forbidden_domain_code_point_or_upper</a> (const char *input, size_t length) noexcept</td></tr>
+<tr class="separator:aa0a6aef61e1b2117fd60ec4ba0ed9a8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abdc1927baa2569e9a1396252d83bb482"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#abdc1927baa2569e9a1396252d83bb482">is_forbidden_domain_code_point</a> (const char c) noexcept</td></tr>
 <tr class="separator:abdc1927baa2569e9a1396252d83bb482"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34ca589b96e46ded7100f244fedd0c36"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a34ca589b96e46ded7100f244fedd0c36">is_alnum_plus</a> (const char c) noexcept</td></tr>
@@ -220,8 +220,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a88bff92c3994ebce3d56fab5dd0ad6bc" name="a88bff92c3994ebce3d56fab5dd0ad6bc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88bff92c3994ebce3d56fab5dd0ad6bc">&#9670;&#160;</a></span>contains_forbidden_domain_code_point_or_upper()</h2>
+<a id="aa0a6aef61e1b2117fd60ec4ba0ed9a8d" name="aa0a6aef61e1b2117fd60ec4ba0ed9a8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0a6aef61e1b2117fd60ec4ba0ed9a8d">&#9670;&#160;</a></span>contains_forbidden_domain_code_point_or_upper()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -230,7 +230,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr bool ada::unicode::contains_forbidden_domain_code_point_or_upper </td>
+          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr uint8_t ada::unicode::contains_forbidden_domain_code_point_or_upper </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>input</em>, </td>
@@ -255,7 +255,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Checks if the input contains a forbidden domain code point in which case the first bit is set to 1. If the input contains an upper case ASCII letter, then the second bit is set to 1. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#forbidden-domain-code-point">https://url.spec.whatwg.org/#forbidden-domain-code-point</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00226">226</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00227">227</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#ad048524b31e4b4cab9eccfe1ac01a2b8">is_forbidden_domain_code_point_table_or_upper</a>.</p>
 
@@ -286,7 +286,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Convert hex to binary. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00372">372</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00373">373</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a">percent_decode()</a>.</p>
 
@@ -349,7 +349,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Checks if the input is alphanumeric, '+', '-' or '.' </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00283">283</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00284">284</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a50281621924992b1070aba94a5b9ff96">is_alnum_plus_table</a>.</p>
 
@@ -382,7 +382,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex digit. An ASCII upper hex digit is an ASCII digit or a code point in the range U+0041 (A) to U+0046 (F), inclusive. An ASCII lower hex digit is an ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00297">297</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00298">298</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a">percent_decode()</a>.</p>
 
@@ -414,7 +414,7 @@ Variables</h2></td></tr>
 <p>Checks if the input is a ASCII tab or newline character.</p>
 <p>An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00306">306</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00307">307</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
@@ -444,7 +444,7 @@ Variables</h2></td></tr>
 <p>Checks if the input is a C0 control or space character.</p>
 <p>A C0 control or space is a C0 control or U+0020 SPACE. A C0 control is a code point in the range U+0000 NULL to U+001F INFORMATION SEPARATOR ONE, inclusive. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00302">302</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00303">303</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#afa758006b81473c457ff8f460db7f115">ada::url::set_port()</a>, and <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#af160be7e52d49441d5ec8244abfaa49f">ada::url_aggregator::set_port()</a>.</p>
 
@@ -475,7 +475,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>A double-dot path segment must be ".." or an ASCII case-insensitive match for ".%2e", "%2e.", or "%2e%2e". </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00314">314</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00315">315</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f">table_is_double_dot_path_segment</a>.</p>
 
@@ -568,7 +568,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>ipv4 character might contain 0-9 or a-f character ranges. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00368">368</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00369">369</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">ada::checkers::is_ipv4()</a>.</p>
 
@@ -599,7 +599,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>A single-dot path segment must be "." or an ASCII case-insensitive match for "%2e". </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00363">363</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00364">364</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
@@ -634,7 +634,7 @@ Variables</h2></td></tr>
 <dd>
 <a href="https://encoding.spec.whatwg.org/#utf-8-decode-without-bom">https://encoding.spec.whatwg.org/#utf-8-decode-without-bom</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00381">381</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00382">382</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#ab69353b882a97069e4b290be2b1097f2">convert_hex_to_binary()</a>, and <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a155ee2ca17ce7bf9c57059d56dbf94da">is_ascii_hex_digit()</a>.</p>
 
@@ -669,7 +669,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Returns a percent-encoding string whether percent encoding was needed or not. </p><dl class="section see"><dt>See also</dt><dd><a href="https://github.com/nodejs/node/blob/main/src/node_url.cc#L226">https://github.com/nodejs/node/blob/main/src/node_url.cc#L226</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00414">414</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00415">415</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">ada::character_sets::bit_at()</a>, and <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">ada::character_sets::hex</a>.</p>
 
@@ -710,7 +710,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Returns a percent-encoded string version of input, while starting the percent encoding at the provided index. </p><dl class="section see"><dt>See also</dt><dd><a href="https://github.com/nodejs/node/blob/main/src/node_url.cc#L226">https://github.com/nodejs/node/blob/main/src/node_url.cc#L226</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00493">493</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00494">494</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">ada::character_sets::bit_at()</a>, and <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">ada::character_sets::hex</a>.</p>
 
@@ -751,7 +751,7 @@ template&lt;bool append&gt; </div>
 </div><div class="memdoc">
 <p>Returns true if percent encoding was needed, in which case, we store the percent-encoded content in 'out'. If the boolean 'append' is set to true, the content is appended to 'out'. If percent encoding is not needed, out is left unchanged. </p><dl class="section see"><dt>See also</dt><dd><a href="https://github.com/nodejs/node/blob/main/src/node_url.cc#L226">https://github.com/nodejs/node/blob/main/src/node_url.cc#L226</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00441">441</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00442">442</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9">ada::character_sets::bit_at()</a>, and <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d">ada::character_sets::hex</a>.</p>
 
@@ -836,7 +836,7 @@ template&lt;bool append&gt; </div>
 <p>The resulting strings should not exceed 255 octets according to RFC 1035 section 2.3.4. ICU checks for label size and domain size, but these errors are ignored.</p>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#concept-domain-to-ascii">https://url.spec.whatwg.org/#concept-domain-to-ascii</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00475">475</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00476">476</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a8e4d69a9364a662aa6b27afee0b33237">contains_forbidden_domain_code_point()</a>, <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#acf371f0a0ee8c11dfaedb1963be2c57a">percent_decode()</a>, and <a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7d88f623d0a7e056cc89920b20e13dde">ada::idna::to_ascii()</a>.</p>
 
@@ -898,7 +898,7 @@ template&lt;bool append&gt; </div>
 </div><div class="memdoc">
 <dl class="section see"><dt>See also</dt><dd><a href="https://www.unicode.org/reports/tr46/#ToUnicode">https://www.unicode.org/reports/tr46/#ToUnicode</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00508">508</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00509">509</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7d9aecb5815cce8db291ed12d5d1774f">ada::idna::to_unicode()</a>.</p>
 
@@ -937,7 +937,7 @@ template&lt;bool append&gt; </div>
 <div class="line">    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
 <div class="line">    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00268">268</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00269">269</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a34ca589b96e46ded7100f244fedd0c36">is_alnum_plus()</a>.</p>
 
@@ -1015,7 +1015,7 @@ template&lt;bool append&gt; </div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00209">209</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a88bff92c3994ebce3d56fab5dd0ad6bc">contains_forbidden_domain_code_point_or_upper()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#aa0a6aef61e1b2117fd60ec4ba0ed9a8d">contains_forbidden_domain_code_point_or_upper()</a>.</p>
 
 </div>
 </div>
@@ -1079,7 +1079,7 @@ template&lt;bool append&gt; </div>
 <b>Initial value:</b><div class="fragment"><div class="line">= {</div>
 <div class="line">    <span class="stringliteral">&quot;..&quot;</span>, <span class="stringliteral">&quot;%2e.&quot;</span>, <span class="stringliteral">&quot;.%2e&quot;</span>, <span class="stringliteral">&quot;%2e%2e&quot;</span>}</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00311">311</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00312">312</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a2a5c2e0ef11ea4d4fe564b7fb1fa1f16">is_double_dot_path_segment()</a>.</p>
 

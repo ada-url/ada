@@ -46,7 +46,7 @@ var namespaceada =
     ] ],
     [ "unicode", "d2/dc3/namespaceada_1_1unicode.html", [
       [ "contains_forbidden_domain_code_point", "d2/dc3/namespaceada_1_1unicode.html#a8e4d69a9364a662aa6b27afee0b33237", null ],
-      [ "contains_forbidden_domain_code_point_or_upper", "d2/dc3/namespaceada_1_1unicode.html#a88bff92c3994ebce3d56fab5dd0ad6bc", null ],
+      [ "contains_forbidden_domain_code_point_or_upper", "d2/dc3/namespaceada_1_1unicode.html#aa0a6aef61e1b2117fd60ec4ba0ed9a8d", null ],
       [ "convert_hex_to_binary", "d2/dc3/namespaceada_1_1unicode.html#ab69353b882a97069e4b290be2b1097f2", null ],
       [ "has_tabs_or_newline", "d2/dc3/namespaceada_1_1unicode.html#ade8fed1cb2577dc6af5b9321a9fb3e00", null ],
       [ "is_alnum_plus", "d2/dc3/namespaceada_1_1unicode.html#a34ca589b96e46ded7100f244fedd0c36", null ],
