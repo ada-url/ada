@@ -479,22 +479,6 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
     }
     ada_log("parse_host fast path ", get_hostname());
     return true;
-  } else if (is_forbidden_or_upper == 2) {
-    // We have encountered at least one upper case ASCII letter, let us
-    // try to convert it to lower case. If there is no 'xn-' in the result,
-    // we can then use a secondary fast path.
-    std::string _buffer = std::string(input);
-    unicode::to_lower_ascii(_buffer.data(), _buffer.size());
-    if (input.find("xn-") == std::string_view::npos) {
-      // secondary fast path when input is not all lower case
-      update_base_hostname(input);
-      if (checkers::is_ipv4(get_hostname())) {
-        ada_log("parse_host fast path ipv4");
-        return parse_ipv4(get_hostname());
-      }
-      ada_log("parse_host fast path ", get_hostname());
-      return true;
-    }
   }
   // We have encountered at least one forbidden code point or the input contains
   // 'xn-' (case insensitive), so we need to call 'to_ascii' to perform the full
