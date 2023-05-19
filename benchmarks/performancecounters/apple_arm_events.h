@@ -416,7 +416,7 @@ typedef struct kpep_db {
   usize fixed_counter_count;
   usize config_counter_count;
   usize power_counter_count;
-  u32 archtecture;  ///< see `KPEP CPU architecture constants` above.
+  u32 architecture;  ///< see `KPEP CPU architecture constants` above.
   u32 fixed_counter_bits;
   u32 config_counter_bits;
   u32 power_counter_bits;
