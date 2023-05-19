@@ -744,7 +744,7 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
   ADA_ASSERT_TRUE(validate());
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter
   // to insert
-  // `//` initially to the buffer, since it depends on the hostname existance.
+  // `//` initially to the buffer, since it depends on the hostname existence.
   if (has_authority()) {
     return;
   }

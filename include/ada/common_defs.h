@@ -242,7 +242,7 @@ namespace ada {
 #define ADA_DEVELOPMENT_CHECKS 1
 #endif  // __OPTIMIZE__
 #endif  // _MSC_VER
-#endif  // SIMDJSON_DEVELOPMENT_CHECKS
+#endif  // ADA_DEVELOPMENT_CHECKS
 
 #define ADA_STR(x) #x
 
