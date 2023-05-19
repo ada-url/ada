@@ -152,7 +152,7 @@ struct url : url_base {
   [[nodiscard]] const std::string_view get_pathname() const noexcept;
 
   /**
-   * Compute the pathname length in bytes witout instantiating a view or a
+   * Compute the pathname length in bytes without instantiating a view or a
    * string.
    * @return size of the pathname in bytes
    * @see https://url.spec.whatwg.org/#dom-url-pathname

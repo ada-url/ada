@@ -563,7 +563,7 @@ size_t count_rust_invalid() {
 // https://twitter.com/ecbos_/status/1627494441656238082?s=61&t=vCdcfSGWHH056CBdklWfCg
 static void BasicBench_ServoUrl(benchmark::State& state) {
   // Other benchmarks copy the 'standard url' to a structure.
-  // We try to mimick the effect.
+  // We try to mimic the effect.
   volatile size_t success = 0;
 
   for (auto _ : state) {

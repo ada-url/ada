@@ -13,7 +13,7 @@
 namespace ada::checkers {
 
 inline bool has_hex_prefix_unsafe(std::string_view input) {
-  // This is actualy efficient code, see has_hex_prefix for the assembly.
+  // This is actually efficient code, see has_hex_prefix for the assembly.
   uint32_t value_one = 1;
   bool is_little_endian = (reinterpret_cast<char*>(&value_one)[0] == 1);
   uint16_t word0x{};

@@ -164,7 +164,7 @@ ada_really_inline void remove_ascii_tab_or_newline(
 ada_really_inline std::string_view substring(std::string_view input,
                                              size_t pos) noexcept {
   ADA_ASSERT_TRUE(pos <= input.size());
-  // The following is safer but uneeded if we have the above line:
+  // The following is safer but unneeded if we have the above line:
   // return pos > input.size() ? std::string_view() : input.substr(pos);
   return input.substr(pos);
 }
