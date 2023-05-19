@@ -273,7 +273,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> std::string_view substring(std::string_view input,</div>
 <div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>                                             <span class="keywordtype">size_t</span> pos) <span class="keyword">noexcept</span> {</div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(pos &lt;= input.size());</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>  <span class="comment">// The following is safer but uneeded if we have the above line:</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>  <span class="comment">// The following is safer but unneeded if we have the above line:</span></div>
 <div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>  <span class="comment">// return pos &gt; input.size() ? std::string_view() : input.substr(pos);</span></div>
 <div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>  <span class="keywordflow">return</span> input.substr(pos);</div>
 <div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>}</div>
