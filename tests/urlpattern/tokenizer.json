@@ -1,0 +1,1772 @@
+[
+    {
+        "input": "https://example.com/foo/:bar([^/]*)?",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "NAME",
+                "value_start": 24,
+                "value_end": 27
+            },
+            {
+                "type": "REGEX",
+                "value_start": 28,
+                "value_end": 33
+            },
+            {
+                "type": "OTHER_MODIFIER",
+                "value_start": 35,
+                "value_end": 36
+            },
+            {
+                "type": "END",
+                "value_start": 36,
+                "value_end": 36
+            }
+        ]
+    },
+    {
+        "input": "http{s}?://*.example.com/books/:id",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "OPEN",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CLOSE",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "OTHER_MODIFIER",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "ASTERISK",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "CHAR",
+                "value_start": 26,
+                "value_end": 27
+            },
+            {
+                "type": "CHAR",
+                "value_start": 27,
+                "value_end": 28
+            },
+            {
+                "type": "CHAR",
+                "value_start": 28,
+                "value_end": 29
+            },
+            {
+                "type": "CHAR",
+                "value_start": 29,
+                "value_end": 30
+            },
+            {
+                "type": "CHAR",
+                "value_start": 30,
+                "value_end": 31
+            },
+            {
+                "type": "NAME",
+                "value_start": 31,
+                "value_end": 33
+            },
+            {
+                "type": "END",
+                "value_start": 34,
+                "value_end": 34
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/2023/may/*",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "CHAR",
+                "value_start": 26,
+                "value_end": 27
+            },
+            {
+                "type": "CHAR",
+                "value_start": 27,
+                "value_end": 28
+            },
+            {
+                "type": "CHAR",
+                "value_start": 28,
+                "value_end": 29
+            },
+            {
+                "type": "ASTERISK",
+                "value_start": 29,
+                "value_end": 30
+            },
+            {
+                "type": "END",
+                "value_start": 30,
+                "value_end": 30
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:id",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "NAME",
+                "value_start": 26,
+                "value_end": 28
+            },
+            {
+                "type": "END",
+                "value_start": 29,
+                "value_end": 29
+            }
+        ]
+    },
+    {
+        "input": "http://example.com/:name/",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "NAME",
+                "value_start": 19,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "END",
+                "value_start": 25,
+                "value_end": 25
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:你好",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "NAME",
+                "value_start": 26,
+                "value_end": 28
+            },
+            {
+                "type": "END",
+                "value_start": 29,
+                "value_end": 29
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:你好/:日本語",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "NAME",
+                "value_start": 26,
+                "value_end": 28
+            },
+            {
+                "type": "CHAR",
+                "value_start": 29,
+                "value_end": 30
+            },
+            {
+                "type": "NAME",
+                "value_start": 30,
+                "value_end": 33
+            },
+            {
+                "type": "END",
+                "value_start": 34,
+                "value_end": 34
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:你好/:𝒳",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "NAME",
+                "value_start": 26,
+                "value_end": 28
+            },
+            {
+                "type": "CHAR",
+                "value_start": 29,
+                "value_end": 30
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 30,
+                "value_end": 31
+            },
+            {
+                "type": "CHAR",
+                "value_start": 31,
+                "value_end": 32
+            },
+            {
+                "type": "CHAR",
+                "value_start": 32,
+                "value_end": 33
+            },
+            {
+                "type": "END",
+                "value_start": 33,
+                "value_end": 33
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:футбол",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "NAME",
+                "value_start": 26,
+                "value_end": 32
+            },
+            {
+                "type": "END",
+                "value_start": 33,
+                "value_end": 33
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:नमस्ते",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "NAME",
+                "value_start": 26,
+                "value_end": 32
+            },
+            {
+                "type": "END",
+                "value_start": 33,
+                "value_end": 33
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:𐤀",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "CHAR",
+                "value_start": 23,
+                "value_end": 24
+            },
+            {
+                "type": "CHAR",
+                "value_start": 24,
+                "value_end": 25
+            },
+            {
+                "type": "CHAR",
+                "value_start": 25,
+                "value_end": 26
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 26,
+                "value_end": 27
+            },
+            {
+                "type": "CHAR",
+                "value_start": 27,
+                "value_end": 28
+            },
+            {
+                "type": "CHAR",
+                "value_start": 28,
+                "value_end": 29
+            },
+            {
+                "type": "END",
+                "value_start": 29,
+                "value_end": 29
+            }
+        ]
+    },
+    {
+        "input": "http://www.example.com/",
+        "output": [
+            {
+                "type": "CHAR",
+                "value_start": 0,
+                "value_end": 1
+            },
+            {
+                "type": "CHAR",
+                "value_start": 1,
+                "value_end": 2
+            },
+            {
+                "type": "CHAR",
+                "value_start": 2,
+                "value_end": 3
+            },
+            {
+                "type": "CHAR",
+                "value_start": 3,
+                "value_end": 4
+            },
+            {
+                "type": "INVALID_CHAR",
+                "value_start": 4,
+                "value_end": 5
+            },
+            {
+                "type": "CHAR",
+                "value_start": 5,
+                "value_end": 6
+            },
+            {
+                "type": "CHAR",
+                "value_start": 6,
+                "value_end": 7
+            },
+            {
+                "type": "CHAR",
+                "value_start": 7,
+                "value_end": 8
+            },
+            {
+                "type": "CHAR",
+                "value_start": 8,
+                "value_end": 9
+            },
+            {
+                "type": "CHAR",
+                "value_start": 9,
+                "value_end": 10
+            },
+            {
+                "type": "CHAR",
+                "value_start": 10,
+                "value_end": 11
+            },
+            {
+                "type": "CHAR",
+                "value_start": 11,
+                "value_end": 12
+            },
+            {
+                "type": "CHAR",
+                "value_start": 12,
+                "value_end": 13
+            },
+            {
+                "type": "CHAR",
+                "value_start": 13,
+                "value_end": 14
+            },
+            {
+                "type": "CHAR",
+                "value_start": 14,
+                "value_end": 15
+            },
+            {
+                "type": "CHAR",
+                "value_start": 15,
+                "value_end": 16
+            },
+            {
+                "type": "CHAR",
+                "value_start": 16,
+                "value_end": 17
+            },
+            {
+                "type": "CHAR",
+                "value_start": 17,
+                "value_end": 18
+            },
+            {
+                "type": "CHAR",
+                "value_start": 18,
+                "value_end": 19
+            },
+            {
+                "type": "CHAR",
+                "value_start": 19,
+                "value_end": 20
+            },
+            {
+                "type": "CHAR",
+                "value_start": 20,
+                "value_end": 21
+            },
+            {
+                "type": "CHAR",
+                "value_start": 21,
+                "value_end": 22
+            },
+            {
+                "type": "CHAR",
+                "value_start": 22,
+                "value_end": 23
+            },
+            {
+                "type": "END",
+                "value_start": 23,
+                "value_end": 23
+            }
+        ]
+    }
+]

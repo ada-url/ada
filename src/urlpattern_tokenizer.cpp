@@ -2,6 +2,8 @@
 #include "ada/unicode.h"
 #include "ada/urlpattern.h"
 
+#include <iostream>
+
 namespace ada::urlpattern {
 
 ada_really_inline bool is_valid_name_code_point(const char32_t &c,
@@ -14,7 +16,10 @@ ada_really_inline bool is_ascii(char32_t &c) { return c < 0x80; }
 
 // https://wicg.github.io/urlpattern/#seek-and-get-the-next-code-point
 ada_really_inline void tokenizer::seek_and_get_next_code_point() {
-  next_index = index;
+  // Set tokenizer’s next index to index.
+  index = next_index;
+
+  // Run get the next code point given tokenizer.
   get_next_code_point();
 }
 
@@ -22,7 +27,7 @@ ada_really_inline void tokenizer::seek_and_get_next_code_point() {
 ada_really_inline void tokenizer::get_next_code_point() {
   // Set tokenizer’s code point to the Unicode code point in tokenizer’s input
   // at the position indicated by tokenizer’s next index.
-  code_point = input[next_index];
+  code_point = input[index];
 
   // Increment tokenizer’s next index by 1.
   ++next_index;
@@ -64,58 +69,81 @@ std::vector<token> tokenize(std::u32string_view _input,
 
   // While tokenizer’s index is less than tokenizer’s input's code point length:
   while (t.index < t.input.size()) {
+    std::cout << t.code_point << std::endl;
+    // Run seek and get the next code point given tokenizer and tokenizer’s
+    // index.
     t.seek_and_get_next_code_point();
+
     switch (t.code_point) {
       case '*': {
+        // Run add a token with default position and length given tokenizer and
+        // "asterisk".
         t.add_token(TOKEN_TYPE::ASTERISK, t.next_index, t.index, t.index);
-        break;
+        continue;
       }
       case '+':
       case '?': {
         t.add_token(TOKEN_TYPE::OTHER_MODIFIER, t.next_index, t.index, t.index);
-        break;
+        continue;
       }
       case '\\': {
         // If tokenizer’s index is equal to tokenizer’s input's code point
         // length − 1:
         if (t.index == t.input.size() - 1) {
+          // Run process a tokenizing error given tokenizer, tokenizer’s next
+          // index, and tokenizer’s index.
           t.process_tokenizing_error("should scape something",
                                      /*value_start*/ t.index,
                                      /*value_end*/ t.index);
+          continue;
         }
 
+        // Run get the next code point given tokenizer.
+        t.get_next_code_point();
+
+        // Run add a token with default length given tokenizer, "escaped-char",
+        // tokenizer’s next index, and escaped index.
         t.add_token(TOKEN_TYPE::ESCAPED_CHAR, t.next_index, t.index, t.index);
-        break;
+        continue;
       }
       case '{': {
         t.add_token(TOKEN_TYPE::OPEN, t.next_index, t.index, t.index);
-        break;
+        continue;
       }
       case '}': {
         t.add_token(TOKEN_TYPE::CLOSE, t.next_index, t.index, t.index);
-        break;
+        continue;
       }
       case ':': {
-        // If valid code point is false, break.
-        // Set name position to tokenizer’s next index.
+        // Let name position be tokenizer’s next index.
         size_t name_start, name_position;
         name_position = t.next_index;
+
+        // Let name start be name position.
         name_start = name_position;
 
         // While name position is less than tokenizer’s input's code point
         // length:
         while (name_position < t.input.size()) {
+          // Run seek and get the next code point given tokenizer and name
+          // position.
+          std::cout << "NEXT INDEX" << t.next_index << std::endl;
           t.seek_and_get_next_code_point();
+
           // Let first code point be true if name position equals name start and
           // false otherwise.
-          if (name_position == name_start &&
-              !is_valid_name_code_point(t.input[t.code_point],
-                                        /*is_first=*/true)) {
-            break;
-          } else if (!is_valid_name_code_point(t.input[t.code_point],
-                                               /*is_first=*/false)) {
-            break;
-          }
+          bool first_code_point = name_position == name_start;
+
+          // Let valid code point be the result of running is a valid name code
+          // point given tokenizer’s code point and first code point.
+          bool valid_code_point =
+              is_valid_name_code_point(t.input[t.code_point],
+                                       /*is_first=*/first_code_point);
+
+          // If valid code point is false break.
+          if (!valid_code_point) break;
+
+          // Set name position to tokenizer’s next index.
           name_position = t.next_index;
         }
         if (name_position <= name_start) {
@@ -201,16 +229,18 @@ std::vector<token> tokenize(std::u32string_view _input,
           if (depth) {
             t.process_tokenizing_error("malformed regex", regexp_start,
                                        t.index);
-            break;
+            continue;
           }
 
           if ((regexp_position - regexp_start) == 0) {
             t.process_tokenizing_error("malformed regex", regexp_start,
                                        t.index);
+            continue;
           }
 
           t.add_token(TOKEN_TYPE::REGEXP, /*next_pos=*/regexp_position,
                       regexp_start, regexp_position);
+          continue;
         }
       }
       default: {
