@@ -634,7 +634,9 @@ bool url_aggregator::set_hostname(const std::string_view input) {
     std::string_view path = get_pathname();
     if (!path.empty()) {
       auto out = ada::parse<ada::url_aggregator>(path);
-      if (out && out->is_special()) {
+      if (out && (out->type == scheme::HTTP || out->type == scheme::HTTPS)) {
+        // If pathURL’s scheme is not "http" and not "https", then return a
+        // new opaque origin.
         return helpers::concat(out->get_protocol(), "//", out->get_host());
       }
     }
