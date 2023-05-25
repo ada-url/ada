@@ -5,6 +5,7 @@
 #include "ada.h"
 #include "ada/implementation.h"
 #include "ada/helpers.h"
+#include "ada/scheme.h"
 
 #include <algorithm>
 #include <string>
@@ -22,7 +23,10 @@ namespace ada {
   if (non_special_scheme == "blob") {
     if (!path.empty()) {
       auto result = ada::parse<ada::url>(path);
-      if (result && result->is_special()) {
+      if (result &&
+          (result->type == scheme::HTTP || result->type == scheme::HTTPS)) {
+        // If pathURL’s scheme is not "http" and not "https", then return a
+        // new opaque origin.
         return ada::helpers::concat(result->get_protocol(), "//",
                                     result->get_host());
       }
