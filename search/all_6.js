@@ -1,7 +1,7 @@
 var searchData=
 [
   ['fast_5fdigit_5fcount_0',['fast_digit_count',['../d7/d6c/namespaceada_1_1helpers.html#a32aaa683783ad16614972ffaa5525ac8',1,'ada::helpers']]],
-  ['file_1',['FILE',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9',1,'ada::scheme::FILE()'],['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719',1,'ada::FILE()']]],
+  ['file_1',['FILE',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9',1,'ada::scheme::FILE'],['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719',1,'ada::FILE']]],
   ['file_5fhost_2',['FILE_HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a8de3c990e78108965db7c3f38cc5fca7',1,'ada']]],
   ['file_5fslash_3',['FILE_SLASH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a33e2ce137194c80639c32978fb77a489',1,'ada']]],
   ['final_5fcode_4',['final_code',['../d2/dec/structada_1_1idna_1_1directions.html#a62bf568024033084f8c723006b676b3c',1,'ada::idna::directions']]],

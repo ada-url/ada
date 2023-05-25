@@ -24,7 +24,7 @@ var searchData=
   ['ada_5fidna_5fto_5funicode_5fh_21',['ADA_IDNA_TO_UNICODE_H',['../dd/d4c/ada__idna_8h.html#a9662a57a85b4be7cbefd946734024fe6',1,'ada_idna.h']]],
   ['ada_5fidna_5funicode_5ftranscoding_5fh_22',['ADA_IDNA_UNICODE_TRANSCODING_H',['../dd/d4c/ada__idna_8h.html#a7c51f02c4cff8d8f66171c2c8716f5df',1,'ada_idna.h']]],
   ['ada_5fidna_5fvalidity_5fh_23',['ADA_IDNA_VALIDITY_H',['../dd/d4c/ada__idna_8h.html#a0d819d87708524de1f5a4515f7f9f6d4',1,'ada_idna.h']]],
-  ['ada_5fis_5fbig_5fendian_24',['ADA_IS_BIG_ENDIAN',['../d7/d19/common__defs_8h.html#a0076490fdf8f2256ed9319348ab762b2',1,'ADA_IS_BIG_ENDIAN():&#160;common_defs.h'],['../d7/d19/common__defs_8h.html#a0076490fdf8f2256ed9319348ab762b2',1,'ADA_IS_BIG_ENDIAN():&#160;common_defs.h']]],
+  ['ada_5fis_5fbig_5fendian_24',['ADA_IS_BIG_ENDIAN',['../d7/d19/common__defs_8h.html#a0076490fdf8f2256ed9319348ab762b2',1,'ADA_IS_BIG_ENDIAN:&#160;common_defs.h'],['../d7/d19/common__defs_8h.html#a0076490fdf8f2256ed9319348ab762b2',1,'ADA_IS_BIG_ENDIAN:&#160;common_defs.h']]],
   ['ada_5fisaligned_5fn_25',['ADA_ISALIGNED_N',['../d7/d19/common__defs_8h.html#a6a069f0d3d1400c28a80a8e5db9859bb',1,'common_defs.h']]],
   ['ada_5flikely_26',['ada_likely',['../d7/d19/common__defs_8h.html#afad02d7ad262323ba94fe6dec9dab4b6',1,'common_defs.h']]],
   ['ada_5fnever_5finline_27',['ada_never_inline',['../d7/d19/common__defs_8h.html#a0349da887815dc7cf3b4229a6bb45669',1,'common_defs.h']]],

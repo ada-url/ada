@@ -21,7 +21,7 @@ var searchData=
   ['url_5fcomponents_2ecpp_18',['url_components.cpp',['../de/d5a/url__components_8cpp.html',1,'']]],
   ['url_5fcomponents_2eh_19',['url_components.h',['../d3/d2a/url__components_8h.html',1,'']]],
   ['userinfo_5fpercent_5fencode_20',['USERINFO_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da',1,'ada::character_sets']]],
-  ['username_5fend_21',['username_end',['../d3/d43/structada_1_1url__components.html#adadba3810c11d983d8551d6a267bb34b',1,'ada::url_components::username_end()'],['../dc/d69/structada__url__components.html#a075cb5bfb997f3811e9607b696071f70',1,'ada_url_components::username_end()']]],
+  ['username_5fend_21',['username_end',['../d3/d43/structada_1_1url__components.html#adadba3810c11d983d8551d6a267bb34b',1,'ada::url_components::username_end'],['../dc/d69/structada__url__components.html#a075cb5bfb997f3811e9607b696071f70',1,'ada_url_components::username_end']]],
   ['utf32_5flength_5ffrom_5futf8_22',['utf32_length_from_utf8',['../d5/ddb/namespaceada_1_1idna.html#a3f4b1dede3010b9e5173fd8c91227ec0',1,'ada::idna']]],
   ['utf32_5fto_5fpunycode_23',['utf32_to_punycode',['../d5/ddb/namespaceada_1_1idna.html#a742b05e0aba2245da3ac0ffd9ec678b6',1,'ada::idna']]],
   ['utf32_5fto_5futf8_24',['utf32_to_utf8',['../d5/ddb/namespaceada_1_1idna.html#a43b333f48581059d57dbbba4e5b13e9a',1,'ada::idna']]],

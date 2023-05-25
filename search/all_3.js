@@ -12,7 +12,7 @@ var searchData=
   ['checkers_2ecpp_9',['checkers.cpp',['../d4/dd6/checkers_8cpp.html',1,'']]],
   ['checkers_2eh_10',['checkers.h',['../d4/dec/checkers_8h.html',1,'']]],
   ['cli_2emd_11',['cli.md',['../d0/d4b/cli_8md.html',1,'']]],
-  ['command_20line_20interface_20_28cli_29_12',['Command line interface (CLI)',['../db/d8a/md_docs_cli.html',1,'']]],
+  ['command_20line_20interface_20_28cli_29_12',['Command line interface (CLI)',['../db/d8a/md_docs_2cli.html',1,'']]],
   ['common_5fdefs_2eh_13',['common_defs.h',['../d7/d19/common__defs_8h.html',1,'']]],
   ['components_14',['components',['../d8/d9f/structparse__result.html#a0e7ad012e6158813cd5208e641c1a94c',1,'parse_result']]],
   ['compose_15',['compose',['../d5/ddb/namespaceada_1_1idna.html#a03db2791270405a5c682305c18c5d1cf',1,'ada::idna']]],

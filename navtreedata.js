@@ -42,7 +42,7 @@ var NAVTREE =
       [ "Amalgamation", "index.html#autotoc_md24", null ],
       [ "License", "index.html#autotoc_md25", null ]
     ] ],
-    [ "Command line interface (CLI)", "db/d8a/md_docs_cli.html", null ],
+    [ "Command line interface (CLI)", "db/d8a/md_docs_2cli.html", null ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
@@ -62,7 +62,7 @@ var NAVTREE =
         [ "All", "functions.html", null ],
         [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", null ],
-        [ "Related Functions", "functions_rela.html", null ]
+        [ "Related Symbols", "functions_rela.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
