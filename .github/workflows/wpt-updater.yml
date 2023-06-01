@@ -23,14 +23,12 @@ jobs:
       - name: Fetch tests
         run: tools/update-wpt.sh
       - name: Open pull request
-        uses: peter-evans/create-pull-request@f3a21bf3404eae73a97f65817ab35f351a1a63fe #v5.0.0
+        uses: peter-evans/create-pull-request@284f54f989303d2699d373481a0cfa13ad5a6666 #v5.0.1
         with:
           token: ${{ env.GITHUB_TOKEN }}
           commit-message: "test: update web platform tests"
           branch: "automatic-update-wpt"
           title: "Update web platform tests"
           body: "This is an automated pull request for updating the WPT"
-          add-paths: |
-            tests/wpt/**/*
           reviewers: "lemire,anonrig"
           delete-branch: true
