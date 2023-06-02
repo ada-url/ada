@@ -24,10 +24,14 @@ jobs:
       - name: Open pull request
         uses: peter-evans/create-pull-request@284f54f989303d2699d373481a0cfa13ad5a6666 #v5.0.1
         with:
-          token: ${{ env.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           commit-message: "test: update web platform tests"
           branch: "automatic-update-wpt"
           title: "Update web platform tests"
-          body: "This is an automated pull request for updating the WPT"
-          reviewers: "lemire,anonrig"
+          body: |
+            This is an automated pull request for updating the WPT.
+            - [Web Platform Tests](https://github.com/web-platform-tests/wpt/tree/master/url)
+            - [Commit History](https://github.com/web-platform-tests/wpt/commits/master/url/resources)
+            cc @anonrig @lemire
+          team-reviewers: core
           delete-branch: true
