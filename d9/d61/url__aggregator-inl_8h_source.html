@@ -960,52 +960,57 @@ $(document).ready(function(){initNavTree('d9/d61/url__aggregator-inl_8h_source.h
 <div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>  }</div>
 <div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>  ada_log(<span class="stringliteral">&quot;parse_port: is_valid = &quot;</span>, is_valid);</div>
 <div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>  <span class="keywordflow">if</span> (is_valid) {</div>
-<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>    <span class="keywordflow">if</span> (r.ec == std::errc() &amp;&amp; scheme_default_port() != parsed_port) {</div>
-<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>      update_base_port(parsed_port);</div>
-<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>      clear_port();</div>
-<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>    }</div>
-<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>  }</div>
-<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>  <span class="keywordflow">return</span> consumed;</div>
-<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>}</div>
-<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span> </div>
-<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span><span class="keyword">inline</span> <span class="keywordtype">void</span> url_aggregator::set_protocol_as_file() {</div>
-<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>  ada_log(<span class="stringliteral">&quot;url_aggregator::set_protocol_as_file &quot;</span>);</div>
-<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(<a class="code hl_function" href="../../d8/d3b/structada_1_1url__aggregator.html#a8cb5bdd9006cb24e3414ca233310e85a">validate</a>());</div>
-<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>  <a class="code hl_enumeration" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3b">type</a> = <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>;</div>
-<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>  <span class="comment">// next line could overflow but unsigned arithmetic has well-defined</span></div>
-<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>  <span class="comment">// overflows.</span></div>
-<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>  uint32_t new_difference = 5 - components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a>;</div>
-<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span> </div>
-<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>  <span class="keywordflow">if</span> (buffer.empty()) {</div>
-<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>    buffer.append(<span class="stringliteral">&quot;file:&quot;</span>);</div>
-<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>    buffer.erase(0, components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a>);</div>
-<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>    buffer.insert(0, <span class="stringliteral">&quot;file:&quot;</span>);</div>
-<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>  }</div>
-<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a> = 5;</div>
-<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span> </div>
-<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>  <span class="comment">// Update the rest of the components.</span></div>
-<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#adadba3810c11d983d8551d6a267bb34b">username_end</a> += new_difference;</div>
-<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f">host_start</a> += new_difference;</div>
-<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b">host_end</a> += new_difference;</div>
-<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a01a782b2fc7b613f7d3b3bb2a48c5095">pathname_start</a> += new_difference;</div>
-<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>  <span class="keywordflow">if</span> (components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a61a69ee2ef2cb82b399b5668b6b8a43c">search_start</a> != <a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">url_components::omitted</a>) {</div>
-<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>    components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a61a69ee2ef2cb82b399b5668b6b8a43c">search_start</a> += new_difference;</div>
-<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>  }</div>
-<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>  <span class="keywordflow">if</span> (components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a06f265e421e6cf2eff0d280ad6170226">hash_start</a> != <a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">url_components::omitted</a>) {</div>
-<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>    components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a06f265e421e6cf2eff0d280ad6170226">hash_start</a> += new_difference;</div>
-<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>  }</div>
-<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(<a class="code hl_function" href="../../d8/d3b/structada_1_1url__aggregator.html#a8cb5bdd9006cb24e3414ca233310e85a">validate</a>());</div>
-<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>}</div>
-<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span> </div>
-<div class="line"><a id="l00896" name="l00896"></a><span class="lineno"><a class="line" href="../../dd/d64/namespaceada.html#a1d9c438eb5078b59b136314467c3dd27">  896</a></span><span class="keyword">inline</span> std::ostream &amp;<a class="code hl_function" href="../../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed">operator&lt;&lt;</a>(std::ostream &amp;out,</div>
-<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>                                <span class="keyword">const</span> <a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">ada::url_aggregator</a> &amp;u) {</div>
-<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>  <span class="keywordflow">return</span> out &lt;&lt; u.<a class="code hl_function" href="../../d8/d3b/structada_1_1url__aggregator.html#a516d5b8a33529dc8b8c95d52abc6e7de">to_string</a>();</div>
+<div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>    ada_log(<span class="stringliteral">&quot;parse_port&quot;</span>, r.ec == std::errc());</div>
+<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>    <span class="comment">// scheme_default_port can return 0, and we should allow 0 as a base port.</span></div>
+<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>    <span class="keyword">auto</span> default_port = scheme_default_port();</div>
+<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>    <span class="keywordtype">bool</span> is_port_valid = (default_port == 0 &amp;&amp; parsed_port == 0) ||</div>
+<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>                         (default_port != parsed_port);</div>
+<div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>    <span class="keywordflow">if</span> (r.ec == std::errc() &amp;&amp; is_port_valid) {</div>
+<div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>      update_base_port(parsed_port);</div>
+<div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>      clear_port();</div>
+<div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>    }</div>
+<div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>  }</div>
+<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>  <span class="keywordflow">return</span> consumed;</div>
+<div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>}</div>
+<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span> </div>
+<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span><span class="keyword">inline</span> <span class="keywordtype">void</span> url_aggregator::set_protocol_as_file() {</div>
+<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>  ada_log(<span class="stringliteral">&quot;url_aggregator::set_protocol_as_file &quot;</span>);</div>
+<div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(<a class="code hl_function" href="../../d8/d3b/structada_1_1url__aggregator.html#a8cb5bdd9006cb24e3414ca233310e85a">validate</a>());</div>
+<div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span>  <a class="code hl_enumeration" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3b">type</a> = <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>;</div>
+<div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>  <span class="comment">// next line could overflow but unsigned arithmetic has well-defined</span></div>
+<div class="line"><a id="l00876" name="l00876"></a><span class="lineno">  876</span>  <span class="comment">// overflows.</span></div>
+<div class="line"><a id="l00877" name="l00877"></a><span class="lineno">  877</span>  uint32_t new_difference = 5 - components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a>;</div>
+<div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span> </div>
+<div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>  <span class="keywordflow">if</span> (buffer.empty()) {</div>
+<div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>    buffer.append(<span class="stringliteral">&quot;file:&quot;</span>);</div>
+<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>    buffer.erase(0, components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a>);</div>
+<div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>    buffer.insert(0, <span class="stringliteral">&quot;file:&quot;</span>);</div>
+<div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>  }</div>
+<div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a> = 5;</div>
+<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span> </div>
+<div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>  <span class="comment">// Update the rest of the components.</span></div>
+<div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#adadba3810c11d983d8551d6a267bb34b">username_end</a> += new_difference;</div>
+<div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f">host_start</a> += new_difference;</div>
+<div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b">host_end</a> += new_difference;</div>
+<div class="line"><a id="l00891" name="l00891"></a><span class="lineno">  891</span>  components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a01a782b2fc7b613f7d3b3bb2a48c5095">pathname_start</a> += new_difference;</div>
+<div class="line"><a id="l00892" name="l00892"></a><span class="lineno">  892</span>  <span class="keywordflow">if</span> (components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a61a69ee2ef2cb82b399b5668b6b8a43c">search_start</a> != <a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">url_components::omitted</a>) {</div>
+<div class="line"><a id="l00893" name="l00893"></a><span class="lineno">  893</span>    components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a61a69ee2ef2cb82b399b5668b6b8a43c">search_start</a> += new_difference;</div>
+<div class="line"><a id="l00894" name="l00894"></a><span class="lineno">  894</span>  }</div>
+<div class="line"><a id="l00895" name="l00895"></a><span class="lineno">  895</span>  <span class="keywordflow">if</span> (components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a06f265e421e6cf2eff0d280ad6170226">hash_start</a> != <a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">url_components::omitted</a>) {</div>
+<div class="line"><a id="l00896" name="l00896"></a><span class="lineno">  896</span>    components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a06f265e421e6cf2eff0d280ad6170226">hash_start</a> += new_difference;</div>
+<div class="line"><a id="l00897" name="l00897"></a><span class="lineno">  897</span>  }</div>
+<div class="line"><a id="l00898" name="l00898"></a><span class="lineno">  898</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(<a class="code hl_function" href="../../d8/d3b/structada_1_1url__aggregator.html#a8cb5bdd9006cb24e3414ca233310e85a">validate</a>());</div>
 <div class="line"><a id="l00899" name="l00899"></a><span class="lineno">  899</span>}</div>
-<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span>}  <span class="comment">// namespace ada</span></div>
-<div class="line"><a id="l00901" name="l00901"></a><span class="lineno">  901</span> </div>
-<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_URL_AGGREGATOR_INL_H</span></div>
+<div class="line"><a id="l00900" name="l00900"></a><span class="lineno">  900</span> </div>
+<div class="line"><a id="l00901" name="l00901"></a><span class="lineno"><a class="line" href="../../dd/d64/namespaceada.html#a1d9c438eb5078b59b136314467c3dd27">  901</a></span><span class="keyword">inline</span> std::ostream &amp;<a class="code hl_function" href="../../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed">operator&lt;&lt;</a>(std::ostream &amp;out,</div>
+<div class="line"><a id="l00902" name="l00902"></a><span class="lineno">  902</span>                                <span class="keyword">const</span> <a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">ada::url_aggregator</a> &amp;u) {</div>
+<div class="line"><a id="l00903" name="l00903"></a><span class="lineno">  903</span>  <span class="keywordflow">return</span> out &lt;&lt; u.<a class="code hl_function" href="../../d8/d3b/structada_1_1url__aggregator.html#a516d5b8a33529dc8b8c95d52abc6e7de">to_string</a>();</div>
+<div class="line"><a id="l00904" name="l00904"></a><span class="lineno">  904</span>}</div>
+<div class="line"><a id="l00905" name="l00905"></a><span class="lineno">  905</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span> </div>
+<div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_URL_AGGREGATOR_INL_H</span></div>
 <div class="ttc" id="acharacter__sets-inl_8h_html"><div class="ttname"><a href="../../da/d69/character__sets-inl_8h.html">character_sets-inl.h</a></div><div class="ttdoc">Definitions of the character sets used by unicode functions.</div></div>
 <div class="ttc" id="acharacter__sets_8h_html"><div class="ttname"><a href="../../d3/d4e/character__sets_8h.html">character_sets.h</a></div><div class="ttdoc">Declaration of the character sets used by unicode functions.</div></div>
 <div class="ttc" id="acheckers-inl_8h_html"><div class="ttname"><a href="../../d4/d46/checkers-inl_8h.html">checkers-inl.h</a></div><div class="ttdoc">Definitions for URL specific checkers used within Ada.</div></div>
