@@ -230,7 +230,11 @@ ada_really_inline size_t url::parse_port(std::string_view view,
   }
   ada_log("parse_port: is_valid = ", is_valid);
   if (is_valid) {
-    port = (r.ec == std::errc() && scheme_default_port() != parsed_port)
+    // scheme_default_port can return 0, and we should allow 0 as a base port.
+    auto default_port = scheme_default_port();
+    bool is_port_valid = (default_port == 0 && parsed_port == 0) ||
+                         (default_port != parsed_port);
+    port = (r.ec == std::errc() && is_port_valid)
                ? std::optional<uint16_t>(parsed_port)
                : std::nullopt;
   }
