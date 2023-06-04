@@ -193,9 +193,9 @@ $(document).ready(function(){initNavTree('dd/d9c/unicode_8cpp_source.html','../.
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        _mm_cmpeq_epi8(word, mask3));</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  }</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="keywordflow">if</span> (i &lt; user_input.size()) {</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    uint8_t buffer[16]{};</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keyword">alignas</span>(16) uint8_t buffer[16]{};</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    memcpy(buffer, user_input.data() + i, user_input.size() - i);</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    __m128i word = _mm_loadu_si128((<span class="keyword">const</span> __m128i*)buffer);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    __m128i word = _mm_load_si128((<span class="keyword">const</span> __m128i*)buffer);</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    running = _mm_or_si128(</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        _mm_or_si128(running, _mm_or_si128(_mm_cmpeq_epi8(word, mask1),</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>                                           _mm_cmpeq_epi8(word, mask2))),</div>
