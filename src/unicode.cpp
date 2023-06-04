@@ -84,9 +84,9 @@ ada_really_inline bool has_tabs_or_newline(
         _mm_cmpeq_epi8(word, mask3));
   }
   if (i < user_input.size()) {
-    uint8_t buffer[16]{};
+    alignas(16) uint8_t buffer[16]{};
     memcpy(buffer, user_input.data() + i, user_input.size() - i);
-    __m128i word = _mm_loadu_si128((const __m128i*)buffer);
+    __m128i word = _mm_load_si128((const __m128i*)buffer);
     running = _mm_or_si128(
         _mm_or_si128(running, _mm_or_si128(_mm_cmpeq_epi8(word, mask1),
                                            _mm_cmpeq_epi8(word, mask2))),
