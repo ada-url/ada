@@ -10,6 +10,8 @@ ADA_POP_DISABLE_WARNINGS
 #include <algorithm>
 #if ADA_NEON
 #include <arm_neon.h>
+#elif ADA_AVX2
+#include <immintrin.h>
 #elif ADA_SSE2
 #include <emmintrin.h>
 #endif
@@ -67,6 +69,34 @@ ada_really_inline bool has_tabs_or_newline(
                        vceqq_u8(word, mask3));
   }
   return vmaxvq_u8(running) != 0;
+}
+#elif ADA_AVX2
+ada_really_inline bool has_tabs_or_newline(
+    std::string_view user_input) noexcept {
+  size_t i = 0;
+  const __m256i mask1 = _mm256_set1_epi8('\r');
+  const __m256i mask2 = _mm256_set1_epi8('\n');
+  const __m256i mask3 = _mm256_set1_epi8('\t');
+  __m256i running{0};
+  for (; i + 31 < user_input.size(); i += 32) {
+    __m256i word = _mm256_loadu_si256((const __m256i*)(user_input.data() + i));
+    running = _mm256_or_si256(
+        _mm256_or_si256(running,
+                        _mm256_or_si256(_mm256_cmpeq_epi8(word, mask1),
+                                        _mm256_cmpeq_epi8(word, mask2))),
+        _mm256_cmpeq_epi8(word, mask3));
+  }
+  if (i < user_input.size()) {
+    alignas(32) uint8_t buffer[32]{};
+    memcpy(buffer, user_input.data() + i, user_input.size() - i);
+    __m256i word = _mm256_load_si256((const __m256i*)buffer);
+    running = _mm256_or_si256(
+        _mm256_or_si256(running,
+                        _mm256_or_si256(_mm256_cmpeq_epi8(word, mask1),
+                                        _mm256_cmpeq_epi8(word, mask2))),
+        _mm256_cmpeq_epi8(word, mask3));
+  }
+  return _mm256_movemask_epi8(running) != 0;
 }
 #elif ADA_SSE2
 ada_really_inline bool has_tabs_or_newline(
