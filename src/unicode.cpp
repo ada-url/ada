@@ -63,7 +63,7 @@ ada_really_inline bool has_tabs_or_newline(
                                             svcmpeq_u8(mask, word, mask2))),
                         svcmpeq_u8(mask, word, mask3));
   }
-  return svptest_any(running);
+  return svptest_any(svptrue_b8(), running);
 }
 #elif ADA_NEON
 ada_really_inline bool has_tabs_or_newline(
