@@ -40,14 +40,15 @@ struct tokenizer {
   char32_t code_point;
 
   // https://wicg.github.io/urlpattern/#seek-and-get-the-next-code-point
-  ada_really_inline void seek_and_get_next_code_point();
+  ada_really_inline void seek_and_get_next_code_point(size_t &_index);
 
   // https://wicg.github.io/urlpattern/#get-the-next-code-point
   ada_really_inline void get_next_code_point();
 
   // https://wicg.github.io/urlpattern/#add-a-token
-  ada_really_inline void add_token(TOKEN_TYPE type, size_t next_pos,
-                                   size_t value_start, size_t value_end);
+  ada_really_inline void add_token(TOKEN_TYPE type, size_t value_start,
+                                   size_t value_end);
+  ada_really_inline void add_token(TOKEN_TYPE type);
 
   // https://wicg.github.io/urlpattern/#process-a-tokenizing-error
   ada_really_inline void process_tokenizing_error(std::string_view msg,
