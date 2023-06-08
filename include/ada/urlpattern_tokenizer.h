@@ -24,8 +24,8 @@ enum class TOKEN_TYPE : uint8_t {
 
 struct token {
   TOKEN_TYPE type;
-  size_t value_start;
-  size_t value_end;
+  size_t index;
+  std::u32string_view value;
 };
 
 enum class POLICY : uint8_t { STRICT, LENIENT };
@@ -46,14 +46,21 @@ struct tokenizer {
   ada_really_inline void get_next_code_point();
 
   // https://wicg.github.io/urlpattern/#add-a-token
-  ada_really_inline void add_token(TOKEN_TYPE type, size_t value_start,
-                                   size_t value_end);
-  ada_really_inline void add_token(TOKEN_TYPE type);
+  ada_really_inline void add_token(TOKEN_TYPE type, size_t next_pos,
+                                   size_t value_pos, size_t value_length);
+
+  // https://wicg.github.io/urlpattern/#add-a-token-with-default-length
+  ada_really_inline void add_token_with_default_length(TOKEN_TYPE type,
+                                                       size_t next_pos,
+                                                       size_t value_pos);
+
+  // https://wicg.github.io/urlpattern/#add-a-token-with-default-position-and-length
+  ada_really_inline void add_token_with_default_position_and_length(
+      TOKEN_TYPE type);
 
   // https://wicg.github.io/urlpattern/#process-a-tokenizing-error
-  ada_really_inline void process_tokenizing_error(std::string_view msg,
-                                                  size_t value_start,
-                                                  size_t value_end);
+  ada_really_inline void process_tokenizing_error(size_t next_pos,
+                                                  size_t value_position);
 };
 
 /**

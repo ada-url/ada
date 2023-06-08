@@ -212,12 +212,13 @@ ada_really_inline bool constructor_string_parser::is_search_prefix() {
 
   // TODO: improve this:
 
-  if (curr_token->value_end - curr_token->value_start != 0) return false;
-
-  const char32_t c = '?';
-  if (input.find(&c, curr_token->value_start, 1) == std::u32string_view::npos) {
-    return false;
-  }
+  //  if (curr_token->value_end - curr_token->value_start != 0) return false;
+  //
+  //  const char32_t c = '?';
+  //  if (input.find(&c, curr_token->value_start, 1) ==
+  //  std::u32string_view::npos) {
+  //    return false;
+  //  }
 
   // Let previous index be parser’s token index − 1.
   size_t prev_index = token_index - 1;
@@ -254,11 +255,12 @@ ada_really_inline bool constructor_string_parser::is_nonspecial_pattern_char(
   //
 
   // TODO: improve this:
-  if (safe_token->value_end - safe_token->value_start != 0) return false;
-
-  if (input.find(&c, safe_token->value_start, 1) == std::u32string_view::npos) {
-    return false;
-  }
+  //  if (safe_token->value_end - safe_token->value_start != 0) return false;
+  //
+  //  if (input.find(&c, safe_token->value_start, 1) ==
+  //  std::u32string_view::npos) {
+  //    return false;
+  //  }
 
   // 3. If any of the following are true :
   // token’s type is "char";
@@ -334,14 +336,15 @@ constructor_string_parser::make_component_string() {
   token *safe_token = get_safe_token(component_start);
 
   // Let component start input index be component start token’s index.
-  size_t component_start_index = safe_token->value_start;
-
-  // Let end index be token’s index.
-  size_t end = token_list[token_index].value_start;
+  //  size_t component_start_index = safe_token->value_start;
+  //
+  //  // Let end index be token’s index.
+  //  size_t end = token_list[token_index].value_start;
 
   // Return the code point substring from component start input index to end
   // index within parser’s input.
-  return input.substr(component_start_index, end);
+  //  return input.substr(component_start_index, end);
+  return U"";
 }
 
 }  // namespace ada::urlpattern

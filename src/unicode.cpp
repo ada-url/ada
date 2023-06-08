@@ -498,12 +498,8 @@ static std::bitset<0x10FFFF> valid_id_start_mask_unicode =
 
 // https://wicg.github.io/urlpattern/#is-a-valid-name-code-point
 ada_really_inline bool is_valid_identifier_start(const char32_t& c) noexcept {
-  if (c == U'𐤀') {
-    std::cerr << "Hello!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-  }
-  return c < 256
-             ? /* extended ascii fast path */ valid_id_start_table_ascii[c - 1]
-             : valid_id_start_mask_unicode[c];
+  return c < 256 ? /* extended ascii fast path */ valid_id_start_table_ascii[c]
+                 : valid_id_start_mask_unicode[c];
 }
 
 // Valid IdentifierPart unicods points 256+
@@ -734,9 +730,6 @@ static_assert(sizeof(valid_id_part_table_ascii) == 256);
 
 // https://wicg.github.io/urlpattern/#is-a-valid-name-code-point
 ada_really_inline bool is_valid_identifier_part(const char32_t& c) noexcept {
-  if (c == U'𐤀') {
-    std::cerr << "PART Hello!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-  }
   return c < 256 ? /* extended ascii fast-path*/ valid_id_part_table_ascii[c]
                  : valid_id_part_mask_unicode[c];
 }

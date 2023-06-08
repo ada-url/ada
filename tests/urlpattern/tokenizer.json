@@ -4,143 +4,143 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "f"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 24,
-                "value_end": 27
+                "index": 24,
+                "value": "bar"
             },
             {
                 "type": "REGEX",
-                "value_start": 28,
-                "value_end": 33
+                "index": 28,
+                "value": "[^/]*"
             },
             {
                 "type": "OTHER_MODIFIER",
-                "value_start": 35,
-                "value_end": 36
+                "index": 35,
+                "value": "?"
             },
             {
                 "type": "END",
-                "value_start": 36,
-                "value_end": 36
+                "index": 36,
+                "value": ""
             }
         ]
     },
@@ -149,168 +149,168 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "OPEN",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "{"
             },
             {
                 "type": "CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": "s"
             },
             {
                 "type": "CLOSE",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "}"
             },
             {
                 "type": "OTHER_MODIFIER",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "?"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "/"
             },
             {
                 "type": "ASTERISK",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "*"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "b"
             },
             {
                 "type": "CHAR",
-                "value_start": 26,
-                "value_end": 27
+                "index": 26,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 27,
-                "value_end": 28
+                "index": 27,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 28,
-                "value_end": 29
+                "index": 28,
+                "value": "k"
             },
             {
                 "type": "CHAR",
-                "value_start": 29,
-                "value_end": 30
+                "index": 29,
+                "value": "s"
             },
             {
                 "type": "CHAR",
-                "value_start": 30,
-                "value_end": 31
+                "index": 30,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 31,
-                "value_end": 33
+                "index": 31,
+                "value": "id"
             },
             {
                 "type": "END",
-                "value_start": 34,
-                "value_end": 34
+                "index": 34,
+                "value": ""
             }
         ]
     },
@@ -319,158 +319,158 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "2"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "0"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "2"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "3"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 26,
-                "value_end": 27
+                "index": 26,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 27,
-                "value_end": 28
+                "index": 27,
+                "value": "y"
             },
             {
                 "type": "CHAR",
-                "value_start": 28,
-                "value_end": 29
+                "index": 28,
+                "value": "/"
             },
             {
                 "type": "ASTERISK",
-                "value_start": 29,
-                "value_end": 30
+                "index": 29,
+                "value": "*"
             },
             {
                 "type": "END",
-                "value_start": 30,
-                "value_end": 30
+                "index": 30,
+                "value": ""
             }
         ]
     },
@@ -479,143 +479,143 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "b"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "k"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "s"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 26,
-                "value_end": 28
+                "index": 26,
+                "value": "id"
             },
             {
                 "type": "END",
-                "value_start": 29,
-                "value_end": 29
+                "index": 29,
+                "value": ""
             }
         ]
     },
@@ -624,113 +624,113 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 19,
-                "value_end": 23
+                "index": 19,
+                "value": "name"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "/"
             },
             {
                 "type": "END",
-                "value_start": 25,
-                "value_end": 25
+                "index": 25,
+                "value": ""
             }
         ]
     },
@@ -739,143 +739,143 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "b"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "k"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "s"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 26,
-                "value_end": 28
+                "index": 26,
+                "value": "你好"
             },
             {
                 "type": "END",
-                "value_start": 29,
-                "value_end": 29
+                "index": 29,
+                "value": ""
             }
         ]
     },
@@ -884,153 +884,153 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "b"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "k"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "s"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 26,
-                "value_end": 28
+                "index": 26,
+                "value": "你好"
             },
             {
                 "type": "CHAR",
-                "value_start": 29,
-                "value_end": 30
+                "index": 29,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 30,
-                "value_end": 33
+                "index": 30,
+                "value": "日本語"
             },
             {
                 "type": "END",
-                "value_start": 34,
-                "value_end": 34
+                "index": 34,
+                "value": ""
             }
         ]
     },
@@ -1039,163 +1039,153 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "b"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "k"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "s"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 26,
-                "value_end": 28
+                "index": 26,
+                "value": "你好"
             },
             {
                 "type": "CHAR",
-                "value_start": 29,
-                "value_end": 30
+                "index": 29,
+                "value": "/"
             },
             {
-                "type": "INVALID_CHAR",
-                "value_start": 30,
-                "value_end": 31
-            },
-            {
-                "type": "CHAR",
-                "value_start": 31,
-                "value_end": 32
-            },
-            {
-                "type": "CHAR",
-                "value_start": 32,
-                "value_end": 33
+                "type": "NAME",
+                "index": 30,
+                "value": "𝒳"
             },
             {
                 "type": "END",
-                "value_start": 33,
-                "value_end": 33
+                "index": 32,
+                "value": ""
             }
         ]
     },
@@ -1204,143 +1194,143 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "b"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "k"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "s"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 26,
-                "value_end": 32
+                "index": 26,
+                "value": "футбол"
             },
             {
                 "type": "END",
-                "value_start": 33,
-                "value_end": 33
+                "index": 33,
+                "value": ""
             }
         ]
     },
@@ -1349,143 +1339,143 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "b"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "k"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "s"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "/"
             },
             {
                 "type": "NAME",
-                "value_start": 26,
-                "value_end": 32
+                "index": 26,
+                "value": "नमस्ते"
             },
             {
                 "type": "END",
-                "value_start": 33,
-                "value_end": 33
+                "index": 33,
+                "value": ""
             }
         ]
     },
@@ -1494,153 +1484,143 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": "s"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "b"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 23,
-                "value_end": 24
+                "index": 23,
+                "value": "k"
             },
             {
                 "type": "CHAR",
-                "value_start": 24,
-                "value_end": 25
+                "index": 24,
+                "value": "s"
             },
             {
                 "type": "CHAR",
-                "value_start": 25,
-                "value_end": 26
+                "index": 25,
+                "value": "/"
             },
             {
-                "type": "INVALID_CHAR",
-                "value_start": 26,
-                "value_end": 27
-            },
-            {
-                "type": "CHAR",
-                "value_start": 27,
-                "value_end": 28
-            },
-            {
-                "type": "CHAR",
-                "value_start": 28,
-                "value_end": 29
+                "type": "NAME",
+                "index": 26,
+                "value": "𐤀"
             },
             {
                 "type": "END",
-                "value_start": 29,
-                "value_end": 29
+                "index": 28,
+                "value": ""
             }
         ]
     },
@@ -1649,123 +1629,123 @@
         "output": [
             {
                 "type": "CHAR",
-                "value_start": 0,
-                "value_end": 1
+                "index": 0,
+                "value": "h"
             },
             {
                 "type": "CHAR",
-                "value_start": 1,
-                "value_end": 2
+                "index": 1,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 2,
-                "value_end": 3
+                "index": 2,
+                "value": "t"
             },
             {
                 "type": "CHAR",
-                "value_start": 3,
-                "value_end": 4
+                "index": 3,
+                "value": "p"
             },
             {
                 "type": "INVALID_CHAR",
-                "value_start": 4,
-                "value_end": 5
+                "index": 4,
+                "value": ":"
             },
             {
                 "type": "CHAR",
-                "value_start": 5,
-                "value_end": 6
+                "index": 5,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 6,
-                "value_end": 7
+                "index": 6,
+                "value": "/"
             },
             {
                 "type": "CHAR",
-                "value_start": 7,
-                "value_end": 8
+                "index": 7,
+                "value": "w"
             },
             {
                 "type": "CHAR",
-                "value_start": 8,
-                "value_end": 9
+                "index": 8,
+                "value": "w"
             },
             {
                 "type": "CHAR",
-                "value_start": 9,
-                "value_end": 10
+                "index": 9,
+                "value": "w"
             },
             {
                 "type": "CHAR",
-                "value_start": 10,
-                "value_end": 11
+                "index": 10,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 11,
-                "value_end": 12
+                "index": 11,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 12,
-                "value_end": 13
+                "index": 12,
+                "value": "x"
             },
             {
                 "type": "CHAR",
-                "value_start": 13,
-                "value_end": 14
+                "index": 13,
+                "value": "a"
             },
             {
                 "type": "CHAR",
-                "value_start": 14,
-                "value_end": 15
+                "index": 14,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 15,
-                "value_end": 16
+                "index": 15,
+                "value": "p"
             },
             {
                 "type": "CHAR",
-                "value_start": 16,
-                "value_end": 17
+                "index": 16,
+                "value": "l"
             },
             {
                 "type": "CHAR",
-                "value_start": 17,
-                "value_end": 18
+                "index": 17,
+                "value": "e"
             },
             {
                 "type": "CHAR",
-                "value_start": 18,
-                "value_end": 19
+                "index": 18,
+                "value": "."
             },
             {
                 "type": "CHAR",
-                "value_start": 19,
-                "value_end": 20
+                "index": 19,
+                "value": "c"
             },
             {
                 "type": "CHAR",
-                "value_start": 20,
-                "value_end": 21
+                "index": 20,
+                "value": "o"
             },
             {
                 "type": "CHAR",
-                "value_start": 21,
-                "value_end": 22
+                "index": 21,
+                "value": "m"
             },
             {
                 "type": "CHAR",
-                "value_start": 22,
-                "value_end": 23
+                "index": 22,
+                "value": "/"
             },
             {
                 "type": "END",
-                "value_start": 23,
-                "value_end": 23
+                "index": 23,
+                "value": ""
             }
         ]
     }

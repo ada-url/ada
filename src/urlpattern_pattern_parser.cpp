@@ -152,10 +152,10 @@ std::vector<part> parse_pattern_string(
       // Let prefix be the empty string.
       // If char token is not null then set prefix to char token’s value.
       std::u32string prefix{};
-      if (char_token.has_value()) {
-        prefix.append(input.substr(char_token.value()->value_start,
-                                   char_token.value()->value_end + 1));
-      }
+      //      if (char_token.has_value()) {
+      //        prefix.append(input.substr(char_token.value()->value_start,
+      //                                   char_token.value()->value_end + 1));
+      //      }
 
       // If prefix is not the empty string and not options’s prefix code point:
       if (!prefix.empty() && prefix != options.prefix) {
