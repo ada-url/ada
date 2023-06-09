@@ -10,8 +10,6 @@
 #include <optional>
 
 namespace ada::urlpattern {
-// https://wicg.github.io/urlpattern/#options
-
 struct urlpattern_component_result {
   std::string_view input;
   std::unordered_map<std::string_view, std::optional<std::string_view>> groups;

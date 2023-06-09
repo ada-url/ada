@@ -9,6 +9,7 @@
 
 namespace ada::urlpattern {
 
+// https://wicg.github.io/urlpattern/#token-type
 enum class TOKEN_TYPE : uint8_t {
   OPEN,
   CLOSE,
@@ -22,12 +23,14 @@ enum class TOKEN_TYPE : uint8_t {
   INVALID_CHAR
 };
 
+// https://wicg.github.io/urlpattern/#token
 struct token {
   TOKEN_TYPE type;
   size_t index;
   std::u32string_view value;
 };
 
+// https://wicg.github.io/urlpattern/#tokenize-policy
 enum class POLICY : uint8_t { STRICT, LENIENT };
 
 // https://wicg.github.io/urlpattern/#tokenizer

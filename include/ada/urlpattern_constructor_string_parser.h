@@ -1,6 +1,7 @@
 #ifndef ADA_URLPATTERN_CONSTRUCTOR_STRING_PARSER_H
 #define ADA_URLPATTERN_CONSTRUCTOR_STRING_PARSER_H
 
+#include <string_view>
 #include "ada/helpers.h"
 
 #include "ada/urlpattern_base.h"
@@ -42,13 +43,32 @@ struct constructor_string_parser {
   ada_really_inline bool is_search_prefix();
 
   // https://wicg.github.io/urlpattern/#is-a-non-special-pattern-char
-  ada_really_inline bool is_nonspecial_pattern_char(const char32_t &c);
+  ada_really_inline bool is_nonspecial_pattern_char(size_t index,
+                                                    const char32_t *value);
+
+  // https://wicg.github.io/urlpattern/#is-an-identity-terminator
+  ada_really_inline bool is_identity_terminator();
+
+  // https://wicg.github.io/urlpattern/#is-a-pathname-start
+  ada_really_inline bool is_pathname_start();
+
+  // https://wicg.github.io/urlpattern/#is-a-password-prefix
+  ada_really_inline bool is_password_prefix();
 
   // https://wicg.github.io/urlpattern/#get-a-safe-token
   ada_really_inline token *get_safe_token(size_t &index);
 
   // https://wicg.github.io/urlpattern/#is-a-group-open
   ada_really_inline bool is_group_open();
+
+  // https://wicg.github.io/urlpattern/#is-an-ipv6-open
+  ada_really_inline bool is_ipv6_open();
+
+  // https://wicg.github.io/urlpattern/#is-an-ipv6-close
+  ada_really_inline bool is_ipv6_close();
+
+  // https://wicg.github.io/urlpattern/#is-a-port-prefix
+  ada_really_inline bool is_port_prefix();
 
   // https://wicg.github.io/urlpattern/#is-a-group-close
   ada_really_inline bool is_group_close();
@@ -62,6 +82,9 @@ struct constructor_string_parser {
   // https://wicg.github.io/urlpattern/#make-a-component-string
   ada_really_inline std::u32string_view make_component_string();
 
+  /// https://wicg.github.io/urlpattern/#next-is-authority-slashes
+  ada_really_inline bool next_is_authority_slashes();
+
   std::u32string_view input;
   std::vector<token> token_list;
   size_t component_start = 0;
@@ -69,13 +92,13 @@ struct constructor_string_parser {
   size_t token_increment = 0;
   size_t group_depth = 0;
   size_t hostname_ipv6_bracket_depth = 0;
-  bool protocol_matches_special_scheme = false;
+  bool protocol_matches_special_scheme_flag = false;
   urlpattern_init result = urlpattern_init();
   PARSER_STATE state = PARSER_STATE::INIT;
 };
 
 // https://wicg.github.io/urlpattern/#parse-a-constructor-string
-void parse_contructor_string(std::u32string_view input);
+urlpattern_init parse_contructor_string(std::u32string_view input);
 
 }  // namespace ada::urlpattern
 

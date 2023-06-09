@@ -2,6 +2,7 @@
 #include "ada/urlpattern_pattern_parser.h"
 
 #include <cassert>
+#include <string_view>
 
 namespace ada::urlpattern {
 
@@ -16,21 +17,15 @@ ada_really_inline pattern_parser::pattern_parser(
 // https://wicg.github.io/urlpattern/#escape-a-regexp-string
 ada_really_inline std::u32string escape_regexp_string(
     std::u32string_view input) {
+  // 1. Assert: input is an ASCII string.
   assert(ada::idna::is_ascii(input));
-
-  //  // TODO: make it cheaper
-  //  size_t u8input_size =
-  //      ada::idna::utf8_length_from_utf32(input.data(), input.size());
-  //  std::string final_u8input(u8input_size, '\0');
-  //  ada::idna::utf32_to_utf8(input.data(), input.size(),
-  //  final_u8input.data());
 
   std::u32string result = U"";
   size_t index = 0;
   while (index < input.size()) {
     size_t pos = input.find_first_of(U".+*?^${}()[]|/\\)");
     if (pos == std::string_view::npos) {
-      result += input.substr(index, input.size());
+      result = result += input.substr(index, input.size());
       break;
     }
     result.append(input.substr(index, pos)).append(U"\\");
