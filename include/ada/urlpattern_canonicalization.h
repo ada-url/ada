@@ -1,6 +1,7 @@
 #ifndef ADA_URLPATTERN_CANONICALIZATION_H
 #define ADA_URLPATTERN_CANONICALIZATION_H
 
+#include "ada/helpers.h"
 #include <string_view>
 
 namespace ada::urlpattern {

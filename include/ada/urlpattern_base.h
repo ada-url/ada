@@ -1,6 +1,8 @@
 #ifndef ADA_URLPATTERN_BASE_H
 #define ADA_URLPATTERN_BASE_H
 
+#include "ada/helpers.h"
+
 #include <string_view>
 
 namespace ada::urlpattern {
