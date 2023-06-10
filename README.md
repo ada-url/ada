@@ -9,12 +9,14 @@ Ada is a fast and spec-compliant URL parser written in C++.
 Specification for URL parser can be found from the
 [WHATWG](https://url.spec.whatwg.org/#url-parsing) website.
 
-We also include a C wrapper for portability.
-
 The Ada library passes the full range of tests from the specification,
 across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
 supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
 
+### Requirements
+
+The project is otherwise self-contained and it has no dependency.
+A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
 
 ## Ada is fast. 
 
@@ -30,11 +32,17 @@ servo url ▏  664 ns/URL ███████████▎
      CURL ▏ 1471 ns/URL █████████████████████████
 ```
 
-## Requirements
+Ada has improved the performance of the popular JavaScript environment Node.js:
 
-- A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
+> Since Node.js 18, a new URL parser dependency was added to Node.js — Ada. This addition bumped the Node.js performance when parsing URLs to a new level. Some results could reach up to an improvement of **400%**. ([State of Node.js Performance 2023](https://blog.rafaelgss.dev/state-of-nodejs-performance-2023))
 
-The project is otherwise self-contained and it has no dependency.
+## Bindings of Ada
+
+We provide clients for different programming languages through our C API.
+
+- [Rust](https://github.com/ada-url/rust): Rust bindings for Ada
+- [Go](https://github.com/ada-url/goada): Go bindings for Ada
+- [Python](https://github.com/ada-url/python): Python bindings for Ada
 
 ## Usage
 

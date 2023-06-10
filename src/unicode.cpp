@@ -85,9 +85,9 @@ ada_really_inline bool has_tabs_or_newline(
         _mm_cmpeq_epi8(word, mask3));
   }
   if (i < user_input.size()) {
-    uint8_t buffer[16]{};
+    alignas(16) uint8_t buffer[16]{};
     memcpy(buffer, user_input.data() + i, user_input.size() - i);
-    __m128i word = _mm_loadu_si128((const __m128i*)buffer);
+    __m128i word = _mm_load_si128((const __m128i*)buffer);
     running = _mm_or_si128(
         _mm_or_si128(running, _mm_or_si128(_mm_cmpeq_epi8(word, mask1),
                                            _mm_cmpeq_epi8(word, mask2))),
@@ -224,8 +224,9 @@ static_assert(sizeof(is_forbidden_domain_code_point_table_or_upper) == 256);
 static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('A')] == 2);
 static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('Z')] == 2);
 
-ada_really_inline constexpr bool contains_forbidden_domain_code_point_or_upper(
-    const char* input, size_t length) noexcept {
+ada_really_inline constexpr uint8_t
+contains_forbidden_domain_code_point_or_upper(const char* input,
+                                              size_t length) noexcept {
   size_t i = 0;
   uint8_t accumulator{};
   for (; i + 4 <= length; i += 4) {

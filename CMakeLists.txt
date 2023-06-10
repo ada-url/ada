@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 project(ada
   DESCRIPTION "Fast spec-compliant URL parser"
   LANGUAGES C CXX
-  VERSION 2.4.0
+  VERSION 2.5.1
 )
 
-set(ADA_LIB_VERSION "2.4.0" CACHE STRING "ada library version")
+set(ADA_LIB_VERSION "2.5.1" CACHE STRING "ada library version")
 set(ADA_LIB_SOVERSION "2" CACHE STRING "ada library soversion")
 
 include(GNUInstallDirs)
@@ -33,23 +33,27 @@ if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
   add_dependency(gtest)
 endif()
 
-if (BUILD_TESTING)
+if (BUILD_TESTING AND NOT EMSCRIPTEN)
   message(STATUS "The tests are enabled.")
   add_subdirectory(tests)
 else()
   if(is_top_project)
     message(STATUS "The tests are disabled.")
   endif()
-endif(BUILD_TESTING)
+endif(BUILD_TESTING AND NOT EMSCRIPTEN)
 
-If(ADA_BENCHMARKS)
+If(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
   message(STATUS "Ada benchmarks enabled.")
   add_subdirectory(benchmarks)
-else(ADA_BENCHMARKS)
+else(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
   if(is_top_project)
     message(STATUS "Ada benchmarks disabled. Set ADA_BENCHMARKS=ON to enable them.")
   endif()
-endif(ADA_BENCHMARKS)
+endif(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
+
+if (BUILD_TESTING AND EMSCRIPTEN)
+  add_subdirectory(tests-wasm)
+endif(BUILD_TESTING AND EMSCRIPTEN)
 
 add_library(ada::ada ALIAS ada)
 
@@ -60,17 +64,14 @@ set_target_properties(
   WINDOWS_EXPORT_ALL_SYMBOLS YES
 )
 
-include (TestBigEndian)
-TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
-if(IS_BIG_ENDIAN)
-  message(STATUS "Big-endian system detected.")
-endif()
-
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
-if(NOT ADA_COVERAGE)
+if(NOT ADA_COVERAGE AND NOT EMSCRIPTEN)
   add_subdirectory(singleheader)
+endif()
+
+if(ADA_TOOLS)
   add_subdirectory(tools)
 endif()
 

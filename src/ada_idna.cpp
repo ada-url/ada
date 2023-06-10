@@ -9195,7 +9195,7 @@ bool is_label_valid(const std::u32string_view label) {
   // - For Nontransitional Processing, each value must be either valid or
   // deviation.
 
-  // If CheckJoiners, the label must satisify the ContextJ rules from Appendix
+  // If CheckJoiners, the label must satisfy the ContextJ rules from Appendix
   // A, in The Unicode Code Points and Internationalized Domain Names for
   // Applications (IDNA) [IDNA2008].
   constexpr static uint32_t virama[] = {

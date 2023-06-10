@@ -316,3 +316,17 @@ TEST(basic_tests, can_parse) {
   ASSERT_FALSE(ada::can_parse("!!!"));
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, node_issue_48254) {
+  auto base_url = ada::parse<TypeParam>("localhost:80");
+  ASSERT_TRUE(base_url);
+  ASSERT_EQ(base_url->get_hostname(), "");
+  ASSERT_EQ(base_url->get_host(), "");
+  ASSERT_EQ(base_url->get_pathname(), "80");
+  ASSERT_EQ(base_url->get_href(), "localhost:80");
+  ASSERT_EQ(base_url->get_origin(), "null");
+  ASSERT_EQ(base_url->has_opaque_path, true);
+  auto url = ada::parse<TypeParam>("", &*base_url);
+  ASSERT_FALSE(url);
+  SUCCEED();
+}

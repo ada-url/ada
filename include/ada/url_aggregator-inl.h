@@ -744,7 +744,7 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
   ADA_ASSERT_TRUE(validate());
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter
   // to insert
-  // `//` initially to the buffer, since it depends on the hostname existance.
+  // `//` initially to the buffer, since it depends on the hostname existence.
   if (has_authority()) {
     return;
   }
@@ -854,7 +854,12 @@ ada_really_inline size_t url_aggregator::parse_port(
   }
   ada_log("parse_port: is_valid = ", is_valid);
   if (is_valid) {
-    if (r.ec == std::errc() && scheme_default_port() != parsed_port) {
+    ada_log("parse_port", r.ec == std::errc());
+    // scheme_default_port can return 0, and we should allow 0 as a base port.
+    auto default_port = scheme_default_port();
+    bool is_port_valid = (default_port == 0 && parsed_port == 0) ||
+                         (default_port != parsed_port);
+    if (r.ec == std::errc() && is_port_valid) {
       update_base_port(parsed_port);
     } else {
       clear_port();

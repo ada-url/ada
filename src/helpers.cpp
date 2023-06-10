@@ -164,7 +164,7 @@ ada_really_inline void remove_ascii_tab_or_newline(
 ada_really_inline std::string_view substring(std::string_view input,
                                              size_t pos) noexcept {
   ADA_ASSERT_TRUE(pos <= input.size());
-  // The following is safer but uneeded if we have the above line:
+  // The following is safer but unneeded if we have the above line:
   // return pos > input.size() ? std::string_view() : input.substr(pos);
   return input.substr(pos);
 }
@@ -238,7 +238,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
                         has_zero_byte(xor3) | has_zero_byte(xor4) |
                         has_zero_byte(xor5);
     if (is_match) {
-      return i + index_of_first_set_byte(is_match);
+      return size_t(i + index_of_first_set_byte(is_match));
     }
   }
   if (i < view.size()) {
@@ -256,7 +256,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
                         has_zero_byte(xor3) | has_zero_byte(xor4) |
                         has_zero_byte(xor5);
     if (is_match) {
-      return i + index_of_first_set_byte(is_match);
+      return size_t(i + index_of_first_set_byte(is_match));
     }
   }
   return view.size();
@@ -300,7 +300,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |
                         has_zero_byte(xor4) | has_zero_byte(xor5);
     if (is_match) {
-      return i + index_of_first_set_byte(is_match);
+      return size_t(i + index_of_first_set_byte(is_match));
     }
   }
   if (i < view.size()) {
@@ -318,7 +318,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |
                         has_zero_byte(xor4) | has_zero_byte(xor5);
     if (is_match) {
-      return i + index_of_first_set_byte(is_match);
+      return size_t(i + index_of_first_set_byte(is_match));
     }
   }
   return view.size();
@@ -625,7 +625,7 @@ find_authority_delimiter_special(std::string_view view) noexcept {
     uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |
                         has_zero_byte(xor3) | has_zero_byte(xor4);
     if (is_match) {
-      return i + index_of_first_set_byte(is_match);
+      return size_t(i + index_of_first_set_byte(is_match));
     }
   }
 
@@ -640,7 +640,7 @@ find_authority_delimiter_special(std::string_view view) noexcept {
     uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |
                         has_zero_byte(xor3) | has_zero_byte(xor4);
     if (is_match) {
-      return i + index_of_first_set_byte(is_match);
+      return size_t(i + index_of_first_set_byte(is_match));
     }
   }
 
@@ -673,7 +673,7 @@ find_authority_delimiter(std::string_view view) noexcept {
     uint64_t is_match =
         has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);
     if (is_match) {
-      return i + index_of_first_set_byte(is_match);
+      return size_t(i + index_of_first_set_byte(is_match));
     }
   }
 
@@ -687,7 +687,7 @@ find_authority_delimiter(std::string_view view) noexcept {
     uint64_t is_match =
         has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);
     if (is_match) {
-      return i + index_of_first_set_byte(is_match);
+      return size_t(i + index_of_first_set_byte(is_match));
     }
   }
 
