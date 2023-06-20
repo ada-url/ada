@@ -16,10 +16,11 @@ ADA_POP_DISABLE_WARNINGS
 
 namespace ada::unicode {
 
+constexpr auto broadcast(uint8_t v) noexcept -> uint64_t {
+  return 0x101010101010101ull * v;
+}
+
 constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
-  auto broadcast = [](uint8_t v) -> uint64_t {
-    return 0x101010101010101ull * v;
-  };
   uint64_t broadcast_80 = broadcast(0x80);
   uint64_t broadcast_Ap = broadcast(128 - 'A');
   uint64_t broadcast_Zp = broadcast(128 - 'Z' - 1);
@@ -99,9 +100,6 @@ ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   auto has_zero_byte = [](uint64_t v) {
     return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
-  };
-  auto broadcast = [](uint8_t v) -> uint64_t {
-    return 0x101010101010101ull * v;
   };
   size_t i = 0;
   uint64_t mask1 = broadcast('\r');
