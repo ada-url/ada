@@ -45,6 +45,7 @@ var namespaceada =
       [ "ipv6", "d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4", null ]
     ] ],
     [ "unicode", "d2/dc3/namespaceada_1_1unicode.html", [
+      [ "broadcast", "d2/dc3/namespaceada_1_1unicode.html#a6ed16a9339ab5625b761e534b10fce84", null ],
       [ "contains_forbidden_domain_code_point", "d2/dc3/namespaceada_1_1unicode.html#a8e4d69a9364a662aa6b27afee0b33237", null ],
       [ "contains_forbidden_domain_code_point_or_upper", "d2/dc3/namespaceada_1_1unicode.html#aa0a6aef61e1b2117fd60ec4ba0ed9a8d", null ],
       [ "convert_hex_to_binary", "d2/dc3/namespaceada_1_1unicode.html#ab69353b882a97069e4b290be2b1097f2", null ],
