@@ -16,7 +16,7 @@ ADA_POP_DISABLE_WARNINGS
 
 namespace ada::unicode {
 
-constexpr auto broadcast(uint8_t v) noexcept -> uint64_t {
+constexpr uint64_t broadcast(uint8_t v) noexcept {
   return 0x101010101010101ull * v;
 }
 
