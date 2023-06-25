@@ -11,6 +11,9 @@ concurrency:
   group: wpt-updater
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   issue:
     runs-on: ubuntu-latest
