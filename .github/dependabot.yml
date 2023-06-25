@@ -16,3 +16,8 @@ updates:
     directory: /benchmarks/competitors/servo-url
     schedule:
       interval: daily
+
+  - package-ecosystem: pip
+    directory: /tools/release
+    schedule:
+      interval: daily
