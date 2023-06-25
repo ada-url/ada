@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
-#include <map>
 #include <set>
 
 #include "simdjson.h"
