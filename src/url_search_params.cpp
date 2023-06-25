@@ -39,11 +39,8 @@ inline void url_search_params::set(const std::string_view key,
   params.emplace_back(std::string(key), std::string(value));
 }
 
-inline std::string url_search_params::to_string() {
-  if (params.empty()) {
-    return "";
-  }
-  std::string out = "?";
+std::string url_search_params::to_string() {
+  std::string out{};
   for (size_t i = 0; i < params.size(); i++) {
     auto param = params[i];
     auto key = std::get<0>(param);

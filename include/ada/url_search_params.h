@@ -61,7 +61,10 @@ struct url_search_params {
    */
   inline void sort() const noexcept;
 
-  inline std::string to_string();
+  /**
+   * @see https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior
+   */
+  std::string to_string();
 
  private:
   uint32_t size{0};
