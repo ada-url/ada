@@ -5,19 +5,19 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
 
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
 
   - package-ecosystem: cargo
     directory: /benchmarks/competitors/servo-url
     schedule:
-      interval: daily
+      interval: monthly
 
   - package-ecosystem: pip
     directory: /tools/release
     schedule:
-      interval: daily
+      interval: monthly
