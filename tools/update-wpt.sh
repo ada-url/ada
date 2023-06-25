@@ -16,10 +16,12 @@ trap cleanup INT TERM EXIT
 
 cd "$WORKSPACE"
 git clone \
+  --no-checkout \
   --depth=1 \
   --filter=blob:none \
   --sparse \
   https://github.com/web-platform-tests/wpt.git wpt
 cd wpt
-git sparse-checkout set "url/resources"
+git sparse-checkout add "url/resources"
+git checkout
 cp url/resources/*.json "$WPT_DIR"
