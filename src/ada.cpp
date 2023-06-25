@@ -11,3 +11,4 @@
 #include "url_components.cpp"
 #include "url_aggregator.cpp"
 #include "ada_c.cpp"
+#include "url_search_params.cpp"
