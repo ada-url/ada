@@ -27,7 +27,7 @@ jobs:
       matrix:
         cxx: [g++-12, clang++-14]
     steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare
