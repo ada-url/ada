@@ -25,12 +25,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v3
-      - uses: mymindstorm/setup-emsdk@v12
+      - uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+      - uses: mymindstorm/setup-emsdk@ab889da2abbcbb280f91ec4c215d3bb4f3a8f775 # v12
       - name: Verify
         run: emcc -v
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - name: Configure
         run: emcmake  cmake -B buildwasm -D ADA_TOOLS=OFF
       - name: Build
