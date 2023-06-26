@@ -52,7 +52,7 @@ else(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
 endif(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
 
 if (BUILD_TESTING AND EMSCRIPTEN)
-  add_subdirectory(tests-wasm)
+  add_subdirectory(tests/wasm)
 endif(BUILD_TESTING AND EMSCRIPTEN)
 
 add_library(ada::ada ALIAS ada)
