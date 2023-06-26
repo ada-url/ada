@@ -25,7 +25,7 @@ inline size_t url_search_params::size() const noexcept { return params.size(); }
 
 inline std::optional<std::string_view> url_search_params::get(
     const std::string_view key) {
-  auto entry = std::find_if(params.begin(), params.end(), [&key](auto param) {
+  auto entry = std::find_if(params.begin(), params.end(), [&key](auto& param) {
     return std::get<0>(param) == key;
   });
 
@@ -50,7 +50,7 @@ inline std::vector<std::string> url_search_params::get_all(
 }
 
 inline bool url_search_params::has(const std::string_view key) noexcept {
-  auto entry = std::find_if(params.begin(), params.end(), [&key](auto param) {
+  auto entry = std::find_if(params.begin(), params.end(), [&key](auto& param) {
     return std::get<0>(param) == key;
   });
   return entry != params.end();
