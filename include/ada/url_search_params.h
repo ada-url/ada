@@ -68,7 +68,7 @@ struct url_search_params {
   std::string to_string();
 
  private:
-  std::vector<std::tuple<std::string, std::string>> params{};
+  std::vector<std::pair<std::string, std::string>> params{};
 };  // url_search_params
 
 }  // namespace ada

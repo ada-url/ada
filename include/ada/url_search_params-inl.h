@@ -18,22 +18,21 @@ namespace ada {
 
 inline void url_search_params::append(const std::string_view key,
                                       const std::string_view value) {
-  params.emplace_back(std::string(key), std::string(value));
+  params.emplace_back(key, value);
 }
 
 inline size_t url_search_params::size() const noexcept { return params.size(); }
 
 inline std::optional<std::string_view> url_search_params::get(
     const std::string_view key) {
-  auto entry = std::find_if(params.begin(), params.end(), [&key](auto& param) {
-    return std::get<0>(param) == key;
-  });
+  auto entry = std::find_if(params.begin(), params.end(),
+                            [&key](auto& param) { return param.first == key; });
 
   if (entry == params.end()) {
     return std::nullopt;
   }
 
-  return std::get<1>(*entry);
+  return entry->second;
 }
 
 inline std::vector<std::string> url_search_params::get_all(
@@ -41,8 +40,8 @@ inline std::vector<std::string> url_search_params::get_all(
   std::vector<std::string> out{};
 
   for (auto& param : params) {
-    if (std::get<0>(param) == key) {
-      out.emplace_back(std::get<1>(param));
+    if (param.first == key) {
+      out.emplace_back(param.second);
     }
   }
 
@@ -50,9 +49,8 @@ inline std::vector<std::string> url_search_params::get_all(
 }
 
 inline bool url_search_params::has(const std::string_view key) noexcept {
-  auto entry = std::find_if(params.begin(), params.end(), [&key](auto& param) {
-    return std::get<0>(param) == key;
-  });
+  auto entry = std::find_if(params.begin(), params.end(),
+                            [&key](auto& param) { return param.first == key; });
   return entry != params.end();
 }
 
