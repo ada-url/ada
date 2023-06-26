@@ -97,5 +97,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
    */
   ada::href_from_file(source);
 
+  /**
+   * ada::url_search_params
+   */
+  auto search_params = ada::url_search_params();
+  search_params.append(source, base_source);
+  search_params.set(source, base_source);
+  search_params.to_string();
+  if (!search_params.has(base_source)) {
+    search_params.append(base_source, source);
+  }
+  search_params.remove(source);
+  search_params.remove(source, base_source);
+
   return 0;
 }  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
