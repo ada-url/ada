@@ -34,12 +34,17 @@ void url_search_params::sort() {
 
 void url_search_params::set(const std::string_view key,
                             const std::string_view value) {
-  params.erase(
-      std::remove_if(params.begin(), params.end(),
-                     [&key](auto &param) { return param.first == key; }),
-      params.end());
+  const auto find = [&key](auto &param) { return param.first == key; };
 
-  params.emplace_back(key, value);
+  auto it = std::find_if(params.begin(), params.end(), find);
+
+  if (it == params.end()) {
+    params.emplace_back(key, value);
+  } else {
+    it->second = value;
+    params.erase(std::remove_if(std::next(it), params.end(), find),
+                 params.end());
+  }
 }
 
 std::string url_search_params::to_string() {
