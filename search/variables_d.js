@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['table_0',['table',['../d5/ddb/namespaceada_1_1idna.html#aab19eab266847496402079e77f5ffa93',1,'ada::idna']]],
-  ['table_5fis_5fdouble_5fdot_5fpath_5fsegment_1',['table_is_double_dot_path_segment',['../d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f',1,'ada::unicode']]],
-  ['tmax_2',['tmax',['../d5/ddb/namespaceada_1_1idna.html#ad2a2a6422a2c30b768e64caa35c39020',1,'ada::idna']]],
-  ['tmin_3',['tmin',['../d5/ddb/namespaceada_1_1idna.html#a4137d2ecd3d2921846af696d6611aed9',1,'ada::idna']]],
-  ['type_4',['type',['../d8/d9f/structparse__result.html#adf42b44299c652bd72fb812c2781e191',1,'parse_result']]]
+  ['userinfo_5fpercent_5fencode_0',['USERINFO_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da',1,'ada::character_sets']]],
+  ['username_5fend_1',['username_end',['../d3/d43/structada_1_1url__components.html#adadba3810c11d983d8551d6a267bb34b',1,'ada::url_components::username_end'],['../dc/d69/structada__url__components.html#a075cb5bfb997f3811e9607b696071f70',1,'ada_url_components::username_end']]]
 ];

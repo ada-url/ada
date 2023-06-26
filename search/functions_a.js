@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['map_0',['map',['../d5/ddb/namespaceada_1_1idna.html#acc44ee8cb1484d14560236b659e12565',1,'ada::idna']]]
+  ['normalize_0',['normalize',['../d5/ddb/namespaceada_1_1idna.html#a66bd7d6170f3e06b968c739e40a35967',1,'ada::idna']]]
 ];

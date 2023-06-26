@@ -77,6 +77,7 @@ var namespaceada =
     [ "url_aggregator", "d8/d3b/structada_1_1url__aggregator.html", "d8/d3b/structada_1_1url__aggregator" ],
     [ "url_base", "db/d75/structada_1_1url__base.html", "db/d75/structada_1_1url__base" ],
     [ "url_components", "d3/d43/structada_1_1url__components.html", "d3/d43/structada_1_1url__components" ],
+    [ "url_search_params", "dd/dcb/structada_1_1url__search__params.html", "dd/dcb/structada_1_1url__search__params" ],
     [ "result", "dd/d64/namespaceada.html#a7f8335195119f1a7f35d14c06558748b", null ],
     [ "encoding_type", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b", [
       [ "UTF8", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1", null ],

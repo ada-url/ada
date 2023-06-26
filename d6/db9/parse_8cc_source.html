@@ -191,8 +191,18 @@ $(document).ready(function(){initNavTree('d6/db9/parse_8cc_source.html','../../'
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file</a>(source);</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <span class="keyword">auto</span> search_params = <a class="code hl_struct" href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a>();</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  search_params.append(source, base_source);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  search_params.set(source, base_source);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  search_params.to_string();</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <span class="keywordflow">if</span> (!search_params.has(base_source)) {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    search_params.append(base_source, source);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  }</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  search_params.remove(source);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  search_params.remove(source, base_source);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="../../d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
 <div class="ttc" id="anamespaceada_1_1idna_html_a7d88f623d0a7e056cc89920b20e13dde"><div class="ttname"><a href="../../d5/ddb/namespaceada_1_1idna.html#a7d88f623d0a7e056cc89920b20e13dde">ada::idna::to_ascii</a></div><div class="ttdeci">std::string to_ascii(std::string_view ut8_string)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d2e/ada__idna_8cpp_source.html#l09521">ada_idna.cpp:9521</a></div></div>
@@ -200,6 +210,7 @@ $(document).ready(function(){initNavTree('d6/db9/parse_8cc_source.html','../../'
 <div class="ttc" id="anamespaceada_html_a03693ff0509e3c177d242205bc8f2748"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748">ada::can_parse</a></div><div class="ttdeci">bool can_parse(std::string_view input, const std::string_view *base_input=nullptr)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00049">implementation.cpp:49</a></div></div>
 <div class="ttc" id="anamespaceada_html_a4796e4f266c83d76b490d423c8336a70"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file</a></div><div class="ttdeci">std::string href_from_file(std::string_view path)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00026">implementation.cpp:26</a></div></div>
 <div class="ttc" id="aparse_8cc_html_a91ce7c16e9840492202299da2b451e60"><div class="ttname"><a href="../../d6/db9/parse_8cc.html#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput</a></div><div class="ttdeci">int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/db9/parse_8cc_source.html#l00008">parse.cc:8</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params_html"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00018">url_search_params.h:18</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->
