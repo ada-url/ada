@@ -29,6 +29,18 @@ TEST(url_search_params, set) {
   search_params.set("key1", "hello");
   ASSERT_EQ(search_params.size(), 1);
   ASSERT_EQ(search_params.to_string(), "key1=hello");
+
+  // reset to initial state
+  search_params.remove("key1");
+  search_params.append("key1", "value1");
+  search_params.append("key1", "value2");
+  search_params.append("key2", "value1");
+  search_params.set("key1", "value3");
+  ASSERT_EQ(search_params.size(), 2);
+  ASSERT_EQ(search_params.to_string(), "key1=value3&key2=value1");
+  search_params.set("key1", "value4");
+  ASSERT_EQ(search_params.to_string(), "key1=value4&key2=value1");
+
   SUCCEED();
 }
 
