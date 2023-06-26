@@ -5,12 +5,12 @@
 #ifndef ADA_URL_SEARCH_PARAMS_H
 #define ADA_URL_SEARCH_PARAMS_H
 
-namespace ada {
-
 #include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
+
+namespace ada {
 
 /**
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
@@ -34,8 +34,8 @@ struct url_search_params {
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-delete
    */
-  void remove(std::string_view key);
-  void remove(std::string_view key, std::string_view value);
+  inline void remove(std::string_view key);
+  inline void remove(std::string_view key, std::string_view value);
 
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-get
@@ -55,17 +55,17 @@ struct url_search_params {
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-set
    */
-  void set(std::string_view key, std::string_view value);
+  inline void set(std::string_view key, std::string_view value);
 
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-sort
    */
-  void sort();
+  inline void sort();
 
   /**
    * @see https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior
    */
-  std::string to_string();
+  inline std::string to_string();
 
  private:
   typedef std::pair<std::string, std::string> key_value_pair;
