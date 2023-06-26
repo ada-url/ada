@@ -21,9 +21,7 @@ inline void url_search_params::append(const std::string_view key,
   params.emplace_back(std::string(key), std::string(value));
 }
 
-inline size_t url_search_params::get_size() const noexcept {
-  return params.size();
-}
+inline size_t url_search_params::size() const noexcept { return params.size(); }
 
 inline std::optional<std::string_view> url_search_params::get(
     const std::string_view key) {

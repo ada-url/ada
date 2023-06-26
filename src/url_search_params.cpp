@@ -8,15 +8,15 @@
 
 namespace ada {
 
-inline void url_search_params::remove(const std::string_view key) {
+void url_search_params::remove(const std::string_view key) {
   params.erase(
       std::remove_if(params.begin(), params.end(),
                      [&key](auto param) { return std::get<0>(param) == key; }),
       params.end());
 }
 
-inline void url_search_params::remove(const std::string_view key,
-                                      std::string_view value) {
+void url_search_params::remove(const std::string_view key,
+                               std::string_view value) {
   params.erase(std::remove_if(params.begin(), params.end(),
                               [&key, &value](auto param) {
                                 return std::get<0>(param) == key &&
@@ -25,12 +25,12 @@ inline void url_search_params::remove(const std::string_view key,
                params.end());
 }
 
-inline void url_search_params::sort() const noexcept {
+void url_search_params::sort() const noexcept {
   // TODO: Implement this
 }
 
-inline void url_search_params::set(const std::string_view key,
-                                   const std::string_view value) {
+void url_search_params::set(const std::string_view key,
+                            const std::string_view value) {
   params.erase(
       std::remove_if(params.begin(), params.end(),
                      [&key](auto param) { return std::get<0>(param) == key; }),
