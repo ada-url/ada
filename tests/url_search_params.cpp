@@ -45,3 +45,14 @@ TEST(url_search_params, remove) {
   ASSERT_EQ(search_params.to_string(), "key1=value1");
   SUCCEED();
 }
+
+TEST(url_search_params, sort) {
+  auto search_params = ada::url_search_params();
+  search_params.append("bbb", "second");
+  search_params.append("aaa", "first");
+  search_params.append("ccc", "third");
+  ASSERT_EQ(search_params.size(), 3);
+  search_params.sort();
+  ASSERT_EQ(search_params.to_string(), "aaa=first&bbb=second&ccc=third");
+  SUCCEED();
+}
