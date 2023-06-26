@@ -1,0 +1,1752 @@
+[
+    {
+        "input": "https://example.com/foo/:bar([^/]*)?",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "f"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 24,
+                "value": "bar"
+            },
+            {
+                "type": "REGEX",
+                "index": 28,
+                "value": "[^/]*"
+            },
+            {
+                "type": "OTHER_MODIFIER",
+                "index": 35,
+                "value": "?"
+            },
+            {
+                "type": "END",
+                "index": 36,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "http{s}?://*.example.com/books/:id",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "OPEN",
+                "index": 4,
+                "value": "{"
+            },
+            {
+                "type": "CHAR",
+                "index": 5,
+                "value": "s"
+            },
+            {
+                "type": "CLOSE",
+                "index": 6,
+                "value": "}"
+            },
+            {
+                "type": "OTHER_MODIFIER",
+                "index": 7,
+                "value": "?"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 8,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "/"
+            },
+            {
+                "type": "ASTERISK",
+                "index": 11,
+                "value": "*"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "b"
+            },
+            {
+                "type": "CHAR",
+                "index": 26,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 27,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 28,
+                "value": "k"
+            },
+            {
+                "type": "CHAR",
+                "index": 29,
+                "value": "s"
+            },
+            {
+                "type": "CHAR",
+                "index": 30,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 31,
+                "value": "id"
+            },
+            {
+                "type": "END",
+                "index": 34,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/2023/may/*",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "2"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "0"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "2"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "3"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 26,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 27,
+                "value": "y"
+            },
+            {
+                "type": "CHAR",
+                "index": 28,
+                "value": "/"
+            },
+            {
+                "type": "ASTERISK",
+                "index": 29,
+                "value": "*"
+            },
+            {
+                "type": "END",
+                "index": 30,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:id",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "b"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "k"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "s"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 26,
+                "value": "id"
+            },
+            {
+                "type": "END",
+                "index": 29,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "http://example.com/:name/",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 4,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 5,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 19,
+                "value": "name"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "/"
+            },
+            {
+                "type": "END",
+                "index": 25,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:你好",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "b"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "k"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "s"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 26,
+                "value": "你好"
+            },
+            {
+                "type": "END",
+                "index": 29,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:你好/:日本語",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "b"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "k"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "s"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 26,
+                "value": "你好"
+            },
+            {
+                "type": "CHAR",
+                "index": 29,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 30,
+                "value": "日本語"
+            },
+            {
+                "type": "END",
+                "index": 34,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:你好/:𝒳",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "b"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "k"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "s"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 26,
+                "value": "你好"
+            },
+            {
+                "type": "CHAR",
+                "index": 29,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 30,
+                "value": "𝒳"
+            },
+            {
+                "type": "END",
+                "index": 32,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:футбол",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "b"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "k"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "s"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 26,
+                "value": "футбол"
+            },
+            {
+                "type": "END",
+                "index": 33,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:नमस्ते",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "b"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "k"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "s"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 26,
+                "value": "नमस्ते"
+            },
+            {
+                "type": "END",
+                "index": 33,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "https://example.com/books/:𐤀",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 4,
+                "value": "s"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 5,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "b"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 23,
+                "value": "k"
+            },
+            {
+                "type": "CHAR",
+                "index": 24,
+                "value": "s"
+            },
+            {
+                "type": "CHAR",
+                "index": 25,
+                "value": "/"
+            },
+            {
+                "type": "NAME",
+                "index": 26,
+                "value": "𐤀"
+            },
+            {
+                "type": "END",
+                "index": 28,
+                "value": ""
+            }
+        ]
+    },
+    {
+        "input": "http://www.example.com/",
+        "output": [
+            {
+                "type": "CHAR",
+                "index": 0,
+                "value": "h"
+            },
+            {
+                "type": "CHAR",
+                "index": 1,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 2,
+                "value": "t"
+            },
+            {
+                "type": "CHAR",
+                "index": 3,
+                "value": "p"
+            },
+            {
+                "type": "INVALID_CHAR",
+                "index": 4,
+                "value": ":"
+            },
+            {
+                "type": "CHAR",
+                "index": 5,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 6,
+                "value": "/"
+            },
+            {
+                "type": "CHAR",
+                "index": 7,
+                "value": "w"
+            },
+            {
+                "type": "CHAR",
+                "index": 8,
+                "value": "w"
+            },
+            {
+                "type": "CHAR",
+                "index": 9,
+                "value": "w"
+            },
+            {
+                "type": "CHAR",
+                "index": 10,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 11,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 12,
+                "value": "x"
+            },
+            {
+                "type": "CHAR",
+                "index": 13,
+                "value": "a"
+            },
+            {
+                "type": "CHAR",
+                "index": 14,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 15,
+                "value": "p"
+            },
+            {
+                "type": "CHAR",
+                "index": 16,
+                "value": "l"
+            },
+            {
+                "type": "CHAR",
+                "index": 17,
+                "value": "e"
+            },
+            {
+                "type": "CHAR",
+                "index": 18,
+                "value": "."
+            },
+            {
+                "type": "CHAR",
+                "index": 19,
+                "value": "c"
+            },
+            {
+                "type": "CHAR",
+                "index": 20,
+                "value": "o"
+            },
+            {
+                "type": "CHAR",
+                "index": 21,
+                "value": "m"
+            },
+            {
+                "type": "CHAR",
+                "index": 22,
+                "value": "/"
+            },
+            {
+                "type": "END",
+                "index": 23,
+                "value": ""
+            }
+        ]
+    }
+]
