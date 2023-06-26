@@ -55,6 +55,9 @@ inline bool url_search_params::has(const std::string_view key) noexcept {
 }
 
 inline std::string url_search_params::to_string() {
+  // TODO: Add encoding support
+  // Add tests from
+  // https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-stringifier.any.js
   std::string out{};
   for (size_t i = 0; i < params.size(); i++) {
     auto [key, value] = params[i];
