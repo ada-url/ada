@@ -1,0 +1,48 @@
+name: Coverage
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ubuntu-build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        shared: [ON]
+        cxx: [g++-12]
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
+      - name: Setup gcovr
+        run: sudo apt-get install gcovr
+      - name: Prepare
+        run: cmake -DADA_COVERAGE=ON -DADA_COVERAGE_XML=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        env:
+          CXX: ${{matrix.cxx}}
+      - name: Build
+        run: cmake --build build -j=2
+      - name: Test
+        run: cmake --build build --target ada_coverage -j=2
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          gcov: true

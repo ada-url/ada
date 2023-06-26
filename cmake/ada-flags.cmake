@@ -29,9 +29,15 @@ if (ADA_COVERAGE)
     #
     # open buildcoverage/ada_coverage/index.html
     #####################
+    option(ADA_COVERAGE_XML "Coverage type is XML" OFF)
     include(${PROJECT_SOURCE_DIR}/cmake/codecoverage.cmake)
     APPEND_COVERAGE_COMPILER_FLAGS()
-    setup_target_for_coverage_gcovr_html(NAME ada_coverage EXECUTABLE ctest EXCLUDE "${PROJECT_SOURCE_DIR}/dependencies/*" "${PROJECT_SOURCE_DIR}/tools/*"  "${PROJECT_SOURCE_DIR}/singleheader/*" ${PROJECT_SOURCE_DIR}/include/ada/common_defs.h)
+
+    if (ADA_COVERAGE_XML)
+        setup_target_for_coverage_gcovr_xml(NAME ada_coverage EXECUTABLE ctest EXCLUDE "${PROJECT_SOURCE_DIR}/dependencies/*" "${PROJECT_SOURCE_DIR}/tools/*"  "${PROJECT_SOURCE_DIR}/singleheader/*" ${PROJECT_SOURCE_DIR}/include/ada/common_defs.h)
+    else()
+        setup_target_for_coverage_gcovr_html(NAME ada_coverage EXECUTABLE ctest EXCLUDE "${PROJECT_SOURCE_DIR}/dependencies/*" "${PROJECT_SOURCE_DIR}/tools/*"  "${PROJECT_SOURCE_DIR}/singleheader/*" ${PROJECT_SOURCE_DIR}/include/ada/common_defs.h)
+    endif()
 endif()
 
 if (NOT CMAKE_BUILD_TYPE)
