@@ -60,7 +60,7 @@ struct url_search_params {
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-sort
    */
-  void sort() const noexcept;
+  void sort();
 
   /**
    * @see https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior

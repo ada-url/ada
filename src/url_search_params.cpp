@@ -1,7 +1,7 @@
 #include "ada.h"
 #include "ada/url_search_params.h"
 
-#include <optional>
+#include <algorithm>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -25,8 +25,12 @@ void url_search_params::remove(const std::string_view key,
                params.end());
 }
 
-void url_search_params::sort() const noexcept {
-  // TODO: Implement this
+void url_search_params::sort() {
+  typedef std::pair<std::string, std::string> key_value_pair;
+  std::stable_sort(params.begin(), params.end(),
+                   [](const key_value_pair &lhs, const key_value_pair &rhs) {
+                     return lhs.first < rhs.first;
+                   });
 }
 
 void url_search_params::set(const std::string_view key,
