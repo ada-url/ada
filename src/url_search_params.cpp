@@ -11,16 +11,16 @@ namespace ada {
 void url_search_params::remove(const std::string_view key) {
   params.erase(
       std::remove_if(params.begin(), params.end(),
-                     [&key](auto &param) { return std::get<0>(param) == key; }),
+                     [&key](auto &param) { return param.first == key; }),
       params.end());
 }
 
 void url_search_params::remove(const std::string_view key,
-                               std::string_view value) {
+                               const std::string_view value) {
   params.erase(std::remove_if(params.begin(), params.end(),
                               [&key, &value](auto &param) {
-                                return std::get<0>(param) == key &&
-                                       std::get<1>(param) == value;
+                                return param.first == key &&
+                                       param.second == value;
                               }),
                params.end());
 }
@@ -33,18 +33,16 @@ void url_search_params::set(const std::string_view key,
                             const std::string_view value) {
   params.erase(
       std::remove_if(params.begin(), params.end(),
-                     [&key](auto &param) { return std::get<0>(param) == key; }),
+                     [&key](auto &param) { return param.first == key; }),
       params.end());
 
-  params.emplace_back(std::string(key), std::string(value));
+  params.emplace_back(key, value);
 }
 
 std::string url_search_params::to_string() {
   std::string out{};
   for (size_t i = 0; i < params.size(); i++) {
-    auto param = params[i];
-    auto key = std::get<0>(param);
-    auto value = std::get<1>(param);
+    auto [key, value] = params[i];
 
     if (i != 0) {
       out += "&";
