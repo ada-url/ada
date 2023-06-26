@@ -26,7 +26,6 @@ void url_search_params::remove(const std::string_view key,
 }
 
 void url_search_params::sort() {
-  typedef std::pair<std::string, std::string> key_value_pair;
   std::stable_sort(params.begin(), params.end(),
                    [](const key_value_pair &lhs, const key_value_pair &rhs) {
                      return lhs.first < rhs.first;
