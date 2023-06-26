@@ -26,7 +26,7 @@ inline size_t url_search_params::size() const noexcept { return params.size(); }
 inline std::optional<std::string_view> url_search_params::get(
     const std::string_view key) {
   auto entry = std::find_if(params.begin(), params.end(),
-                            [&key](auto& param) { return param.first == key; });
+                            [&key](auto &param) { return param.first == key; });
 
   if (entry == params.end()) {
     return std::nullopt;
@@ -39,7 +39,7 @@ inline std::vector<std::string> url_search_params::get_all(
     const std::string_view key) {
   std::vector<std::string> out{};
 
-  for (auto& param : params) {
+  for (auto &param : params) {
     if (param.first == key) {
       out.emplace_back(param.second);
     }
@@ -50,7 +50,7 @@ inline std::vector<std::string> url_search_params::get_all(
 
 inline bool url_search_params::has(const std::string_view key) noexcept {
   auto entry = std::find_if(params.begin(), params.end(),
-                            [&key](auto& param) { return param.first == key; });
+                            [&key](auto &param) { return param.first == key; });
   return entry != params.end();
 }
 
@@ -70,7 +70,7 @@ inline std::string url_search_params::to_string() {
 }
 
 inline void url_search_params::set(const std::string_view key,
-                            const std::string_view value) {
+                                   const std::string_view value) {
   const auto find = [&key](auto &param) { return param.first == key; };
 
   auto it = std::find_if(params.begin(), params.end(), find);
@@ -92,7 +92,7 @@ inline void url_search_params::remove(const std::string_view key) {
 }
 
 inline void url_search_params::remove(const std::string_view key,
-                               const std::string_view value) {
+                                      const std::string_view value) {
   params.erase(std::remove_if(params.begin(), params.end(),
                               [&key, &value](auto &param) {
                                 return param.first == key &&
