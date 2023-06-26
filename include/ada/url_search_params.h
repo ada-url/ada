@@ -16,6 +16,7 @@ namespace ada {
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
  */
 struct url_search_params {
+  // TODO: Add missing constructors
   url_search_params() = default;
   url_search_params(const url_search_params &u) = default;
   url_search_params(url_search_params &&u) noexcept = default;
@@ -23,7 +24,7 @@ struct url_search_params {
   url_search_params &operator=(const url_search_params &u) = default;
   ~url_search_params() = default;
 
-  [[nodiscard]] inline size_t get_size() const noexcept;
+  [[nodiscard]] inline size_t size() const noexcept;
 
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-append
@@ -33,8 +34,8 @@ struct url_search_params {
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-delete
    */
-  inline void remove(std::string_view key);
-  inline void remove(std::string_view key, std::string_view value);
+  void remove(std::string_view key);
+  void remove(std::string_view key, std::string_view value);
 
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-get
@@ -54,12 +55,12 @@ struct url_search_params {
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-set
    */
-  inline void set(std::string_view key, std::string_view value);
+  void set(std::string_view key, std::string_view value);
 
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-sort
    */
-  inline void sort() const noexcept;
+  void sort() const noexcept;
 
   /**
    * @see https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior
@@ -67,7 +68,6 @@ struct url_search_params {
   std::string to_string();
 
  private:
-  uint32_t size{0};
   std::vector<std::tuple<std::string, std::string>> params{};
 };  // url_search_params
 
