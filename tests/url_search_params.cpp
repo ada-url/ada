@@ -31,3 +31,17 @@ TEST(url_search_params, set) {
   ASSERT_EQ(search_params.to_string(), "key1=hello");
   SUCCEED();
 }
+
+TEST(url_search_params, remove) {
+  auto search_params = ada::url_search_params();
+  search_params.append("key1", "value1");
+  search_params.append("key1", "value2");
+  search_params.append("key2", "value2");
+  search_params.remove("key2");
+  ASSERT_EQ(search_params.size(), 2);
+  ASSERT_EQ(search_params.to_string(), "key1=value1&key1=value2");
+  search_params.remove("key1", "value2");
+  ASSERT_EQ(search_params.size(), 1);
+  ASSERT_EQ(search_params.to_string(), "key1=value1");
+  SUCCEED();
+}
