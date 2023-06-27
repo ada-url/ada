@@ -441,7 +441,6 @@ constexpr uint8_t PATH_PERCENT_ENCODE[32] = {
     // F8     F9     FA     FB     FC     FD     FE     FF
     0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40 | 0x80};
 
-
 constexpr uint8_t COMPONENT_PERCENT_ENCODE[32] = {
     // 00     01     02     03     04     05     06     07
     0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40 | 0x80,
@@ -507,7 +506,6 @@ constexpr uint8_t COMPONENT_PERCENT_ENCODE[32] = {
     0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40 | 0x80,
     // F8     F9     FA     FB     FC     FD     FE     FF
     0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40 | 0x80};
-
 
 constexpr uint8_t WWW_FORM_URLENCODED_PERCENT_ENCODE[32] = {
     // 00     01     02     03     04     05     06     07
