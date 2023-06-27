@@ -21,6 +21,37 @@ TEST(url_search_params, to_string) {
   SUCCEED();
 }
 
+/**
+ * @see https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-stringifier.any.js
+ */
+TEST(url_search_params, to_string_serialize_space) {
+  auto params = ada::url_search_params();
+  params.append("a", "b c");
+  ASSERT_EQ(params.to_string(), "a=b+c");
+  params.remove("a");
+  params.append("a b", "c");
+  ASSERT_EQ(params.to_string(), "a+b=c");
+  params.remove("a b");
+  ASSERT_EQ(params.to_string(), "");
+  params.append("a", "");
+  ASSERT_EQ(params.to_string(), "a=");
+  params.append("", "");
+  ASSERT_EQ(params.to_string(), "a=&=");
+  params.append("", "b");
+  ASSERT_EQ(params.to_string(), "a=&=&=b");
+  SUCCEED();
+}
+
+TEST(url_search_params, to_string_serialize_plus) {
+  auto params = ada::url_search_params();
+  params.append("a", "b+c");
+  ASSERT_EQ(params.to_string(), "a=b%2Bc");
+  params.remove("a");
+  params.append("a+b", "c");
+  ASSERT_EQ(params.to_string(), "a%2Bb=c");
+  SUCCEED();
+}
+
 TEST(url_search_params, set) {
   auto search_params = ada::url_search_params();
   search_params.append("key1", "value1");
