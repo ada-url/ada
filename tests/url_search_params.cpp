@@ -22,7 +22,8 @@ TEST(url_search_params, to_string) {
 }
 
 /**
- * @see https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-stringifier.any.js
+ * @see
+ * https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-stringifier.any.js
  */
 TEST(url_search_params, to_string_serialize_space) {
   auto params = ada::url_search_params();
@@ -49,6 +50,15 @@ TEST(url_search_params, to_string_serialize_plus) {
   params.remove("a");
   params.append("a+b", "c");
   ASSERT_EQ(params.to_string(), "a%2Bb=c");
+  SUCCEED();
+}
+
+TEST(url_search_params, to_string_serialize_ampersand) {
+  auto params = ada::url_search_params();
+  params.append("&", "a");
+  ASSERT_EQ(params.to_string(), "%26=a");
+  params.remove("&");
+  ASSERT_EQ(params.to_string(), "%26=a&b=%26");
   SUCCEED();
 }
 
