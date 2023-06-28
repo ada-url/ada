@@ -57,7 +57,7 @@ TEST(url_search_params, to_string_serialize_ampersand) {
   auto params = ada::url_search_params();
   params.append("&", "a");
   ASSERT_EQ(params.to_string(), "%26=a");
-  params.remove("&");
+  params.append("b", "&");
   ASSERT_EQ(params.to_string(), "%26=a&b=%26");
   SUCCEED();
 }
