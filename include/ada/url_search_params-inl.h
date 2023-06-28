@@ -6,6 +6,8 @@
 #define ADA_URL_SEARCH_PARAMS_INL_H
 
 #include "ada.h"
+#include "ada/character_sets-inl.h"
+#include "ada/unicode.h"
 #include "ada/url_search_params.h"
 
 #include <algorithm>
@@ -55,9 +57,7 @@ inline bool url_search_params::has(const std::string_view key) noexcept {
 }
 
 inline std::string url_search_params::to_string() {
-  // TODO: Add encoding support
-  // Add tests from
-  // https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-stringifier.any.js
+  auto character_set = ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE;
   std::string out{};
   for (size_t i = 0; i < params.size(); i++) {
     auto [key, value] = params[i];
@@ -65,9 +65,9 @@ inline std::string url_search_params::to_string() {
     if (i != 0) {
       out += "&";
     }
-    out.append(key);
+    out.append(ada::unicode::percent_encode(key, character_set));
     out += "=";
-    out.append(value);
+    out.append(ada::unicode::percent_encode(value, character_set));
   }
   return out;
 }
