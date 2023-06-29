@@ -194,7 +194,7 @@ static uint64_t percent_decode_16(char const* in, char* out,
     // Second hex digit
     simde__m128i second1 = simde_mm_srli_si128(first_and_second, 1);
 
-    // Merge hex digits into place and position where the percent was
+    // Merge hex digits into place and position after the percent
     simde__m128i hex = simde_mm_or_si128(first1, second1);
     print_m128i(hex);
 
@@ -217,8 +217,6 @@ static uint64_t percent_decode_16(char const* in, char* out,
 }
 
 struct Generic {
-    // inputsize : number of input bytes we want to decode
-    // returns the number of written ints
     static size_t percent_decode(const char *in, char *out, size_t inputsize) {
         size_t consumed = 0; // number of bytes read
         char *initout = out;
@@ -430,7 +428,7 @@ static uint64_t percent_decode_16(char const* in, char* out,
     // Second hex digit
     __m128i second1 = _mm_srli_si128(first_and_second, 1);
 
-    // Merge hex digits into place and position where the percent was
+    // Merge hex digits into place and position after the percent
     __m128i hex = _mm_or_si128(first1, second1);
     print_m128i(hex);
 
@@ -453,8 +451,6 @@ static uint64_t percent_decode_16(char const* in, char* out,
 }
 
 struct Generic {
-    // inputsize : number of input bytes we want to decode
-    // returns the number of written ints
     [[gnu::target("sse,sse2,sse3,ssse3,sse4,sse4.1,sse4.2,avx,avx2,popcnt")]]
     static size_t percent_decode(const char *in, char *out, size_t inputsize) {
         size_t consumed = 0; // number of bytes read
@@ -664,6 +660,23 @@ struct AVX512 {
                 continue;
             }
 
+            // ascii to hex conversion can be done in two instructions as
+            // follows, but it seems a tiny bit slower on my benchmarks. this
+            // will likely change in the future if _mm512_permutexvar_epi8
+            // becomes faster.
+//            const __m512i ascii_to_hex = _mm512_set_epi8(
+//                0,  0,  0,  0,  0,  0,  0,  0,
+//                0,  0,  0,  0,  0,  0,  0,  0,
+//                0,  0,  0,  0,  0,  0,  0,  0,
+//                0,  0,  0,  0,  0,  0,  0,  0,
+//                0,  0,  0,  0,  0,  0,  9,  8,
+//                7,  6,  5,  4,  3,  2,  1,  0,
+//                0,  0,  0,  0,  0,  0,  0,  0,
+//                0, 15, 14, 13, 12, 11, 10,  0);
+//
+//            __m512i first_and_second = _mm512_and_si512(chunk, _mm512_set1_epi8(0x1F));
+//            first_and_second = _mm512_permutexvar_epi8(first_and_second, ascii_to_hex);
+
             // Number hex
             __m512i binary_numbers = _mm512_sub_epi8(chunk, _mm512_set1_epi8('0'));
             uint64_t number_mask = _mm512_cmplt_epu8_mask(binary_numbers, _mm512_set1_epi8(10));
@@ -699,7 +712,7 @@ struct AVX512 {
             __m512i second1 = _mm512_permutexvar_epi8(srli_1_shuffle_vector, first_and_second);
             print_m512i(second1);
 
-            // Merge hex digits into place and position where the percent was
+            // Merge hex digits into place and position after the percent
             __m512i hex = _mm512_or_si512(first1, second1);
             print_m512i(hex);
 
