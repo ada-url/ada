@@ -686,6 +686,12 @@ struct AVX512 {
             __m512i uppercase_mask = _mm512_set1_epi8(0b00100000);
             __m512i binary_letters = _mm512_or_si512(chunk, uppercase_mask);
 
+            //this is just for validation
+            __m512i letters = _mm512_sub_epi8(binary_letters, _mm512_set1_epi8('a'));
+            uint64_t letter_mask = _mm512_cmplt_epu8_mask(letters, _mm512_set1_epi8(6));
+            uint64_t hex_chars = number_mask | letter_mask;
+            uint64_t valid_mask = (((hex_chars >> 1) & hex_chars) >> 1) & mask;
+
             // lowercase hex
             binary_letters = _mm512_sub_epi8(binary_letters, _mm512_set1_epi8('a' - 10));
             print_m512i(binary_letters);
@@ -717,15 +723,15 @@ struct AVX512 {
             print_m512i(hex);
 
             // Squash hex and original data together with mask
-            hex = _mm512_mask_blend_epi8(mask << 1, chunk, hex);
+            hex = _mm512_mask_blend_epi8(valid_mask << 1, chunk, hex);
             print_m512i(hex);
 
             // Copy to dst
-            uint64_t keep_bytes = ~(mask | (mask << 2));
+            uint64_t keep_bytes = ~(valid_mask | (valid_mask << 2));
             uint64_t store_mask = load_mask >> shift_next;
             _mm512_mask_compressstoreu_epi8(out, store_mask & keep_bytes, hex);
 
-            uint32_t num_percent = __builtin_popcountll(found_mask);
+            uint32_t num_percent = __builtin_popcountll(valid_mask & 0x3FFFFFFFFFFFFFFFull);
             uint32_t num_junk = 2 * num_percent;
             size_t input_bytes_consumed = valid_bytes - shift_next;
             size_t output_bytes = input_bytes_consumed - num_junk;
