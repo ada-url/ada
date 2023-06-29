@@ -14,6 +14,8 @@ ADA_POP_DISABLE_WARNINGS
 #include <emmintrin.h>
 #endif
 
+#include "ada/percent_decoder.h"
+
 namespace ada::unicode {
 
 constexpr uint64_t broadcast(uint8_t v) noexcept {
@@ -473,10 +475,11 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
 
 bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
               size_t first_percent) {
-  std::string percent_decoded_buffer;
+  std::string percent_decoded_buffer(plain.size(), 0);
   std::string_view input = plain;
   if (first_percent != std::string_view::npos) {
-    percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
+    size_t output_size = percent_decoder::percent_decode(plain.data(), percent_decoded_buffer.data(), plain.size());
+    percent_decoded_buffer.resize(output_size);
     input = percent_decoded_buffer;
   }
   // input is a non-empty UTF-8 string, must be percent decoded
