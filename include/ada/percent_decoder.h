@@ -8,10 +8,6 @@
 #include <cstring>
 #include <charconv>
 
-#ifdef ENABLE_SIMDE
-#include <x86/avx2.h>
-#endif
-
 #ifdef __x86_64__
 #include <immintrin.h>
 #endif
@@ -100,273 +96,38 @@ unsigned constexpr convert_hex_to_binary(const char c) noexcept {
     return 10 + (c - del);
 }
 
-size_t percent_decode_slow(char const* pointer, size_t len, char* out, uint64_t* chars_read) {
-    *chars_read = 0;
-    const char* end = pointer + len;
-    char const* init_pointer = pointer;
+size_t percent_decode_slow(char const* in, size_t len, char* out) {
+    const char* end = in + len;
+    char const* init_out = out;
     // Optimization opportunity: if the following code gets
     // called often, it can be optimized quite a bit.
-    while (pointer < end) {
-        const char ch = pointer[0];
-        size_t remaining = end - pointer - 1;
+    while (in < end) {
+        const char ch = in[0];
+        size_t remaining = end - in - 1;
         if (ch == '+') {
             *out = ' ';
             ++out;
-            ++pointer;
+            ++in;
         } else if (ch != '%' || remaining < 2 ||
                    (  // ch == '%' && // It is unnecessary to check that ch == '%'.
-                       (!is_ascii_hex_digit(pointer[1]) ||
-                        !is_ascii_hex_digit(pointer[2])))) {
+                       (!is_ascii_hex_digit(in[1]) ||
+                        !is_ascii_hex_digit(in[2])))) {
             *out = ch;
             ++out;
-            ++pointer;
+            ++in;
         } else {
-            unsigned a = convert_hex_to_binary(pointer[1]);
-            unsigned b = convert_hex_to_binary(pointer[2]);
+            unsigned a = convert_hex_to_binary(in[1]);
+            unsigned b = convert_hex_to_binary(in[2]);
             char c = static_cast<char>(a * 16 + b);
             *out = c;
             ++out;
-            pointer += 3;
+            in += 3;
         }
-        ++*chars_read;
     }
-    return pointer - init_pointer;
+    return out - init_out;
 }
 
-#ifdef ENABLE_SIMDE
-
-simde__m128i const* const shuffle_vectors = reinterpret_cast<simde__m128i const*>(shuffle_vectors_array.data());
-
-void print_m128i(simde__m128i i) {
-    //    char* c = reinterpret_cast<char*>(&i);
-    //    printf("%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n", c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12], c[13], c[14], c[15]);
-}
-
-static uint64_t percent_decode_16(char const* in, char* out,
-                                  uint64_t mask, uint64_t* chars_read) {
-    simde__m128i byte_plus = simde_mm_set1_epi8('+');
-    simde__m128i byte_space = simde_mm_set1_epi8(' ');
-    simde__m128i byte_percent = simde_mm_set1_epi8('%');
-
-    simde__m128i chunk = simde_mm_lddqu_si128(reinterpret_cast<simde__m128i const*>(in));
-    print_m128i(chunk);
-
-    // Replace plus (+) with space
-    simde__m128i pluses = simde_mm_cmpeq_epi8(chunk, byte_plus);
-    chunk = simde_mm_blendv_epi8(chunk, byte_space, pluses);
-    print_m128i(chunk);
-
-    uint32_t found_mask = mask & 0x3FFF;
-    size_t shift_next = ((mask >> 15) & 1) | ((mask >> 13) & 2);
-
-    if (!found_mask) {
-        simde_mm_storeu_si128(out, chunk);
-        *chars_read = 16 - shift_next;
-        return *chars_read;
-    }
-
-    // Locate percent symbol
-    simde__m128i found = simde_mm_cmpeq_epi8(chunk, byte_percent);
-    simde__m128i mask1 = simde_mm_slli_si128(found, 1);
-
-    // Decode hex
-
-    // Number hex
-    simde__m128i byte_zero = simde_mm_set1_epi8('0');
-    simde__m128i number_mask = simde_mm_cmplt_epi8(chunk, simde_mm_set1_epi8(':')); // : is character after 9
-    simde__m128i binary_numbers = simde_mm_sub_epi8(chunk, byte_zero);
-
-    // set the 6th bit (0x20) to convert uppercase characters to lowercase
-    simde__m128i lower_mask = simde_mm_set1_epi8(0b00100000);
-    simde__m128i binary_letters = simde_mm_or_si128(chunk, lower_mask);
-
-    // lowercase hex
-    simde__m128i byte_upper = simde_mm_set1_epi8('a' - 10);
-    binary_letters = simde_mm_sub_epi8(binary_letters, byte_upper);
-
-    // Merge first hex digit transforms
-    simde__m128i first_and_second = simde_mm_blendv_epi8(binary_letters, binary_numbers, number_mask);
-    first_and_second = simde_mm_and_si128(first_and_second, simde_mm_set1_epi8(0xF));
-    print_m128i(first_and_second);
-
-    simde__m128i first1 = simde_mm_slli_epi16(first_and_second, 4);
-
-    // Second hex digit
-    simde__m128i second1 = simde_mm_srli_si128(first_and_second, 1);
-
-    // Merge hex digits into place and position after the percent
-    simde__m128i hex = simde_mm_or_si128(first1, second1);
-    print_m128i(hex);
-
-    // Squash hex and original data together with mask
-    hex = simde_mm_blendv_epi8(chunk, hex, mask1);
-    print_m128i(hex);
-
-    uint16_t vector_index = vector_indexes[found_mask];
-    simde__m128i shuffle_vector = shuffle_vectors[vector_index];
-
-    hex = simde_mm_shuffle_epi8(hex, shuffle_vector);
-    print_m128i(hex);
-
-    // Copy to dst
-    simde_mm_storeu_si128(out, hex);
-    uint32_t num_percent = __builtin_popcount(found_mask);
-    uint32_t num_junk = 2 * num_percent;
-    *chars_read = 16 - shift_next - num_junk;
-    return 16 - shift_next;
-}
-
-struct Generic {
-    static size_t percent_decode(const char *in, char *out, size_t inputsize) {
-        size_t consumed = 0; // number of bytes read
-        char *initout = out;
-
-        uint64_t sig = 0;
-#ifdef __AVX2__
-        simde__m256i byte_percent_256 = simde_mm256_set1_epi8('%');
-#endif
-        simde__m128i byte_percent = simde_mm_set1_epi8('%');
-
-        size_t availablebytes = 0;
-        if (96 < inputsize) {
-            size_t scanned = 0;
-
-
-#ifdef __AVX2__
-            simde__m256i low = simde_mm256_loadu_si256((simde__m256i *) (in + scanned));
-            simde__m256i found1 = simde_mm256_cmpeq_epi8(low, byte_percent_256);
-            uint32_t lowSig = simde_mm256_movemask_epi8(found1);
-#else
-            simde__m128i low1 = simde_mm_loadu_si128((simde__m128i *) (in + scanned));
-            simde__m128i found1 = simde_mm_cmpeq_epi8(low1, byte_percent);
-            uint32_t lowSig1 = simde_mm_movemask_epi8(found1);
-            simde__m128i low2 = simde_mm_loadu_si128((simde__m128i *) (in + scanned + 16));
-            simde__m128i found2 = simde_mm_cmpeq_epi8(low2, byte_percent);
-            uint32_t lowSig2 = simde_mm_movemask_epi8(found2);
-            uint32_t lowSig = lowSig2 << 16;
-            lowSig |= lowSig1;
-#endif
-
-            // excess verbosity to avoid problems with sign extension on conversions
-            // better to think about what's happening and make it clearer
-            simde__m128i high = simde_mm_loadu_si128((simde__m128i *) (in + scanned + 32));
-            simde__m128i found3 = simde_mm_cmpeq_epi8(high, byte_percent);
-            uint32_t highSig = simde_mm_movemask_epi8(found3);
-            uint64_t nextSig = highSig;
-            nextSig <<= 32;
-            nextSig |= lowSig;
-            scanned += 48;
-
-            do {
-                uint64_t thisSig = nextSig;
-
-#ifdef __AVX2__
-                low = simde_mm256_loadu_si256((simde__m256i *) (in + scanned));
-                found1 = simde_mm256_cmpeq_epi8(low, byte_percent_256);
-                lowSig = simde_mm256_movemask_epi8(found1);
-#else
-                low1 = simde_mm_loadu_si128((simde__m128i *) (in + scanned));
-                found1 = simde_mm_cmpeq_epi8(low1, byte_percent);
-                lowSig1 = simde_mm_movemask_epi8(found1);
-                low2 = simde_mm_loadu_si128((simde__m128i *) (in + scanned + 16));
-                found2 = simde_mm_cmpeq_epi8(low2, byte_percent);
-                lowSig2 = simde_mm_movemask_epi8(found2);
-                lowSig = lowSig2 << 16;
-                lowSig |= lowSig1;
-#endif
-
-                high = simde_mm_loadu_si128((simde__m128i *) (in + scanned + 32));
-                found3 = simde_mm_cmpeq_epi8(high, byte_percent);
-                highSig = simde_mm_movemask_epi8(found3);
-                nextSig = highSig;
-                nextSig <<= 32;
-                nextSig |= lowSig;
-
-                uint64_t remaining = scanned - (consumed + 48);
-                sig = (thisSig << remaining) | sig;
-
-                uint64_t reload = scanned - 16;
-                scanned += 48;
-
-                //            size_t prefetch = consumed;
-                //            uint64_t prefetch_sig = sig;
-                //            while (prefetch < reload) {
-                //                uint32_t found_mask = prefetch_sig & 0x3FFF;
-                //                simde_mm_prefetch(&vector_indexes[found_mask], simde_MM_HINT_NTA);
-                //                size_t shift_next = ((prefetch_sig >> 15) & 1) | ((prefetch_sig >> 13) & 2);
-                //                uint64_t bytes = 16 - shift_next;
-                //                prefetch_sig >>= bytes;
-                //                prefetch += bytes;
-                //            }
-
-                // need to reload when less than 16 scanned bytes remain in sig
-                while (consumed < reload) {
-                    uint64_t chars_read;
-                    uint64_t bytes = percent_decode_16(in + consumed,
-                                                       out, sig, &chars_read);
-                    sig >>= bytes;
-
-                    // seems like this might force the compiler to prioritize shifting sig >>= bytes
-                    if (sig == 0xFFFFFFFFFFFFFFFF)
-                        return 0; // fake check to force earliest evaluation
-
-                    consumed += bytes;
-                    out += chars_read;
-                }
-            } while (scanned + 112 < inputsize);  // 112 == 48 + 48 ahead for scanning + up to 16 remaining in sig
-            sig = (nextSig << (scanned - consumed - 48)) | sig;
-            availablebytes = scanned - consumed;
-        }
-        while (true) {
-            if (availablebytes < 16) {
-                if (availablebytes + consumed + 31 < inputsize) {
-#ifdef __AVX2__
-                    uint64_t newsigavx = (uint32_t) simde_mm256_movemask_epi8(simde_mm256_cmpeq_epi8(
-                            simde_mm256_loadu_si256((simde__m256i *) (in + availablebytes + consumed)),
-                            byte_percent_256));
-                    sig |= (newsigavx << availablebytes);
-#else
-                    uint64_t newsig = simde_mm_movemask_epi8(simde_mm_cmpeq_epi8(
-                            simde_mm_lddqu_si128(
-                                    (const simde__m128i *) (in + availablebytes
-                                                       + consumed)), byte_percent));
-                    uint64_t newsig2 = simde_mm_movemask_epi8(simde_mm_cmpeq_epi8(
-                            simde_mm_lddqu_si128(
-                                    (const simde__m128i *) (in + availablebytes + 16
-                                                       + consumed)), byte_percent));
-                    sig |= (newsig << availablebytes)
-                           | (newsig2 << (availablebytes + 16));
-#endif
-                    availablebytes += 32;
-                } else if (availablebytes + consumed + 15 < inputsize) {
-                    int newsig = simde_mm_movemask_epi8(simde_mm_cmpeq_epi8(
-                            simde_mm_lddqu_si128(
-                                    (const simde__m128i *) (in + availablebytes
-                                                            + consumed)), byte_percent));
-                    sig |= newsig << availablebytes;
-                    availablebytes += 16;
-                } else {
-                    break;
-                }
-            }
-            uint64_t chars_read;
-            uint64_t bytes = percent_decode_16(in + consumed, out,
-                                               sig, &chars_read);
-            consumed += bytes;
-            availablebytes -= bytes;
-            sig >>= bytes;
-            out += chars_read;
-        }
-        if (consumed < inputsize) {
-            uint64_t chars_read;
-            percent_decode_slow(in + consumed, inputsize - consumed, out, &chars_read);
-            out += chars_read;
-        }
-        return out - initout;
-    }
-};
-
-#elif defined(__x86_64__)
+#if defined(__x86_64__)
 
 __m128i const* const shuffle_vectors = reinterpret_cast<__m128i const*>(shuffle_vectors_array.data());
 
@@ -390,10 +151,8 @@ static uint64_t percent_decode_16(char const* in, char* out,
     chunk = _mm_blendv_epi8(chunk, byte_space, pluses);
     print_m128i(chunk);
 
-    uint32_t found_mask = mask & 0x3FFF;
     size_t shift_next = ((mask >> 15) & 1) | ((mask >> 13) & 2);
-
-    if (!found_mask) {
+    if (!(mask & 0x3FFF)) {
         _mm_storeu_si128(reinterpret_cast<__m128i*>(out), chunk);
         *chars_read = 16 - shift_next;
         return *chars_read;
@@ -401,7 +160,6 @@ static uint64_t percent_decode_16(char const* in, char* out,
 
     // Locate percent symbol
     __m128i found = _mm_cmpeq_epi8(chunk, byte_percent);
-    __m128i mask1 = _mm_slli_si128(found, 1);
 
     // Decode hex
 
@@ -413,6 +171,18 @@ static uint64_t percent_decode_16(char const* in, char* out,
     // set the 6th bit (0x20) to convert uppercase characters to lowercase
     __m128i lower_mask = _mm_set1_epi8(0b00100000);
     __m128i binary_letters = _mm_or_si128(chunk, lower_mask);
+    
+    //this is just for validation
+    __m128i number_mask2 = _mm_cmpgt_epi8(chunk, _mm_set1_epi8('0' - 1));
+    __m128i letters = _mm_sub_epi8(binary_letters, _mm_set1_epi8('a' + 128));
+    __m128i letter_mask = _mm_cmplt_epi8(letters, _mm_set1_epi8(-128 + 6));
+    __m128i hex_chars = _mm_and_si128(number_mask, number_mask2);
+    hex_chars = _mm_or_si128(hex_chars, letter_mask);
+    
+    __m128i valid_mask = _mm_and_si128(found, _mm_srli_si128(hex_chars, 1));
+    valid_mask = _mm_and_si128(valid_mask, _mm_srli_si128(hex_chars, 2));
+    __m128i mask1 = _mm_slli_si128(valid_mask, 1);
+    uint32_t found_mask = _mm_movemask_epi8(valid_mask);
 
     // lowercase hex
     __m128i byte_upper = _mm_set1_epi8('a' - 10);
@@ -450,37 +220,24 @@ static uint64_t percent_decode_16(char const* in, char* out,
     return 16 - shift_next;
 }
 
-struct Generic {
+struct AVX2 {
     [[gnu::target("sse,sse2,sse3,ssse3,sse4,sse4.1,sse4.2,avx,avx2,popcnt")]]
-    static size_t percent_decode(const char *in, char *out, size_t inputsize) {
+    static size_t percent_decode(const char *in, size_t inputsize, char *out) {
         size_t consumed = 0; // number of bytes read
         char *initout = out;
 
         uint64_t sig = 0;
-#ifdef __AVX2__
+
         __m256i byte_percent_256 = _mm256_set1_epi8('%');
-#endif
         __m128i byte_percent = _mm_set1_epi8('%');
 
         size_t availablebytes = 0;
         if (96 < inputsize) {
             size_t scanned = 0;
 
-
-#ifdef __AVX2__
             __m256i low = _mm256_loadu_si256((__m256i *) (in + scanned));
             __m256i found1 = _mm256_cmpeq_epi8(low, byte_percent_256);
             uint32_t lowSig = _mm256_movemask_epi8(found1);
-#else
-            __m128i low1 = _mm_loadu_si128((__m128i *) (in + scanned));
-            __m128i found1 = _mm_cmpeq_epi8(low1, byte_percent);
-            uint32_t lowSig1 = _mm_movemask_epi8(found1);
-            __m128i low2 = _mm_loadu_si128((__m128i *) (in + scanned + 16));
-            __m128i found2 = _mm_cmpeq_epi8(low2, byte_percent);
-            uint32_t lowSig2 = _mm_movemask_epi8(found2);
-            uint32_t lowSig = lowSig2 << 16;
-            lowSig |= lowSig1;
-#endif
 
             // excess verbosity to avoid problems with sign extension on conversions
             // better to think about what's happening and make it clearer
@@ -495,20 +252,9 @@ struct Generic {
             do {
                 uint64_t thisSig = nextSig;
 
-#ifdef __AVX2__
                 low = _mm256_loadu_si256((__m256i *) (in + scanned));
                 found1 = _mm256_cmpeq_epi8(low, byte_percent_256);
                 lowSig = _mm256_movemask_epi8(found1);
-#else
-                low1 = _mm_loadu_si128((__m128i *) (in + scanned));
-                found1 = _mm_cmpeq_epi8(low1, byte_percent);
-                lowSig1 = _mm_movemask_epi8(found1);
-                low2 = _mm_loadu_si128((__m128i *) (in + scanned + 16));
-                found2 = _mm_cmpeq_epi8(low2, byte_percent);
-                lowSig2 = _mm_movemask_epi8(found2);
-                lowSig = lowSig2 << 16;
-                lowSig |= lowSig1;
-#endif
 
                 high = _mm_loadu_si128((__m128i *) (in + scanned + 32));
                 found3 = _mm_cmpeq_epi8(high, byte_percent);
@@ -555,23 +301,10 @@ struct Generic {
         while (true) {
             if (availablebytes < 16) {
                 if (availablebytes + consumed + 31 < inputsize) {
-#ifdef __AVX2__
                     uint64_t newsigavx = (uint32_t) _mm256_movemask_epi8(_mm256_cmpeq_epi8(
                         _mm256_loadu_si256((__m256i *) (in + availablebytes + consumed)),
                         byte_percent_256));
                     sig |= (newsigavx << availablebytes);
-#else
-                    uint64_t newsig = _mm_movemask_epi8(_mm_cmpeq_epi8(
-                        _mm_lddqu_si128(
-                            (const __m128i *) (in + availablebytes
-                                                  + consumed)), byte_percent));
-                    uint64_t newsig2 = _mm_movemask_epi8(_mm_cmpeq_epi8(
-                        _mm_lddqu_si128(
-                            (const __m128i *) (in + availablebytes + 16
-                                                  + consumed)), byte_percent));
-                    sig |= (newsig << availablebytes)
-                           | (newsig2 << (availablebytes + 16));
-#endif
                     availablebytes += 32;
                 } else if (availablebytes + consumed + 15 < inputsize) {
                     int newsig = _mm_movemask_epi8(_mm_cmpeq_epi8(
@@ -593,17 +326,11 @@ struct Generic {
             out += chars_read;
         }
         if (consumed < inputsize) {
-            uint64_t chars_read;
-            percent_decode_slow(in + consumed, inputsize - consumed, out, &chars_read);
-            out += chars_read;
+            out += percent_decode_slow(in + consumed, inputsize - consumed, out);
         }
         return out - initout;
     }
 };
-
-#endif
-
-#ifdef __x86_64__
 
 [[gnu::target("avx512f,avx512bw,avx512vbmi,avx512vbmi2")]] void print_m512i(__m512i m) {
 //    unsigned char* c = reinterpret_cast<unsigned char*>(&m);
@@ -618,7 +345,7 @@ struct Generic {
 }
 struct AVX512 {
     [[gnu::target("avx512f,avx512bw,avx512vbmi,avx512vbmi2")]] static size_t
-    percent_decode(char const *in, char *out, size_t inputsize) {
+    percent_decode(char const *in, size_t inputsize, char *out) {
 
         const __m512i byte_plus = _mm512_set1_epi8('+');
         const __m512i byte_percent = _mm512_set1_epi8('%');
@@ -753,9 +480,11 @@ auto find_best_percent_decode() {
         __builtin_cpu_supports("avx512vbmi2")
     ) {
         return AVX512::percent_decode;
+    } else if (__builtin_cpu_supports("avx2")) {
+        return AVX2::percent_decode;
     }
 #endif
-    return Generic::percent_decode;
+    return percent_decode_slow;
 }
 
 const auto percent_decode = find_best_percent_decode();

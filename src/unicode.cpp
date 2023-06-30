@@ -478,7 +478,7 @@ bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
   std::string percent_decoded_buffer(plain.size(), 0);
   std::string_view input = plain;
   if (first_percent != std::string_view::npos) {
-    size_t output_size = percent_decoder::percent_decode(plain.data(), percent_decoded_buffer.data(), plain.size());
+    size_t output_size = percent_decoder::percent_decode(plain.data(), plain.size(), percent_decoded_buffer.data());
     percent_decoded_buffer.resize(output_size);
     input = percent_decoded_buffer;
   }
