@@ -163,30 +163,26 @@ static uint64_t percent_decode_16(char const* in, char* out,
 
     // Decode hex
 
-    // Number hex
-    __m128i byte_zero = _mm_set1_epi8('0');
-    __m128i number_mask = _mm_cmplt_epi8(chunk, _mm_set1_epi8(':')); // : is character after 9
-    __m128i binary_numbers = _mm_sub_epi8(chunk, byte_zero);
+    // compute mask of which characters are numbers and convert number characters to 0-9
+    __m128i numbers = _mm_sub_epi8(chunk, _mm_set1_epi8('0' + 128));
+    __m128i number_mask = _mm_cmplt_epi8(numbers, _mm_set1_epi8(-128 + 10));
+    __m128i binary_numbers = _mm_sub_epi8(chunk, _mm_set1_epi8('0'));
 
     // set the 6th bit (0x20) to convert uppercase characters to lowercase
     __m128i lower_mask = _mm_set1_epi8(0b00100000);
     __m128i binary_letters = _mm_or_si128(chunk, lower_mask);
-    
-    //this is just for validation
-    __m128i number_mask2 = _mm_cmpgt_epi8(chunk, _mm_set1_epi8('0' - 1));
+
+    // mask out any percent chars that aren't followed by two hex chars
     __m128i letters = _mm_sub_epi8(binary_letters, _mm_set1_epi8('a' + 128));
     __m128i letter_mask = _mm_cmplt_epi8(letters, _mm_set1_epi8(-128 + 6));
-    __m128i hex_chars = _mm_and_si128(number_mask, number_mask2);
-    hex_chars = _mm_or_si128(hex_chars, letter_mask);
-    
+    __m128i hex_chars = _mm_or_si128(number_mask, letter_mask);
     __m128i valid_mask = _mm_and_si128(found, _mm_srli_si128(hex_chars, 1));
     valid_mask = _mm_and_si128(valid_mask, _mm_srli_si128(hex_chars, 2));
     __m128i mask1 = _mm_slli_si128(valid_mask, 1);
     uint32_t found_mask = _mm_movemask_epi8(valid_mask);
 
-    // lowercase hex
-    __m128i byte_upper = _mm_set1_epi8('a' - 10);
-    binary_letters = _mm_sub_epi8(binary_letters, byte_upper);
+    // convert lowercase letter characters to [10-15]
+    binary_letters = _mm_sub_epi8(binary_letters, _mm_set1_epi8('a' - 10));
 
     // Merge first hex digit transforms
     __m128i first_and_second = _mm_blendv_epi8(binary_letters, binary_numbers, number_mask);
