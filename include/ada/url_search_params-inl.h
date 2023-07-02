@@ -19,7 +19,7 @@
 namespace ada {
 
 inline void url_search_params::initialize(std::string_view input) {
-  if (input.front() == '?') {
+  if (!input.empty() && input.front() == '?') {
     input.remove_prefix(1);
   }
 
