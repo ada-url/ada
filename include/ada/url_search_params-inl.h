@@ -18,6 +18,47 @@
 
 namespace ada {
 
+inline void url_search_params::initialize(std::string_view input) {
+  if (input.front() == '?') {
+    input.remove_prefix(1);
+  }
+
+  auto process_key_value = [&](const std::string_view current) {
+    auto equal = current.find_first_of("=");
+
+    if (equal == std::string_view::npos) {
+      params.emplace_back(current, "");
+    } else {
+      auto plain_name = current.substr(0, equal);
+      auto plain_value = current.substr(equal + 1);
+      auto name =
+          unicode::percent_decode(plain_name, plain_name.find_first_of('%'));
+      auto value =
+          unicode::percent_decode(plain_value, plain_value.find_first_of('%'));
+
+      std::replace(name.begin(), name.end(), '+', ' ');
+      std::replace(value.begin(), value.end(), '+', ' ');
+
+      params.emplace_back(name, value);
+    }
+  };
+
+  while (!input.empty()) {
+    auto ampersand_index = input.find_first_of("&");
+
+    if (ampersand_index == std::string_view::npos) {
+      if (!input.empty()) {
+        process_key_value(input);
+      }
+      break;
+    } else if (ampersand_index != 0) {
+      process_key_value(input.substr(0, ampersand_index));
+    }
+
+    input.remove_prefix(ampersand_index + 1);
+  }
+}
+
 inline void url_search_params::append(const std::string_view key,
                                       const std::string_view value) {
   params.emplace_back(key, value);
