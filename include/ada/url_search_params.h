@@ -16,10 +16,14 @@ namespace ada {
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
  */
 struct url_search_params {
-  // TODO: Add missing constructors
-  // Add tests from
-  // https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-constructor.any.js
   url_search_params() = default;
+
+  /**
+   * @see
+   * https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-constructor.any.js
+   */
+  url_search_params(const std::string_view input) { initialize(input); }
+
   url_search_params(const url_search_params &u) = default;
   url_search_params(url_search_params &&u) noexcept = default;
   url_search_params &operator=(url_search_params &&u) noexcept = default;
@@ -72,6 +76,11 @@ struct url_search_params {
  private:
   typedef std::pair<std::string, std::string> key_value_pair;
   std::vector<key_value_pair> params{};
+
+  /**
+   * @see https://url.spec.whatwg.org/#concept-urlencoded-parser
+   */
+  void initialize(std::string_view init);
 };  // url_search_params
 
 }  // namespace ada
