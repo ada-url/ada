@@ -116,6 +116,13 @@ TEST(url_search_params, string_constructor) {
   SUCCEED();
 }
 
+TEST(url_search_params, string_constructor_with_empty_input) {
+  auto p = ada::url_search_params("");
+  ASSERT_EQ(p.to_string(), "");
+  ASSERT_EQ(p.size(), 0);
+  SUCCEED();
+}
+
 TEST(url_search_params, string_constructor_without_value) {
   auto p = ada::url_search_params("a=b&c");
   ASSERT_EQ(p.to_string(), "a=b&c=");
