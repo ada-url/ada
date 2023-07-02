@@ -27,19 +27,20 @@ inline void url_search_params::initialize(std::string_view input) {
     auto equal = current.find_first_of("=");
 
     if (equal == std::string_view::npos) {
-      params.emplace_back(current, "");
+      auto name = std::string(current);
+      std::replace(name.begin(), name.end(), '+', ' ');
+      params.emplace_back(
+          unicode::percent_decode(name, name.find_first_of('%')), "");
     } else {
-      auto plain_name = current.substr(0, equal);
-      auto plain_value = current.substr(equal + 1);
-      auto name =
-          unicode::percent_decode(plain_name, plain_name.find_first_of('%'));
-      auto value =
-          unicode::percent_decode(plain_value, plain_value.find_first_of('%'));
+      auto name = std::string(current.substr(0, equal));
+      auto value = std::string(current.substr(equal + 1));
 
       std::replace(name.begin(), name.end(), '+', ' ');
       std::replace(value.begin(), value.end(), '+', ' ');
 
-      params.emplace_back(name, value);
+      params.emplace_back(
+          unicode::percent_decode(name, name.find_first_of('%')),
+          unicode::percent_decode(value, value.find_first_of('%')));
     }
   };
 
