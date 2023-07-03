@@ -24,13 +24,12 @@ inline void url_search_params::initialize(std::string_view input) {
   }
 
   auto process_key_value = [&](const std::string_view current) {
-    auto equal = current.find_first_of("=");
+    auto equal = current.find('=');
 
     if (equal == std::string_view::npos) {
       auto name = std::string(current);
       std::replace(name.begin(), name.end(), '+', ' ');
-      params.emplace_back(
-          unicode::percent_decode(name, name.find_first_of('%')), "");
+      params.emplace_back(unicode::percent_decode(name, name.find('%')), "");
     } else {
       auto name = std::string(current.substr(0, equal));
       auto value = std::string(current.substr(equal + 1));
@@ -38,14 +37,13 @@ inline void url_search_params::initialize(std::string_view input) {
       std::replace(name.begin(), name.end(), '+', ' ');
       std::replace(value.begin(), value.end(), '+', ' ');
 
-      params.emplace_back(
-          unicode::percent_decode(name, name.find_first_of('%')),
-          unicode::percent_decode(value, value.find_first_of('%')));
+      params.emplace_back(unicode::percent_decode(name, name.find('%')),
+                          unicode::percent_decode(value, value.find('%')));
     }
   };
 
   while (!input.empty()) {
-    auto ampersand_index = input.find_first_of("&");
+    auto ampersand_index = input.find('&');
 
     if (ampersand_index == std::string_view::npos) {
       if (!input.empty()) {
