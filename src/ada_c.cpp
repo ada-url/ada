@@ -369,4 +369,23 @@ const ada_url_components* ada_get_components(ada_url result) noexcept {
   }
   return reinterpret_cast<const ada_url_components*>(&r->get_components());
 }
+
+ada_owned_string ada_idna_to_unicode(const char* input, size_t length) {
+  std::string out = ada::idna::to_unicode(std::string_view(input, length));
+  ada_owned_string owned{};
+  owned.length = out.length();
+  owned.data = new char[owned.length];
+  memcpy((void*)owned.data, out.data(), owned.length);
+  return owned;
+}
+
+ada_owned_string ada_idna_to_ascii(const char* input, size_t length) {
+  std::string out = ada::idna::to_ascii(std::string_view(input, length));
+  ada_owned_string owned{};
+  owned.length = out.size();
+  owned.data = new char[owned.length];
+  memcpy((void*)owned.data, out.data(), owned.length);
+  return owned;
+}
+
 }  // extern "C"
