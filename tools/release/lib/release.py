@@ -25,7 +25,7 @@ def create_release(
 
     except Exception as exp:
         raise Exception(
-            f"create_release: Error creating release/tag {tag}: {str(exp)}"
+            f"create_release: Error creating release/tag {tag}: {exp!s}"
         ) from exp
 
 
