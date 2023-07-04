@@ -1,7 +1,6 @@
-const child_process = require('child_process');
-const assert = require('assert');
+const assert = require('node:assert');
 const test = require('node:test');
-const wasm = require('${CMAKE_CURRENT_BINARY_DIR}/wasm');
+const wasm = require('${CMAKE_CURRENT_BINARY_DIR}/wasm-node');
 
 function toJS(obj) {
   const result = {};
@@ -29,7 +28,6 @@ const expected = {
 
 test('wasm', async () => {
   const { parse } = await wasm();
-  console.log();
   assert.deepStrictEqual(toJS(parse('https://google.com/?q=Yagiz#Nizipli')), expected);
 });
 
