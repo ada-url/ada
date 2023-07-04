@@ -135,3 +135,19 @@ TEST(ada_c, ada_url_components) {
 
   SUCCEED();
 }
+
+TEST(ada_c, ada_idna) {
+  std::string_view ascii_input = "straße.de";
+  std::string_view unicode_input = "xn--strae-oqa.de";
+  ada_owned_string ascii =
+      ada_idna_to_ascii(ascii_input.data(), ascii_input.length());
+  ASSERT_EQ(std::string_view(ascii.data, ascii.length), unicode_input);
+
+  ada_owned_string unicode =
+      ada_idna_to_unicode(unicode_input.data(), unicode_input.length());
+  ASSERT_EQ(std::string_view(unicode.data, unicode.length), ascii_input);
+
+  ada_free_owned_string(ascii);
+  ada_free_owned_string(unicode);
+  SUCCEED();
+}
