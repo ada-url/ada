@@ -29,6 +29,8 @@ var ada__c_8cpp =
     [ "ada_has_password", "dd/dd6/ada__c_8cpp.html#ac79eb13340f06b81dedeab821655c9b0", null ],
     [ "ada_has_port", "dd/dd6/ada__c_8cpp.html#ad3323e027f014a8b302c680198e11492", null ],
     [ "ada_has_search", "dd/dd6/ada__c_8cpp.html#a11b78b08ce1ec8fc3095e99940831977", null ],
+    [ "ada_idna_to_ascii", "dd/dd6/ada__c_8cpp.html#abaf5cb37f65dbd14bfc89ad2db9aa276", null ],
+    [ "ada_idna_to_unicode", "dd/dd6/ada__c_8cpp.html#a56a6e283c6cda8ae15d40c2273763873", null ],
     [ "ada_is_valid", "dd/dd6/ada__c_8cpp.html#a827ba55ae07a3233b14c1065a25ae683", null ],
     [ "ada_parse", "dd/dd6/ada__c_8cpp.html#a3d27272e23679da004dc75ca466587b0", null ],
     [ "ada_parse_with_base", "dd/dd6/ada__c_8cpp.html#a9fbd8028d594a7d4534cb981b7f2d9ae", null ],

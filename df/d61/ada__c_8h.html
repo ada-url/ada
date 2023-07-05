@@ -218,6 +218,10 @@ Functions</h2></td></tr>
 <tr class="separator:af3a0f1e2989c4afb46d51fbf2f51616f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25eff808160bfe0dab2ad70a82b9ad90"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="../../dc/d69/structada__url__components.html">ada_url_components</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d61/ada__c_8h.html#a25eff808160bfe0dab2ad70a82b9ad90">ada_get_components</a> (<a class="el" href="../../df/d61/ada__c_8h.html#a94710a7b3fe3ecbf7a2113e015d423ba">ada_url</a> result)</td></tr>
 <tr class="separator:a25eff808160bfe0dab2ad70a82b9ad90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56a6e283c6cda8ae15d40c2273763873"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d1e/structada__owned__string.html">ada_owned_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d61/ada__c_8h.html#a56a6e283c6cda8ae15d40c2273763873">ada_idna_to_unicode</a> (const char *input, size_t length)</td></tr>
+<tr class="separator:a56a6e283c6cda8ae15d40c2273763873"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abaf5cb37f65dbd14bfc89ad2db9aa276"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d1e/structada__owned__string.html">ada_owned_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d61/ada__c_8h.html#abaf5cb37f65dbd14bfc89ad2db9aa276">ada_idna_to_ascii</a> (const char *input, size_t length)</td></tr>
+<tr class="separator:abaf5cb37f65dbd14bfc89ad2db9aa276"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Includes the C definitions for Ada. This is a C file, not C++. </p>
@@ -1033,6 +1037,70 @@ Functions</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html#l00355">355</a> of file <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html">ada_c.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../dd/dd6/ada__c_8cpp.html#a5649d9beb5e8b4fcbb78d274d85c3b69">get_instance()</a>.</p>
+
+</div>
+</div>
+<a id="abaf5cb37f65dbd14bfc89ad2db9aa276" name="abaf5cb37f65dbd14bfc89ad2db9aa276"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abaf5cb37f65dbd14bfc89ad2db9aa276">&#9670;&#160;</a></span>ada_idna_to_ascii()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../df/d1e/structada__owned__string.html">ada_owned_string</a> ada_idna_to_ascii </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html#l00382">382</a> of file <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html">ada_c.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../df/d1e/structada__owned__string.html#a1ea9760fddfc53d557c8cf3bfb8d15b8">ada_owned_string::length</a>, and <a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7d88f623d0a7e056cc89920b20e13dde">ada::idna::to_ascii()</a>.</p>
+
+</div>
+</div>
+<a id="a56a6e283c6cda8ae15d40c2273763873" name="a56a6e283c6cda8ae15d40c2273763873"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56a6e283c6cda8ae15d40c2273763873">&#9670;&#160;</a></span>ada_idna_to_unicode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../df/d1e/structada__owned__string.html">ada_owned_string</a> ada_idna_to_unicode </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html#l00373">373</a> of file <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html">ada_c.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../df/d1e/structada__owned__string.html#a1ea9760fddfc53d557c8cf3bfb8d15b8">ada_owned_string::length</a>, and <a class="el" href="../../d5/ddb/namespaceada_1_1idna.html#a7d9aecb5815cce8db291ed12d5d1774f">ada::idna::to_unicode()</a>.</p>
 
 </div>
 </div>

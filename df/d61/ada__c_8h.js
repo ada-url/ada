@@ -30,6 +30,8 @@ var ada__c_8h =
     [ "ada_has_password", "df/d61/ada__c_8h.html#a1930807692656c922f46c34c338b775b", null ],
     [ "ada_has_port", "df/d61/ada__c_8h.html#a7874d151441705f23df9fdf01b2d0ab4", null ],
     [ "ada_has_search", "df/d61/ada__c_8h.html#af3a0f1e2989c4afb46d51fbf2f51616f", null ],
+    [ "ada_idna_to_ascii", "df/d61/ada__c_8h.html#abaf5cb37f65dbd14bfc89ad2db9aa276", null ],
+    [ "ada_idna_to_unicode", "df/d61/ada__c_8h.html#a56a6e283c6cda8ae15d40c2273763873", null ],
     [ "ada_is_valid", "df/d61/ada__c_8h.html#ab972152184cf854bd47dae0b8f1f184a", null ],
     [ "ada_parse", "df/d61/ada__c_8h.html#a769af1f10e5c8407a02afc1eddfeacba", null ],
     [ "ada_parse_with_base", "df/d61/ada__c_8h.html#a5d601c8be3157767fa66e6a18f679f59", null ],
