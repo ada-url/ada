@@ -276,7 +276,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
 
   if (begins_with_dashdash && !has_opaque_path && !has_authority() &&
       !has_dash_dot()) {
-    // If url’s host is null, url does not have an opaque path, url’s path’s
+    // If url's host is null, url does not have an opaque path, url's path's
     // size is greater than 1, then append U+002F (/) followed by U+002E (.) to
     // output.
     buffer.insert(components.pathname_start, "/.");
@@ -809,8 +809,8 @@ inline bool url_aggregator::has_port() const noexcept {
 }
 
 inline bool url_aggregator::has_dash_dot() const noexcept {
-  // If url’s host is null, url does not have an opaque path, url’s path’s size
-  // is greater than 1, and url’s path[0] is the empty string, then append
+  // If url's host is null, url does not have an opaque path, url's path's size
+  // is greater than 1, and url's path[0] is the empty string, then append
   // U+002F (/) followed by U+002E (.) to output.
   ada_log("url_aggregator::has_dash_dot");
   // Performance: instead of doing this potentially expensive check, we could

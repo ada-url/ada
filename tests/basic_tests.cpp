@@ -26,6 +26,11 @@ TYPED_TEST(basic_tests, bad_percent_encoding) {
   ASSERT_EQ(r->get_href(), "http://www.google.com/%X%");
   r = ada::parse<TypeParam>("http://www.google%X%.com/");
   ASSERT_FALSE(r);
+  r = ada::parse<TypeParam>("http://www.google.com/");
+  ASSERT_TRUE(r);
+  r->set_href("http://www.google.com/%X%");
+  ASSERT_EQ(r->get_href(), "http://www.google.com/%X%");
+  ASSERT_FALSE(r->set_host("www.google%X%.com"));
   SUCCEED();
 }
 
@@ -33,6 +38,9 @@ TYPED_TEST(basic_tests, spaces_spaces) {
   auto r = ada::parse<TypeParam>("http://www.google.com/%37/ /");
   ASSERT_TRUE(r);
   ASSERT_EQ(r->get_href(), "http://www.google.com/%37/%20/");
+  r->set_href("http://www.google.com/  /  /+/");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_href(), "http://www.google.com/%20%20/%20%20/+/");
   r = ada::parse<TypeParam>("http://www.google com/");
   ASSERT_FALSE(r);
   SUCCEED();

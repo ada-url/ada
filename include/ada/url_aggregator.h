@@ -43,7 +43,7 @@ struct url_aggregator : url_base {
 
   [[nodiscard]] bool has_valid_domain() const noexcept override;
   /**
-   * The origin getter steps are to return the serialization of this’s URL’s
+   * The origin getter steps are to return the serialization of this's URL's
    * origin. [HTML]
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#concept-url-origin
@@ -59,35 +59,35 @@ struct url_aggregator : url_base {
    */
   inline std::string_view get_href() const noexcept;
   /**
-   * The username getter steps are to return this’s URL’s username.
+   * The username getter steps are to return this's URL's username.
    * This function does not allocate memory.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
   [[nodiscard]] std::string_view get_username() const noexcept;
   /**
-   * The password getter steps are to return this’s URL’s password.
+   * The password getter steps are to return this's URL's password.
    * This function does not allocate memory.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
   [[nodiscard]] std::string_view get_password() const noexcept;
   /**
-   * Return this’s URL’s port, serialized.
+   * Return this's URL's port, serialized.
    * This function does not allocate memory.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
   [[nodiscard]] std::string_view get_port() const noexcept;
   /**
-   * Return U+0023 (#), followed by this’s URL’s fragment.
+   * Return U+0023 (#), followed by this's URL's fragment.
    * This function does not allocate memory.
    * @return a lightweight std::string_view..
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
   [[nodiscard]] std::string_view get_hash() const noexcept;
   /**
-   * Return url’s host, serialized, followed by U+003A (:) and url’s port,
+   * Return url's host, serialized, followed by U+003A (:) and url's port,
    * serialized.
    * This function does not allocate memory.
    * When there is no host, this function returns the empty view.
@@ -96,7 +96,7 @@ struct url_aggregator : url_base {
    */
   [[nodiscard]] std::string_view get_host() const noexcept;
   /**
-   * Return this’s URL’s host, serialized.
+   * Return this's URL's host, serialized.
    * This function does not allocate memory.
    * When there is no host, this function returns the empty view.
    * @return a lightweight std::string_view.
@@ -105,7 +105,7 @@ struct url_aggregator : url_base {
   [[nodiscard]] std::string_view get_hostname() const noexcept;
   /**
    * The pathname getter steps are to return the result of URL path serializing
-   * this’s URL.
+   * this's URL.
    * This function does not allocate memory.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
@@ -119,14 +119,14 @@ struct url_aggregator : url_base {
    */
   ada_really_inline uint32_t get_pathname_length() const noexcept;
   /**
-   * Return U+003F (?), followed by this’s URL’s query.
+   * Return U+003F (?), followed by this's URL's query.
    * This function does not allocate memory.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
   [[nodiscard]] std::string_view get_search() const noexcept;
   /**
-   * The protocol getter steps are to return this’s URL’s scheme, followed by
+   * The protocol getter steps are to return this's URL's scheme, followed by
    * U+003A (:).
    * This function does not allocate memory.
    * @return a lightweight std::string_view.
