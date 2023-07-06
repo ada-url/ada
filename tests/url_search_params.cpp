@@ -26,7 +26,8 @@ TEST(url_search_params, with_accents) {
   search_params.append("key1", "été");
   search_params.append("key2", "Céline Dion++");
   ASSERT_EQ(search_params.size(), 2);
-  ASSERT_EQ(search_params.to_string(), "key1=%C3%A9t%C3%A9&key2=C%C3%A9line+Dion%2B%2B");
+  ASSERT_EQ(search_params.to_string(),
+            "key1=%C3%A9t%C3%A9&key2=C%C3%A9line+Dion%2B%2B");
   ASSERT_EQ(search_params.get("key1"), "été");
   ASSERT_EQ(search_params.get("key2"), "Céline Dion++");
   SUCCEED();
