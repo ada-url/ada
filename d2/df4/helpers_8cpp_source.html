@@ -211,8 +211,8 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>                                    <a class="code hl_enumeration" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3b">ada::scheme::type</a> type) <span class="keyword">noexcept</span> {</div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <span class="keywordtype">size_t</span> first_delimiter = path.find_first_of(<span class="charliteral">&#39;/&#39;</span>, 1);</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="comment">// Let path be url’s path.</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="comment">// If url’s scheme is &quot;file&quot;, path’s size is 1, and path[0] is a normalized</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="comment">// Let path be url&#39;s path.</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="comment">// If url&#39;s scheme is &quot;file&quot;, path&#39;s size is 1, and path[0] is a normalized</span></div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <span class="comment">// Windows drive letter, then return.</span></div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp;</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>      first_delimiter == std::string_view::npos &amp;&amp; !path.empty()) {</div>
@@ -222,7 +222,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    }</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  }</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  <span class="comment">// Remove path’s last item, if any.</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  <span class="comment">// Remove path&#39;s last item, if any.</span></div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  <span class="keywordtype">size_t</span> last_delimiter = path.rfind(<span class="charliteral">&#39;/&#39;</span>);</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  <span class="keywordflow">if</span> (last_delimiter != std::string::npos) {</div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    path.erase(last_delimiter);</div>
@@ -236,8 +236,8 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>                                    <a class="code hl_enumeration" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3b">ada::scheme::type</a> type) <span class="keyword">noexcept</span> {</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>  <span class="keywordtype">size_t</span> first_delimiter = path.find_first_of(<span class="charliteral">&#39;/&#39;</span>, 1);</div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <span class="comment">// Let path be url’s path.</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  <span class="comment">// If url’s scheme is &quot;file&quot;, path’s size is 1, and path[0] is a normalized</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <span class="comment">// Let path be url&#39;s path.</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  <span class="comment">// If url&#39;s scheme is &quot;file&quot;, path&#39;s size is 1, and path[0] is a normalized</span></div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  <span class="comment">// Windows drive letter, then return.</span></div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp;</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>      first_delimiter == std::string_view::npos &amp;&amp; !path.empty()) {</div>
@@ -247,7 +247,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    }</div>
 <div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  }</div>
 <div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  <span class="comment">// Remove path’s last item, if any.</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  <span class="comment">// Remove path&#39;s last item, if any.</span></div>
 <div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>  <span class="keywordflow">if</span> (!path.empty()) {</div>
 <div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="keywordtype">size_t</span> slash_loc = path.rfind(<span class="charliteral">&#39;/&#39;</span>);</div>
 <div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="keywordflow">if</span> (slash_loc != std::string_view::npos) {</div>
@@ -633,7 +633,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>      }</div>
 <div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>      <span class="comment">// Otherwise, if path_buffer is not a single-dot path segment, then:</span></div>
 <div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>      <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d2/dc3/namespaceada_1_1unicode.html#ad649ab6ed074b809af2eceaaa0c787db">unicode::is_single_dot_path_segment</a>(path_buffer)) {</div>
-<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>        <span class="comment">// If url’s scheme is &quot;file&quot;, url’s path is empty, and path_buffer is a</span></div>
+<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>        <span class="comment">// If url&#39;s scheme is &quot;file&quot;, url&#39;s path is empty, and path_buffer is a</span></div>
 <div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>        <span class="comment">// Windows drive letter, then replace the second code point in</span></div>
 <div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>        <span class="comment">// path_buffer with U+003A (:).</span></div>
 <div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>        <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp; path.empty() &amp;&amp;</div>
@@ -644,7 +644,7 @@ $(document).ready(function(){initNavTree('d2/df4/helpers_8cpp_source.html','../.
 <div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>          path_buffer.remove_prefix(2);</div>
 <div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>          path.append(path_buffer);</div>
 <div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>          <span class="comment">// Append path_buffer to url’s path.</span></div>
+<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>          <span class="comment">// Append path_buffer to url&#39;s path.</span></div>
 <div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>          path += <span class="charliteral">&#39;/&#39;</span>;</div>
 <div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span>          path.append(path_buffer);</div>
 <div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span>        }</div>

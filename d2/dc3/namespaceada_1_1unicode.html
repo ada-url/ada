@@ -857,7 +857,7 @@ template&lt;bool append&gt; </div>
 </div><div class="memdoc">
 <p>We receive a UTF-8 string representing a domain name. If the string is percent encoded, we apply percent decoding.</p>
 <p>Given a domain, we need to identify its labels. They are separated by label-separators:</p>
-<p>U+002E ( . ) FULL STOP U+FF0E ( ． ) FULLWIDTH FULL STOP U+3002 ( 。 ) IDEOGRAPHIC FULL STOP U+FF61 ( ｡ ) HALFWIDTH IDEOGRAPHIC FULL STOP</p>
+<p>U+002E (.) FULL STOP U+FF0E FULLWIDTH FULL STOP U+3002 IDEOGRAPHIC FULL STOP U+FF61 HALFWIDTH IDEOGRAPHIC FULL STOP</p>
 <p>They are all mapped to U+002E.</p>
 <p>We process each label into a string that should not exceed 63 octets. If the string is already punycode (starts with "xn--"), then we must scan it to look for unallowed code points. Otherwise, if the string is not pure ASCII, we need to transcode it to punycode by following RFC 3454 which requires us to</p><ul>
 <li>Map characters (see section 3),</li>

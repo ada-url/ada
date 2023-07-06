@@ -254,13 +254,13 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>          }</div>
 <div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>          ada_log(<span class="stringliteral">&quot;SCHEME the scheme is &quot;</span>, <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_function" href="../../dd/d03/structada_1_1url.html#aea51f25837108e049b0b9ea834b7eec1">get_protocol</a>());</div>
 <div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>          <span class="comment">// If url’s scheme is &quot;file&quot;, then:</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>          <span class="comment">// If url&#39;s scheme is &quot;file&quot;, then:</span></div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>          <span class="keywordflow">if</span> (<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>            <span class="comment">// Set state to file state.</span></div>
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>            <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719">ada::state::FILE</a>;</div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>          }</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>          <span class="comment">// Otherwise, if url is special, base is non-null, and base’s scheme</span></div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>          <span class="comment">// is url’s scheme: Note: Doing base_url-&gt;scheme is unsafe if base_url</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>          <span class="comment">// Otherwise, if url is special, base is non-null, and base&#39;s scheme</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>          <span class="comment">// is url&#39;s scheme: Note: Doing base_url-&gt;scheme is unsafe if base_url</span></div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>          <span class="comment">// != nullptr is false.</span></div>
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>          <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_function" href="../../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd">is_special</a>() &amp;&amp; base_url != <span class="keyword">nullptr</span> &amp;&amp;</div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>                   base_url-&gt;type == <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.type) {</div>
@@ -279,7 +279,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>            <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574afb111d1dc7e43a21ed9dcb1c618a6f88">ada::state::PATH_OR_AUTHORITY</a>;</div>
 <div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>            input_position++;</div>
 <div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>          }</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>          <span class="comment">// Otherwise, set url’s path to the empty string and set state to</span></div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>          <span class="comment">// Otherwise, set url&#39;s path to the empty string and set state to</span></div>
 <div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>          <span class="comment">// opaque path state.</span></div>
 <div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>          <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>            <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd">ada::state::OPAQUE_PATH</a>;</div>
@@ -307,8 +307,8 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>          <span class="keywordflow">return</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>;</div>
 <div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        }</div>
 <div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="comment">// Otherwise, if base has an opaque path and c is U+0023 (#),</span></div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        <span class="comment">// set url’s scheme to base’s scheme, url’s path to base’s path, url’s</span></div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="comment">// query to base’s query, and set state to fragment state.</span></div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        <span class="comment">// set url&#39;s scheme to base&#39;s scheme, url&#39;s path to base&#39;s path, url&#39;s</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="comment">// query to base&#39;s query, and set state to fragment state.</span></div>
 <div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (base_url-&gt;has_opaque_path &amp;&amp; fragment.has_value() &amp;&amp;</div>
 <div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>                 input_position == input_size) {</div>
 <div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>          ada_log(<span class="stringliteral">&quot;NO_SCHEME opaque base with fragment&quot;</span>);</div>
@@ -325,7 +325,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>          <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.update_unencoded_base_hash(*fragment);</div>
 <div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>          <span class="keywordflow">return</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>;</div>
 <div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        }</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <span class="comment">// Otherwise, if base’s scheme is not &quot;file&quot;, set state to relative</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <span class="comment">// Otherwise, if base&#39;s scheme is not &quot;file&quot;, set state to relative</span></div>
 <div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        <span class="comment">// state and decrease pointer by 1.</span></div>
 <div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (base_url-&gt;type != <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
 <div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>          ada_log(<span class="stringliteral">&quot;NO_SCHEME non-file relative path&quot;</span>);</div>
@@ -493,7 +493,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        ada_log(<span class="stringliteral">&quot;RELATIVE_SCHEME &quot;</span>,</div>
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>                helpers::substring(url_data, input_position));</div>
 <div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span> </div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        <span class="comment">// Set url’s scheme to base’s scheme.</span></div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        <span class="comment">// Set url&#39;s scheme to base&#39;s scheme.</span></div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.copy_scheme(*base_url);</div>
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span> </div>
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>        <span class="comment">// If c is U+002F (/), then set state to relative slash state.</span></div>
@@ -513,9 +513,9 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ec740dccfce73682b0fc766b3367b20">ada::state::RELATIVE_SLASH</a>;</div>
 <div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>        } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>          ada_log(<span class="stringliteral">&quot;RELATIVE_SCHEME otherwise&quot;</span>);</div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>          <span class="comment">// Set url’s username to base’s username, url’s password to base’s</span></div>
-<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>          <span class="comment">// password, url’s host to base’s host, url’s port to base’s port,</span></div>
-<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>          <span class="comment">// url’s path to a clone of base’s path, and url’s query to base’s</span></div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>          <span class="comment">// Set url&#39;s username to base&#39;s username, url&#39;s password to base&#39;s</span></div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>          <span class="comment">// password, url&#39;s host to base&#39;s host, url&#39;s port to base&#39;s port,</span></div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>          <span class="comment">// url&#39;s path to a clone of base&#39;s path, and url&#39;s query to base&#39;s</span></div>
 <div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>          <span class="comment">// query.</span></div>
 <div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>          <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
 <div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.username = base_url-&gt;username;</div>
@@ -541,7 +541,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span> </div>
 <div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span>          <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_variable" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">has_opaque_path</a> = base_url-&gt;has_opaque_path;</div>
 <div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span> </div>
-<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>          <span class="comment">// If c is U+003F (?), then set url’s query to the empty string, and</span></div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span>          <span class="comment">// If c is U+003F (?), then set url&#39;s query to the empty string, and</span></div>
 <div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span>          <span class="comment">// state to query state.</span></div>
 <div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span>          <span class="keywordflow">if</span> ((input_position != input_size) &amp;&amp;</div>
 <div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>              (url_data[input_position] == <span class="charliteral">&#39;?&#39;</span>)) {</div>
@@ -549,10 +549,10 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00447" name="l00447"></a><span class="lineno">  447</span>          }</div>
 <div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>          <span class="comment">// Otherwise, if c is not the EOF code point:</span></div>
 <div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span>          <span class="keywordflow">else</span> <span class="keywordflow">if</span> (input_position != input_size) {</div>
-<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span>            <span class="comment">// Set url’s query to null.</span></div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span>            <span class="comment">// Set url&#39;s query to null.</span></div>
 <div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_search();</div>
 <div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span>            <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
-<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>              <span class="comment">// Shorten url’s path.</span></div>
+<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>              <span class="comment">// Shorten url&#39;s path.</span></div>
 <div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>              helpers::shorten_path(<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.path, <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.type);</div>
 <div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>            } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>              std::string_view path = <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_function" href="../../dd/d03/structada_1_1url.html#a1000c2e4b931739729c00ce724275925">get_pathname</a>();</div>
@@ -585,10 +585,10 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39">ada::state::AUTHORITY</a>;</div>
 <div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span>        }</div>
 <div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span>        <span class="comment">// Otherwise, set</span></div>
-<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>        <span class="comment">// - url’s username to base’s username,</span></div>
-<div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>        <span class="comment">// - url’s password to base’s password,</span></div>
-<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>        <span class="comment">// - url’s host to base’s host,</span></div>
-<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>        <span class="comment">// - url’s port to base’s port,</span></div>
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>        <span class="comment">// - url&#39;s username to base&#39;s username,</span></div>
+<div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>        <span class="comment">// - url&#39;s password to base&#39;s password,</span></div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>        <span class="comment">// - url&#39;s host to base&#39;s host,</span></div>
+<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>        <span class="comment">// - url&#39;s port to base&#39;s port,</span></div>
 <div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>        <span class="comment">// - state to path state, and then, decrease pointer by 1.</span></div>
 <div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>        <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>          <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
@@ -650,7 +650,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>                             : <a class="code hl_variable" href="../../d7/d35/namespaceada_1_1character__sets.html#a18aa23e2f62732f939016a46b0b5e94b">ada::character_sets::QUERY_PERCENT_ENCODE</a>;</div>
 <div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span> </div>
 <div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>        <span class="comment">// Percent-encode after encoding, with encoding, buffer, and</span></div>
-<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>        <span class="comment">// queryPercentEncodeSet, and append the result to url’s query.</span></div>
+<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>        <span class="comment">// queryPercentEncodeSet, and append the result to url&#39;s query.</span></div>
 <div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>        <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.update_base_search(helpers::substring(url_data, input_position),</div>
 <div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>                               query_percent_encode_set);</div>
 <div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>        ada_log(<span class="stringliteral">&quot;QUERY update_base_search completed &quot;</span>);</div>
@@ -681,7 +681,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span>            <span class="keywordflow">return</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>;</div>
 <div class="line"><a id="l00580" name="l00580"></a><span class="lineno">  580</span>          }</div>
 <div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span>          ada_log(<span class="stringliteral">&quot;HOST parsing results in &quot;</span>, <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_function" href="../../dd/d03/structada_1_1url.html#aa4f23a030f0adb5301962fd5b5e68f86">get_hostname</a>());</div>
-<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span>          <span class="comment">// Set url’s host to host, buffer to the empty string, and state to</span></div>
+<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span>          <span class="comment">// Set url&#39;s host to host, buffer to the empty string, and state to</span></div>
 <div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span>          <span class="comment">// port state.</span></div>
 <div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5">ada::state::PORT</a>;</div>
 <div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>          input_position++;</div>
@@ -709,7 +709,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span>          ada_log(<span class="stringliteral">&quot;HOST parsing results in &quot;</span>, <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_function" href="../../dd/d03/structada_1_1url.html#aa4f23a030f0adb5301962fd5b5e68f86">get_hostname</a>(),</div>
 <div class="line"><a id="l00608" name="l00608"></a><span class="lineno">  608</span>                  <span class="stringliteral">&quot; href=&quot;</span>, <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_function" href="../../dd/d03/structada_1_1url.html#a5500ad7f3289828e6bc654ebd0554bf4">get_href</a>());</div>
 <div class="line"><a id="l00609" name="l00609"></a><span class="lineno">  609</span> </div>
-<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span>          <span class="comment">// Set url’s host to host, and state to path start state.</span></div>
+<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span>          <span class="comment">// Set url&#39;s host to host, and state to path start state.</span></div>
 <div class="line"><a id="l00611" name="l00611"></a><span class="lineno">  611</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aba05134b69d52ab8a9c703362ee02fa4">ada::state::PATH_START</a>;</div>
 <div class="line"><a id="l00612" name="l00612"></a><span class="lineno">  612</span>        }</div>
 <div class="line"><a id="l00613" name="l00613"></a><span class="lineno">  613</span> </div>
@@ -718,7 +718,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>      <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd">ada::state::OPAQUE_PATH</a>: {</div>
 <div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>        ada_log(<span class="stringliteral">&quot;OPAQUE_PATH &quot;</span>, helpers::substring(url_data, input_position));</div>
 <div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span>        std::string_view view = helpers::substring(url_data, input_position);</div>
-<div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span>        <span class="comment">// If c is U+003F (?), then set url’s query to the empty string and</span></div>
+<div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span>        <span class="comment">// If c is U+003F (?), then set url&#39;s query to the empty string and</span></div>
 <div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span>        <span class="comment">// state to query state.</span></div>
 <div class="line"><a id="l00621" name="l00621"></a><span class="lineno">  621</span>        <span class="keywordtype">size_t</span> location = view.find(<span class="charliteral">&#39;?&#39;</span>);</div>
 <div class="line"><a id="l00622" name="l00622"></a><span class="lineno">  622</span>        <span class="keywordflow">if</span> (location != std::string_view::npos) {</div>
@@ -773,7 +773,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span>          }</div>
 <div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span>        }</div>
 <div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span>        <span class="comment">// Otherwise, if state override is not given and c is U+003F (?),</span></div>
-<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>        <span class="comment">// set url’s query to the empty string and state to query state.</span></div>
+<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>        <span class="comment">// set url&#39;s query to the empty string and state to query state.</span></div>
 <div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((input_position != input_size) &amp;&amp;</div>
 <div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>                 (url_data[input_position] == <span class="charliteral">&#39;?&#39;</span>)) {</div>
 <div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5662080872eece1e1ceeec5750198283">ada::state::QUERY</a>;</div>
@@ -827,12 +827,12 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>          input_position++;</div>
 <div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>        } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span>          ada_log(<span class="stringliteral">&quot;FILE_SLASH otherwise&quot;</span>);</div>
-<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>          <span class="comment">// If base is non-null and base’s scheme is &quot;file&quot;, then:</span></div>
+<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>          <span class="comment">// If base is non-null and base&#39;s scheme is &quot;file&quot;, then:</span></div>
 <div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span>          <span class="comment">// Note: it is unsafe to do base_url-&gt;scheme unless you know that</span></div>
 <div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span>          <span class="comment">// base_url_has_value() is true.</span></div>
 <div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span>          <span class="keywordflow">if</span> (base_url != <span class="keyword">nullptr</span> &amp;&amp;</div>
 <div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span>              base_url-&gt;type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
-<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>            <span class="comment">// Set url’s host to base’s host.</span></div>
+<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span>            <span class="comment">// Set url&#39;s host to base&#39;s host.</span></div>
 <div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span>            <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
 <div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span>              <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.host = base_url-&gt;host;</div>
 <div class="line"><a id="l00736" name="l00736"></a><span class="lineno">  736</span>            } <span class="keywordflow">else</span> {</div>
@@ -840,9 +840,9 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00738" name="l00738"></a><span class="lineno">  738</span>              <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_function" href="../../dd/d03/structada_1_1url.html#a716bea9e0b8f60b16c97b5268458da7f">set_host</a>(base_url-&gt;get_host());</div>
 <div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span>            }</div>
 <div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span>            <span class="comment">// If the code point substring from pointer to the end of input does</span></div>
-<div class="line"><a id="l00741" name="l00741"></a><span class="lineno">  741</span>            <span class="comment">// not start with a Windows drive letter and base’s path[0] is a</span></div>
-<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span>            <span class="comment">// normalized Windows drive letter, then append base’s path[0] to</span></div>
-<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>            <span class="comment">// url’s path.</span></div>
+<div class="line"><a id="l00741" name="l00741"></a><span class="lineno">  741</span>            <span class="comment">// not start with a Windows drive letter and base&#39;s path[0] is a</span></div>
+<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span>            <span class="comment">// normalized Windows drive letter, then append base&#39;s path[0] to</span></div>
+<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>            <span class="comment">// url&#39;s path.</span></div>
 <div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span>            <span class="keywordflow">if</span> (!base_url-&gt;get_pathname().empty()) {</div>
 <div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span>              <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">checkers::is_windows_drive_letter</a>(</div>
 <div class="line"><a id="l00746" name="l00746"></a><span class="lineno">  746</span>                      helpers::substring(url_data, input_position))) {</div>
@@ -884,7 +884,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00782" name="l00782"></a><span class="lineno">  782</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">checkers::is_windows_drive_letter</a>(file_host_buffer)) {</div>
 <div class="line"><a id="l00783" name="l00783"></a><span class="lineno">  783</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5ffb5f0d0de78321df46fc7c93ca64a3">ada::state::PATH</a>;</div>
 <div class="line"><a id="l00784" name="l00784"></a><span class="lineno">  784</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (file_host_buffer.empty()) {</div>
-<div class="line"><a id="l00785" name="l00785"></a><span class="lineno">  785</span>          <span class="comment">// Set url’s host to the empty string.</span></div>
+<div class="line"><a id="l00785" name="l00785"></a><span class="lineno">  785</span>          <span class="comment">// Set url&#39;s host to the empty string.</span></div>
 <div class="line"><a id="l00786" name="l00786"></a><span class="lineno">  786</span>          <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
 <div class="line"><a id="l00787" name="l00787"></a><span class="lineno">  787</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.host = <span class="stringliteral">&quot;&quot;</span>;</div>
 <div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>          } <span class="keywordflow">else</span> {</div>
@@ -925,7 +925,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span> </div>
 <div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>        <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.set_protocol_as_file();</div>
 <div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
-<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span>          <span class="comment">// Set url’s host to the empty string.</span></div>
+<div class="line"><a id="l00826" name="l00826"></a><span class="lineno">  826</span>          <span class="comment">// Set url&#39;s host to the empty string.</span></div>
 <div class="line"><a id="l00827" name="l00827"></a><span class="lineno">  827</span>          <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.host = <span class="stringliteral">&quot;&quot;</span>;</div>
 <div class="line"><a id="l00828" name="l00828"></a><span class="lineno">  828</span>        } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00829" name="l00829"></a><span class="lineno">  829</span>          <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.update_base_hostname(<span class="stringliteral">&quot;&quot;</span>);</div>
@@ -938,11 +938,11 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>          <span class="comment">// Set state to file slash state.</span></div>
 <div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>          <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a33e2ce137194c80639c32978fb77a489">ada::state::FILE_SLASH</a>;</div>
 <div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>        }</div>
-<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>        <span class="comment">// Otherwise, if base is non-null and base’s scheme is &quot;file&quot;:</span></div>
+<div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>        <span class="comment">// Otherwise, if base is non-null and base&#39;s scheme is &quot;file&quot;:</span></div>
 <div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (base_url != <span class="keyword">nullptr</span> &amp;&amp;</div>
 <div class="line"><a id="l00841" name="l00841"></a><span class="lineno">  841</span>                 base_url-&gt;type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
-<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>          <span class="comment">// Set url’s host to base’s host, url’s path to a clone of base’s</span></div>
-<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>          <span class="comment">// path, and url’s query to base’s query.</span></div>
+<div class="line"><a id="l00842" name="l00842"></a><span class="lineno">  842</span>          <span class="comment">// Set url&#39;s host to base&#39;s host, url&#39;s path to a clone of base&#39;s</span></div>
+<div class="line"><a id="l00843" name="l00843"></a><span class="lineno">  843</span>          <span class="comment">// path, and url&#39;s query to base&#39;s query.</span></div>
 <div class="line"><a id="l00844" name="l00844"></a><span class="lineno">  844</span>          ada_log(<span class="stringliteral">&quot;FILE base non-null&quot;</span>);</div>
 <div class="line"><a id="l00845" name="l00845"></a><span class="lineno">  845</span>          <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
 <div class="line"><a id="l00846" name="l00846"></a><span class="lineno">  846</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.host = base_url-&gt;host;</div>
@@ -957,17 +957,17 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>          }</div>
 <div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>          <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_variable" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">has_opaque_path</a> = base_url-&gt;has_opaque_path;</div>
 <div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span> </div>
-<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>          <span class="comment">// If c is U+003F (?), then set url’s query to the empty string and</span></div>
+<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>          <span class="comment">// If c is U+003F (?), then set url&#39;s query to the empty string and</span></div>
 <div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>          <span class="comment">// state to query state.</span></div>
 <div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>          <span class="keywordflow">if</span> (input_position != input_size &amp;&amp; url_data[input_position] == <span class="charliteral">&#39;?&#39;</span>) {</div>
 <div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>            <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> = <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5662080872eece1e1ceeec5750198283">ada::state::QUERY</a>;</div>
 <div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>          }</div>
 <div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span>          <span class="comment">// Otherwise, if c is not the EOF code point:</span></div>
 <div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>          <span class="keywordflow">else</span> <span class="keywordflow">if</span> (input_position != input_size) {</div>
-<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>            <span class="comment">// Set url’s query to null.</span></div>
+<div class="line"><a id="l00865" name="l00865"></a><span class="lineno">  865</span>            <span class="comment">// Set url&#39;s query to null.</span></div>
 <div class="line"><a id="l00866" name="l00866"></a><span class="lineno">  866</span>            <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_search();</div>
 <div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>            <span class="comment">// If the code point substring from pointer to the end of input does</span></div>
-<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>            <span class="comment">// not start with a Windows drive letter, then shorten url’s path.</span></div>
+<div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>            <span class="comment">// not start with a Windows drive letter, then shorten url&#39;s path.</span></div>
 <div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>            <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">checkers::is_windows_drive_letter</a>(file_view)) {</div>
 <div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>              <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url) {</div>
 <div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>                helpers::shorten_path(<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.path, <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.type);</div>
@@ -980,7 +980,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00878" name="l00878"></a><span class="lineno">  878</span>            }</div>
 <div class="line"><a id="l00879" name="l00879"></a><span class="lineno">  879</span>            <span class="comment">// Otherwise:</span></div>
 <div class="line"><a id="l00880" name="l00880"></a><span class="lineno">  880</span>            <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>              <span class="comment">// Set url’s path to an empty list.</span></div>
+<div class="line"><a id="l00881" name="l00881"></a><span class="lineno">  881</span>              <span class="comment">// Set url&#39;s path to an empty list.</span></div>
 <div class="line"><a id="l00882" name="l00882"></a><span class="lineno">  882</span>              <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.clear_pathname();</div>
 <div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>              <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>.<a class="code hl_variable" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">has_opaque_path</a> = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span>            }</div>
