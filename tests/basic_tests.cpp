@@ -20,6 +20,34 @@ TYPED_TEST(basic_tests, insane_url) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, bad_percent_encoding) {
+  auto r = ada::parse<TypeParam>("http://www.google.com/%X%");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_href(), "http://www.google.com/%X%");
+  r = ada::parse<TypeParam>("http://www.google%X%.com/");
+  ASSERT_FALSE(r);
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, spaces_spaces) {
+  auto r = ada::parse<TypeParam>("http://www.google.com/%37/ /");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_href(), "http://www.google.com/%37/%20/");
+  r = ada::parse<TypeParam>("http://www.google com/");
+  ASSERT_FALSE(r);
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, pluses) {
+  auto r = ada::parse<TypeParam>("http://www.google.com/%37+/");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_href(), "http://www.google.com/%37+/");
+  r = ada::parse<TypeParam>("http://www.google+com/");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_href(), "http://www.google+com/");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_host_should_return_false_sometimes) {
   auto r = ada::parse<TypeParam>("mailto:a@b.com");
   ASSERT_FALSE(r->set_host("something"));

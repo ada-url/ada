@@ -29,6 +29,7 @@ TEST(url_search_params, to_string_serialize_space) {
   auto params = ada::url_search_params();
   params.append("a", "b c");
   ASSERT_EQ(params.to_string(), "a=b+c");
+  ASSERT_EQ(params.get("a").value(), "b c");
   params.remove("a");
   params.append("a b", "c");
   ASSERT_EQ(params.to_string(), "a+b=c");
