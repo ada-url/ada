@@ -30,7 +30,7 @@ template <bool has_state_override>
    **/
   if (is_input_special) {  // fast path!!!
     if (has_state_override) {
-      // If url’s scheme is not a special scheme and buffer is a special scheme,
+      // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
       if (is_special() != is_input_special) {
         return true;
@@ -43,7 +43,7 @@ template <bool has_state_override>
         return true;
       }
 
-      // If url’s scheme is "file" and its host is an empty host, then return.
+      // If url's scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE &&
           components.host_start == components.host_end) {
@@ -58,7 +58,7 @@ template <bool has_state_override>
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
-      // If url’s port is url’s scheme’s default port, then set url’s port to
+      // If url's port is url's scheme's default port, then set url's port to
       // null.
       if (components.port == urls_scheme_port) {
         clear_port();
@@ -72,8 +72,8 @@ template <bool has_state_override>
     unicode::to_lower_ascii(_buffer.data(), _buffer.size());
 
     if (has_state_override) {
-      // If url’s scheme is a special scheme and buffer is not a special scheme,
-      // then return. If url’s scheme is not a special scheme and buffer is a
+      // If url's scheme is a special scheme and buffer is not a special scheme,
+      // then return. If url's scheme is not a special scheme and buffer is a
       // special scheme, then return.
       if (is_special() != ada::scheme::is_special(_buffer)) {
         return true;
@@ -86,7 +86,7 @@ template <bool has_state_override>
         return true;
       }
 
-      // If url’s scheme is "file" and its host is an empty host, then return.
+      // If url's scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE &&
           components.host_start == components.host_end) {
@@ -100,7 +100,7 @@ template <bool has_state_override>
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
-      // If url’s port is url’s scheme’s default port, then set url’s port to
+      // If url's port is url's scheme's default port, then set url's port to
       // null.
       if (components.port == urls_scheme_port) {
         clear_port();
@@ -549,7 +549,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     }
     // If url is special and host_view is the empty string, validation error,
     // return failure. Otherwise, if state override is given, host_view is the
-    // empty string, and either url includes credentials or url’s port is
+    // empty string, and either url includes credentials or url's port is
     // non-null, return.
     else if (host_view.empty() &&
              (is_special() || has_credentials() ||
@@ -585,7 +585,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   }
 
   if (new_host.empty()) {
-    // Set url’s host to the empty string.
+    // Set url's host to the empty string.
     clear_hostname();
   } else {
     // Let host be the result of host parsing buffer with url is not special.
@@ -635,7 +635,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
     if (!path.empty()) {
       auto out = ada::parse<ada::url_aggregator>(path);
       if (out && (out->type == scheme::HTTP || out->type == scheme::HTTPS)) {
-        // If pathURL’s scheme is not "http" and not "https", then return a
+        // If pathURL's scheme is not "http" and not "https", then return a
         // new opaque origin.
         return helpers::concat(out->get_protocol(), "//", out->get_host());
       }
@@ -675,8 +675,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept {
   ada_log("url_aggregator::get_hash");
-  // If this’s URL’s fragment is either null or the empty string, then return
-  // the empty string. Return U+0023 (#), followed by this’s URL’s fragment.
+  // If this's URL's fragment is either null or the empty string, then return
+  // the empty string. Return U+0023 (#), followed by this's URL's fragment.
   if (components.hash_start == url_components::omitted) {
     return "";
   }
@@ -734,8 +734,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
 [[nodiscard]] std::string_view url_aggregator::get_search() const noexcept {
   ada_log("url_aggregator::get_search");
-  // If this’s URL’s query is either null or the empty string, then return the
-  // empty string. Return U+003F (?), followed by this’s URL’s query.
+  // If this's URL's query is either null or the empty string, then return the
+  // empty string. Return U+003F (?), followed by this's URL's query.
   if (components.search_start == url_components::omitted) {
     return "";
   }
@@ -1002,7 +1002,7 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
     uint16_t value = 0, length = 0;
 
     // While length is less than 4 and c is an ASCII hex digit,
-    // set value to value × 0x10 + c interpreted as hexadecimal number, and
+    // set value to value times 0x10 + c interpreted as hexadecimal number, and
     // increase pointer and length by 1.
     while (length < 4 && pointer != input.end() &&
            unicode::is_ascii_hex_digit(*pointer)) {
@@ -1072,7 +1072,7 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
             ada_log("parse_ipv6 if ipv4Piece is 0, validation error");
             return is_valid = false;
           }
-          // Otherwise, set ipv4Piece to ipv4Piece × 10 + number.
+          // Otherwise, set ipv4Piece to ipv4Piece times 10 + number.
           else {
             ipv4_piece = *ipv4_piece * 10 + number;
           }
@@ -1087,7 +1087,8 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
           pointer++;
         }
 
-        // Set address[pieceIndex] to address[pieceIndex] × 0x100 + ipv4Piece.
+        // Set address[pieceIndex] to address[pieceIndex] times 0x100 +
+        // ipv4Piece.
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
         address[piece_index] =
             uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
@@ -1140,14 +1141,14 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
 
   // If compress is non-null, then:
   if (compress.has_value()) {
-    // Let swaps be pieceIndex − compress.
+    // Let swaps be pieceIndex - compress.
     int swaps = piece_index - *compress;
 
     // Set pieceIndex to 7.
     piece_index = 7;
 
     // While pieceIndex is not 0 and swaps is greater than 0,
-    // swap address[pieceIndex] with address[compress + swaps − 1], and then
+    // swap address[pieceIndex] with address[compress + swaps - 1], and then
     // decrease both pieceIndex and swaps by 1.
     while (piece_index != 0 && swaps > 0) {
       std::swap(address[piece_index], address[*compress + swaps - 1]);
@@ -1688,7 +1689,7 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
       }
       // Otherwise, if path_buffer is not a single-dot path segment, then:
       else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-        // If url’s scheme is "file", url’s path is empty, and path_buffer is a
+        // If url's scheme is "file", url's path is empty, and path_buffer is a
         // Windows drive letter, then replace the second code point in
         // path_buffer with U+003A (:).
         if (type == ada::scheme::type::FILE && path.empty() &&
@@ -1699,7 +1700,7 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
           path_buffer.remove_prefix(2);
           path.append(path_buffer);
         } else {
-          // Append path_buffer to url’s path.
+          // Append path_buffer to url's path.
           path += '/';
           path.append(path_buffer);
         }

@@ -110,7 +110,6 @@ namespace ada::idna {
 // this function. We also do not trim control characters. We also assume that
 // the input is not empty. We return "" on error.
 //
-// Example: "www.öbb.at" -> "www.xn--bb-eka.at"
 //
 // This function may accept or even produce invalid domains.
 std::string to_ascii(std::string_view ut8_string);

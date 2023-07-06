@@ -24,10 +24,10 @@ namespace ada::unicode {
  * Given a domain, we need to identify its labels.
  * They are separated by label-separators:
  *
- * U+002E ( . ) FULL STOP
- * U+FF0E ( ． ) FULLWIDTH FULL STOP
- * U+3002 ( 。 ) IDEOGRAPHIC FULL STOP
- * U+FF61 ( ｡ ) HALFWIDTH IDEOGRAPHIC FULL STOP
+ * U+002E (.) FULL STOP
+ * U+FF0E FULLWIDTH FULL STOP
+ * U+3002 IDEOGRAPHIC FULL STOP
+ * U+FF61 HALFWIDTH IDEOGRAPHIC FULL STOP
  *
  * They are all mapped to U+002E.
  *

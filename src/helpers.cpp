@@ -102,8 +102,8 @@ ada_really_inline bool shorten_path(std::string& path,
                                     ada::scheme::type type) noexcept {
   size_t first_delimiter = path.find_first_of('/', 1);
 
-  // Let path be url’s path.
-  // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized
+  // Let path be url's path.
+  // If url's scheme is "file", path's size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
   if (type == ada::scheme::type::FILE &&
       first_delimiter == std::string_view::npos && !path.empty()) {
@@ -113,7 +113,7 @@ ada_really_inline bool shorten_path(std::string& path,
     }
   }
 
-  // Remove path’s last item, if any.
+  // Remove path's last item, if any.
   size_t last_delimiter = path.rfind('/');
   if (last_delimiter != std::string::npos) {
     path.erase(last_delimiter);
@@ -127,8 +127,8 @@ ada_really_inline bool shorten_path(std::string_view& path,
                                     ada::scheme::type type) noexcept {
   size_t first_delimiter = path.find_first_of('/', 1);
 
-  // Let path be url’s path.
-  // If url’s scheme is "file", path’s size is 1, and path[0] is a normalized
+  // Let path be url's path.
+  // If url's scheme is "file", path's size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
   if (type == ada::scheme::type::FILE &&
       first_delimiter == std::string_view::npos && !path.empty()) {
@@ -138,7 +138,7 @@ ada_really_inline bool shorten_path(std::string_view& path,
     }
   }
 
-  // Remove path’s last item, if any.
+  // Remove path's last item, if any.
   if (!path.empty()) {
     size_t slash_loc = path.rfind('/');
     if (slash_loc != std::string_view::npos) {
@@ -551,7 +551,7 @@ ada_really_inline void parse_prepared_path(std::string_view input,
       }
       // Otherwise, if path_buffer is not a single-dot path segment, then:
       else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-        // If url’s scheme is "file", url’s path is empty, and path_buffer is a
+        // If url's scheme is "file", url's path is empty, and path_buffer is a
         // Windows drive letter, then replace the second code point in
         // path_buffer with U+003A (:).
         if (type == ada::scheme::type::FILE && path.empty() &&
@@ -562,7 +562,7 @@ ada_really_inline void parse_prepared_path(std::string_view input,
           path_buffer.remove_prefix(2);
           path.append(path_buffer);
         } else {
-          // Append path_buffer to url’s path.
+          // Append path_buffer to url's path.
           path += '/';
           path.append(path_buffer);
         }

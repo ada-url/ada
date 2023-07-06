@@ -45,48 +45,48 @@ struct url : url_base {
 
   /**
    * @private
-   * A URL’s username is an ASCII string identifying a username. It is initially
+   * A URL's username is an ASCII string identifying a username. It is initially
    * the empty string.
    */
   std::string username{};
 
   /**
    * @private
-   * A URL’s password is an ASCII string identifying a password. It is initially
+   * A URL's password is an ASCII string identifying a password. It is initially
    * the empty string.
    */
   std::string password{};
 
   /**
    * @private
-   * A URL’s host is null or a host. It is initially null.
+   * A URL's host is null or a host. It is initially null.
    */
   std::optional<std::string> host{};
 
   /**
    * @private
-   * A URL’s port is either null or a 16-bit unsigned integer that identifies a
+   * A URL's port is either null or a 16-bit unsigned integer that identifies a
    * networking port. It is initially null.
    */
   std::optional<uint16_t> port{};
 
   /**
    * @private
-   * A URL’s path is either an ASCII string or a list of zero or more ASCII
+   * A URL's path is either an ASCII string or a list of zero or more ASCII
    * strings, usually identifying a location.
    */
   std::string path{};
 
   /**
    * @private
-   * A URL’s query is either null or an ASCII string. It is initially null.
+   * A URL's query is either null or an ASCII string. It is initially null.
    */
   std::optional<std::string> query{};
 
   /**
    * @private
-   * A URL’s fragment is either null or an ASCII string that can be used for
-   * further processing on the resource the URL’s other components identify. It
+   * A URL's fragment is either null or an ASCII string that can be used for
+   * further processing on the resource the URL's other components identify. It
    * is initially null.
    */
   std::optional<std::string> hash{};
@@ -111,7 +111,7 @@ struct url : url_base {
   [[nodiscard]] ada_really_inline std::string get_href() const noexcept;
 
   /**
-   * The origin getter steps are to return the serialization of this’s URL’s
+   * The origin getter steps are to return the serialization of this's URL's
    * origin. [HTML]
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#concept-url-origin
@@ -119,7 +119,7 @@ struct url : url_base {
   [[nodiscard]] std::string get_origin() const noexcept override;
 
   /**
-   * The protocol getter steps are to return this’s URL’s scheme, followed by
+   * The protocol getter steps are to return this's URL's scheme, followed by
    * U+003A (:).
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-protocol
@@ -127,7 +127,7 @@ struct url : url_base {
   [[nodiscard]] std::string get_protocol() const noexcept;
 
   /**
-   * Return url’s host, serialized, followed by U+003A (:) and url’s port,
+   * Return url's host, serialized, followed by U+003A (:) and url's port,
    * serialized.
    * When there is no host, this function returns the empty string.
    * @return a newly allocated string.
@@ -136,7 +136,7 @@ struct url : url_base {
   [[nodiscard]] std::string get_host() const noexcept;
 
   /**
-   * Return this’s URL’s host, serialized.
+   * Return this's URL's host, serialized.
    * When there is no host, this function returns the empty string.
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
@@ -145,7 +145,7 @@ struct url : url_base {
 
   /**
    * The pathname getter steps are to return the result of URL path serializing
-   * this’s URL.
+   * this's URL.
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
@@ -160,14 +160,14 @@ struct url : url_base {
   ada_really_inline size_t get_pathname_length() const noexcept;
 
   /**
-   * Return U+003F (?), followed by this’s URL’s query.
+   * Return U+003F (?), followed by this's URL's query.
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
   [[nodiscard]] std::string get_search() const noexcept;
 
   /**
-   * The username getter steps are to return this’s URL’s username.
+   * The username getter steps are to return this's URL's username.
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
@@ -233,21 +233,21 @@ struct url : url_base {
   bool set_href(const std::string_view input);
 
   /**
-   * The password getter steps are to return this’s URL’s password.
+   * The password getter steps are to return this's URL's password.
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
   [[nodiscard]] const std::string &get_password() const noexcept;
 
   /**
-   * Return this’s URL’s port, serialized.
+   * Return this's URL's port, serialized.
    * @return a newly constructed string representing the port.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
   [[nodiscard]] std::string get_port() const noexcept;
 
   /**
-   * Return U+0023 (#), followed by this’s URL’s fragment.
+   * Return U+0023 (#), followed by this's URL's fragment.
    * @return a newly constructed string representing the hash.
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
@@ -333,7 +333,7 @@ struct url : url_base {
   [[nodiscard]] bool parse_opaque_host(std::string_view input);
 
   /**
-   * A URL’s scheme is an ASCII string that identifies the type of URL and can
+   * A URL's scheme is an ASCII string that identifies the type of URL and can
    * be used to dispatch a URL for further processing after parsing. It is
    * initially the empty string. We only set non_special_scheme when the scheme
    * is non-special, otherwise we avoid constructing string.

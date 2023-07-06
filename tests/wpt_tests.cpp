@@ -402,7 +402,7 @@ TYPED_TEST(wpt_tests_typed, urltestdata_encoding) {
             std::string_view href = object["href"].get_string();
             ASSERT_EQ(input_url->get_href(), href);
 
-            // The origin key may be missing. In that case, the API’s origin
+            // The origin key may be missing. In that case, the API's origin
             // attribute is not tested.
             std::string_view origin;
             if (!object["origin"].get(origin)) {

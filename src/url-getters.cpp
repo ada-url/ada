@@ -25,7 +25,7 @@ namespace ada {
       auto result = ada::parse<ada::url>(path);
       if (result &&
           (result->type == scheme::HTTP || result->type == scheme::HTTPS)) {
-        // If pathURL’s scheme is not "http" and not "https", then return a
+        // If pathURL's scheme is not "http" and not "https", then return a
         // new opaque origin.
         return ada::helpers::concat(result->get_protocol(), "//",
                                     result->get_host());
@@ -46,9 +46,9 @@ namespace ada {
 }
 
 [[nodiscard]] std::string url::get_host() const noexcept {
-  // If url’s host is null, then return the empty string.
-  // If url’s port is null, return url’s host, serialized.
-  // Return url’s host, serialized, followed by U+003A (:) and url’s port,
+  // If url's host is null, then return the empty string.
+  // If url's port is null, return url's host, serialized.
+  // Return url's host, serialized, followed by U+003A (:) and url's port,
   // serialized.
   if (!host.has_value()) {
     return "";
@@ -68,8 +68,8 @@ namespace ada {
 }
 
 [[nodiscard]] std::string url::get_search() const noexcept {
-  // If this’s URL’s query is either null or the empty string, then return the
-  // empty string. Return U+003F (?), followed by this’s URL’s query.
+  // If this's URL's query is either null or the empty string, then return the
+  // empty string. Return U+003F (?), followed by this's URL's query.
   return (!query.has_value() || (query.value().empty())) ? ""
                                                          : "?" + query.value();
 }
@@ -87,8 +87,8 @@ namespace ada {
 }
 
 [[nodiscard]] std::string url::get_hash() const noexcept {
-  // If this’s URL’s fragment is either null or the empty string, then return
-  // the empty string. Return U+0023 (#), followed by this’s URL’s fragment.
+  // If this's URL's fragment is either null or the empty string, then return
+  // the empty string. Return U+0023 (#), followed by this's URL's fragment.
   return (!hash.has_value() || (hash.value().empty())) ? ""
                                                        : "#" + hash.value();
 }

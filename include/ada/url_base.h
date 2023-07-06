@@ -47,7 +47,7 @@ struct url_base {
   [[nodiscard]] ada_really_inline bool is_special() const noexcept;
 
   /**
-   * The origin getter steps are to return the serialization of this’s URL’s
+   * The origin getter steps are to return the serialization of this's URL's
    * origin. [HTML]
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#concept-url-origin

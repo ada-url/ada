@@ -47,7 +47,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
     }
     // If url is special and host_view is the empty string, validation error,
     // return failure. Otherwise, if state override is given, host_view is the
-    // empty string, and either url includes credentials or url’s port is
+    // empty string, and either url includes credentials or url's port is
     // non-null, return.
     else if (host_view.empty() &&
              (is_special() || has_credentials() || port.has_value())) {
@@ -74,7 +74,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
   }
 
   if (new_host.empty()) {
-    // Set url’s host to the empty string.
+    // Set url's host to the empty string.
     host = "";
   } else {
     // Let host be the result of host parsing buffer with url is not special.

@@ -157,7 +157,7 @@ bool url::parse_ipv6(std::string_view input) {
     uint16_t value = 0, length = 0;
 
     // While length is less than 4 and c is an ASCII hex digit,
-    // set value to value × 0x10 + c interpreted as hexadecimal number, and
+    // set value to value times 0x10 + c interpreted as hexadecimal number, and
     // increase pointer and length by 1.
     while (length < 4 && pointer != input.end() &&
            unicode::is_ascii_hex_digit(*pointer)) {
@@ -228,7 +228,7 @@ bool url::parse_ipv6(std::string_view input) {
             ada_log("parse_ipv6 if ipv4Piece is 0, validation error");
             return is_valid = false;
           }
-          // Otherwise, set ipv4Piece to ipv4Piece × 10 + number.
+          // Otherwise, set ipv4Piece to ipv4Piece times 10 + number.
           else {
             ipv4_piece = *ipv4_piece * 10 + number;
           }
@@ -243,7 +243,8 @@ bool url::parse_ipv6(std::string_view input) {
           pointer++;
         }
 
-        // Set address[pieceIndex] to address[pieceIndex] × 0x100 + ipv4Piece.
+        // Set address[pieceIndex] to address[pieceIndex] times 0x100 +
+        // ipv4Piece.
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
         address[piece_index] =
             uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
@@ -296,14 +297,14 @@ bool url::parse_ipv6(std::string_view input) {
 
   // If compress is non-null, then:
   if (compress.has_value()) {
-    // Let swaps be pieceIndex − compress.
+    // Let swaps be pieceIndex - compress.
     int swaps = piece_index - *compress;
 
     // Set pieceIndex to 7.
     piece_index = 7;
 
     // While pieceIndex is not 0 and swaps is greater than 0,
-    // swap address[pieceIndex] with address[compress + swaps − 1], and then
+    // swap address[pieceIndex] with address[compress + swaps - 1], and then
     // decrease both pieceIndex and swaps by 1.
     while (piece_index != 0 && swaps > 0) {
       std::swap(address[piece_index], address[*compress + swaps - 1]);
@@ -334,7 +335,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
    **/
   if (is_input_special) {  // fast path!!!
     if (has_state_override) {
-      // If url’s scheme is not a special scheme and buffer is a special scheme,
+      // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
       if (is_special() != is_input_special) {
         return true;
@@ -347,7 +348,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
         return true;
       }
 
-      // If url’s scheme is "file" and its host is an empty host, then return.
+      // If url's scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE && host.has_value() &&
           host.value().empty()) {
@@ -362,7 +363,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
       uint16_t urls_scheme_port = get_special_port();
 
       if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to
+        // If url's port is url's scheme's default port, then set url's port to
         // null.
         if (port.has_value() && *port == urls_scheme_port) {
           port = std::nullopt;
@@ -378,8 +379,8 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
     unicode::to_lower_ascii(_buffer.data(), _buffer.size());
 
     if (has_state_override) {
-      // If url’s scheme is a special scheme and buffer is not a special scheme,
-      // then return. If url’s scheme is not a special scheme and buffer is a
+      // If url's scheme is a special scheme and buffer is not a special scheme,
+      // then return. If url's scheme is not a special scheme and buffer is a
       // special scheme, then return.
       if (is_special() != ada::scheme::is_special(_buffer)) {
         return true;
@@ -391,7 +392,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
         return true;
       }
 
-      // If url’s scheme is "file" and its host is an empty host, then return.
+      // If url's scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE && host.has_value() &&
           host.value().empty()) {
@@ -406,7 +407,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
       uint16_t urls_scheme_port = get_special_port();
 
       if (urls_scheme_port) {
-        // If url’s port is url’s scheme’s default port, then set url’s port to
+        // If url's port is url's scheme's default port, then set url's port to
         // null.
         if (port.has_value() && *port == urls_scheme_port) {
           port = std::nullopt;

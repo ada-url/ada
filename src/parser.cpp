@@ -147,13 +147,13 @@ result_type parse_url(std::string_view user_input,
           }
           ada_log("SCHEME the scheme is ", url.get_protocol());
 
-          // If url’s scheme is "file", then:
+          // If url's scheme is "file", then:
           if (url.type == ada::scheme::type::FILE) {
             // Set state to file state.
             state = ada::state::FILE;
           }
-          // Otherwise, if url is special, base is non-null, and base’s scheme
-          // is url’s scheme: Note: Doing base_url->scheme is unsafe if base_url
+          // Otherwise, if url is special, base is non-null, and base's scheme
+          // is url's scheme: Note: Doing base_url->scheme is unsafe if base_url
           // != nullptr is false.
           else if (url.is_special() && base_url != nullptr &&
                    base_url->type == url.type) {
@@ -172,7 +172,7 @@ result_type parse_url(std::string_view user_input,
             state = ada::state::PATH_OR_AUTHORITY;
             input_position++;
           }
-          // Otherwise, set url’s path to the empty string and set state to
+          // Otherwise, set url's path to the empty string and set state to
           // opaque path state.
           else {
             state = ada::state::OPAQUE_PATH;
@@ -200,8 +200,8 @@ result_type parse_url(std::string_view user_input,
           return url;
         }
         // Otherwise, if base has an opaque path and c is U+0023 (#),
-        // set url’s scheme to base’s scheme, url’s path to base’s path, url’s
-        // query to base’s query, and set state to fragment state.
+        // set url's scheme to base's scheme, url's path to base's path, url's
+        // query to base's query, and set state to fragment state.
         else if (base_url->has_opaque_path && fragment.has_value() &&
                  input_position == input_size) {
           ada_log("NO_SCHEME opaque base with fragment");
@@ -218,7 +218,7 @@ result_type parse_url(std::string_view user_input,
           url.update_unencoded_base_hash(*fragment);
           return url;
         }
-        // Otherwise, if base’s scheme is not "file", set state to relative
+        // Otherwise, if base's scheme is not "file", set state to relative
         // state and decrease pointer by 1.
         else if (base_url->type != ada::scheme::type::FILE) {
           ada_log("NO_SCHEME non-file relative path");
@@ -391,7 +391,7 @@ result_type parse_url(std::string_view user_input,
         ada_log("RELATIVE_SCHEME ",
                 helpers::substring(url_data, input_position));
 
-        // Set url’s scheme to base’s scheme.
+        // Set url's scheme to base's scheme.
         url.copy_scheme(*base_url);
 
         // If c is U+002F (/), then set state to relative slash state.
@@ -411,9 +411,9 @@ result_type parse_url(std::string_view user_input,
           state = ada::state::RELATIVE_SLASH;
         } else {
           ada_log("RELATIVE_SCHEME otherwise");
-          // Set url’s username to base’s username, url’s password to base’s
-          // password, url’s host to base’s host, url’s port to base’s port,
-          // url’s path to a clone of base’s path, and url’s query to base’s
+          // Set url's username to base's username, url's password to base's
+          // password, url's host to base's host, url's port to base's port,
+          // url's path to a clone of base's path, and url's query to base's
           // query.
           if constexpr (result_type_is_ada_url) {
             url.username = base_url->username;
@@ -439,7 +439,7 @@ result_type parse_url(std::string_view user_input,
 
           url.has_opaque_path = base_url->has_opaque_path;
 
-          // If c is U+003F (?), then set url’s query to the empty string, and
+          // If c is U+003F (?), then set url's query to the empty string, and
           // state to query state.
           if ((input_position != input_size) &&
               (url_data[input_position] == '?')) {
@@ -447,10 +447,10 @@ result_type parse_url(std::string_view user_input,
           }
           // Otherwise, if c is not the EOF code point:
           else if (input_position != input_size) {
-            // Set url’s query to null.
+            // Set url's query to null.
             url.clear_search();
             if constexpr (result_type_is_ada_url) {
-              // Shorten url’s path.
+              // Shorten url's path.
               helpers::shorten_path(url.path, url.type);
             } else {
               std::string_view path = url.get_pathname();
@@ -483,10 +483,10 @@ result_type parse_url(std::string_view user_input,
           state = ada::state::AUTHORITY;
         }
         // Otherwise, set
-        // - url’s username to base’s username,
-        // - url’s password to base’s password,
-        // - url’s host to base’s host,
-        // - url’s port to base’s port,
+        // - url's username to base's username,
+        // - url's password to base's password,
+        // - url's host to base's host,
+        // - url's port to base's port,
         // - state to path state, and then, decrease pointer by 1.
         else {
           if constexpr (result_type_is_ada_url) {
@@ -548,7 +548,7 @@ result_type parse_url(std::string_view user_input,
                              : ada::character_sets::QUERY_PERCENT_ENCODE;
 
         // Percent-encode after encoding, with encoding, buffer, and
-        // queryPercentEncodeSet, and append the result to url’s query.
+        // queryPercentEncodeSet, and append the result to url's query.
         url.update_base_search(helpers::substring(url_data, input_position),
                                query_percent_encode_set);
         ada_log("QUERY update_base_search completed ");
@@ -579,7 +579,7 @@ result_type parse_url(std::string_view user_input,
             return url;
           }
           ada_log("HOST parsing results in ", url.get_hostname());
-          // Set url’s host to host, buffer to the empty string, and state to
+          // Set url's host to host, buffer to the empty string, and state to
           // port state.
           state = ada::state::PORT;
           input_position++;
@@ -607,7 +607,7 @@ result_type parse_url(std::string_view user_input,
           ada_log("HOST parsing results in ", url.get_hostname(),
                   " href=", url.get_href());
 
-          // Set url’s host to host, and state to path start state.
+          // Set url's host to host, and state to path start state.
           state = ada::state::PATH_START;
         }
 
@@ -616,7 +616,7 @@ result_type parse_url(std::string_view user_input,
       case ada::state::OPAQUE_PATH: {
         ada_log("OPAQUE_PATH ", helpers::substring(url_data, input_position));
         std::string_view view = helpers::substring(url_data, input_position);
-        // If c is U+003F (?), then set url’s query to the empty string and
+        // If c is U+003F (?), then set url's query to the empty string and
         // state to query state.
         size_t location = view.find('?');
         if (location != std::string_view::npos) {
@@ -671,7 +671,7 @@ result_type parse_url(std::string_view user_input,
           }
         }
         // Otherwise, if state override is not given and c is U+003F (?),
-        // set url’s query to the empty string and state to query state.
+        // set url's query to the empty string and state to query state.
         else if ((input_position != input_size) &&
                  (url_data[input_position] == '?')) {
           state = ada::state::QUERY;
@@ -725,12 +725,12 @@ result_type parse_url(std::string_view user_input,
           input_position++;
         } else {
           ada_log("FILE_SLASH otherwise");
-          // If base is non-null and base’s scheme is "file", then:
+          // If base is non-null and base's scheme is "file", then:
           // Note: it is unsafe to do base_url->scheme unless you know that
           // base_url_has_value() is true.
           if (base_url != nullptr &&
               base_url->type == ada::scheme::type::FILE) {
-            // Set url’s host to base’s host.
+            // Set url's host to base's host.
             if constexpr (result_type_is_ada_url) {
               url.host = base_url->host;
             } else {
@@ -738,9 +738,9 @@ result_type parse_url(std::string_view user_input,
               url.set_host(base_url->get_host());
             }
             // If the code point substring from pointer to the end of input does
-            // not start with a Windows drive letter and base’s path[0] is a
-            // normalized Windows drive letter, then append base’s path[0] to
-            // url’s path.
+            // not start with a Windows drive letter and base's path[0] is a
+            // normalized Windows drive letter, then append base's path[0] to
+            // url's path.
             if (!base_url->get_pathname().empty()) {
               if (!checkers::is_windows_drive_letter(
                       helpers::substring(url_data, input_position))) {
@@ -782,7 +782,7 @@ result_type parse_url(std::string_view user_input,
         if (checkers::is_windows_drive_letter(file_host_buffer)) {
           state = ada::state::PATH;
         } else if (file_host_buffer.empty()) {
-          // Set url’s host to the empty string.
+          // Set url's host to the empty string.
           if constexpr (result_type_is_ada_url) {
             url.host = "";
           } else {
@@ -823,7 +823,7 @@ result_type parse_url(std::string_view user_input,
 
         url.set_protocol_as_file();
         if constexpr (result_type_is_ada_url) {
-          // Set url’s host to the empty string.
+          // Set url's host to the empty string.
           url.host = "";
         } else {
           url.update_base_hostname("");
@@ -836,11 +836,11 @@ result_type parse_url(std::string_view user_input,
           // Set state to file slash state.
           state = ada::state::FILE_SLASH;
         }
-        // Otherwise, if base is non-null and base’s scheme is "file":
+        // Otherwise, if base is non-null and base's scheme is "file":
         else if (base_url != nullptr &&
                  base_url->type == ada::scheme::type::FILE) {
-          // Set url’s host to base’s host, url’s path to a clone of base’s
-          // path, and url’s query to base’s query.
+          // Set url's host to base's host, url's path to a clone of base's
+          // path, and url's query to base's query.
           ada_log("FILE base non-null");
           if constexpr (result_type_is_ada_url) {
             url.host = base_url->host;
@@ -855,17 +855,17 @@ result_type parse_url(std::string_view user_input,
           }
           url.has_opaque_path = base_url->has_opaque_path;
 
-          // If c is U+003F (?), then set url’s query to the empty string and
+          // If c is U+003F (?), then set url's query to the empty string and
           // state to query state.
           if (input_position != input_size && url_data[input_position] == '?') {
             state = ada::state::QUERY;
           }
           // Otherwise, if c is not the EOF code point:
           else if (input_position != input_size) {
-            // Set url’s query to null.
+            // Set url's query to null.
             url.clear_search();
             // If the code point substring from pointer to the end of input does
-            // not start with a Windows drive letter, then shorten url’s path.
+            // not start with a Windows drive letter, then shorten url's path.
             if (!checkers::is_windows_drive_letter(file_view)) {
               if constexpr (result_type_is_ada_url) {
                 helpers::shorten_path(url.path, url.type);
@@ -878,7 +878,7 @@ result_type parse_url(std::string_view user_input,
             }
             // Otherwise:
             else {
-              // Set url’s path to an empty list.
+              // Set url's path to an empty list.
               url.clear_pathname();
               url.has_opaque_path = true;
             }
