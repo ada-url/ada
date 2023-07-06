@@ -475,11 +475,16 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
 
 bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
               size_t first_percent) {
-  std::string percent_decoded_buffer(plain.size(), 0);
+  std::string percent_decoded_buffer;
   std::string_view input = plain;
   if (first_percent != std::string_view::npos) {
-    size_t output_size = percent_decoder::percent_decode(plain.data(), plain.size(), percent_decoded_buffer.data());
-    percent_decoded_buffer.resize(output_size);
+    // The indeed code does full percent decoding (over all of plain),
+    // but it seems more suitable to skip over the prefix before the first "%"
+    // since in many cases, we might expect percent encoding to be sparse.
+    percent_decoded_buffer.assign(input.substr(0, first_percent));
+    percent_decoded_buffer.resize(plain.size());
+    size_t output_size = percent_decoder::percent_decode(plain.data() + first_percent, plain.size() - first_percent, percent_decoded_buffer.data() + first_percent);
+    percent_decoded_buffer.resize(output_size + first_percent);
     input = percent_decoded_buffer;
   }
   // input is a non-empty UTF-8 string, must be percent decoded

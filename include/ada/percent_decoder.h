@@ -342,7 +342,6 @@ struct AVX2 {
 struct AVX512 {
     [[gnu::target("avx512f,avx512bw,avx512vbmi,avx512vbmi2")]] static size_t
     percent_decode(char const *in, size_t inputsize, char *out) {
-
         const __m512i byte_plus = _mm512_set1_epi8('+');
         const __m512i byte_percent = _mm512_set1_epi8('%');
 
