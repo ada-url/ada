@@ -52,7 +52,7 @@ result_type parse_url(std::string_view user_input,
     // Most of the time, we just need user_input.size().
     // In some instances, we may need a bit more.
     ///////////////////////////
-    // This is *very* important. This line should be removed
+    // This is *very* important. This line should *not* be removed
     // hastily. There are principled reasons why reserve is important
     // for performance. If you have a benchmark with small inputs,
     // it may not matter, but in other instances, it could.
