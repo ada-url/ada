@@ -160,7 +160,7 @@ $(document).ready(function(){initNavTree('dc/ddd/parser_8cpp_source.html','../..
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (result_type_is_ada_url_aggregator) {</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// Most of the time, we just need user_input.size().</span></div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="comment">// In some instances, we may need a bit more.</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment"></span>    <span class="comment">// This is *very* important. This line should be removed</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment"></span>    <span class="comment">// This is *very* important. This line should *not* be removed</span></div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="comment">// hastily. There are principled reasons why reserve is important</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="comment">// for performance. If you have a benchmark with small inputs,</span></div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="comment">// it may not matter, but in other instances, it could.</span></div>
