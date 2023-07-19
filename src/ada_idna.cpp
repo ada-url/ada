@@ -2711,8 +2711,6 @@ std::u32string map(std::u32string_view input) {
         break;
       case 2:
         return error;  // disallowed
-        break;
-
       // case 3 :
       default:
         // We have a mapping
