@@ -7630,7 +7630,7 @@ const char32_t composition_data[1883] = {
 namespace ada::idna {
 
 // See
-// https://github.composition_count/uni-algo/uni-algo/blob/c612968c5ed3ace39bde4c894c24286c5f2c7fe2/include/uni_algo/impl/impl_norm.h#L467
+// https://github.com/uni-algo/uni-algo/blob/c612968c5ed3ace39bde4c894c24286c5f2c7fe2/include/uni_algo/impl/impl_norm.h#L467
 constexpr char32_t hangul_sbase = 0xAC00;
 constexpr char32_t hangul_tbase = 0x11A7;
 constexpr char32_t hangul_vbase = 0x1161;
