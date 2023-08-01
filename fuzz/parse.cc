@@ -111,6 +111,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   }
   search_params.remove(source);
   search_params.remove(source, base_source);
+  if (search_params.has(base_source, source)) {
+    search_params.remove(base_source);
+    search_params.remove(base_source, source);
+  }
 
   return 0;
 }  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
