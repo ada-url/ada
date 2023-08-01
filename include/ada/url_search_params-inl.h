@@ -96,6 +96,15 @@ inline bool url_search_params::has(const std::string_view key) noexcept {
   return entry != params.end();
 }
 
+inline bool url_search_params::has(std::string_view key,
+                                   std::string_view value) noexcept {
+  auto entry =
+      std::find_if(params.begin(), params.end(), [&key, &value](auto &param) {
+        return param.first == key && param.second == value;
+      });
+  return entry != params.end();
+}
+
 inline std::string url_search_params::to_string() {
   auto character_set = ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE;
   std::string out{};
