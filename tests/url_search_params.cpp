@@ -155,3 +155,15 @@ TEST(url_search_params, string_constructor_with_edge_cases) {
   ASSERT_TRUE(p.has("møø"));
   SUCCEED();
 }
+
+TEST(url_search_params, has) {
+  auto search_params = ada::url_search_params("key1=value1&key2=value2");
+  ASSERT_TRUE(search_params.has("key1"));
+  ASSERT_TRUE(search_params.has("key2"));
+  ASSERT_TRUE(search_params.has("key1", "value1"));
+  ASSERT_TRUE(search_params.has("key2", "value2"));
+  ASSERT_TRUE(!search_params.has("key3"));
+  ASSERT_TRUE(!search_params.has("key1", "value2"));
+  ASSERT_TRUE(!search_params.has("key3", "value3"));
+  SUCCEED();
+}

@@ -57,6 +57,7 @@ struct url_search_params {
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-has
    */
   inline bool has(std::string_view key) noexcept;
+  inline bool has(std::string_view key, std::string_view value) noexcept;
 
   /**
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-set
