@@ -202,9 +202,13 @@ $(document).ready(function(){initNavTree('d6/db9/parse_8cc_source.html','../../'
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  }</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  search_params.remove(source);</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  search_params.remove(source, base_source);</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  <span class="keywordflow">if</span> (search_params.has(base_source, source)) {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    search_params.remove(base_source);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    search_params.remove(base_source, source);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  }</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="../../d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
 <div class="ttc" id="anamespaceada_1_1idna_html_a7d88f623d0a7e056cc89920b20e13dde"><div class="ttname"><a href="../../d5/ddb/namespaceada_1_1idna.html#a7d88f623d0a7e056cc89920b20e13dde">ada::idna::to_ascii</a></div><div class="ttdeci">std::string to_ascii(std::string_view ut8_string)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d2e/ada__idna_8cpp_source.html#l09519">ada_idna.cpp:9519</a></div></div>
