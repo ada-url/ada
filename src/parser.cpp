@@ -516,7 +516,6 @@ result_type parse_url(std::string_view user_input,
         // If c is U+002F (/) and remaining starts with U+002F (/),
         // then set state to special authority ignore slashes state and increase
         // pointer by 1.
-        state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
         std::string_view view = helpers::substring(url_data, input_position);
         if (ada::checkers::begins_with(view, "//")) {
           input_position += 2;
