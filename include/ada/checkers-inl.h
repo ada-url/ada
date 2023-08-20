@@ -7,6 +7,7 @@
 
 #include "ada/common_defs.h"
 
+#include <algorithm>
 #include <string_view>
 #include <cstring>
 
@@ -57,7 +58,7 @@ ada_really_inline constexpr bool begins_with(std::string_view view,
                                              std::string_view prefix) {
   // in C++20, you have view.begins_with(prefix)
   return view.size() >= prefix.size() &&
-         (view.substr(0, prefix.size()) == prefix);
+         std::equal(prefix.begin(), prefix.end(), view.begin());
 }
 
 }  // namespace ada::checkers
