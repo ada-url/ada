@@ -368,13 +368,12 @@ ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept {
   return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
 }
 
+constexpr static char hex_to_binary_table[] = {
+    0,  1,  2,  3,  4, 5, 6, 7, 8, 9, 0, 0,  0,  0,  0,  0,  0, 10, 11,
+    12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0, 0,  0,
+    0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15};
 unsigned constexpr convert_hex_to_binary(const char c) noexcept {
-  // this code can be optimized.
-  if (c <= '9') {
-    return c - '0';
-  }
-  char del = c >= 'a' ? 'a' : 'A';
-  return 10 + (c - del);
+  return hex_to_binary_table[c - '0'];
 }
 
 std::string percent_decode(const std::string_view input, size_t first_percent) {
