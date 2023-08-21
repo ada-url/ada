@@ -1,3 +1,7 @@
+# bench_search_params
+add_executable(bench_search_params bench_search_params.cpp)
+target_link_libraries(bench_search_params PRIVATE ada)
+
 # Bench
 add_executable(wpt_bench wpt_bench.cpp)
 target_link_libraries(wpt_bench PRIVATE ada)
@@ -54,6 +58,7 @@ target_link_libraries(bench PRIVATE benchmark::benchmark)
 target_link_libraries(benchdata PRIVATE benchmark::benchmark)
 target_link_libraries(bbc_bench PRIVATE benchmark::benchmark)
 target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
+target_link_libraries(bench_search_params PRIVATE benchmark::benchmark)
 
 option(ADA_COMPETITION "Whether to install various competitors." OFF)
 
