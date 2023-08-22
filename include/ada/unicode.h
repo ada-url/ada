@@ -157,7 +157,7 @@ ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept;
  * @details Convert hex to binary. Caller is responsible to ensure that
  * the parameter is an hexadecimal digit (0-9, A-F, a-f).
  */
-unsigned constexpr convert_hex_to_binary(char c) noexcept;
+ada_really_inline unsigned constexpr convert_hex_to_binary(char c) noexcept;
 
 /**
  * first_percent should be  = input.find('%')
