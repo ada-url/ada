@@ -293,11 +293,6 @@ static_assert(unicode::is_alnum_plus('1'));
 static_assert(unicode::is_alnum_plus('a'));
 static_assert(unicode::is_alnum_plus('b'));
 
-ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
-  return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') ||
-         (c >= 'a' && c <= 'f');
-}
-
 ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept {
   return (unsigned char)c <= ' ';
 }
@@ -369,9 +364,17 @@ ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept {
 }
 
 constexpr static char hex_to_binary_table[] = {
-    0,  1,  2,  3,  4, 5, 6, 7, 8, 9, 0, 0,  0,  0,  0,  0,  0, 10, 11,
-    12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0, 0,  0,
-    0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15};
+    0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  -1, -1, -1, -1, -1, -1, -1, 10, 11,
+    12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15};
+
+ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
+  if (c > 'f' || c < '0') {
+    return false;
+  }
+  return hex_to_binary_table[c - '0'] != -1;
+}
+
 unsigned constexpr convert_hex_to_binary(const char c) noexcept {
   return hex_to_binary_table[c - '0'];
 }
