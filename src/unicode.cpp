@@ -294,8 +294,9 @@ static_assert(unicode::is_alnum_plus('a'));
 static_assert(unicode::is_alnum_plus('b'));
 
 ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
-  return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') ||
-         (c >= 'a' && c <= 'f');
+  if (c >= '0' && c <= '9') return true;
+  char lowercased = c | 0x20;
+  return (lowercased >= 'a' && lowercased <= 'f');
 }
 
 ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept {
