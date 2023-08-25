@@ -14,6 +14,15 @@
 namespace ada {
 
 /**
+ * Type of URL host as an enum.
+ */
+enum url_host_type : uint8_t {
+  DEFAULT = 0,
+  IPV4 = 1,
+  IPV6 = 2,
+};
+
+/**
  * @brief Base class of URL implementations
  *
  * @details A url_base contains a few attributes: is_valid, has_opaque_path and
@@ -34,6 +43,11 @@ struct url_base {
    * A URL has an opaque path if its path is a string.
    */
   bool has_opaque_path{false};
+
+  /**
+   * URL hosts type
+   */
+  url_host_type host_type = url_host_type::DEFAULT;
 
   /**
    * @private

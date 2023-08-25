@@ -205,6 +205,14 @@ ada_string ada_get_protocol(ada_url result) noexcept {
   return ada_string_create(out.data(), out.length());
 }
 
+uint8_t ada_get_url_host_type(ada_url result) noexcept {
+  ada::result<ada::url_aggregator>& r = get_instance(result);
+  if (!r) {
+    return 0;
+  }
+  return r->host_type;
+}
+
 bool ada_set_href(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (!r) {

@@ -106,6 +106,8 @@ TEST(ada_c, setters) {
   ada_set_protocol(url, "wss", 3);
   ASSERT_EQ(convert_string(ada_get_protocol(url)), "wss:");
 
+  ASSERT_EQ(ada_get_url_host_type(url), 0);
+
   ada_free(url);
 
   SUCCEED();

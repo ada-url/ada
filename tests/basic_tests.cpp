@@ -366,3 +366,15 @@ TYPED_TEST(basic_tests, node_issue_48254) {
   ASSERT_FALSE(url);
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, url_host_type) {
+  ASSERT_EQ(ada::parse<TypeParam>("http://localhost:3000")->host_type,
+            ada::url_host_type::DEFAULT);
+  ASSERT_EQ(ada::parse<TypeParam>("http://0.0.0.0")->host_type,
+            ada::url_host_type::IPV4);
+  ASSERT_EQ(
+      ada::parse<TypeParam>("http://[2001:db8:3333:4444:5555:6666:7777:8888]")
+          ->host_type,
+      ada::url_host_type::IPV6);
+  SUCCEED();
+}
