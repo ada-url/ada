@@ -19,6 +19,7 @@ var ada__c_8cpp =
     [ "ada_get_port", "dd/dd6/ada__c_8cpp.html#a4ed6111d02ff556f686799c482076e5e", null ],
     [ "ada_get_protocol", "dd/dd6/ada__c_8cpp.html#a464a9d76edaa72fa469f5f3c1856d935", null ],
     [ "ada_get_search", "dd/dd6/ada__c_8cpp.html#a0a228b2660c45fee39f628a1e58bab58", null ],
+    [ "ada_get_url_host_type", "dd/dd6/ada__c_8cpp.html#af1482c6b51ffd5dbe68f0e4609035339", null ],
     [ "ada_get_username", "dd/dd6/ada__c_8cpp.html#afefee1972fe326cbcd42dbbf5887109d", null ],
     [ "ada_has_credentials", "dd/dd6/ada__c_8cpp.html#a49d3ab9142863e08d13ea54aa71cda70", null ],
     [ "ada_has_empty_hostname", "dd/dd6/ada__c_8cpp.html#a6a0dd3805497651cc3c38fa841bea699", null ],

@@ -146,13 +146,15 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a5b7742e4d4d63f7829dd1e510eba88b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9996c7aa6d12a6b61c05304fb51c98e2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">has_opaque_path</a> {false}</td></tr>
 <tr class="separator:a9996c7aa6d12a6b61c05304fb51c98e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c371e9b7a17ef5cc5f374f1454fb6b5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7">url_host_type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d75/structada_1_1url__base.html#a3c371e9b7a17ef5cc5f374f1454fb6b5">host_type</a> = <a class="el" href="../../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7af3a60367cbbc6f2f9f571353fa0a6429">url_host_type::DEFAULT</a></td></tr>
+<tr class="separator:a3c371e9b7a17ef5cc5f374f1454fb6b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class of URL implementations. </p>
 <p>A <a class="el" href="../../db/d75/structada_1_1url__base.html" title="Base class of URL implementations.">url_base</a> contains a few attributes: is_valid, has_opaque_path and type. All non-trivial implementation details are in derived classes such as <a class="el" href="../../dd/d03/structada_1_1url.html" title="Generic URL struct reliant on std::string instantiation.">ada::url</a> and <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">ada::url_aggregator</a>.</p>
 <p>It is an abstract class that cannot be instantiated directly. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00025">25</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00044">44</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a199631ce6f8fe9849f2cca80f875b0c4" name="a199631ce6f8fe9849f2cca80f875b0c4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a199631ce6f8fe9849f2cca80f875b0c4">&#9670;&#160;</a></span>~url_base()</h2>
@@ -311,9 +313,26 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <p>A URL has an opaque path if its path is a string. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00036">36</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00055">55</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/d03/structada_1_1url.html#a166c9ff1373a6c292ba887355bb8407f">ada::url::get_components()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a5500ad7f3289828e6bc654ebd0554bf4">ada::url::get_href()</a>, <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a2b0835f0dceec1161ca5e13bfffdf598">ada::parser::parse_url()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a9cbad568b85dbae513da65c3a48c45a3">ada::url::set_href()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#ad25f560e4c3ff137c82c32203044e034">ada::url::set_pathname()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a332a6bb66c2223ecb6649369cf37eec9">ada::url_aggregator::set_pathname()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#adfb7b5e6efd80467c30c81e6e6a4651a">ada::url::to_string()</a>, and <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a8cb5bdd9006cb24e3414ca233310e85a">ada::url_aggregator::validate()</a>.</p>
+
+</div>
+</div>
+<a id="a3c371e9b7a17ef5cc5f374f1454fb6b5" name="a3c371e9b7a17ef5cc5f374f1454fb6b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c371e9b7a17ef5cc5f374f1454fb6b5">&#9670;&#160;</a></span>host_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7">url_host_type</a> ada::url_base::host_type = <a class="el" href="../../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7af3a60367cbbc6f2f9f571353fa0a6429">url_host_type::DEFAULT</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>URL hosts type </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00060">60</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
 
 </div>
 </div>
@@ -330,7 +349,7 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 <p>Used for returning the validity from the result of the URL parser. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00031">31</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00050">50</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a2b0835f0dceec1161ca5e13bfffdf598">ada::parser::parse_url()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#afa758006b81473c457ff8f460db7f115">ada::url::set_port()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#af160be7e52d49441d5ec8244abfaa49f">ada::url_aggregator::set_port()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a797ff3cd4b1202306424fd847927e096">ada::url_aggregator::to_diagram()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#adfb7b5e6efd80467c30c81e6e6a4651a">ada::url::to_string()</a>, and <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a8cb5bdd9006cb24e3414ca233310e85a">ada::url_aggregator::validate()</a>.</p>
 

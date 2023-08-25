@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['l_0',['L',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda4a022b59c5ef2d6b3e1f19d3b920c6ac',1,'ada::idna']]],
-  ['lre_1',['LRE',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddabb23dfa68106b68b977e46321c8b7535',1,'ada::idna']]],
-  ['lri_2',['LRI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda2d7d0c38d1aed6ef9c96581cc66f79b6',1,'ada::idna']]],
-  ['lro_3',['LRO',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddad4b0a8976d6e01d9536f6d4546c21514',1,'ada::idna']]]
+  ['host_0',['HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5',1,'ada']]],
+  ['http_1',['HTTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c',1,'ada::scheme']]],
+  ['https_2',['HTTPS',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0',1,'ada::scheme']]]
 ];
