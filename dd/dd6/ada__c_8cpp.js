@@ -6,6 +6,7 @@ var ada__c_8cpp =
     [ "ada_url", "dd/dd6/ada__c_8cpp.html#a94710a7b3fe3ecbf7a2113e015d423ba", null ],
     [ "ada_can_parse", "dd/dd6/ada__c_8cpp.html#a7836700b513acf18da654ef235d0bb16", null ],
     [ "ada_can_parse_with_base", "dd/dd6/ada__c_8cpp.html#a3a07936e2312d7645a60959e78befcf8", null ],
+    [ "ada_copy", "dd/dd6/ada__c_8cpp.html#ac4109b38a024922e2ade0dae2d0ab76a", null ],
     [ "ada_free", "dd/dd6/ada__c_8cpp.html#a37d3c8d2cd9d66644fa77440e4cb1802", null ],
     [ "ada_free_owned_string", "dd/dd6/ada__c_8cpp.html#a3bd81cffa42ece6ac111b2abc9fe583a", null ],
     [ "ada_get_components", "dd/dd6/ada__c_8cpp.html#a93439c6dd4a8f2fefac90b7757fbf4fa", null ],

@@ -28,11 +28,12 @@ var searchData=
   ['helpers_2ecpp_25',['helpers.cpp',['../d2/df4/helpers_8cpp.html',1,'']]],
   ['helpers_2eh_26',['helpers.h',['../d1/d98/helpers_8h.html',1,'']]],
   ['hex_27',['hex',['../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d',1,'ada::character_sets']]],
-  ['host_28',['HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5',1,'ada']]],
-  ['host_5fend_29',['host_end',['../dc/d69/structada__url__components.html#a09b0452389414b3788594b9b4b1aeec6',1,'ada_url_components::host_end'],['../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b',1,'ada::url_components::host_end']]],
-  ['host_5fstart_30',['host_start',['../dc/d69/structada__url__components.html#afdbe58a41d73db4faa282654a172d376',1,'ada_url_components::host_start'],['../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f',1,'ada::url_components::host_start']]],
-  ['host_5ftype_31',['host_type',['../db/d75/structada_1_1url__base.html#a3c371e9b7a17ef5cc5f374f1454fb6b5',1,'ada::url_base']]],
-  ['href_5ffrom_5ffile_32',['href_from_file',['../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70',1,'ada']]],
-  ['http_33',['HTTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c',1,'ada::scheme']]],
-  ['https_34',['HTTPS',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0',1,'ada::scheme']]]
+  ['homebrew_28',['Homebrew',['../index.html#autotoc_md21',1,'']]],
+  ['host_29',['HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5',1,'ada']]],
+  ['host_5fend_30',['host_end',['../dc/d69/structada__url__components.html#a09b0452389414b3788594b9b4b1aeec6',1,'ada_url_components::host_end'],['../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b',1,'ada::url_components::host_end']]],
+  ['host_5fstart_31',['host_start',['../dc/d69/structada__url__components.html#afdbe58a41d73db4faa282654a172d376',1,'ada_url_components::host_start'],['../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f',1,'ada::url_components::host_start']]],
+  ['host_5ftype_32',['host_type',['../db/d75/structada_1_1url__base.html#a3c371e9b7a17ef5cc5f374f1454fb6b5',1,'ada::url_base']]],
+  ['href_5ffrom_5ffile_33',['href_from_file',['../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70',1,'ada']]],
+  ['http_34',['HTTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c',1,'ada::scheme']]],
+  ['https_35',['HTTPS',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0',1,'ada::scheme']]]
 ];
