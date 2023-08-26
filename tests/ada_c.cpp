@@ -138,6 +138,23 @@ TEST(ada_c, ada_url_components) {
   SUCCEED();
 }
 
+TEST(ada_c, ada_copy) {
+  std::string lemire_blog = "https://lemire.me";
+  std::string anonrig_blog = "https://yagiz.co";
+  ada_url first = ada_parse(lemire_blog.data(), lemire_blog.length());
+  ada_url second = ada_copy(first);
+
+  ASSERT_TRUE(ada_set_href(second, anonrig_blog.data(), anonrig_blog.size()));
+
+  ASSERT_EQ(convert_string(ada_get_href(first)), "https://lemire.me/");
+  ASSERT_EQ(convert_string(ada_get_href(second)), "https://yagiz.co/");
+
+  ada_free(first);
+  ada_free(second);
+
+  SUCCEED();
+}
+
 TEST(ada_c, ada_idna) {
   std::string_view ascii_input = "straße.de";
   std::string_view unicode_input = "xn--strae-oqa.de";

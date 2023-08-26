@@ -51,6 +51,7 @@ bool ada_can_parse_with_base(const char* input, size_t input_length,
 
 void ada_free(ada_url result);
 void ada_free_owned_string(ada_owned_string owned);
+ada_url ada_copy(ada_url input);
 
 bool ada_is_valid(ada_url result);
 

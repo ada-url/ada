@@ -88,6 +88,11 @@ void ada_free(ada_url result) noexcept {
   delete r;
 }
 
+ada_url ada_copy(ada_url input) noexcept {
+  ada::result<ada::url_aggregator>& r = get_instance(input);
+  return new ada::result<ada::url_aggregator>(r);
+}
+
 bool ada_is_valid(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   return r.has_value();
