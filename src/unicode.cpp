@@ -383,8 +383,9 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   if (first_percent == std::string_view::npos) {
     return std::string(input);
   }
-  std::string dest(input.substr(0, first_percent));
+  std::string dest;
   dest.reserve(input.length());
+  dest.append(input.substr(0, first_percent));
   const char* pointer = input.data() + first_percent;
   const char* end = input.data() + input.size();
   // Optimization opportunity: if the following code gets
