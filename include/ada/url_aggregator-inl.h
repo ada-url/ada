@@ -700,7 +700,9 @@ inline void url_aggregator::clear_hostname() {
                        " with " + components.to_string() + "\n" + to_diagram());
 #endif
   ADA_ASSERT_TRUE(has_authority());
-  ADA_ASSERT_TRUE(has_empty_hostname());
+  ADA_ASSERT_EQUAL(has_empty_hostname(), true,
+                   "hostname should have been cleared on buffer=" + buffer +
+                       " with " + components.to_string() + "\n" + to_diagram());
   ADA_ASSERT_TRUE(validate());
 }
 

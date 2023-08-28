@@ -87,9 +87,14 @@ TEST(ada_c, setters) {
 
   ada_set_port(url, "4242", 4);
   ASSERT_EQ(convert_string(ada_get_port(url)), "4242");
+  ada_clear_port(url);
+  ASSERT_EQ(convert_string(ada_get_port(url)), "");
+  ASSERT_FALSE(ada_has_port(url));
 
   ada_set_hash(url, "new-hash", strlen("new-hash"));
   ASSERT_EQ(convert_string(ada_get_hash(url)), "#new-hash");
+  ada_clear_hash(url);
+  ASSERT_FALSE(ada_has_hash(url));
 
   ada_set_hostname(url, "new-host", strlen("new-host"));
   ASSERT_EQ(convert_string(ada_get_hostname(url)), "new-host");
@@ -99,9 +104,13 @@ TEST(ada_c, setters) {
 
   ada_set_pathname(url, "new-pathname", strlen("new-pathname"));
   ASSERT_EQ(convert_string(ada_get_pathname(url)), "/new-pathname");
+  ada_clear_pathname(url);
+  ASSERT_EQ(convert_string(ada_get_pathname(url)), "");
 
   ada_set_search(url, "new-search", strlen("new-search"));
   ASSERT_EQ(convert_string(ada_get_search(url)), "?new-search");
+  ada_clear_search(url);
+  ASSERT_EQ(convert_string(ada_get_search(url)), "");
 
   ada_set_protocol(url, "wss", 3);
   ASSERT_EQ(convert_string(ada_get_protocol(url)), "wss:");
