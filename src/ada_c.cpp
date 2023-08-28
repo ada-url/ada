@@ -210,7 +210,7 @@ ada_string ada_get_protocol(ada_url result) noexcept {
   return ada_string_create(out.data(), out.length());
 }
 
-uint8_t ada_get_url_host_type(ada_url result) noexcept {
+uint8_t ada_get_host_type(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (!r) {
     return 0;
