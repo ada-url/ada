@@ -84,6 +84,12 @@ bool ada_set_pathname(ada_url result, const char* input, size_t length);
 void ada_set_search(ada_url result, const char* input, size_t length);
 void ada_set_hash(ada_url result, const char* input, size_t length);
 
+// url_aggregator clear methods
+void ada_clear_port(ada_url result);
+void ada_clear_hash(ada_url result);
+void ada_clear_pathname(ada_url result);
+void ada_clear_search(ada_url result);
+
 // url_aggregator functions
 // if ada_is_valid(result) is false, functions below will return false
 bool ada_has_credentials(ada_url result);

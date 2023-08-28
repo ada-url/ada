@@ -301,6 +301,34 @@ void ada_set_hash(ada_url result, const char* input, size_t length) noexcept {
   }
 }
 
+void ada_clear_port(ada_url result) noexcept {
+  ada::result<ada::url_aggregator>& r = get_instance(result);
+  if (r) {
+    r->clear_port();
+  }
+}
+
+void ada_clear_hash(ada_url result) noexcept {
+  ada::result<ada::url_aggregator>& r = get_instance(result);
+  if (r) {
+    r->clear_hash();
+  }
+}
+
+void ada_clear_pathname(ada_url result) noexcept {
+  ada::result<ada::url_aggregator>& r = get_instance(result);
+  if (r) {
+    r->clear_pathname();
+  }
+}
+
+void ada_clear_search(ada_url result) noexcept {
+  ada::result<ada::url_aggregator>& r = get_instance(result);
+  if (r) {
+    r->clear_search();
+  }
+}
+
 bool ada_has_credentials(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (!r) {

@@ -196,6 +196,11 @@ struct url_aggregator : url_base {
   /** @return true if the URL has a search component */
   [[nodiscard]] inline bool has_search() const noexcept override;
 
+  inline void clear_port();
+  inline void clear_hash();
+  inline void clear_pathname() override;
+  inline void clear_search() override;
+
  private:
   friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
       std::string_view, const ada::url_aggregator *);
@@ -270,11 +275,7 @@ struct url_aggregator : url_base {
   inline void update_base_port(uint32_t input);
   inline void append_base_pathname(const std::string_view input);
   inline uint32_t retrieve_base_port() const;
-  inline void clear_port();
   inline void clear_hostname();
-  inline void clear_hash();
-  inline void clear_pathname() override;
-  inline void clear_search() override;
   inline void clear_password();
   inline bool has_dash_dot() const noexcept;
   void delete_dash_dot();
