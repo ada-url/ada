@@ -180,8 +180,8 @@ Functions</h2></td></tr>
 <tr class="separator:aea81956480d2eb9af02d30a72b1ce85b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9cdeb5279529ab82057aec49227e3534" id="r_a9cdeb5279529ab82057aec49227e3534"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/daa/structada__string.html">ada_string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d61/ada__c_8h.html#a9cdeb5279529ab82057aec49227e3534">ada_get_protocol</a> (<a class="el" href="../../df/d61/ada__c_8h.html#a94710a7b3fe3ecbf7a2113e015d423ba">ada_url</a> result)</td></tr>
 <tr class="separator:a9cdeb5279529ab82057aec49227e3534"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a102ae27e72da26c4df2d4117df5c1eb7" id="r_a102ae27e72da26c4df2d4117df5c1eb7"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d61/ada__c_8h.html#a102ae27e72da26c4df2d4117df5c1eb7">ada_get_url_host_type</a> (<a class="el" href="../../df/d61/ada__c_8h.html#a94710a7b3fe3ecbf7a2113e015d423ba">ada_url</a> result)</td></tr>
-<tr class="separator:a102ae27e72da26c4df2d4117df5c1eb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a378cddd67cc944cbd24ebd721c155697" id="r_a378cddd67cc944cbd24ebd721c155697"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d61/ada__c_8h.html#a378cddd67cc944cbd24ebd721c155697">ada_get_host_type</a> (<a class="el" href="../../df/d61/ada__c_8h.html#a94710a7b3fe3ecbf7a2113e015d423ba">ada_url</a> result)</td></tr>
+<tr class="separator:a378cddd67cc944cbd24ebd721c155697"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f91cae7049729b7209cc109ffd24ec1" id="r_a8f91cae7049729b7209cc109ffd24ec1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d61/ada__c_8h.html#a8f91cae7049729b7209cc109ffd24ec1">ada_set_href</a> (<a class="el" href="../../df/d61/ada__c_8h.html#a94710a7b3fe3ecbf7a2113e015d423ba">ada_url</a> result, const char *input, size_t length)</td></tr>
 <tr class="separator:a8f91cae7049729b7209cc109ffd24ec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18b182a77e270b6b824353e82f931a22" id="r_a18b182a77e270b6b824353e82f931a22"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d61/ada__c_8h.html#a18b182a77e270b6b824353e82f931a22">ada_set_host</a> (<a class="el" href="../../df/d61/ada__c_8h.html#a94710a7b3fe3ecbf7a2113e015d423ba">ada_url</a> result, const char *input, size_t length)</td></tr>
@@ -664,6 +664,36 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a378cddd67cc944cbd24ebd721c155697" name="a378cddd67cc944cbd24ebd721c155697"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a378cddd67cc944cbd24ebd721c155697">&#9670;&#160;</a></span>ada_get_host_type()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t ada_get_host_type </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../df/d61/ada__c_8h.html#a94710a7b3fe3ecbf7a2113e015d423ba">ada_url</a>&#160;</td>
+          <td class="paramname"><em>result</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html#l00213">213</a> of file <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html">ada_c.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dd/dd6/ada__c_8cpp.html#a5649d9beb5e8b4fcbb78d274d85c3b69">get_instance()</a>.</p>
+
+</div>
+</div>
 <a id="a33c8949a7ae29e5eb0f0e4dc616a8a06" name="a33c8949a7ae29e5eb0f0e4dc616a8a06"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a33c8949a7ae29e5eb0f0e4dc616a8a06">&#9670;&#160;</a></span>ada_get_hostname()</h2>
 
@@ -901,36 +931,6 @@ Functions</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html#l00195">195</a> of file <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html">ada_c.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../dd/dd6/ada__c_8cpp.html#a54aa4bf9b91403fe2fb4f5b9d1fcf201">ada_string_create()</a>, and <a class="el" href="../../dd/dd6/ada__c_8cpp.html#a5649d9beb5e8b4fcbb78d274d85c3b69">get_instance()</a>.</p>
-
-</div>
-</div>
-<a id="a102ae27e72da26c4df2d4117df5c1eb7" name="a102ae27e72da26c4df2d4117df5c1eb7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a102ae27e72da26c4df2d4117df5c1eb7">&#9670;&#160;</a></span>ada_get_url_host_type()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint8_t ada_get_url_host_type </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../df/d61/ada__c_8h.html#a94710a7b3fe3ecbf7a2113e015d423ba">ada_url</a>&#160;</td>
-          <td class="paramname"><em>result</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html#l00213">213</a> of file <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html">ada_c.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../dd/dd6/ada__c_8cpp.html#a5649d9beb5e8b4fcbb78d274d85c3b69">get_instance()</a>.</p>
 
 </div>
 </div>
