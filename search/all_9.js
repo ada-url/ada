@@ -6,7 +6,7 @@ var searchData=
   ['initial_5fn_3',['initial_n',['../d5/ddb/namespaceada_1_1idna.html#ab4504379d0bcd88ac427b8b70062d166',1,'ada::idna']]],
   ['installation_4',['Installation',['../index.html#autotoc_md20',1,'']]],
   ['interface_20cli_5',['Command line interface (CLI)',['../db/d8a/md_docs_2cli.html',1,'']]],
-  ['ipv4_6',['ipv4',['../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39',1,'ada::IPV4'],['../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5',1,'ada::serializers::ipv4()']]],
+  ['ipv4_6',['ipv4',['../d9/dea/namespaceada_1_1serializers.html#ab61ad957ad92ba4f14f5ac6ee618efa5',1,'ada::serializers::ipv4()'],['../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39',1,'ada::IPV4']]],
   ['ipv6_7',['ipv6',['../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee',1,'ada::IPV6'],['../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4',1,'ada::serializers::ipv6()']]],
   ['is_20fast_8',['Ada is fast.',['../index.html#autotoc_md13',1,'']]],
   ['is_5falnum_5fplus_9',['is_alnum_plus',['../d2/dc3/namespaceada_1_1unicode.html#a34ca589b96e46ded7100f244fedd0c36',1,'ada::unicode']]],
