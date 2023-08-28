@@ -422,9 +422,10 @@ std::string percent_encode(const std::string_view input,
     return std::string(input);
   }
 
-  std::string result(input.substr(0, std::distance(input.begin(), pointer)));
+  std::string result;
   result.reserve(input.length());  // in the worst case, percent encoding might
                                    // produce 3 characters.
+  result.append(input.substr(0, std::distance(input.begin(), pointer)));
 
   for (; pointer != input.end(); pointer++) {
     if (character_sets::bit_at(character_set, *pointer)) {
