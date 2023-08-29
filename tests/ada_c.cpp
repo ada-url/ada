@@ -177,3 +177,35 @@ TEST(ada_c, ada_idna) {
   ada_free_owned_string(unicode);
   SUCCEED();
 }
+
+TEST(ada_c, ada_clear_hash) {
+  // Make sure a hash attribute with `#` is removed.
+  std::string_view input = "https://www.google.com/hello-world?query=1#";
+  ada_url out = ada_parse(input.data(), input.size());
+  ASSERT_TRUE(ada_is_valid(out));
+
+  ada_clear_hash(out);
+  ASSERT_EQ(convert_string(ada_get_hash(out)), "");
+  ASSERT_FALSE(ada_has_hash(out));
+  ASSERT_EQ(convert_string(ada_get_href(out)),
+            "https://www.google.com/hello-world?query=1");
+
+  ada_free(out);
+  SUCCEED();
+}
+
+TEST(ada_c, ada_clear_search) {
+  // Make sure a search attribute with `?` is removed.
+  std::string_view input = "https://www.google.com/hello-world?#hash";
+  ada_url out = ada_parse(input.data(), input.size());
+  ASSERT_TRUE(ada_is_valid(out));
+
+  ada_clear_search(out);
+  ASSERT_EQ(convert_string(ada_get_search(out)), "");
+  ASSERT_FALSE(ada_has_search(out));
+  ASSERT_EQ(convert_string(ada_get_href(out)),
+            "https://www.google.com/hello-world#hash");
+
+  ada_free(out);
+  SUCCEED();
+}
