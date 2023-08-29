@@ -79,7 +79,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     // clear methods
     out_aggregator->clear_port();
-    out_aggregator->clear_pathname();
     out_aggregator->clear_search();
     out_aggregator->clear_hash();
   }
