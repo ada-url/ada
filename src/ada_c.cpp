@@ -315,13 +315,6 @@ void ada_clear_hash(ada_url result) noexcept {
   }
 }
 
-void ada_clear_pathname(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (r) {
-    r->clear_pathname();
-  }
-}
-
 void ada_clear_search(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (r) {
