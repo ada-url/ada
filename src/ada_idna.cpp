@@ -1,7 +1,8 @@
-/* auto-generated on 2023-05-07 19:12:14 -0400. Do not edit! */
+/* auto-generated on 2023-08-29 15:28:19 -0400. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 
@@ -108,38 +109,22 @@ size_t utf8_length_from_utf32(const char32_t* buf, size_t len) {
   // We are not BOM aware.
   const uint32_t* p = reinterpret_cast<const uint32_t*>(buf);
   size_t counter{0};
-  for (size_t i = 0; i < len; i++) {
-    /** ASCII **/
-    if (p[i] <= 0x7F) {
-      counter++;
-    }
-    /** two-byte **/
-    else if (p[i] <= 0x7FF) {
-      counter += 2;
-    }
-    /** three-byte **/
-    else if (p[i] <= 0xFFFF) {
-      counter += 3;
-    }
-    /** four-bytes **/
-    else {
-      counter += 4;
-    }
+  for (size_t i = 0; i != len; ++i) {
+    ++counter;                                      // ASCII
+    counter += static_cast<size_t>(p[i] > 0x7F);    // two-byte
+    counter += static_cast<size_t>(p[i] > 0x7FF);   // three-byte
+    counter += static_cast<size_t>(p[i] > 0xFFFF);  // four-bytes
   }
   return counter;
 }
 
 size_t utf32_length_from_utf8(const char* buf, size_t len) {
   const int8_t* p = reinterpret_cast<const int8_t*>(buf);
-  size_t counter{0};
-  for (size_t i = 0; i < len; i++) {
+  return std::count_if(p, std::next(p, len), [](int8_t c) {
     // -65 is 0b10111111, anything larger in two-complement's
     // should start a new code point.
-    if (p[i] > -65) {
-      counter++;
-    }
-  }
-  return counter;
+    return c > -65;
+  });
 }
 
 size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output) {
@@ -9407,14 +9392,14 @@ bool constexpr begins_with(std::u32string_view view,
   if (view.size() < prefix.size()) {
     return false;
   }
-  return view.substr(0, prefix.size()) == prefix;
+  return std::equal(prefix.begin(), prefix.end(), view.begin());
 }
 
 bool constexpr begins_with(std::string_view view, std::string_view prefix) {
   if (view.size() < prefix.size()) {
     return false;
   }
-  return view.substr(0, prefix.size()) == prefix;
+  return std::equal(prefix.begin(), prefix.end(), view.begin());
 }
 
 bool constexpr is_ascii(std::u32string_view view) {
