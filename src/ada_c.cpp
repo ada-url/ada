@@ -7,6 +7,11 @@ ada::result<ada::url_aggregator>& get_instance(void* result) noexcept {
 extern "C" {
 typedef void* ada_url;
 
+typedef struct {
+  ada_url url;
+  bool is_valid;
+} ada_parse_result;
+
 struct ada_string {
   const char* data;
   size_t length;
@@ -54,22 +59,33 @@ struct ada_url_components {
   uint32_t hash_start;
 };
 
-ada_url ada_parse(const char* input, size_t length) noexcept {
-  return new ada::result<ada::url_aggregator>(
-      ada::parse<ada::url_aggregator>(std::string_view(input, length)));
+ada_parse_result ada_parse(const char* input, size_t length) noexcept {
+  auto url = ada::parse<ada::url_aggregator>(std::string_view(input, length));
+  ada_parse_result out{};
+  out.url = new ada::result<ada::url_aggregator>(url);
+  out.is_valid = url.has_value();
+  return out;
 }
 
-ada_url ada_parse_with_base(const char* input, size_t input_length,
-                            const char* base, size_t base_length) noexcept {
+ada_parse_result ada_parse_with_base(const char* input, size_t input_length,
+                                     const char* base,
+                                     size_t base_length) noexcept {
   auto base_out =
       ada::parse<ada::url_aggregator>(std::string_view(base, base_length));
+  ada_parse_result out{};
 
   if (!base_out) {
-    return new ada::result<ada::url_aggregator>(base_out);
+    out.is_valid = false;
+    out.url = new ada::result<ada::url_aggregator>(base_out);
+    return out;
   }
 
-  return new ada::result<ada::url_aggregator>(ada::parse<ada::url_aggregator>(
-      std::string_view(input, input_length), &base_out.value()));
+  auto input_out = ada::parse<ada::url_aggregator>(
+      std::string_view(input, input_length), &base_out.value());
+
+  out.is_valid = input_out.has_value();
+  out.url = new ada::result<ada::url_aggregator>(input_out);
+  return out;
 }
 
 bool ada_can_parse(const char* input, size_t length) noexcept {

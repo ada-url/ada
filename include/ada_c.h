@@ -38,11 +38,16 @@ typedef struct {
 
 typedef void* ada_url;
 
+typedef struct {
+  ada_url url;
+  bool is_valid;
+} ada_parse_result;
+
 // input should be a null terminated C string (ASCII or UTF-8)
 // you must call ada_free on the returned pointer
-ada_url ada_parse(const char* input, size_t length);
-ada_url ada_parse_with_base(const char* input, size_t input_length,
-                            const char* base, size_t base_length);
+ada_parse_result ada_parse(const char* input, size_t length);
+ada_parse_result ada_parse_with_base(const char* input, size_t input_length,
+                                     const char* base, size_t base_length);
 
 // input and base should be a null terminated C strings
 bool ada_can_parse(const char* input, size_t length);
@@ -53,10 +58,7 @@ void ada_free(ada_url result);
 void ada_free_owned_string(ada_owned_string owned);
 ada_url ada_copy(ada_url input);
 
-bool ada_is_valid(ada_url result);
-
 // url_aggregator getters
-// if ada_is_valid(result)) is false, an empty string is returned
 ada_owned_string ada_get_origin(ada_url result);
 ada_string ada_get_href(ada_url result);
 ada_string ada_get_username(ada_url result);
