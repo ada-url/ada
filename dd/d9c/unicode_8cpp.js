@@ -21,6 +21,7 @@ var unicode_8cpp =
     [ "to_ascii", "dd/d9c/unicode_8cpp.html#ab8f1dfd5acdce0079d239a4f6b0f23e5", null ],
     [ "to_lower_ascii", "dd/d9c/unicode_8cpp.html#ab9b70de07868ab60794c3079aa4db46f", null ],
     [ "to_unicode", "dd/d9c/unicode_8cpp.html#a80fc8cdeb27824384b9228896d3666f0", null ],
+    [ "hex_to_binary_table", "dd/d9c/unicode_8cpp.html#a653abc739f565d2b62c72a8499cf573e", null ],
     [ "is_alnum_plus_table", "dd/d9c/unicode_8cpp.html#a50281621924992b1070aba94a5b9ff96", null ],
     [ "is_forbidden_domain_code_point_table", "dd/d9c/unicode_8cpp.html#a7216c89ab4ae9363099bd6eda485257f", null ],
     [ "is_forbidden_domain_code_point_table_or_upper", "dd/d9c/unicode_8cpp.html#ad048524b31e4b4cab9eccfe1ac01a2b8", null ],
