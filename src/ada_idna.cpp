@@ -109,22 +109,10 @@ size_t utf8_length_from_utf32(const char32_t* buf, size_t len) {
   const uint32_t* p = reinterpret_cast<const uint32_t*>(buf);
   size_t counter{0};
   for (size_t i = 0; i < len; i++) {
-    /** ASCII **/
-    if (p[i] <= 0x7F) {
-      counter++;
-    }
-    /** two-byte **/
-    else if (p[i] <= 0x7FF) {
-      counter += 2;
-    }
-    /** three-byte **/
-    else if (p[i] <= 0xFFFF) {
-      counter += 3;
-    }
-    /** four-bytes **/
-    else {
-      counter += 4;
-    }
+    ++counter;                                      // ASCII
+    counter += static_cast<size_t>(p[i] > 0x7F);    // two-byte
+    counter += static_cast<size_t>(p[i] > 0x7FF);   // three-byte
+    counter += static_cast<size_t>(p[i] > 0xFFFF);  // four-bytes
   }
   return counter;
 }
