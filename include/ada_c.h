@@ -87,7 +87,6 @@ void ada_set_hash(ada_url result, const char* input, size_t length);
 // url_aggregator clear methods
 void ada_clear_port(ada_url result);
 void ada_clear_hash(ada_url result);
-void ada_clear_pathname(ada_url result);
 void ada_clear_search(ada_url result);
 
 // url_aggregator functions

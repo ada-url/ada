@@ -104,8 +104,6 @@ TEST(ada_c, setters) {
 
   ada_set_pathname(url, "new-pathname", strlen("new-pathname"));
   ASSERT_EQ(convert_string(ada_get_pathname(url)), "/new-pathname");
-  ada_clear_pathname(url);
-  ASSERT_EQ(convert_string(ada_get_pathname(url)), "");
 
   ada_set_search(url, "new-search", strlen("new-search"));
   ASSERT_EQ(convert_string(ada_get_search(url)), "?new-search");
