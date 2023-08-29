@@ -188,39 +188,38 @@ $(document).ready(function(){initNavTree('d6/db9/parse_8cc_source.html','../../'
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="comment">// clear methods</span></div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    out_aggregator-&gt;clear_port();</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    out_aggregator-&gt;clear_pathname();</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    out_aggregator-&gt;clear_search();</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    out_aggregator-&gt;clear_hash();</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  }</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="keyword">auto</span> base_source_view =</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>      std::string_view(base_source.data(), base_source.length());</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748">ada::can_parse</a>(source);</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748">ada::can_parse</a>(source, &amp;base_source_view);</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <a class="code hl_function" href="../../d5/ddb/namespaceada_1_1idna.html#a7d88f623d0a7e056cc89920b20e13dde">ada::idna::to_ascii</a>(source);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  <a class="code hl_function" href="../../d5/ddb/namespaceada_1_1idna.html#a7d9aecb5815cce8db291ed12d5d1774f">ada::idna::to_unicode</a>(source);</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file</a>(source);</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="keyword">auto</span> initialized = <a class="code hl_struct" href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a>(base_source_view);</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  <span class="keyword">auto</span> search_params = <a class="code hl_struct" href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a>();</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  search_params.append(source, base_source);</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  search_params.set(source, base_source);</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  search_params.to_string();</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <span class="keywordflow">if</span> (!search_params.has(base_source)) {</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    search_params.append(base_source, source);</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  }</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  search_params.remove(source);</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  search_params.remove(source, base_source);</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  <span class="keywordflow">if</span> (search_params.has(base_source, source)) {</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    search_params.remove(base_source);</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    search_params.remove(base_source, source);</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  }</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    out_aggregator-&gt;clear_search();</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    out_aggregator-&gt;clear_hash();</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  }</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keyword">auto</span> base_source_view =</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>      std::string_view(base_source.data(), base_source.length());</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748">ada::can_parse</a>(source);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748">ada::can_parse</a>(source, &amp;base_source_view);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <a class="code hl_function" href="../../d5/ddb/namespaceada_1_1idna.html#a7d88f623d0a7e056cc89920b20e13dde">ada::idna::to_ascii</a>(source);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <a class="code hl_function" href="../../d5/ddb/namespaceada_1_1idna.html#a7d9aecb5815cce8db291ed12d5d1774f">ada::idna::to_unicode</a>(source);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file</a>(source);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keyword">auto</span> initialized = <a class="code hl_struct" href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a>(base_source_view);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <span class="keyword">auto</span> search_params = <a class="code hl_struct" href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a>();</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  search_params.append(source, base_source);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  search_params.set(source, base_source);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  search_params.to_string();</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  <span class="keywordflow">if</span> (!search_params.has(base_source)) {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    search_params.append(base_source, source);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  }</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  search_params.remove(source);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  search_params.remove(source, base_source);</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  <span class="keywordflow">if</span> (search_params.has(base_source, source)) {</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    search_params.remove(base_source);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    search_params.remove(base_source, source);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  }</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
 </div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="../../d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>

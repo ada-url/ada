@@ -8,7 +8,6 @@ var ada__c_8h =
     [ "ada_can_parse", "df/d61/ada__c_8h.html#ae9077832390c5ed1c1d74176d4fe59e0", null ],
     [ "ada_can_parse_with_base", "df/d61/ada__c_8h.html#a3586d49424936b0845c0e13ecc40fce4", null ],
     [ "ada_clear_hash", "df/d61/ada__c_8h.html#a8116460f9fe1f6232598d77312eb3e64", null ],
-    [ "ada_clear_pathname", "df/d61/ada__c_8h.html#a82b189d957ff7a3453d56e1b4d6f92c9", null ],
     [ "ada_clear_port", "df/d61/ada__c_8h.html#ab6e9007aa406fb687c171906be75b470", null ],
     [ "ada_clear_search", "df/d61/ada__c_8h.html#a0c701ceba5448fbf807c4219352426ff", null ],
     [ "ada_copy", "df/d61/ada__c_8h.html#af6f40f0999f7f2408cb9622a00e1351b", null ],
