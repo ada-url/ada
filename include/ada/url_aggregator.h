@@ -198,7 +198,6 @@ struct url_aggregator : url_base {
 
   inline void clear_port();
   inline void clear_hash();
-  inline void clear_pathname() override;
   inline void clear_search() override;
 
  private:
@@ -277,6 +276,7 @@ struct url_aggregator : url_base {
   inline uint32_t retrieve_base_port() const;
   inline void clear_hostname();
   inline void clear_password();
+  inline void clear_pathname() override;
   inline bool has_dash_dot() const noexcept;
   void delete_dash_dot();
   inline void consume_prepared_path(std::string_view input);
