@@ -287,6 +287,13 @@ bool ada_set_pathname(ada_url result, const char* input,
   return r->set_pathname(std::string_view(input, length));
 }
 
+/**
+ * Update the search/query of the URL.
+ *
+ * If a URL has `?` as the search value, passing empty string to this function
+ * does not remove the attribute. If you need to remove it, please use
+ * `ada_clear_search` method.
+ */
 void ada_set_search(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (r) {
@@ -294,6 +301,13 @@ void ada_set_search(ada_url result, const char* input, size_t length) noexcept {
   }
 }
 
+/**
+ * Update the hash/fragment of the URL.
+ *
+ * If a URL has `#` as the hash value, passing empty string to this function
+ * does not remove the attribute. If you need to remove it, please use
+ * `ada_clear_hash` method.
+ */
 void ada_set_hash(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (r) {
@@ -308,6 +322,12 @@ void ada_clear_port(ada_url result) noexcept {
   }
 }
 
+/**
+ * Removes the hash of the URL.
+ *
+ * Despite `ada_set_hash` method, this function allows the complete
+ * removal of the hash attribute, even if it has a value of `#`.
+ */
 void ada_clear_hash(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (r) {
@@ -315,6 +335,12 @@ void ada_clear_hash(ada_url result) noexcept {
   }
 }
 
+/**
+ * Removes the search of the URL.
+ *
+ * Despite `ada_set_search` method, this function allows the complete
+ * removal of the search attribute, even if it has a value of `?`.
+ */
 void ada_clear_search(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (r) {
