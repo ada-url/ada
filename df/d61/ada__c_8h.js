@@ -24,7 +24,7 @@ var ada__c_8h =
     [ "ada_get_pathname", "df/d61/ada__c_8h.html#a245099bc91ac81c704a4367654fba6d7", null ],
     [ "ada_get_port", "df/d61/ada__c_8h.html#a64ad16f3671c29f17e32880ff2d99a07", null ],
     [ "ada_get_protocol", "df/d61/ada__c_8h.html#a9cdeb5279529ab82057aec49227e3534", null ],
-    [ "ada_get_schema_type", "df/d61/ada__c_8h.html#a45f4867e12bab74a8c752baf66f67b13", null ],
+    [ "ada_get_scheme_type", "df/d61/ada__c_8h.html#aa454ceb24f88f5df9758b50c387fd5b6", null ],
     [ "ada_get_search", "df/d61/ada__c_8h.html#aea81956480d2eb9af02d30a72b1ce85b", null ],
     [ "ada_get_username", "df/d61/ada__c_8h.html#aa3ca533c9964f06679ae9112f8218a2b", null ],
     [ "ada_has_credentials", "df/d61/ada__c_8h.html#ae7a2c085bda3a813a513321f30cbfbc8", null ],
