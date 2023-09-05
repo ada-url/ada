@@ -218,6 +218,14 @@ uint8_t ada_get_host_type(ada_url result) noexcept {
   return r->host_type;
 }
 
+uint8_t ada_get_schema_type(ada_url result) noexcept {
+  ada::result<ada::url_aggregator>& r = get_instance(result);
+  if (!r) {
+    return 0;
+  }
+  return r->type;
+}
+
 bool ada_set_href(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (!r) {
