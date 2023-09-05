@@ -218,7 +218,7 @@ uint8_t ada_get_host_type(ada_url result) noexcept {
   return r->host_type;
 }
 
-uint8_t ada_get_schema_type(ada_url result) noexcept {
+uint8_t ada_get_scheme_type(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (!r) {
     return 0;

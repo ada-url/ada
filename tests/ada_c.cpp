@@ -210,50 +210,50 @@ TEST(ada_c, ada_clear_search) {
   SUCCEED();
 }
 
-TEST(ada_c, ada_get_schema_type) {
+TEST(ada_c, ada_get_scheme_type) {
   std::string_view input;
   ada_url out;
 
   input = "http://www.google.com";
   out = ada_parse(input.data(), input.size());
   ASSERT_TRUE(ada_is_valid(out));
-  ASSERT_EQ(ada_get_schema_type(out), 0);
+  ASSERT_EQ(ada_get_scheme_type(out), 0);
 
   input = "notspecial://www.google.com";
   ada_free(out);
   out = ada_parse(input.data(), input.size());
   ASSERT_TRUE(ada_is_valid(out));
-  ASSERT_EQ(ada_get_schema_type(out), 1);
+  ASSERT_EQ(ada_get_scheme_type(out), 1);
 
   input = "https://www.google.com";
   ada_free(out);
   out = ada_parse(input.data(), input.size());
   ASSERT_TRUE(ada_is_valid(out));
-  ASSERT_EQ(ada_get_schema_type(out), 2);
+  ASSERT_EQ(ada_get_scheme_type(out), 2);
 
   input = "ws://www.google.com/ws";
   ada_free(out);
   out = ada_parse(input.data(), input.size());
   ASSERT_TRUE(ada_is_valid(out));
-  ASSERT_EQ(ada_get_schema_type(out), 3);
+  ASSERT_EQ(ada_get_scheme_type(out), 3);
 
   input = "ftp://www.google.com/file.txt";
   ada_free(out);
   out = ada_parse(input.data(), input.size());
   ASSERT_TRUE(ada_is_valid(out));
-  ASSERT_EQ(ada_get_schema_type(out), 4);
+  ASSERT_EQ(ada_get_scheme_type(out), 4);
 
   input = "wss://www.google.com/wss";
   ada_free(out);
   out = ada_parse(input.data(), input.size());
   ASSERT_TRUE(ada_is_valid(out));
-  ASSERT_EQ(ada_get_schema_type(out), 5);
+  ASSERT_EQ(ada_get_scheme_type(out), 5);
 
   input = "file:///foo/bar";
   ada_free(out);
   out = ada_parse(input.data(), input.size());
   ASSERT_TRUE(ada_is_valid(out));
-  ASSERT_EQ(ada_get_schema_type(out), 6);
+  ASSERT_EQ(ada_get_scheme_type(out), 6);
 
   ada_free(out);
   SUCCEED();
