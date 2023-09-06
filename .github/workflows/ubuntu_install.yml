@@ -43,4 +43,4 @@ jobs:
       - name: Build test package
         run: cmake --build buildbabyada
       - name: Run example
-        run: ./buildbabyada/babyada
+        run: ./buildbabyada/main
