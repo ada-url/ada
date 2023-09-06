@@ -1,0 +1,44 @@
+name: macos (Installation)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ubuntu-build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - {shared: ON}
+          - {shared: OFF}
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Prepare
+        run: cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -DCMAKE_INSTALL_PREFIX:PATH=destination -B build
+      - name: Build
+        run: cmake --build build -j=2
+      - name: Install
+        run: cmake --install build
+      - name: Prepare test package
+        run: cmake -DCMAKE_INSTALL_PREFIX:PATH=../../destination -S tests/installation -B buildbabyada
+      - name: Build test package
+        run: cmake --build buildbabyada
+      - name: Run example
+        run: ./buildbabyada/main
