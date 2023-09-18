@@ -378,3 +378,12 @@ TYPED_TEST(basic_tests, url_host_type) {
       ada::url_host_type::IPV6);
   SUCCEED();
 }
+
+// https://github.com/nodejs/node/issues/49650
+TYPED_TEST(basic_tests, nodejs_49650) {
+  auto out = ada::parse<TypeParam>("http://foo");
+  ASSERT_TRUE(out);
+  ASSERT_FALSE(out->set_host("::"));
+  ASSERT_EQ(out->get_href(), "http://foo/");
+  SUCCEED();
+}
