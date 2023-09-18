@@ -552,13 +552,12 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // empty string, and either url includes credentials or url's port is
     // non-null, return.
     else if (host_view.empty() &&
-             (is_special() || has_credentials() ||
-              components.port != url_components::omitted)) {
+             (is_special() || has_credentials() || has_port())) {
       return false;
     }
 
     // Let host be the result of host parsing host_view with url is not special.
-    if (host_view.empty()) {
+    if (host_view.empty() && !is_special()) {
       if (has_hostname()) {
         clear_hostname();  // easy!
       } else if (has_dash_dot()) {
