@@ -55,7 +55,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
     }
 
     // Let host be the result of host parsing host_view with url is not special.
-    if (host_view.empty()) {
+    if (host_view.empty() && !is_special()) {
       host = "";
       return true;
     }

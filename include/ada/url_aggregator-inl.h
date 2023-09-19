@@ -807,7 +807,9 @@ inline bool url_aggregator::has_hostname() const noexcept {
 
 inline bool url_aggregator::has_port() const noexcept {
   ada_log("url_aggregator::has_port");
-  return components.pathname_start != components.host_end;
+  // A URL cannot have a username/password/port if its host is null or the empty
+  // string, or its scheme is "file".
+  return has_hostname() && components.pathname_start != components.host_end;
 }
 
 inline bool url_aggregator::has_dash_dot() const noexcept {
