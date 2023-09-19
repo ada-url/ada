@@ -70,9 +70,9 @@ inline constexpr bool is_normalized_windows_drive_letter(
     std::string_view input) noexcept;
 
 /**
- * @warning Will be removed when Ada supports C++20.
+ * @warning Will be removed when Ada requires C++20.
  */
-ada_really_inline constexpr bool begins_with(std::string_view view,
+ada_really_inline bool begins_with(std::string_view view,
                                              std::string_view prefix);
 
 /**

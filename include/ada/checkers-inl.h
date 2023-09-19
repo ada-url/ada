@@ -54,9 +54,10 @@ inline constexpr bool is_normalized_windows_drive_letter(
   return input.size() >= 2 && (is_alpha(input[0]) && (input[1] == ':'));
 }
 
-ada_really_inline constexpr bool begins_with(std::string_view view,
+ada_really_inline bool begins_with(std::string_view view,
                                              std::string_view prefix) {
   // in C++20, you have view.begins_with(prefix)
+  // std::equal is constexpr in C++20
   return view.size() >= prefix.size() &&
          std::equal(prefix.begin(), prefix.end(), view.begin());
 }
