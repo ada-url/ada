@@ -166,7 +166,7 @@ $(document).ready(function(){initNavTree('d5/dee/url-setters_8cpp_source.html','
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    }</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="comment">// Let host be the result of host parsing host_view with url is not special.</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">host_view</a>.empty()) {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">host_view</a>.empty() &amp;&amp; !<a class="code hl_function" href="../../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd">is_special</a>()) {</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>      host = <span class="stringliteral">&quot;&quot;</span>;</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>      <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    }</div>
