@@ -12,7 +12,7 @@ var namespaceada =
       [ "WWW_FORM_URLENCODED_PERCENT_ENCODE", "d7/d35/namespaceada_1_1character__sets.html#aec120154efccb7b70bd36785bf6a71b7", null ]
     ] ],
     [ "checkers", "d3/dbe/namespaceada_1_1checkers.html", [
-      [ "begins_with", "d3/dbe/namespaceada_1_1checkers.html#a867f628fcb4da6f36cd5e87d93cc3cbf", null ],
+      [ "begins_with", "d3/dbe/namespaceada_1_1checkers.html#ae2b07791c8b63539276ed017340ef4d0", null ],
       [ "has_hex_prefix", "d3/dbe/namespaceada_1_1checkers.html#aa30ee2c6ba3a3e942c7e2e70729a1cca", null ],
       [ "has_hex_prefix_unsafe", "d3/dbe/namespaceada_1_1checkers.html#a429bd47d8a8754da869ae095c9bb1c9f", null ],
       [ "is_alpha", "d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5", null ],
