@@ -367,6 +367,98 @@ BENCHMARK(BasicBench_BoostURL);
 // BENCHMARK(BasicBench_BoostURL_just_parse);
 #endif  // ADA_BOOST_ENABLED
 
+#if ADA_ZURI_ENABLED
+#include <zuri.h>
+
+size_t count_zuri_invalid() {
+  size_t how_many = 0;
+  for (std::string& url_string : url_examples) {
+    struct zuri2k uri;
+    zuri_error err = zuri_parse2k(&uri, url_string.c_str(), url_string.size());
+    if (err) how_many++;
+  }
+  return how_many;
+}
+
+// ZURI follows RFC3986
+template <bool just_parse = false>
+static void BasicBench_ZURI(benchmark::State& state) {
+  // volatile to prevent optimizations.
+  volatile size_t success = 0;
+  volatile size_t href_size = 0;
+
+
+  for (auto _ : state) {
+    for (std::string& url_string : url_examples) {
+      struct zuri2k uri;
+      benchmark::DoNotOptimize(uri);
+      zuri_error err = zuri_parse2k(&uri, url_string.c_str(), url_string.size());
+      if (!err) {
+        success++;
+        if constexpr (!just_parse) {
+          char buf[2048];
+          benchmark::DoNotOptimize(href_size += zuri_read2k(&uri, &buf[0], sizeof(buf)));
+        }
+      }
+    }
+  }
+  if (collector.has_events()) {
+    event_aggregate aggregate{};
+    for (size_t i = 0; i < N; i++) {
+      std::atomic_thread_fence(std::memory_order_acquire);
+      collector.start();
+      for (std::string& url_string : url_examples) {
+        struct zuri2k uri;
+        benchmark::DoNotOptimize(uri);
+        zuri_error err = zuri_parse2k(&uri, url_string.c_str(), url_string.size());
+        if (!err) {
+          success++;
+          if constexpr (!just_parse) {
+            char buf[2048];
+            benchmark::DoNotOptimize(href_size += zuri_read2k(&uri, &buf[0], sizeof(buf)));
+          }
+        }
+      }
+      std::atomic_thread_fence(std::memory_order_release);
+      event_count allocate_count = collector.end();
+      aggregate << allocate_count;
+    }
+    state.counters["cycles/url"] =
+        aggregate.best.cycles() / std::size(url_examples);
+    state.counters["instructions/url"] =
+        aggregate.best.instructions() / std::size(url_examples);
+    state.counters["instructions/cycle"] =
+        aggregate.best.instructions() / aggregate.best.cycles();
+    state.counters["instructions/byte"] =
+        aggregate.best.instructions() / url_examples_bytes;
+    state.counters["instructions/ns"] =
+        aggregate.best.instructions() / aggregate.best.elapsed_ns();
+    state.counters["GHz"] =
+        aggregate.best.cycles() / aggregate.best.elapsed_ns();
+    state.counters["ns/url"] =
+        aggregate.best.elapsed_ns() / std::size(url_examples);
+    state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
+  }
+  (void)success;
+  (void)href_size;
+
+  state.counters["time/byte"] = benchmark::Counter(
+      url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate |
+                              benchmark::Counter::kInvert);
+  state.counters["time/url"] = benchmark::Counter(
+      std::size(url_examples), benchmark::Counter::kIsIterationInvariantRate |
+                                   benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+  state.counters["url/s"] = benchmark::Counter(
+      std::size(url_examples), benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(BasicBench_ZURI);
+// There is no need for 'just_parse' because BoostURL materializes the href.
+// auto BasicBench_BoostURL_just_parse = BasicBench_BoostURL<JUST_PARSE>;
+// BENCHMARK(BasicBench_BoostURL_just_parse);
+#endif  // ADA_ZURI_ENABLED
+
 #if ADA_VARIOUS_COMPETITION_ENABLED
 static void BasicBench_uriparser_just_parse(benchmark::State& state) {
   // volatile to prevent optimizations.
@@ -658,6 +750,13 @@ int main(int argc, char** argv) {
                               "Boost URL follows RFC3986, not whatwg/url");
   size_t boost_bad_url = count_boosturl_invalid();
 #endif
+#if ADA_ZURI_ENABLED
+  benchmark::AddCustomContext("zuri spec",
+                              "Zuri follows RFC3986, not whatwg/url");
+  size_t zuri_bad_url = count_zuri_invalid();
+#else
+  benchmark::AddCustomContext("zuri ", "OMITTED");
+#endif
 #if (__APPLE__ && __aarch64__) || defined(__linux__)
   if (!collector.has_events()) {
     benchmark::AddCustomContext("performance counters",
@@ -701,6 +800,10 @@ int main(int argc, char** argv) {
 #endif
 #if ADA_BOOST_ENABLED
   badcounts << "boost-url---count of bad URLs " << std::to_string(boost_bad_url)
+            << "\n";
+#endif
+#if ADA_ZURI_ENABLED
+  badcounts << "zuri---count of bad URLs      " << std::to_string(zuri_bad_url)
             << "\n";
 #endif
   badcounts << "-------------------------------\n";

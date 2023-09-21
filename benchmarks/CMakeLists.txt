@@ -225,6 +225,19 @@ if(ADA_BOOST_URL)
 endif(ADA_BOOST_URL)
 endif(Boost_FOUND)
 
+# Zuri
+find_package(ZURI)
+if(ZURI_FOUND)
+	message(STATUS "Zuri found")
+	target_link_libraries(bench PRIVATE zuri)
+	target_link_libraries(benchdata PRIVATE zuri)
+	target_link_libraries(bbc_bench PRIVATE zuri)
+	target_compile_definitions(bench PRIVATE ADA_ZURI_ENABLED=1)
+	target_compile_definitions(benchdata PRIVATE ADA_ZURI_ENABLED=1)
+	target_compile_definitions(bbc_bench PRIVATE ADA_ZURI_ENABLED=1)
+else(ZURI_FOUND)
+    message(STATUS "Zuri not found! Please install to include in benchmark.")
+endif(ZURI_FOUND)
 
 
 # We want the check whether Rust is available before trying to build a crate.
