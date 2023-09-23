@@ -14,6 +14,17 @@ The Ada library passes the full range of tests from the specification,
 across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
 supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
 
+A common use of a URL parser is to take a URL string and normalize it. 
+The WHATWG URL specification has been adopted by most browsers.  Other tools, such as curl and many 
+standard libraries, follow the RFC 3986. The following table illustrates possible differences in practice
+(encoding of the host, encoding of the path):
+
+| string source | string value |
+|:--------------|:--------------|
+| input string | https://www.7‑Eleven.com/Home/Privacy/Montréal |
+| ada's normalized string | https://www.xn--7eleven-506c.com/Home/Privacy/Montr%C3%A9al |
+| curl 7.87 | (returns the original unchanged) |
+
 ### Requirements
 
 The project is otherwise self-contained and it has no dependency.
