@@ -387,17 +387,18 @@ static void BasicBench_ZURI(benchmark::State& state) {
   volatile size_t success = 0;
   volatile size_t href_size = 0;
 
-
   for (auto _ : state) {
     for (std::string& url_string : url_examples) {
       struct zuri2k uri;
       benchmark::DoNotOptimize(uri);
-      zuri_error err = zuri_parse2k(&uri, url_string.c_str(), url_string.size());
+      zuri_error err =
+          zuri_parse2k(&uri, url_string.c_str(), url_string.size());
       if (!err) {
         success++;
         if constexpr (!just_parse) {
           char buf[2048];
-          benchmark::DoNotOptimize(href_size += zuri_read2k(&uri, &buf[0], sizeof(buf)));
+          benchmark::DoNotOptimize(href_size +=
+                                   zuri_read2k(&uri, &buf[0], sizeof(buf)));
         }
       }
     }
@@ -410,12 +411,14 @@ static void BasicBench_ZURI(benchmark::State& state) {
       for (std::string& url_string : url_examples) {
         struct zuri2k uri;
         benchmark::DoNotOptimize(uri);
-        zuri_error err = zuri_parse2k(&uri, url_string.c_str(), url_string.size());
+        zuri_error err =
+            zuri_parse2k(&uri, url_string.c_str(), url_string.size());
         if (!err) {
           success++;
           if constexpr (!just_parse) {
             char buf[2048];
-            benchmark::DoNotOptimize(href_size += zuri_read2k(&uri, &buf[0], sizeof(buf)));
+            benchmark::DoNotOptimize(href_size +=
+                                     zuri_read2k(&uri, &buf[0], sizeof(buf)));
           }
         }
       }
