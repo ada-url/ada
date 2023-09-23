@@ -99,7 +99,7 @@ ada_really_inline bool has_tabs_or_newline(
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   auto has_zero_byte = [](uint64_t v) {
-    return ((v - 0x0101010101010101) & ~(v) & 0x8080808080808080);
+    return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
   };
   size_t i = 0;
   uint64_t mask1 = broadcast('\r');

@@ -177,14 +177,14 @@ ada_really_inline void resize(std::string_view& input, size_t pos) noexcept {
 // Reverse the byte order.
 ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept {
   // performance: this often compiles to a single instruction (e.g., bswap)
-  return ((((val) & 0xff00000000000000ull) >> 56) |
-          (((val) & 0x00ff000000000000ull) >> 40) |
-          (((val) & 0x0000ff0000000000ull) >> 24) |
-          (((val) & 0x000000ff00000000ull) >> 8) |
-          (((val) & 0x00000000ff000000ull) << 8) |
-          (((val) & 0x0000000000ff0000ull) << 24) |
-          (((val) & 0x000000000000ff00ull) << 40) |
-          (((val) & 0x00000000000000ffull) << 56));
+  return ((((val)&0xff00000000000000ull) >> 56) |
+          (((val)&0x00ff000000000000ull) >> 40) |
+          (((val)&0x0000ff0000000000ull) >> 24) |
+          (((val)&0x000000ff00000000ull) >> 8) |
+          (((val)&0x00000000ff000000ull) << 8) |
+          (((val)&0x0000000000ff0000ull) << 24) |
+          (((val)&0x000000000000ff00ull) << 40) |
+          (((val)&0x00000000000000ffull) << 56));
 }
 
 ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept {
@@ -206,7 +206,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
   // you *really* want find_next_host_delimiter to be inlined, because
   // otherwise, the constants may get reloaded each time (bad).
   auto has_zero_byte = [](uint64_t v) {
-    return ((v - 0x0101010101010101) & ~(v) & 0x8080808080808080);
+    return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
   };
   auto index_of_first_set_byte = [](uint64_t v) {
     return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
@@ -271,7 +271,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
   // you *really* want find_next_host_delimiter to be inlined, because
   // otherwise, the constants may get reloaded each time (bad).
   auto has_zero_byte = [](uint64_t v) {
-    return ((v - 0x0101010101010101) & ~(v) & 0x8080808080808080);
+    return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
   };
   auto index_of_first_set_byte = [](uint64_t v) {
     return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
@@ -600,7 +600,7 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(
 ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
   auto has_zero_byte = [](uint64_t v) {
-    return ((v - 0x0101010101010101) & ~(v) & 0x8080808080808080);
+    return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
   };
   auto index_of_first_set_byte = [](uint64_t v) {
     return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
@@ -650,7 +650,7 @@ find_authority_delimiter_special(std::string_view view) noexcept {
 ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
   auto has_zero_byte = [](uint64_t v) {
-    return ((v - 0x0101010101010101) & ~(v) & 0x8080808080808080);
+    return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
   };
   auto index_of_first_set_byte = [](uint64_t v) {
     return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
