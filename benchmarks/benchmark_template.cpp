@@ -391,8 +391,7 @@ static void BasicBench_ZURI(benchmark::State& state) {
     for (std::string& url_string : url_examples) {
       struct zuri2k uri;
       benchmark::DoNotOptimize(uri);
-      zuri_error err =
-          zuri_parse2k(&uri, url_string.c_str());
+      zuri_error err = zuri_parse2k(&uri, url_string.c_str());
       if (!err) {
         success++;
         if constexpr (!just_parse) {
@@ -411,8 +410,7 @@ static void BasicBench_ZURI(benchmark::State& state) {
       for (std::string& url_string : url_examples) {
         struct zuri2k uri;
         benchmark::DoNotOptimize(uri);
-        zuri_error err =
-            zuri_parse2k(&uri, url_string.c_str());
+        zuri_error err = zuri_parse2k(&uri, url_string.c_str());
         if (!err) {
           success++;
           if constexpr (!just_parse) {
