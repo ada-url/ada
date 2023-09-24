@@ -374,7 +374,7 @@ size_t count_zuri_invalid() {
   size_t how_many = 0;
   for (std::string& url_string : url_examples) {
     struct zuri2k uri;
-    zuri_error err = zuri_parse2k(&uri, url_string.c_str(), url_string.size());
+    zuri_error err = zuri_parse2k(&uri, url_string.c_str());
     if (err) how_many++;
   }
   return how_many;
@@ -392,7 +392,7 @@ static void BasicBench_ZURI(benchmark::State& state) {
       struct zuri2k uri;
       benchmark::DoNotOptimize(uri);
       zuri_error err =
-          zuri_parse2k(&uri, url_string.c_str(), url_string.size());
+          zuri_parse2k(&uri, url_string.c_str());
       if (!err) {
         success++;
         if constexpr (!just_parse) {
@@ -412,7 +412,7 @@ static void BasicBench_ZURI(benchmark::State& state) {
         struct zuri2k uri;
         benchmark::DoNotOptimize(uri);
         zuri_error err =
-            zuri_parse2k(&uri, url_string.c_str(), url_string.size());
+            zuri_parse2k(&uri, url_string.c_str());
         if (!err) {
           success++;
           if constexpr (!just_parse) {
@@ -456,10 +456,8 @@ static void BasicBench_ZURI(benchmark::State& state) {
   state.counters["url/s"] = benchmark::Counter(
       std::size(url_examples), benchmark::Counter::kIsIterationInvariantRate);
 }
+
 BENCHMARK(BasicBench_ZURI);
-// There is no need for 'just_parse' because BoostURL materializes the href.
-// auto BasicBench_BoostURL_just_parse = BasicBench_BoostURL<JUST_PARSE>;
-// BENCHMARK(BasicBench_BoostURL_just_parse);
 #endif  // ADA_ZURI_ENABLED
 
 #if ADA_VARIOUS_COMPETITION_ENABLED
