@@ -103,7 +103,7 @@ ada_really_inline bool has_tabs_or_newline(
         _mm_cmpeq_epi8(word, mask3));
   }
   if (i < user_input.size()) {
-    __m128i word = _mm_load_si128((const __m128i*)(user_input.data() + user_input.length() - 16));
+    __m128i word = _mm_loadu_si128((const __m128i*)(user_input.data() + user_input.length() - 16));
     running = _mm_or_si128(
         _mm_or_si128(running, _mm_or_si128(_mm_cmpeq_epi8(word, mask1),
                                            _mm_cmpeq_epi8(word, mask2))),
