@@ -62,7 +62,7 @@ ada_really_inline bool has_tabs_or_newline(
   if (i < user_input.size()) {
     uint8_t buffer[16]{};
     memcpy(buffer, user_input.data() + i, user_input.size() - i);
-    uint8x16_t word = vld1q_u8((const uint8_t*)user_input.data() + i);
+    uint8x16_t word = vld1q_u8((const uint8_t*)buffer);
     running = vorrq_u8(vorrq_u8(running, vorrq_u8(vceqq_u8(word, mask1),
                                                   vceqq_u8(word, mask2))),
                        vceqq_u8(word, mask3));
