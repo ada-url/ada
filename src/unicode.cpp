@@ -49,9 +49,10 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
-  if(user_input.size() < 16) { // slow path
-    for(size_t i = 0; i < user_input.size(); i++) {
-      if(user_input[i] == '\r' || user_input[i] == '\n' || user_input[i] == '\t') {
+  if (user_input.size() < 16) {  // slow path
+    for (size_t i = 0; i < user_input.size(); i++) {
+      if (user_input[i] == '\r' || user_input[i] == '\n' ||
+          user_input[i] == '\t') {
         return true;
       }
     }
@@ -70,10 +71,11 @@ ada_really_inline bool has_tabs_or_newline(
                        vceqq_u8(word, mask3));
   }
   if (i < user_input.size()) {
-      uint8x16_t word = vld1q_u8((const uint8_t*)user_input.data() + user_input.length() - 16);
-      running = vorrq_u8(vorrq_u8(running, vorrq_u8(vceqq_u8(word, mask1),
-                                                    vceqq_u8(word, mask2))),
-                        vceqq_u8(word, mask3));
+    uint8x16_t word =
+        vld1q_u8((const uint8_t*)user_input.data() + user_input.length() - 16);
+    running = vorrq_u8(vorrq_u8(running, vorrq_u8(vceqq_u8(word, mask1),
+                                                  vceqq_u8(word, mask2))),
+                       vceqq_u8(word, mask3));
   }
   return vmaxvq_u8(running) != 0;
 }
@@ -81,9 +83,10 @@ ada_really_inline bool has_tabs_or_newline(
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
-  if(user_input.size() < 16) { // slow path
-    for(size_t i = 0; i < user_input.size(); i++) {
-      if(user_input[i] == '\r' || user_input[i] == '\n' || user_input[i] == '\t') {
+  if (user_input.size() < 16) {  // slow path
+    for (size_t i = 0; i < user_input.size(); i++) {
+      if (user_input[i] == '\r' || user_input[i] == '\n' ||
+          user_input[i] == '\t') {
         return true;
       }
     }
@@ -103,7 +106,8 @@ ada_really_inline bool has_tabs_or_newline(
         _mm_cmpeq_epi8(word, mask3));
   }
   if (i < user_input.size()) {
-    __m128i word = _mm_loadu_si128((const __m128i*)(user_input.data() + user_input.length() - 16));
+    __m128i word = _mm_loadu_si128(
+        (const __m128i*)(user_input.data() + user_input.length() - 16));
     running = _mm_or_si128(
         _mm_or_si128(running, _mm_or_si128(_mm_cmpeq_epi8(word, mask1),
                                            _mm_cmpeq_epi8(word, mask2))),
