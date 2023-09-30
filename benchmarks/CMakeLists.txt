@@ -226,7 +226,7 @@ endif(ADA_BOOST_URL)
 endif(Boost_FOUND)
 
 # Zuri
-find_package(ZURI)
+find_package(ZURI QUIET)
 if(ZURI_FOUND)
 	message(STATUS "Zuri found")
 	target_link_libraries(bench PRIVATE zuri)
