@@ -26,7 +26,7 @@ jobs:
     env:
       CXX: clang++-14
     steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v3.6.0
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v3.6.0
   
       - name: Install dependencies
         run: pip3 install -r ./tools/release/requirements.txt
