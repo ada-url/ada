@@ -55,6 +55,7 @@ We provide clients for different programming languages through our C API.
 - [Rust](https://github.com/ada-url/rust): Rust bindings for Ada
 - [Go](https://github.com/ada-url/goada): Go bindings for Ada
 - [Python](https://github.com/ada-url/python): Python bindings for Ada
+- [R](https://github.com/schochastics/adaR): R wrapper for Ada
 
 ## Usage
 
