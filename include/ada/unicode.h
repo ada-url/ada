@@ -78,8 +78,7 @@ ada_really_inline bool has_tabs_or_newline(
  * Checks if the input is a forbidden host code point.
  * @see https://url.spec.whatwg.org/#forbidden-host-code-point
  */
-ada_really_inline constexpr bool is_forbidden_host_code_point(
-    char c) noexcept;
+ada_really_inline constexpr bool is_forbidden_host_code_point(char c) noexcept;
 
 /**
  * Checks if the input contains a forbidden domain code point.

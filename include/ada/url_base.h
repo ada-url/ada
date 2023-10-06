@@ -111,9 +111,8 @@ struct url_base {
    * @return On failure, it returns zero.
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  virtual ada_really_inline size_t parse_port(
-      std::string_view view, bool check_trailing_content) noexcept = 0;
-
+  virtual ada_really_inline size_t
+  parse_port(std::string_view view, bool check_trailing_content) noexcept = 0;
 
   virtual ada_really_inline size_t parse_port(std::string_view view) noexcept {
     return this->parse_port(view, false);

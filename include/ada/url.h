@@ -349,9 +349,8 @@ struct url : url_base {
    */
   [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
-  ada_really_inline size_t
-  parse_port(std::string_view view,
-             bool check_trailing_content) noexcept override;
+  ada_really_inline size_t parse_port(
+      std::string_view view, bool check_trailing_content) noexcept override;
 
   ada_really_inline size_t parse_port(std::string_view view) noexcept override {
     return this->parse_port(view, false);
@@ -374,8 +373,7 @@ struct url : url_base {
   [[nodiscard]] ada_really_inline bool parse_host(std::string_view input);
 
   template <bool has_state_override = false>
-  [[nodiscard]] ada_really_inline bool parse_scheme(
-      std::string_view input);
+  [[nodiscard]] ada_really_inline bool parse_scheme(std::string_view input);
 
   inline void clear_pathname() override;
   inline void clear_search() override;

@@ -224,14 +224,12 @@ struct url_aggregator : url_base {
    */
   inline void reserve(uint32_t capacity);
 
-  ada_really_inline size_t
-  parse_port(std::string_view view,
-             bool check_trailing_content) noexcept override;
+  ada_really_inline size_t parse_port(
+      std::string_view view, bool check_trailing_content) noexcept override;
 
   ada_really_inline size_t parse_port(std::string_view view) noexcept override {
     return this->parse_port(view, false);
   }
-
 
   /**
    * Return true on success.

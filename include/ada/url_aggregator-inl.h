@@ -833,7 +833,8 @@ inline bool url_aggregator::has_port() const noexcept {
          components.pathname_start + 1 < buffer.size();
 }
 
-[[nodiscard]] inline std::string_view url_aggregator::get_href() const noexcept {
+[[nodiscard]] inline std::string_view url_aggregator::get_href()
+    const noexcept {
   ada_log("url_aggregator::get_href");
   return buffer;
 }
