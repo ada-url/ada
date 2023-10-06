@@ -67,12 +67,12 @@ struct url_components {
    * @return true if the offset values are
    *  consistent with a possible URL string
    */
-  bool check_offset_consistency() const noexcept;
+  [[nodiscard]] bool check_offset_consistency() const noexcept;
 
   /**
    * Converts a url_components to JSON stringified version.
    */
-  std::string to_string() const;
+  [[nodiscard]] std::string to_string() const;
 
 };  // struct url_components
 

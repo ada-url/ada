@@ -753,7 +753,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, 0, components.protocol_end);
 }
 
-std::string ada::url_aggregator::to_string() const {
+[[nodiscard]] std::string ada::url_aggregator::to_string() const {
   ada_log("url_aggregator::to_string buffer:", buffer, "[", buffer.size(),
           " bytes]");
   if (!is_valid) {
@@ -1198,7 +1198,7 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   return true;
 }
 
-std::string url_aggregator::to_diagram() const {
+[[nodiscard]] std::string url_aggregator::to_diagram() const {
   if (!is_valid) {
     return "invalid";
   }
@@ -1355,7 +1355,7 @@ std::string url_aggregator::to_diagram() const {
   return answer;
 }
 
-bool url_aggregator::validate() const noexcept {
+[[nodiscard]] bool url_aggregator::validate() const noexcept {
   if (!is_valid) {
     return true;
   }

@@ -60,4 +60,4 @@ constexpr ada::scheme::type get_scheme_type(std::string_view scheme) noexcept {
 
 }  // namespace ada::scheme
 
-#endif  // ADA_SCHEME_H
+#endif  // ADA_SCHEME_INL_H

@@ -38,7 +38,7 @@ std::string ipv6(const std::array<uint16_t, 8>& address) noexcept;
  * network address.
  * @see https://url.spec.whatwg.org/#concept-ipv4-serializer
  */
-std::string ipv4(const uint64_t address) noexcept;
+std::string ipv4(uint64_t address) noexcept;
 
 }  // namespace ada::serializers
 

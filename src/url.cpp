@@ -529,10 +529,9 @@ ada_really_inline void url::parse_path(std::string_view input) {
       path = "/";
     }
   }
-  return;
 }
 
-std::string url::to_string() const {
+[[nodiscard]] std::string url::to_string() const {
   if (!is_valid) {
     return "null";
   }

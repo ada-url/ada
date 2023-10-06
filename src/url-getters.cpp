@@ -63,7 +63,7 @@ namespace ada {
   return host.value_or("");
 }
 
-[[nodiscard]] const std::string_view url::get_pathname() const noexcept {
+[[nodiscard]] std::string_view url::get_pathname() const noexcept {
   return path;
 }
 
