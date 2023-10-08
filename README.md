@@ -48,6 +48,47 @@ Ada has improved the performance of the popular JavaScript environment Node.js:
 
 > Since Node.js 18, a new URL parser dependency was added to Node.js — Ada. This addition bumped the Node.js performance when parsing URLs to a new level. Some results could reach up to an improvement of **400%**. ([State of Node.js Performance 2023](https://blog.rafaelgss.dev/state-of-nodejs-performance-2023))
 
+## Quick Start
+
+
+
+Linux or macOS users might follow the following instructions if they have a recent C++ compiler installed and a standard utility (`wget`)
+
+
+1. Pull the library in a directory
+   ```
+   wget https://github.com/ada-url/ada/releases/download/v2.6.10/ada.cpp
+   wget https://github.com/ada-url/ada/releases/download/v2.6.10/ada.h
+   ```
+2. Create a new file named `demo.cpp` with this content:
+   ```C++
+    #include "ada.cpp"
+    #include "ada.h"
+    #include <iostream>
+
+    int main(int, char *[]) {
+      auto url = ada::parse<ada::url>("https://www.google.com");
+      if (!url) {
+        std::cout << "failure" << std::endl;
+        return EXIT_FAILURE;
+      }
+      url->set_protocol("http");
+      std::cout << url->get_protocol() << std::endl;
+      std::cout << url->get_host() << std::endl;
+      return EXIT_SUCCESS;
+    }
+   ```
+2. Compile
+   ```
+   c++ -std=c++17 -o demo demo.cpp
+   ```
+3. `./demo`
+
+  ```
+  http:
+  www.google.com
+  ```
+
 ## Bindings of Ada
 
 We provide clients for different programming languages through our C API.
