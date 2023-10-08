@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['ada_0',['ada',['../index.html',1,'Ada'],['../dd/d64/namespaceada.html',1,'ada'],['../index.html#autotoc_md14',1,'Bindings of Ada']]],
+  ['ada_0',['ada',['../index.html',1,'Ada'],['../dd/d64/namespaceada.html',1,'ada'],['../index.html#autotoc_md15',1,'Bindings of Ada']]],
   ['ada_20is_20fast_1',['Ada is fast.',['../index.html#autotoc_md13',1,'']]],
   ['ada_2ecpp_2',['ada.cpp',['../d8/d50/ada_8cpp.html',1,'']]],
   ['ada_2eh_3',['ada.h',['../d0/da8/ada_8h.html',1,'']]],
@@ -120,7 +120,7 @@ var searchData=
   ['adapt_117',['adapt',['../d5/ddb/namespaceada_1_1idna.html#a28815dfd4e31facb82c56c817dd1067f',1,'ada::idna']]],
   ['advanced_20usage_118',['Advanced Usage',['../db/d8a/md_docs_2cli.html#autotoc_md10',1,'']]],
   ['al_119',['AL',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda831b2be749a96dc44d52a2a4f157cc4a',1,'ada::idna']]],
-  ['amalgamation_120',['Amalgamation',['../index.html#autotoc_md24',1,'']]],
+  ['amalgamation_120',['Amalgamation',['../index.html#autotoc_md25',1,'']]],
   ['an_121',['AN',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda057b30dd2eafb32307e5a4f76ba371c1',1,'ada::idna']]],
   ['append_122',['append',['../dd/dcb/structada_1_1url__search__params.html#a99663e8026d089177c53ce2133812ef2',1,'ada::url_search_params']]],
   ['ascii_5fhas_5fupper_5fcase_123',['ascii_has_upper_case',['../d5/ddb/namespaceada_1_1idna.html#ac6f73440f8dc6ef6ecd14b7a3a836b21',1,'ada::idna']]],

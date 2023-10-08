@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['of_20ada_0',['Bindings of Ada',['../index.html#autotoc_md14',1,'']]],
+  ['of_20ada_0',['Bindings of Ada',['../index.html#autotoc_md15',1,'']]],
   ['omitted_1',['omitted',['../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47',1,'ada::url_components']]],
   ['on_2',['ON',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda22fa19d0cae8249a34f5a1ebb8e14dc4',1,'ada::idna']]],
   ['opaque_5fpath_3',['OPAQUE_PATH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd',1,'ada']]],

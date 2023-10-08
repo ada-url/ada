@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['c_20wrapper_0',['C wrapper',['../index.html#autotoc_md18',1,'']]],
+  ['c_20wrapper_0',['C wrapper',['../index.html#autotoc_md19',1,'']]],
   ['c0_5fcontrol_5fpercent_5fencode_1',['C0_CONTROL_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a961ff8bb694197e2f9f339cae226db66',1,'ada::character_sets']]],
   ['can_5fparse_2',['can_parse',['../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748',1,'ada']]],
   ['canonical_5fcombining_5fclass_5fblock_3',['canonical_combining_class_block',['../d5/ddb/namespaceada_1_1idna.html#a59287719010e9172d71163ba81d20d71',1,'ada::idna']]],
@@ -17,7 +17,7 @@ var searchData=
   ['clear_5fsearch_14',['clear_search',['../d8/d3b/structada_1_1url__aggregator.html#a1fe20c2ceed925359fa53a459d42f789',1,'ada::url_aggregator']]],
   ['cli_15',['Command line interface (CLI)',['../db/d8a/md_docs_2cli.html',1,'']]],
   ['cli_2emd_16',['cli.md',['../d0/d4b/cli_8md.html',1,'']]],
-  ['cmake_20dependency_17',['CMake dependency',['../index.html#autotoc_md19',1,'']]],
+  ['cmake_20dependency_17',['CMake dependency',['../index.html#autotoc_md20',1,'']]],
   ['command_20line_20interface_20cli_18',['Command line interface (CLI)',['../db/d8a/md_docs_2cli.html',1,'']]],
   ['command_20line_20options_19',['Command line options',['../db/d8a/md_docs_2cli.html#autotoc_md1',1,'']]],
   ['common_5fdefs_2eh_20',['common_defs.h',['../d7/d19/common__defs_8h.html',1,'']]],
@@ -30,7 +30,7 @@ var searchData=
   ['concat_27',['concat',['../d7/d6c/namespaceada_1_1helpers.html#ac359d3384b2aea67ce34bcd33b2d1258',1,'ada::helpers']]],
   ['contains_5fforbidden_5fdomain_5fcode_5fpoint_28',['contains_forbidden_domain_code_point',['../d2/dc3/namespaceada_1_1unicode.html#a8e4d69a9364a662aa6b27afee0b33237',1,'ada::unicode::contains_forbidden_domain_code_point()'],['../d5/ddb/namespaceada_1_1idna.html#ac7ad7c23c6223982a88d1f079a2e6e97',1,'ada::idna::contains_forbidden_domain_code_point()']]],
   ['contains_5fforbidden_5fdomain_5fcode_5fpoint_5for_5fupper_29',['contains_forbidden_domain_code_point_or_upper',['../d2/dc3/namespaceada_1_1unicode.html#aa0a6aef61e1b2117fd60ec4ba0ed9a8d',1,'ada::unicode']]],
-  ['contributing_30',['Contributing',['../index.html#autotoc_md22',1,'']]],
+  ['contributing_30',['Contributing',['../index.html#autotoc_md23',1,'']]],
   ['convert_5fhex_5fto_5fbinary_31',['convert_hex_to_binary',['../d2/dc3/namespaceada_1_1unicode.html#ab69353b882a97069e4b290be2b1097f2',1,'ada::unicode']]],
   ['cs_32',['CS',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda994c4dd22eee0900705a2f51fa1e8efc',1,'ada::idna']]]
 ];

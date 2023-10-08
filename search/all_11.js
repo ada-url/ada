@@ -29,8 +29,9 @@ var searchData=
   ['special_5fports_26',['special_ports',['../d1/dfb/namespaceada_1_1scheme_1_1details.html#a75649c394af1b43d325ac9fffde2e2a3',1,'ada::scheme::details']]],
   ['special_5fquery_5fpercent_5fencode_27',['SPECIAL_QUERY_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a2a5253f4fefdf61c146c4daf9a3633b9',1,'ada::character_sets']]],
   ['special_5frelative_5for_5fauthority_28',['SPECIAL_RELATIVE_OR_AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a218882a191c9c4136a977c25b895eaff',1,'ada']]],
-  ['start_5fcode_29',['start_code',['../d2/dec/structada_1_1idna_1_1directions.html#a7b877e28c099d72df7301a3f5c6f8905',1,'ada::idna::directions']]],
-  ['state_30',['state',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574',1,'ada']]],
-  ['state_2eh_31',['state.h',['../db/d3b/state_8h.html',1,'']]],
-  ['system_32',['Saving result to file system',['../db/d8a/md_docs_2cli.html#autotoc_md9',1,'']]]
+  ['start_29',['Quick Start',['../index.html#autotoc_md14',1,'']]],
+  ['start_5fcode_30',['start_code',['../d2/dec/structada_1_1idna_1_1directions.html#a7b877e28c099d72df7301a3f5c6f8905',1,'ada::idna::directions']]],
+  ['state_31',['state',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574',1,'ada']]],
+  ['state_2eh_32',['state.h',['../db/d3b/state_8h.html',1,'']]],
+  ['system_33',['Saving result to file system',['../db/d8a/md_docs_2cli.html#autotoc_md9',1,'']]]
 ];
