@@ -14,7 +14,7 @@ var ada__idna_8h =
     [ "contains_forbidden_domain_code_point", "dd/d4c/ada__idna_8h.html#ac7ad7c23c6223982a88d1f079a2e6e97", null ],
     [ "is_ascii", "dd/d4c/ada__idna_8h.html#a256324be086f84ee56e21f9bff4acacf", null ],
     [ "is_ascii", "dd/d4c/ada__idna_8h.html#a66015ea551d99b27023cc184e74ba63d", null ],
-    [ "is_label_valid", "dd/d4c/ada__idna_8h.html#a49fd6f959fb86c8f3099c7b6dc368836", null ],
+    [ "is_label_valid", "dd/d4c/ada__idna_8h.html#ac39ccead632e6f2bf5049d1b643c5e1c", null ],
     [ "map", "dd/d4c/ada__idna_8h.html#acc44ee8cb1484d14560236b659e12565", null ],
     [ "normalize", "dd/d4c/ada__idna_8h.html#a66bd7d6170f3e06b968c739e40a35967", null ],
     [ "punycode_to_utf32", "dd/d4c/ada__idna_8h.html#a2cfd434e37cade8764f29cc4d722b70f", null ],

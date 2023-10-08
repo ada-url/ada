@@ -47,7 +47,7 @@ var namespaceada_1_1idna =
     [ "is_ascii", "d5/ddb/namespaceada_1_1idna.html#a256324be086f84ee56e21f9bff4acacf", null ],
     [ "is_ascii", "d5/ddb/namespaceada_1_1idna.html#a66015ea551d99b27023cc184e74ba63d", null ],
     [ "is_forbidden_domain_code_point", "d5/ddb/namespaceada_1_1idna.html#aa9d13586049e9e107a2d372eeb81ddfc", null ],
-    [ "is_label_valid", "d5/ddb/namespaceada_1_1idna.html#a49fd6f959fb86c8f3099c7b6dc368836", null ],
+    [ "is_label_valid", "d5/ddb/namespaceada_1_1idna.html#ac39ccead632e6f2bf5049d1b643c5e1c", null ],
     [ "is_rtl_label", "d5/ddb/namespaceada_1_1idna.html#a164d095ce497ec0086fcd41e3f7e311e", null ],
     [ "map", "d5/ddb/namespaceada_1_1idna.html#acc44ee8cb1484d14560236b659e12565", null ],
     [ "normalize", "d5/ddb/namespaceada_1_1idna.html#a66bd7d6170f3e06b968c739e40a35967", null ],
