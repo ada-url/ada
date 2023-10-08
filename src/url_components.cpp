@@ -7,7 +7,7 @@
 
 namespace ada {
 
-bool url_components::check_offset_consistency() const noexcept {
+[[nodiscard]] bool url_components::check_offset_consistency() const noexcept {
   /**
    * https://user:pass@example.com:1234/foo/bar?baz#quux
    *       |     |    |          | ^^^^|       |   |
@@ -83,7 +83,7 @@ bool url_components::check_offset_consistency() const noexcept {
   return true;
 }
 
-std::string url_components::to_string() const {
+[[nodiscard]] std::string url_components::to_string() const {
   std::string answer;
   auto back = std::back_insert_iterator(answer);
   answer.append("{\n");

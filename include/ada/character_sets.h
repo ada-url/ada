@@ -8,14 +8,14 @@
 #define ADA_CHARACTER_SETS_H
 
 #include "ada/common_defs.h"
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * @namespace ada::character_sets
  * @brief Includes the definitions for unicode character sets.
  */
 namespace ada::character_sets {
-ada_really_inline bool bit_at(const uint8_t a[], const uint8_t i);
+ada_really_inline bool bit_at(const uint8_t a[], uint8_t i);
 }  // namespace ada::character_sets
 
 #endif  // ADA_CHARACTER_SETS_H

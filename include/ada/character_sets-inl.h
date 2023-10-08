@@ -513,4 +513,4 @@ ada_really_inline bool bit_at(const uint8_t a[], const uint8_t i) {
 
 }  // namespace ada::character_sets
 
-#endif  // ADA_CHARACTER_SETS_H
+#endif  // ADA_CHARACTER_SETS_INL_H

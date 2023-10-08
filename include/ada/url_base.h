@@ -111,13 +111,17 @@ struct url_base {
    * @return On failure, it returns zero.
    * @see https://url.spec.whatwg.org/#host-parsing
    */
-  virtual ada_really_inline size_t parse_port(
-      std::string_view view, bool check_trailing_content = false) noexcept = 0;
+  virtual ada_really_inline size_t
+  parse_port(std::string_view view, bool check_trailing_content) noexcept = 0;
+
+  virtual ada_really_inline size_t parse_port(std::string_view view) noexcept {
+    return this->parse_port(view, false);
+  }
 
   /**
    * Returns a JSON string representation of this URL.
    */
-  virtual std::string to_string() const = 0;
+  [[nodiscard]] virtual std::string to_string() const = 0;
 
   /** @private */
   virtual inline void clear_pathname() = 0;
@@ -126,10 +130,10 @@ struct url_base {
   virtual inline void clear_search() = 0;
 
   /** @private */
-  virtual inline bool has_hash() const noexcept = 0;
+  [[nodiscard]] virtual inline bool has_hash() const noexcept = 0;
 
   /** @private */
-  virtual inline bool has_search() const noexcept = 0;
+  [[nodiscard]] virtual inline bool has_search() const noexcept = 0;
 
 };  // url_base
 

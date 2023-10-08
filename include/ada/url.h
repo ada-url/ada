@@ -41,7 +41,7 @@ struct url : url_base {
   url(url &&u) noexcept = default;
   url &operator=(url &&u) noexcept = default;
   url &operator=(const url &u) = default;
-  ~url() = default;
+  ~url() override = default;
 
   /**
    * @private
@@ -102,7 +102,7 @@ struct url : url_base {
   /**
    * Returns a JSON string representation of this URL.
    */
-  std::string to_string() const override;
+  [[nodiscard]] std::string to_string() const override;
 
   /**
    * @see https://url.spec.whatwg.org/#dom-url-href
@@ -149,7 +149,7 @@ struct url : url_base {
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  [[nodiscard]] const std::string_view get_pathname() const noexcept;
+  [[nodiscard]] std::string_view get_pathname() const noexcept;
 
   /**
    * Compute the pathname length in bytes without instantiating a view or a
@@ -157,7 +157,7 @@ struct url : url_base {
    * @return size of the pathname in bytes
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  ada_really_inline size_t get_pathname_length() const noexcept;
+  [[nodiscard]] ada_really_inline size_t get_pathname_length() const noexcept;
 
   /**
    * Return U+003F (?), followed by this's URL's query.
@@ -177,60 +177,60 @@ struct url : url_base {
    * @return Returns true on successful operation.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  bool set_username(const std::string_view input);
+  bool set_username(std::string_view input);
 
   /**
    * @return Returns true on success.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  bool set_password(const std::string_view input);
+  bool set_password(std::string_view input);
 
   /**
    * @return Returns true on success.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
-  bool set_port(const std::string_view input);
+  bool set_port(std::string_view input);
 
   /**
    * This function always succeeds.
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
-  void set_hash(const std::string_view input);
+  void set_hash(std::string_view input);
 
   /**
    * This function always succeeds.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
-  void set_search(const std::string_view input);
+  void set_search(std::string_view input);
 
   /**
    * @return Returns true on success.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
-  bool set_pathname(const std::string_view input);
+  bool set_pathname(std::string_view input);
 
   /**
    * @return Returns true on success.
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
-  bool set_host(const std::string_view input);
+  bool set_host(std::string_view input);
 
   /**
    * @return Returns true on success.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
    */
-  bool set_hostname(const std::string_view input);
+  bool set_hostname(std::string_view input);
 
   /**
    * @return Returns true on success.
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
-  bool set_protocol(const std::string_view input);
+  bool set_protocol(std::string_view input);
 
   /**
    * @see https://url.spec.whatwg.org/#dom-url-href
    */
-  bool set_href(const std::string_view input);
+  bool set_href(std::string_view input);
 
   /**
    * The password getter steps are to return this's URL's password.
@@ -301,9 +301,9 @@ struct url : url_base {
   inline void update_base_search(std::string_view input,
                                  const uint8_t query_percent_encode_set[]);
   inline void update_base_search(std::optional<std::string> input);
-  inline void update_base_pathname(const std::string_view input);
-  inline void update_base_username(const std::string_view input);
-  inline void update_base_password(const std::string_view input);
+  inline void update_base_pathname(std::string_view input);
+  inline void update_base_username(std::string_view input);
+  inline void update_base_password(std::string_view input);
   inline void update_base_port(std::optional<uint16_t> input);
 
   /**
@@ -349,9 +349,12 @@ struct url : url_base {
    */
   [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
-  ada_really_inline size_t
-  parse_port(std::string_view view,
-             bool check_trailing_content = false) noexcept override;
+  ada_really_inline size_t parse_port(
+      std::string_view view, bool check_trailing_content) noexcept override;
+
+  ada_really_inline size_t parse_port(std::string_view view) noexcept override {
+    return this->parse_port(view, false);
+  }
 
   /**
    * Take the scheme from another URL. The scheme string is copied from the
@@ -370,8 +373,7 @@ struct url : url_base {
   [[nodiscard]] ada_really_inline bool parse_host(std::string_view input);
 
   template <bool has_state_override = false>
-  [[nodiscard]] ada_really_inline bool parse_scheme(
-      const std::string_view input);
+  [[nodiscard]] ada_really_inline bool parse_scheme(std::string_view input);
 
   inline void clear_pathname() override;
   inline void clear_search() override;
@@ -387,7 +389,7 @@ struct url : url_base {
    *
    * @see https://url.spec.whatwg.org/
    */
-  ada_really_inline void parse_path(const std::string_view input);
+  ada_really_inline void parse_path(std::string_view input);
 
   /**
    * Set the scheme for this URL. The provided scheme should be a valid

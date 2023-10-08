@@ -70,7 +70,7 @@ ada_really_inline bool shorten_path(std::string_view& path,
  *
  * @see https://url.spec.whatwg.org/
  */
-ada_really_inline void parse_prepared_path(const std::string_view input,
+ada_really_inline void parse_prepared_path(std::string_view input,
                                            ada::scheme::type type,
                                            std::string& path);
 

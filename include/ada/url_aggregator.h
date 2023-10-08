@@ -28,18 +28,18 @@ struct url_aggregator : url_base {
   url_aggregator(url_aggregator &&u) noexcept = default;
   url_aggregator &operator=(url_aggregator &&u) noexcept = default;
   url_aggregator &operator=(const url_aggregator &u) = default;
-  ~url_aggregator() = default;
+  ~url_aggregator() override = default;
 
-  bool set_href(const std::string_view input);
-  bool set_host(const std::string_view input);
-  bool set_hostname(const std::string_view input);
-  bool set_protocol(const std::string_view input);
-  bool set_username(const std::string_view input);
-  bool set_password(const std::string_view input);
-  bool set_port(const std::string_view input);
-  bool set_pathname(const std::string_view input);
-  void set_search(const std::string_view input);
-  void set_hash(const std::string_view input);
+  bool set_href(std::string_view input);
+  bool set_host(std::string_view input);
+  bool set_hostname(std::string_view input);
+  bool set_protocol(std::string_view input);
+  bool set_username(std::string_view input);
+  bool set_password(std::string_view input);
+  bool set_port(std::string_view input);
+  bool set_pathname(std::string_view input);
+  void set_search(std::string_view input);
+  void set_hash(std::string_view input);
 
   [[nodiscard]] bool has_valid_domain() const noexcept override;
   /**
@@ -57,7 +57,7 @@ struct url_aggregator : url_base {
    * @see https://url.spec.whatwg.org/#dom-url-href
    * @see https://url.spec.whatwg.org/#concept-url-serializer
    */
-  inline std::string_view get_href() const noexcept;
+  [[nodiscard]] inline std::string_view get_href() const noexcept;
   /**
    * The username getter steps are to return this's URL's username.
    * This function does not allocate memory.
@@ -117,7 +117,7 @@ struct url_aggregator : url_base {
    * @return size of the pathname in bytes
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  ada_really_inline uint32_t get_pathname_length() const noexcept;
+  [[nodiscard]] ada_really_inline uint32_t get_pathname_length() const noexcept;
   /**
    * Return U+003F (?), followed by this's URL's query.
    * This function does not allocate memory.
@@ -166,18 +166,18 @@ struct url_aggregator : url_base {
   /**
    * Returns a string representation of this URL.
    */
-  std::string to_string() const override;
+  [[nodiscard]] std::string to_string() const override;
   /**
    * Returns a string diagram of this URL.
    */
-  std::string to_diagram() const;
+  [[nodiscard]] std::string to_diagram() const;
 
   /**
    * Verifies that the parsed URL could be valid. Useful for debugging purposes.
    * @return true if the URL is valid, otherwise return true of the offsets are
    * possible.
    */
-  bool validate() const noexcept;
+  [[nodiscard]] bool validate() const noexcept;
 
   /** @return true if it has an host but it is the empty string */
   [[nodiscard]] inline bool has_empty_hostname() const noexcept;
@@ -224,9 +224,12 @@ struct url_aggregator : url_base {
    */
   inline void reserve(uint32_t capacity);
 
-  ada_really_inline size_t
-  parse_port(std::string_view view,
-             bool check_trailing_content = false) noexcept override;
+  ada_really_inline size_t parse_port(
+      std::string_view view, bool check_trailing_content) noexcept override;
+
+  ada_really_inline size_t parse_port(std::string_view view) noexcept override {
+    return this->parse_port(view, false);
+  }
 
   /**
    * Return true on success.
@@ -255,7 +258,7 @@ struct url_aggregator : url_base {
   [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
 
   template <bool override_hostname = false>
-  bool set_host_or_hostname(const std::string_view input);
+  bool set_host_or_hostname(std::string_view input);
 
   ada_really_inline bool parse_host(std::string_view input);
 
@@ -266,26 +269,26 @@ struct url_aggregator : url_base {
   inline void update_base_search(std::string_view input);
   inline void update_base_search(std::string_view input,
                                  const uint8_t *query_percent_encode_set);
-  inline void update_base_pathname(const std::string_view input);
-  inline void update_base_username(const std::string_view input);
-  inline void append_base_username(const std::string_view input);
-  inline void update_base_password(const std::string_view input);
-  inline void append_base_password(const std::string_view input);
+  inline void update_base_pathname(std::string_view input);
+  inline void update_base_username(std::string_view input);
+  inline void append_base_username(std::string_view input);
+  inline void update_base_password(std::string_view input);
+  inline void append_base_password(std::string_view input);
   inline void update_base_port(uint32_t input);
-  inline void append_base_pathname(const std::string_view input);
-  inline uint32_t retrieve_base_port() const;
+  inline void append_base_pathname(std::string_view input);
+  [[nodiscard]] inline uint32_t retrieve_base_port() const;
   inline void clear_hostname();
   inline void clear_password();
   inline void clear_pathname() override;
-  inline bool has_dash_dot() const noexcept;
+  [[nodiscard]] inline bool has_dash_dot() const noexcept;
   void delete_dash_dot();
   inline void consume_prepared_path(std::string_view input);
   template <bool has_state_override = false>
   [[nodiscard]] ada_really_inline bool parse_scheme_with_colon(
-      const std::string_view input);
+      std::string_view input);
   ada_really_inline uint32_t replace_and_resize(uint32_t start, uint32_t end,
                                                 std::string_view input);
-  inline bool has_authority() const noexcept;
+  [[nodiscard]] inline bool has_authority() const noexcept;
   inline void set_protocol_as_file();
   inline void set_scheme(std::string_view new_scheme) noexcept;
   /**

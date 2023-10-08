@@ -78,8 +78,7 @@ ada_really_inline bool has_tabs_or_newline(
  * Checks if the input is a forbidden host code point.
  * @see https://url.spec.whatwg.org/#forbidden-host-code-point
  */
-ada_really_inline constexpr bool is_forbidden_host_code_point(
-    const char c) noexcept;
+ada_really_inline constexpr bool is_forbidden_host_code_point(char c) noexcept;
 
 /**
  * Checks if the input contains a forbidden domain code point.
@@ -103,12 +102,12 @@ contains_forbidden_domain_code_point_or_upper(const char* input,
  * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
  */
 ada_really_inline constexpr bool is_forbidden_domain_code_point(
-    const char c) noexcept;
+    char c) noexcept;
 
 /**
  * Checks if the input is alphanumeric, '+', '-' or '.'
  */
-ada_really_inline constexpr bool is_alnum_plus(const char c) noexcept;
+ada_really_inline constexpr bool is_alnum_plus(char c) noexcept;
 
 /**
  * @details An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex
@@ -116,7 +115,7 @@ ada_really_inline constexpr bool is_alnum_plus(const char c) noexcept;
  * range U+0041 (A) to U+0046 (F), inclusive. An ASCII lower hex digit is an
  * ASCII digit or a code point in the range U+0061 (a) to U+0066 (f), inclusive.
  */
-ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept;
+ada_really_inline constexpr bool is_ascii_hex_digit(char c) noexcept;
 
 /**
  * Checks if the input is a C0 control or space character.
@@ -125,33 +124,33 @@ ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept;
  * A C0 control is a code point in the range U+0000 NULL to U+001F INFORMATION
  * SEPARATOR ONE, inclusive.
  */
-ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept;
+ada_really_inline constexpr bool is_c0_control_or_space(char c) noexcept;
 
 /**
  * Checks if the input is a ASCII tab or newline character.
  *
  * @details An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR.
  */
-ada_really_inline constexpr bool is_ascii_tab_or_newline(const char c) noexcept;
+ada_really_inline constexpr bool is_ascii_tab_or_newline(char c) noexcept;
 
 /**
  * @details A double-dot path segment must be ".." or an ASCII case-insensitive
  * match for ".%2e", "%2e.", or "%2e%2e".
  */
 ada_really_inline ada_constexpr bool is_double_dot_path_segment(
-    const std::string_view input) noexcept;
+    std::string_view input) noexcept;
 
 /**
  * @details A single-dot path segment must be "." or an ASCII case-insensitive
  * match for "%2e".
  */
 ada_really_inline constexpr bool is_single_dot_path_segment(
-    const std::string_view input) noexcept;
+    std::string_view input) noexcept;
 
 /**
  * @details ipv4 character might contain 0-9 or a-f character ranges.
  */
-ada_really_inline constexpr bool is_lowercase_hex(const char c) noexcept;
+ada_really_inline constexpr bool is_lowercase_hex(char c) noexcept;
 
 /**
  * @details Convert hex to binary. Caller is responsible to ensure that
@@ -167,20 +166,20 @@ ada_really_inline unsigned constexpr convert_hex_to_binary(char c) noexcept;
  * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L245
  * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
  */
-std::string percent_decode(const std::string_view input, size_t first_percent);
+std::string percent_decode(std::string_view input, size_t first_percent);
 
 /**
  * Returns a percent-encoding string whether percent encoding was needed or not.
  * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
  */
-std::string percent_encode(const std::string_view input,
+std::string percent_encode(std::string_view input,
                            const uint8_t character_set[]);
 /**
  * Returns a percent-encoded string version of input, while starting the percent
  * encoding at the provided index.
  * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
  */
-std::string percent_encode(const std::string_view input,
+std::string percent_encode(std::string_view input,
                            const uint8_t character_set[], size_t index);
 /**
  * Returns true if percent encoding was needed, in which case, we store
@@ -190,13 +189,13 @@ std::string percent_encode(const std::string_view input,
  * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
  */
 template <bool append>
-bool percent_encode(const std::string_view input, const uint8_t character_set[],
+bool percent_encode(std::string_view input, const uint8_t character_set[],
                     std::string& out);
 /**
  * Returns the index at which percent encoding should start, or (equivalently),
  * the length of the prefix that does not require percent encoding.
  */
-ada_really_inline size_t percent_encode_index(const std::string_view input,
+ada_really_inline size_t percent_encode_index(std::string_view input,
                                               const uint8_t character_set[]);
 /**
  * Lowers the string in-place, assuming that the content is ASCII.

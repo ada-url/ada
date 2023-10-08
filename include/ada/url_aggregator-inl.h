@@ -152,7 +152,7 @@ inline void url_aggregator::update_base_hostname(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
 }
 
-ada_really_inline uint32_t
+[[nodiscard]] ada_really_inline uint32_t
 url_aggregator::get_pathname_length() const noexcept {
   ada_log("url_aggregator::get_pathname_length");
   uint32_t ending_index = uint32_t(buffer.size());
@@ -587,7 +587,7 @@ inline void url_aggregator::clear_port() {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline uint32_t url_aggregator::retrieve_base_port() const {
+[[nodiscard]] inline uint32_t url_aggregator::retrieve_base_port() const {
   ada_log("url_aggregator::retrieve_base_port");
   return components.port;
 }
@@ -812,7 +812,7 @@ inline bool url_aggregator::has_port() const noexcept {
   return has_hostname() && components.pathname_start != components.host_end;
 }
 
-inline bool url_aggregator::has_dash_dot() const noexcept {
+[[nodiscard]] inline bool url_aggregator::has_dash_dot() const noexcept {
   // If url's host is null, url does not have an opaque path, url's path's size
   // is greater than 1, and url's path[0] is the empty string, then append
   // U+002F (/) followed by U+002E (.) to output.
@@ -833,7 +833,8 @@ inline bool url_aggregator::has_dash_dot() const noexcept {
          components.pathname_start + 1 < buffer.size();
 }
 
-inline std::string_view url_aggregator::get_href() const noexcept {
+[[nodiscard]] inline std::string_view url_aggregator::get_href()
+    const noexcept {
   ada_log("url_aggregator::get_href");
   return buffer;
 }

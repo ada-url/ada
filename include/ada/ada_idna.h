@@ -88,7 +88,7 @@ namespace ada::idna {
 /**
  * @see https://www.unicode.org/reports/tr46/#Validity_Criteria
  */
-bool is_label_valid(const std::u32string_view label);
+bool is_label_valid(std::u32string_view label);
 
 }  // namespace ada::idna
 
