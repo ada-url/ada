@@ -18,6 +18,10 @@
 
 namespace ada {
 
+// A default, empty url_search_params for use with empty iterators.
+template <typename T, ada::url_search_params_iter_type Type>
+url_search_params url_search_params_iter<T, Type>::EMPTY;
+
 inline void url_search_params::initialize(std::string_view input) {
   if (!input.empty() && input.front() == '?') {
     input.remove_prefix(1);
@@ -163,6 +167,48 @@ inline void url_search_params::sort() {
                    [](const key_value_pair &lhs, const key_value_pair &rhs) {
                      return lhs.first < rhs.first;
                    });
+}
+
+inline url_search_params_keys_iter url_search_params::get_keys() {
+  return url_search_params_keys_iter(*this);
+}
+
+/**
+ * @see https://url.spec.whatwg.org/#interface-urlsearchparams
+ */
+inline url_search_params_values_iter url_search_params::get_values() {
+  return url_search_params_values_iter(*this);
+}
+
+/**
+ * @see https://url.spec.whatwg.org/#interface-urlsearchparams
+ */
+inline url_search_params_entries_iter url_search_params::get_entries() {
+  return url_search_params_entries_iter(*this);
+}
+
+template <typename T, url_search_params_iter_type Type>
+inline bool url_search_params_iter<T, Type>::has_next() {
+  return pos < params.params.size();
+}
+
+template <>
+inline std::optional<std::string_view> url_search_params_keys_iter::next() {
+  if (!has_next()) return std::nullopt;
+  return params.params[pos++].first;
+}
+
+template <>
+inline std::optional<std::string_view> url_search_params_values_iter::next() {
+  if (!has_next()) return std::nullopt;
+  return params.params[pos++].second;
+}
+
+template <>
+inline std::optional<key_value_view_pair>
+url_search_params_entries_iter::next() {
+  if (!has_next()) return std::nullopt;
+  return params.params[pos++];
 }
 
 }  // namespace ada
