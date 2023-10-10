@@ -258,3 +258,86 @@ TEST(ada_c, ada_get_scheme_type) {
   ada_free(out);
   SUCCEED();
 }
+
+TEST(ada_c, ada_url_search_params) {
+  std::string_view input;
+  ada_url_search_params out;
+
+  input = "a=b&c=d&c=e&f=g";
+  out = ada_parse_search_params(input.data(), input.size());
+
+  ASSERT_EQ(ada_search_params_size(out), 4);
+
+  std::string key = "key1";
+  std::string value = "value1";
+  std::string value2 = "value2";
+  ada_search_params_append(out, key.c_str(), key.length(), value.c_str(),
+                           value.length());
+  ASSERT_EQ(ada_search_params_size(out), 5);
+
+  ada_search_params_set(out, key.c_str(), key.length(), value2.c_str(),
+                        value2.length());
+  ASSERT_EQ(ada_search_params_size(out), 5);
+
+  ASSERT_TRUE(ada_search_params_has(out, key.c_str(), key.length()));
+  ASSERT_FALSE(ada_search_params_has_value(out, key.c_str(), key.length(),
+                                           value.c_str(), value.length()));
+  ASSERT_TRUE(ada_search_params_has_value(out, key.c_str(), key.length(),
+                                          value2.c_str(), value2.length()));
+
+  ada_strings result =
+      ada_search_params_get_all(out, key.c_str(), key.length());
+  ASSERT_EQ(ada_strings_size(result), 1);
+  ada_free_strings(result);
+
+  ada_url_search_params_keys_iter keys = ada_search_params_get_keys(out);
+  ada_url_search_params_values_iter values = ada_search_params_get_values(out);
+  ada_url_search_params_entries_iter entries =
+      ada_search_params_get_entries(out);
+
+  ASSERT_TRUE(ada_search_params_keys_iter_has_next(keys));
+  ASSERT_TRUE(ada_search_params_values_iter_has_next(values));
+  ASSERT_TRUE(ada_search_params_entries_iter_has_next(entries));
+
+  ASSERT_EQ(convert_string(ada_search_params_keys_iter_next(keys)), "a");
+  ASSERT_EQ(convert_string(ada_search_params_keys_iter_next(keys)), "c");
+  ASSERT_EQ(convert_string(ada_search_params_keys_iter_next(keys)), "c");
+  ASSERT_EQ(convert_string(ada_search_params_keys_iter_next(keys)), "f");
+  ASSERT_EQ(convert_string(ada_search_params_keys_iter_next(keys)), "key1");
+  ASSERT_FALSE(ada_search_params_keys_iter_has_next(keys));
+
+  ASSERT_EQ(convert_string(ada_search_params_values_iter_next(values)), "b");
+  ASSERT_EQ(convert_string(ada_search_params_values_iter_next(values)), "d");
+  ASSERT_EQ(convert_string(ada_search_params_values_iter_next(values)), "e");
+  ASSERT_EQ(convert_string(ada_search_params_values_iter_next(values)), "g");
+  ASSERT_EQ(convert_string(ada_search_params_values_iter_next(values)),
+            "value2");
+  ASSERT_FALSE(ada_search_params_values_iter_has_next(values));
+
+  ada_string_pair pair = ada_search_params_entries_iter_next(entries);
+  ASSERT_EQ(convert_string(pair.value), "b");
+  ASSERT_EQ(convert_string(pair.key), "a");
+
+  pair = ada_search_params_entries_iter_next(entries);
+  ASSERT_EQ(convert_string(pair.value), "d");
+  ASSERT_EQ(convert_string(pair.key), "c");
+
+  while (ada_search_params_entries_iter_has_next(entries)) {
+    ada_search_params_entries_iter_next(entries);
+  }
+
+  ada_search_params_remove(out, key.c_str(), key.length());
+  ada_search_params_remove_value(out, key.c_str(), key.length(), value.c_str(),
+                                 value.length());
+
+  ada_owned_string str = ada_search_params_to_string(out);
+  ASSERT_EQ(convert_string(str), "a=b&c=d&c=e&f=g");
+
+  ada_free_search_params_keys_iter(keys);
+  ada_free_search_params_values_iter(values);
+  ada_free_search_params_entries_iter(entries);
+  ada_free_owned_string(str);
+  ada_free_search_params(out);
+
+  SUCCEED();
+}

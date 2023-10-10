@@ -167,3 +167,55 @@ TEST(url_search_params, has) {
   ASSERT_TRUE(!search_params.has("key3", "value3"));
   SUCCEED();
 }
+
+TEST(url_search_params, iterators) {
+  // JS style iterators
+  auto search_params =
+      ada::url_search_params("key1=value1&key1=value2&key2=value3");
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "key1");
+  ASSERT_EQ(keys.next(), "key1");
+  ASSERT_EQ(keys.next(), "key2");
+  ASSERT_FALSE(keys.next().has_value());
+
+  auto values = search_params.get_values();
+  ASSERT_EQ(values.next(), "value1");
+  ASSERT_EQ(values.next(), "value2");
+  ASSERT_EQ(values.next(), "value3");
+  ASSERT_FALSE(keys.next().has_value());
+
+  auto entries = search_params.get_entries();
+  auto next = entries.next();
+  ASSERT_EQ(next->first, "key1");
+  ASSERT_EQ(next->second, "value1");
+  next = entries.next();
+  ASSERT_EQ(next->first, "key1");
+  ASSERT_EQ(next->second, "value2");
+  next = entries.next();
+  ASSERT_EQ(next->first, "key2");
+  ASSERT_EQ(next->second, "value3");
+  // At this point we can add a new entry and the iterator will pick it up.
+  search_params.append("foo", "bar");
+  next = entries.next();
+  ASSERT_EQ(next->first, "foo");
+  ASSERT_EQ(next->second, "bar");
+
+  ASSERT_FALSE(entries.next().has_value());
+
+  // C++ conventional iterator
+  std::vector<std::pair<std::string, std::string>> expected = {
+      {"foo", "bar"},
+      {"key2", "value3"},
+      {"key1", "value2"},
+      {"key1", "value1"},
+  };
+  for (auto& entry : search_params) {
+    auto check = expected.back();
+    expected.pop_back();
+    ASSERT_EQ(check.first, entry.first);
+    ASSERT_EQ(check.second, entry.second);
+  }
+  ASSERT_EQ(expected.size(), 0);
+
+  SUCCEED();
+}

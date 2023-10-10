@@ -121,5 +121,20 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     search_params.remove(base_source, source);
   }
 
+  auto keys = search_params.get_keys();
+  while (keys.has_next()) {
+    keys.next();
+  }
+
+  auto values = search_params.get_values();
+  while (values.has_next()) {
+    values.next();
+  }
+
+  auto entries = search_params.get_entries();
+  while (entries.has_next()) {
+    entries.next();
+  }
+
   return 0;
 }  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {

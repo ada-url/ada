@@ -14,8 +14,8 @@ The Ada library passes the full range of tests from the specification,
 across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
 supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
 
-A common use of a URL parser is to take a URL string and normalize it. 
-The WHATWG URL specification has been adopted by most browsers.  Other tools, such as curl and many 
+A common use of a URL parser is to take a URL string and normalize it.
+The WHATWG URL specification has been adopted by most browsers.  Other tools, such as curl and many
 standard libraries, follow the RFC 3986. The following table illustrates possible differences in practice
 (encoding of the host, encoding of the path):
 
@@ -30,10 +30,10 @@ standard libraries, follow the RFC 3986. The following table illustrates possibl
 The project is otherwise self-contained and it has no dependency.
 A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
 
-## Ada is fast. 
+## Ada is fast.
 
 On a benchmark where we need to validate and normalize [thousands URLs found
-on popular websites](https://github.com/ada-url/url-various-datasets/tree/main/top100), 
+on popular websites](https://github.com/ada-url/url-various-datasets/tree/main/top100),
 we find that ada can be several times faster than popular competitors (system: Apple MacBook 2022
 with LLVM 14).
 
@@ -201,6 +201,21 @@ url->set_hash("is-this-the-real-life");
 // url->get_hash() will return "#is-this-the-real-life"
 ```
 For more information about command-line options, please refer to the [CLI documentation](docs/cli.md).
+
+- URL search params
+
+```cpp
+ada::url_search_params search_params("a=b&c=d&e=f");
+search_params.append("g=h");
+
+search_params.get("g");  // will return "h"
+
+auto keys = search_params.get_keys();
+while (keys.has_next()) {
+  auto key = keys.next();  // "a", "c", "e", "g"
+}
+```
+
 ### C wrapper
 
 See the file `include/ada_c.h` for our C interface. We expect ASCII or UTF-8 strings.
@@ -231,6 +246,17 @@ int main(int c, char *arg[] ) {
   ada_set_search(url, "new-search");
   ada_set_protocol(url, "wss");
   ada_print(ada_get_href(url)); // will print wss://changed-host:9090/new-pathname?new-search#new-hash
+
+  // Manipulating search params
+  ada_string search = ada_get_search(url);
+  ada_url_search_params search_params =
+      ada_parse_search_params(search.data, search.length);
+  ada_search_params_append(search_params, "a", 1, "b", 1);
+  ada_owned_string result = ada_search_params_to_string(search_params);
+  ada_set_search(url, result.data, result.length);
+  ada_free_owned_string(result);
+  ada_free_search_params(search_params);
+
   ada_free(url);
   return EXIT_SUCCESS;
 }
@@ -283,6 +309,6 @@ You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) 
 
 ### License
 
-This code is made available under the Apache License 2.0 as well as the MIT license. 
+This code is made available under the Apache License 2.0 as well as the MIT license.
 
 Our tests include third-party code and data. The benchmarking code includes third-party code: it is provided for research purposes only and not part of the library.
