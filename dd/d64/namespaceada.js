@@ -80,7 +80,12 @@ var namespaceada =
     [ "url_base", "db/d75/structada_1_1url__base.html", "db/d75/structada_1_1url__base" ],
     [ "url_components", "d3/d43/structada_1_1url__components.html", "d3/d43/structada_1_1url__components" ],
     [ "url_search_params", "dd/dcb/structada_1_1url__search__params.html", "dd/dcb/structada_1_1url__search__params" ],
+    [ "url_search_params_iter", "dd/dc7/structada_1_1url__search__params__iter.html", "dd/dc7/structada_1_1url__search__params__iter" ],
+    [ "key_value_view_pair", "dd/d64/namespaceada.html#ac15176b2a757ccdfdec97ec4ca67ba88", null ],
     [ "result", "dd/d64/namespaceada.html#a7f8335195119f1a7f35d14c06558748b", null ],
+    [ "url_search_params_entries_iter", "dd/d64/namespaceada.html#a0636bf92ba53937b8f57f0e2a7a9bcab", null ],
+    [ "url_search_params_keys_iter", "dd/d64/namespaceada.html#aa7b1706b686faeb5846094a89dfb8b76", null ],
+    [ "url_search_params_values_iter", "dd/d64/namespaceada.html#aa2de1fe54132385a4048062611efa9d7", null ],
     [ "encoding_type", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b", [
       [ "UTF8", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1", null ],
       [ "UTF_16LE", "dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240", null ],
@@ -115,6 +120,11 @@ var namespaceada =
       [ "DEFAULT", "dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7af3a60367cbbc6f2f9f571353fa0a6429", null ],
       [ "IPV4", "dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39", null ],
       [ "IPV6", "dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee", null ]
+    ] ],
+    [ "url_search_params_iter_type", "dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23", [
+      [ "KEYS", "dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243", null ],
+      [ "VALUES", "dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598", null ],
+      [ "ENTRIES", "dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33", null ]
     ] ],
     [ "can_parse", "dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748", null ],
     [ "href_from_file", "dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70", null ],

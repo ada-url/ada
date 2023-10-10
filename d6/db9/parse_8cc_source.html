@@ -218,8 +218,23 @@ $(document).ready(function(){initNavTree('d6/db9/parse_8cc_source.html','../../'
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    search_params.remove(base_source, source);</div>
 <div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  }</div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keyword">auto</span> keys = search_params.get_keys();</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  <span class="keywordflow">while</span> (keys.has_next()) {</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    keys.next();</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>  }</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  <span class="keyword">auto</span> values = search_params.get_values();</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <span class="keywordflow">while</span> (values.has_next()) {</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    values.next();</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  }</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  <span class="keyword">auto</span> entries = search_params.get_entries();</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  <span class="keywordflow">while</span> (entries.has_next()) {</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    entries.next();</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  }</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
 </div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="../../d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
@@ -229,7 +244,7 @@ $(document).ready(function(){initNavTree('d6/db9/parse_8cc_source.html','../../'
 <div class="ttc" id="anamespaceada_html_a4796e4f266c83d76b490d423c8336a70"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file</a></div><div class="ttdeci">std::string href_from_file(std::string_view path)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00026">implementation.cpp:26</a></div></div>
 <div class="ttc" id="anamespaceada_html_af64c23f52049411702be65b780947d8b"><div class="ttname"><a href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse</a></div><div class="ttdeci">ada_warn_unused ada::result&lt; result_type &gt; parse(std::string_view input, const result_type *base_url=nullptr)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00012">implementation.cpp:12</a></div></div>
 <div class="ttc" id="aparse_8cc_html_a91ce7c16e9840492202299da2b451e60"><div class="ttname"><a href="../../d6/db9/parse_8cc.html#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput</a></div><div class="ttdeci">int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/db9/parse_8cc_source.html#l00008">parse.cc:8</a></div></div>
-<div class="ttc" id="astructada_1_1url__search__params_html"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00018">url_search_params.h:18</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params_html"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00038">url_search_params.h:38</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->

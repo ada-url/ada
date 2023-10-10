@@ -69,7 +69,7 @@ var NAVTREE =
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ],
       [ "File Members", "globals.html", [
-        [ "All", "globals.html", null ],
+        [ "All", "globals.html", "globals_dup" ],
         [ "Functions", "globals_func.html", null ],
         [ "Typedefs", "globals_type.html", null ],
         [ "Macros", "globals_defs.html", null ]
@@ -81,10 +81,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda6d0675a048f080298c4f41c07abe26e0",
-"db/d2e/ada__idna_8cpp.html#a0d1e1182a7cae8b4c1063dbc7614f88f",
-"dd/d4c/ada__idna_8h.html#ac7ad7c23c6223982a88d1f079a2e6e97",
-"df/d61/ada__c_8h.html#ae7a2c085bda3a813a513321f30cbfbc8"
+"d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda311346d58b6d078f57fd93dc14c5c9b3",
+"da/dac/url__search__params_8h.html#aa7b1706b686faeb5846094a89dfb8b76",
+"dd/d4c/ada__idna_8h.html#a742b05e0aba2245da3ac0ffd9ec678b6",
+"dd/dd6/ada__c_8cpp.html#a6dc47c597c8c69e81551b3533a46924e"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

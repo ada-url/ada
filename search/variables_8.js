@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['omitted_0',['omitted',['../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47',1,'ada::url_components']]]
+  ['mappings_0',['mappings',['../d5/ddb/namespaceada_1_1idna.html#ad39325463bccb5615ad4aafb3f45ddd6',1,'ada::idna']]]
 ];

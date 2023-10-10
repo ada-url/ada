@@ -2,7 +2,7 @@ var searchData=
 [
   ['fast_0',['Ada is fast.',['../index.html#autotoc_md13',1,'']]],
   ['fast_5fdigit_5fcount_1',['fast_digit_count',['../d7/d6c/namespaceada_1_1helpers.html#a32aaa683783ad16614972ffaa5525ac8',1,'ada::helpers']]],
-  ['file_2',['file',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719',1,'ada::FILE'],['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9',1,'ada::scheme::FILE']]],
+  ['file_2',['file',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9',1,'ada::scheme::FILE'],['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719',1,'ada::FILE']]],
   ['file_20system_3',['Saving result to file system',['../db/d8a/md_docs_2cli.html#autotoc_md9',1,'']]],
   ['file_5fhost_4',['FILE_HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a8de3c990e78108965db7c3f38cc5fca7',1,'ada']]],
   ['file_5fslash_5',['FILE_SLASH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a33e2ce137194c80639c32978fb77a489',1,'ada']]],
@@ -17,6 +17,7 @@ var searchData=
   ['fragment_14',['FRAGMENT',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a7345a249ed5c2f850d85dc1727c24716',1,'ada']]],
   ['fragment_5fpercent_5fencode_15',['FRAGMENT_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67',1,'ada::character_sets']]],
   ['from_5fascii_5fto_5fascii_16',['from_ascii_to_ascii',['../d5/ddb/namespaceada_1_1idna.html#a939fc0c16e2a4fe433685bcd44ad9c75',1,'ada::idna']]],
-  ['fsi_17',['FSI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda73df67ab66bd491a7f2227fd6f071b86',1,'ada::idna']]],
-  ['ftp_18',['FTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf',1,'ada::scheme']]]
+  ['front_17',['front',['../dd/dcb/structada_1_1url__search__params.html#ab7449a44a68949c02276a94dcd99cf22',1,'ada::url_search_params']]],
+  ['fsi_18',['FSI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda73df67ab66bd491a7f2227fd6f071b86',1,'ada::idna']]],
+  ['ftp_19',['FTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf',1,'ada::scheme']]]
 ];

@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['_7eurl_0',['~url',['../dd/d03/structada_1_1url.html#a7d8fa5f940de5da835f37aed05859700',1,'ada::url']]],
-  ['_7eurl_5faggregator_1',['~url_aggregator',['../d8/d3b/structada_1_1url__aggregator.html#aacfa5af3401702831f9d92779317d269',1,'ada::url_aggregator']]],
-  ['_7eurl_5fbase_2',['~url_base',['../db/d75/structada_1_1url__base.html#a199631ce6f8fe9849f2cca80f875b0c4',1,'ada::url_base']]],
-  ['_7eurl_5fcomponents_3',['~url_components',['../d3/d43/structada_1_1url__components.html#a5e613b82f32f372dd1a1d3b1be36b4ac',1,'ada::url_components']]],
-  ['_7eurl_5fsearch_5fparams_4',['~url_search_params',['../dd/dcb/structada_1_1url__search__params.html#aa9ec7a39a042f3a28572bd46e17bcd95',1,'ada::url_search_params']]]
+  ['validate_0',['validate',['../d8/d3b/structada_1_1url__aggregator.html#a8cb5bdd9006cb24e3414ca233310e85a',1,'ada::url_aggregator']]],
+  ['verify_5fdns_5flength_1',['verify_dns_length',['../d3/dbe/namespaceada_1_1checkers.html#a80d00566fb3198a225d4fe7f38a53d06',1,'ada::checkers']]],
+  ['verify_5fpunycode_2',['verify_punycode',['../d5/ddb/namespaceada_1_1idna.html#af593f5293a356a9fc9bb3878a96b3eae',1,'ada::idna']]]
 ];

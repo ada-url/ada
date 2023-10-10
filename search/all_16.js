@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['_7eurl_0',['~url',['../dd/d03/structada_1_1url.html#a7d8fa5f940de5da835f37aed05859700',1,'ada::url']]],
-  ['_7eurl_5faggregator_1',['~url_aggregator',['../d8/d3b/structada_1_1url__aggregator.html#aacfa5af3401702831f9d92779317d269',1,'ada::url_aggregator']]],
-  ['_7eurl_5fbase_2',['~url_base',['../db/d75/structada_1_1url__base.html#a199631ce6f8fe9849f2cca80f875b0c4',1,'ada::url_base']]],
-  ['_7eurl_5fcomponents_3',['~url_components',['../d3/d43/structada_1_1url__components.html#a5e613b82f32f372dd1a1d3b1be36b4ac',1,'ada::url_components']]],
-  ['_7eurl_5fsearch_5fparams_4',['~url_search_params',['../dd/dcb/structada_1_1url__search__params.html#aa9ec7a39a042f3a28572bd46e17bcd95',1,'ada::url_search_params']]]
+  ['well_20formatted_20url_0',['Well-formatted URL',['../db/d8a/md_docs_2cli.html#autotoc_md5',1,'']]],
+  ['wrapper_1',['C wrapper',['../index.html#autotoc_md19',1,'']]],
+  ['ws_2',['ws',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba1b6522b40511ec15ca60df3eb3858df2',1,'ada::scheme::WS'],['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda0843a0dba176121295e786fa573eded5',1,'ada::idna::WS']]],
+  ['wss_3',['WSS',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3bac48a95c337aa2775b07339cf74cf903d',1,'ada::scheme']]],
+  ['www_5fform_5furlencoded_5fpercent_5fencode_4',['WWW_FORM_URLENCODED_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aec120154efccb7b70bd36785bf6a71b7',1,'ada::character_sets']]]
 ];

@@ -1,11 +1,9 @@
 var searchData=
 [
-  ['of_20ada_0',['Bindings of Ada',['../index.html#autotoc_md15',1,'']]],
-  ['omitted_1',['omitted',['../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47',1,'ada::url_components']]],
-  ['on_2',['ON',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda22fa19d0cae8249a34f5a1ebb8e14dc4',1,'ada::idna']]],
-  ['opaque_5fpath_3',['OPAQUE_PATH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd',1,'ada']]],
-  ['operator_4',['Pipe Operator',['../db/d8a/md_docs_2cli.html#autotoc_md7',1,'']]],
-  ['operator_3c_3c_5',['operator&lt;&lt;',['../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed',1,'ada::operator&lt;&lt;(std::ostream &amp;out, const ada::url &amp;u)'],['../dd/d64/namespaceada.html#a1d9c438eb5078b59b136314467c3dd27',1,'ada::operator&lt;&lt;(std::ostream &amp;out, const ada::url_aggregator &amp;u)']]],
-  ['operator_3d_6',['operator=',['../dd/d03/structada_1_1url.html#a38e998e7cf59025409e7e7cd4157e544',1,'ada::url::operator=(url &amp;&amp;u) noexcept=default'],['../dd/d03/structada_1_1url.html#a3cc4e67cc46625eef41979275167183d',1,'ada::url::operator=(const url &amp;u)=default'],['../d8/d3b/structada_1_1url__aggregator.html#a02551d16fc5d83cc640934405c0831e5',1,'ada::url_aggregator::operator=(url_aggregator &amp;&amp;u) noexcept=default'],['../d8/d3b/structada_1_1url__aggregator.html#a01fc389f9f1141adfd7e20260e1cb674',1,'ada::url_aggregator::operator=(const url_aggregator &amp;u)=default'],['../d3/d43/structada_1_1url__components.html#a3df693b93819a6307aa6d193e59c6d0c',1,'ada::url_components::operator=(url_components &amp;&amp;u) noexcept=default'],['../d3/d43/structada_1_1url__components.html#ade8e8cbb87ac562d1c2e1c2b0247c57a',1,'ada::url_components::operator=(const url_components &amp;u)=default'],['../dd/dcb/structada_1_1url__search__params.html#a6818adec6aa0cad0766c2a7d087015dd',1,'ada::url_search_params::operator=(url_search_params &amp;&amp;u) noexcept=default'],['../dd/dcb/structada_1_1url__search__params.html#a8a13971c945e7ca210303a0c5edc3872',1,'ada::url_search_params::operator=(const url_search_params &amp;u)=default']]],
-  ['options_7',['Command line options',['../db/d8a/md_docs_2cli.html#autotoc_md1',1,'']]]
+  ['next_0',['next',['../dd/dc7/structada_1_1url__search__params__iter.html#abd48d5df7cc6a5cb11275c1bf5f85be8',1,'ada::url_search_params_iter']]],
+  ['no_5fscheme_1',['NO_SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab6e5680904440aafe18fa12e655b1397',1,'ada']]],
+  ['none_2',['NONE',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddac9f65cb69f001440b334cff56faee94f',1,'ada::idna']]],
+  ['normalize_3',['normalize',['../d5/ddb/namespaceada_1_1idna.html#a66bd7d6170f3e06b968c739e40a35967',1,'ada::idna']]],
+  ['not_5fspecial_4',['NOT_SPECIAL',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baaff84b9b3b0f0f7c8f56b9a01f3107af',1,'ada::scheme']]],
+  ['nsm_5',['NSM',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda30c6bda4bdb26fb36fb63a5c0d024b91',1,'ada::idna']]]
 ];
