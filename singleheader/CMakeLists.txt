@@ -37,14 +37,14 @@ if (Python3_Interpreter_FOUND)
       #
       DEPENDS amalgamate.py ada
   )
-  add_custom_target(singleheader-files DEPENDS ${SINGLEHEADER_FILES})
+  add_custom_target(ada-singleheader-files DEPENDS ${SINGLEHEADER_FILES})
 
   #
   # Include this if you intend to #include "ada.cpp" in your own .cpp files.
   #
   add_library(ada-singleheader-include-source INTERFACE)
   target_include_directories(ada-singleheader-include-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-  add_dependencies(ada-singleheader-include-source singleheader-files)
+  add_dependencies(ada-singleheader-include-source ada-singleheader-files)
 
   add_library(ada-singleheader-source INTERFACE)
   target_sources(ada-singleheader-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/ada.cpp>)
