@@ -26,11 +26,23 @@ option(ADA_BENCHMARKS "Build benchmarks" OFF)
 
 # We use Google Benchmark, but it does not build under several 32-bit systems.
 if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
-  include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
-  import_dependency(simdjson simdjson/simdjson 14d927128ba14e13913fc0e7c2cf538790bd1622)
-  add_dependency(simdjson)
-  import_dependency(gtest google/googletest 797b0ad2a3a45608ecf5c67e6e289d377a3521ca)
-  add_dependency(gtest)
+  include(cmake/CPM.cmake)
+  CPMAddPackage("gh:simdjson/simdjson@3.3.0")
+  CPMAddPackage(
+    NAME GTest
+    GITHUB_REPOSITORY google/googletest
+    VERSION 1.14.0
+    OPTIONS  "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
+  )
+  CPMAddPackage(
+    NAME benchmark
+    GITHUB_REPOSITORY google/benchmark
+    GIT_TAG f91b6b4
+    OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
+            "BENCHMARK_ENABLE_INSTALL OFF"
+            "BENCHMARK_ENABLE_WERROR OFF"
+
+  )
 endif()
 
 if (BUILD_TESTING AND NOT EMSCRIPTEN)
