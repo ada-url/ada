@@ -332,7 +332,7 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   std::string_view internal_input;
   if (unicode::has_tabs_or_newline(input)) {
-    internal_input = helpers::get_ascii_tab_or_newline_removed(user_input);
+    internal_input = helpers::get_ascii_tab_or_newline_removed(input);
   } else {
     internal_input = input;
   }

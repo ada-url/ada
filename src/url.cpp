@@ -495,7 +495,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string_view internal_input;
   if (unicode::has_tabs_or_newline(input)) {
-    internal_input = helpers::get_ascii_tab_or_newline_removed(user_input);
+    internal_input = helpers::get_ascii_tab_or_newline_removed(input);
   } else {
     internal_input = input;
   }

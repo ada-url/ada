@@ -161,7 +161,7 @@ ada_really_inline void remove_ascii_tab_or_newline(
 }
 
 ada_really_inline std::string get_ascii_tab_or_newline_removed(
-    std::string_view input) noexcept {
+    std::string_view input) {
   std::string res;
   res.reserve(input.size());
 
