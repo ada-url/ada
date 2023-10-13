@@ -124,11 +124,11 @@ struct url_search_params {
    * C++ style conventional iterator support. const only because we
    * do not really want the params to be modified via the iterator.
    */
-  inline const auto begin() const { return params.begin(); }
-  inline const auto end() const { return params.end(); }
-  inline const auto front() const { return params.front(); }
-  inline const auto back() const { return params.back(); }
-  inline const auto operator[](size_t index) const { return params[index]; }
+  inline auto begin() const { return params.begin(); }
+  inline auto end() const { return params.end(); }
+  inline auto front() const { return params.front(); }
+  inline auto back() const { return params.back(); }
+  inline auto operator[](size_t index) const { return params[index]; }
 
  private:
   typedef std::pair<std::string, std::string> key_value_pair;
