@@ -1,6 +1,7 @@
 #include "ada.h"
 #include "ada/common_defs.h"
 #include "ada/character_sets-inl.h"
+#include "ada/helpers.h"
 #include "ada/unicode.h"
 #include "ada/url-inl.h"
 #include "ada/log.h"
@@ -69,14 +70,9 @@ result_type parse_url(std::string_view user_input,
     //
     //
   }
-  std::string tmp_buffer;
   std::string_view internal_input;
   if (unicode::has_tabs_or_newline(user_input)) {
-    tmp_buffer = user_input;
-    // Optimization opportunity: Instead of copying and then pruning, we could
-    // just directly build the string from user_input.
-    helpers::remove_ascii_tab_or_newline(tmp_buffer);
-    internal_input = tmp_buffer;
+    internal_input = helpers::get_ascii_tab_or_newline_removed(user_input);
   } else {
     internal_input = user_input;
   }

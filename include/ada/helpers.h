@@ -82,6 +82,13 @@ ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept;
 
 /**
  * @private
+ * Create a new string that all ASCII tab or newline characters are removed.
+ */
+ada_really_inline std::string get_ascii_tab_or_newline_removed(
+    std::string_view input) noexcept;
+
+/**
+ * @private
  * Return the substring from input going from index pos to the end.
  * This function cannot throw.
  */
