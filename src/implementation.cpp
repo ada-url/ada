@@ -25,9 +25,11 @@ template ada::result<url_aggregator> parse<url_aggregator>(
 
 std::string href_from_file(std::string_view input) {
   // This is going to be much faster than constructing a URL.
+  std::string tmp_buffer;
   std::string_view internal_input;
   if (unicode::has_tabs_or_newline(input)) {
-    internal_input = helpers::get_ascii_tab_or_newline_removed(input);
+    tmp_buffer = helpers::get_ascii_tab_or_newline_removed(input);
+    internal_input = tmp_buffer;
   } else {
     internal_input = input;
   }

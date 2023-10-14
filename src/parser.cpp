@@ -70,9 +70,11 @@ result_type parse_url(std::string_view user_input,
     //
     //
   }
+  std::string tmp_buffer;
   std::string_view internal_input;
   if (unicode::has_tabs_or_newline(user_input)) {
-    internal_input = helpers::get_ascii_tab_or_newline_removed(user_input);
+    tmp_buffer = helpers::get_ascii_tab_or_newline_removed(user_input);
+    internal_input = tmp_buffer;
   } else {
     internal_input = user_input;
   }
