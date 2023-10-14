@@ -25,9 +25,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
 
 include(cmake/CPM.cmake)
-
+# CPM requires git as an implicit dependency
+find_package(Git QUIET)
 # We use Google Benchmark, but it does not build under several 32-bit systems.
-if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
+if(Git_FOUND AND (BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
   CPMAddPackage("gh:simdjson/simdjson@3.3.0")
   CPMAddPackage(
     NAME GTest
@@ -47,8 +48,12 @@ if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
 endif()
 
 if (BUILD_TESTING AND NOT EMSCRIPTEN)
-  message(STATUS "The tests are enabled.")
-  add_subdirectory(tests)
+  if(Git_FOUND)
+    message(STATUS "The tests are enabled.")
+    add_subdirectory(tests)
+  else()
+    message(STATUS "The tests are disabled because git was not found.")
+  endif()
 else()
   if(is_top_project)
     message(STATUS "The tests are disabled.")
@@ -56,8 +61,12 @@ else()
 endif(BUILD_TESTING AND NOT EMSCRIPTEN)
 
 If(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
-  message(STATUS "Ada benchmarks enabled.")
-  add_subdirectory(benchmarks)
+  if(Git_FOUND)
+    message(STATUS "Ada benchmarks enabled.")
+    add_subdirectory(benchmarks)
+  else()
+    message(STATUS "The benchmarks are disabled because git was not found.")
+  endif()
 else(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
   if(is_top_project)
     message(STATUS "Ada benchmarks disabled. Set ADA_BENCHMARKS=ON to enable them.")
@@ -85,7 +94,11 @@ if(NOT ADA_COVERAGE AND NOT EMSCRIPTEN)
 endif()
 
 if(ADA_TOOLS)
-  add_subdirectory(tools)
+  if(Git_FOUND)
+    add_subdirectory(tools)
+  else()
+    message(STATUS "The tools are disabled because git was not found.")
+  endif()
 endif()
 
 install(
