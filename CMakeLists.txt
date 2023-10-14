@@ -24,9 +24,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
 
+include(cmake/CPM.cmake)
+
 # We use Google Benchmark, but it does not build under several 32-bit systems.
 if((BUILD_TESTING OR ADA_BENCHMARKS) AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
-  include(cmake/CPM.cmake)
   CPMAddPackage("gh:simdjson/simdjson@3.3.0")
   CPMAddPackage(
     NAME GTest
