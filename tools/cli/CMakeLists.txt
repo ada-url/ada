@@ -2,11 +2,12 @@ add_executable(adaparse adaparse.cpp line_iterator.h)
 target_link_libraries(adaparse PRIVATE ada)
 target_include_directories(adaparse PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
-include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
-import_dependency(cxxopts jarro2783/cxxopts eb78730)
-add_dependency(cxxopts)
-import_dependency(fmt fmtlib/fmt a337011)
-add_dependency(fmt)
+CPMAddPackage("gh:fmtlib/fmt#7.1.3")
+CPMAddPackage(
+  GITHUB_REPOSITORY jarro2783/cxxopts
+  VERSION 3.1.1
+  OPTIONS "CXXOPTS_BUILD_EXAMPLES NO" "CXXOPTS_BUILD_TESTS NO" "CXXOPTS_ENABLE_INSTALL YES"
+)
 target_link_libraries(adaparse PRIVATE cxxopts::cxxopts fmt::fmt)
 
 if(MSVC OR MINGW)

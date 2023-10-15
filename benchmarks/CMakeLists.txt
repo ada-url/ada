@@ -16,7 +16,7 @@ target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
 # Benchdata
-import_dependency(url-dataset ada-url/url-dataset 9749b92c13e970e70409948fa862461191504ccc)
+CPMAddPackage("gh:ada-url/url-dataset#9749b92c13e970e70409948fa862461191504ccc")
 add_executable(benchdata bench.cpp)
 target_link_libraries(benchdata PRIVATE ada)
 target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -45,14 +45,6 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
     target_compile_definitions(model_bench PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
 endif()
 
-include(${PROJECT_SOURCE_DIR}/cmake/import.cmake)
-
-set_off(BENCHMARK_ENABLE_TESTING)
-set_off(BENCHMARK_ENABLE_INSTALL)
-set_off(BENCHMARK_ENABLE_WERROR)
-
-import_dependency(google_benchmarks google/benchmark f91b6b4)
-add_dependency(google_benchmarks)
 target_link_libraries(wpt_bench PRIVATE benchmark::benchmark)
 target_link_libraries(bench PRIVATE benchmark::benchmark)
 target_link_libraries(benchdata PRIVATE benchmark::benchmark)
@@ -96,10 +88,12 @@ if(NOT ICU_FOUND)
 endif(NOT ICU_FOUND)
 
 if(ICU_FOUND)
-    set_off(URL_BUILD_TESTS)
-    set_off(URL_USE_LIBS)
-    import_dependency(url_whatwg rmisev/url_whatwg cbcf3043eccb380cb4bef7486465ac3b02d2f674)
-    add_dependency(url_whatwg)
+    CPMAddPackage(
+      NAME url_whatwg
+      GITHUB_REPOSITORY rmisev/url_whatwg
+      GIT_TAG cbcf3043eccb380cb4bef7486465ac3b02d2f674
+      OPTIONS  "URL_BUILD_TESTS OFF" "URL_USE_LIBS OFF"
+    )
     add_library(url_whatwg_lib STATIC "${url_whatwg_SOURCE_DIR}/src/url.cpp"
       "${url_whatwg_SOURCE_DIR}/src/url_idna.cpp"
       "${url_whatwg_SOURCE_DIR}/src/url_ip.cpp"
@@ -129,22 +123,31 @@ endif(ICU_FOUND)
 
 if(ADA_COMPETITION)
     # URI Parser
-    set_off(URIPARSER_BUILD_TESTS)
-    set_off(URIPARSER_BUILD_DOCS)
-    import_dependency(uriparser uriparser/uriparser 634b678)
-    add_dependency(uriparser)
+    CPMAddPackage(
+      NAME uriparser
+      GITHUB_REPOSITORY uriparser/uriparser
+      GIT_TAG 634b678
+      OPTIONS "URIPARSER_BUILD_TESTS OFF" "URIPARSER_BUILD_DOCS OFF"
+    )
     target_link_libraries(bench PRIVATE uriparser)
     target_link_libraries(bbc_bench PRIVATE uriparser)
-
     # URL Parser
-    import_dependency(urlparser netmindms/urlparser 69c09ed)
+    CPMAddPackage(
+      NAME urlparser
+      GITHUB_REPOSITORY netmindms/urlparser
+      GIT_TAG 69c09ed
+    )
     add_library(urlparser STATIC "${urlparser_SOURCE_DIR}/src/EdUrlParser.cpp")
     target_include_directories(urlparser PUBLIC "${urlparser_SOURCE_DIR}/src")
     target_link_libraries(bench PRIVATE urlparser)
     target_link_libraries(bbc_bench PRIVATE urlparser)
 
     # HTTP Parser
-    import_dependency(httpparser nodejs/http-parser v2.9.4)
+    CPMAddPackage(
+      NAME httpparser
+      GITHUB_REPOSITORY nodejs/http-parser
+      VERSION 2.9.4
+    )
     add_library(httpparser STATIC "${httpparser_SOURCE_DIR}/http_parser.c")
     set_source_files_properties("${httpparser_SOURCE_DIR}/http_parser.c" PROPERTIES LANGUAGE C)
     target_include_directories(httpparser PUBLIC "${httpparser_SOURCE_DIR}")
@@ -203,7 +206,11 @@ find_package(
 endif(ADA_BOOST_URL)
 
 if(Boost_FOUND)
-    import_dependency(boost_url boostorg/url boost-1.81.0)
+    CPMAddPackage(
+      NAME boost_url
+      GITHUB_REPOSITORY  boostorg/url
+      GIT_TAG boost-1.81.0
+    )
     add_library(boost_url INTERFACE)
     target_include_directories(boost_url INTERFACE
            "${boost_url_SOURCE_DIR}/include")
@@ -241,16 +248,19 @@ endif(ZURI_FOUND)
 
 
 # We want the check whether Rust is available before trying to build a crate.
-set(Rust_FIND_QUIETLY ON) # No need to alarm the user if rust is not available.
-import_dependency(corrosion corrosion-rs/corrosion v0.3.4)
+CPMAddPackage(
+  NAME corrosion
+  GITHUB_REPOSITORY corrosion-rs/corrosion
+  VERSION 0.4.4
+  DOWNLOAD_ONLY ON
+  OPTIONS "Rust_FIND_QUIETLY OFF"
+)
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
 
 
 if(RUST_FOUND)
   message(STATUS "Rust found: " ${Rust_VERSION} )
-  # Important: we only want to include corrosion *if* rust is available.
-  # Otherwise, it is impossible to run ada benchmarks without rust.
-  add_dependency(corrosion)
+  add_subdirectory("${corrosion_SOURCE_DIR}" "${PROJECT_BINARY_DIR}/_deps/corrosion" EXCLUDE_FROM_ALL)
   # Important: we want to build in release mode!
   corrosion_import_crate(MANIFEST_PATH "competitors/servo-url/Cargo.toml" NO_LINKER_OVERRIDE PROFILE release)
 
