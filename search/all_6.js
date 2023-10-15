@@ -17,7 +17,7 @@ var searchData=
   ['fragment_14',['FRAGMENT',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a7345a249ed5c2f850d85dc1727c24716',1,'ada']]],
   ['fragment_5fpercent_5fencode_15',['FRAGMENT_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67',1,'ada::character_sets']]],
   ['from_5fascii_5fto_5fascii_16',['from_ascii_to_ascii',['../d5/ddb/namespaceada_1_1idna.html#a939fc0c16e2a4fe433685bcd44ad9c75',1,'ada::idna']]],
-  ['front_17',['front',['../dd/dcb/structada_1_1url__search__params.html#ab7449a44a68949c02276a94dcd99cf22',1,'ada::url_search_params']]],
+  ['front_17',['front',['../dd/dcb/structada_1_1url__search__params.html#a2a13ee0da6cbc197c4fa398b7fcbe75b',1,'ada::url_search_params']]],
   ['fsi_18',['FSI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda73df67ab66bd491a7f2227fd6f071b86',1,'ada::idna']]],
   ['ftp_19',['FTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf',1,'ada::scheme']]]
 ];
