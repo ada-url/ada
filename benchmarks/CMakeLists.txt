@@ -91,7 +91,7 @@ if(ICU_FOUND)
     CPMAddPackage(
       NAME url_whatwg
       GITHUB_REPOSITORY rmisev/url_whatwg
-      GIT_TAG cbcf3043eccb380cb4bef7486465ac3b02d2f674
+      GIT_TAG 72bcabf
       OPTIONS  "URL_BUILD_TESTS OFF" "URL_USE_LIBS OFF"
     )
     add_library(url_whatwg_lib STATIC "${url_whatwg_SOURCE_DIR}/src/url.cpp"
@@ -101,6 +101,7 @@ if(ICU_FOUND)
       "${url_whatwg_SOURCE_DIR}/src/url_search_params.cpp"
       "${url_whatwg_SOURCE_DIR}/src/url_utf.cpp"
       "${url_whatwg_SOURCE_DIR}/src/url.cpp")
+    target_include_directories(url_whatwg_lib PUBLIC "${url_whatwg_SOURCE_DIR}/include")
     target_link_libraries(url_whatwg_lib PRIVATE ICU::uc ICU::i18n)
 
 

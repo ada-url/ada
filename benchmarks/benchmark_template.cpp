@@ -93,8 +93,8 @@ BENCHMARK(BasicBench_AdaURL_aggregator_href);
 size_t count_whatwg_invalid() {
   size_t how_many = 0;
   for (std::string& url_string : url_examples) {
-    whatwg::url url;
-    if (!whatwg::success(url.parse(url_string, nullptr))) {
+    upa::url url;
+    if (!upa::success(url.parse(url_string, nullptr))) {
       how_many++;
     }
   }
@@ -108,8 +108,8 @@ static void BasicBench_whatwg(benchmark::State& state) {
   volatile size_t href_size = 0;
   for (auto _ : state) {
     for (std::string& url_string : url_examples) {
-      whatwg::url url;
-      if (whatwg::success(url.parse(url_string, nullptr))) {
+      upa::url url;
+      if (upa::success(url.parse(url_string, nullptr))) {
         success++;
         if (!just_parse) {
           href_size += url.href().size();
@@ -123,8 +123,8 @@ static void BasicBench_whatwg(benchmark::State& state) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
       for (std::string& url_string : url_examples) {
-        whatwg::url url;
-        if (whatwg::success(url.parse(url_string, nullptr))) {
+        upa::url url;
+        if (upa::success(url.parse(url_string, nullptr))) {
           success++;
           if (!just_parse) {
             href_size += url.href().size();
