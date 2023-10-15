@@ -11,7 +11,7 @@
 #include <http_parser.h>
 #endif
 #if ADA_url_whatwg_ENABLED
-#include <src/url.h>
+#include <upa/url.h>
 #endif
 
 #include "ada.h"

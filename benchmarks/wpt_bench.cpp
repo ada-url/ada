@@ -118,22 +118,22 @@ BENCHMARK(BasicBench_AdaURL_url_aggregator);
 
 #if ADA_url_whatwg_ENABLED
 
-#include <src/url.h>
+#include <upa/url.h>
 
 static void BasicBench_whatwg(benchmark::State &state) {
   volatile size_t success{};
   for (auto _ : state) {
     for (const std::pair<std::string, std::string> &url_strings :
          url_examples) {
-      whatwg::url base;
-      whatwg::url *base_ptr = nullptr;
+      upa::url base;
+      upa::url *base_ptr = nullptr;
       if (!url_strings.second.empty()) {
-        if (whatwg::success(base.parse(url_strings.second, nullptr))) {
+        if (upa::success(base.parse(url_strings.second, nullptr))) {
           base_ptr = &base;
         }
       }
-      whatwg::url url;
-      if (whatwg::success(url.parse(url_strings.first, base_ptr))) {
+      upa::url url;
+      if (upa::success(url.parse(url_strings.first, base_ptr))) {
         success++;
       }
     }
@@ -145,15 +145,15 @@ static void BasicBench_whatwg(benchmark::State &state) {
       collector.start();
       for (const std::pair<std::string, std::string> &url_strings :
            url_examples) {
-        whatwg::url base;
-        whatwg::url *base_ptr = nullptr;
+        upa::url base;
+        upa::url *base_ptr = nullptr;
         if (!url_strings.second.empty()) {
-          if (whatwg::success(base.parse(url_strings.second, nullptr))) {
+          if (upa::success(base.parse(url_strings.second, nullptr))) {
             base_ptr = &base;
           }
         }
-        whatwg::url url;
-        if (whatwg::success(url.parse(url_strings.first, base_ptr))) {
+        upa::url url;
+        if (upa::success(url.parse(url_strings.first, base_ptr))) {
           success++;
         }
       }
