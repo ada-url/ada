@@ -393,9 +393,6 @@ TYPED_TEST(basic_tests, nodejs_50235) {
   auto out = ada::parse<TypeParam>("http://test.com:5/?param=1");
   ASSERT_TRUE(out);
   ASSERT_TRUE(out->set_pathname("path"));
-  std::cout << "====================" << std::endl;
-  std::cout << out->get_href() << std::endl;
-  std::cout << "====================" << std::endl;
   ASSERT_EQ(out->get_href(), "http://test.com:5/path?param=1");
   SUCCEED();
 }
