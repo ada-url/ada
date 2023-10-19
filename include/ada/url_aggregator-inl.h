@@ -827,7 +827,7 @@ inline bool url_aggregator::has_port() const noexcept {
                     (buffer[components.host_end] == ':' &&
                      checkers::is_digit(buffer[components.host_end + 1])));
   }
-  if (&&components.pathname_start == components.host_end + 2 &&
+  if (components.pathname_start == components.host_end + 2 &&
       buffer[components.host_end] == '/' &&
       buffer[components.host_end + 1] == '.') {
     ADA_ASSERT_TRUE(components.pathname_start + 1 < buffer.size());
