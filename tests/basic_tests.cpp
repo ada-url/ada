@@ -387,3 +387,12 @@ TYPED_TEST(basic_tests, nodejs_49650) {
   ASSERT_EQ(out->get_href(), "http://foo/");
   SUCCEED();
 }
+
+// https://github.com/nodejs/node/issues/50235
+TYPED_TEST(basic_tests, nodejs_50235) {
+  auto out = ada::parse<TypeParam>("http://test.com:5/?param=1");
+  ASSERT_TRUE(out);
+  ASSERT_TRUE(out->set_pathname("path"));
+  ASSERT_EQ(out->get_href(), "http://test.com:5/path?param=1");
+  SUCCEED();
+}
