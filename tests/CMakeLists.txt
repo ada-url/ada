@@ -22,7 +22,7 @@ if(MSVC AND BUILD_SHARED_LIBS)
   # Copy the ada dll into the directory
   add_custom_command(TARGET url_search_params POST_BUILD        # Adds a post-build event
     COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake -E copy_if_different..."
-        "$<TARGET_FILE:simdutf>"      # <--this is in-file
+        "$<TARGET_FILE:ada>"      # <--this is in-file
         "$<TARGET_FILE_DIR:url_search_params>")                 # <--this is out-file path
 endif()
 target_link_libraries(wpt_tests PRIVATE simdjson GTest::gtest_main)
