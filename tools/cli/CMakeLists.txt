@@ -1,7 +1,13 @@
 add_executable(adaparse adaparse.cpp line_iterator.h)
 target_link_libraries(adaparse PRIVATE ada)
 target_include_directories(adaparse PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
-
+if(MSVC AND BUILD_SHARED_LIBS)
+  # Copy the ada dll into the directory
+  add_custom_command(TARGET adaparse POST_BUILD        # Adds a post-build event
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake -E copy_if_different..."
+        "$<TARGET_FILE:ada>"      # <--this is in-file
+        "$<TARGET_FILE_DIR:adaparse>")                 # <--this is out-file path
+endif()
 CPMAddPackage("gh:fmtlib/fmt#7.1.3")
 CPMAddPackage(
   GITHUB_REPOSITORY jarro2783/cxxopts

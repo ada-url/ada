@@ -102,7 +102,7 @@ size_t roller_fuzz(size_t N) {
   size_t valid{};
 
   for (std::string copy : url_examples) {
-    for (int index = 0; index < copy.size(); index++) {
+    for (size_t index = 0; index < copy.size(); index++) {
       char orig = copy[index];
       for (unsigned int value = 0; value < 255; value++) {
         copy[index] = char(value);
