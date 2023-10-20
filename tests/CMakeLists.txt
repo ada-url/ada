@@ -10,6 +10,17 @@ endif()
 include(${PROJECT_SOURCE_DIR}/cmake/add-cpp-test.cmake)
 link_libraries(ada)
 
+add_cpp_test(basic_fuzzer)
+
+if(MSVC AND BUILD_SHARED_LIBS)
+  # Copy the ada dll into the directory
+  add_custom_command(TARGET basic_fuzzer POST_BUILD        # Adds a post-build event
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake -E copy_if_different..."
+        "$<TARGET_FILE:ada>"      # <--this is in-file
+        "$<TARGET_FILE_DIR:basic_fuzzer>")                 # <--this is out-file path
+endif()
+
+
 include(GoogleTest)
 
 add_executable(wpt_tests wpt_tests.cpp)
@@ -32,16 +43,6 @@ gtest_discover_tests(basic_tests)
 gtest_discover_tests(from_file_tests)
 gtest_discover_tests(ada_c)
 gtest_discover_tests(url_search_params)
-
-add_cpp_test(basic_fuzzer)
-
-if(MSVC AND BUILD_SHARED_LIBS)
-  # Copy the ada dll into the directory
-  add_custom_command(TARGET basic_fuzzer POST_BUILD        # Adds a post-build event
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake -E copy_if_different..."
-        "$<TARGET_FILE:ada>"      # <--this is in-file
-        "$<TARGET_FILE_DIR:basic_fuzzer>")                 # <--this is out-file path
-endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
