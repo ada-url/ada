@@ -49,6 +49,8 @@ if (Python3_Interpreter_FOUND)
   add_library(ada-singleheader-source INTERFACE)
   target_sources(ada-singleheader-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/ada.cpp>)
   target_link_libraries(ada-singleheader-source INTERFACE ada-singleheader-include-source)
+  add_library(ada-singleheader-lib STATIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/ada.cpp>)
+
   if (BUILD_TESTING)
     add_executable(demo $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.cpp>)
     target_link_libraries(demo ada-singleheader-include-source)
@@ -56,8 +58,7 @@ if (Python3_Interpreter_FOUND)
     add_test(demo demo)
 
     add_executable(cdemo $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.c>)
-    target_link_libraries(cdemo ada)
-
+    target_link_libraries(cdemo ada-singleheader-lib)
     add_test(cdemo cdemo)
   endif()
 else()
