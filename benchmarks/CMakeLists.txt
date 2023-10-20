@@ -35,7 +35,13 @@ add_executable(percent_encode percent_encode.cpp)
 target_link_libraries(percent_encode PRIVATE ada)
 target_include_directories(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
-
+if(MSVC AND BUILD_SHARED_LIBS)
+  # Copy the ada dll into the directory
+  add_custom_command(TARGET percent_encode POST_BUILD        # Adds a post-build event
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake -E copy_if_different..."
+        "$<TARGET_FILE:simdutf>"      # <--this is in-file
+        "$<TARGET_FILE_DIR:percent_encode>")                 # <--this is out-file path
+endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
     # The model_bench program requires accurate/low-overhead performance counters.

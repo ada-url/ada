@@ -18,7 +18,13 @@ add_executable(basic_tests basic_tests.cpp)
 add_executable(from_file_tests from_file_tests.cpp)
 add_executable(ada_c ada_c.cpp)
 add_executable(url_search_params url_search_params.cpp)
-
+if(MSVC AND BUILD_SHARED_LIBS)
+  # Copy the ada dll into the directory
+  add_custom_command(TARGET url_search_params POST_BUILD        # Adds a post-build event
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake -E copy_if_different..."
+        "$<TARGET_FILE:simdutf>"      # <--this is in-file
+        "$<TARGET_FILE_DIR:url_search_params>")                 # <--this is out-file path
+endif()
 target_link_libraries(wpt_tests PRIVATE simdjson GTest::gtest_main)
 target_link_libraries(url_components PRIVATE simdjson GTest::gtest_main)
 target_link_libraries(basic_tests PRIVATE simdjson GTest::gtest_main)

@@ -28,12 +28,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {gen: Visual Studio 17 2022, arch: x64, devchecks: ON}
+          - {gen: Visual Studio 17 2022, arch: x64, devchecks: ON, shared: OFF}
+          - {gen: Visual Studio 17 2022, arch: x64, devchecks: ON, shared: ON}
+          - {gen: Visual Studio 17 2022, arch: Win32, devchecks: ON, shared: OFF}
+          - {gen: Visual Studio 17 2022, arch: Win32, devchecks: ON, shared: ON}
     steps:
     - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v3.6.0
     - name: Configure
       run: |
-        cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -B build
+        cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build
     - name: Build Debug
       run: cmake --build build --config Debug --verbose
     - name: Run Debug tests
