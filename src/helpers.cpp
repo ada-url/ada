@@ -197,8 +197,6 @@ ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept {
 #endif
 }
 
-
-
 ada_really_inline int trailing_zeroes(uint32_t input_num) {
 #ifdef ADA_REGULAR_VISUAL_STUDIO
   unsigned long ret;
@@ -206,54 +204,52 @@ ada_really_inline int trailing_zeroes(uint32_t input_num) {
   // to the most significant bit (MSB) for a set bit (1).
   _BitScanForward(&ret, input_num);
   return (int)ret;
-#else // ADA_REGULAR_VISUAL_STUDIO
+#else   // ADA_REGULAR_VISUAL_STUDIO
   return __builtin_ctzl(input_num);
-#endif // ADA_REGULAR_VISUAL_STUDIO
+#endif  // ADA_REGULAR_VISUAL_STUDIO
 }
-
 
 // starting at index location, this finds the next location of a character
 // :, /, \\, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
 // ['0x3a', '0x2f', '0x5c', '0x3f', '0x5b']
-
 #if ADA_NEON
 ada_really_inline size_t find_next_host_delimiter_special(
     std::string_view view, size_t location) noexcept {
   // first check for short strings in which case we do it naively.
   if (view.size() - location < 16) {  // slow path
     for (size_t i = location; i < view.size(); i++) {
-      if (view[i] == ':' || view[i] == '/' ||
-          view[i] == '\\' || view[i] == '?' || view[i] == '[') {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '\\' ||
+          view[i] == '?' || view[i] == '[') {
         return i;
       }
     }
     return size_t(view.size());
   }
   auto to_bitmask = [](uint8x16_t input) -> uint16_t {
-    uint8x16_t bit_mask =  {0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
-                            0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
+    uint8x16_t bit_mask = {0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
+                           0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
     uint8x16_t minput = vandq_u8(input, bit_mask);
     uint8x16_t tmp = vpaddq_u8(minput, minput);
     tmp = vpaddq_u8(tmp, tmp);
     tmp = vpaddq_u8(tmp, tmp);
     return vgetq_lane_u16(vreinterpretq_u16_u8(tmp), 0);
   };
-  
+
   // fast path for long strings (expected to be common)
   size_t i = location;
-  uint8x16_t low_mask =  {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                          0x00, 0x00, 0x01, 0x04, 0x04, 0x00, 0x00, 0x03};
-  uint8x16_t high_mask =  {0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00,
+  uint8x16_t low_mask = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                         0x00, 0x00, 0x01, 0x04, 0x04, 0x00, 0x00, 0x03};
+  uint8x16_t high_mask = {0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-  uint8x16_t fmask = vmovq_n_u8(0xf); 
+  uint8x16_t fmask = vmovq_n_u8(0xf);
   uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
     uint8x16_t word = vld1q_u8((const uint8_t*)view.data() + i);
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
     uint8x16_t classify = vandq_u8(lowpart, highpart);
-    if(vmaxvq_u8(classify) != 0) {
+    if (vmaxvq_u8(classify) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
       return i + trailing_zeroes(is_non_zero);
@@ -266,7 +262,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
     uint8x16_t classify = vandq_u8(lowpart, highpart);
-    if(vmaxvq_u8(classify) != 0) {
+    if (vmaxvq_u8(classify) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
       return view.length() - 16 + trailing_zeroes(is_non_zero);
@@ -280,8 +276,8 @@ ada_really_inline size_t find_next_host_delimiter_special(
   // first check for short strings in which case we do it naively.
   if (view.size() - location < 16) {  // slow path
     for (size_t i = location; i < view.size(); i++) {
-      if (view[i] == ':' || view[i] == '/' ||
-          view[i] == '\\' || view[i] == '?' || view[i] == '[') {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '\\' ||
+          view[i] == '?' || view[i] == '[') {
         return i;
       }
     }
@@ -302,23 +298,25 @@ ada_really_inline size_t find_next_host_delimiter_special(
     __m128i m3 = _mm_cmpeq_epi8(word, mask3);
     __m128i m4 = _mm_cmpeq_epi8(word, mask4);
     __m128i m5 = _mm_cmpeq_epi8(word, mask5);
-    __m128i m = _mm_or_si128(_mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m3, m4)), m5);
+    __m128i m = _mm_or_si128(
+        _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m3, m4)), m5);
     int mask = _mm_movemask_epi8(m);
-    if(mask != 0) {
+    if (mask != 0) {
       return i + trailing_zeroes(mask);
     }
   }
   if (i < view.size()) {
-    __m128i word = _mm_loadu_si128(
-        (const __m128i*)(view.data() + view.length() - 16));
+    __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
     __m128i m1 = _mm_cmpeq_epi8(word, mask1);
     __m128i m2 = _mm_cmpeq_epi8(word, mask2);
     __m128i m3 = _mm_cmpeq_epi8(word, mask3);
     __m128i m4 = _mm_cmpeq_epi8(word, mask4);
     __m128i m5 = _mm_cmpeq_epi8(word, mask5);
-    __m128i m = _mm_or_si128(_mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m3, m4)), m5);
+    __m128i m = _mm_or_si128(
+        _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m3, m4)), m5);
     int mask = _mm_movemask_epi8(m);
-    if(mask != 0) {
+    if (mask != 0) {
       return view.length() - 16 + trailing_zeroes(mask);
     }
   }
@@ -391,18 +389,117 @@ ada_really_inline size_t find_next_host_delimiter_special(
 // starting at index location, this finds the next location of a character
 // :, /, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
+
+#if ADA_NEON
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
                                                   size_t location) noexcept {
-  for(size_t i = location; i < view.size(); i++) {
-    if (view[i] == ':' || view[i] == '/' || view[i] == '?' || view[i] == '[') {
-      return i;
+  // first check for short strings in which case we do it naively.
+  if (view.size() - location < 16) {  // slow path
+    for (size_t i = location; i < view.size(); i++) {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '?' ||
+          view[i] == '[') {
+        return i;
+      }
+    }
+    return size_t(view.size());
+  }
+  auto to_bitmask = [](uint8x16_t input) -> uint16_t {
+    uint8x16_t bit_mask = {0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
+                           0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
+    uint8x16_t minput = vandq_u8(input, bit_mask);
+    uint8x16_t tmp = vpaddq_u8(minput, minput);
+    tmp = vpaddq_u8(tmp, tmp);
+    tmp = vpaddq_u8(tmp, tmp);
+    return vgetq_lane_u16(vreinterpretq_u16_u8(tmp), 0);
+  };
+
+  // fast path for long strings (expected to be common)
+  size_t i = location;
+  uint8x16_t low_mask = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                         0x00, 0x00, 0x01, 0x04, 0x00, 0x00, 0x00, 0x03};
+  uint8x16_t high_mask = {0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  uint8x16_t fmask = vmovq_n_u8(0xf);
+  uint8x16_t zero{0};
+  for (; i + 15 < view.size(); i += 16) {
+    uint8x16_t word = vld1q_u8((const uint8_t*)view.data() + i);
+    uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
+    uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
+    uint8x16_t classify = vandq_u8(lowpart, highpart);
+    if (vmaxvq_u8(classify) != 0) {
+      uint8x16_t is_zero = vceqq_u8(classify, zero);
+      uint16_t is_non_zero = ~to_bitmask(is_zero);
+      return i + trailing_zeroes(is_non_zero);
+    }
+  }
+
+  if (i < view.size()) {
+    uint8x16_t word =
+        vld1q_u8((const uint8_t*)view.data() + view.length() - 16);
+    uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
+    uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
+    uint8x16_t classify = vandq_u8(lowpart, highpart);
+    if (vmaxvq_u8(classify) != 0) {
+      uint8x16_t is_zero = vceqq_u8(classify, zero);
+      uint16_t is_non_zero = ~to_bitmask(is_zero);
+      return view.length() - 16 + trailing_zeroes(is_non_zero);
     }
   }
   return size_t(view.size());
+}
+#elif ADA_SSE2
+ada_really_inline size_t find_next_host_delimiter(std::string_view view,
+                                                  size_t location) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (view.size() - location < 16) {  // slow path
+    for (size_t i = location; i < view.size(); i++) {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '?' ||
+          view[i] == '[') {
+        return i;
+      }
+    }
+    return size_t(view.size());
+  }
+  // fast path for long strings (expected to be common)
+  size_t i = location;
+  const __m128i mask1 = _mm_set1_epi8(':');
+  const __m128i mask2 = _mm_set1_epi8('/');
+  const __m128i mask4 = _mm_set1_epi8('?');
+  const __m128i mask5 = _mm_set1_epi8('[');
+
+  for (; i + 15 < view.size(); i += 16) {
+    __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    __m128i m1 = _mm_cmpeq_epi8(word, mask1);
+    __m128i m2 = _mm_cmpeq_epi8(word, mask2);
+    __m128i m4 = _mm_cmpeq_epi8(word, mask4);
+    __m128i m5 = _mm_cmpeq_epi8(word, mask5);
+    __m128i m = _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m4, m5));
+    int mask = _mm_movemask_epi8(m);
+    if (mask != 0) {
+      return i + trailing_zeroes(mask);
+    }
+  }
+  if (i < view.size()) {
+    __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    __m128i m1 = _mm_cmpeq_epi8(word, mask1);
+    __m128i m2 = _mm_cmpeq_epi8(word, mask2);
+    __m128i m4 = _mm_cmpeq_epi8(word, mask4);
+    __m128i m5 = _mm_cmpeq_epi8(word, mask5);
+    __m128i m = _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m4, m5));
+    int mask = _mm_movemask_epi8(m);
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(mask);
+    }
+  }
+  return size_t(view.length());
+}
+#else
+ada_really_inline size_t find_next_host_delimiter(std::string_view view,
+                                                  size_t location) noexcept {
   // performance: if you plan to call find_next_host_delimiter more than once,
   // you *really* want find_next_host_delimiter to be inlined, because
   // otherwise, the constants may get reloaded each time (bad).
-  /*
   auto has_zero_byte = [](uint64_t v) {
     return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
   };
@@ -454,8 +551,9 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
       return size_t(i + index_of_first_set_byte(is_match));
     }
   }
-  return view.size();*/
+  return view.size();
 }
+#endif
 
 ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
     const bool is_special, std::string_view& view) noexcept {
