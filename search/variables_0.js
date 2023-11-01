@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['base_0',['base',['../d5/ddb/namespaceada_1_1idna.html#a0d1e1182a7cae8b4c1063dbc7614f88f',1,'ada::idna']]]
+  ['authority_5fdelimiter_0',['authority_delimiter',['../d7/d6c/namespaceada_1_1helpers.html#a47732589ddb45d78afa510ff8cea369c',1,'ada::helpers']]],
+  ['authority_5fdelimiter_5fspecial_1',['authority_delimiter_special',['../d7/d6c/namespaceada_1_1helpers.html#ae1215f099b11df4e5da905e45be0d7e0',1,'ada::helpers']]]
 ];

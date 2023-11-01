@@ -31,7 +31,12 @@ var namespaceada =
       [ "find_next_host_delimiter", "d7/d6c/namespaceada_1_1helpers.html#a2a58f86cdd1531639773044c45320fa7", null ],
       [ "find_next_host_delimiter_special", "d7/d6c/namespaceada_1_1helpers.html#a507c70c395c7a5a152cc214f7a335fe5", null ],
       [ "get_state", "d7/d6c/namespaceada_1_1helpers.html#a6b55d7d7b1918e00a9a1eeb3c91b8f90", null ],
-      [ "leading_zeroes", "d7/d6c/namespaceada_1_1helpers.html#ac4d60df9832144829b0639e64794ebb2", null ]
+      [ "leading_zeroes", "d7/d6c/namespaceada_1_1helpers.html#ac4d60df9832144829b0639e64794ebb2", null ],
+      [ "trailing_zeroes", "d7/d6c/namespaceada_1_1helpers.html#ac933d028f7c550fa819c4ccac98c1ea3", null ],
+      [ "authority_delimiter", "d7/d6c/namespaceada_1_1helpers.html#a47732589ddb45d78afa510ff8cea369c", null ],
+      [ "authority_delimiter_special", "d7/d6c/namespaceada_1_1helpers.html#ae1215f099b11df4e5da905e45be0d7e0", null ],
+      [ "host_delimiters", "d7/d6c/namespaceada_1_1helpers.html#a0a04d6f5d663b58bd05c180a61dabd4b", null ],
+      [ "special_host_delimiters", "d7/d6c/namespaceada_1_1helpers.html#a1e5b802e87cb59434ddcf220cb052794", null ]
     ] ],
     [ "idna", "d5/ddb/namespaceada_1_1idna.html", "d5/ddb/namespaceada_1_1idna" ],
     [ "parser", "d6/da3/namespaceada_1_1parser.html", [
