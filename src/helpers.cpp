@@ -174,20 +174,6 @@ ada_really_inline void resize(std::string_view& input, size_t pos) noexcept {
   input.remove_suffix(input.size() - pos);
 }
 
-// Reverse the byte order.
-// this is a private inline function only defined in this source file.
-ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept {
-  // performance: this often compiles to a single instruction (e.g., bswap)
-  return ((((val)&0xff00000000000000ull) >> 56) |
-          (((val)&0x00ff000000000000ull) >> 40) |
-          (((val)&0x0000ff0000000000ull) >> 24) |
-          (((val)&0x000000ff00000000ull) >> 8) |
-          (((val)&0x00000000ff000000ull) << 8) |
-          (((val)&0x0000000000ff0000ull) << 24) |
-          (((val)&0x000000000000ff00ull) << 40) |
-          (((val)&0x00000000000000ffull) << 56));
-}
-
 // computes the number of trailing zeroes
 // this is a private inline function only defined in this source file.
 ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
