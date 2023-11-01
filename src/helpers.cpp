@@ -389,7 +389,6 @@ ada_really_inline size_t find_next_host_delimiter_special(
 // starting at index location, this finds the next location of a character
 // :, /, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
-
 #if ADA_NEON
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
                                                   size_t location) noexcept {
