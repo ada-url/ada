@@ -151,12 +151,6 @@ ada_really_inline uint64_t swap_bytes(uint64_t val) noexcept;
 
 /**
  * @private
- * Reverse the order of the bytes but only if the system is big endian
- */
-ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept;
-
-/**
- * @private
  * Finds the delimiter of a view in authority state.
  */
 ada_really_inline size_t
