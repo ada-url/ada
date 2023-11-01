@@ -197,69 +197,47 @@ ada_really_inline uint64_t swap_bytes_if_big_endian(uint64_t val) noexcept {
 #endif
 }
 
+// : / [ \\ ?
+static constexpr bool special_host_delimiters[256] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+// : / [ ?
+static constexpr bool host_delimiters[256] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
 // starting at index location, this finds the next location of a character
 // :, /, \\, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
+// ['0x3a', '0x2f', '0x5c', '0x3f', '0x5b']
 ada_really_inline size_t find_next_host_delimiter_special(
     std::string_view view, size_t location) noexcept {
-  // performance: if you plan to call find_next_host_delimiter more than once,
-  // you *really* want find_next_host_delimiter to be inlined, because
-  // otherwise, the constants may get reloaded each time (bad).
-  auto has_zero_byte = [](uint64_t v) {
-    return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
-  };
-  auto index_of_first_set_byte = [](uint64_t v) {
-    return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
-  };
-  auto broadcast = [](uint8_t v) -> uint64_t {
-    return 0x101010101010101ull * v;
-  };
-  size_t i = location;
-  uint64_t mask1 = broadcast(':');
-  uint64_t mask2 = broadcast('/');
-  uint64_t mask3 = broadcast('\\');
-  uint64_t mask4 = broadcast('?');
-  uint64_t mask5 = broadcast('[');
-  // This loop will get autovectorized under many optimizing compilers,
-  // so you get actually SIMD!
-  for (; i + 7 < view.size(); i += 8) {
-    uint64_t word{};
-    // performance: the next memcpy translates into a single CPU instruction.
-    memcpy(&word, view.data() + i, sizeof(word));
-    // performance: on little-endian systems (most systems), this next line is
-    // free.
-    word = swap_bytes_if_big_endian(word);
-    uint64_t xor1 = word ^ mask1;
-    uint64_t xor2 = word ^ mask2;
-    uint64_t xor3 = word ^ mask3;
-    uint64_t xor4 = word ^ mask4;
-    uint64_t xor5 = word ^ mask5;
-    uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |
-                        has_zero_byte(xor3) | has_zero_byte(xor4) |
-                        has_zero_byte(xor5);
-    if (is_match) {
-      return size_t(i + index_of_first_set_byte(is_match));
+  auto const str = view.substr(location);
+  for (auto pos = str.begin(); pos != str.end(); ++pos) {
+    if (special_host_delimiters[(uint8_t)*pos]) {
+      return pos - str.begin() + location;
     }
   }
-  if (i < view.size()) {
-    uint64_t word{};
-    // performance: the next memcpy translates into a function call, but
-    // that is difficult to avoid. Might be a bit expensive.
-    memcpy(&word, view.data() + i, view.size() - i);
-    word = swap_bytes_if_big_endian(word);
-    uint64_t xor1 = word ^ mask1;
-    uint64_t xor2 = word ^ mask2;
-    uint64_t xor3 = word ^ mask3;
-    uint64_t xor4 = word ^ mask4;
-    uint64_t xor5 = word ^ mask5;
-    uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |
-                        has_zero_byte(xor3) | has_zero_byte(xor4) |
-                        has_zero_byte(xor5);
-    if (is_match) {
-      return size_t(i + index_of_first_set_byte(is_match));
-    }
-  }
-  return view.size();
+  return size_t(view.size());
 }
 
 // starting at index location, this finds the next location of a character
@@ -267,61 +245,13 @@ ada_really_inline size_t find_next_host_delimiter_special(
 // For use within get_host_delimiter_location.
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
                                                   size_t location) noexcept {
-  // performance: if you plan to call find_next_host_delimiter more than once,
-  // you *really* want find_next_host_delimiter to be inlined, because
-  // otherwise, the constants may get reloaded each time (bad).
-  auto has_zero_byte = [](uint64_t v) {
-    return ((v - 0x0101010101010101) & ~(v)&0x8080808080808080);
-  };
-  auto index_of_first_set_byte = [](uint64_t v) {
-    return ((((v - 1) & 0x101010101010101) * 0x101010101010101) >> 56) - 1;
-  };
-  auto broadcast = [](uint8_t v) -> uint64_t {
-    return 0x101010101010101ull * v;
-  };
-  size_t i = location;
-  uint64_t mask1 = broadcast(':');
-  uint64_t mask2 = broadcast('/');
-  uint64_t mask4 = broadcast('?');
-  uint64_t mask5 = broadcast('[');
-  // This loop will get autovectorized under many optimizing compilers,
-  // so you get actually SIMD!
-  for (; i + 7 < view.size(); i += 8) {
-    uint64_t word{};
-    // performance: the next memcpy translates into a single CPU instruction.
-    memcpy(&word, view.data() + i, sizeof(word));
-    // performance: on little-endian systems (most systems), this next line is
-    // free.
-    word = swap_bytes_if_big_endian(word);
-    uint64_t xor1 = word ^ mask1;
-    uint64_t xor2 = word ^ mask2;
-    uint64_t xor4 = word ^ mask4;
-    uint64_t xor5 = word ^ mask5;
-    uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |
-                        has_zero_byte(xor4) | has_zero_byte(xor5);
-    if (is_match) {
-      return size_t(i + index_of_first_set_byte(is_match));
+  auto const str = view.substr(location);
+  for (auto pos = str.begin(); pos != str.end(); ++pos) {
+    if (host_delimiters[(uint8_t)*pos]) {
+      return pos - str.begin() + location;
     }
   }
-  if (i < view.size()) {
-    uint64_t word{};
-    // performance: the next memcpy translates into a function call, but
-    // that is difficult to avoid. Might be a bit expensive.
-    memcpy(&word, view.data() + i, view.size() - i);
-    // performance: on little-endian systems (most systems), this next line is
-    // free.
-    word = swap_bytes_if_big_endian(word);
-    uint64_t xor1 = word ^ mask1;
-    uint64_t xor2 = word ^ mask2;
-    uint64_t xor4 = word ^ mask4;
-    uint64_t xor5 = word ^ mask5;
-    uint64_t is_match = has_zero_byte(xor1) | has_zero_byte(xor2) |
-                        has_zero_byte(xor4) | has_zero_byte(xor5);
-    if (is_match) {
-      return size_t(i + index_of_first_set_byte(is_match));
-    }
-  }
-  return view.size();
+  return size_t(view.size());
 }
 
 ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
