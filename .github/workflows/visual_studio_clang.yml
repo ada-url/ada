@@ -30,7 +30,7 @@ jobs:
         include:
           - {gen: Visual Studio 17 2022, arch: x64, devchecks: ON}
     steps:
-    - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v3.6.0
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v3.6.0
     - name: Configure
       run: |
         cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -T ClangCL -B build
