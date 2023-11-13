@@ -76,7 +76,9 @@ ada_really_inline bool begins_with(std::string_view view,
                                    std::string_view prefix);
 
 /**
- * Returns true if an input is an ipv4 address.
+ * Returns true if an input is an ipv4 address. It is assumed that the string
+ * does not contain uppercase ASCII characters (the input should have been
+ * lowered cased before calling this function) and is not empty.
  */
 ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept;
 

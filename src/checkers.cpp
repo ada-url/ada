@@ -4,6 +4,20 @@
 namespace ada::checkers {
 
 ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
+  // The string is not empty and does not contain upper case ASCII characters.
+  //
+  // Optimization. To be considered as a possible ipv4, the string must end
+  // with 'x' or a lowercase hex character.
+  // Most of the time, this will be false so this simple check will save a lot
+  // of effort.
+  const char last_char = view.back();
+  bool possible_ipv4 = (last_char >= '0' && last_char <= '9') ||
+                       (last_char >= 'a' && last_char <= 'f') ||
+                       last_char == 'x';
+  if (!possible_ipv4) {
+    return false;
+  }
+  // From the last character, find the last dot.
   size_t last_dot = view.rfind('.');
   if (last_dot != std::string_view::npos) {
     // We have at least one dot.
@@ -20,6 +34,8 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
       view = view.substr(last_dot + 1);
     }
   }
+  // We may have an empty result if the address ends with two dots (..).
+  // It is an unlikely case.
   if (view.empty()) {
     return false;
   }
@@ -29,9 +45,22 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
   if (std::all_of(view.begin(), view.end(), ada::checkers::is_digit)) {
     return true;
   }
-  return (checkers::has_hex_prefix(view) &&
-          (view.size() == 2 || std::all_of(view.begin() + 2, view.end(),
-                                           ada::unicode::is_lowercase_hex)));
+  // It could be hex (0x), but not if there is a single character.
+  if(view.size() == 1) {
+    return false;
+  }
+  // It must start with 0x.
+  if(!std::equal(view.begin(), view.begin() + 2, "0x")) {
+    return false;
+  }
+  // We must allow "0x".
+  if(view.size() == 2) {
+    return true;
+  }
+  // We have 0x followed by some characters, we need to check that they are
+  // hexadecimals.
+  return std::all_of(view.begin() + 2, view.end(),
+                                       ada::unicode::is_lowercase_hex);
 }
 
 // for use with path_signature, we include all characters that need percent
