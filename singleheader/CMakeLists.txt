@@ -51,7 +51,7 @@ if (Python3_Interpreter_FOUND)
   target_link_libraries(ada-singleheader-source INTERFACE ada-singleheader-include-source)
   add_library(ada-singleheader-lib STATIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/ada.cpp>)
 
-  if (BUILD_TESTING)
+  if (ADA_TESTING)
     add_executable(demo $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.cpp>)
     target_link_libraries(demo ada-singleheader-include-source)
 

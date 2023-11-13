@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 project(ada
   DESCRIPTION "Fast spec-compliant URL parser"
   LANGUAGES C CXX
-  VERSION 2.7.2
+  VERSION 2.7.3
 )
 
-set(ADA_LIB_VERSION "2.7.2" CACHE STRING "ada library version")
+set(ADA_LIB_VERSION "2.7.3" CACHE STRING "ada library version")
 set(ADA_LIB_SOVERSION "2" CACHE STRING "ada library soversion")
 
 include(GNUInstallDirs)
@@ -23,65 +23,73 @@ add_subdirectory(src)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
+option(ADA_TESTING "Build tests" ${BUILD_TESTING})
 
-include(cmake/CPM.cmake)
-# CPM requires git as an implicit dependency
-find_package(Git QUIET)
-# We use googletest in the tests
-if(Git_FOUND AND BUILD_TESTING)
-  CPMAddPackage(
-    NAME GTest
-    GITHUB_REPOSITORY google/googletest
-    VERSION 1.14.0
-    OPTIONS  "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
-  )
-endif()
-# We use simdjson in both the benchmarks and tests
-if(Git_FOUND AND (BUILD_TESTING OR ADA_BENCHMARKS))
-  CPMAddPackage("gh:simdjson/simdjson@3.3.0")
-endif()
-# We use Google Benchmark, but it does not build under several 32-bit systems.
-if(Git_FOUND AND ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
-  CPMAddPackage(
-    NAME benchmark
-    GITHUB_REPOSITORY google/benchmark
-    GIT_TAG f91b6b4
-    OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
-            "BENCHMARK_ENABLE_INSTALL OFF"
-            "BENCHMARK_ENABLE_WERROR OFF"
-
-  )
-endif()
-
-if (BUILD_TESTING AND NOT EMSCRIPTEN)
-  if(Git_FOUND)
-    message(STATUS "The tests are enabled.")
-    add_subdirectory(tests)
+# There are cases where when embedding ada as a dependency for other CMake 
+# projects as submodules or subdirectories (via FetchContent) can lead to
+# errors due to CPM, so this is here to support disabling all the testing
+# and tooling for ada if one only wishes to use the ada library.
+if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
+  include(cmake/CPM.cmake)
+  # CPM requires git as an implicit dependency
+  find_package(Git QUIET)
+  # We use googletest in the tests
+  if(Git_FOUND AND ADA_TESTING)
+    CPMAddPackage(
+      NAME GTest
+      GITHUB_REPOSITORY google/googletest
+      VERSION 1.14.0
+      OPTIONS  "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
+    )
+  endif()
+  # We use simdjson in both the benchmarks and tests
+  if(Git_FOUND AND (ADA_TESTING OR ADA_BENCHMARKS))
+    CPMAddPackage("gh:simdjson/simdjson@3.3.0")
+  endif()
+  # We use Google Benchmark, but it does not build under several 32-bit systems.
+  if(Git_FOUND AND ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
+    CPMAddPackage(
+      NAME benchmark
+      GITHUB_REPOSITORY google/benchmark
+      GIT_TAG f91b6b4
+      OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
+              "BENCHMARK_ENABLE_INSTALL OFF"
+              "BENCHMARK_ENABLE_WERROR OFF"
+  
+    )
+  endif()
+  
+  if (ADA_TESTING AND NOT EMSCRIPTEN)
+    if(Git_FOUND)
+      message(STATUS "The tests are enabled.")
+      add_subdirectory(tests)
+    else()
+      message(STATUS "The tests are disabled because git was not found.")
+    endif()
   else()
-    message(STATUS "The tests are disabled because git was not found.")
-  endif()
-else()
-  if(is_top_project)
-    message(STATUS "The tests are disabled.")
-  endif()
-endif(BUILD_TESTING AND NOT EMSCRIPTEN)
+    if(is_top_project)
+      message(STATUS "The tests are disabled.")
+    endif()
+  endif(ADA_TESTING AND NOT EMSCRIPTEN)
+  
+  If(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
+    if(Git_FOUND)
+      message(STATUS "Ada benchmarks enabled.")
+      add_subdirectory(benchmarks)
+    else()
+      message(STATUS "The benchmarks are disabled because git was not found.")
+    endif()
+  else(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
+    if(is_top_project)
+      message(STATUS "Ada benchmarks disabled. Set ADA_BENCHMARKS=ON to enable them.")
+    endif()
+  endif(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
+  
+  if (ADA_TESTING AND EMSCRIPTEN)
+    add_subdirectory(tests/wasm)
+  endif(ADA_TESTING AND EMSCRIPTEN)
+endif()
 
-If(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
-  if(Git_FOUND)
-    message(STATUS "Ada benchmarks enabled.")
-    add_subdirectory(benchmarks)
-  else()
-    message(STATUS "The benchmarks are disabled because git was not found.")
-  endif()
-else(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
-  if(is_top_project)
-    message(STATUS "Ada benchmarks disabled. Set ADA_BENCHMARKS=ON to enable them.")
-  endif()
-endif(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
-
-if (BUILD_TESTING AND EMSCRIPTEN)
-  add_subdirectory(tests/wasm)
-endif(BUILD_TESTING AND EMSCRIPTEN)
 
 add_library(ada::ada ALIAS ada)
 

@@ -28,17 +28,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {gen: Visual Studio 17 2022, arch: x64, devchecks: ON, shared: OFF}
-          - {gen: Visual Studio 17 2022, arch: x64, devchecks: ON, shared: ON}
-          - {gen: Visual Studio 17 2022, arch: Win32, devchecks: ON, shared: OFF}
-          - {gen: Visual Studio 17 2022, arch: Win32, devchecks: ON, shared: ON}
+          - {gen: Visual Studio 17 2022, arch: x64, devchecks: OFF, shared: OFF, config: Release}
+          - {gen: Visual Studio 17 2022, arch: x64, devchecks: ON, shared: OFF, config: Debug}
+          - {gen: Visual Studio 17 2022, arch: x64, devchecks: ON, shared: ON, config: Debug}
+          - {gen: Visual Studio 17 2022, arch: Win32, devchecks: ON, shared: OFF, config: Debug}
+          - {gen: Visual Studio 17 2022, arch: Win32, devchecks: ON, shared: ON, config: Debug}
     steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v3.6.0
     - name: Configure
       run: |
-        cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build-debug
-    - name: Build Debug
-      run: cmake --build build --config Debug --verbose
-    - name: Run Debug tests
+        cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build
+    - name: Build
+      run: cmake --build build --config "${{matrix.config}}" --verbose
+    - name: Run  tests
       working-directory: build
-      run: ctest -C Debug  --output-on-failure
+      run: ctest -C "${{matrix.config}}"  --output-on-failure
