@@ -36,14 +36,9 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v3.6.0
     - name: Configure
       run: |
-        cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build
+        cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build-debug
     - name: Build Debug
-      run: cmake --build build-debug --config Debug --verbose
+      run: cmake --build build --config Debug --verbose
     - name: Run Debug tests
-      working-directory: build-debug
+      working-directory: build
       run: ctest -C Debug  --output-on-failure
-    - name: Build Release
-      run: cmake --build build-release --config Release --verbose
-    - name: Run Release tests
-      working-directory: build-release
-      run: ctest -C Release   --output-on-failure

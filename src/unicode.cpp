@@ -152,13 +152,14 @@ ada_really_inline bool has_tabs_or_newline(
 // U+007C (|).
 constexpr static std::array<uint8_t, 256> is_forbidden_host_code_point_table =
     []() constexpr {
-      std::array<uint8_t, 256> result{};
-      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
-                        '>', '?', '@', '[', '\\', ']', '^', '|'}) {
-        result[c] = true;
-      }
-      return result;
-    }();
+  std::array<uint8_t, 256> result{};
+  for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<', '>',
+                    '?', '@', '[', '\\', ']', '^', '|'}) {
+    result[c] = true;
+  }
+  return result;
+}
+();
 
 ada_really_inline constexpr bool is_forbidden_host_code_point(
     const char c) noexcept {
@@ -167,19 +168,20 @@ ada_really_inline constexpr bool is_forbidden_host_code_point(
 
 constexpr static std::array<uint8_t, 256> is_forbidden_domain_code_point_table =
     []() constexpr {
-      std::array<uint8_t, 256> result{};
-      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
-                        '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
-        result[c] = true;
-      }
-      for (uint8_t c = 0; c <= 32; c++) {
-        result[c] = true;
-      }
-      for (size_t c = 127; c < 255; c++) {
-        result[c] = true;
-      }
-      return result;
-    }();
+  std::array<uint8_t, 256> result{};
+  for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<', '>',
+                    '?', '@', '[', '\\', ']', '^', '|', '%'}) {
+    result[c] = true;
+  }
+  for (uint8_t c = 0; c <= 32; c++) {
+    result[c] = true;
+  }
+  for (size_t c = 127; c < 255; c++) {
+    result[c] = true;
+  }
+  return result;
+}
+();
 
 static_assert(sizeof(is_forbidden_domain_code_point_table) == 256);
 
@@ -206,22 +208,23 @@ ada_really_inline constexpr bool contains_forbidden_domain_code_point(
 
 constexpr static std::array<uint8_t, 256>
     is_forbidden_domain_code_point_table_or_upper = []() constexpr {
-      std::array<uint8_t, 256> result{};
-      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
-                        '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
-        result[c] = 1;
-      }
-      for (uint8_t c = 'A'; c <= 'Z'; c++) {
-        result[c] = 2;
-      }
-      for (uint8_t c = 0; c <= 32; c++) {
-        result[c] = 1;
-      }
-      for (size_t c = 127; c < 255; c++) {
-        result[c] = 1;
-      }
-      return result;
-    }();
+  std::array<uint8_t, 256> result{};
+  for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<', '>',
+                    '?', '@', '[', '\\', ']', '^', '|', '%'}) {
+    result[c] = 1;
+  }
+  for (uint8_t c = 'A'; c <= 'Z'; c++) {
+    result[c] = 2;
+  }
+  for (uint8_t c = 0; c <= 32; c++) {
+    result[c] = 1;
+  }
+  for (size_t c = 127; c < 255; c++) {
+    result[c] = 1;
+  }
+  return result;
+}
+();
 
 ada_really_inline constexpr uint8_t
 contains_forbidden_domain_code_point_or_upper(const char* input,
@@ -260,7 +263,8 @@ constexpr static std::array<bool, 256> is_alnum_plus_table = []() constexpr {
       result[c] = false;
   }
   return result;
-}();
+}
+();
 
 ada_really_inline constexpr bool is_alnum_plus(const char c) noexcept {
   return is_alnum_plus_table[uint8_t(c)];

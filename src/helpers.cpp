@@ -302,8 +302,9 @@ ada_really_inline size_t find_next_host_delimiter_special(
 }
 #else
 // : / [ \\ ?
-static constexpr std::array<uint8_t, 256> special_host_delimiters = []() constexpr {
-  std::array<uint8_t, 256> result;
+static constexpr std::array<uint8_t, 256> special_host_delimiters =
+    []() constexpr {
+  std::array<uint8_t, 256> result{};
   for (size_t i = 0; i < 256; i++) {
     if (i == ':' || i == '/' || i == '[' || i == '\\' || i == '?') {
       result[i] = 1;
@@ -312,7 +313,8 @@ static constexpr std::array<uint8_t, 256> special_host_delimiters = []() constex
     }
   }
   return result;
-}();
+}
+();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t find_next_host_delimiter_special(
     std::string_view view, size_t location) noexcept {
@@ -436,7 +438,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 #else
 // : / [ ?
 static constexpr std::array<uint8_t, 256> host_delimiters = []() constexpr {
-  std::array<uint8_t, 256> result;
+  std::array<uint8_t, 256> result{};
   for (size_t i = 0; i < 256; i++) {
     if (i == ':' || i == '/' || i == '?' || i == '[') {
       result[i] = 1;
@@ -445,7 +447,8 @@ static constexpr std::array<uint8_t, 256> host_delimiters = []() constexpr {
     }
   }
   return result;
-}();
+}
+();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
                                                   size_t location) noexcept {
@@ -733,7 +736,8 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(
 }
 
 // @ / \\ ?
-static constexpr std::array<uint8_t, 256> authority_delimiter_special = []() constexpr {
+static constexpr std::array<uint8_t, 256> authority_delimiter_special =
+    []() constexpr {
   std::array<uint8_t, 256> result{};
   for (size_t i = 0; i < 256; i++) {
     if (i == '@' || i == '/' || i == '\\' || i == '?') {
@@ -743,7 +747,8 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special = []() con
     }
   }
   return result;
-}();
+}
+();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
@@ -768,7 +773,8 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() constexpr {
     }
   }
   return result;
-}();
+}
+();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
