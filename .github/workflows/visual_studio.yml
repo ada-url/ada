@@ -38,12 +38,12 @@ jobs:
       run: |
         cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build
     - name: Build Debug
-      run: cmake --build build --config Debug --verbose
+      run: cmake --build build-debug --config Debug --verbose
     - name: Run Debug tests
-      working-directory: build
+      working-directory: build-debug
       run: ctest -C Debug  --output-on-failure
     - name: Build Release
-      run: cmake --build build --config Release --verbose
+      run: cmake --build build-release --config Release --verbose
     - name: Run Release tests
-      working-directory: build
+      working-directory: build-release
       run: ctest -C Release   --output-on-failure

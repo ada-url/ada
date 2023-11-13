@@ -151,7 +151,7 @@ ada_really_inline bool has_tabs_or_newline(
 // U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]), U+005E (^), or
 // U+007C (|).
 constexpr static std::array<uint8_t, 256> is_forbidden_host_code_point_table =
-    []() {
+    []() constexpr {
       std::array<uint8_t, 256> result{};
       for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
                         '>', '?', '@', '[', '\\', ']', '^', '|'}) {
@@ -166,7 +166,7 @@ ada_really_inline constexpr bool is_forbidden_host_code_point(
 }
 
 constexpr static std::array<uint8_t, 256> is_forbidden_domain_code_point_table =
-    []() {
+    []() constexpr {
       std::array<uint8_t, 256> result{};
       for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
                         '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
@@ -205,7 +205,7 @@ ada_really_inline constexpr bool contains_forbidden_domain_code_point(
 }
 
 constexpr static std::array<uint8_t, 256>
-    is_forbidden_domain_code_point_table_or_upper = []() {
+    is_forbidden_domain_code_point_table_or_upper = []() constexpr {
       std::array<uint8_t, 256> result{};
       for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
                         '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
@@ -245,7 +245,7 @@ contains_forbidden_domain_code_point_or_upper(const char* input,
   return accumulator;
 }
 
-constexpr static std::array<bool, 256> is_alnum_plus_table = []() {
+constexpr static std::array<bool, 256> is_alnum_plus_table = []() constexpr {
   std::array<bool, 256> result{};
   for (size_t c = 0; c < 256; c++) {
     if (c >= '0' && c <= '9') {
