@@ -10,7 +10,15 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
   // with 'x' or a lowercase hex character.
   // Most of the time, this will be false so this simple check will save a lot
   // of effort.
-  const char last_char = view.back();
+  char last_char = view.back();
+  // If the address ends with a dot, we need to prune it (special case).
+  if (last_char == '.') {
+    view.remove_suffix(1);
+    if (view.empty()) {
+      return false;
+    }
+    last_char = view.back();
+  }
   bool possible_ipv4 = (last_char >= '0' && last_char <= '9') ||
                        (last_char >= 'a' && last_char <= 'f') ||
                        last_char == 'x';
@@ -21,23 +29,7 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
   size_t last_dot = view.rfind('.');
   if (last_dot != std::string_view::npos) {
     // We have at least one dot.
-    //
-    // If the address ends with a dot, we need to prune it (special case).
-    if (last_dot == view.size() - 1) {
-      view.remove_suffix(1);
-      last_dot = view.rfind('.');
-      if (last_dot != std::string_view::npos) {
-        view = view.substr(last_dot + 1);
-      }
-    } else {
-      // We have at least one dot and the address does not end with a dot.
-      view = view.substr(last_dot + 1);
-    }
-  }
-  // We may have an empty result if the address ends with two dots (..).
-  // It is an unlikely case.
-  if (view.empty()) {
-    return false;
+    view = view.substr(last_dot + 1);
   }
   /** Optimization opportunity: we have basically identified the last number of
      the ipv4 if we return true here. We might as well parse it and have at
@@ -46,21 +38,21 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
     return true;
   }
   // It could be hex (0x), but not if there is a single character.
-  if(view.size() == 1) {
+  if (view.size() == 1) {
     return false;
   }
   // It must start with 0x.
-  if(!std::equal(view.begin(), view.begin() + 2, "0x")) {
+  if (!std::equal(view.begin(), view.begin() + 2, "0x")) {
     return false;
   }
   // We must allow "0x".
-  if(view.size() == 2) {
+  if (view.size() == 2) {
     return true;
   }
   // We have 0x followed by some characters, we need to check that they are
   // hexadecimals.
   return std::all_of(view.begin() + 2, view.end(),
-                                       ada::unicode::is_lowercase_hex);
+                     ada::unicode::is_lowercase_hex);
 }
 
 // for use with path_signature, we include all characters that need percent
