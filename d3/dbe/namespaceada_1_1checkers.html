@@ -211,8 +211,6 @@ Variables</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a429bd47d8a8754da869ae095c9bb1c9f">has_hex_prefix_unsafe()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a14231efa76a2139432359418296556d0">is_ipv4()</a>.</p>
-
 </div>
 </div>
 <a id="a429bd47d8a8754da869ae095c9bb1c9f" name="a429bd47d8a8754da869ae095c9bb1c9f"></a>
@@ -339,13 +337,13 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns true if an input is an ipv4 address. </p>
+<p>Returns true if an input is an ipv4 address. It is assumed that the string does not contain uppercase ASCII characters (the input should have been lowered cased before calling this function) and is not empty. </p>
 <p>Optimization opportunity: we have basically identified the last number of the ipv4 if we return true here. We might as well parse it and have at least one number parsed when we get to parse_ipv4.</p>
 <p>Optimization opportunity: we have basically identified the last number of the ipv4 if we return true here. We might as well parse it and have at least one number parsed when we get to parse_ipv4.</p>
 
 <p class="definition">Definition at line <a class="el" href="../../d4/dd6/checkers_8cpp_source.html#l00006">6</a> of file <a class="el" href="../../d4/dd6/checkers_8cpp_source.html">checkers.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#aa30ee2c6ba3a3e942c7e2e70729a1cca">has_hex_prefix()</a>, <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">is_digit()</a>, <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a0577b6e41486aeee7b143ad2e779a4c2">ada::unicode::is_lowercase_hex()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>.</p>
+<p class="reference">References <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">is_digit()</a>, <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a0577b6e41486aeee7b143ad2e779a4c2">ada::unicode::is_lowercase_hex()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>.</p>
 
 </div>
 </div>
@@ -546,7 +544,7 @@ Variables</h2></td></tr>
 <div class="line">    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,</div>
 <div class="line">    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d4/dd6/checkers_8cpp_source.html#l00030">30</a> of file <a class="el" href="../../d4/dd6/checkers_8cpp_source.html">checkers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/dd6/checkers_8cpp_source.html#l00060">60</a> of file <a class="el" href="../../d4/dd6/checkers_8cpp_source.html">checkers.cpp</a>.</p>
 
 </div>
 </div>
