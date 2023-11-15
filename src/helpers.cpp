@@ -304,13 +304,12 @@ ada_really_inline size_t find_next_host_delimiter_special(
 // : / [ \\ ?
 static constexpr std::array<uint8_t, 256> special_host_delimiters =
     []() constexpr {
-  std::array<uint8_t, 256> result{};
-  for(int i : {':', '/', '[', '\\', '?'}) {
-    result[i] = 1;
-  }
-  return result;
-}
-();
+      std::array<uint8_t, 256> result{};
+      for (int i : {':', '/', '[', '\\', '?'}) {
+        result[i] = 1;
+      }
+      return result;
+    }();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t find_next_host_delimiter_special(
     std::string_view view, size_t location) noexcept {
@@ -435,12 +434,11 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 // : / [ ?
 static constexpr std::array<uint8_t, 256> host_delimiters = []() constexpr {
   std::array<uint8_t, 256> result{};
-  for(int i : {':', '/', '?', '['}) {
+  for (int i : {':', '/', '?', '['}) {
     result[i] = 1;
   }
   return result;
-}
-();
+}();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
                                                   size_t location) noexcept {
@@ -730,13 +728,12 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(
 // @ / \\ ?
 static constexpr std::array<uint8_t, 256> authority_delimiter_special =
     []() constexpr {
-  std::array<uint8_t, 256> result{};
-  for(int i : {'@', '/', '\\', '?'}) {
-    result[i] = 1;
-  }
-  return result;
-}
-();
+      std::array<uint8_t, 256> result{};
+      for (int i : {'@', '/', '\\', '?'}) {
+        result[i] = 1;
+      }
+      return result;
+    }();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
@@ -753,12 +750,11 @@ find_authority_delimiter_special(std::string_view view) noexcept {
 // @ / ?
 static constexpr std::array<uint8_t, 256> authority_delimiter = []() constexpr {
   std::array<uint8_t, 256> result{};
-  for(int i : {'@', '/', '?'}) {
+  for (int i : {'@', '/', '?'}) {
     result[i] = 1;
   }
   return result;
-}
-();
+}();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
