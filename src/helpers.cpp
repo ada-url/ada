@@ -305,12 +305,8 @@ ada_really_inline size_t find_next_host_delimiter_special(
 static constexpr std::array<uint8_t, 256> special_host_delimiters =
     []() constexpr {
   std::array<uint8_t, 256> result{};
-  for (size_t i = 0; i < 256; i++) {
-    if (i == ':' || i == '/' || i == '[' || i == '\\' || i == '?') {
-      result[i] = 1;
-    } else {
-      result[i] = 0;
-    }
+  for(int i : {':', '/', '[', '\\', '?'}) {
+    result[i] = 1;
   }
   return result;
 }
@@ -439,12 +435,8 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 // : / [ ?
 static constexpr std::array<uint8_t, 256> host_delimiters = []() constexpr {
   std::array<uint8_t, 256> result{};
-  for (size_t i = 0; i < 256; i++) {
-    if (i == ':' || i == '/' || i == '?' || i == '[') {
-      result[i] = 1;
-    } else {
-      result[i] = 0;
-    }
+  for(int i : {':', '/', '?', '['}) {
+    result[i] = 1;
   }
   return result;
 }
@@ -765,12 +757,8 @@ find_authority_delimiter_special(std::string_view view) noexcept {
 // @ / ?
 static constexpr std::array<uint8_t, 256> authority_delimiter = []() constexpr {
   std::array<uint8_t, 256> result{};
-  for (size_t i = 0; i < 256; i++) {
-    if (i == '@' || i == '/' || i == '?') {
-      result[i] = 1;
-    } else {
-      result[i] = 0;
-    }
+  for(int i : {'@', '/', '?'}) {
+    result[i] = 1;
   }
   return result;
 }

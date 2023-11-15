@@ -248,6 +248,7 @@ contains_forbidden_domain_code_point_or_upper(const char* input,
   return accumulator;
 }
 
+// std::isalnum(c) || c == '+' || c == '-' || c == '.') is true for
 constexpr static std::array<bool, 256> is_alnum_plus_table = []() constexpr {
   std::array<bool, 256> result{};
   for (size_t c = 0; c < 256; c++) {
@@ -259,8 +260,7 @@ constexpr static std::array<bool, 256> is_alnum_plus_table = []() constexpr {
       result[c] = true;
     } else if (c == '+' || c == '-' || c == '.') {
       result[c] = true;
-    } else
-      result[c] = false;
+    }
   }
   return result;
 }
