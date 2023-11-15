@@ -731,12 +731,8 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(
 static constexpr std::array<uint8_t, 256> authority_delimiter_special =
     []() constexpr {
   std::array<uint8_t, 256> result{};
-  for (size_t i = 0; i < 256; i++) {
-    if (i == '@' || i == '/' || i == '\\' || i == '?') {
-      result[i] = 1;
-    } else {
-      result[i] = 0;
-    }
+  for(int i : {'@', '/', '\\', '?'}) {
+    result[i] = 1;
   }
   return result;
 }
