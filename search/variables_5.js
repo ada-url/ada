@@ -13,7 +13,7 @@ var searchData=
   ['hash_5fstart_10',['hash_start',['../d3/d43/structada_1_1url__components.html#a06f265e421e6cf2eff0d280ad6170226',1,'ada::url_components::hash_start'],['../dc/d69/structada__url__components.html#a1f1cec4d94d0a2e9c91ab60a0123089f',1,'ada_url_components::hash_start']]],
   ['hex_11',['hex',['../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d',1,'ada::character_sets']]],
   ['hex_5fto_5fbinary_5ftable_12',['hex_to_binary_table',['../d2/dc3/namespaceada_1_1unicode.html#a653abc739f565d2b62c72a8499cf573e',1,'ada::unicode']]],
-  ['host_5fdelimiters_13',['host_delimiters',['../d7/d6c/namespaceada_1_1helpers.html#a0a04d6f5d663b58bd05c180a61dabd4b',1,'ada::helpers']]],
+  ['host_5fdelimiters_13',['host_delimiters',['../d7/d6c/namespaceada_1_1helpers.html#a4416803ffe1dee3e52ee5aab0f73ba98',1,'ada::helpers']]],
   ['host_5fend_14',['host_end',['../dc/d69/structada__url__components.html#a09b0452389414b3788594b9b4b1aeec6',1,'ada_url_components::host_end'],['../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b',1,'ada::url_components::host_end']]],
   ['host_5fstart_15',['host_start',['../dc/d69/structada__url__components.html#afdbe58a41d73db4faa282654a172d376',1,'ada_url_components::host_start'],['../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f',1,'ada::url_components::host_start']]],
   ['host_5ftype_16',['host_type',['../db/d75/structada_1_1url__base.html#a3c371e9b7a17ef5cc5f374f1454fb6b5',1,'ada::url_base']]]

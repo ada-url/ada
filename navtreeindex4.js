@@ -1,5 +1,7 @@
 var NAVTREEINDEX4 =
 {
+"dd/dd6/ada__c_8cpp.html#a4ed6111d02ff556f686799c482076e5e":[9,0,3,1,32],
+"dd/dd6/ada__c_8cpp.html#a54aa4bf9b91403fe2fb4f5b9d1fcf201":[9,0,3,1,82],
 "dd/dd6/ada__c_8cpp.html#a5649d9beb5e8b4fcbb78d274d85c3b69":[9,0,3,1,85],
 "dd/dd6/ada__c_8cpp.html#a56a6e283c6cda8ae15d40c2273763873":[9,0,3,1,47],
 "dd/dd6/ada__c_8cpp.html#a56b13e712fadf1a2081c6b15bdf4953d":[9,0,3,1,24],

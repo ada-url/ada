@@ -160,6 +160,6 @@ var searchData=
   ['ascii_5fhas_5fupper_5fcase_157',['ascii_has_upper_case',['../d5/ddb/namespaceada_1_1idna.html#ac6f73440f8dc6ef6ecd14b7a3a836b21',1,'ada::idna']]],
   ['ascii_5fmap_158',['ascii_map',['../d5/ddb/namespaceada_1_1idna.html#a10ef8e085520b93791eef38bdabf5941',1,'ada::idna']]],
   ['authority_159',['AUTHORITY',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39',1,'ada']]],
-  ['authority_5fdelimiter_160',['authority_delimiter',['../d7/d6c/namespaceada_1_1helpers.html#a47732589ddb45d78afa510ff8cea369c',1,'ada::helpers']]],
-  ['authority_5fdelimiter_5fspecial_161',['authority_delimiter_special',['../d7/d6c/namespaceada_1_1helpers.html#ae1215f099b11df4e5da905e45be0d7e0',1,'ada::helpers']]]
+  ['authority_5fdelimiter_160',['authority_delimiter',['../d7/d6c/namespaceada_1_1helpers.html#a7117e5e670efb876537a058d5fb559ed',1,'ada::helpers']]],
+  ['authority_5fdelimiter_5fspecial_161',['authority_delimiter_special',['../d7/d6c/namespaceada_1_1helpers.html#a324e85a68bea57ef8f599ab60c68779a',1,'ada::helpers']]]
 ];

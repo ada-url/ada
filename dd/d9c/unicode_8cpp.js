@@ -22,9 +22,9 @@ var unicode_8cpp =
     [ "to_lower_ascii", "dd/d9c/unicode_8cpp.html#ab9b70de07868ab60794c3079aa4db46f", null ],
     [ "to_unicode", "dd/d9c/unicode_8cpp.html#a80fc8cdeb27824384b9228896d3666f0", null ],
     [ "hex_to_binary_table", "dd/d9c/unicode_8cpp.html#a653abc739f565d2b62c72a8499cf573e", null ],
-    [ "is_alnum_plus_table", "dd/d9c/unicode_8cpp.html#a50281621924992b1070aba94a5b9ff96", null ],
-    [ "is_forbidden_domain_code_point_table", "dd/d9c/unicode_8cpp.html#a7216c89ab4ae9363099bd6eda485257f", null ],
-    [ "is_forbidden_domain_code_point_table_or_upper", "dd/d9c/unicode_8cpp.html#ad048524b31e4b4cab9eccfe1ac01a2b8", null ],
-    [ "is_forbidden_host_code_point_table", "dd/d9c/unicode_8cpp.html#aa68997eae390658825c090597114213d", null ],
+    [ "is_alnum_plus_table", "dd/d9c/unicode_8cpp.html#aa96be0c7e7a403dc114665734796702e", null ],
+    [ "is_forbidden_domain_code_point_table", "dd/d9c/unicode_8cpp.html#a1820f38f00f21a80cf55f662b4b5985c", null ],
+    [ "is_forbidden_domain_code_point_table_or_upper", "dd/d9c/unicode_8cpp.html#a1cd0be00a2404ea2f5fc7f92eca8a4eb", null ],
+    [ "is_forbidden_host_code_point_table", "dd/d9c/unicode_8cpp.html#a9e8b3ffd5313024ee058b6ce32e185bf", null ],
     [ "table_is_double_dot_path_segment", "dd/d9c/unicode_8cpp.html#a7c997c07906bb9e6ce09e5bab8e8364f", null ]
 ];
