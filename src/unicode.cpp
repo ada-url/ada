@@ -150,56 +150,36 @@ ada_really_inline bool has_tabs_or_newline(
 // U+0020 SPACE, U+0023 (#), U+002F (/), U+003A (:), U+003C (<), U+003E (>),
 // U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]), U+005E (^), or
 // U+007C (|).
-constexpr static bool is_forbidden_host_code_point_table[] = {
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-static_assert(sizeof(is_forbidden_host_code_point_table) == 256);
+constexpr static std::array<uint8_t, 256> is_forbidden_host_code_point_table =
+    []() constexpr {
+      std::array<uint8_t, 256> result{};
+      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
+                        '>', '?', '@', '[', '\\', ']', '^', '|'}) {
+        result[c] = true;
+      }
+      return result;
+    }();
 
 ada_really_inline constexpr bool is_forbidden_host_code_point(
     const char c) noexcept {
   return is_forbidden_host_code_point_table[uint8_t(c)];
 }
 
-static_assert(unicode::is_forbidden_host_code_point('\0'));
-static_assert(unicode::is_forbidden_host_code_point('\t'));
-static_assert(unicode::is_forbidden_host_code_point('\n'));
-static_assert(unicode::is_forbidden_host_code_point('\r'));
-static_assert(unicode::is_forbidden_host_code_point(' '));
-static_assert(unicode::is_forbidden_host_code_point('#'));
-static_assert(unicode::is_forbidden_host_code_point('/'));
-static_assert(unicode::is_forbidden_host_code_point(':'));
-static_assert(unicode::is_forbidden_host_code_point('?'));
-static_assert(unicode::is_forbidden_host_code_point('@'));
-static_assert(unicode::is_forbidden_host_code_point('['));
-static_assert(unicode::is_forbidden_host_code_point('?'));
-static_assert(unicode::is_forbidden_host_code_point('<'));
-static_assert(unicode::is_forbidden_host_code_point('>'));
-static_assert(unicode::is_forbidden_host_code_point('\\'));
-static_assert(unicode::is_forbidden_host_code_point(']'));
-static_assert(unicode::is_forbidden_host_code_point('^'));
-static_assert(unicode::is_forbidden_host_code_point('|'));
-
-constexpr static uint8_t is_forbidden_domain_code_point_table[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+constexpr static std::array<uint8_t, 256> is_forbidden_domain_code_point_table =
+    []() constexpr {
+      std::array<uint8_t, 256> result{};
+      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
+                        '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
+        result[c] = true;
+      }
+      for (uint8_t c = 0; c <= 32; c++) {
+        result[c] = true;
+      }
+      for (size_t c = 127; c < 255; c++) {
+        result[c] = true;
+      }
+      return result;
+    }();
 
 static_assert(sizeof(is_forbidden_domain_code_point_table) == 256);
 
@@ -224,22 +204,24 @@ ada_really_inline constexpr bool contains_forbidden_domain_code_point(
   return accumulator;
 }
 
-constexpr static uint8_t is_forbidden_domain_code_point_table_or_upper[] = {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-
-static_assert(sizeof(is_forbidden_domain_code_point_table_or_upper) == 256);
-static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('A')] == 2);
-static_assert(is_forbidden_domain_code_point_table_or_upper[uint8_t('Z')] == 2);
+constexpr static std::array<uint8_t, 256>
+    is_forbidden_domain_code_point_table_or_upper = []() constexpr {
+      std::array<uint8_t, 256> result{};
+      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
+                        '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
+        result[c] = 1;
+      }
+      for (uint8_t c = 'A'; c <= 'Z'; c++) {
+        result[c] = 2;
+      }
+      for (uint8_t c = 0; c <= 32; c++) {
+        result[c] = 1;
+      }
+      for (size_t c = 127; c < 255; c++) {
+        result[c] = 1;
+      }
+      return result;
+    }();
 
 ada_really_inline constexpr uint8_t
 contains_forbidden_domain_code_point_or_upper(const char* input,
@@ -263,41 +245,22 @@ contains_forbidden_domain_code_point_or_upper(const char* input,
   return accumulator;
 }
 
-static_assert(unicode::is_forbidden_domain_code_point('%'));
-static_assert(unicode::is_forbidden_domain_code_point('\x7f'));
-static_assert(unicode::is_forbidden_domain_code_point('\0'));
-static_assert(unicode::is_forbidden_domain_code_point('\t'));
-static_assert(unicode::is_forbidden_domain_code_point('\n'));
-static_assert(unicode::is_forbidden_domain_code_point('\r'));
-static_assert(unicode::is_forbidden_domain_code_point(' '));
-static_assert(unicode::is_forbidden_domain_code_point('#'));
-static_assert(unicode::is_forbidden_domain_code_point('/'));
-static_assert(unicode::is_forbidden_domain_code_point(':'));
-static_assert(unicode::is_forbidden_domain_code_point('?'));
-static_assert(unicode::is_forbidden_domain_code_point('@'));
-static_assert(unicode::is_forbidden_domain_code_point('['));
-static_assert(unicode::is_forbidden_domain_code_point('?'));
-static_assert(unicode::is_forbidden_domain_code_point('<'));
-static_assert(unicode::is_forbidden_domain_code_point('>'));
-static_assert(unicode::is_forbidden_domain_code_point('\\'));
-static_assert(unicode::is_forbidden_domain_code_point(']'));
-static_assert(unicode::is_forbidden_domain_code_point('^'));
-static_assert(unicode::is_forbidden_domain_code_point('|'));
-
-constexpr static bool is_alnum_plus_table[] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-static_assert(sizeof(is_alnum_plus_table) == 256);
+// std::isalnum(c) || c == '+' || c == '-' || c == '.') is true for
+constexpr static std::array<bool, 256> is_alnum_plus_table = []() constexpr {
+  std::array<bool, 256> result{};
+  for (size_t c = 0; c < 256; c++) {
+    if (c >= '0' && c <= '9') {
+      result[c] = true;
+    } else if (c >= 'a' && c <= 'z') {
+      result[c] = true;
+    } else if (c >= 'A' && c <= 'Z') {
+      result[c] = true;
+    } else if (c == '+' || c == '-' || c == '.') {
+      result[c] = true;
+    }
+  }
+  return result;
+}();
 
 ada_really_inline constexpr bool is_alnum_plus(const char c) noexcept {
   return is_alnum_plus_table[uint8_t(c)];
@@ -305,13 +268,6 @@ ada_really_inline constexpr bool is_alnum_plus(const char c) noexcept {
   // following under most compilers: return
   // return (std::isalnum(c) || c == '+' || c == '-' || c == '.');
 }
-static_assert(unicode::is_alnum_plus('+'));
-static_assert(unicode::is_alnum_plus('-'));
-static_assert(unicode::is_alnum_plus('.'));
-static_assert(unicode::is_alnum_plus('0'));
-static_assert(unicode::is_alnum_plus('1'));
-static_assert(unicode::is_alnum_plus('a'));
-static_assert(unicode::is_alnum_plus('b'));
 
 ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
   return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') ||
