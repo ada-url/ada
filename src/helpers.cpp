@@ -192,6 +192,19 @@ ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
 // :, /, \\, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
 #if ADA_NEON
+// The ada_make_uint8x16_t macro is necessary because Visual Studio does not
+// support direct initialization of uint8x16_t. See
+// https://developercommunity.visualstudio.com/t/error-C2078:-too-many-initializers-whe/402911?q=backend+neon
+#ifndef ada_make_uint8x16_t
+#define ada_make_uint8x16_t(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, \
+                            x13, x14, x15, x16)                                \
+  ([=]() {                                                                     \
+    static uint8_t array[16] = {x1, x2,  x3,  x4,  x5,  x6,  x7,  x8,          \
+                                x9, x10, x11, x12, x13, x14, x15, x16};        \
+    return vld1q_u8(array);                                                    \
+  }())
+#endif
+
 ada_really_inline size_t find_next_host_delimiter_special(
     std::string_view view, size_t location) noexcept {
   // first check for short strings in which case we do it naively.
@@ -205,8 +218,9 @@ ada_really_inline size_t find_next_host_delimiter_special(
     return size_t(view.size());
   }
   auto to_bitmask = [](uint8x16_t input) -> uint16_t {
-    uint8x16_t bit_mask = {0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
-                           0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
+    uint8x16_t bit_mask =
+        ada_make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x01,
+                            0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
     uint8x16_t minput = vandq_u8(input, bit_mask);
     uint8x16_t tmp = vpaddq_u8(minput, minput);
     tmp = vpaddq_u8(tmp, tmp);
@@ -216,10 +230,12 @@ ada_really_inline size_t find_next_host_delimiter_special(
 
   // fast path for long strings (expected to be common)
   size_t i = location;
-  uint8x16_t low_mask = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                         0x00, 0x00, 0x01, 0x04, 0x04, 0x00, 0x00, 0x03};
-  uint8x16_t high_mask = {0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  uint8x16_t low_mask =
+      ada_make_uint8x16_t(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                          0x00, 0x01, 0x04, 0x04, 0x00, 0x00, 0x03);
+  uint8x16_t high_mask =
+      ada_make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   uint8x16_t fmask = vmovq_n_u8(0xf);
   uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
@@ -340,8 +356,9 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     return size_t(view.size());
   }
   auto to_bitmask = [](uint8x16_t input) -> uint16_t {
-    uint8x16_t bit_mask = {0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
-                           0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80};
+    uint8x16_t bit_mask =
+        ada_make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x01,
+                            0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
     uint8x16_t minput = vandq_u8(input, bit_mask);
     uint8x16_t tmp = vpaddq_u8(minput, minput);
     tmp = vpaddq_u8(tmp, tmp);
@@ -351,10 +368,12 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 
   // fast path for long strings (expected to be common)
   size_t i = location;
-  uint8x16_t low_mask = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                         0x00, 0x00, 0x01, 0x04, 0x00, 0x00, 0x00, 0x03};
-  uint8x16_t high_mask = {0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  uint8x16_t low_mask =
+      ada_make_uint8x16_t(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                          0x00, 0x01, 0x04, 0x00, 0x00, 0x00, 0x03);
+  uint8x16_t high_mask =
+      ada_make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   uint8x16_t fmask = vmovq_n_u8(0xf);
   uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
@@ -774,4 +793,5 @@ namespace ada {
 ada_warn_unused std::string to_string(ada::state state) {
   return ada::helpers::get_state(state);
 }
+#undef ada_make_uint8x16_t
 }  // namespace ada
