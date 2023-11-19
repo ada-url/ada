@@ -198,14 +198,14 @@ ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
  * make_uint8x16_t initializes a SIMD register (uint8x16_t).
  * This is needed because, incredibly, the syntax uint8x16_t x = {1,2,3...}
  * is not recognized under Visual Studio! This is a workaround.
- * GNU GCC compiles it to ldr, the same as uint8x16_t x = {1,2,3...}.
+ * GNU GCC and LLVM compile it to ldr, the same as uint8x16_t x = {1,2,3...}.
  * You should not use this function except for compile-time constants:
  * it is not efficient.
  */
-ada_really_inline uint8x16_t make_uint8x16_t(uint8_t x1,  uint8_t x2,  uint8_t x3,  uint8_t x4,
-                                         uint8_t x5,  uint8_t x6,  uint8_t x7,  uint8_t x8,
-                                         uint8_t x9,  uint8_t x10, uint8_t x11, uint8_t x12,
-                                         uint8_t x13, uint8_t x14, uint8_t x15, uint8_t x16) {
+ada_really_inline uint8x16_t make_uint8x16_t(
+    uint8_t x1, uint8_t x2, uint8_t x3, uint8_t x4, uint8_t x5, uint8_t x6,
+    uint8_t x7, uint8_t x8, uint8_t x9, uint8_t x10, uint8_t x11, uint8_t x12,
+    uint8_t x13, uint8_t x14, uint8_t x15, uint8_t x16) noexcept {
   // Doing a load like so end ups generating worse code.
   // uint8_t array[16] = {x1, x2, x3, x4, x5, x6, x7, x8,
   //                     x9, x10,x11,x12,x13,x14,x15,x16};
@@ -243,8 +243,9 @@ ada_really_inline size_t find_next_host_delimiter_special(
     return size_t(view.size());
   }
   auto to_bitmask = [](uint8x16_t input) -> uint16_t {
-    uint8x16_t bit_mask = make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
-                           0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
+    uint8x16_t bit_mask =
+        make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x01,
+                        0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
     uint8x16_t minput = vandq_u8(input, bit_mask);
     uint8x16_t tmp = vpaddq_u8(minput, minput);
     tmp = vpaddq_u8(tmp, tmp);
@@ -254,10 +255,12 @@ ada_really_inline size_t find_next_host_delimiter_special(
 
   // fast path for long strings (expected to be common)
   size_t i = location;
-  uint8x16_t low_mask = make_uint8x16_t(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                         0x00, 0x00, 0x01, 0x04, 0x04, 0x00, 0x00, 0x03);
-  uint8x16_t high_mask = make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  uint8x16_t low_mask =
+      make_uint8x16_t(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                      0x00, 0x01, 0x04, 0x04, 0x00, 0x00, 0x03);
+  uint8x16_t high_mask =
+      make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   uint8x16_t fmask = vmovq_n_u8(0xf);
   uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
@@ -378,8 +381,9 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     return size_t(view.size());
   }
   auto to_bitmask = [](uint8x16_t input) -> uint16_t {
-    uint8x16_t bit_mask = make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
-                           0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
+    uint8x16_t bit_mask =
+        make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x01,
+                        0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
     uint8x16_t minput = vandq_u8(input, bit_mask);
     uint8x16_t tmp = vpaddq_u8(minput, minput);
     tmp = vpaddq_u8(tmp, tmp);
@@ -389,10 +393,12 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 
   // fast path for long strings (expected to be common)
   size_t i = location;
-  uint8x16_t low_mask = make_uint8x16_t(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                         0x00, 0x00, 0x01, 0x04, 0x00, 0x00, 0x00, 0x03);
-  uint8x16_t high_mask = make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  uint8x16_t low_mask =
+      make_uint8x16_t(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                      0x00, 0x01, 0x04, 0x00, 0x00, 0x00, 0x03);
+  uint8x16_t high_mask =
+      make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   uint8x16_t fmask = vmovq_n_u8(0xf);
   uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
