@@ -192,7 +192,7 @@ ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
 // :, /, \\, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
 #if ADA_NEON
-// This macro is necessary because Visual Studio does not support direct
+// The ada_make_uint8x16_t macro is necessary because Visual Studio does not support direct
 // initialization of uint8x16_t.
 // See
 // https://developercommunity.visualstudio.com/t/error-C2078:-too-many-initializers-whe/402911?q=backend+neon
