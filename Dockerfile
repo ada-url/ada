@@ -1,4 +1,4 @@
-FROM debian:12-slim@sha256:6cc67f78e0e8295b4fbe055eba0356648f149daf15db9179aa51fcfa9cc131cd
+FROM debian:12-slim@sha256:2bc5c236e9b262645a323e9088dfa3bb1ecb16cc75811daf40a23a824d665be9
 
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
