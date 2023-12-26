@@ -858,10 +858,20 @@ bool url_aggregator::parse_ipv4(std::string_view input) {
           " bytes], overlaps with buffer: ",
           helpers::overlaps(input, buffer) ? "yes" : "no");
   ADA_ASSERT_TRUE(validate());
-  const bool trailing_dot = (input.back() == '.');
-  if (trailing_dot) {
-    input.remove_suffix(1);
+
+  // remove all of the last empty dots at the end:
+  bool trailing_dot = false;
+  for (;;) {
+    if (input.back() == '.') {
+      trailing_dot = true;
+      input.remove_suffix(1);
+      if (!input.empty()) {
+        continue;
+      }
+    }
+    break;
   }
+
   size_t digit_count{0};
   int pure_decimal_count = 0;  // entries that are decimal
   uint64_t ipv4{0};

@@ -24,7 +24,7 @@ bool url::parse_opaque_host(std::string_view input) {
 
 bool url::parse_ipv4(std::string_view input) {
   ada_log("parse_ipv4 ", input, "[", input.size(), " bytes]");
-  if (input.back() == '.') {
+  while (!input.empty() && input.back() == '.') {
     input.remove_suffix(1);
   }
   size_t digit_count{0};

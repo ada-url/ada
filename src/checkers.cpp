@@ -10,14 +10,17 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
   // with 'x' or a lowercase hex character.
   // Most of the time, this will be false so this simple check will save a lot
   // of effort.
-  char last_char = view.back();
   // If the address ends with a dot, we need to prune it (special case).
-  if (last_char == '.') {
+  char last_char{};
+  for (;;) {
+    last_char = view.back();
+    if (last_char != '.') {
+      break;
+    }
     view.remove_suffix(1);
     if (view.empty()) {
       return false;
     }
-    last_char = view.back();
   }
   bool possible_ipv4 = (last_char >= '0' && last_char <= '9') ||
                        (last_char >= 'a' && last_char <= 'f') ||
