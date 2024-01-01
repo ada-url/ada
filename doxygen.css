@@ -1,4 +1,4 @@
-/* The standard CSS for doxygen 1.9.8*/
+/* The standard CSS for doxygen 1.10.0*/
 
 body {
     background-color: white;
@@ -15,8 +15,6 @@ body, table, div, p, dl {
 /* @group Heading Levels */
 
 .title {
-	font-weight: 400;
-	font-size: 14px;
 	font-family: Roboto,sans-serif;
 	line-height: 28px;
 	font-size: 150%;
@@ -214,7 +212,13 @@ a {
 }
 
 a:hover {
-	text-decoration: underline;
+	text-decoration: none;
+	background:   linear-gradient(to bottom, transparent 0,transparent calc(100% - 1px), currentColor 100%);
+}
+
+a:hover > span.arrow {
+        text-decoration: none;
+        background : #F3F9FE;
 }
 
 a.el {
@@ -290,30 +294,63 @@ ul.multicol {
 .fragment {
   text-align: left;
   direction: ltr;
-  overflow-x: auto; /*Fixed: fragment lines overlap floating elements*/
+  overflow-x: auto;
   overflow-y: hidden;
+  position: relative;
+  min-height: 12px;
+  margin: 10px 0px;
+  padding: 10px 10px;
+  border: 1px solid #8DC8FF;
+  border-radius: 4px;
+  background-color: #F8FBFF;
+  color: black;
 }
 
 pre.fragment {
-        border: 1px solid #8DC8FF;
-        background-color: #F8FBFF;
-	color: black;
-        padding: 4px 6px;
-        margin: 4px 8px 4px 2px;
-        overflow: auto;
-        word-wrap: break-word;
-        font-size:  9pt;
-        line-height: 125%;
-        font-family: 'JetBrains Mono',Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace,fixed;
-        font-size: 105%;
+  word-wrap: break-word;
+  font-size:  10pt;
+  line-height: 125%;
+  font-family: 'JetBrains Mono',Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace,fixed;
 }
 
-div.fragment {
-	padding: 0 0 1px 0; /*Fixed: last line underline overlap border*/
-	margin: 4px 8px 4px 2px;
-	color: black;
-	background-color: #F8FBFF;
-	border: 1px solid #8DC8FF;
+.clipboard {
+        width: 24px;
+        height: 24px;
+        right: 5px;
+        top: 5px;
+        opacity: 0;
+        position: absolute;
+        display: inline;
+        overflow: auto;
+        fill: black;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+}
+
+.clipboard.success {
+        border: 1px solid black;
+        border-radius: 4px;
+}
+
+.fragment:hover .clipboard, .clipboard.success {
+        opacity: .28;
+}
+
+.clipboard:hover, .clipboard.success {
+        opacity: 1 !important;
+}
+
+.clipboard:active:not([class~=success]) svg {
+        transform: scale(.91);
+}
+
+.clipboard.success svg {
+        fill: #2EC82E;
+}
+
+.clipboard.success {
+        border-color: #2EC82E;
 }
 
 div.line {
@@ -434,10 +471,6 @@ img.dark-mode-visible {
 }
 img.light-mode-visible {
 	display: none;
-}
-
-img.formulaDsp {
-	
 }
 
 img.formulaInl, img.inline {
@@ -739,17 +772,25 @@ dl.reflist dd {
 
 .paramtype {
 	white-space: nowrap;
+	padding: 0px;
+	padding-bottom: 1px;
 }
 
 .paramname {
-	color: #602020;
 	white-space: nowrap;
+        padding: 0px;
+        padding-bottom: 1px;
+        margin-left: 2px;
 }
+
 .paramname em {
+	color: #602020;
 	font-style: normal;
+	margin-right: 1px;
 }
-.paramname code {
-        line-height: 14px;
+
+.paramname .paramdefval {
+	font-family: 'JetBrains Mono',Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace,fixed;
 }
 
 .params, .retval, .exception, .tparams {
@@ -1083,7 +1124,6 @@ table.fieldtable {
 {
 	height:32px;
 	display:block;
-	text-decoration: none;
 	outline: none;
 	color: #00274D;
 	font-family: 'Lucida Grande',Geneva,Helvetica,Arial,sans-serif;
@@ -1172,7 +1212,8 @@ dl {
         padding: 0 0 0 0;
 }
 
-/* dl.note, dl.warning, dl.attention, dl.pre, dl.post, dl.invariant, dl.deprecated, dl.todo, dl.test, dl.bug, dl.examples */
+/*
+
 dl.section {
 	margin-left: 0px;
 	padding-left: 0px;
@@ -1227,8 +1268,101 @@ dl.bug {
   border-color: #C08050;
 }
 
+*/
+
+dl.bug dt a, dl.deprecated dt a, dl.todo dt a, dl.test a {
+    font-weight: bold !important;
+}
+
+dl.warning, dl.attention, dl.note, dl.deprecated, dl.bug,
+dl.invariant, dl.pre, dl.post, dl.todo, dl.test, dl.remark {
+    padding: 10px;
+    margin: 10px 0px;
+    overflow: hidden;
+    margin-left: 0;
+    border-radius: 4px;
+}
+
 dl.section dd {
-	margin-bottom: 6px;
+    margin-bottom: 2px;
+}
+
+dl.warning, dl.attention {
+    background: #f8d1cc;
+    border-left: 8px solid #b61825;
+    color: #75070f;
+}
+
+dl.warning dt, dl.attention dt {
+    color: #b61825;
+}
+
+dl.note, dl.remark {
+    background: #faf3d8;
+    border-left: 8px solid #f3a600;
+    color: #5f4204;
+}
+
+dl.note dt, dl.remark dt {
+    color: #f3a600;
+}
+
+dl.todo {
+    background: #e4f3ff;
+    border-left: 8px solid #1879C4;
+    color: #274a5c;
+}
+
+dl.todo dt {
+    color: #1879C4;
+}
+
+dl.test {
+    background: #e8e8ff;
+    border-left: 8px solid #3939C4;
+    color: #1a1a5c;
+}
+
+dl.test dt {
+    color: #3939C4;
+}
+
+dl.bug dt a {
+    color: #5b2bdd !important;
+}
+
+dl.bug {
+    background: #e4dafd;
+    border-left: 8px solid #5b2bdd;
+    color: #2a0d72;
+}
+
+dl.bug dt a {
+    color: #5b2bdd !important;
+}
+
+dl.deprecated {
+    background: #ecf0f3;
+    border-left: 8px solid #5b6269;
+    color: #43454a;
+}
+
+dl.deprecated dt a {
+    color: #5b6269 !important;
+}
+
+dl.section dd, dl.bug dd, dl.deprecated dd, dl.todo dd, dl.test dd {
+    margin-inline-start: 0px;
+}
+
+dl.invariant, dl.pre, dl.post {
+    background: #d8f1e3;
+    border-left: 8px solid #44b86f;
+    color: #265532;
+}
+
+dl.invariant dt, dl.pre dt, dl.post dt {
+    color: #44b86f;
 }
 
 
@@ -1243,12 +1377,12 @@ dl.section dd {
 	vertical-align: bottom;
 	border-collapse: separate;
 }
- 
+
 #projectlogo img
-{ 
+{
 	border: 0px none;
 }
- 
+
 #projectalign
 {
         vertical-align: middle;
