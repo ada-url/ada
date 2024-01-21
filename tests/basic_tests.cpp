@@ -399,6 +399,6 @@ TYPED_TEST(basic_tests, nodejs_50235) {
 
 // https://github.com/nodejs/node/issues/51514
 TYPED_TEST(basic_tests, nodejs_51514) {
-  auto out = ada::parse<ada::url>("http://1.1.1.256");
+  auto out = ada::parse<TypeParam>("http://1.1.1.256");
   ASSERT_FALSE(out);
 }
