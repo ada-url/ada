@@ -396,3 +396,9 @@ TYPED_TEST(basic_tests, nodejs_50235) {
   ASSERT_EQ(out->get_href(), "http://test.com:5/path?param=1");
   SUCCEED();
 }
+
+// https://github.com/nodejs/node/issues/51514
+TYPED_TEST(basic_tests, nodejs_51514) {
+  auto out = ada::parse<TypeParam>("http://1.1.1.256");
+  ASSERT_FALSE(out);
+}
