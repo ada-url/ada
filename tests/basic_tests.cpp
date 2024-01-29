@@ -402,3 +402,10 @@ TYPED_TEST(basic_tests, nodejs_51514) {
   auto out = ada::parse<TypeParam>("http://1.1.1.256");
   ASSERT_FALSE(out);
 }
+// https://github.com/nodejs/node/issues/51593
+TYPED_TEST(basic_tests, nodejs_51593) {
+  auto out = ada::parse<TypeParam>("http://\u200b123.123.123.123");
+  ASSERT_TRUE(out);
+  ASSERT_EQ(out->get_href(), "http://123.123.123.123/");
+  SUCCEED();
+}
