@@ -232,10 +232,12 @@ struct url_aggregator : url_base {
   }
 
   /**
-   * Return true on success.
+   * Return true on success. The 'in_place' parameter indicates whether the
+   * the string_view input is pointing in the buffer. When in_place is false,
+   * we must nearly always update the buffer.
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
-  [[nodiscard]] bool parse_ipv4(std::string_view input);
+  [[nodiscard]] bool parse_ipv4(std::string_view input, bool in_place);
 
   /**
    * Return true on success.
