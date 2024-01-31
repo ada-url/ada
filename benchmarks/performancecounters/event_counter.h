@@ -35,8 +35,8 @@ struct event_count {
   enum event_counter_types {
     CPU_CYCLES,
     INSTRUCTIONS,
-    BRANCH_MISSES=2,
-    BRANCH=4
+    BRANCH_MISSES = 2,
+    BRANCH = 4
   };
 
   double elapsed_sec() const {
@@ -51,9 +51,7 @@ struct event_count {
   double instructions() const {
     return static_cast<double>(event_counts[INSTRUCTIONS]);
   }
-  double branches() const {
-    return static_cast<double>(event_counts[BRANCH]);
-  }
+  double branches() const { return static_cast<double>(event_counts[BRANCH]); }
   double branch_misses() const {
     return static_cast<double>(event_counts[BRANCH_MISSES]);
   }
