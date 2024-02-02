@@ -5,10 +5,10 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 MAINSOURCE=$SCRIPTPATH/..
 ALL_ADA_FILES=$(cd $MAINSOURCE && git ls-tree --full-tree --name-only -r HEAD | grep -e ".*\.\(c\|h\|cc\|cpp\|hh\)\$" | grep -vFf clang-format-ignore.txt)
 
-if clang-format-15 --version | grep -qF 'version 15.'; then
+if clang-format-15 --version  2>/dev/null | grep -qF 'version 15.'; then
   clang-format-15 --style=file --verbose -i "$@" $ALL_ADA_FILES
   exit 0
-elif clang-format --version | grep -qF 'version 15.'; then
+elif clang-format --version  2>/dev/null | grep -qF 'version 15.'; then
   clang-format --style=file --verbose -i "$@" $ALL_ADA_FILES
   exit 0
 fi
