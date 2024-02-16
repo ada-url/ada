@@ -9,6 +9,11 @@
 
 #include "ada/character_sets.h"
 
+/**
+ * These functions are not part of our public API and may
+ * change at any time.
+ * @private
+ */
 namespace ada::character_sets {
 
 constexpr char hex[1024] =

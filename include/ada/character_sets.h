@@ -11,6 +11,9 @@
 #include <cstdint>
 
 /**
+ * These functions are not part of our public API and may
+ * change at any time.
+ * @private
  * @namespace ada::character_sets
  * @brief Includes the definitions for unicode character sets.
  */
