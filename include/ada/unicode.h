@@ -12,12 +12,17 @@
 #include <optional>
 
 /**
+ * Unicode operations. These functions are not part of our public API and may
+ * change at any time.
+ *
+ * @private
  * @namespace ada::unicode
  * @brief Includes the definitions for unicode operations
  */
 namespace ada::unicode {
 
 /**
+ * @private
  * We receive a UTF-8 string representing a domain name.
  * If the string is percent encoded, we apply percent decoding.
  *
@@ -61,11 +66,13 @@ bool to_ascii(std::optional<std::string>& out, std::string_view plain,
               size_t first_percent);
 
 /**
+ * @private
  * @see https://www.unicode.org/reports/tr46/#ToUnicode
  */
 std::string to_unicode(std::string_view input);
 
 /**
+* @private
  * Checks if the input has tab or newline characters.
  *
  * @attention The has_tabs_or_newline function is a bottleneck and it is simple
@@ -75,12 +82,14 @@ ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept;
 
 /**
+ * @private
  * Checks if the input is a forbidden host code point.
  * @see https://url.spec.whatwg.org/#forbidden-host-code-point
  */
 ada_really_inline constexpr bool is_forbidden_host_code_point(char c) noexcept;
 
 /**
+ * @private
  * Checks if the input contains a forbidden domain code point.
  * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
  */
@@ -88,6 +97,7 @@ ada_really_inline constexpr bool contains_forbidden_domain_code_point(
     const char* input, size_t length) noexcept;
 
 /**
+ * @private
  * Checks if the input contains a forbidden domain code point in which case
  * the first bit is set to 1. If the input contains an upper case ASCII letter,
  * then the second bit is set to 1.
@@ -98,6 +108,7 @@ contains_forbidden_domain_code_point_or_upper(const char* input,
                                               size_t length) noexcept;
 
 /**
+ * @private
  * Checks if the input is a forbidden domain code point.
  * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
  */
@@ -105,11 +116,13 @@ ada_really_inline constexpr bool is_forbidden_domain_code_point(
     char c) noexcept;
 
 /**
+ * @private
  * Checks if the input is alphanumeric, '+', '-' or '.'
  */
 ada_really_inline constexpr bool is_alnum_plus(char c) noexcept;
 
 /**
+ * @private
  * @details An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex
  * digit. An ASCII upper hex digit is an ASCII digit or a code point in the
  * range U+0041 (A) to U+0046 (F), inclusive. An ASCII lower hex digit is an
@@ -118,6 +131,7 @@ ada_really_inline constexpr bool is_alnum_plus(char c) noexcept;
 ada_really_inline constexpr bool is_ascii_hex_digit(char c) noexcept;
 
 /**
+ * @private
  * Checks if the input is a C0 control or space character.
  *
  * @details A C0 control or space is a C0 control or U+0020 SPACE.
@@ -127,6 +141,7 @@ ada_really_inline constexpr bool is_ascii_hex_digit(char c) noexcept;
 ada_really_inline constexpr bool is_c0_control_or_space(char c) noexcept;
 
 /**
+ * @private
  * Checks if the input is a ASCII tab or newline character.
  *
  * @details An ASCII tab or newline is U+0009 TAB, U+000A LF, or U+000D CR.
@@ -134,6 +149,7 @@ ada_really_inline constexpr bool is_c0_control_or_space(char c) noexcept;
 ada_really_inline constexpr bool is_ascii_tab_or_newline(char c) noexcept;
 
 /**
+ * @private
  * @details A double-dot path segment must be ".." or an ASCII case-insensitive
  * match for ".%2e", "%2e.", or "%2e%2e".
  */
@@ -141,6 +157,7 @@ ada_really_inline ada_constexpr bool is_double_dot_path_segment(
     std::string_view input) noexcept;
 
 /**
+ * @private
  * @details A single-dot path segment must be "." or an ASCII case-insensitive
  * match for "%2e".
  */
@@ -148,17 +165,20 @@ ada_really_inline constexpr bool is_single_dot_path_segment(
     std::string_view input) noexcept;
 
 /**
+ * @private
  * @details ipv4 character might contain 0-9 or a-f character ranges.
  */
 ada_really_inline constexpr bool is_lowercase_hex(char c) noexcept;
 
 /**
+ * @private
  * @details Convert hex to binary. Caller is responsible to ensure that
  * the parameter is an hexadecimal digit (0-9, A-F, a-f).
  */
 ada_really_inline unsigned constexpr convert_hex_to_binary(char c) noexcept;
 
 /**
+ * @private
  * first_percent should be  = input.find('%')
  *
  * @todo It would be faster as noexcept maybe, but it could be unsafe since.
@@ -169,12 +189,14 @@ ada_really_inline unsigned constexpr convert_hex_to_binary(char c) noexcept;
 std::string percent_decode(std::string_view input, size_t first_percent);
 
 /**
+ * @private
  * Returns a percent-encoding string whether percent encoding was needed or not.
  * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
  */
 std::string percent_encode(std::string_view input,
                            const uint8_t character_set[]);
 /**
+ * @private
  * Returns a percent-encoded string version of input, while starting the percent
  * encoding at the provided index.
  * @see https://github.com/nodejs/node/blob/main/src/node_url.cc#L226
@@ -182,6 +204,7 @@ std::string percent_encode(std::string_view input,
 std::string percent_encode(std::string_view input,
                            const uint8_t character_set[], size_t index);
 /**
+ * @private
  * Returns true if percent encoding was needed, in which case, we store
  * the percent-encoded content in 'out'. If the boolean 'append' is set to
  * true, the content is appended to 'out'.
@@ -192,12 +215,14 @@ template <bool append>
 bool percent_encode(std::string_view input, const uint8_t character_set[],
                     std::string& out);
 /**
+ * @private
  * Returns the index at which percent encoding should start, or (equivalently),
  * the length of the prefix that does not require percent encoding.
  */
 ada_really_inline size_t percent_encode_index(std::string_view input,
                                               const uint8_t character_set[]);
 /**
+ * @private
  * Lowers the string in-place, assuming that the content is ASCII.
  * Return true if the content was ASCII.
  */

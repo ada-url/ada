@@ -13,6 +13,9 @@
 #include <optional>
 
 /**
+ * These functions are not part of our public API and may
+ * change at any time.
+ *
  * @private
  * @namespace ada::helpers
  * @brief Includes the definitions for helper functions
@@ -175,6 +178,7 @@ inline void inner_concat(std::string& buffer, T t, Args... args) {
 }
 
 /**
+ * @private
  * Concatenate the arguments and return a string.
  * @returns a string
  */
@@ -186,6 +190,7 @@ std::string concat(Args... args) {
 }
 
 /**
+ * @private
  * @return Number of leading zeroes.
  */
 inline int leading_zeroes(uint32_t input_num) noexcept {
@@ -199,6 +204,7 @@ inline int leading_zeroes(uint32_t input_num) noexcept {
 }
 
 /**
+ * @private
  * Counts the number of decimal digits necessary to represent x.
  * faster than std::to_string(x).size().
  * @return digit count

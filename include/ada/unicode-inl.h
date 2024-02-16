@@ -8,6 +8,10 @@
 #include "ada/unicode.h"
 
 /**
+ * Unicode operations. These functions are not part of our public API and may
+ * change at any time.
+ *
+ * private
  * @namespace ada::unicode
  * @brief Includes the declarations for unicode operations
  */
