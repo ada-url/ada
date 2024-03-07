@@ -219,3 +219,16 @@ TEST(url_search_params, iterators) {
 
   SUCCEED();
 }
+
+// https://github.com/cloudflare/workerd/issues/1777
+TEST(url_search_params, test_to_string_encoding) {
+  auto search_params =
+      ada::url_search_params("q1=foo&q2=foo+bar&q3=foo bar&q4=foo/bar");
+  ASSERT_EQ(search_params.get("q1").value(), "foo");
+  ASSERT_EQ(search_params.get("q2").value(), "foo bar");
+  ASSERT_EQ(search_params.get("q3").value(), "foo bar");
+  ASSERT_EQ(search_params.get("q4").value(), "foo/bar");
+  ASSERT_EQ(search_params.to_string(),
+            "q1=foo&q2=foo+bar&q3=foo+bar&q4=foo%2Fbar");
+  SUCCEED();
+}
