@@ -366,7 +366,8 @@ unsigned constexpr convert_hex_to_binary(const char c) noexcept {
   return hex_to_binary_table[c - '0'];
 }
 
-std::string percent_decode(const std::string_view input, size_t first_percent) {
+std::string percent_decode(const std::string_view input,
+                           size_t const first_percent) {
   // next line is for safety only, we expect users to avoid calling
   // percent_decode when first_percent is outside the range.
   if (first_percent == std::string_view::npos) {

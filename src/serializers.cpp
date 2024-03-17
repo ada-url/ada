@@ -72,10 +72,13 @@ std::string ipv4(const uint64_t address) noexcept {
   std::string output(15, '\0');
   char* point = output.data();
   char* point_end = output.data() + output.size();
-  point = std::to_chars(point, point_end, static_cast<uint8_t>(address >> 24U)).ptr;
+  point =
+      std::to_chars(point, point_end, static_cast<uint8_t>(address >> 24U)).ptr;
   for (int i = 2; i >= 0; i--) {
     *point++ = '.';
-    point = std::to_chars(point, point_end, static_cast<uint8_t>(address >> (i * 8U))).ptr;
+    point = std::to_chars(point, point_end,
+                          static_cast<uint8_t>(address >> (i * 8U)))
+                .ptr;
   }
   output.resize(point - output.data());
   return output;
