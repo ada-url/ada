@@ -870,7 +870,7 @@ result_type parse_url(std::string_view user_input,
               if constexpr (result_type_is_ada_url) {
                 helpers::shorten_path(url.path, url.type);
               } else {
-                std::string_view const path = url.get_pathname();
+                std::string_view path = url.get_pathname();
                 if (helpers::shorten_path(path, url.type)) {
                   url.update_base_pathname(std::string(path));
                 }
