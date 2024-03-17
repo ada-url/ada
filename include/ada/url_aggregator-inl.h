@@ -16,7 +16,6 @@
 #include "ada/scheme.h"
 #include "ada/log.h"
 
-#include <optional>
 #include <string_view>
 
 namespace ada {
@@ -51,17 +50,17 @@ inline void url_aggregator::update_base_authority(
     std::string_view password = input.substr(password_delimiter + 1);
 
     buffer.insert(components.protocol_end + diff, username);
-    diff += uint32_t(username.size());
+    diff += static_cast<uint32_t>(username.size());
     buffer.insert(components.protocol_end + diff, ":");
     components.username_end = components.protocol_end + diff;
     buffer.insert(components.protocol_end + diff + 1, password);
-    diff += uint32_t(password.size()) + 1;
+    diff += static_cast<uint32_t>(password.size()) + 1;
   } else if (!input.empty()) {
     // Insert only username
     buffer.insert(components.protocol_end + diff, input);
     components.username_end =
-        components.protocol_end + diff + uint32_t(input.size());
-    diff += uint32_t(input.size());
+        components.protocol_end + diff + static_cast<uint32_t>(input.size());
+    diff += static_cast<uint32_t>(input.size());
   }
 
   components.host_start += diff;
@@ -89,7 +88,7 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   if (components.hash_start != url_components::omitted) {
     buffer.resize(components.hash_start);
   }
-  components.hash_start = uint32_t(buffer.size());
+  components.hash_start = static_cast<uint32_t>(buffer.size());
   buffer += "#";
   bool encoding_required = unicode::percent_encode<true>(
       input, ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
@@ -104,10 +103,10 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
 }
 
 ada_really_inline uint32_t url_aggregator::replace_and_resize(
-    uint32_t start, uint32_t end, std::string_view input) {
-  uint32_t current_length = end - start;
-  uint32_t input_size = uint32_t(input.size());
-  uint32_t new_difference = input_size - current_length;
+    uint32_t const start, uint32_t const end, std::string_view const input) {
+  uint32_t const current_length = end - start;
+  auto const input_size = static_cast<uint32_t>(input.size());
+  uint32_t const new_difference = input_size - current_length;
 
   if (current_length == 0) {
     buffer.insert(start, input);
@@ -155,7 +154,7 @@ inline void url_aggregator::update_base_hostname(const std::string_view input) {
 [[nodiscard]] ada_really_inline uint32_t
 url_aggregator::get_pathname_length() const noexcept {
   ada_log("url_aggregator::get_pathname_length");
-  uint32_t ending_index = uint32_t(buffer.size());
+  auto ending_index = static_cast<uint32_t>(buffer.size());
   if (components.search_start != url_components::omitted) {
     ending_index = components.search_start;
   } else if (components.hash_start != url_components::omitted) {
@@ -184,7 +183,7 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 
   if (components.hash_start == url_components::omitted) {
     if (components.search_start == url_components::omitted) {
-      components.search_start = uint32_t(buffer.size());
+      components.search_start = static_cast<uint32_t>(buffer.size());
       buffer += "?";
     } else {
       buffer.resize(components.search_start + 1);
@@ -202,7 +201,8 @@ inline void url_aggregator::update_base_search(std::string_view input) {
 
     buffer.insert(components.search_start, "?");
     buffer.insert(components.search_start + 1, input);
-    components.hash_start += uint32_t(input.size() + 1);  // Do not forget `?`
+    components.hash_start +=
+        static_cast<uint32_t>(input.size() + 1);  // Do not forget `?`
   }
 
   ADA_ASSERT_TRUE(validate());
@@ -217,7 +217,7 @@ inline void url_aggregator::update_base_search(
 
   if (components.hash_start == url_components::omitted) {
     if (components.search_start == url_components::omitted) {
-      components.search_start = uint32_t(buffer.size());
+      components.search_start = static_cast<uint32_t>(buffer.size());
       buffer += "?";
     } else {
       buffer.resize(components.search_start + 1);
@@ -244,7 +244,8 @@ inline void url_aggregator::update_base_search(
         ada::unicode::percent_encode_index(input, query_percent_encode_set);
     if (idx == input.size()) {
       buffer.insert(components.search_start + 1, input);
-      components.hash_start += uint32_t(input.size() + 1);  // Do not forget `?`
+      components.hash_start +=
+          static_cast<uint32_t>(input.size() + 1);  // Do not forget `?`
     } else {
       buffer.insert(components.search_start + 1, input, 0, idx);
       input.remove_prefix(idx);
@@ -254,7 +255,7 @@ inline void url_aggregator::update_base_search(
           ada::unicode::percent_encode(input, query_percent_encode_set);
       buffer.insert(components.search_start + idx + 1, encoded);
       components.hash_start +=
-          uint32_t(encoded.size() + idx + 1);  // Do not forget `?`
+          static_cast<uint32_t>(encoded.size() + idx + 1);  // Do not forget `?`
     }
   }
 
@@ -283,7 +284,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
     components.pathname_start += 2;
   }
 
-  uint32_t difference = replace_and_resize(
+  uint32_t const difference = replace_and_resize(
       components.pathname_start,
       components.pathname_start + get_pathname_length(), input);
   if (components.search_start != url_components::omitted) {
@@ -304,10 +305,10 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
-  std::string path_expected = std::string(get_pathname());
+  std::string path_expected{get_pathname()};
   path_expected.append(input);
 #endif  // ADA_DEVELOPMENT_CHECKS
-  uint32_t ending_index = uint32_t(buffer.size());
+  auto ending_index = static_cast<uint32_t>(buffer.size());
   if (components.search_start != url_components::omitted) {
     ending_index = components.search_start;
   } else if (components.hash_start != url_components::omitted) {
@@ -316,13 +317,13 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
   buffer.insert(ending_index, input);
 
   if (components.search_start != url_components::omitted) {
-    components.search_start += uint32_t(input.size());
+    components.search_start += static_cast<uint32_t>(input.size());
   }
   if (components.hash_start != url_components::omitted) {
-    components.hash_start += uint32_t(input.size());
+    components.hash_start += static_cast<uint32_t>(input.size());
   }
 #if ADA_DEVELOPMENT_CHECKS
-  std::string path_after = std::string(get_pathname());
+  std::string const path_after{get_pathname()};
   ADA_ASSERT_EQUAL(
       path_expected, path_after,
       "append_base_pathname problem after inserting " + std::string(input));
@@ -384,7 +385,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
     return;
   }
 
-  uint32_t difference = uint32_t(input.size());
+  auto difference = static_cast<uint32_t>(input.size());
   buffer.insert(components.username_end, input);
   components.username_end += difference;
   components.host_start += difference;
@@ -404,7 +405,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
     components.hash_start += difference;
   }
 #if ADA_DEVELOPMENT_CHECKS
-  std::string username_after = std::string(get_username());
+  std::string const username_after{get_username()};
   ADA_ASSERT_EQUAL(
       username_expected, username_after,
       "append_base_username problem after inserting " + std::string(input));
@@ -451,11 +452,11 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
     return;
   }
 
-  bool password_exists = has_password();
-  uint32_t difference = uint32_t(input.size());
+  bool const password_exists = has_password();
+  auto difference = static_cast<uint32_t>(input.size());
 
   if (password_exists) {
-    uint32_t current_length =
+    uint32_t const current_length =
         components.host_start - components.username_end - 1;
     buffer.erase(components.username_end + 1, current_length);
     difference -= current_length;
@@ -493,7 +494,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
-  std::string password_expected = std::string(get_password());
+  std::string password_expected{get_password()};
   password_expected.append(input);
 #endif  // ADA_DEVELOPMENT_CHECKS
   add_authority_slashes_if_needed();
@@ -503,7 +504,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
     return;
   }
 
-  uint32_t difference = uint32_t(input.size());
+  auto difference = static_cast<uint32_t>(input.size());
   if (has_password()) {
     buffer.insert(components.host_start, input);
   } else {
@@ -530,7 +531,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
     components.hash_start += difference;
   }
 #if ADA_DEVELOPMENT_CHECKS
-  std::string password_after = std::string(get_password());
+  std::string const password_after{get_password()};
   ADA_ASSERT_EQUAL(
       password_expected, password_after,
       "append_base_password problem after inserting " + std::string(input));
@@ -538,7 +539,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void url_aggregator::update_base_port(uint32_t input) {
+inline void url_aggregator::update_base_port(uint32_t const input) {
   ada_log("url_aggregator::update_base_port");
   ADA_ASSERT_TRUE(validate());
   if (input == url_components::omitted) {
@@ -547,8 +548,8 @@ inline void url_aggregator::update_base_port(uint32_t input) {
   }
   // calling std::to_string(input.value()) is unfortunate given that the port
   // value is probably already available as a string.
-  std::string value = helpers::concat(":", std::to_string(input));
-  uint32_t difference = uint32_t(value.size());
+  std::string const value = helpers::concat(":", std::to_string(input));
+  auto difference = static_cast<uint32_t>(value.size());
 
   if (components.port != url_components::omitted) {
     difference -= components.pathname_start - components.host_end;
@@ -574,7 +575,7 @@ inline void url_aggregator::clear_port() {
   if (components.port == url_components::omitted) {
     return;
   }
-  uint32_t length = components.pathname_start - components.host_end;
+  uint32_t const length = components.pathname_start - components.host_end;
   buffer.erase(components.host_end, length);
   components.pathname_start -= length;
   if (components.search_start != url_components::omitted) {
@@ -637,13 +638,13 @@ inline void url_aggregator::clear_hash() {
 inline void url_aggregator::clear_pathname() {
   ada_log("url_aggregator::clear_pathname");
   ADA_ASSERT_TRUE(validate());
-  uint32_t ending_index = uint32_t(buffer.size());
+  auto ending_index = static_cast<uint32_t>(buffer.size());
   if (components.search_start != url_components::omitted) {
     ending_index = components.search_start;
   } else if (components.hash_start != url_components::omitted) {
     ending_index = components.hash_start;
   }
-  uint32_t pathname_length = ending_index - components.pathname_start;
+  uint32_t const pathname_length = ending_index - components.pathname_start;
   buffer.erase(components.pathname_start, pathname_length);
   uint32_t difference = pathname_length;
   if (components.pathname_start == components.host_end + 2 &&
@@ -851,17 +852,18 @@ inline bool url_aggregator::has_port() const noexcept {
 }
 
 ada_really_inline size_t url_aggregator::parse_port(
-    std::string_view view, bool check_trailing_content) noexcept {
+    std::string_view const view, bool const check_trailing_content) noexcept {
   ada_log("url_aggregator::parse_port('", view, "') ", view.size());
   uint16_t parsed_port{};
-  auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
+  auto const r =
+      std::from_chars(view.data(), view.data() + view.size(), parsed_port);
   if (r.ec == std::errc::result_out_of_range) {
     ada_log("parse_port: std::errc::result_out_of_range");
     is_valid = false;
     return 0;
   }
   ada_log("parse_port: ", parsed_port);
-  const size_t consumed = size_t(r.ptr - view.data());
+  const auto consumed = static_cast<size_t>(r.ptr - view.data());
   ada_log("parse_port: consumed ", consumed);
   if (check_trailing_content) {
     is_valid &=
@@ -872,9 +874,9 @@ ada_really_inline size_t url_aggregator::parse_port(
   if (is_valid) {
     ada_log("parse_port", r.ec == std::errc());
     // scheme_default_port can return 0, and we should allow 0 as a base port.
-    auto default_port = scheme_default_port();
-    bool is_port_valid = (default_port == 0 && parsed_port == 0) ||
-                         (default_port != parsed_port);
+    auto const default_port = scheme_default_port();
+    bool const is_port_valid = (default_port == 0 && parsed_port == 0) ||
+                               (default_port != parsed_port);
     if (r.ec == std::errc() && is_port_valid) {
       update_base_port(parsed_port);
     } else {
@@ -890,7 +892,7 @@ inline void url_aggregator::set_protocol_as_file() {
   type = ada::scheme::type::FILE;
   // next line could overflow but unsigned arithmetic has well-defined
   // overflows.
-  uint32_t new_difference = 5 - components.protocol_end;
+  uint32_t const new_difference = 5 - components.protocol_end;
 
   if (buffer.empty()) {
     buffer.append("file:");

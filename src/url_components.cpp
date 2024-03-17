@@ -2,7 +2,6 @@
 #include "ada/helpers.h"
 #include "ada/url_components.h"
 
-#include <numeric>
 #include <string>
 
 namespace ada {
@@ -85,7 +84,7 @@ namespace ada {
 
 [[nodiscard]] std::string url_components::to_string() const {
   std::string answer;
-  auto back = std::back_insert_iterator(answer);
+  auto const back = std::back_insert_iterator(answer);
   answer.append("{\n");
 
   answer.append("\t\"protocol_end\":\"");

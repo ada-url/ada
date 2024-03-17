@@ -19,15 +19,15 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
     }
     last_char = view.back();
   }
-  bool possible_ipv4 = (last_char >= '0' && last_char <= '9') ||
-                       (last_char >= 'a' && last_char <= 'f') ||
-                       last_char == 'x';
-  if (!possible_ipv4) {
+  if (bool const possible_ipv4 = (last_char >= '0' && last_char <= '9') ||
+                                 (last_char >= 'a' && last_char <= 'f') ||
+                                 last_char == 'x';
+      !possible_ipv4) {
     return false;
   }
   // From the last character, find the last dot.
-  size_t last_dot = view.rfind('.');
-  if (last_dot != std::string_view::npos) {
+  if (size_t const last_dot = view.rfind('.');
+      last_dot != std::string_view::npos) {
     // We have at least one dot.
     view = view.substr(last_dot + 1);
   }
@@ -88,37 +88,45 @@ ada_really_inline constexpr uint8_t path_signature(
   size_t i = 0;
   uint8_t accumulator{};
   for (; i + 7 < input.size(); i += 8) {
-    accumulator |= uint8_t(path_signature_table[uint8_t(input[i])] |
-                           path_signature_table[uint8_t(input[i + 1])] |
-                           path_signature_table[uint8_t(input[i + 2])] |
-                           path_signature_table[uint8_t(input[i + 3])] |
-                           path_signature_table[uint8_t(input[i + 4])] |
-                           path_signature_table[uint8_t(input[i + 5])] |
-                           path_signature_table[uint8_t(input[i + 6])] |
-                           path_signature_table[uint8_t(input[i + 7])]);
+    accumulator |= static_cast<uint8_t>(
+        path_signature_table[static_cast<uint8_t>(input[i])] |
+        path_signature_table[static_cast<uint8_t>(input[i + 1])] |
+        path_signature_table[static_cast<uint8_t>(input[i + 2])] |
+        path_signature_table[static_cast<uint8_t>(input[i + 3])] |
+        path_signature_table[static_cast<uint8_t>(input[i + 4])] |
+        path_signature_table[static_cast<uint8_t>(input[i + 5])] |
+        path_signature_table[static_cast<uint8_t>(input[i + 6])] |
+        path_signature_table[static_cast<uint8_t>(input[i + 7])]);
   }
   for (; i < input.size(); i++) {
-    accumulator |= uint8_t(path_signature_table[uint8_t(input[i])]);
+    accumulator |= static_cast<uint8_t>(
+        path_signature_table[static_cast<uint8_t>(input[i])]);
   }
   return accumulator;
 }
 
 ada_really_inline constexpr bool verify_dns_length(
-    std::string_view input) noexcept {
+    std::string_view const input) noexcept {
   if (input.back() == '.') {
-    if (input.size() > 254) return false;
-  } else if (input.size() > 253)
+    if (input.size() > 254) {
+      return false;
+    }
+  } else if (input.size() > 253) {
     return false;
+  }
 
   size_t start = 0;
   while (start < input.size()) {
     auto dot_location = input.find('.', start);
     // If not found, it's likely the end of the domain
-    if (dot_location == std::string_view::npos) dot_location = input.size();
+    if (dot_location == std::string_view::npos) {
+      dot_location = input.size();
+    }
 
-    auto label_size = dot_location - start;
-    if (label_size > 63 || label_size == 0) return false;
-
+    auto const label_size = dot_location - start;
+    if (label_size > 63 || label_size == 0) {
+      return false;
+    }
     start = dot_location + 1;
   }
 

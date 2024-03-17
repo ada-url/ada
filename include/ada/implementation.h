@@ -7,13 +7,10 @@
 #define ADA_IMPLEMENTATION_H
 
 #include <string>
-#include <optional>
 
 #include "ada/parser.h"
 #include "ada/common_defs.h"
-#include "ada/encoding_type.h"
 #include "ada/url.h"
-#include "ada/state.h"
 #include "ada/url_aggregator.h"
 
 namespace ada {

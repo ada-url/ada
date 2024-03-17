@@ -13,8 +13,6 @@
 #include "ada/checkers.h"
 #include "ada/url.h"
 
-#include <optional>
-#include <string>
 #if ADA_REGULAR_VISUAL_STUDIO
 #include <intrin.h>
 #endif  // ADA_REGULAR_VISUAL_STUDIO

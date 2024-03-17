@@ -22,8 +22,8 @@ template <bool has_state_override>
   ADA_ASSERT_TRUE(!helpers::overlaps(input_with_colon, buffer));
   std::string_view input{input_with_colon};
   input.remove_suffix(1);
-  auto parsed_type = ada::scheme::get_scheme_type(input);
-  bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
+  auto const parsed_type = ada::scheme::get_scheme_type(input);
+  bool const is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
   /**
    * In the common case, we will immediately recognize a special scheme (e.g.,
    *http, https), in which case, we can go really fast.
@@ -56,7 +56,7 @@ template <bool has_state_override>
 
     if (has_state_override) {
       // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
+      uint16_t const urls_scheme_port = get_special_port();
 
       // If url's port is url's scheme's default port, then set url's port to
       // null.
@@ -65,7 +65,7 @@ template <bool has_state_override>
       }
     }
   } else {  // slow path
-    std::string _buffer = std::string(input);
+    std::string _buffer{input};
     // Next function is only valid if the input is ASCII and returns false
     // otherwise, but it seems that we always have ascii content so we do not
     // need to check the return value.
@@ -98,7 +98,7 @@ template <bool has_state_override>
 
     if (has_state_override) {
       // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
+      uint16_t const urls_scheme_port = get_special_port();
 
       // If url's port is url's scheme's default port, then set url's port to
       // null.
@@ -116,7 +116,8 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
   ADA_ASSERT_TRUE(validate());
   // next line could overflow but unsigned arithmetic has well-defined
   // overflows.
-  uint32_t new_difference = u.components.protocol_end - components.protocol_end;
+  uint32_t const new_difference =
+      u.components.protocol_end - components.protocol_end;
   type = u.type;
   buffer.erase(0, components.protocol_end);
   buffer.insert(0, u.get_protocol());
@@ -150,8 +151,9 @@ inline void url_aggregator::set_scheme_from_view_with_colon(
                   new_scheme_with_colon.back() == ':');
   // next line could overflow but unsigned arithmetic has well-defined
   // overflows.
-  uint32_t new_difference =
-      uint32_t(new_scheme_with_colon.size()) - components.protocol_end;
+  auto const new_difference =
+      static_cast<uint32_t>(new_scheme_with_colon.size()) -
+      components.protocol_end;
 
   if (buffer.empty()) {
     buffer.append(new_scheme_with_colon);
@@ -181,8 +183,8 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
   ADA_ASSERT_TRUE(new_scheme.empty() || new_scheme.back() != ':');
   // next line could overflow but unsigned arithmetic has well-defined
   // overflows.
-  uint32_t new_difference =
-      uint32_t(new_scheme.size()) - components.protocol_end + 1;
+  auto const new_difference =
+      static_cast<uint32_t>(new_scheme.size()) - components.protocol_end + 1;
 
   type = ada::scheme::get_scheme_type(new_scheme);
   if (buffer.empty()) {
@@ -191,7 +193,7 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
     buffer.erase(0, components.protocol_end);
     buffer.insert(0, helpers::concat(new_scheme, ":"));
   }
-  components.protocol_end = uint32_t(new_scheme.size() + 1);
+  components.protocol_end = static_cast<uint32_t>(new_scheme.size() + 1);
 
   // Update the rest of the components.
   components.username_end += new_difference;
@@ -224,7 +226,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 
   view.append(":");
 
-  std::string::iterator pointer =
+  auto const pointer =
       std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
@@ -241,7 +243,7 @@ bool url_aggregator::set_username(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  size_t idx = ada::unicode::percent_encode_index(
+  size_t const idx = ada::unicode::percent_encode_index(
       input, character_sets::USERINFO_PERCENT_ENCODE);
   if (idx == input.size()) {
     update_base_username(input);
@@ -261,7 +263,7 @@ bool url_aggregator::set_password(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  size_t idx = ada::unicode::percent_encode_index(
+  size_t const idx = ada::unicode::percent_encode_index(
       input, character_sets::USERINFO_PERCENT_ENCODE);
   if (idx == input.size()) {
     update_base_password(input);
@@ -297,7 +299,7 @@ bool url_aggregator::set_port(const std::string_view input) {
   }
 
   // Revert changes if parse_port fails.
-  uint32_t previous_port = components.port;
+  uint32_t const previous_port = components.port;
   parse_port(trimmed);
   if (is_valid) {
     return true;
@@ -326,7 +328,8 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   return true;
 }
 
-ada_really_inline void url_aggregator::parse_path(std::string_view input) {
+ada_really_inline void url_aggregator::parse_path(
+    std::string_view const input) {
   ada_log("url_aggregator::parse_path ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -461,7 +464,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   // Often, the input does not contain any forbidden code points, and no upper
   // case ASCII letter, then we can just copy it to the buffer. We want to
   // optimize for such a common case.
-  uint8_t is_forbidden_or_upper =
+  uint8_t const is_forbidden_or_upper =
       unicode::contains_forbidden_domain_code_point_or_upper(input.data(),
                                                              input.size());
   // Minor optimization opportunity:
@@ -486,7 +489,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   // conversion.
 
   ada_log("parse_host calling to_ascii");
-  std::optional<std::string> host = std::string(get_hostname());
+  std::optional<std::string> host{get_hostname()};
   is_valid = ada::unicode::to_ascii(host, input, input.find('%'));
   if (!is_valid) {
     ada_log("parse_host to_ascii returns false");
@@ -521,10 +524,10 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     return false;
   }
 
-  std::string previous_host = std::string(get_hostname());
-  uint32_t previous_port = components.port;
+  std::string previous_host{get_hostname()};
+  uint32_t const previous_port = components.port;
 
-  size_t host_end_pos = input.find('#');
+  size_t const host_end_pos = input.find('#');
   std::string _host(input.data(), host_end_pos != std::string_view::npos
                                       ? host_end_pos
                                       : input.size());
@@ -535,7 +538,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   // host state.
   if (type != ada::scheme::type::FILE) {
     std::string_view host_view(_host.data(), _host.length());
-    auto [location, found_colon] =
+    auto const [location, found_colon] =
         helpers::get_host_delimiter_location(is_special(), host_view);
 
     // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
@@ -545,7 +548,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
       if (override_hostname) {
         return false;
       }
-      std::string_view sub_buffer = new_host.substr(location + 1);
+      std::string_view const sub_buffer = new_host.substr(location + 1);
       if (!sub_buffer.empty()) {
         set_port(sub_buffer);
       }
@@ -570,7 +573,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
       return true;
     }
 
-    bool succeeded = parse_host(host_view);
+    bool const succeeded = parse_host(host_view);
     if (!succeeded) {
       update_base_hostname(previous_host);
       update_base_port(previous_port);
@@ -581,7 +584,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     return succeeded;
   }
 
-  size_t location = new_host.find_first_of("/\\?");
+  size_t const location = new_host.find_first_of("/\\?");
   if (location != std::string_view::npos) {
     new_host.remove_suffix(new_host.length() - location);
   }
@@ -633,9 +636,9 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   }
 
   if (get_protocol() == "blob:") {
-    std::string_view path = get_pathname();
+    std::string_view const path = get_pathname();
     if (!path.empty()) {
-      auto out = ada::parse<ada::url_aggregator>(path);
+      auto const out = ada::parse<ada::url_aggregator>(path);
       if (out && (out->type == scheme::HTTP || out->type == scheme::HTTPS)) {
         // If pathURL's scheme is not "http" and not "https", then return a
         // new opaque origin.
@@ -701,7 +704,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   // if we have an empty host, then the space between components.host_end and
   // components.pathname_start may be occupied by /.
   if (start == components.host_end) {
-    return std::string_view();
+    return {};
   }
   return helpers::substring(buffer, start, components.pathname_start);
 }
@@ -725,7 +728,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
           components.pathname_start, " buffer.size() = ", buffer.size(),
           " components.search_start = ", components.search_start,
           " components.hash_start = ", components.hash_start);
-  uint32_t ending_index = uint32_t(buffer.size());
+  auto ending_index = static_cast<uint32_t>(buffer.size());
   if (components.search_start != url_components::omitted) {
     ending_index = components.search_start;
   } else if (components.hash_start != url_components::omitted) {
@@ -741,7 +744,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   if (components.search_start == url_components::omitted) {
     return "";
   }
-  uint32_t ending_index = uint32_t(buffer.size());
+  auto ending_index = static_cast<uint32_t>(buffer.size());
   if (components.hash_start != url_components::omitted) {
     ending_index = components.hash_start;
   }
@@ -764,7 +767,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   }
 
   std::string answer;
-  auto back = std::back_insert_iterator(answer);
+  auto const back = std::back_insert_iterator(answer);
   answer.append("{\n");
 
   answer.append("\t\"buffer\":\"");
@@ -809,9 +812,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   auto convert_offset_to_string = [](uint32_t offset) -> std::string {
     if (offset == url_components::omitted) {
       return "null";
-    } else {
-      return std::to_string(offset);
     }
+    return std::to_string(offset);
   };
 
   answer.append("\t\"protocol_end\":");
@@ -872,7 +874,7 @@ bool url_aggregator::parse_ipv4(std::string_view input, bool in_place) {
   for (; (digit_count < 4) && !(input.empty()); digit_count++) {
     uint32_t
         segment_result{};  // If any number exceeds 32 bits, we have an error.
-    bool is_hex = checkers::has_hex_prefix(input);
+    bool const is_hex = checkers::has_hex_prefix(input);
     if (is_hex && ((input.length() == 2) ||
                    ((input.length() > 2) && (input[2] == '.')))) {
       // special case
@@ -906,7 +908,7 @@ bool url_aggregator::parse_ipv4(std::string_view input, bool in_place) {
       // We have the last value.
       // At this stage, ipv4 contains digit_count*8 bits.
       // So we have 32-digit_count*8 bits left.
-      if (segment_result >= (uint64_t(1) << (32 - digit_count * 8))) {
+      if (segment_result >= (1ULL << (32 - digit_count * 8))) {
         return is_valid = false;
       }
       ipv4 <<= (32 - digit_count * 8);
@@ -918,7 +920,7 @@ bool url_aggregator::parse_ipv4(std::string_view input, bool in_place) {
       if ((segment_result > 255) || (input[0] != '.')) {
         return is_valid = false;
       }
-      ipv4 <<= 8;
+      ipv4 <<= 8U;
       ipv4 |= segment_result;
       input.remove_prefix(1);  // remove '.'
     }
@@ -952,7 +954,7 @@ final:
   return true;
 }
 
-bool url_aggregator::parse_ipv6(std::string_view input) {
+bool url_aggregator::parse_ipv6(std::string_view const input) {
   // TODO: Implement in_place optimization: we know that input points
   // in the buffer, so we can just check whether the buffer is already
   // well formatted.
@@ -973,7 +975,7 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
   std::optional<int> compress{};
 
   // Let pointer be a pointer for input.
-  std::string_view::iterator pointer = input.begin();
+  const auto* pointer = input.begin();
 
   // If c is U+003A (:), then:
   if (input[0] == ':') {
@@ -1015,7 +1017,8 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
     }
 
     // Let value and length be 0.
-    uint16_t value = 0, length = 0;
+    uint16_t value = 0;
+    uint16_t length = 0;
 
     // While length is less than 4 and c is an ASCII hex digit,
     // set value to value times 0x10 + c interpreted as hexadecimal number, and
@@ -1023,7 +1026,8 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
     while (length < 4 && pointer != input.end() &&
            unicode::is_ascii_hex_digit(*pointer)) {
       // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
-      value = uint16_t(value * 0x10 + unicode::convert_hex_to_binary(*pointer));
+      value = static_cast<uint16_t>(value * 0x10 +
+                                    unicode::convert_hex_to_binary(*pointer));
       pointer++;
       length++;
     }
@@ -1107,7 +1111,7 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
         // ipv4Piece.
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
         address[piece_index] =
-            uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
+            static_cast<uint16_t>(address[piece_index] * 0x100 + *ipv4_piece);
 
         // Increase numbersSeen by 1.
         numbers_seen++;
@@ -1126,8 +1130,9 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
       // Break.
       break;
     }
+
     // Otherwise, if c is U+003A (:):
-    else if ((pointer != input.end()) && (*pointer == ':')) {
+    if ((pointer != input.end()) && (*pointer == ':')) {
       // Increase pointer by 1.
       pointer++;
 
@@ -1201,7 +1206,7 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
 
   // Return the result of running UTF-8 percent-encode on input using the C0
   // control percent-encode set.
-  size_t idx = ada::unicode::percent_encode_index(
+  size_t const idx = ada::unicode::percent_encode_index(
       input, character_sets::C0_CONTROL_PERCENT_ENCODE);
   if (idx == input.size()) {
     update_base_hostname(input);
@@ -1577,9 +1582,10 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
   constexpr uint8_t backslash_char = 2;
   constexpr uint8_t dot_char = 4;
   constexpr uint8_t percent_char = 8;
-  bool special = type != ada::scheme::NOT_SPECIAL;
-  bool may_need_slow_file_handling = (type == ada::scheme::type::FILE &&
-                                      checkers::is_windows_drive_letter(input));
+  bool const special = type != ada::scheme::NOT_SPECIAL;
+  bool const may_need_slow_file_handling =
+      (type == ada::scheme::type::FILE &&
+       checkers::is_windows_drive_letter(input));
   bool trivial_path =
       (special ? (accumulator == 0)
                : ((accumulator & (need_encoding | dot_char | percent_char)) ==
@@ -1594,14 +1600,13 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
     // Note: input cannot be empty, it must at least contain one character ('.')
     // Note: we know that '\' is not present.
     if (input[0] != '.') {
-      size_t slashdot = input.find("/.");
+      size_t const slashdot = input.find("/.");
       if (slashdot == std::string_view::npos) {  // common case
         trivial_path = true;
       } else {  // uncommon
         // only three cases matter: /./, /.. or a final /
-        trivial_path =
-            !(slashdot + 2 == input.size() || input[slashdot + 2] == '.' ||
-              input[slashdot + 2] == '/');
+        trivial_path = slashdot + 2 != input.size() &&
+                       input[slashdot + 2] != '.' && input[slashdot + 2] != '/';
       }
     }
   }
@@ -1611,12 +1616,12 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
     buffer += input;
     return;
   }
-  std::string path = std::string(get_pathname());
+  std::string path{get_pathname()};
   // We are going to need to look a bit at the path, but let us see if we can
   // ignore percent encoding *and* backslashes *and* percent characters.
   // Except for the trivial case, this is likely to capture 99% of paths out
   // there.
-  bool fast_path =
+  bool const fast_path =
       (special &&
        (accumulator & (need_encoding | backslash_char | percent_char)) == 0) &&
       (type != ada::scheme::type::FILE);
@@ -1627,12 +1632,12 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
     // but dots must as appear as '.', and they cannot be encoded because
     // the symbol '%' is not present.
     size_t previous_location = 0;  // We start at 0.
-    do {
-      size_t new_location = input.find('/', previous_location);
+    for (;;) {
+      size_t const new_location = input.find('/', previous_location);
       // std::string_view path_view = input;
       //  We process the last segment separately:
       if (new_location == std::string_view::npos) {
-        std::string_view path_view = input.substr(previous_location);
+        std::string_view const path_view = input.substr(previous_location);
         if (path_view == "..") {  // The path ends with ..
           // e.g., if you receive ".." with an empty path, you go to "/".
           if (path.empty()) {
@@ -1657,31 +1662,31 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
         }
         update_base_pathname(path);
         return;
-      } else {
-        // This is a non-final segment.
-        std::string_view path_view =
-            input.substr(previous_location, new_location - previous_location);
-        previous_location = new_location + 1;
-        if (path_view == "..") {
-          size_t last_delimiter = path.rfind('/');
-          if (last_delimiter != std::string::npos) {
-            path.erase(last_delimiter);
-          }
-        } else if (path_view != ".") {
-          path += '/';
-          path.append(path_view);
-        }
       }
-    } while (true);
+
+      // This is a non-final segment.
+      std::string_view path_view =
+          input.substr(previous_location, new_location - previous_location);
+      previous_location = new_location + 1;
+      if (path_view == "..") {
+        size_t const last_delimiter = path.rfind('/');
+        if (last_delimiter != std::string::npos) {
+          path.erase(last_delimiter);
+        }
+      } else if (path_view != ".") {
+        path += '/';
+        path.append(path_view);
+      }
+    }
   } else {
     ada_log("parse_path slow");
     // we have reached the general case
-    bool needs_percent_encoding = (accumulator & 1);
+    bool const needs_percent_encoding = static_cast<bool>(accumulator & 1U);
     std::string path_buffer_tmp;
-    do {
-      size_t location = (special && (accumulator & 2))
-                            ? input.find_first_of("/\\")
-                            : input.find('/');
+    for (;;) {
+      size_t const location = (special && static_cast<bool>(accumulator & 2U))
+                                  ? input.find_first_of("/\\")
+                                  : input.find('/');
       std::string_view path_view = input;
       if (location != std::string_view::npos) {
         path_view.remove_suffix(path_view.size() - location);
@@ -1726,7 +1731,7 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
         update_base_pathname(path);
         return;
       }
-    } while (true);
+    }
   }
 }
 }  // namespace ada

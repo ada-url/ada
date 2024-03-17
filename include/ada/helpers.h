@@ -9,8 +9,8 @@
 #include "ada/state.h"
 #include "ada/url_base.h"
 
-#include <string_view>
 #include <optional>
+#include <string_view>
 
 /**
  * These functions are not part of our public API and may
@@ -103,16 +103,16 @@ bool overlaps(std::string_view input1, const std::string& input2) noexcept;
  * included). The length of the substring is pos2 - pos1.
  */
 ada_really_inline std::string_view substring(const std::string& input,
-                                             size_t pos1,
-                                             size_t pos2) noexcept {
+                                             size_t const pos1,
+                                             size_t const pos2) noexcept {
 #if ADA_DEVELOPMENT_CHECKS
   if (pos2 < pos1) {
-    std::cerr << "Negative-length substring: [" << pos1 << " to " << pos2 << ")"
-              << std::endl;
+    std::cerr << "Negative-length substring: [" << pos1 << " to " << pos2
+              << ")\n";
     abort();
   }
 #endif
-  return std::string_view(input.data() + pos1, pos2 - pos1);
+  return std::string_view{input.data() + pos1, pos2 - pos1};
 }
 
 /**
@@ -128,7 +128,7 @@ ada_really_inline void resize(std::string_view& input, size_t pos) noexcept;
  * and whether a colon was found outside brackets. Used by the host parser.
  */
 ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
-    const bool is_special, std::string_view& view) noexcept;
+    bool is_special, std::string_view& view) noexcept;
 
 /**
  * @private
@@ -209,15 +209,15 @@ inline int leading_zeroes(uint32_t input_num) noexcept {
  * faster than std::to_string(x).size().
  * @return digit count
  */
-inline int fast_digit_count(uint32_t x) noexcept {
-  auto int_log2 = [](uint32_t z) -> int {
-    return 31 - ada::helpers::leading_zeroes(z | 1);
+inline int fast_digit_count(uint32_t const x) noexcept {
+  auto int_log2 = [](uint32_t const z) -> int {
+    return 31 - ada::helpers::leading_zeroes(z | 1U);
   };
   // Compiles to very few instructions. Note that the
   // table is static and thus effectively a constant.
   // We leave it inside the function because it is meaningless
   // outside of it (this comes at no performance cost).
-  const static uint64_t table[] = {
+  constexpr static uint64_t table[] = {
       4294967296,  8589934582,  8589934582,  8589934582,  12884901788,
       12884901788, 12884901788, 17179868184, 17179868184, 17179868184,
       21474826480, 21474826480, 21474826480, 21474826480, 25769703776,
@@ -225,7 +225,7 @@ inline int fast_digit_count(uint32_t x) noexcept {
       34349738368, 34349738368, 34349738368, 34349738368, 38554705664,
       38554705664, 38554705664, 41949672960, 41949672960, 41949672960,
       42949672960, 42949672960};
-  return int((x + table[int_log2(x)]) >> 32);
+  return static_cast<int>((x + table[int_log2(x)]) >> 32U);
 }
 }  // namespace ada::helpers
 

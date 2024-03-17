@@ -11,12 +11,16 @@ void find_longest_sequence_of_ipv6_pieces(
   for (size_t i = 0; i < 8; i++) {
     if (address[i] == 0) {
       size_t next = i + 1;
-      while (next != 8 && address[next] == 0) ++next;
+      while (next != 8 && address[next] == 0) {
+        ++next;
+      }
       const size_t count = next - i;
       if (compress_length < count) {
         compress_length = count;
         compress = i;
-        if (next == 8) break;
+        if (next == 8) {
+          break;
+        }
         i = next;
       }
     }
@@ -68,10 +72,10 @@ std::string ipv4(const uint64_t address) noexcept {
   std::string output(15, '\0');
   char* point = output.data();
   char* point_end = output.data() + output.size();
-  point = std::to_chars(point, point_end, uint8_t(address >> 24)).ptr;
+  point = std::to_chars(point, point_end, static_cast<uint8_t>(address >> 24U)).ptr;
   for (int i = 2; i >= 0; i--) {
     *point++ = '.';
-    point = std::to_chars(point, point_end, uint8_t(address >> (i * 8))).ptr;
+    point = std::to_chars(point, point_end, static_cast<uint8_t>(address >> (i * 8U))).ptr;
   }
   output.resize(point - output.data());
   return output;

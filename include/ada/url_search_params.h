@@ -21,7 +21,7 @@ enum class url_search_params_iter_type {
 template <typename T, url_search_params_iter_type Type>
 struct url_search_params_iter;
 
-typedef std::pair<std::string_view, std::string_view> key_value_view_pair;
+using key_value_view_pair = std::pair<std::string_view, std::string_view>;
 
 using url_search_params_keys_iter =
     url_search_params_iter<std::string_view, url_search_params_iter_type::KEYS>;
@@ -92,7 +92,7 @@ struct url_search_params {
   /**
    * @see https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior
    */
-  inline std::string to_string();
+  [[nodiscard]] std::string to_string() const;
 
   /**
    * Returns a simple JS-style iterator over all of the keys in this
@@ -124,14 +124,16 @@ struct url_search_params {
    * C++ style conventional iterator support. const only because we
    * do not really want the params to be modified via the iterator.
    */
-  inline auto begin() const { return params.begin(); }
-  inline auto end() const { return params.end(); }
-  inline auto front() const { return params.front(); }
-  inline auto back() const { return params.back(); }
-  inline auto operator[](size_t index) const { return params[index]; }
+  [[nodiscard]] auto begin() const { return params.begin(); }
+  [[nodiscard]] auto end() const { return params.end(); }
+  [[nodiscard]] auto front() const { return params.front(); }
+  [[nodiscard]] auto back() const { return params.back(); }
+  [[nodiscard]] auto operator[](size_t const index) const {
+    return params[index];
+  }
 
  private:
-  typedef std::pair<std::string, std::string> key_value_pair;
+  using key_value_pair = std::pair<std::string, std::string>;
   std::vector<key_value_pair> params{};
 
   /**
@@ -151,7 +153,7 @@ struct url_search_params {
  */
 template <typename T, url_search_params_iter_type Type>
 struct url_search_params_iter {
-  inline url_search_params_iter() : params(EMPTY) {}
+  url_search_params_iter() : params(EMPTY) {}
   url_search_params_iter(const url_search_params_iter &u) = default;
   url_search_params_iter(url_search_params_iter &&u) noexcept = default;
   url_search_params_iter &operator=(url_search_params_iter &&u) noexcept =
@@ -168,7 +170,7 @@ struct url_search_params_iter {
 
  private:
   static url_search_params EMPTY;
-  inline url_search_params_iter(url_search_params &params_) : params(params_) {}
+  url_search_params_iter(url_search_params &params_) : params(params_) {}
 
   url_search_params &params;
   size_t pos = 0;

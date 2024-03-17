@@ -146,7 +146,6 @@ TEST(url_search_params, string_constructor_without_value) {
 // https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-constructor.any.js
 TEST(url_search_params, string_constructor_with_edge_cases) {
   auto p = ada::url_search_params("&a&&& &&&&&a+b=& c&m%c3%b8%c3%b8");
-  p.to_string();
   ASSERT_TRUE(p.has("a"));
   ASSERT_TRUE(p.has("a b"));
   ASSERT_TRUE(p.has(" "));

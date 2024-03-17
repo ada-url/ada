@@ -5,10 +5,8 @@
 #ifndef ADA_URL_COMPONENTS_H
 #define ADA_URL_COMPONENTS_H
 
-#include "ada/common_defs.h"
-
-#include <optional>
-#include <string_view>
+#include <cstdint>
+#include <string>
 
 namespace ada {
 
@@ -21,7 +19,7 @@ namespace ada {
  * This struct is used to extract components from a single 'href'.
  */
 struct url_components {
-  constexpr static uint32_t omitted = uint32_t(-1);
+  constexpr static uint32_t omitted = static_cast<uint32_t>(-1);
 
   url_components() = default;
   url_components(const url_components &u) = default;

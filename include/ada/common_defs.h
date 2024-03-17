@@ -255,14 +255,14 @@ namespace ada {
   do {                                               \
     std::cerr << "FAIL: " << (MESSAGE) << std::endl; \
     abort();                                         \
-  } while (0);
+  } while (false)
 #define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)                                    \
   do {                                                                         \
     if (LHS != RHS) {                                                          \
       std::cerr << "Mismatch: '" << LHS << "' - '" << RHS << "'" << std::endl; \
       ADA_FAIL(MESSAGE);                                                       \
     }                                                                          \
-  } while (0);
+  } while (false)
 #define ADA_ASSERT_TRUE(COND)                                               \
   do {                                                                      \
     if (!(COND)) {                                                          \
@@ -270,7 +270,7 @@ namespace ada {
                 << std::endl;                                               \
       ADA_FAIL(ADA_STR(COND));                                              \
     }                                                                       \
-  } while (0);
+  } while (false)
 #else
 #define ADA_FAIL(MESSAGE)
 #define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)
@@ -280,10 +280,12 @@ namespace ada {
 #ifdef ADA_VISUAL_STUDIO
 #define ADA_ASSUME(COND) __assume(COND)
 #else
-#define ADA_ASSUME(COND)                  \
-  do {                                    \
-    if (!(COND)) __builtin_unreachable(); \
-  } while (0)
+#define ADA_ASSUME(COND)       \
+  do {                         \
+    if (!(COND)) {             \
+      __builtin_unreachable(); \
+    }                          \
+  } while (false)
 #endif
 
 #if defined(__SSE2__) || defined(__x86_64__) || defined(__x86_64) || \

@@ -9,7 +9,6 @@
 #include "ada/encoding_type.h"
 #include "ada/expected.h"
 
-#include <optional>
 #include <string_view>
 
 /**

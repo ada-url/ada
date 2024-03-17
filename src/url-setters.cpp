@@ -16,10 +16,10 @@ bool url::set_host_or_hostname(const std::string_view input) {
     return false;
   }
 
-  std::optional<std::string> previous_host = host;
-  std::optional<uint16_t> previous_port = port;
+  std::optional<std::string> const previous_host = host;
+  std::optional<uint16_t> const previous_port = port;
 
-  size_t host_end_pos = input.find('#');
+  size_t const host_end_pos = input.find('#');
   std::string _host(input.data(), host_end_pos != std::string_view::npos
                                       ? host_end_pos
                                       : input.size());
@@ -30,7 +30,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
   // host state.
   if (type != ada::scheme::type::FILE) {
     std::string_view host_view(_host.data(), _host.length());
-    auto [location, found_colon] =
+    auto const [location, found_colon] =
         helpers::get_host_delimiter_location(is_special(), host_view);
 
     // Otherwise, if c is U+003A (:) and insideBrackets is false, then:
@@ -40,7 +40,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
       if (override_hostname) {
         return false;
       }
-      std::string_view buffer = new_host.substr(location + 1);
+      std::string_view const buffer = new_host.substr(location + 1);
       if (!buffer.empty()) {
         set_port(buffer);
       }
@@ -60,7 +60,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
       return true;
     }
 
-    bool succeeded = parse_host(host_view);
+    bool const succeeded = parse_host(host_view);
     if (!succeeded) {
       host = previous_host;
       update_base_port(previous_port);
@@ -68,8 +68,8 @@ bool url::set_host_or_hostname(const std::string_view input) {
     return succeeded;
   }
 
-  size_t location = new_host.find_first_of("/\\?");
-  if (location != std::string_view::npos) {
+  if (size_t const location = new_host.find_first_of("/\\?");
+      location != std::string_view::npos) {
     new_host.remove_suffix(new_host.length() - location);
   }
 
@@ -138,7 +138,7 @@ bool url::set_port(const std::string_view input) {
   }
 
   // Revert changes if parse_port fails.
-  std::optional<uint16_t> previous_port = port;
+  std::optional<uint16_t> const previous_port = port;
   parse_port(trimmed);
   if (is_valid) {
     return true;
@@ -160,7 +160,6 @@ void url::set_hash(const std::string_view input) {
   helpers::remove_ascii_tab_or_newline(new_value);
   hash = unicode::percent_encode(new_value,
                                  ada::character_sets::FRAGMENT_PERCENT_ENCODE);
-  return;
 }
 
 void url::set_search(const std::string_view input) {
@@ -205,7 +204,7 @@ bool url::set_protocol(const std::string_view input) {
 
   view.append(":");
 
-  std::string::iterator pointer =
+  auto const pointer =
       std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {

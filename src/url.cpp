@@ -8,7 +8,7 @@
 
 namespace ada {
 
-bool url::parse_opaque_host(std::string_view input) {
+bool url::parse_opaque_host(std::string_view const input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
   if (std::any_of(input.begin(), input.end(),
                   ada::unicode::is_forbidden_host_code_point)) {
@@ -36,7 +36,7 @@ bool url::parse_ipv4(std::string_view input) {
   for (; (digit_count < 4) && !(input.empty()); digit_count++) {
     uint32_t
         segment_result{};  // If any number exceeds 32 bits, we have an error.
-    bool is_hex = checkers::has_hex_prefix(input);
+    bool const is_hex = checkers::has_hex_prefix(input);
     if (is_hex && ((input.length() == 2) ||
                    ((input.length() > 2) && (input[2] == '.')))) {
       // special case
@@ -65,7 +65,7 @@ bool url::parse_ipv4(std::string_view input) {
       // We have the last value.
       // At this stage, ipv4 contains digit_count*8 bits.
       // So we have 32-digit_count*8 bits left.
-      if (segment_result >= (uint64_t(1) << (32 - digit_count * 8))) {
+      if (segment_result >= (1ULL << (32 - digit_count * 8))) {
         return is_valid = false;
       }
       ipv4 <<= (32 - digit_count * 8);
@@ -77,7 +77,7 @@ bool url::parse_ipv4(std::string_view input) {
       if ((segment_result > 255) || (input[0] != '.')) {
         return is_valid = false;
       }
-      ipv4 <<= 8;
+      ipv4 <<= 8U;
       ipv4 |= segment_result;
       input.remove_prefix(1);  // remove '.'
     }
@@ -97,7 +97,7 @@ final:
   return true;
 }
 
-bool url::parse_ipv6(std::string_view input) {
+bool url::parse_ipv6(std::string_view const input) {
   ada_log("parse_ipv6 ", input, " [", input.size(), " bytes]");
 
   if (input.empty()) {
@@ -113,7 +113,7 @@ bool url::parse_ipv6(std::string_view input) {
   std::optional<int> compress{};
 
   // Let pointer be a pointer for input.
-  std::string_view::iterator pointer = input.begin();
+  const auto *pointer = input.begin();
 
   // If c is U+003A (:), then:
   if (input[0] == ':') {
@@ -155,7 +155,8 @@ bool url::parse_ipv6(std::string_view input) {
     }
 
     // Let value and length be 0.
-    uint16_t value = 0, length = 0;
+    uint16_t value = 0;
+    uint16_t length = 0;
 
     // While length is less than 4 and c is an ASCII hex digit,
     // set value to value times 0x10 + c interpreted as hexadecimal number, and
@@ -163,7 +164,8 @@ bool url::parse_ipv6(std::string_view input) {
     while (length < 4 && pointer != input.end() &&
            unicode::is_ascii_hex_digit(*pointer)) {
       // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
-      value = uint16_t(value * 0x10 + unicode::convert_hex_to_binary(*pointer));
+      value = static_cast<uint16_t>(value * 0x10 +
+                                    unicode::convert_hex_to_binary(*pointer));
       pointer++;
       length++;
     }
@@ -248,7 +250,7 @@ bool url::parse_ipv6(std::string_view input) {
         // ipv4Piece.
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
         address[piece_index] =
-            uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
+            static_cast<uint16_t>(address[piece_index] * 0x100 + *ipv4_piece);
 
         // Increase numbersSeen by 1.
         numbers_seen++;
@@ -267,8 +269,9 @@ bool url::parse_ipv6(std::string_view input) {
       // Break.
       break;
     }
+
     // Otherwise, if c is U+003A (:):
-    else if ((pointer != input.end()) && (*pointer == ':')) {
+    if ((pointer != input.end()) && (*pointer == ':')) {
       // Increase pointer by 1.
       pointer++;
 
@@ -329,8 +332,8 @@ bool url::parse_ipv6(std::string_view input) {
 
 template <bool has_state_override>
 ada_really_inline bool url::parse_scheme(const std::string_view input) {
-  auto parsed_type = ada::scheme::get_scheme_type(input);
-  bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
+  auto const parsed_type = ada::scheme::get_scheme_type(input);
+  bool const is_input_special = parsed_type != ada::scheme::NOT_SPECIAL;
   /**
    * In the common case, we will immediately recognize a special scheme (e.g.,
    *http, https), in which case, we can go really fast.
@@ -362,9 +365,8 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
 
     if (has_state_override) {
       // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
 
-      if (urls_scheme_port) {
+      if (const uint16_t urls_scheme_port = get_special_port()) {
         // If url's port is url's scheme's default port, then set url's port to
         // null.
         if (port.has_value() && *port == urls_scheme_port) {
@@ -372,8 +374,10 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
         }
       }
     }
-  } else {  // slow path
-    std::string _buffer = std::string(input);
+  } else {
+    // slow path
+    std::string _buffer{input};
+
     // Next function is only valid if the input is ASCII and returns false
     // otherwise, but it seems that we always have ascii content so we do not
     // need to check the return value.
@@ -406,9 +410,8 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
 
     if (has_state_override) {
       // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
 
-      if (urls_scheme_port) {
+      if (uint16_t const urls_scheme_port = get_special_port()) {
         // If url's port is url's scheme's default port, then set url's port to
         // null.
         if (port.has_value() && *port == urls_scheme_port) {
@@ -451,14 +454,14 @@ ada_really_inline bool url::parse_host(std::string_view input) {
   // to ASCII with domain and false. The most common case is an ASCII input, in
   // which case we do not need to call the expensive 'to_ascii' if a few
   // conditions are met: no '%' and no 'xn-' subsequence.
-  std::string buffer = std::string(input);
+  std::string buffer{input};
   // This next function checks that the result is ascii, but we are going to
   // to check anyhow with is_forbidden.
   // bool is_ascii =
   unicode::to_lower_ascii(buffer.data(), buffer.size());
-  bool is_forbidden = unicode::contains_forbidden_domain_code_point(
+  bool const is_forbidden = unicode::contains_forbidden_domain_code_point(
       buffer.data(), buffer.size());
-  if (is_forbidden == 0 && buffer.find("xn-") == std::string_view::npos) {
+  if (!is_forbidden && buffer.find("xn-") == std::string_view::npos) {
     // fast path
     host = std::move(buffer);
     if (checkers::is_ipv4(host.value())) {
@@ -513,19 +516,15 @@ ada_really_inline void url::parse_path(std::string_view input) {
       path = "/";
     } else if ((internal_input[0] == '/') || (internal_input[0] == '\\')) {
       helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      return;
     } else {
       helpers::parse_prepared_path(internal_input, type, path);
-      return;
     }
   } else if (!internal_input.empty()) {
     if (internal_input[0] == '/') {
       helpers::parse_prepared_path(internal_input.substr(1), type, path);
       return;
-    } else {
-      helpers::parse_prepared_path(internal_input, type, path);
-      return;
     }
+    helpers::parse_prepared_path(internal_input, type, path);
   } else {
     if (!host.has_value()) {
       path = "/";
@@ -538,7 +537,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
     return "null";
   }
   std::string answer;
-  auto back = std::back_insert_iterator(answer);
+  auto const back = std::back_insert_iterator(answer);
   answer.append("{\n");
   answer.append("\t\"protocol\":\"");
   helpers::encode_json(get_protocol(), back);

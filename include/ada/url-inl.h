@@ -9,6 +9,7 @@
 #include "ada/url.h"
 #include "ada/url_components.h"
 
+#include <charconv>
 #include <optional>
 #include <string>
 #if ADA_REGULAR_VISUAL_STUDIO
@@ -48,7 +49,7 @@ inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
   url_components out{};
 
   // protocol ends with ':'. for example: "https:"
-  out.protocol_end = uint32_t(get_protocol().size());
+  out.protocol_end = static_cast<uint32_t>(get_protocol().size());
 
   // Trailing index is always the next character of the current one.
   size_t running_index = out.protocol_end;
@@ -58,20 +59,23 @@ inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
     out.host_start = out.protocol_end + 2;
 
     if (has_credentials()) {
-      out.username_end = uint32_t(out.host_start + username.size());
+      out.username_end =
+          static_cast<uint32_t>(out.host_start + username.size());
 
-      out.host_start += uint32_t(username.size());
+      out.host_start += static_cast<uint32_t>(username.size());
 
       if (!password.empty()) {
-        out.host_start += uint32_t(password.size() + 1);
+        out.host_start += static_cast<uint32_t>(password.size() + 1);
       }
 
-      out.host_end = uint32_t(out.host_start + host.value().size());
+      out.host_end =
+          static_cast<uint32_t>(out.host_start + host.value().size());
     } else {
       out.username_end = out.host_start;
 
       // Host does not start with "@" if it does not include credentials.
-      out.host_end = uint32_t(out.host_start + host.value().size()) - 1;
+      out.host_end =
+          static_cast<uint32_t>(out.host_start + host.value().size()) - 1;
     }
 
     running_index = out.host_end + 1;
@@ -96,20 +100,20 @@ inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
     running_index += helpers::fast_digit_count(*port) + 1;  // Port omits ':'
   }
 
-  out.pathname_start = uint32_t(running_index);
+  out.pathname_start = static_cast<uint32_t>(running_index);
 
   running_index += path.size();
 
   if (query.has_value()) {
-    out.search_start = uint32_t(running_index);
+    out.search_start = static_cast<uint32_t>(running_index);
     running_index += get_search().size();
-    if (get_search().size() == 0) {
+    if (get_search().empty()) {
       running_index++;
     }
   }
 
   if (hash.has_value()) {
-    out.hash_start = uint32_t(running_index);
+    out.hash_start = static_cast<uint32_t>(running_index);
   }
 
   return out;
@@ -117,18 +121,18 @@ inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
 
 inline void url::update_base_hostname(std::string_view input) { host = input; }
 
-inline void url::update_unencoded_base_hash(std::string_view input) {
+inline void url::update_unencoded_base_hash(std::string_view const input) {
   // We do the percent encoding
   hash = unicode::percent_encode(input,
                                  ada::character_sets::FRAGMENT_PERCENT_ENCODE);
 }
 
-inline void url::update_base_search(std::string_view input,
+inline void url::update_base_search(std::string_view const input,
                                     const uint8_t query_percent_encode_set[]) {
   query = ada::unicode::percent_encode(input, query_percent_encode_set);
 }
 
-inline void url::update_base_search(std::optional<std::string> input) {
+inline void url::update_base_search(std::optional<std::string> const &input) {
   query = input;
 }
 
@@ -166,12 +170,12 @@ inline void url::set_scheme(std::string &&new_scheme) noexcept {
   type = ada::scheme::get_scheme_type(new_scheme);
   // We only move the 'scheme' if it is non-special.
   if (!is_special()) {
-    non_special_scheme = new_scheme;
+    non_special_scheme = std::move(new_scheme);
   }
 }
 
 inline void url::copy_scheme(ada::url &&u) noexcept {
-  non_special_scheme = u.non_special_scheme;
+  non_special_scheme = std::move(u.non_special_scheme);
   type = u.type;
 }
 
@@ -212,8 +216,8 @@ inline void url::copy_scheme(const ada::url &u) {
   return output;
 }
 
-ada_really_inline size_t url::parse_port(std::string_view view,
-                                         bool check_trailing_content) noexcept {
+ada_really_inline size_t url::parse_port(
+    std::string_view const view, bool const check_trailing_content) noexcept {
   ada_log("parse_port('", view, "') ", view.size());
   uint16_t parsed_port{};
   auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
@@ -223,7 +227,7 @@ ada_really_inline size_t url::parse_port(std::string_view view,
     return 0;
   }
   ada_log("parse_port: ", parsed_port);
-  const size_t consumed = size_t(r.ptr - view.data());
+  auto const consumed = static_cast<size_t>(r.ptr - view.data());
   ada_log("parse_port: consumed ", consumed);
   if (check_trailing_content) {
     is_valid &=

@@ -19,10 +19,9 @@ result_type parse_url(std::string_view user_input,
   // means that doing if constexpr(result_type_is_ada_url) { something } else {
   // something else } is free (at runtime). This means that ada::url_aggregator
   // and ada::url **do not have to support the exact same API**.
-  constexpr bool result_type_is_ada_url =
-      std::is_same<ada::url, result_type>::value;
+  constexpr bool result_type_is_ada_url = std::is_same_v<ada::url, result_type>;
   constexpr bool result_type_is_ada_url_aggregator =
-      std::is_same<ada::url_aggregator, result_type>::value;
+      std::is_same_v<ada::url_aggregator, result_type>;
   static_assert(result_type_is_ada_url ||
                 result_type_is_ada_url_aggregator);  // We don't support
                                                      // anything else for now.
@@ -61,8 +60,8 @@ result_type parse_url(std::string_view user_input,
     // We know that user_input.size() is in [0,
     // std::numeric_limits<uint32_t>::max).
     uint32_t reserve_capacity =
-        (0xFFFFFFFF >>
-         helpers::leading_zeroes(uint32_t(1 | user_input.size()))) +
+        (0xFFFFFFFF >> helpers::leading_zeroes(
+                           static_cast<uint32_t>(1U | user_input.size()))) +
         1;
     url.reserve(reserve_capacity);
     //
@@ -202,8 +201,8 @@ result_type parse_url(std::string_view user_input,
         // Otherwise, if base has an opaque path and c is U+0023 (#),
         // set url's scheme to base's scheme, url's path to base's path, url's
         // query to base's query, and set state to fragment state.
-        else if (base_url->has_opaque_path && fragment.has_value() &&
-                 input_position == input_size) {
+        if (base_url->has_opaque_path && fragment.has_value() &&
+            input_position == input_size) {
           ada_log("NO_SCHEME opaque base with fragment");
           url.copy_scheme(*base_url);
           url.has_opaque_path = base_url->has_opaque_path;
@@ -220,7 +219,7 @@ result_type parse_url(std::string_view user_input,
         }
         // Otherwise, if base's scheme is not "file", set state to relative
         // state and decrease pointer by 1.
-        else if (base_url->type != ada::scheme::type::FILE) {
+        if (base_url->type != ada::scheme::type::FILE) {
           ada_log("NO_SCHEME non-file relative path");
           state = ada::state::RELATIVE_SCHEME;
         }
@@ -241,10 +240,10 @@ result_type parse_url(std::string_view user_input,
         // TODO: We could do various processing early on, using a single pass
         // over the string to collect information about it, e.g., telling us
         // whether there is a @ and if so, where (or how many).
-        const bool contains_ampersand =
-            (url_data.find('@', input_position) != std::string_view::npos);
 
-        if (!contains_ampersand) {
+        if (const bool contains_ampersand =
+                (url_data.find('@', input_position) != std::string_view::npos);
+            !contains_ampersand) {
           state = ada::state::HOST;
           break;
         }
@@ -255,7 +254,7 @@ result_type parse_url(std::string_view user_input,
          * https://user:pass@example.com:1234/foo/bar?baz#quux
          * --------^
          */
-        do {
+        for (;;) {
           std::string_view view = helpers::substring(url_data, input_position);
           // The delimiters are @, /, ? \\.
           size_t location =
@@ -348,7 +347,7 @@ result_type parse_url(std::string_view user_input,
             return url;
           }
           input_position = end_of_authority + 1;
-        } while (true);
+        }
 
         break;
       }
@@ -359,7 +358,8 @@ result_type parse_url(std::string_view user_input,
         // If c is U+002F (/) and remaining starts with U+002F (/),
         // then set state to special authority ignore slashes state and increase
         // pointer by 1.
-        std::string_view view = helpers::substring(url_data, input_position);
+        std::string_view const view =
+            helpers::substring(url_data, input_position);
         if (ada::checkers::begins_with(view, "//")) {
           state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
           input_position += 2;
@@ -516,7 +516,8 @@ result_type parse_url(std::string_view user_input,
         // If c is U+002F (/) and remaining starts with U+002F (/),
         // then set state to special authority ignore slashes state and increase
         // pointer by 1.
-        std::string_view view = helpers::substring(url_data, input_position);
+        std::string_view const view =
+            helpers::substring(url_data, input_position);
         if (ada::checkers::begins_with(view, "//")) {
           input_position += 2;
         }
@@ -561,7 +562,7 @@ result_type parse_url(std::string_view user_input,
 
         std::string_view host_view =
             helpers::substring(url_data, input_position);
-        auto [location, found_colon] =
+        auto const [location, found_colon] =
             helpers::get_host_delimiter_location(url.is_special(), host_view);
         input_position = (location != std::string_view::npos)
                              ? input_position + location
@@ -617,8 +618,8 @@ result_type parse_url(std::string_view user_input,
         std::string_view view = helpers::substring(url_data, input_position);
         // If c is U+003F (?), then set url's query to the empty string and
         // state to query state.
-        size_t location = view.find('?');
-        if (location != std::string_view::npos) {
+        if (size_t const location = view.find('?');
+            location != std::string_view::npos) {
           view.remove_suffix(view.size() - location);
           state = ada::state::QUERY;
           input_position += location + 1;
@@ -774,7 +775,7 @@ result_type parse_url(std::string_view user_input,
         ada_log("FILE_HOST ", helpers::substring(url_data, input_position));
 
         size_t location = view.find_first_of("/\\?");
-        std::string_view file_host_buffer(
+        std::string_view const file_host_buffer(
             view.data(),
             (location != std::string_view::npos) ? location : view.size());
 
@@ -907,9 +908,8 @@ result_type parse_url(std::string_view user_input,
   return url;
 }
 
-template url parse_url<url>(std::string_view user_input,
-                            const url* base_url = nullptr);
+template url parse_url<url>(std::string_view user_input, const url* base_url);
 template url_aggregator parse_url<url_aggregator>(
-    std::string_view user_input, const url_aggregator* base_url = nullptr);
+    std::string_view user_input, const url_aggregator* base_url);
 
 }  // namespace ada::parser

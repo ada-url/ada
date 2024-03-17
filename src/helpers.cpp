@@ -7,15 +7,16 @@
 
 #include <algorithm>
 #include <charconv>
+#include <cstddef>
 #include <cstring>
 #include <sstream>
 
 namespace ada::helpers {
 
 template <typename out_iter>
-void encode_json(std::string_view view, out_iter out) {
+void encode_json(std::string_view const view, out_iter out) {
   // trivial implementation. could be faster.
-  const char* hexvalues =
+  static constexpr auto hexvalues =
       "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
   for (uint8_t c : view) {
     if (c == '\\') {
@@ -29,7 +30,7 @@ void encode_json(std::string_view view, out_iter out) {
       *out++ = 'u';
       *out++ = '0';
       *out++ = '0';
-      *out++ = hexvalues[2 * c];
+      *out++ = hexvalues[static_cast<ptrdiff_t>(2 * c)];
       *out++ = hexvalues[2 * c + 1];
     } else {
       *out++ = c;
@@ -99,7 +100,7 @@ ada_really_inline std::optional<std::string_view> prune_hash(
 }
 
 ada_really_inline bool shorten_path(std::string& path,
-                                    ada::scheme::type type) noexcept {
+                                    ada::scheme::type const type) noexcept {
   size_t first_delimiter = path.find_first_of('/', 1);
 
   // Let path be url's path.
@@ -155,14 +156,14 @@ ada_really_inline void remove_ascii_tab_or_newline(
   // if this ever becomes a performance issue, we could use an approach similar
   // to has_tabs_or_newline
   input.erase(std::remove_if(input.begin(), input.end(),
-                             [](char c) {
+                             [](char const c) {
                                return ada::unicode::is_ascii_tab_or_newline(c);
                              }),
               input.end());
 }
 
-ada_really_inline std::string_view substring(std::string_view input,
-                                             size_t pos) noexcept {
+ada_really_inline std::string_view substring(std::string_view const input,
+                                             size_t const pos) noexcept {
   ADA_ASSERT_TRUE(pos <= input.size());
   // The following is safer but unneeded if we have the above line:
   // return pos > input.size() ? std::string_view() : input.substr(pos);
@@ -176,7 +177,7 @@ ada_really_inline void resize(std::string_view& input, size_t pos) noexcept {
 
 // computes the number of trailing zeroes
 // this is a private inline function only defined in this source file.
-ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
+ada_really_inline int trailing_zeroes(uint32_t const input_num) noexcept {
 #ifdef ADA_REGULAR_VISUAL_STUDIO
   unsigned long ret;
   // Search the mask data from least significant bit (LSB)
@@ -266,7 +267,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
 }
 #elif ADA_SSE2
 ada_really_inline size_t find_next_host_delimiter_special(
-    std::string_view view, size_t location) noexcept {
+    std::string_view const view, size_t const location) noexcept {
   // first check for short strings in which case we do it naively.
   if (view.size() - location < 16) {  // slow path
     for (size_t i = location; i < view.size(); i++) {
@@ -275,7 +276,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
         return i;
       }
     }
-    return size_t(view.size());
+    return view.size();
   }
   // fast path for long strings (expected to be common)
   size_t i = location;
@@ -413,7 +414,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
         return i;
       }
     }
-    return size_t(view.size());
+    return view.size();
   }
   // fast path for long strings (expected to be common)
   size_t i = location;
@@ -447,7 +448,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
       return view.length() - 16 + trailing_zeroes(mask);
     }
   }
-  return size_t(view.length());
+  return view.length();
 }
 #else
 // : / [ ?
@@ -591,14 +592,13 @@ ada_really_inline void parse_prepared_path(std::string_view input,
     // Note: input cannot be empty, it must at least contain one character ('.')
     // Note: we know that '\' is not present.
     if (input[0] != '.') {
-      size_t slashdot = input.find("/.");
+      size_t const slashdot = input.find("/.");
       if (slashdot == std::string_view::npos) {  // common case
         trivial_path = true;
       } else {  // uncommon
         // only three cases matter: /./, /.. or a final /
-        trivial_path =
-            !(slashdot + 2 == input.size() || input[slashdot + 2] == '.' ||
-              input[slashdot + 2] == '/');
+        trivial_path = slashdot + 2 != input.size() &&
+                       input[slashdot + 2] != '.' && input[slashdot + 2] != '/';
       }
     }
   }
@@ -612,7 +612,7 @@ ada_really_inline void parse_prepared_path(std::string_view input,
   // ignore percent encoding *and* backslashes *and* percent characters.
   // Except for the trivial case, this is likely to capture 99% of paths out
   // there.
-  bool fast_path =
+  bool const fast_path =
       (special &&
        (accumulator & (need_encoding | backslash_char | percent_char)) == 0) &&
       (type != ada::scheme::type::FILE);
@@ -623,12 +623,12 @@ ada_really_inline void parse_prepared_path(std::string_view input,
     // but dots must as appear as '.', and they cannot be encoded because
     // the symbol '%' is not present.
     size_t previous_location = 0;  // We start at 0.
-    do {
-      size_t new_location = input.find('/', previous_location);
+    for (;;) {
+      size_t const new_location = input.find('/', previous_location);
       // std::string_view path_view = input;
       //  We process the last segment separately:
       if (new_location == std::string_view::npos) {
-        std::string_view path_view = input.substr(previous_location);
+        std::string_view const path_view = input.substr(previous_location);
         if (path_view == "..") {  // The path ends with ..
           // e.g., if you receive ".." with an empty path, you go to "/".
           if (path.empty()) {
@@ -649,75 +649,74 @@ ada_really_inline void parse_prepared_path(std::string_view input,
           path.append(path_view);
         }
         return;
-      } else {
-        // This is a non-final segment.
-        std::string_view path_view =
-            input.substr(previous_location, new_location - previous_location);
-        previous_location = new_location + 1;
-        if (path_view == "..") {
-          size_t last_delimiter = path.rfind('/');
-          if (last_delimiter != std::string::npos) {
-            path.erase(last_delimiter);
-          }
-        } else if (path_view != ".") {
-          path += '/';
-          path.append(path_view);
-        }
       }
-    } while (true);
-  } else {
-    ada_log("parse_path slow");
-    // we have reached the general case
-    bool needs_percent_encoding = (accumulator & 1);
-    std::string path_buffer_tmp;
-    do {
-      size_t location = (special && (accumulator & 2))
-                            ? input.find_first_of("/\\")
-                            : input.find('/');
-      std::string_view path_view = input;
-      if (location != std::string_view::npos) {
-        path_view.remove_suffix(path_view.size() - location);
-        input.remove_prefix(location + 1);
-      }
-      // path_buffer is either path_view or it might point at a percent encoded
-      // temporary file.
-      std::string_view path_buffer =
-          (needs_percent_encoding &&
-           ada::unicode::percent_encode<false>(
-               path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp))
-              ? path_buffer_tmp
-              : path_view;
-      if (unicode::is_double_dot_path_segment(path_buffer)) {
-        if ((helpers::shorten_path(path, type) || special) &&
-            location == std::string_view::npos) {
-          path += '/';
+      // This is a non-final segment.
+      std::string_view path_view =
+          input.substr(previous_location, new_location - previous_location);
+      previous_location = new_location + 1;
+      if (path_view == "..") {
+        if (size_t const last_delimiter = path.rfind('/');
+            last_delimiter != std::string::npos) {
+          path.erase(last_delimiter);
         }
-      } else if (unicode::is_single_dot_path_segment(path_buffer) &&
-                 (location == std::string_view::npos)) {
+      } else if (path_view != ".") {
+        path += '/';
+        path.append(path_view);
+      }
+    }
+  }
+
+  ada_log("parse_path slow");
+  // we have reached the general case
+  bool const needs_percent_encoding = static_cast<bool>(accumulator & 1U);
+  std::string path_buffer_tmp;
+  for (;;) {
+    size_t const location = (special && static_cast<bool>(accumulator & 2U))
+                                ? input.find_first_of("/\\")
+                                : input.find('/');
+    std::string_view path_view = input;
+    if (location != std::string_view::npos) {
+      path_view.remove_suffix(path_view.size() - location);
+      input.remove_prefix(location + 1);
+    }
+    // path_buffer is either path_view or it might point at a percent encoded
+    // temporary file.
+    std::string_view path_buffer =
+        (needs_percent_encoding &&
+         ada::unicode::percent_encode<false>(
+             path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp))
+            ? path_buffer_tmp
+            : path_view;
+    if (unicode::is_double_dot_path_segment(path_buffer)) {
+      if ((helpers::shorten_path(path, type) || special) &&
+          location == std::string_view::npos) {
         path += '/';
       }
-      // Otherwise, if path_buffer is not a single-dot path segment, then:
-      else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-        // If url's scheme is "file", url's path is empty, and path_buffer is a
-        // Windows drive letter, then replace the second code point in
-        // path_buffer with U+003A (:).
-        if (type == ada::scheme::type::FILE && path.empty() &&
-            checkers::is_windows_drive_letter(path_buffer)) {
-          path += '/';
-          path += path_buffer[0];
-          path += ':';
-          path_buffer.remove_prefix(2);
-          path.append(path_buffer);
-        } else {
-          // Append path_buffer to url's path.
-          path += '/';
-          path.append(path_buffer);
-        }
+    } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+               (location == std::string_view::npos)) {
+      path += '/';
+    }
+    // Otherwise, if path_buffer is not a single-dot path segment, then:
+    else if (!unicode::is_single_dot_path_segment(path_buffer)) {
+      // If url's scheme is "file", url's path is empty, and path_buffer is a
+      // Windows drive letter, then replace the second code point in
+      // path_buffer with U+003A (:).
+      if (type == ada::scheme::type::FILE && path.empty() &&
+          checkers::is_windows_drive_letter(path_buffer)) {
+        path += '/';
+        path += path_buffer[0];
+        path += ':';
+        path_buffer.remove_prefix(2);
+        path.append(path_buffer);
+      } else {
+        // Append path_buffer to url's path.
+        path += '/';
+        path.append(path_buffer);
       }
-      if (location == std::string_view::npos) {
-        return;
-      }
-    } while (true);
+    }
+    if (location == std::string_view::npos) {
+      return;
+    }
   }
 }
 
@@ -733,9 +732,9 @@ template <class url_type>
 ada_really_inline void strip_trailing_spaces_from_opaque_path(
     url_type& url) noexcept {
   ada_log("helpers::strip_trailing_spaces_from_opaque_path");
-  if (!url.has_opaque_path) return;
-  if (url.has_hash()) return;
-  if (url.has_search()) return;
+  if (!url.has_opaque_path || url.has_hash() || url.has_search()) {
+    return;
+  }
 
   auto path = std::string(url.get_pathname());
   while (!path.empty() && path.back() == ' ') {
@@ -748,49 +747,50 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(
 static constexpr std::array<uint8_t, 256> authority_delimiter_special =
     []() constexpr {
       std::array<uint8_t, 256> result{};
-      for (int i : {'@', '/', '\\', '?'}) {
+      for (auto const i : {'@', '/', '\\', '?'}) {
         result[i] = 1;
       }
       return result;
     }();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
-find_authority_delimiter_special(std::string_view view) noexcept {
+find_authority_delimiter_special(std::string_view const view) noexcept {
   // performance note: we might be able to gain further performance
   // with SIMD instrinsics.
-  for (auto pos = view.begin(); pos != view.end(); ++pos) {
-    if (authority_delimiter_special[(uint8_t)*pos]) {
+  for (const auto* pos = view.begin(); pos != view.end(); ++pos) {
+    if (static_cast<bool>(
+            authority_delimiter_special[static_cast<uint8_t>(*pos)])) {
       return pos - view.begin();
     }
   }
-  return size_t(view.size());
+  return view.size();
 }
 
 // @ / ?
 static constexpr std::array<uint8_t, 256> authority_delimiter = []() constexpr {
   std::array<uint8_t, 256> result{};
-  for (int i : {'@', '/', '?'}) {
+  for (auto const i : {'@', '/', '?'}) {
     result[i] = 1;
   }
   return result;
 }();
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
-find_authority_delimiter(std::string_view view) noexcept {
+find_authority_delimiter(std::string_view const view) noexcept {
   // performance note: we might be able to gain further performance
   // with SIMD instrinsics.
-  for (auto pos = view.begin(); pos != view.end(); ++pos) {
-    if (authority_delimiter[(uint8_t)*pos]) {
+  for (const auto* pos = view.begin(); pos != view.end(); ++pos) {
+    if (static_cast<bool>(authority_delimiter[static_cast<uint8_t>(*pos)])) {
       return pos - view.begin();
     }
   }
-  return size_t(view.size());
+  return view.size();
 }
 
 }  // namespace ada::helpers
 
 namespace ada {
-ada_warn_unused std::string to_string(ada::state state) {
+ada_warn_unused std::string to_string(ada::state const state) {
   return ada::helpers::get_state(state);
 }
 #undef ada_make_uint8x16_t

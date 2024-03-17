@@ -16,17 +16,20 @@ namespace ada::scheme {
 namespace details {
 // for use with is_special and get_special_port
 // Spaces, if present, are removed from URL.
-constexpr std::string_view is_special_list[] = {"http", " ",   "https", "ws",
-                                                "ftp",  "wss", "file",  " "};
+static constexpr std::string_view is_special_list[] = {
+    "http", " ", "https", "ws", "ftp", "wss", "file", " "};
+
 // for use with get_special_port
-constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
+static constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
 }  // namespace details
 
 ada_really_inline constexpr bool is_special(std::string_view scheme) {
   if (scheme.empty()) {
     return false;
   }
-  int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
+  auto const hash_value = static_cast<int>(
+      (2 * static_cast<int>(scheme.size()) + static_cast<unsigned>(scheme[0])) &
+      7U);
   const std::string_view target = details::is_special_list[hash_value];
   return (target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1));
 }
@@ -34,28 +37,29 @@ constexpr uint16_t get_special_port(std::string_view scheme) noexcept {
   if (scheme.empty()) {
     return 0;
   }
-  int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
-  const std::string_view target = details::is_special_list[hash_value];
+  auto const hash_value = static_cast<int>(
+      (2 * scheme.size() + static_cast<unsigned>(scheme[0])) & 7U);
+  std::string_view const target = details::is_special_list[hash_value];
   if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
     return details::special_ports[hash_value];
-  } else {
-    return 0;
   }
+  return 0;
 }
-constexpr uint16_t get_special_port(ada::scheme::type type) noexcept {
-  return details::special_ports[int(type)];
+constexpr uint16_t get_special_port(ada::scheme::type const type) noexcept {
+  return details::special_ports[static_cast<int>(type)];
 }
-constexpr ada::scheme::type get_scheme_type(std::string_view scheme) noexcept {
+constexpr ada::scheme::type get_scheme_type(
+    std::string_view const scheme) noexcept {
   if (scheme.empty()) {
     return ada::scheme::NOT_SPECIAL;
   }
-  int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
+  auto const hash_value =
+      static_cast<int>((2 * scheme.size() + static_cast<unsigned>(scheme[0])) & 7U);
   const std::string_view target = details::is_special_list[hash_value];
   if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
-    return ada::scheme::type(hash_value);
-  } else {
-    return ada::scheme::NOT_SPECIAL;
+    return static_cast<ada::scheme::type>(hash_value);
   }
+  return ada::scheme::NOT_SPECIAL;
 }
 
 }  // namespace ada::scheme

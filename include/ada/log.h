@@ -70,7 +70,7 @@ ada_really_inline void log([[maybe_unused]] T t) {
 #define ada_log(...)       \
   do {                     \
     ada::log(__VA_ARGS__); \
-  } while (0)
+  } while (false)
 #endif  // ada_log
 #else
 #define ada_log(...)

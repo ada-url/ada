@@ -28,9 +28,7 @@ inline void url_search_params::initialize(std::string_view input) {
   }
 
   auto process_key_value = [&](const std::string_view current) {
-    auto equal = current.find('=');
-
-    if (equal == std::string_view::npos) {
+    if (auto const equal = current.find('='); equal == std::string_view::npos) {
       auto name = std::string(current);
       std::replace(name.begin(), name.end(), '+', ' ');
       params.emplace_back(unicode::percent_decode(name, name.find('%')), "");
@@ -47,14 +45,15 @@ inline void url_search_params::initialize(std::string_view input) {
   };
 
   while (!input.empty()) {
-    auto ampersand_index = input.find('&');
+    auto const ampersand_index = input.find('&');
 
     if (ampersand_index == std::string_view::npos) {
       if (!input.empty()) {
         process_key_value(input);
       }
       break;
-    } else if (ampersand_index != 0) {
+    }
+    if (ampersand_index != 0) {
       process_key_value(input.substr(0, ampersand_index));
     }
 
@@ -71,8 +70,9 @@ inline size_t url_search_params::size() const noexcept { return params.size(); }
 
 inline std::optional<std::string_view> url_search_params::get(
     const std::string_view key) {
-  auto entry = std::find_if(params.begin(), params.end(),
-                            [&key](auto &param) { return param.first == key; });
+  auto const entry =
+      std::find_if(params.begin(), params.end(),
+                   [&key](auto &param) { return param.first == key; });
 
   if (entry == params.end()) {
     return std::nullopt;
@@ -85,9 +85,9 @@ inline std::vector<std::string> url_search_params::get_all(
     const std::string_view key) {
   std::vector<std::string> out{};
 
-  for (auto &param : params) {
-    if (param.first == key) {
-      out.emplace_back(param.second);
+  for (auto &[first, second] : params) {
+    if (first == key) {
+      out.emplace_back(second);
     }
   }
 
@@ -95,22 +95,24 @@ inline std::vector<std::string> url_search_params::get_all(
 }
 
 inline bool url_search_params::has(const std::string_view key) noexcept {
-  auto entry = std::find_if(params.begin(), params.end(),
-                            [&key](auto &param) { return param.first == key; });
+  auto const entry =
+      std::find_if(params.begin(), params.end(),
+                   [&key](auto &param) { return param.first == key; });
   return entry != params.end();
 }
 
 inline bool url_search_params::has(std::string_view key,
                                    std::string_view value) noexcept {
-  auto entry =
+  auto const entry =
       std::find_if(params.begin(), params.end(), [&key, &value](auto &param) {
         return param.first == key && param.second == value;
       });
   return entry != params.end();
 }
 
-inline std::string url_search_params::to_string() {
-  auto character_set = ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE;
+inline std::string url_search_params::to_string() const {
+  static constexpr auto character_set =
+      ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE;
   std::string out{};
   for (size_t i = 0; i < params.size(); i++) {
     auto key = ada::unicode::percent_encode(params[i].first, character_set);
@@ -134,9 +136,8 @@ inline void url_search_params::set(const std::string_view key,
                                    const std::string_view value) {
   const auto find = [&key](auto &param) { return param.first == key; };
 
-  auto it = std::find_if(params.begin(), params.end(), find);
-
-  if (it == params.end()) {
+  if (auto it = std::find_if(params.begin(), params.end(), find);
+      it == params.end()) {
     params.emplace_back(key, value);
   } else {
     it->second = value;
@@ -194,20 +195,26 @@ inline bool url_search_params_iter<T, Type>::has_next() {
 
 template <>
 inline std::optional<std::string_view> url_search_params_keys_iter::next() {
-  if (!has_next()) return std::nullopt;
+  if (!has_next()) {
+    return std::nullopt;
+  }
   return params.params[pos++].first;
 }
 
 template <>
 inline std::optional<std::string_view> url_search_params_values_iter::next() {
-  if (!has_next()) return std::nullopt;
+  if (!has_next()) {
+    return std::nullopt;
+  }
   return params.params[pos++].second;
 }
 
 template <>
 inline std::optional<key_value_view_pair>
 url_search_params_entries_iter::next() {
-  if (!has_next()) return std::nullopt;
+  if (!has_next()) {
+    return std::nullopt;
+  }
   return params.params[pos++];
 }
 
