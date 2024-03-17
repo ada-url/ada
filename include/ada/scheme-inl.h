@@ -53,8 +53,8 @@ constexpr ada::scheme::type get_scheme_type(
   if (scheme.empty()) {
     return ada::scheme::NOT_SPECIAL;
   }
-  auto const hash_value =
-      static_cast<int>((2 * scheme.size() + static_cast<unsigned>(scheme[0])) & 7U);
+  auto const hash_value = static_cast<int>(
+      (2 * scheme.size() + static_cast<unsigned>(scheme[0])) & 7U);
   const std::string_view target = details::is_special_list[hash_value];
   if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
     return static_cast<ada::scheme::type>(hash_value);
