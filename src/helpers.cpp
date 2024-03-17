@@ -757,7 +757,7 @@ ada_really_inline size_t
 find_authority_delimiter_special(std::string_view const view) noexcept {
   // performance note: we might be able to gain further performance
   // with SIMD instrinsics.
-  for (const auto* pos = view.begin(); pos != view.end(); ++pos) {
+  for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (static_cast<bool>(
             authority_delimiter_special[static_cast<uint8_t>(*pos)])) {
       return pos - view.begin();
@@ -779,7 +779,7 @@ ada_really_inline size_t
 find_authority_delimiter(std::string_view const view) noexcept {
   // performance note: we might be able to gain further performance
   // with SIMD instrinsics.
-  for (const auto* pos = view.begin(); pos != view.end(); ++pos) {
+  for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (static_cast<bool>(authority_delimiter[static_cast<uint8_t>(*pos)])) {
       return pos - view.begin();
     }

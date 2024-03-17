@@ -401,7 +401,7 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
 
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
-  const auto* pointer =
+  auto pointer =
       std::find_if(input.begin(), input.end(), [character_set](const char c) {
         return character_sets::bit_at(character_set, c);
       });
@@ -484,7 +484,7 @@ std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[], size_t index) {
   std::string out;
   out.append(input.data(), index);
-  const auto* pointer = input.begin() + index;
+  auto pointer = input.begin() + index;
   for (; pointer != input.end(); pointer++) {
     if (character_sets::bit_at(character_set, *pointer)) {
       out.append(character_sets::hex + static_cast<uint8_t>(*pointer) * 4, 3);

@@ -975,7 +975,7 @@ bool url_aggregator::parse_ipv6(std::string_view const input) {
   std::optional<int> compress{};
 
   // Let pointer be a pointer for input.
-  const auto* pointer = input.begin();
+  auto pointer = input.begin();
 
   // If c is U+003A (:), then:
   if (input[0] == ':') {
