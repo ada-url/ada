@@ -420,11 +420,14 @@ TYPED_TEST(basic_tests, nodejs_51619) {
 
 // https://github.com/nodejs/undici/pull/2971
 TYPED_TEST(basic_tests, nodejs_undici_2971) {
-  std::string_view base = "https://non-ascii-location-header.sys.workers.dev/redirect";
+  std::string_view base =
+      "https://non-ascii-location-header.sys.workers.dev/redirect";
   auto base_url = ada::parse<TypeParam>(base);
   ASSERT_TRUE(base_url);
   auto out = ada::parse<TypeParam>("/\xec\x95\x88\xeb\x85\x95", &*base_url);
   ASSERT_TRUE(out);
-  ASSERT_EQ(out->get_href(), R"(https://non-ascii-location-header.sys.workers.dev/%EC%95%88%EB%85%95)");
+  ASSERT_EQ(
+      out->get_href(),
+      R"(https://non-ascii-location-header.sys.workers.dev/%EC%95%88%EB%85%95)");
   SUCCEED();
 }
