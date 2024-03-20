@@ -210,7 +210,7 @@ $(function(){initNavTree('dd/dd6/ada__c_8cpp_source.html','../../'); initResizab
 <div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="../../df/d61/ada__c_8h.html#a3586d49424936b0845c0e13ecc40fce4">   89</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../dd/dd6/ada__c_8cpp.html#a3a07936e2312d7645a60959e78befcf8">ada_can_parse_with_base</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* input, <span class="keywordtype">size_t</span> input_length,</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>                             <span class="keyword">const</span> <span class="keywordtype">char</span>* base, <span class="keywordtype">size_t</span> base_length) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="keyword">auto</span> base_view = std::string_view(base, base_length);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  std::string_view base_view(base, base_length);</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748">ada::can_parse</a>(std::string_view(input, input_length), &amp;base_view);</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>}</div>
 </div>
