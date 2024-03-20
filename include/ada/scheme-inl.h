@@ -42,7 +42,6 @@ constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
  * Reference: https://github.com/ada-url/ada/issues/617
  ****/
 
-
 ada_really_inline constexpr bool is_special(std::string_view scheme) {
   if (scheme.empty()) {
     return false;
