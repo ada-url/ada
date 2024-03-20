@@ -64,4 +64,4 @@ ada_really_inline bool begins_with(std::string_view view,
 
 }  // namespace ada::checkers
 
-#endif  // ADA_CHECKERS_H
+#endif  // ADA_CHECKERS_INL_H
