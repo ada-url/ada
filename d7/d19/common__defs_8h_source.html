@@ -402,24 +402,26 @@ $(function(){initNavTree('d7/d19/common__defs_8h_source.html','../../'); initRes
 <div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span><span class="preprocessor">#define ADA_ASSUME(COND) __assume(COND)</span></div>
 <div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="preprocessor">#else</span></div>
 <div class="foldopen" id="foldopen00283" data-start="" data-end="">
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="../../d7/d19/common__defs_8h.html#a2b24d97ea59794050c906d68303d2737">  283</a></span><span class="preprocessor">#define ADA_ASSUME(COND)                  \</span></div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span><span class="preprocessor">  do {                                    \</span></div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span><span class="preprocessor">    if (!(COND)) __builtin_unreachable(); \</span></div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="preprocessor">  } while (0)</span></div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="../../d7/d19/common__defs_8h.html#a2b24d97ea59794050c906d68303d2737">  283</a></span><span class="preprocessor">#define ADA_ASSUME(COND)       \</span></div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span><span class="preprocessor">  do {                         \</span></div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span><span class="preprocessor">    if (!(COND)) {             \</span></div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="preprocessor">      __builtin_unreachable(); \</span></div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span><span class="preprocessor">    }                          \</span></div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span><span class="preprocessor">  } while (0)</span></div>
 </div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span> </div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span><span class="preprocessor">#if defined(__SSE2__) || defined(__x86_64__) || defined(__x86_64) || \</span></div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span><span class="preprocessor">    (defined(_M_AMD64) || defined(_M_X64) ||                         \</span></div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span><span class="preprocessor">     (defined(_M_IX86_FP) &amp;&amp; _M_IX86_FP == 2))</span></div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span><span class="preprocessor">#define ADA_SSE2 1</span></div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span> </div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span><span class="preprocessor">#if defined(__aarch64__) || defined(_M_ARM64)</span></div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span><span class="preprocessor">#define ADA_NEON 1</span></div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_COMMON_DEFS_H</span></div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span><span class="preprocessor">#if defined(__SSE2__) || defined(__x86_64__) || defined(__x86_64) || \</span></div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span><span class="preprocessor">    (defined(_M_AMD64) || defined(_M_X64) ||                         \</span></div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span><span class="preprocessor">     (defined(_M_IX86_FP) &amp;&amp; _M_IX86_FP == 2))</span></div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span><span class="preprocessor">#define ADA_SSE2 1</span></div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span><span class="preprocessor">#if defined(__aarch64__) || defined(_M_ARM64)</span></div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="preprocessor">#define ADA_NEON 1</span></div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_COMMON_DEFS_H</span></div>
 <div class="ttc" id="anamespaceada_html"><div class="ttname"><a href="../../dd/d64/namespaceada.html">ada</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4c/ada__idna_8h_source.html#l00013">ada_idna.h:13</a></div></div>
 <div class="ttc" id="anamespaceada_html_ad3a5d67b58ebecc2e711d4b444408f2d"><div class="ttname"><a href="../../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d">ada::unreachable</a></div><div class="ttdeci">void unreachable()</div><div class="ttdef"><b>Definition</b> <a href="#l00166">common_defs.h:166</a></div></div>
 <div class="ttc" id="anamespaceada_html_af64c23f52049411702be65b780947d8b"><div class="ttname"><a href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse</a></div><div class="ttdeci">ada_warn_unused ada::result&lt; result_type &gt; parse(std::string_view input, const result_type *base_url=nullptr)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/df6/implementation_8cpp_source.html#l00012">implementation.cpp:12</a></div></div>

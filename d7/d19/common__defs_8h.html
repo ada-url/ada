@@ -303,8 +303,10 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {                                    \</div>
-<div class="line">    if (!(COND)) __builtin_unreachable(); \</div>
+<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {                         \</div>
+<div class="line">    if (!(COND)) {             \</div>
+<div class="line">      __builtin_unreachable(); \</div>
+<div class="line">    }                          \</div>
 <div class="line">  } <span class="keywordflow">while</span> (0)</div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="../../d7/d19/common__defs_8h_source.html#l00283">283</a> of file <a class="el" href="../../d7/d19/common__defs_8h_source.html">common_defs.h</a>.</p>
