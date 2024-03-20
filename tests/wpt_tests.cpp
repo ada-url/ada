@@ -119,7 +119,7 @@ TEST(wpt_tests, percent_encoding) {
         std::cout << "   comment: " << element.get_string() << std::endl;
       } else if (element.type() == ondemand::json_type::object) {
         ondemand::object object = element.get_object();
-        auto element_string = std::string(std::string_view(object.raw_json()));
+        std::string element_string(std::string_view(object.raw_json()));
         object.reset();
 
         // We might want to decode the strings into UTF-8, but some of the

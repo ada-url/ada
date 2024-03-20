@@ -304,7 +304,7 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
-  std::string path_expected = std::string(get_pathname());
+  std::string path_expected(get_pathname());
   path_expected.append(input);
 #endif  // ADA_DEVELOPMENT_CHECKS
   uint32_t ending_index = uint32_t(buffer.size());
@@ -374,7 +374,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
-  std::string username_expected = std::string(get_username());
+  std::string username_expected(get_username());
   username_expected.append(input);
 #endif  // ADA_DEVELOPMENT_CHECKS
   add_authority_slashes_if_needed();
@@ -404,7 +404,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
     components.hash_start += difference;
   }
 #if ADA_DEVELOPMENT_CHECKS
-  std::string username_after = std::string(get_username());
+  std::string username_after(get_username());
   ADA_ASSERT_EQUAL(
       username_expected, username_after,
       "append_base_username problem after inserting " + std::string(input));
@@ -530,7 +530,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
     components.hash_start += difference;
   }
 #if ADA_DEVELOPMENT_CHECKS
-  std::string password_after = std::string(get_password());
+  std::string password_after(get_password());
   ADA_ASSERT_EQUAL(
       password_expected, password_after,
       "append_base_password problem after inserting " + std::string(input));
