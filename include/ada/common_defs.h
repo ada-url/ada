@@ -280,9 +280,11 @@ namespace ada {
 #ifdef ADA_VISUAL_STUDIO
 #define ADA_ASSUME(COND) __assume(COND)
 #else
-#define ADA_ASSUME(COND)                  \
-  do {                                    \
-    if (!(COND)) __builtin_unreachable(); \
+#define ADA_ASSUME(COND)       \
+  do {                         \
+    if (!(COND)) {             \
+      __builtin_unreachable(); \
+    }                          \
   } while (0)
 #endif
 

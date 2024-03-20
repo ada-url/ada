@@ -194,20 +194,26 @@ inline bool url_search_params_iter<T, Type>::has_next() {
 
 template <>
 inline std::optional<std::string_view> url_search_params_keys_iter::next() {
-  if (!has_next()) return std::nullopt;
+  if (!has_next()) {
+    return std::nullopt;
+  }
   return params.params[pos++].first;
 }
 
 template <>
 inline std::optional<std::string_view> url_search_params_values_iter::next() {
-  if (!has_next()) return std::nullopt;
+  if (!has_next()) {
+    return std::nullopt;
+  }
   return params.params[pos++].second;
 }
 
 template <>
 inline std::optional<key_value_view_pair>
 url_search_params_entries_iter::next() {
-  if (!has_next()) return std::nullopt;
+  if (!has_next()) {
+    return std::nullopt;
+  }
   return params.params[pos++];
 }
 
