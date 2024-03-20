@@ -32,9 +32,9 @@ constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
  * performance by using a simpler approach where we loop and compare
  * scheme with all possible protocols starting with the most likely
  * protocol. Doing multiple comparisons may have a poor worst case
- * performance, however. In this instance, we choose a potentially slightly
- * lower best-case performance for a better worst-case performance.
- * We can revisit this choice at any time.
+ * performance, however. In this instance, we choose a potentially
+ * slightly lower best-case performance for a better worst-case
+ * performance. We can revisit this choice at any time.
  *
  * Reference:
  * Schmidt, Douglas C. "Gperf: A perfect hash function generator." More C++
