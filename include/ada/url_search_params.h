@@ -92,7 +92,7 @@ struct url_search_params {
   /**
    * @see https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior
    */
-  inline std::string to_string();
+  inline std::string to_string() const;
 
   /**
    * Returns a simple JS-style iterator over all of the keys in this
