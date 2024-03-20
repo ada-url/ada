@@ -26,6 +26,18 @@ ada_really_inline constexpr bool is_special(std::string_view scheme) {
   if (scheme.empty()) {
     return false;
   }
+  /**
+   * We use a standard hashing technique to find the index of the scheme in the
+   * is_special_list. The hashing technique is based on the size of the scheme
+   * and the first character of the scheme. It ensures that we do at most one
+   * string comparison per call. If the protocol is predictible (e.g., it is
+   * always "http"), we can get a better average performance by using a a
+   * simpler approach where we loop and compare scheme with all possible
+   * protocol. In this instance, we choose a potentially slightly lower
+   * best-case performance for a better worst-case performance. Reference:
+   * Schmidt, Douglas C. "Gperf: A perfect hash function generator." More C++
+   * gems 17 (2000).
+   */
   int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
   const std::string_view target = details::is_special_list[hash_value];
   return (target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1));
@@ -34,6 +46,18 @@ constexpr uint16_t get_special_port(std::string_view scheme) noexcept {
   if (scheme.empty()) {
     return 0;
   }
+  /**
+   * We use a standard hashing technique to find the index of the scheme in the
+   * is_special_list. The hashing technique is based on the size of the scheme
+   * and the first character of the scheme. It ensures that we do at most one
+   * string comparison per call. If the protocol is predictible (e.g., it is
+   * always "http"), we can get a better average performance by using a a
+   * simpler approach where we loop and compare scheme with all possible
+   * protocol. In this instance, we choose a potentially slightly lower
+   * best-case performance for a better worst-case performance. Reference:
+   * Schmidt, Douglas C. "Gperf: A perfect hash function generator." More C++
+   * gems 17 (2000).
+   */
   int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
   const std::string_view target = details::is_special_list[hash_value];
   if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
@@ -49,6 +73,18 @@ constexpr ada::scheme::type get_scheme_type(std::string_view scheme) noexcept {
   if (scheme.empty()) {
     return ada::scheme::NOT_SPECIAL;
   }
+  /**
+   * We use a standard hashing technique to find the index of the scheme in the
+   * is_special_list. The hashing technique is based on the size of the scheme
+   * and the first character of the scheme. It ensures that we do at most one
+   * string comparison per call. If the protocol is predictible (e.g., it is
+   * always "http"), we can get a better average performance by using a a
+   * simpler approach where we loop and compare scheme with all possible
+   * protocol. In this instance, we choose a potentially slightly lower
+   * best-case performance for a better worst-case performance. Reference:
+   * Schmidt, Douglas C. "Gperf: A perfect hash function generator." More C++
+   * gems 17 (2000).
+   */
   int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
   const std::string_view target = details::is_special_list[hash_value];
   if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
