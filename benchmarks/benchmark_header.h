@@ -32,7 +32,7 @@ bool file_exists(const char* filename) {
 }
 
 std::string read_file(std::string filename) {
-  constexpr std::size_t read_size = 4096;
+  constexpr size_t read_size = 4096;
   auto stream = std::ifstream(filename.c_str());
   stream.exceptions(std::ios_base::badbit);
   std::string out;
