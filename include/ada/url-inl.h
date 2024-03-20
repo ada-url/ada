@@ -103,7 +103,7 @@ inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
   if (query.has_value()) {
     out.search_start = uint32_t(running_index);
     running_index += get_search().size();
-    if (get_search().size() == 0) {
+    if (get_search().empty()) {
       running_index++;
     }
   }
