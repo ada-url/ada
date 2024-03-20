@@ -88,7 +88,7 @@ bool ada_can_parse(const char* input, size_t length) noexcept {
 
 bool ada_can_parse_with_base(const char* input, size_t input_length,
                              const char* base, size_t base_length) noexcept {
-  auto base_view = std::string_view(base, base_length);
+  std::string_view base_view(base, base_length);
   return ada::can_parse(std::string_view(input, input_length), &base_view);
 }
 

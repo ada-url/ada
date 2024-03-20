@@ -32,11 +32,11 @@ bool file_exists(const char* filename) {
 }
 
 std::string read_file(std::string filename) {
-  constexpr auto read_size = std::size_t(4096);
+  constexpr size_t read_size = 4096;
   auto stream = std::ifstream(filename.c_str());
   stream.exceptions(std::ios_base::badbit);
-  auto out = std::string();
-  auto buf = std::string(read_size, '\0');
+  std::string out;
+  std::string buf(read_size, '\0');
   while (stream.read(&buf[0], read_size)) {
     out.append(buf, 0, size_t(stream.gcount()));
   }
@@ -45,8 +45,8 @@ std::string read_file(std::string filename) {
 }
 
 std::vector<std::string> split_string(const std::string& str) {
-  auto result = std::vector<std::string>{};
-  auto ss = std::stringstream{str};
+  std::vector<std::string> result;
+  std::stringstream ss{str};
   for (std::string line; std::getline(ss, line, '\n');) {
     std::string_view view = line;
     // Some parsers like boost/url will refuse to parse a URL with trailing

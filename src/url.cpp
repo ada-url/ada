@@ -373,7 +373,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
       }
     }
   } else {  // slow path
-    std::string _buffer = std::string(input);
+    std::string _buffer(input);
     // Next function is only valid if the input is ASCII and returns false
     // otherwise, but it seems that we always have ascii content so we do not
     // need to check the return value.

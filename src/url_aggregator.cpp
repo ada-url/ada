@@ -65,7 +65,7 @@ template <bool has_state_override>
       }
     }
   } else {  // slow path
-    std::string _buffer = std::string(input);
+    std::string _buffer(input);
     // Next function is only valid if the input is ASCII and returns false
     // otherwise, but it seems that we always have ascii content so we do not
     // need to check the return value.
@@ -521,7 +521,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     return false;
   }
 
-  std::string previous_host = std::string(get_hostname());
+  std::string previous_host(get_hostname());
   uint32_t previous_port = components.port;
 
   size_t host_end_pos = input.find('#');
