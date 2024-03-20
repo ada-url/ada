@@ -37,8 +37,8 @@ constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
  * performance. We can revisit this choice at any time.
  *
  * Reference:
- * Schmidt, Douglas C. "Gperf: A perfect hash function generator." More C++
- * gems 17 (2000).
+ * Schmidt, Douglas C. "Gperf: A perfect hash function generator."
+ * More C++ gems 17 (2000).
  *
  * Reference: https://en.wikipedia.org/wiki/Perfect_hash_function
  *
