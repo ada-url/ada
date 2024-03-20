@@ -28,8 +28,7 @@ std::string href_from_file(std::string_view input) {
   std::string tmp_buffer;
   std::string_view internal_input;
   if (unicode::has_tabs_or_newline(input)) {
-    tmp_buffer = input;
-    helpers::remove_ascii_tab_or_newline(tmp_buffer);
+    tmp_buffer = helpers::get_ascii_tab_or_newline_removed(input);
     internal_input = tmp_buffer;
   } else {
     internal_input = input;
