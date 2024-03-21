@@ -11,6 +11,5 @@ var scheme_8h =
     ] ],
     [ "get_scheme_type", "d2/d64/scheme_8h.html#a5e6e7cb90bb372cd1554c6bebb944de6", null ],
     [ "get_special_port", "d2/d64/scheme_8h.html#aba53560a51ae2f47d4295398c57c73ba", null ],
-    [ "get_special_port", "d2/d64/scheme_8h.html#ab67b7bc4789cda1d068df8d5b49d4fde", null ],
-    [ "is_special", "d2/d64/scheme_8h.html#aaa417a8a6b3eca540e6c86789a67f2f8", null ]
+    [ "get_special_port", "d2/d64/scheme_8h.html#ab67b7bc4789cda1d068df8d5b49d4fde", null ]
 ];

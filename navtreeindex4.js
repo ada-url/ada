@@ -1,8 +1,5 @@
 var NAVTREEINDEX4 =
 {
-"df/d61/ada__c_8h.html#a29628cc4060d2b991d19da3903fe8579":[9,0,2,2,39],
-"df/d61/ada__c_8h.html#a2e674e127d8f8957372263788fd2c65d":[9,0,2,2,23],
-"df/d61/ada__c_8h.html#a2ff63854fd9243b04cee594765824d0f":[9,0,2,2,53],
 "df/d61/ada__c_8h.html#a2ff905e41752042a9953a11ef1645b3c":[9,0,2,2,42],
 "df/d61/ada__c_8h.html#a31597c85d75186a69dfa9b2d4dd5389e":[9,0,2,2,77],
 "df/d61/ada__c_8h.html#a3159e29f9b1b57af1bb747bd61aa9184":[9,0,2,2,58],

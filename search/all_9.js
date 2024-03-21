@@ -22,7 +22,7 @@ var searchData=
   ['is_5flabel_5fvalid_19',['is_label_valid',['../d5/ddb/namespaceada_1_1idna.html#ac39ccead632e6f2bf5049d1b643c5e1c',1,'ada::idna']]],
   ['is_5fnormalized_5fwindows_5fdrive_5fletter_20',['is_normalized_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b',1,'ada::checkers']]],
   ['is_5frtl_5flabel_21',['is_rtl_label',['../d5/ddb/namespaceada_1_1idna.html#a164d095ce497ec0086fcd41e3f7e311e',1,'ada::idna']]],
-  ['is_5fspecial_22',['is_special',['../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd',1,'ada::url_base::is_special()'],['../d2/d63/namespaceada_1_1scheme.html#aaa417a8a6b3eca540e6c86789a67f2f8',1,'ada::scheme::is_special()']]],
+  ['is_5fspecial_22',['is_special',['../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd',1,'ada::url_base']]],
   ['is_5fspecial_5flist_23',['is_special_list',['../d1/dfb/namespaceada_1_1scheme_1_1details.html#a45786dafa7d1a411f6606fee8f667a6f',1,'ada::scheme::details']]],
   ['is_5fvalid_24',['is_valid',['../db/d75/structada_1_1url__base.html#a5b7742e4d4d63f7829dd1e510eba88b0',1,'ada::url_base']]],
   ['is_5fwindows_5fdrive_5fletter_25',['is_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca',1,'ada::checkers']]]

@@ -139,8 +139,6 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aaa417a8a6b3eca540e6c86789a67f2f8" id="r_aaa417a8a6b3eca540e6c86789a67f2f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">constexpr</a> <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa417a8a6b3eca540e6c86789a67f2f8">is_special</a> (std::string_view scheme)</td></tr>
-<tr class="separator:aaa417a8a6b3eca540e6c86789a67f2f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab67b7bc4789cda1d068df8d5b49d4fde" id="r_ab67b7bc4789cda1d068df8d5b49d4fde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">constexpr</a> <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">uint16_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab67b7bc4789cda1d068df8d5b49d4fde">get_special_port</a> (std::string_view scheme) <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">noexcept</a></td></tr>
 <tr class="separator:ab67b7bc4789cda1d068df8d5b49d4fde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba53560a51ae2f47d4295398c57c73ba" id="r_aba53560a51ae2f47d4295398c57c73ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">constexpr</a> <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">uint16_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba53560a51ae2f47d4295398c57c73ba">get_special_port</a> (<a class="el" href="#aad13381a250ed0cf04d1cff0a6ae4a3b">ada::scheme::type</a> <a class="el" href="#aad13381a250ed0cf04d1cff0a6ae4a3b">type</a>) <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">noexcept</a></td></tr>
@@ -202,7 +200,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Returns the scheme of an input, or NOT_SPECIAL if it's not a special scheme defined by the spec. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00048">48</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00072">72</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/dfb/namespaceada_1_1scheme_1_1details.html#a45786dafa7d1a411f6606fee8f667a6f">ada::scheme::details::is_special_list</a>, <a class="el" href="#aad13381a250ed0cf04d1cff0a6ae4a3baaff84b9b3b0f0f7c8f56b9a01f3107af">NOT_SPECIAL</a>, and <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>.</p>
 
@@ -232,7 +230,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Returns the port number of a special scheme. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#special-scheme">https://url.spec.whatwg.org/#special-scheme</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00045">45</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00069">69</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>, and <a class="el" href="../../d1/dfb/namespaceada_1_1scheme_1_1details.html#a75649c394af1b43d325ac9fffde2e2a3">ada::scheme::details::special_ports</a>.</p>
 
@@ -270,47 +268,9 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The special port </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00033">33</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00057">57</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/dfb/namespaceada_1_1scheme_1_1details.html#a45786dafa7d1a411f6606fee8f667a6f">ada::scheme::details::is_special_list</a>, <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>, and <a class="el" href="../../d1/dfb/namespaceada_1_1scheme_1_1details.html#a75649c394af1b43d325ac9fffde2e2a3">ada::scheme::details::special_ports</a>.</p>
-
-</div>
-</div>
-<a id="aaa417a8a6b3eca540e6c86789a67f2f8" name="aaa417a8a6b3eca540e6c86789a67f2f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa417a8a6b3eca540e6c86789a67f2f8">&#9670;&#160;</a></span>is_special()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">constexpr</a> <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">bool</a> ada::scheme::is_special </td>
-          <td>(</td>
-          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>scheme</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>A special scheme is an ASCII string that is listed in the first column of the following table. The default port for a special scheme is listed in the second column on the same row. The default port for any other ASCII string is null.</p>
-<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#url-miscellaneous">https://url.spec.whatwg.org/#url-miscellaneous</a> </dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">scheme</td><td></td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>If scheme is a special scheme </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00025">25</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d1/dfb/namespaceada_1_1scheme_1_1details.html#a45786dafa7d1a411f6606fee8f667a6f">ada::scheme::details::is_special_list</a>, and <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>.</p>
 
 </div>
 </div>
