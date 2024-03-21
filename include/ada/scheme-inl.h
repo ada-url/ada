@@ -52,7 +52,7 @@ ada_really_inline constexpr bool is_special(std::string_view scheme) {
   }
   int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
   const std::string_view target = details::is_special_list[hash_value];
-  return (target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1));
+  return target == scheme;
 }
 constexpr uint16_t get_special_port(std::string_view scheme) noexcept {
   if (scheme.empty()) {
@@ -60,7 +60,7 @@ constexpr uint16_t get_special_port(std::string_view scheme) noexcept {
   }
   int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
   const std::string_view target = details::is_special_list[hash_value];
-  if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
+  if (target == scheme) {
     return details::special_ports[hash_value];
   } else {
     return 0;
@@ -75,7 +75,7 @@ constexpr ada::scheme::type get_scheme_type(std::string_view scheme) noexcept {
   }
   int hash_value = (2 * scheme.size() + (unsigned)(scheme[0])) & 7;
   const std::string_view target = details::is_special_list[hash_value];
-  if ((target[0] == scheme[0]) && (target.substr(1) == scheme.substr(1))) {
+  if (target == scheme) {
     return ada::scheme::type(hash_value);
   } else {
     return ada::scheme::NOT_SPECIAL;
