@@ -23,6 +23,7 @@ constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
 }  // namespace details
 
 /****
+ * @private
  * In is_special, get_scheme_type, and get_special_port, we
  * use a standard hashing technique to find the index of the scheme in
  * the is_special_list. The hashing technique is based on the size of
