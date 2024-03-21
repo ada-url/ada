@@ -22,6 +22,30 @@ constexpr std::string_view is_special_list[] = {"http", " ",   "https", "ws",
 constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
 }  // namespace details
 
+/****
+ * @private
+ * In is_special, get_scheme_type, and get_special_port, we
+ * use a standard hashing technique to find the index of the scheme in
+ * the is_special_list. The hashing technique is based on the size of
+ * the scheme and the first character of the scheme. It ensures that we
+ * do at most one string comparison per call. If the protocol is
+ * predictible (e.g., it is always "http"), we can get a better average
+ * performance by using a simpler approach where we loop and compare
+ * scheme with all possible protocols starting with the most likely
+ * protocol. Doing multiple comparisons may have a poor worst case
+ * performance, however. In this instance, we choose a potentially
+ * slightly lower best-case performance for a better worst-case
+ * performance. We can revisit this choice at any time.
+ *
+ * Reference:
+ * Schmidt, Douglas C. "Gperf: A perfect hash function generator."
+ * More C++ gems 17 (2000).
+ *
+ * Reference: https://en.wikipedia.org/wiki/Perfect_hash_function
+ *
+ * Reference: https://github.com/ada-url/ada/issues/617
+ ****/
+
 ada_really_inline constexpr bool is_special(std::string_view scheme) {
   if (scheme.empty()) {
     return false;
