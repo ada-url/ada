@@ -28,7 +28,7 @@ jobs:
         shared: [ON, OFF]
         cxx: [g++-12, clang++-14]
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v3.6.0
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v3.6.0
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare

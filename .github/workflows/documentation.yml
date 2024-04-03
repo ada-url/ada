@@ -22,7 +22,7 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v3.6.0
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v3.6.0
       - name: Install theme
         run: ./tools/prepare-doxygen.sh
       - uses: mattnotmitt/doxygen-action@e0c8cd4cd05e28b88e723b25b30188ecf2505b40 # edge
