@@ -318,3 +318,8 @@ You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) 
 This code is made available under the Apache License 2.0 as well as the MIT license.
 
 Our tests include third-party code and data. The benchmarking code includes third-party code: it is provided for research purposes only and not part of the library.
+
+### Further reading
+
+
+* Yagiz Nizipli, Daniel Lemire, [Parsing Millions of URLs per Second](https://doi.org/10.1002/spe.3296), Software: Practice and Experience 54(5) May 2024.
