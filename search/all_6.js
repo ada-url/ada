@@ -18,5 +18,6 @@ var searchData=
   ['from_5fascii_5fto_5fascii_15',['from_ascii_to_ascii',['../d5/ddb/namespaceada_1_1idna.html#a939fc0c16e2a4fe433685bcd44ad9c75',1,'ada::idna']]],
   ['front_16',['front',['../dd/dcb/structada_1_1url__search__params.html#a2a13ee0da6cbc197c4fa398b7fcbe75b',1,'ada::url_search_params']]],
   ['fsi_17',['FSI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda73df67ab66bd491a7f2227fd6f071b86',1,'ada::idna']]],
-  ['ftp_18',['FTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf',1,'ada::scheme']]]
+  ['ftp_18',['FTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf',1,'ada::scheme']]],
+  ['further_20reading_19',['Further reading',['../index.html#autotoc_md27',1,'']]]
 ];

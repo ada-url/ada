@@ -41,7 +41,8 @@ var NAVTREE =
     [ "Contributing", "index.html#autotoc_md23", [
       [ "Building", "index.html#autotoc_md24", null ],
       [ "Amalgamation", "index.html#autotoc_md25", null ],
-      [ "License", "index.html#autotoc_md26", null ]
+      [ "License", "index.html#autotoc_md26", null ],
+      [ "Further reading", "index.html#autotoc_md27", null ]
     ] ],
     [ "Command line interface (CLI)", "db/d8a/md_docs_2cli.html", null ],
     [ "Namespaces", "namespaces.html", [
