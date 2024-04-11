@@ -232,3 +232,28 @@ TEST(url_search_params, test_to_string_encoding) {
             "q1=foo&q2=foo+bar&q3=foo+bar&q4=foo%2Fbar");
   SUCCEED();
 }
+
+// https://github.com/cloudflare/workerd/issues/1777
+TEST(url_search_params, test_character_set) {
+  auto search_params = ada::url_search_params("key=value");
+
+  // - The application/x-www-form-urlencoded percent-encode set is the component
+  // percent-encode set and U+0021 (!), U+0027 (') to U+0029 RIGHT PARENTHESIS,
+  // inclusive, and U+007E (~).
+  // - The component percent-encode set is the userinfo percent-encode set and
+  // U+0024 ($) to U+0026 (&), inclusive, U+002B (+), and U+002C (,).
+  // - The userinfo percent-encode set is the path percent-encode set and U+002F
+  // (/), U+003A (:), U+003B (;), U+003D (=), U+0040 (@), U+005B ([) to U+005E
+  // (^), inclusive, and U+007C (|).
+  std::vector<char> unique_keys = {'/', ':', ';', '=', '@', '[',  ']', '^', '|',
+                                   '$', '&', '+', ',', '!', '\'', ')', '~'};
+  for (auto& unique_key : unique_keys) {
+    auto value = "value" + std::string(1, unique_key);
+    search_params.set("key", value);
+    // Getting should return the same thing.
+    ASSERT_EQ(search_params.get("key").value(), value);
+    // Stringified version should be percent encoded.
+    ASSERT_NE(search_params.to_string(), "key=" + value);
+  }
+  SUCCEED();
+}
