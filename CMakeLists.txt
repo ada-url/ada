@@ -25,7 +25,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
 option(ADA_TESTING "Build tests" ${BUILD_TESTING})
 
-# There are cases where when embedding ada as a dependency for other CMake 
+# There are cases where when embedding ada as a dependency for other CMake
 # projects as submodules or subdirectories (via FetchContent) can lead to
 # errors due to CPM, so this is here to support disabling all the testing
 # and tooling for ada if one only wishes to use the ada library.
@@ -44,7 +44,7 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   endif()
   # We use simdjson in both the benchmarks and tests
   if(Git_FOUND AND (ADA_TESTING OR ADA_BENCHMARKS))
-    CPMAddPackage("gh:simdjson/simdjson@3.3.0")
+    CPMAddPackage("gh:simdjson/simdjson@3.9.1")
   endif()
   # We use Google Benchmark, but it does not build under several 32-bit systems.
   if(Git_FOUND AND ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
@@ -55,10 +55,10 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
       OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
               "BENCHMARK_ENABLE_INSTALL OFF"
               "BENCHMARK_ENABLE_WERROR OFF"
-  
+
     )
   endif()
-  
+
   if (ADA_TESTING AND NOT EMSCRIPTEN)
     if(Git_FOUND)
       message(STATUS "The tests are enabled.")
@@ -71,7 +71,7 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
       message(STATUS "The tests are disabled.")
     endif()
   endif(ADA_TESTING AND NOT EMSCRIPTEN)
-  
+
   If(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
     if(Git_FOUND)
       message(STATUS "Ada benchmarks enabled.")
@@ -84,7 +84,7 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
       message(STATUS "Ada benchmarks disabled. Set ADA_BENCHMARKS=ON to enable them.")
     endif()
   endif(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
-  
+
   if (ADA_TESTING AND EMSCRIPTEN)
     add_subdirectory(tests/wasm)
   endif(ADA_TESTING AND EMSCRIPTEN)
