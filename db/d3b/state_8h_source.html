@@ -125,34 +125,53 @@ $(function(){initNavTree('db/d3b/state_8h_source.html','../../'); initResizable(
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="foldopen" id="foldopen00017" data-start="{" data-end="};">
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">   17</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">state</a> {</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39">AUTHORITY</a>,</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae773385c8d9dd6358a604116b8fb188c">SCHEME_START</a>,</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a3a70b5d6e416eeccda948d3ccc246f25">SCHEME</a>,</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5">HOST</a>,</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab6e5680904440aafe18fa12e655b1397">NO_SCHEME</a>,</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a7345a249ed5c2f850d85dc1727c24716">FRAGMENT</a>,</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ad418402f9786d8d940e8cbb595090523">RELATIVE_SCHEME</a>,</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ec740dccfce73682b0fc766b3367b20">RELATIVE_SLASH</a>,</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719">FILE</a>,</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a8de3c990e78108965db7c3f38cc5fca7">FILE_HOST</a>,</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a33e2ce137194c80639c32978fb77a489">FILE_SLASH</a>,</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574afb111d1dc7e43a21ed9dcb1c618a6f88">PATH_OR_AUTHORITY</a>,</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae65c30c3a220bc0aae9e11dc316c4625">SPECIAL_AUTHORITY_IGNORE_SLASHES</a>,</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5839c72e828b49749aa4a8f390a8d097">SPECIAL_AUTHORITY_SLASHES</a>,</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a218882a191c9c4136a977c25b895eaff">SPECIAL_RELATIVE_OR_AUTHORITY</a>,</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5662080872eece1e1ceeec5750198283">QUERY</a>,</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5ffb5f0d0de78321df46fc7c93ca64a3">PATH</a>,</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aba05134b69d52ab8a9c703362ee02fa4">PATH_START</a>,</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd">OPAQUE_PATH</a>,</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5">PORT</a>,</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>};</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39">AUTHORITY</a>,</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae773385c8d9dd6358a604116b8fb188c">SCHEME_START</a>,</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a3a70b5d6e416eeccda948d3ccc246f25">SCHEME</a>,</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5">HOST</a>,</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab6e5680904440aafe18fa12e655b1397">NO_SCHEME</a>,</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a7345a249ed5c2f850d85dc1727c24716">FRAGMENT</a>,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ad418402f9786d8d940e8cbb595090523">RELATIVE_SCHEME</a>,</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ec740dccfce73682b0fc766b3367b20">RELATIVE_SLASH</a>,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719">FILE</a>,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a8de3c990e78108965db7c3f38cc5fca7">FILE_HOST</a>,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a33e2ce137194c80639c32978fb77a489">FILE_SLASH</a>,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574afb111d1dc7e43a21ed9dcb1c618a6f88">PATH_OR_AUTHORITY</a>,</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ae65c30c3a220bc0aae9e11dc316c4625">SPECIAL_AUTHORITY_IGNORE_SLASHES</a>,</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5839c72e828b49749aa4a8f390a8d097">SPECIAL_AUTHORITY_SLASHES</a>,</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a218882a191c9c4136a977c25b895eaff">SPECIAL_RELATIVE_OR_AUTHORITY</a>,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5662080872eece1e1ceeec5750198283">QUERY</a>,</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a5ffb5f0d0de78321df46fc7c93ca64a3">PATH</a>,</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574aba05134b69d52ab8a9c703362ee02fa4">PATH_START</a>,</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd">OPAQUE_PATH</a>,</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  <a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5">PORT</a>,</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>};</div>
 </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> std::string <a class="code hl_function" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">to_string</a>(<a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">ada::state</a> <a class="code hl_function" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">s</a>);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>}  <span class="comment">// namespace ada</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_STATE_H</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a> std::string <a class="code hl_function" href="../../dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7">to_string</a>(<a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574">ada::state</a> <a class="code hl_function" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">s</a>);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_STATE_H</span></div>
 <div class="ttc" id="acommon__defs_8h_html"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html">common_defs.h</a></div><div class="ttdoc">Common definitions for cross-platform compiler support.</div></div>
 <div class="ttc" id="acommon__defs_8h_html_a8756815190bd85a52b1a14af2fa17a34"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a></div><div class="ttdeci">#define ada_warn_unused</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d19/common__defs_8h_source.html#l00088">common_defs.h:88</a></div></div>
 <div class="ttc" id="anamespaceada_html"><div class="ttname"><a href="../../dd/d64/namespaceada.html">ada</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4c/ada__idna_8h_source.html#l00013">ada_idna.h:13</a></div></div>
