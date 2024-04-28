@@ -388,7 +388,7 @@ def test_get_last_release():
 
     # Should return None (in case there are no releases yet)
     last_release = release.get_last_release([])
-    assert last_release == None
+    assert last_release is None
 
 
 def test_get_old_contributors():
