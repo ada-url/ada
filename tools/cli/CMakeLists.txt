@@ -8,10 +8,10 @@ if(MSVC AND BUILD_SHARED_LIBS)
         "$<TARGET_FILE:ada>"      # <--this is in-file
         "$<TARGET_FILE_DIR:adaparse>")                 # <--this is out-file path
 endif()
-CPMAddPackage("gh:fmtlib/fmt#7.1.3")
+CPMAddPackage("gh:fmtlib/fmt#10.2.1")
 CPMAddPackage(
   GITHUB_REPOSITORY jarro2783/cxxopts
-  VERSION 3.1.1
+  VERSION 3.2.0
   OPTIONS "CXXOPTS_BUILD_EXAMPLES NO" "CXXOPTS_BUILD_TESTS NO" "CXXOPTS_ENABLE_INSTALL YES"
 )
 target_link_libraries(adaparse PRIVATE cxxopts::cxxopts fmt::fmt)
