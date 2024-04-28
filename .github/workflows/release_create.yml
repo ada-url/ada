@@ -1,4 +1,4 @@
-name: Release Create 
+name: Release Create
 
 on:
   pull_request:
@@ -11,16 +11,16 @@ jobs:
   check-release-conditions:
     runs-on: ubuntu-latest
     if: |
-      github.event.pull_request.merged == true && 
-      github.event.pull_request.base.ref == 'main' && 
-      startsWith(github.event.pull_request.head.ref, 'release/v') && 
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      startsWith(github.event.pull_request.head.ref, 'release/v') &&
       startsWith(github.event.pull_request.user.login, 'github-actions')
-  
+
     steps:
       - name: Check release conditions
-        run: | 
+        run: |
           echo "All conditions have been met!"
-          
+
   release-script-test:
     needs: check-release-conditions
     uses: ./.github/workflows/release-script-tests.yml
@@ -31,18 +31,18 @@ jobs:
     needs: release-script-test
     runs-on: ubuntu-latest
     if: ${{ needs.release-script-test.result == 'success' }}
-      
+
     env:
       NEXT_RELEASE_TAG: ${{ github.event.pull_request.head.ref }}
     steps:
       - name: Checkout
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v3.6.0
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
 
       - name: Prepare Python
         uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
         with:
           cache: 'pip' # caching pip dependencies
-      
+
       - name: Install dependencies
         run: pip install -r ./tools/release/requirements.txt
 
@@ -56,6 +56,6 @@ jobs:
 
       - name: Amalgamation
         run: ./singleheader/amalgamate.py
-      
+
       - name: "Create release"
         run: ./tools/release/create_release.py
