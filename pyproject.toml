@@ -1,5 +1,4 @@
-[tool.ruff]
-select = [
+'lint.select' = [
   "C90",    # McCabe cyclomatic complexity
   "E",      # pycodestyle
   "F",      # Pyflakes
@@ -22,8 +21,8 @@ exclude = [
   "docs",
   "tests",
 ]
-ignore = [
+'lint.ignore' = [
   "E722"   # Do not use bare `except`
 ]
 line-length = 120
-target-version = "py37"
+target-version = "py312"

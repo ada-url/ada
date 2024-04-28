@@ -97,7 +97,7 @@ def dofile(fid: str, prepath: str, filename: str) -> None:
 try:
     timestamp = subprocess.run(['git', 'show', '-s', '--format=%ci', 'HEAD'],
                            stdout=subprocess.PIPE).stdout.decode('utf-8').strip()
-except:
+except Exception:
     print("git not found, timestamp based on current time")
     timestamp = str(datetime.datetime.now())
 print(f"timestamp is {timestamp}")
@@ -143,4 +143,3 @@ print("Done with all files generation.")
 
 print(f"Files have been written to directory: {AMALGAMATE_OUTPUT_PATH}/")
 print("Done with all files generation.")
-

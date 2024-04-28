@@ -26,19 +26,13 @@ jobs:
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
 
-      - name: Install clang-format
-        run: |
-          sudo apt update && sudo apt install clang-format-15 -y
-          sudo ln -sf /usr/bin/clang-format-15 /usr/bin/clang-format
-
-      - name: Build with Lint and Format Check
-        run: |
-          cmake -B build && cmake --build build
-        env:
-          CXX: clang++-14
-          LINT_AND_FORMAT_CHECK: true
+      - name: Run clang-format
+        uses: jidicula/clang-format-action@f62da5e3d3a2d88ff364771d9d938773a618ab5e # v4.11.0
+        with:
+          clang-format-version: '17'
+          fallback-style: 'Google'
 
       - uses: chartboost/ruff-action@e18ae971ccee1b2d7bbef113930f00c670b78da4 # v1.0.0
         name: Lint with Ruff
         with:
-          version: 0.0.263
+          version: 0.4.2
