@@ -25,7 +25,7 @@ jobs:
       - name: Fetch tests
         run: tools/update-wpt.sh
       - name: Open pull request
-        uses: peter-evans/create-pull-request@284f54f989303d2699d373481a0cfa13ad5a6666 #v5.0.1
+        uses: peter-evans/create-pull-request@6d6857d36972b65feb161a90e484f2984215f83e #v6.0.5
         with:
           token: ${{ secrets.GH_PAT }}
           commit-message: "test: update web platform tests"
