@@ -34,7 +34,7 @@ jobs:
           - {gen: Visual Studio 17 2022, arch: Win32, devchecks: ON, shared: OFF, config: Debug}
           - {gen: Visual Studio 17 2022, arch: Win32, devchecks: ON, shared: ON, config: Debug}
     steps:
-    - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v3.6.0
+    - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
     - name: Configure
       run: |
         cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build

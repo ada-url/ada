@@ -1,7 +1,7 @@
 name: Release Script Tests
 
 on:
-  # workflow_call is used to indicate that a workflow can be called by another workflow. 
+  # workflow_call is used to indicate that a workflow can be called by another workflow.
   workflow_call:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -26,7 +26,7 @@ jobs:
         working-directory: ./tools/release
 
     steps:
-      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v3.6.0
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
 
       - name: Prepare Python
         uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
