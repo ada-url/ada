@@ -60,7 +60,18 @@ ada_really_inline bool has_tabs_or_newline(
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
-  // credit: aqrit
+  /**
+   * The fastest way to check for `\t` (==9), '\n'(== 10) and `\r` (==13) relies
+   * on table lookup instruction. We notice that these are all unique numbers
+   * between 0..15. Let's prepare a special register, where we put '\t' in the
+   * 9th position, '\n' - 10th and '\r' - 13th. Then we shuffle this register by
+   * input register. If the input had `\t` in position X then this shuffled
+   * register will also have '\t' in that position. Comparing input with this
+   * shuffled register will mark us all interesting characters in the input.
+   *
+   * credit for algorithmic idea: @aqrit, credit for description:
+   * @DenisYaroshevskiy
+   */
   static uint8_t rnt_array[16] = {1, 0,  0, 0, 0,  0, 0, 0,
                                   9, 10, 0, 0, 13, 0, 0, 0};
   const uint8x16_t rnt = vld1q_u8(rnt_array);
