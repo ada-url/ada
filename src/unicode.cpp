@@ -60,6 +60,7 @@ ada_really_inline bool has_tabs_or_newline(
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
+  // credit: aqrit
   static uint8_t rnt_array[16] = {1, 0,  0, 0, 0,  0, 0, 0,
                                   9, 10, 0, 0, 13, 0, 0, 0};
   const uint8x16_t rnt = vld1q_u8(rnt_array);
