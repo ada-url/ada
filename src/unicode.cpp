@@ -60,22 +60,20 @@ ada_really_inline bool has_tabs_or_newline(
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
-  const uint8x16_t mask1 = vmovq_n_u8('\r');
-  const uint8x16_t mask2 = vmovq_n_u8('\n');
-  const uint8x16_t mask3 = vmovq_n_u8('\t');
+  static uint8_t rnt_array[16] = {1, 0,  0, 0, 0,  0, 0, 0,
+                                  9, 10, 0, 0, 13, 0, 0, 0};
+  const uint8x16_t rnt = vld1q_u8(rnt_array);
+  // m['0xd', '0xa', '0x9']
   uint8x16_t running{0};
   for (; i + 15 < user_input.size(); i += 16) {
     uint8x16_t word = vld1q_u8((const uint8_t*)user_input.data() + i);
-    running = vorrq_u8(vorrq_u8(running, vorrq_u8(vceqq_u8(word, mask1),
-                                                  vceqq_u8(word, mask2))),
-                       vceqq_u8(word, mask3));
+
+    running = vorrq_u8(running, vceqq_u8(vqtbl1q_u8(rnt, word), word));
   }
   if (i < user_input.size()) {
     uint8x16_t word =
         vld1q_u8((const uint8_t*)user_input.data() + user_input.length() - 16);
-    running = vorrq_u8(vorrq_u8(running, vorrq_u8(vceqq_u8(word, mask1),
-                                                  vceqq_u8(word, mask2))),
-                       vceqq_u8(word, mask3));
+    running = vorrq_u8(running, vceqq_u8(vqtbl1q_u8(rnt, word), word));
   }
   return vmaxvq_u8(running) != 0;
 }
@@ -97,6 +95,7 @@ ada_really_inline bool has_tabs_or_newline(
   const __m128i mask1 = _mm_set1_epi8('\r');
   const __m128i mask2 = _mm_set1_epi8('\n');
   const __m128i mask3 = _mm_set1_epi8('\t');
+  // If we supported SSSE3, we could use the algorithm that we use for NEON.
   __m128i running{0};
   for (; i + 15 < user_input.size(); i += 16) {
     __m128i word = _mm_loadu_si128((const __m128i*)(user_input.data() + i));
