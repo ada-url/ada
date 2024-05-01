@@ -87,7 +87,7 @@ ada_really_inline bool has_tabs_or_newline(
         vld1q_u8((const uint8_t*)user_input.data() + user_input.length() - 16);
     running = vorrq_u8(running, vceqq_u8(vqtbl1q_u8(rnt, word), word));
   }
-  return vmaxvq_u8(running) != 0;
+  return vmaxvq_u32(vreinterpretq_u32_u8(running)) != 0;
 }
 #elif ADA_SSE2
 ada_really_inline bool has_tabs_or_newline(
