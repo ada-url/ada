@@ -31,6 +31,8 @@ jobs:
       - uses: uraimo/run-on-arch-action@v2
         name: Build
         id: runcmd
+        env:
+          CXX: g++-12
         with:
           arch: aarch64
           githubToken: ${{ github.token }}
@@ -41,7 +43,5 @@ jobs:
           run: |
             cmake -DADA_SANITIZE=ON -DADA_DEVELOPMENT_CHECKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
             cmake --build build -j=2
-          env:
-            CXX: g++-12
       - name: Test
         run: ctest --output-on-failure --test-dir build
