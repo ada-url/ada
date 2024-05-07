@@ -253,7 +253,7 @@ else(ZURI_FOUND)
     message(STATUS "Zuri not found! Please install to include in benchmark.")
 endif(ZURI_FOUND)
 
-
+if(NOT WIN32)
 # We want the check whether Rust is available before trying to build a crate.
 CPMAddPackage(
   NAME corrosion
@@ -263,7 +263,7 @@ CPMAddPackage(
   OPTIONS "Rust_FIND_QUIETLY OFF"
 )
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
-
+endif()
 
 if(RUST_FOUND)
   message(STATUS "Rust found: " ${Rust_VERSION} )
