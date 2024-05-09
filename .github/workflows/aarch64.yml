@@ -41,4 +41,4 @@ jobs:
             cmake -DADA_SANITIZE=ON -DADA_DEVELOPMENT_CHECKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
             cmake --build build -j=2
       - name: Test
-        run: ctest --output-on-failure --test-dir build
+        run: ctest --test-dir build
