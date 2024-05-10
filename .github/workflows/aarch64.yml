@@ -1,0 +1,43 @@
+name: Ubuntu aarch64 (GCC 12)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shared: [ON, OFF]
+    steps:
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build and Test
+        id: runcmd
+        env:
+          CXX: g++-12
+        with:
+          arch: aarch64
+          githubToken: ${{ github.token }}
+          distro: ubuntu_latest
+          install: |
+            apt-get update -q -y
+            apt-get install -y cmake make g++ ninja-build
+          run: |
+            cmake -DADA_SANITIZE=ON -DADA_DEVELOPMENT_CHECKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+            cmake --build build -j=2
+            ctest --test-dir build
