@@ -36,7 +36,7 @@ jobs:
           distro: ubuntu_latest
           install: |
             apt-get update -q -y
-            apt-get install -y cmake make g++ ninja-build
+            apt-get install -y cmake make g++ ninja-build git
           run: |
             cmake -DADA_SANITIZE=ON -DADA_DEVELOPMENT_CHECKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
             cmake --build build -j=2
