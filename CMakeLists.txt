@@ -59,6 +59,7 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
 
   if (ADA_TESTING AND NOT EMSCRIPTEN)
     if(Git_FOUND)
+      set(CTEST_TEST_TIMEOUT 5)
       message(STATUS "The tests are enabled.")
       add_subdirectory(tests)
     else()
