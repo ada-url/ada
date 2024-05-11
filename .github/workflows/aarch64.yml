@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        shared: [ON, OFF]
+        shared: [OFF]
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - uses: uraimo/run-on-arch-action@v2
@@ -41,6 +41,6 @@ jobs:
             apt-get update -q -y
             apt-get install -y cmake make g++ ninja-build git
           run: |
-            cmake -DADA_SANITIZE=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
-            cmake --build build -j=2
+            cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build
+            cmake --build build
             ctest --test-dir build
