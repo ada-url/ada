@@ -89,7 +89,6 @@ auto BasicBench_AdaURL_aggregator_href =
     BasicBench_AdaURL<PARSE_AND_HREF, ada::url_aggregator>;
 BENCHMARK(BasicBench_AdaURL_aggregator_href);
 
-
 static void BasicBench_AdaURL_CanParse(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;
