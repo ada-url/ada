@@ -92,7 +92,6 @@ BENCHMARK(BasicBench_AdaURL_aggregator_href);
 static void BasicBench_AdaURL_CanParse(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;
-  volatile size_t href_size = 0;
 
   for (auto _ : state) {
     for (std::string& url_string : url_examples) {
