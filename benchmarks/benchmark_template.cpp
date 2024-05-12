@@ -89,6 +89,66 @@ auto BasicBench_AdaURL_aggregator_href =
     BasicBench_AdaURL<PARSE_AND_HREF, ada::url_aggregator>;
 BENCHMARK(BasicBench_AdaURL_aggregator_href);
 
+static void BasicBench_AdaURL_CanParse(benchmark::State& state) {
+  // volatile to prevent optimizations.
+  volatile size_t success = 0;
+
+  for (auto _ : state) {
+    for (std::string& url_string : url_examples) {
+      bool can_parse = ada::can_parse(url_string);
+      if (can_parse) {
+        success++;
+      }
+    }
+  }
+  if (collector.has_events()) {
+    event_aggregate aggregate{};
+    for (size_t i = 0; i < N; i++) {
+      std::atomic_thread_fence(std::memory_order_acquire);
+      collector.start();
+      for (std::string& url_string : url_examples) {
+        bool can_parse = ada::can_parse(url_string);
+        if (can_parse) {
+          success++;
+        }
+      }
+      std::atomic_thread_fence(std::memory_order_release);
+      event_count allocate_count = collector.end();
+      aggregate << allocate_count;
+    }
+    state.counters["cycles/url"] =
+        aggregate.best.cycles() / std::size(url_examples);
+    state.counters["instructions/url"] =
+        aggregate.best.instructions() / std::size(url_examples);
+    state.counters["instructions/cycle"] =
+        aggregate.best.instructions() / aggregate.best.cycles();
+    state.counters["instructions/byte"] =
+        aggregate.best.instructions() / url_examples_bytes;
+    state.counters["instructions/ns"] =
+        aggregate.best.instructions() / aggregate.best.elapsed_ns();
+    state.counters["GHz"] =
+        aggregate.best.cycles() / aggregate.best.elapsed_ns();
+    state.counters["ns/url"] =
+        aggregate.best.elapsed_ns() / std::size(url_examples);
+    state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
+  }
+  (void)success;
+  state.counters["time/byte"] = benchmark::Counter(
+      url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate |
+                              benchmark::Counter::kInvert);
+  state.counters["time/url"] =
+      benchmark::Counter(double(std::size(url_examples)),
+                         benchmark::Counter::kIsIterationInvariantRate |
+                             benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+  state.counters["url/s"] =
+      benchmark::Counter(double(std::size(url_examples)),
+                         benchmark::Counter::kIsIterationInvariantRate);
+}
+
+BENCHMARK(BasicBench_AdaURL_CanParse);
+
 #if ADA_url_whatwg_ENABLED
 size_t count_whatwg_invalid() {
   size_t how_many = 0;
