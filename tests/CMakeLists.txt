@@ -40,7 +40,6 @@ else()
   target_link_libraries(url_search_params PRIVATE simdjson GTest::gtest_main)
 
   gtest_discover_tests(wpt_tests PROPERTIES TEST_DISCOVERY_TIMEOUT 600)
-  gtest_discover_tests(wpt_tests DISCOVERY_MODE PRE_TEST)
   gtest_discover_tests(url_components PROPERTIES TEST_DISCOVERY_TIMEOUT 600)
   gtest_discover_tests(basic_tests PROPERTIES TEST_DISCOVERY_TIMEOUT 600)
   gtest_discover_tests(from_file_tests PROPERTIES TEST_DISCOVERY_TIMEOUT 600)
