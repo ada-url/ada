@@ -1,4 +1,5 @@
 #include <fuzzer/FuzzedDataProvider.h>
+
 #include <memory>
 #include <string>
 

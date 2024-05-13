@@ -1,4 +1,5 @@
 #include <fuzzer/FuzzedDataProvider.h>
+
 #include <memory>
 #include <string>
 
@@ -14,8 +15,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
    * ada::url_search_params
    */
 
-auto base_source_view =
-    std::string_view(base_source.data(), base_source.length());
+  auto base_source_view =
+      std::string_view(base_source.data(), base_source.length());
   auto initialized = ada::url_search_params(base_source_view);
 
   auto search_params = ada::url_search_params();
