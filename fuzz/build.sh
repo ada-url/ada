@@ -36,3 +36,11 @@ $CXX $CFLAGS $CXXFLAGS \
 
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_search_params.o \
      -o $OUT/url_search_params
+
+$CXX $CFLAGS $CXXFLAGS \
+     -std=c++17 \
+     -I build/singleheader \
+     -c fuzz/href.cc -o href.o
+
+$CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE href.o \
+     -o $OUT/href
