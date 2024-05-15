@@ -2,6 +2,7 @@
 
 cd $SRC/ada-url
 
+rm -r build
 mkdir build
 AMALGAMATE_OUTPUT_PATH=./build/singleheader python3 singleheader/amalgamate.py
 

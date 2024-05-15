@@ -43,6 +43,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     length += out_url->get_hash().size();
     length += out_url->get_origin().size();
     length += out_url->get_port().size();
+
+    out_url->to_string();
   }
 
   /**
@@ -77,6 +79,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     length += out_aggregator->get_hash().size();
     length += out_aggregator->get_origin().size();
     length += out_aggregator->get_port().size();
+
+    out_aggregator->to_string();
+    out_aggregator->to_diagram();
 
     // clear methods
     out_aggregator->clear_port();
