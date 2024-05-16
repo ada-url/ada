@@ -1,2 +1,7 @@
+"ftp://"
+"file://"
+"http://"
 "https://"
+"ws://"
+"wss://"
 ".com"
