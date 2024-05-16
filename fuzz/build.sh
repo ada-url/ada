@@ -36,3 +36,5 @@ $CXX $CFLAGS $CXXFLAGS \
 
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_search_params.o \
      -o $OUT/url_search_params
+
+cp $SRC/ada-url/fuzz/*.dict $SRC/ada-url/fuzz/*.options $OUT/
