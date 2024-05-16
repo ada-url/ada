@@ -1,3 +1,5 @@
+#define ADA_DEVELOPMENT_CHECKS 1
+
 #include <fuzzer/FuzzedDataProvider.h>
 
 #include <memory>
