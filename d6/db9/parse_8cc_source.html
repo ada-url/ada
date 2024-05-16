@@ -188,16 +188,18 @@ $(function(){initNavTree('d6/db9/parse_8cc_source.html','../../'); initResizable
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    length += out_aggregator-&gt;get_origin().size();</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    length += out_aggregator-&gt;get_port().size();</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="comment">// clear methods</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    out_aggregator-&gt;clear_port();</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    out_aggregator-&gt;clear_search();</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    out_aggregator-&gt;clear_hash();</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  }</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file</a>(source);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    out_aggregator-&gt;validate();</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="comment">// clear methods</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    out_aggregator-&gt;clear_port();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    out_aggregator-&gt;clear_search();</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    out_aggregator-&gt;clear_hash();</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  }</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <a class="code hl_function" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file</a>(source);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>}  <span class="comment">// extern &quot;C&quot; int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {</span></div>
 </div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="../../d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
