@@ -1,3 +1,2 @@
 [libfuzzer]
 dict = url.dict
-max_len = 1024
