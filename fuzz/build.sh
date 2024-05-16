@@ -37,4 +37,12 @@ $CXX $CFLAGS $CXXFLAGS \
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_search_params.o \
      -o $OUT/url_search_params
 
+$CXX $CFLAGS $CXXFLAGS \
+     -std=c++17 \
+     -I build/singleheader \
+     -c fuzz/validate.cc -o validate.o
+
+$CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE validate.o \
+     -o $OUT/validate
+
 cp $SRC/ada-url/fuzz/*.dict $SRC/ada-url/fuzz/*.options $OUT/
