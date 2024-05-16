@@ -9,28 +9,37 @@
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   FuzzedDataProvider fdp(data, size);
   std::string source = fdp.ConsumeRandomLengthString(256);
-  std::string base_source = fdp.ConsumeRandomLengthString(256);
+
+  // volatile forces the compiler to store the results without undue
+  // optimizations
+  volatile size_t length = 0;
+
+  auto parse_url = ada::parse<ada::url>(source);
+  auto parse_url_aggregator = ada::parse<ada::url_aggregator>(source);
+
+  if (parse_url) {
+    length += parse_url->get_href().size();
+  }
+
+  if (parse_url_aggregator) {
+    length += parse_url_aggregator->get_href().size();
+  }
 
   /**
    * ada::parse<ada::url>
    */
-  auto out_url = ada::parse<ada::url>(source);
+  auto out_url = ada::parse<ada::url>("https://www.ada-url.com");
 
   if (out_url) {
-    std::string input = fdp.ConsumeRandomLengthString(256);
-    out_url->set_protocol(input);
-    out_url->set_username(input);
-    out_url->set_password(input);
-    out_url->set_hostname(input);
-    out_url->set_host(input);
-    out_url->set_pathname(input);
-    out_url->set_search(input);
-    out_url->set_hash(input);
-    out_url->set_port(input);
-
-    // volatile forces the compiler to store the results without undue
-    // optimizations
-    volatile size_t length = 0;
+    out_url->set_protocol(source);
+    out_url->set_username(source);
+    out_url->set_password(source);
+    out_url->set_hostname(source);
+    out_url->set_host(source);
+    out_url->set_pathname(source);
+    out_url->set_search(source);
+    out_url->set_hash(source);
+    out_url->set_port(source);
 
     // getters
     length += out_url->get_protocol().size();
@@ -48,23 +57,19 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   /**
    * ada::parse<ada::url_aggregator>
    */
-  auto out_aggregator = ada::parse<ada::url_aggregator>(source);
+  auto out_aggregator =
+      ada::parse<ada::url_aggregator>("https://www.ada-url.com");
 
   if (out_aggregator) {
-    std::string input = fdp.ConsumeRandomLengthString(256);
-    out_aggregator->set_protocol(input);
-    out_aggregator->set_username(input);
-    out_aggregator->set_password(input);
-    out_aggregator->set_hostname(input);
-    out_aggregator->set_host(input);
-    out_aggregator->set_pathname(input);
-    out_aggregator->set_search(input);
-    out_aggregator->set_hash(input);
-    out_aggregator->set_port(input);
-
-    // volatile forces the compiler to store the results without undue
-    // optimizations
-    volatile size_t length = 0;
+    out_aggregator->set_protocol(source);
+    out_aggregator->set_username(source);
+    out_aggregator->set_password(source);
+    out_aggregator->set_hostname(source);
+    out_aggregator->set_host(source);
+    out_aggregator->set_pathname(source);
+    out_aggregator->set_search(source);
+    out_aggregator->set_hash(source);
+    out_aggregator->set_port(source);
 
     // getters
     length += out_aggregator->get_protocol().size();
