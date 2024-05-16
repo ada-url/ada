@@ -15,7 +15,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
    * ada::validate
    */
   auto out_aggregator = ada::parse<ada::url_aggregator>(source);
-  out_aggregator->validate();
+  if (out_aggregator) {
+    out_aggregator->validate();
+  }
 
   return 0;
 }
