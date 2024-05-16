@@ -431,3 +431,13 @@ TYPED_TEST(basic_tests, nodejs_undici_2971) {
       R"(https://non-ascii-location-header.sys.workers.dev/%EC%95%88%EB%85%95)");
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, path_setter_bug) {
+  std::string_view base = "blob:/?";
+  auto base_url = ada::parse<ada::url_aggregator>(base);
+  ASSERT_TRUE(base_url);
+  ASSERT_TRUE(base_url->validate());
+  ASSERT_TRUE(base_url->set_pathname("//.."));
+  ASSERT_TRUE(base_url->validate());
+  SUCCEED();
+}
