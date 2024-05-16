@@ -45,3 +45,5 @@ $CXX $CFLAGS $CXXFLAGS \
 
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE href.o \
      -o $OUT/href
+
+cp $SRC/ada-url/fuzz/*.dict $SRC/ada-url/fuzz/*.options $OUT/
