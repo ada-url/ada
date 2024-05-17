@@ -6,7 +6,6 @@
 #include "ada/log.h"
 #include "ada/parser.h"
 
-#include <numeric>
 #include <limits>
 
 namespace ada::parser {

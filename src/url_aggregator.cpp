@@ -1,6 +1,5 @@
 #include "ada.h"
 #include "ada/checkers-inl.h"
-#include "ada/checkers.h"
 #include "ada/helpers.h"
 #include "ada/implementation.h"
 #include "ada/scheme.h"
@@ -8,7 +7,6 @@
 #include "ada/url_components.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
-#include "ada/parser.h"
 
 #include <string>
 #include <string_view>
@@ -701,7 +699,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   // if we have an empty host, then the space between components.host_end and
   // components.pathname_start may be occupied by /.
   if (start == components.host_end) {
-    return std::string_view();
+    return {};
   }
   return helpers::substring(buffer, start, components.pathname_start);
 }
@@ -725,7 +723,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
           components.pathname_start, " buffer.size() = ", buffer.size(),
           " components.search_start = ", components.search_start,
           " components.hash_start = ", components.hash_start);
-  uint32_t ending_index = uint32_t(buffer.size());
+  auto ending_index = uint32_t(buffer.size());
   if (components.search_start != url_components::omitted) {
     ending_index = components.search_start;
   } else if (components.hash_start != url_components::omitted) {
@@ -741,7 +739,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   if (components.search_start == url_components::omitted) {
     return "";
   }
-  uint32_t ending_index = uint32_t(buffer.size());
+  auto ending_index = uint32_t(buffer.size());
   if (components.hash_start != url_components::omitted) {
     ending_index = components.hash_start;
   }
@@ -879,7 +877,7 @@ bool url_aggregator::parse_ipv4(std::string_view input, bool in_place) {
       segment_result = 0;
       input.remove_prefix(2);
     } else {
-      std::from_chars_result r;
+      std::from_chars_result r{};
       if (is_hex) {
         ada_log("parse_ipv4 trying to parse hex number");
         r = std::from_chars(input.data() + 2, input.data() + input.size(),
