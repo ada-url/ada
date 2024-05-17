@@ -425,8 +425,7 @@ Variables</h2></td></tr>
 <div class="line">      std::array&lt;uint8_t, 256&gt; <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>{};</div>
 <div class="line">      <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; 256; i++) {</div>
 <div class="line">        <span class="keywordflow">if</span> (i &lt;= 0x20 || i == 0x22 || i == 0x23 || i == 0x3c || i == 0x3e ||</div>
-<div class="line">            i == 0x3f || i == 0x60 || i == 0x7b || i == 0x7b || i == 0x7d ||</div>
-<div class="line">            i &gt; 0x7e) {</div>
+<div class="line">            i == 0x3f || i == 0x60 || i == 0x7b || i == 0x7d || i &gt; 0x7e) {</div>
 <div class="line">          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 1;</div>
 <div class="line">        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (i == 0x25) {</div>
 <div class="line">          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 8;</div>
