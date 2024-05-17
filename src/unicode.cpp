@@ -260,15 +260,8 @@ contains_forbidden_domain_code_point_or_upper(const char* input,
 constexpr static std::array<bool, 256> is_alnum_plus_table = []() constexpr {
   std::array<bool, 256> result{};
   for (size_t c = 0; c < 256; c++) {
-    if (c >= '0' && c <= '9') {
-      result[c] = true;
-    } else if (c >= 'a' && c <= 'z') {
-      result[c] = true;
-    } else if (c >= 'A' && c <= 'Z') {
-      result[c] = true;
-    } else if (c == '+' || c == '-' || c == '.') {
-      result[c] = true;
-    }
+    result[c] = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') || c == '+' || c == '-' || c == '.';
   }
   return result;
 }();

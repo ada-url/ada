@@ -1,8 +1,6 @@
 #include "ada.h"
 #include "ada/checkers-inl.h"
-#include "ada/checkers.h"
 #include "ada/common_defs.h"  // make sure ADA_IS_BIG_ENDIAN gets defined.
-#include "ada/unicode.h"
 #include "ada/scheme.h"
 
 #include <algorithm>
@@ -748,7 +746,7 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(
 static constexpr std::array<uint8_t, 256> authority_delimiter_special =
     []() constexpr {
       std::array<uint8_t, 256> result{};
-      for (int i : {'@', '/', '\\', '?'}) {
+      for (uint8_t i : {'@', '/', '\\', '?'}) {
         result[i] = 1;
       }
       return result;
@@ -769,7 +767,7 @@ find_authority_delimiter_special(std::string_view view) noexcept {
 // @ / ?
 static constexpr std::array<uint8_t, 256> authority_delimiter = []() constexpr {
   std::array<uint8_t, 256> result{};
-  for (int i : {'@', '/', '?'}) {
+  for (uint8_t i : {'@', '/', '?'}) {
     result[i] = 1;
   }
   return result;

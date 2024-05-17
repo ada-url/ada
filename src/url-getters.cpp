@@ -7,7 +7,6 @@
 #include "ada/helpers.h"
 #include "ada/scheme.h"
 
-#include <algorithm>
 #include <string>
 
 namespace ada {

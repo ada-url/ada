@@ -160,7 +160,6 @@ void url::set_hash(const std::string_view input) {
   helpers::remove_ascii_tab_or_newline(new_value);
   hash = unicode::percent_encode(new_value,
                                  ada::character_sets::FRAGMENT_PERCENT_ENCODE);
-  return;
 }
 
 void url::set_search(const std::string_view input) {

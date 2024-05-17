@@ -43,7 +43,7 @@ bool url::parse_ipv4(std::string_view input) {
       segment_result = 0;
       input.remove_prefix(2);
     } else {
-      std::from_chars_result r;
+      std::from_chars_result r{};
       if (is_hex) {
         r = std::from_chars(input.data() + 2, input.data() + input.size(),
                             segment_result, 16);
