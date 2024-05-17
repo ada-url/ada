@@ -21,13 +21,13 @@ jobs:
     steps:
       - name: Build Fuzzers (${{ matrix.sanitizer }})
         id: build
-        uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@c9485cb75e3e39a122264a45ce667d3b57188675 # master
+        uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@b07cc908abf97529a95a4dd9b3d152bf4f101e71 # master
         with:
          oss-fuzz-project-name: 'ada-url'
          language: c++
          sanitizer: ${{ matrix.sanitizer }}
       - name: Run Fuzzers (${{ matrix.sanitizer }})
-        uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@c9485cb75e3e39a122264a45ce667d3b57188675 # master
+        uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@b07cc908abf97529a95a4dd9b3d152bf4f101e71 # master
         with:
          oss-fuzz-project-name: 'ada-url'
          language: c++
