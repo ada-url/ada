@@ -226,7 +226,7 @@ Variables</h2></td></tr>
 <div class="line">    12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0, 0,  0,</div>
 <div class="line">    0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15}</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00358">358</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00351">351</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
@@ -252,15 +252,8 @@ Variables</h2></td></tr>
 <b>Initial value:</b><div class="fragment"><div class="line">= []() <span class="keyword">constexpr</span> {</div>
 <div class="line">  std::array&lt;bool, 256&gt; <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>{};</div>
 <div class="line">  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; 256; c++) {</div>
-<div class="line">    <span class="keywordflow">if</span> (c &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
-<div class="line">      <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[c] = <span class="keyword">true</span>;</div>
-<div class="line">    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c &gt;= <span class="charliteral">&#39;a&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;z&#39;</span>) {</div>
-<div class="line">      <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[c] = <span class="keyword">true</span>;</div>
-<div class="line">    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c &gt;= <span class="charliteral">&#39;A&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;Z&#39;</span>) {</div>
-<div class="line">      result[c] = <span class="keyword">true</span>;</div>
-<div class="line">    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;+&#39;</span> || c == <span class="charliteral">&#39;-&#39;</span> || c == <span class="charliteral">&#39;.&#39;</span>) {</div>
-<div class="line">      <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[c] = <span class="keyword">true</span>;</div>
-<div class="line">    }</div>
+<div class="line">    <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[c] = (c &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;9&#39;</span>) || (c &gt;= <span class="charliteral">&#39;a&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;z&#39;</span>) ||</div>
+<div class="line">                (c &gt;= <span class="charliteral">&#39;A&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;Z&#39;</span>) || c == <span class="charliteral">&#39;+&#39;</span> || c == <span class="charliteral">&#39;-&#39;</span> || c == <span class="charliteral">&#39;.&#39;</span>;</div>
 <div class="line">  }</div>
 <div class="line">  <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>;</div>
 <div class="line">}()</div>
@@ -405,7 +398,7 @@ Variables</h2></td></tr>
 <b>Initial value:</b><div class="fragment"><div class="line">= {</div>
 <div class="line">    <span class="stringliteral">&quot;..&quot;</span>, <span class="stringliteral">&quot;%2e.&quot;</span>, <span class="stringliteral">&quot;.%2e&quot;</span>, <span class="stringliteral">&quot;%2e%2e&quot;</span>}</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00297">297</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00290">290</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
