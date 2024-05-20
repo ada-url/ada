@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['ada_0',['ada',['../dd/d64/namespaceada.html',1,'']]],
-  ['ada_1',['Ada',['../index.html',1,'Ada'],['../index.html#autotoc_md15',1,'Bindings of Ada']]],
+  ['ada_0',['Ada',['../index.html',1,'Ada'],['../index.html#autotoc_md15',1,'Bindings of Ada']]],
+  ['ada_1',['ada',['../dd/d64/namespaceada.html',1,'']]],
   ['ada_20is_20fast_2',['Ada is fast.',['../index.html#autotoc_md13',1,'']]],
   ['ada_2ecpp_3',['ada.cpp',['../d8/d50/ada_8cpp.html',1,'']]],
   ['ada_2eh_4',['ada.h',['../d0/da8/ada_8h.html',1,'']]],
