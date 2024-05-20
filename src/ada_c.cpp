@@ -125,8 +125,6 @@ ada_owned_string ada_get_origin(ada_url result) noexcept {
 
 void ada_free_owned_string(ada_owned_string owned) noexcept {
   delete[] owned.data;
-  owned.data = nullptr;
-  owned.length = 0;
 }
 
 ada_string ada_get_href(ada_url result) noexcept {
