@@ -660,9 +660,9 @@ result_type parse_url_without_allocation(std::string_view user_input,
         ada_log("QUERY ", helpers::substring(url_data, input_position));
         // Let queryPercentEncodeSet be the special-query percent-encode set if
         // url is special; otherwise the query percent-encode set.
-        const uint8_t* query_percent_encode_set =
-            url.is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
-                             : ada::character_sets::QUERY_PERCENT_ENCODE;
+        // const uint8_t* query_percent_encode_set =
+        //     url.is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
+        //                      : ada::character_sets::QUERY_PERCENT_ENCODE;
 
         // Percent-encode after encoding, with encoding, buffer, and
         // queryPercentEncodeSet, and append the result to url's query.
