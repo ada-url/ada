@@ -49,10 +49,12 @@ std::string href_from_file(std::string_view input) {
 bool can_parse(std::string_view input, const std::string_view* base_input) {
   ada::url_aggregator base_aggregator;
   ada::url_aggregator* base_pointer = nullptr;
-  
+
   // If a base input is provided, parse it first
   if (base_input != nullptr) {
-    base_aggregator = ada::checkers::parse_url_without_allocation<ada::url_aggregator>(*base_input, nullptr);
+    base_aggregator =
+        ada::checkers::parse_url_without_allocation<ada::url_aggregator>(
+            *base_input, nullptr);
     if (!base_aggregator.is_valid) {
       return false;
     }
@@ -60,7 +62,9 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
   }
 
   // Parse the main input with the (possibly parsed) base pointer
-  ada::url_aggregator result = ada::checkers::parse_url_without_allocation<ada::url_aggregator>(input, base_pointer);
+  ada::url_aggregator result =
+      ada::checkers::parse_url_without_allocation<ada::url_aggregator>(
+          input, base_pointer);
   return result.is_valid;
 }
 ada_warn_unused std::string to_string(ada::encoding_type type) {

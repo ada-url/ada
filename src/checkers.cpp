@@ -1,8 +1,8 @@
 #include "ada/checkers.h"
-#include <algorithm>
 
-#include <numeric>
+#include <algorithm>
 #include <limits>
+#include <numeric>
 
 namespace ada::checkers {
 
@@ -129,7 +129,7 @@ ada_really_inline constexpr bool verify_dns_length(
 
 template <class result_type>
 result_type parse_url_without_allocation(std::string_view user_input,
-                      const result_type* base_url) {
+                                         const result_type* base_url) {
   // We can specialize the implementation per type.
   // Important: result_type_is_ada_url is evaluated at *compile time*. This
   // means that doing if constexpr(result_type_is_ada_url) { something } else {
@@ -410,10 +410,12 @@ result_type parse_url_without_allocation(std::string_view user_input,
             //   if (!password_token_seen) {
             //     if constexpr (result_type_is_ada_url) {
             //       url.username += unicode::percent_encode(
-            //           authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+            //           authority_view,
+            //           character_sets::USERINFO_PERCENT_ENCODE);
             //     } else {
             //       url.append_base_username(unicode::percent_encode(
-            //           authority_view, character_sets::USERINFO_PERCENT_ENCODE));
+            //           authority_view,
+            //           character_sets::USERINFO_PERCENT_ENCODE));
             //     }
             //   } else {
             //     if constexpr (result_type_is_ada_url) {
@@ -438,7 +440,8 @@ result_type parse_url_without_allocation(std::string_view user_input,
             //         authority_view, character_sets::USERINFO_PERCENT_ENCODE);
             //   } else {
             //     url.append_base_password(unicode::percent_encode(
-            //         authority_view, character_sets::USERINFO_PERCENT_ENCODE));
+            //         authority_view,
+            //         character_sets::USERINFO_PERCENT_ENCODE));
             //   }
             // }
           }
@@ -661,7 +664,8 @@ result_type parse_url_without_allocation(std::string_view user_input,
         // Let queryPercentEncodeSet be the special-query percent-encode set if
         // url is special; otherwise the query percent-encode set.
         // const uint8_t* query_percent_encode_set =
-        //     url.is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
+        //     url.is_special() ?
+        //     ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
         //                      : ada::character_sets::QUERY_PERCENT_ENCODE;
 
         // Percent-encode after encoding, with encoding, buffer, and
@@ -1029,6 +1033,7 @@ result_type parse_url_without_allocation(std::string_view user_input,
 }
 
 template url parse_url_without_allocation<url>(std::string_view user_input,
-                            const url* base_url = nullptr);
-template url_aggregator parse_url_without_allocation<url_aggregator>(std::string_view user_input, const url_aggregator* base_url = nullptr);
+                                               const url* base_url = nullptr);
+template url_aggregator parse_url_without_allocation<url_aggregator>(
+    std::string_view user_input, const url_aggregator* base_url = nullptr);
 }  // namespace ada::checkers
