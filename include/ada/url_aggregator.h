@@ -205,6 +205,8 @@ struct url_aggregator : url_base {
       std::string_view, const ada::url_aggregator *);
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<
       ada::url_aggregator>(ada::url_aggregator &url) noexcept;
+  friend ada::url_aggregator ada::checkers::parse_url_without_allocation<ada::url_aggregator>(
+      std::string_view, const ada::url_aggregator *);
 
   std::string buffer{};
   url_components components{};

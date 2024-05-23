@@ -118,6 +118,18 @@ ada_really_inline constexpr uint8_t path_signature(
 ada_really_inline constexpr bool verify_dns_length(
     std::string_view input) noexcept;
 
+/**
+ * Parses a url without storing values.
+ */
+template <typename result_type = ada::url_aggregator>
+result_type parse_url_without_allocation(std::string_view user_input,
+                      const result_type* base_url = nullptr);
+
+extern template url_aggregator parse_url_without_allocation<url_aggregator>(
+    std::string_view user_input, const url_aggregator* base_url);
+extern template url parse_url_without_allocation<url>(std::string_view user_input,
+                                   const url* base_url);
+
 }  // namespace ada::checkers
 
 #endif  // ADA_CHECKERS_H

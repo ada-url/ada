@@ -295,6 +295,11 @@ struct url : url_base {
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
       ada::url &url) noexcept;
 
+  friend ada::url ada::checkers::parse_url_without_allocation<ada::url>(
+    std::string_view, const ada::url *);
+  friend ada::url_aggregator ada::checkers::parse_url_without_allocation<ada::url_aggregator>(
+    std::string_view, const ada::url_aggregator *);
+
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);
   inline void update_base_search(std::string_view input);
