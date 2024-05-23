@@ -23,7 +23,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
   if (parse_url_aggregator) {
     length += parse_url_aggregator->get_href().size();
-    
+
     assert(parse_url->get_protocol() == parse_url_aggregator->get_protocol());
     assert(parse_url->get_href() == parse_url_aggregator->get_href());
   }
