@@ -1,5 +1,6 @@
 #include <fuzzer/FuzzedDataProvider.h>
 
+#include <cstdio>
 #include <memory>
 #include <string>
 
@@ -18,6 +19,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   auto parse_url_aggregator = ada::parse<ada::url_aggregator>(source);
 
   if (parse_url.has_value() ^ parse_url_aggregator.has_value()) {
+    printf("Source used to parse: %s", source.c_str());
     abort();
   }
 
