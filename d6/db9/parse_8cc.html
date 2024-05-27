@@ -116,6 +116,7 @@ $(function(){initNavTree('d6/db9/parse_8cc.html','../../'); initResizable(true);
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;fuzzer/FuzzedDataProvider.h&gt;</code><br />
+<code>#include &lt;cstdio&gt;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d50/ada_8cpp_source.html">ada.cpp</a>&quot;</code><br />
@@ -125,10 +126,37 @@ $(function(){initNavTree('d6/db9/parse_8cc.html','../../'); initResizable(true);
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a2ab8bd0c9e8e8f312b3571640917ef0d" id="r_a2ab8bd0c9e8e8f312b3571640917ef0d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ab8bd0c9e8e8f312b3571640917ef0d">is_valid_utf8_string</a> (const char *buf, size_t len)</td></tr>
+<tr class="separator:a2ab8bd0c9e8e8f312b3571640917ef0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a91ce7c16e9840492202299da2b451e60" id="r_a91ce7c16e9840492202299da2b451e60"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput</a> (const uint8_t *data, size_t size)</td></tr>
 <tr class="separator:a91ce7c16e9840492202299da2b451e60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="a2ab8bd0c9e8e8f312b3571640917ef0d" name="a2ab8bd0c9e8e8f312b3571640917ef0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ab8bd0c9e8e8f312b3571640917ef0d">&#9670;&#160;</a></span>is_valid_utf8_string()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool is_valid_utf8_string </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>buf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d6/db9/parse_8cc_source.html#l00010">10</a> of file <a class="el" href="../../d6/db9/parse_8cc_source.html">parse.cc</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput()</a>.</p>
+
+</div>
+</div>
 <a id="a91ce7c16e9840492202299da2b451e60" name="a91ce7c16e9840492202299da2b451e60"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a91ce7c16e9840492202299da2b451e60">&#9670;&#160;</a></span>LLVMFuzzerTestOneInput()</h2>
 
@@ -151,9 +179,9 @@ Functions</h2></td></tr>
 <p><a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse&lt;ada::url_aggregator&gt;</a></p>
 <p>Node.js specific</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/db9/parse_8cc_source.html#l00009">9</a> of file <a class="el" href="../../d6/db9/parse_8cc_source.html">parse.cc</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/db9/parse_8cc_source.html#l00094">94</a> of file <a class="el" href="../../d6/db9/parse_8cc_source.html">parse.cc</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70">ada::href_from_file()</a>, <a class="el" href="#a2ab8bd0c9e8e8f312b3571640917ef0d">is_valid_utf8_string()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>.</p>
 
 </div>
 </div>
