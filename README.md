@@ -115,7 +115,7 @@ components (path, host, and so forth).
 
 ### Parsing & Validation
 
-- Parse and validate a URL from an ASCII or UTF-8 string
+- Parse and validate a URL from an ASCII or a valid UTF-8 string.
 
 ```cpp
 ada::result<ada::url_aggregator> url = ada::parse<ada::url_aggregator>("https://www.google.com");
@@ -144,7 +144,8 @@ if(url) {
 ```
 
 For simplicity, in the examples below, we skip the check because
-we know that parsing succeeds.
+we know that parsing succeeds. All strings are assumed to be valid
+UTF-8 strings.
 
 ### Examples
 
