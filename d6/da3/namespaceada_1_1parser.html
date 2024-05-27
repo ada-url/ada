@@ -152,7 +152,7 @@ template&lt;typename result_type  = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Parses a url. </p>
+<p>Parses a url. The parameter user_input is the input to be parsed: it should be a valid UTF-8 string. The parameter base_url is an optional parameter that can be used to resolve relative URLs. If the base_url is provided, the user_input is resolved against the base_url. </p>
 <p>We expect something of the sort... <a href="https://user:pass@example.com:1234/foo/bar?baz#quux">https://user:pass@example.com:1234/foo/bar?baz#quux</a> -----&mdash;^</p>
 <p>We expect something of the sort... <a href="https://user:pass@example.com:1234/foo/bar?baz#quux">https://user:pass@example.com:1234/foo/bar?baz#quux</a> -----&mdash;^</p>
 

@@ -194,7 +194,7 @@ Usage</h1>
 <h2><a class="anchor" id="autotoc_md17"></a>
 Parsing &amp; Validation</h2>
 <ul>
-<li>Parse and validate a URL from an ASCII or UTF-8 string</li>
+<li>Parse and validate a URL from an ASCII or a valid UTF-8 string.</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code hl_typedef" href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result&lt;ada::url_aggregator&gt;</a> url = <a class="code hl_function" href="dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse&lt;ada::url_aggregator&gt;</a>(<span class="stringliteral">&quot;https://www.google.com&quot;</span>);</div>
 <div class="line"><span class="keywordflow">if</span> (url) { <span class="comment">/* URL is valid */</span> }</div>
@@ -210,7 +210,7 @@ Parsing &amp; Validation</h2>
 <div class="line">} <span class="keywordflow">else</span> {</div>
 <div class="line">  <span class="comment">// report a parsing failure</span></div>
 <div class="line">}</div>
-</div><!-- fragment --><p>For simplicity, in the examples below, we skip the check because we know that parsing succeeds.</p>
+</div><!-- fragment --><p>For simplicity, in the examples below, we skip the check because we know that parsing succeeds. All strings are assumed to be valid UTF-8 strings.</p>
 <h2><a class="anchor" id="autotoc_md18"></a>
 Examples</h2>
 <ul>
