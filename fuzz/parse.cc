@@ -152,7 +152,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     length += out_url->get_origin().size();
     length += out_url->get_port().size();
 
-    out_url->to_string();
+    length += out_url->to_string().size();
   }
 
   /**
@@ -184,9 +184,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     length += out_aggregator->get_origin().size();
     length += out_aggregator->get_port().size();
 
-    out_aggregator->to_string();
-    out_aggregator->to_diagram();
-    out_aggregator->validate();
+    volatile bool is_output_valid = false;
+    length += out_aggregator->to_string().size();
+    is_output_valid = out_aggregator->validate();
+
+    // Printing due to dead-code elimination
+    printf("diagram %s\n", out_aggregator->to_diagram().c_str());
 
     // clear methods
     out_aggregator->clear_port();
@@ -197,7 +200,20 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   /**
    * Node.js specific
    */
-  ada::href_from_file(source);
+  length += ada::href_from_file(source).size();
+
+  /**
+   * Others
+   */
+  bool is_valid = ada::checkers::verify_dns_length(source);
+
+  // Only used for avoiding dead-code elimination
+  if (is_valid) {
+    printf("dns length is valid\n");
+  }
+
+  // Only used for avoiding dead-code elimination
+  printf("length of url is %d\n", length);
 
   return 0;
 }  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
