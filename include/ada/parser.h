@@ -27,7 +27,10 @@ struct url;
 namespace ada::parser {
 
 /**
- * Parses a url.
+ * Parses a url. The parameter user_input is the input to be parsed:
+ * it should be a valid UTF-8 string. The parameter base_url is an optional
+ * parameter that can be used to resolve relative URLs. If the base_url is
+ * provided, the user_input is resolved against the base_url.
  */
 template <typename result_type = ada::url_aggregator>
 result_type parse_url(std::string_view user_input,

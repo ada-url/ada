@@ -21,17 +21,17 @@ jobs:
     steps:
       - name: Build Fuzzers (${{ matrix.sanitizer }})
         id: build
-        uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@b07cc908abf97529a95a4dd9b3d152bf4f101e71 # master
+        uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
         with:
          oss-fuzz-project-name: 'ada-url'
          language: c++
          sanitizer: ${{ matrix.sanitizer }}
       - name: Run Fuzzers (${{ matrix.sanitizer }})
-        uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@b07cc908abf97529a95a4dd9b3d152bf4f101e71 # master
+        uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
         with:
          oss-fuzz-project-name: 'ada-url'
          language: c++
-         fuzz-seconds: 300
+         fuzz-seconds: 600
          sanitizer: ${{ matrix.sanitizer }}
       - name: Upload Crash
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
