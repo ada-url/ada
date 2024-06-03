@@ -5,12 +5,12 @@
 #ifndef ADA_PARSER_H
 #define ADA_PARSER_H
 
-#include "ada/state.h"
-#include "ada/encoding_type.h"
-#include "ada/expected.h"
-
 #include <optional>
 #include <string_view>
+
+#include "ada/encoding_type.h"
+#include "ada/expected.h"
+#include "ada/state.h"
 
 /**
  * @private
@@ -42,12 +42,12 @@ extern template url parse_url<url>(std::string_view user_input,
 
 template <typename result_type = ada::url_aggregator, bool store_values = true>
 result_type parse_url_impl(std::string_view user_input,
-                      const result_type* base_url = nullptr);
+                           const result_type* base_url = nullptr);
 
 extern template url_aggregator parse_url_impl<url_aggregator>(
     std::string_view user_input, const url_aggregator* base_url);
 extern template url parse_url_impl<url>(std::string_view user_input,
-                                   const url* base_url);
+                                        const url* base_url);
 }  // namespace ada::parser
 
 #endif  // ADA_PARSER_H
