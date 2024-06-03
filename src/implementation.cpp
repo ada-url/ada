@@ -11,7 +11,8 @@ namespace ada {
 template <class result_type>
 ada_warn_unused tl::expected<result_type, ada::errors> parse(
     std::string_view input, const result_type* base_url) {
-  result_type u = ada::parser::parse_url<result_type>(input, base_url);
+  result_type u =
+      ada::parser::parse_url_impl<result_type, true>(input, base_url);
   if (!u.is_valid) {
     return tl::unexpected(errors::generic_error);
   }
@@ -50,23 +51,21 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
   ada::url_aggregator base_aggregator;
   ada::url_aggregator* base_pointer = nullptr;
 
-  // If a base input is provided, parse it first
   if (base_input != nullptr) {
-    base_aggregator =
-        ada::checkers::parse_url_without_allocation<ada::url_aggregator>(
-            *base_input, nullptr);
+    base_aggregator = ada::parser::parse_url_impl<ada::url_aggregator, false>(
+        *base_input, nullptr);
     if (!base_aggregator.is_valid) {
       return false;
     }
     base_pointer = &base_aggregator;
   }
 
-  // Parse the main input with the (possibly parsed) base pointer
   ada::url_aggregator result =
-      ada::checkers::parse_url_without_allocation<ada::url_aggregator>(
-          input, base_pointer);
+      ada::parser::parse_url_impl<ada::url_aggregator, false>(input,
+                                                              base_pointer);
   return result.is_valid;
 }
+
 ada_warn_unused std::string to_string(ada::encoding_type type) {
   switch (type) {
     case ada::encoding_type::UTF8:

@@ -1,18 +1,19 @@
-#include "ada.h"
-#include "ada/common_defs.h"
-#include "ada/character_sets-inl.h"
-#include "ada/unicode.h"
-#include "ada/url-inl.h"
-#include "ada/log.h"
 #include "ada/parser.h"
 
 #include <limits>
 
+#include "ada.h"
+#include "ada/character_sets-inl.h"
+#include "ada/common_defs.h"
+#include "ada/log.h"
+#include "ada/unicode.h"
+#include "ada/url-inl.h"
+
 namespace ada::parser {
 
-template <class result_type>
-result_type parse_url(std::string_view user_input,
-                      const result_type* base_url) {
+template <class result_type, bool store_values>
+result_type parse_url_impl(std::string_view user_input,
+                           const result_type* base_url) {
   // We can specialize the implementation per type.
   // Important: result_type_is_ada_url is evaluated at *compile time*. This
   // means that doing if constexpr(result_type_is_ada_url) { something } else {
@@ -539,19 +540,22 @@ result_type parse_url(std::string_view user_input,
       }
       case ada::state::QUERY: {
         ada_log("QUERY ", helpers::substring(url_data, input_position));
-        // Let queryPercentEncodeSet be the special-query percent-encode set if
-        // url is special; otherwise the query percent-encode set.
-        const uint8_t* query_percent_encode_set =
-            url.is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
-                             : ada::character_sets::QUERY_PERCENT_ENCODE;
+        if (store_values) {
+          // Let queryPercentEncodeSet be the special-query percent-encode set
+          // if url is special; otherwise the query percent-encode set.
+          const uint8_t* query_percent_encode_set =
+              url.is_special()
+                  ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
+                  : ada::character_sets::QUERY_PERCENT_ENCODE;
 
-        // Percent-encode after encoding, with encoding, buffer, and
-        // queryPercentEncodeSet, and append the result to url's query.
-        url.update_base_search(helpers::substring(url_data, input_position),
-                               query_percent_encode_set);
-        ada_log("QUERY update_base_search completed ");
-        if (fragment.has_value()) {
-          url.update_unencoded_base_hash(*fragment);
+          // Percent-encode after encoding, with encoding, buffer, and
+          // queryPercentEncodeSet, and append the result to url's query.
+          url.update_base_search(helpers::substring(url_data, input_position),
+                                 query_percent_encode_set);
+          ada_log("QUERY update_base_search completed ");
+          if (fragment.has_value()) {
+            url.update_unencoded_base_hash(*fragment);
+          }
         }
         return url;
       }
@@ -702,11 +706,13 @@ result_type parse_url(std::string_view user_input,
         } else {
           input_position = input_size + 1;
         }
-        if constexpr (result_type_is_ada_url) {
-          helpers::parse_prepared_path(view, url.type, url.path);
-        } else {
-          url.consume_prepared_path(view);
-          ADA_ASSERT_TRUE(url.validate());
+        if (store_values) {
+          if constexpr (result_type_is_ada_url) {
+            helpers::parse_prepared_path(view, url.type, url.path);
+          } else {
+            url.consume_prepared_path(view);
+            ADA_ASSERT_TRUE(url.validate());
+          }
         }
         break;
       }
@@ -906,9 +912,19 @@ result_type parse_url(std::string_view user_input,
   return url;
 }
 
+template url parse_url_impl(std::string_view user_input,
+                            const url* base_url = nullptr);
+template url_aggregator parse_url_impl(
+    std::string_view user_input, const url_aggregator* base_url = nullptr);
+
+template <class result_type>
+result_type parse_url(std::string_view user_input,
+                      const result_type* base_url) {
+  return parse_url_impl<result_type, true>(user_input, base_url);
+}
+
 template url parse_url<url>(std::string_view user_input,
                             const url* base_url = nullptr);
 template url_aggregator parse_url<url_aggregator>(
     std::string_view user_input, const url_aggregator* base_url = nullptr);
-
 }  // namespace ada::parser
