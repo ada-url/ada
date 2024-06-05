@@ -16,6 +16,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
    */
   ada::idna::to_ascii(source);
   ada::idna::to_unicode(source);
+  ada::idna::ascii_has_upper_case(source.data(), source.length());
 
   return 0;
 }
