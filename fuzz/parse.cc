@@ -118,6 +118,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     length += parse_url_aggregator->get_href().size();
     length += parse_url_aggregator->get_origin().size();
 
+    volatile bool is_parse_url_aggregator_output_valid = false;
+    is_parse_url_aggregator_output_valid = parse_url_aggregator->validate();
+
     assert(parse_url->get_protocol() == parse_url_aggregator->get_protocol());
     assert(parse_url->get_href() == parse_url_aggregator->get_href());
 
@@ -186,8 +189,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     length += out_aggregator->get_origin().size();
     length += out_aggregator->get_port().size();
 
-    volatile bool is_output_valid = false;
     length += out_aggregator->to_string().size();
+
+    volatile bool is_output_valid = false;
     is_output_valid = out_aggregator->validate();
 
     // Printing due to dead-code elimination
