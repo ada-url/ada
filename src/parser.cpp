@@ -540,7 +540,7 @@ result_type parse_url_impl(std::string_view user_input,
       }
       case ada::state::QUERY: {
         ada_log("QUERY ", helpers::substring(url_data, input_position));
-        if (store_values) {
+        if constexpr (store_values) {
           // Let queryPercentEncodeSet be the special-query percent-encode set
           // if url is special; otherwise the query percent-encode set.
           const uint8_t* query_percent_encode_set =
@@ -553,8 +553,10 @@ result_type parse_url_impl(std::string_view user_input,
           url.update_base_search(helpers::substring(url_data, input_position),
                                  query_percent_encode_set);
           ada_log("QUERY update_base_search completed ");
-          if (fragment.has_value()) {
-            url.update_unencoded_base_hash(*fragment);
+          if constexpr (store_values) {
+            if (fragment.has_value()) {
+              url.update_unencoded_base_hash(*fragment);
+            }
           }
         }
         return url;
@@ -706,7 +708,7 @@ result_type parse_url_impl(std::string_view user_input,
         } else {
           input_position = input_size + 1;
         }
-        if (store_values) {
+        if constexpr (store_values) {
           if constexpr (result_type_is_ada_url) {
             helpers::parse_prepared_path(view, url.type, url.path);
           } else {
