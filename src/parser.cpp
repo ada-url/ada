@@ -553,10 +553,8 @@ result_type parse_url_impl(std::string_view user_input,
           url.update_base_search(helpers::substring(url_data, input_position),
                                  query_percent_encode_set);
           ada_log("QUERY update_base_search completed ");
-          if constexpr (store_values) {
-            if (fragment.has_value()) {
-              url.update_unencoded_base_hash(*fragment);
-            }
+          if (fragment.has_value()) {
+            url.update_unencoded_base_hash(*fragment);
           }
         }
         return url;
