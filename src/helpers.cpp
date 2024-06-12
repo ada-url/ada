@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <charconv>
 #include <cstring>
+#include <iterator>
 #include <sstream>
 
 namespace ada::helpers {
@@ -153,10 +154,19 @@ ada_really_inline void remove_ascii_tab_or_newline(
   // if this ever becomes a performance issue, we could use an approach similar
   // to has_tabs_or_newline
   input.erase(std::remove_if(input.begin(), input.end(),
-                             [](char c) {
-                               return ada::unicode::is_ascii_tab_or_newline(c);
-                             }),
+                             ada::unicode::is_ascii_tab_or_newline),
               input.end());
+}
+
+ada_really_inline std::string get_ascii_tab_or_newline_removed(
+    std::string_view input) {
+  std::string res;
+  res.reserve(input.size());
+
+  std::copy_if(input.begin(), input.end(), std::back_insert_iterator{res},
+               std::not_fn(ada::unicode::is_ascii_tab_or_newline));
+
+  return res;
 }
 
 ada_really_inline std::string_view substring(std::string_view input,
