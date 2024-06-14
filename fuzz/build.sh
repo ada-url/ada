@@ -37,4 +37,16 @@ $CXX $CFLAGS $CXXFLAGS \
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_search_params.o \
      -o $OUT/url_search_params
 
+$CXX $CFLAGS $CXXFLAGS \
+     -std=c++17 \
+     -I build/singleheader \
+     -c build/singleheader/ada.cpp -o ada.o
+
+$CC $CFLAGS $CXXFLAGS \
+     -I build/singleheader \
+     -c fuzz/ada_c.c -o ada_c.o
+
+$CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE ./ada.o ada_c.o \
+     -o $OUT/ada_c
+
 cp $SRC/ada-url/fuzz/*.dict $SRC/ada-url/fuzz/*.options $OUT/
