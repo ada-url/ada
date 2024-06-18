@@ -5,6 +5,13 @@
 #ifndef ADA_URL_H
 #define ADA_URL_H
 
+#include <algorithm>
+#include <charconv>
+#include <iostream>
+#include <optional>
+#include <string>
+#include <string_view>
+
 #include "ada/checkers.h"
 #include "ada/common_defs.h"
 #include "ada/log.h"
@@ -13,13 +20,6 @@
 #include "ada/unicode.h"
 #include "ada/url_base.h"
 #include "ada/url_components.h"
-
-#include <algorithm>
-#include <charconv>
-#include <iostream>
-#include <optional>
-#include <string>
-#include <string_view>
 
 namespace ada {
 
@@ -294,6 +294,11 @@ struct url : url_base {
       std::string_view, const ada::url_aggregator *);
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
       ada::url &url) noexcept;
+
+  friend ada::url ada::parser::parse_url_impl<ada::url, true>(std::string_view,
+                                                              const ada::url *);
+  friend ada::url_aggregator ada::parser::parse_url_impl<
+      ada::url_aggregator, true>(std::string_view, const ada::url_aggregator *);
 
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);
