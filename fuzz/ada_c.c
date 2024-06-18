@@ -59,7 +59,6 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   bool can_parse_result = ada_can_parse((char*)data, size);
 
-  ada_free_strings(out);
   ada_free(out);
 
   return 0;
