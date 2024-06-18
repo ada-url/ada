@@ -117,21 +117,21 @@ $(function(){initNavTree('df/db8/url_8h_source.html','../../'); initResizable(tr
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#ifndef ADA_URL_H</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#define ADA_URL_H</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/dec/checkers_8h.html">ada/checkers.h</a>&quot;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d19/common__defs_8h.html">ada/common_defs.h</a>&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;ada/log.h&quot;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d64/scheme_8h.html">ada/scheme.h</a>&quot;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d2e/serializers_8h.html">ada/serializers.h</a>&quot;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d90/unicode_8h.html">ada/unicode.h</a>&quot;</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d07/url__base_8h.html">ada/url_base.h</a>&quot;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d2a/url__components_8h.html">ada/url_components.h</a>&quot;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;charconv&gt;</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;charconv&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/dec/checkers_8h.html">ada/checkers.h</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d19/common__defs_8h.html">ada/common_defs.h</a>&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;ada/log.h&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d64/scheme_8h.html">ada/scheme.h</a>&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d2e/serializers_8h.html">ada/serializers.h</a>&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d90/unicode_8h.html">ada/unicode.h</a>&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d07/url__base_8h.html">ada/url_base.h</a>&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d2a/url__components_8h.html">ada/url_components.h</a>&quot;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a> {</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
@@ -224,61 +224,66 @@ $(function(){initNavTree('df/db8/url_8h_source.html','../../'); initResizable(tr
 <div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#aa2ca8de64a5ea1479ff05ff7a7f6efcc">  295</a></span>  friend <span class="keywordtype">void</span> <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::helpers::<a class="code hl_friend" href="../../dd/d03/structada_1_1url.html#aa2ca8de64a5ea1479ff05ff7a7f6efcc">strip_trailing_spaces_from_opaque_path</a>&lt;<a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>&gt;(</div>
 <div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>      <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a> &amp;<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>) noexcept;</div>
 <div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>  inline <span class="keywordtype">void</span> update_unencoded_base_hash(std::string_view input);</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>  inline <span class="keywordtype">void</span> update_base_hostname(std::string_view input);</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>  inline <span class="keywordtype">void</span> update_base_search(std::string_view input);</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>  inline <span class="keywordtype">void</span> update_base_search(std::string_view input,</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>                                 const uint8_t query_percent_encode_set[]);</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>  inline <span class="keywordtype">void</span> update_base_search(std::optional&lt;std::<span class="keywordtype">string</span>&gt; input);</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>  inline <span class="keywordtype">void</span> update_base_pathname(std::string_view input);</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>  inline <span class="keywordtype">void</span> update_base_username(std::string_view input);</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>  inline <span class="keywordtype">void</span> update_base_password(std::string_view input);</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>  inline <span class="keywordtype">void</span> update_base_port(std::optional&lt;uint16_t&gt; input);</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span> </div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>  template &lt;<span class="keywordtype">bool</span> override_hostname = false&gt;</div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>  <span class="keywordtype">bool</span> set_host_or_hostname(std::string_view input);</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span> </div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>  [[nodiscard]] <span class="keywordtype">bool</span> parse_ipv4(std::string_view input);</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>  [[nodiscard]] <span class="keywordtype">bool</span> parse_ipv6(std::string_view input);</div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span> </div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>  [[nodiscard]] <span class="keywordtype">bool</span> parse_opaque_host(std::string_view input);</div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>  std::<span class="keywordtype">string</span> non_special_scheme{};</div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span> </div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>  [[nodiscard]] <span class="keyword">inline</span> <span class="keywordtype">bool</span> cannot_have_credentials_or_port() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span> </div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">size_t</span> parse_port(</div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>      std::string_view view, <span class="keywordtype">bool</span> check_trailing_content) <span class="keyword">noexcept</span> <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span> </div>
-<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">size_t</span> parse_port(std::string_view view) <span class="keyword">noexcept</span> <span class="keyword">override</span> {</div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>    <span class="keywordflow">return</span> this-&gt;parse_port(view, <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>  }</div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span> </div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> copy_scheme(<span class="keyword">const</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;u);</div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span> </div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>  [[nodiscard]] <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> parse_host(std::string_view input);</div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span> </div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>  <span class="keyword">template</span> &lt;<span class="keywordtype">bool</span> has_state_overr<span class="keywordtype">id</span>e = false&gt;</div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>  [[nodiscard]] <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> parse_scheme(std::string_view input);</div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span> </div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> clear_pathname() <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> clear_search() <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> set_protocol_as_file();</div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span> </div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">void</span> parse_path(std::string_view input);</div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span> </div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> set_scheme(std::string &amp;&amp;new_scheme) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span> </div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> copy_scheme(<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;&amp;u) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span> </div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>};  <span class="comment">// struct url</span></div>
-</div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span> </div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span><span class="keyword">inline</span> std::ostream &amp;<a class="code hl_function" href="../../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed">operator&lt;&lt;</a>(std::ostream &amp;out, <span class="keyword">const</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;u);</div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#ab61a3cf4e20c19e2756bc491cd1c9a2f">  298</a></span>  friend <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a> <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::parser::<a class="code hl_friend" href="../../dd/d03/structada_1_1url.html#ab61a3cf4e20c19e2756bc491cd1c9a2f">parse_url_impl</a>&lt;<a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a>, true&gt;(std::string_view,</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>                                                              const <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">url</a> *);</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno"><a class="line" href="../../dd/d03/structada_1_1url.html#aeb5d0e3b419d0a0ec50dffbbe96bcfa3">  300</a></span>  friend <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::<a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a> <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::parser::<a class="code hl_friend" href="../../dd/d03/structada_1_1url.html#ab61a3cf4e20c19e2756bc491cd1c9a2f">parse_url_impl</a>&lt;</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>      <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::<a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a>, true&gt;(std::string_view, const <a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a>::<a class="code hl_struct" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a> *);</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> </div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>  inline <span class="keywordtype">void</span> update_unencoded_base_hash(std::string_view input);</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>  inline <span class="keywordtype">void</span> update_base_hostname(std::string_view input);</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>  inline <span class="keywordtype">void</span> update_base_search(std::string_view input);</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>  inline <span class="keywordtype">void</span> update_base_search(std::string_view input,</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>                                 const uint8_t query_percent_encode_set[]);</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>  inline <span class="keywordtype">void</span> update_base_search(std::optional&lt;std::<span class="keywordtype">string</span>&gt; input);</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>  inline <span class="keywordtype">void</span> update_base_pathname(std::string_view input);</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>  inline <span class="keywordtype">void</span> update_base_username(std::string_view input);</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>  inline <span class="keywordtype">void</span> update_base_password(std::string_view input);</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>  inline <span class="keywordtype">void</span> update_base_port(std::optional&lt;uint16_t&gt; input);</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span> </div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>  template &lt;<span class="keywordtype">bool</span> override_hostname = false&gt;</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>  <span class="keywordtype">bool</span> set_host_or_hostname(std::string_view input);</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span> </div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>  [[nodiscard]] <span class="keywordtype">bool</span> parse_ipv4(std::string_view input);</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span> </div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>  [[nodiscard]] <span class="keywordtype">bool</span> parse_ipv6(std::string_view input);</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>  [[nodiscard]] <span class="keywordtype">bool</span> parse_opaque_host(std::string_view input);</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span> </div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>  std::<span class="keywordtype">string</span> non_special_scheme{};</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span> </div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>  [[nodiscard]] <span class="keyword">inline</span> <span class="keywordtype">bool</span> cannot_have_credentials_or_port() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span> </div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">size_t</span> parse_port(</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>      std::string_view view, <span class="keywordtype">bool</span> check_trailing_content) <span class="keyword">noexcept</span> <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span> </div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">size_t</span> parse_port(std::string_view view) <span class="keyword">noexcept</span> <span class="keyword">override</span> {</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>    <span class="keywordflow">return</span> this-&gt;parse_port(view, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>  }</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> copy_scheme(<span class="keyword">const</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;u);</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span> </div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>  [[nodiscard]] <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> parse_host(std::string_view input);</div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>  <span class="keyword">template</span> &lt;<span class="keywordtype">bool</span> has_state_overr<span class="keywordtype">id</span>e = false&gt;</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>  [[nodiscard]] <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">bool</span> parse_scheme(std::string_view input);</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span> </div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> clear_pathname() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> clear_search() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> set_protocol_as_file();</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span> </div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">void</span> parse_path(std::string_view input);</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span> </div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> set_scheme(std::string &amp;&amp;new_scheme) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span> </div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>  <span class="keyword">inline</span> <span class="keywordtype">void</span> copy_scheme(<a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;&amp;u) <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span> </div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_URL_H</span></div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>};  <span class="comment">// struct url</span></div>
+</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span> </div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span><span class="keyword">inline</span> std::ostream &amp;<a class="code hl_function" href="../../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed">operator&lt;&lt;</a>(std::ostream &amp;out, <span class="keyword">const</span> <a class="code hl_struct" href="../../dd/d03/structada_1_1url.html">ada::url</a> &amp;u);</div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span> </div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_URL_H</span></div>
 <div class="ttc" id="acheckers_8h_html"><div class="ttname"><a href="../../d4/dec/checkers_8h.html">checkers.h</a></div><div class="ttdoc">Declarations for URL specific checkers used within Ada.</div></div>
 <div class="ttc" id="acommon__defs_8h_html"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html">common_defs.h</a></div><div class="ttdoc">Common definitions for cross-platform compiler support.</div></div>
 <div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d19/common__defs_8h_source.html#l00084">common_defs.h:84</a></div></div>
@@ -319,6 +324,7 @@ $(function(){initNavTree('df/db8/url_8h_source.html','../../'); initResizable(tr
 <div class="ttc" id="astructada_1_1url_html_a97d8483c8a6b8f211a0fcbab05b0a071"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#a97d8483c8a6b8f211a0fcbab05b0a071">ada::url::get_origin</a></div><div class="ttdeci">std::string get_origin() const noexcept override</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d25/url-getters_8cpp_source.html#l00013">url-getters.cpp:13</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_aa2ca8de64a5ea1479ff05ff7a7f6efcc"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#aa2ca8de64a5ea1479ff05ff7a7f6efcc">ada::url::strip_trailing_spaces_from_opaque_path</a></div><div class="ttdeci">friend void ada::helpers::strip_trailing_spaces_from_opaque_path(ada::url &amp;url) noexcept</div></div>
 <div class="ttc" id="astructada_1_1url_html_aa4f23a030f0adb5301962fd5b5e68f86"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#aa4f23a030f0adb5301962fd5b5e68f86">ada::url::get_hostname</a></div><div class="ttdeci">std::string get_hostname() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d25/url-getters_8cpp_source.html#l00061">url-getters.cpp:61</a></div></div>
+<div class="ttc" id="astructada_1_1url_html_ab61a3cf4e20c19e2756bc491cd1c9a2f"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#ab61a3cf4e20c19e2756bc491cd1c9a2f">ada::url::parse_url_impl</a></div><div class="ttdeci">friend ada::url ada::parser::parse_url_impl(std::string_view, const ada::url *)</div></div>
 <div class="ttc" id="astructada_1_1url_html_abf05247468983609663574fcec0d2078"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#abf05247468983609663574fcec0d2078">ada::url::get_password</a></div><div class="ttdeci">const std::string &amp; get_password() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d25/url-getters_8cpp_source.html#l00080">url-getters.cpp:80</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_acd6eb9a82c5039488ada48662eb4e2b6"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#acd6eb9a82c5039488ada48662eb4e2b6">ada::url::set_protocol</a></div><div class="ttdeci">bool set_protocol(std::string_view input)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dee/url-setters_8cpp_source.html#l00193">url-setters.cpp:193</a></div></div>
 <div class="ttc" id="astructada_1_1url_html_acef0e8c266e5586b15e2dcab5c7f566f"><div class="ttname"><a href="../../dd/d03/structada_1_1url.html#acef0e8c266e5586b15e2dcab5c7f566f">ada::url::get_port</a></div><div class="ttdeci">std::string get_port() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d25/url-getters_8cpp_source.html#l00084">url-getters.cpp:84</a></div></div>

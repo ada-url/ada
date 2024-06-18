@@ -39,5 +39,7 @@ var structada_1_1url =
     [ "to_string", "dd/d03/structada_1_1url.html#adfb7b5e6efd80467c30c81e6e6a4651a", null ],
     [ "ada::helpers::strip_trailing_spaces_from_opaque_path", "dd/d03/structada_1_1url.html#aa2ca8de64a5ea1479ff05ff7a7f6efcc", null ],
     [ "ada::parser::parse_url", "dd/d03/structada_1_1url.html#a2df764d8379699484c1c724502b757f7", null ],
-    [ "ada::parser::parse_url", "dd/d03/structada_1_1url.html#a490db078b24eaca0d12c874fcd741b69", null ]
+    [ "ada::parser::parse_url", "dd/d03/structada_1_1url.html#a490db078b24eaca0d12c874fcd741b69", null ],
+    [ "ada::parser::parse_url_impl", "dd/d03/structada_1_1url.html#ab61a3cf4e20c19e2756bc491cd1c9a2f", null ],
+    [ "ada::parser::parse_url_impl", "dd/d03/structada_1_1url.html#aeb5d0e3b419d0a0ec50dffbbe96bcfa3", null ]
 ];

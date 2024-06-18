@@ -119,11 +119,11 @@ $(function(){initNavTree('d5/d36/parser_8h.html','../../'); initResizable(true);
 
 <p>Definitions for the parser.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../db/d3b/state_8h_source.html">ada/state.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
 <code>#include &quot;<a class="el" href="../../d0/dbb/encoding__type_8h_source.html">ada/encoding_type.h</a>&quot;</code><br />
 <code>#include &quot;ada/expected.h&quot;</code><br />
-<code>#include &lt;optional&gt;</code><br />
-<code>#include &lt;string_view&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d3b/state_8h_source.html">ada/state.h</a>&quot;</code><br />
 </div>
 <p><a href="../../d5/d36/parser_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -144,6 +144,13 @@ Functions</h2></td></tr>
 <tr class="separator:ae218eecdf660d5149f20464a90730915"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0abcc72d74b95df866bb5741a6802e40" id="r_a0abcc72d74b95df866bb5741a6802e40"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="../../dd/d03/structada_1_1url.html">url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a0abcc72d74b95df866bb5741a6802e40">ada::parser::parse_url&lt; url &gt;</a> (std::string_view user_input, const <a class="el" href="../../dd/d03/structada_1_1url.html">url</a> *base_url)</td></tr>
 <tr class="separator:a0abcc72d74b95df866bb5741a6802e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5bc0e565c8d7db76f6bdc7f7243c6ef" id="r_ae5bc0e565c8d7db76f6bdc7f7243c6ef"><td class="memTemplParams" colspan="2">template&lt;typename result_type  = ada::url_aggregator, bool store_values = true&gt; </td></tr>
+<tr class="memitem:ae5bc0e565c8d7db76f6bdc7f7243c6ef"><td class="memTemplItemLeft" align="right" valign="top">result_type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d6/da3/namespaceada_1_1parser.html#ae5bc0e565c8d7db76f6bdc7f7243c6ef">ada::parser::parse_url_impl</a> (std::string_view user_input, const result_type *base_url=nullptr)</td></tr>
+<tr class="separator:ae5bc0e565c8d7db76f6bdc7f7243c6ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa565135765e7cc4893c30a2bc41d5324" id="r_aa565135765e7cc4893c30a2bc41d5324"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/da3/namespaceada_1_1parser.html#aa565135765e7cc4893c30a2bc41d5324">ada::parser::parse_url_impl&lt; url_aggregator &gt;</a> (std::string_view user_input, const <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a> *base_url)</td></tr>
+<tr class="separator:aa565135765e7cc4893c30a2bc41d5324"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a6388eded52cafa5e3c87fb1f03037a" id="r_a9a6388eded52cafa5e3c87fb1f03037a"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="../../dd/d03/structada_1_1url.html">url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/da3/namespaceada_1_1parser.html#a9a6388eded52cafa5e3c87fb1f03037a">ada::parser::parse_url_impl&lt; url &gt;</a> (std::string_view user_input, const <a class="el" href="../../dd/d03/structada_1_1url.html">url</a> *base_url)</td></tr>
+<tr class="separator:a9a6388eded52cafa5e3c87fb1f03037a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Definitions for the parser. </p>
