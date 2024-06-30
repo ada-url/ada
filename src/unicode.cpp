@@ -1,7 +1,8 @@
+#include "ada/unicode.h"
+
 #include "ada.h"
 #include "ada/character_sets-inl.h"
 #include "ada/common_defs.h"
-#include "ada/unicode.h"
 
 ADA_PUSH_DISABLE_ALL_WARNINGS
 #include "ada_idna.cpp"
@@ -46,17 +47,15 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   return non_ascii == 0;
 }
 #if ADA_NEON
+constexpr bool is_tabs_or_newline(char c) noexcept {
+  return c == '\r' || c == '\n' || c == '\t';
+}
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
-    for (size_t i = 0; i < user_input.size(); i++) {
-      if (user_input[i] == '\r' || user_input[i] == '\n' ||
-          user_input[i] == '\t') {
-        return true;
-      }
-    }
-    return false;
+    return std::any_of(user_input.begin(), user_input.end(),
+                       is_tabs_or_newline);
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
