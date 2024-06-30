@@ -28,6 +28,10 @@ jobs:
         shared: [ON, OFF]
         cxx: [g++-12, clang++-14]
     steps:
+      - name: Build Rust crate
+      run: |
+        cd benchmarks/competitors/servo-url
+        cargo build --release
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
