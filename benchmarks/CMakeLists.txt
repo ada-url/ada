@@ -271,20 +271,25 @@ if(RUST_FOUND)
   # Important: we want to build in release mode!
   corrosion_import_crate(MANIFEST_PATH "competitors/servo-url/Cargo.toml" NO_LINKER_OVERRIDE PROFILE release)
 
-  target_link_libraries(bench PRIVATE servo-url)
-  target_compile_definitions(bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+  # Check if servo-url target was created successfully
+  if(TARGET servo-url)
+    target_link_libraries(bench PRIVATE servo-url)
+    target_compile_definitions(bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
-  target_link_libraries(benchdata PRIVATE servo-url)
-  target_compile_definitions(benchdata PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+    target_link_libraries(benchdata PRIVATE servo-url)
+    target_compile_definitions(benchdata PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
-  target_link_libraries(bbc_bench PRIVATE servo-url)
-  target_compile_definitions(bbc_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+    target_link_libraries(bbc_bench PRIVATE servo-url)
+    target_compile_definitions(bbc_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
-  target_link_libraries(percent_encode PRIVATE servo-url)
-  target_compile_definitions(percent_encode PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+    target_link_libraries(percent_encode PRIVATE servo-url)
+    target_compile_definitions(percent_encode PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
-  target_link_libraries(wpt_bench PRIVATE servo-url)
-  target_compile_definitions(wpt_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+    target_link_libraries(wpt_bench PRIVATE servo-url)
+    target_compile_definitions(wpt_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+  else()
+    message(WARNING "servo-url target was not created. Skipping servo-url benchmarks.")
+  endif()
 else()
   message(STATUS "Rust/Cargo is unavailable." )
   message(STATUS "We will not benchmark servo-url." )
