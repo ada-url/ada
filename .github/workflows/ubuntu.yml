@@ -28,15 +28,24 @@ jobs:
         shared: [ON, OFF]
         cxx: [g++-12, clang++-14]
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
-      - name: Setup Ninja
-        run: sudo apt-get install ninja-build
+      - uses: actions/checkout@v4.1.6
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libcurl4-openssl-dev
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
       - name: Prepare
-        run: cmake -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        run: |
+          cmake -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -DCMAKE_VERBOSE_MAKEFILE=ON -G Ninja -B build
         env:
           CXX: ${{matrix.cxx}}
       - name: Build
-        run: cmake --build build -j=2
+        run: cmake --build build -j=2 -- VERBOSE=1
       - name: Test
         run: ctest --output-on-failure --test-dir build
       - name: Run default benchmark
