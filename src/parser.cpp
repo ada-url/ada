@@ -48,7 +48,7 @@ result_type parse_url_impl(std::string_view user_input,
   if (!url.is_valid) {
     return url;
   }
-  if constexpr (result_type_is_ada_url_aggregator) {
+  if constexpr (result_type_is_ada_url_aggregator && store_values) {
     // Most of the time, we just need user_input.size().
     // In some instances, we may need a bit more.
     ///////////////////////////
@@ -65,9 +65,6 @@ result_type parse_url_impl(std::string_view user_input,
          helpers::leading_zeroes(uint32_t(1 | user_input.size()))) +
         1;
     url.reserve(reserve_capacity);
-    //
-    //
-    //
   }
   std::string tmp_buffer;
   std::string_view internal_input;
@@ -290,32 +287,36 @@ result_type parse_url_impl(std::string_view user_input,
               password_token_seen =
                   password_token_location != std::string_view::npos;
 
-              if (!password_token_seen) {
-                if constexpr (result_type_is_ada_url) {
-                  url.username += unicode::percent_encode(
-                      authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+              if constexpr (store_values) {
+                if (!password_token_seen) {
+                  if constexpr (result_type_is_ada_url) {
+                    url.username += unicode::percent_encode(
+                        authority_view,
+                        character_sets::USERINFO_PERCENT_ENCODE);
+                  } else {
+                    url.append_base_username(unicode::percent_encode(
+                        authority_view,
+                        character_sets::USERINFO_PERCENT_ENCODE));
+                  }
                 } else {
-                  url.append_base_username(unicode::percent_encode(
-                      authority_view, character_sets::USERINFO_PERCENT_ENCODE));
-                }
-              } else {
-                if constexpr (result_type_is_ada_url) {
-                  url.username += unicode::percent_encode(
-                      authority_view.substr(0, password_token_location),
-                      character_sets::USERINFO_PERCENT_ENCODE);
-                  url.password += unicode::percent_encode(
-                      authority_view.substr(password_token_location + 1),
-                      character_sets::USERINFO_PERCENT_ENCODE);
-                } else {
-                  url.append_base_username(unicode::percent_encode(
-                      authority_view.substr(0, password_token_location),
-                      character_sets::USERINFO_PERCENT_ENCODE));
-                  url.append_base_password(unicode::percent_encode(
-                      authority_view.substr(password_token_location + 1),
-                      character_sets::USERINFO_PERCENT_ENCODE));
+                  if constexpr (result_type_is_ada_url) {
+                    url.username += unicode::percent_encode(
+                        authority_view.substr(0, password_token_location),
+                        character_sets::USERINFO_PERCENT_ENCODE);
+                    url.password += unicode::percent_encode(
+                        authority_view.substr(password_token_location + 1),
+                        character_sets::USERINFO_PERCENT_ENCODE);
+                  } else {
+                    url.append_base_username(unicode::percent_encode(
+                        authority_view.substr(0, password_token_location),
+                        character_sets::USERINFO_PERCENT_ENCODE));
+                    url.append_base_password(unicode::percent_encode(
+                        authority_view.substr(password_token_location + 1),
+                        character_sets::USERINFO_PERCENT_ENCODE));
+                  }
                 }
               }
-            } else {
+            } else if constexpr (store_values) {
               if constexpr (result_type_is_ada_url) {
                 url.password += unicode::percent_encode(
                     authority_view, character_sets::USERINFO_PERCENT_ENCODE);
@@ -342,8 +343,10 @@ result_type parse_url_impl(std::string_view user_input,
             break;
           }
           if (end_of_authority == input_size) {
-            if (fragment.has_value()) {
-              url.update_unencoded_base_hash(*fragment);
+            if constexpr (store_values) {
+              if (fragment.has_value()) {
+                url.update_unencoded_base_hash(*fragment);
+              }
             }
             return url;
           }
@@ -658,9 +661,11 @@ result_type parse_url_impl(std::string_view user_input,
           // Optimization: Avoiding going into PATH state improves the
           // performance of urls ending with /.
           if (input_position == input_size) {
-            url.update_base_pathname("/");
-            if (fragment.has_value()) {
-              url.update_unencoded_base_hash(*fragment);
+            if constexpr (store_values) {
+              url.update_base_pathname("/");
+              if (fragment.has_value()) {
+                url.update_unencoded_base_hash(*fragment);
+              }
             }
             return url;
           }
@@ -906,8 +911,10 @@ result_type parse_url_impl(std::string_view user_input,
         ada::unreachable();
     }
   }
-  if (fragment.has_value()) {
-    url.update_unencoded_base_hash(*fragment);
+  if constexpr (store_values) {
+    if (fragment.has_value()) {
+      url.update_unencoded_base_hash(*fragment);
+    }
   }
   return url;
 }
