@@ -48,5 +48,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     entries.next();
   }
 
+  // This is testing a private method used only for C API.
+  std::string resetted_value = fdp.ConsumeRandomLengthString(256);
+  search_params.reset(resetted_value);
+
   return 0;
 }
