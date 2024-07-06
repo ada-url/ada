@@ -25,7 +25,8 @@ var searchData=
   ['is_5frtl_5flabel_22',['is_rtl_label',['../d5/ddb/namespaceada_1_1idna.html#a164d095ce497ec0086fcd41e3f7e311e',1,'ada::idna']]],
   ['is_5fspecial_23',['is_special',['../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd',1,'ada::url_base']]],
   ['is_5fspecial_5flist_24',['is_special_list',['../d1/dfb/namespaceada_1_1scheme_1_1details.html#a45786dafa7d1a411f6606fee8f667a6f',1,'ada::scheme::details']]],
-  ['is_5fvalid_25',['is_valid',['../db/d75/structada_1_1url__base.html#a5b7742e4d4d63f7829dd1e510eba88b0',1,'ada::url_base']]],
-  ['is_5fvalid_5futf8_5fstring_26',['is_valid_utf8_string',['../d6/db9/parse_8cc.html#a2ab8bd0c9e8e8f312b3571640917ef0d',1,'parse.cc']]],
-  ['is_5fwindows_5fdrive_5fletter_27',['is_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca',1,'ada::checkers']]]
+  ['is_5ftabs_5for_5fnewline_25',['is_tabs_or_newline',['../d2/dc3/namespaceada_1_1unicode.html#a956a9f069a4505ce3f0b31995bf2b273',1,'ada::unicode']]],
+  ['is_5fvalid_26',['is_valid',['../db/d75/structada_1_1url__base.html#a5b7742e4d4d63f7829dd1e510eba88b0',1,'ada::url_base']]],
+  ['is_5fvalid_5futf8_5fstring_27',['is_valid_utf8_string',['../d6/db9/parse_8cc.html#a2ab8bd0c9e8e8f312b3571640917ef0d',1,'parse.cc']]],
+  ['is_5fwindows_5fdrive_5fletter_28',['is_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca',1,'ada::checkers']]]
 ];

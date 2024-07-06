@@ -1,6 +1,7 @@
 var unicode_8cpp =
 [
     [ "broadcast", "dd/d9c/unicode_8cpp.html#a6ed16a9339ab5625b761e534b10fce84", null ],
+    [ "is_tabs_or_newline", "dd/d9c/unicode_8cpp.html#a956a9f069a4505ce3f0b31995bf2b273", null ],
     [ "hex_to_binary_table", "dd/d9c/unicode_8cpp.html#a653abc739f565d2b62c72a8499cf573e", null ],
     [ "is_alnum_plus_table", "dd/d9c/unicode_8cpp.html#aa96be0c7e7a403dc114665734796702e", null ],
     [ "is_forbidden_domain_code_point_table", "dd/d9c/unicode_8cpp.html#a1820f38f00f21a80cf55f662b4b5985c", null ],

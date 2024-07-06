@@ -51,6 +51,7 @@ var namespaceada =
     ] ],
     [ "unicode", "d2/dc3/namespaceada_1_1unicode.html", [
       [ "broadcast", "d2/dc3/namespaceada_1_1unicode.html#a6ed16a9339ab5625b761e534b10fce84", null ],
+      [ "is_tabs_or_newline", "d2/dc3/namespaceada_1_1unicode.html#a956a9f069a4505ce3f0b31995bf2b273", null ],
       [ "percent_encode_index", "d2/dc3/namespaceada_1_1unicode.html#a2c259cbcbfcbab3faa8f3f1d31ea553c", null ],
       [ "hex_to_binary_table", "d2/dc3/namespaceada_1_1unicode.html#a653abc739f565d2b62c72a8499cf573e", null ],
       [ "is_alnum_plus_table", "d2/dc3/namespaceada_1_1unicode.html#aa96be0c7e7a403dc114665734796702e", null ],

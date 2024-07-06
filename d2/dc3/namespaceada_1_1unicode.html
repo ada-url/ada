@@ -124,6 +124,8 @@ $(function(){initNavTree('d2/dc3/namespaceada_1_1unicode.html','../../'); initRe
 Functions</h2></td></tr>
 <tr class="memitem:a2c259cbcbfcbab3faa8f3f1d31ea553c" id="r_a2c259cbcbfcbab3faa8f3f1d31ea553c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c259cbcbfcbab3faa8f3f1d31ea553c">percent_encode_index</a> (const std::string_view input, const uint8_t character_set[])</td></tr>
 <tr class="separator:a2c259cbcbfcbab3faa8f3f1d31ea553c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a956a9f069a4505ce3f0b31995bf2b273" id="r_a956a9f069a4505ce3f0b31995bf2b273"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a956a9f069a4505ce3f0b31995bf2b273">is_tabs_or_newline</a> (char c) noexcept</td></tr>
+<tr class="separator:a956a9f069a4505ce3f0b31995bf2b273"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6ed16a9339ab5625b761e534b10fce84" id="r_a6ed16a9339ab5625b761e534b10fce84"><td class="memItemLeft" align="right" valign="top">constexpr uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6ed16a9339ab5625b761e534b10fce84">broadcast</a> (uint8_t v) noexcept</td></tr>
 <tr class="separator:a6ed16a9339ab5625b761e534b10fce84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -162,6 +164,33 @@ Variables</h2></td></tr>
           <td class="memname">uint64_t ada::unicode::broadcast </td>
           <td>(</td>
           <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>v</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00023">23</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a956a9f069a4505ce3f0b31995bf2b273" name="a956a9f069a4505ce3f0b31995bf2b273"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a956a9f069a4505ce3f0b31995bf2b273">&#9670;&#160;</a></span>is_tabs_or_newline()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ada::unicode::is_tabs_or_newline </td>
+          <td>(</td>
+          <td class="paramtype">char</td>          <td class="paramname"><span class="paramname"><em>c</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -227,7 +256,7 @@ Variables</h2></td></tr>
 <div class="line">    12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0, 0,  0,</div>
 <div class="line">    0,  0,  0,  0,  0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15}</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00351">351</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00345">345</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
@@ -260,7 +289,7 @@ Variables</h2></td></tr>
 <div class="line">}()</div>
 <div class="ttc" id="anamespaceada_html_ae493e1ddb3e9a7bc3fd4f8935cd67b3b"><div class="ttname"><a href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a></div><div class="ttdeci">tl::expected&lt; result_type, ada::errors &gt; result</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d6b/implementation_8h_source.html#l00023">implementation.h:23</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00260">260</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00254">254</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
@@ -299,7 +328,7 @@ Variables</h2></td></tr>
 <div class="line">      <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>;</div>
 <div class="line">    }()</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00179">179</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00173">173</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
@@ -340,7 +369,7 @@ Variables</h2></td></tr>
 <div class="line">      <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>;</div>
 <div class="line">    }()</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00219">219</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00213">213</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
@@ -373,7 +402,7 @@ Variables</h2></td></tr>
 <div class="line">      <span class="keywordflow">return</span> result;</div>
 <div class="line">    }()</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00164">164</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00158">158</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
@@ -399,7 +428,7 @@ Variables</h2></td></tr>
 <b>Initial value:</b><div class="fragment"><div class="line">= {</div>
 <div class="line">    <span class="stringliteral">&quot;..&quot;</span>, <span class="stringliteral">&quot;%2e.&quot;</span>, <span class="stringliteral">&quot;.%2e&quot;</span>, <span class="stringliteral">&quot;%2e%2e&quot;</span>}</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00290">290</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d9c/unicode_8cpp_source.html#l00284">284</a> of file <a class="el" href="../../dd/d9c/unicode_8cpp_source.html">unicode.cpp</a>.</p>
 
 </div>
 </div>
