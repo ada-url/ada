@@ -66,6 +66,7 @@ var ada__c_8cpp =
     [ "ada_search_params_keys_iter_next", "dd/dd6/ada__c_8cpp.html#aa4d4d54925053a595483db33036ee6e9", null ],
     [ "ada_search_params_remove", "dd/dd6/ada__c_8cpp.html#aec5b9e4136a5d73716cf84a9da656789", null ],
     [ "ada_search_params_remove_value", "dd/dd6/ada__c_8cpp.html#a570f5f0e36aa9cd14156fba8a8de1fd5", null ],
+    [ "ada_search_params_reset", "dd/dd6/ada__c_8cpp.html#aeaf6867f8c367b98291f141ac7b0ac99", null ],
     [ "ada_search_params_set", "dd/dd6/ada__c_8cpp.html#ad4b436a85d4ef55293361f90ea8ffc48", null ],
     [ "ada_search_params_size", "dd/dd6/ada__c_8cpp.html#a97d4c137929575743967cf5256d9c1eb", null ],
     [ "ada_search_params_sort", "dd/dd6/ada__c_8cpp.html#a4847ac55086714ae0e3e5a4748acdb00", null ],

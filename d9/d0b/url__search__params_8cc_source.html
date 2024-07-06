@@ -160,8 +160,12 @@ $(function(){initNavTree('d9/d0b/url__search__params_8cc_source.html','../../');
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    entries.next();</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  }</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="comment">// This is testing a private method used only for C API.</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  std::string resetted_value = fdp.ConsumeRandomLengthString(256);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  search_params.reset(resetted_value);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
 </div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="../../d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
