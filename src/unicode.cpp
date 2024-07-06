@@ -479,8 +479,4 @@ std::string percent_encode(const std::string_view input,
   return out;
 }
 
-std::string to_unicode(std::string_view input) {
-  return ada::idna::to_unicode(input);
-}
-
 }  // namespace ada::unicode
