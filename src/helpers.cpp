@@ -215,15 +215,14 @@ ada_really_inline size_t find_next_host_delimiter_special(
     }
     return size_t(view.size());
   }
-  auto to_bitmask = [](uint8x16_t input) -> uint16_t {
+  // return the first matching index, or 16 if no match is found.
+  auto first_index = [](uint8x16_t input) -> int {
     uint8x16_t bit_mask =
-        ada_make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x01,
-                            0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
-    uint8x16_t minput = vandq_u8(input, bit_mask);
-    uint8x16_t tmp = vpaddq_u8(minput, minput);
-    tmp = vpaddq_u8(tmp, tmp);
-    tmp = vpaddq_u8(tmp, tmp);
-    return vgetq_lane_u16(vreinterpretq_u16_u8(tmp), 0);
+        ada_make_uint8x16_t(16, 15, 14, 13, 12, 11, 10, 9, 8,
+                            7, 6, 5, 4, 3, 2, 1);
+    uint8x16_t select_mask = vandq_u8(input, bit_mask);
+    int largest = vmaxvq_u8(select_mask);
+    return 16 - largest;
   };
 
   // fast path for long strings (expected to be common)
@@ -235,17 +234,27 @@ ada_really_inline size_t find_next_host_delimiter_special(
       ada_make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   uint8x16_t fmask = vmovq_n_u8(0xf);
-  uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
     uint8x16_t word = vld1q_u8((const uint8_t*)view.data() + i);
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
     uint8x16_t classify = vandq_u8(lowpart, highpart);
+    int match = first_index(vtstq_u8(classify, vdupq_n_u8(0xFF)));
+    if(match < 16) {
+      return i + match;
+    }
+
+/*
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
+
+    //if (match != 16) {
+      //return i + match;
+   // }
+if(match !=trailing_zeroes(is_non_zero)) {abort();}
       return i + trailing_zeroes(is_non_zero);
-    }
+    }*/
   }
 
   if (i < view.size()) {
@@ -254,11 +263,21 @@ ada_really_inline size_t find_next_host_delimiter_special(
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
     uint8x16_t classify = vandq_u8(lowpart, highpart);
+    int match = first_index(vtstq_u8(classify, vdupq_n_u8(0xFF)));
+    if(match < 16) {
+      return view.length() - 16 + match;
+    }/*
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
-      return view.length() - 16 + trailing_zeroes(is_non_zero);
+          int match = first_index(vtstq_u8(classify, vdupq_n_u8(0xFF)));
+    if (match != 16) {
+     // return i + match;
     }
+    if(match !=trailing_zeroes(is_non_zero)) {abort();}
+
+      return view.length() - 16 + trailing_zeroes(is_non_zero);
+    }*/
   }
   return size_t(view.size());
 }
@@ -353,17 +372,14 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     }
     return size_t(view.size());
   }
-  auto to_bitmask = [](uint8x16_t input) -> uint16_t {
+  auto first_index = [](uint8x16_t input) -> int {
     uint8x16_t bit_mask =
-        ada_make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x01,
-                            0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
-    uint8x16_t minput = vandq_u8(input, bit_mask);
-    uint8x16_t tmp = vpaddq_u8(minput, minput);
-    tmp = vpaddq_u8(tmp, tmp);
-    tmp = vpaddq_u8(tmp, tmp);
-    return vgetq_lane_u16(vreinterpretq_u16_u8(tmp), 0);
+        ada_make_uint8x16_t(16, 15, 14, 13, 12, 11, 10, 9, 8,
+                            7, 6, 5, 4, 3, 2, 1);
+    uint8x16_t select_mask = vandq_u8(input, bit_mask);
+    int largest = vmaxvq_u8(select_mask);
+    return 16 - largest;
   };
-
   // fast path for long strings (expected to be common)
   size_t i = location;
   uint8x16_t low_mask =
@@ -373,17 +389,28 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
       ada_make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   uint8x16_t fmask = vmovq_n_u8(0xf);
-  uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
     uint8x16_t word = vld1q_u8((const uint8_t*)view.data() + i);
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
     uint8x16_t classify = vandq_u8(lowpart, highpart);
+    int match = first_index(vtstq_u8(classify, vdupq_n_u8(0xFF)));
+    if(match < 16) {
+      return i + match;
+    }/*
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
-      return i + trailing_zeroes(is_non_zero);
+
+ int match = first_index(vtstq_u8(classify, vdupq_n_u8(0xFF)));
+    if (match != 16) {
+      //return i + match;
     }
+if(match !=trailing_zeroes(is_non_zero)) {abort();}
+
+
+      return i + trailing_zeroes(is_non_zero);
+    }*/
   }
 
   if (i < view.size()) {
@@ -392,11 +419,22 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
     uint8x16_t classify = vandq_u8(lowpart, highpart);
-    if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
+    int match = first_index(vtstq_u8(classify, vdupq_n_u8(0xFF)));
+    if(match < 16) {
+      return view.length() - 16 + match;
+    }
+    /*if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
-      return view.length() - 16 + trailing_zeroes(is_non_zero);
+
+          int match = first_index(vtstq_u8(classify, vdupq_n_u8(0xFF)));
+    if (match != 16) {
+     // return i + match;
     }
+    if(match !=trailing_zeroes(is_non_zero)) {abort();}
+
+      return view.length() - 16 + trailing_zeroes(is_non_zero);
+    }*/
   }
   return size_t(view.size());
 }
