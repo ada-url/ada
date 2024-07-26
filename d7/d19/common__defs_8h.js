@@ -19,6 +19,7 @@ var common__defs_8h =
     [ "ADA_IS_BIG_ENDIAN", "d7/d19/common__defs_8h.html#a0076490fdf8f2256ed9319348ab762b2", null ],
     [ "ADA_IS_BIG_ENDIAN", "d7/d19/common__defs_8h.html#a0076490fdf8f2256ed9319348ab762b2", null ],
     [ "ADA_ISALIGNED_N", "d7/d19/common__defs_8h.html#a6a069f0d3d1400c28a80a8e5db9859bb", null ],
+    [ "ada_lifetime_bound", "d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60", null ],
     [ "ada_likely", "d7/d19/common__defs_8h.html#afad02d7ad262323ba94fe6dec9dab4b6", null ],
     [ "ada_never_inline", "d7/d19/common__defs_8h.html#a0349da887815dc7cf3b4229a6bb45669", null ],
     [ "ADA_POP_DISABLE_WARNINGS", "d7/d19/common__defs_8h.html#a4edcbe1183fb8dd530378209ecda57cf", null ],

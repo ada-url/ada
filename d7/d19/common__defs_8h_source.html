@@ -421,7 +421,19 @@ $(function(){initNavTree('d7/d19/common__defs_8h_source.html','../../'); initRes
 <div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="preprocessor">#define ADA_NEON 1</span></div>
 <div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_COMMON_DEFS_H</span></div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span><span class="preprocessor">#ifndef __has_cpp_attribute</span></div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span><span class="preprocessor">#define ada_lifetime_bound</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span><span class="preprocessor">#elif __has_cpp_attribute(msvc::lifetimebound)</span></div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span><span class="preprocessor">#define ada_lifetime_bound [[msvc::lifetimebound]]</span></div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span><span class="preprocessor">#elif __has_cpp_attribute(clang::lifetimebound)</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span><span class="preprocessor">#define ada_lifetime_bound [[clang::lifetimebound]]</span></div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span><span class="preprocessor">#elif __has_cpp_attribute(lifetimebound)</span></div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="preprocessor">#define ada_lifetime_bound [[lifetimebound]]</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno"><a class="line" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">  310</a></span><span class="preprocessor">#define ada_lifetime_bound</span></div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_COMMON_DEFS_H</span></div>
 <div class="ttc" id="anamespaceada_html"><div class="ttname"><a href="../../dd/d64/namespaceada.html">ada</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4c/ada__idna_8h_source.html#l00013">ada_idna.h:13</a></div></div>
 <div class="ttc" id="anamespaceada_html_ad3a5d67b58ebecc2e711d4b444408f2d"><div class="ttname"><a href="../../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d">ada::unreachable</a></div><div class="ttdeci">void unreachable()</div><div class="ttdef"><b>Definition</b> <a href="#l00166">common_defs.h:166</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
