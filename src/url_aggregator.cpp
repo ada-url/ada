@@ -646,7 +646,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return "null";
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_username() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_username() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_username");
   if (has_non_empty_username()) {
     return helpers::substring(buffer, components.protocol_end + 2,
@@ -655,7 +655,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return "";
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_password() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_password() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_password");
   if (has_non_empty_password()) {
     return helpers::substring(buffer, components.username_end + 1,
@@ -664,7 +664,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return "";
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_port() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_port() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_port");
   if (components.port == url_components::omitted) {
     return "";
@@ -673,7 +673,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
                             components.pathname_start);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_hash");
   // If this's URL's fragment is either null or the empty string, then return
   // the empty string. Return U+0023 (#), followed by this's URL's fragment.
@@ -686,7 +686,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, components.hash_start);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_host() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_host() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_host");
   // Technically, we should check if there is a hostname, but
   // the code below works even if there isn't.
@@ -704,7 +704,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, start, components.pathname_start);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_hostname");
   // Technically, we should check if there is a hostname, but
   // the code below works even if there isn't.
@@ -718,7 +718,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, start, components.host_end);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_pathname pathname_start = ",
           components.pathname_start, " buffer.size() = ", buffer.size(),
           " components.search_start = ", components.search_start,
@@ -732,7 +732,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, components.pathname_start, ending_index);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_search() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_search() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_search");
   // If this's URL's query is either null or the empty string, then return the
   // empty string. Return U+003F (?), followed by this's URL's query.
@@ -749,7 +749,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, components.search_start, ending_index);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_protocol() const noexcept {
+[[nodiscard]] std::string_view url_aggregator::get_protocol() const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_protocol");
   return helpers::substring(buffer, 0, components.protocol_end);
 }

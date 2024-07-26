@@ -845,7 +845,7 @@ inline bool url_aggregator::has_port() const noexcept {
 }
 
 [[nodiscard]] inline std::string_view url_aggregator::get_href()
-    const noexcept {
+    const noexcept ada_lifetime_bound {
   ada_log("url_aggregator::get_href");
   return buffer;
 }

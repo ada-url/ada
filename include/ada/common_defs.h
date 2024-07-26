@@ -298,4 +298,16 @@ namespace ada {
 #define ADA_NEON 1
 #endif
 
+#ifndef __has_cpp_attribute
+    #define ada_lifetime_bound
+#elif __has_cpp_attribute(msvc::lifetimebound)
+    #define ada_lifetime_bound [[msvc::lifetimebound]]
+#elif __has_cpp_attribute(clang::lifetimebound)
+    #define ada_lifetime_bound [[clang::lifetimebound]]
+#elif __has_cpp_attribute(lifetimebound)
+    #define ada_lifetime_bound [[lifetimebound]]
+#else
+    #define ada_lifetime_bound
+#endif
+
 #endif  // ADA_COMMON_DEFS_H
