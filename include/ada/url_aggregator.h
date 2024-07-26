@@ -57,21 +57,24 @@ struct url_aggregator : url_base {
    * @see https://url.spec.whatwg.org/#dom-url-href
    * @see https://url.spec.whatwg.org/#concept-url-serializer
    */
-  [[nodiscard]] inline std::string_view get_href() const noexcept ada_lifetime_bound;
+  [[nodiscard]] inline std::string_view get_href() const noexcept
+      ada_lifetime_bound;
   /**
    * The username getter steps are to return this's URL's username.
    * This function does not allocate memory.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  [[nodiscard]] std::string_view get_username() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_username() const noexcept
+      ada_lifetime_bound;
   /**
    * The password getter steps are to return this's URL's password.
    * This function does not allocate memory.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  [[nodiscard]] std::string_view get_password() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_password() const noexcept
+      ada_lifetime_bound;
   /**
    * Return this's URL's port, serialized.
    * This function does not allocate memory.
@@ -102,7 +105,8 @@ struct url_aggregator : url_base {
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
    */
-  [[nodiscard]] std::string_view get_hostname() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_hostname() const noexcept
+      ada_lifetime_bound;
   /**
    * The pathname getter steps are to return the result of URL path serializing
    * this's URL.
@@ -110,7 +114,8 @@ struct url_aggregator : url_base {
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  [[nodiscard]] std::string_view get_pathname() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_pathname() const noexcept
+      ada_lifetime_bound;
   /**
    * Compute the pathname length in bytes without instantiating a view or a
    * string.
@@ -132,7 +137,8 @@ struct url_aggregator : url_base {
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
-  [[nodiscard]] std::string_view get_protocol() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_protocol() const noexcept
+      ada_lifetime_bound;
 
   /**
    * A URL includes credentials if its username or password is not the empty
