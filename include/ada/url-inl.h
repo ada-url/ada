@@ -166,7 +166,7 @@ inline void url::set_scheme(std::string &&new_scheme) noexcept {
   type = ada::scheme::get_scheme_type(new_scheme);
   // We only move the 'scheme' if it is non-special.
   if (!is_special()) {
-    non_special_scheme = new_scheme;
+    non_special_scheme = std::move(new_scheme);
   }
 }
 
