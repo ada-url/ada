@@ -296,7 +296,7 @@ $(function(){initNavTree('df/ddc/url-inl_8h_source.html','../../'); initResizabl
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>  type = <a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#a5e6e7cb90bb372cd1554c6bebb944de6">ada::scheme::get_scheme_type</a>(new_scheme);</div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>  <span class="comment">// We only move the &#39;scheme&#39; if it is non-special.</span></div>
 <div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>  <span class="keywordflow">if</span> (!is_special()) {</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    non_special_scheme = new_scheme;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    non_special_scheme = std::move(new_scheme);</div>
 <div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>  }</div>
 <div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>}</div>
 <div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
