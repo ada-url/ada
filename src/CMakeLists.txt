@@ -46,13 +46,13 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_BUILD_TYPE STREQUAL "Debug"
 endif()
 
 if(ADA_SANITIZE)
-  target_compile_options(ada INTERFACE -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
-  target_compile_definitions(ada INTERFACE ASAN_OPTIONS=detect_leaks=1)
-  target_link_libraries(ada INTERFACE -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
+  target_compile_options(ada PUBLIC -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
+  target_compile_definitions(ada PUBLIC ASAN_OPTIONS=detect_leaks=1)
+  target_link_libraries(ada PUBLIC -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
 endif()
 if(ADA_SANITIZE_WITHOUT_LEAKS)
-  target_compile_options(ada INTERFACE -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
-  target_link_libraries(ada INTERFACE -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
+  target_compile_options(ada PUBLIC -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
+  target_link_libraries(ada PUBLIC -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
 endif()
 
 if(ADA_LOGGING)
