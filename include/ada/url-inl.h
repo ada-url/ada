@@ -217,7 +217,7 @@ ada_really_inline size_t url::parse_port(std::string_view view,
   ada_log("parse_port('", view, "') ", view.size());
   uint16_t parsed_port{};
   auto r = std::from_chars(view.data(), view.data() + view.size(), parsed_port);
-  if (r.ec == std::errc::result_out_of_range) {
+  if (r.ec != std::errc()) {
     ada_log("parse_port: std::errc::result_out_of_range");
     is_valid = false;
     return 0;
