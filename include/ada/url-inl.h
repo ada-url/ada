@@ -215,7 +215,7 @@ inline void url::copy_scheme(const ada::url &u) {
 ada_really_inline size_t url::parse_port(std::string_view view,
                                          bool check_trailing_content) noexcept {
   ada_log("parse_port('", view, "') ", view.size());
-  if (!view.empty() && view[1] == '-') {
+  if (!view.empty() && view[0] == '-') {
     ada_log("parse_port: view[0] == '0' && view.size() > 1");
     is_valid = false;
     return 0;
