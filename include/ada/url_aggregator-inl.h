@@ -853,7 +853,7 @@ inline bool url_aggregator::has_port() const noexcept {
 ada_really_inline size_t url_aggregator::parse_port(
     std::string_view view, bool check_trailing_content) noexcept {
   ada_log("url_aggregator::parse_port('", view, "') ", view.size());
-  if(!view.empty() && view[1] == '-') {
+  if (!view.empty() && view[1] == '-') {
     ada_log("parse_port: view[0] == '0' && view.size() > 1");
     is_valid = false;
     return 0;
