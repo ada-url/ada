@@ -354,7 +354,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE && host.has_value() &&
           host.value().empty()) {
-        return true;
+        return false;
       }
     }
 

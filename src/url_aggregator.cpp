@@ -45,7 +45,7 @@ template <bool has_state_override>
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE &&
           components.host_start == components.host_end) {
-        return true;
+        return false;
       }
     }
 
