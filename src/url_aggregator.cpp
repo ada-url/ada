@@ -31,14 +31,14 @@ template <bool has_state_override>
       // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
       if (is_special() != is_input_special) {
-        return true;
+        return false;
       }
 
       // If url includes credentials or has a non-null port, and buffer is
       // "file", then return.
       if ((has_credentials() || components.port != url_components::omitted) &&
           parsed_type == ada::scheme::type::FILE) {
-        return true;
+        return false;
       }
 
       // If url's scheme is "file" and its host is an empty host, then return.

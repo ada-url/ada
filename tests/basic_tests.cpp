@@ -104,7 +104,7 @@ TYPED_TEST(basic_tests, readme2) {
 
 TYPED_TEST(basic_tests, readme3) {
   auto url = ada::parse<TypeParam>("https://www.google.com");
-  url->set_protocol("wss");
+  ASSERT_EQ(url->set_protocol("wss"), true);
   ASSERT_EQ(url->get_protocol(), "wss:");
   ASSERT_EQ(url->get_href(), "wss://www.google.com/");
   SUCCEED();
