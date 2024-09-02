@@ -35,20 +35,20 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
     CPMAddPackage(
       NAME GTest
       GITHUB_REPOSITORY google/googletest
-      VERSION 1.14.0
+      VERSION 1.15.2
       OPTIONS  "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
     )
   endif()
   # We use simdjson in both the benchmarks and tests
   if(Git_FOUND AND (ADA_TESTING OR ADA_BENCHMARKS))
-    CPMAddPackage("gh:simdjson/simdjson@3.9.1")
+    CPMAddPackage("gh:simdjson/simdjson@3.10.1")
   endif()
   # We use Google Benchmark, but it does not build under several 32-bit systems.
   if(Git_FOUND AND ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
     CPMAddPackage(
       NAME benchmark
       GITHUB_REPOSITORY google/benchmark
-      GIT_TAG f91b6b4
+      VERSION 1.9.0
       OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
               "BENCHMARK_ENABLE_INSTALL OFF"
               "BENCHMARK_ENABLE_WERROR OFF"
