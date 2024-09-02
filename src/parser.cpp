@@ -363,7 +363,7 @@ result_type parse_url_impl(std::string_view user_input,
         // then set state to special authority ignore slashes state and increase
         // pointer by 1.
         std::string_view view = helpers::substring(url_data, input_position);
-        if (ada::checkers::begins_with(view, "//")) {
+        if (view.starts_with("//")) {
           state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
           input_position += 2;
         } else {
@@ -520,7 +520,7 @@ result_type parse_url_impl(std::string_view user_input,
         // then set state to special authority ignore slashes state and increase
         // pointer by 1.
         std::string_view view = helpers::substring(url_data, input_position);
-        if (ada::checkers::begins_with(view, "//")) {
+        if (view.starts_with("//")) {
           input_position += 2;
         }
 

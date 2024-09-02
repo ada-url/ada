@@ -8,7 +8,7 @@ if(MSVC AND BUILD_SHARED_LIBS)
         "$<TARGET_FILE:ada>"      # <--this is in-file
         "$<TARGET_FILE_DIR:adaparse>")                 # <--this is out-file path
 endif()
-CPMAddPackage("gh:fmtlib/fmt#10.2.1")
+CPMAddPackage("gh:fmtlib/fmt#11.0.2")
 CPMAddPackage(
   GITHUB_REPOSITORY jarro2783/cxxopts
   VERSION 3.2.0

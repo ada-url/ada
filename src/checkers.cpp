@@ -43,7 +43,7 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
     return false;
   }
   // It must start with 0x.
-  if (!std::equal(view.begin(), view.begin() + 2, "0x")) {
+  if (!view.starts_with("0x")) {
     return false;
   }
   // We must allow "0x".
@@ -59,7 +59,7 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
 // for use with path_signature, we include all characters that need percent
 // encoding.
 static constexpr std::array<uint8_t, 256> path_signature_table =
-    []() constexpr {
+    []() consteval {
       std::array<uint8_t, 256> result{};
       for (size_t i = 0; i < 256; i++) {
         if (i <= 0x20 || i == 0x22 || i == 0x23 || i == 0x3c || i == 0x3e ||

@@ -27,7 +27,7 @@ inline void url_aggregator::update_base_authority(
       base.protocol_end, base.host_start - base.protocol_end);
   ada_log("url_aggregator::update_base_authority ", input);
 
-  bool input_starts_with_dash = checkers::begins_with(input, "//");
+  bool input_starts_with_dash = input.starts_with("//");
   uint32_t diff = components.host_start - components.protocol_end;
 
   buffer.erase(components.protocol_end,
@@ -267,7 +267,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   ADA_ASSERT_TRUE(validate());
 
-  const bool begins_with_dashdash = checkers::begins_with(input, "//");
+  const bool begins_with_dashdash = input.starts_with("//");
   if (!begins_with_dashdash && has_dash_dot()) {
     ada_log("url_aggregator::update_base_pathname has /.: \n", to_diagram());
     // We must delete the ./
