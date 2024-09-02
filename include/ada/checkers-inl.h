@@ -5,6 +5,7 @@
 #ifndef ADA_CHECKERS_INL_H
 #define ADA_CHECKERS_INL_H
 
+#include <bit>
 #include <string_view>
 
 namespace ada::checkers {
