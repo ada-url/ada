@@ -273,6 +273,7 @@ if(RUST_FOUND)
 
   # Check if servo-url target was created successfully
   if(TARGET servo-url)
+    message(STATUS "servo-url target was created. Linking benchmarks and servo-url.")
     target_link_libraries(bench PRIVATE servo-url)
     target_compile_definitions(bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
@@ -287,8 +288,6 @@ if(RUST_FOUND)
 
     target_link_libraries(wpt_bench PRIVATE servo-url)
     target_compile_definitions(wpt_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
-  else()
-    message(WARNING "servo-url target was not created. Skipping linking benchmarks and servo-url.")
   endif()
 else()
   message(STATUS "Rust/Cargo is unavailable." )

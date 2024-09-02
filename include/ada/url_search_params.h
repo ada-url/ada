@@ -130,6 +130,14 @@ struct url_search_params {
   inline auto back() const { return params.back(); }
   inline auto operator[](size_t index) const { return params[index]; }
 
+  /**
+   * @private
+   * Used to reset the search params to a new input.
+   * Used primarily for C API.
+   * @param input
+   */
+  void reset(std::string_view input);
+
  private:
   typedef std::pair<std::string, std::string> key_value_pair;
   std::vector<key_value_pair> params{};

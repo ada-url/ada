@@ -259,6 +259,21 @@ TEST(ada_c, ada_get_scheme_type) {
   SUCCEED();
 }
 
+TEST(ada_c, ada_search_params_reset) {
+  ada_url_search_params out;
+
+  std::string_view input = "a=b&c=d&c=e&f=g";
+  out = ada_parse_search_params(input.data(), input.size());
+  ASSERT_EQ(ada_search_params_size(out), 4);
+
+  std::string_view resetted_value = "a=b";
+  ada_search_params_reset(out, resetted_value.data(), resetted_value.size());
+  ASSERT_EQ(ada_search_params_size(out), 1);
+
+  ada_free_search_params(out);
+  SUCCEED();
+}
+
 TEST(ada_c, ada_url_search_params) {
   std::string_view input;
   ada_url_search_params out;

@@ -503,6 +503,15 @@ void ada_search_params_sort(ada_url_search_params result) {
   }
 }
 
+void ada_search_params_reset(ada_url_search_params result, const char* input,
+                             size_t length) {
+  ada::result<ada::url_search_params>& r =
+      *(ada::result<ada::url_search_params>*)result;
+  if (r) {
+    r->reset(std::string_view(input, length));
+  }
+}
+
 void ada_search_params_append(ada_url_search_params result, const char* key,
                               size_t key_length, const char* value,
                               size_t value_length) {

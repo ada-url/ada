@@ -457,3 +457,9 @@ TYPED_TEST(basic_tests, path_setter_bug) {
   ASSERT_TRUE(base_url->validate());
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, negativeport) {
+  auto url = ada::parse<TypeParam>("https://www.google.com");
+  ASSERT_FALSE(url->set_port("-1"));
+  SUCCEED();
+}
