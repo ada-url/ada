@@ -340,21 +340,21 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
       // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
       if (is_special() != is_input_special) {
-        return true;
+        return false;
       }
 
       // If url includes credentials or has a non-null port, and buffer is
       // "file", then return.
       if ((has_credentials() || port.has_value()) &&
           parsed_type == ada::scheme::type::FILE) {
-        return true;
+        return false;
       }
 
       // If url's scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE && host.has_value() &&
           host.value().empty()) {
-        return true;
+        return false;
       }
     }
 

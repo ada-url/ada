@@ -104,9 +104,25 @@ TYPED_TEST(basic_tests, readme2) {
 
 TYPED_TEST(basic_tests, readme3) {
   auto url = ada::parse<TypeParam>("https://www.google.com");
-  url->set_protocol("wss");
+  ASSERT_EQ(url->set_protocol("wss"), true);
   ASSERT_EQ(url->get_protocol(), "wss:");
   ASSERT_EQ(url->get_href(), "wss://www.google.com/");
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, set_protocol_should_return_false_sometimes) {
+  auto url = ada::parse<TypeParam>("file:");
+  ASSERT_EQ(url->set_protocol("https"), false);
+  ASSERT_EQ(url->set_host("google.com"), true);
+  ASSERT_EQ(url->get_href(), "file://google.com/");
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, set_protocol_should_return_true_sometimes) {
+  auto url = ada::parse<TypeParam>("file:");
+  ASSERT_EQ(url->set_host("google.com"), true);
+  ASSERT_EQ(url->set_protocol("https"), true);
+  ASSERT_EQ(url->get_href(), "https://google.com/");
   SUCCEED();
 }
 
