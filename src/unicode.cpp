@@ -210,7 +210,7 @@ ada_really_inline constexpr bool contains_forbidden_domain_code_point(
 }
 
 constexpr static std::array<uint8_t, 256>
-    is_forbidden_domain_code_point_table_or_upper = []() constexpr {
+    is_forbidden_domain_code_point_table_or_upper = []() consteval {
       std::array<uint8_t, 256> result{};
       for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
                         '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
