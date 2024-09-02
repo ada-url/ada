@@ -86,7 +86,7 @@ Linux or macOS users might follow the following instructions if they have a rece
    ```
 2. Compile
    ```
-   c++ -std=c++17 -o demo demo.cpp
+   c++ -std=c++20 -o demo demo.cpp
    ```
 3. `./demo`
 
@@ -279,7 +279,7 @@ E.g., if you grab our single-header C++ files (`ada.cpp` and `ada.h`), as well a
 you can often compile a C program (`demo.c`) as follows under Linux/macOS systems:
 
 ```
-c++ -c ada.cpp -std=c++17
+c++ -c ada.cpp -std=c++20
 cc -c demo.c
 c++ demo.o ada.o -o cdemo
 ./cdemo
