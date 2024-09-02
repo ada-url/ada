@@ -142,21 +142,21 @@ $(function(){initNavTree('dd/dc8/url__aggregator_8cpp_source.html','../../'); in
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>      <span class="comment">// If url&#39;s scheme is not a special scheme and buffer is a special scheme,</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>      <span class="comment">// then return.</span></div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>      <span class="keywordflow">if</span> (<a class="code hl_function" href="../../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd">is_special</a>() != is_input_special) {</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>      }</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>      <span class="comment">// If url includes credentials or has a non-null port, and buffer is</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>      <span class="comment">// &quot;file&quot;, then return.</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>      <span class="keywordflow">if</span> ((<a class="code hl_function" href="../../d8/d3b/structada_1_1url__aggregator.html#a4855f872e60e4cf87f33637ee404c3ee">has_credentials</a>() || components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a094bca845b1356fd7a345ca69e604e94">port</a> != <a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">url_components::omitted</a>) &amp;&amp;</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>          parsed_type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>      }</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>      <span class="comment">// If url&#39;s scheme is &quot;file&quot; and its host is an empty host, then return.</span></div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>      <span class="comment">// An empty host is the empty string.</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>      <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp;</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>          components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f">host_start</a> == components.<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b">host_end</a>) {</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>      }</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    }</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>

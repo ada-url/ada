@@ -451,21 +451,21 @@ $(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../'); initResizable(
 <div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>      <span class="comment">// If url&#39;s scheme is not a special scheme and buffer is a special scheme,</span></div>
 <div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>      <span class="comment">// then return.</span></div>
 <div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>      <span class="keywordflow">if</span> (<a class="code hl_function" href="../../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd">is_special</a>() != is_input_special) {</div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>      }</div>
 <div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span> </div>
 <div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>      <span class="comment">// If url includes credentials or has a non-null port, and buffer is</span></div>
 <div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>      <span class="comment">// &quot;file&quot;, then return.</span></div>
 <div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>      <span class="keywordflow">if</span> ((<a class="code hl_function" href="../../dd/d03/structada_1_1url.html#a2c444d911356018a1e06f7dddddcd53a">has_credentials</a>() || port.has_value()) &amp;&amp;</div>
 <div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>          parsed_type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>      }</div>
 <div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
 <div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>      <span class="comment">// If url&#39;s scheme is &quot;file&quot; and its host is an empty host, then return.</span></div>
 <div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>      <span class="comment">// An empty host is the empty string.</span></div>
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>      <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a> &amp;&amp; host.has_value() &amp;&amp;</div>
 <div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>          host.value().empty()) {</div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>      }</div>
 <div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>    }</div>
 <div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span> </div>
