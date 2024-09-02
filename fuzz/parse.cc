@@ -219,7 +219,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   }
 
   // Only used for avoiding dead-code elimination
-  printf("length of url is %d\n", length);
+  printf("length of url is %zu\n", length);
 
   return 0;
 }  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
