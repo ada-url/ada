@@ -43,12 +43,12 @@ constexpr bool is_alpha(char x) noexcept;
  *
  * @see has_hex_prefix
  */
-inline bool has_hex_prefix_unsafe(std::string_view input);
+constexpr bool has_hex_prefix_unsafe(std::string_view input);
 /**
  * @private
  * Check whether a string starts with 0x or 0X.
  */
-inline bool has_hex_prefix(std::string_view input);
+constexpr bool has_hex_prefix(std::string_view input);
 
 /**
  * @private
