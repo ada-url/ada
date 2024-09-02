@@ -512,7 +512,7 @@ constexpr uint8_t WWW_FORM_URLENCODED_PERCENT_ENCODE[32] = {
     // F8     F9     FA     FB     FC     FD     FE     FF
     0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40 | 0x80};
 
-ada_really_inline bool bit_at(const uint8_t a[], const uint8_t i) {
+ada_really_inline constexpr bool bit_at(const uint8_t a[], const uint8_t i) {
   return !!(a[i >> 3] & (1 << (i & 7)));
 }
 
