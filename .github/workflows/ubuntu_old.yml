@@ -21,12 +21,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ubuntu-build:
+  ubuntu-build-20-04:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         shared: [ON, OFF]
-        cxx: [g++-9, clang++-10]
+        cxx: [g++-10, clang++-10]
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Setup Ninja
