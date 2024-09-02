@@ -5,7 +5,6 @@ project(ada
   LANGUAGES C CXX
   VERSION 2.9.2
 )
-set(CMAKE_CXX_STANDARD 17)
 set(ADA_LIB_VERSION "2.9.2" CACHE STRING "ada library version")
 set(ADA_LIB_SOVERSION "2" CACHE STRING "ada library soversion")
 

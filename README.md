@@ -28,7 +28,7 @@ standard libraries, follow the RFC 3986. The following table illustrates possibl
 ### Requirements
 
 The project is otherwise self-contained and it has no dependency.
-A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
+A recent C++ compiler supporting C++20. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.
 
 ## Ada is fast.
 

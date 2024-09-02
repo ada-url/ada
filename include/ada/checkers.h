@@ -81,13 +81,6 @@ inline constexpr bool is_normalized_windows_drive_letter(
 
 /**
  * @private
- * @warning Will be removed when Ada requires C++20.
- */
-ada_really_inline bool begins_with(std::string_view view,
-                                   std::string_view prefix);
-
-/**
- * @private
  * Returns true if an input is an ipv4 address. It is assumed that the string
  * does not contain uppercase ASCII characters (the input should have been
  * lowered cased before calling this function) and is not empty.

@@ -225,10 +225,10 @@ int main(int argc, char** argv) {
 
   auto adaparse_print = [has_result, &out](const std::string& format_str,
                                            auto&&... args) {
-    std::string formatted_str =
-        fmt::format(format_str, std::forward<decltype(args)>(args)...);
+    std::string formatted_str = fmt::format(
+        fmt::runtime(format_str), std::forward<decltype(args)>(args)...);
     if (has_result) {
-      out.print(formatted_str);
+      out.print(fmt::runtime(formatted_str));
     } else {
       fmt::print("{}", formatted_str);
     }
@@ -275,7 +275,8 @@ int main(int argc, char** argv) {
     std::string get_part = result["get"].as<std::string>();
 
     auto print_lambda = [](const std::string& format_str, auto&&... args) {
-      fmt::print(format_str, std::forward<decltype(args)>(args)...);
+      fmt::print(fmt::runtime(format_str),
+                 std::forward<decltype(args)>(args)...);
     };
 
     return print_part(print_lambda, get_part, url.value()) ? EXIT_SUCCESS
