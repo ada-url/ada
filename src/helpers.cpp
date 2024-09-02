@@ -3,8 +3,6 @@
 #include "ada/common_defs.h"  // make sure ADA_IS_BIG_ENDIAN gets defined.
 #include "ada/scheme.h"
 
-#include <algorithm>
-#include <charconv>
 #include <cstring>
 #include <sstream>
 
@@ -159,8 +157,8 @@ ada_really_inline void remove_ascii_tab_or_newline(
               input.end());
 }
 
-ada_really_inline std::string_view substring(std::string_view input,
-                                             size_t pos) noexcept {
+ada_really_inline constexpr std::string_view substring(std::string_view input,
+                                                       size_t pos) noexcept {
   ADA_ASSERT_TRUE(pos <= input.size());
   // The following is safer but unneeded if we have the above line:
   // return pos > input.size() ? std::string_view() : input.substr(pos);
@@ -317,7 +315,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
 #else
 // : / [ \\ ?
 static constexpr std::array<uint8_t, 256> special_host_delimiters =
-    []() constexpr {
+    []() consteval {
       std::array<uint8_t, 256> result{};
       for (int i : {':', '/', '[', '\\', '?'}) {
         result[i] = 1;
@@ -449,7 +447,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 }
 #else
 // : / [ ?
-static constexpr std::array<uint8_t, 256> host_delimiters = []() constexpr {
+static constexpr std::array<uint8_t, 256> host_delimiters = []() consteval {
   std::array<uint8_t, 256> result{};
   for (int i : {':', '/', '?', '['}) {
     result[i] = 1;
@@ -744,7 +742,7 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(
 
 // @ / \\ ?
 static constexpr std::array<uint8_t, 256> authority_delimiter_special =
-    []() constexpr {
+    []() consteval {
       std::array<uint8_t, 256> result{};
       for (uint8_t i : {'@', '/', '\\', '?'}) {
         result[i] = 1;
@@ -765,7 +763,7 @@ find_authority_delimiter_special(std::string_view view) noexcept {
 }
 
 // @ / ?
-static constexpr std::array<uint8_t, 256> authority_delimiter = []() constexpr {
+static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   std::array<uint8_t, 256> result{};
   for (uint8_t i : {'@', '/', '?'}) {
     result[i] = 1;
