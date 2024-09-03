@@ -35,4 +35,4 @@ jobs:
       - uses: chartboost/ruff-action@e18ae971ccee1b2d7bbef113930f00c670b78da4 # v1.0.0
         name: Lint with Ruff
         with:
-          version: 0.4.4
+          version: 0.6.0
