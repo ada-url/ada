@@ -1,7 +1,7 @@
 var namespaceada =
 [
     [ "character_sets", "d7/d35/namespaceada_1_1character__sets.html", [
-      [ "bit_at", "d7/d35/namespaceada_1_1character__sets.html#aee6c8e39f71490cb037234f38bfdc5f9", null ],
+      [ "bit_at", "d7/d35/namespaceada_1_1character__sets.html#a2ca6a9b8234902d944f7a052fdf9935f", null ],
       [ "C0_CONTROL_PERCENT_ENCODE", "d7/d35/namespaceada_1_1character__sets.html#a961ff8bb694197e2f9f339cae226db66", null ],
       [ "FRAGMENT_PERCENT_ENCODE", "d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67", null ],
       [ "hex", "d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d", null ],
@@ -12,9 +12,8 @@ var namespaceada =
       [ "WWW_FORM_URLENCODED_PERCENT_ENCODE", "d7/d35/namespaceada_1_1character__sets.html#aec120154efccb7b70bd36785bf6a71b7", null ]
     ] ],
     [ "checkers", "d3/dbe/namespaceada_1_1checkers.html", [
-      [ "begins_with", "d3/dbe/namespaceada_1_1checkers.html#ae2b07791c8b63539276ed017340ef4d0", null ],
-      [ "has_hex_prefix", "d3/dbe/namespaceada_1_1checkers.html#aa30ee2c6ba3a3e942c7e2e70729a1cca", null ],
-      [ "has_hex_prefix_unsafe", "d3/dbe/namespaceada_1_1checkers.html#a429bd47d8a8754da869ae095c9bb1c9f", null ],
+      [ "has_hex_prefix", "d3/dbe/namespaceada_1_1checkers.html#a34d5be12630bcce5a782ef2f8b5e1e48", null ],
+      [ "has_hex_prefix_unsafe", "d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae", null ],
       [ "is_alpha", "d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5", null ],
       [ "is_digit", "d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6", null ],
       [ "is_normalized_windows_drive_letter", "d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b", null ],

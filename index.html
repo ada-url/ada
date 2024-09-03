@@ -130,7 +130,7 @@ $(function(){initNavTree('index.html',''); initResizable(true); });
 </table>
 <h2><a class="anchor" id="autotoc_md12"></a>
 Requirements</h2>
-<p>The project is otherwise self-contained and it has no dependency. A recent C++ compiler supporting C++17. We test GCC 9 or better, LLVM 10 or better and Microsoft Visual Studio 2022.</p>
+<p>The project is otherwise self-contained and it has no dependency. A recent C++ compiler supporting C++20. We test GCC 12 or better, LLVM 12 or better and Microsoft Visual Studio 2022.</p>
 <h1><a class="anchor" id="autotoc_md13"></a>
 Ada is fast.</h1>
 <p>On a benchmark where we need to validate and normalize <a href="https://github.com/ada-url/url-various-datasets/tree/main/top100">thousands URLs found on popular websites</a>, we find that ada can be several times faster than popular competitors (system: Apple MacBook 2022 with LLVM 14).</p>
@@ -173,7 +173,7 @@ Quick Start</h1>
 </div><!-- fragment --></li>
 </ol>
 <ol type="1">
-<li>Compile <div class="fragment"><div class="line">c++ -std=c++17 -o demo demo.cpp</div>
+<li>Compile <div class="fragment"><div class="line">c++ -std=c++20 -o demo demo.cpp</div>
 </div><!-- fragment --></li>
 <li><p class="startli"><code>./demo</code></p>
 <div class="fragment"><div class="line">http:</div>
@@ -346,7 +346,7 @@ C wrapper</h2>
 <div class="ttc" id="astructada__string_html_a9493413d41e1003fd0da00457fccd94f"><div class="ttname"><a href="d2/daa/structada__string.html#a9493413d41e1003fd0da00457fccd94f">ada_string::length</a></div><div class="ttdeci">size_t length</div><div class="ttdef"><b>Definition</b> <a href="df/d61/ada__c_8h_source.html#l00019">ada_c.h:19</a></div></div>
 </div><!-- fragment --><p>When linking against the ada library from C++, be minding that ada requires access to the standard C++ library. E.g., you may link with the C++ compiler.</p>
 <p>E.g., if you grab our single-header C++ files (<code><a class="el" href="d8/d50/ada_8cpp.html">ada.cpp</a></code> and <code><a class="el" href="d0/da8/ada_8h.html" title="Includes all definitions for Ada.">ada.h</a></code>), as well as the C header (<code><a class="el" href="df/d61/ada__c_8h.html" title="Includes the C definitions for Ada. This is a C file, not C++.">ada_c.h</a></code>), you can often compile a C program (<code>demo.c</code>) as follows under Linux/macOS systems:</p>
-<div class="fragment"><div class="line">c++ -c ada.cpp -std=c++17</div>
+<div class="fragment"><div class="line">c++ -c ada.cpp -std=c++20</div>
 <div class="line">cc -c demo.c</div>
 <div class="line">c++ demo.o ada.o -o cdemo</div>
 <div class="line">./cdemo</div>

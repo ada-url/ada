@@ -279,7 +279,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= []() <span class="keyword">constexpr</span> {</div>
+<b>Initial value:</b><div class="fragment"><div class="line">= []() <span class="keyword">consteval</span> {</div>
 <div class="line">  std::array&lt;bool, 256&gt; <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>{};</div>
 <div class="line">  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; 256; c++) {</div>
 <div class="line">    <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[c] = (c &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;9&#39;</span>) || (c &gt;= <span class="charliteral">&#39;a&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;z&#39;</span>) ||</div>
@@ -313,7 +313,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">=</div>
-<div class="line">    []() <span class="keyword">constexpr</span> {</div>
+<div class="line">    []() <span class="keyword">consteval</span> {</div>
 <div class="line">      std::array&lt;uint8_t, 256&gt; <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>{};</div>
 <div class="line">      <span class="keywordflow">for</span> (uint8_t c : {<span class="charliteral">&#39;\0&#39;</span>, <span class="stringliteral">&#39;\x09&#39;</span>, <span class="stringliteral">&#39;\x0a&#39;</span>, <span class="stringliteral">&#39;\x0d&#39;</span>, <span class="charliteral">&#39; &#39;</span>, <span class="charliteral">&#39;#&#39;</span>, <span class="charliteral">&#39;/&#39;</span>, <span class="charliteral">&#39;:&#39;</span>, <span class="charliteral">&#39;&lt;&#39;</span>,</div>
 <div class="line">                        <span class="charliteral">&#39;&gt;&#39;</span>, <span class="charliteral">&#39;?&#39;</span>, <span class="charliteral">&#39;@&#39;</span>, <span class="charliteral">&#39;[&#39;</span>, <span class="charliteral">&#39;\\&#39;</span>, <span class="charliteral">&#39;]&#39;</span>, <span class="charliteral">&#39;^&#39;</span>, <span class="charliteral">&#39;|&#39;</span>, <span class="charliteral">&#39;%&#39;</span>}) {</div>
@@ -351,7 +351,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= []() <span class="keyword">constexpr</span> {</div>
+<b>Initial value:</b><div class="fragment"><div class="line">= []() <span class="keyword">consteval</span> {</div>
 <div class="line">      std::array&lt;uint8_t, 256&gt; <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>{};</div>
 <div class="line">      <span class="keywordflow">for</span> (uint8_t c : {<span class="charliteral">&#39;\0&#39;</span>, <span class="stringliteral">&#39;\x09&#39;</span>, <span class="stringliteral">&#39;\x0a&#39;</span>, <span class="stringliteral">&#39;\x0d&#39;</span>, <span class="charliteral">&#39; &#39;</span>, <span class="charliteral">&#39;#&#39;</span>, <span class="charliteral">&#39;/&#39;</span>, <span class="charliteral">&#39;:&#39;</span>, <span class="charliteral">&#39;&lt;&#39;</span>,</div>
 <div class="line">                        <span class="charliteral">&#39;&gt;&#39;</span>, <span class="charliteral">&#39;?&#39;</span>, <span class="charliteral">&#39;@&#39;</span>, <span class="charliteral">&#39;[&#39;</span>, <span class="charliteral">&#39;\\&#39;</span>, <span class="charliteral">&#39;]&#39;</span>, <span class="charliteral">&#39;^&#39;</span>, <span class="charliteral">&#39;|&#39;</span>, <span class="charliteral">&#39;%&#39;</span>}) {</div>
@@ -393,7 +393,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">=</div>
-<div class="line">    []() <span class="keyword">constexpr</span> {</div>
+<div class="line">    []() <span class="keyword">consteval</span> {</div>
 <div class="line">      std::array&lt;uint8_t, 256&gt; <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>{};</div>
 <div class="line">      <span class="keywordflow">for</span> (uint8_t c : {<span class="charliteral">&#39;\0&#39;</span>, <span class="stringliteral">&#39;\x09&#39;</span>, <span class="stringliteral">&#39;\x0a&#39;</span>, <span class="stringliteral">&#39;\x0d&#39;</span>, <span class="charliteral">&#39; &#39;</span>, <span class="charliteral">&#39;#&#39;</span>, <span class="charliteral">&#39;/&#39;</span>, <span class="charliteral">&#39;:&#39;</span>, <span class="charliteral">&#39;&lt;&#39;</span>,</div>
 <div class="line">                        <span class="charliteral">&#39;&gt;&#39;</span>, <span class="charliteral">&#39;?&#39;</span>, <span class="charliteral">&#39;@&#39;</span>, <span class="charliteral">&#39;[&#39;</span>, <span class="charliteral">&#39;\\&#39;</span>, <span class="charliteral">&#39;]&#39;</span>, <span class="charliteral">&#39;^&#39;</span>, <span class="charliteral">&#39;|&#39;</span>}) {</div>

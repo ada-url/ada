@@ -119,10 +119,8 @@ $(function(){initNavTree('d4/d46/checkers-inl_8h.html','../../'); initResizable(
 
 <p>Definitions for URL specific checkers used within Ada.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d7/d19/common__defs_8h_source.html">ada/common_defs.h</a>&quot;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
+<div class="textblock"><code>#include &lt;bit&gt;</code><br />
 <code>#include &lt;string_view&gt;</code><br />
-<code>#include &lt;cstring&gt;</code><br />
 </div>
 <p><a href="../../d4/d46/checkers-inl_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -136,10 +134,10 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a429bd47d8a8754da869ae095c9bb1c9f" id="r_a429bd47d8a8754da869ae095c9bb1c9f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a429bd47d8a8754da869ae095c9bb1c9f">ada::checkers::has_hex_prefix_unsafe</a> (std::string_view input)</td></tr>
-<tr class="separator:a429bd47d8a8754da869ae095c9bb1c9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa30ee2c6ba3a3e942c7e2e70729a1cca" id="r_aa30ee2c6ba3a3e942c7e2e70729a1cca"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#aa30ee2c6ba3a3e942c7e2e70729a1cca">ada::checkers::has_hex_prefix</a> (std::string_view input)</td></tr>
-<tr class="separator:aa30ee2c6ba3a3e942c7e2e70729a1cca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a078ffb35a09d688f031537ea728fe3ae" id="r_a078ffb35a09d688f031537ea728fe3ae"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">ada::checkers::has_hex_prefix_unsafe</a> (std::string_view input)</td></tr>
+<tr class="separator:a078ffb35a09d688f031537ea728fe3ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34d5be12630bcce5a782ef2f8b5e1e48" id="r_a34d5be12630bcce5a782ef2f8b5e1e48"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a34d5be12630bcce5a782ef2f8b5e1e48">ada::checkers::has_hex_prefix</a> (std::string_view input)</td></tr>
+<tr class="separator:a34d5be12630bcce5a782ef2f8b5e1e48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5d849fea825255d7156a2d0749db7b6" id="r_ad5d849fea825255d7156a2d0749db7b6"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">ada::checkers::is_digit</a> (char x) noexcept</td></tr>
 <tr class="separator:ad5d849fea825255d7156a2d0749db7b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5fc18eced396380017dff3e03cbea20b" id="r_a5fc18eced396380017dff3e03cbea20b"><td class="memItemLeft" align="right" valign="top">constexpr char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">ada::checkers::to_lower</a> (char x) noexcept</td></tr>
@@ -150,8 +148,6 @@ Functions</h2></td></tr>
 <tr class="separator:a56afc8de56c96291388a49bdee9e6aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53d7ea2ae8deb63a37be60d56121ca3b" id="r_a53d7ea2ae8deb63a37be60d56121ca3b"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">ada::checkers::is_normalized_windows_drive_letter</a> (std::string_view input) noexcept</td></tr>
 <tr class="separator:a53d7ea2ae8deb63a37be60d56121ca3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2b07791c8b63539276ed017340ef4d0" id="r_ae2b07791c8b63539276ed017340ef4d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#ae2b07791c8b63539276ed017340ef4d0">ada::checkers::begins_with</a> (std::string_view view, std::string_view prefix)</td></tr>
-<tr class="separator:ae2b07791c8b63539276ed017340ef4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Definitions for URL specific checkers used within Ada. </p>

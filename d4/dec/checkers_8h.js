@@ -1,8 +1,7 @@
 var checkers_8h =
 [
-    [ "begins_with", "d4/dec/checkers_8h.html#ae2b07791c8b63539276ed017340ef4d0", null ],
-    [ "has_hex_prefix", "d4/dec/checkers_8h.html#aa30ee2c6ba3a3e942c7e2e70729a1cca", null ],
-    [ "has_hex_prefix_unsafe", "d4/dec/checkers_8h.html#a429bd47d8a8754da869ae095c9bb1c9f", null ],
+    [ "has_hex_prefix", "d4/dec/checkers_8h.html#a34d5be12630bcce5a782ef2f8b5e1e48", null ],
+    [ "has_hex_prefix_unsafe", "d4/dec/checkers_8h.html#a078ffb35a09d688f031537ea728fe3ae", null ],
     [ "is_alpha", "d4/dec/checkers_8h.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5", null ],
     [ "is_digit", "d4/dec/checkers_8h.html#ad5d849fea825255d7156a2d0749db7b6", null ],
     [ "is_normalized_windows_drive_letter", "d4/dec/checkers_8h.html#a53d7ea2ae8deb63a37be60d56121ca3b", null ],
