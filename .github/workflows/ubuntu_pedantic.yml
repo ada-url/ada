@@ -36,6 +36,6 @@ jobs:
           CXX: g++-12
           CXXFLAGS: -Werror
       - name: Build
-        run: cmake --build build -j=2
+        run: cmake --build build -j=4
       - name: Test
         run: ctest --output-on-failure --test-dir build

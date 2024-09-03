@@ -42,4 +42,4 @@ jobs:
       run: cmake --build build --config "${{matrix.config}}" --verbose
     - name: Run  tests
       working-directory: build
-      run: ctest -C "${{matrix.config}}"  --output-on-failure
+      run: ctest -C "${{matrix.config}}" --output-on-failure
