@@ -2,7 +2,7 @@
 set -e
 
 PACKAGE_URL="https://github.com/jothepro/doxygen-awesome-css.git"
-PACKAGE_VERSION="v2.2.0"
+PACKAGE_VERSION="v2.3.3"
 
 BASE_DIR=$(pwd)
 THEME_DIR="$BASE_DIR/docs/theme"
