@@ -1,4 +1,4 @@
-/* auto-generated on 2023-09-19 15:58:51 -0400. Do not edit! */
+/* auto-generated on 2024-09-03 10:55:13 -0400. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 
@@ -9387,22 +9387,6 @@ bool is_label_valid(const std::u32string_view label) {
 
 namespace ada::idna {
 
-bool begins_with(std::u32string_view view, std::u32string_view prefix) {
-  if (view.size() < prefix.size()) {
-    return false;
-  }
-  // constexpr as of C++20
-  return std::equal(prefix.begin(), prefix.end(), view.begin());
-}
-
-bool begins_with(std::string_view view, std::string_view prefix) {
-  if (view.size() < prefix.size()) {
-    return false;
-  }
-  // constexpr as of C++20
-  return std::equal(prefix.begin(), prefix.end(), view.begin());
-}
-
 bool constexpr is_ascii(std::u32string_view view) {
   for (uint32_t c : view) {
     if (c >= 0x80) {
@@ -9465,7 +9449,7 @@ static std::string from_ascii_to_ascii(std::string_view ut8_string) {
     label_start += label_size_with_dot;
     if (label_size == 0) {
       // empty label? Nothing to do.
-    } else if (begins_with(label_view, "xn--")) {
+    } else if (label_view.starts_with("xn--")) {
       // The xn-- part is the expensive game.
       out.append(label_view);
       std::string_view puny_segment_ascii(
@@ -9532,7 +9516,7 @@ std::string to_ascii(std::string_view ut8_string) {
     label_start += label_size_with_dot;
     if (label_size == 0) {
       // empty label? Nothing to do.
-    } else if (begins_with(label_view, U"xn--")) {
+    } else if (label_view.starts_with(U"xn--")) {
       // we do not need to check, e.g., Xn-- because mapping goes to lower case
       for (char32_t c : label_view) {
         if (c >= 0x80) {
@@ -9611,8 +9595,7 @@ std::string to_unicode(std::string_view input) {
         is_last_label ? input.size() - label_start : loc_dot - label_start;
     auto label_view = std::string_view(input.data() + label_start, label_size);
 
-    if (ada::idna::begins_with(label_view, "xn--") &&
-        ada::idna::is_ascii(label_view)) {
+    if (label_view.starts_with("xn--") && ada::idna::is_ascii(label_view)) {
       label_view.remove_prefix(4);
       if (ada::idna::verify_punycode(label_view)) {
         std::u32string tmp_buffer;
