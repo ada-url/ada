@@ -1,4 +1,4 @@
-/* auto-generated on 2023-09-19 15:58:51 -0400. Do not edit! */
+/* auto-generated on 2024-09-03 10:55:13 -0400. Do not edit! */
 /* begin file include/idna.h */
 #ifndef ADA_IDNA_H
 #define ADA_IDNA_H
@@ -118,9 +118,6 @@ std::string to_ascii(std::string_view ut8_string);
 // WHATGL URL specification:
 // https://url.spec.whatwg.org/#forbidden-domain-code-point
 bool contains_forbidden_domain_code_point(std::string_view ascii_string);
-
-bool begins_with(std::u32string_view view, std::u32string_view prefix);
-bool begins_with(std::string_view view, std::string_view prefix);
 
 bool constexpr is_ascii(std::u32string_view view);
 bool constexpr is_ascii(std::string_view view);
