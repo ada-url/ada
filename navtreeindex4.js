@@ -1,11 +1,5 @@
 var NAVTREEINDEX4 =
 {
-"dd/dd6/ada__c_8cpp.html#adf43435636b3ff65d12c74dee86d9da0":[9,0,3,1,59],
-"dd/dd6/ada__c_8cpp.html#ae17f46b5b5cd69a0608fbf1d5aabc545":[9,0,3,1,73],
-"dd/dd6/ada__c_8cpp.html#ae4c399eed2d7eafdb4263147a653d1e1":[9,0,3,1,60],
-"dd/dd6/ada__c_8cpp.html#ae6b8b22187c2379cd9331d16a6cd4f8f":[9,0,3,1,42],
-"dd/dd6/ada__c_8cpp.html#ae8b223fca129426568ba6476e2cd5a4c":[9,0,3,1,9],
-"dd/dd6/ada__c_8cpp.html#aeaf6867f8c367b98291f141ac7b0ac99":[9,0,3,1,66],
 "dd/dd6/ada__c_8cpp.html#aec5b9e4136a5d73716cf84a9da656789":[9,0,3,1,64],
 "dd/dd6/ada__c_8cpp.html#af0f52b45140d99995d144ebf4b9d591a":[9,0,3,1,14],
 "dd/dd6/ada__c_8cpp.html#afefee1972fe326cbcd42dbbf5887109d":[9,0,3,1,36],

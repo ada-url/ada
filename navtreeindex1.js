@@ -1,7 +1,5 @@
 var NAVTREEINDEX1 =
 {
-"d5/ddb/namespaceada_1_1idna.html#ae3fa7abe424f63e3595039e90e3c316a":[7,0,0,3,34],
-"d5/ddb/namespaceada_1_1idna.html#af593f5293a356a9fc9bb3878a96b3eae":[7,0,0,3,35],
 "d5/dee/url-setters_8cpp.html":[9,0,3,10],
 "d5/dee/url-setters_8cpp_source.html":[9,0,3,10],
 "d5/df0/ada__c_8c.html":[9,0,1,0],
@@ -249,5 +247,7 @@ var NAVTREEINDEX1 =
 "da/dac/url__search__params_8h.html#a0221646aa68b66f5dd447ea589c988a3":[9,0,2,0,25,5],
 "da/dac/url__search__params_8h.html#a27b44c690edb4b609f8d0a2d7e7475ae":[9,0,2,0,25,3],
 "da/dac/url__search__params_8h.html#a663e90222ab2aa9380ddf76bf055b2ad":[9,0,2,0,25,4],
-"da/dac/url__search__params_8h.html#aae48bce1c55d1bfd1b41bd2a64d5eb23":[9,0,2,0,25,6]
+"da/dac/url__search__params_8h.html#aae48bce1c55d1bfd1b41bd2a64d5eb23":[9,0,2,0,25,6],
+"da/dac/url__search__params_8h.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33":[9,0,2,0,25,6,2],
+"da/dac/url__search__params_8h.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243":[9,0,2,0,25,6,0]
 };

@@ -30,8 +30,6 @@ var namespaceada_1_1idna =
     [ "adapt", "d5/ddb/namespaceada_1_1idna.html#a28815dfd4e31facb82c56c817dd1067f", null ],
     [ "ascii_has_upper_case", "d5/ddb/namespaceada_1_1idna.html#ac6f73440f8dc6ef6ecd14b7a3a836b21", null ],
     [ "ascii_map", "d5/ddb/namespaceada_1_1idna.html#a10ef8e085520b93791eef38bdabf5941", null ],
-    [ "begins_with", "d5/ddb/namespaceada_1_1idna.html#ada325b61431cf2aa7414dbfcd8e9c391", null ],
-    [ "begins_with", "d5/ddb/namespaceada_1_1idna.html#ab32141007e2a5423ea8cf91f849b9d39", null ],
     [ "char_to_digit_value", "d5/ddb/namespaceada_1_1idna.html#ac48f13e12efe5af075e58ca8ed4690ae", null ],
     [ "compose", "d5/ddb/namespaceada_1_1idna.html#a03db2791270405a5c682305c18c5d1cf", null ],
     [ "compute_decomposition_length", "d5/ddb/namespaceada_1_1idna.html#ac50c30d0d051c6f5b6463cedd5eda8e1", null ],
