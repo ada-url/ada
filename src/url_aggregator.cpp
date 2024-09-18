@@ -27,7 +27,7 @@ template <bool has_state_override>
    *http, https), in which case, we can go really fast.
    **/
   if (is_input_special) {  // fast path!!!
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
       if (is_special() != is_input_special) {
@@ -52,7 +52,7 @@ template <bool has_state_override>
     type = parsed_type;
     set_scheme_from_view_with_colon(input_with_colon);
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
@@ -69,7 +69,7 @@ template <bool has_state_override>
     // need to check the return value.
     unicode::to_lower_ascii(_buffer.data(), _buffer.size());
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // If url's scheme is a special scheme and buffer is not a special scheme,
       // then return. If url's scheme is not a special scheme and buffer is a
       // special scheme, then return.
@@ -94,7 +94,7 @@ template <bool has_state_override>
 
     set_scheme(_buffer);
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
@@ -539,7 +539,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // Note: the 'found_colon' value is true if and only if a colon was
     // encountered while not inside brackets.
     if (found_colon) {
-      if (override_hostname) {
+      if constexpr (override_hostname) {
         return false;
       }
       std::string_view sub_buffer = new_host.substr(location + 1);
