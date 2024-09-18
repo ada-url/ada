@@ -43,6 +43,10 @@ inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
   return path.size();
 }
 
+[[nodiscard]] constexpr std::string_view url::get_pathname() const noexcept {
+  return path;
+}
+
 [[nodiscard]] ada_really_inline ada::url_components url::get_components()
     const noexcept {
   url_components out{};

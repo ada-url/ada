@@ -75,6 +75,5 @@ struct url_components {
   [[nodiscard]] std::string to_string() const;
 
 };  // struct url_components
-
 }  // namespace ada
 #endif
