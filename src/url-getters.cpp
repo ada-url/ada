@@ -58,11 +58,14 @@ namespace ada {
   return host.value();
 }
 
-[[nodiscard]] std::string url::get_hostname() const noexcept {
-  return host.value_or("");
+[[nodiscard]] constexpr std::string_view url::get_hostname() const noexcept {
+  if (host.has_value()) {
+    return *host;
+  }
+  return {};
 }
 
-[[nodiscard]] std::string_view url::get_pathname() const noexcept {
+[[nodiscard]] constexpr std::string_view url::get_pathname() const noexcept {
   return path;
 }
 
@@ -73,11 +76,11 @@ namespace ada {
                                                          : "?" + query.value();
 }
 
-[[nodiscard]] const std::string& url::get_username() const noexcept {
+[[nodiscard]] constexpr std::string_view url::get_username() const noexcept {
   return username;
 }
 
-[[nodiscard]] const std::string& url::get_password() const noexcept {
+[[nodiscard]] constexpr std::string_view url::get_password() const noexcept ada_lifetime_bound {
   return password;
 }
 

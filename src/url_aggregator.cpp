@@ -27,7 +27,7 @@ template <bool has_state_override>
    *http, https), in which case, we can go really fast.
    **/
   if (is_input_special) {  // fast path!!!
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
       if (is_special() != is_input_special) {
@@ -52,7 +52,7 @@ template <bool has_state_override>
     type = parsed_type;
     set_scheme_from_view_with_colon(input_with_colon);
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
@@ -69,7 +69,7 @@ template <bool has_state_override>
     // need to check the return value.
     unicode::to_lower_ascii(_buffer.data(), _buffer.size());
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // If url's scheme is a special scheme and buffer is not a special scheme,
       // then return. If url's scheme is not a special scheme and buffer is a
       // special scheme, then return.
@@ -94,7 +94,7 @@ template <bool has_state_override>
 
     set_scheme(_buffer);
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
@@ -222,8 +222,8 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 
   view.append(":");
 
-  std::string::iterator pointer =
-      std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
+  auto pointer =
+      std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
     return parse_scheme_with_colon<true>(
@@ -539,7 +539,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // Note: the 'found_colon' value is true if and only if a colon was
     // encountered while not inside brackets.
     if (found_colon) {
-      if (override_hostname) {
+      if constexpr (override_hostname) {
         return false;
       }
       std::string_view sub_buffer = new_host.substr(location + 1);
@@ -645,52 +645,51 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return "null";
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_username() const noexcept
+[[nodiscard]] constexpr std::string_view url_aggregator::get_username() const noexcept
     ada_lifetime_bound {
   ada_log("url_aggregator::get_username");
   if (has_non_empty_username()) {
     return helpers::substring(buffer, components.protocol_end + 2,
                               components.username_end);
   }
-  return "";
+  return {};
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_password() const noexcept
+[[nodiscard]] constexpr std::string_view url_aggregator::get_password() const noexcept
     ada_lifetime_bound {
   ada_log("url_aggregator::get_password");
   if (has_non_empty_password()) {
     return helpers::substring(buffer, components.username_end + 1,
                               components.host_start);
   }
-  return "";
+  return {};
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_port() const noexcept
+[[nodiscard]] constexpr std::string_view url_aggregator::get_port() const noexcept
     ada_lifetime_bound {
   ada_log("url_aggregator::get_port");
   if (components.port == url_components::omitted) {
-    return "";
+    return {};
   }
   return helpers::substring(buffer, components.host_end + 1,
                             components.pathname_start);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept
+[[nodiscard]] constexpr std::string_view url_aggregator::get_hash() const noexcept
     ada_lifetime_bound {
   ada_log("url_aggregator::get_hash");
-  // If this's URL's fragment is either null or the empty string, then return
+  // If this URL's fragment is either null or the empty string, then return
   // the empty string. Return U+0023 (#), followed by this's URL's fragment.
   if (components.hash_start == url_components::omitted) {
-    return "";
+    return {};
   }
   if (buffer.size() - components.hash_start <= 1) {
-    return "";
+    return {};
   }
   return helpers::substring(buffer, components.hash_start);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_host() const noexcept
-    ada_lifetime_bound {
+[[nodiscard]] constexpr std::string_view url_aggregator::get_host() const noexcept {
   ada_log("url_aggregator::get_host");
   // Technically, we should check if there is a hostname, but
   // the code below works even if there isn't.
@@ -729,7 +728,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
           components.pathname_start, " buffer.size() = ", buffer.size(),
           " components.search_start = ", components.search_start,
           " components.hash_start = ", components.hash_start);
-  auto ending_index = uint32_t(buffer.size());
+  auto ending_index = static_cast<uint32_t>(buffer.size());
   if (components.search_start != url_components::omitted) {
     ending_index = components.search_start;
   } else if (components.hash_start != url_components::omitted) {
@@ -746,7 +745,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   if (components.search_start == url_components::omitted) {
     return "";
   }
-  auto ending_index = uint32_t(buffer.size());
+  auto ending_index = static_cast<uint32_t>(buffer.size());
   if (components.hash_start != url_components::omitted) {
     ending_index = components.hash_start;
   }

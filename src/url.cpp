@@ -10,7 +10,7 @@ namespace ada {
 
 bool url::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
-  if (std::any_of(input.begin(), input.end(),
+  if (std::ranges::any_of(input,
                   ada::unicode::is_forbidden_host_code_point)) {
     return is_valid = false;
   }
@@ -65,7 +65,7 @@ bool url::parse_ipv4(std::string_view input) {
       // We have the last value.
       // At this stage, ipv4 contains digit_count*8 bits.
       // So we have 32-digit_count*8 bits left.
-      if (segment_result >= (uint64_t(1) << (32 - digit_count * 8))) {
+      if (segment_result >= (static_cast<uint64_t>(1) << (32 - digit_count * 8))) {
         return is_valid = false;
       }
       ipv4 <<= (32 - digit_count * 8);
@@ -113,7 +113,7 @@ bool url::parse_ipv6(std::string_view input) {
   std::optional<int> compress{};
 
   // Let pointer be a pointer for input.
-  std::string_view::iterator pointer = input.begin();
+ auto pointer = input.begin();
 
   // If c is U+003A (:), then:
   if (input[0] == ':') {
@@ -163,7 +163,8 @@ bool url::parse_ipv6(std::string_view input) {
     while (length < 4 && pointer != input.end() &&
            unicode::is_ascii_hex_digit(*pointer)) {
       // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
-      value = uint16_t(value * 0x10 + unicode::convert_hex_to_binary(*pointer));
+      value = static_cast<uint16_t>(value * 0x10 +
+                                    unicode::convert_hex_to_binary(*pointer));
       pointer++;
       length++;
     }
@@ -248,7 +249,7 @@ bool url::parse_ipv6(std::string_view input) {
         // ipv4Piece.
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
         address[piece_index] =
-            uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
+            static_cast<uint16_t>(address[piece_index] * 0x100 + *ipv4_piece);
 
         // Increase numbersSeen by 1.
         numbers_seen++;
@@ -330,12 +331,12 @@ bool url::parse_ipv6(std::string_view input) {
 template <bool has_state_override>
 ada_really_inline bool url::parse_scheme(const std::string_view input) {
   auto parsed_type = ada::scheme::get_scheme_type(input);
-  bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
   /**
    * In the common case, we will immediately recognize a special scheme (e.g.,
    *http, https), in which case, we can go really fast.
    **/
-  if (is_input_special) {  // fast path!!!
+  if (bool is_input_special =
+          (parsed_type != ada::scheme::NOT_SPECIAL)) {  // fast path!!!
     if (has_state_override) {
       // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
