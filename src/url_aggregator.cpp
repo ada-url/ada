@@ -723,7 +723,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, start, components.host_end);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_pathname() const noexcept
+[[nodiscard]] constexpr std::string_view url_aggregator::get_pathname() const noexcept
     ada_lifetime_bound {
   ada_log("url_aggregator::get_pathname pathname_start = ",
           components.pathname_start, " buffer.size() = ", buffer.size(),
@@ -1377,7 +1377,7 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   return answer;
 }
 
-[[nodiscard]] bool url_aggregator::validate() const noexcept {
+[[nodiscard]] constexpr bool url_aggregator::validate() const noexcept {
   if (!is_valid) {
     return true;
   }
