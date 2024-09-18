@@ -37,7 +37,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
     // Note: the 'found_colon' value is true if and only if a colon was
     // encountered while not inside brackets.
     if (found_colon) {
-      if (override_hostname) {
+      if constexpr (override_hostname) {
         return false;
       }
       std::string_view buffer = new_host.substr(location + 1);

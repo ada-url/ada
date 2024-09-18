@@ -428,7 +428,7 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
     ada_log("percent_encode encoding not needed.");
     return false;
   }
-  if (!append) {
+  if constexpr (!append) {
     out.clear();
   }
   ada_log("percent_encode appending ", std::distance(input.begin(), pointer),

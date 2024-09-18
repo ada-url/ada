@@ -336,7 +336,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
    *http, https), in which case, we can go really fast.
    **/
   if (is_input_special) {  // fast path!!!
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
       if (is_special() != is_input_special) {
@@ -360,7 +360,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
 
     type = parsed_type;
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
@@ -380,7 +380,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
     // bool is_ascii =
     unicode::to_lower_ascii(_buffer.data(), _buffer.size());
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // If url's scheme is a special scheme and buffer is not a special scheme,
       // then return. If url's scheme is not a special scheme and buffer is a
       // special scheme, then return.
@@ -404,7 +404,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
 
     set_scheme(std::move(_buffer));
 
-    if (has_state_override) {
+    if constexpr (has_state_override) {
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
