@@ -119,7 +119,7 @@ size_t roller_fuzz(size_t N) {
 }
 
 int main() {
-  if(std::endian::native == std::endian::big) {
+  if (std::endian::native == std::endian::big) {
     std::cout << "You have big-endian system." << std::endl;
   } else {
     std::cout << "You have litte-endian system." << std::endl;
