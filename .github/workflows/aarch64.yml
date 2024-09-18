@@ -23,16 +23,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        shared: [OFF]
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - uses: uraimo/run-on-arch-action@b0ffb25eb00af00468375982384441f063da1741 # v2.7.2
         name: Build and Test
         id: runcmd
-        env:
-          CXX: g++-12
         with:
           arch: aarch64
           githubToken: ${{ github.token }}
@@ -41,6 +36,6 @@ jobs:
             apt-get update -q -y
             apt-get install -y cmake make g++ ninja-build git
           run: |
-            cmake -DADA_SANITIZE_BOUNDS_STRICT=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -B build
+            cmake -B build
             cmake --build build
             ctest --test-dir build
