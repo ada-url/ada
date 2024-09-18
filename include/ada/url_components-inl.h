@@ -9,7 +9,8 @@
 
 namespace ada {
 
-[[nodiscard]] constexpr bool url_components::check_offset_consistency() const noexcept {
+[[nodiscard]] constexpr bool url_components::check_offset_consistency()
+    const noexcept {
   /**
    * https://user:pass@example.com:1234/foo/bar?baz#quux
    *       |     |    |          | ^^^^|       |   |
