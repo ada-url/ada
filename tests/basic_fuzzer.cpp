@@ -1,6 +1,7 @@
 #include "ada.h"
 #include <iostream>
 #include <memory>
+#include <bit>
 
 std::string url_examples[] = {
     "https://www.google.com/"
@@ -118,11 +119,11 @@ size_t roller_fuzz(size_t N) {
 }
 
 int main() {
-#if ADA_IS_BIG_ENDIAN
-  std::cout << "You have big-endian system." << std::endl;
-#else
-  std::cout << "You have litte-endian system." << std::endl;
-#endif
+  if (std::endian::native == std::endian::big) {
+    std::cout << "You have big-endian system." << std::endl;
+  } else {
+    std::cout << "You have litte-endian system." << std::endl;
+  }
   std::cout << "Running basic fuzzer.\n";
   std::cout << "[fancy]  Executed " << fancy_fuzz<ada::url>(100000)
             << " mutations.\n";
