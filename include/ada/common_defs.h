@@ -185,40 +185,6 @@ namespace ada {
 #define ada_constexpr constexpr
 #endif
 
-#if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__)
-#define ADA_IS_BIG_ENDIAN (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
-#elif defined(_WIN32)
-#define ADA_IS_BIG_ENDIAN 0
-#else
-#if defined(__APPLE__) || \
-    defined(__FreeBSD__)  // defined __BYTE_ORDER__ && defined
-                          // __ORDER_BIG_ENDIAN__
-#include <machine/endian.h>
-#elif defined(sun) || \
-    defined(__sun)  // defined(__APPLE__) || defined(__FreeBSD__)
-#include <sys/byteorder.h>
-#else  // defined(__APPLE__) || defined(__FreeBSD__)
-
-#ifdef __has_include
-#if __has_include(<endian.h>)
-#include <endian.h>
-#endif  //__has_include(<endian.h>)
-#endif  //__has_include
-
-#endif  // defined(__APPLE__) || defined(__FreeBSD__)
-
-#ifndef !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__)
-#define ADA_IS_BIG_ENDIAN 0
-#endif
-
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define ADA_IS_BIG_ENDIAN 0
-#else  // __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define ADA_IS_BIG_ENDIAN 1
-#endif  // __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-
-#endif  // defined __BYTE_ORDER__ && defined __ORDER_BIG_ENDIAN__
-
 // Unless the programmer has already set ADA_DEVELOPMENT_CHECKS,
 // we want to set it under debug builds. We detect a debug build
 // under Visual Studio when the _DEBUG macro is set. Under the other
