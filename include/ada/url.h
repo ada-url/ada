@@ -92,11 +92,11 @@ struct url : url_base {
   std::optional<std::string> hash{};
 
   /** @return true if it has an host but it is the empty string */
-  [[nodiscard]] inline bool has_empty_hostname() const noexcept;
+  [[nodiscard]] constexpr bool has_empty_hostname() const noexcept;
   /** @return true if the URL has a (non default) port */
   [[nodiscard]] inline bool has_port() const noexcept;
   /** @return true if it has a host (included an empty host) */
-  [[nodiscard]] inline bool has_hostname() const noexcept;
+  [[nodiscard]] constexpr bool has_hostname() const noexcept;
   [[nodiscard]] bool has_valid_domain() const noexcept override;
 
   /**
@@ -141,7 +141,7 @@ struct url : url_base {
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
    */
-  [[nodiscard]] std::string get_hostname() const noexcept;
+  [[nodiscard]] constexpr std::string_view get_hostname() const noexcept;
 
   /**
    * The pathname getter steps are to return the result of URL path serializing
@@ -149,7 +149,7 @@ struct url : url_base {
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  [[nodiscard]] std::string_view get_pathname() const noexcept;
+  [[nodiscard]] constexpr std::string_view get_pathname() const noexcept;
 
   /**
    * Compute the pathname length in bytes without instantiating a view or a
@@ -171,7 +171,7 @@ struct url : url_base {
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  [[nodiscard]] const std::string &get_username() const noexcept;
+  [[nodiscard]] constexpr std::string_view get_username() const noexcept;
 
   /**
    * @return Returns true on successful operation.
@@ -237,7 +237,7 @@ struct url : url_base {
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  [[nodiscard]] const std::string &get_password() const noexcept;
+  [[nodiscard]] constexpr std::string_view get_password() const noexcept;
 
   /**
    * Return this's URL's port, serialized.

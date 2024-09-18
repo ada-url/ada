@@ -37,7 +37,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
     // Note: the 'found_colon' value is true if and only if a colon was
     // encountered while not inside brackets.
     if (found_colon) {
-      if (override_hostname) {
+      if constexpr (override_hostname) {
         return false;
       }
       std::string_view buffer = new_host.substr(location + 1);
@@ -204,8 +204,8 @@ bool url::set_protocol(const std::string_view input) {
 
   view.append(":");
 
-  std::string::iterator pointer =
-      std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
+  auto pointer =
+      std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
     return parse_scheme<true>(
@@ -215,19 +215,10 @@ bool url::set_protocol(const std::string_view input) {
 }
 
 bool url::set_href(const std::string_view input) {
-  ada::result<ada::url> out = ada::parse<ada::url>(input);
+  auto out = ada::parse<ada::url>(input);
 
   if (out) {
-    username = out->username;
-    password = out->password;
-    host = out->host;
-    port = out->port;
-    path = out->path;
-    query = out->query;
-    hash = out->hash;
-    type = out->type;
-    non_special_scheme = out->non_special_scheme;
-    has_opaque_path = out->has_opaque_path;
+    *this = *out;
   }
 
   return out.has_value();

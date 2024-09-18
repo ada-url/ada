@@ -451,10 +451,9 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
     return;
   }
 
-  bool password_exists = has_password();
-  uint32_t difference = uint32_t(input.size());
+  auto difference = static_cast<uint32_t>(input.size());
 
-  if (password_exists) {
+  if (has_password()) {
     uint32_t current_length =
         components.host_start - components.username_end - 1;
     buffer.erase(components.username_end + 1, current_length);
@@ -493,7 +492,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 #if ADA_DEVELOPMENT_CHECKS
   // computing the expected password.
-  std::string password_expected = std::string(get_password());
+  auto password_expected = std::string(get_password());
   password_expected.append(input);
 #endif  // ADA_DEVELOPMENT_CHECKS
   add_authority_slashes_if_needed();
@@ -503,7 +502,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
     return;
   }
 
-  uint32_t difference = uint32_t(input.size());
+  auto difference = static_cast<uint32_t>(input.size());
   if (has_password()) {
     buffer.insert(components.host_start, input);
   } else {
@@ -548,7 +547,7 @@ inline void url_aggregator::update_base_port(uint32_t input) {
   // calling std::to_string(input.value()) is unfortunate given that the port
   // value is probably already available as a string.
   std::string value = helpers::concat(":", std::to_string(input));
-  uint32_t difference = uint32_t(value.size());
+  auto difference = static_cast<uint32_t>(value.size());
 
   if (components.port != url_components::omitted) {
     difference -= components.pathname_start - components.host_end;
@@ -568,7 +567,7 @@ inline void url_aggregator::update_base_port(uint32_t input) {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void url_aggregator::clear_port() {
+constexpr void url_aggregator::clear_port() {
   ada_log("url_aggregator::clear_port");
   ADA_ASSERT_TRUE(validate());
   if (components.port == url_components::omitted) {
@@ -587,7 +586,7 @@ inline void url_aggregator::clear_port() {
   ADA_ASSERT_TRUE(validate());
 }
 
-[[nodiscard]] inline uint32_t url_aggregator::retrieve_base_port() const {
+[[nodiscard]] constexpr uint32_t url_aggregator::retrieve_base_port() const {
   ada_log("url_aggregator::retrieve_base_port");
   return components.port;
 }
@@ -610,9 +609,9 @@ inline void url_aggregator::clear_search() {
   components.search_start = url_components::omitted;
 
 #if ADA_DEVELOPMENT_CHECKS
-  ADA_ASSERT_EQUAL(get_search(), "",
-                   "search should have been cleared on buffer=" + buffer +
-                       " with " + components.to_string() + "\n" + to_diagram());
+  ADA_ASSERT_TRUE(get_search().empty(),
+                  "search should have been cleared on buffer=" + buffer +
+                  " with " + components.to_string() + "\n" + to_diagram());
 #endif
   ADA_ASSERT_TRUE(validate());
 }
@@ -627,7 +626,7 @@ inline void url_aggregator::clear_hash() {
   components.hash_start = url_components::omitted;
 
 #if ADA_DEVELOPMENT_CHECKS
-  ADA_ASSERT_EQUAL(get_hash(), "",
+  ADA_ASSERT_TRUE(get_hash().empty(),
                    "hash should have been cleared on buffer=" + buffer +
                        " with " + components.to_string() + "\n" + to_diagram());
 #endif
@@ -637,7 +636,7 @@ inline void url_aggregator::clear_hash() {
 inline void url_aggregator::clear_pathname() {
   ada_log("url_aggregator::clear_pathname");
   ADA_ASSERT_TRUE(validate());
-  uint32_t ending_index = uint32_t(buffer.size());
+  auto ending_index = static_cast<uint32_t>(buffer.size());
   if (components.search_start != url_components::omitted) {
     ending_index = components.search_start;
   } else if (components.hash_start != url_components::omitted) {
@@ -661,7 +660,7 @@ inline void url_aggregator::clear_pathname() {
   }
   ada_log("url_aggregator::clear_pathname completed, running checks...");
 #if ADA_DEVELOPMENT_CHECKS
-  ADA_ASSERT_EQUAL(get_pathname(), "",
+  ADA_ASSERT_TRUE(get_pathname().empty(),
                    "pathname should have been cleared on buffer=" + buffer +
                        " with " + components.to_string() + "\n" + to_diagram());
 #endif
@@ -706,22 +705,22 @@ inline void url_aggregator::clear_hostname() {
   ADA_ASSERT_TRUE(validate());
 }
 
-[[nodiscard]] inline bool url_aggregator::has_hash() const noexcept {
+[[nodiscard]] constexpr bool url_aggregator::has_hash() const noexcept {
   ada_log("url_aggregator::has_hash");
   return components.hash_start != url_components::omitted;
 }
 
-[[nodiscard]] inline bool url_aggregator::has_search() const noexcept {
+[[nodiscard]] constexpr bool url_aggregator::has_search() const noexcept {
   ada_log("url_aggregator::has_search");
   return components.search_start != url_components::omitted;
 }
 
-ada_really_inline bool url_aggregator::has_credentials() const noexcept {
+ada_really_inline constexpr bool url_aggregator::has_credentials() const noexcept {
   ada_log("url_aggregator::has_credentials");
   return has_non_empty_username() || has_non_empty_password();
 }
 
-inline bool url_aggregator::cannot_have_credentials_or_port() const {
+constexpr bool url_aggregator::cannot_have_credentials_or_port() const {
   ada_log("url_aggregator::cannot_have_credentials_or_port");
   return type == ada::scheme::type::FILE ||
          components.host_start == components.host_end;
@@ -732,7 +731,7 @@ url_aggregator::get_components() const noexcept {
   return components;
 }
 
-[[nodiscard]] inline bool ada::url_aggregator::has_authority() const noexcept {
+[[nodiscard]] constexpr bool ada::url_aggregator::has_authority() const noexcept {
   ada_log("url_aggregator::has_authority");
   // Performance: instead of doing this potentially expensive check, we could
   // have a boolean in the struct.
@@ -767,28 +766,28 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void ada::url_aggregator::reserve(uint32_t capacity) {
+constexpr void ada::url_aggregator::reserve(uint32_t capacity) {
   buffer.reserve(capacity);
 }
 
-inline bool url_aggregator::has_non_empty_username() const noexcept {
+constexpr bool url_aggregator::has_non_empty_username() const noexcept {
   ada_log("url_aggregator::has_non_empty_username");
   return components.protocol_end + 2 < components.username_end;
 }
 
-inline bool url_aggregator::has_non_empty_password() const noexcept {
+constexpr bool url_aggregator::has_non_empty_password() const noexcept {
   ada_log("url_aggregator::has_non_empty_password");
   return components.host_start - components.username_end > 0;
 }
 
-inline bool url_aggregator::has_password() const noexcept {
+constexpr bool url_aggregator::has_password() const noexcept {
   ada_log("url_aggregator::has_password");
   // This function does not care about the length of the password
   return components.host_start > components.username_end &&
          buffer[components.username_end] == ':';
 }
 
-inline bool url_aggregator::has_empty_hostname() const noexcept {
+constexpr bool url_aggregator::has_empty_hostname() const noexcept {
   if (!has_hostname()) {
     return false;
   }
@@ -801,11 +800,11 @@ inline bool url_aggregator::has_empty_hostname() const noexcept {
   return components.username_end != components.host_start;
 }
 
-inline bool url_aggregator::has_hostname() const noexcept {
+constexpr bool url_aggregator::has_hostname() const noexcept {
   return has_authority();
 }
 
-inline bool url_aggregator::has_port() const noexcept {
+constexpr bool url_aggregator::has_port() const noexcept {
   ada_log("url_aggregator::has_port");
   // A URL cannot have a username/password/port if its host is null or the empty
   // string, or its scheme is "file".

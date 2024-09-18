@@ -26,13 +26,13 @@ namespace ada {
   return !host.has_value() || host.value().empty() ||
          type == ada::scheme::type::FILE;
 }
-[[nodiscard]] inline bool url::has_empty_hostname() const noexcept {
+[[nodiscard]] constexpr bool url::has_empty_hostname() const noexcept {
   if (!host.has_value()) {
     return false;
   }
   return host.value().empty();
 }
-[[nodiscard]] inline bool url::has_hostname() const noexcept {
+[[nodiscard]] constexpr bool url::has_hostname() const noexcept {
   return host.has_value();
 }
 inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
@@ -188,7 +188,7 @@ inline void url::copy_scheme(const ada::url &u) {
     if (has_credentials()) {
       output += username;
       if (!password.empty()) {
-        output += ":" + get_password();
+        output += ":" + std::string(get_password());
       }
       output += "@";
     }

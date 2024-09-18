@@ -65,7 +65,7 @@ struct url_aggregator : url_base {
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  [[nodiscard]] std::string_view get_username() const noexcept
+  [[nodiscard]] constexpr std::string_view get_username() const noexcept
       ada_lifetime_bound;
   /**
    * The password getter steps are to return this's URL's password.
@@ -73,7 +73,7 @@ struct url_aggregator : url_base {
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  [[nodiscard]] std::string_view get_password() const noexcept
+  [[nodiscard]] constexpr std::string_view get_password() const noexcept
       ada_lifetime_bound;
   /**
    * Return this's URL's port, serialized.
@@ -81,14 +81,14 @@ struct url_aggregator : url_base {
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
-  [[nodiscard]] std::string_view get_port() const noexcept ada_lifetime_bound;
+  [[nodiscard]] constexpr std::string_view get_port() const noexcept ada_lifetime_bound;
   /**
    * Return U+0023 (#), followed by this's URL's fragment.
    * This function does not allocate memory.
    * @return a lightweight std::string_view..
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
-  [[nodiscard]] std::string_view get_hash() const noexcept ada_lifetime_bound;
+  [[nodiscard]] constexpr std::string_view get_hash() const noexcept ada_lifetime_bound;
   /**
    * Return url's host, serialized, followed by U+003A (:) and url's port,
    * serialized.
@@ -97,7 +97,7 @@ struct url_aggregator : url_base {
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
-  [[nodiscard]] std::string_view get_host() const noexcept ada_lifetime_bound;
+  [[nodiscard]] constexpr std::string_view get_host() const noexcept;
   /**
    * Return this's URL's host, serialized.
    * This function does not allocate memory.
@@ -144,7 +144,7 @@ struct url_aggregator : url_base {
    * A URL includes credentials if its username or password is not the empty
    * string.
    */
-  [[nodiscard]] ada_really_inline bool has_credentials() const noexcept;
+  [[nodiscard]] ada_really_inline constexpr bool has_credentials() const noexcept;
 
   /**
    * Useful for implementing efficient serialization for the URL.
@@ -186,23 +186,23 @@ struct url_aggregator : url_base {
   [[nodiscard]] bool validate() const noexcept;
 
   /** @return true if it has an host but it is the empty string */
-  [[nodiscard]] inline bool has_empty_hostname() const noexcept;
+  [[nodiscard]] constexpr bool has_empty_hostname() const noexcept;
   /** @return true if it has a host (included an empty host) */
-  [[nodiscard]] inline bool has_hostname() const noexcept;
+  [[nodiscard]] constexpr bool has_hostname() const noexcept;
   /** @return true if the URL has a non-empty username */
-  [[nodiscard]] inline bool has_non_empty_username() const noexcept;
+  [[nodiscard]] constexpr bool has_non_empty_username() const noexcept;
   /** @return true if the URL has a non-empty password */
-  [[nodiscard]] inline bool has_non_empty_password() const noexcept;
+  [[nodiscard]] constexpr bool has_non_empty_password() const noexcept;
   /** @return true if the URL has a (non default) port */
-  [[nodiscard]] inline bool has_port() const noexcept;
+  [[nodiscard]] constexpr bool has_port() const noexcept;
   /** @return true if the URL has a password */
-  [[nodiscard]] inline bool has_password() const noexcept;
+  [[nodiscard]] constexpr bool has_password() const noexcept;
   /** @return true if the URL has a hash component */
-  [[nodiscard]] inline bool has_hash() const noexcept override;
+  [[nodiscard]] constexpr bool has_hash() const noexcept override;
   /** @return true if the URL has a search component */
-  [[nodiscard]] inline bool has_search() const noexcept override;
+  [[nodiscard]] constexpr bool has_search() const noexcept override;
 
-  inline void clear_port();
+  constexpr void clear_port();
   inline void clear_hash();
   inline void clear_search() override;
 
@@ -233,7 +233,7 @@ struct url_aggregator : url_base {
    * To optimize performance, you may indicate how much memory to allocate
    * within this instance.
    */
-  inline void reserve(uint32_t capacity);
+  constexpr void reserve(uint32_t capacity);
 
   ada_really_inline size_t parse_port(
       std::string_view view, bool check_trailing_content) noexcept override;
@@ -268,7 +268,7 @@ struct url_aggregator : url_base {
    * A URL cannot have a username/password/port if its host is null or the empty
    * string, or its scheme is "file".
    */
-  [[nodiscard]] inline bool cannot_have_credentials_or_port() const;
+  [[nodiscard]] constexpr bool cannot_have_credentials_or_port() const;
 
   template <bool override_hostname = false>
   bool set_host_or_hostname(std::string_view input);
@@ -289,7 +289,7 @@ struct url_aggregator : url_base {
   inline void append_base_password(std::string_view input);
   inline void update_base_port(uint32_t input);
   inline void append_base_pathname(std::string_view input);
-  [[nodiscard]] inline uint32_t retrieve_base_port() const;
+  [[nodiscard]] constexpr uint32_t retrieve_base_port() const;
   inline void clear_hostname();
   inline void clear_password();
   inline void clear_pathname() override;
@@ -301,7 +301,7 @@ struct url_aggregator : url_base {
       std::string_view input);
   ada_really_inline uint32_t replace_and_resize(uint32_t start, uint32_t end,
                                                 std::string_view input);
-  [[nodiscard]] inline bool has_authority() const noexcept;
+  [[nodiscard]] constexpr bool has_authority() const noexcept;
   inline void set_protocol_as_file();
   inline void set_scheme(std::string_view new_scheme) noexcept;
   /**
