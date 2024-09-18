@@ -447,7 +447,7 @@ $(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../'); initResizable(
 <div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>  <span class="keyword">auto</span> parsed_type = <a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#a5e6e7cb90bb372cd1554c6bebb944de6">ada::scheme::get_scheme_type</a>(input);</div>
 <div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>  <span class="keywordtype">bool</span> is_input_special = (parsed_type != <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baaff84b9b3b0f0f7c8f56b9a01f3107af">ada::scheme::NOT_SPECIAL</a>);</div>
 <div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>  <span class="keywordflow">if</span> (is_input_special) {  <span class="comment">// fast path!!!</span></div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>    <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>    <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (has_state_override) {</div>
 <div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>      <span class="comment">// If url&#39;s scheme is not a special scheme and buffer is a special scheme,</span></div>
 <div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>      <span class="comment">// then return.</span></div>
 <div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>      <span class="keywordflow">if</span> (<a class="code hl_function" href="../../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd">is_special</a>() != is_input_special) {</div>
@@ -471,7 +471,7 @@ $(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../'); initResizable(
 <div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span> </div>
 <div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>    <a class="code hl_enumeration" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3b">type</a> = parsed_type;</div>
 <div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span> </div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>    <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>    <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (has_state_override) {</div>
 <div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>      <span class="comment">// This is uncommon.</span></div>
 <div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>      uint16_t urls_scheme_port = <a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde">get_special_port</a>();</div>
 <div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span> </div>
@@ -491,7 +491,7 @@ $(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../'); initResizable(
 <div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>    <span class="comment">// bool is_ascii =</span></div>
 <div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>    unicode::to_lower_ascii(_buffer.data(), _buffer.size());</div>
 <div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span> </div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (has_state_override) {</div>
 <div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>      <span class="comment">// If url&#39;s scheme is a special scheme and buffer is not a special scheme,</span></div>
 <div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>      <span class="comment">// then return. If url&#39;s scheme is not a special scheme and buffer is a</span></div>
 <div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>      <span class="comment">// special scheme, then return.</span></div>
@@ -515,7 +515,7 @@ $(function(){initNavTree('d6/d0e/url_8cpp_source.html','../../'); initResizable(
 <div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span> </div>
 <div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>    set_scheme(std::move(_buffer));</div>
 <div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span> </div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>    <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>    <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (has_state_override) {</div>
 <div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>      <span class="comment">// This is uncommon.</span></div>
 <div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>      uint16_t urls_scheme_port = <a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde">get_special_port</a>();</div>
 <div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span> </div>

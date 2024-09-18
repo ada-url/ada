@@ -138,7 +138,7 @@ $(function(){initNavTree('dd/dc8/url__aggregator_8cpp_source.html','../../'); in
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  <span class="keyword">auto</span> parsed_type = <a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#a5e6e7cb90bb372cd1554c6bebb944de6">ada::scheme::get_scheme_type</a>(input);</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  <span class="keywordtype">bool</span> is_input_special = (parsed_type != <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baaff84b9b3b0f0f7c8f56b9a01f3107af">ada::scheme::NOT_SPECIAL</a>);</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="keywordflow">if</span> (is_input_special) {  <span class="comment">// fast path!!!</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (has_state_override) {</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>      <span class="comment">// If url&#39;s scheme is not a special scheme and buffer is a special scheme,</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>      <span class="comment">// then return.</span></div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>      <span class="keywordflow">if</span> (<a class="code hl_function" href="../../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd">is_special</a>() != is_input_special) {</div>
@@ -163,7 +163,7 @@ $(function(){initNavTree('dd/dc8/url__aggregator_8cpp_source.html','../../'); in
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <a class="code hl_enumeration" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3b">type</a> = parsed_type;</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    set_scheme_from_view_with_colon(input_with_colon);</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (has_state_override) {</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>      <span class="comment">// This is uncommon.</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>      uint16_t urls_scheme_port = <a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde">get_special_port</a>();</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
@@ -180,7 +180,7 @@ $(function(){initNavTree('dd/dc8/url__aggregator_8cpp_source.html','../../'); in
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="comment">// need to check the return value.</span></div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    unicode::to_lower_ascii(_buffer.data(), _buffer.size());</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (has_state_override) {</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>      <span class="comment">// If url&#39;s scheme is a special scheme and buffer is not a special scheme,</span></div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>      <span class="comment">// then return. If url&#39;s scheme is not a special scheme and buffer is a</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>      <span class="comment">// special scheme, then return.</span></div>
@@ -205,7 +205,7 @@ $(function(){initNavTree('dd/dc8/url__aggregator_8cpp_source.html','../../'); in
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    set_scheme(_buffer);</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordflow">if</span> (has_state_override) {</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (has_state_override) {</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>      <span class="comment">// This is uncommon.</span></div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>      uint16_t urls_scheme_port = <a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde">get_special_port</a>();</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
@@ -666,7 +666,7 @@ $(function(){initNavTree('dd/dc8/url__aggregator_8cpp_source.html','../../'); in
 <div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>    <span class="comment">// Note: the &#39;found_colon&#39; value is true if and only if a colon was</span></div>
 <div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>    <span class="comment">// encountered while not inside brackets.</span></div>
 <div class="line"><a id="l00541" name="l00541"></a><span class="lineno">  541</span>    <span class="keywordflow">if</span> (found_colon) {</div>
-<div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span>      <span class="keywordflow">if</span> (override_hostname) {</div>
+<div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (override_hostname) {</div>
 <div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>      }</div>
 <div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>      std::string_view sub_buffer = new_host.substr(location + 1);</div>

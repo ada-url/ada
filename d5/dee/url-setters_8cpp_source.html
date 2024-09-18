@@ -149,7 +149,7 @@ $(function(){initNavTree('d5/dee/url-setters_8cpp_source.html','../../'); initRe
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// Note: the &#39;found_colon&#39; value is true if and only if a colon was</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="comment">// encountered while not inside brackets.</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordflow">if</span> (found_colon) {</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>      <span class="keywordflow">if</span> (override_hostname) {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>      <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (override_hostname) {</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>      }</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>      std::string_view buffer = new_host.substr(location + 1);</div>
