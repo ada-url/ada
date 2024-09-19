@@ -9,7 +9,7 @@ var searchData=
   ['is_5flabel_5fvalid_6',['is_label_valid',['../d5/ddb/namespaceada_1_1idna.html#ac39ccead632e6f2bf5049d1b643c5e1c',1,'ada::idna']]],
   ['is_5fnormalized_5fwindows_5fdrive_5fletter_7',['is_normalized_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b',1,'ada::checkers']]],
   ['is_5frtl_5flabel_8',['is_rtl_label',['../d5/ddb/namespaceada_1_1idna.html#a164d095ce497ec0086fcd41e3f7e311e',1,'ada::idna']]],
-  ['is_5fspecial_9',['is_special',['../db/d75/structada_1_1url__base.html#a3b79d8e0037530979f8740aaca23f4dd',1,'ada::url_base']]],
+  ['is_5fspecial_9',['is_special',['../db/d75/structada_1_1url__base.html#a0fd9855b9e1b961e3a26887f81bb9b77',1,'ada::url_base']]],
   ['is_5ftabs_5for_5fnewline_10',['is_tabs_or_newline',['../d2/dc3/namespaceada_1_1unicode.html#a956a9f069a4505ce3f0b31995bf2b273',1,'ada::unicode']]],
   ['is_5fvalid_5futf8_5fstring_11',['is_valid_utf8_string',['../d6/db9/parse_8cc.html#a2ab8bd0c9e8e8f312b3571640917ef0d',1,'parse.cc']]],
   ['is_5fwindows_5fdrive_5fletter_12',['is_windows_drive_letter',['../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca',1,'ada::checkers']]]
