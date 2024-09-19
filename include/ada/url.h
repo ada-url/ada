@@ -149,7 +149,7 @@ struct url : url_base {
    * @return a newly allocated string.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  [[nodiscard]] std::string_view get_pathname() const noexcept;
+  [[nodiscard]] constexpr std::string_view get_pathname() const noexcept;
 
   /**
    * Compute the pathname length in bytes without instantiating a view or a
@@ -283,9 +283,9 @@ struct url : url_base {
   [[nodiscard]] ada_really_inline ada::url_components get_components()
       const noexcept;
   /** @return true if the URL has a hash component */
-  [[nodiscard]] inline bool has_hash() const noexcept override;
+  [[nodiscard]] constexpr bool has_hash() const noexcept override;
   /** @return true if the URL has a search component */
-  [[nodiscard]] inline bool has_search() const noexcept override;
+  [[nodiscard]] constexpr bool has_search() const noexcept override;
 
  private:
   friend ada::url ada::parser::parse_url<ada::url>(std::string_view,
@@ -362,12 +362,6 @@ struct url : url_base {
   }
 
   /**
-   * Take the scheme from another URL. The scheme string is copied from the
-   * provided url.
-   */
-  inline void copy_scheme(const ada::url &u);
-
-  /**
    * Parse the host from the provided input. We assume that
    * the input does not contain spaces or tabs. Control
    * characters and spaces are not trimmed (they should have
@@ -380,9 +374,9 @@ struct url : url_base {
   template <bool has_state_override = false>
   [[nodiscard]] ada_really_inline bool parse_scheme(std::string_view input);
 
-  inline void clear_pathname() override;
-  inline void clear_search() override;
-  inline void set_protocol_as_file();
+  constexpr void clear_pathname() override;
+  constexpr void clear_search() override;
+  constexpr void set_protocol_as_file();
 
   /**
    * Parse the path from the provided input.
@@ -407,7 +401,13 @@ struct url : url_base {
    * Take the scheme from another URL. The scheme string is moved from the
    * provided url.
    */
-  inline void copy_scheme(ada::url &&u) noexcept;
+  constexpr void copy_scheme(ada::url &&u) noexcept;
+
+  /**
+   * Take the scheme from another URL. The scheme string is copied from the
+   * provided url.
+   */
+  constexpr void copy_scheme(const ada::url &u);
 
 };  // struct url
 

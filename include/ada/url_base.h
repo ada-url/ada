@@ -68,7 +68,7 @@ struct url_base {
    * A URL is special if its scheme is a special scheme. A URL is not special if
    * its scheme is not a special scheme.
    */
-  [[nodiscard]] ada_really_inline bool is_special() const noexcept;
+  [[nodiscard]] ada_really_inline constexpr bool is_special() const noexcept;
 
   /**
    * The origin getter steps are to return the serialization of this's URL's

@@ -43,6 +43,10 @@ inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
   return path.size();
 }
 
+[[nodiscard]] constexpr std::string_view url::get_pathname() const noexcept {
+  return path;
+}
+
 [[nodiscard]] ada_really_inline ada::url_components url::get_components()
     const noexcept {
   url_components out{};
@@ -148,19 +152,19 @@ inline void url::update_base_port(std::optional<uint16_t> input) {
   port = input;
 }
 
-inline void url::clear_pathname() { path.clear(); }
+constexpr void url::clear_pathname() { path.clear(); }
 
-inline void url::clear_search() { query = std::nullopt; }
+constexpr void url::clear_search() { query = std::nullopt; }
 
-[[nodiscard]] inline bool url::has_hash() const noexcept {
+[[nodiscard]] constexpr bool url::has_hash() const noexcept {
   return hash.has_value();
 }
 
-[[nodiscard]] inline bool url::has_search() const noexcept {
+[[nodiscard]] constexpr bool url::has_search() const noexcept {
   return query.has_value();
 }
 
-inline void url::set_protocol_as_file() { type = ada::scheme::type::FILE; }
+constexpr void url::set_protocol_as_file() { type = ada::scheme::type::FILE; }
 
 inline void url::set_scheme(std::string &&new_scheme) noexcept {
   type = ada::scheme::get_scheme_type(new_scheme);
@@ -170,12 +174,12 @@ inline void url::set_scheme(std::string &&new_scheme) noexcept {
   }
 }
 
-inline void url::copy_scheme(ada::url &&u) noexcept {
+constexpr void url::copy_scheme(ada::url &&u) noexcept {
   non_special_scheme = u.non_special_scheme;
   type = u.type;
 }
 
-inline void url::copy_scheme(const ada::url &u) {
+constexpr void url::copy_scheme(const ada::url &u) {
   non_special_scheme = u.non_special_scheme;
   type = u.type;
 }

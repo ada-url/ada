@@ -62,10 +62,6 @@ namespace ada {
   return host.value_or("");
 }
 
-[[nodiscard]] std::string_view url::get_pathname() const noexcept {
-  return path;
-}
-
 [[nodiscard]] std::string url::get_search() const noexcept {
   // If this's URL's query is either null or the empty string, then return the
   // empty string. Return U+003F (?), followed by this's URL's query.
