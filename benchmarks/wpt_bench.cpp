@@ -7,7 +7,11 @@ double url_examples_bytes{};
 
 std::vector<std::pair<std::string, std::string>> url_examples;
 
-size_t init_data(const char *source) {
+enum {
+  ALL_URLS = -1,
+};
+
+size_t init_data(const char *source, int which_url) {
   ondemand::parser parser;
   std::vector<std::pair<std::string, std::string>> answer;
 
@@ -16,19 +20,48 @@ size_t init_data(const char *source) {
   }
   padded_string json = padded_string::load(source);
   ondemand::document doc = parser.iterate(json);
-  for (auto element : doc.get_array()) {
-    if (element.type() == ondemand::json_type::object) {
-      std::string_view input;
-      if (element["input"].get_string(true).get(input) != simdjson::SUCCESS) {
-        printf("missing input.\n");
+  if (which_url == ALL_URLS) {
+    for (auto element : doc.get_array()) {
+      if (element.type() == ondemand::json_type::object) {
+        std::string_view input;
+        if (element["input"].get_string(true).get(input) != simdjson::SUCCESS) {
+          printf("missing input.\n");
+          continue;
+        }
+        std::string_view base;
+        if (element["base"].get_string(true).get(base) != simdjson::SUCCESS) {
+          // missing base is ok?
+        }
+        url_examples.push_back({std::string(input), std::string(base)});
+        url_examples_bytes += input.size() + base.size();
       }
-      std::string_view base;
-      if (element["base"].get_string(true).get(base) != simdjson::SUCCESS) {
+    }
+  } else {
+    size_t count = 0;
+    for (auto element : doc.get_array()) {
+      if (element.type() == ondemand::json_type::object) {
+        std::string_view input;
+        if (element["input"].get_string(true).get(input) != simdjson::SUCCESS) {
+          printf("missing input.\n");
+          continue;
+        }
+        std::string_view base;
+        if (element["base"].get_string(true).get(base) != simdjson::SUCCESS) {
+          // missing base is ok?
+        }
+        if (count++ == which_url) {
+          url_examples.push_back({std::string(input), std::string(base)});
+          url_examples_bytes += input.size() + base.size();
+          break;
+        }
       }
-      url_examples.push_back({std::string(input), std::string(base)});
-      url_examples_bytes += input.size() + base.size();
+    }
+    if (url_examples.size() == 0) {
+      printf("# There are %zu urls in the file, index is %d.\n", count,
+             which_url);
     }
   }
+  printf("# recovered %zu urls.\n", url_examples.size());
   return url_examples.size();
 }
 
@@ -52,7 +85,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       }
       auto url = ada::parse(url_strings.first, base_ptr);
       if (url) {
-        href_size += url->get_href().size();
+        href_size = href_size + url->get_href().size();
       }
     }
   }
@@ -75,7 +108,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
         }
         auto url = ada::parse(url_strings.first, base_ptr);
         if (url) {
-          href_size += url->get_href().size();
+          href_size = href_size + url->get_href().size();
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
@@ -134,7 +167,7 @@ static void BasicBench_whatwg(benchmark::State &state) {
       }
       upa::url url;
       if (upa::success(url.parse(url_strings.first, base_ptr))) {
-        success++;
+        success = success + 1;
       }
     }
   }
@@ -154,7 +187,7 @@ static void BasicBench_whatwg(benchmark::State &state) {
         }
         upa::url url;
         if (upa::success(url.parse(url_strings.first, base_ptr))) {
-          success++;
+          success = success + 1;
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
@@ -195,13 +228,23 @@ BENCHMARK(BasicBench_whatwg);
 #endif  // ADA_url_whatwg_ENABLED
 
 int main(int argc, char **argv) {
-  if (argc == 1 || !init_data(argv[1])) {
+  int which_url = ALL_URLS;
+  if (argc > 3 && std::string_view(argv[2]) == "--select") {
+    which_url = std::atoi(argv[3]);
+    printf("# Selecting url %d.\n", which_url);
+  }
+  if (argc == 1 || !init_data(argv[1], which_url)) {
     std::cout
         << "pass the path to the file wpt/urltestdata.json as a parameter."
         << std::endl;
     std::cout
         << "E.g., './build/benchmarks/wpt_bench tests/wpt/urltestdata.json'"
         << std::endl;
+    std::cout << "You can also select a single URL by passing --select <index>."
+              << std::endl;
+    std::cout << "E.g., './build/benchmarks/wpt_bench "
+                 "tests/wpt/urltestdata.json --select 0'"
+              << std::endl;
     return EXIT_SUCCESS;
   }
 #if defined(ADA_RUST_VERSION)
