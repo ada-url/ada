@@ -209,15 +209,15 @@ inline int leading_zeroes(uint32_t input_num) noexcept {
  * faster than std::to_string(x).size().
  * @return digit count
  */
-inline int fast_digit_count(uint32_t x) noexcept {
-  auto int_log2 = [](uint32_t z) -> int {
+constexpr int fast_digit_count(uint32_t x) noexcept {
+  constexpr auto int_log2 = [](uint32_t z) -> int {
     return 31 - ada::helpers::leading_zeroes(z | 1);
   };
   // Compiles to very few instructions. Note that the
   // table is static and thus effectively a constant.
   // We leave it inside the function because it is meaningless
   // outside of it (this comes at no performance cost).
-  const static uint64_t table[] = {
+  constexpr uint64_t table[] = {
       4294967296,  8589934582,  8589934582,  8589934582,  12884901788,
       12884901788, 12884901788, 17179868184, 17179868184, 17179868184,
       21474826480, 21474826480, 21474826480, 21474826480, 25769703776,

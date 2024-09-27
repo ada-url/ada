@@ -7,9 +7,8 @@
 
 #include "ada/common_defs.h"
 
-#include <array>
-#include <optional>
-#include <string>
+#include <string_view>
+#include <cstdint>
 
 /**
  * @namespace ada::scheme

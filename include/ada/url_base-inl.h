@@ -26,11 +26,11 @@ namespace ada {
   return type != ada::scheme::NOT_SPECIAL;
 }
 
-[[nodiscard]] inline uint16_t url_base::get_special_port() const noexcept {
+[[nodiscard]] constexpr uint16_t url_base::get_special_port() const noexcept {
   return ada::scheme::get_special_port(type);
 }
 
-[[nodiscard]] ada_really_inline uint16_t
+[[nodiscard]] ada_really_inline constexpr uint16_t
 url_base::scheme_default_port() const noexcept {
   return scheme::get_special_port(type);
 }

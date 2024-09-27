@@ -7,6 +7,9 @@
 
 #include "ada/scheme.h"
 
+#include <string_view>
+#include <cstdint>
+
 namespace ada::scheme {
 
 /**

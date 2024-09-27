@@ -91,14 +91,14 @@ struct url_base {
    * Return the 'special port' if the URL is special and not 'file'.
    * Returns 0 otherwise.
    */
-  [[nodiscard]] inline uint16_t get_special_port() const noexcept;
+  [[nodiscard]] constexpr uint16_t get_special_port() const noexcept;
 
   /**
    * @private
    *
    * Get the default port if the url's scheme has one, returns 0 otherwise.
    */
-  [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
+  [[nodiscard]] ada_really_inline constexpr uint16_t scheme_default_port() const noexcept;
 
   /**
    * @private

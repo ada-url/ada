@@ -5,11 +5,8 @@
 #ifndef ADA_SERIALIZERS_H
 #define ADA_SERIALIZERS_H
 
-#include "ada/common_defs.h"
-
-#include <array>
-#include <optional>
 #include <string>
+#include <cstdint>
 
 /**
  * @namespace ada::serializers
