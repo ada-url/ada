@@ -6,6 +6,7 @@
 #define ADA_URL_H
 
 #include <cstdint>
+#include <charconv>
 #include <iostream>
 #include <optional>
 #include <string>
