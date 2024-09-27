@@ -316,7 +316,8 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   }
   clear_pathname();
   parse_path(input);
-  if (get_pathname().starts_with("//") && !has_authority() && !has_dash_dot()) {
+  if (get_pathname().starts_with("//") && !has_authority && !has_dash_dot()) {
+    has_authority = true;
     buffer.insert(components.pathname_start, "/.");
     components.pathname_start += 2;
   }
@@ -358,7 +359,7 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
   } else {
     // Non-special URLs with an empty host can have their paths erased
     // Path-only URLs cannot have their paths erased
-    if (components.host_start == components.host_end && !has_authority()) {
+    if (components.host_start == components.host_end && !has_authority) {
       update_base_pathname("/");
     }
   }
