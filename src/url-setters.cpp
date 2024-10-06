@@ -177,8 +177,7 @@ void url::set_search(const std::string_view input) {
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
                    : ada::character_sets::QUERY_PERCENT_ENCODE;
 
-  query = ada::unicode::percent_encode(std::string_view(new_value),
-                                       query_percent_encode_set);
+  query = ada::unicode::percent_encode(new_value, query_percent_encode_set);
 }
 
 bool url::set_pathname(const std::string_view input) {
@@ -205,7 +204,7 @@ bool url::set_protocol(const std::string_view input) {
   view.append(":");
 
   std::string::iterator pointer =
-      std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
+      std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
     return parse_scheme<true>(
@@ -218,16 +217,7 @@ bool url::set_href(const std::string_view input) {
   ada::result<ada::url> out = ada::parse<ada::url>(input);
 
   if (out) {
-    username = out->username;
-    password = out->password;
-    host = out->host;
-    port = out->port;
-    path = out->path;
-    query = out->query;
-    hash = out->hash;
-    type = out->type;
-    non_special_scheme = out->non_special_scheme;
-    has_opaque_path = out->has_opaque_path;
+    *this = *out;
   }
 
   return out.has_value();

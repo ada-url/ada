@@ -42,7 +42,9 @@ struct url_search_params {
    * @see
    * https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-constructor.any.js
    */
-  url_search_params(const std::string_view input) { initialize(input); }
+  explicit url_search_params(const std::string_view input) {
+    initialize(input);
+  }
 
   url_search_params(const url_search_params &u) = default;
   url_search_params(url_search_params &&u) noexcept = default;
@@ -172,7 +174,7 @@ struct url_search_params_iter {
    */
   inline std::optional<T> next();
 
-  inline bool has_next();
+  inline bool has_next() const;
 
  private:
   static url_search_params EMPTY;

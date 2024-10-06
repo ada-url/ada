@@ -5,13 +5,14 @@
 #include <numeric>
 #include <algorithm>
 #include <string>
+#include <string_view>
 
 namespace ada {
 
 bool url::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
-  if (std::any_of(input.begin(), input.end(),
-                  ada::unicode::is_forbidden_host_code_point)) {
+  if (std::ranges::any_of(input.begin(), input.end(),
+                          ada::unicode::is_forbidden_host_code_point)) {
     return is_valid = false;
   }
 
@@ -513,18 +514,14 @@ ada_really_inline void url::parse_path(std::string_view input) {
       path = "/";
     } else if ((internal_input[0] == '/') || (internal_input[0] == '\\')) {
       helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      return;
     } else {
       helpers::parse_prepared_path(internal_input, type, path);
-      return;
     }
   } else if (!internal_input.empty()) {
     if (internal_input[0] == '/') {
       helpers::parse_prepared_path(internal_input.substr(1), type, path);
-      return;
     } else {
       helpers::parse_prepared_path(internal_input, type, path);
-      return;
     }
   } else {
     if (!host.has_value()) {

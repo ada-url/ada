@@ -22,7 +22,7 @@ template <bool has_state_override>
   std::string_view input{input_with_colon};
   input.remove_suffix(1);
   auto parsed_type = ada::scheme::get_scheme_type(input);
-  bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
+  const bool is_input_special = (parsed_type != ada::scheme::NOT_SPECIAL);
   /**
    * In the common case, we will immediately recognize a special scheme (e.g.,
    *http, https), in which case, we can go really fast.
@@ -224,7 +224,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   view.append(":");
 
   std::string::iterator pointer =
-      std::find_if_not(view.begin(), view.end(), unicode::is_alnum_plus);
+      std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
     return parse_scheme_with_colon<true>(
