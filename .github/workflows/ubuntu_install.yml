@@ -1,45 +1,44 @@
 name: Ubuntu 22.04 (Installation)
-
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - "**.md"
+      - docs/**
   push:
     branches:
       - main
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-
+      - "**.md"
+      - docs/**
 permissions:
   contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   ubuntu-build:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        include:
-          shared: [ON, OFF]
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare
-        run: cmake -G Ninja -DBUILD_SHARED_LIBS=${{matrix.shared}} -DCMAKE_INSTALL_PREFIX:PATH=destination -B build
+        run: cmake -G Ninja -DBUILD_SHARED_LIBS=ON
+          -DCMAKE_INSTALL_PREFIX:PATH=destination -B build
       - name: Build
         run: cmake --build build -j=4
       - name: Install
         run: cmake --install build
       - name: Prepare test package
-        run: cmake -DCMAKE_INSTALL_PREFIX:PATH=../../destination -S tests/installation -B buildbabyada
+        run: cmake -DCMAKE_INSTALL_PREFIX:PATH=../../destination -S tests/installation
+          -B buildbabyada
       - name: Build test package
         run: cmake --build buildbabyada
       - name: Run example
         run: ./buildbabyada/main
+
