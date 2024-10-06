@@ -149,7 +149,7 @@ $(function(){initNavTree('d1/d98/helpers_8h_source.html','../../'); initResizabl
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="keywordtype">bool</span> overlaps(std::string_view input1, <span class="keyword">const</span> std::string&amp; input2) <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keyword">constexpr</span> std::string_view substring(<span class="keyword">const</span> std::string&amp; input,</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keyword">constexpr</span> std::string_view substring(std::string_view input,</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                                                       <span class="keywordtype">size_t</span> pos1,</div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                                                       <span class="keywordtype">size_t</span> pos2) <span class="keyword">noexcept</span> {</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">#if ADA_DEVELOPMENT_CHECKS</span></div>
@@ -159,7 +159,7 @@ $(function(){initNavTree('d1/d98/helpers_8h_source.html','../../'); initResizabl
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    abort();</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  }</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <span class="keywordflow">return</span> std::string_view(input.data() + pos1, pos2 - pos1);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <span class="keywordflow">return</span> input.substr(pos1, pos2 - pos1);</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>}</div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keywordtype">void</span> resize(std::string_view&amp; input, <span class="keywordtype">size_t</span> pos) <span class="keyword">noexcept</span>;</div>
