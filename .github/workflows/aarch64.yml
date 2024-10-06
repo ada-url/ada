@@ -36,6 +36,6 @@ jobs:
             apt-get update -q -y
             apt-get install -y cmake make g++ ninja-build git
           run: |
-            cmake -B build
+            cmake -DCMAKE_CXX_STANDARD=20 -B build
             cmake --build build
             ctest --test-dir build
