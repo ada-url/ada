@@ -9,6 +9,7 @@
 #include "ada/character_sets-inl.h"
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
+#include "ada/ada_data_url.h"
 #include "ada/log.h"
 #include "ada/encoding_type.h"
 #include "ada/helpers.h"

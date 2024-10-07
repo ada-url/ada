@@ -40,6 +40,8 @@ std::string ipv6(const std::array<uint16_t, 8>& address) noexcept;
  */
 std::string ipv4(uint64_t address) noexcept;
 
+std::string url_serializer(const ada::url& url, bool excludeFragment) noexcept;
+
 }  // namespace ada::serializers
 
 #endif  // ADA_SERIALIZERS_H
