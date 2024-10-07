@@ -6,6 +6,10 @@
 #include <cstring>
 #include <sstream>
 
+#if ADA_NEON
+#include <arm_neon.h>
+#endif  // ADA_NEON
+
 namespace ada::helpers {
 
 template <typename out_iter>
@@ -762,6 +766,42 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   }
   return result;
 }();
+#if ADA_NEON
+ada_really_inline size_t
+find_authority_delimiter(std::string_view view) noexcept {
+  const auto* data = reinterpret_cast<const uint8_t*>(view.data());
+  size_t length = view.size();
+  size_t i = 0;
+
+  // Prepare NEON registers
+  uint8x16_t lookup = vld1q_u8(authority_delimiter.data());
+
+  // SIMD processing for 16-byte chunks
+  for (; i + 16 <= length; i += 16) {
+    uint8x16_t chunk = vld1q_u8(data + i);
+    uint8x16_t result = vqtbl1q_u8(lookup, chunk);
+
+    uint64x2_t mask64 = vreinterpretq_u64_u8(result);
+    uint64_t low_bits = vgetq_lane_u64(mask64, 0);
+    uint64_t high_bits = vgetq_lane_u64(mask64, 1);
+
+    if (low_bits != 0) {
+      return i + __builtin_ctzll(low_bits);
+    } else if (high_bits != 0) {
+      return i + 64 + __builtin_ctzll(high_bits);
+    }
+  }
+
+  // Handle remaining bytes
+  for (; i < length; ++i) {
+    if (authority_delimiter[data[i]]) {
+      return i;
+    }
+  }
+
+  return length;
+}
+#else
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
@@ -774,6 +814,7 @@ find_authority_delimiter(std::string_view view) noexcept {
   }
   return size_t(view.size());
 }
+#endif
 
 }  // namespace ada::helpers
 
