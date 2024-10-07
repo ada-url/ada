@@ -11,49 +11,43 @@ ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
   // with 'x' or a lowercase hex character.
   // Most of the time, this will be false so this simple check will save a lot
   // of effort.
-  char last_char = view.back();
   // If the address ends with a dot, we need to prune it (special case).
-  if (last_char == '.') {
+  if (view.back() == '.') [[unlikely]] {
     view.remove_suffix(1);
-    if (view.empty()) {
+    if (view.empty()) [[unlikely]] {
       return false;
     }
-    last_char = view.back();
   }
-  bool possible_ipv4 = (last_char >= '0' && last_char <= '9') ||
-                       (last_char >= 'a' && last_char <= 'f') ||
-                       last_char == 'x';
-  if (!possible_ipv4) {
+  const char last_char = view.back();
+  if (!unicode::is_lowercase_hex(last_char) && last_char != 'x') {
     return false;
   }
   // From the last character, find the last dot.
   size_t last_dot = view.rfind('.');
-  if (last_dot != std::string_view::npos) {
+  if (last_dot != std::string_view::npos) [[likely]] {
     // We have at least one dot.
     view = view.substr(last_dot + 1);
   }
   /** Optimization opportunity: we have basically identified the last number of
      the ipv4 if we return true here. We might as well parse it and have at
      least one number parsed when we get to parse_ipv4. */
-  if (std::all_of(view.begin(), view.end(), ada::checkers::is_digit)) {
+  if (std::ranges::all_of(view, ada::checkers::is_digit)) {
     return true;
   }
   // It could be hex (0x), but not if there is a single character.
-  if (view.size() == 1) {
-    return false;
-  }
   // It must start with 0x.
-  if (!view.starts_with("0x")) {
+  if (view.size() == 1 || !view.starts_with("0x")) {
     return false;
   }
   // We must allow "0x".
   if (view.size() == 2) {
     return true;
   }
+
+  view.remove_prefix(2);
   // We have 0x followed by some characters, we need to check that they are
   // hexadecimals.
-  return std::all_of(view.begin() + 2, view.end(),
-                     ada::unicode::is_lowercase_hex);
+  return std::ranges::all_of(view, ada::unicode::is_lowercase_hex);
 }
 
 // for use with path_signature, we include all characters that need percent
