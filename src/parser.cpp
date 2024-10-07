@@ -36,7 +36,7 @@ result_type parse_url_impl(std::string_view user_input,
 
   // We refuse to parse URL strings that exceed 4GB. Such strings are almost
   // surely the result of a bug or are otherwise a security concern.
-  if (user_input.size() > std::numeric_limits<uint32_t>::max()) {
+  if (user_input.size() > std::numeric_limits<uint32_t>::max()) [[unlikely]] {
     url.is_valid = false;
   }
   // Going forward, user_input.size() is in [0,
@@ -67,20 +67,19 @@ result_type parse_url_impl(std::string_view user_input,
     url.reserve(reserve_capacity);
   }
   std::string tmp_buffer;
-  std::string_view internal_input;
-  if (unicode::has_tabs_or_newline(user_input)) {
+  std::string_view url_data;
+  if (unicode::has_tabs_or_newline(user_input)) [[unlikely]] {
     tmp_buffer = user_input;
     // Optimization opportunity: Instead of copying and then pruning, we could
     // just directly build the string from user_input.
     helpers::remove_ascii_tab_or_newline(tmp_buffer);
-    internal_input = tmp_buffer;
-  } else {
-    internal_input = user_input;
+    url_data = tmp_buffer;
+  } else [[likely]] {
+    url_data = user_input;
   }
 
   // Leading and trailing control characters are uncommon and easy to deal with
   // (no performance concern).
-  std::string_view url_data = internal_input;
   helpers::trim_c0_whitespace(url_data);
 
   // Optimization opportunity. Most websites do not have fragment.
