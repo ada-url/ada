@@ -126,124 +126,123 @@ $(function(){initNavTree('d4/dd6/checkers_8cpp_source.html','../../'); initResiz
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>  <span class="comment">// with &#39;x&#39; or a lowercase hex character.</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>  <span class="comment">// Most of the time, this will be false so this simple check will save a lot</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>  <span class="comment">// of effort.</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>  <span class="keywordtype">char</span> last_char = view.back();</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  <span class="comment">// If the address ends with a dot, we need to prune it (special case).</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>  <span class="keywordflow">if</span> (last_char == <span class="charliteral">&#39;.&#39;</span>) {</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    view.remove_suffix(1);</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="keywordflow">if</span> (view.empty()) {</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    }</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    last_char = view.back();</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  }</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  <span class="keywordtype">bool</span> possible_ipv4 = (last_char &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; last_char &lt;= <span class="charliteral">&#39;9&#39;</span>) ||</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>                       (last_char &gt;= <span class="charliteral">&#39;a&#39;</span> &amp;&amp; last_char &lt;= <span class="charliteral">&#39;f&#39;</span>) ||</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>                       last_char == <span class="charliteral">&#39;x&#39;</span>;</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="keywordflow">if</span> (!possible_ipv4) {</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  }</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="comment">// From the last character, find the last dot.</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="keywordtype">size_t</span> last_dot = view.rfind(<span class="charliteral">&#39;.&#39;</span>);</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <span class="keywordflow">if</span> (last_dot != std::string_view::npos) {</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="comment">// We have at least one dot.</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    view = view.substr(last_dot + 1);</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  }</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keywordflow">if</span> (std::all_of(view.begin(), view.end(), <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">ada::checkers::is_digit</a>)) {</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  }</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="comment">// It could be hex (0x), but not if there is a single character.</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="keywordflow">if</span> (view.size() == 1) {</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  }</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="comment">// It must start with 0x.</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="keywordflow">if</span> (!view.starts_with(<span class="stringliteral">&quot;0x&quot;</span>)) {</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  }</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="comment">// We must allow &quot;0x&quot;.</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keywordflow">if</span> (view.size() == 2) {</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  }</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="comment">// We have 0x followed by some characters, we need to check that they are</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="comment">// hexadecimals.</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keywordflow">return</span> std::all_of(view.begin() + 2, view.end(),</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>                     ada::unicode::is_lowercase_hex);</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// for use with path_signature, we include all characters that need percent</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">// encoding.</span></div>
-<div class="foldopen" id="foldopen00061" data-start="{" data-end="};">
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">   61</a></span><span class="keyword">static</span> <span class="keyword">constexpr</span> std::array&lt;uint8_t, 256&gt; <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a> =</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    []() <span class="keyword">consteval</span> {</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      std::array&lt;uint8_t, 256&gt; <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>{};</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; 256; i++) {</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keywordflow">if</span> (i &lt;= 0x20 || i == 0x22 || i == 0x23 || i == 0x3c || i == 0x3e ||</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            i == 0x3f || i == 0x60 || i == 0x7b || i == 0x7d || i &gt; 0x7e) {</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 1;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (i == 0x25) {</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 8;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (i == 0x2e) {</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 4;</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (i == 0x5c) {</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 2;</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 0;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        }</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>      }</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    }();</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>  <span class="comment">// If the address ends with a dot, we need to prune it (special case).</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  <span class="keywordflow">if</span> (view.ends_with(<span class="charliteral">&#39;.&#39;</span>)) {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    view.remove_suffix(1);</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keywordflow">if</span> (view.empty()) {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    }</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  }</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <span class="keywordtype">char</span> last_char = view.back();</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  <span class="keywordtype">bool</span> possible_ipv4 = (last_char &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; last_char &lt;= <span class="charliteral">&#39;9&#39;</span>) ||</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>                       (last_char &gt;= <span class="charliteral">&#39;a&#39;</span> &amp;&amp; last_char &lt;= <span class="charliteral">&#39;f&#39;</span>) ||</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>                       last_char == <span class="charliteral">&#39;x&#39;</span>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <span class="keywordflow">if</span> (!possible_ipv4) {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  }</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <span class="comment">// From the last character, find the last dot.</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="keywordtype">size_t</span> last_dot = view.rfind(<span class="charliteral">&#39;.&#39;</span>);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="keywordflow">if</span> (last_dot != std::string_view::npos) {</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="comment">// We have at least one dot.</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    view = view.substr(last_dot + 1);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  }</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keywordflow">if</span> (std::ranges::all_of(view, <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">ada::checkers::is_digit</a>)) {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  }</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="comment">// It could be hex (0x), but not if there is a single character.</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keywordflow">if</span> (view.size() == 1) {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="comment">// It must start with 0x.</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keywordflow">if</span> (!view.starts_with(<span class="stringliteral">&quot;0x&quot;</span>)) {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  }</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="comment">// We must allow &quot;0x&quot;.</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keywordflow">if</span> (view.size() == 2) {</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  }</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="comment">// We have 0x followed by some characters, we need to check that they are</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="comment">// hexadecimals.</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordflow">return</span> std::all_of(view.begin() + 2, view.end(),</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>                     ada::unicode::is_lowercase_hex);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">// for use with path_signature, we include all characters that need percent</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// encoding.</span></div>
+<div class="foldopen" id="foldopen00060" data-start="{" data-end="};">
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">   60</a></span><span class="keyword">static</span> <span class="keyword">constexpr</span> std::array&lt;uint8_t, 256&gt; <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a> =</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    []() <span class="keyword">consteval</span> {</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>      std::array&lt;uint8_t, 256&gt; <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>{};</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; 256; i++) {</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keywordflow">if</span> (i &lt;= 0x20 || i == 0x22 || i == 0x23 || i == 0x3c || i == 0x3e ||</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            i == 0x3f || i == 0x60 || i == 0x7b || i == 0x7d || i &gt; 0x7e) {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 1;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (i == 0x25) {</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 8;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (i == 0x2e) {</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 4;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (i == 0x5c) {</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 2;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>          <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>[i] = 0;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        }</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>      }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>      <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    }();</div>
 </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keyword">constexpr</span> uint8_t path_signature(</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    std::string_view input) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="comment">// The path percent-encode set is the query percent-encode set and U+003F (?),</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="comment">// U+0060 (`), U+007B ({), and U+007D (}). The query percent-encode set is the</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="comment">// C0 control percent-encode set and U+0020 SPACE, U+0022 (&quot;), U+0023 (#),</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="comment">// U+003C (&lt;), and U+003E (&gt;). The C0 control percent-encode set are the C0</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="comment">// controls and all code points greater than U+007E (~).</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keywordtype">size_t</span> i = 0;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  uint8_t accumulator{};</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="keywordflow">for</span> (; i + 7 &lt; input.size(); i += 8) {</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    accumulator |= uint8_t(<a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i])] |</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 1])] |</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 2])] |</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 3])] |</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 4])] |</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 5])] |</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 6])] |</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 7])]);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  }</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  <span class="keywordflow">for</span> (; i &lt; input.size(); i++) {</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    accumulator |= uint8_t(<a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i])]);</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  }</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <span class="keywordflow">return</span> accumulator;</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>}</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> verify_dns_length(</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    std::string_view input) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordflow">if</span> (input.back() == <span class="charliteral">&#39;.&#39;</span>) {</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">if</span> (input.size() &gt; 254) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (input.size() &gt; 253)</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keywordtype">size_t</span> start = 0;</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  <span class="keywordflow">while</span> (start &lt; input.size()) {</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keyword">auto</span> dot_location = input.find(<span class="charliteral">&#39;.&#39;</span>, start);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="comment">// If not found, it&#39;s likely the end of the domain</span></div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordflow">if</span> (dot_location == std::string_view::npos) dot_location = input.size();</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="keyword">auto</span> label_size = dot_location - start;</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keywordflow">if</span> (label_size &gt; 63 || label_size == 0) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    start = dot_location + 1;</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  }</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>}</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>}  <span class="comment">// namespace ada::checkers</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keyword">constexpr</span> uint8_t path_signature(</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    std::string_view input) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <span class="comment">// The path percent-encode set is the query percent-encode set and U+003F (?),</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="comment">// U+0060 (`), U+007B ({), and U+007D (}). The query percent-encode set is the</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="comment">// C0 control percent-encode set and U+0020 SPACE, U+0022 (&quot;), U+0023 (#),</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="comment">// U+003C (&lt;), and U+003E (&gt;). The C0 control percent-encode set are the C0</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="comment">// controls and all code points greater than U+007E (~).</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="keywordtype">size_t</span> i = 0;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  uint8_t accumulator{};</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keywordflow">for</span> (; i + 7 &lt; input.size(); i += 8) {</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    accumulator |= uint8_t(<a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i])] |</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 1])] |</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 2])] |</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 3])] |</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 4])] |</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 5])] |</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 6])] |</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                           <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i + 7])]);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  }</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  <span class="keywordflow">for</span> (; i &lt; input.size(); i++) {</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    accumulator |= uint8_t(<a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">path_signature_table</a>[uint8_t(input[i])]);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  }</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <span class="keywordflow">return</span> accumulator;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>}</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> verify_dns_length(</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    std::string_view input) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <span class="keywordflow">if</span> (input.back() == <span class="charliteral">&#39;.&#39;</span>) {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordflow">if</span> (input.size() &gt; 254) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (input.size() &gt; 253)</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  <span class="keywordtype">size_t</span> start = 0;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keywordflow">while</span> (start &lt; input.size()) {</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keyword">auto</span> dot_location = input.find(<span class="charliteral">&#39;.&#39;</span>, start);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="comment">// If not found, it&#39;s likely the end of the domain</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordflow">if</span> (dot_location == std::string_view::npos) dot_location = input.size();</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keyword">auto</span> label_size = dot_location - start;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="keywordflow">if</span> (label_size &gt; 63 || label_size == 0) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    start = dot_location + 1;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  }</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>}</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>}  <span class="comment">// namespace ada::checkers</span></div>
 <div class="ttc" id="acheckers_8h_html"><div class="ttname"><a href="../../d4/dec/checkers_8h.html">checkers.h</a></div><div class="ttdoc">Declarations for URL specific checkers used within Ada.</div></div>
 <div class="ttc" id="acommon__defs_8h_html_a07d379d8d79da994acde714818eaefbe"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#a07d379d8d79da994acde714818eaefbe">ada_constexpr</a></div><div class="ttdeci">#define ada_constexpr</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d19/common__defs_8h_source.html#l00185">common_defs.h:185</a></div></div>
 <div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d19/common__defs_8h_source.html#l00084">common_defs.h:84</a></div></div>
 <div class="ttc" id="anamespaceada_1_1checkers_html"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html">ada::checkers</a></div><div class="ttdoc">Includes the definitions for validation functions.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d46/checkers-inl_8h_source.html#l00011">checkers-inl.h:11</a></div></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html_a73198c595770108974913b10664004b3"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">ada::checkers::path_signature_table</a></div><div class="ttdeci">static constexpr std::array&lt; uint8_t, 256 &gt; path_signature_table</div><div class="ttdef"><b>Definition</b> <a href="#l00061">checkers.cpp:61</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_a73198c595770108974913b10664004b3"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3">ada::checkers::path_signature_table</a></div><div class="ttdeci">static constexpr std::array&lt; uint8_t, 256 &gt; path_signature_table</div><div class="ttdef"><b>Definition</b> <a href="#l00060">checkers.cpp:60</a></div></div>
 <div class="ttc" id="anamespaceada_1_1checkers_html_ad5d849fea825255d7156a2d0749db7b6"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">ada::checkers::is_digit</a></div><div class="ttdeci">constexpr bool is_digit(char x) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d46/checkers-inl_8h_source.html#l00033">checkers-inl.h:33</a></div></div>
 <div class="ttc" id="anamespaceada_html_ae493e1ddb3e9a7bc3fd4f8935cd67b3b"><div class="ttname"><a href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a></div><div class="ttdeci">tl::expected&lt; result_type, ada::errors &gt; result</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d6b/implementation_8h_source.html#l00023">implementation.h:23</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

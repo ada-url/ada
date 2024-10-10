@@ -120,22 +120,21 @@ $(function(){initNavTree('d7/d2e/serializers_8h_source.html','../../'); initResi
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d19/common__defs_8h.html">ada/common_defs.h</a>&quot;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;array&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d9/dea/namespaceada_1_1serializers.html">ada::serializers</a> {</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4">find_longest_sequence_of_ipv6_pieces</a>(</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">const</span> std::array&lt;uint16_t, 8&gt;&amp; address, <span class="keywordtype">size_t</span>&amp; compress,</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keywordtype">size_t</span>&amp; compress_length) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>std::string <a class="code hl_function" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ipv6</a>(<span class="keyword">const</span> std::array&lt;uint16_t, 8&gt;&amp; address) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>std::string <a class="code hl_function" href="../../d9/dea/namespaceada_1_1serializers.html#a86d16b1cbe5907c9e67788fa9d8fa960">ipv4</a>(uint64_t address) <span class="keyword">noexcept</span>;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}  <span class="comment">// namespace ada::serializers</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_SERIALIZERS_H</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d9/dea/namespaceada_1_1serializers.html">ada::serializers</a> {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d9/dea/namespaceada_1_1serializers.html#a3807c277d4c9ad2c8f2fa252e790edf4">find_longest_sequence_of_ipv6_pieces</a>(</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">const</span> std::array&lt;uint16_t, 8&gt;&amp; address, <span class="keywordtype">size_t</span>&amp; compress,</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordtype">size_t</span>&amp; compress_length) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>std::string <a class="code hl_function" href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ipv6</a>(<span class="keyword">const</span> std::array&lt;uint16_t, 8&gt;&amp; address) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>std::string <a class="code hl_function" href="../../d9/dea/namespaceada_1_1serializers.html#a86d16b1cbe5907c9e67788fa9d8fa960">ipv4</a>(uint64_t address) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}  <span class="comment">// namespace ada::serializers</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_SERIALIZERS_H</span></div>
 <div class="ttc" id="acommon__defs_8h_html"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html">common_defs.h</a></div><div class="ttdoc">Common definitions for cross-platform compiler support.</div></div>
 <div class="ttc" id="anamespaceada_1_1serializers_html"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html">ada::serializers</a></div><div class="ttdoc">Includes the definitions for URL serializers.</div></div>
 <div class="ttc" id="anamespaceada_1_1serializers_html_a18d92c8904f03bf914c9ff5f943194e4"><div class="ttname"><a href="../../d9/dea/namespaceada_1_1serializers.html#a18d92c8904f03bf914c9ff5f943194e4">ada::serializers::ipv6</a></div><div class="ttdeci">std::string ipv6(const std::array&lt; uint16_t, 8 &gt; &amp;address) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../da/d84/serializers_8cpp_source.html#l00026">serializers.cpp:26</a></div></div>
