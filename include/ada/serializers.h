@@ -8,7 +8,6 @@
 #include "ada/common_defs.h"
 
 #include <array>
-#include <optional>
 #include <string>
 
 /**

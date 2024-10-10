@@ -12,6 +12,10 @@
 #include <string_view>
 #include <optional>
 
+#if ADA_DEVELOPMENT_CHECKS
+#include <iostream>
+#endif  // ADA_DEVELOPMENT_CHECKS
+
 /**
  * These functions are not part of our public API and may
  * change at any time.
@@ -128,7 +132,7 @@ ada_really_inline void resize(std::string_view& input, size_t pos) noexcept;
  * and whether a colon was found outside brackets. Used by the host parser.
  */
 ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
-    const bool is_special, std::string_view& view) noexcept;
+    bool is_special, std::string_view& view) noexcept;
 
 /**
  * @private

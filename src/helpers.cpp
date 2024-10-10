@@ -96,13 +96,11 @@ ada_really_inline std::optional<std::string_view> prune_hash(
 
 ada_really_inline bool shorten_path(std::string& path,
                                     ada::scheme::type type) noexcept {
-  size_t first_delimiter = path.find_first_of('/', 1);
-
   // Let path be url's path.
   // If url's scheme is "file", path's size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
   if (type == ada::scheme::type::FILE &&
-      first_delimiter == std::string_view::npos && !path.empty()) {
+      path.find('/', 1) == std::string_view::npos && !path.empty()) {
     if (checkers::is_normalized_windows_drive_letter(
             helpers::substring(path, 1))) {
       return false;
@@ -121,13 +119,11 @@ ada_really_inline bool shorten_path(std::string& path,
 
 ada_really_inline bool shorten_path(std::string_view& path,
                                     ada::scheme::type type) noexcept {
-  size_t first_delimiter = path.find_first_of('/', 1);
-
   // Let path be url's path.
   // If url's scheme is "file", path's size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
   if (type == ada::scheme::type::FILE &&
-      first_delimiter == std::string_view::npos && !path.empty()) {
+      path.find('/', 1) == std::string_view::npos && !path.empty()) {
     if (checkers::is_normalized_windows_drive_letter(
             helpers::substring(path, 1))) {
       return false;
@@ -150,11 +146,7 @@ ada_really_inline void remove_ascii_tab_or_newline(
     std::string& input) noexcept {
   // if this ever becomes a performance issue, we could use an approach similar
   // to has_tabs_or_newline
-  input.erase(std::remove_if(input.begin(), input.end(),
-                             [](char c) {
-                               return ada::unicode::is_ascii_tab_or_newline(c);
-                             }),
-              input.end());
+  std::erase_if(input, ada::unicode::is_ascii_tab_or_newline);
 }
 
 ada_really_inline constexpr std::string_view substring(std::string_view input,

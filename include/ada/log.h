@@ -7,11 +7,14 @@
 #define ADA_LOG_H
 #include "ada/common_defs.h"
 
-#include <iostream>
 // To enable logging, set ADA_LOGGING to 1:
 #ifndef ADA_LOGGING
 #define ADA_LOGGING 0
 #endif
+
+#if ADA_LOGGING
+#include <iostream>
+#endif  // ADA_LOGGING
 
 namespace ada {
 
