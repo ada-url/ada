@@ -6,6 +6,10 @@
 #include <cstring>
 #include <sstream>
 
+#if ADA_NEON
+#include <arm_neon.h>
+#endif  // ADA_NEON
+
 namespace ada::helpers {
 
 template <typename out_iter>
@@ -741,6 +745,38 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special =
       }
       return result;
     }();
+#if ADA_NEON
+ada_really_inline size_t
+find_authority_delimiter_special(std::string_view view) noexcept {
+  const auto* data = reinterpret_cast<const uint8_t*>(view.data());
+  size_t length = view.size();
+  size_t i = 0;
+  // Prepare NEON register
+  uint8x16_t lookup =
+      ada_make_uint8x16_t(0x40, 0x40, 0x2f, 0x3f, 0x40, 0x5c, 0x40, 0x40, 0x40,
+                          0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40);
+
+  // SIMD processing for 16-byte chunks
+  for (; i + 16 <= length; i += 16) {
+    // Here we can do (x == '@' || x == '/' || x == '?') which is 5
+    // instructions. Or we can do lookup(x>>4) == x which is 3 instructions.
+    uint8x16_t chunk = vld1q_u8(data + i);
+    uint8x16_t result = vqtbl1q_u8(lookup, vshrq_n_u8(chunk, 4));
+    uint8x16_t match = vceqq_u8(result, chunk);
+    uint8x8_t narrow_match = vshrn_n_u16(vreinterpretq_u16_u8(match), 4);
+    uint64_t nibblemask = vget_lane_u64(vreinterpret_u64_u8(narrow_match), 0);
+    if (nibblemask != 0) {
+      return i + (std::countr_zero(nibblemask) >> 2);
+    }
+  }
+  for (auto pos = view.begin(); pos != view.end(); ++pos) {
+    if (authority_delimiter_special[(uint8_t)*pos]) {
+      return pos - view.begin();
+    }
+  }
+  return size_t(view.size());
+}
+#else
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
@@ -753,6 +789,7 @@ find_authority_delimiter_special(std::string_view view) noexcept {
   }
   return size_t(view.size());
 }
+#endif
 
 // @ / ?
 static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
@@ -762,6 +799,41 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   }
   return result;
 }();
+#if ADA_NEON
+ada_really_inline size_t
+find_authority_delimiter(std::string_view view) noexcept {
+  const auto* data = reinterpret_cast<const uint8_t*>(view.data());
+  size_t length = view.size();
+  size_t i = 0;
+  // Prepare NEON register
+  uint8x16_t lookup =
+      ada_make_uint8x16_t(0x40, 0x40, 0x2f, 0x3f, 0x40, 0x40, 0x40, 0x40, 0x40,
+                          0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40);
+
+  // SIMD processing for 16-byte chunks
+  for (; i + 16 <= length; i += 16) {
+    // Here we can do (x == '@' || x == '/' || x == '?') which is 5
+    // instructions. Or we can do lookup(x>>4) == x which is 3 instructions.
+    uint8x16_t chunk = vld1q_u8(data + i);
+    uint8x16_t result = vqtbl1q_u8(lookup, vshrq_n_u8(chunk, 4));
+    uint8x16_t match = vceqq_u8(result, chunk);
+    uint8x8_t narrow_match = vshrn_n_u16(vreinterpretq_u16_u8(match), 4);
+    uint64_t nibblemask = vget_lane_u64(vreinterpret_u64_u8(narrow_match), 0);
+    if (nibblemask != 0) {
+      return i + (std::countr_zero(nibblemask) >> 2);
+    }
+  }
+
+  // Handle remaining bytes
+  for (; i < length; ++i) {
+    if (authority_delimiter[data[i]]) {
+      return i;
+    }
+  }
+
+  return length;
+}
+#else
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
@@ -774,6 +846,7 @@ find_authority_delimiter(std::string_view view) noexcept {
   }
   return size_t(view.size());
 }
+#endif
 
 }  // namespace ada::helpers
 
