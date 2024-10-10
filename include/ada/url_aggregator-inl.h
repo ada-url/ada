@@ -37,6 +37,7 @@ inline void url_aggregator::update_base_authority(
   if (input_starts_with_dash) {
     input.remove_prefix(2);
     diff += 2;  // add "//"
+    has_authority = true;
     buffer.insert(components.protocol_end, "//");
     components.username_end += 2;
   }
@@ -274,7 +275,7 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
     delete_dash_dot();
   }
 
-  if (begins_with_dashdash && !has_opaque_path && !has_authority() &&
+  if (begins_with_dashdash && !has_opaque_path && !has_authority &&
       !has_dash_dot()) {
     // If url's host is null, url does not have an opaque path, url's path's
     // size is greater than 1, then append U+002F (/) followed by U+002E (.) to
@@ -672,10 +673,9 @@ constexpr void url_aggregator::clear_pathname() {
 constexpr void url_aggregator::clear_hostname() {
   ada_log("url_aggregator::clear_hostname");
   ADA_ASSERT_TRUE(validate());
-  if (!has_authority()) {
+  if (!has_authority) {
     return;
   }
-  ADA_ASSERT_TRUE(has_authority());
 
   uint32_t hostname_length = components.host_end - components.host_start;
   uint32_t start = components.host_start;
@@ -699,7 +699,7 @@ constexpr void url_aggregator::clear_hostname() {
                    "hostname should have been cleared on buffer=" + buffer +
                        " with " + components.to_string() + "\n" + to_diagram());
 #endif
-  ADA_ASSERT_TRUE(has_authority());
+  ADA_ASSERT_TRUE(has_authority);
   ADA_ASSERT_EQUAL(has_empty_hostname(), true,
                    "hostname should have been cleared on buffer=" + buffer +
                        " with " + components.to_string() + "\n" + to_diagram());
@@ -732,28 +732,19 @@ url_aggregator::get_components() const noexcept {
   return components;
 }
 
-[[nodiscard]] constexpr bool ada::url_aggregator::has_authority()
-    const noexcept {
-  ada_log("url_aggregator::has_authority");
-  // Performance: instead of doing this potentially expensive check, we could
-  // have a boolean in the struct.
-  return components.protocol_end + 2 <= components.host_start &&
-         helpers::substring(buffer, components.protocol_end,
-                            components.protocol_end + 2) == "//";
-}
-
 inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
   ada_log("url_aggregator::add_authority_slashes_if_needed");
   ADA_ASSERT_TRUE(validate());
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter
   // to insert
   // `//` initially to the buffer, since it depends on the hostname existence.
-  if (has_authority()) {
+  if (has_authority) {
     return;
   }
   // Performance: the common case is components.protocol_end == buffer.size()
   // Optimization opportunity: in many cases, the "//" is part of the input and
   // the insert could be fused with another insert.
+  has_authority = true;
   buffer.insert(components.protocol_end, "//");
   components.username_end += 2;
   components.host_start += 2;
@@ -803,7 +794,7 @@ constexpr bool url_aggregator::has_empty_hostname() const noexcept {
 }
 
 constexpr bool url_aggregator::has_hostname() const noexcept {
-  return has_authority();
+  return has_authority;
 }
 
 constexpr bool url_aggregator::has_port() const noexcept {
@@ -1085,6 +1076,13 @@ constexpr void url_aggregator::set_protocol_as_file() {
               to_diagram());
       return false;
     }
+  }
+
+  // Check for has_authority
+  bool expect_authority = components.host_start == components.protocol_end + 2;
+  if (expect_authority != has_authority) {
+    ada_log("has_authority value is wrong \n", to_diagram());
+    return false;
   }
 
   return true;
