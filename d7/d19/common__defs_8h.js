@@ -6,7 +6,6 @@ var common__defs_8h =
     [ "ADA_ASSUME", "d7/d19/common__defs_8h.html#a2b24d97ea59794050c906d68303d2737", null ],
     [ "ADA_ATTRIBUTE_NOINLINE", "d7/d19/common__defs_8h.html#a54667c5b6f1fc49a96ba9e0d20981a1e", null ],
     [ "ADA_BEGIN_DEBUG_BLOCK", "d7/d19/common__defs_8h.html#a31a6d634911ea9b624098074699d5817", null ],
-    [ "ada_constexpr", "d7/d19/common__defs_8h.html#a07d379d8d79da994acde714818eaefbe", null ],
     [ "ADA_DEBUG_BLOCK", "d7/d19/common__defs_8h.html#af5e7eda996a38344a54f49fa1634aa1a", null ],
     [ "ADA_DEVELOPMENT_CHECKS", "d7/d19/common__defs_8h.html#af315197608ce36e3dc0442efc7816eeb", null ],
     [ "ADA_DISABLE_DEPRECATED_WARNING", "d7/d19/common__defs_8h.html#af9708bb8e27a87b07d50a75693aee837", null ],

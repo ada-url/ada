@@ -154,8 +154,6 @@ var NAVTREEINDEX0 =
 "d4/dec/checkers_8h.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5":[9,0,2,0,5,2],
 "d4/dec/checkers_8h.html#ad5d849fea825255d7156a2d0749db7b6":[9,0,2,0,5,3],
 "d4/dec/checkers_8h_source.html":[9,0,2,0,5],
-"d5/d25/url-getters_8cpp.html":[9,0,3,9],
-"d5/d25/url-getters_8cpp_source.html":[9,0,3,9],
 "d5/d36/parser_8h.html":[9,0,2,0,10],
 "d5/d36/parser_8h.html#a0abcc72d74b95df866bb5741a6802e40":[9,0,2,0,10,1],
 "d5/d36/parser_8h.html#a2b0835f0dceec1161ca5e13bfffdf598":[9,0,2,0,10,0],
@@ -249,5 +247,7 @@ var NAVTREEINDEX0 =
 "d5/ddb/namespaceada_1_1idna.html#ad4ec90e439aa4453a705d0e4e26d493d":[7,0,0,3,53],
 "d5/ddb/namespaceada_1_1idna.html#ae3c6519de00a8711290d24453721b0e7":[7,0,0,3,50],
 "d5/ddb/namespaceada_1_1idna.html#ae3fa7abe424f63e3595039e90e3c316a":[7,0,0,3,32],
-"d5/ddb/namespaceada_1_1idna.html#af593f5293a356a9fc9bb3878a96b3eae":[7,0,0,3,33]
+"d5/ddb/namespaceada_1_1idna.html#af593f5293a356a9fc9bb3878a96b3eae":[7,0,0,3,33],
+"d5/df0/ada__c_8c.html":[9,0,1,0],
+"d5/df0/ada__c_8c.html#a91ce7c16e9840492202299da2b451e60":[9,0,1,0,0]
 };
