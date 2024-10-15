@@ -147,7 +147,7 @@ ada_really_inline constexpr bool is_ascii_tab_or_newline(char c) noexcept;
  * @details A double-dot path segment must be ".." or an ASCII case-insensitive
  * match for ".%2e", "%2e.", or "%2e%2e".
  */
-ada_really_inline ada_constexpr bool is_double_dot_path_segment(
+ada_really_inline constexpr bool is_double_dot_path_segment(
     std::string_view input) noexcept;
 
 /**

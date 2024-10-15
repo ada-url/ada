@@ -4,7 +4,7 @@
 
 namespace ada::checkers {
 
-ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept {
+ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept {
   // The string is not empty and does not contain upper case ASCII characters.
   //
   // Optimization. To be considered as a possible ipv4, the string must end
