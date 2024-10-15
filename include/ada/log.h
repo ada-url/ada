@@ -19,56 +19,19 @@
 namespace ada {
 
 /**
- * Private function used for logging messages.
+ * Log a message. If you want to have no overhead when logging is disabled, use
+ * the ada_log macro.
  * @private
  */
-template <typename T>
-ada_really_inline void inner_log([[maybe_unused]] T t) {
+template <typename... Args>
+constexpr ada_really_inline void log([[maybe_unused]] Args... args) {
 #if ADA_LOGGING
-  std::cout << t << std::endl;
-#endif
-}
-
-/**
- * Private function used for logging messages.
- * @private
- */
-template <typename T, typename... Args>
-ada_really_inline void inner_log([[maybe_unused]] T t,
-                                 [[maybe_unused]] Args... args) {
-#if ADA_LOGGING
-  std::cout << t;
-  inner_log(args...);
-#endif
-}
-
-/**
- * Log a message.
- * @private
- */
-template <typename T, typename... Args>
-ada_really_inline void log([[maybe_unused]] T t,
-                           [[maybe_unused]] Args... args) {
-#if ADA_LOGGING
-  std::cout << "ADA_LOG: " << t;
-  inner_log(args...);
-#endif
-}
-
-/**
- * Log a message.
- * @private
- */
-template <typename T>
-ada_really_inline void log([[maybe_unused]] T t) {
-#if ADA_LOGGING
-  std::cout << "ADA_LOG: " << t << std::endl;
-#endif
+  ((std::cout << "ADA_LOG: ") << ... << args) << std::endl;
+#endif  // ADA_LOGGING
 }
 }  // namespace ada
 
 #if ADA_LOGGING
-
 #ifndef ada_log
 #define ada_log(...)       \
   do {                     \
