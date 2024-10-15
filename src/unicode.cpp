@@ -284,7 +284,7 @@ ada_really_inline constexpr bool is_ascii_tab_or_newline(
 constexpr std::string_view table_is_double_dot_path_segment[] = {
     "..", "%2e.", ".%2e", "%2e%2e"};
 
-ada_really_inline ada_constexpr bool is_double_dot_path_segment(
+ada_really_inline constexpr bool is_double_dot_path_segment(
     std::string_view input) noexcept {
   // This will catch most cases:
   // The length must be 2,4 or 6.

@@ -85,7 +85,7 @@ inline constexpr bool is_normalized_windows_drive_letter(
  * does not contain uppercase ASCII characters (the input should have been
  * lowered cased before calling this function) and is not empty.
  */
-ada_really_inline ada_constexpr bool is_ipv4(std::string_view view) noexcept;
+ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept;
 
 /**
  * @private
