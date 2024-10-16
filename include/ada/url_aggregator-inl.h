@@ -1110,7 +1110,8 @@ inline std::ostream &operator<<(std::ostream &out,
   return out << u.to_string();
 }
 
-void url_aggregator::set_host_to_base_host(const std::string_view input) noexcept {
+void url_aggregator::set_host_to_base_host(
+    const std::string_view input) noexcept {
   ada_log("url_aggregator::set_host_to_base_host ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -1128,7 +1129,7 @@ void url_aggregator::set_host_to_base_host(const std::string_view input) noexcep
   }
   update_base_hostname(input);
   ADA_ASSERT_TRUE(validate());
-  return ;
+  return;
 }
 }  // namespace ada
 
