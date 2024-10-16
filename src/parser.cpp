@@ -427,9 +427,7 @@ result_type parse_url_impl(std::string_view user_input,
           } else {
             url.update_base_authority(base_url->get_href(),
                                       base_url->get_components());
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
-            url.set_hostname(base_url->get_hostname());
+            url.update_host_to_base_host(base_url->get_hostname());
             url.update_base_port(base_url->retrieve_base_port());
             // cloning the base path includes cloning the has_opaque_path flag
             url.has_opaque_path = base_url->has_opaque_path;
@@ -497,9 +495,7 @@ result_type parse_url_impl(std::string_view user_input,
           } else {
             url.update_base_authority(base_url->get_href(),
                                       base_url->get_components());
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
-            url.set_hostname(base_url->get_hostname());
+            url.update_host_to_base_host(base_url->get_hostname());
             url.update_base_port(base_url->retrieve_base_port());
           }
           state = ada::state::PATH;
@@ -736,8 +732,7 @@ result_type parse_url_impl(std::string_view user_input,
             if constexpr (result_type_is_ada_url) {
               url.host = base_url->host;
             } else {
-              // TODO: Optimization opportunity.
-              url.set_host(base_url->get_host());
+              url.update_host_to_base_host(base_url->get_host());
             }
             // If the code point substring from pointer to the end of input does
             // not start with a Windows drive letter and base's path[0] is a
@@ -848,9 +843,7 @@ result_type parse_url_impl(std::string_view user_input,
             url.path = base_url->path;
             url.query = base_url->query;
           } else {
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
-            url.set_hostname(base_url->get_hostname());
+            url.update_host_to_base_host(base_url->get_hostname());
             url.update_base_pathname(base_url->get_pathname());
             url.update_base_search(base_url->get_search());
           }
