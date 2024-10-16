@@ -1245,9 +1245,31 @@ $(function(){initNavTree('d9/d61/url__aggregator-inl_8h_source.html','../../'); 
 <div class="line"><a id="l01110" name="l01110"></a><span class="lineno"> 1110</span>  <span class="keywordflow">return</span> out &lt;&lt; u.<a class="code hl_function" href="../../d8/d3b/structada_1_1url__aggregator.html#a516d5b8a33529dc8b8c95d52abc6e7de">to_string</a>();</div>
 <div class="line"><a id="l01111" name="l01111"></a><span class="lineno"> 1111</span>}</div>
 </div>
-<div class="line"><a id="l01112" name="l01112"></a><span class="lineno"> 1112</span>}  <span class="comment">// namespace ada</span></div>
-<div class="line"><a id="l01113" name="l01113"></a><span class="lineno"> 1113</span> </div>
-<div class="line"><a id="l01114" name="l01114"></a><span class="lineno"> 1114</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_URL_AGGREGATOR_INL_H</span></div>
+<div class="line"><a id="l01112" name="l01112"></a><span class="lineno"> 1112</span> </div>
+<div class="line"><a id="l01113" name="l01113"></a><span class="lineno"> 1113</span><span class="keywordtype">void</span> url_aggregator::update_host_to_base_host(</div>
+<div class="line"><a id="l01114" name="l01114"></a><span class="lineno"> 1114</span>    <span class="keyword">const</span> std::string_view input) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l01115" name="l01115"></a><span class="lineno"> 1115</span>  ada_log(<span class="stringliteral">&quot;url_aggregator::update_host_to_base_host &quot;</span>, input);</div>
+<div class="line"><a id="l01116" name="l01116"></a><span class="lineno"> 1116</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(validate());</div>
+<div class="line"><a id="l01117" name="l01117"></a><span class="lineno"> 1117</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(!helpers::overlaps(input, buffer));</div>
+<div class="line"><a id="l01118" name="l01118"></a><span class="lineno"> 1118</span>  <span class="keywordflow">if</span> (type != <a class="code hl_enumvalue" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::type::FILE</a>) {</div>
+<div class="line"><a id="l01119" name="l01119"></a><span class="lineno"> 1119</span>    <span class="comment">// Let host be the result of host parsing host_view with url is not special.</span></div>
+<div class="line"><a id="l01120" name="l01120"></a><span class="lineno"> 1120</span>    <span class="keywordflow">if</span> (input.empty() &amp;&amp; !is_special()) {</div>
+<div class="line"><a id="l01121" name="l01121"></a><span class="lineno"> 1121</span>      <span class="keywordflow">if</span> (has_hostname()) {</div>
+<div class="line"><a id="l01122" name="l01122"></a><span class="lineno"> 1122</span>        clear_hostname();</div>
+<div class="line"><a id="l01123" name="l01123"></a><span class="lineno"> 1123</span>      } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (has_dash_dot()) {</div>
+<div class="line"><a id="l01124" name="l01124"></a><span class="lineno"> 1124</span>        add_authority_slashes_if_needed();</div>
+<div class="line"><a id="l01125" name="l01125"></a><span class="lineno"> 1125</span>        delete_dash_dot();</div>
+<div class="line"><a id="l01126" name="l01126"></a><span class="lineno"> 1126</span>      }</div>
+<div class="line"><a id="l01127" name="l01127"></a><span class="lineno"> 1127</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l01128" name="l01128"></a><span class="lineno"> 1128</span>    }</div>
+<div class="line"><a id="l01129" name="l01129"></a><span class="lineno"> 1129</span>  }</div>
+<div class="line"><a id="l01130" name="l01130"></a><span class="lineno"> 1130</span>  update_base_hostname(input);</div>
+<div class="line"><a id="l01131" name="l01131"></a><span class="lineno"> 1131</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(validate());</div>
+<div class="line"><a id="l01132" name="l01132"></a><span class="lineno"> 1132</span>  <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l01133" name="l01133"></a><span class="lineno"> 1133</span>}</div>
+<div class="line"><a id="l01134" name="l01134"></a><span class="lineno"> 1134</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l01135" name="l01135"></a><span class="lineno"> 1135</span> </div>
+<div class="line"><a id="l01136" name="l01136"></a><span class="lineno"> 1136</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_URL_AGGREGATOR_INL_H</span></div>
 <div class="ttc" id="acharacter__sets-inl_8h_html"><div class="ttname"><a href="../../da/d69/character__sets-inl_8h.html">character_sets-inl.h</a></div><div class="ttdoc">Definitions of the character sets used by unicode functions.</div></div>
 <div class="ttc" id="acharacter__sets_8h_html"><div class="ttname"><a href="../../d3/d4e/character__sets_8h.html">character_sets.h</a></div><div class="ttdoc">Declaration of the character sets used by unicode functions.</div></div>
 <div class="ttc" id="acheckers-inl_8h_html"><div class="ttname"><a href="../../d4/d46/checkers-inl_8h.html">checkers-inl.h</a></div><div class="ttdoc">Definitions for URL specific checkers used within Ada.</div></div>
