@@ -1110,9 +1110,9 @@ inline std::ostream &operator<<(std::ostream &out,
   return out << u.to_string();
 }
 
-void url_aggregator::set_host_to_base_host(
+void url_aggregator::update_host_to_base_host(
     const std::string_view input) noexcept {
-  ada_log("url_aggregator::set_host_to_base_host ", input);
+  ada_log("url_aggregator::update_host_to_base_host ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (type != ada::scheme::type::FILE) {

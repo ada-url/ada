@@ -313,7 +313,7 @@ struct url_aggregator : url_base {
       std::string_view new_scheme_with_colon) noexcept;
   inline void copy_scheme(const url_aggregator &u) noexcept;
 
-  inline void set_host_to_base_host(const std::string_view input) noexcept;
+  inline void update_host_to_base_host(const std::string_view input) noexcept;
 
 };  // url_aggregator
 
