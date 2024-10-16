@@ -220,6 +220,7 @@ struct url_aggregator : url_base {
 
   std::string buffer{};
   url_components components{};
+  bool has_authority{false};
 
   /**
    * Returns true if neither the search, nor the hash nor the pathname
@@ -302,7 +303,6 @@ struct url_aggregator : url_base {
       std::string_view input);
   ada_really_inline uint32_t replace_and_resize(uint32_t start, uint32_t end,
                                                 std::string_view input);
-  [[nodiscard]] constexpr bool has_authority() const noexcept;
   constexpr void set_protocol_as_file();
   inline void set_scheme(std::string_view new_scheme) noexcept;
   /**
