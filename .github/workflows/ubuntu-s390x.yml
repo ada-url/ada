@@ -29,9 +29,10 @@ jobs:
         name: Test
         id: runcmd
         with:
-          arch: s390x
-          distro: ubuntu_latest
+          arch: none
+          distro: none
           githubToken: ${{ github.token }}
+          base_image: '--platform=linux/s390x s390x/ubuntu:latest'
           install: |
             apt-get update -q -y
             apt-get install -y cmake make g++ git ninja-build

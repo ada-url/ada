@@ -1,4 +1,4 @@
-name: Ubuntu aarch64 (GCC 12)
+name: Ubuntu arm64v8 (GCC 12)
 
 on:
   pull_request:
@@ -29,9 +29,10 @@ jobs:
         name: Build and Test
         id: runcmd
         with:
-          arch: aarch64
+          arch: none
           githubToken: ${{ github.token }}
-          distro: ubuntu22.04
+          distro: none
+          base_image: '--platform=linux/arm64 arm64v8/ubuntu:latest'
           install: |
             apt-get update -q -y
             apt-get install -y cmake make g++-12 ninja-build git gcc-12
