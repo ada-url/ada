@@ -22,9 +22,9 @@ ada::data_url::data_url parse_data_url(std::string_view data_url);
 
 std::string collect_sequence_of_code_points(char c, const std::string& input, size_t& position);
 
-bool isASCIIWhiteSpace(char c);
+bool is_ascii_whitespace(char c);
 
-std::string removeASCIIWhiteSpace(const std::string& input, bool leading, bool trailing);
+std::string remove_ascii_whitespace(std::string input, bool leading, bool trailing);
 
 static constexpr bool is_base64(std::string_view input);
 

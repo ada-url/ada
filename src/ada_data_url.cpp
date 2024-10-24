@@ -33,7 +33,7 @@ ada::data_url::data_url parse_data_url(std::string_view data_url) {
   auto mimetype_length = mimetype.length();
 
   // 6. Strip leading and trailing ASCII whitespace from mimeType.
-  mimetype = removeASCIIWhiteSpace(mimetype, true, true);
+  mimetype = remove_ascii_whitespace(mimetype, true, true);
 
   // 7. If position is past the end of input, then return failure.
   if (position >= input.length()) {
@@ -89,33 +89,43 @@ std::string collect_sequence_of_code_points(char c, const std::string& input, si
     size_t start = position;
 
     if (idx == std::string::npos) {
-        position = reinterpret_cast<size_t>(input.length());
+        position = static_cast<size_t>(input.length());
         return input.substr(start);
     }
 
-    position = reinterpret_cast<size_t>(idx);
+    position = static_cast<size_t>(idx);
     return input.substr(start, position);
 }
 
-std::string removeASCIIWhiteSpace(const std::string& input, bool leading, bool trailing) {
+std::string remove_ascii_whitespace(std::string input, bool leading, bool trailing) {
     size_t lead = 0;
     size_t trail = input.length();
 
     if (leading) {
-        while (lead < input.length() && isASCIIWhiteSpace(input[lead]))
+        while (lead < input.length() && is_ascii_whitespace(input[lead])) {
             lead++;
+        }
+
+        if (lead != 0) {
+            input.erase(lead);
+        }
     }
 
     if (trailing) {
-        while (trail > 0 && isASCIIWhiteSpace(input[trail]))
+        while (trail > 0 && is_ascii_whitespace(input[trail])) {
             trail--;
+        }
+
+        if (trail != input.length()) {
+            input.resize(input.length() - trail);
+        }
     }
 
-    return input.substr(lead, trail);
+    return input;
 }
 
-bool isASCIIWhiteSpace(char c) {
-    return c == '\r' || c == '\n' || c == '\t' || c == '\f';
+bool is_ascii_whitespace(char c) {
+    return c == '\r' || c == '\n' || c == '\t' || c == '\f' || c == ' ';
 }
 
 static constexpr bool is_base64(std::string_view input) {
