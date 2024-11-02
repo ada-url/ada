@@ -28,7 +28,7 @@ jobs:
         include:
           shared: [ON, OFF]
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Prepare
         run: cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -DCMAKE_INSTALL_PREFIX:PATH=destination -B build
       - name: Build
