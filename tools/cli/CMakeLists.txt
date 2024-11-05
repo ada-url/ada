@@ -8,12 +8,21 @@ if(MSVC AND BUILD_SHARED_LIBS)
         "$<TARGET_FILE:ada>"      # <--this is in-file
         "$<TARGET_FILE_DIR:adaparse>")                 # <--this is out-file path
 endif()
-CPMAddPackage("gh:fmtlib/fmt#11.0.2")
-CPMAddPackage(
-  GITHUB_REPOSITORY jarro2783/cxxopts
-  VERSION 3.2.0
-  OPTIONS "CXXOPTS_BUILD_EXAMPLES NO" "CXXOPTS_BUILD_TESTS NO" "CXXOPTS_ENABLE_INSTALL YES"
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 11.0.2
 )
+FetchContent_MakeAvailable(fmt)
+FetchContent_Declare(
+  cxxopts
+  GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
+  GIT_TAG v3.2.0
+)
+set(CXXOPTS_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(CXXOPTS_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(CXXOPTS_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(cxxopts)
 target_link_libraries(adaparse PRIVATE cxxopts::cxxopts fmt::fmt)
 
 if(MSVC OR MINGW)
@@ -21,9 +30,8 @@ if(MSVC OR MINGW)
 endif()
 
 install(
-   TARGETS
-    adaparse
-   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  TARGETS adaparse
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

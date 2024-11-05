@@ -16,7 +16,12 @@ target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
 # Benchdata
-CPMAddPackage("gh:ada-url/url-dataset#9749b92c13e970e70409948fa862461191504ccc")
+FetchContent_Declare(
+  url-dataset
+  GIT_REPOSITORY https://github.com/ada-url/url-dataset.git
+  GIT_TAG        9749b92c13e970e70409948fa862461191504ccc
+)
+FetchContent_MakeAvailable(url-dataset)
 add_executable(benchdata bench.cpp)
 target_link_libraries(benchdata PRIVATE ada)
 target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -94,12 +99,14 @@ if(NOT ICU_FOUND)
 endif(NOT ICU_FOUND)
 
 if(ICU_FOUND)
-    CPMAddPackage(
-      NAME url_whatwg
-      GITHUB_REPOSITORY rmisev/url_whatwg
-      GIT_TAG 72bcabf
-      OPTIONS  "URL_BUILD_TESTS OFF" "URL_USE_LIBS OFF"
+    FetchContent_Declare(
+      url_whatwg
+      GIT_REPOSITORY https://github.com/rmisev/url_whatwg.git
+      GIT_TAG        72bcabf
     )
+    set(URL_BUILD_TESTS OFF CACHE BOOL "")
+    set(URL_USE_LIBS OFF CACHE BOOL "")
+    FetchContent_MakeAvailable(url_whatwg)
     add_library(url_whatwg_lib STATIC "${url_whatwg_SOURCE_DIR}/src/url.cpp"
       "${url_whatwg_SOURCE_DIR}/src/url_idna.cpp"
       "${url_whatwg_SOURCE_DIR}/src/url_ip.cpp"
@@ -109,7 +116,6 @@ if(ICU_FOUND)
       "${url_whatwg_SOURCE_DIR}/src/url.cpp")
     target_include_directories(url_whatwg_lib PUBLIC "${url_whatwg_SOURCE_DIR}/include")
     target_link_libraries(url_whatwg_lib PRIVATE ICU::uc ICU::i18n)
-
 
     target_link_libraries(bench PRIVATE url_whatwg_lib)
     target_link_libraries(benchdata PRIVATE url_whatwg_lib)
@@ -255,13 +261,13 @@ endif(ZURI_FOUND)
 
 if(NOT WIN32)
 # We want the check whether Rust is available before trying to build a crate.
-CPMAddPackage(
-  NAME corrosion
-  GITHUB_REPOSITORY corrosion-rs/corrosion
-  VERSION 0.4.4
-  DOWNLOAD_ONLY ON
-  OPTIONS "Rust_FIND_QUIETLY OFF"
+FetchContent_Declare(
+  corrosion
+  GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+  GIT_TAG        v0.4.4
 )
+set(Rust_FIND_QUIETLY OFF CACHE BOOL "")
+FetchContent_MakeAvailable(corrosion)
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
 endif()
 

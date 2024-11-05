@@ -10,6 +10,7 @@ set(ADA_LIB_SOVERSION "2" CACHE STRING "ada library soversion")
 
 include(GNUInstallDirs)
 
+include(FetchContent)
 include(CTest)
 include(cmake/ada-flags.cmake)
 
@@ -22,38 +23,39 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
 option(ADA_TESTING "Build tests" ${BUILD_TESTING})
 
-# There are cases where when embedding ada as a dependency for other CMake
-# projects as submodules or subdirectories (via FetchContent) can lead to
-# errors due to CPM, so this is here to support disabling all the testing
-# and tooling for ada if one only wishes to use the ada library.
 if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
-  include(cmake/CPM.cmake)
-  # CPM requires git as an implicit dependency
   find_package(Git QUIET)
   # We use googletest in the tests
   if(Git_FOUND AND ADA_TESTING)
-    CPMAddPackage(
-      NAME GTest
-      GITHUB_REPOSITORY google/googletest
-      VERSION 1.15.2
-      OPTIONS  "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
+    FetchContent_Declare(
+      GTest
+      GIT_REPOSITORY https://github.com/google/googletest.git
+      GIT_TAG v1.15.2
     )
+    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(GTest)
   endif()
   # We use simdjson in both the benchmarks and tests
   if(Git_FOUND AND (ADA_TESTING OR ADA_BENCHMARKS))
-    CPMAddPackage("gh:simdjson/simdjson@3.10.1")
+    FetchContent_Declare(
+      simdjson
+      GIT_REPOSITORY https://github.com/simdjson/simdjson.git
+      GIT_TAG v3.10.1
+    )
+    FetchContent_MakeAvailable(simdjson)
   endif()
   # We use Google Benchmark, but it does not build under several 32-bit systems.
   if(Git_FOUND AND ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
-    CPMAddPackage(
-      NAME benchmark
-      GITHUB_REPOSITORY google/benchmark
-      VERSION 1.9.0
-      OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
-              "BENCHMARK_ENABLE_INSTALL OFF"
-              "BENCHMARK_ENABLE_WERROR OFF"
-
+    FetchContent_Declare(
+      benchmark
+      GIT_REPOSITORY https://github.com/google/benchmark.git
+      GIT_TAG v1.9.0
     )
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(benchmark)
   endif()
 
   if (ADA_TESTING AND NOT EMSCRIPTEN)
