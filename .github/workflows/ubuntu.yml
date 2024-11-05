@@ -32,7 +32,7 @@ jobs:
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare
-        run: cmake -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        run: cmake -D ADA_TESTING=ON -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
         env:
           CXX: ${{matrix.cxx}}
       - name: Build

@@ -36,7 +36,7 @@ jobs:
           ./alpine.sh apk add build-base cmake g++ linux-headers git bash icu-dev
       - name: cmake
         run: |
-          ./alpine.sh cmake -DADA_BENCHMARKS=ON -B build_for_alpine
+          ./alpine.sh cmake -D ADA_TESTING=ON -DADA_BENCHMARKS=ON -B build_for_alpine
       - name: build
         run: |
           ./alpine.sh cmake --build build_for_alpine
