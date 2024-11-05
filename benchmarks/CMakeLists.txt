@@ -264,15 +264,14 @@ if(NOT WIN32)
 FetchContent_Declare(
   corrosion
   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-  GIT_TAG        v0.4.4
+  GIT_TAG        v0.5.0
 )
 set(Rust_FIND_QUIETLY OFF CACHE BOOL "")
-FetchContent_MakeAvailable(corrosion)
-include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
 endif()
 
 if(RUST_FOUND)
   message(STATUS "Rust found: " ${Rust_VERSION} )
+  FetchContent_MakeAvailable(corrosion)
   add_subdirectory("${corrosion_SOURCE_DIR}" "${PROJECT_BINARY_DIR}/_deps/corrosion" EXCLUDE_FROM_ALL)
   # Important: we want to build in release mode!
   corrosion_import_crate(MANIFEST_PATH "competitors/servo-url/Cargo.toml" NO_LINKER_OVERRIDE PROFILE release)
