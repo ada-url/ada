@@ -7,7 +7,7 @@ path = "lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-url = "2.5.2"
+url = "2.5.3"
 libc = "0.2"
 
 [profile.release]
