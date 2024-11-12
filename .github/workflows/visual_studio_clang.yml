@@ -33,7 +33,7 @@ jobs:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
     - name: Configure
       run: |
-        cmake -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -T ClangCL -B build
+        cmake -D ADA_TESTING=ON -DADA_DEVELOPMENT_CHECKS="${{matrix.devchecks}}" -G "${{matrix.gen}}" -A ${{matrix.arch}} -T ClangCL -B build
     - name: Build Debug
       run: cmake --build build --config Debug --verbose
     - name: Run Debug tests

@@ -38,6 +38,6 @@ jobs:
             ln -s -f /usr/bin/gcc-12 /usr/bin/gcc
             ln -s -f /usr/bin/g++-12 /usr/bin/g++
           run: |
-            cmake -DCMAKE_CXX_STANDARD=20 -B build
+            cmake -DCMAKE_CXX_STANDARD=20 -D ADA_TESTING=ON -B build
             cmake --build build
             ctest --test-dir build

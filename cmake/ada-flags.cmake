@@ -15,7 +15,7 @@ if(ADA_SANITIZE_UNDEFINED)
   message(STATUS "Undefined sanitizer enabled.")
 endif()
 option(ADA_COVERAGE "Compute coverage" OFF)
-option(ADA_TOOLS "Build cli tools (adaparse)" ON)
+option(ADA_TOOLS "Build cli tools (adaparse)" OFF)
 
 if (ADA_COVERAGE)
     message(STATUS "You want to compute coverage. We assume that you have installed gcovr.")

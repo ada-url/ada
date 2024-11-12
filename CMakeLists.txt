@@ -20,7 +20,7 @@ add_subdirectory(src)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
 
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
-option(ADA_TESTING "Build tests" ${BUILD_TESTING})
+option(ADA_TESTING "Build tests" OFF)
 
 # There are cases where when embedding ada as a dependency for other CMake
 # projects as submodules or subdirectories (via FetchContent) can lead to
