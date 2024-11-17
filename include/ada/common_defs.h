@@ -49,13 +49,6 @@
 #define ada_unused
 #define ada_warn_unused
 
-#ifndef ada_likely
-#define ada_likely(x) x
-#endif
-#ifndef ada_unlikely
-#define ada_unlikely(x) x
-#endif
-
 #define ADA_PUSH_DISABLE_WARNINGS __pragma(warning(push))
 #define ADA_PUSH_DISABLE_ALL_WARNINGS __pragma(warning(push, 0))
 #define ADA_DISABLE_VS_WARNING(WARNING_NUMBER) \
@@ -86,13 +79,6 @@
 
 #define ada_unused __attribute__((unused))
 #define ada_warn_unused __attribute__((warn_unused_result))
-
-#ifndef ada_likely
-#define ada_likely(x) __builtin_expect(!!(x), 1)
-#endif
-#ifndef ada_unlikely
-#define ada_unlikely(x) __builtin_expect(!!(x), 0)
-#endif
 
 #define ADA_PUSH_DISABLE_WARNINGS _Pragma("GCC diagnostic push")
 // gcc doesn't seem to disable all warnings with all and extra, add warnings
