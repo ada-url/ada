@@ -18,10 +18,31 @@
 namespace ada::unicode {
 ada_really_inline size_t percent_encode_index(const std::string_view input,
                                               const uint8_t character_set[]) {
-  return std::distance(
-      input.begin(), std::ranges::find_if(input, [character_set](const char c) {
-        return character_sets::bit_at(character_set, c);
-      }));
+  const char* data = input.data();
+  const size_t size = input.size();
+
+  // Process 8 bytes at a time using unrolled loop
+  size_t i = 0;
+  for (; i + 8 <= size; i += 8) {
+    unsigned char chunk[8];
+    std::memcpy(&chunk, data + i, 8);  // Avoid potential alignment issues
+
+    // Check 8 characters at once
+    for (size_t j = 0; j < 8; j++) {
+      if (character_sets::bit_at(character_set, chunk[j])) {
+        return i + j;
+      }
+    }
+  }
+
+  // Handle remaining bytes
+  for (; i < size; i++) {
+    if (character_sets::bit_at(character_set, data[i])) {
+      return i;
+    }
+  }
+
+  return size;
 }
 }  // namespace ada::unicode
 
