@@ -25,7 +25,7 @@ ada_really_inline size_t percent_encode_index(const std::string_view input,
   size_t i = 0;
   for (; i + 8 <= size; i += 8) {
     unsigned char chunk[8];
-    std::memcpy(&chunk, data + i, 8);  // Avoid potential alignment issues
+    std::memcpy(&chunk, data + i, 8);  // entices compiler to unconditionally process 8 characters
 
     // Check 8 characters at once
     for (size_t j = 0; j < 8; j++) {
