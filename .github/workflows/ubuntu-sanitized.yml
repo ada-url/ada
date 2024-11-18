@@ -33,7 +33,7 @@ jobs:
       - name: Prepare
         run: cmake -D ADA_TESTING=ON -DADA_SANITIZE=ON -DADA_DEVELOPMENT_CHECKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
         env:
-          CXX: g++
+          CXX: g++-12
       - name: Build
         run: cmake --build build -j=4
       - name: Test
