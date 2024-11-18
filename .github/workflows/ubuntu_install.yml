@@ -1,4 +1,4 @@
-name: Ubuntu 22.04 (Installation)
+name: Ubuntu 24.04 (Installation)
 on:
   pull_request:
     types:
@@ -22,7 +22,10 @@ concurrency:
   cancel-in-progress: true
 jobs:
   ubuntu-build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        cxx: [g++-12, clang++]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup Ninja
