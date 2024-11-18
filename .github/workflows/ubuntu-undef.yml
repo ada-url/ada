@@ -1,4 +1,4 @@
-name: Ubuntu 22.04 (GCC 12 SANITIZE UNDEFINED)
+name: Ubuntu 24.04 (GCC 12 SANITIZE UNDEFINED)
 
 on:
   pull_request:
@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   ubuntu-build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         shared: [ON, OFF]
@@ -33,7 +33,7 @@ jobs:
       - name: Prepare
         run: cmake -D ADA_TESTING=ON -D ADA_SANITIZE_UNDEFINED=ON -DADA_DEVELOPMENT_CHECKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
         env:
-          CXX: g++-12
+          CXX: g++
       - name: Build
         run: cmake --build build -j=4
       - name: Test
