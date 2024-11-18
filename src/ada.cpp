@@ -5,8 +5,6 @@
 #include "implementation.cpp"
 #include "helpers.cpp"
 #include "url.cpp"
-#include "url-getters.cpp"
-#include "url-setters.cpp"
 #include "parser.cpp"
 #include "url_components.cpp"
 #include "url_aggregator.cpp"

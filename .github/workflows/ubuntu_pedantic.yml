@@ -27,11 +27,11 @@ jobs:
       matrix:
         shared: [ON, OFF]
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare
-        run: cmake -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        run: cmake -D ADA_TESTING=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
         env:
           CXX: g++-12
           CXXFLAGS: -Werror

@@ -24,7 +24,7 @@ jobs:
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: start docker
         run: |
           docker run -w /src -dit --name alpine -v $PWD:/src alpine:latest
@@ -36,7 +36,7 @@ jobs:
           ./alpine.sh apk add build-base cmake g++ linux-headers git bash icu-dev
       - name: cmake
         run: |
-          ./alpine.sh cmake -DADA_BENCHMARKS=ON -B build_for_alpine
+          ./alpine.sh cmake -D ADA_TESTING=ON -DADA_BENCHMARKS=ON -B build_for_alpine
       - name: build
         run: |
           ./alpine.sh cmake --build build_for_alpine

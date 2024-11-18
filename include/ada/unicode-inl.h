@@ -19,8 +19,7 @@ namespace ada::unicode {
 ada_really_inline size_t percent_encode_index(const std::string_view input,
                                               const uint8_t character_set[]) {
   return std::distance(
-      input.begin(),
-      std::find_if(input.begin(), input.end(), [character_set](const char c) {
+      input.begin(), std::ranges::find_if(input, [character_set](const char c) {
         return character_sets::bit_at(character_set, c);
       }));
 }

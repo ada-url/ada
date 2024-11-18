@@ -302,10 +302,9 @@ struct url : url_base {
 
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);
-  inline void update_base_search(std::string_view input);
   inline void update_base_search(std::string_view input,
                                  const uint8_t query_percent_encode_set[]);
-  inline void update_base_search(std::optional<std::string> input);
+  inline void update_base_search(std::optional<std::string> &&input);
   inline void update_base_pathname(std::string_view input);
   inline void update_base_username(std::string_view input);
   inline void update_base_password(std::string_view input);

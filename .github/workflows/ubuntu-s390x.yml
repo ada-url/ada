@@ -24,8 +24,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - uses: uraimo/run-on-arch-action@b0ffb25eb00af00468375982384441f063da1741 # v2.7.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: uraimo/run-on-arch-action@5397f9e30a9b62422f302092631c99ae1effcd9e # v2.8.1
         name: Test
         id: runcmd
         with:
@@ -36,7 +36,7 @@ jobs:
             apt-get update -q -y
             apt-get install -y cmake make g++ git ninja-build
           run: |
-            cmake -DCMAKE_BUILD_TYPE=Release -G Ninja -B build
+            cmake -D ADA_TESTING=ON -DCMAKE_BUILD_TYPE=Release -G Ninja -B build
             rm -r -f dependencies
             cmake --build build -j=4
             ctest --output-on-failure --test-dir build

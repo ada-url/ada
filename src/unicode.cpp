@@ -284,7 +284,7 @@ ada_really_inline constexpr bool is_ascii_tab_or_newline(
 constexpr std::string_view table_is_double_dot_path_segment[] = {
     "..", "%2e.", ".%2e", "%2e%2e"};
 
-ada_really_inline ada_constexpr bool is_double_dot_path_segment(
+ada_really_inline constexpr bool is_double_dot_path_segment(
     std::string_view input) noexcept {
   // This will catch most cases:
   // The length must be 2,4 or 6.
@@ -372,7 +372,6 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
              !is_ascii_hex_digit(pointer[2])))) {
       dest += ch;
       pointer++;
-      continue;
     } else {
       unsigned a = convert_hex_to_binary(pointer[1]);
       unsigned b = convert_hex_to_binary(pointer[2]);
@@ -386,10 +385,9 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
 
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
-  auto pointer =
-      std::find_if(input.begin(), input.end(), [character_set](const char c) {
-        return character_sets::bit_at(character_set, c);
-      });
+  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
+    return character_sets::bit_at(character_set, c);
+  });
   // Optimization: Don't iterate if percent encode is not required
   if (pointer == input.end()) {
     return std::string(input);

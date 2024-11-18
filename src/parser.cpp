@@ -36,7 +36,7 @@ result_type parse_url_impl(std::string_view user_input,
 
   // We refuse to parse URL strings that exceed 4GB. Such strings are almost
   // surely the result of a bug or are otherwise a security concern.
-  if (user_input.size() > std::numeric_limits<uint32_t>::max()) {
+  if (user_input.size() > std::numeric_limits<uint32_t>::max()) [[unlikely]] {
     url.is_valid = false;
   }
   // Going forward, user_input.size() is in [0,
@@ -67,20 +67,19 @@ result_type parse_url_impl(std::string_view user_input,
     url.reserve(reserve_capacity);
   }
   std::string tmp_buffer;
-  std::string_view internal_input;
-  if (unicode::has_tabs_or_newline(user_input)) {
+  std::string_view url_data;
+  if (unicode::has_tabs_or_newline(user_input)) [[unlikely]] {
     tmp_buffer = user_input;
     // Optimization opportunity: Instead of copying and then pruning, we could
     // just directly build the string from user_input.
     helpers::remove_ascii_tab_or_newline(tmp_buffer);
-    internal_input = tmp_buffer;
-  } else {
-    internal_input = user_input;
+    url_data = tmp_buffer;
+  } else [[likely]] {
+    url_data = user_input;
   }
 
   // Leading and trailing control characters are uncommon and easy to deal with
   // (no performance concern).
-  std::string_view url_data = internal_input;
   helpers::trim_c0_whitespace(url_data);
 
   // Optimization opportunity. Most websites do not have fragment.
@@ -238,10 +237,9 @@ result_type parse_url_impl(std::string_view user_input,
         // TODO: We could do various processing early on, using a single pass
         // over the string to collect information about it, e.g., telling us
         // whether there is a @ and if so, where (or how many).
-        const bool contains_ampersand =
-            (url_data.find('@', input_position) != std::string_view::npos);
 
-        if (!contains_ampersand) {
+        // Check if url data contains an @.
+        if (url_data.find('@', input_position) == std::string_view::npos) {
           state = ada::state::HOST;
           break;
         }
@@ -253,12 +251,12 @@ result_type parse_url_impl(std::string_view user_input,
          * --------^
          */
         do {
-          std::string_view view = helpers::substring(url_data, input_position);
+          std::string_view view = url_data.substr(input_position);
           // The delimiters are @, /, ? \\.
           size_t location =
               url.is_special() ? helpers::find_authority_delimiter_special(view)
                                : helpers::find_authority_delimiter(view);
-          std::string_view authority_view(view.data(), location);
+          std::string_view authority_view = view.substr(0, location);
           size_t end_of_authority = input_position + authority_view.size();
           // If c is U+0040 (@), then:
           if ((end_of_authority != input_size) &&
@@ -362,8 +360,7 @@ result_type parse_url_impl(std::string_view user_input,
         // If c is U+002F (/) and remaining starts with U+002F (/),
         // then set state to special authority ignore slashes state and increase
         // pointer by 1.
-        std::string_view view = helpers::substring(url_data, input_position);
-        if (view.starts_with("//")) {
+        if (url_data.substr(input_position, 2) == "//") {
           state = ada::state::SPECIAL_AUTHORITY_IGNORE_SLASHES;
           input_position += 2;
         } else {
@@ -430,9 +427,7 @@ result_type parse_url_impl(std::string_view user_input,
           } else {
             url.update_base_authority(base_url->get_href(),
                                       base_url->get_components());
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
-            url.set_hostname(base_url->get_hostname());
+            url.update_host_to_base_host(base_url->get_hostname());
             url.update_base_port(base_url->retrieve_base_port());
             // cloning the base path includes cloning the has_opaque_path flag
             url.has_opaque_path = base_url->has_opaque_path;
@@ -458,7 +453,7 @@ result_type parse_url_impl(std::string_view user_input,
             } else {
               std::string_view path = url.get_pathname();
               if (helpers::shorten_path(path, url.type)) {
-                url.update_base_pathname(std::string(path));
+                url.update_base_pathname(std::move(std::string(path)));
               }
             }
             // Set state to path state and decrease pointer by 1.
@@ -500,9 +495,7 @@ result_type parse_url_impl(std::string_view user_input,
           } else {
             url.update_base_authority(base_url->get_href(),
                                       base_url->get_components());
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
-            url.set_hostname(base_url->get_hostname());
+            url.update_host_to_base_host(base_url->get_hostname());
             url.update_base_port(base_url->retrieve_base_port());
           }
           state = ada::state::PATH;
@@ -519,8 +512,7 @@ result_type parse_url_impl(std::string_view user_input,
         // If c is U+002F (/) and remaining starts with U+002F (/),
         // then set state to special authority ignore slashes state and increase
         // pointer by 1.
-        std::string_view view = helpers::substring(url_data, input_position);
-        if (view.starts_with("//")) {
+        if (url_data.substr(input_position, 2) == "//") {
           input_position += 2;
         }
 
@@ -553,7 +545,7 @@ result_type parse_url_impl(std::string_view user_input,
 
           // Percent-encode after encoding, with encoding, buffer, and
           // queryPercentEncodeSet, and append the result to url's query.
-          url.update_base_search(helpers::substring(url_data, input_position),
+          url.update_base_search(url_data.substr(input_position),
                                  query_percent_encode_set);
           ada_log("QUERY update_base_search completed ");
           if (fragment.has_value()) {
@@ -565,8 +557,7 @@ result_type parse_url_impl(std::string_view user_input,
       case ada::state::HOST: {
         ada_log("HOST ", helpers::substring(url_data, input_position));
 
-        std::string_view host_view =
-            helpers::substring(url_data, input_position);
+        std::string_view host_view = url_data.substr(input_position);
         auto [location, found_colon] =
             helpers::get_host_delimiter_location(url.is_special(), host_view);
         input_position = (location != std::string_view::npos)
@@ -597,7 +588,7 @@ result_type parse_url_impl(std::string_view user_input,
         else {
           // If url is special and host_view is the empty string, validation
           // error, return failure.
-          if (url.is_special() && host_view.empty()) {
+          if (host_view.empty() && url.is_special()) {
             url.is_valid = false;
             return url;
           }
@@ -620,7 +611,7 @@ result_type parse_url_impl(std::string_view user_input,
       }
       case ada::state::OPAQUE_PATH: {
         ada_log("OPAQUE_PATH ", helpers::substring(url_data, input_position));
-        std::string_view view = helpers::substring(url_data, input_position);
+        std::string_view view = url_data.substr(input_position);
         // If c is U+003F (?), then set url's query to the empty string and
         // state to query state.
         size_t location = view.find('?');
@@ -640,10 +631,8 @@ result_type parse_url_impl(std::string_view user_input,
       }
       case ada::state::PORT: {
         ada_log("PORT ", helpers::substring(url_data, input_position));
-        std::string_view port_view =
-            helpers::substring(url_data, input_position);
-        size_t consumed_bytes = url.parse_port(port_view, true);
-        input_position += consumed_bytes;
+        std::string_view port_view = url_data.substr(input_position);
+        input_position += url.parse_port(port_view, true);
         if (!url.is_valid) {
           return url;
         }
@@ -698,8 +687,8 @@ result_type parse_url_impl(std::string_view user_input,
         break;
       }
       case ada::state::PATH: {
-        std::string_view view = helpers::substring(url_data, input_position);
         ada_log("PATH ", helpers::substring(url_data, input_position));
+        std::string_view view = url_data.substr(input_position);
 
         // Most time, we do not need percent encoding.
         // Furthermore, we can immediately locate the '?'.
@@ -743,8 +732,7 @@ result_type parse_url_impl(std::string_view user_input,
             if constexpr (result_type_is_ada_url) {
               url.host = base_url->host;
             } else {
-              // TODO: Optimization opportunity.
-              url.set_host(base_url->get_host());
+              url.update_host_to_base_host(base_url->get_host());
             }
             // If the code point substring from pointer to the end of input does
             // not start with a Windows drive letter and base's path[0] is a
@@ -752,7 +740,7 @@ result_type parse_url_impl(std::string_view user_input,
             // url's path.
             if (!base_url->get_pathname().empty()) {
               if (!checkers::is_windows_drive_letter(
-                      helpers::substring(url_data, input_position))) {
+                      url_data.substr(input_position))) {
                 std::string_view first_base_url_path =
                     base_url->get_pathname().substr(1);
                 size_t loc = first_base_url_path.find('/');
@@ -780,8 +768,8 @@ result_type parse_url_impl(std::string_view user_input,
         break;
       }
       case ada::state::FILE_HOST: {
-        std::string_view view = helpers::substring(url_data, input_position);
         ada_log("FILE_HOST ", helpers::substring(url_data, input_position));
+        std::string_view view = url_data.substr(input_position);
 
         size_t location = view.find_first_of("/\\?");
         std::string_view file_host_buffer(
@@ -827,8 +815,7 @@ result_type parse_url_impl(std::string_view user_input,
       }
       case ada::state::FILE: {
         ada_log("FILE ", helpers::substring(url_data, input_position));
-        std::string_view file_view =
-            helpers::substring(url_data, input_position);
+        std::string_view file_view = url_data.substr(input_position);
 
         url.set_protocol_as_file();
         if constexpr (result_type_is_ada_url) {
@@ -856,9 +843,7 @@ result_type parse_url_impl(std::string_view user_input,
             url.path = base_url->path;
             url.query = base_url->query;
           } else {
-            // TODO: Get rid of set_hostname and replace it with
-            // update_base_hostname
-            url.set_hostname(base_url->get_hostname());
+            url.update_host_to_base_host(base_url->get_hostname());
             url.update_base_pathname(base_url->get_pathname());
             url.update_base_search(base_url->get_search());
           }
@@ -881,7 +866,7 @@ result_type parse_url_impl(std::string_view user_input,
               } else {
                 std::string_view path = url.get_pathname();
                 if (helpers::shorten_path(path, url.type)) {
-                  url.update_base_pathname(std::string(path));
+                  url.update_base_pathname(std::move(std::string(path)));
                 }
               }
             }

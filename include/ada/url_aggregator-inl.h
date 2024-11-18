@@ -1109,6 +1109,28 @@ inline std::ostream &operator<<(std::ostream &out,
                                 const ada::url_aggregator &u) {
   return out << u.to_string();
 }
+
+void url_aggregator::update_host_to_base_host(
+    const std::string_view input) noexcept {
+  ada_log("url_aggregator::update_host_to_base_host ", input);
+  ADA_ASSERT_TRUE(validate());
+  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
+  if (type != ada::scheme::type::FILE) {
+    // Let host be the result of host parsing host_view with url is not special.
+    if (input.empty() && !is_special()) {
+      if (has_hostname()) {
+        clear_hostname();
+      } else if (has_dash_dot()) {
+        add_authority_slashes_if_needed();
+        delete_dash_dot();
+      }
+      return;
+    }
+  }
+  update_base_hostname(input);
+  ADA_ASSERT_TRUE(validate());
+  return;
+}
 }  // namespace ada
 
 #endif  // ADA_URL_AGGREGATOR_INL_H

@@ -132,8 +132,8 @@ inline void url::update_base_search(std::string_view input,
   query = ada::unicode::percent_encode(input, query_percent_encode_set);
 }
 
-inline void url::update_base_search(std::optional<std::string> input) {
-  query = input;
+inline void url::update_base_search(std::optional<std::string> &&input) {
+  query = std::move(input);
 }
 
 inline void url::update_base_pathname(const std::string_view input) {
@@ -232,7 +232,7 @@ ada_really_inline size_t url::parse_port(std::string_view view,
     return 0;
   }
   ada_log("parse_port: ", parsed_port);
-  const size_t consumed = size_t(r.ptr - view.data());
+  const auto consumed = size_t(r.ptr - view.data());
   ada_log("parse_port: consumed ", consumed);
   if (check_trailing_content) {
     is_valid &=
@@ -245,9 +245,8 @@ ada_really_inline size_t url::parse_port(std::string_view view,
     auto default_port = scheme_default_port();
     bool is_port_valid = (default_port == 0 && parsed_port == 0) ||
                          (default_port != parsed_port);
-    port = (r.ec == std::errc() && is_port_valid)
-               ? std::optional<uint16_t>(parsed_port)
-               : std::nullopt;
+    port = (r.ec == std::errc() && is_port_valid) ? std::optional(parsed_port)
+                                                  : std::nullopt;
   }
   return consumed;
 }
