@@ -1,7 +1,5 @@
 var NAVTREEINDEX3 =
 {
-"dd/d4c/ada__idna_8h.html#a9662a57a85b4be7cbefd946734024fe6":[9,0,2,0,0,4],
-"dd/d4c/ada__idna_8h.html#a9942f3702efabf632ba34ecd609e211c":[9,0,2,0,0,3],
 "dd/d4c/ada__idna_8h.html#aaa7c2ae34181ce7dd06159e254304596":[9,0,2,0,0,2],
 "dd/d4c/ada__idna_8h.html#abf65afb975393474b917637a8ae045bb":[9,0,2,0,0,21],
 "dd/d4c/ada__idna_8h.html#ac39ccead632e6f2bf5049d1b643c5e1c":[9,0,2,0,0,12],
@@ -249,5 +247,7 @@ var NAVTREEINDEX3 =
 "dd/dd6/ada__c_8cpp.html#af0f52b45140d99995d144ebf4b9d591a":[9,0,3,1,14],
 "dd/dd6/ada__c_8cpp.html#afefee1972fe326cbcd42dbbf5887109d":[9,0,3,1,36],
 "dd/dd6/ada__c_8cpp_source.html":[9,0,3,1],
-"de/d5a/url__components_8cpp.html":[9,0,3,11]
+"de/d5a/url__components_8cpp.html":[9,0,3,11],
+"de/d5a/url__components_8cpp_source.html":[9,0,3,11],
+"df/d1e/structada__owned__string.html":[8,0,1]
 };

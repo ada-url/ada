@@ -1,7 +1,5 @@
 var NAVTREEINDEX2 =
 {
-"db/d2e/ada__idna_8cpp.html#a04152d08ff9b28a79096f98f9741ab8a":[9,0,3,2,41],
-"db/d2e/ada__idna_8cpp.html#a07dc07ec6be862cf01e910353dcb481e":[9,0,3,2,53],
 "db/d2e/ada__idna_8cpp.html#a0d1e1182a7cae8b4c1063dbc7614f88f":[9,0,3,2,36],
 "db/d2e/ada__idna_8cpp.html#a10ef8e085520b93791eef38bdabf5941":[9,0,3,2,6],
 "db/d2e/ada__idna_8cpp.html#a1273085e8773bf04ccd97128cd3db1e0":[9,0,3,2,11],
@@ -249,5 +247,7 @@ var NAVTREEINDEX2 =
 "dd/d4c/ada__idna_8h.html#a742b05e0aba2245da3ac0ffd9ec678b6":[9,0,2,0,0,19],
 "dd/d4c/ada__idna_8h.html#a7c51f02c4cff8d8f66171c2c8716f5df":[9,0,2,0,0,5],
 "dd/d4c/ada__idna_8h.html#a7d88f623d0a7e056cc89920b20e13dde":[9,0,2,0,0,16],
-"dd/d4c/ada__idna_8h.html#a7d9aecb5815cce8db291ed12d5d1774f":[9,0,2,0,0,17]
+"dd/d4c/ada__idna_8h.html#a7d9aecb5815cce8db291ed12d5d1774f":[9,0,2,0,0,17],
+"dd/d4c/ada__idna_8h.html#a9662a57a85b4be7cbefd946734024fe6":[9,0,2,0,0,4],
+"dd/d4c/ada__idna_8h.html#a9942f3702efabf632ba34ecd609e211c":[9,0,2,0,0,3]
 };

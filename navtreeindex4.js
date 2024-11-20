@@ -1,7 +1,5 @@
 var NAVTREEINDEX4 =
 {
-"de/d5a/url__components_8cpp_source.html":[9,0,3,11],
-"df/d1e/structada__owned__string.html":[8,0,1],
 "df/d1e/structada__owned__string.html#a1ea9760fddfc53d557c8cf3bfb8d15b8":[8,0,1,1],
 "df/d1e/structada__owned__string.html#a8609a034dc7e41fdcc9df68ac2ec80b2":[8,0,1,0],
 "df/d61/ada__c_8h.html":[9,0,2,2],

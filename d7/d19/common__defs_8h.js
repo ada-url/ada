@@ -17,7 +17,6 @@ var common__defs_8h =
     [ "ADA_FAIL", "d7/d19/common__defs_8h.html#a71028de8e23116c43559a4580619bac9", null ],
     [ "ADA_ISALIGNED_N", "d7/d19/common__defs_8h.html#a6a069f0d3d1400c28a80a8e5db9859bb", null ],
     [ "ada_lifetime_bound", "d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60", null ],
-    [ "ada_likely", "d7/d19/common__defs_8h.html#afad02d7ad262323ba94fe6dec9dab4b6", null ],
     [ "ada_never_inline", "d7/d19/common__defs_8h.html#a0349da887815dc7cf3b4229a6bb45669", null ],
     [ "ADA_POP_DISABLE_WARNINGS", "d7/d19/common__defs_8h.html#a4edcbe1183fb8dd530378209ecda57cf", null ],
     [ "ADA_PRAGMA", "d7/d19/common__defs_8h.html#a4d69a05262ebb21a9b7eae1db41b7860", null ],
@@ -29,7 +28,6 @@ var common__defs_8h =
     [ "ADA_ROUNDUP_N", "d7/d19/common__defs_8h.html#a4b70eccce6659fc617b1700e5d5b96b2", null ],
     [ "ADA_STR", "d7/d19/common__defs_8h.html#a9331dd9609e5b9280daf48ad115c662c", null ],
     [ "ADA_TRY", "d7/d19/common__defs_8h.html#a88089db9c1afc7d6a3ccd6334ff6f287", null ],
-    [ "ada_unlikely", "d7/d19/common__defs_8h.html#a8b66b4c710d564028a16dd2f77510958", null ],
     [ "ada_unused", "d7/d19/common__defs_8h.html#a157b2f0935f72bb3dd766c4e9b03f4ea", null ],
     [ "ada_warn_unused", "d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34", null ],
     [ "unreachable", "d7/d19/common__defs_8h.html#ad3a5d67b58ebecc2e711d4b444408f2d", null ]
