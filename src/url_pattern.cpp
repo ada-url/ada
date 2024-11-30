@@ -5,11 +5,13 @@
 
 namespace ada {
 
-URLPattern::Component::Component(std::string_view pattern,
-                                 std::string_view regex,
-                                 const std::vector<std::string>& names) {
+URLPattern::Component::Component(std::string_view pattern_,
+                                 std::string_view regex_,
+                                 const std::vector<std::string>& names_) {
   // TODO: Implement this
-  return {.pattern = pattern, .regex = regex, .names = std::move(names)};
+  pattern = pattern_;
+  regex = regex_;
+  names = std::move(names_);
 }
 
 std::optional<URLPattern::Result> URLPattern::exec(
