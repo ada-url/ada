@@ -23,17 +23,10 @@ class URLPattern {
     explicit Component(std::string_view pattern, std::string_view regex,
                        const std::vector<std::string>& names);
 
-    // TODO(anonrig): Move these implementations to `url_pattern-inl.h`
-    std::string_view get_pattern() const noexcept ada_lifetime_bound {
-      return pattern;
-    }
-    std::string_view get_regex() const noexcept ada_lifetime_bound {
-      return regex;
-    }
+    std::string_view get_pattern() const noexcept ada_lifetime_bound;
+    std::string_view get_regex() const noexcept ada_lifetime_bound;
     const std::vector<std::string>& get_names() const noexcept
-        ada_lifetime_bound {
-      return names;
-    }
+        ada_lifetime_bound;
 
    private:
     // Disallow copy.
@@ -106,19 +99,17 @@ class URLPattern {
   bool test(std::optional<Input> input,
             std::optional<std::string_view> base_url);
 
-  // TODO(anonrig): Move these to `url_pattern-inl.h`.
-  const Component& get_protocol() const ada_lifetime_bound { return protocol; }
-  const Component& get_username() const ada_lifetime_bound { return username; }
-  const Component& get_password() const ada_lifetime_bound { return password; }
-  const Component& get_port() const ada_lifetime_bound { return port; }
-  const Component& get_pathname() const ada_lifetime_bound { return pathname; }
-  const Component& get_search() const ada_lifetime_bound { return search; }
-  const Component& get_hash() const ada_lifetime_bound { return hash; }
+  const Component& get_protocol() const ada_lifetime_bound;
+  const Component& get_username() const ada_lifetime_bound;
+  const Component& get_password() const ada_lifetime_bound;
+  const Component& get_port() const ada_lifetime_bound;
+  const Component& get_pathname() const ada_lifetime_bound;
+  const Component& get_search() const ada_lifetime_bound;
+  const Component& get_hash() const ada_lifetime_bound;
 
   // If ignoreCase is true, the JavaScript regular expression created for each
   // pattern must use the `vi` flag. Otherwise, they must use the `v` flag.
-  // TODO(anonrig): Move these to `url_pattern-inl.h`.
-  bool case_ignored() const ada_lifetime_bound { return ignore_case; }
+  bool case_ignored() const ada_lifetime_bound;
 
  private:
   Component protocol;
