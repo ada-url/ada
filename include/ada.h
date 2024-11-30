@@ -26,6 +26,7 @@
 #include "ada/url_aggregator-inl.h"
 #include "ada/url_search_params.h"
 #include "ada/url_search_params-inl.h"
+#include "ada/url_pattern.h"
 
 // Public API
 #include "ada/ada_version.h"
