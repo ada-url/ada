@@ -29,7 +29,7 @@ var searchData=
   ['helpers_2eh_26',['helpers.h',['../d1/d98/helpers_8h.html',1,'']]],
   ['hex_27',['hex',['../d7/d35/namespaceada_1_1character__sets.html#af0a664da2aca1e06bb14bb068f62f27d',1,'ada::character_sets']]],
   ['hex_5fto_5fbinary_5ftable_28',['hex_to_binary_table',['../d2/dc3/namespaceada_1_1unicode.html#a653abc739f565d2b62c72a8499cf573e',1,'ada::unicode']]],
-  ['homebrew_29',['Homebrew',['../index.html#autotoc_md22',1,'']]],
+  ['homebrew_29',['Homebrew',['../index.html#autotoc_md24',1,'']]],
   ['host_30',['HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ab9361011891280a44d85b967739cc6a5',1,'ada']]],
   ['host_5fdelimiters_31',['host_delimiters',['../d7/d6c/namespaceada_1_1helpers.html#a4416803ffe1dee3e52ee5aab0f73ba98',1,'ada::helpers']]],
   ['host_5fend_32',['host_end',['../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b',1,'ada::url_components::host_end'],['../dc/d69/structada__url__components.html#a09b0452389414b3788594b9b4b1aeec6',1,'ada_url_components::host_end']]],

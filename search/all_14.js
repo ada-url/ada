@@ -30,7 +30,7 @@ var searchData=
   ['url_5fsearch_5fparams_5fiter_5ftype_27',['url_search_params_iter_type',['../dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23',1,'ada']]],
   ['url_5fsearch_5fparams_5fkeys_5fiter_28',['url_search_params_keys_iter',['../dd/d64/namespaceada.html#a663e90222ab2aa9380ddf76bf055b2ad',1,'ada']]],
   ['url_5fsearch_5fparams_5fvalues_5fiter_29',['url_search_params_values_iter',['../dd/d64/namespaceada.html#a0221646aa68b66f5dd447ea589c988a3',1,'ada']]],
-  ['usage_30',['Usage',['../db/d8a/md_docs_2cli.html#autotoc_md10',1,'Advanced Usage'],['../index.html#autotoc_md16',1,'Usage']]],
+  ['usage_30',['Usage',['../db/d8a/md_docs_2cli.html#autotoc_md10',1,'Advanced Usage'],['../index.html#autotoc_md18',1,'Usage']]],
   ['usage_20examples_31',['Usage/Examples',['../db/d8a/md_docs_2cli.html#autotoc_md4',1,'']]],
   ['userinfo_5fpercent_5fencode_32',['USERINFO_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da',1,'ada::character_sets']]],
   ['username_5fend_33',['username_end',['../d3/d43/structada_1_1url__components.html#adadba3810c11d983d8551d6a267bb34b',1,'ada::url_components::username_end'],['../dc/d69/structada__url__components.html#a075cb5bfb997f3811e9607b696071f70',1,'ada_url_components::username_end']]],

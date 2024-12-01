@@ -8,5 +8,5 @@ var searchData=
   ['errors_5',['errors',['../dd/d64/namespaceada.html#a6e2c9c4694121664afd9db2d56453cb2',1,'ada']]],
   ['es_6',['ES',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda6d0675a048f080298c4f41c07abe26e0',1,'ada::idna']]],
   ['et_7',['ET',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddafc48151aee9d9d0dce07468e47f7fd7a',1,'ada::idna']]],
-  ['examples_8',['Examples',['../index.html#autotoc_md18',1,'Examples'],['../db/d8a/md_docs_2cli.html#autotoc_md4',1,'Usage/Examples']]]
+  ['examples_8',['Examples',['../index.html#autotoc_md20',1,'Examples'],['../db/d8a/md_docs_2cli.html#autotoc_md4',1,'Usage/Examples']]]
 ];

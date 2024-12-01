@@ -26,23 +26,26 @@ var NAVTREE =
 [
   [ "Ada", "index.html", [
     [ "Ada is fast.", "index.html#autotoc_md13", null ],
-    [ "Quick Start", "index.html#autotoc_md14", null ],
-    [ "Bindings of Ada", "index.html#autotoc_md15", null ],
-    [ "Usage", "index.html#autotoc_md16", [
+    [ "Installation", "index.html#autotoc_md14", null ],
+    [ "Quick Start", "index.html#autotoc_md15", null ],
+    [ "Bindings of Ada", "index.html#autotoc_md16", [
       [ "Requirements", "index.html#autotoc_md12", null ],
-      [ "Parsing & Validation", "index.html#autotoc_md17", null ],
-      [ "Examples", "index.html#autotoc_md18", null ],
-      [ "C wrapper", "index.html#autotoc_md19", null ],
-      [ "CMake dependency", "index.html#autotoc_md20", null ]
+      [ "Community maintained", "index.html#autotoc_md17", null ]
     ] ],
-    [ "Installation", "index.html#autotoc_md21", [
-      [ "Homebrew", "index.html#autotoc_md22", null ]
+    [ "Usage", "index.html#autotoc_md18", [
+      [ "Parsing & Validation", "index.html#autotoc_md19", null ],
+      [ "Examples", "index.html#autotoc_md20", null ],
+      [ "C wrapper", "index.html#autotoc_md21", null ],
+      [ "CMake dependency", "index.html#autotoc_md22", null ]
     ] ],
-    [ "Contributing", "index.html#autotoc_md23", [
-      [ "Building", "index.html#autotoc_md24", null ],
-      [ "Amalgamation", "index.html#autotoc_md25", null ],
-      [ "License", "index.html#autotoc_md26", null ],
-      [ "Further reading", "index.html#autotoc_md27", null ]
+    [ "Installation", "index.html#autotoc_md23", [
+      [ "Homebrew", "index.html#autotoc_md24", null ]
+    ] ],
+    [ "Contributing", "index.html#autotoc_md25", [
+      [ "Building", "index.html#autotoc_md26", null ],
+      [ "Amalgamation", "index.html#autotoc_md27", null ],
+      [ "License", "index.html#autotoc_md28", null ],
+      [ "Further reading", "index.html#autotoc_md29", null ]
     ] ],
     [ "Command line interface (CLI)", "db/d8a/md_docs_2cli.html", null ],
     [ "Namespaces", "namespaces.html", [

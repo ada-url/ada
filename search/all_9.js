@@ -5,7 +5,7 @@ var searchData=
   ['implementation_2eh_2',['implementation.h',['../dd/d6b/implementation_8h.html',1,'']]],
   ['initial_5fbias_3',['initial_bias',['../d5/ddb/namespaceada_1_1idna.html#acdcde57bdbb6064aa3958878ae5f62f6',1,'ada::idna']]],
   ['initial_5fn_4',['initial_n',['../d5/ddb/namespaceada_1_1idna.html#ab4504379d0bcd88ac427b8b70062d166',1,'ada::idna']]],
-  ['installation_5',['Installation',['../index.html#autotoc_md21',1,'']]],
+  ['installation_5',['Installation',['../index.html#autotoc_md14',1,'Installation'],['../index.html#autotoc_md23',1,'Installation']]],
   ['interface_20cli_6',['Command line interface (CLI)',['../db/d8a/md_docs_2cli.html',1,'']]],
   ['ipv4_7',['IPV4',['../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39',1,'ada']]],
   ['ipv4_8',['ipv4',['../d9/dea/namespaceada_1_1serializers.html#a86d16b1cbe5907c9e67788fa9d8fa960',1,'ada::serializers']]],

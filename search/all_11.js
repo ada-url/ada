@@ -1,7 +1,7 @@
 var searchData=
 [
   ['r_0',['R',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda311346d58b6d078f57fd93dc14c5c9b3',1,'ada::idna']]],
-  ['reading_1',['Further reading',['../index.html#autotoc_md27',1,'']]],
+  ['reading_1',['Further reading',['../index.html#autotoc_md29',1,'']]],
   ['readme_2emd_2',['README.md',['../da/ddd/README_8md.html',1,'']]],
   ['relative_5fscheme_3',['RELATIVE_SCHEME',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574ad418402f9786d8d940e8cbb595090523',1,'ada']]],
   ['relative_5fslash_4',['RELATIVE_SLASH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ec740dccfce73682b0fc766b3367b20',1,'ada']]],

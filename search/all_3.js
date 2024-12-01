@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['c_20wrapper_0',['C wrapper',['../index.html#autotoc_md19',1,'']]],
+  ['c_20wrapper_0',['C wrapper',['../index.html#autotoc_md21',1,'']]],
   ['c0_5fcontrol_5fpercent_5fencode_1',['C0_CONTROL_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#a961ff8bb694197e2f9f339cae226db66',1,'ada::character_sets']]],
   ['can_5fparse_2',['can_parse',['../dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748',1,'ada']]],
   ['can_5fparse_2ecc_3',['can_parse.cc',['../da/d52/can__parse_8cc.html',1,'']]],
@@ -18,17 +18,18 @@ var searchData=
   ['clear_5fsearch_15',['clear_search',['../d8/d3b/structada_1_1url__aggregator.html#a1fe20c2ceed925359fa53a459d42f789',1,'ada::url_aggregator']]],
   ['cli_16',['Command line interface (CLI)',['../db/d8a/md_docs_2cli.html',1,'']]],
   ['cli_2emd_17',['cli.md',['../d0/d4b/cli_8md.html',1,'']]],
-  ['cmake_20dependency_18',['CMake dependency',['../index.html#autotoc_md20',1,'']]],
+  ['cmake_20dependency_18',['CMake dependency',['../index.html#autotoc_md22',1,'']]],
   ['command_20line_20interface_20cli_19',['Command line interface (CLI)',['../db/d8a/md_docs_2cli.html',1,'']]],
   ['command_20line_20options_20',['Command line options',['../db/d8a/md_docs_2cli.html#autotoc_md1',1,'']]],
   ['common_5fdefs_2eh_21',['common_defs.h',['../d7/d19/common__defs_8h.html',1,'']]],
-  ['comparison_22',['Comparison',['../db/d8a/md_docs_2cli.html#autotoc_md3',1,'']]],
-  ['compose_23',['compose',['../d5/ddb/namespaceada_1_1idna.html#a03db2791270405a5c682305c18c5d1cf',1,'ada::idna']]],
-  ['composition_5fblock_24',['composition_block',['../d5/ddb/namespaceada_1_1idna.html#a7a9b9104fed112133289d3f67bb94b0a',1,'ada::idna']]],
-  ['composition_5fdata_25',['composition_data',['../d5/ddb/namespaceada_1_1idna.html#a2504167b83ba3ae4819f5d250ec0806d',1,'ada::idna']]],
-  ['composition_5findex_26',['composition_index',['../d5/ddb/namespaceada_1_1idna.html#a04152d08ff9b28a79096f98f9741ab8a',1,'ada::idna']]],
-  ['compute_5fdecomposition_5flength_27',['compute_decomposition_length',['../d5/ddb/namespaceada_1_1idna.html#ac50c30d0d051c6f5b6463cedd5eda8e1',1,'ada::idna']]],
-  ['contains_5fforbidden_5fdomain_5fcode_5fpoint_28',['contains_forbidden_domain_code_point',['../d5/ddb/namespaceada_1_1idna.html#ac7ad7c23c6223982a88d1f079a2e6e97',1,'ada::idna']]],
-  ['contributing_29',['Contributing',['../index.html#autotoc_md23',1,'']]],
-  ['cs_30',['CS',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda994c4dd22eee0900705a2f51fa1e8efc',1,'ada::idna']]]
+  ['community_20maintained_22',['Community maintained',['../index.html#autotoc_md17',1,'']]],
+  ['comparison_23',['Comparison',['../db/d8a/md_docs_2cli.html#autotoc_md3',1,'']]],
+  ['compose_24',['compose',['../d5/ddb/namespaceada_1_1idna.html#a03db2791270405a5c682305c18c5d1cf',1,'ada::idna']]],
+  ['composition_5fblock_25',['composition_block',['../d5/ddb/namespaceada_1_1idna.html#a7a9b9104fed112133289d3f67bb94b0a',1,'ada::idna']]],
+  ['composition_5fdata_26',['composition_data',['../d5/ddb/namespaceada_1_1idna.html#a2504167b83ba3ae4819f5d250ec0806d',1,'ada::idna']]],
+  ['composition_5findex_27',['composition_index',['../d5/ddb/namespaceada_1_1idna.html#a04152d08ff9b28a79096f98f9741ab8a',1,'ada::idna']]],
+  ['compute_5fdecomposition_5flength_28',['compute_decomposition_length',['../d5/ddb/namespaceada_1_1idna.html#ac50c30d0d051c6f5b6463cedd5eda8e1',1,'ada::idna']]],
+  ['contains_5fforbidden_5fdomain_5fcode_5fpoint_29',['contains_forbidden_domain_code_point',['../d5/ddb/namespaceada_1_1idna.html#ac7ad7c23c6223982a88d1f079a2e6e97',1,'ada::idna']]],
+  ['contributing_30',['Contributing',['../index.html#autotoc_md25',1,'']]],
+  ['cs_31',['CS',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda994c4dd22eee0900705a2f51fa1e8efc',1,'ada::idna']]]
 ];
