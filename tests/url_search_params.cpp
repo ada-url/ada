@@ -257,3 +257,22 @@ TEST(url_search_params, test_character_set) {
   }
   SUCCEED();
 }
+
+// https://github.com/web-platform-tests/wpt/blob/76dfa54e5df7f8cee7501cc6d598cf647c2b8564/url/urlsearchparams-constructor.any.js#L203
+// Construct with 2 unpaired surrogates (no trailing)
+TEST(url_search_params, unpaired_surrogates_no_trailing) {
+  auto search_params = ada::url_search_params("\uD835x=1&xx=2&\uD83Dx=3");
+  ASSERT_EQ(search_params.get("\uFFFDx"), "3");
+  ASSERT_EQ(search_params.get("xx"), "2");
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+// https://github.com/web-platform-tests/wpt/blob/76dfa54e5df7f8cee7501cc6d598cf647c2b8564/url/urlsearchparams-constructor.any.js#L204
+// Construct with 3 unpaired surrogates (no leading)
+TEST(url_search_params, unpaired_surrogates_no_leading) {
+  auto search_params = ada::url_search_params("x\uDC53=1&x\uDC5C=2&x\uDC65=3");
+  ASSERT_EQ(search_params.get("x\uFFFD"), "3");
+  ASSERT_EQ(search_params.size(), 1);
+  SUCCEED();
+}
