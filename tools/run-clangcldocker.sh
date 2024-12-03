@@ -3,7 +3,7 @@ set -e
 COMMAND=$*
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 MAINSOURCE=$SCRIPTPATH/..
-ALL_ADA_FILES=$(cd $MAINSOURCE && git ls-tree --full-tree --name-only -r HEAD | grep -e ".*\.\(c\|h\|cc\|cpp\|hh\)\$" | grep -vFf clang-format-ignore.txt)
+ALL_ADA_FILES=$(cd $MAINSOURCE && git ls-tree --full-tree --name-only -r HEAD | grep -e ".*\.\(c\|h\|cc\|cpp\|hh\)\$")
 
 if clang-format-17 --version  2>/dev/null | grep -qF 'version 17.'; then
   cd $MAINSOURCE; clang-format-17 --style=file --verbose -i "$@" $ALL_ADA_FILES

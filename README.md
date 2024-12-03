@@ -54,9 +54,13 @@ The Ada library is used by important systems besides Node.js such as Redpanda, K
 
 [![the ada library](http://img.youtube.com/vi/tQ-6OWRDsZg/0.jpg)](https://www.youtube.com/watch?v=tQ-6OWRDsZg)<br />
 
+## Installation
+
+Binary packages for the following systems are currently available:
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/ada.svg)](https://repology.org/project/ada/versions)
+
 ## Quick Start
-
-
 
 Linux or macOS users might follow the following instructions if they have a recent C++ compiler installed and a standard utility (`wget`)
 
@@ -73,7 +77,7 @@ Linux or macOS users might follow the following instructions if they have a rece
     #include <iostream>
 
     int main(int, char *[]) {
-      auto url = ada::parse<ada::url>("https://www.google.com");
+      auto url = ada::parse("https://www.google.com");
       if (!url) {
         std::cout << "failure" << std::endl;
         return EXIT_FAILURE;
@@ -84,11 +88,11 @@ Linux or macOS users might follow the following instructions if they have a rece
       return EXIT_SUCCESS;
     }
    ```
-2. Compile
+3. Compile
    ```
    c++ -std=c++20 -o demo demo.cpp
    ```
-3. `./demo`
+4. `./demo`
 
    ```
    http:
@@ -97,12 +101,20 @@ Linux or macOS users might follow the following instructions if they have a rece
 
 ## Bindings of Ada
 
-We provide clients for different programming languages through our C API.
+The following libraries are maintained by the Ada team and available under [Ada GitHub organization](https://github.com/ada-url).
 
 - [Rust](https://github.com/ada-url/rust): Rust bindings for Ada
 - [Go](https://github.com/ada-url/goada): Go bindings for Ada
 - [Python](https://github.com/ada-url/python): Python bindings for Ada
+
+### Community maintained
+
 - [R](https://github.com/schochastics/adaR): R wrapper for Ada
+- [PHP](https://github.com/lnear-dev/ada-url): PHP Wrapper for Ada URL
+- [LuaJIT](https://github.com/bungle/lua-resty-ada): LuaJIT FFI bindings for Ada
+- [Zig](https://github.com/alperencantez/zigada): Unofficial Zig bindings for Ada
+- [Python](https://github.com/TkTech/can_ada): Python bindings for Ada
+- [React Native](https://github.com/KusStar/react-native-fast-url): A Fast URL and URLSearchParams polyfill for React Native.
 
 ## Usage
 

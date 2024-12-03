@@ -207,7 +207,7 @@ endif()
 # Boost
 if(ADA_BOOST_URL)
 find_package(
-    Boost 1.80
+    Boost 1.86
     COMPONENTS system
 )
 endif(ADA_BOOST_URL)
@@ -258,7 +258,7 @@ if(NOT WIN32)
 CPMAddPackage(
   NAME corrosion
   GITHUB_REPOSITORY corrosion-rs/corrosion
-  VERSION 0.4.4
+  VERSION 0.5.0
   DOWNLOAD_ONLY ON
   OPTIONS "Rust_FIND_QUIETLY OFF"
 )
@@ -272,22 +272,24 @@ if(RUST_FOUND)
   corrosion_import_crate(MANIFEST_PATH "competitors/servo-url/Cargo.toml" NO_LINKER_OVERRIDE PROFILE release)
 
   # Check if servo-url target was created successfully
-  if(TARGET servo-url)
-    message(STATUS "servo-url target was created. Linking benchmarks and servo-url.")
-    target_link_libraries(bench PRIVATE servo-url)
+  if(TARGET servo_url)
+    message(STATUS "servo_url target was created. Linking benchmarks and servo_url. ")
+    target_link_libraries(bench PRIVATE servo_url)
     target_compile_definitions(bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
-    target_link_libraries(benchdata PRIVATE servo-url)
+    target_link_libraries(benchdata PRIVATE servo_url)
     target_compile_definitions(benchdata PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
-    target_link_libraries(bbc_bench PRIVATE servo-url)
+    target_link_libraries(bbc_bench PRIVATE servo_url)
     target_compile_definitions(bbc_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
-    target_link_libraries(percent_encode PRIVATE servo-url)
+    target_link_libraries(percent_encode PRIVATE servo_url)
     target_compile_definitions(percent_encode PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
 
-    target_link_libraries(wpt_bench PRIVATE servo-url)
+    target_link_libraries(wpt_bench PRIVATE servo_url)
     target_compile_definitions(wpt_bench PRIVATE ADA_RUST_VERSION="${Rust_VERSION}")
+  else()
+    message(SEND_ERROR "Rust servo-url target was not created successfully. Likely due to a bug.")
   endif()
 else()
   message(STATUS "Rust/Cargo is unavailable." )

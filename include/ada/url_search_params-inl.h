@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -37,14 +38,14 @@ inline void url_search_params::initialize(std::string_view input) {
 
     if (equal == std::string_view::npos) {
       std::string name(current);
-      std::replace(name.begin(), name.end(), '+', ' ');
+      std::ranges::replace(name, '+', ' ');
       params.emplace_back(unicode::percent_decode(name, name.find('%')), "");
     } else {
       std::string name(current.substr(0, equal));
       std::string value(current.substr(equal + 1));
 
-      std::replace(name.begin(), name.end(), '+', ' ');
-      std::replace(value.begin(), value.end(), '+', ' ');
+      std::ranges::replace(name, '+', ' ');
+      std::ranges::replace(value, '+', ' ');
 
       params.emplace_back(unicode::percent_decode(name, name.find('%')),
                           unicode::percent_decode(value, value.find('%')));
@@ -76,8 +77,8 @@ inline size_t url_search_params::size() const noexcept { return params.size(); }
 
 inline std::optional<std::string_view> url_search_params::get(
     const std::string_view key) {
-  auto entry = std::find_if(params.begin(), params.end(),
-                            [&key](auto &param) { return param.first == key; });
+  auto entry = std::ranges::find_if(
+      params, [&key](auto &param) { return param.first == key; });
 
   if (entry == params.end()) {
     return std::nullopt;
@@ -100,17 +101,16 @@ inline std::vector<std::string> url_search_params::get_all(
 }
 
 inline bool url_search_params::has(const std::string_view key) noexcept {
-  auto entry = std::find_if(params.begin(), params.end(),
-                            [&key](auto &param) { return param.first == key; });
+  auto entry = std::ranges::find_if(
+      params, [&key](auto &param) { return param.first == key; });
   return entry != params.end();
 }
 
 inline bool url_search_params::has(std::string_view key,
                                    std::string_view value) noexcept {
-  auto entry =
-      std::find_if(params.begin(), params.end(), [&key, &value](auto &param) {
-        return param.first == key && param.second == value;
-      });
+  auto entry = std::ranges::find_if(params, [&key, &value](auto &param) {
+    return param.first == key && param.second == value;
+  });
   return entry != params.end();
 }
 
@@ -122,8 +122,8 @@ inline std::string url_search_params::to_string() const {
     auto value = ada::unicode::percent_encode(params[i].second, character_set);
 
     // Performance optimization: Move this inside percent_encode.
-    std::replace(key.begin(), key.end(), ' ', '+');
-    std::replace(value.begin(), value.end(), ' ', '+');
+    std::ranges::replace(key, ' ', '+');
+    std::ranges::replace(value, ' ', '+');
 
     if (i != 0) {
       out += "&";
@@ -139,7 +139,7 @@ inline void url_search_params::set(const std::string_view key,
                                    const std::string_view value) {
   const auto find = [&key](auto &param) { return param.first == key; };
 
-  auto it = std::find_if(params.begin(), params.end(), find);
+  auto it = std::ranges::find_if(params, find);
 
   if (it == params.end()) {
     params.emplace_back(key, value);
@@ -151,27 +151,21 @@ inline void url_search_params::set(const std::string_view key,
 }
 
 inline void url_search_params::remove(const std::string_view key) {
-  params.erase(
-      std::remove_if(params.begin(), params.end(),
-                     [&key](auto &param) { return param.first == key; }),
-      params.end());
+  std::erase_if(params, [&key](auto &param) { return param.first == key; });
 }
 
 inline void url_search_params::remove(const std::string_view key,
                                       const std::string_view value) {
-  params.erase(std::remove_if(params.begin(), params.end(),
-                              [&key, &value](auto &param) {
-                                return param.first == key &&
-                                       param.second == value;
-                              }),
-               params.end());
+  std::erase_if(params, [&key, &value](auto &param) {
+    return param.first == key && param.second == value;
+  });
 }
 
 inline void url_search_params::sort() {
-  std::stable_sort(params.begin(), params.end(),
-                   [](const key_value_pair &lhs, const key_value_pair &rhs) {
-                     return lhs.first < rhs.first;
-                   });
+  std::ranges::stable_sort(
+      params, [](const key_value_pair &lhs, const key_value_pair &rhs) {
+        return lhs.first < rhs.first;
+      });
 }
 
 inline url_search_params_keys_iter url_search_params::get_keys() {
@@ -193,7 +187,7 @@ inline url_search_params_entries_iter url_search_params::get_entries() {
 }
 
 template <typename T, url_search_params_iter_type Type>
-inline bool url_search_params_iter<T, Type>::has_next() {
+inline bool url_search_params_iter<T, Type>::has_next() const {
   return pos < params.params.size();
 }
 
