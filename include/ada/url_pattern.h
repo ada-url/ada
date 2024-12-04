@@ -136,13 +136,22 @@ class URLPattern {
   bool test(std::optional<Input> input,
             std::optional<std::string_view> base_url);
 
-  const Component& get_protocol() const ada_lifetime_bound;
-  const Component& get_username() const ada_lifetime_bound;
-  const Component& get_password() const ada_lifetime_bound;
-  const Component& get_port() const ada_lifetime_bound;
-  const Component& get_pathname() const ada_lifetime_bound;
-  const Component& get_search() const ada_lifetime_bound;
-  const Component& get_hash() const ada_lifetime_bound;
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-protocol
+  std::string_view get_protocol() const ada_lifetime_bound;
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-username
+  std::string_view get_username() const ada_lifetime_bound;
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-password
+  std::string_view get_password() const ada_lifetime_bound;
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-hostname
+  std::string_view get_hostname() const ada_lifetime_bound;
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-port
+  std::string_view get_port() const ada_lifetime_bound;
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-pathname
+  std::string_view get_pathname() const ada_lifetime_bound;
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-search
+  std::string_view get_search() const ada_lifetime_bound;
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-hash
+  std::string_view get_hash() const ada_lifetime_bound;
 
   // If ignoreCase is true, the JavaScript regular expression created for each
   // pattern must use the `vi` flag. Otherwise, they must use the `v` flag.
@@ -152,6 +161,7 @@ class URLPattern {
   Component protocol;
   Component username;
   Component password;
+  Component hostname;
   Component port;
   Component pathname;
   Component search;

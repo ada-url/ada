@@ -26,33 +26,37 @@ inline const std::vector<std::string>& URLPattern::Component::get_names()
   return names;
 }
 
-inline const URLPattern::Component& URLPattern::get_protocol() const
-    ada_lifetime_bound {
-  return protocol;
+inline std::string_view URLPattern::get_protocol() const ada_lifetime_bound {
+  // Return this's associated URL pattern's protocol component's pattern string.
+  return protocol.get_pattern();
 }
-inline const URLPattern::Component& URLPattern::get_username() const
-    ada_lifetime_bound {
-  return username;
+inline std::string_view URLPattern::get_username() const ada_lifetime_bound {
+  // Return this's associated URL pattern's username component's pattern string.
+  return username.get_pattern();
 }
-inline const URLPattern::Component& URLPattern::get_password() const
-    ada_lifetime_bound {
-  return password;
+inline std::string_view URLPattern::get_password() const ada_lifetime_bound {
+  // Return this's associated URL pattern's password component's pattern string.
+  return password.get_pattern();
 }
-inline const URLPattern::Component& URLPattern::get_port() const
-    ada_lifetime_bound {
-  return port;
+inline std::string_view URLPattern::get_hostname() const ada_lifetime_bound {
+  // Return this's associated URL pattern's hostname component's pattern string.
+  return hostname.get_pattern();
 }
-inline const URLPattern::Component& URLPattern::get_pathname() const
-    ada_lifetime_bound {
-  return pathname;
+inline std::string_view URLPattern::get_port() const ada_lifetime_bound {
+  // Return this's associated URL pattern's port component's pattern string.
+  return port.get_pattern();
 }
-inline const URLPattern::Component& URLPattern::get_search() const
-    ada_lifetime_bound {
-  return search;
+inline std::string_view URLPattern::get_pathname() const ada_lifetime_bound {
+  // Return this's associated URL pattern's pathname component's pattern string.
+  return pathname.get_pattern();
 }
-inline const URLPattern::Component& URLPattern::get_hash() const
-    ada_lifetime_bound {
-  return hash;
+inline std::string_view URLPattern::get_search() const ada_lifetime_bound {
+  // Return this's associated URL pattern's search component's pattern string.
+  return search.get_pattern();
+}
+inline std::string_view URLPattern::get_hash() const ada_lifetime_bound {
+  // Return this's associated URL pattern's hash component's pattern string.
+  return hash.get_pattern();
 }
 
 inline bool URLPattern::case_ignored() const ada_lifetime_bound {
