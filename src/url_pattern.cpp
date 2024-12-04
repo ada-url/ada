@@ -607,8 +607,36 @@ std::string tokenize(std::string_view input, Token::Policy policy) {
 std::string escape_pattern(std::string_view input) {
   // Assert: input is an ASCII string.
   ADA_ASSERT_TRUE(ada::idna::is_ascii(input));
-  // TODO: Implement this.
-  return "";
+  // Let result be the empty string.
+  std::string result{};
+  result.reserve(input.size());
+  // Let index be 0.
+  size_t index = 0;
+
+  // TODO: Optimization opportunity: Use a lookup table
+  const auto should_escape =
+      [](const char c) {
+        return c == '+' || c == '*' || c == '?' || c == ':' || c == '{' ||
+               c == '}' || c == '(' || c == ')' || c == '\\';
+      }
+
+  // While index is less than input’s length:
+  while (index < input.size()) {
+    // Let c be input[index].
+    auto c = input[index];
+    // Increment index by 1.
+    index++;
+
+    if (should_escape(c)) {
+      // then append U+005C (\) to the end of result.
+      result.append('\\');
+    }
+
+    // Append c to the end of result.
+    result.append(c);
+  }
+  // Return result.
+  return result;
 }
 
 std::string process_base_url_string(std::string_view input,
