@@ -59,8 +59,16 @@ inline std::string_view URLPattern::get_hash() const ada_lifetime_bound {
   return hash.get_pattern();
 }
 
-inline bool URLPattern::case_ignored() const ada_lifetime_bound {
-  return ignore_case;
+inline bool URLPattern::ignore_case() const ada_lifetime_bound {
+  return ignore_case_;
+}
+
+inline bool URLPattern::has_regexp_groups() const ada_lifetime_bound {
+  // If this's associated URL pattern's has regexp groups, then return true.
+  return protocol.has_regexp_groups() || username.has_regexp_groups() ||
+         password.has_regexp_groups() || hostname.has_regexp_groups() ||
+         port.has_regexp_groups() || pathname.has_regexp_groups() ||
+         search.has_regexp_groups() || hash.has_regexp_groups();
 }
 
 }  // namespace ada

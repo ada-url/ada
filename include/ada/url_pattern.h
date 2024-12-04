@@ -64,6 +64,7 @@ class URLPattern {
     std::string_view get_regex() const noexcept ada_lifetime_bound;
     const std::vector<std::string>& get_names() const noexcept
         ada_lifetime_bound;
+    bool has_regexp_groups() const noexcept ada_lifetime_bound;
 
    private:
     // Disallow copy.
@@ -75,6 +76,8 @@ class URLPattern {
     std::string regex = "";
     // The list of sub-component names extracted for this component.
     std::vector<std::string> names{};
+
+    bool has_regexp_groups_ = false;
   };
 
   // A structure providing matching patterns for individual components
@@ -155,7 +158,10 @@ class URLPattern {
 
   // If ignoreCase is true, the JavaScript regular expression created for each
   // pattern must use the `vi` flag. Otherwise, they must use the `v` flag.
-  bool case_ignored() const ada_lifetime_bound;
+  bool ignore_case() const ada_lifetime_bound;
+
+  // @see https://urlpattern.spec.whatwg.org/#url-pattern-has-regexp-groups
+  bool has_regexp_groups() const ada_lifetime_bound;
 
  private:
   Component protocol;
@@ -166,7 +172,7 @@ class URLPattern {
   Component pathname;
   Component search;
   Component hash;
-  bool ignore_case = false;
+  bool ignore_case_ = false;
 };
 
 }  // namespace ada
