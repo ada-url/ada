@@ -192,6 +192,28 @@ std::optional<std::string> canonicalize_hash(std::string_view input) {
   return std::string(hash.substr(1));
 }
 
+URLPattern::Init parse_constructor_string(std::string_view input) {
+  // Let parser be a new constructor string parser whose input is input and
+  // token list is the result of running tokenize given input and "lenient".
+  // TODO: Implement this
+  return {};
+}
+
+std::string tokenize(std::string_view input, Token::Policy policy) {
+  // Let tokenizer be a new tokenizer.
+  // Set tokenizer’s input to input.
+  // Set tokenizer’s policy to policy.
+  auto tokenizer = Tokenizer(input, policy);
+  // While tokenizer’s index is less than tokenizer’s input's code point length:
+  while (tokenizer.index < tokenizer.input.size()) {
+    // Run seek and get the next code point given tokenizer and tokenizer’s
+    // index.
+    // TODO
+  }
+  // TODO: Implement this
+  return "";
+}
+
 }  // namespace url_pattern
 
 URLPattern::Component::Component(std::string_view pattern_,
