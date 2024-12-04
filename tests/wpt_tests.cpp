@@ -278,20 +278,20 @@ TYPED_TEST(wpt_tests_typed, toascii_encoding) {
         // tests.
         // @see
         // https://github.com/web-platform-tests/wpt/blob/master/url/toascii.window.js
-        if(output.has_value()) {
+        if (output.has_value()) {
           std::string_view stringified_output = expected_output.get_string();
           ASSERT_EQ(output.value(), stringified_output);
 
-          std::string url_string = "https://" + std::string(output.value()) + "/x";
-          auto current =
-              ada::parse<TypeParam>(url_string);
+          std::string url_string =
+              "https://" + std::string(output.value()) + "/x";
+          auto current = ada::parse<TypeParam>(url_string);
 
           if (expected_output.type() == ondemand::json_type::string) {
             std::string_view stringified_output = expected_output.get_string();
-            if(!current.has_value()) {
+            if (!current.has_value()) {
               std::cerr << "The URL instance could not be created from '";
-              for(uint8_t c : url_string) {
-                if(c >= 32 && c <= 126) {
+              for (uint8_t c : url_string) {
+                if (c >= 32 && c <= 126) {
                   std::cerr << (char)c;
                 } else {
                   // non-printable characters
@@ -325,7 +325,6 @@ TYPED_TEST(wpt_tests_typed, toascii_encoding) {
             ASSERT_EQ(setter->get_hostname(), "x");
           }
         }
-
       }
     }
   } catch (simdjson::simdjson_error &error) {
