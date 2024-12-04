@@ -58,17 +58,17 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
   }
 
   // Let baseURL be null.
-  std::optional<ada::url_aggregator> base_url{};
+  std::optional<url_aggregator> base_url{};
 
   // If init["baseURL"] exists:
   if (init.base_url.has_value()) {
     // Set baseURL to the result of parsing init["baseURL"].
-    auto parsing_result = ada::parse<ada::url_aggregator>(*init.base_url);
+    auto parsing_result = ada::parse<url_aggregator>(*init.base_url);
     // If baseURL is failure, then throw a TypeError.
     if (!parsing_result) {
       return tl::unexpected(url_pattern::errors::type_error);
     }
-    base_url = std::move(parsing_result.value<ada::url_aggregator>());
+    base_url = std::move(parsing_result.value<url_aggregator>());
 
     // If init["protocol"] does not exist, then set result["protocol"] to the
     // result of processing a base URL string given baseURL’s scheme and type.
@@ -278,7 +278,7 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
   return result;
 }
 
-tl::expected<std::string, ada::url_pattern::errors>
+tl::expected<std::string, url_pattern::errors>
 URLPattern::Init::process_protocol(std::string_view value,
                                    std::string_view type) {
   // Let strippedValue be the given value with a single trailing U+003A (:)
@@ -348,7 +348,7 @@ URLPattern::Init::process_pathname(std::string_view value,
 
   // If protocolValue is a special scheme or the empty string, then return the
   // result of running canonicalize a pathname given pathnameValue.
-  if (protocol.empty() || ada::scheme::is_special(protocol)) {
+  if (protocol.empty() || scheme::is_special(protocol)) {
     return url_pattern::canonicalize_pathname(value);
   }
 
@@ -400,7 +400,7 @@ tl::expected<std::string, errors> canonicalize_protocol(
   // Let dummyURL be a new URL record.
   // Let parseResult be the result of running the basic URL parser given value
   // followed by "://dummy.test", with dummyURL as url.
-  if (auto dummy_url = ada::parse<ada::url_aggregator>(
+  if (auto dummy_url = ada::parse<url_aggregator>(
           std::string(input) + "://dummy.test", nullptr)) {
     // Return dummyURL’s scheme.
     return std::string(dummy_url->get_protocol());
@@ -416,7 +416,7 @@ tl::expected<std::string, errors> canonicalize_username(
     return "";
   }
   // Let dummyURL be a new URL record.
-  auto url = ada::parse<ada::url_aggregator>("fake://dummy.test", nullptr);
+  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
   ADA_ASSERT_TRUE(url.has_value());
   // Set the username given dummyURL and value.
   if (!url->set_username(input)) {
@@ -434,7 +434,7 @@ tl::expected<std::string, errors> canonicalize_password(
   }
   // Let dummyURL be a new URL record.
   // Set the password given dummyURL and value.
-  auto url = ada::parse<ada::url_aggregator>("fake://dummy.test", nullptr);
+  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
 
   ADA_ASSERT_TRUE(url.has_value());
   if (!url->set_password(input)) {
@@ -453,7 +453,7 @@ tl::expected<std::string, errors> canonicalize_hostname(
   // Let dummyURL be a new URL record.
   // Let parseResult be the result of running the basic URL parser given value
   // with dummyURL as url and hostname state as state override.
-  auto url = ada::parse<ada::url_aggregator>("fake://dummy.test", nullptr);
+  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
   ADA_ASSERT_TRUE(url.has_value());
   // if (!isValidHostnameInput(hostname)) return kj::none;
   if (!url->set_hostname(input)) {
@@ -470,14 +470,14 @@ tl::expected<std::string, errors> canonicalize_ipv6_hostname(
   // Optimization opportunity: Use lookup table to speed up checking
   if (std::ranges::all_of(input, [](char c) {
         return c == '[' || c == ']' || c == ':' ||
-               ada::unicode::is_ascii_hex_digit(c);
+               unicode::is_ascii_hex_digit(c);
       })) {
     return tl::unexpected(errors::type_error);
   }
   // Append the result of running ASCII lowercase given code point to the end of
   // result.
   auto hostname = std::string(input);
-  ada::unicode::to_lower_ascii(hostname.data(), hostname.size());
+  unicode::to_lower_ascii(hostname.data(), hostname.size());
   return hostname;
 }
 
@@ -491,8 +491,8 @@ tl::expected<std::string, errors> canonicalize_port(std::string_view port_value,
   // If protocolValue was given, then set dummyURL’s scheme to protocolValue.
   // Let parseResult be the result of running basic URL parser given portValue
   // with dummyURL as url and port state as state override.
-  auto url = ada::parse<ada::url_aggregator>(
-      std::string(protocol) + "://dummy.test", nullptr);
+  auto url = ada::parse<url_aggregator>(std::string(protocol) + "://dummy.test",
+                                        nullptr);
   if (url && url->set_port(port_value)) {
     // Return dummyURL’s port, serialized, or empty string if it is null.
     return std::string(url->get_port());
@@ -515,7 +515,7 @@ tl::expected<std::string, errors> canonicalize_pathname(
   const auto modified_value = leading_slash ? "" : "/-";
   const auto full_url =
       std::string("fake://fake-url") + modified_value + std::string(input);
-  if (auto url = ada::parse<ada::url_aggregator>(full_url, nullptr)) {
+  if (auto url = ada::parse<url_aggregator>(full_url, nullptr)) {
     const auto pathname = url->get_pathname();
     // If leading slash is false, then set result to the code point substring
     // from 2 to the end of the string within result.
@@ -536,8 +536,8 @@ tl::expected<std::string, errors> canonicalize_opaque_pathname(
   // Set dummyURL’s path to the empty string.
   // Let parseResult be the result of running URL parsing given value with
   // dummyURL as url and opaque path state as state override.
-  if (auto url = ada::parse<ada::url_aggregator>("fake:" + std::string(input),
-                                                 nullptr)) {
+  if (auto url =
+          ada::parse<url_aggregator>("fake:" + std::string(input), nullptr)) {
     // Return the result of URL path serializing dummyURL.
     return std::string(url->get_pathname());
   }
@@ -554,7 +554,7 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   // Set dummyURL’s query to the empty string.
   // Let parseResult be the result of running basic URL parser given value with
   // dummyURL as url and query state as state override.
-  auto url = ada::parse<ada::url_aggregator>("fake://dummy.test", nullptr);
+  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
   ADA_ASSERT_TRUE(url.has_value());
   url->set_search(input);
   const auto search = url->get_search();
@@ -571,7 +571,7 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   // Set dummyURL’s fragment to the empty string.
   // Let parseResult be the result of running basic URL parser given value with
   // dummyURL as url and fragment state as state override.
-  auto url = ada::parse<ada::url_aggregator>("fake://dummy.test", nullptr);
+  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
   ADA_ASSERT_TRUE(url.has_value());
   url->set_hash(input);
   const auto hash = url->get_hash();
@@ -607,6 +607,7 @@ std::string tokenize(std::string_view input, Token::Policy policy) {
 std::string escape_pattern(std::string_view input) {
   // Assert: input is an ASCII string.
   ADA_ASSERT_TRUE(ada::idna::is_ascii(input));
+  // TODO: Implement this.
   return "";
 }
 
@@ -622,7 +623,8 @@ std::string process_base_url_string(std::string_view input,
   return escape_pattern(input);
 }
 
-bool is_absolute_pathname(std::string_view input, std::string_view type) {
+constexpr bool is_absolute_pathname(std::string_view input,
+                                    std::string_view type) noexcept {
   // If input is the empty string, then return false.
   if (input.empty()) [[unlikely]] {
     return false;
