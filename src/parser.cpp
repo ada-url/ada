@@ -907,7 +907,44 @@ result_type parse_url_impl(std::string_view user_input,
 tl::expected<ada::URLPattern, ada::url_pattern::errors> parse_url_pattern(
     std::variant<std::string_view, URLPattern::Init> input,
     const std::string_view* base_url, const ada::URLPattern::Options* options) {
-  // TODO: Implement parser here.
+  // Let init be null.
+  URLPattern::Init init;
+
+  // If input is a scalar value string then:
+  if (std::holds_alternative<std::string_view>(input)) {
+    // Set init to the result of running parse a constructor string given input.
+    init = url_pattern::parse_constructor_string(
+        std::get<std::string_view>(input));
+
+    // If baseURL is null and init["protocol"] does not exist, then throw a
+    // TypeError.
+    if (base_url == nullptr && !init.protocol.has_value()) {
+      return tl::unexpected(url_pattern::errors::type_error);
+    }
+
+    // If baseURL is not null, set init["baseURL"] to baseURL.
+    if (base_url != nullptr) {
+      init.base_url = std::string(*base_url);
+    }
+  } else {
+    // Assert: input is a URLPatternInit.
+    ADA_ASSERT_TRUE(std::holds_alternative<URLPattern::Init>(input));
+    // If baseURL is not null, then throw a TypeError.
+    if (base_url == nullptr) {
+      return tl::unexpected(url_pattern::errors::type_error);
+    }
+    // Optimization: Avoid copy by moving the input value.
+    // Set init to input.
+    init = std::move(std::get<URLPattern::Init>(input));
+  }
+
+  // Let processedInit be the result of process a URLPatternInit given init,
+  // "pattern", null, null, null, null, null, null, null, and null.
+  // TODO: Implement this
+
+  // For each componentName of « "protocol", "username", "password", "hostname",
+  // "port", "pathname", "search", "hash" If processedInit[componentName] does
+  // not exist, then set processedInit[componentName] to "*".
   return tl::unexpected(url_pattern::errors::type_error);
 }
 
