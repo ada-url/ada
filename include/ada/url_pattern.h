@@ -13,6 +13,8 @@ namespace ada {
 
 namespace url_pattern {
 
+enum class errors { type_error };
+
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-username
 std::optional<std::string> canonicalize_username(std::string_view input);
 

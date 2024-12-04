@@ -904,6 +904,13 @@ result_type parse_url_impl(std::string_view user_input,
   return url;
 }
 
+tl::expected<ada::URLPattern, ada::url_pattern::errors> parse_url_pattern(
+    std::variant<std::string_view, URLPattern::Init> input,
+    const std::string_view* base_url, const ada::URLPattern::Options* options) {
+  // TODO: Implement parser here.
+  return tl::unexpected(url_pattern::errors::type_error);
+}
+
 template url parse_url_impl(std::string_view user_input,
                             const url* base_url = nullptr);
 template url_aggregator parse_url_impl(
