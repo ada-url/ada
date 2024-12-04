@@ -15,6 +15,9 @@ namespace url_pattern {
 
 enum class errors { type_error };
 
+// @see https://urlpattern.spec.whatwg.org/#canonicalize-a-protocol
+std::optional<std::string> canonicalize_protocol(std::string_view input);
+
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-username
 std::optional<std::string> canonicalize_username(std::string_view input);
 
