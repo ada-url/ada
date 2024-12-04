@@ -11,6 +11,38 @@
 
 namespace ada {
 
+namespace url_pattern {
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-a-username
+std::optional<std::string> canonicalize_username(std::string_view input);
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-a-password
+std::optional<std::string> canonicalize_password(std::string_view input);
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-a-password
+std::optional<std::string> canonicalize_hostname(std::string_view input);
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-an-ipv6-hostname
+std::optional<std::string> canonicalize_ipv6_hostname(std::string_view input);
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-a-port
+std::optional<std::string> canonicalize_port(
+    std::string_view input, std::string_view protocol = "fake");
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-a-pathname
+std::optional<std::string> canonicalize_pathname(std::string_view input);
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-an-opaque-pathname
+std::optional<std::string> canonicalize_opaque_pathname(std::string_view input);
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-a-search
+std::optional<std::string> canonicalize_search(std::string_view input);
+
+// @see https://wicg.github.io/urlpattern/#canonicalize-a-hash
+std::optional<std::string> canonicalize_hash(std::string_view input);
+
+}  // namespace url_pattern
+
 // URLPattern is a Web Platform standard API for matching URLs against a
 // pattern syntax (think of it as a regular expression for URLs). It is
 // defined in https://wicg.github.io/urlpattern.
@@ -37,7 +69,7 @@ class URLPattern {
     // The generated JavaScript regular expression for this component.
     std::string regex = "";
     // The list of sub-component names extracted for this component.
-    std::vector<std::string> names;
+    std::vector<std::string> names{};
   };
 
   // A structure providing matching patterns for individual components
