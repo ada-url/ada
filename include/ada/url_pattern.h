@@ -325,7 +325,8 @@ std::string process_base_url_string(std::string_view input,
 std::string escape_pattern(std::string_view input);
 
 // @see https://urlpattern.spec.whatwg.org/#is-an-absolute-pathname
-bool is_absolute_pathname(std::string_view input, std::string_view type);
+constexpr bool is_absolute_pathname(std::string_view input,
+                                    std::string_view type) noexcept;
 
 }  // namespace url_pattern
 
