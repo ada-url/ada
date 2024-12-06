@@ -278,33 +278,52 @@ TYPED_TEST(wpt_tests_typed, toascii_encoding) {
         // tests.
         // @see
         // https://github.com/web-platform-tests/wpt/blob/master/url/toascii.window.js
-        auto current =
-            ada::parse<TypeParam>("https://" + std::string(input) + "/x");
-
-        if (expected_output.type() == ondemand::json_type::string) {
+        if (output.has_value()) {
           std::string_view stringified_output = expected_output.get_string();
-          ASSERT_EQ(current->get_host(), stringified_output);
-          ASSERT_EQ(current->get_hostname(), stringified_output);
-          ASSERT_EQ(current->get_pathname(), "/x");
-          ASSERT_EQ(current->get_href(),
-                    "https://" + std::string(stringified_output) + "/x");
-        } else if (expected_output.is_null()) {
-          ASSERT_FALSE(current.has_value());
-        }
+          ASSERT_EQ(output.value(), stringified_output);
 
-        // Test setters for host and hostname values.
-        auto setter = ada::parse<TypeParam>("https://x/x");
-        ASSERT_EQ(setter->set_host(input), !expected_output.is_null());
-        ASSERT_EQ(setter->set_hostname(input), !expected_output.is_null());
+          std::string url_string =
+              "https://" + std::string(output.value()) + "/x";
+          auto current = ada::parse<TypeParam>(url_string);
 
-        if (expected_output.type() == ondemand::json_type::string) {
-          std::string_view stringified_output = expected_output.get_string();
-          ASSERT_EQ(setter->get_host(), stringified_output);
-          ASSERT_EQ(setter->get_hostname(), stringified_output);
-        } else if (expected_output.is_null()) {
-          // host and hostname should not be updated if the input is invalid.
-          ASSERT_EQ(setter->get_host(), "x");
-          ASSERT_EQ(setter->get_hostname(), "x");
+          if (expected_output.type() == ondemand::json_type::string) {
+            std::string_view stringified_output = expected_output.get_string();
+            if (!current.has_value()) {
+              std::cerr << "The URL instance could not be created from '";
+              for (uint8_t c : url_string) {
+                if (c >= 32 && c <= 126) {
+                  std::cerr << (char)c;
+                } else {
+                  // non-printable characters
+                  std::cerr << "\\x" << std::hex << (uint32_t)c;
+                }
+              }
+              std::cerr << "'" << std::endl;
+            }
+            ASSERT_TRUE(current.has_value());
+            ASSERT_EQ(current->get_host(), stringified_output);
+            ASSERT_EQ(current->get_hostname(), stringified_output);
+            ASSERT_EQ(current->get_pathname(), "/x");
+            ASSERT_EQ(current->get_href(),
+                      "https://" + std::string(stringified_output) + "/x");
+          } else if (expected_output.is_null()) {
+            ASSERT_FALSE(current.has_value());
+          }
+
+          // Test setters for host and hostname values.
+          auto setter = ada::parse<TypeParam>("https://x/x");
+          ASSERT_EQ(setter->set_host(input), !expected_output.is_null());
+          ASSERT_EQ(setter->set_hostname(input), !expected_output.is_null());
+
+          if (expected_output.type() == ondemand::json_type::string) {
+            std::string_view stringified_output = expected_output.get_string();
+            ASSERT_EQ(setter->get_host(), stringified_output);
+            ASSERT_EQ(setter->get_hostname(), stringified_output);
+          } else if (expected_output.is_null()) {
+            // host and hostname should not be updated if the input is invalid.
+            ASSERT_EQ(setter->get_host(), "x");
+            ASSERT_EQ(setter->get_hostname(), "x");
+          }
         }
       }
     }

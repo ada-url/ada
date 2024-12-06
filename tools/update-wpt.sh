@@ -23,5 +23,7 @@ git clone \
   https://github.com/web-platform-tests/wpt.git wpt
 cd wpt
 git sparse-checkout add "url/resources"
+git sparse-checkout add "urlpattern/resources"
 git checkout
 cp url/resources/*.json "$WPT_DIR"
+cp urlpattern/resources/*.json "$WPT_DIR"
