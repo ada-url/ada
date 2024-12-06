@@ -1,0 +1,16 @@
+cc_library(
+    name = "ada",
+    srcs = [
+        "src/ada.cpp",
+    ],
+    hdrs = glob([
+        "include/*.h",
+        "include/ada/*.h",
+        "src/*.cpp"
+    ]),
+    includes=[
+        "include",
+        "include/ada"
+    ],
+    copts = select({ "//conditions:default": ["-std=c++20"] })
+)
