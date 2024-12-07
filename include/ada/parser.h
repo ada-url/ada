@@ -9,7 +9,6 @@
 #include <variant>
 
 #include "ada/expected.h"
-#include "ada/url_pattern.h"
 
 /**
  * @private
@@ -17,6 +16,14 @@
 namespace ada {
 struct url_aggregator;
 struct url;
+class URLPattern {
+ public:
+  struct Init;
+  struct Options;
+};
+namespace url_pattern {
+enum class errors : uint8_t;
+}
 }  // namespace ada
 
 /**
@@ -43,15 +50,15 @@ template <typename result_type = url_aggregator, bool store_values = true>
 result_type parse_url_impl(std::string_view user_input,
                            const result_type* base_url = nullptr);
 
-tl::expected<URLPattern, url_pattern::errors> parse_url_pattern(
-    std::variant<std::string_view, URLPattern::Init> input,
-    const std::string_view* base_url = nullptr,
-    const URLPattern::Options* options = nullptr);
-
 extern template url_aggregator parse_url_impl<url_aggregator>(
     std::string_view user_input, const url_aggregator* base_url);
 extern template url parse_url_impl<url>(std::string_view user_input,
                                         const url* base_url);
+
+tl::expected<URLPattern, url_pattern::errors> parse_url_pattern(
+    std::variant<std::string_view, URLPattern::Init> input,
+    const std::string_view* base_url = nullptr,
+    const URLPattern::Options* options = nullptr);
 
 }  // namespace ada::parser
 

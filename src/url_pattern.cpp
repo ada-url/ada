@@ -125,7 +125,7 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
     // If init contains none of "protocol", "hostname", "port", and "pathname",
     // then set result["pathname"] to the result of processing a base URL string
     // given the result of URL path serializing baseURL and type.
-    if (!init.protocol.has_value() && !init.hostname.has_value() ||
+    if (!init.protocol.has_value() && !init.hostname.has_value() &&
         !init.port.has_value()) {
       ADA_ASSERT_TRUE(base_url.has_value());
       result.pathname = base_url->get_pathname();
@@ -614,11 +614,10 @@ std::string escape_pattern(std::string_view input) {
   size_t index = 0;
 
   // TODO: Optimization opportunity: Use a lookup table
-  const auto should_escape =
-      [](const char c) {
-        return c == '+' || c == '*' || c == '?' || c == ':' || c == '{' ||
-               c == '}' || c == '(' || c == ')' || c == '\\';
-      }
+  const auto should_escape = [](const char c) {
+    return c == '+' || c == '*' || c == '?' || c == ':' || c == '{' ||
+           c == '}' || c == '(' || c == ')' || c == '\\';
+  };
 
   // While index is less than input’s length:
   while (index < input.size()) {
@@ -629,11 +628,11 @@ std::string escape_pattern(std::string_view input) {
 
     if (should_escape(c)) {
       // then append U+005C (\) to the end of result.
-      result.append('\\');
+      result.append("\\");
     }
 
     // Append c to the end of result.
-    result.append(c);
+    result += c;
   }
   // Return result.
   return result;
@@ -671,15 +670,67 @@ constexpr bool is_absolute_pathname(std::string_view input,
   return false;
 }
 
+std::vector<URLPattern::Part> parse_pattern_string(
+    std::string_view pattern, URLPattern::CompileComponentOptions& options,
+    URLPattern::EncodingCallback encoding_callback) {
+  // TODO: Implement this
+  return {};
+}
+
+std::string generate_pattern_string(
+    std::vector<URLPattern::Part>& part_list,
+    URLPattern::CompileComponentOptions& options) {
+  // TODO: Implement this
+  return {};
+}
+
 }  // namespace url_pattern
 
-URLPattern::Component::Component(std::string_view pattern_,
-                                 std::string_view regex_,
-                                 const std::vector<std::string>& names_) {
+URLPattern::Component URLPattern::Component::compile(
+    std::string_view input, EncodingCallback encoding_callback,
+    CompileComponentOptions& options) {
+  // Let part list be the result of running parse a pattern string given input,
+  // options, and encoding callback.
+  auto part_list = parse_pattern_string(input, options, encoding_callback);
+
+  // Let (regular expression string, name list) be the result of running
+  // generate a regular expression and name list given part list and options.
+  auto [regular_expression, name_list] =
+      url_pattern::generate_regular_expression_and_name_list(part_list,
+                                                             options);
+
+  // Let flags be an empty string.
+  // If options’s ignore case is true then set flags to "vi".
+  // Otherwise set flags to "v"
+  std::string flags = options.ignore_case ? "vi" : "v";
+
+  // Let regular expression be RegExpCreate(regular expression string, flags).
+  // If this throws an exception, catch it, and throw a TypeError.
+  // TODO: Investigate how to properly support this.
+
+  // Let pattern string be the result of running generate a pattern string given
+  // part list and options.
+  auto pattern_string =
+      url_pattern::generate_pattern_string(part_list, options);
+
+  // For each part of part list:
+  // - If part’s type is "regexp", then set has regexp groups to true.
+  const auto has_regexp = [](const Part& part) { return part.isRegexp(); };
+  const bool has_regexp_groups = std::ranges::any_of(part_list, has_regexp);
+
+  // Return a new component whose pattern string is pattern string, regular
+  // expression is regular expression, group name list is name list, and has
+  // regexp groups is has regexp groups.
+  return Component(std::move(pattern_string), std::move(regular_expression),
+                   std::move(name_list), has_regexp_groups);
+}
+
+std::tuple<std::string, std::vector<std::string>>
+generate_regular_expression_and_name_list(
+    std::vector<URLPattern::Part>& part_list,
+    URLPattern::CompileComponentOptions options) {
   // TODO: Implement this
-  pattern = pattern_;
-  regex = regex_;
-  names = std::move(names_);
+  return {"", {}};
 }
 
 std::optional<URLPattern::Result> URLPattern::exec(
