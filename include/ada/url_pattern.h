@@ -8,8 +8,16 @@
 #include "ada/expected.h"
 
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <variant>
+#include <vector>
+
+namespace ada::parser {
+tl::expected<URLPattern, url_pattern::errors> parse_url_pattern(
+    std::variant<std::string_view, URLPattern::Init> input,
+    const std::string_view* base_url, const URLPattern::Options* options);
+}
 
 namespace ada {
 
@@ -33,14 +41,15 @@ class URLPattern {
   struct Init {
     // @see https://urlpattern.spec.whatwg.org/#process-a-urlpatterninit
     static tl::expected<Init, url_pattern::errors> process(
-        Init init, std::string type, std::optional<std::string_view> protocol,
-        std::optional<std::string_view> username,
-        std::optional<std::string_view> password,
-        std::optional<std::string_view> hostname,
-        std::optional<std::string_view> port,
-        std::optional<std::string_view> pathname,
-        std::optional<std::string_view> search,
-        std::optional<std::string_view> hash);
+        Init init, std::string type,
+        std::optional<std::string_view> protocol = std::nullopt,
+        std::optional<std::string_view> username = std::nullopt,
+        std::optional<std::string_view> password = std::nullopt,
+        std::optional<std::string_view> hostname = std::nullopt,
+        std::optional<std::string_view> port = std::nullopt,
+        std::optional<std::string_view> pathname = std::nullopt,
+        std::optional<std::string_view> search = std::nullopt,
+        std::optional<std::string_view> hash = std::nullopt);
 
     // @see https://urlpattern.spec.whatwg.org/#process-protocol-for-init
     static tl::expected<std::string, url_pattern::errors> process_protocol(
@@ -88,32 +97,79 @@ class URLPattern {
     std::optional<std::string> base_url;
   };
 
+  // @see https://urlpattern.spec.whatwg.org/#part
+  struct Part {
+    // A part has an associated type, a string, which must be set upon creation.
+    std::string type;
+    // A part has an associated name, a string, initially the empty string.
+    std::string name{};
+    // A part has an associated prefix, a string, initially the empty string.
+    std::string prefix{};
+    // A part has an associated suffix, a string, initially the empty string.
+    std::string suffix{};
+
+    inline bool isRegexp() const noexcept;
+  };
+
+  // @see https://urlpattern.spec.whatwg.org/#options-header
+  struct CompileComponentOptions {
+    CompileComponentOptions() = default;
+    explicit CompileComponentOptions(
+        std::optional<char> delimiter = std::nullopt,
+        std::optional<char> prefix = std::nullopt)
+        : delimiter(delimiter), prefix(prefix){};
+
+    // @see https://urlpattern.spec.whatwg.org/#options-delimiter-code-point
+    std::optional<char> delimiter{};
+    // @see https://urlpattern.spec.whatwg.org/#options-prefix-code-point
+    std::optional<char> prefix{};
+    // @see https://urlpattern.spec.whatwg.org/#options-ignore-case
+    bool ignore_case = false;
+
+    static const CompileComponentOptions DEFAULT;
+    static const CompileComponentOptions HOSTNAME;
+    static const CompileComponentOptions PATHNAME;
+  };
+
+  using EncodingCallback =
+      std::function<tl::expected<bool, url_pattern::errors>(std::string_view)>;
+
   class Component {
    public:
-    explicit Component(std::string_view pattern, std::string_view regex,
-                       const std::vector<std::string>& names);
+    Component() = default;
+
+    // This function explicitly takes a std::string because it is moved.
+    // To avoid unnecessary copy, move each value while calling the constructor.
+    Component(std::string pattern, std::string regexp,
+              std::vector<std::string> group_name_list, bool has_regexp_groups)
+        : pattern(std::move(pattern)),
+          regexp(std::move(regexp)),
+          group_name_list(std::move(group_name_list)),
+          has_regexp_groups_(has_regexp_groups){};
+
+    // @see https://urlpattern.spec.whatwg.org/#compile-a-component
+    static Component compile(std::string_view input,
+                             EncodingCallback encoding_callback,
+                             CompileComponentOptions& options);
 
     std::string_view get_pattern() const noexcept ada_lifetime_bound;
-    std::string_view get_regex() const noexcept ada_lifetime_bound;
-    const std::vector<std::string>& get_names() const noexcept
+    std::string_view get_regexp() const noexcept ada_lifetime_bound;
+    const std::vector<std::string>& get_group_name_list() const noexcept
         ada_lifetime_bound;
     bool has_regexp_groups() const noexcept ada_lifetime_bound;
 
    private:
-    // Disallow copy.
-    Component(const Component&);
-
     // The normalized pattern for this component.
     std::string pattern = "";
     // The generated JavaScript regular expression for this component.
-    std::string regex = "";
+    std::string regexp = "";
     // The list of sub-component names extracted for this component.
-    std::vector<std::string> names{};
+    std::vector<std::string> group_name_list{};
 
     bool has_regexp_groups_ = false;
   };
 
-  using Input = std::variant<std::string, URLPattern::Init>;
+  using Input = std::variant<std::string, Init>;
 
   // A struct providing the URLPattern matching results for a single
   // URL component. The URLPatternComponentResult is only ever used
@@ -144,6 +200,7 @@ class URLPattern {
     bool ignore_case = false;
   };
 
+  URLPattern() = default;
   explicit URLPattern(std::optional<Input> input,
                       std::optional<std::string_view> base_url,
                       std::optional<Options> options);
@@ -178,15 +235,20 @@ class URLPattern {
   bool has_regexp_groups() const ada_lifetime_bound;
 
  private:
-  Component protocol;
-  Component username;
-  Component password;
-  Component hostname;
-  Component port;
-  Component pathname;
-  Component search;
-  Component hash;
+  Component protocol{};
+  Component username{};
+  Component password{};
+  Component hostname{};
+  Component port{};
+  Component pathname{};
+  Component search{};
+  Component hash{};
   bool ignore_case_ = false;
+
+  friend tl::expected<URLPattern, url_pattern::errors>
+  parser::parse_url_pattern(std::variant<std::string_view, Init> input,
+                            const std::string_view* base_url,
+                            const Options* options);
 };
 
 namespace url_pattern {
@@ -327,6 +389,23 @@ std::string escape_pattern(std::string_view input);
 // @see https://urlpattern.spec.whatwg.org/#is-an-absolute-pathname
 constexpr bool is_absolute_pathname(std::string_view input,
                                     std::string_view type) noexcept;
+
+// @see https://urlpattern.spec.whatwg.org/#parse-a-pattern-string
+std::vector<URLPattern::Part> parse_pattern_string(
+    std::string_view pattern, URLPattern::CompileComponentOptions& options,
+    URLPattern::EncodingCallback encoding_callback);
+
+// @see https://urlpattern.spec.whatwg.org/#generate-a-pattern-string
+std::string generate_pattern_string(
+    std::vector<URLPattern::Part>& part_list,
+    URLPattern::CompileComponentOptions& options);
+
+// @see
+// https://urlpattern.spec.whatwg.org/#generate-a-regular-expression-and-name-list
+std::tuple<std::string, std::vector<std::string>>
+generate_regular_expression_and_name_list(
+    std::vector<URLPattern::Part>& part_list,
+    URLPattern::CompileComponentOptions options);
 
 }  // namespace url_pattern
 
