@@ -940,11 +940,45 @@ tl::expected<ada::URLPattern, ada::url_pattern::errors> parse_url_pattern(
 
   // Let processedInit be the result of process a URLPatternInit given init,
   // "pattern", null, null, null, null, null, null, null, and null.
-  // TODO: Implement this
+  auto processed_init = URLPattern::Init::process(
+      init, "pattern", std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+      std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  if (!processed_init.has_value()) {
+    return tl::unexpected(processed_init.error());
+  }
 
   // For each componentName of « "protocol", "username", "password", "hostname",
   // "port", "pathname", "search", "hash" If processedInit[componentName] does
   // not exist, then set processedInit[componentName] to "*".
+  if (!processed_init->protocol.has_value()) processed_init->protocol = "*";
+  if (!processed_init->username.has_value()) processed_init->username = "*";
+  if (!processed_init->username.has_value()) processed_init->username = "*";
+  if (!processed_init->password.has_value()) processed_init->password = "*";
+  if (!processed_init->hostname.has_value()) processed_init->hostname = "*";
+  if (!processed_init->port.has_value()) processed_init->port = "*";
+  if (!processed_init->pathname.has_value()) processed_init->pathname = "*";
+  if (!processed_init->search.has_value()) processed_init->search = "*";
+  if (!processed_init->hash.has_value()) processed_init->hash = "*";
+
+  // If processedInit["protocol"] is a special scheme and processedInit["port"]
+  // is a string which represents its corresponding default port in radix-10
+  // using ASCII digits then set processedInit["port"] to the empty string.
+  if (scheme::is_special(*processed_init->protocol)) {
+    // TODO: Implement this.
+    processed_init->port = "";
+  }
+
+  // Let urlPattern be a new URL pattern.
+  auto url_pattern = URLPattern{};
+
+  // Set urlPattern’s protocol component to the result of compiling a component
+  // given processedInit["protocol"], canonicalize a protocol, and default
+  // options.
+  url_pattern.protocol = URLPattern::Component::compile(
+      processed_init->protocol.value(), nullptr,
+      URLPattern::CompileComponentOptions::DEFAULT);
+  // TODO: Complete this
+
   return tl::unexpected(url_pattern::errors::type_error);
 }
 

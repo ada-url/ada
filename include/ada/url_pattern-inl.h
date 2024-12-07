@@ -11,19 +11,35 @@
 #include <string_view>
 
 namespace ada {
+
+// The default options is an options struct with delimiter code point set to
+// the empty string and prefix code point set to the empty string.
+const URLPattern::CompileComponentOptions
+    URLPattern::CompileComponentOptions::DEFAULT(std::nullopt, std::nullopt);
+
+// The hostname options is an options struct with delimiter code point set
+// "." and prefix code point set to the empty string.
+const URLPattern::CompileComponentOptions
+    URLPattern::CompileComponentOptions::HOSTNAME('.', std::nullopt);
+
+// The pathname options is an options struct with delimiter code point set
+// "/" and prefix code point set to "/".
+const URLPattern::CompileComponentOptions
+    URLPattern::CompileComponentOptions::PATHNAME('/', '/');
+
 inline std::string_view URLPattern::Component::get_pattern() const noexcept
     ada_lifetime_bound {
   return pattern;
 }
 
-inline std::string_view URLPattern::Component::get_regex() const noexcept
+inline std::string_view URLPattern::Component::get_regexp() const noexcept
     ada_lifetime_bound {
-  return regex;
+  return regexp;
 }
 
-inline const std::vector<std::string>& URLPattern::Component::get_names()
-    const noexcept ada_lifetime_bound {
-  return names;
+inline const std::vector<std::string>&
+URLPattern::Component::get_group_name_list() const noexcept ada_lifetime_bound {
+  return group_name_list;
 }
 
 inline std::string_view URLPattern::get_protocol() const ada_lifetime_bound {
@@ -69,6 +85,10 @@ inline bool URLPattern::has_regexp_groups() const ada_lifetime_bound {
          password.has_regexp_groups() || hostname.has_regexp_groups() ||
          port.has_regexp_groups() || pathname.has_regexp_groups() ||
          search.has_regexp_groups() || hash.has_regexp_groups();
+}
+
+inline bool URLPattern::Part::isRegexp() const noexcept {
+  return type == "regexp";
 }
 
 }  // namespace ada
