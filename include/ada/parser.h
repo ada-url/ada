@@ -9,6 +9,7 @@
 #include <variant>
 
 #include "ada/expected.h"
+#include "ada/url_pattern.h"
 
 /**
  * @private
@@ -16,11 +17,7 @@
 namespace ada {
 struct url_aggregator;
 struct url;
-class URLPattern {
- public:
-  struct Init;
-  struct Options;
-};
+
 namespace url_pattern {
 enum class errors : uint8_t;
 }
