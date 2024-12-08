@@ -12,18 +12,18 @@
 
 namespace ada {
 
-inline std::string_view URLPattern::Component::get_pattern() const noexcept
+inline std::string_view url_pattern_component::get_pattern() const noexcept
     ada_lifetime_bound {
   return pattern;
 }
 
-inline std::string_view URLPattern::Component::get_regexp() const noexcept
+inline std::string_view url_pattern_component::get_regexp() const noexcept
     ada_lifetime_bound {
   return regexp;
 }
 
 inline const std::vector<std::string>&
-URLPattern::Component::get_group_name_list() const noexcept ada_lifetime_bound {
+url_pattern_component::get_group_name_list() const noexcept ada_lifetime_bound {
   return group_name_list;
 }
 
@@ -72,7 +72,7 @@ inline bool URLPattern::has_regexp_groups() const ada_lifetime_bound {
          search.has_regexp_groups() || hash.has_regexp_groups();
 }
 
-inline bool URLPattern::Part::isRegexp() const noexcept {
+inline bool url_pattern_part::is_regexp() const noexcept {
   return type == "regexp";
 }
 

@@ -6,21 +6,22 @@
 namespace ada {
 // The default options is an options struct with delimiter code point set to
 // the empty string and prefix code point set to the empty string.
-URLPattern::CompileComponentOptions
-    URLPattern::CompileComponentOptions::DEFAULT(std::nullopt, std::nullopt);
+url_pattern_compile_component_options
+    url_pattern_compile_component_options::DEFAULT(std::nullopt, std::nullopt);
 
 // The hostname options is an options struct with delimiter code point set
 // "." and prefix code point set to the empty string.
-URLPattern::CompileComponentOptions
-    URLPattern::CompileComponentOptions::HOSTNAME('.', std::nullopt);
+url_pattern_compile_component_options
+    url_pattern_compile_component_options::HOSTNAME('.', std::nullopt);
 
 // The pathname options is an options struct with delimiter code point set
 // "/" and prefix code point set to "/".
-URLPattern::CompileComponentOptions
-    URLPattern::CompileComponentOptions::PATHNAME('/', '/');
+url_pattern_compile_component_options
+    url_pattern_compile_component_options::PATHNAME('/', '/');
 
-tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
-    Init init, std::string type, std::optional<std::string_view> protocol,
+tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
+    url_pattern_init init, std::string type,
+    std::optional<std::string_view> protocol,
     std::optional<std::string_view> username,
     std::optional<std::string_view> password,
     std::optional<std::string_view> hostname,
@@ -29,7 +30,7 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
     std::optional<std::string_view> search,
     std::optional<std::string_view> hash) {
   // Let result be the result of creating a new URLPatternInit.
-  auto result = Init{};
+  auto result = url_pattern_init{};
 
   // If protocol is not null, set result["protocol"] to protocol.
   if (protocol.has_value()) {
@@ -80,7 +81,7 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
     auto parsing_result = ada::parse<url_aggregator>(*init.base_url);
     // If baseURL is failure, then throw a TypeError.
     if (!parsing_result) {
-      return tl::unexpected(url_pattern::errors::type_error);
+      return tl::unexpected(url_pattern_errors::type_error);
     }
     base_url = std::move(parsing_result.value<url_aggregator>());
 
@@ -88,8 +89,8 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
     // result of processing a base URL string given baseURL’s scheme and type.
     if (!init.protocol.has_value()) {
       ADA_ASSERT_TRUE(base_url.has_value());
-      result.protocol =
-          url_pattern::process_base_url_string(base_url->get_protocol(), type);
+      result.protocol = url_pattern_helpers::process_base_url_string(
+          base_url->get_protocol(), type);
     }
 
     // If type is not "pattern" and init contains none of "protocol",
@@ -99,8 +100,8 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
         !init.hostname.has_value() && !init.port.has_value() &&
         !init.username.has_value()) {
       ADA_ASSERT_TRUE(base_url.has_value());
-      result.username =
-          url_pattern::process_base_url_string(base_url->get_username(), type);
+      result.username = url_pattern_helpers::process_base_url_string(
+          base_url->get_username(), type);
     }
 
     // TODO: Optimization opportunity: Merge this with the previous check.
@@ -112,8 +113,8 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
         !init.hostname.has_value() && !init.port.has_value() &&
         !init.username.has_value() && !init.password.has_value()) {
       ADA_ASSERT_TRUE(base_url.has_value());
-      result.username =
-          url_pattern::process_base_url_string(base_url->get_password(), type);
+      result.username = url_pattern_helpers::process_base_url_string(
+          base_url->get_password(), type);
     }
 
     // If init contains neither "protocol" nor "hostname", then:
@@ -124,7 +125,8 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
       auto base_host = base_url->get_host();
       // Set result["hostname"] to the result of processing a base URL string
       // given baseHost and type.
-      result.hostname = url_pattern::process_base_url_string(base_host, type);
+      result.hostname =
+          url_pattern_helpers::process_base_url_string(base_host, type);
     }
 
     // If init contains none of "protocol", "hostname", and "port", then:
@@ -155,7 +157,8 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
       auto base_query = base_url->get_search();
       // Set result["search"] to the result of processing a base URL string
       // given baseQuery and type.
-      result.search = url_pattern::process_base_url_string(base_query, type);
+      result.search =
+          url_pattern_helpers::process_base_url_string(base_query, type);
     }
 
     // If init contains none of "protocol", "hostname", "port", "pathname",
@@ -168,7 +171,8 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
       auto base_fragment = base_url->get_hash();
       // Set result["hash"] to the result of processing a base URL string given
       // baseFragment and type.
-      result.hash = url_pattern::process_base_url_string(base_fragment, type);
+      result.hash =
+          url_pattern_helpers::process_base_url_string(base_fragment, type);
     }
   }
 
@@ -234,11 +238,11 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
     // - the result of running is an absolute pathname given result["pathname"]
     // and type is false,
     if (base_url.has_value() && base_url->has_opaque_path &&
-        !url_pattern::is_absolute_pathname(*result.pathname, type)) {
+        !url_pattern_helpers::is_absolute_pathname(*result.pathname, type)) {
       // Let baseURLPath be the result of running process a base URL string
       // given the result of URL path serializing baseURL and type.
-      std::string base_url_path =
-          url_pattern::process_base_url_string(base_url->get_pathname(), type);
+      std::string base_url_path = url_pattern_helpers::process_base_url_string(
+          base_url->get_pathname(), type);
 
       // Let slash index be the index of the last U+002F (/) code point found in
       // baseURLPath, interpreted as a sequence of code points, or null if there
@@ -292,8 +296,8 @@ tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
   return result;
 }
 
-tl::expected<std::string, url_pattern::errors>
-URLPattern::Init::process_protocol(std::string_view value,
+tl::expected<std::string, url_pattern_errors>
+url_pattern_init::process_protocol(std::string_view value,
                                    std::string_view type) {
   // Let strippedValue be the given value with a single trailing U+003A (:)
   // removed, if any.
@@ -304,43 +308,43 @@ URLPattern::Init::process_protocol(std::string_view value,
     return std::string(value);
   }
   // Return the result of running canonicalize a protocol given strippedValue.
-  return url_pattern::canonicalize_protocol(value);
+  return url_pattern_helpers::canonicalize_protocol(value);
 }
 
-tl::expected<std::string, url_pattern::errors>
-URLPattern::Init::process_username(std::string_view value,
+tl::expected<std::string, url_pattern_errors>
+url_pattern_init::process_username(std::string_view value,
                                    std::string_view type) {
   // If type is "pattern" then return value.
   if (type == "pattern") {
     return std::string(value);
   }
   // Return the result of running canonicalize a username given value.
-  return url_pattern::canonicalize_username(value);
+  return url_pattern_helpers::canonicalize_username(value);
 }
 
-tl::expected<std::string, url_pattern::errors>
-URLPattern::Init::process_password(std::string_view value,
+tl::expected<std::string, url_pattern_errors>
+url_pattern_init::process_password(std::string_view value,
                                    std::string_view type) {
   // If type is "pattern" then return value.
   if (type == "pattern") {
     return std::string(value);
   }
   // Return the result of running canonicalize a password given value.
-  return url_pattern::canonicalize_password(value);
+  return url_pattern_helpers::canonicalize_password(value);
 }
 
-tl::expected<std::string, url_pattern::errors>
-URLPattern::Init::process_hostname(std::string_view value,
+tl::expected<std::string, url_pattern_errors>
+url_pattern_init::process_hostname(std::string_view value,
                                    std::string_view type) {
   // If type is "pattern" then return value.
   if (type == "pattern") {
     return std::string(value);
   }
   // Return the result of running canonicalize a hostname given value.
-  return url_pattern::canonicalize_hostname(value);
+  return url_pattern_helpers::canonicalize_hostname(value);
 }
 
-tl::expected<std::string, url_pattern::errors> URLPattern::Init::process_port(
+tl::expected<std::string, url_pattern_errors> url_pattern_init::process_port(
     std::string_view port, std::string_view protocol, std::string_view type) {
   // If type is "pattern" then return portValue.
   if (type == "pattern") {
@@ -348,11 +352,11 @@ tl::expected<std::string, url_pattern::errors> URLPattern::Init::process_port(
   }
   // Return the result of running canonicalize a port given portValue and
   // protocolValue.
-  return url_pattern::canonicalize_port(port, protocol);
+  return url_pattern_helpers::canonicalize_port(port, protocol);
 }
 
-tl::expected<std::string, url_pattern::errors>
-URLPattern::Init::process_pathname(std::string_view value,
+tl::expected<std::string, url_pattern_errors>
+url_pattern_init::process_pathname(std::string_view value,
                                    std::string_view protocol,
                                    std::string_view type) {
   // If type is "pattern" then return pathnameValue.
@@ -363,15 +367,15 @@ URLPattern::Init::process_pathname(std::string_view value,
   // If protocolValue is a special scheme or the empty string, then return the
   // result of running canonicalize a pathname given pathnameValue.
   if (protocol.empty() || scheme::is_special(protocol)) {
-    return url_pattern::canonicalize_pathname(value);
+    return url_pattern_helpers::canonicalize_pathname(value);
   }
 
   // Return the result of running canonicalize an opaque pathname given
   // pathnameValue.
-  return url_pattern::canonicalize_opaque_pathname(value);
+  return url_pattern_helpers::canonicalize_opaque_pathname(value);
 }
 
-tl::expected<std::string, url_pattern::errors> URLPattern::Init::process_search(
+tl::expected<std::string, url_pattern_errors> url_pattern_init::process_search(
     std::string_view value, std::string_view type) {
   // Let strippedValue be the given value with a single leading U+003F (?)
   // removed, if any.
@@ -384,10 +388,10 @@ tl::expected<std::string, url_pattern::errors> URLPattern::Init::process_search(
     return std::string(value);
   }
   // Return the result of running canonicalize a search given strippedValue.
-  return url_pattern::canonicalize_search(value);
+  return url_pattern_helpers::canonicalize_search(value);
 }
 
-tl::expected<std::string, url_pattern::errors> URLPattern::Init::process_hash(
+tl::expected<std::string, url_pattern_errors> url_pattern_init::process_hash(
     std::string_view value, std::string_view type) {
   // Let strippedValue be the given value with a single leading U+0023 (#)
   // removed, if any.
@@ -400,12 +404,12 @@ tl::expected<std::string, url_pattern::errors> URLPattern::Init::process_hash(
     return std::string(value);
   }
   // Return the result of running canonicalize a hash given strippedValue.
-  return url_pattern::canonicalize_hash(value);
+  return url_pattern_helpers::canonicalize_hash(value);
 }
 
-namespace url_pattern {
+namespace url_pattern_helpers {
 
-tl::expected<std::string, errors> canonicalize_protocol(
+tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
     std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -420,10 +424,10 @@ tl::expected<std::string, errors> canonicalize_protocol(
     return std::string(dummy_url->get_protocol());
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(errors::type_error);
+  return tl::unexpected(url_pattern_errors::type_error);
 }
 
-tl::expected<std::string, errors> canonicalize_username(
+tl::expected<std::string, url_pattern_errors> canonicalize_username(
     std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -434,13 +438,13 @@ tl::expected<std::string, errors> canonicalize_username(
   ADA_ASSERT_TRUE(url.has_value());
   // Set the username given dummyURL and value.
   if (!url->set_username(input)) {
-    return tl::unexpected(errors::type_error);
+    return tl::unexpected(url_pattern_errors::type_error);
   }
   // Return dummyURL’s username.
   return std::string(url->get_username());
 }
 
-tl::expected<std::string, errors> canonicalize_password(
+tl::expected<std::string, url_pattern_errors> canonicalize_password(
     std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -452,13 +456,13 @@ tl::expected<std::string, errors> canonicalize_password(
 
   ADA_ASSERT_TRUE(url.has_value());
   if (!url->set_password(input)) {
-    return tl::unexpected(errors::type_error);
+    return tl::unexpected(url_pattern_errors::type_error);
   }
   // Return dummyURL’s password.
   return std::string(url->get_password());
 }
 
-tl::expected<std::string, errors> canonicalize_hostname(
+tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
     std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -472,21 +476,21 @@ tl::expected<std::string, errors> canonicalize_hostname(
   // if (!isValidHostnameInput(hostname)) return kj::none;
   if (!url->set_hostname(input)) {
     // If parseResult is failure, then throw a TypeError.
-    return tl::unexpected(errors::type_error);
+    return tl::unexpected(url_pattern_errors::type_error);
   }
   const auto hostname = url->get_hostname();
   // Return dummyURL’s host, serialized, or empty string if it is null.
   return hostname.empty() ? "" : std::string(hostname);
 }
 
-tl::expected<std::string, errors> canonicalize_ipv6_hostname(
+tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
     std::string_view input) {
   // Optimization opportunity: Use lookup table to speed up checking
   if (std::ranges::all_of(input, [](char c) {
         return c == '[' || c == ']' || c == ':' ||
                unicode::is_ascii_hex_digit(c);
       })) {
-    return tl::unexpected(errors::type_error);
+    return tl::unexpected(url_pattern_errors::type_error);
   }
   // Append the result of running ASCII lowercase given code point to the end of
   // result.
@@ -495,8 +499,8 @@ tl::expected<std::string, errors> canonicalize_ipv6_hostname(
   return hostname;
 }
 
-tl::expected<std::string, errors> canonicalize_port(std::string_view port_value,
-                                                    std::string_view protocol) {
+tl::expected<std::string, url_pattern_errors> canonicalize_port(
+    std::string_view port_value, std::string_view protocol) {
   // If portValue is the empty string, return portValue.
   if (port_value.empty()) [[unlikely]] {
     return "";
@@ -512,10 +516,10 @@ tl::expected<std::string, errors> canonicalize_port(std::string_view port_value,
     return std::string(url->get_port());
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(errors::type_error);
+  return tl::unexpected(url_pattern_errors::type_error);
 }
 
-tl::expected<std::string, errors> canonicalize_pathname(
+tl::expected<std::string, url_pattern_errors> canonicalize_pathname(
     std::string_view input) {
   // If value is the empty string, then return value.
   if (input.empty()) [[unlikely]] {
@@ -537,10 +541,10 @@ tl::expected<std::string, errors> canonicalize_pathname(
                          : std::string(pathname.substr(2));
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(errors::type_error);
+  return tl::unexpected(url_pattern_errors::type_error);
 }
 
-tl::expected<std::string, errors> canonicalize_opaque_pathname(
+tl::expected<std::string, url_pattern_errors> canonicalize_opaque_pathname(
     std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -556,10 +560,11 @@ tl::expected<std::string, errors> canonicalize_opaque_pathname(
     return std::string(url->get_pathname());
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(errors::type_error);
+  return tl::unexpected(url_pattern_errors::type_error);
 }
 
-tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
+tl::expected<std::string, url_pattern_errors> canonicalize_search(
+    std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
@@ -576,7 +581,8 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   return !search.empty() ? std::string(search.substr(1)) : "";
 }
 
-tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
+tl::expected<std::string, url_pattern_errors> canonicalize_hash(
+    std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
@@ -596,7 +602,7 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   return std::string(hash.substr(1));
 }
 
-URLPattern::Init parse_constructor_string(std::string_view input) {
+url_pattern_init parse_constructor_string(std::string_view input) {
   (void)input;
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
@@ -685,9 +691,9 @@ constexpr bool is_absolute_pathname(std::string_view input,
   return false;
 }
 
-std::vector<URLPattern::Part> parse_pattern_string(
-    std::string_view pattern, URLPattern::CompileComponentOptions& options,
-    URLPattern::EncodingCallback encoding_callback) {
+std::vector<url_pattern_part> parse_pattern_string(
+    std::string_view pattern, url_pattern_compile_component_options& options,
+    url_pattern_encoding_callback encoding_callback) {
   (void)pattern;
   (void)options;
   (void)encoding_callback;
@@ -696,28 +702,29 @@ std::vector<URLPattern::Part> parse_pattern_string(
 }
 
 std::string generate_pattern_string(
-    std::vector<URLPattern::Part>& part_list,
-    URLPattern::CompileComponentOptions& options) {
+    std::vector<url_pattern_part>& part_list,
+    url_pattern_compile_component_options& options) {
   (void)part_list;
   (void)options;
   // TODO: Implement this
   return {};
 }
 
-}  // namespace url_pattern
+}  // namespace url_pattern_helpers
 
-URLPattern::Component URLPattern::Component::compile(
-    std::string_view input, EncodingCallback encoding_callback,
-    CompileComponentOptions& options) {
+url_pattern_component url_pattern_component::compile(
+    std::string_view input, url_pattern_encoding_callback encoding_callback,
+    url_pattern_compile_component_options& options) {
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
-  auto part_list = parse_pattern_string(input, options, encoding_callback);
+  auto part_list = url_pattern_helpers::parse_pattern_string(input, options,
+                                                             encoding_callback);
 
   // Let (regular expression string, name list) be the result of running
   // generate a regular expression and name list given part list and options.
   auto [regular_expression, name_list] =
-      url_pattern::generate_regular_expression_and_name_list(part_list,
-                                                             options);
+      url_pattern_helpers::generate_regular_expression_and_name_list(part_list,
+                                                                     options);
 
   // Let flags be an empty string.
   // If options’s ignore case is true then set flags to "vi".
@@ -731,41 +738,43 @@ URLPattern::Component URLPattern::Component::compile(
   // Let pattern string be the result of running generate a pattern string given
   // part list and options.
   auto pattern_string =
-      url_pattern::generate_pattern_string(part_list, options);
+      url_pattern_helpers::generate_pattern_string(part_list, options);
 
   // For each part of part list:
   // - If part’s type is "regexp", then set has regexp groups to true.
-  const auto has_regexp = [](const Part& part) { return part.isRegexp(); };
+  const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
   const bool has_regexp_groups = std::ranges::any_of(part_list, has_regexp);
 
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
   // regexp groups is has regexp groups.
-  return Component(std::move(pattern_string), std::move(regular_expression),
-                   std::move(name_list), has_regexp_groups);
+  return url_pattern_component(std::move(pattern_string),
+                               std::move(regular_expression),
+                               std::move(name_list), has_regexp_groups);
 }
 
-namespace url_pattern {
+namespace url_pattern_helpers {
 std::tuple<std::string, std::vector<std::string>>
 generate_regular_expression_and_name_list(
-    std::vector<URLPattern::Part>& part_list,
-    URLPattern::CompileComponentOptions options) {
+    std::vector<url_pattern_part>& part_list,
+    url_pattern_compile_component_options options) {
   // TODO: Implement this
   (void)part_list;
   (void)options;
   return {"", {}};
 }
-}  // namespace url_pattern
+}  // namespace url_pattern_helpers
 
-std::optional<URLPattern::Result> URLPattern::exec(
-    std::optional<Input> input, std::optional<std::string> base_url) {
+std::optional<url_pattern_result> URLPattern::exec(
+    std::optional<url_pattern_input> input,
+    std::optional<std::string> base_url) {
   (void)input;
   (void)base_url;
   // TODO: Implement this
   return std::nullopt;
 }
 
-bool URLPattern::test(std::optional<Input> input,
+bool URLPattern::test(std::optional<url_pattern_input> input,
                       std::optional<std::string_view> base_url) {
   // TODO: Implement this
   (void)input;
