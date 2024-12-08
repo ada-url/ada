@@ -12,21 +12,6 @@
 
 namespace ada {
 
-// The default options is an options struct with delimiter code point set to
-// the empty string and prefix code point set to the empty string.
-const URLPattern::CompileComponentOptions
-    URLPattern::CompileComponentOptions::DEFAULT(std::nullopt, std::nullopt);
-
-// The hostname options is an options struct with delimiter code point set
-// "." and prefix code point set to the empty string.
-const URLPattern::CompileComponentOptions
-    URLPattern::CompileComponentOptions::HOSTNAME('.', std::nullopt);
-
-// The pathname options is an options struct with delimiter code point set
-// "/" and prefix code point set to "/".
-const URLPattern::CompileComponentOptions
-    URLPattern::CompileComponentOptions::PATHNAME('/', '/');
-
 inline std::string_view URLPattern::Component::get_pattern() const noexcept
     ada_lifetime_bound {
   return pattern;

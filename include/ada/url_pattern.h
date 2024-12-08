@@ -13,17 +13,19 @@
 #include <variant>
 #include <vector>
 
-namespace ada::parser {
-tl::expected<URLPattern, url_pattern::errors> parse_url_pattern(
-    std::variant<std::string_view, URLPattern::Init> input,
-    const std::string_view* base_url, const URLPattern::Options* options);
-}
-
 namespace ada {
 
 namespace url_pattern {
 enum class errors : uint8_t { type_error };
 }  // namespace url_pattern
+
+namespace parser {
+template <typename result_type, typename URLPattern_Init,
+          typename URLPattern_Options>
+tl::expected<result_type, url_pattern::errors> parse_url_pattern(
+    std::variant<std::string_view, URLPattern_Init> input,
+    const std::string_view* base_url, const URLPattern_Options* options);
+}
 
 // URLPattern is a Web Platform standard API for matching URLs against a
 // pattern syntax (think of it as a regular expression for URLs). It is
@@ -126,9 +128,9 @@ class URLPattern {
     // @see https://urlpattern.spec.whatwg.org/#options-ignore-case
     bool ignore_case = false;
 
-    static const CompileComponentOptions DEFAULT;
-    static const CompileComponentOptions HOSTNAME;
-    static const CompileComponentOptions PATHNAME;
+    static CompileComponentOptions DEFAULT;
+    static CompileComponentOptions HOSTNAME;
+    static CompileComponentOptions PATHNAME;
   };
 
   using EncodingCallback =
@@ -245,10 +247,12 @@ class URLPattern {
   Component hash{};
   bool ignore_case_ = false;
 
-  friend tl::expected<URLPattern, url_pattern::errors>
-  parser::parse_url_pattern(std::variant<std::string_view, Init> input,
-                            const std::string_view* base_url,
-                            const Options* options);
+  template <typename result_type, typename URLPattern_Init,
+            typename URLPattern_Options>
+  friend tl::expected<result_type, url_pattern::errors>
+  parser::parse_url_pattern(
+      std::variant<std::string_view, URLPattern_Init> input,
+      const std::string_view* base_url, const URLPattern_Options* options);
 };
 
 namespace url_pattern {
@@ -392,7 +396,8 @@ constexpr bool is_absolute_pathname(std::string_view input,
 
 // @see https://urlpattern.spec.whatwg.org/#parse-a-pattern-string
 std::vector<URLPattern::Part> parse_pattern_string(
-    std::string_view pattern, URLPattern::CompileComponentOptions& options,
+    std::string_view pattern,
+    const URLPattern::CompileComponentOptions& options,
     URLPattern::EncodingCallback encoding_callback);
 
 // @see https://urlpattern.spec.whatwg.org/#generate-a-pattern-string
