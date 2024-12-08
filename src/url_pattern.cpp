@@ -4,6 +4,20 @@
 #include <string>
 
 namespace ada {
+// The default options is an options struct with delimiter code point set to
+// the empty string and prefix code point set to the empty string.
+URLPattern::CompileComponentOptions
+    URLPattern::CompileComponentOptions::DEFAULT(std::nullopt, std::nullopt);
+
+// The hostname options is an options struct with delimiter code point set
+// "." and prefix code point set to the empty string.
+URLPattern::CompileComponentOptions
+    URLPattern::CompileComponentOptions::HOSTNAME('.', std::nullopt);
+
+// The pathname options is an options struct with delimiter code point set
+// "/" and prefix code point set to "/".
+URLPattern::CompileComponentOptions
+    URLPattern::CompileComponentOptions::PATHNAME('/', '/');
 
 tl::expected<URLPattern::Init, url_pattern::errors> URLPattern::Init::process(
     Init init, std::string type, std::optional<std::string_view> protocol,
@@ -583,6 +597,7 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
 }
 
 URLPattern::Init parse_constructor_string(std::string_view input) {
+  (void)input;
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
   // TODO: Implement this
@@ -673,6 +688,9 @@ constexpr bool is_absolute_pathname(std::string_view input,
 std::vector<URLPattern::Part> parse_pattern_string(
     std::string_view pattern, URLPattern::CompileComponentOptions& options,
     URLPattern::EncodingCallback encoding_callback) {
+  (void)pattern;
+  (void)options;
+  (void)encoding_callback;
   // TODO: Implement this
   return {};
 }
@@ -680,6 +698,8 @@ std::vector<URLPattern::Part> parse_pattern_string(
 std::string generate_pattern_string(
     std::vector<URLPattern::Part>& part_list,
     URLPattern::CompileComponentOptions& options) {
+  (void)part_list;
+  (void)options;
   // TODO: Implement this
   return {};
 }
@@ -725,16 +745,22 @@ URLPattern::Component URLPattern::Component::compile(
                    std::move(name_list), has_regexp_groups);
 }
 
+namespace url_pattern {
 std::tuple<std::string, std::vector<std::string>>
 generate_regular_expression_and_name_list(
     std::vector<URLPattern::Part>& part_list,
     URLPattern::CompileComponentOptions options) {
   // TODO: Implement this
+  (void)part_list;
+  (void)options;
   return {"", {}};
 }
+}  // namespace url_pattern
 
 std::optional<URLPattern::Result> URLPattern::exec(
     std::optional<Input> input, std::optional<std::string> base_url) {
+  (void)input;
+  (void)base_url;
   // TODO: Implement this
   return std::nullopt;
 }
@@ -742,6 +768,8 @@ std::optional<URLPattern::Result> URLPattern::exec(
 bool URLPattern::test(std::optional<Input> input,
                       std::optional<std::string_view> base_url) {
   // TODO: Implement this
+  (void)input;
+  (void)base_url;
   return false;
 }
 

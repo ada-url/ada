@@ -21,12 +21,6 @@ ada_warn_unused tl::expected<result_type, ada::errors> parse(
   return u;
 }
 
-ada_warn_unused tl::expected<ada::URLPattern, ada::url_pattern::errors>
-parse_url_pattern(std::variant<std::string_view, URLPattern::Init> input,
-                  const std::string_view* base_url,
-                  const ada::URLPattern::Options* options) {
-  return ada::parser::parse_url_pattern(input, base_url, options);
-}
 template ada::result<url> parse<url>(std::string_view input,
                                      const url* base_url = nullptr);
 template ada::result<url_aggregator> parse<url_aggregator>(
