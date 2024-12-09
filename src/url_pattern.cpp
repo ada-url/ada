@@ -812,7 +812,7 @@ tl::expected<url_pattern_result, url_pattern_errors> url_pattern::exec(
 // TODO: This function argument should bve url_pattern_input but the spec is
 // vague.
 bool url_pattern::test(std::variant<url_pattern_init, url_aggregator> input,
-                           std::string_view* base_url = nullptr) {
+                       std::string_view* base_url = nullptr) {
   // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
   // Implement a fast path just like `can_parse()` in ada_url.
   // Let result be the result of match given this's associated URL pattern,
@@ -826,14 +826,14 @@ bool url_pattern::test(std::variant<url_pattern_init, url_aggregator> input,
 tl::expected<url_pattern_result, url_pattern_errors> url_pattern::match(
     std::variant<url_pattern_init, url_aggregator> input,
     std::string_view* base_url_string) {
-  std::string protocol_value{};
-  std::string username_value{};
-  std::string password_value{};
-  std::string hostname_value{};
-  std::string port_value{};
-  std::string pathname_value{};
-  std::string search_value{};
-  std::string hash_value{};
+  std::string protocol{};
+  std::string username{};
+  std::string password{};
+  std::string hostname{};
+  std::string port{};
+  std::string pathname{};
+  std::string search{};
+  std::string hash{};
 
   // Let inputs be an empty list.
   // Append input to inputs.
@@ -851,9 +851,8 @@ tl::expected<url_pattern_result, url_pattern_errors> url_pattern::match(
     // and hash.
     // TODO: If this throws an exception, catch it, and return null.
     auto apply_result = url_pattern_init::process(
-        std::get<url_pattern_init>(input), "url", protocol_value,
-        username_value, password_value, hostname_value, port_value,
-        pathname_value, search_value, hash_value);
+        std::get<url_pattern_init>(input), "url", protocol, username, password,
+        hostname, port, pathname, search, hash);
   }
 
   // TODO: Implement this
