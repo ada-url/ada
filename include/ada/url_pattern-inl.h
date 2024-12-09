@@ -27,44 +27,44 @@ url_pattern_component::get_group_name_list() const noexcept ada_lifetime_bound {
   return group_name_list;
 }
 
-inline std::string_view URLPattern::get_protocol() const ada_lifetime_bound {
+inline std::string_view url_pattern::get_protocol() const ada_lifetime_bound {
   // Return this's associated URL pattern's protocol component's pattern string.
   return protocol.get_pattern();
 }
-inline std::string_view URLPattern::get_username() const ada_lifetime_bound {
+inline std::string_view url_pattern::get_username() const ada_lifetime_bound {
   // Return this's associated URL pattern's username component's pattern string.
   return username.get_pattern();
 }
-inline std::string_view URLPattern::get_password() const ada_lifetime_bound {
+inline std::string_view url_pattern::get_password() const ada_lifetime_bound {
   // Return this's associated URL pattern's password component's pattern string.
   return password.get_pattern();
 }
-inline std::string_view URLPattern::get_hostname() const ada_lifetime_bound {
+inline std::string_view url_pattern::get_hostname() const ada_lifetime_bound {
   // Return this's associated URL pattern's hostname component's pattern string.
   return hostname.get_pattern();
 }
-inline std::string_view URLPattern::get_port() const ada_lifetime_bound {
+inline std::string_view url_pattern::get_port() const ada_lifetime_bound {
   // Return this's associated URL pattern's port component's pattern string.
   return port.get_pattern();
 }
-inline std::string_view URLPattern::get_pathname() const ada_lifetime_bound {
+inline std::string_view url_pattern::get_pathname() const ada_lifetime_bound {
   // Return this's associated URL pattern's pathname component's pattern string.
   return pathname.get_pattern();
 }
-inline std::string_view URLPattern::get_search() const ada_lifetime_bound {
+inline std::string_view url_pattern::get_search() const ada_lifetime_bound {
   // Return this's associated URL pattern's search component's pattern string.
   return search.get_pattern();
 }
-inline std::string_view URLPattern::get_hash() const ada_lifetime_bound {
+inline std::string_view url_pattern::get_hash() const ada_lifetime_bound {
   // Return this's associated URL pattern's hash component's pattern string.
   return hash.get_pattern();
 }
 
-inline bool URLPattern::ignore_case() const ada_lifetime_bound {
+inline bool url_pattern::ignore_case() const ada_lifetime_bound {
   return ignore_case_;
 }
 
-inline bool URLPattern::has_regexp_groups() const ada_lifetime_bound {
+inline bool url_pattern::has_regexp_groups() const ada_lifetime_bound {
   // If this's associated URL pattern's has regexp groups, then return true.
   return protocol.has_regexp_groups() || username.has_regexp_groups() ||
          password.has_regexp_groups() || hostname.has_regexp_groups() ||

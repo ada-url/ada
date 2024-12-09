@@ -205,12 +205,12 @@ struct url_pattern_options {
 // defined in https://wicg.github.io/urlpattern.
 // More information about the URL Pattern syntax can be found at
 // https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
-class URLPattern {
+class url_pattern {
  public:
-  URLPattern() = default;
-  explicit URLPattern(std::optional<url_pattern_input> input,
-                      std::optional<std::string_view> base_url,
-                      std::optional<url_pattern_options> options);
+  url_pattern() = default;
+  explicit url_pattern(std::optional<url_pattern_input> input,
+                       std::optional<std::string_view> base_url,
+                       std::optional<url_pattern_options> options);
 
   std::optional<url_pattern_result> exec(std::optional<url_pattern_input> input,
                                          std::optional<std::string> base_url);
