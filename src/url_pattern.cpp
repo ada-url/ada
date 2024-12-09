@@ -731,6 +731,8 @@ url_pattern_component url_pattern_component::compile(
   // Let flags be an empty string.
   // If options’s ignore case is true then set flags to "vi".
   // Otherwise set flags to "v"
+  // TODO: Optimization opportunity: Move this to options constructor and use
+  // std::string_view to stop allocating unnecessary memory.
   std::string flags = options.ignore_case ? "vi" : "v";
 
   // Let regular expression be RegExpCreate(regular expression string, flags).
@@ -785,7 +787,7 @@ constexpr bool is_ipv6_address(std::string_view input) noexcept {
 
 }  // namespace url_pattern_helpers
 
-std::optional<url_pattern_result> URLPattern::exec(
+std::optional<url_pattern_result> url_pattern::exec(
     std::optional<url_pattern_input> input,
     std::optional<std::string> base_url) {
   (void)input;
@@ -794,8 +796,8 @@ std::optional<url_pattern_result> URLPattern::exec(
   return std::nullopt;
 }
 
-bool URLPattern::test(std::optional<url_pattern_input> input,
-                      std::optional<std::string_view> base_url) {
+bool url_pattern::test(std::optional<url_pattern_input> input,
+                       std::optional<std::string_view> base_url) {
   // TODO: Implement this
   (void)input;
   (void)base_url;
