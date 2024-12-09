@@ -179,7 +179,7 @@ struct url_pattern_component_result {
   std::unordered_map<std::string, std::string> groups;
 };
 
-using url_pattern_input = std::variant<std::string, url_pattern_init>;
+using url_pattern_input = std::variant<std::string_view, url_pattern_init>;
 
 // A struct providing the URLPattern matching results for all
 // components of a URL. The URLPatternResult API is defined as
@@ -212,10 +212,18 @@ class url_pattern {
                        std::optional<std::string_view> base_url,
                        std::optional<url_pattern_options> options);
 
-  std::optional<url_pattern_result> exec(std::optional<url_pattern_input> input,
-                                         std::optional<std::string> base_url);
-  bool test(std::optional<url_pattern_input> input,
-            std::optional<std::string_view> base_url);
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
+  tl::expected<url_pattern_result, url_pattern_errors> exec(
+      std::variant<url_pattern_init, url_aggregator> input,
+      std::string_view* base_url);
+  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
+  bool test(std::variant<url_pattern_init, url_aggregator> input,
+            std::string_view* base_url);
+
+  // @see https://urlpattern.spec.whatwg.org/#url-pattern-match
+  tl::expected<url_pattern_result, url_pattern_errors> match(
+      std::variant<url_pattern_init, url_aggregator> input,
+      std::string_view* base_url_string);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-protocol
   std::string_view get_protocol() const ada_lifetime_bound;
@@ -426,6 +434,10 @@ generate_regular_expression_and_name_list(
 
 // @see https://urlpattern.spec.whatwg.org/#hostname-pattern-is-an-ipv6-address
 constexpr bool is_ipv6_address(std::string_view input) noexcept;
+
+// @see
+// https://urlpattern.spec.whatwg.org/#protocol-component-matches-a-special-scheme
+bool protocol_component_matches_special_scheme(std::string_view input);
 
 }  // namespace url_pattern_helpers
 

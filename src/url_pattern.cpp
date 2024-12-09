@@ -1,6 +1,7 @@
 #include "ada.h"
 
 #include <optional>
+#include <regex>
 #include <string>
 
 namespace ada {
@@ -785,23 +786,78 @@ constexpr bool is_ipv6_address(std::string_view input) noexcept {
   return false;
 }
 
-}  // namespace url_pattern_helpers
-
-std::optional<url_pattern_result> url_pattern::exec(
-    std::optional<url_pattern_input> input,
-    std::optional<std::string> base_url) {
-  (void)input;
-  (void)base_url;
-  // TODO: Implement this
-  return std::nullopt;
+bool protocol_component_matches_special_scheme(std::string_view input) {
+  // TODO: Optimize this.
+  std::regex rx(input.begin(), input.size());
+  std::cmatch cmatch;
+  return std::regex_match("http", cmatch, rx) ||
+         std::regex_match("https", cmatch, rx) ||
+         std::regex_match("ws", cmatch, rx) ||
+         std::regex_match("wss", cmatch, rx) ||
+         std::regex_match("ftp", cmatch, rx);
 }
 
-bool url_pattern::test(std::optional<url_pattern_input> input,
-                       std::optional<std::string_view> base_url) {
+}  // namespace url_pattern_helpers
+
+// TODO: This function argument should bve url_pattern_input but the spec is
+// vague.
+tl::expected<url_pattern_result, url_pattern_errors> url_pattern::exec(
+    std::variant<url_pattern_init, url_aggregator> input,
+    std::string_view* base_url = nullptr) {
+  // Return the result of match given this's associated URL pattern, input, and
+  // baseURL if given.
+  return match(input, base_url);
+}
+
+// TODO: This function argument should bve url_pattern_input but the spec is
+// vague.
+bool url_pattern::test(std::variant<url_pattern_init, url_aggregator> input,
+                           std::string_view* base_url = nullptr) {
+  // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
+  // Implement a fast path just like `can_parse()` in ada_url.
+  // Let result be the result of match given this's associated URL pattern,
+  // input, and baseURL if given.
+  auto result = match(input, base_url);
+  // If result is null, return false.
+  // Return true.
+  return result.has_value();
+}
+
+tl::expected<url_pattern_result, url_pattern_errors> url_pattern::match(
+    std::variant<url_pattern_init, url_aggregator> input,
+    std::string_view* base_url_string) {
+  std::string protocol_value{};
+  std::string username_value{};
+  std::string password_value{};
+  std::string hostname_value{};
+  std::string port_value{};
+  std::string pathname_value{};
+  std::string search_value{};
+  std::string hash_value{};
+
+  // Let inputs be an empty list.
+  // Append input to inputs.
+  std::vector inputs{input};
+
+  // If input is a URLPatternInit then:
+  if (std::holds_alternative<url_pattern_init>(input)) {
+    // If baseURLString was given, throw a TypeError.
+    if (base_url_string != nullptr) {
+      return tl::unexpected(url_pattern_errors::type_error);
+    }
+
+    // Let applyResult be the result of process a URLPatternInit given input,
+    // "url", protocol, username, password, hostname, port, pathname, search,
+    // and hash.
+    // TODO: If this throws an exception, catch it, and return null.
+    auto apply_result = url_pattern_init::process(
+        std::get<url_pattern_init>(input), "url", protocol_value,
+        username_value, password_value, hostname_value, port_value,
+        pathname_value, search_value, hash_value);
+  }
+
   // TODO: Implement this
-  (void)input;
-  (void)base_url;
-  return false;
+  return {};
 }
 
 }  // namespace ada

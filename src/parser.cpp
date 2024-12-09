@@ -1024,11 +1024,45 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
   auto compile_options = url_pattern_compile_component_options::DEFAULT;
   compile_options.ignore_case = options->ignore_case;
 
+  // TODO: Optimization opportunity: Simplify this if statement.
   // If the result of running protocol component matches a special scheme given
   // urlPattern’s protocol component is true, then:
-  // TODO: Complete this
+  if (url_pattern_helpers::protocol_component_matches_special_scheme(
+          url_pattern_.protocol.get_pattern())) {
+    // Let pathCompileOptions be copy of the pathname options with the ignore
+    // case property set to options["ignoreCase"].
+    auto path_compile_options = url_pattern_compile_component_options::HOSTNAME;
+    path_compile_options.ignore_case = options->ignore_case;
 
-  return tl::unexpected(url_pattern_errors::type_error);
+    // Set urlPattern’s pathname component to the result of compiling a
+    // component given processedInit["pathname"], canonicalize a pathname, and
+    // pathCompileOptions.
+    url_pattern_.pathname = url_pattern_component::compile(
+        processed_init->pathname.value(),
+        url_pattern_helpers::canonicalize_pathname, path_compile_options);
+  } else {
+    // Otherwise set urlPattern’s pathname component to the result of compiling
+    // a component given processedInit["pathname"], canonicalize an opaque
+    // pathname, and compileOptions.
+    url_pattern_.pathname = url_pattern_component::compile(
+        processed_init->pathname.value(),
+        url_pattern_helpers::canonicalize_opaque_pathname, compile_options);
+  }
+
+  // Set urlPattern’s search component to the result of compiling a component
+  // given processedInit["search"], canonicalize a search, and compileOptions.
+  url_pattern_.search = url_pattern_component::compile(
+      processed_init->search.value(), url_pattern_helpers::canonicalize_search,
+      compile_options);
+
+  // Set urlPattern’s hash component to the result of compiling a component
+  // given processedInit["hash"], canonicalize a hash, and compileOptions.
+  url_pattern_.hash = url_pattern_component::compile(
+      processed_init->hash.value(), url_pattern_helpers::canonicalize_hash,
+      compile_options);
+
+  // Return urlPattern.
+  return url_pattern_;
 }
 
 template url parse_url_impl(std::string_view user_input,
