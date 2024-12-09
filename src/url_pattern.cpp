@@ -691,9 +691,10 @@ constexpr bool is_absolute_pathname(std::string_view input,
   return false;
 }
 
+template <url_pattern_encoding_callback F>
 std::vector<url_pattern_part> parse_pattern_string(
     std::string_view pattern, url_pattern_compile_component_options& options,
-    url_pattern_encoding_callback encoding_callback) {
+    F encoding_callback) {
   (void)pattern;
   (void)options;
   (void)encoding_callback;
@@ -712,8 +713,9 @@ std::string generate_pattern_string(
 
 }  // namespace url_pattern_helpers
 
+template <url_pattern_encoding_callback F>
 url_pattern_component url_pattern_component::compile(
-    std::string_view input, url_pattern_encoding_callback encoding_callback,
+    std::string_view input, F encoding_callback,
     url_pattern_compile_component_options& options) {
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
@@ -763,6 +765,24 @@ generate_regular_expression_and_name_list(
   (void)options;
   return {"", {}};
 }
+
+constexpr bool is_ipv6_address(std::string_view input) noexcept {
+  // If input’s code point length is less than 2, then return false.
+  if (input.size() < 2) return false;
+
+  // Let input code points be input interpreted as a list of code points.
+  // If input code points[0] is U+005B ([), then return true.
+  if (input.front() == '[') return true;
+  // If input code points[0] is U+007B ({) and input code points[1] is U+005B
+  // ([), then return true.
+  if (input.front() == '{' && input.at(1) == '[') return true;
+  // If input code points[0] is U+005C (\) and input code points[1] is U+005B
+  // ([), then return true.
+  if (input.front() == '\\' && input.at(1) == '[') return true;
+  // Return false.
+  return false;
+}
+
 }  // namespace url_pattern_helpers
 
 std::optional<url_pattern_result> URLPattern::exec(
