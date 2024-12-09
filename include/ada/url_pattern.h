@@ -250,14 +250,14 @@ class url_pattern {
   bool has_regexp_groups() const ada_lifetime_bound;
 
  private:
-  url_pattern_component protocol{};
-  url_pattern_component username{};
-  url_pattern_component password{};
-  url_pattern_component hostname{};
-  url_pattern_component port{};
-  url_pattern_component pathname{};
-  url_pattern_component search{};
-  url_pattern_component hash{};
+  url_pattern_component protocol_component{};
+  url_pattern_component username_component{};
+  url_pattern_component password_component{};
+  url_pattern_component hostname_component{};
+  url_pattern_component port_component{};
+  url_pattern_component pathname_component{};
+  url_pattern_component search_component{};
+  url_pattern_component hash_component{};
   bool ignore_case_ = false;
 
   template <typename result_type, typename url_pattern_init,
