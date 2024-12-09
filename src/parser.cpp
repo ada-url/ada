@@ -900,7 +900,7 @@ result_type parse_url_impl(std::string_view user_input,
 }
 
 template <>
-tl::expected<URLPattern, url_pattern_errors> parse_url_pattern(
+tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options) {
   (void)options;
@@ -966,12 +966,12 @@ tl::expected<URLPattern, url_pattern_errors> parse_url_pattern(
   }
 
   // Let urlPattern be a new URL pattern.
-  auto url_pattern = URLPattern{};
+  auto url_pattern_ = url_pattern{};
 
   // Set urlPattern’s protocol component to the result of compiling a component
   // given processedInit["protocol"], canonicalize a protocol, and default
   // options.
-  url_pattern.protocol = url_pattern_component::compile(
+  url_pattern_.protocol = url_pattern_component::compile(
       processed_init->protocol.value(),
       url_pattern_helpers::canonicalize_protocol,
       url_pattern_compile_component_options::DEFAULT);
@@ -979,7 +979,7 @@ tl::expected<URLPattern, url_pattern_errors> parse_url_pattern(
   // Set urlPattern’s username component to the result of compiling a component
   // given processedInit["username"], canonicalize a username, and default
   // options.
-  url_pattern.username = url_pattern_component::compile(
+  url_pattern_.username = url_pattern_component::compile(
       processed_init->username.value(),
       url_pattern_helpers::canonicalize_username,
       url_pattern_compile_component_options::DEFAULT);
@@ -987,7 +987,7 @@ tl::expected<URLPattern, url_pattern_errors> parse_url_pattern(
   // Set urlPattern’s password component to the result of compiling a component
   // given processedInit["password"], canonicalize a password, and default
   // options.
-  url_pattern.password = url_pattern_component::compile(
+  url_pattern_.password = url_pattern_component::compile(
       processed_init->password.value(),
       url_pattern_helpers::canonicalize_password,
       url_pattern_compile_component_options::DEFAULT);
@@ -999,7 +999,7 @@ tl::expected<URLPattern, url_pattern_errors> parse_url_pattern(
   // to the result of compiling a component given processedInit["hostname"],
   // canonicalize an IPv6 hostname, and hostname options.
   if (url_pattern_helpers::is_ipv6_address(processed_init->hostname.value())) {
-    url_pattern.hostname = url_pattern_component::compile(
+    url_pattern_.hostname = url_pattern_component::compile(
         processed_init->hostname.value(),
         url_pattern_helpers::canonicalize_hostname,
         url_pattern_compile_component_options::DEFAULT);
@@ -1007,7 +1007,7 @@ tl::expected<URLPattern, url_pattern_errors> parse_url_pattern(
     // Otherwise, set urlPattern’s hostname component to the result of compiling
     // a component given processedInit["hostname"], canonicalize a hostname, and
     // hostname options.
-    url_pattern.hostname = url_pattern_component::compile(
+    url_pattern_.hostname = url_pattern_component::compile(
         processed_init->hostname.value(),
         url_pattern_helpers::canonicalize_hostname,
         url_pattern_compile_component_options::HOSTNAME);
@@ -1015,7 +1015,7 @@ tl::expected<URLPattern, url_pattern_errors> parse_url_pattern(
 
   // Set urlPattern’s port component to the result of compiling a component
   // given processedInit["port"], canonicalize a port, and default options.
-  url_pattern.port = url_pattern_component::compile(
+  url_pattern_.port = url_pattern_component::compile(
       processed_init->port.value(), url_pattern_helpers::canonicalize_port,
       url_pattern_compile_component_options::DEFAULT);
 
