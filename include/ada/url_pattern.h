@@ -18,15 +18,22 @@ namespace ada {
 enum class url_pattern_errors : uint8_t { type_error };
 
 namespace parser {
-template <typename result_type, typename URLPattern_Init,
-          typename URLPattern_Options>
+template <typename result_type, typename url_pattern_init,
+          typename url_pattern_options>
 tl::expected<result_type, url_pattern_errors> parse_url_pattern(
-    std::variant<std::string_view, URLPattern_Init> input,
-    const std::string_view* base_url, const URLPattern_Options* options);
+    std::variant<std::string_view, url_pattern_init> input,
+    const std::string_view* base_url, const url_pattern_options* options);
 }
 
-using url_pattern_encoding_callback =
-    std::function<tl::expected<bool, url_pattern_errors>(std::string_view)>;
+// Important: C++20 allows us to use concept rather than `using` or `typedef
+// and allows functions with second argument, which is optional (using either
+// std::nullopt or a parameter with default value)
+template <typename F>
+concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
+  { f(sv) } -> std::same_as<tl::expected<std::string, url_pattern_errors>>;
+} || requires(F f, std::string_view sv, std::string_view opt) {
+  { f(sv, opt) } -> std::same_as<tl::expected<std::string, url_pattern_errors>>;
+};
 
 // A structure providing matching patterns for individual components
 // of a URL. When a URLPattern is created, or when a URLPattern is
@@ -140,8 +147,9 @@ class url_pattern_component {
         has_regexp_groups_(has_regexp_groups){};
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
+  template <url_pattern_encoding_callback F>
   static url_pattern_component compile(
-      std::string_view input, url_pattern_encoding_callback encoding_callback,
+      std::string_view input, F encoding_callback,
       url_pattern_compile_component_options& options);
 
   std::string_view get_pattern() const noexcept ada_lifetime_bound;
@@ -244,12 +252,12 @@ class URLPattern {
   url_pattern_component hash{};
   bool ignore_case_ = false;
 
-  template <typename result_type, typename URLPattern_Init,
-            typename URLPattern_Options>
+  template <typename result_type, typename url_pattern_init,
+            typename url_pattern_options>
   friend tl::expected<result_type, url_pattern_errors>
   parser::parse_url_pattern(
-      std::variant<std::string_view, URLPattern_Init> input,
-      const std::string_view* base_url, const URLPattern_Options* options);
+      std::variant<std::string_view, url_pattern_init> input,
+      const std::string_view* base_url, const url_pattern_options* options);
 };
 
 namespace url_pattern_helpers {
@@ -297,9 +305,9 @@ struct Tokenizer {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
-struct ConstructorStringParser {
-  explicit ConstructorStringParser(std::string_view input,
-                                   std::vector<Token>& token_list);
+struct constructor_string_parser {
+  explicit constructor_string_parser(std::string_view input,
+                                     std::vector<Token>& token_list);
 
  private:
   // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser-state
@@ -399,10 +407,10 @@ constexpr bool is_absolute_pathname(std::string_view input,
                                     std::string_view type) noexcept;
 
 // @see https://urlpattern.spec.whatwg.org/#parse-a-pattern-string
+template <url_pattern_encoding_callback F>
 std::vector<url_pattern_part> parse_pattern_string(
     std::string_view pattern,
-    const url_pattern_compile_component_options& options,
-    url_pattern_encoding_callback encoding_callback);
+    const url_pattern_compile_component_options& options, F encoding_callback);
 
 // @see https://urlpattern.spec.whatwg.org/#generate-a-pattern-string
 std::string generate_pattern_string(
@@ -415,6 +423,9 @@ std::tuple<std::string, std::vector<std::string>>
 generate_regular_expression_and_name_list(
     std::vector<url_pattern_part>& part_list,
     url_pattern_compile_component_options options);
+
+// @see https://urlpattern.spec.whatwg.org/#hostname-pattern-is-an-ipv6-address
+constexpr bool is_ipv6_address(std::string_view input) noexcept;
 
 }  // namespace url_pattern_helpers
 
