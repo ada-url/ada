@@ -302,38 +302,49 @@ class url_pattern {
 
 namespace url_pattern_helpers {
 
+// @see https://urlpattern.spec.whatwg.org/#token
+enum class token_type {
+  INVALID_CHAR,    // 0
+  OPEN,            // 1
+  CLOSE,           // 2
+  REGEXP,          // 3
+  NAME,            // 4
+  CHAR,            // 5
+  ESCAPED_CHAR,    // 6
+  OTHER_MODIFIER,  // 7
+  ASTERISK,        // 8
+  END,             // 9
+};
+
+// @see https://urlpattern.spec.whatwg.org/#tokenize-policy
+enum class token_policy {
+  STRICT,
+  LENIENT,
+};
+
 // @see https://urlpattern.spec.whatwg.org/#tokens
 struct Token {
-  // @see https://urlpattern.spec.whatwg.org/#tokenize-policy
-  enum class Policy {
-    STRICT,
-    LENIENT,
-  };
+  // A token has an associated type, a string, initially "invalid-char".
+  token_type type = token_type::INVALID_CHAR;
 
-  // @see https://urlpattern.spec.whatwg.org/#token
-  enum class Type {
-    INVALID_CHAR,    // 0
-    OPEN,            // 1
-    CLOSE,           // 2
-    REGEXP,          // 3
-    NAME,            // 4
-    CHAR,            // 5
-    ESCAPED_CHAR,    // 6
-    OTHER_MODIFIER,  // 7
-    ASTERISK,        // 8
-    END,             // 9
-  };
+  // A token has an associated index, a number, initially 0. It is the position
+  // of the first code point in the pattern string represented by the token.
+  size_t index = 0;
+
+  // A token has an associated value, a string, initially the empty string. It
+  // contains the code points from the pattern string represented by the token.
+  std::string value{};
 };
 
 // @see https://urlpattern.spec.whatwg.org/#tokenizer
 struct Tokenizer {
-  explicit Tokenizer(std::string_view input, Token::Policy policy)
+  explicit Tokenizer(std::string_view input, token_policy policy)
       : input(input), policy(policy) {}
 
   // has an associated input, a pattern string, initially the empty string.
   std::string input{};
   // has an associated policy, a tokenize policy, initially "strict".
-  Token::Policy policy = Token::Policy::STRICT;
+  token_policy policy = token_policy::STRICT;
   // has an associated token list, a token list, initially an empty list.
   std::vector<Token> token_list{};
   // has an associated index, a number, initially 0.
@@ -347,14 +358,27 @@ struct Tokenizer {
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
 struct constructor_string_parser {
   explicit constructor_string_parser(std::string_view input,
-                                     std::vector<Token>& token_list);
+                                     std::vector<Token>& token_list)
+      : input(input), token_list(token_list){};
 
- private:
+  // @see https://urlpattern.spec.whatwg.org/#rewind
+  void rewind();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-hash-prefix
+  bool is_hash_prefix();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-search-prefix
+  bool is_search_prefix();
+
+  // @see https://urlpattern.spec.whatwg.org/#parse-a-constructor-string
+  static url_pattern_init parse(std::string_view input);
+
   // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser-state
   enum class State {
     INIT,
     PROTOCOL,
     AUTHORITY,
+    USERNAME,
     PASSWORD,
     HOSTNAME,
     PORT,
@@ -363,6 +387,26 @@ struct constructor_string_parser {
     HASH,
     DONE,
   };
+
+  // @see https://urlpattern.spec.whatwg.org/#change-state
+  void change_state(State state, size_t skip);
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-group-open
+  bool is_group_open() const;
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-group-close
+  bool is_group_close() const;
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-protocol-suffix
+  bool is_protocol_suffix();
+
+  // @see
+  // https://urlpattern.spec.whatwg.org/#compute-protocol-matches-a-special-scheme-flag
+  void compute_protocol_matches_special_scheme_flag();
+
+  // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
+  bool next_is_authority_slashes();
+
   // has an associated input, a string, which must be set upon creation.
   std::string input;
   // has an associated token list, a token list, which must be set upon
@@ -387,6 +431,16 @@ struct constructor_string_parser {
   bool protocol_matches_a_special_scheme_flag = false;
   // has an associated state, a string, initially set to "init".
   State state = State::INIT;
+
+ private:
+  // @see https://urlpattern.spec.whatwg.org/#is-a-non-special-pattern-char
+  bool is_non_special_pattern_char(size_t index, std::string_view value);
+
+  // @see https://urlpattern.spec.whatwg.org/#get-a-safe-token
+  const Token& get_safe_token(size_t index);
+
+  // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
+  std::string_view make_component_string();
 };
 
 // @see https://urlpattern.spec.whatwg.org/#canonicalize-a-protocol
@@ -429,11 +483,8 @@ tl::expected<std::string, url_pattern_errors> canonicalize_search(
 tl::expected<std::string, url_pattern_errors> canonicalize_hash(
     std::string_view input);
 
-// @see https://urlpattern.spec.whatwg.org/#parse-a-constructor-string
-url_pattern_init parse_constructor_string(std::string_view input);
-
 // @see https://urlpattern.spec.whatwg.org/#tokenize
-std::string tokenize(std::string_view input, Token::Policy policy);
+std::vector<Token> tokenize(std::string_view input, token_policy policy);
 
 // @see https://urlpattern.spec.whatwg.org/#process-a-base-url-string
 std::string process_base_url_string(std::string_view input,

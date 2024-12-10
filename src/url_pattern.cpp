@@ -603,15 +603,126 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hash(
   return std::string(hash.substr(1));
 }
 
-url_pattern_init parse_constructor_string(std::string_view input) {
+url_pattern_init constructor_string_parser::parse(std::string_view input) {
   (void)input;
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
-  // TODO: Implement this
+  auto token_list = tokenize(input, token_policy::LENIENT);
+  auto parser = constructor_string_parser(input, token_list);
+
+  // While parser’s token index is less than parser’s token list size:
+  while (parser.token_index < parser.token_list.size()) {
+    // Set parser’s token increment to 1.
+    parser.token_increment = 1;
+
+    // If parser’s token list[parser’s token index]'s type is "end" then:
+    if (parser.token_list[parser.token_index].type == token_type::END) {
+      // If parser’s state is "init":
+      if (parser.state == State::INIT) {
+        // Run rewind given parser.
+        parser.rewind();
+        // If the result of running is a hash prefix given parser is true, then
+        // run change state given parser, "hash" and 1.
+        if (parser.is_hash_prefix()) {
+          parser.change_state(State::HASH, 1);
+        } else if (parser.is_search_prefix()) {
+          // Otherwise if the result of running is a search prefix given parser
+          // is true: Run change state given parser, "search" and 1.
+          parser.change_state(State::SEARCH, 1);
+        } else {
+          // Run change state given parser, "pathname" and 0.
+          parser.change_state(State::PATHNAME, 0);
+        }
+        // Increment parser’s token index by parser’s token increment.
+        parser.token_index += parser.token_increment;
+        // Continue.
+        continue;
+      }
+
+      if (parser.state == State::AUTHORITY) {
+        // If parser’s state is "authority":
+        // Run rewind and set state given parser, and "hostname".
+        parser.rewind();
+        parser.change_state(State::HOSTNAME, 0);
+        // Increment parser’s token index by parser’s token increment.
+        parser.token_index += parser.token_increment;
+        // Continue.
+        continue;
+      }
+
+      // Run change state given parser, "done" and 0.
+      parser.change_state(State::DONE, 0);
+      // Break.
+      break;
+    }
+
+    // If the result of running is a group open given parser is true:
+    if (parser.is_group_open()) {
+      // Increment parser’s group depth by 1.
+      parser.group_depth += 1;
+      // Increment parser’s token index by parser’s token increment.
+      parser.token_index += parser.token_increment;
+    }
+
+    // If parser’s group depth is greater than 0:
+    if (parser.group_depth > 0) {
+      // If the result of running is a group close given parser is true, then
+      // decrement parser’s group depth by 1.
+      if (parser.is_group_close()) {
+        parser.group_depth -= 1;
+      } else {
+        // Increment parser’s token index by parser’s token increment.
+        parser.token_index += parser.token_increment;
+        continue;
+      }
+    }
+
+    // Switch on parser’s state and run the associated steps:
+    switch (parser.state) {
+      case State::INIT: {
+        // If the result of running is a protocol suffix given parser is true:
+        if (parser.is_protocol_suffix()) {
+          // Run rewind and set state given parser and "protocol".
+          parser.rewind();
+          parser.change_state(State::PROTOCOL, 0);
+        }
+        break;
+      }
+      case State::PROTOCOL: {
+        // If the result of running is a protocol suffix given parser is true:
+        if (parser.is_protocol_suffix()) {
+          // Run compute protocol matches a special scheme flag given parser.
+          parser.compute_protocol_matches_special_scheme_flag();
+          // Let next state be "pathname".
+          auto next_state = State::PATHNAME;
+          // Let skip be 1.
+          auto skip = 1;
+          // If the result of running next is authority slashes given parser is
+          // true:
+          if (parser.next_is_authority_slashes()) {
+            // Set next state to "authority".
+            next_state = State::AUTHORITY;
+            // Set skip to 3.
+            skip = 3;
+          } else if (parser.protocol_matches_a_special_scheme_flag) {
+            // Otherwise if parser’s protocol matches a special scheme flag is
+            // true, then set next state to "authority".
+            next_state = State::AUTHORITY;
+          }
+
+          // Run change state given parser, next state, and skip.
+          parser.change_state(next_state, skip);
+        }
+        break;
+      }
+      default:
+        // TODO: Implement this.
+    }
+  }
   return {};
 }
 
-std::string tokenize(std::string_view input, Token::Policy policy) {
+std::vector<Token> tokenize(std::string_view input, token_policy policy) {
   // Let tokenizer be a new tokenizer.
   // Set tokenizer’s input to input.
   // Set tokenizer’s policy to policy.
@@ -623,7 +734,7 @@ std::string tokenize(std::string_view input, Token::Policy policy) {
     // TODO
   }
   // TODO: Implement this
-  return "";
+  return {};
 }
 
 std::string escape_pattern(std::string_view input) {
