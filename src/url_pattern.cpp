@@ -660,6 +660,12 @@ std::string escape_pattern(std::string_view input) {
   return result;
 }
 
+std::string escape_regexp_string(std::string_view input) {
+  (void)input;
+  // TODO: Implement this.
+  return "";
+}
+
 std::string process_base_url_string(std::string_view input,
                                     std::string_view type) {
   // Assert: input is not null.
@@ -763,10 +769,103 @@ std::tuple<std::string, std::vector<std::string>>
 generate_regular_expression_and_name_list(
     std::vector<url_pattern_part>& part_list,
     url_pattern_compile_component_options options) {
-  // TODO: Implement this
-  (void)part_list;
-  (void)options;
-  return {"", {}};
+  // Let result be "^"
+  std::string result = "^";
+
+  // Let name list be a new list
+  std::vector<std::string> name_list;
+  const std::string full_wildcard_regexp_value = ".*";
+
+  // For each part of part list:
+  for (const url_pattern_part& part : part_list) {
+    // If part's type is "fixed-text":
+    if (part.type == url_pattern_part_type::FIXED_TEST) {
+      // If part's modifier is "none"
+      if (part.modifier == url_pattern_part_modifier::NONE) {
+        // Append the result of running escape a regexp string given part's
+        // value
+        result += escape_regexp_string(part.value);
+      } else {
+        // A "fixed-text" part with a modifier uses a non capturing group
+        // (?:<fixed text>)<modifier>
+        result += "(?:" + escape_regexp_string(part.value) + ")" +
+                  convert_modifier_to_string(part.modifier);
+      }
+      continue;
+    }
+
+    // Assert: part's name is not the empty string
+    ADA_ASSERT_TRUE(!part.name.empty());
+
+    // Append part's name to name list
+    name_list.push_back(part.name);
+
+    // Let regexp value be part's value
+    std::string regexp_value = part.value;
+
+    // If part's type is "segment-wildcard"
+    if (part.type == url_pattern_part_type::SEGMENT_WILDCARD) {
+      regexp_value = generate_segment_wildcard_regexp(options);
+    }
+    // Otherwise if part's type is "full-wildcard"
+    else if (part.type == url_pattern_part_type::FULL_WILDCARD) {
+      regexp_value = full_wildcard_regexp_value;
+    }
+
+    // If part's prefix is the empty string and part's suffix is the empty
+    // string
+    if (part.prefix.empty() && part.suffix.empty()) {
+      // If part's modifier is "none" or "optional"
+      if (part.modifier == url_pattern_part_modifier::NONE ||
+          part.modifier == url_pattern_part_modifier::OPTIONAL) {
+        // (<regexp value>)<modifier>
+        result += "(" + regexp_value + ")" +
+                  convert_modifier_to_string(part.modifier);
+      } else {
+        // ((?:<regexp value>)<modifier>)
+        result += "((?:" + regexp_value + ")" +
+                  convert_modifier_to_string(part.modifier) + ")";
+      }
+      continue;
+    }
+
+    // If part's modifier is "none" or "optional"
+    if (part.modifier == url_pattern_part_modifier::NONE ||
+        part.modifier == url_pattern_part_modifier::OPTIONAL) {
+      // (?:<prefix>(<regexp value>)<suffix>)<modifier>
+      result += "(?:" + escape_regexp_string(part.prefix) + "(" + regexp_value +
+                ")" + escape_regexp_string(part.suffix) + ")" +
+                convert_modifier_to_string(part.modifier);
+      continue;
+    }
+
+    // Assert: part's modifier is "zero-or-more" or "one-or-more"
+    ADA_ASSERT_TRUE(part.modifier == url_pattern_part_modifier::ZERO_OR_MORE ||
+                    part.modifier == url_pattern_part_modifier::ONE_OR_MORE);
+
+    // Assert: part's prefix is not the empty string or part's suffix is not the
+    // empty string
+    ADA_ASSERT_TRUE(!part.prefix.empty() || !part.suffix.empty());
+
+    // (?:<prefix>((?:<regexp value>)(?:<suffix><prefix>(?:<regexp
+    // value>))*)<suffix>)?
+    result += "(?:" + escape_regexp_string(part.prefix) +
+              "((?:" + regexp_value +
+              ")(?:" + escape_regexp_string(part.suffix) +
+              escape_regexp_string(part.prefix) + "(?:" + regexp_value +
+              "))*)" + escape_regexp_string(part.suffix) + ")";
+
+    // If part's modifier is "zero-or-more" then append "?" to the end of result
+    if (part.modifier == url_pattern_part_modifier::ZERO_OR_MORE) {
+      result += "?";
+    }
+  }
+
+  // Append "$" to the end of result
+  result += "$";
+
+  // Return (result, name list)
+  return {result, name_list};
 }
 
 constexpr bool is_ipv6_address(std::string_view input) noexcept {
@@ -784,6 +883,39 @@ constexpr bool is_ipv6_address(std::string_view input) noexcept {
   if (input.front() == '\\' && input.at(1) == '[') return true;
   // Return false.
   return false;
+}
+
+std::string convert_modifier_to_string(url_pattern_part_modifier modifier) {
+  // TODO: Optimize this.
+  switch (modifier) {
+      // If modifier is "zero-or-more", then return "*".
+    case url_pattern_part_modifier::ZERO_OR_MORE:
+      return "*";
+    // If modifier is "optional", then return "?".
+    case url_pattern_part_modifier::NONE:
+      return "?";
+    // If modifier is "one-or-more", then return "+".
+    case url_pattern_part_modifier::ONE_OR_MORE:
+      return "+";
+    // Return the empty string.
+    default:
+      return "";
+  }
+}
+
+std::string generate_segment_wildcard_regexp(
+    url_pattern_compile_component_options options) {
+  // Let result be "[^".
+  std::string result = "[^";
+  // Append the result of running escape a regexp string given options’s
+  // delimiter code point to the end of result.
+  ADA_ASSERT_TRUE(options.delimiter.has_value());
+  result.append(
+      escape_regexp_string(std::string_view(&options.delimiter.value(), 1)));
+  // Append "]+?" to the end of result.
+  result.append("]+?");
+  // Return result.
+  return result;
 }
 
 bool protocol_component_matches_special_scheme(std::string_view input) {

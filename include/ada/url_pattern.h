@@ -98,10 +98,42 @@ struct url_pattern_init {
   std::optional<std::string> base_url;
 };
 
+enum class url_pattern_part_type : uint8_t {
+  // The part represents a simple fixed text string.
+  FIXED_TEST,
+  // The part represents a matching group with a custom regular expression.
+  REGEXP,
+  // The part represents a matching group that matches code points up to the
+  // next separator code point. This is typically used for a named group like
+  // ":foo" that does not have a custom regular expression.
+  SEGMENT_WILDCARD,
+  // The part represents a matching group that greedily matches all code points.
+  // This is typically used for the "*" wildcard matching group.
+  FULL_WILDCARD,
+};
+
+enum class url_pattern_part_modifier : uint8_t {
+  // The part does not have a modifier.
+  NONE,
+  // The part has an optional modifier indicated by the U+003F (?) code point.
+  OPTIONAL,
+  // The part has a "zero or more" modifier indicated by the U+002A (*) code
+  // point.
+  ZERO_OR_MORE,
+  // The part has a "one or more" modifier indicated by the U+002B (+) code
+  // point.
+  ONE_OR_MORE,
+};
+
 // @see https://urlpattern.spec.whatwg.org/#part
 struct url_pattern_part {
   // A part has an associated type, a string, which must be set upon creation.
-  std::string type;
+  url_pattern_part_type type;
+  // A part has an associated value, a string, which must be set upon creation.
+  std::string value;
+  // A part has an associated modifier a string, which must be set upon
+  // creation.
+  url_pattern_part_modifier modifier;
   // A part has an associated name, a string, initially the empty string.
   std::string name{};
   // A part has an associated prefix, a string, initially the empty string.
@@ -410,6 +442,9 @@ std::string process_base_url_string(std::string_view input,
 // @see https://urlpattern.spec.whatwg.org/#escape-a-pattern-string
 std::string escape_pattern(std::string_view input);
 
+// @see https://urlpattern.spec.whatwg.org/#escape-a-regexp-string
+std::string escape_regexp_string(std::string_view input);
+
 // @see https://urlpattern.spec.whatwg.org/#is-an-absolute-pathname
 constexpr bool is_absolute_pathname(std::string_view input,
                                     std::string_view type) noexcept;
@@ -438,6 +473,13 @@ constexpr bool is_ipv6_address(std::string_view input) noexcept;
 // @see
 // https://urlpattern.spec.whatwg.org/#protocol-component-matches-a-special-scheme
 bool protocol_component_matches_special_scheme(std::string_view input);
+
+// @see https://urlpattern.spec.whatwg.org/#convert-a-modifier-to-a-string
+std::string convert_modifier_to_string(url_pattern_part_modifier modifier);
+
+// @see https://urlpattern.spec.whatwg.org/#generate-a-segment-wildcard-regexp
+std::string generate_segment_wildcard_regexp(
+    url_pattern_compile_component_options options);
 
 }  // namespace url_pattern_helpers
 
