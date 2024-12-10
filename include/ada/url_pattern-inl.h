@@ -77,7 +77,7 @@ inline bool url_pattern::has_regexp_groups() const ada_lifetime_bound {
 }
 
 inline bool url_pattern_part::is_regexp() const noexcept {
-  return type == "regexp";
+  return type == url_pattern_part_type::REGEXP;
 }
 
 }  // namespace ada
