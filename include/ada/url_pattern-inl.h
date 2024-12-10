@@ -80,6 +80,244 @@ inline bool url_pattern_part::is_regexp() const noexcept {
   return type == url_pattern_part_type::REGEXP;
 }
 
+namespace url_pattern_helpers {
+inline void constructor_string_parser::rewind() {
+  // Set parser’s token index to parser’s component start.
+  token_index = component_start;
+  // Set parser’s token increment to 0.
+  token_increment = 0;
+}
+
+inline bool constructor_string_parser::is_hash_prefix() {
+  // Return the result of running is a non-special pattern char given parser,
+  // parser’s token index and "#".
+  return is_non_special_pattern_char(token_index, "#");
+}
+
+inline bool constructor_string_parser::is_search_prefix() {
+  // If result of running is a non-special pattern char given parser, parser’s
+  // token index and "?" is true, then return true.
+  if (is_non_special_pattern_char(token_index, "?")) {
+    return true;
+  }
+
+  // If parser’s token list[parser’s token index]'s value is not "?", then
+  // return false.
+  if (token_list[token_index].value != "?") {
+    return false;
+  }
+
+  // If previous index is less than 0, then return true.
+  if (token_index == 0) return true;
+  // Let previous index be parser’s token index − 1.
+  auto previous_index = token_index - 1;
+  // Let previous token be the result of running get a safe token given parser
+  // and previous index.
+  auto previous_token = get_safe_token(previous_index);
+  // If any of the following are true, then return false:
+  // - previous token’s type is "name".
+  // - previous token’s type is "regexp".
+  // - previous token’s type is "close".
+  // - previous token’s type is "asterisk".
+  return !(previous_token.type == token_type::NAME ||
+           previous_token.type == token_type::REGEXP ||
+           previous_token.type == token_type::CLOSE ||
+           previous_token.type == token_type::ASTERISK);
+}
+
+inline bool constructor_string_parser::is_non_special_pattern_char(
+    size_t index, std::string_view value) {
+  // Let token be the result of running get a safe token given parser and index.
+  auto token = get_safe_token(index);
+
+  // If token’s value is not value, then return false.
+  if (token.value != value) {
+    return false;
+  }
+
+  // If any of the following are true:
+  // - token’s type is "char";
+  // - token’s type is "escaped-char"; or
+  // - token’s type is "invalid-char",
+  // - then return true.
+  return token.type == token_type::CHAR ||
+         token.type == token_type::ESCAPED_CHAR ||
+         token.type == token_type::INVALID_CHAR ||
+         token.type == token_type::INVALID_CHAR;
+}
+
+inline const Token& constructor_string_parser::get_safe_token(size_t index) {
+  // If index is less than parser’s token list's size, then return parser’s
+  // token list[index].
+  if (index < token_list.size()) [[likely]] {
+    return token_list[index];
+  }
+
+  // Assert: parser’s token list's size is greater than or equal to 1.
+  ADA_ASSERT_TRUE(token_list.size() >= 1);
+
+  // Let token be parser’s token list[last index].
+  // Assert: token’s type is "end".
+  ADA_ASSERT_TRUE(token_list.end()->type == token_type::END);
+
+  // Return token.
+  return *token_list.end();
+}
+
+inline bool constructor_string_parser::is_group_open() const {
+  // If parser’s token list[parser’s token index]'s type is "open", then return
+  // true.
+  return token_list[token_index].type == token_type::OPEN;
+}
+
+inline bool constructor_string_parser::is_group_close() const {
+  // If parser’s token list[parser’s token index]'s type is "close", then return
+  // true.
+  return token_list[token_index].type == token_type::CLOSE;
+}
+
+inline bool constructor_string_parser::next_is_authority_slashes() {
+  // If the result of running is a non-special pattern char given parser,
+  // parser’s token index + 1, and "/" is false, then return false.
+  if (!is_non_special_pattern_char(token_index + 1, "/")) {
+    return false;
+  }
+  // If the result of running is a non-special pattern char given parser,
+  // parser’s token index + 2, and "/" is false, then return false.
+  if (!is_non_special_pattern_char(token_index + 2, "/")) {
+    return false;
+  }
+  return true;
+}
+
+inline bool constructor_string_parser::is_protocol_suffix() {
+  // Return the result of running is a non-special pattern char given parser,
+  // parser’s token index, and ":".
+  return is_non_special_pattern_char(token_index, ":");
+}
+
+inline void
+constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
+  // Let protocol string be the result of running make a component string given
+  // parser.
+  auto protocol_string = make_component_string();
+  // Let protocol component be the result of compiling a component given
+  // protocol string, canonicalize a protocol, and default options.
+  auto protocol_component = url_pattern_component::compile(
+      protocol_string, canonicalize_protocol,
+      url_pattern_compile_component_options::DEFAULT);
+  // If the result of running protocol component matches a special scheme given
+  // protocol component is true, then set parser’s protocol matches a special
+  // scheme flag to true.
+  if (protocol_component_matches_special_scheme(
+          protocol_component.get_pattern())) {
+    protocol_matches_a_special_scheme_flag = true;
+  }
+}
+
+inline void constructor_string_parser::change_state(State new_state,
+                                                    size_t skip) {
+  // If parser’s state is not "init", not "authority", and not "done", then set
+  // parser’s result[parser’s state] to the result of running make a component
+  // string given parser.
+  if (state != State::INIT && state != State::AUTHORITY &&
+      state != State::DONE) {
+    auto value = make_component_string();
+    // TODO: Simplify this.
+    switch (state) {
+      case State::PROTOCOL: {
+        result.protocol = value;
+        break;
+      }
+      case State::USERNAME: {
+        result.username = value;
+        break;
+      }
+      case State::PASSWORD: {
+        result.password = value;
+        break;
+      }
+      case State::HOSTNAME: {
+        result.hostname = value;
+        break;
+      }
+      case State::PORT: {
+        result.port = value;
+        break;
+      }
+      case State::PATHNAME: {
+        result.pathname = value;
+        break;
+      }
+      case State::SEARCH: {
+        result.search = value;
+        break;
+      }
+      case State::HASH: {
+        result.hash = value;
+        break;
+      }
+      default:
+        unreachable();
+    }
+  } else if ((state == State::PROTOCOL || state == State::AUTHORITY ||
+              state == State::USERNAME || state == State::PASSWORD ||
+              state == State::HOSTNAME || state == State::PORT) &&
+             (new_state == State::SEARCH || new_state == State::HASH) &&
+             !result.pathname.has_value()) {
+    // If parser’s state is "protocol", "authority", "username", "password",
+    // "hostname", or "port"; new state is "search" or "hash"; and parser’s
+    // result["pathname"] does not exist, then:
+    // If parser’s protocol matches a special scheme flag is true, then set
+    // parser’s result["pathname"] to "/".
+    if (protocol_matches_a_special_scheme_flag) {
+      result.pathname = "/";
+    } else {
+      // Otherwise, set parser’s result["pathname"] to the empty string.
+      result.pathname = "";
+    }
+  } else if ((state == State::PROTOCOL || state == State::AUTHORITY ||
+              state == State::USERNAME || state == State::PASSWORD ||
+              state == State::HOSTNAME || state == State::PORT ||
+              state == State::PATHNAME) &&
+             new_state == State::HASH && !result.search.has_value()) {
+    // If parser’s state is "protocol", "authority", "username", "password",
+    // "hostname", "port", or "pathname"; new state is "hash"; and parser’s
+    // result["search"] does not exist, then set parser’s result["search"] to
+    // the empty string.
+    result.search = "";
+  }
+
+  // If parser’s state is not "init" and new state is not "done", then:
+
+  // Set parser’s state to new state.
+  state = new_state;
+  // Increment parser’s token index by skip.
+  token_index += skip;
+  // Set parser’s token increment to 0.
+  token_increment = 0;
+}
+
+inline std::string_view constructor_string_parser::make_component_string() {
+  // Assert: parser’s token index is less than parser’s token list's size.
+  ADA_ASSERT_TRUE(token_index < token_list.size());
+
+  // Let token be parser’s token list[parser’s token index].
+  const auto token = token_list[token_index];
+  // Let component start token be the result of running get a safe token given
+  // parser and parser’s component start.
+  const auto component_start_token = get_safe_token(component_start);
+  // Let component start input index be component start token’s index.
+  const auto component_start_input_index = component_start_token.index;
+  // Let end index be token’s index.
+  const auto end_index = token.index;
+  // Return the code point substring from component start input index to end
+  // index within parser’s input.
+  return input.substr(component_start_input_index, end_index);
+}
+
+}  // namespace url_pattern_helpers
+
 }  // namespace ada
 
 #endif
