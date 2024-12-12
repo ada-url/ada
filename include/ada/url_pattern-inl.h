@@ -352,6 +352,68 @@ inline bool constructor_string_parser::is_port_prefix() {
   return is_non_special_pattern_char(token_index, ":");
 }
 
+inline void Tokenizer::get_next_code_point() {
+  // Set tokenizer’s code point to the Unicode code point in tokenizer’s input
+  // at the position indicated by tokenizer’s next index.
+  code_point = &input[next_index];
+  // Increment tokenizer’s next index by 1.
+  next_index++;
+}
+
+inline void Tokenizer::seek_and_get_next_code_point(size_t index) {
+  // Set tokenizer’s next index to index.
+  next_index = index;
+  // Run get the next code point given tokenizer.
+  get_next_code_point();
+}
+
+inline void Tokenizer::add_token(token_type type, size_t next_position,
+                                 size_t value_position,
+                                 std::optional<size_t> value_length) {
+  // This is done to merge 2 different functions into 1.
+  auto default_length = value_length.value_or(next_position - value_position);
+
+  // Let token be a new token.
+  // Set token’s type to type.
+  // Set token’s index to tokenizer’s index.
+  // Set token’s value to the code point substring from value position with
+  // length value length within tokenizer’s input.
+  auto token = Token{.type = type,
+                     .index = index,
+                     .value = input.substr(value_position, default_length)};
+
+  // Append token to the back of tokenizer’s token list.
+  token_list.push_back(token);
+  // Set tokenizer’s index to next position.
+  index = next_position;
+}
+
+// @see https://urlpattern.spec.whatwg.org/#process-a-tokenizing-error
+inline tl::expected<void, url_pattern_errors>
+Tokenizer::process_tokenizing_error(size_t next_position,
+                                    size_t value_position) {
+  // If tokenizer’s policy is "strict", then throw a TypeError.
+  if (policy == token_policy::STRICT) {
+    return tl::unexpected(url_pattern_errors::type_error);
+  }
+  // Assert: tokenizer’s policy is "lenient".
+  ADA_ASSERT_TRUE(policy == token_policy::LENIENT);
+  // Run add a token with default length given tokenizer, "invalid-char", next
+  // position, and value position.
+  add_token(token_type::INVALID_CHAR, next_position, value_position);
+  return {};
+}
+
+// @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
+inline bool Tokenizer::is_valid_name_code_point(char code_point, bool first) {
+  // If first is true return the result of checking if code point is contained
+  // in the IdentifierStart set of code points. Otherwise return the result of
+  // checking if code point is contained in the IdentifierPart set of code
+  // points.
+  // TODO: Implement this
+  return true;
+}
+
 }  // namespace url_pattern_helpers
 
 }  // namespace ada
