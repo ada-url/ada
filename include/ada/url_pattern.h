@@ -337,9 +337,27 @@ struct Token {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#tokenizer
-struct Tokenizer {
+class Tokenizer {
   explicit Tokenizer(std::string_view input, token_policy policy)
       : input(input), policy(policy) {}
+
+  // @see https://urlpattern.spec.whatwg.org/#get-the-next-code-point
+  void get_next_code_point();
+
+  // @see https://urlpattern.spec.whatwg.org/#seek-and-get-the-next-code-point
+  void seek_and_get_next_code_point(size_t index);
+
+  // @see https://urlpattern.spec.whatwg.org/#add-a-token
+  // @see https://urlpattern.spec.whatwg.org/#add-a-token-with-default-length
+  void add_token(token_type type, size_t next_position, size_t value_position,
+                 std::optional<size_t> value_length = std::nullopt);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-a-tokenizing-error
+  tl::expected<void, url_pattern_errors> process_tokenizing_error(
+      size_t next_position, size_t value_position);
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
+  bool is_valid_name_code_point(char code_point, bool first);
 
   // has an associated input, a pattern string, initially the empty string.
   std::string input{};
