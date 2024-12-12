@@ -316,6 +316,42 @@ inline std::string_view constructor_string_parser::make_component_string() {
   return input.substr(component_start_input_index, end_index);
 }
 
+inline bool constructor_string_parser::is_an_identity_terminator() {
+  // Return the result of running is a non-special pattern char given parser,
+  // parser’s token index, and "@".
+  return is_non_special_pattern_char(token_index, "@");
+}
+
+inline bool constructor_string_parser::is_pathname_start() {
+  // Return the result of running is a non-special pattern char given parser,
+  // parser’s token index, and "/".
+  return is_non_special_pattern_char(token_index, "/");
+}
+
+inline bool constructor_string_parser::is_password_prefix() {
+  // Return the result of running is a non-special pattern char given parser,
+  // parser’s token index, and ":".
+  return is_non_special_pattern_char(token_index, ":");
+}
+
+inline bool constructor_string_parser::is_an_ipv6_open() {
+  // Return the result of running is a non-special pattern char given parser,
+  // parser’s token index, and "[".
+  return is_non_special_pattern_char(token_index, "[");
+}
+
+inline bool constructor_string_parser::is_an_ipv6_close() {
+  // Return the result of running is a non-special pattern char given parser,
+  // parser’s token index, and "]".
+  return is_non_special_pattern_char(token_index, "]");
+}
+
+inline bool constructor_string_parser::is_port_prefix() {
+  // Return the result of running is a non-special pattern char given parser,
+  // parser’s token index, and ":".
+  return is_non_special_pattern_char(token_index, ":");
+}
+
 }  // namespace url_pattern_helpers
 
 }  // namespace ada

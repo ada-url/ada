@@ -407,6 +407,24 @@ struct constructor_string_parser {
   // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
   bool next_is_authority_slashes();
 
+  // @see https://urlpattern.spec.whatwg.org/#is-an-identity-terminator
+  bool is_an_identity_terminator();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-pathname-start
+  bool is_pathname_start();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-password-prefix
+  bool is_password_prefix();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-an-ipv6-open
+  bool is_an_ipv6_open();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-an-ipv6-close
+  bool is_an_ipv6_close();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-port-prefix
+  bool is_port_prefix();
+
   // has an associated input, a string, which must be set upon creation.
   std::string input;
   // has an associated token list, a token list, which must be set upon
