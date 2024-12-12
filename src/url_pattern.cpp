@@ -1,5 +1,6 @@
 #include "ada.h"
 
+#include <algorithm>
 #include <optional>
 #include <ranges>
 #include <regex>
@@ -1213,7 +1214,7 @@ std::string generate_pattern_string(
   std::string result{};
   // Let index list be the result of getting the indices for part list.
   // For each index of index list:
-  for (size_t index : std::views::iota(size_t{0}, part_list.size())) {
+  for (size_t index : std::views::iota(0UL, part_list.size())) {
     // Let part be part list[index].
     auto part = part_list[index];
     // Let previous part be part list[index - 1] if index is greater than 0,
