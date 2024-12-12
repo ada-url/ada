@@ -148,9 +148,9 @@ struct url_pattern_part {
 struct url_pattern_compile_component_options {
   url_pattern_compile_component_options() = default;
   explicit url_pattern_compile_component_options(
-      std::optional<char> delimiter = std::nullopt,
-      std::optional<char> prefix = std::nullopt)
-      : delimiter(delimiter), prefix(prefix){};
+      std::optional<char> new_delimiter = std::nullopt,
+      std::optional<char> new_prefix = std::nullopt)
+      : delimiter(new_delimiter), prefix(new_prefix){};
 
   // @see https://urlpattern.spec.whatwg.org/#options-delimiter-code-point
   std::optional<char> delimiter{};
@@ -170,13 +170,13 @@ class url_pattern_component {
 
   // This function explicitly takes a std::string because it is moved.
   // To avoid unnecessary copy, move each value while calling the constructor.
-  url_pattern_component(std::string pattern, std::string regexp,
-                        std::vector<std::string> group_name_list,
-                        bool has_regexp_groups)
-      : pattern(std::move(pattern)),
-        regexp(std::move(regexp)),
-        group_name_list(std::move(group_name_list)),
-        has_regexp_groups_(has_regexp_groups){};
+  url_pattern_component(std::string new_pattern, std::string new_regexp,
+                        std::vector<std::string> new_group_name_list,
+                        bool new_has_regexp_groups)
+      : pattern(std::move(new_pattern)),
+        regexp(std::move(new_regexp)),
+        group_name_list(std::move(new_group_name_list)),
+        has_regexp_groups_(new_has_regexp_groups){};
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
   template <url_pattern_encoding_callback F>
@@ -338,7 +338,7 @@ struct Token {
 
 // @see https://urlpattern.spec.whatwg.org/#tokenizer
 class Tokenizer {
-public:
+ public:
   explicit Tokenizer(std::string_view input, token_policy policy)
       : input(input), policy(policy) {}
 
@@ -371,7 +371,7 @@ public:
   // has an associated next index, a number, initially 0.
   size_t next_index = 0;
   // has an associated code point, a Unicode code point, initially null.
-  char* code_point = nullptr;
+  std::string_view code_point{};
 };
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
