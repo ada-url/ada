@@ -388,7 +388,13 @@ inline void Tokenizer::add_token(token_type type, size_t next_position,
   index = next_position;
 }
 
-// @see https://urlpattern.spec.whatwg.org/#process-a-tokenizing-error
+inline void Tokenizer::add_token_with_defaults(token_type type) {
+  // Run add a token with default length given tokenizer, type, tokenizer’s next
+  // index, and tokenizer’s index.
+  add_token(type, next_index, index);
+}
+
+// TODO: Make this a `[[nodiscard]]` to handle the errors.
 inline tl::expected<void, url_pattern_errors>
 Tokenizer::process_tokenizing_error(size_t next_position,
                                     size_t value_position) {
