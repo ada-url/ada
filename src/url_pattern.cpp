@@ -1,6 +1,7 @@
 #include "ada.h"
 
 #include <optional>
+#include <ranges>
 #include <regex>
 #include <string>
 
@@ -926,7 +927,7 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
         bool first_code_point = name_position == name_start;
         // Let valid code point be the result of running is a valid name code
         // point given tokenizer’s code point and first code point.
-        auto valid_code_point = tokenizer.is_valid_name_code_point(
+        auto valid_code_point = is_valid_name_code_point(
             tokenizer.code_point.at(0), first_code_point);
         // If valid code point is false break.
         if (!valid_code_point) break;
@@ -1154,7 +1155,7 @@ std::string escape_regexp_string(std::string_view input) {
   for (const auto& c : input) {
     // TODO: Optimize this even further
     if (should_escape_regexp_char(c)) {
-      result.append("\\" + c);
+      result.append(std::string("\\") + c);
     } else {
       result.push_back(c);
     }
@@ -1208,10 +1209,184 @@ std::vector<url_pattern_part> parse_pattern_string(
 std::string generate_pattern_string(
     std::vector<url_pattern_part>& part_list,
     url_pattern_compile_component_options& options) {
-  (void)part_list;
-  (void)options;
-  // TODO: Implement this
-  return {};
+  // Let result be the empty string.
+  std::string result{};
+  // Let index list be the result of getting the indices for part list.
+  // For each index of index list:
+  for (size_t index : std::views::iota(size_t{0}, part_list.size())) {
+    // Let part be part list[index].
+    auto part = part_list[index];
+    // Let previous part be part list[index - 1] if index is greater than 0,
+    // otherwise let it be null.
+    // TODO: Optimization opportunity. Find a way to avoid making a copy here.
+    std::optional<url_pattern_part> previous_part =
+        index == 0 ? std::nullopt : std::optional(part_list.at(index - 1));
+    // Let next part be part list[index + 1] if index is less than index list’s
+    // size - 1, otherwise let it be null.
+    std::optional<url_pattern_part> next_part =
+        index < part_list.size() - 1 ? std::optional(part_list.at(index + 1))
+                                     : std::nullopt;
+    // If part’s type is "fixed-text" then:
+    if (part.type == url_pattern_part_type::FIXED_TEXT) {
+      // If part’s modifier is "none" then:
+      if (part.modifier == url_pattern_part_modifier::NONE) {
+        // Append the result of running escape a pattern string given part’s
+        // value to the end of result.
+        result.append(escape_pattern(part.value));
+        continue;
+      }
+      // Append "{" to the end of result.
+      result += "{";
+      // Append the result of running escape a pattern string given part’s value
+      // to the end of result.
+      result.append(escape_pattern(part.value));
+      // Append "}" to the end of result.
+      result += "}";
+      // Append the result of running convert a modifier to a string given
+      // part’s modifier to the end of result.
+      result.append(convert_modifier_to_string(part.modifier));
+      continue;
+    }
+    // Let custom name be true if part’s name[0] is not an ASCII digit;
+    // otherwise false.
+    // TODO: Optimization opportunity: Find a way to directly check
+    // is_ascii_digit.
+    bool custom_name = idna::is_ascii(std::string_view(part.name.data(), 1));
+    // Let needs grouping be true if at least one of the following are true,
+    // otherwise let it be false:
+    // - part’s suffix is not the empty string.
+    // - part’s prefix is not the empty string and is not options’s prefix code
+    // point.
+    // TODO: part.prefix is a string, but options.prefix is a char. Which one is
+    // true?
+    bool needs_grouping =
+        !part.suffix.empty() ||
+        (!part.prefix.empty() && part.prefix[0] != options.prefix);
+
+    // If all of the following are true:
+    // - needs grouping is false; and
+    // - custom name is true; and
+    // - part’s type is "segment-wildcard"; and
+    // - part’s modifier is "none"; and
+    // - next part is not null; and
+    // - next part’s prefix is the empty string; and
+    // - next part’s suffix is the empty string
+    if (!needs_grouping && custom_name &&
+        part.type == url_pattern_part_type::SEGMENT_WILDCARD &&
+        part.modifier == url_pattern_part_modifier::NONE &&
+        next_part.has_value() && next_part->prefix.empty() &&
+        next_part->suffix.empty()) {
+      // If next part’s type is "fixed-text":
+      if (next_part->type == url_pattern_part_type::FIXED_TEXT) {
+        // Set needs grouping to true if the result of running is a valid name
+        // code point given next part’s value's first code point and the boolean
+        // false is true.
+        // TODO: Implement this.
+      } else {
+        // Set needs grouping to true if next part’s name[0] is an ASCII digit.
+        needs_grouping =
+            idna::is_ascii(std::string_view(next_part->name.data(), 1));
+      }
+    }
+
+    // If all of the following are true:
+    // - needs grouping is false; and
+    // - part’s prefix is the empty string; and
+    // - previous part is not null; and
+    // - previous part’s type is "fixed-text"; and
+    // - previous part’s value's last code point is options’s prefix code point.
+    // then set needs grouping to true.
+    if (!needs_grouping && part.prefix.empty() && previous_part.has_value() &&
+        previous_part->type == url_pattern_part_type::FIXED_TEXT &&
+        previous_part->value.at(previous_part->value.size() - 1) ==
+            options.prefix.value()) {
+      needs_grouping = true;
+    }
+
+    // Assert: part’s name is not the empty string or null.
+    ADA_ASSERT_TRUE(!part.name.empty());
+
+    // If needs grouping is true, then append "{" to the end of result.
+    if (needs_grouping) {
+      result.append("{");
+    }
+
+    // Append the result of running escape a pattern string given part’s prefix
+    // to the end of result.
+    result.append(escape_pattern(part.prefix));
+
+    // If custom name is true:
+    if (custom_name) {
+      // Append ":" to the end of result.
+      result.append(":");
+      // Append part’s name to the end of result.
+      result.append(part.name);
+    }
+
+    // If part’s type is "regexp" then:
+    if (part.type == url_pattern_part_type::REGEXP) {
+      // Append "(" to the end of result.
+      result.append("(");
+      // Append part’s value to the end of result.
+      result.append(part.value);
+      // Append ")" to the end of result.
+      result.append(")");
+    } else if (part.type == url_pattern_part_type::SEGMENT_WILDCARD) {
+      // Otherwise if part’s type is "segment-wildcard" and custom name is
+      // false: Append "(" to the end of result.
+      result.append("(");
+      // Append the result of running generate a segment wildcard regexp given
+      // options to the end of result.
+      result.append(generate_segment_wildcard_regexp(options));
+      // Append ")" to the end of result.
+      result.append(")");
+    } else if (part.type == url_pattern_part_type::FULL_WILDCARD) {
+      // Otherwise if part’s type is "full-wildcard":
+      // If custom name is false and one of the following is true:
+      // - previous part is null; or
+      // - previous part’s type is "fixed-text"; or
+      // - previous part’s modifier is not "none"; or
+      // - needs grouping is true; or
+      // - part’s prefix is not the empty string
+      // - then append "*" to the end of result.
+      if (!custom_name &&
+          (!previous_part.has_value() ||
+           previous_part->type == url_pattern_part_type::FIXED_TEXT ||
+           previous_part->modifier != url_pattern_part_modifier::NONE ||
+           needs_grouping || !part.prefix.empty())) {
+        result.append("*");
+      } else {
+        // Append "(" to the end of result.
+        // Append full wildcard regexp value to the end of result.
+        // Append ")" to the end of result.
+        result.append("(.*)");
+      }
+    }
+
+    // If all of the following are true:
+    // - part’s type is "segment-wildcard"; and
+    // - custom name is true; and
+    // - part’s suffix is not the empty string; and
+    // - The result of running is a valid name code point given part’s suffix's
+    // first code point and the boolean false is true then append U+005C (\) to
+    // the end of result.
+    if (part.type == url_pattern_part_type::SEGMENT_WILDCARD && custom_name &&
+        !part.suffix.empty() &&
+        is_valid_name_code_point(part.suffix[0], true)) {
+      result.append("\\");
+    }
+
+    // Append the result of running escape a pattern string given part’s suffix
+    // to the end of result.
+    result.append(escape_pattern(part.suffix));
+    // If needs grouping is true, then append "}" to the end of result.
+    if (needs_grouping) result.append("}");
+    // Append the result of running convert a modifier to a string given part’s
+    // modifier to the end of result.
+    result.append(convert_modifier_to_string(part.modifier));
+  }
+  // Return result.
+  return result;
 }
 
 }  // namespace url_pattern_helpers
@@ -1275,7 +1450,7 @@ generate_regular_expression_and_name_list(
   // For each part of part list:
   for (const url_pattern_part& part : part_list) {
     // If part's type is "fixed-text":
-    if (part.type == url_pattern_part_type::FIXED_TEST) {
+    if (part.type == url_pattern_part_type::FIXED_TEXT) {
       // If part's modifier is "none"
       if (part.modifier == url_pattern_part_modifier::NONE) {
         // Append the result of running escape a regexp string given part's
