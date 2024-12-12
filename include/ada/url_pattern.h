@@ -86,16 +86,16 @@ struct url_pattern_init {
   static tl::expected<std::string, url_pattern_errors> process_hash(
       std::string_view value, std::string_view type);
 
-  std::optional<std::string> protocol;
-  std::optional<std::string> username;
-  std::optional<std::string> password;
-  std::optional<std::string> hostname;
-  std::optional<std::string> port;
-  std::optional<std::string> pathname;
-  std::optional<std::string> search;
-  std::optional<std::string> hash;
+  std::optional<std::string> protocol{};
+  std::optional<std::string> username{};
+  std::optional<std::string> password{};
+  std::optional<std::string> hostname{};
+  std::optional<std::string> port{};
+  std::optional<std::string> pathname{};
+  std::optional<std::string> search{};
+  std::optional<std::string> hash{};
 
-  std::optional<std::string> base_url;
+  std::optional<std::string> base_url{};
 };
 
 enum class url_pattern_part_type : uint8_t {
@@ -339,8 +339,8 @@ struct Token {
 // @see https://urlpattern.spec.whatwg.org/#tokenizer
 class Tokenizer {
  public:
-  explicit Tokenizer(std::string_view input, token_policy policy)
-      : input(input), policy(policy) {}
+  explicit Tokenizer(std::string_view new_input, token_policy new_policy)
+      : input(new_input), policy(new_policy) {}
 
   // @see https://urlpattern.spec.whatwg.org/#get-the-next-code-point
   void get_next_code_point();
@@ -377,9 +377,9 @@ class Tokenizer {
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
 struct constructor_string_parser {
-  explicit constructor_string_parser(std::string_view input,
-                                     std::vector<Token>& token_list)
-      : input(input), token_list(token_list){};
+  explicit constructor_string_parser(std::string_view new_input,
+                                     std::vector<Token>& new_token_list)
+      : input(new_input), token_list(new_token_list){};
 
   // @see https://urlpattern.spec.whatwg.org/#rewind
   void rewind();
