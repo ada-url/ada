@@ -1130,10 +1130,36 @@ std::string escape_pattern(std::string_view input) {
   return result;
 }
 
+namespace {
+constexpr std::array<uint8_t, 256> escape_regexp_table = []() consteval {
+  std::array<uint8_t, 256> out{};
+  for (auto& c : {'.', '+', '*', '?', '^', '$', '{', '}', '(', ')', '[', ']',
+                  '|', '/', '\\'}) {
+    out[c] = 1;
+  }
+  return out;
+}();
+
+constexpr bool should_escape_regexp_char(char c) {
+  return escape_regexp_table[(uint8_t)c];
+}
+}  // namespace
+
 std::string escape_regexp_string(std::string_view input) {
-  (void)input;
-  // TODO: Implement this.
-  return "";
+  // Assert: input is an ASCII string.
+  ADA_ASSERT_TRUE(idna::is_ascii(input));
+  // Let result be the empty string.
+  std::string result{};
+  result.reserve(input.size());
+  for (const auto& c : input) {
+    // TODO: Optimize this even further
+    if (should_escape_regexp_char(c)) {
+      result.append("\\" + c);
+    } else {
+      result.push_back(c);
+    }
+  }
+  return result;
 }
 
 std::string process_base_url_string(std::string_view input,
