@@ -411,7 +411,7 @@ Tokenizer::process_tokenizing_error(size_t next_position,
 }
 
 // @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
-inline bool Tokenizer::is_valid_name_code_point(char cp, bool first) {
+inline bool is_valid_name_code_point(char cp, bool first) {
   // If first is true return the result of checking if code point is contained
   // in the IdentifierStart set of code points. Otherwise return the result of
   // checking if code point is contained in the IdentifierPart set of code

@@ -100,7 +100,7 @@ struct url_pattern_init {
 
 enum class url_pattern_part_type : uint8_t {
   // The part represents a simple fixed text string.
-  FIXED_TEST,
+  FIXED_TEXT,
   // The part represents a matching group with a custom regular expression.
   REGEXP,
   // The part represents a matching group that matches code points up to the
@@ -361,9 +361,6 @@ class Tokenizer {
   tl::expected<void, url_pattern_errors> process_tokenizing_error(
       size_t next_position, size_t value_position);
 
-  // @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
-  bool is_valid_name_code_point(char code_point, bool first);
-
   // has an associated input, a pattern string, initially the empty string.
   std::string input{};
   // has an associated policy, a tokenize policy, initially "strict".
@@ -572,6 +569,9 @@ std::string convert_modifier_to_string(url_pattern_part_modifier modifier);
 // @see https://urlpattern.spec.whatwg.org/#generate-a-segment-wildcard-regexp
 std::string generate_segment_wildcard_regexp(
     url_pattern_compile_component_options options);
+
+// @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
+bool is_valid_name_code_point(char code_point, bool first);
 
 }  // namespace url_pattern_helpers
 
