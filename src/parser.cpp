@@ -909,7 +909,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
   // If input is a scalar value string then:
   if (std::holds_alternative<std::string_view>(input)) {
     // Set init to the result of running parse a constructor string given input.
-    init = url_pattern_helpers::parse_constructor_string(
+    init = url_pattern_helpers::constructor_string_parser::parse(
         std::get<std::string_view>(input));
 
     // If baseURL is null and init["protocol"] does not exist, then throw a
