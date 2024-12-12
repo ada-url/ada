@@ -411,6 +411,8 @@ inline bool Tokenizer::is_valid_name_code_point(char code_point, bool first) {
   // checking if code point is contained in the IdentifierPart set of code
   // points.
   // TODO: Implement this
+  (void)code_point;
+  (void)first;
   return true;
 }
 
