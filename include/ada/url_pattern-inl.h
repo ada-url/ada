@@ -313,7 +313,7 @@ inline std::string_view constructor_string_parser::make_component_string() {
   const auto end_index = token.index;
   // Return the code point substring from component start input index to end
   // index within parser’s input.
-  return input.substr(component_start_input_index, end_index);
+  return std::string_view(input).substr(component_start_input_index, end_index);
 }
 
 inline bool constructor_string_parser::is_an_identity_terminator() {
@@ -360,9 +360,9 @@ inline void Tokenizer::get_next_code_point() {
   next_index++;
 }
 
-inline void Tokenizer::seek_and_get_next_code_point(size_t index) {
+inline void Tokenizer::seek_and_get_next_code_point(size_t new_index) {
   // Set tokenizer’s next index to index.
-  next_index = index;
+  next_index = new_index;
   // Run get the next code point given tokenizer.
   get_next_code_point();
 }
@@ -405,13 +405,13 @@ Tokenizer::process_tokenizing_error(size_t next_position,
 }
 
 // @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
-inline bool Tokenizer::is_valid_name_code_point(char code_point, bool first) {
+inline bool Tokenizer::is_valid_name_code_point(char cp, bool first) {
   // If first is true return the result of checking if code point is contained
   // in the IdentifierStart set of code points. Otherwise return the result of
   // checking if code point is contained in the IdentifierPart set of code
   // points.
   // TODO: Implement this
-  (void)code_point;
+  (void)cp;
   (void)first;
   return true;
 }
