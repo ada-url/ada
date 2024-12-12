@@ -77,4 +77,22 @@ std::string ipv4(const uint64_t address) noexcept {
   return output;
 }
 
+std::string url_serializer(const ada::url& url, bool excludeFragment) noexcept {
+    if (!excludeFragment) {
+        return url.get_href();
+    }
+
+    std::string href = url.get_href();
+    size_t hashLength = url.has_hash() ? url.get_hash().size() : 0;
+
+    std::string serialized = hashLength == 0 ? href : href.substr(0, href.length() - hashLength);
+
+    if (hashLength == 0 && href.ends_with('#')) {
+        serialized.pop_back();
+        return serialized;
+    }
+
+    return serialized;
+}
+
 }  // namespace ada::serializers
