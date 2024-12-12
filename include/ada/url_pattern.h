@@ -338,6 +338,7 @@ struct Token {
 
 // @see https://urlpattern.spec.whatwg.org/#tokenizer
 class Tokenizer {
+public:
   explicit Tokenizer(std::string_view input, token_policy policy)
       : input(input), policy(policy) {}
 
