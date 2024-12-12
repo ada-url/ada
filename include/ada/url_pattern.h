@@ -353,6 +353,10 @@ class Tokenizer {
   void add_token(token_type type, size_t next_position, size_t value_position,
                  std::optional<size_t> value_length = std::nullopt);
 
+  // @see
+  // https://urlpattern.spec.whatwg.org/#add-a-token-with-default-position-and-length
+  void add_token_with_defaults(token_type type);
+
   // @see https://urlpattern.spec.whatwg.org/#process-a-tokenizing-error
   tl::expected<void, url_pattern_errors> process_tokenizing_error(
       size_t next_position, size_t value_position);
