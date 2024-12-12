@@ -715,11 +715,133 @@ url_pattern_init constructor_string_parser::parse(std::string_view input) {
         }
         break;
       }
-      default:
-        // TODO: Implement this.
+      case State::AUTHORITY: {
+        // If the result of running is an identity terminator given parser is
+        // true, then run rewind and set state given parser and "username".
+        if (parser.is_an_identity_terminator()) {
+          parser.rewind();
+          parser.change_state(State::USERNAME, 0);
+        } else if (parser.is_pathname_start() || parser.is_search_prefix() ||
+                   parser.is_hash_prefix()) {
+          // Otherwise if any of the following are true:
+          // - the result of running is a pathname start given parser;
+          // - the result of running is a search prefix given parser; or
+          // - the result of running is a hash prefix given parser,
+          // then run rewind and set state given parser and "hostname".
+          parser.rewind();
+          parser.change_state(State::HOSTNAME, 0);
+        }
+        break;
+      }
+      case State::USERNAME: {
+        // If the result of running is a password prefix given parser is true,
+        // then run change state given parser, "password", and 1.
+        if (parser.is_password_prefix()) {
+          parser.change_state(State::PASSWORD, 1);
+        } else if (parser.is_an_identity_terminator()) {
+          // Otherwise if the result of running is an identity terminator given
+          // parser is true, then run change state given parser, "hostname",
+          // and 1.
+          parser.change_state(State::HOSTNAME, 1);
+        }
+        break;
+      }
+      case State::PASSWORD: {
+        // If the result of running is an identity terminator given parser is
+        // true, then run change state given parser, "hostname", and 1.
+        if (parser.is_an_identity_terminator()) {
+          parser.change_state(State::HOSTNAME, 1);
+        }
+        break;
+      }
+      case State::HOSTNAME: {
+        // If the result of running is an IPv6 open given parser is true, then
+        // increment parser’s hostname IPv6 bracket depth by 1.
+        if (parser.is_an_ipv6_open()) {
+          parser.hostname_ipv6_bracket_depth += 1;
+        } else if (parser.is_an_ipv6_close()) {
+          // Otherwise if the result of running is an IPv6 close given parser is
+          // true, then decrement parser’s hostname IPv6 bracket depth by 1.
+          parser.hostname_ipv6_bracket_depth -= 1;
+        } else if (parser.is_port_prefix() &&
+                   parser.hostname_ipv6_bracket_depth == 0) {
+          // Otherwise if the result of running is a port prefix given parser is
+          // true and parser’s hostname IPv6 bracket depth is zero, then run
+          // change state given parser, "port", and 1.
+          parser.change_state(State::PORT, 1);
+        } else if (parser.is_pathname_start()) {
+          // Otherwise if the result of running is a pathname start given parser
+          // is true, then run change state given parser, "pathname", and 0.
+          parser.change_state(State::PATHNAME, 0);
+        } else if (parser.is_search_prefix()) {
+          // Otherwise if the result of running is a search prefix given parser
+          // is true, then run change state given parser, "search", and 1.
+          parser.change_state(State::SEARCH, 1);
+        } else if (parser.is_hash_prefix()) {
+          // Otherwise if the result of running is a hash prefix given parser is
+          // true, then run change state given parser, "hash", and 1.
+          parser.change_state(State::HASH, 1);
+        }
+
+        break;
+      }
+      case State::PORT: {
+        // If the result of running is a pathname start given parser is true,
+        // then run change state given parser, "pathname", and 0.
+        if (parser.is_pathname_start()) {
+          parser.change_state(State::PATHNAME, 0);
+        } else if (parser.is_search_prefix()) {
+          // Otherwise if the result of running is a search prefix given parser
+          // is true, then run change state given parser, "search", and 1.
+          parser.change_state(State::SEARCH, 1);
+        } else if (parser.is_hash_prefix()) {
+          // Otherwise if the result of running is a hash prefix given parser is
+          // true, then run change state given parser, "hash", and 1.
+          parser.change_state(State::HASH, 1);
+        }
+        break;
+      }
+      case State::PATHNAME: {
+        // If the result of running is a search prefix given parser is true,
+        // then run change state given parser, "search", and 1.
+        if (parser.is_search_prefix()) {
+          parser.change_state(State::SEARCH, 1);
+        } else if (parser.is_hash_prefix()) {
+          // Otherwise if the result of running is a hash prefix given parser is
+          // true, then run change state given parser, "hash", and 1.
+          parser.change_state(State::HASH, 1);
+        }
+        break;
+      }
+      case State::SEARCH: {
+        // If the result of running is a hash prefix given parser is true, then
+        // run change state given parser, "hash", and 1.
+        if (parser.is_hash_prefix()) {
+          parser.change_state(State::HASH, 1);
+        }
+      }
+      case State::HASH: {
+        // Do nothing
+        break;
+      }
+      default: {
+        // Assert: This step is never reached.
+        unreachable();
+      }
     }
+
+    // Increment parser’s token index by parser’s token increment.
+    parser.token_index += parser.token_increment;
   }
-  return {};
+
+  // If parser’s result contains "hostname" and not "port", then set parser’s
+  // result["port"] to the empty string.
+  if (parser.result.hostname.has_value() && !parser.result.port.has_value()) {
+    parser.result.port = "";
+  }
+
+  // Return parser’s result.
+  return parser.result;
 }
 
 std::vector<Token> tokenize(std::string_view input, token_policy policy) {
