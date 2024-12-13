@@ -605,12 +605,16 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hash(
   return std::string(hash.substr(1));
 }
 
-url_pattern_init constructor_string_parser::parse(std::string_view input) {
+tl::expected<url_pattern_init, url_pattern_errors>
+constructor_string_parser::parse(std::string_view input) {
   (void)input;
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
   auto token_list = tokenize(input, token_policy::LENIENT);
-  auto parser = constructor_string_parser(input, token_list);
+  if (!token_list) {
+    return tl::unexpected(token_list.error());
+  }
+  auto parser = constructor_string_parser(input, *token_list);
 
   // While parser’s token index is less than parser’s token list size:
   while (parser.token_index < parser.token_list.size()) {
@@ -846,7 +850,8 @@ url_pattern_init constructor_string_parser::parse(std::string_view input) {
   return parser.result;
 }
 
-std::vector<Token> tokenize(std::string_view input, token_policy policy) {
+tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
+    std::string_view input, token_policy policy) {
   // Let tokenizer be a new tokenizer.
   // Set tokenizer’s input to input.
   // Set tokenizer’s policy to policy.
@@ -880,8 +885,11 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
       if (tokenizer.index == tokenizer.input.size() - 1) {
         // Run process a tokenizing error given tokenizer, tokenizer’s next
         // index, and tokenizer’s index.
-        tokenizer.process_tokenizing_error(tokenizer.next_index,
-                                           tokenizer.index);
+        if (auto error = tokenizer.process_tokenizing_error(
+                tokenizer.next_index, tokenizer.index);
+            error.has_value()) {
+          return tl::unexpected(*error);
+        }
         continue;
       }
 
@@ -940,7 +948,11 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
       if (name_position <= name_start) {
         // Run process a tokenizing error given tokenizer, name start, and
         // tokenizer’s index.
-        tokenizer.process_tokenizing_error(name_start, tokenizer.index);
+        if (auto error =
+                tokenizer.process_tokenizing_error(name_start, tokenizer.index);
+            error.has_value()) {
+          return tl::unexpected(*error);
+        }
       }
 
       // Run add a token with default length given tokenizer, "name", name
@@ -970,10 +982,14 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
         // TODO: Optimization opportunity: The next 2 if statements can be
         // merged. If the result of running is ASCII given tokenizer’s code
         // point is false:
-        if (!ada::idna::is_ascii(tokenizer.code_point)) {
+        if (!idna::is_ascii(tokenizer.code_point)) {
           // Run process a tokenizing error given tokenizer, regexp start, and
           // tokenizer’s index.
-          tokenizer.process_tokenizing_error(regexp_start, tokenizer.index);
+          if (auto process_error = tokenizer.process_tokenizing_error(
+                  regexp_start, tokenizer.index);
+              process_error.has_value()) {
+            return tl::unexpected(*process_error);
+          }
           // Set error to true.
           error = true;
           break;
@@ -984,7 +1000,11 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
         if (regexp_position == regexp_start && tokenizer.code_point == "?") {
           // Run process a tokenizing error given tokenizer, regexp start, and
           // tokenizer’s index.
-          tokenizer.process_tokenizing_error(regexp_start, tokenizer.index);
+          if (auto process_error = tokenizer.process_tokenizing_error(
+                  regexp_start, tokenizer.index);
+              process_error.has_value()) {
+            return tl::unexpected(*process_error);
+          }
           // Set error to true;
           error = true;
           break;
@@ -992,12 +1012,15 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
 
         // If tokenizer’s code point is U+005C (\):
         if (tokenizer.code_point == "\\") {
-          // If regexp position equals tokenizer’s input's code point length −
-          // 1:
+          // If regexp position equals tokenizer’s input's code point length − 1
           if (regexp_position == tokenizer.input.size() - 1) {
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
-            tokenizer.process_tokenizing_error(regexp_start, tokenizer.index);
+            if (auto process_error = tokenizer.process_tokenizing_error(
+                    regexp_start, tokenizer.index);
+                process_error.has_value()) {
+              return tl::unexpected(*process_error);
+            }
             // Set error to true.
             error = true;
             break;
@@ -1009,7 +1032,11 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
           if (!idna::is_ascii(tokenizer.code_point)) {
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
-            tokenizer.process_tokenizing_error(regexp_start, tokenizer.index);
+            if (auto process_error = tokenizer.process_tokenizing_error(
+                    regexp_start, tokenizer.index);
+                process_error.has_value()) {
+              return tl::unexpected(*process_error);
+            }
             // Set error to true.
             error = true;
             break;
@@ -1037,7 +1064,11 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
           if (regexp_position == tokenizer.input.size() - 1) {
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
-            tokenizer.process_tokenizing_error(regexp_start, tokenizer.index);
+            if (auto process_error = tokenizer.process_tokenizing_error(
+                    regexp_start, tokenizer.index);
+                process_error.has_value()) {
+              return tl::unexpected(*process_error);
+            }
             // Set error to true.
             error = true;
             break;
@@ -1050,7 +1081,11 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
           if (tokenizer.code_point != "?") {
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
-            tokenizer.process_tokenizing_error(regexp_start, tokenizer.index);
+            if (auto process_error = tokenizer.process_tokenizing_error(
+                    regexp_start, tokenizer.index);
+                process_error.has_value()) {
+              return tl::unexpected(*process_error);
+            }
             // Set error to true.
             error = true;
             break;
@@ -1068,7 +1103,11 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
       if (depth != 0) {
         // Run process a tokenizing error given tokenizer, regexp start, and
         // tokenizer’s index.
-        tokenizer.process_tokenizing_error(regexp_start, tokenizer.index);
+        if (auto process_error = tokenizer.process_tokenizing_error(
+                regexp_start, tokenizer.index);
+            process_error.has_value()) {
+          return tl::unexpected(*process_error);
+        }
         continue;
       }
       // Let regexp length be regexp position − regexp start − 1.
@@ -1077,7 +1116,11 @@ std::vector<Token> tokenize(std::string_view input, token_policy policy) {
       if (regexp_length == 0) {
         // Run process a tokenizing error given tokenizer, regexp start, and
         // tokenizer’s index.
-        tokenizer.process_tokenizing_error(regexp_start, tokenizer.index);
+        if (auto process_error = tokenizer.process_tokenizing_error(
+                regexp_start, tokenizer.index);
+            process_error.has_value()) {
+          return tl::unexpected(*process_error);
+        }
         continue;
       }
       // Run add a token given tokenizer, "regexp", regexp position, regexp
@@ -1104,22 +1147,15 @@ std::string escape_pattern(std::string_view input) {
   // Let result be the empty string.
   std::string result{};
   result.reserve(input.size());
-  // Let index be 0.
-  size_t index = 0;
 
   // TODO: Optimization opportunity: Use a lookup table
-  const auto should_escape = [](const char c) {
+  constexpr auto should_escape = [](const char c) {
     return c == '+' || c == '*' || c == '?' || c == ':' || c == '{' ||
            c == '}' || c == '(' || c == ')' || c == '\\';
   };
 
   // While index is less than input’s length:
-  while (index < input.size()) {
-    // Let c be input[index].
-    auto c = input[index];
-    // Increment index by 1.
-    index++;
-
+  for (const auto& c : input) {
     if (should_escape(c)) {
       // then append U+005C (\) to the end of result.
       result.append("\\");
