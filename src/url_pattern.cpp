@@ -1639,19 +1639,15 @@ bool protocol_component_matches_special_scheme(std::string_view input) {
 
 }  // namespace url_pattern_helpers
 
-// TODO: This function argument should bve url_pattern_input but the spec is
-// vague.
 tl::expected<std::optional<url_pattern_result>, url_pattern_errors>
-url_pattern::exec(std::variant<url_pattern_init, url_aggregator> input,
+url_pattern::exec(url_pattern_input input,
                   std::string_view* base_url = nullptr) {
   // Return the result of match given this's associated URL pattern, input, and
   // baseURL if given.
   return match(input, base_url);
 }
 
-// TODO: This function argument should bve url_pattern_input but the spec is
-// vague.
-bool url_pattern::test(std::variant<url_pattern_init, url_aggregator> input,
+bool url_pattern::test(url_pattern_input input,
                        std::string_view* base_url = nullptr) {
   // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
   // Implement a fast path just like `can_parse()` in ada_url.
@@ -1665,8 +1661,7 @@ bool url_pattern::test(std::variant<url_pattern_init, url_aggregator> input,
 }
 
 tl::expected<std::optional<url_pattern_result>, url_pattern_errors>
-url_pattern::match(std::variant<url_pattern_init, url_aggregator> input,
-                   std::string_view* base_url_string) {
+url_pattern::match(url_pattern_input input, std::string_view* base_url_string) {
   std::string protocol{};
   std::string username{};
   std::string password{};
@@ -1736,37 +1731,35 @@ url_pattern::match(std::variant<url_pattern_init, url_aggregator> input,
     // Let baseURL be null.
     result<url_aggregator> base_url;
 
-    // If input is a USVString:
-    // TODO: Implement this.
-    if (true) {
-      // If baseURLString was given, then:
-      if (base_url_string) {
-        // Let baseURL be the result of parsing baseURLString.
-        base_url = ada::parse<url_aggregator>(*base_url_string, nullptr);
+    // NOTE: We don't check for USVString here because we are already expecting
+    // a valid UTF-8 string. If input is a USVString: If baseURLString was
+    // given, then:
+    if (base_url_string) {
+      // Let baseURL be the result of parsing baseURLString.
+      base_url = ada::parse<url_aggregator>(*base_url_string, nullptr);
 
-        // If baseURL is failure, return null.
-        if (!base_url) {
-          return std::nullopt;
-        }
-
-        // Append baseURLString to inputs.
-        inputs.emplace_back(*base_url);
-      }
-
-      url_aggregator* base_url_value =
-          base_url.has_value() ? &*base_url : nullptr;
-
-      // Set url to the result of parsing input given baseURL.
-      auto parsed_url =
-          ada::parse<url_aggregator>(url.get_href(), base_url_value);
-
-      // If url is failure, return null.
-      if (!parsed_url) {
+      // If baseURL is failure, return null.
+      if (!base_url) {
         return std::nullopt;
       }
 
-      url = parsed_url.value();
+      // Append baseURLString to inputs.
+      inputs.emplace_back(*base_url);
     }
+
+    url_aggregator* base_url_value =
+        base_url.has_value() ? &*base_url : nullptr;
+
+    // Set url to the result of parsing input given baseURL.
+    auto parsed_url =
+        ada::parse<url_aggregator>(url.get_href(), base_url_value);
+
+    // If url is failure, return null.
+    if (!parsed_url) {
+      return std::nullopt;
+    }
+
+    url = parsed_url.value();
 
     // Set protocol to url’s scheme.
     protocol = url.get_protocol();
