@@ -362,7 +362,7 @@ class Tokenizer {
   void add_token_with_defaults(token_type type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-a-tokenizing-error
-  tl::expected<void, url_pattern_errors> process_tokenizing_error(
+  ada_warn_unused std::optional<url_pattern_errors> process_tokenizing_error(
       size_t next_position, size_t value_position);
 
   // has an associated input, a pattern string, initially the empty string.
@@ -395,7 +395,8 @@ struct constructor_string_parser {
   bool is_search_prefix();
 
   // @see https://urlpattern.spec.whatwg.org/#parse-a-constructor-string
-  static url_pattern_init parse(std::string_view input);
+  static tl::expected<url_pattern_init, url_pattern_errors> parse(
+      std::string_view input);
 
   // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser-state
   enum class State {
@@ -526,7 +527,8 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hash(
     std::string_view input);
 
 // @see https://urlpattern.spec.whatwg.org/#tokenize
-std::vector<Token> tokenize(std::string_view input, token_policy policy);
+tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
+    std::string_view input, token_policy policy);
 
 // @see https://urlpattern.spec.whatwg.org/#process-a-base-url-string
 std::string process_base_url_string(std::string_view input,

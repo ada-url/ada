@@ -46,8 +46,8 @@ url_pattern_component::create_component_match_result(
     // Let value be Get(execResult, ToString(index)).
     // Set groups[name] to value.
     result.groups.insert({
-        .name = group_name_list[index - 1],
-        .value = exec_result.at(index),
+        group_name_list[index - 1],
+        exec_result.at(index),
     });
   }
   return result;
@@ -420,20 +420,19 @@ inline void Tokenizer::add_token_with_defaults(token_type type) {
   add_token(type, next_index, index);
 }
 
-// TODO: Make this a `[[nodiscard]]` to handle the errors.
-inline tl::expected<void, url_pattern_errors>
+inline ada_warn_unused std::optional<url_pattern_errors>
 Tokenizer::process_tokenizing_error(size_t next_position,
                                     size_t value_position) {
   // If tokenizer’s policy is "strict", then throw a TypeError.
   if (policy == token_policy::STRICT) {
-    return tl::unexpected(url_pattern_errors::type_error);
+    return url_pattern_errors::type_error;
   }
   // Assert: tokenizer’s policy is "lenient".
   ADA_ASSERT_TRUE(policy == token_policy::LENIENT);
   // Run add a token with default length given tokenizer, "invalid-char", next
   // position, and value position.
   add_token(token_type::INVALID_CHAR, next_position, value_position);
-  return {};
+  return std::nullopt;
 }
 
 // @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
