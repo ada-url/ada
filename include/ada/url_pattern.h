@@ -164,6 +164,16 @@ struct url_pattern_compile_component_options {
   static url_pattern_compile_component_options PATHNAME;
 };
 
+// A struct providing the URLPattern matching results for a single
+// URL component. The URLPatternComponentResult is only ever used
+// as a member attribute of a URLPatternResult struct. The
+// URLPatternComponentResult API is defined as part of the URLPattern
+// specification.
+struct url_pattern_component_result {
+  std::string input;
+  std::unordered_map<std::string, std::string> groups;
+};
+
 class url_pattern_component {
  public:
   url_pattern_component() = default;
@@ -184,6 +194,10 @@ class url_pattern_component {
       std::string_view input, F encoding_callback,
       url_pattern_compile_component_options& options);
 
+  // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
+  url_pattern_component_result create_component_match_result(
+      std::string_view input, const std::vector<std::string>& exec_result);
+
   std::string_view get_pattern() const noexcept ada_lifetime_bound;
   std::string_view get_regexp() const noexcept ada_lifetime_bound;
   const std::vector<std::string>& get_group_name_list() const noexcept
@@ -199,16 +213,6 @@ class url_pattern_component {
   std::vector<std::string> group_name_list{};
 
   bool has_regexp_groups_ = false;
-};
-
-// A struct providing the URLPattern matching results for a single
-// URL component. The URLPatternComponentResult is only ever used
-// as a member attribute of a URLPatternResult struct. The
-// URLPatternComponentResult API is defined as part of the URLPattern
-// specification.
-struct url_pattern_component_result {
-  std::string input;
-  std::unordered_map<std::string, std::string> groups;
 };
 
 using url_pattern_input = std::variant<std::string_view, url_pattern_init>;
@@ -245,7 +249,7 @@ class url_pattern {
                        std::optional<url_pattern_options> options);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
-  tl::expected<url_pattern_result, url_pattern_errors> exec(
+  tl::expected<std::optional<url_pattern_result>, url_pattern_errors> exec(
       std::variant<url_pattern_init, url_aggregator> input,
       std::string_view* base_url);
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
@@ -253,7 +257,7 @@ class url_pattern {
             std::string_view* base_url);
 
   // @see https://urlpattern.spec.whatwg.org/#url-pattern-match
-  tl::expected<url_pattern_result, url_pattern_errors> match(
+  tl::expected<std::optional<url_pattern_result>, url_pattern_errors> match(
       std::variant<url_pattern_init, url_aggregator> input,
       std::string_view* base_url_string);
 

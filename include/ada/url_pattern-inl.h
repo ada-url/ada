@@ -27,6 +27,31 @@ url_pattern_component::get_group_name_list() const noexcept ada_lifetime_bound {
   return group_name_list;
 }
 
+inline url_pattern_component_result
+url_pattern_component::create_component_match_result(
+    std::string_view input, const std::vector<std::string>& exec_result) {
+  // Let result be a new URLPatternComponentResult.
+  auto result = url_pattern_component_result{};
+  // Set result["input"] to input.
+  result.input = std::string(input);
+  // Let groups be a record<USVString, (USVString or undefined)>.
+  result.groups = {};
+  // Let index be 1.
+  size_t index = 1;
+  // While index is less than Get(execResult, "length"):
+  while (index < exec_result.size()) {
+    // Let name be component’s group name list[index − 1].
+    auto name = group_name_list[index - 1];
+    // Let value be Get(execResult, ToString(index)).
+    auto value = exec_result.at(index);
+    // Set groups[name] to value.
+    result.groups.insert({name, value});
+    // Increment index by 1.
+    index++;
+  }
+  return result;
+}
+
 inline std::string_view url_pattern::get_protocol() const ada_lifetime_bound {
   // Return this's associated URL pattern's protocol component's pattern string.
   return protocol_component.get_pattern();
