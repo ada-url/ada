@@ -1654,10 +1654,13 @@ url_pattern::match(std::variant<url_pattern_init, url_aggregator> input,
     // Let applyResult be the result of process a URLPatternInit given input,
     // "url", protocol, username, password, hostname, port, pathname, search,
     // and hash.
-    // TODO: If this throws an exception, catch it, and return null.
     auto apply_result = url_pattern_init::process(
         std::get<url_pattern_init>(input), "url", protocol, username, password,
         hostname, port, pathname, search, hash);
+
+    if (!apply_result.has_value()) {
+      return tl::unexpected(apply_result.error());
+    }
 
     // Set protocol to applyResult["protocol"].
     ADA_ASSERT_TRUE(apply_result->protocol.has_value());
