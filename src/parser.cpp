@@ -930,7 +930,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     // Assert: input is a URLPatternInit.
     ADA_ASSERT_TRUE(std::holds_alternative<url_pattern_init>(input));
     // If baseURL is not null, then throw a TypeError.
-    if (base_url == nullptr) {
+    if (base_url != nullptr) {
       return tl::unexpected(url_pattern_errors::type_error);
     }
     // Optimization: Avoid copy by moving the input value.
