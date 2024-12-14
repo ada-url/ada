@@ -12,6 +12,10 @@
 
 namespace ada {
 
+inline bool url_pattern_component::has_regexp_groups() const noexcept ada_lifetime_bound {
+  return has_regexp_groups_;
+}
+
 inline std::string_view url_pattern_component::get_pattern() const noexcept
     ada_lifetime_bound {
   return pattern;
