@@ -304,8 +304,9 @@ url_pattern_init::process_protocol(std::string_view value,
                                    std::string_view type) {
   // Let strippedValue be the given value with a single trailing U+003A (:)
   // removed, if any.
-  ADA_ASSERT_TRUE(value.ends_with(":"));
-  value.remove_suffix(1);
+  if (value.ends_with(":")) {
+    value.remove_suffix(1);
+  }
   // If type is "pattern" then return strippedValue.
   if (type == "pattern") {
     return std::string(value);
