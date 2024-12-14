@@ -51,10 +51,6 @@ extern template url_aggregator parse_url_impl<url_aggregator>(
 extern template url parse_url_impl<url>(std::string_view user_input,
                                         const url* base_url);
 
-tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
-    std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url = nullptr,
-    const url_pattern_options* options = nullptr);
 
 }  // namespace ada::parser
 

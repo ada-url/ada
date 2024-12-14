@@ -900,7 +900,7 @@ result_type parse_url_impl(std::string_view user_input,
 }
 
 template <>
-tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
+tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options) {
   // Let init be null.
@@ -1084,3 +1084,11 @@ template url parse_url<url>(std::string_view user_input,
 template url_aggregator parse_url<url_aggregator>(
     std::string_view user_input, const url_aggregator* base_url = nullptr);
 }  // namespace ada::parser
+
+namespace ada {
+ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
+    std::variant<std::string_view, url_pattern_init> input,
+    const std::string_view* base_url, const url_pattern_options* options) {
+  return ada::parser::parse_url_pattern_impl<url_pattern>(std::move(input), base_url, options);
+}
+}  // namespace ada

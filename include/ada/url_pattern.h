@@ -20,7 +20,7 @@ enum class url_pattern_errors : uint8_t { type_error };
 namespace parser {
 template <typename result_type, typename url_pattern_init,
           typename url_pattern_options>
-tl::expected<result_type, url_pattern_errors> parse_url_pattern(
+tl::expected<result_type, url_pattern_errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options);
 }
@@ -202,7 +202,7 @@ class url_pattern_component {
   std::string_view get_regexp() const noexcept ada_lifetime_bound;
   const std::vector<std::string>& get_group_name_list() const noexcept
       ada_lifetime_bound;
-  bool has_regexp_groups() const noexcept ada_lifetime_bound;
+  inline bool has_regexp_groups() const noexcept ada_lifetime_bound;
 
  private:
   // The normalized pattern for this component.
@@ -299,7 +299,7 @@ class url_pattern {
   template <typename result_type, typename url_pattern_init,
             typename url_pattern_options>
   friend tl::expected<result_type, url_pattern_errors>
-  parser::parse_url_pattern(
+  parser::parse_url_pattern_impl(
       std::variant<std::string_view, url_pattern_init> input,
       const std::string_view* base_url, const url_pattern_options* options);
 };
