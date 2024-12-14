@@ -943,7 +943,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   auto processed_init = url_pattern_init::process(
       init, "pattern", std::nullopt, std::nullopt, std::nullopt, std::nullopt,
       std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  if (!processed_init.has_value()) {
+  if (!processed_init) {
     return tl::unexpected(processed_init.error());
   }
 
@@ -1025,7 +1025,9 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   // Let compileOptions be a copy of the default options with the ignore case
   // property set to options["ignoreCase"].
   auto compile_options = url_pattern_compile_component_options::DEFAULT;
-  compile_options.ignore_case = options->ignore_case;
+  if (options) {
+    compile_options.ignore_case = options->ignore_case;
+  }
 
   // TODO: Optimization opportunity: Simplify this if statement.
   // If the result of running protocol component matches a special scheme given
@@ -1035,7 +1037,9 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     // Let pathCompileOptions be copy of the pathname options with the ignore
     // case property set to options["ignoreCase"].
     auto path_compile_options = url_pattern_compile_component_options::HOSTNAME;
-    path_compile_options.ignore_case = options->ignore_case;
+    if (options) {
+      path_compile_options.ignore_case = options->ignore_case;
+    }
 
     // Set urlPattern’s pathname component to the result of compiling a
     // component given processedInit["pathname"], canonicalize a pathname, and
