@@ -12,7 +12,8 @@
 
 namespace ada {
 
-inline bool url_pattern_component::has_regexp_groups() const noexcept ada_lifetime_bound {
+inline bool url_pattern_component::has_regexp_groups() const noexcept
+    ada_lifetime_bound {
   return has_regexp_groups_;
 }
 

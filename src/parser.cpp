@@ -1089,6 +1089,7 @@ namespace ada {
 ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options) {
-  return ada::parser::parse_url_pattern_impl<url_pattern>(std::move(input), base_url, options);
+  return ada::parser::parse_url_pattern_impl<url_pattern>(std::move(input),
+                                                          base_url, options);
 }
 }  // namespace ada
