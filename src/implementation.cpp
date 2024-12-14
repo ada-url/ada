@@ -68,6 +68,12 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
   return result.is_valid;
 }
 
+ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
+    std::variant<std::string_view, url_pattern_init> input,
+    const std::string_view* base_url, const url_pattern_options* options) {
+  return ada::parser::parse_url_pattern(std::move(input), base_url, options);
+}
+
 ada_warn_unused std::string to_string(ada::encoding_type type) {
   switch (type) {
     case ada::encoding_type::UTF8:
