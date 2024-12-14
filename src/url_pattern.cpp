@@ -183,40 +183,40 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   // process protocol for init given init["protocol"] and type.
   if (init.protocol.has_value()) {
     auto process_result = process_protocol(*init.protocol, type);
-    if (process_result.has_value()) {
-      result.protocol = std::move(process_result.value<std::string>());
+    if (!process_result) {
+      return tl::unexpected(process_result.error());
     }
-    return tl::unexpected(process_result.error());
+    result.protocol = std::move(process_result.value<std::string>());
   }
 
   // If init["username"] exists, then set result["username"] to the result of
   // process username for init given init["username"] and type.
   if (init.username.has_value()) {
     auto process_result = process_username(*init.username, type);
-    if (process_result.has_value()) {
-      result.username = std::move(process_result.value<std::string>());
+    if (!process_result) {
+      return tl::unexpected(process_result.error());
     }
-    return tl::unexpected(process_result.error());
+    result.username = std::move(process_result.value<std::string>());
   }
 
   // If init["password"] exists, then set result["password"] to the result of
   // process password for init given init["password"] and type.
   if (init.password.has_value()) {
     auto process_result = process_password(*init.password, type);
-    if (process_result.has_value()) {
-      result.password = std::move(process_result.value<std::string>());
+    if (!process_result) {
+      return tl::unexpected(process_result.error());
     }
-    return tl::unexpected(process_result.error());
+    result.password = std::move(process_result.value<std::string>());
   }
 
   // If init["hostname"] exists, then set result["hostname"] to the result of
   // process hostname for init given init["hostname"] and type.
   if (init.hostname.has_value()) {
     auto process_result = process_hostname(*init.hostname, type);
-    if (process_result.has_value()) {
-      result.hostname = std::move(process_result.value<std::string>());
+    if (!process_result) {
+      return tl::unexpected(process_result.error());
     }
-    return tl::unexpected(process_result.error());
+    result.hostname = std::move(process_result.value<std::string>());
   }
 
   // If init["port"] exists, then set result["port"] to the result of process
@@ -224,10 +224,10 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   if (init.port.has_value()) {
     auto process_result =
         process_port(*init.port, result.protocol.value_or("fake"), type);
-    if (process_result.has_value()) {
-      result.port = std::move(process_result.value<std::string>());
+    if (!process_result) {
+      return tl::unexpected(process_result.error());
     }
-    return tl::unexpected(process_result.error());
+    result.port = std::move(process_result.value<std::string>());
   }
 
   // If init["pathname"] exists:
@@ -269,7 +269,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     // result["pathname"], result["protocol"], and type.
     auto pathname_processing_result = process_pathname(
         *result.pathname, result.protocol.value_or("fake"), type);
-    if (!pathname_processing_result.has_value()) {
+    if (!pathname_processing_result) {
       return tl::unexpected(pathname_processing_result.error());
     }
     result.pathname =
@@ -280,20 +280,20 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   // search for init given init["search"] and type.
   if (init.search.has_value()) {
     auto process_result = process_search(*init.search, type);
-    if (process_result.has_value()) {
-      result.search = std::move(process_result.value<std::string>());
+    if (!process_result) {
+      return tl::unexpected(process_result.error());
     }
-    return tl::unexpected(process_result.error());
+    result.search = std::move(process_result.value<std::string>());
   }
 
   // If init["hash"] exists then set result["hash"] to the result of process
   // hash for init given init["hash"] and type.
   if (init.hash.has_value()) {
     auto process_result = process_hash(*init.hash, type);
-    if (process_result.has_value()) {
-      result.hash = std::move(process_result.value<std::string>());
+    if (!process_result) {
+      return tl::unexpected(process_result.error());
     }
-    return tl::unexpected(process_result.error());
+    result.hash = std::move(process_result.value<std::string>());
   }
   // Return result.
   return result;
