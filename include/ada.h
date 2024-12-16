@@ -28,6 +28,8 @@
 #include "ada/url_search_params-inl.h"
 #include "ada/url_pattern.h"
 #include "ada/url_pattern-inl.h"
+#include "ada/url_pattern_helpers.h"
+#include "ada/url_pattern_helpers-inl.h"
 
 // Public API
 #include "ada/ada_version.h"
