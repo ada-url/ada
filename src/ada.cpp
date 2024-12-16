@@ -9,4 +9,5 @@
 #include "url_components.cpp"
 #include "url_aggregator.cpp"
 #include "url_pattern.cpp"
+#include "url_pattern_helpers.cpp"
 #include "ada_c.cpp"
