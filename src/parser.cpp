@@ -971,18 +971,6 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   // Let urlPattern be a new URL pattern.
   auto url_pattern_ = url_pattern{};
 
-  // Set urlPattern’s protocol component to the result of compiling a component
-  // given processedInit["protocol"], canonicalize a protocol, and default
-  // options.
-  auto protocol_component = url_pattern_component::compile(
-      processed_init->protocol.value(),
-      url_pattern_helpers::canonicalize_protocol,
-      url_pattern_compile_component_options::DEFAULT);
-  if (!protocol_component) {
-    return tl::unexpected(protocol_component.error());
-  }
-  url_pattern_.protocol_component = std::move(*protocol_component);
-
   // Set urlPattern’s username component to the result of compiling a component
   // given processedInit["username"], canonicalize a username, and default
   // options.
@@ -994,6 +982,18 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     return tl::unexpected(username_component.error());
   }
   url_pattern_.username_component = std::move(*username_component);
+
+  // Set urlPattern’s protocol component to the result of compiling a component
+  // given processedInit["protocol"], canonicalize a protocol, and default
+  // options.
+  auto protocol_component = url_pattern_component::compile(
+      processed_init->protocol.value(),
+      url_pattern_helpers::canonicalize_protocol,
+      url_pattern_compile_component_options::DEFAULT);
+  if (!protocol_component) {
+    return tl::unexpected(protocol_component.error());
+  }
+  url_pattern_.protocol_component = std::move(*protocol_component);
 
   // Set urlPattern’s password component to the result of compiling a component
   // given processedInit["password"], canonicalize a password, and default

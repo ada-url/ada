@@ -28,12 +28,13 @@ tl::expected<result_type, url_pattern_errors> parse_url_pattern_impl(
 // Important: C++20 allows us to use concept rather than `using` or `typedef
 // and allows functions with second argument, which is optional (using either
 // std::nullopt or a parameter with default value)
-template <typename F>
-concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
-  { f(sv) } -> std::same_as<tl::expected<std::string, url_pattern_errors>>;
-} || requires(F f, std::string_view sv, std::string_view opt) {
-  { f(sv, opt) } -> std::same_as<tl::expected<std::string, url_pattern_errors>>;
-};
+// template <typename F>
+// concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
+//   { f(sv) } -> std::same_as<tl::expected<std::string, url_pattern_errors>>;
+// } || requires(F f, std::string_view sv, std::string_view opt) {
+//   { f(sv, opt) } -> std::same_as<tl::expected<std::string,
+//   url_pattern_errors>>;
+// };
 
 // A structure providing matching patterns for individual components
 // of a URL. When a URLPattern is created, or when a URLPattern is
@@ -194,9 +195,9 @@ class url_pattern_component {
         has_regexp_groups_(new_has_regexp_groups){};
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
-  template <url_pattern_encoding_callback F>
+  template <typename url_pattern_encoding_callback>
   static tl::expected<url_pattern_component, url_pattern_errors> compile(
-      std::string_view input, F encoding_callback,
+      std::string_view input, url_pattern_encoding_callback encoding_callback,
       url_pattern_compile_component_options& options);
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
@@ -249,9 +250,9 @@ struct url_pattern_options {
 class url_pattern {
  public:
   url_pattern() = default;
-  explicit url_pattern(std::optional<url_pattern_input> input,
-                       std::optional<std::string_view> base_url,
-                       std::optional<url_pattern_options> options);
+  explicit url_pattern(std::optional<url_pattern_input>&& input,
+                       std::optional<std::string_view>&& base_url,
+                       std::optional<url_pattern_options>&& options);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
   tl::expected<std::optional<url_pattern_result>, url_pattern_errors> exec(
