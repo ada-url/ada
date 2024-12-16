@@ -122,6 +122,25 @@ tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
 }
 
 tl::expected<std::string, url_pattern_errors> canonicalize_port(
+    std::string_view port_value) {
+  // If portValue is the empty string, return portValue.
+  if (port_value.empty()) [[unlikely]] {
+    return "";
+  }
+  // Let dummyURL be a new URL record.
+  // If protocolValue was given, then set dummyURL’s scheme to protocolValue.
+  // Let parseResult be the result of running basic URL parser given portValue
+  // with dummyURL as url and port state as state override.
+  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
+  if (url && url->set_port(port_value)) {
+    // Return dummyURL’s port, serialized, or empty string if it is null.
+    return std::string(url->get_port());
+  }
+  // If parseResult is failure, then throw a TypeError.
+  return tl::unexpected(url_pattern_errors::type_error);
+}
+
+tl::expected<std::string, url_pattern_errors> canonicalize_port_with_protocol(
     std::string_view port_value, std::string_view protocol) {
   // If portValue is the empty string, return portValue.
   if (port_value.empty()) [[unlikely]] {
@@ -854,15 +873,15 @@ constexpr bool is_absolute_pathname(std::string_view input,
   return false;
 }
 
-template <url_pattern_encoding_callback F>
+template <typename url_pattern_encoding_callback>
 tl::expected<std::vector<url_pattern_part>, url_pattern_errors>
 parse_pattern_string(std::string_view input,
                      url_pattern_compile_component_options& options,
-                     F encoding_callback) {
+                     url_pattern_encoding_callback&& encoding_callback) {
   // Let parser be a new pattern parser whose encoding callback is encoding
   // callback and segment wildcard regexp is the result of running generate a
   // segment wildcard regexp given options.
-  auto parser = url_pattern_parser<F>(
+  auto parser = url_pattern_parser<url_pattern_encoding_callback>(
       encoding_callback, generate_segment_wildcard_regexp(options));
   // Set parser’s token list to the result of running tokenize given input and
   // "strict".

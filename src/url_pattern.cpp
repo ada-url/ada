@@ -356,7 +356,7 @@ tl::expected<std::string, url_pattern_errors> url_pattern_init::process_port(
   }
   // Return the result of running canonicalize a port given portValue and
   // protocolValue.
-  return url_pattern_helpers::canonicalize_port(port, protocol);
+  return url_pattern_helpers::canonicalize_port_with_protocol(port, protocol);
 }
 
 tl::expected<std::string, url_pattern_errors>
@@ -411,9 +411,10 @@ tl::expected<std::string, url_pattern_errors> url_pattern_init::process_hash(
   return url_pattern_helpers::canonicalize_hash(value);
 }
 
-template <url_pattern_encoding_callback F>
+template <typename url_pattern_encoding_callback>
 tl::expected<url_pattern_component, url_pattern_errors>
-url_pattern_component::compile(std::string_view input, F encoding_callback,
+url_pattern_component::compile(std::string_view input,
+                               url_pattern_encoding_callback encoding_callback,
                                url_pattern_compile_component_options& options) {
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
