@@ -152,16 +152,21 @@ struct url_pattern_compile_component_options {
       std::optional<char> new_prefix = std::nullopt)
       : delimiter(new_delimiter), prefix(new_prefix){};
 
-  // @see https://urlpattern.spec.whatwg.org/#options-delimiter-code-point
-  std::optional<char> delimiter{};
-  // @see https://urlpattern.spec.whatwg.org/#options-prefix-code-point
-  std::optional<char> prefix{};
+  std::string_view get_delimiter() const ada_warn_unused;
+  std::string_view get_prefix() const ada_warn_unused;
+
   // @see https://urlpattern.spec.whatwg.org/#options-ignore-case
   bool ignore_case = false;
 
   static url_pattern_compile_component_options DEFAULT;
   static url_pattern_compile_component_options HOSTNAME;
   static url_pattern_compile_component_options PATHNAME;
+
+ private:
+  // @see https://urlpattern.spec.whatwg.org/#options-delimiter-code-point
+  std::optional<char> delimiter{};
+  // @see https://urlpattern.spec.whatwg.org/#options-prefix-code-point
+  std::optional<char> prefix{};
 };
 
 // A struct providing the URLPattern matching results for a single
@@ -190,7 +195,7 @@ class url_pattern_component {
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
   template <url_pattern_encoding_callback F>
-  static url_pattern_component compile(
+  static tl::expected<url_pattern_component, url_pattern_errors> compile(
       std::string_view input, F encoding_callback,
       url_pattern_compile_component_options& options);
 
@@ -340,6 +345,48 @@ struct Token {
   std::string value{};
 };
 
+// @see https://urlpattern.spec.whatwg.org/#pattern-parser
+template <url_pattern_encoding_callback F>
+class url_pattern_parser {
+ public:
+  url_pattern_parser(F encoding_callback_,
+                     std::string_view segment_wildcard_regexp_)
+      : encoding_callback(encoding_callback_),
+        segment_wildcard_regexp(std::string(segment_wildcard_regexp_)) {}
+
+  // @see https://urlpattern.spec.whatwg.org/#try-to-consume-a-token
+  Token* try_consume_token(token_type type);
+  // @see https://urlpattern.spec.whatwg.org/#try-to-consume-a-modifier-token
+  Token* try_consume_modifier_token();
+  // @see
+  // https://urlpattern.spec.whatwg.org/#try-to-consume-a-regexp-or-wildcard-token
+  Token* try_consume_regexp_or_wildcard_token(Token* name_token);
+  // @see https://urlpattern.spec.whatwg.org/#consume-text
+  std::string consume_text();
+  // @see https://urlpattern.spec.whatwg.org/#consume-a-required-token
+  tl::expected<Token, url_pattern_errors> consume_required_token(
+      token_type type);
+  // @see
+  // https://urlpattern.spec.whatwg.org/#maybe-add-a-part-from-the-pending-fixed-value
+  std::optional<url_pattern_errors>
+  maybe_add_part_from_the_pending_fixed_value() ada_warn_unused;
+  // @see https://urlpattern.spec.whatwg.org/#add-a-part
+  std::optional<url_pattern_errors> add_part(
+      std::string_view prefix, Token* name_token,
+      Token* regexp_or_wildcard_token, std::string_view suyffix,
+      Token* modifier_token) ada_warn_unused;
+  // @see https://urlpattern.spec.whatwg.org/#is-a-duplicate-name
+  bool is_duplicate_name(std::string_view name);
+
+  std::vector<Token> tokens{};
+  F encoding_callback;
+  std::string segment_wildcard_regexp;
+  std::vector<url_pattern_part> parts{};
+  std::string pending_fixed_value{};
+  size_t index = 0;
+  size_t next_numeric_name = 0;
+};
+
 // @see https://urlpattern.spec.whatwg.org/#tokenizer
 class Tokenizer {
  public:
@@ -427,7 +474,8 @@ struct constructor_string_parser {
 
   // @see
   // https://urlpattern.spec.whatwg.org/#compute-protocol-matches-a-special-scheme-flag
-  void compute_protocol_matches_special_scheme_flag();
+  std::optional<url_pattern_errors>
+  compute_protocol_matches_special_scheme_flag();
 
   // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
   bool next_is_authority_slashes();

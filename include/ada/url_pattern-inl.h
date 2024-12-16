@@ -227,25 +227,6 @@ inline bool constructor_string_parser::is_protocol_suffix() {
   return is_non_special_pattern_char(token_index, ":");
 }
 
-inline void
-constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
-  // Let protocol string be the result of running make a component string given
-  // parser.
-  auto protocol_string = make_component_string();
-  // Let protocol component be the result of compiling a component given
-  // protocol string, canonicalize a protocol, and default options.
-  auto protocol_component = url_pattern_component::compile(
-      protocol_string, canonicalize_protocol,
-      url_pattern_compile_component_options::DEFAULT);
-  // If the result of running protocol component matches a special scheme given
-  // protocol component is true, then set parser’s protocol matches a special
-  // scheme flag to true.
-  if (protocol_component_matches_special_scheme(
-          protocol_component.get_pattern())) {
-    protocol_matches_a_special_scheme_flag = true;
-  }
-}
-
 inline void constructor_string_parser::change_state(State new_state,
                                                     size_t skip) {
   // If parser’s state is not "init", not "authority", and not "done", then set
@@ -452,8 +433,253 @@ inline bool is_valid_name_code_point(char cp, bool first) {
   return true;
 }
 
+template <url_pattern_encoding_callback F>
+Token* url_pattern_parser<F>::try_consume_modifier_token() {
+  // Let token be the result of running try to consume a token given parser and
+  // "other-modifier".
+  auto token = try_consume_token(token_type::OTHER_MODIFIER);
+  // If token is not null, then return token.
+  if (token) return token;
+  // Set token to the result of running try to consume a token given parser and
+  // "asterisk".
+  token = try_consume_token(token_type::ASTERISK);
+  // Return token.
+  return token;
+}
+
+template <url_pattern_encoding_callback F>
+Token* url_pattern_parser<F>::try_consume_regexp_or_wildcard_token(
+    Token* name_token) {
+  // Let token be the result of running try to consume a token given parser and
+  // "regexp".
+  auto token = try_consume_token(token_type::REGEXP);
+  // If name token is null and token is null, then set token to the result of
+  // running try to consume a token given parser and "asterisk".
+  if (!name_token && !token) {
+    token = try_consume_token(token_type::ASTERISK);
+  }
+  // Return token.
+  return token;
+}
+
+template <url_pattern_encoding_callback F>
+Token* url_pattern_parser<F>::try_consume_token(token_type type) {
+  // Assert: parser’s index is less than parser’s token list size.
+  ADA_ASSERT_TRUE(index < tokens.size());
+  // Let next token be parser’s token list[parser’s index].
+  auto& next_token = tokens.at(index);
+  // If next token’s type is not type return null.
+  if (next_token.type != type) return nullptr;
+  // Increase parser’s index by 1.
+  index++;
+  // Return next token.
+  return &next_token;
+}
+
+template <url_pattern_encoding_callback F>
+std::string url_pattern_parser<F>::consume_text() {
+  // Let result be the empty string.
+  std::string result{};
+  // While true:
+  while (true) {
+    // Let token be the result of running try to consume a token given parser
+    // and "char".
+    auto token = try_consume_token(token_type::CHAR);
+    // If token is null, then set token to the result of running try to consume
+    // a token given parser and "escaped-char".
+    if (!token) token = try_consume_token(token_type::ESCAPED_CHAR);
+    // If token is null, then break.
+    if (!token) break;
+    // Append token’s value to the end of result.
+    result.append(token->value);
+  }
+  // Return result.
+  return result;
+}
+
+template <url_pattern_encoding_callback F>
+tl::expected<Token, url_pattern_errors>
+url_pattern_parser<F>::consume_required_token(token_type type) {
+  // Let result be the result of running try to consume a token given parser and
+  // type.
+  auto result = try_consume_token(type);
+  // If result is null, then throw a TypeError.
+  if (!result) {
+    return tl::unexpected(url_pattern_errors::type_error);
+  }
+  return std::move(*result);
+}
+
+template <url_pattern_encoding_callback F>
+std::optional<url_pattern_errors>
+url_pattern_parser<F>::maybe_add_part_from_the_pending_fixed_value() {
+  // If parser’s pending fixed value is the empty string, then return.
+  if (pending_fixed_value.empty()) return std::nullopt;
+  // Let encoded value be the result of running parser’s encoding callback given
+  // parser’s pending fixed value.
+  tl::expected<std::string, url_pattern_errors> encoded_value =
+      encoding_callback(pending_fixed_value);
+  if (!encoded_value) {
+    return encoded_value.error();
+  }
+  // Set parser’s pending fixed value to the empty string.
+  pending_fixed_value.clear();
+  // Let part be a new part whose type is "fixed-text", value is encoded value,
+  // and modifier is "none".
+  url_pattern_part part{.type = url_pattern_part_type::FIXED_TEXT,
+                        .value = std::move(encoded_value.value()),
+                        .modifier = url_pattern_part_modifier::NONE};
+  // Append part to parser’s part list.
+  parts.push_back(std::move(part));
+  return std::nullopt;
+}
+
+template <url_pattern_encoding_callback F>
+std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
+    std::string_view prefix, Token* name_token, Token* regexp_or_wildcard_token,
+    std::string_view suffix, Token* modifier_token) {
+  // Let modifier be "none".
+  auto modifier = url_pattern_part_modifier::NONE;
+  // If modifier token is not null:
+  if (modifier_token) {
+    // If modifier token’s value is "?" then set modifier to "optional".
+    if (modifier_token->value == "?") {
+      modifier = url_pattern_part_modifier::OPTIONAL;
+    } else if (modifier_token->value == "*") {
+      // Otherwise if modifier token’s value is "*" then set modifier to
+      // "zero-or-more".
+      modifier = url_pattern_part_modifier::ZERO_OR_MORE;
+    } else if (modifier_token->value == "+") {
+      // Otherwise if modifier token’s value is "+" then set modifier to
+      // "one-or-more".
+      modifier = url_pattern_part_modifier::ONE_OR_MORE;
+    }
+    // If name token is null and regexp or wildcard token is null and modifier
+    // is "none":
+    if (!name_token && !regexp_or_wildcard_token &&
+        modifier == url_pattern_part_modifier::NONE) {
+      // Append prefix to the end of parser’s pending fixed value.
+      pending_fixed_value.append(prefix);
+      return std::nullopt;
+    }
+    // Run maybe add a part from the pending fixed value given parser.
+    if (auto error = maybe_add_part_from_the_pending_fixed_value()) {
+      return *error;
+    }
+    // If name token is null and regexp or wildcard token is null:
+    if (!name_token && !regexp_or_wildcard_token) {
+      // Assert: suffix is the empty string.
+      ADA_ASSERT_TRUE(suffix.empty());
+      // If prefix is the empty string, then return.
+      if (prefix.empty()) return std::nullopt;
+      // Let encoded value be the result of running parser’s encoding callback
+      // given prefix.
+      auto encoded_value = encoding_callback(prefix);
+      if (!encoded_value) {
+        return encoded_value.error();
+      }
+      // Let part be a new part whose type is "fixed-text", value is encoded
+      // value, and modifier is modifier.
+      url_pattern_part part{.type = url_pattern_part_type::FIXED_TEXT,
+                            .value = std::move(*encoded_value),
+                            .modifier = modifier};
+      // Append part to parser’s part list.
+      parts.push_back(std::move(part));
+      return std::nullopt;
+    }
+    // Let regexp value be the empty string.
+    std::string regexp_value{};
+    // If regexp or wildcard token is null, then set regexp value to parser’s
+    // segment wildcard regexp.
+    if (!regexp_or_wildcard_token) {
+      regexp_value = segment_wildcard_regexp;
+    } else if (regexp_or_wildcard_token->type == token_type::ASTERISK) {
+      // Otherwise if regexp or wildcard token’s type is "asterisk", then set
+      // regexp value to the full wildcard regexp value.
+      regexp_value = ".*";
+    } else {
+      // Otherwise set regexp value to regexp or wildcard token’s value.
+      regexp_value = regexp_or_wildcard_token->value;
+    }
+    // Let type be "regexp".
+    auto type = url_pattern_part_type::REGEXP;
+    // If regexp value is parser’s segment wildcard regexp:
+    if (regexp_value == segment_wildcard_regexp) {
+      // Set type to "segment-wildcard".
+      type = url_pattern_part_type::SEGMENT_WILDCARD;
+      // Set regexp value to the empty string.
+      regexp_value.clear();
+    } else if (regexp_value == ".*") {
+      // Otherwise if regexp value is the full wildcard regexp value:
+      // Set type to "full-wildcard".
+      type = url_pattern_part_type::FULL_WILDCARD;
+      // Set regexp value to the empty string.
+      regexp_value.clear();
+    }
+    // Let name be the empty string.
+    std::string name{};
+    // If name token is not null, then set name to name token’s value.
+    if (name_token) {
+      name = name_token->value;
+    } else if (regexp_or_wildcard_token != nullptr) {
+      // Otherwise if regexp or wildcard token is not null:
+      // Set name to parser’s next numeric name, serialized.
+      // TODO: Implement this
+      // Increment parser’s next numeric name by 1.
+      next_numeric_name++;
+    }
+    // If the result of running is a duplicate name given parser and name is
+    // true, then throw a TypeError.
+    if (is_duplicate_name(name)) {
+      return url_pattern_errors::type_error;
+    }
+    // Let encoded prefix be the result of running parser’s encoding callback
+    // given prefix.
+    auto encoded_prefix = encoding_callback(prefix);
+    if (!encoded_prefix) return encoded_prefix.error();
+    // Let encoded suffix be the result of running parser’s encoding callback
+    // given suffix.
+    auto encoded_suffix = encoding_callback(suffix);
+    if (!encoded_suffix) return encoded_suffix.error();
+    // Let part be a new part whose type is type, value is regexp value,
+    // modifier is modifier, name is name, prefix is encoded prefix, and suffix
+    // is encoded suffix.
+    auto part = url_pattern_part{.type = type,
+                                 .value = std::move(regexp_value),
+                                 .modifier = modifier,
+                                 .prefix = std::move(*encoded_prefix),
+                                 .suffix = std::move(*encoded_suffix)};
+    // Append part to parser’s part list.
+    parts.emplace_back(std::move(part));
+  }
+  return std::nullopt;
+}
+
+template <url_pattern_encoding_callback F>
+bool url_pattern_parser<F>::is_duplicate_name(std::string_view name) {
+  // For each part of parser’s part list:
+  // If part’s name is name, then return true.
+  return std::ranges::any_of(
+      parts, [&name](const auto& part) { return part.name == name; });
+}
+
 }  // namespace url_pattern_helpers
 
+inline std::string_view url_pattern_compile_component_options::get_delimiter()
+    const {
+  if (delimiter) {
+    return {&delimiter.value(), 1};
+  }
+  return {};
+}
+
+inline std::string_view url_pattern_compile_component_options::get_prefix()
+    const {
+  if (prefix) {
+    return {&prefix.value(), 1};
+  }
+  return {};
+}
 }  // namespace ada
 
 #endif
