@@ -413,6 +413,29 @@ tl::expected<std::string, url_pattern_errors> url_pattern_init::process_hash(
 
 namespace url_pattern_helpers {
 
+inline std::optional<url_pattern_errors>
+constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
+  // Let protocol string be the result of running make a component string given
+  // parser.
+  auto protocol_string = make_component_string();
+  // Let protocol component be the result of compiling a component given
+  // protocol string, canonicalize a protocol, and default options.
+  auto protocol_component = url_pattern_component::compile(
+      protocol_string, canonicalize_protocol,
+      url_pattern_compile_component_options::DEFAULT);
+  if (!protocol_component) {
+    return protocol_component.error();
+  }
+  // If the result of running protocol component matches a special scheme given
+  // protocol component is true, then set parser’s protocol matches a special
+  // scheme flag to true.
+  if (protocol_component_matches_special_scheme(
+          protocol_component->get_pattern())) {
+    protocol_matches_a_special_scheme_flag = true;
+  }
+  return std::nullopt;
+}
+
 tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
     std::string_view input) {
   // If value is the empty string, return value.
@@ -699,7 +722,10 @@ constructor_string_parser::parse(std::string_view input) {
         // If the result of running is a protocol suffix given parser is true:
         if (parser.is_protocol_suffix()) {
           // Run compute protocol matches a special scheme flag given parser.
-          parser.compute_protocol_matches_special_scheme_flag();
+          if (const auto error =
+                  parser.compute_protocol_matches_special_scheme_flag()) {
+            return tl::unexpected(*error);
+          }
           // Let next state be "pathname".
           auto next_state = State::PATHNAME;
           // Let skip be 1.
@@ -1234,14 +1260,125 @@ constexpr bool is_absolute_pathname(std::string_view input,
 }
 
 template <url_pattern_encoding_callback F>
-std::vector<url_pattern_part> parse_pattern_string(
-    std::string_view pattern, url_pattern_compile_component_options& options,
-    F encoding_callback) {
-  (void)pattern;
-  (void)options;
-  (void)encoding_callback;
-  // TODO: Implement this
-  return {};
+tl::expected<std::vector<url_pattern_part>, url_pattern_errors>
+parse_pattern_string(std::string_view input,
+                     url_pattern_compile_component_options& options,
+                     F encoding_callback) {
+  // Let parser be a new pattern parser whose encoding callback is encoding
+  // callback and segment wildcard regexp is the result of running generate a
+  // segment wildcard regexp given options.
+  auto parser = url_pattern_parser<F>(
+      encoding_callback, generate_segment_wildcard_regexp(options));
+  // Set parser’s token list to the result of running tokenize given input and
+  // "strict".
+  auto tokenize_result = tokenize(input, token_policy::STRICT);
+  if (!tokenize_result) {
+    return tl::unexpected(tokenize_result.error());
+  }
+  parser.tokens = std::move(tokenize_result.value<std::vector<Token>>());
+
+  // While parser’s index is less than parser’s token list's size:
+  while (parser.index < parser.tokens.size()) {
+    // Let char token be the result of running try to consume a token given
+    // parser and "char".
+    auto char_token = parser.try_consume_token(token_type::CHAR);
+    // Let name token be the result of running try to consume a token given
+    // parser and "name".
+    auto name_token_ = parser.try_consume_token(token_type::NAME);
+    // Let regexp or wildcard token be the result of running try to consume a
+    // regexp or wildcard token given parser and name token.
+    auto regexp_or_wildcard_token_ =
+        parser.try_consume_token(token_type::REGEXP);
+    // If name token is not null or regexp or wildcard token is not null:
+    if (name_token_ || regexp_or_wildcard_token_) {
+      // Let prefix be the empty string.
+      std::string prefix{};
+      // If char token is not null then set prefix to char token’s value.
+      if (char_token) prefix = char_token->value;
+      // If prefix is not the empty string and not options’s prefix code point:
+      if (!prefix.empty() && prefix != options.get_prefix()) {
+        // Append prefix to the end of parser’s pending fixed value.
+        parser.pending_fixed_value.append(prefix);
+        // Set prefix to the empty string.
+        prefix.clear();
+      }
+      // Run maybe add a part from the pending fixed value given parser.
+      if (auto error = parser.maybe_add_part_from_the_pending_fixed_value()) {
+        return tl::unexpected(*error);
+      }
+      // Let modifier token be the result of running try to consume a modifier
+      // token given parser.
+      auto modifier_token_ = parser.try_consume_modifier_token();
+      // Run add a part given parser, prefix, name token, regexp or wildcard
+      // token, the empty string, and modifier token.
+      if (auto error =
+              parser.add_part(prefix, name_token_, regexp_or_wildcard_token_,
+                              {}, modifier_token_)) {
+        return tl::unexpected(*error);
+      }
+      // Continue.
+      continue;
+    }
+
+    // Let fixed token be char token.
+    auto fixed_token = char_token;
+    // If fixed token is null, then set fixed token to the result of running try
+    // to consume a token given parser and "escaped-char".
+    if (!fixed_token)
+      fixed_token = parser.try_consume_token(token_type::ESCAPED_CHAR);
+    // If fixed token is not null:
+    if (fixed_token) {
+      // Append fixed token’s value to parser’s pending fixed value.
+      parser.pending_fixed_value.append(fixed_token->value);
+      // Continue.
+      continue;
+    }
+    // Let open token be the result of running try to consume a token given
+    // parser and "open".
+    auto open_token = parser.try_consume_token(token_type::OPEN);
+    // If open token is not null:
+    if (open_token) {
+      // Set prefix be the result of running consume text given parser.
+      auto prefix_ = parser.consume_text();
+      // Set name token to the result of running try to consume a token given
+      // parser and "name".
+      name_token_ = parser.try_consume_token(token_type::NAME);
+      // Set regexp or wildcard token to the result of running try to consume a
+      // regexp or wildcard token given parser and name token.
+      regexp_or_wildcard_token_ =
+          parser.try_consume_regexp_or_wildcard_token(name_token_);
+      // Let suffix be the result of running consume text given parser.
+      auto suffix_ = parser.consume_text();
+      // Run consume a required token given parser and "close".
+      auto required_token = parser.consume_required_token(token_type::CLOSE);
+      if (!required_token) {
+        return tl::unexpected(url_pattern_errors::type_error);
+      }
+      // Set modifier token to the result of running try to consume a modifier
+      // token given parser.
+      auto modifier_token_ = parser.try_consume_modifier_token();
+      // Run add a part given parser, prefix, name token, regexp or wildcard
+      // token, suffix, and modifier token.
+      if (auto error =
+              parser.add_part(prefix_, name_token_, regexp_or_wildcard_token_,
+                              suffix_, modifier_token_)) {
+        return tl::unexpected(*error);
+      }
+      // Continue.
+      continue;
+    }
+    // Run maybe add a part from the pending fixed value given parser.
+    if (auto error = parser.maybe_add_part_from_the_pending_fixed_value()) {
+      return tl::unexpected(*error);
+    }
+    // Run consume a required token given parser and "end".
+    auto required_token = parser.consume_required_token(token_type::END);
+    if (!required_token) {
+      return tl::unexpected(url_pattern_errors::type_error);
+    }
+  }
+  // Return parser’s part list.
+  return parser.parts;
 }
 
 std::string generate_pattern_string(
@@ -1299,7 +1436,7 @@ std::string generate_pattern_string(
     // true?
     bool needs_grouping =
         !part.suffix.empty() ||
-        (!part.prefix.empty() && part.prefix[0] != options.prefix);
+        (!part.prefix.empty() && part.prefix[0] != options.get_prefix()[0]);
 
     // If all of the following are true:
     // - needs grouping is false; and
@@ -1337,7 +1474,7 @@ std::string generate_pattern_string(
     if (!needs_grouping && part.prefix.empty() && previous_part.has_value() &&
         previous_part->type == url_pattern_part_type::FIXED_TEXT &&
         previous_part->value.at(previous_part->value.size() - 1) ==
-            options.prefix.value()) {
+            options.get_prefix().at(0)) {
       needs_grouping = true;
     }
 
@@ -1430,18 +1567,22 @@ std::string generate_pattern_string(
 }  // namespace url_pattern_helpers
 
 template <url_pattern_encoding_callback F>
-url_pattern_component url_pattern_component::compile(
-    std::string_view input, F encoding_callback,
-    url_pattern_compile_component_options& options) {
+tl::expected<url_pattern_component, url_pattern_errors>
+url_pattern_component::compile(std::string_view input, F encoding_callback,
+                               url_pattern_compile_component_options& options) {
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
   auto part_list = url_pattern_helpers::parse_pattern_string(input, options,
                                                              encoding_callback);
 
+  if (!part_list) {
+    return tl::unexpected(part_list.error());
+  }
+
   // Let (regular expression string, name list) be the result of running
   // generate a regular expression and name list given part list and options.
   auto [regular_expression, name_list] =
-      url_pattern_helpers::generate_regular_expression_and_name_list(part_list,
+      url_pattern_helpers::generate_regular_expression_and_name_list(*part_list,
                                                                      options);
 
   // Let flags be an empty string.
@@ -1458,12 +1599,12 @@ url_pattern_component url_pattern_component::compile(
   // Let pattern string be the result of running generate a pattern string given
   // part list and options.
   auto pattern_string =
-      url_pattern_helpers::generate_pattern_string(part_list, options);
+      url_pattern_helpers::generate_pattern_string(*part_list, options);
 
   // For each part of part list:
   // - If part’s type is "regexp", then set has regexp groups to true.
   const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
-  const bool has_regexp_groups = std::ranges::any_of(part_list, has_regexp);
+  const bool has_regexp_groups = std::ranges::any_of(*part_list, has_regexp);
 
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
@@ -1618,9 +1759,7 @@ std::string generate_segment_wildcard_regexp(
   std::string result = "[^";
   // Append the result of running escape a regexp string given options’s
   // delimiter code point to the end of result.
-  ADA_ASSERT_TRUE(options.delimiter.has_value());
-  result.append(
-      escape_regexp_string(std::string_view(&options.delimiter.value(), 1)));
+  result.append(escape_regexp_string(options.get_delimiter()));
   // Append "]+?" to the end of result.
   result.append("]+?");
   // Return result.
