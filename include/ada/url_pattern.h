@@ -8,7 +8,6 @@
 #include "ada/expected.h"
 
 #include <string>
-#include <tuple>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -28,13 +27,10 @@ tl::expected<result_type, url_pattern_errors> parse_url_pattern_impl(
 // Important: C++20 allows us to use concept rather than `using` or `typedef
 // and allows functions with second argument, which is optional (using either
 // std::nullopt or a parameter with default value)
-// template <typename F>
-// concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
-//   { f(sv) } -> std::same_as<tl::expected<std::string, url_pattern_errors>>;
-// } || requires(F f, std::string_view sv, std::string_view opt) {
-//   { f(sv, opt) } -> std::same_as<tl::expected<std::string,
-//   url_pattern_errors>>;
-// };
+template <typename F>
+concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
+  { f(sv) } -> std::same_as<tl::expected<std::string, url_pattern_errors>>;
+};
 
 // A structure providing matching patterns for individual components
 // of a URL. When a URLPattern is created, or when a URLPattern is
@@ -186,36 +182,41 @@ class url_pattern_component {
 
   // This function explicitly takes a std::string because it is moved.
   // To avoid unnecessary copy, move each value while calling the constructor.
-  url_pattern_component(std::string new_pattern, std::string new_regexp,
-                        std::vector<std::string> new_group_name_list,
+  url_pattern_component(std::string&& new_pattern, std::string&& new_regexp,
+                        std::string&& new_flags,
+                        std::vector<std::string>&& new_group_name_list,
                         bool new_has_regexp_groups)
       : pattern(std::move(new_pattern)),
+        flags(std::move(new_flags)),
         regexp(std::move(new_regexp)),
         group_name_list(std::move(new_group_name_list)),
         has_regexp_groups_(new_has_regexp_groups){};
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
-  template <typename url_pattern_encoding_callback>
+  template <url_pattern_encoding_callback F>
   static tl::expected<url_pattern_component, url_pattern_errors> compile(
-      std::string_view input, url_pattern_encoding_callback encoding_callback,
+      std::string_view input, F encoding_callback,
       url_pattern_compile_component_options& options);
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
       std::string_view input, const std::vector<std::string>& exec_result);
 
-  std::string_view get_pattern() const noexcept ada_lifetime_bound;
-  std::string_view get_regexp() const noexcept ada_lifetime_bound;
+  std::string_view get_pattern() const noexcept ada_lifetime_bound
+      ada_warn_unused;
+  std::string_view get_regexp() const noexcept ada_lifetime_bound
+      ada_warn_unused;
+  std::string_view get_regexp_flags() const noexcept ada_lifetime_bound
+      ada_warn_unused;
   const std::vector<std::string>& get_group_name_list() const noexcept
-      ada_lifetime_bound;
-  inline bool has_regexp_groups() const noexcept ada_lifetime_bound;
+      ada_lifetime_bound ada_warn_unused;
+  inline bool has_regexp_groups() const noexcept ada_lifetime_bound
+      ada_warn_unused;
 
  private:
-  // The normalized pattern for this component.
-  std::string pattern = "";
-  // The generated JavaScript regular expression for this component.
-  std::string regexp = "";
-  // The list of sub-component names extracted for this component.
+  std::string pattern{};
+  std::string flags{};
+  std::string regexp{};
   std::vector<std::string> group_name_list{};
 
   bool has_regexp_groups_ = false;
