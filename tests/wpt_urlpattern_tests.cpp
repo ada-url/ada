@@ -111,24 +111,21 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       }
 
       ondemand::object main_object = element.get_object();
-
-      for (auto mainfield : main_object) {
-        auto key = mainfield.key().value();
-        auto value = mainfield.value();
-        auto value_type = value.type().value();
-
-        if (key == "expected_obj") {
-          if (value_type == ondemand::json_type::string &&
-              value.value() == "error") {
-            ondemand::array patterns;
-            ASSERT_FALSE(
-                main_object.find_field_unordered("pattern").get_array().get(
-                    patterns));
-            auto init = parse_pattern_field(patterns);
-            std::cout << "patterns: " << patterns.raw_json().value()
-                      << std::endl;
-            ASSERT_FALSE(ada::parse_url_pattern(init));
-          }
+      // If we have a key with 'expected_obj' and the value is 'error', then
+      // we expect the pattern to be invalid. There should be a key with
+      // 'pattern' and the value should be an array.
+      std::string_view expected_obj;
+      if (!main_object["expected_obj"].get_string().get(expected_obj) &&
+          expected_obj == "error") {
+        ondemand::array patterns;
+        if (!main_object["pattern"].get_array().get(patterns)) {
+          auto init = parse_pattern_field(patterns);
+          std::cout << "patterns: " << patterns.raw_json().value() << std::endl;
+          ASSERT_FALSE(ada::parse_url_pattern(init));
+        } else {
+          std::cerr << "expected_obj does not have an array in pattern"
+                    << std::endl;
+          FAIL();
         }
       }
     }
