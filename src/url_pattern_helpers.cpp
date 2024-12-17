@@ -504,7 +504,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     tokenizer.seek_and_get_next_code_point(tokenizer.index);
 
     // If tokenizer’s code point is U+002A (*):
-    if (tokenizer.code_point == "*") {
+    if (tokenizer.code_point == '*') {
       // Run add a token with default position and length given tokenizer and
       // "asterisk".
       tokenizer.add_token_with_defaults(token_type::ASTERISK);
@@ -512,7 +512,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     }
 
     // If tokenizer’s code point is U+002B (+) or U+003F (?):
-    if (tokenizer.code_point == "+" || tokenizer.code_point == "?") {
+    if (tokenizer.code_point == '+' || tokenizer.code_point == '?') {
       // Run add a token with default position and length given tokenizer and
       // "other-modifier".
       tokenizer.add_token_with_defaults(token_type::OTHER_MODIFIER);
@@ -520,7 +520,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     }
 
     // If tokenizer’s code point is U+005C (\):
-    if (tokenizer.code_point == "\\") {
+    if (tokenizer.code_point == '\\') {
       // If tokenizer’s index is equal to tokenizer’s input's code point length
       // − 1:
       if (tokenizer.index == tokenizer.input.size() - 1) {
@@ -546,7 +546,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     }
 
     // If tokenizer’s code point is U+007B ({):
-    if (tokenizer.code_point == "{") {
+    if (tokenizer.code_point == '{') {
       // Run add a token with default position and length given tokenizer and
       // "open".
       tokenizer.add_token_with_defaults(token_type::OPEN);
@@ -554,7 +554,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     }
 
     // If tokenizer’s code point is U+007D (}):
-    if (tokenizer.code_point == "}") {
+    if (tokenizer.code_point == '}') {
       // Run add a token with default position and length given tokenizer and
       // "close".
       tokenizer.add_token_with_defaults(token_type::CLOSE);
@@ -562,7 +562,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     }
 
     // If tokenizer’s code point is U+003A (:):
-    if (tokenizer.code_point == ":") {
+    if (tokenizer.code_point == ':') {
       // Let name position be tokenizer’s next index.
       auto name_position = tokenizer.next_index;
       // Let name start be name position.
@@ -577,8 +577,8 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         bool first_code_point = name_position == name_start;
         // Let valid code point be the result of running is a valid name code
         // point given tokenizer’s code point and first code point.
-        auto valid_code_point = is_valid_name_code_point(
-            tokenizer.code_point.at(0), first_code_point);
+        auto valid_code_point =
+            is_valid_name_code_point(tokenizer.code_point, first_code_point);
         // If valid code point is false break.
         if (!valid_code_point) break;
         // Set name position to tokenizer’s next index.
@@ -603,7 +603,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     }
 
     // If tokenizer’s code point is U+0028 (():
-    if (tokenizer.code_point == "(") {
+    if (tokenizer.code_point == '(') {
       // Let depth be 1.
       size_t depth = 1;
       // Let regexp position be tokenizer’s next index.
@@ -622,8 +622,8 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
 
         // TODO: Optimization opportunity: The next 2 if statements can be
         // merged. If the result of running is ASCII given tokenizer’s code
-        // point is false:
-        if (!idna::is_ascii(tokenizer.code_point)) {
+        // point is false:i
+        if (!unicode::is_ascii(tokenizer.code_point)) {
           // Run process a tokenizing error given tokenizer, regexp start, and
           // tokenizer’s index.
           if (auto process_error = tokenizer.process_tokenizing_error(
@@ -638,7 +638,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
 
         // If regexp position equals regexp start and tokenizer’s code point is
         // U+003F (?):
-        if (regexp_position == regexp_start && tokenizer.code_point == "?") {
+        if (regexp_position == regexp_start && tokenizer.code_point == '?') {
           // Run process a tokenizing error given tokenizer, regexp start, and
           // tokenizer’s index.
           if (auto process_error = tokenizer.process_tokenizing_error(
@@ -652,7 +652,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         }
 
         // If tokenizer’s code point is U+005C (\):
-        if (tokenizer.code_point == "\\") {
+        if (tokenizer.code_point == '\\') {
           // If regexp position equals tokenizer’s input's code point length − 1
           if (regexp_position == tokenizer.input.size() - 1) {
             // Run process a tokenizing error given tokenizer, regexp start, and
@@ -670,7 +670,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
           tokenizer.get_next_code_point();
           // If the result of running is ASCII given tokenizer’s code point is
           // false:
-          if (!idna::is_ascii(tokenizer.code_point)) {
+          if (!unicode::is_ascii(tokenizer.code_point)) {
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
             if (auto process_error = tokenizer.process_tokenizing_error(
@@ -688,7 +688,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         }
 
         // If tokenizer’s code point is U+0029 ()):
-        if (tokenizer.code_point == ")") {
+        if (tokenizer.code_point == ')') {
           // Decrement depth by 1.
           depth--;
           if (depth == 0) {
@@ -696,7 +696,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
             regexp_position = tokenizer.next_index;
             break;
           }
-        } else if (tokenizer.code_point == "(") {
+        } else if (tokenizer.code_point == '(') {
           // Otherwise if tokenizer’s code point is U+0028 (():
           // Increment depth by 1.
           depth++;
@@ -719,7 +719,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
           // Run get the next code point given tokenizer.
           tokenizer.get_next_code_point();
           // If tokenizer’s code point is not U+003F (?):
-          if (tokenizer.code_point != "?") {
+          if (tokenizer.code_point != '?') {
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
             if (auto process_error = tokenizer.process_tokenizing_error(

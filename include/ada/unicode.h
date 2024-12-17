@@ -126,6 +126,13 @@ ada_really_inline constexpr bool is_ascii_hex_digit(char c) noexcept;
 
 /**
  * @private
+ * @details If a char is between U+0000 and U+007F inclusive, then it's an ASCII
+ * character.
+ */
+ada_really_inline constexpr bool is_ascii(uint16_t c) noexcept;
+
+/**
+ * @private
  * Checks if the input is a C0 control or space character.
  *
  * @details A C0 control or space is a C0 control or U+0020 SPACE.

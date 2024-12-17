@@ -911,26 +911,26 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     // Set init to the result of running parse a constructor string given input.
     auto parse_result = url_pattern_helpers::constructor_string_parser::parse(
         std::get<std::string_view>(input));
-    if (!parse_result.has_value()) {
+    if (!parse_result) {
       return tl::unexpected(parse_result.error());
     }
     init = *parse_result;
 
     // If baseURL is null and init["protocol"] does not exist, then throw a
     // TypeError.
-    if (base_url == nullptr && !init.protocol.has_value()) {
+    if (!base_url && !init.protocol) {
       return tl::unexpected(url_pattern_errors::type_error);
     }
 
     // If baseURL is not null, set init["baseURL"] to baseURL.
-    if (base_url != nullptr) {
+    if (base_url) {
       init.base_url = std::string(*base_url);
     }
   } else {
     // Assert: input is a URLPatternInit.
     ADA_ASSERT_TRUE(std::holds_alternative<url_pattern_init>(input));
     // If baseURL is not null, then throw a TypeError.
-    if (base_url != nullptr) {
+    if (base_url) {
       return tl::unexpected(url_pattern_errors::type_error);
     }
     // Optimization: Avoid copy by moving the input value.
@@ -950,6 +950,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   // For each componentName of « "protocol", "username", "password", "hostname",
   // "port", "pathname", "search", "hash" If processedInit[componentName] does
   // not exist, then set processedInit[componentName] to "*".
+  ADA_ASSERT_TRUE(processed_init.has_value());
   if (!processed_init->protocol) processed_init->protocol = "*";
   if (!processed_init->username) processed_init->username = "*";
   if (!processed_init->username) processed_init->username = "*";
@@ -963,25 +964,15 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   // If processedInit["protocol"] is a special scheme and processedInit["port"]
   // is a string which represents its corresponding default port in radix-10
   // using ASCII digits then set processedInit["port"] to the empty string.
-  if (scheme::is_special(*processed_init->protocol)) {
-    // TODO: Implement this.
+  // TODO: Optimization opportunity.
+  if (scheme::is_special(*processed_init->protocol) &&
+      std::to_string(scheme::get_special_port(*processed_init->protocol)) ==
+          processed_init->port) {
     processed_init->port = "";
   }
 
   // Let urlPattern be a new URL pattern.
   auto url_pattern_ = url_pattern{};
-
-  // Set urlPattern’s username component to the result of compiling a component
-  // given processedInit["username"], canonicalize a username, and default
-  // options.
-  auto username_component = url_pattern_component::compile(
-      processed_init->username.value(),
-      url_pattern_helpers::canonicalize_username,
-      url_pattern_compile_component_options::DEFAULT);
-  if (!username_component) {
-    return tl::unexpected(username_component.error());
-  }
-  url_pattern_.username_component = std::move(*username_component);
 
   // Set urlPattern’s protocol component to the result of compiling a component
   // given processedInit["protocol"], canonicalize a protocol, and default
@@ -994,6 +985,18 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     return tl::unexpected(protocol_component.error());
   }
   url_pattern_.protocol_component = std::move(*protocol_component);
+
+  // Set urlPattern’s username component to the result of compiling a component
+  // given processedInit["username"], canonicalize a username, and default
+  // options.
+  auto username_component = url_pattern_component::compile(
+      processed_init->username.value(),
+      url_pattern_helpers::canonicalize_username,
+      url_pattern_compile_component_options::DEFAULT);
+  if (!username_component) {
+    return tl::unexpected(username_component.error());
+  }
+  url_pattern_.username_component = std::move(*username_component);
 
   // Set urlPattern’s password component to the result of compiling a component
   // given processedInit["password"], canonicalize a password, and default
