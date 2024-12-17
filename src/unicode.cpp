@@ -272,6 +272,11 @@ ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
          (c >= 'a' && c <= 'f');
 }
 
+ada_really_inline constexpr bool is_ascii(const uint16_t c) noexcept {
+  // If code point is between U+0000 and U+007F inclusive, then return true.
+  return c <= 0x7F;
+}
+
 ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept {
   return (unsigned char)c <= ' ';
 }
