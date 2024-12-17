@@ -118,15 +118,10 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       if (!main_object["expected_obj"].get_string().get(expected_obj) &&
           expected_obj == "error") {
         ondemand::array patterns;
-        if (!main_object["pattern"].get_array().get(patterns)) {
-          auto init = parse_pattern_field(patterns);
-          std::cout << "patterns: " << patterns.raw_json().value() << std::endl;
-          ASSERT_FALSE(ada::parse_url_pattern(init));
-        } else {
-          std::cerr << "expected_obj does not have an array in pattern"
-                    << std::endl;
-          FAIL();
-        }
+        ASSERT_FALSE(main_object["pattern"].get_array().get(patterns));
+        auto init = parse_pattern_field(patterns);
+        std::cout << "patterns: " << patterns.raw_json().value() << std::endl;
+        ASSERT_FALSE(ada::parse_url_pattern(init));
       }
     }
   } catch (simdjson_error& error) {
