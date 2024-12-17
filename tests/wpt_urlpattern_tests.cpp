@@ -111,6 +111,9 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       }
 
       ondemand::object main_object = element.get_object();
+      // If we have a key with 'expected_obj' and the value is 'error', then
+      // we expect the pattern to be invalid. There should be a key with
+      // 'pattern' and the value should be an array.
       std::string_view expected_obj;
       if (!main_object["expected_obj"].get_string().get(expected_obj) &&
           expected_obj == "error") {
