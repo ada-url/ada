@@ -27,6 +27,11 @@ inline std::string_view url_pattern_component::get_regexp() const noexcept
   return regexp;
 }
 
+inline std::string_view url_pattern_component::get_regexp_flags() const noexcept
+    ada_lifetime_bound {
+  return flags;
+}
+
 inline const std::vector<std::string>&
 url_pattern_component::get_group_name_list() const noexcept ada_lifetime_bound {
   return group_name_list;

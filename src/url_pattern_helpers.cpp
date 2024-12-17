@@ -873,15 +873,15 @@ constexpr bool is_absolute_pathname(std::string_view input,
   return false;
 }
 
-template <typename url_pattern_encoding_callback>
+template <url_pattern_encoding_callback F>
 tl::expected<std::vector<url_pattern_part>, url_pattern_errors>
 parse_pattern_string(std::string_view input,
                      url_pattern_compile_component_options& options,
-                     url_pattern_encoding_callback&& encoding_callback) {
+                     F&& encoding_callback) {
   // Let parser be a new pattern parser whose encoding callback is encoding
   // callback and segment wildcard regexp is the result of running generate a
   // segment wildcard regexp given options.
-  auto parser = url_pattern_parser<url_pattern_encoding_callback>(
+  auto parser = url_pattern_parser<F>(
       encoding_callback, generate_segment_wildcard_regexp(options));
   // Set parser’s token list to the result of running tokenize given input and
   // "strict".
@@ -889,7 +889,7 @@ parse_pattern_string(std::string_view input,
   if (!tokenize_result) {
     return tl::unexpected(tokenize_result.error());
   }
-  parser.tokens = std::move(tokenize_result.value<std::vector<Token>>());
+  parser.tokens = std::move(*tokenize_result);
 
   // While parser’s index is less than parser’s token list's size:
   while (parser.index < parser.tokens.size()) {
@@ -898,13 +898,13 @@ parse_pattern_string(std::string_view input,
     auto char_token = parser.try_consume_token(token_type::CHAR);
     // Let name token be the result of running try to consume a token given
     // parser and "name".
-    auto name_token_ = parser.try_consume_token(token_type::NAME);
+    auto name_token = parser.try_consume_token(token_type::NAME);
     // Let regexp or wildcard token be the result of running try to consume a
     // regexp or wildcard token given parser and name token.
-    auto regexp_or_wildcard_token_ =
-        parser.try_consume_token(token_type::REGEXP);
+    auto regexp_or_wildcard_token =
+        parser.try_consume_regexp_or_wildcard_token(name_token);
     // If name token is not null or regexp or wildcard token is not null:
-    if (name_token_ || regexp_or_wildcard_token_) {
+    if (name_token || regexp_or_wildcard_token) {
       // Let prefix be the empty string.
       std::string prefix{};
       // If char token is not null then set prefix to char token’s value.
@@ -922,12 +922,12 @@ parse_pattern_string(std::string_view input,
       }
       // Let modifier token be the result of running try to consume a modifier
       // token given parser.
-      auto modifier_token_ = parser.try_consume_modifier_token();
+      auto modifier_token = parser.try_consume_modifier_token();
       // Run add a part given parser, prefix, name token, regexp or wildcard
       // token, the empty string, and modifier token.
       if (auto error =
-              parser.add_part(prefix, name_token_, regexp_or_wildcard_token_,
-                              {}, modifier_token_)) {
+              parser.add_part(prefix, name_token, regexp_or_wildcard_token, {},
+                              modifier_token)) {
         return tl::unexpected(*error);
       }
       // Continue.
@@ -956,26 +956,25 @@ parse_pattern_string(std::string_view input,
       auto prefix_ = parser.consume_text();
       // Set name token to the result of running try to consume a token given
       // parser and "name".
-      name_token_ = parser.try_consume_token(token_type::NAME);
+      name_token = parser.try_consume_token(token_type::NAME);
       // Set regexp or wildcard token to the result of running try to consume a
       // regexp or wildcard token given parser and name token.
-      regexp_or_wildcard_token_ =
-          parser.try_consume_regexp_or_wildcard_token(name_token_);
+      regexp_or_wildcard_token =
+          parser.try_consume_regexp_or_wildcard_token(name_token);
       // Let suffix be the result of running consume text given parser.
       auto suffix_ = parser.consume_text();
       // Run consume a required token given parser and "close".
-      auto required_token = parser.consume_required_token(token_type::CLOSE);
-      if (!required_token) {
+      if (!parser.consume_required_token(token_type::CLOSE)) {
         return tl::unexpected(url_pattern_errors::type_error);
       }
       // Set modifier token to the result of running try to consume a modifier
       // token given parser.
-      auto modifier_token_ = parser.try_consume_modifier_token();
+      auto modifier_token = parser.try_consume_modifier_token();
       // Run add a part given parser, prefix, name token, regexp or wildcard
       // token, suffix, and modifier token.
       if (auto error =
-              parser.add_part(prefix_, name_token_, regexp_or_wildcard_token_,
-                              suffix_, modifier_token_)) {
+              parser.add_part(prefix_, name_token, regexp_or_wildcard_token,
+                              suffix_, modifier_token)) {
         return tl::unexpected(*error);
       }
       // Continue.
@@ -986,8 +985,7 @@ parse_pattern_string(std::string_view input,
       return tl::unexpected(*error);
     }
     // Run consume a required token given parser and "end".
-    auto required_token = parser.consume_required_token(token_type::END);
-    if (!required_token) {
+    if (!parser.consume_required_token(token_type::END)) {
       return tl::unexpected(url_pattern_errors::type_error);
     }
   }

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <optional>
-#include <ranges>
 #include <regex>
 #include <string>
 
@@ -411,10 +410,9 @@ tl::expected<std::string, url_pattern_errors> url_pattern_init::process_hash(
   return url_pattern_helpers::canonicalize_hash(value);
 }
 
-template <typename url_pattern_encoding_callback>
+template <url_pattern_encoding_callback F>
 tl::expected<url_pattern_component, url_pattern_errors>
-url_pattern_component::compile(std::string_view input,
-                               url_pattern_encoding_callback encoding_callback,
+url_pattern_component::compile(std::string_view input, F encoding_callback,
                                url_pattern_compile_component_options& options) {
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
@@ -427,20 +425,19 @@ url_pattern_component::compile(std::string_view input,
 
   // Let (regular expression string, name list) be the result of running
   // generate a regular expression and name list given part list and options.
-  auto [regular_expression, name_list] =
+  auto [regular_expression_string, name_list] =
       url_pattern_helpers::generate_regular_expression_and_name_list(*part_list,
                                                                      options);
 
   // Let flags be an empty string.
   // If options’s ignore case is true then set flags to "vi".
   // Otherwise set flags to "v"
-  // TODO: Optimization opportunity: Move this to options constructor and use
-  // std::string_view to stop allocating unnecessary memory.
   std::string flags = options.ignore_case ? "vi" : "v";
 
   // Let regular expression be RegExpCreate(regular expression string, flags).
   // If this throws an exception, catch it, and throw a TypeError.
-  // TODO: Investigate how to properly support this.
+  // Note: We don't implement this, since we expect library users to use their
+  // own regular expression engine.
 
   // Let pattern string be the result of running generate a pattern string given
   // part list and options.
@@ -455,8 +452,8 @@ url_pattern_component::compile(std::string_view input,
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
   // regexp groups is has regexp groups.
-  return url_pattern_component(std::move(pattern_string),
-                               std::move(regular_expression),
+  return url_pattern_component(std::move(pattern_string), std::move(flags),
+                               std::move(regular_expression_string),
                                std::move(name_list), has_regexp_groups);
 }
 
