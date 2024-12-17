@@ -281,8 +281,9 @@ inline void Tokenizer::seek_and_get_next_code_point(size_t new_index) {
 inline void Tokenizer::add_token(token_type type, size_t next_position,
                                  size_t value_position,
                                  std::optional<size_t> value_length) {
+  ADA_ASSERT_TRUE(next_position >= value_position);
   // This is done to merge 2 different functions into 1.
-  auto default_length = value_length.value_or(next_position - value_position);
+  auto computed_length = value_length.value_or(next_position - value_position);
 
   // Let token be a new token.
   // Set token’s type to type.
@@ -291,10 +292,10 @@ inline void Tokenizer::add_token(token_type type, size_t next_position,
   // length value length within tokenizer’s input.
   auto token = Token{.type = type,
                      .index = index,
-                     .value = input.substr(value_position, default_length)};
+                     .value = input.substr(value_position, computed_length)};
 
   // Append token to the back of tokenizer’s token list.
-  token_list.push_back(token);
+  token_list.push_back(std::move(token));
   // Set tokenizer’s index to next position.
   index = next_position;
 }
@@ -519,10 +520,11 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
     // If name token is not null, then set name to name token’s value.
     if (name_token) {
       name = name_token->value;
-    } else if (regexp_or_wildcard_token != nullptr) {
+    } else if (regexp_or_wildcard_token) {
       // Otherwise if regexp or wildcard token is not null:
       // Set name to parser’s next numeric name, serialized.
-      // TODO: Implement this
+      // TODO: Make sure this is correct.
+      name = std::to_string(next_numeric_name);
       // Increment parser’s next numeric name by 1.
       next_numeric_name++;
     }
@@ -548,7 +550,7 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
                                  .prefix = std::move(*encoded_prefix),
                                  .suffix = std::move(*encoded_suffix)};
     // Append part to parser’s part list.
-    parts.emplace_back(std::move(part));
+    parts.push_back(std::move(part));
   }
   return std::nullopt;
 }

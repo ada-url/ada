@@ -290,7 +290,7 @@ std::string process_base_url_string(std::string_view input,
                                     std::string_view type);
 
 // @see https://urlpattern.spec.whatwg.org/#escape-a-pattern-string
-std::string escape_pattern(std::string_view input);
+std::string escape_pattern_string(std::string_view input);
 
 // @see https://urlpattern.spec.whatwg.org/#escape-a-regexp-string
 std::string escape_regexp_string(std::string_view input);
