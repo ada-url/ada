@@ -266,7 +266,7 @@ inline bool constructor_string_parser::is_port_prefix() {
 inline void Tokenizer::get_next_code_point() {
   // Set tokenizer’s code point to the Unicode code point in tokenizer’s input
   // at the position indicated by tokenizer’s next index.
-  code_point = &input[next_index];
+  code_point = input[next_index];
   // Increment tokenizer’s next index by 1.
   next_index++;
 }
@@ -321,7 +321,7 @@ Tokenizer::process_tokenizing_error(size_t next_position,
 }
 
 // @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
-inline bool is_valid_name_code_point(char cp, bool first) {
+inline bool is_valid_name_code_point(uint16_t cp, bool first) {
   // If first is true return the result of checking if code point is contained
   // in the IdentifierStart set of code points. Otherwise return the result of
   // checking if code point is contained in the IdentifierPart set of code
