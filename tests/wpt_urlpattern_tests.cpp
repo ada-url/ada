@@ -127,7 +127,6 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       }
     }
   } catch (simdjson_error& error) {
-    std::abort();
     std::cerr << "JSON error: " << error.what() << " near "
               << doc.current_location() << " in " << URL_PATTERN_TEST_DATA
               << std::endl;
