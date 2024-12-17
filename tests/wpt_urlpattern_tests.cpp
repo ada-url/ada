@@ -111,28 +111,23 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       }
 
       ondemand::object main_object = element.get_object();
-
-      for (auto mainfield : main_object) {
-        auto key = mainfield.key().value();
-        auto value = mainfield.value();
-        auto value_type = value.type().value();
-
-        if (key == "expected_obj") {
-          if (value_type == ondemand::json_type::string &&
-              value.value() == "error") {
-            ondemand::array patterns;
-            ASSERT_FALSE(
-                main_object.find_field_unordered("pattern").get_array().get(
-                    patterns));
-            auto init = parse_pattern_field(patterns);
-            std::cout << "patterns: " << patterns.raw_json().value()
-                      << std::endl;
-            ASSERT_FALSE(ada::parse_url_pattern(init));
-          }
+      std::string_view expected_obj;
+      if (!main_object["expected_obj"].get_string().get(expected_obj) &&
+          expected_obj == "error") {
+        ondemand::array patterns;
+        if (!main_object["pattern"].get_array().get(patterns)) {
+          auto init = parse_pattern_field(patterns);
+          std::cout << "patterns: " << patterns.raw_json().value() << std::endl;
+          ASSERT_FALSE(ada::parse_url_pattern(init));
+        } else {
+          std::cerr << "expected_obj does not have an array in pattern"
+                    << std::endl;
+          FAIL();
         }
       }
     }
   } catch (simdjson_error& error) {
+    std::abort();
     std::cerr << "JSON error: " << error.what() << " near "
               << doc.current_location() << " in " << URL_PATTERN_TEST_DATA
               << std::endl;
