@@ -508,6 +508,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // Run add a token with default position and length given tokenizer and
       // "asterisk".
       tokenizer.add_token_with_defaults(token_type::ASTERISK);
+      // Continue.
       continue;
     }
 
@@ -516,6 +517,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // Run add a token with default position and length given tokenizer and
       // "other-modifier".
       tokenizer.add_token_with_defaults(token_type::OTHER_MODIFIER);
+      // Continue.
       continue;
     }
 
@@ -527,8 +529,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         // Run process a tokenizing error given tokenizer, tokenizer’s next
         // index, and tokenizer’s index.
         if (auto error = tokenizer.process_tokenizing_error(
-                tokenizer.next_index, tokenizer.index);
-            error.has_value()) {
+                tokenizer.next_index, tokenizer.index)) {
           return tl::unexpected(*error);
         }
         continue;
@@ -542,6 +543,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // tokenizer’s next index, and escaped index.
       tokenizer.add_token(token_type::ESCAPED_CHAR, tokenizer.next_index,
                           escaped_index);
+      // Continue.
       continue;
     }
 
@@ -589,11 +591,12 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       if (name_position <= name_start) {
         // Run process a tokenizing error given tokenizer, name start, and
         // tokenizer’s index.
-        if (auto error =
-                tokenizer.process_tokenizing_error(name_start, tokenizer.index);
-            error.has_value()) {
+        if (auto error = tokenizer.process_tokenizing_error(name_start,
+                                                            tokenizer.index)) {
           return tl::unexpected(*error);
         }
+        // Continue
+        continue;
       }
 
       // Run add a token with default length given tokenizer, "name", name
@@ -622,13 +625,12 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
 
         // TODO: Optimization opportunity: The next 2 if statements can be
         // merged. If the result of running is ASCII given tokenizer’s code
-        // point is false:i
+        // point is false:
         if (!unicode::is_ascii(tokenizer.code_point)) {
           // Run process a tokenizing error given tokenizer, regexp start, and
           // tokenizer’s index.
           if (auto process_error = tokenizer.process_tokenizing_error(
-                  regexp_start, tokenizer.index);
-              process_error.has_value()) {
+                  regexp_start, tokenizer.index)) {
             return tl::unexpected(*process_error);
           }
           // Set error to true.
@@ -642,8 +644,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
           // Run process a tokenizing error given tokenizer, regexp start, and
           // tokenizer’s index.
           if (auto process_error = tokenizer.process_tokenizing_error(
-                  regexp_start, tokenizer.index);
-              process_error.has_value()) {
+                  regexp_start, tokenizer.index)) {
             return tl::unexpected(*process_error);
           }
           // Set error to true;
@@ -658,8 +659,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
             if (auto process_error = tokenizer.process_tokenizing_error(
-                    regexp_start, tokenizer.index);
-                process_error.has_value()) {
+                    regexp_start, tokenizer.index)) {
               return tl::unexpected(*process_error);
             }
             // Set error to true.
@@ -691,9 +691,11 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         if (tokenizer.code_point == ')') {
           // Decrement depth by 1.
           depth--;
+          // If depth is 0:
           if (depth == 0) {
             // Set regexp position to tokenizer’s next index.
             regexp_position = tokenizer.next_index;
+            // Break.
             break;
           }
         } else if (tokenizer.code_point == '(') {
@@ -706,8 +708,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
             if (auto process_error = tokenizer.process_tokenizing_error(
-                    regexp_start, tokenizer.index);
-                process_error.has_value()) {
+                    regexp_start, tokenizer.index)) {
               return tl::unexpected(*process_error);
             }
             // Set error to true.
@@ -723,8 +724,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
             // Run process a tokenizing error given tokenizer, regexp start, and
             // tokenizer’s index.
             if (auto process_error = tokenizer.process_tokenizing_error(
-                    regexp_start, tokenizer.index);
-                process_error.has_value()) {
+                    regexp_start, tokenizer.index)) {
               return tl::unexpected(*process_error);
             }
             // Set error to true.
@@ -745,8 +745,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         // Run process a tokenizing error given tokenizer, regexp start, and
         // tokenizer’s index.
         if (auto process_error = tokenizer.process_tokenizing_error(
-                regexp_start, tokenizer.index);
-            process_error.has_value()) {
+                regexp_start, tokenizer.index)) {
           return tl::unexpected(*process_error);
         }
         continue;
@@ -758,8 +757,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         // Run process a tokenizing error given tokenizer, regexp start, and
         // tokenizer’s index.
         if (auto process_error = tokenizer.process_tokenizing_error(
-                regexp_start, tokenizer.index);
-            process_error.has_value()) {
+                regexp_start, tokenizer.index)) {
           return tl::unexpected(*process_error);
         }
         continue;
@@ -778,11 +776,10 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
   // index, and tokenizer’s index.
   tokenizer.add_token(token_type::END, tokenizer.index, tokenizer.index);
   // Return tokenizer’s token list.
-  // TODO: Optimization opportunity: This makes an unnecessary copy.
-  return tokenizer.token_list;
+  return std::move(tokenizer.token_list);
 }
 
-std::string escape_pattern(std::string_view input) {
+std::string escape_pattern_string(std::string_view input) {
   // Assert: input is an ASCII string.
   ADA_ASSERT_TRUE(ada::idna::is_ascii(input));
   // Let result be the empty string.
@@ -850,7 +847,7 @@ std::string process_base_url_string(std::string_view input,
     return std::string(input);
   }
   // Return the result of escaping a pattern string given input.
-  return escape_pattern(input);
+  return escape_pattern_string(input);
 }
 
 constexpr bool is_absolute_pathname(std::string_view input,
@@ -1019,14 +1016,14 @@ std::string generate_pattern_string(
       if (part.modifier == url_pattern_part_modifier::NONE) {
         // Append the result of running escape a pattern string given part’s
         // value to the end of result.
-        result.append(escape_pattern(part.value));
+        result.append(escape_pattern_string(part.value));
         continue;
       }
       // Append "{" to the end of result.
       result += "{";
       // Append the result of running escape a pattern string given part’s value
       // to the end of result.
-      result.append(escape_pattern(part.value));
+      result.append(escape_pattern_string(part.value));
       // Append "}" to the end of result.
       result += "}";
       // Append the result of running convert a modifier to a string given
@@ -1100,7 +1097,7 @@ std::string generate_pattern_string(
 
     // Append the result of running escape a pattern string given part’s prefix
     // to the end of result.
-    result.append(escape_pattern(part.prefix));
+    result.append(escape_pattern_string(part.prefix));
 
     // If custom name is true:
     if (custom_name) {
@@ -1165,7 +1162,7 @@ std::string generate_pattern_string(
 
     // Append the result of running escape a pattern string given part’s suffix
     // to the end of result.
-    result.append(escape_pattern(part.suffix));
+    result.append(escape_pattern_string(part.suffix));
     // If needs grouping is true, then append "}" to the end of result.
     if (needs_grouping) result.append("}");
     // Append the result of running convert a modifier to a string given part’s
