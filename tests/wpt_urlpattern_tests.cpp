@@ -72,7 +72,6 @@ ada::url_pattern_init parse_pattern_field(ondemand::array& patterns) {
     ondemand::object object = pattern.get_object();
 
     for (auto field : object) {
-      object.reset();
       auto key = field.key().value();
       std::string_view value;
       EXPECT_FALSE(field.value().get_string(value));
