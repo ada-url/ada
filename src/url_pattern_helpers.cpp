@@ -579,8 +579,8 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         bool first_code_point = name_position == name_start;
         // Let valid code point be the result of running is a valid name code
         // point given tokenizer’s code point and first code point.
-        auto valid_code_point =
-            is_valid_name_code_point(tokenizer.code_point, first_code_point);
+        auto valid_code_point = idna::valid_name_code_point(
+            std::string_view{&tokenizer.code_point, 1}, first_code_point);
         // If valid code point is false break.
         if (!valid_code_point) break;
         // Set name position to tokenizer’s next index.
@@ -1156,7 +1156,8 @@ std::string generate_pattern_string(
     // the end of result.
     if (part.type == url_pattern_part_type::SEGMENT_WILDCARD && custom_name &&
         !part.suffix.empty() &&
-        is_valid_name_code_point(part.suffix[0], true)) {
+        idna::valid_name_code_point(std::string_view{&part.suffix[0], 1},
+                                    true)) {
       result.append("\\");
     }
 
