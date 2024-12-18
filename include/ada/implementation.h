@@ -50,6 +50,20 @@ bool can_parse(std::string_view input,
                const std::string_view* base_input = nullptr);
 
 /**
+ * Implementation of the URL pattern parsing algorithm.
+ * @see https://urlpattern.spec.whatwg.org
+ *
+ * @param input valid UTF-8 string or URLPatternInit struct
+ * @param base_url an optional valid UTF-8 string
+ * @param options an optional url_pattern_options struct
+ * @return url_pattern instance
+ */
+ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
+    std::variant<std::string_view, url_pattern_init> input,
+    const std::string_view* base_url = nullptr,
+    const url_pattern_options* options = nullptr);
+
+/**
  * Computes a href string from a file path. The function assumes
  * that the input is a valid ASCII or UTF-8 string.
  * @return a href string (starts with file:://)
