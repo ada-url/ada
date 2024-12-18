@@ -50,16 +50,18 @@ TEST(wpt_urlpattern_tests, has_regexp_groups) {
       ASSERT_FALSE(
           ada::parse_url_pattern(create_init(field, "a-{:hello}-z-*-a"))
               ->has_regexp_groups());
-      ASSERT_FALSE(ada::parse_url_pattern(create_init(field, "a-(hi)-z-(lo)-a"))
-                       ->has_regexp_groups());
+      ASSERT_TRUE(ada::parse_url_pattern(create_init(field, "a-(hi)-z-(lo)-a"))
+                      ->has_regexp_groups());
     }
-
-    ASSERT_FALSE(ada::parse_url_pattern(create_init(field, "/a/:foo/:baz?/b/*"))
-                     ->has_regexp_groups());
-    ASSERT_FALSE(
-        ada::parse_url_pattern(create_init(field, "/a/:foo/:baz([a-z]+)?/b/*"))
-            ->has_regexp_groups());
   }
+
+  ASSERT_FALSE(ada::parse_url_pattern(
+                   ada::url_pattern_init{.pathname = "/a/:foo/:baz?/b/*"})
+                   ->has_regexp_groups());
+  ASSERT_TRUE(
+      ada::parse_url_pattern(
+          ada::url_pattern_init{.pathname = "/a/:foo/:baz([a-z]+)?/b/*"})
+          ->has_regexp_groups());
 
   SUCCEED();
 }
