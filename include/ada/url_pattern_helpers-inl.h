@@ -321,18 +321,6 @@ Tokenizer::process_tokenizing_error(size_t next_position,
   return std::nullopt;
 }
 
-// @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
-inline bool is_valid_name_code_point(uint16_t cp, bool first) {
-  // If first is true return the result of checking if code point is contained
-  // in the IdentifierStart set of code points. Otherwise return the result of
-  // checking if code point is contained in the IdentifierPart set of code
-  // points.
-  // TODO: Implement this
-  (void)cp;
-  (void)first;
-  return true;
-}
-
 template <url_pattern_encoding_callback F>
 Token* url_pattern_parser<F>::try_consume_modifier_token() {
   // Let token be the result of running try to consume a token given parser and
