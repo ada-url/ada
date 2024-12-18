@@ -17,7 +17,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
   // Testing with base_url
   std::string_view base_source_view(base_source.data(), base_source.length());
-  auto result_with_base = ada::parse_url_pattern(source, &base_source_view, nullptr);
+  auto result_with_base =
+      ada::parse_url_pattern(source, &base_source_view, nullptr);
   (void)result_with_base;
 
   return 0;
