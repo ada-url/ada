@@ -441,105 +441,106 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
       // "one-or-more".
       modifier = url_pattern_part_modifier::ONE_OR_MORE;
     }
-    // If name token is null and regexp or wildcard token is null and modifier
-    // is "none":
-    if (!name_token && !regexp_or_wildcard_token &&
-        modifier == url_pattern_part_modifier::NONE) {
-      // Append prefix to the end of parser’s pending fixed value.
-      pending_fixed_value.append(prefix);
-      return std::nullopt;
-    }
-    // Run maybe add a part from the pending fixed value given parser.
-    if (auto error = maybe_add_part_from_the_pending_fixed_value()) {
-      return *error;
-    }
-    // If name token is null and regexp or wildcard token is null:
-    if (!name_token && !regexp_or_wildcard_token) {
-      // Assert: suffix is the empty string.
-      ADA_ASSERT_TRUE(suffix.empty());
-      // If prefix is the empty string, then return.
-      if (prefix.empty()) return std::nullopt;
-      // Let encoded value be the result of running parser’s encoding callback
-      // given prefix.
-      auto encoded_value = encoding_callback(prefix);
-      if (!encoded_value) {
-        return encoded_value.error();
-      }
-      // Let part be a new part whose type is "fixed-text", value is encoded
-      // value, and modifier is modifier.
-      url_pattern_part part{.type = url_pattern_part_type::FIXED_TEXT,
-                            .value = std::move(*encoded_value),
-                            .modifier = modifier};
-      // Append part to parser’s part list.
-      parts.push_back(std::move(part));
-      return std::nullopt;
-    }
-    // Let regexp value be the empty string.
-    std::string regexp_value{};
-    // If regexp or wildcard token is null, then set regexp value to parser’s
-    // segment wildcard regexp.
-    if (!regexp_or_wildcard_token) {
-      regexp_value = segment_wildcard_regexp;
-    } else if (regexp_or_wildcard_token->type == token_type::ASTERISK) {
-      // Otherwise if regexp or wildcard token’s type is "asterisk", then set
-      // regexp value to the full wildcard regexp value.
-      regexp_value = ".*";
-    } else {
-      // Otherwise set regexp value to regexp or wildcard token’s value.
-      regexp_value = regexp_or_wildcard_token->value;
-    }
-    // Let type be "regexp".
-    auto type = url_pattern_part_type::REGEXP;
-    // If regexp value is parser’s segment wildcard regexp:
-    if (regexp_value == segment_wildcard_regexp) {
-      // Set type to "segment-wildcard".
-      type = url_pattern_part_type::SEGMENT_WILDCARD;
-      // Set regexp value to the empty string.
-      regexp_value.clear();
-    } else if (regexp_value == ".*") {
-      // Otherwise if regexp value is the full wildcard regexp value:
-      // Set type to "full-wildcard".
-      type = url_pattern_part_type::FULL_WILDCARD;
-      // Set regexp value to the empty string.
-      regexp_value.clear();
-    }
-    // Let name be the empty string.
-    std::string name{};
-    // If name token is not null, then set name to name token’s value.
-    if (name_token) {
-      name = name_token->value;
-    } else if (regexp_or_wildcard_token) {
-      // Otherwise if regexp or wildcard token is not null:
-      // Set name to parser’s next numeric name, serialized.
-      // TODO: Make sure this is correct.
-      name = std::to_string(next_numeric_name);
-      // Increment parser’s next numeric name by 1.
-      next_numeric_name++;
-    }
-    // If the result of running is a duplicate name given parser and name is
-    // true, then throw a TypeError.
-    if (is_duplicate_name(name)) {
-      return url_pattern_errors::type_error;
-    }
-    // Let encoded prefix be the result of running parser’s encoding callback
+  }
+  // If name token is null and regexp or wildcard token is null and modifier
+  // is "none":
+  if (!name_token && !regexp_or_wildcard_token &&
+      modifier == url_pattern_part_modifier::NONE) {
+    // Append prefix to the end of parser’s pending fixed value.
+    pending_fixed_value.append(prefix);
+    return std::nullopt;
+  }
+  // Run maybe add a part from the pending fixed value given parser.
+  if (auto error = maybe_add_part_from_the_pending_fixed_value()) {
+    return *error;
+  }
+  // If name token is null and regexp or wildcard token is null:
+  if (!name_token && !regexp_or_wildcard_token) {
+    // Assert: suffix is the empty string.
+    ADA_ASSERT_TRUE(suffix.empty());
+    // If prefix is the empty string, then return.
+    if (prefix.empty()) return std::nullopt;
+    // Let encoded value be the result of running parser’s encoding callback
     // given prefix.
-    auto encoded_prefix = encoding_callback(prefix);
-    if (!encoded_prefix) return encoded_prefix.error();
-    // Let encoded suffix be the result of running parser’s encoding callback
-    // given suffix.
-    auto encoded_suffix = encoding_callback(suffix);
-    if (!encoded_suffix) return encoded_suffix.error();
-    // Let part be a new part whose type is type, value is regexp value,
-    // modifier is modifier, name is name, prefix is encoded prefix, and suffix
-    // is encoded suffix.
-    auto part = url_pattern_part{.type = type,
-                                 .value = std::move(regexp_value),
-                                 .modifier = modifier,
-                                 .prefix = std::move(*encoded_prefix),
-                                 .suffix = std::move(*encoded_suffix)};
+    auto encoded_value = encoding_callback(prefix);
+    if (!encoded_value) {
+      return encoded_value.error();
+    }
+    // Let part be a new part whose type is "fixed-text", value is encoded
+    // value, and modifier is modifier.
+    url_pattern_part part{.type = url_pattern_part_type::FIXED_TEXT,
+                          .value = std::move(*encoded_value),
+                          .modifier = modifier};
     // Append part to parser’s part list.
     parts.push_back(std::move(part));
+    return std::nullopt;
   }
+  // Let regexp value be the empty string.
+  std::string regexp_value{};
+  // If regexp or wildcard token is null, then set regexp value to parser’s
+  // segment wildcard regexp.
+  if (!regexp_or_wildcard_token) {
+    regexp_value = segment_wildcard_regexp;
+  } else if (regexp_or_wildcard_token->type == token_type::ASTERISK) {
+    // Otherwise if regexp or wildcard token’s type is "asterisk", then set
+    // regexp value to the full wildcard regexp value.
+    regexp_value = ".*";
+  } else {
+    // Otherwise set regexp value to regexp or wildcard token’s value.
+    regexp_value = regexp_or_wildcard_token->value;
+  }
+  // Let type be "regexp".
+  auto type = url_pattern_part_type::REGEXP;
+  // If regexp value is parser’s segment wildcard regexp:
+  if (regexp_value == segment_wildcard_regexp) {
+    // Set type to "segment-wildcard".
+    type = url_pattern_part_type::SEGMENT_WILDCARD;
+    // Set regexp value to the empty string.
+    regexp_value.clear();
+  } else if (regexp_value == ".*") {
+    // Otherwise if regexp value is the full wildcard regexp value:
+    // Set type to "full-wildcard".
+    type = url_pattern_part_type::FULL_WILDCARD;
+    // Set regexp value to the empty string.
+    regexp_value.clear();
+  }
+  // Let name be the empty string.
+  std::string name{};
+  // If name token is not null, then set name to name token’s value.
+  if (name_token) {
+    name = name_token->value;
+  } else if (regexp_or_wildcard_token) {
+    // Otherwise if regexp or wildcard token is not null:
+    // Set name to parser’s next numeric name, serialized.
+    // TODO: Make sure this is correct.
+    name = std::to_string(next_numeric_name);
+    // Increment parser’s next numeric name by 1.
+    next_numeric_name++;
+  }
+  // If the result of running is a duplicate name given parser and name is
+  // true, then throw a TypeError.
+  if (is_duplicate_name(name)) {
+    return url_pattern_errors::type_error;
+  }
+  // Let encoded prefix be the result of running parser’s encoding callback
+  // given prefix.
+  auto encoded_prefix = encoding_callback(prefix);
+  if (!encoded_prefix) return encoded_prefix.error();
+  // Let encoded suffix be the result of running parser’s encoding callback
+  // given suffix.
+  auto encoded_suffix = encoding_callback(suffix);
+  if (!encoded_suffix) return encoded_suffix.error();
+  // Let part be a new part whose type is type, value is regexp value,
+  // modifier is modifier, name is name, prefix is encoded prefix, and suffix
+  // is encoded suffix.
+  auto part = url_pattern_part{.type = type,
+                               .value = std::move(regexp_value),
+                               .modifier = modifier,
+                               .name = std::move(name),
+                               .prefix = std::move(*encoded_prefix),
+                               .suffix = std::move(*encoded_suffix)};
+  // Append part to parser’s part list.
+  parts.push_back(std::move(part));
   return std::nullopt;
 }
 
