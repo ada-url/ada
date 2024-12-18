@@ -570,10 +570,10 @@ constexpr bool is_ipv6_address(std::string_view input) noexcept {
   if (input.front() == '[') return true;
   // If input code points[0] is U+007B ({) and input code points[1] is U+005B
   // ([), then return true.
-  if (input.front() == '{' && input.at(1) == '[') return true;
+  if (input.front() == '{' && input[1] == '[') return true;
   // If input code points[0] is U+005C (\) and input code points[1] is U+005B
   // ([), then return true.
-  if (input.front() == '\\' && input.at(1) == '[') return true;
+  if (input.front() == '\\' && input[1] == '[') return true;
   // Return false.
   return false;
 }
