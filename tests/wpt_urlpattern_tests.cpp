@@ -66,37 +66,61 @@ TEST(wpt_urlpattern_tests, has_regexp_groups) {
   SUCCEED();
 }
 
-ada::url_pattern_init parse_pattern_field(ondemand::array& patterns) {
+ada::url_pattern_init parse_init(ondemand::object& object) {
   ada::url_pattern_init init{};
-  size_t pattern_size = patterns.count_elements().value_unsafe();
-  EXPECT_TRUE(pattern_size == 1);
-  for (auto pattern : patterns) {
-    ondemand::object object = pattern.get_object();
-
-    for (auto field : object) {
-      auto key = field.key().value();
-      std::string_view value;
-      EXPECT_FALSE(field.value().get_string(value));
-      if (key == "protocol") {
-        init.protocol = std::string(value);
-      } else if (key == "username") {
-        init.username = std::string(value);
-      } else if (key == "password") {
-        init.password = std::string(value);
-      } else if (key == "hostname") {
-        init.hostname = std::string(value);
-      } else if (key == "port") {
-        init.port = std::string(value);
-      } else if (key == "pathname") {
-        init.pathname = std::string(value);
-      } else if (key == "search") {
-        init.search = std::string(value);
-      } else if (key == "hash") {
-        init.hash = std::string(value);
-      }
+  for (auto field : object) {
+    auto key = field.key().value();
+    std::string_view value;
+    EXPECT_FALSE(field.value().get_string(value));
+    if (key == "protocol") {
+      init.protocol = std::string(value);
+    } else if (key == "username") {
+      init.username = std::string(value);
+    } else if (key == "password") {
+      init.password = std::string(value);
+    } else if (key == "hostname") {
+      init.hostname = std::string(value);
+    } else if (key == "port") {
+      init.port = std::string(value);
+    } else if (key == "pathname") {
+      init.pathname = std::string(value);
+    } else if (key == "search") {
+      init.search = std::string(value);
+    } else if (key == "hash") {
+      init.hash = std::string(value);
+    } else if (key == "baseURL") {
+      init.base_url = std::string(value);
     }
   }
   return init;
+}
+
+std::variant<std::string, ada::url_pattern_init> parse_pattern_field(
+    ondemand::array& patterns, std::optional<std::string>& base_url) {
+  std::optional<ada::url_pattern_init> init{};
+  std::optional<std::string> init_str{};
+  for (auto pattern : patterns) {
+    // TODO: patterns can be an array or string in the same JSON.
+    // Ex: [{ "pathname": "/foo" }, "https://example.com" ]
+    // Array items can be string as well...
+    if (pattern.type() == ondemand::json_type::string) {
+      std::string_view url;
+      EXPECT_FALSE(pattern.get_string().get(url));
+      if (init.has_value()) {
+        base_url = std::string(url);
+      } else {
+        init_str = std::string(url);
+      }
+      continue;
+    }
+    ondemand::object object = pattern.get_object();
+    init = parse_init(object);
+  }
+  if (init_str.has_value()) {
+    return init_str.value();
+  }
+  EXPECT_TRUE(init.has_value());
+  return *init;
 }
 
 TEST(wpt_urlpattern_tests, urlpattern_test_data) {
@@ -120,9 +144,28 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           expected_obj == "error") {
         ondemand::array patterns;
         ASSERT_FALSE(main_object["pattern"].get_array().get(patterns));
-        auto init = parse_pattern_field(patterns);
+        std::optional<std::string> base_url{};
+        auto init = parse_pattern_field(patterns, base_url);
         std::cout << "patterns: " << patterns.raw_json().value() << std::endl;
-        ASSERT_FALSE(ada::parse_url_pattern(init));
+        std::string_view base_url_view{};
+        if (base_url) {
+          std::cout << "  base_url: " << base_url.value() << std::endl;
+          base_url_view = {base_url->data(), base_url->size()};
+        }
+        if (std::holds_alternative<std::string>(init)) {
+          auto str_init = std::get<std::string>(init);
+          std::cout << "  init: " << str_init << std::endl;
+          ASSERT_FALSE(ada::parse_url_pattern(
+              std::string_view(str_init),
+              base_url.has_value() ? &base_url_view : nullptr));
+        } else {
+          auto obj_init = std::get<ada::url_pattern_init>(init);
+          // TODO: Change this once we have a to_string() for url_pattern_init.
+          std::cout << "  init: "
+                    << "[IS_OBJECT]" << std::endl;
+          ASSERT_FALSE(ada::parse_url_pattern(
+              obj_init, base_url.has_value() ? &base_url_view : nullptr));
+        }
       }
     }
   } catch (simdjson_error& error) {
