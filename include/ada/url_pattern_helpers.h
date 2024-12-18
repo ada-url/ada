@@ -126,7 +126,7 @@ class Tokenizer {
   // has an associated next index, a number, initially 0.
   size_t next_index = 0;
   // has an associated code point, a Unicode code point, initially null.
-  uint16_t code_point{};
+  char code_point{};
 };
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
@@ -331,9 +331,6 @@ std::string convert_modifier_to_string(url_pattern_part_modifier modifier);
 // @see https://urlpattern.spec.whatwg.org/#generate-a-segment-wildcard-regexp
 std::string generate_segment_wildcard_regexp(
     url_pattern_compile_component_options options);
-
-// @see https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
-bool is_valid_name_code_point(uint16_t code_point, bool first);
 
 }  // namespace ada::url_pattern_helpers
 
