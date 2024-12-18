@@ -1004,11 +1004,11 @@ std::string generate_pattern_string(
     // otherwise let it be null.
     // TODO: Optimization opportunity. Find a way to avoid making a copy here.
     std::optional<url_pattern_part> previous_part =
-        index == 0 ? std::nullopt : std::optional(part_list.at(index - 1));
+        index == 0 ? std::nullopt : std::optional(part_list[index - 1]);
     // Let next part be part list[index + 1] if index is less than index list’s
     // size - 1, otherwise let it be null.
     std::optional<url_pattern_part> next_part =
-        index < part_list.size() - 1 ? std::optional(part_list.at(index + 1))
+        index < part_list.size() - 1 ? std::optional(part_list[index + 1])
                                      : std::nullopt;
     // If part’s type is "fixed-text" then:
     if (part.type == url_pattern_part_type::FIXED_TEXT) {
@@ -1082,8 +1082,9 @@ std::string generate_pattern_string(
     // then set needs grouping to true.
     if (!needs_grouping && part.prefix.empty() && previous_part.has_value() &&
         previous_part->type == url_pattern_part_type::FIXED_TEXT &&
+        !options.get_prefix().empty() &&
         previous_part->value.at(previous_part->value.size() - 1) ==
-            options.get_prefix().at(0)) {
+            options.get_prefix()[0]) {
       needs_grouping = true;
     }
 

@@ -355,7 +355,7 @@ Token* url_pattern_parser<F>::try_consume_token(token_type type) {
   // Assert: parser’s index is less than parser’s token list size.
   ADA_ASSERT_TRUE(index < tokens.size());
   // Let next token be parser’s token list[parser’s index].
-  auto& next_token = tokens.at(index);
+  auto& next_token = tokens[index];
   // If next token’s type is not type return null.
   if (next_token.type != type) return nullptr;
   // Increase parser’s index by 1.
