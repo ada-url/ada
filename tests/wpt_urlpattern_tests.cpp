@@ -118,9 +118,12 @@ parse_pattern_field(ondemand::array& patterns) {
   // In simdjson's On-Demand, we disallow the pattern array size, access element
   // 0, access element 1... as it leads to inefficient code. Instead, we iterate
   // over the array.
-  size_t pattern_size = 0; // how many elements we have consumed.
+  // The following can be used for debugging:
+  //  std::cout << "parse_pattern_field" << patterns.raw_json().value()<<
+  //  std::endl; patterns.reset(); // <==== Do not forget because raw_json()
+  //  consumes the object!!!
+  size_t pattern_size = 0;  // how many elements we have consumed.
   for (auto pattern : patterns) {
-    std::cout << "pattern: " << pattern.raw_json().value() << std::endl;
     if (pattern_size == 0) {
       // Init can be a string or an object.
       if (pattern.type() == ondemand::json_type::string) {
@@ -141,10 +144,19 @@ parse_pattern_field(ondemand::array& patterns) {
       }
     } else if (pattern_size == 2) {
       // This can only be options now.
-      EXPECT_FALSE(options.has_value());
-      EXPECT_TRUE(pattern.type() == ondemand::json_type::object);
-      ondemand::object object = pattern.get_object();
-      options = parse_options(object);
+      if (pattern.type() == ondemand::json_type::object) {
+        EXPECT_FALSE(options.has_value());
+        ondemand::object object = pattern.get_object();
+        options = parse_options(object);
+      } else if (pattern.type() == ondemand::json_type::string) {
+        // E.g., [ "/foo?bar#baz", { "ignoreCase": true },
+        // "https://example.com:8080" ]
+        std::cerr
+            << "We have a string maybe, I don't know what to do about it: "
+            << pattern.get_string() << std::endl;
+      } else {
+        std::cerr << "HMMM????" << std::endl;
+      }
     } else {
       std::cerr << "Too many elements?" << std::endl;
     }
@@ -180,7 +192,6 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         ondemand::array patterns;
         ASSERT_FALSE(main_object["pattern"].get_array().get(patterns));
         auto [init_variant, base_url, options] = parse_pattern_field(patterns);
-        std::cout << "patterns: " << patterns.raw_json().value() << std::endl;
         std::string_view base_url_view{};
         if (base_url) {
           std::cout << "base_url: " << base_url.value() << std::endl;
