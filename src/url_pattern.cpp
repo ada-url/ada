@@ -410,6 +410,69 @@ tl::expected<std::string, url_pattern_errors> url_pattern_init::process_hash(
   return url_pattern_helpers::canonicalize_hash(value);
 }
 
+std::string url_pattern_init::to_string() const {
+  std::string answer;
+  auto back = std::back_insert_iterator(answer);
+  answer.append("{\n");
+
+  if (protocol.has_value()) {
+    answer.append("\t\"protocol\":\"");
+    helpers::encode_json(protocol.value(), back);
+    answer.append("\",\n");
+  }
+
+  if (username.has_value()) {
+    answer.append("\t\"username\":\"");
+    helpers::encode_json(username.value(), back);
+    answer.append("\",\n");
+  }
+
+  if (password.has_value()) {
+    answer.append("\t\"password\":\"");
+    helpers::encode_json(password.value(), back);
+    answer.append("\",\n");
+  }
+
+  if (hostname.has_value()) {
+    answer.append("\t\"hostname\":\"");
+    helpers::encode_json(hostname.value(), back);
+    answer.append("\",\n");
+  }
+
+  if (port.has_value()) {
+    answer.append("\t\"port\":\"");
+    helpers::encode_json(port.value(), back);
+    answer.append("\",\n");
+  }
+
+  if (pathname.has_value()) {
+    answer.append("\t\"pathname\":\"");
+    helpers::encode_json(pathname.value(), back);
+    answer.append("\",\n");
+  }
+
+  if (search.has_value()) {
+    answer.append("\t\"search\":\"");
+    helpers::encode_json(search.value(), back);
+    answer.append("\",\n");
+  }
+
+  if (hash.has_value()) {
+    answer.append("\t\"hash\":\"");
+    helpers::encode_json(hash.value(), back);
+    answer.append("\",\n");
+  }
+
+  if (base_url.has_value()) {
+    answer.append("\t\"base_url\":\"");
+    helpers::encode_json(base_url.value(), back);
+    answer.append("\",\n");
+  }
+
+  answer.append("}");
+  return answer;
+}
+
 template <url_pattern_encoding_callback F>
 tl::expected<url_pattern_component, url_pattern_errors>
 url_pattern_component::compile(std::string_view input, F encoding_callback,

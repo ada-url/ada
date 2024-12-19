@@ -149,20 +149,18 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         std::cout << "patterns: " << patterns.raw_json().value() << std::endl;
         std::string_view base_url_view{};
         if (base_url) {
-          std::cout << "  base_url: " << base_url.value() << std::endl;
+          std::cout << "base_url: " << base_url.value() << std::endl;
           base_url_view = {base_url->data(), base_url->size()};
         }
         if (std::holds_alternative<std::string>(init)) {
           auto str_init = std::get<std::string>(init);
-          std::cout << "  init: " << str_init << std::endl;
+          std::cout << "init: " << str_init << std::endl;
           ASSERT_FALSE(ada::parse_url_pattern(
               std::string_view(str_init),
               base_url.has_value() ? &base_url_view : nullptr));
         } else {
           auto obj_init = std::get<ada::url_pattern_init>(init);
-          // TODO: Change this once we have a to_string() for url_pattern_init.
-          std::cout << "  init: "
-                    << "[IS_OBJECT]" << std::endl;
+          std::cout << "init: " << obj_init.to_string() << std::endl;
           ASSERT_FALSE(ada::parse_url_pattern(
               obj_init, base_url.has_value() ? &base_url_view : nullptr));
         }
