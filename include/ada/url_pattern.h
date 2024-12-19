@@ -83,6 +83,8 @@ struct url_pattern_init {
   static tl::expected<std::string, url_pattern_errors> process_hash(
       std::string_view value, std::string_view type);
 
+  [[nodiscard]] std::string to_string() const;
+
   std::optional<std::string> protocol{};
   std::optional<std::string> username{};
   std::optional<std::string> password{};
@@ -91,7 +93,6 @@ struct url_pattern_init {
   std::optional<std::string> pathname{};
   std::optional<std::string> search{};
   std::optional<std::string> hash{};
-
   std::optional<std::string> base_url{};
 };
 
