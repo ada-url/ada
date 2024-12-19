@@ -115,46 +115,42 @@ parse_pattern_field(ondemand::array& patterns) {
   std::optional<std::string> init_str{};
   std::optional<std::string> base_url{};
   std::optional<ada::url_pattern_options> options{};
-
-  auto pattern_size = patterns.count_elements().value();
-  EXPECT_TRUE(pattern_size > 0);
-
-  // Init can be a string or an object.
-  auto init_value = patterns.at(0);
-  if (init_value.type() == ondemand::json_type::string) {
-    std::string_view value;
-    EXPECT_FALSE(init_value.get_string().get(value));
-    init_str = std::string(value);
-  } else {
-    EXPECT_TRUE(init_value.type() == ondemand::json_type::object);
-    ondemand::object object = init_value.get_object();
-    init_obj = parse_init(object);
-  }
-
-  // The second value can be a base url or an option.
-  if (pattern_size >= 2) {
-    auto base_url_or_options_value = patterns.at(1);
-    if (base_url_or_options_value.type() == ondemand::json_type::string) {
-      std::string_view value;
-      EXPECT_FALSE(base_url_or_options_value.get_string().get(value));
-      base_url = std::string(value);
-    } else {
-      EXPECT_TRUE(base_url_or_options_value.type() ==
-                  ondemand::json_type::object);
-      ondemand::object object = base_url_or_options_value.get_object();
+  // In simdjson's On-Demand, we disallow the pattern array size, access element
+  // 0, access element 1... as it leads to inefficient code. Instead, we iterate
+  // over the array.
+  size_t pattern_size = 0; // how many elements we have consumed.
+  for (auto pattern : patterns) {
+    std::cout << "pattern: " << pattern.raw_json().value() << std::endl;
+    if (pattern_size == 0) {
+      // Init can be a string or an object.
+      if (pattern.type() == ondemand::json_type::string) {
+        EXPECT_FALSE(pattern.get_string(init_str));
+      } else {
+        EXPECT_TRUE(pattern.type() == ondemand::json_type::object);
+        ondemand::object object = pattern.get_object();
+        init_obj = parse_init(object);
+      }
+    } else if (pattern_size == 1) {
+      // The second value can be a base url or an option.
+      if (pattern.type() == ondemand::json_type::string) {
+        EXPECT_FALSE(pattern.get_string(base_url));
+      } else {
+        EXPECT_TRUE(pattern.type() == ondemand::json_type::object);
+        ondemand::object object = pattern.get_object();
+        options = parse_options(object);
+      }
+    } else if (pattern_size == 2) {
+      // This can only be options now.
+      EXPECT_FALSE(options.has_value());
+      EXPECT_TRUE(pattern.type() == ondemand::json_type::object);
+      ondemand::object object = pattern.get_object();
       options = parse_options(object);
+    } else {
+      std::cerr << "Too many elements?" << std::endl;
     }
+    pattern_size++;
   }
-
-  // This can only be options now.
-  if (pattern_size == 3) {
-    EXPECT_FALSE(options.has_value());
-    auto options_value = patterns.at(2);
-    EXPECT_TRUE(options_value.type() == ondemand::json_type::object);
-    ondemand::object object = options_value.get_object();
-    options = parse_options(object);
-  }
-
+  EXPECT_TRUE(pattern_size > 0);
   if (init_obj) {
     return std::tuple(*init_obj, base_url, options);
   }
