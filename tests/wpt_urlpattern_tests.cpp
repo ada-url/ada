@@ -95,32 +95,71 @@ ada::url_pattern_init parse_init(ondemand::object& object) {
   return init;
 }
 
-std::variant<std::string, ada::url_pattern_init> parse_pattern_field(
-    ondemand::array& patterns, std::optional<std::string>& base_url) {
-  std::optional<ada::url_pattern_init> init{};
+ada::url_pattern_options parse_options(ondemand::object& object) {
+  ada::url_pattern_options options{};
+  if (object["ignoreCase"]) {
+    options.ignore_case = object["ignoreCase"].get_bool().value();
+  }
+  return options;
+}
+
+// URLPattern can accept the following use cases:
+// new URLPattern(input)
+// new URLPattern(input, baseURL)
+// new URLPattern(input, options)
+// new URLPattern(input, baseURL, options)
+std::tuple<std::variant<std::string, ada::url_pattern_init>,
+           std::optional<std::string>, std::optional<ada::url_pattern_options>>
+parse_pattern_field(ondemand::array& patterns) {
+  std::optional<ada::url_pattern_init> init_obj{};
   std::optional<std::string> init_str{};
-  for (auto pattern : patterns) {
-    // TODO: patterns can be an array or string in the same JSON.
-    // Ex: [{ "pathname": "/foo" }, "https://example.com" ]
-    // Array items can be string as well...
-    if (pattern.type() == ondemand::json_type::string) {
-      std::string_view url;
-      EXPECT_FALSE(pattern.get_string().get(url));
-      if (init.has_value()) {
-        base_url = std::string(url);
-      } else {
-        init_str = std::string(url);
-      }
-      continue;
+  std::optional<std::string> base_url{};
+  std::optional<ada::url_pattern_options> options{};
+
+  auto pattern_size = patterns.count_elements().value();
+  EXPECT_TRUE(pattern_size > 0);
+
+  // Init can be a string or an object.
+  auto init_value = patterns.at(0);
+  if (init_value.type() == ondemand::json_type::string) {
+    std::string_view value;
+    EXPECT_FALSE(init_value.get_string().get(value));
+    init_str = std::string(value);
+  } else {
+    EXPECT_TRUE(init_value.type() == ondemand::json_type::object);
+    ondemand::object object = init_value.get_object();
+    init_obj = parse_init(object);
+  }
+
+  // The second value can be a base url or an option.
+  if (pattern_size >= 2) {
+    auto base_url_or_options_value = patterns.at(1);
+    if (base_url_or_options_value.type() == ondemand::json_type::string) {
+      std::string_view value;
+      EXPECT_FALSE(base_url_or_options_value.get_string().get(value));
+      base_url = std::string(value);
+    } else {
+      EXPECT_TRUE(base_url_or_options_value.type() ==
+                  ondemand::json_type::object);
+      ondemand::object object = base_url_or_options_value.get_object();
+      options = parse_options(object);
     }
-    ondemand::object object = pattern.get_object();
-    init = parse_init(object);
   }
-  if (init_str.has_value()) {
-    return init_str.value();
+
+  // This can only be options now.
+  if (pattern_size == 3) {
+    EXPECT_FALSE(options.has_value());
+    auto options_value = patterns.at(2);
+    EXPECT_TRUE(options_value.type() == ondemand::json_type::object);
+    ondemand::object object = options_value.get_object();
+    options = parse_options(object);
   }
-  EXPECT_TRUE(init.has_value());
-  return *init;
+
+  if (init_obj) {
+    return std::tuple(*init_obj, base_url, options);
+  }
+  EXPECT_TRUE(init_str.has_value());
+  return std::tuple(*init_str, base_url, options);
 }
 
 TEST(wpt_urlpattern_tests, urlpattern_test_data) {
@@ -144,25 +183,26 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           expected_obj == "error") {
         ondemand::array patterns;
         ASSERT_FALSE(main_object["pattern"].get_array().get(patterns));
-        std::optional<std::string> base_url{};
-        auto init = parse_pattern_field(patterns, base_url);
+        auto [init_variant, base_url, options] = parse_pattern_field(patterns);
         std::cout << "patterns: " << patterns.raw_json().value() << std::endl;
         std::string_view base_url_view{};
         if (base_url) {
           std::cout << "base_url: " << base_url.value() << std::endl;
           base_url_view = {base_url->data(), base_url->size()};
         }
-        if (std::holds_alternative<std::string>(init)) {
-          auto str_init = std::get<std::string>(init);
+        if (std::holds_alternative<std::string>(init_variant)) {
+          auto str_init = std::get<std::string>(init_variant);
           std::cout << "init: " << str_init << std::endl;
           ASSERT_FALSE(ada::parse_url_pattern(
               std::string_view(str_init),
-              base_url.has_value() ? &base_url_view : nullptr));
+              base_url.has_value() ? &base_url_view : nullptr,
+              options.has_value() ? &options.value() : nullptr));
         } else {
-          auto obj_init = std::get<ada::url_pattern_init>(init);
+          auto obj_init = std::get<ada::url_pattern_init>(init_variant);
           std::cout << "init: " << obj_init.to_string() << std::endl;
           ASSERT_FALSE(ada::parse_url_pattern(
-              obj_init, base_url.has_value() ? &base_url_view : nullptr));
+              obj_init, base_url.has_value() ? &base_url_view : nullptr,
+              options.has_value() ? &options.value() : nullptr));
         }
       }
     }
