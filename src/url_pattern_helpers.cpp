@@ -1065,7 +1065,10 @@ std::string generate_pattern_string(
         // Set needs grouping to true if the result of running is a valid name
         // code point given next part’s value's first code point and the boolean
         // false is true.
-        // TODO: Implement this.
+        if (idna::valid_name_code_point(
+                std::string_view{(next_part->value.c_str()), 1}, false)) {
+          needs_grouping = true;
+        }
       } else {
         // Set needs grouping to true if next part’s name[0] is an ASCII digit.
         needs_grouping =
