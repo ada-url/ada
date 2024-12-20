@@ -21,5 +21,24 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
       ada::parse_url_pattern(source, &base_source_view, nullptr);
   (void)result_with_base;
 
+  // Testing with base_url and options
+  ada::url_pattern_options options{.ignore_case = true};
+  auto result_with_base_and_options =
+      ada::parse_url_pattern(source, &base_source_view, &options);
+  (void)result_with_base_and_options;
+
+  // Testing with url_pattern_init and base url.
+  ada::url_pattern_init init{.protocol = source,
+                             .username = source,
+                             .password = source,
+                             .hostname = source,
+                             .port = source,
+                             .pathname = source,
+                             .search = source,
+                             .hash = source};
+  auto result_with_init =
+      ada::parse_url_pattern(init, &base_source_view, nullptr);
+  (void)result_with_init;
+
   return 0;
 }
