@@ -723,15 +723,21 @@ std::string generate_segment_wildcard_regexp(
 
 bool protocol_component_matches_special_scheme(
     ada::url_pattern_component& component) {
-  // TODO: Optimize this.
   auto regex = component.get_regexp();
-  std::regex rx(regex.data(), regex.size());
-  std::cmatch cmatch;
-  return std::regex_match("http", cmatch, rx) ||
+  try {
+    std::regex rx(regex.data(), regex.size());
+    std::cmatch cmatch;
+    return std::regex_match("http", cmatch, rx) ||
          std::regex_match("https", cmatch, rx) ||
          std::regex_match("ws", cmatch, rx) ||
          std::regex_match("wss", cmatch, rx) ||
          std::regex_match("ftp", cmatch, rx);
+  } catch (...) {
+    // You probably want to log this error.
+    ada_log("Error while matching protocol component with special scheme");
+    ada_log("Regex Input: ", input);
+    return false;
+  }
 }
 
 }  // namespace url_pattern_helpers
