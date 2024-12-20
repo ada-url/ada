@@ -260,16 +260,16 @@ class url_pattern {
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
   tl::expected<std::optional<url_pattern_result>, url_pattern_errors> exec(
-      url_pattern_input input, std::string_view* base_url);
+      url_pattern_input&& input, std::string_view* base_url);
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
-  bool test(url_pattern_input input, std::string_view* base_url);
+  bool test(url_pattern_input&& input, std::string_view* base_url);
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#url-pattern-match
    * This function expects a valid UTF-8 string if input is a string.
    */
   tl::expected<std::optional<url_pattern_result>, url_pattern_errors> match(
-      url_pattern_input input, std::string_view* base_url_string);
+      url_pattern_input&& input, std::string_view* base_url_string);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-protocol
   std::string_view get_protocol() const ada_lifetime_bound;
