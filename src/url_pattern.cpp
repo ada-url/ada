@@ -674,7 +674,7 @@ std::string generate_segment_wildcard_regexp(
 
 bool protocol_component_matches_special_scheme(std::string_view input) {
   // TODO: Optimize this.
-  std::regex rx(input.begin(), input.size());
+  std::regex rx(input.data(), input.size());
   std::cmatch cmatch;
   return std::regex_match("http", cmatch, rx) ||
          std::regex_match("https", cmatch, rx) ||
