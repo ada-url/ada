@@ -91,8 +91,13 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     // result of processing a base URL string given baseURL’s scheme and type.
     if (!init.protocol.has_value()) {
       ADA_ASSERT_TRUE(base_url.has_value());
-      result.protocol = url_pattern_helpers::process_base_url_string(
-          base_url->get_protocol(), type);
+      // TODO: Look into why we need this.
+      // We need to remove the trailing ':' from the protocol or
+      // canonicalize_port will fail.
+      std::string_view protocol_view = base_url->get_protocol();
+      protocol_view.remove_suffix(1);
+      result.protocol =
+          url_pattern_helpers::process_base_url_string(protocol_view, type);
     }
 
     // If type is not "pattern" and init contains none of "protocol",
