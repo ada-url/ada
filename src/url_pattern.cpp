@@ -410,6 +410,16 @@ tl::expected<std::string, url_pattern_errors> url_pattern_init::process_hash(
   return url_pattern_helpers::canonicalize_hash(value);
 }
 
+std::string url_pattern_options::to_string() const {
+  std::string answer;
+  answer.append("{\n");
+  answer.append("\t\"ignore_case\":\"");
+  answer.append(ignore_case ? "true" : "false");
+  answer.append("\",\n");
+  answer.append("}");
+  return answer;
+}
+
 std::string url_pattern_init::to_string() const {
   std::string answer;
   auto back = std::back_insert_iterator(answer);
