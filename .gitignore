@@ -25,3 +25,4 @@ benchmarks/competitors/servo-url/target
 
 #ignore VScode
 .vscode/
+.idea
