@@ -36,13 +36,17 @@ tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
   if (input.empty()) [[unlikely]] {
     return "";
   }
+
   // Let dummyURL be a new URL record.
   // Let parseResult be the result of running the basic URL parser given value
   // followed by "://dummy.test", with dummyURL as url.
   if (auto dummy_url = ada::parse<url_aggregator>(
           std::string(input) + "://dummy.test", nullptr)) {
     // Return dummyURL’s scheme.
-    return std::string(dummy_url->get_protocol());
+    // Remove the trailing ':' from the protocol.
+    std::string_view protocol = dummy_url->get_protocol();
+    protocol.remove_suffix(1);
+    return std::string(protocol);
   }
   // If parseResult is failure, then throw a TypeError.
   return tl::unexpected(url_pattern_errors::type_error);
@@ -779,6 +783,9 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
 }
 
 std::string escape_pattern_string(std::string_view input) {
+  if (input.empty()) [[unlikely]] {
+    return "";
+  }
   // Assert: input is an ASCII string.
   ADA_ASSERT_TRUE(ada::idna::is_ascii(input));
   // Let result be the empty string.

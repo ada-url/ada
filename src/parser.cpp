@@ -1063,7 +1063,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
           url_pattern_.protocol_component.get_pattern())) {
     // Let pathCompileOptions be copy of the pathname options with the ignore
     // case property set to options["ignoreCase"].
-    auto path_compile_options = url_pattern_compile_component_options::HOSTNAME;
+    auto path_compile_options = url_pattern_compile_component_options::PATHNAME;
     if (options) {
       path_compile_options.ignore_case = options->ignore_case;
     }
