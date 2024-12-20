@@ -559,8 +559,16 @@ generate_regular_expression_and_name_list(
       } else {
         // A "fixed-text" part with a modifier uses a non capturing group
         // (?:<fixed text>)<modifier>
-        result += "(?:" + escape_regexp_string(part.value) + ")" +
-                  convert_modifier_to_string(part.modifier);
+        // Append "(?:" to the end of result.
+        result.append("(?:");
+        // Append the result of running escape a regexp string given part’s
+        // value to the end of result.
+        result.append(escape_regexp_string(part.value));
+        // Append ")" to the end of result.
+        result.append(")");
+        // Append the result of running convert a modifier to a string given
+        // part’s modifier to the end of result.
+        result.append(convert_modifier_to_string(part.modifier));
       }
       continue;
     }
@@ -576,10 +584,13 @@ generate_regular_expression_and_name_list(
 
     // If part's type is "segment-wildcard"
     if (part.type == url_pattern_part_type::SEGMENT_WILDCARD) {
+      // then set regexp value to the result of running generate a segment
+      // wildcard regexp given options.
       regexp_value = generate_segment_wildcard_regexp(options);
     }
     // Otherwise if part's type is "full-wildcard"
     else if (part.type == url_pattern_part_type::FULL_WILDCARD) {
+      // then set regexp value to full wildcard regexp value.
       regexp_value = full_wildcard_regexp_value;
     }
 
@@ -620,11 +631,34 @@ generate_regular_expression_and_name_list(
 
     // (?:<prefix>((?:<regexp value>)(?:<suffix><prefix>(?:<regexp
     // value>))*)<suffix>)?
-    result += "(?:" + escape_regexp_string(part.prefix) +
-              "((?:" + regexp_value +
-              ")(?:" + escape_regexp_string(part.suffix) +
-              escape_regexp_string(part.prefix) + "(?:" + regexp_value +
-              "))*)" + escape_regexp_string(part.suffix) + ")";
+    // Append "(?:" to the end of result.
+    result.append("(?:");
+    // Append the result of running escape a regexp string given part’s prefix
+    // to the end of result.
+    result.append(escape_regexp_string(part.prefix));
+    // Append "((?:" to the end of result.
+    result.append("((?:");
+    // Append regexp value to the end of result.
+    result.append(regexp_value);
+    // Append ")(?:" to the end of result.
+    result.append(")(?:");
+    // Append the result of running escape a regexp string given part’s suffix
+    // to the end of result.
+    result.append(escape_regexp_string(part.suffix));
+    // Append the result of running escape a regexp string given part’s prefix
+    // to the end of result.
+    result.append(escape_regexp_string(part.prefix));
+    // Append "(?:" to the end of result.
+    result.append("(?:");
+    // Append regexp value to the end of result.
+    result.append(regexp_value);
+    // Append "))*)" to the end of result.
+    result.append("))*)");
+    // Append the result of running escape a regexp string given part’s suffix
+    // to the end of result.
+    result.append(escape_regexp_string(part.suffix));
+    // Append ")" to the end of result.
+    result.append(")");
 
     // If part's modifier is "zero-or-more" then append "?" to the end of result
     if (part.modifier == url_pattern_part_modifier::ZERO_OR_MORE) {
