@@ -167,6 +167,38 @@ parse_pattern_field(ondemand::array& patterns) {
   return std::tuple(*init_str, base_url, options);
 }
 
+std::optional<tl::expected<ada::url_pattern, ada::url_pattern_errors>>
+parse_pattern(
+    std::variant<std::string, ada::url_pattern_init, bool>& init_variant,
+    std::optional<std::string>& base_url,
+    std::optional<ada::url_pattern_options>& options) {
+  std::string_view base_url_view{};
+
+  // This is an invalid test case. We should not test it.
+  if (std::holds_alternative<bool>(init_variant)) {
+    return std::nullopt;
+  }
+
+  if (base_url) {
+    base_url_view = {base_url->data(), base_url->size()};
+  }
+
+  if (std::holds_alternative<std::string>(init_variant)) {
+    auto str_init = std::get<std::string>(init_variant);
+    std::cout << "init: " << str_init << std::endl;
+    return ada::parse_url_pattern(
+        std::string_view(str_init),
+        base_url.has_value() ? &base_url_view : nullptr,
+        options.has_value() ? &options.value() : nullptr);
+  }
+
+  auto obj_init = std::get<ada::url_pattern_init>(init_variant);
+  std::cout << "init: " << obj_init.to_string() << std::endl;
+  return ada::parse_url_pattern(
+      obj_init, base_url.has_value() ? &base_url_view : nullptr,
+      options.has_value() ? &options.value() : nullptr);
+}
+
 TEST(wpt_urlpattern_tests, urlpattern_test_data) {
   ondemand::parser parser;
   ASSERT_TRUE(std::filesystem::exists(URL_PATTERN_TEST_DATA));
@@ -179,42 +211,41 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         continue;
       }
 
+      std::cout << "----------" << std::endl;
+
       ondemand::object main_object = element.get_object();
       // If we have a key with 'expected_obj' and the value is 'error', then
       // we expect the pattern to be invalid. There should be a key with
       // 'pattern' and the value should be an array.
       std::string_view expected_obj;
+      ondemand::array patterns;
+      ASSERT_FALSE(main_object["pattern"].get_array().get(patterns));
+      auto [init_variant, base_url, options] = parse_pattern_field(patterns);
+      auto parse_result = parse_pattern(init_variant, base_url, options);
+
+      if (!parse_result) {
+        // Skip invalid test cases.
+        continue;
+      }
+
       if (!main_object["expected_obj"].get_string().get(expected_obj) &&
           expected_obj == "error") {
-        ondemand::array patterns;
-        ASSERT_FALSE(main_object["pattern"].get_array().get(patterns));
-        auto [init_variant, base_url, options] = parse_pattern_field(patterns);
-        if (std::holds_alternative<bool>(init_variant)) {
-          // This is an invalid pattern. We should not test it.
-          // We return false to indicate that should skip the test.
-          continue;
-        }
+        // This test should fail.
+        ASSERT_FALSE(parse_result->has_value());
+        continue;
+      }
 
-        std::string_view base_url_view{};
-
+      // Test for valid cases.
+      if (!parse_result->has_value()) {
+        main_object.reset();
         if (base_url) {
-          std::cout << "base_url: " << base_url.value() << std::endl;
-          base_url_view = {base_url->data(), base_url->size()};
+          std::cerr << "base_url: " << base_url.value_or("") << std::endl;
         }
-        if (std::holds_alternative<std::string>(init_variant)) {
-          auto str_init = std::get<std::string>(init_variant);
-          std::cout << "init: " << str_init << std::endl;
-          ASSERT_FALSE(ada::parse_url_pattern(
-              std::string_view(str_init),
-              base_url.has_value() ? &base_url_view : nullptr,
-              options.has_value() ? &options.value() : nullptr));
-        } else {
-          auto obj_init = std::get<ada::url_pattern_init>(init_variant);
-          std::cout << "init: " << obj_init.to_string() << std::endl;
-          ASSERT_FALSE(ada::parse_url_pattern(
-              obj_init, base_url.has_value() ? &base_url_view : nullptr,
-              options.has_value() ? &options.value() : nullptr));
+        if (options) {
+          std::cerr << "options: " << options->to_string() << std::endl;
         }
+        std::cerr << "JSON: " << main_object.raw_json().value() << std::endl;
+        FAIL();
       }
     }
   } catch (simdjson_error& error) {

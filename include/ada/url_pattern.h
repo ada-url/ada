@@ -242,6 +242,8 @@ struct url_pattern_result {
 
 struct url_pattern_options {
   bool ignore_case = false;
+
+  std::string to_string() const;
 };
 
 // URLPattern is a Web Platform standard API for matching URLs against a
