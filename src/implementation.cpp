@@ -1,10 +1,12 @@
 #include <string_view>
+#include <variant>
 
 #include "ada.h"
 #include "ada/common_defs.h"
 #include "ada/parser.h"
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
+#include "ada/url_pattern.h"
 
 namespace ada {
 
