@@ -110,7 +110,7 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
 
 tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
     std::string_view input) {
-  // Optimization opportunity: Use lookup table to speed up checking
+  // TODO: Optimization opportunity: Use lookup table to speed up checking
   if (std::ranges::all_of(input, [](char c) {
         return c == '[' || c == ']' || c == ':' ||
                unicode::is_ascii_hex_digit(c);
@@ -1039,16 +1039,12 @@ std::string generate_pattern_string(
     }
     // Let custom name be true if part’s name[0] is not an ASCII digit;
     // otherwise false.
-    // TODO: Optimization opportunity: Find a way to directly check
-    // is_ascii_digit.
-    bool custom_name = idna::is_ascii(std::string_view(part.name.data(), 1));
+    bool custom_name = !unicode::is_ascii_digit(part.name[0]);
     // Let needs grouping be true if at least one of the following are true,
     // otherwise let it be false:
     // - part’s suffix is not the empty string.
     // - part’s prefix is not the empty string and is not options’s prefix code
     // point.
-    // TODO: part.prefix is a string, but options.prefix is a char. Which one is
-    // true?
     bool needs_grouping =
         !part.suffix.empty() ||
         (!part.prefix.empty() && part.prefix[0] != options.get_prefix()[0]);
@@ -1077,8 +1073,7 @@ std::string generate_pattern_string(
         }
       } else {
         // Set needs grouping to true if next part’s name[0] is an ASCII digit.
-        needs_grouping =
-            idna::is_ascii(std::string_view(next_part->name.data(), 1));
+        needs_grouping = unicode::is_ascii_digit(next_part->name[0]);
       }
     }
 
