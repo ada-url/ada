@@ -1060,7 +1060,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   // If the result of running protocol component matches a special scheme given
   // urlPattern’s protocol component is true, then:
   if (url_pattern_helpers::protocol_component_matches_special_scheme(
-          url_pattern_.protocol_component.get_pattern())) {
+          url_pattern_.protocol_component)) {
     // Let pathCompileOptions be copy of the pathname options with the ignore
     // case property set to options["ignoreCase"].
     auto path_compile_options = url_pattern_compile_component_options::PATHNAME;
