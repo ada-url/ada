@@ -700,7 +700,7 @@ bool url_pattern::test(url_pattern_input input,
   // Let result be the result of match given this's associated URL pattern,
   // input, and baseURL if given.
   // If result is null, return false.
-  if (auto result = match(input, base_url); result.has_value()) {
+  if (auto result = match(std::move(input), base_url); result.has_value()) {
     return result->has_value();
   }
   return false;
