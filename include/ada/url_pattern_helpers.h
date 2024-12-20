@@ -133,7 +133,7 @@ class Tokenizer {
 struct constructor_string_parser {
   explicit constructor_string_parser(std::string_view new_input,
                                      std::vector<Token>& new_token_list)
-      : input(new_input), token_list(new_token_list){};
+      : input(new_input), token_list(new_token_list){}
 
   // @see https://urlpattern.spec.whatwg.org/#rewind
   void rewind();
