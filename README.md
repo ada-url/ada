@@ -315,7 +315,13 @@ You can install Ada using `brew install ada-url`.
 
 Ada uses cmake as a build system. It's recommended you to run the following commands to build it locally.
 
+Without tests:
+
 - **Build**: `cmake -B build && cmake --build build`
+
+With tests (requires git):
+
+- **Build**: `cmake -B build -DADA_TESTING=ON && cmake --build build`
 - **Test**: `ctest --output-on-failure --test-dir build`
 
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
