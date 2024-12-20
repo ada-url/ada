@@ -323,7 +323,8 @@ constexpr bool is_ipv6_address(std::string_view input) noexcept;
 
 // @see
 // https://urlpattern.spec.whatwg.org/#protocol-component-matches-a-special-scheme
-bool protocol_component_matches_special_scheme(std::string_view input);
+bool protocol_component_matches_special_scheme(
+    ada::url_pattern_component& input);
 
 // @see https://urlpattern.spec.whatwg.org/#convert-a-modifier-to-a-string
 std::string convert_modifier_to_string(url_pattern_part_modifier modifier);

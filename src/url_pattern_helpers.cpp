@@ -23,8 +23,7 @@ constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
   // If the result of running protocol component matches a special scheme given
   // protocol component is true, then set parser’s protocol matches a special
   // scheme flag to true.
-  if (protocol_component_matches_special_scheme(
-          protocol_component->get_pattern())) {
+  if (protocol_component_matches_special_scheme(*protocol_component)) {
     protocol_matches_a_special_scheme_flag = true;
   }
   return std::nullopt;
@@ -1073,7 +1072,8 @@ std::string generate_pattern_string(
         }
       } else {
         // Set needs grouping to true if next part’s name[0] is an ASCII digit.
-        needs_grouping = unicode::is_ascii_digit(next_part->name[0]);
+        needs_grouping = !next_part->name.empty() &&
+                         unicode::is_ascii_digit(next_part->name[0]);
       }
     }
 

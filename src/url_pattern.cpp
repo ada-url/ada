@@ -530,9 +530,9 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
   // regexp groups is has regexp groups.
-  return url_pattern_component(std::move(pattern_string), std::move(flags),
-                               std::move(regular_expression_string),
-                               std::move(name_list), has_regexp_groups);
+  return url_pattern_component(
+      std::move(pattern_string), std::move(regular_expression_string),
+      std::move(flags), std::move(name_list), has_regexp_groups);
 }
 
 namespace url_pattern_helpers {
@@ -721,9 +721,11 @@ std::string generate_segment_wildcard_regexp(
   return result;
 }
 
-bool protocol_component_matches_special_scheme(std::string_view input) {
+bool protocol_component_matches_special_scheme(
+    ada::url_pattern_component& component) {
   // TODO: Optimize this.
-  std::regex rx(input.data(), input.size());
+  auto regex = component.get_regexp();
+  std::regex rx(regex.data(), regex.size());
   std::cmatch cmatch;
   return std::regex_match("http", cmatch, rx) ||
          std::regex_match("https", cmatch, rx) ||
@@ -735,14 +737,14 @@ bool protocol_component_matches_special_scheme(std::string_view input) {
 }  // namespace url_pattern_helpers
 
 tl::expected<std::optional<url_pattern_result>, url_pattern_errors>
-url_pattern::exec(url_pattern_input input,
+url_pattern::exec(url_pattern_input&& input,
                   std::string_view* base_url = nullptr) {
   // Return the result of match given this's associated URL pattern, input, and
   // baseURL if given.
-  return match(input, base_url);
+  return match(std::move(input), base_url);
 }
 
-bool url_pattern::test(url_pattern_input input,
+bool url_pattern::test(url_pattern_input&& input,
                        std::string_view* base_url = nullptr) {
   // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
   // Implement a fast path just like `can_parse()` in ada_url.
@@ -756,7 +758,8 @@ bool url_pattern::test(url_pattern_input input,
 }
 
 tl::expected<std::optional<url_pattern_result>, url_pattern_errors>
-url_pattern::match(url_pattern_input input, std::string_view* base_url_string) {
+url_pattern::match(url_pattern_input&& input,
+                   std::string_view* base_url_string) {
   std::string protocol{};
   std::string username{};
   std::string password{};
