@@ -12,6 +12,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   ada_url out = ada_parse((char*)data, size);
   
   if (!out) {
+    bool can_parse_result = ada_can_parse((char*)data, size);
     return 0;
   }
 
@@ -19,6 +20,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   
   if (!is_valid) {
     ada_free(out);
+    bool can_parse_result = ada_can_parse((char*)data, size);
     return 0;
   }
 
