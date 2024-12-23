@@ -307,12 +307,32 @@ inline bool constructor_string_parser::is_port_prefix() {
 }
 
 inline void Tokenizer::get_next_code_point() {
-  ADA_ASSERT_TRUE(next_index < input.size());
-  // Set tokenizer’s code point to the Unicode code point in tokenizer’s input
-  // at the position indicated by tokenizer’s next index.
-  code_point = input[next_index];
-  // Increment tokenizer’s next index by 1.
-  next_index++;
+  // this assumes that we have a valid, non-truncated UTF-8 stream.
+  code_point = 0;
+  size_t number_bytes = 0;
+  unsigned char first_byte = input[index];
+
+  if ((first_byte & 0x80) == 0) {
+    // 1-byte character (ASCII)
+    index++;
+    code_point = first_byte;
+    return;
+  } else if ((first_byte & 0xE0) == 0xC0) {
+    code_point = first_byte & 0x1F;
+    number_bytes = 2;
+  } else if ((first_byte & 0xF0) == 0xE0) {
+    code_point = first_byte & 0x0F;
+    number_bytes = 3;
+  } else if ((first_byte & 0xF8) == 0xF0) {
+    code_point = first_byte & 0x07;
+    number_bytes = 4;
+  }
+
+  for (size_t i = 1 + index; i < number_bytes + index; ++i) {
+    unsigned char byte = input[i];
+    code_point = (code_point << 6) | (byte & 0x3F);
+  }
+  index += number_bytes;
 }
 
 inline void Tokenizer::seek_and_get_next_code_point(size_t new_index) {
