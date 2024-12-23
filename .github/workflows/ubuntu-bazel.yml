@@ -1,0 +1,36 @@
+name: Ubuntu 22.04
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ubuntu-build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        shared: [ON, OFF]
+        cxx: [g++-12, clang++-14]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: bazelbuild/setup-bazelisk@v3
+      - name: Build & Test
+        run: bazel test //...
+        env:
+          CXX: ${{matrix.cxx}}
