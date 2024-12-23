@@ -495,6 +495,7 @@ constructor_string_parser::parse(std::string_view input) {
 
 tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     std::string_view input, token_policy policy) {
+  ada_log("tokenize input: ", input);
   // Let tokenizer be a new tokenizer.
   // Set tokenizer’s input to input.
   // Set tokenizer’s policy to policy.
@@ -505,11 +506,15 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
     // index.
     tokenizer.seek_and_get_next_code_point(tokenizer.index);
 
+    ada_log("tokenizer.code_point: ", tokenizer.code_point);
+    ada_log("tokenizer.index: ", tokenizer.index);
+
     // If tokenizer’s code point is U+002A (*):
     if (tokenizer.code_point == '*') {
       // Run add a token with default position and length given tokenizer and
       // "asterisk".
       tokenizer.add_token_with_defaults(token_type::ASTERISK);
+      ada_log("add ASTERISK token");
       // Continue.
       continue;
     }
@@ -519,6 +524,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // Run add a token with default position and length given tokenizer and
       // "other-modifier".
       tokenizer.add_token_with_defaults(token_type::OTHER_MODIFIER);
+      ada_log("add OTHER_MODIFIER token");
       // Continue.
       continue;
     }
@@ -532,6 +538,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         // index, and tokenizer’s index.
         if (auto error = tokenizer.process_tokenizing_error(
                 tokenizer.next_index, tokenizer.index)) {
+          ada_log("process_tokenizing_error failed");
           return tl::unexpected(*error);
         }
         continue;
@@ -545,6 +552,8 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // tokenizer’s next index, and escaped index.
       tokenizer.add_token(token_type::ESCAPED_CHAR, tokenizer.next_index,
                           escaped_index);
+      ada_log("add ESCAPED_CHAR token on next_index ", tokenizer.next_index,
+              " with escaped index ", escaped_index);
       // Continue.
       continue;
     }
@@ -554,6 +563,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // Run add a token with default position and length given tokenizer and
       // "open".
       tokenizer.add_token_with_defaults(token_type::OPEN);
+      ada_log("add OPEN token");
       continue;
     }
 
@@ -562,6 +572,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // Run add a token with default position and length given tokenizer and
       // "close".
       tokenizer.add_token_with_defaults(token_type::CLOSE);
+      ada_log("add CLOSE token");
       continue;
     }
 
@@ -583,6 +594,8 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         // point given tokenizer’s code point and first code point.
         auto valid_code_point = idna::valid_name_code_point(
             std::string_view{&tokenizer.code_point, 1}, first_code_point);
+        ada_log("tokenizer.code_point: ", tokenizer.code_point,
+                " is_valid_name_code_point: ", valid_code_point);
         // If valid code point is false break.
         if (!valid_code_point) break;
         // Set name position to tokenizer’s next index.
@@ -595,6 +608,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         // tokenizer’s index.
         if (auto error = tokenizer.process_tokenizing_error(name_start,
                                                             tokenizer.index)) {
+          ada_log("process_tokenizing_error failed");
           return tl::unexpected(*error);
         }
         // Continue
@@ -604,6 +618,8 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // Run add a token with default length given tokenizer, "name", name
       // position, and name start.
       tokenizer.add_token(token_type::NAME, name_position, name_start);
+      ada_log("add NAME token on name_position ", name_position,
+              " with name_start ", name_start);
       continue;
     }
 
@@ -633,6 +649,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
           // tokenizer’s index.
           if (auto process_error = tokenizer.process_tokenizing_error(
                   regexp_start, tokenizer.index)) {
+            ada_log("process_tokenizing_error failed");
             return tl::unexpected(*process_error);
           }
           // Set error to true.
@@ -647,6 +664,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
           // tokenizer’s index.
           if (auto process_error = tokenizer.process_tokenizing_error(
                   regexp_start, tokenizer.index)) {
+            ada_log("process_tokenizing_error failed");
             return tl::unexpected(*process_error);
           }
           // Set error to true;
@@ -662,6 +680,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
             // tokenizer’s index.
             if (auto process_error = tokenizer.process_tokenizing_error(
                     regexp_start, tokenizer.index)) {
+              ada_log("process_tokenizing_error failed");
               return tl::unexpected(*process_error);
             }
             // Set error to true.
@@ -678,6 +697,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
             if (auto process_error = tokenizer.process_tokenizing_error(
                     regexp_start, tokenizer.index);
                 process_error.has_value()) {
+              ada_log("process_tokenizing_error failed");
               return tl::unexpected(*process_error);
             }
             // Set error to true.
@@ -711,6 +731,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
             // tokenizer’s index.
             if (auto process_error = tokenizer.process_tokenizing_error(
                     regexp_start, tokenizer.index)) {
+              ada_log("process_tokenizing_error failed");
               return tl::unexpected(*process_error);
             }
             // Set error to true.
@@ -727,6 +748,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
             // tokenizer’s index.
             if (auto process_error = tokenizer.process_tokenizing_error(
                     regexp_start, tokenizer.index)) {
+              ada_log("process_tokenizing_error failed");
               return tl::unexpected(*process_error);
             }
             // Set error to true.
@@ -748,6 +770,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         // tokenizer’s index.
         if (auto process_error = tokenizer.process_tokenizing_error(
                 regexp_start, tokenizer.index)) {
+          ada_log("process_tokenizing_error failed");
           return tl::unexpected(*process_error);
         }
         continue;
@@ -760,6 +783,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
         // tokenizer’s index.
         if (auto process_error = tokenizer.process_tokenizing_error(
                 regexp_start, tokenizer.index)) {
+          ada_log("process_tokenizing_error failed");
           return tl::unexpected(*process_error);
         }
         continue;
@@ -768,6 +792,9 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
       // start, and regexp length.
       tokenizer.add_token(token_type::REGEXP, regexp_position, regexp_start,
                           regexp_length);
+      ada_log("add REGEXP token on regexp_position ", regexp_position,
+              " with regexp_start ", regexp_start, " and regexp_length ",
+              regexp_length);
       continue;
     }
     // Run add a token with default position and length given tokenizer and
@@ -777,6 +804,9 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
   // Run add a token with default length given tokenizer, "end", tokenizer’s
   // index, and tokenizer’s index.
   tokenizer.add_token(token_type::END, tokenizer.index, tokenizer.index);
+  ada_log("add token END");
+
+  ada_log("tokenizer.token_list size is: ", tokenizer.token_list.size());
   // Return tokenizer’s token list.
   return std::move(tokenizer.token_list);
 }
@@ -889,6 +919,7 @@ parse_pattern_string(std::string_view input,
   // "strict".
   auto tokenize_result = tokenize(input, token_policy::STRICT);
   if (!tokenize_result) {
+    ada_log("parse_pattern_string tokenize failed");
     return tl::unexpected(tokenize_result.error());
   }
   parser.tokens = std::move(*tokenize_result);
@@ -920,6 +951,7 @@ parse_pattern_string(std::string_view input,
       }
       // Run maybe add a part from the pending fixed value given parser.
       if (auto error = parser.maybe_add_part_from_the_pending_fixed_value()) {
+        ada_log("maybe_add_part_from_the_pending_fixed_value failed");
         return tl::unexpected(*error);
       }
       // Let modifier token be the result of running try to consume a modifier
@@ -930,6 +962,7 @@ parse_pattern_string(std::string_view input,
       if (auto error =
               parser.add_part(prefix, name_token, regexp_or_wildcard_token, {},
                               modifier_token)) {
+        ada_log("parser.add_part failed");
         return tl::unexpected(*error);
       }
       // Continue.
@@ -967,6 +1000,7 @@ parse_pattern_string(std::string_view input,
       auto suffix_ = parser.consume_text();
       // Run consume a required token given parser and "close".
       if (!parser.consume_required_token(token_type::CLOSE)) {
+        ada_log("parser.consume_required_token failed");
         return tl::unexpected(url_pattern_errors::type_error);
       }
       // Set modifier token to the result of running try to consume a modifier
@@ -977,6 +1011,7 @@ parse_pattern_string(std::string_view input,
       if (auto error =
               parser.add_part(prefix_, name_token, regexp_or_wildcard_token,
                               suffix_, modifier_token)) {
+        ada_log("parser.add_part failed on line 984");
         return tl::unexpected(*error);
       }
       // Continue.
@@ -984,13 +1019,16 @@ parse_pattern_string(std::string_view input,
     }
     // Run maybe add a part from the pending fixed value given parser.
     if (auto error = parser.maybe_add_part_from_the_pending_fixed_value()) {
+      ada_log("maybe_add_part_from_the_pending_fixed_value failed on line 992");
       return tl::unexpected(*error);
     }
     // Run consume a required token given parser and "end".
     if (!parser.consume_required_token(token_type::END)) {
+      ada_log("parser.consume_required_token failed");
       return tl::unexpected(url_pattern_errors::type_error);
     }
   }
+  ada_log("parser.parts size is: ", parser.parts.size());
   // Return parser’s part list.
   return parser.parts;
 }

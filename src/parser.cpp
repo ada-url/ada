@@ -912,6 +912,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     auto parse_result = url_pattern_helpers::constructor_string_parser::parse(
         std::get<std::string_view>(input));
     if (!parse_result) {
+      ada_log("constructor_string_parser::parse failed");
       return tl::unexpected(parse_result.error());
     }
     init = *parse_result;
@@ -919,6 +920,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     // If baseURL is null and init["protocol"] does not exist, then throw a
     // TypeError.
     if (!base_url && !init.protocol) {
+      ada_log("base url is null and protocol is not set");
       return tl::unexpected(url_pattern_errors::type_error);
     }
 
@@ -931,6 +933,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     ADA_ASSERT_TRUE(std::holds_alternative<url_pattern_init>(input));
     // If baseURL is not null, then throw a TypeError.
     if (base_url) {
+      ada_log("base url is not null");
       return tl::unexpected(url_pattern_errors::type_error);
     }
     // Optimization: Avoid copy by moving the input value.
@@ -944,6 +947,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
       init, "pattern", std::nullopt, std::nullopt, std::nullopt, std::nullopt,
       std::nullopt, std::nullopt, std::nullopt, std::nullopt);
   if (!processed_init) {
+    ada_log("url_pattern_init::process failed for init and 'pattern'");
     return tl::unexpected(processed_init.error());
   }
 
@@ -960,6 +964,15 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   if (!processed_init->pathname) processed_init->pathname = "*";
   if (!processed_init->search) processed_init->search = "*";
   if (!processed_init->hash) processed_init->hash = "*";
+
+  ada_log("-- processed_init->protocol: ", processed_init->protocol.value());
+  ada_log("-- processed_init->username: ", processed_init->username.value());
+  ada_log("-- processed_init->password: ", processed_init->password.value());
+  ada_log("-- processed_init->hostname: ", processed_init->hostname.value());
+  ada_log("-- processed_init->port: ", processed_init->port.value());
+  ada_log("-- processed_init->pathname: ", processed_init->pathname.value());
+  ada_log("-- processed_init->search: ", processed_init->search.value());
+  ada_log("-- processed_init->hash: ", processed_init->hash.value());
 
   // If processedInit["protocol"] is a special scheme and processedInit["port"]
   // is a string which represents its corresponding default port in radix-10
@@ -982,6 +995,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
       url_pattern_helpers::canonicalize_protocol,
       url_pattern_compile_component_options::DEFAULT);
   if (!protocol_component) {
+    ada_log("url_pattern_component::compile failed for protocol ",
+            processed_init->protocol.value());
     return tl::unexpected(protocol_component.error());
   }
   url_pattern_.protocol_component = std::move(*protocol_component);
@@ -994,6 +1009,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
       url_pattern_helpers::canonicalize_username,
       url_pattern_compile_component_options::DEFAULT);
   if (!username_component) {
+    ada_log("url_pattern_component::compile failed for username ",
+            processed_init->username.value());
     return tl::unexpected(username_component.error());
   }
   url_pattern_.username_component = std::move(*username_component);
@@ -1006,6 +1023,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
       url_pattern_helpers::canonicalize_password,
       url_pattern_compile_component_options::DEFAULT);
   if (!password_component) {
+    ada_log("url_pattern_component::compile failed for password ",
+            processed_init->password.value());
     return tl::unexpected(password_component.error());
   }
   url_pattern_.password_component = std::move(*password_component);
@@ -1022,6 +1041,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
         url_pattern_helpers::canonicalize_hostname,
         url_pattern_compile_component_options::DEFAULT);
     if (!hostname_component) {
+      ada_log("url_pattern_component::compile failed for ipv6 hostname ",
+              processed_init->hostname.value());
       return tl::unexpected(hostname_component.error());
     }
     url_pattern_.hostname_component = std::move(*hostname_component);
@@ -1034,6 +1055,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
         url_pattern_helpers::canonicalize_hostname,
         url_pattern_compile_component_options::HOSTNAME);
     if (!hostname_component) {
+      ada_log("url_pattern_component::compile failed for hostname ",
+              processed_init->hostname.value());
       return tl::unexpected(hostname_component.error());
     }
     url_pattern_.hostname_component = std::move(*hostname_component);
@@ -1045,6 +1068,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
       processed_init->port.value(), url_pattern_helpers::canonicalize_port,
       url_pattern_compile_component_options::DEFAULT);
   if (!port_component) {
+    ada_log("url_pattern_component::compile failed for port ",
+            processed_init->port.value());
     return tl::unexpected(port_component.error());
   }
   url_pattern_.port_component = std::move(*port_component);
@@ -1075,6 +1100,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
         processed_init->pathname.value(),
         url_pattern_helpers::canonicalize_pathname, path_compile_options);
     if (!pathname_component) {
+      ada_log("url_pattern_component::compile failed for pathname ",
+              processed_init->pathname.value());
       return tl::unexpected(pathname_component.error());
     }
     url_pattern_.pathname_component = std::move(*pathname_component);
@@ -1086,6 +1113,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
         processed_init->pathname.value(),
         url_pattern_helpers::canonicalize_opaque_pathname, compile_options);
     if (!pathname_component) {
+      ada_log("url_pattern_component::compile failed for opaque pathname ",
+              processed_init->pathname.value());
       return tl::unexpected(pathname_component.error());
     }
     url_pattern_.pathname_component = std::move(*pathname_component);
@@ -1097,6 +1126,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
       processed_init->search.value(), url_pattern_helpers::canonicalize_search,
       compile_options);
   if (!search_component) {
+    ada_log("url_pattern_component::compile failed for search ",
+            processed_init->search.value());
     return tl::unexpected(search_component.error());
   }
   url_pattern_.search_component = std::move(*search_component);
@@ -1107,6 +1138,8 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
       processed_init->hash.value(), url_pattern_helpers::canonicalize_hash,
       compile_options);
   if (!hash_component) {
+    ada_log("url_pattern_component::compile failed for hash ",
+            processed_init->hash.value());
     return tl::unexpected(hash_component.error());
   }
   url_pattern_.hash_component = std::move(*hash_component);
