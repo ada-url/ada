@@ -320,11 +320,12 @@ inline void Tokenizer::get_next_code_point() {
     code_point = first_byte;
     ada_log("Tokenizer::get_next_code_point returning ASCII code point=",
             uint32_t(code_point));
-    ada_log("Tokenizer::get_next_code_point next_index =", next_index, " input.size() =", input.size());
+    ada_log("Tokenizer::get_next_code_point next_index =", next_index,
+            " input.size()=", input.size());
     return;
   }
   ada_log("Tokenizer::get_next_code_point read first byte=",
-            uint32_t(first_byte));
+          uint32_t(first_byte));
   if ((first_byte & 0xE0) == 0xC0) {
     code_point = first_byte & 0x1F;
     number_bytes = 2;
@@ -338,17 +339,17 @@ inline void Tokenizer::get_next_code_point() {
     number_bytes = 4;
     ada_log("Tokenizer::get_next_code_point four bytes");
   }
-  ADA_ASSERT_TRUE(number_bytes + next_index < input.size());
+  ADA_ASSERT_TRUE(number_bytes + next_index <= input.size());
 
   for (size_t i = 1 + next_index; i < number_bytes + next_index; ++i) {
     unsigned char byte = input[i];
-    ada_log("Tokenizer::get_next_code_point read byte=",
-            uint32_t(byte));
+    ada_log("Tokenizer::get_next_code_point read byte=", uint32_t(byte));
     code_point = (code_point << 6) | (byte & 0x3F);
   }
   ada_log("Tokenizer::get_next_code_point returning non-ASCII code point=",
           uint32_t(code_point));
-  ada_log("Tokenizer::get_next_code_point next_index =", next_index, " input.size() =", input.size());
+  ada_log("Tokenizer::get_next_code_point next_index =", next_index,
+          " input.size()=", input.size());
   next_index += number_bytes;
 }
 
