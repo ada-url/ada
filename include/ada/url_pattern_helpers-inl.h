@@ -11,6 +11,33 @@
 #include "ada/url_pattern_helpers.h"
 
 namespace ada::url_pattern_helpers {
+inline std::string to_string(token_type type) {
+  switch (type) {
+    case token_type::INVALID_CHAR:
+      return "INVALID_CHAR";
+    case token_type::OPEN:
+      return "OPEN";
+    case token_type::CLOSE:
+      return "CLOSE";
+    case token_type::REGEXP:
+      return "REGEXP";
+    case token_type::NAME:
+      return "NAME";
+    case token_type::CHAR:
+      return "CHAR";
+    case token_type::ESCAPED_CHAR:
+      return "ESCAPED_CHAR";
+    case token_type::OTHER_MODIFIER:
+      return "OTHER_MODIFIER";
+    case token_type::ASTERISK:
+      return "ASTERISK";
+    case token_type::END:
+      return "END";
+    default:
+      ada::unreachable();
+  }
+}
+
 inline void constructor_string_parser::rewind() {
   // Set parser’s token index to parser’s component start.
   token_index = component_start;
@@ -264,6 +291,7 @@ inline bool constructor_string_parser::is_port_prefix() {
 }
 
 inline void Tokenizer::get_next_code_point() {
+  ADA_ASSERT_TRUE(next_index < input.size());
   // Set tokenizer’s code point to the Unicode code point in tokenizer’s input
   // at the position indicated by tokenizer’s next index.
   code_point = input[next_index];
@@ -272,6 +300,8 @@ inline void Tokenizer::get_next_code_point() {
 }
 
 inline void Tokenizer::seek_and_get_next_code_point(size_t new_index) {
+  ada_log("Tokenizer::seek_and_get_next_code_point called with new_index=",
+          new_index);
   // Set tokenizer’s next index to index.
   next_index = new_index;
   // Run get the next code point given tokenizer.
@@ -279,11 +309,10 @@ inline void Tokenizer::seek_and_get_next_code_point(size_t new_index) {
 }
 
 inline void Tokenizer::add_token(token_type type, size_t next_position,
-                                 size_t value_position,
-                                 std::optional<size_t> value_length) {
+                                 size_t value_position, size_t value_length) {
+  ada_log("Tokenizer::add_token called with type=", to_string(type),
+          " next_position=", next_position, " value_position=", value_position);
   ADA_ASSERT_TRUE(next_position >= value_position);
-  // This is done to merge 2 different functions into 1.
-  auto computed_length = value_length.value_or(next_position - value_position);
 
   // Let token be a new token.
   // Set token’s type to type.
@@ -292,7 +321,7 @@ inline void Tokenizer::add_token(token_type type, size_t next_position,
   // length value length within tokenizer’s input.
   auto token = Token{.type = type,
                      .index = index,
-                     .value = input.substr(value_position, computed_length)};
+                     .value = input.substr(value_position, value_length)};
 
   // Append token to the back of tokenizer’s token list.
   token_list.push_back(std::move(token));
@@ -300,10 +329,22 @@ inline void Tokenizer::add_token(token_type type, size_t next_position,
   index = next_position;
 }
 
+inline void Tokenizer::add_token_with_default_length(token_type type,
+                                                     size_t next_position,
+                                                     size_t value_position) {
+  // Let computed length be next position − value position.
+  auto computed_length = next_position - value_position;
+  // Run add a token given tokenizer, type, next position, value position, and
+  // computed length.
+  add_token(type, next_position, value_position, computed_length);
+}
+
 inline void Tokenizer::add_token_with_defaults(token_type type) {
+  ada_log("Tokenizer::add_token_with_defaults called with type=",
+          to_string(type));
   // Run add a token with default length given tokenizer, type, tokenizer’s next
   // index, and tokenizer’s index.
-  add_token(type, next_index, index);
+  add_token_with_default_length(type, next_index, index);
 }
 
 inline ada_warn_unused std::optional<url_pattern_errors>
@@ -311,13 +352,16 @@ Tokenizer::process_tokenizing_error(size_t next_position,
                                     size_t value_position) {
   // If tokenizer’s policy is "strict", then throw a TypeError.
   if (policy == token_policy::STRICT) {
+    ada_log("process_tokenizing_error failed with next_position=",
+            next_position, " value_position=", value_position);
     return url_pattern_errors::type_error;
   }
   // Assert: tokenizer’s policy is "lenient".
   ADA_ASSERT_TRUE(policy == token_policy::LENIENT);
   // Run add a token with default length given tokenizer, "invalid-char", next
   // position, and value position.
-  add_token(token_type::INVALID_CHAR, next_position, value_position);
+  add_token_with_default_length(token_type::INVALID_CHAR, next_position,
+                                value_position);
   return std::nullopt;
 }
 
@@ -352,6 +396,8 @@ Token* url_pattern_parser<F>::try_consume_regexp_or_wildcard_token(
 
 template <url_pattern_encoding_callback F>
 Token* url_pattern_parser<F>::try_consume_token(token_type type) {
+  ada_log("url_pattern_parser::try_consume_token called with type=",
+          to_string(type));
   // Assert: parser’s index is less than parser’s token list size.
   ADA_ASSERT_TRUE(index < tokens.size());
   // Let next token be parser’s token list[parser’s index].
@@ -388,6 +434,8 @@ std::string url_pattern_parser<F>::consume_text() {
 template <url_pattern_encoding_callback F>
 tl::expected<Token, url_pattern_errors>
 url_pattern_parser<F>::consume_required_token(token_type type) {
+  ada_log("url_pattern_parser::consume_required_token called with type=",
+          to_string(type));
   // Let result be the result of running try to consume a token given parser and
   // type.
   auto result = try_consume_token(type);

@@ -15,7 +15,7 @@
 namespace ada::url_pattern_helpers {
 
 // @see https://urlpattern.spec.whatwg.org/#token
-enum class token_type {
+enum class token_type : uint8_t {
   INVALID_CHAR,    // 0
   OPEN,            // 1
   CLOSE,           // 2
@@ -27,6 +27,8 @@ enum class token_type {
   ASTERISK,        // 8
   END,             // 9
 };
+
+std::string to_string(token_type type);
 
 // @see https://urlpattern.spec.whatwg.org/#tokenize-policy
 enum class token_policy {
@@ -103,17 +105,21 @@ class Tokenizer {
   void seek_and_get_next_code_point(size_t index);
 
   // @see https://urlpattern.spec.whatwg.org/#add-a-token
-  // @see https://urlpattern.spec.whatwg.org/#add-a-token-with-default-length
+
   void add_token(token_type type, size_t next_position, size_t value_position,
-                 std::optional<size_t> value_length = std::nullopt);
+                 size_t value_length);
+
+  // @see https://urlpattern.spec.whatwg.org/#add-a-token-with-default-length
+  void add_token_with_default_length(token_type type, size_t next_position,
+                                     size_t value_position);
 
   // @see
   // https://urlpattern.spec.whatwg.org/#add-a-token-with-default-position-and-length
   void add_token_with_defaults(token_type type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-a-tokenizing-error
-  ada_warn_unused std::optional<url_pattern_errors> process_tokenizing_error(
-      size_t next_position, size_t value_position);
+  std::optional<url_pattern_errors> process_tokenizing_error(
+      size_t next_position, size_t value_position) ada_warn_unused;
 
   // has an associated input, a pattern string, initially the empty string.
   std::string input{};
@@ -126,14 +132,14 @@ class Tokenizer {
   // has an associated next index, a number, initially 0.
   size_t next_index = 0;
   // has an associated code point, a Unicode code point, initially null.
-  char code_point{};
+  char32_t code_point{};
 };
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
 struct constructor_string_parser {
   explicit constructor_string_parser(std::string_view new_input,
-                                     std::vector<Token>& new_token_list)
-      : input(new_input), token_list(new_token_list) {}
+                                     std::vector<Token>&& new_token_list)
+      : input(new_input), token_list(std::move(new_token_list)) {}
 
   // @see https://urlpattern.spec.whatwg.org/#rewind
   void rewind();

@@ -957,7 +957,6 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   ADA_ASSERT_TRUE(processed_init.has_value());
   if (!processed_init->protocol) processed_init->protocol = "*";
   if (!processed_init->username) processed_init->username = "*";
-  if (!processed_init->username) processed_init->username = "*";
   if (!processed_init->password) processed_init->password = "*";
   if (!processed_init->hostname) processed_init->hostname = "*";
   if (!processed_init->port) processed_init->port = "*";
