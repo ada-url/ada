@@ -10227,31 +10227,26 @@ uint32_t get_first_code_point(std::string_view input) {
   return code_point;
 }
 
-bool is_ascii_letter(char c) {
+bool is_ascii_letter(char32_t c) {
   return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 }
 
-bool is_ascii_letter_or_digit(char c) {
+bool is_ascii_letter_or_digit(char32_t c) {
   return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
          (c >= '0' && c <= '9');
 }
 
-bool valid_name_code_point(std::string_view input, bool first) {
-  // https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
-  if (input.empty()) {
-    return false;
-  }
+bool valid_name_code_point(char32_t code_point, bool first) {
   // https://tc39.es/ecma262/#prod-IdentifierStart
   // Fast paths:
   if (first &&
-      (input[0] == '$' || input[0] == '_' || is_ascii_letter(input[0]))) {
+      (code_point == '$' || code_point == '_' || is_ascii_letter(code_point))) {
     return true;
   }
-  if (!first && (input[0] == '$' || is_ascii_letter_or_digit(input[0]))) {
+  if (!first && (code_point == '$' || is_ascii_letter_or_digit(code_point))) {
     return true;
   }
   // Slow path...
-  uint32_t code_point = get_first_code_point(input);
   if (code_point == 0xffffffff) {
     return false;  // minimal error handling
   }

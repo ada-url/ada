@@ -136,7 +136,7 @@ ada_really_inline constexpr bool is_ascii_digit(char c) noexcept;
  * @details If a char is between U+0000 and U+007F inclusive, then it's an ASCII
  * character.
  */
-ada_really_inline constexpr bool is_ascii(uint16_t c) noexcept;
+ada_really_inline constexpr bool is_ascii(char32_t c) noexcept;
 
 /**
  * @private
