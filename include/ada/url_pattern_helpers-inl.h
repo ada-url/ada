@@ -99,7 +99,6 @@ inline bool constructor_string_parser::is_non_special_pattern_char(
   // - then return true.
   return token.type == token_type::CHAR ||
          token.type == token_type::ESCAPED_CHAR ||
-         token.type == token_type::INVALID_CHAR ||
          token.type == token_type::INVALID_CHAR;
 }
 
@@ -111,7 +110,7 @@ inline const Token& constructor_string_parser::get_safe_token(size_t index) {
   }
 
   // Assert: parser’s token list's size is greater than or equal to 1.
-  ADA_ASSERT_TRUE(token_list.size() >= 1);
+  ADA_ASSERT_TRUE(!token_list.empty());
 
   // Let token be parser’s token list[last index].
   // Assert: token’s type is "end".
@@ -196,42 +195,58 @@ inline void constructor_string_parser::change_state(State new_state,
         break;
       }
       default:
-        unreachable();
+        ada::unreachable();
     }
-  } else if ((state == State::PROTOCOL || state == State::AUTHORITY ||
-              state == State::USERNAME || state == State::PASSWORD ||
-              state == State::HOSTNAME || state == State::PORT) &&
-             (new_state == State::SEARCH || new_state == State::HASH) &&
-             !result.pathname.has_value()) {
-    // If parser’s state is "protocol", "authority", "username", "password",
-    // "hostname", or "port"; new state is "search" or "hash"; and parser’s
-    // result["pathname"] does not exist, then:
-    // If parser’s protocol matches a special scheme flag is true, then set
-    // parser’s result["pathname"] to "/".
+  }
+
+  // If parser’s state is not "init" and new state is not "done", then:
+  if (state != State::INIT && new_state != State::DONE) {
+    // If parser’s state is "protocol", "authority", "username", or "password";
+    // new state is "port", "pathname", "search", or "hash"; and parser’s
+    // result["hostname"] does not exist, then set parser’s result["hostname"]
+    // to the empty string.
+    if ((state == State::PROTOCOL || state == State::AUTHORITY ||
+         state == State::USERNAME || state == State::PASSWORD) &&
+        (new_state == State::PORT || new_state == State::PATHNAME ||
+         new_state == State::SEARCH || new_state == State::HASH) &&
+        !result.hostname)
+      result.hostname = "";
+  }
+
+  // If parser’s state is "protocol", "authority", "username", "password",
+  // "hostname", or "port"; new state is "search" or "hash"; and parser’s
+  // result["pathname"] does not exist, then:
+  if ((state == State::PROTOCOL || state == State::AUTHORITY ||
+       state == State::USERNAME || state == State::PASSWORD ||
+       state == State::HOSTNAME || state == State::PORT) &&
+      (new_state == State::SEARCH || new_state == State::HASH) &&
+      !result.pathname) {
     if (protocol_matches_a_special_scheme_flag) {
       result.pathname = "/";
     } else {
       // Otherwise, set parser’s result["pathname"] to the empty string.
       result.pathname = "";
     }
-  } else if ((state == State::PROTOCOL || state == State::AUTHORITY ||
-              state == State::USERNAME || state == State::PASSWORD ||
-              state == State::HOSTNAME || state == State::PORT ||
-              state == State::PATHNAME) &&
-             new_state == State::HASH && !result.search.has_value()) {
-    // If parser’s state is "protocol", "authority", "username", "password",
-    // "hostname", "port", or "pathname"; new state is "hash"; and parser’s
-    // result["search"] does not exist, then set parser’s result["search"] to
-    // the empty string.
-    result.search = "";
   }
 
-  // If parser’s state is not "init" and new state is not "done", then:
+  // If parser’s state is "protocol", "authority", "username", "password",
+  // "hostname", "port", or "pathname"; new state is "hash"; and parser’s
+  // result["search"] does not exist, then set parser’s result["search"] to
+  // the empty string.
+  if ((state == State::PROTOCOL || state == State::AUTHORITY ||
+       state == State::USERNAME || state == State::PASSWORD ||
+       state == State::HOSTNAME || state == State::PORT ||
+       state == State::PATHNAME) &&
+      new_state == State::HASH && !result.search) {
+    result.search = "";
+  }
 
   // Set parser’s state to new state.
   state = new_state;
   // Increment parser’s token index by skip.
   token_index += skip;
+  // Set parser’s component start to parser’s token index.
+  component_start = token_index;
   // Set parser’s token increment to 0.
   token_increment = 0;
 }
