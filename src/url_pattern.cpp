@@ -22,7 +22,7 @@ url_pattern_compile_component_options
     url_pattern_compile_component_options::PATHNAME('/', '/');
 
 tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
-    url_pattern_init init, std::string type,
+    url_pattern_init init, std::string_view type,
     std::optional<std::string_view> protocol,
     std::optional<std::string_view> username,
     std::optional<std::string_view> password,

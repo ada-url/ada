@@ -41,7 +41,7 @@ concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
 struct url_pattern_init {
   // @see https://urlpattern.spec.whatwg.org/#process-a-urlpatterninit
   static tl::expected<url_pattern_init, url_pattern_errors> process(
-      url_pattern_init init, std::string type,
+      url_pattern_init init, std::string_view type,
       std::optional<std::string_view> protocol = std::nullopt,
       std::optional<std::string_view> username = std::nullopt,
       std::optional<std::string_view> password = std::nullopt,
