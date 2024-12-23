@@ -1150,7 +1150,7 @@ std::string generate_pattern_string(
       result.append(part.value);
       // Append ")" to the end of result.
       result.append(")");
-    } else if (part.type == url_pattern_part_type::SEGMENT_WILDCARD) {
+    } else if (part.type == url_pattern_part_type::SEGMENT_WILDCARD && !custom_name) {
       // Otherwise if part’s type is "segment-wildcard" and custom name is
       // false: Append "(" to the end of result.
       result.append("(");
@@ -1191,7 +1191,7 @@ std::string generate_pattern_string(
     // the end of result.
     if (part.type == url_pattern_part_type::SEGMENT_WILDCARD && custom_name &&
         !part.suffix.empty() &&
-        idna::valid_name_code_point(part.suffix[0], true)) {
+        idna::valid_name_code_point(part.suffix[0], false)) {
       result.append("\\");
     }
 
