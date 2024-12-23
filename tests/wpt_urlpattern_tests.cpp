@@ -230,7 +230,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
 
       if (!main_object["expected_obj"].get_string().get(expected_obj) &&
           expected_obj == "error") {
-        if (parse_result.has_value()) {
+        if (parse_result.value().has_value()) {
           main_object.reset();
           FAIL() << "Test should have failed but it didn't" << std::endl
                  << main_object.raw_json().value() << std::endl;
