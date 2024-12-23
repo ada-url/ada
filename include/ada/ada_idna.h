@@ -158,7 +158,7 @@ namespace ada::idna {
 // code points. Returns false if the input is empty or the code point is not
 // valid. There is minimal Unicode error handling: the input should be valid
 // UTF-8. https://urlpattern.spec.whatwg.org/#is-a-valid-name-code-point
-bool valid_name_code_point(std::string_view input, bool first);
+bool valid_name_code_point(char32_t input, bool first);
 
 }  // namespace ada::idna
 
