@@ -9,6 +9,9 @@ namespace ada::url_pattern_helpers {
 
 inline std::optional<url_pattern_errors>
 constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
+  ada_log(
+      "constructor_string_parser::compute_protocol_matches_special_scheme_"
+      "flag");
   // Let protocol string be the result of running make a component string given
   // parser.
   auto protocol_string = make_component_string();
@@ -18,6 +21,8 @@ constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
       protocol_string, canonicalize_protocol,
       url_pattern_compile_component_options::DEFAULT);
   if (!protocol_component) {
+    ada_log("url_pattern_component::compile failed for protocol_string ",
+            protocol_string);
     return protocol_component.error();
   }
   // If the result of running protocol component matches a special scheme given
@@ -348,6 +353,7 @@ constructor_string_parser::parse(std::string_view input) {
           // Run compute protocol matches a special scheme flag given parser.
           if (const auto error =
                   parser.compute_protocol_matches_special_scheme_flag()) {
+            ada_log("compute_protocol_matches_special_scheme_flag failed");
             return tl::unexpected(*error);
           }
           // Let next state be "pathname".
