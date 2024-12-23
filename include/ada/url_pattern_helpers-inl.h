@@ -266,7 +266,8 @@ inline std::string_view constructor_string_parser::make_component_string() {
   const auto end_index = token.index;
   // Return the code point substring from component start input index to end
   // index within parser’s input.
-  return std::string_view(input).substr(component_start_input_index, end_index - component_start_input_index);
+  return std::string_view(input).substr(
+      component_start_input_index, end_index - component_start_input_index);
 }
 
 inline bool constructor_string_parser::is_an_identity_terminator() {

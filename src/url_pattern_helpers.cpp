@@ -89,6 +89,7 @@ tl::expected<std::string, url_pattern_errors> canonicalize_password(
 
 tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
     std::string_view input) {
+  ada_log("canonicalize_hostname input=", input);
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
@@ -97,15 +98,14 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
   // Let parseResult be the result of running the basic URL parser given value
   // with dummyURL as url and hostname state as state override.
   auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
-  ADA_ASSERT_TRUE(url.has_value());
+  ADA_ASSERT_TRUE(url);
   // if (!isValidHostnameInput(hostname)) return kj::none;
   if (!url->set_hostname(input)) {
     // If parseResult is failure, then throw a TypeError.
     return tl::unexpected(url_pattern_errors::type_error);
   }
-  const auto hostname = url->get_hostname();
   // Return dummyURL’s host, serialized, or empty string if it is null.
-  return hostname.empty() ? "" : std::string(hostname);
+  return std::string(url->get_hostname());
 }
 
 tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
@@ -135,7 +135,8 @@ tl::expected<std::string, url_pattern_errors> canonicalize_port(
   // Let parseResult be the result of running basic URL parser given portValue
   // with dummyURL as url and port state as state override.
   auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
-  if (url && url->set_port(port_value)) {
+  ADA_ASSERT_TRUE(url);
+  if (url->set_port(port_value)) {
     // Return dummyURL’s port, serialized, or empty string if it is null.
     return std::string(url->get_port());
   }
@@ -1150,7 +1151,8 @@ std::string generate_pattern_string(
       result.append(part.value);
       // Append ")" to the end of result.
       result.append(")");
-    } else if (part.type == url_pattern_part_type::SEGMENT_WILDCARD && !custom_name) {
+    } else if (part.type == url_pattern_part_type::SEGMENT_WILDCARD &&
+               !custom_name) {
       // Otherwise if part’s type is "segment-wildcard" and custom name is
       // false: Append "(" to the end of result.
       result.append("(");
