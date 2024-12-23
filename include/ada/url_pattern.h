@@ -148,7 +148,7 @@ struct url_pattern_compile_component_options {
   explicit url_pattern_compile_component_options(
       std::optional<char> new_delimiter = std::nullopt,
       std::optional<char> new_prefix = std::nullopt)
-      : delimiter(new_delimiter), prefix(new_prefix){}
+      : delimiter(new_delimiter), prefix(new_prefix) {}
 
   std::string_view get_delimiter() const ada_warn_unused;
   std::string_view get_prefix() const ada_warn_unused;
@@ -191,7 +191,7 @@ class url_pattern_component {
         flags(std::move(new_flags)),
         regexp(std::move(new_regexp)),
         group_name_list(std::move(new_group_name_list)),
-        has_regexp_groups_(new_has_regexp_groups){}
+        has_regexp_groups_(new_has_regexp_groups) {}
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
   template <url_pattern_encoding_callback F>

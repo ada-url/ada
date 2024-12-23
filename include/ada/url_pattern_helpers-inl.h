@@ -402,11 +402,15 @@ template <url_pattern_encoding_callback F>
 std::optional<url_pattern_errors>
 url_pattern_parser<F>::maybe_add_part_from_the_pending_fixed_value() {
   // If parser’s pending fixed value is the empty string, then return.
-  if (pending_fixed_value.empty()) return std::nullopt;
+  if (pending_fixed_value.empty()) {
+    ada_log("pending_fixed_value is empty");
+    return std::nullopt;
+  }
   // Let encoded value be the result of running parser’s encoding callback given
   // parser’s pending fixed value.
   auto encoded_value = encoding_callback(pending_fixed_value);
   if (!encoded_value) {
+    ada_log("failed to encode pending_fixed_value: ", pending_fixed_value);
     return encoded_value.error();
   }
   // Set parser’s pending fixed value to the empty string.

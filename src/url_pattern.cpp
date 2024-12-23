@@ -492,12 +492,14 @@ template <url_pattern_encoding_callback F>
 tl::expected<url_pattern_component, url_pattern_errors>
 url_pattern_component::compile(std::string_view input, F encoding_callback,
                                url_pattern_compile_component_options& options) {
+  ada_log("url_pattern_component::compile input: ", input);
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
   auto part_list = url_pattern_helpers::parse_pattern_string(input, options,
                                                              encoding_callback);
 
   if (!part_list) {
+    ada_log("parse_pattern_string failed");
     return tl::unexpected(part_list.error());
   }
 
@@ -506,6 +508,8 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   auto [regular_expression_string, name_list] =
       url_pattern_helpers::generate_regular_expression_and_name_list(*part_list,
                                                                      options);
+
+  ada_log("regular expression string: ", regular_expression_string);
 
   // Let flags be an empty string.
   // If options’s ignore case is true then set flags to "vi".
@@ -526,6 +530,8 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   // - If part’s type is "regexp", then set has regexp groups to true.
   const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
   const bool has_regexp_groups = std::ranges::any_of(*part_list, has_regexp);
+
+  ada_log("has regexp groups: ", has_regexp_groups);
 
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
@@ -718,24 +724,26 @@ std::string generate_segment_wildcard_regexp(
   // Append "]+?" to the end of result.
   result.append("]+?");
   // Return result.
+  ada_log("generate_segment_wildcard_regexp result: ", result);
   return result;
 }
 
 bool protocol_component_matches_special_scheme(
     ada::url_pattern_component& component) {
   auto regex = component.get_regexp();
+  ada_log("protocol_component_matches_special_scheme regex: ", regex);
   try {
     std::regex rx(regex.data(), regex.size());
     std::cmatch cmatch;
     return std::regex_match("http", cmatch, rx) ||
-         std::regex_match("https", cmatch, rx) ||
-         std::regex_match("ws", cmatch, rx) ||
-         std::regex_match("wss", cmatch, rx) ||
-         std::regex_match("ftp", cmatch, rx);
+           std::regex_match("https", cmatch, rx) ||
+           std::regex_match("ws", cmatch, rx) ||
+           std::regex_match("wss", cmatch, rx) ||
+           std::regex_match("ftp", cmatch, rx);
   } catch (...) {
     // You probably want to log this error.
     ada_log("Error while matching protocol component with special scheme");
-    ada_log("Regex Input: ", input);
+    ada_log("Regex Input: ", regex);
     return false;
   }
 }
@@ -866,7 +874,10 @@ url_pattern::match(url_pattern_input&& input,
     url = parsed_url.value();
 
     // Set protocol to url’s scheme.
-    protocol = url.get_protocol();
+    // IMPORTANT: Not documented on the URLPattern spec, but protocol suffix ':'
+    // is removed. Similar work was done on workerd:
+    // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2038
+    protocol = url.get_protocol().substr(0, url.get_protocol().size() - 1);
     // Set username to url’s username.
     username = url.get_username();
     // Set password to url’s password.
@@ -880,9 +891,23 @@ url_pattern::match(url_pattern_input&& input,
     // Set pathname to the result of URL path serializing url.
     pathname = url.get_pathname();
     // Set search to url’s query or the empty string if the value is null.
-    search = url.get_search();
+    // IMPORTANT: Not documented on the URLPattern spec, but search prefix '?'
+    // is removed. Similar work was done on workerd:
+    // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2232
+    if (url.has_search()) {
+      search = url.get_search().substr(1);
+    } else {
+      search = "";
+    }
     // Set hash to url’s fragment or the empty string if the value is null.
-    hash = url.get_hash();
+    // IMPORTANT: Not documented on the URLPattern spec, but hash prefix '#' is
+    // removed. Similar work was done on workerd:
+    // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2242
+    if (url.has_hash()) {
+      hash = url.get_hash().substr(1);
+    } else {
+      hash = "";
+    }
   }
 
   // TODO: Make this function pluggable using a parameter.
