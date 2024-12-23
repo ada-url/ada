@@ -211,7 +211,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         continue;
       }
 
-      std::cout << "----------" << std::endl;
+      std::cout << "--------------------" << std::endl;
 
       ondemand::object main_object = element.get_object();
       // If we have a key with 'expected_obj' and the value is 'error', then
