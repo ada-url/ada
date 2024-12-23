@@ -678,12 +678,10 @@ constexpr bool is_ipv6_address(std::string_view input) noexcept {
   if (input.front() == '[') return true;
   // If input code points[0] is U+007B ({) and input code points[1] is U+005B
   // ([), then return true.
-  if (input.front() == '{' && input[1] == '[') return true;
+  if (input.starts_with("{[")) return true;
   // If input code points[0] is U+005C (\) and input code points[1] is U+005B
   // ([), then return true.
-  if (input.front() == '\\' && input[1] == '[') return true;
-  // Return false.
-  return false;
+  return input.starts_with("\\[");
 }
 
 std::string convert_modifier_to_string(url_pattern_part_modifier modifier) {
@@ -693,7 +691,7 @@ std::string convert_modifier_to_string(url_pattern_part_modifier modifier) {
     case url_pattern_part_modifier::ZERO_OR_MORE:
       return "*";
     // If modifier is "optional", then return "?".
-    case url_pattern_part_modifier::NONE:
+    case url_pattern_part_modifier::OPTIONAL:
       return "?";
     // If modifier is "one-or-more", then return "+".
     case url_pattern_part_modifier::ONE_OR_MORE:
