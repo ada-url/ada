@@ -492,7 +492,7 @@ constructor_string_parser::parse(std::string_view input) {
 
   // If parser’s result contains "hostname" and not "port", then set parser’s
   // result["port"] to the empty string.
-  if (parser.result.hostname.has_value() && !parser.result.port.has_value()) {
+  if (parser.result.hostname && !parser.result.port) {
     parser.result.port = "";
   }
 

@@ -915,8 +915,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
       ada_log("constructor_string_parser::parse failed");
       return tl::unexpected(parse_result.error());
     }
-    init = *parse_result;
-
+    init = std::move(*parse_result);
     // If baseURL is null and init["protocol"] does not exist, then throw a
     // TypeError.
     if (!base_url && !init.protocol) {

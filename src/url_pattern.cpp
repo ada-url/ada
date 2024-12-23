@@ -85,15 +85,12 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     if (!parsing_result) {
       return tl::unexpected(url_pattern_errors::type_error);
     }
-    base_url = std::move(parsing_result.value<url_aggregator>());
+    base_url = std::move(*parsing_result);
 
     // If init["protocol"] does not exist, then set result["protocol"] to the
     // result of processing a base URL string given baseURL’s scheme and type.
     if (!init.protocol.has_value()) {
       ADA_ASSERT_TRUE(base_url.has_value());
-      // TODO: Look into why we need this.
-      // We need to remove the trailing ':' from the protocol or
-      // canonicalize_port will fail.
       result.protocol = url_pattern_helpers::process_base_url_string(
           base_url->get_protocol(), type);
     }
@@ -123,7 +120,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     }
 
     // If init contains neither "protocol" nor "hostname", then:
-    if (!init.protocol.has_value() || !init.hostname.has_value()) {
+    if (!init.protocol || !init.hostname) {
       ADA_ASSERT_TRUE(base_url.has_value());
       // Let baseHost be baseURL’s host.
       // If baseHost is null, then set baseHost to the empty string.
@@ -135,28 +132,25 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     }
 
     // If init contains none of "protocol", "hostname", and "port", then:
-    if (!init.protocol.has_value() && !init.hostname.has_value() &&
-        !init.port.has_value()) {
+    if (!init.protocol && !init.hostname && !init.port) {
       ADA_ASSERT_TRUE(base_url.has_value());
       // If baseURL’s port is null, then set result["port"] to the empty string.
       // Otherwise, set result["port"] to baseURL’s port, serialized.
-      result.port = base_url->get_port();
+      result.port = std::string(base_url->get_port());
     }
 
     // If init contains none of "protocol", "hostname", "port", and "pathname",
     // then set result["pathname"] to the result of processing a base URL string
     // given the result of URL path serializing baseURL and type.
-    if (!init.protocol.has_value() && !init.hostname.has_value() &&
-        !init.port.has_value()) {
+    if (!init.protocol && !init.hostname && !init.port) {
       ADA_ASSERT_TRUE(base_url.has_value());
       result.pathname = base_url->get_pathname();
     }
 
     // If init contains none of "protocol", "hostname", "port", "pathname", and
     // "search", then:
-    if (!init.protocol.has_value() && !init.hostname.has_value() &&
-        !init.port.has_value() && !init.pathname.has_value() &&
-        !init.search.has_value()) {
+    if (!init.protocol && !init.hostname && !init.port && !init.pathname &&
+        !init.search) {
       ADA_ASSERT_TRUE(base_url.has_value());
       // Let baseQuery be baseURL’s query.
       auto base_query = base_url->get_search();
@@ -168,9 +162,8 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
 
     // If init contains none of "protocol", "hostname", "port", "pathname",
     // "search", and "hash", then:
-    if (!init.protocol.has_value() && !init.hostname.has_value() &&
-        !init.port.has_value() && !init.pathname.has_value() &&
-        !init.search.has_value() && !init.hash.has_value()) {
+    if (!init.protocol && !init.hostname && !init.port && !init.pathname &&
+        !init.search && !init.hash) {
       ADA_ASSERT_TRUE(base_url.has_value());
       // Let baseFragment be baseURL’s fragment.
       auto base_fragment = base_url->get_hash();
@@ -188,7 +181,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     if (!process_result) {
       return tl::unexpected(process_result.error());
     }
-    result.protocol = std::move(process_result.value<std::string>());
+    result.protocol = std::move(*process_result);
   }
 
   // If init["username"] exists, then set result["username"] to the result of
@@ -198,7 +191,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     if (!process_result) {
       return tl::unexpected(process_result.error());
     }
-    result.username = std::move(process_result.value<std::string>());
+    result.username = std::move(*process_result);
   }
 
   // If init["password"] exists, then set result["password"] to the result of
@@ -208,7 +201,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     if (!process_result) {
       return tl::unexpected(process_result.error());
     }
-    result.password = std::move(process_result.value<std::string>());
+    result.password = std::move(*process_result);
   }
 
   // If init["hostname"] exists, then set result["hostname"] to the result of
@@ -218,18 +211,18 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     if (!process_result) {
       return tl::unexpected(process_result.error());
     }
-    result.hostname = std::move(process_result.value<std::string>());
+    result.hostname = std::move(*process_result);
   }
 
   // If init["port"] exists, then set result["port"] to the result of process
   // port for init given init["port"], result["protocol"], and type.
-  if (init.port.has_value()) {
+  if (init.port) {
     auto process_result =
         process_port(*init.port, result.protocol.value_or("fake"), type);
     if (!process_result) {
       return tl::unexpected(process_result.error());
     }
-    result.port = std::move(process_result.value<std::string>());
+    result.port = std::move(*process_result);
   }
 
   // If init["pathname"] exists:
@@ -274,28 +267,27 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     if (!pathname_processing_result) {
       return tl::unexpected(pathname_processing_result.error());
     }
-    result.pathname =
-        std::move(pathname_processing_result.value<std::string>());
+    result.pathname = std::move(*pathname_processing_result);
   }
 
   // If init["search"] exists then set result["search"] to the result of process
   // search for init given init["search"] and type.
-  if (init.search.has_value()) {
+  if (init.search) {
     auto process_result = process_search(*init.search, type);
     if (!process_result) {
       return tl::unexpected(process_result.error());
     }
-    result.search = std::move(process_result.value<std::string>());
+    result.search = std::move(*process_result);
   }
 
   // If init["hash"] exists then set result["hash"] to the result of process
   // hash for init given init["hash"] and type.
-  if (init.hash.has_value()) {
+  if (init.hash) {
     auto process_result = process_hash(*init.hash, type);
     if (!process_result) {
       return tl::unexpected(process_result.error());
     }
-    result.hash = std::move(process_result.value<std::string>());
+    result.hash = std::move(*process_result);
   }
   // Return result.
   return result;
