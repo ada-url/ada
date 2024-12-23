@@ -37,6 +37,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
     return "";
   }
 
+  if (input.ends_with(":")) {
+    input.remove_suffix(1);
+  }
+
   // Let dummyURL be a new URL record.
   // Let parseResult be the result of running the basic URL parser given value
   // followed by "://dummy.test", with dummyURL as url.
@@ -145,6 +149,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_port_with_protocol(
   if (port_value.empty()) [[unlikely]] {
     return "";
   }
+
+  if (protocol.ends_with(":")) {
+    protocol.remove_suffix(1);
+  }
   // Let dummyURL be a new URL record.
   // If protocolValue was given, then set dummyURL’s scheme to protocolValue.
   // Let parseResult be the result of running basic URL parser given portValue
@@ -216,9 +224,11 @@ tl::expected<std::string, url_pattern_errors> canonicalize_search(
   auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
   ADA_ASSERT_TRUE(url.has_value());
   url->set_search(input);
-  const auto search = url->get_search();
-  // Return dummyURL’s query.
-  return !search.empty() ? std::string(search.substr(1)) : "";
+  if (url->has_search()) {
+    const auto search = url->get_search();
+    return std::string(search.substr(1));
+  }
+  return tl::unexpected(url_pattern_errors::type_error);
 }
 
 tl::expected<std::string, url_pattern_errors> canonicalize_hash(
@@ -234,17 +244,17 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hash(
   auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
   ADA_ASSERT_TRUE(url.has_value());
   url->set_hash(input);
-  const auto hash = url->get_hash();
-  if (hash.empty()) {
-    return "";
-  }
   // Return dummyURL’s fragment.
-  return std::string(hash.substr(1));
+  if (url->has_hash()) {
+    const auto hash = url->get_hash();
+    return std::string(hash.substr(1));
+  }
+  return tl::unexpected(url_pattern_errors::type_error);
 }
 
 tl::expected<url_pattern_init, url_pattern_errors>
 constructor_string_parser::parse(std::string_view input) {
-  (void)input;
+  ada_log("constructor_string_parser::parse input=", input);
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
   auto token_list = tokenize(input, token_policy::LENIENT);
@@ -894,6 +904,7 @@ tl::expected<std::vector<url_pattern_part>, url_pattern_errors>
 parse_pattern_string(std::string_view input,
                      url_pattern_compile_component_options& options,
                      F&& encoding_callback) {
+  ada_log("parse_pattern_string input=", input);
   // Let parser be a new pattern parser whose encoding callback is encoding
   // callback and segment wildcard regexp is the result of running generate a
   // segment wildcard regexp given options.
