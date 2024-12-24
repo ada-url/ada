@@ -333,6 +333,7 @@ url_pattern_init::process_password(std::string_view value,
 tl::expected<std::string, url_pattern_errors>
 url_pattern_init::process_hostname(std::string_view value,
                                    std::string_view type) {
+  ada_log("process_hostname value=", value, " type=", type);
   // If type is "pattern" then return value.
   if (type == "pattern") {
     return std::string(value);
