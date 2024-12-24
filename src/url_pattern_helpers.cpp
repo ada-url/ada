@@ -876,8 +876,6 @@ std::string escape_regexp_string(std::string_view input) {
 
 std::string process_base_url_string(std::string_view input,
                                     std::string_view type) {
-  // Assert: input is not null.
-  ADA_ASSERT_TRUE(!input.empty());
   // If type is not "pattern" return input.
   if (type != "pattern") {
     return std::string(input);
