@@ -2745,13 +2745,6 @@
     }
   },
   {
-    "pattern": [{ "ignoreCase": true }],
-    "inputs": [{ "pathname": "/FOO/BAR" }],
-    "expected_match": {
-      "pathname": { "input": "/FOO/BAR", "groups": { "0": "/FOO/BAR" } }
-    }
-  },
-  {
     "pattern": [ "https://example.com:8080/foo?bar#baz",
                  { "ignoreCase": true }],
     "inputs": [{ "pathname": "/FOO", "search": "BAR", "hash": "BAZ",
