@@ -218,7 +218,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       // If we have a key with 'expected_obj' and the value is 'error', then
       // we expect the pattern to be invalid. There should be a key with
       // 'pattern' and the value should be an array.
-      std::string_view expected_obj;
+      std::string_view expected_obj_str;
       ondemand::array patterns;
       ASSERT_FALSE(main_object["pattern"].get_array().get(patterns));
       auto [init_variant, base_url, options] = parse_pattern_field(patterns);
@@ -229,8 +229,8 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       }
       auto parse_result = parse_pattern(init_variant, base_url, options);
 
-      if (!main_object["expected_obj"].get_string().get(expected_obj) &&
-          expected_obj == "error") {
+      if (!main_object["expected_obj"].get_string().get(expected_obj_str) &&
+          expected_obj_str == "error") {
         if (parse_result) {
           main_object.reset();
           FAIL() << "Test should have failed but it didn't" << std::endl
@@ -250,6 +250,34 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         }
         FAIL() << "Test should have succeeded but failed" << std::endl
                << main_object.raw_json().value() << std::endl;
+      }
+
+      ondemand::object expected_obj;
+      if (!main_object["expected_obj"].get_object().get(expected_obj)) {
+        for (auto obj_element : expected_obj) {
+          auto key = obj_element.key().value();
+          std::string_view value;
+          ASSERT_FALSE(obj_element.value().get_string().get(value));
+          if (key == "hash") {
+            ASSERT_EQ(parse_result->get_hash(), value);
+          } else if (key == "hostname") {
+            ASSERT_EQ(parse_result->get_hostname(), value);
+          } else if (key == "password") {
+            ASSERT_EQ(parse_result->get_password(), value);
+          } else if (key == "pathname") {
+            ASSERT_EQ(parse_result->get_pathname(), value);
+          } else if (key == "port") {
+            ASSERT_EQ(parse_result->get_port(), value);
+          } else if (key == "protocol") {
+            ASSERT_EQ(parse_result->get_protocol(), value);
+          } else if (key == "search") {
+            ASSERT_EQ(parse_result->get_search(), value);
+          } else if (key == "username") {
+            ASSERT_EQ(parse_result->get_username(), value);
+          } else {
+            FAIL() << "Unknown key in expected object: " << key << std::endl;
+          }
+        }
       }
     }
   } catch (simdjson_error& error) {
