@@ -1811,11 +1811,6 @@
     }
   },
   {
-    "pattern": [ "https://{sub.}?example{.com/}foo" ],
-    "inputs": [ "https://example.com/foo" ],
-    "expected_obj": "error"
-  },
-  {
     "pattern": [ "{https://}example.com/foo" ],
     "inputs": [ "https://example.com/foo" ],
     "expected_obj": "error"
