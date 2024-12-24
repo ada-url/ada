@@ -33,4 +33,5 @@ jobs:
       - name: Build & Test
         run: bazel test //...
         env:
+          CC: ${{matrix.cxx}}
           CXX: ${{matrix.cxx}}
