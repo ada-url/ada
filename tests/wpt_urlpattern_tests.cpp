@@ -138,6 +138,7 @@ parse_pattern_field(ondemand::array& patterns) {
       } else {
         EXPECT_TRUE(pattern.type() == ondemand::json_type::object);
         ondemand::object object = pattern.get_object();
+        // TODO: URLPattern({ ignoreCase: true }) should also work...
         init_obj = parse_init(object);
       }
     } else if (pattern_size == 1) {
