@@ -111,10 +111,16 @@ ada::url_pattern_options parse_options(ondemand::object& object) {
 std::tuple<std::variant<std::string, ada::url_pattern_init, bool>,
            std::optional<std::string>, std::optional<ada::url_pattern_options>>
 parse_pattern_field(ondemand::array& patterns) {
+  // If no arguments have been passed let's assume it's an empty init.
+  if (patterns.count_elements().value() == 0) {
+    return {ada::url_pattern_init{}, {}, {}};
+  }
+
   std::optional<ada::url_pattern_init> init_obj{};
   std::optional<std::string> init_str{};
   std::optional<std::string> base_url{};
   std::optional<ada::url_pattern_options> options{};
+
   // In simdjson's On-Demand, we disallow the pattern array size, access element
   // 0, access element 1... as it leads to inefficient code. Instead, we iterate
   // over the array.
