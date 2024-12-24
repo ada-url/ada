@@ -167,17 +167,11 @@ parse_pattern_field(ondemand::array& patterns) {
   return std::tuple(*init_str, base_url, options);
 }
 
-std::optional<tl::expected<ada::url_pattern, ada::url_pattern_errors>>
-parse_pattern(
+tl::expected<ada::url_pattern, ada::url_pattern_errors> parse_pattern(
     std::variant<std::string, ada::url_pattern_init, bool>& init_variant,
     std::optional<std::string>& base_url,
     std::optional<ada::url_pattern_options>& options) {
   std::string_view base_url_view{};
-
-  // This is an invalid test case. We should not test it.
-  if (std::holds_alternative<bool>(init_variant)) {
-    return std::nullopt;
-  }
 
   if (base_url) {
     base_url_view = {base_url->data(), base_url->size()};
@@ -221,16 +215,16 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       ondemand::array patterns;
       ASSERT_FALSE(main_object["pattern"].get_array().get(patterns));
       auto [init_variant, base_url, options] = parse_pattern_field(patterns);
-      auto parse_result = parse_pattern(init_variant, base_url, options);
-
-      if (!parse_result) {
+      // This is an invalid test case. We should not test it.
+      if (std::holds_alternative<bool>(init_variant)) {
         // Skip invalid test cases.
         continue;
       }
+      auto parse_result = parse_pattern(init_variant, base_url, options);
 
       if (!main_object["expected_obj"].get_string().get(expected_obj) &&
           expected_obj == "error") {
-        if (parse_result.value().has_value()) {
+        if (parse_result) {
           main_object.reset();
           FAIL() << "Test should have failed but it didn't" << std::endl
                  << main_object.raw_json().value() << std::endl;
@@ -239,7 +233,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       }
 
       // Test for valid cases.
-      if (!parse_result->has_value()) {
+      if (!parse_result) {
         main_object.reset();
         if (base_url) {
           std::cerr << "base_url: " << base_url.value_or("") << std::endl;
@@ -247,8 +241,8 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         if (options) {
           std::cerr << "options: " << options->to_string() << std::endl;
         }
-        std::cerr << "JSON: " << main_object.raw_json().value() << std::endl;
-        FAIL();
+        FAIL() << "Test should have succeeded but failed" << std::endl
+               << main_object.raw_json().value() << std::endl;
       }
     }
   } catch (simdjson_error& error) {
