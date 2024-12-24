@@ -115,6 +115,7 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
 
 tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
     std::string_view input) {
+  ada_log("canonicalize_ipv6_hostname input=", input);
   // TODO: Optimization opportunity: Use lookup table to speed up checking
   if (std::ranges::all_of(input, [](char c) {
         return c == '[' || c == ']' || c == ':' ||
