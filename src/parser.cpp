@@ -1034,9 +1034,13 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   // to the result of compiling a component given processedInit["hostname"],
   // canonicalize an IPv6 hostname, and hostname options.
   if (url_pattern_helpers::is_ipv6_address(processed_init->hostname.value())) {
+    ada_log("processed_init->hostname is ipv6 address");
+    // then set urlPattern’s hostname component to the result of compiling a
+    // component given processedInit["hostname"], canonicalize an IPv6 hostname,
+    // and hostname options.
     auto hostname_component = url_pattern_component::compile(
         processed_init->hostname.value(),
-        url_pattern_helpers::canonicalize_hostname,
+        url_pattern_helpers::canonicalize_ipv6_hostname,
         url_pattern_compile_component_options::DEFAULT);
     if (!hostname_component) {
       ada_log("url_pattern_component::compile failed for ipv6 hostname ",
