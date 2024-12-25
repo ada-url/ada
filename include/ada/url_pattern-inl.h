@@ -22,13 +22,13 @@ inline std::string_view url_pattern_component::get_pattern() const noexcept
   return pattern;
 }
 
-inline std::string_view url_pattern_component::get_regexp() const noexcept
+inline const std::regex& url_pattern_component::get_regexp() const noexcept
     ada_lifetime_bound {
   return regexp;
 }
 
-inline std::string_view url_pattern_component::get_regexp_flags() const noexcept
-    ada_lifetime_bound {
+inline std::regex_constants::syntax_option_type
+url_pattern_component::get_regexp_flags() const noexcept ada_lifetime_bound {
   return flags;
 }
 
@@ -39,7 +39,7 @@ url_pattern_component::get_group_name_list() const noexcept ada_lifetime_bound {
 
 inline url_pattern_component_result
 url_pattern_component::create_component_match_result(
-    std::string_view input, const std::vector<std::string>& exec_result) {
+    std::string_view input, const std::smatch& exec_result) {
   // Let result be a new URLPatternComponentResult.
   // Set result["input"] to input.
   // Let groups be a record<USVString, (USVString or undefined)>.
@@ -57,7 +57,7 @@ url_pattern_component::create_component_match_result(
     // Set groups[name] to value.
     result.groups.insert({
         group_name_list[index - 1],
-        exec_result.at(index),
+        exec_result[index].str(),
     });
   }
   return result;
