@@ -7,6 +7,7 @@
 
 #include "ada/expected.h"
 
+#include <regex>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -183,12 +184,12 @@ class url_pattern_component {
 
   // This function explicitly takes a std::string because it is moved.
   // To avoid unnecessary copy, move each value while calling the constructor.
-  url_pattern_component(std::string&& new_pattern, std::string&& new_regexp,
-                        std::string&& new_flags,
+  url_pattern_component(std::string&& new_pattern, std::regex&& new_regexp,
+                        std::regex_constants::syntax_option_type&& new_flags,
                         std::vector<std::string>&& new_group_name_list,
                         bool new_has_regexp_groups)
       : pattern(std::move(new_pattern)),
-        flags(std::move(new_flags)),
+        flags(new_flags),
         regexp(std::move(new_regexp)),
         group_name_list(std::move(new_group_name_list)),
         has_regexp_groups_(new_has_regexp_groups) {}
@@ -201,23 +202,22 @@ class url_pattern_component {
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
-      std::string_view input, const std::vector<std::string>& exec_result);
+      std::string_view input, const std::smatch& exec_result);
 
   std::string_view get_pattern() const noexcept ada_lifetime_bound
       ada_warn_unused;
-  std::string_view get_regexp() const noexcept ada_lifetime_bound
+  const std::regex& get_regexp() const noexcept ada_lifetime_bound
       ada_warn_unused;
-  std::string_view get_regexp_flags() const noexcept ada_lifetime_bound
-      ada_warn_unused;
+  std::regex_constants::syntax_option_type get_regexp_flags() const noexcept
+      ada_lifetime_bound ada_warn_unused;
   const std::vector<std::string>& get_group_name_list() const noexcept
       ada_lifetime_bound ada_warn_unused;
-  inline bool has_regexp_groups() const noexcept ada_lifetime_bound
-      ada_warn_unused;
+  bool has_regexp_groups() const noexcept ada_lifetime_bound ada_warn_unused;
 
  private:
   std::string pattern{};
-  std::string flags{};
-  std::string regexp{};
+  std::regex_constants::syntax_option_type flags{};
+  std::regex regexp{};
   std::vector<std::string> group_name_list{};
 
   bool has_regexp_groups_ = false;
