@@ -102,7 +102,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
   // Let dummyURL be a new URL record.
   // Let parseResult be the result of running the basic URL parser given value
   // with dummyURL as url and hostname state as state override.
-  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
+
+  // IMPORTANT: The protocol needs to be a special protocol, otherwise the
+  // hostname will not be converted using IDNA.
+  auto url = ada::parse<url_aggregator>("https://dummy.test", nullptr);
   ADA_ASSERT_TRUE(url);
   // if (!isValidHostnameInput(hostname)) return kj::none;
   if (!url->set_hostname(input)) {
