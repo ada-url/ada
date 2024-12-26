@@ -523,6 +523,7 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   try {
     regular_expression = std::regex(regular_expression_string, flags);
   } catch (std::regex_error& error) {
+    (void)error;
     ada_log("std::regex_error: ", error.what());
     return tl::unexpected(url_pattern_errors::type_error);
   }
