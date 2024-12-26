@@ -252,9 +252,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         FAIL() << "Test should have succeeded but failed" << std::endl
                << main_object.raw_json().value() << std::endl;
       }
-#ifdef ADA_HAS_FORMAT
       ada_log("parse_result: ", parse_result->to_string());
-#endif
       ondemand::array exactly_empty_components;
       if (!main_object["exactly_empty_components"].get_array().get(
               exactly_empty_components)) {

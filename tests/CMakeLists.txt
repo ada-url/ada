@@ -7,6 +7,10 @@ if(MSVC)
   add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif()
 
+if(ADA_LOGGING)
+  add_compile_definitions(ADA_LOGGING=1)
+endif()
+
 include(${PROJECT_SOURCE_DIR}/cmake/add-cpp-test.cmake)
 link_libraries(ada)
 
