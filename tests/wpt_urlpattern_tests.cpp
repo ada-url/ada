@@ -252,6 +252,35 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
                << main_object.raw_json().value() << std::endl;
       }
 
+      ondemand::array exactly_empty_components;
+      if (!main_object["exactly_empty_components"].get_array().get(
+              exactly_empty_components)) {
+        for (auto component : exactly_empty_components) {
+          std::string_view key;
+          ASSERT_FALSE(component.get_string().get(key));
+          if (key == "hash") {
+            ASSERT_TRUE(parse_result->get_hash().empty());
+          } else if (key == "hostname") {
+            ASSERT_TRUE(parse_result->get_hostname().empty());
+          } else if (key == "pathname") {
+            ASSERT_TRUE(parse_result->get_pathname().empty());
+          } else if (key == "search") {
+            ASSERT_TRUE(parse_result->get_search().empty());
+          } else if (key == "port") {
+            ASSERT_TRUE(parse_result->get_port().empty());
+          } else if (key == "protocol") {
+            ASSERT_TRUE(parse_result->get_protocol().empty());
+          } else if (key == "username") {
+            ASSERT_TRUE(parse_result->get_username().empty());
+          } else if (key == "password") {
+            ASSERT_TRUE(parse_result->get_password().empty());
+          } else {
+            FAIL() << "Unknown key in exactly_empty_components: " << key
+                   << std::endl;
+          }
+        }
+      }
+
       ondemand::object expected_obj;
       if (!main_object["expected_obj"].get_object().get(expected_obj)) {
         for (auto obj_element : expected_obj) {

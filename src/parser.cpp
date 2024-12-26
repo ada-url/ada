@@ -976,10 +976,13 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
   // is a string which represents its corresponding default port in radix-10
   // using ASCII digits then set processedInit["port"] to the empty string.
   // TODO: Optimization opportunity.
-  if (scheme::is_special(*processed_init->protocol) &&
-      std::to_string(scheme::get_special_port(*processed_init->protocol)) ==
-          processed_init->port) {
-    processed_init->port = "";
+  if (scheme::is_special(*processed_init->protocol)) {
+    std::string_view port = processed_init->port.value();
+    helpers::trim_c0_whitespace(port);
+    if (std::to_string(scheme::get_special_port(*processed_init->protocol)) ==
+        port) {
+      processed_init->port->clear();
+    }
   }
 
   // Let urlPattern be a new URL pattern.
