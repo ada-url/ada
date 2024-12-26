@@ -250,4 +250,11 @@ namespace ada {
 #define ada_lifetime_bound
 #endif
 
+#ifdef __has_include
+#if __has_include(<format>)
+#include <format>
+#define ADA_HAS_FORMAT 1
+#endif
+#endif
+
 #endif  // ADA_COMMON_DEFS_H
