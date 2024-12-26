@@ -1,0 +1,54 @@
+name: Bazel
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: bazel-contrib/setup-bazel@bbf8fe8b219f642c7f8bc673215f28eb1d9dec51 # v0.10.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      - name: Build & Test
+        run: bazel test //...
+  ubuntu:
+    strategy:
+      fail-fast: false
+      matrix:
+        shared: [ON, OFF]
+        cxx: [g++-12, clang++-14]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: bazel-contrib/setup-bazel@bbf8fe8b219f642c7f8bc673215f28eb1d9dec51 # v0.10.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      - name: Build & Test
+        run: bazel test //...
+        env:
+          CC: ${{matrix.cxx}}
+          CXX: ${{matrix.cxx}}
