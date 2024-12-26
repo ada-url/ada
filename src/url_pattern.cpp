@@ -295,6 +295,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
 tl::expected<std::string, url_pattern_errors>
 url_pattern_init::process_protocol(std::string_view value,
                                    std::string_view type) {
+  ada_log("process_protocol=", value, " [", type, "]");
   // Let strippedValue be the given value with a single trailing U+003A (:)
   // removed, if any.
   if (value.ends_with(":")) {
@@ -518,8 +519,13 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   // Let regular expression be RegExpCreate(regular expression string,
   // flags). If this throws an exception, catch it, and throw a
   // TypeError.
-  // TODO: This can technically throw a std::regex_error. We should catch it.
-  std::regex regular_expression(regular_expression_string, flags);
+  std::regex regular_expression;
+  try {
+    regular_expression = std::regex(regular_expression_string, flags);
+  } catch (std::regex_error& error) {
+    ada_log("std::regex_error: ", error.what());
+    return tl::unexpected(url_pattern_errors::type_error);
+  }
 
   // For each part of part list:
   // - If part’s type is "regexp", then set has regexp groups to true.
@@ -858,7 +864,7 @@ url_pattern::match(url_pattern_input&& input,
     // IMPORTANT: Not documented on the URLPattern spec, but protocol suffix ':'
     // is removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2038
-    protocol = url.get_protocol().substr(0, url.get_protocol().size() - 1);
+    protocol = url.get_protocol().substr(0, url.get_protocol().size() - 2);
     // Set username to url’s username.
     username = url.get_username();
     // Set password to url’s password.

@@ -42,6 +42,7 @@ tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
     return "";
   }
 
+  // IMPORTANT: Deviation from the spec. We remove the trailing ':' here.
   if (input.ends_with(":")) {
     input.remove_suffix(1);
   }
@@ -51,7 +52,11 @@ tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
   // followed by "://dummy.test", with dummyURL as url.
   if (auto dummy_url = ada::parse<url_aggregator>(
           std::string(input) + "://dummy.test", nullptr)) {
-    return std::string(dummy_url->get_protocol());
+    // IMPORTANT: Deviation from the spec. We remove the trailing ':' here.
+    // Since URL parser always return protocols ending with `:`
+    auto protocol = dummy_url->get_protocol();
+    protocol.remove_suffix(1);
+    return std::string(protocol);
   }
   // If parseResult is failure, then throw a TypeError.
   return tl::unexpected(url_pattern_errors::type_error);

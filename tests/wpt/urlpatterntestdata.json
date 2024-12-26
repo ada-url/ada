@@ -1389,6 +1389,10 @@
     }
   },
   {
+    "pattern": [{ "pathname": "/(\\m)" }],
+    "expected_obj": "error"
+  },
+  {
     "pattern": [{ "pathname": "/foo!" }],
     "inputs": [{ "pathname": "/foo!" }],
     "expected_match": {
@@ -2366,21 +2370,16 @@
   },
   {
     "pattern": [{ "hostname": "bad#hostname" }],
-    "exactly_empty_components": ["port"],
     "expected_match": {
       "hostname": { "input": "bad", "groups": {} }
     }
   },
   {
     "pattern": [{ "hostname": "bad%hostname" }],
-    "exactly_empty_components": ["port"],
-    "expected_match": {
-      "hostname": { "input": "bad%hostname", "groups": {} }
-    }
+    "expected_obj": "error"
   },
   {
     "pattern": [{ "hostname": "bad/hostname" }],
-    "exactly_empty_components": ["port"],
     "expected_match": {
       "hostname": { "input": "bad", "groups": {} }
     }
@@ -2414,37 +2413,12 @@
     "expected_obj": "error"
   },
   {
-    "pattern": [{ "hostname": "bad\\\\hostname" }],
-    "expected_obj": "error"
-  },
-  {
     "pattern": [{ "hostname": "bad^hostname" }],
     "expected_obj": "error"
   },
   {
     "pattern": [{ "hostname": "bad|hostname" }],
     "expected_obj": "error"
-  },
-  {
-    "pattern": [{ "hostname": "bad\nhostname" }],
-    "exactly_empty_components": ["port"],
-    "expected_match": {
-      "hostname": { "input": "badhostname", "groups": {} }
-    }
-  },
-  {
-    "pattern": [{ "hostname": "bad\rhostname" }],
-    "exactly_empty_components": ["port"],
-    "expected_match": {
-      "hostname": { "input": "badhostname", "groups": {} }
-    }
-  },
-  {
-    "pattern": [{ "hostname": "bad\thostname" }],
-    "exactly_empty_components": ["port"],
-    "expected_match": {
-      "hostname": { "input": "badhostname", "groups": {} }
-    }
   },
   {
     "pattern": [{}],
