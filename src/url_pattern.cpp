@@ -508,8 +508,8 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   std::regex_constants::syntax_option_type flags =
       options.ignore_case
           ? std::regex::icase |
-                std::regex_constants::syntax_option_type::ECMAScript
-          : std::regex_constants::syntax_option_type::ECMAScript;
+                std::regex_constants::ECMAScript
+          : std::regex_constants::ECMAScript;
 
   // Let pattern string be the result of running generate a pattern
   // string given part list and options.
@@ -523,6 +523,7 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   try {
     regular_expression = std::regex(regular_expression_string, flags);
   } catch (std::regex_error& error) {
+    (void)error;
     ada_log("std::regex_error: ", error.what());
     return tl::unexpected(url_pattern_errors::type_error);
   }
