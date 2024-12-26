@@ -214,6 +214,8 @@ class url_pattern_component {
       ada_lifetime_bound ada_warn_unused;
   bool has_regexp_groups() const noexcept ada_lifetime_bound ada_warn_unused;
 
+  std::string to_string() const;
+
  private:
   std::string pattern{};
   std::regex_constants::syntax_option_type flags{};
@@ -294,6 +296,8 @@ class url_pattern {
 
   // @see https://urlpattern.spec.whatwg.org/#url-pattern-has-regexp-groups
   bool has_regexp_groups() const ada_lifetime_bound;
+
+  std::string to_string() const;
 
  private:
   url_pattern_component protocol_component{};
