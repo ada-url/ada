@@ -1,8 +1,9 @@
 #include <string_view>
 
-#include "ada.h"
 #include "ada/common_defs.h"
+#include "ada/expected.h"
 #include "ada/parser.h"
+#include "ada/unicode.h"
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
 

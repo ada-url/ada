@@ -1,4 +1,8 @@
-#include "ada.h"
+#include "ada/ada_idna.h"
+#include "ada/expected.h"
+#include "ada/implementation.h"
+#include "ada/url_aggregator.h"
+#include "ada/url_search_params.h"
 
 ada::result<ada::url_aggregator>& get_instance(void* result) noexcept {
   return *(ada::result<ada::url_aggregator>*)result;

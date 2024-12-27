@@ -28,3 +28,4 @@ benchmarks/competitors/servo-url/target
 
 # bazel output
 bazel-*
+.clwb

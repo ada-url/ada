@@ -1,6 +1,7 @@
-#include "ada.h"
-#include <emscripten/emscripten.h>
 #include <emscripten/bind.h>
+#include <emscripten/emscripten.h>
+
+#include "ada.h"
 
 using namespace emscripten;
 

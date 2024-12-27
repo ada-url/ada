@@ -1,11 +1,14 @@
-#include "ada.h"
-#include "ada/scheme.h"
-#include "ada/log.h"
-
-#include <numeric>
 #include <algorithm>
+#include <numeric>
 #include <string>
 #include <string_view>
+
+#include "ada/character_sets-inl.h"
+#include "ada/checkers-inl.h"
+#include "ada/log.h"
+#include "ada/scheme-inl.h"
+#include "ada/serializers.h"
+#include "ada/url-inl.h"
 
 namespace ada {
 

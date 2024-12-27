@@ -1,10 +1,19 @@
-#include "ada.h"
-#include "ada/checkers-inl.h"
-#include "ada/common_defs.h"
-#include "ada/scheme.h"
+#include "ada/helpers.h"
 
 #include <cstring>
 #include <sstream>
+
+#include "ada/character_sets-inl.h"
+#include "ada/checkers-inl.h"
+#include "ada/common_defs.h"
+#include "ada/log.h"
+#include "ada/scheme.h"
+#include "ada/state.h"
+#include "ada/unicode-inl.h"
+
+#if ADA_NEON
+#include <arm_neon.h>
+#endif
 
 namespace ada::helpers {
 

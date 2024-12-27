@@ -1,13 +1,11 @@
-#include "ada.h"
-#include "ada/character_sets-inl.h"
-#include "ada/common_defs.h"
 #include "ada/unicode.h"
 
-ADA_PUSH_DISABLE_ALL_WARNINGS
-#include "ada_idna.cpp"
-ADA_POP_DISABLE_WARNINGS
-
 #include <algorithm>
+#include <array>
+
+#include "ada/character_sets-inl.h"
+#include "ada/common_defs.h"
+#include "ada/log.h"
 #if ADA_NEON
 #include <arm_neon.h>
 #elif ADA_SSE2

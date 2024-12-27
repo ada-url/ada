@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+
 #include <cstring>
 #include <filesystem>
 #include <iostream>
@@ -6,7 +8,6 @@
 #include <set>
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "ada.h"
 #include "ada/character_sets-inl.h"
 #include "ada/parser.h"

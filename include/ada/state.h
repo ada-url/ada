@@ -5,9 +5,9 @@
 #ifndef ADA_STATE_H
 #define ADA_STATE_H
 
-#include "ada/common_defs.h"
-
 #include <string>
+
+#include "common_defs.h"
 
 namespace ada {
 

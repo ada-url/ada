@@ -6,8 +6,8 @@
 #define ADA_C_H
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 // This is a reference to ada::url_components::omitted
 // It represents "uint32_t(-1)"

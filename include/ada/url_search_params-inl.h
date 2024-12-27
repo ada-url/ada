@@ -5,17 +5,16 @@
 #ifndef ADA_URL_SEARCH_PARAMS_INL_H
 #define ADA_URL_SEARCH_PARAMS_INL_H
 
-#include "ada.h"
-#include "ada/character_sets-inl.h"
-#include "ada/unicode.h"
-#include "ada/url_search_params.h"
-
 #include <algorithm>
 #include <optional>
 #include <ranges>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include "character_sets-inl.h"
+#include "unicode.h"
+#include "url_search_params.h"
 
 namespace ada {
 

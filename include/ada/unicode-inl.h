@@ -4,8 +4,9 @@
  */
 #ifndef ADA_UNICODE_INL_H
 #define ADA_UNICODE_INL_H
-#include <algorithm>
-#include "ada/unicode.h"
+
+#include "character_sets.h"
+#include "unicode.h"
 
 /**
  * Unicode operations. These functions are not part of our public API and may

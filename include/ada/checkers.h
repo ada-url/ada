@@ -5,10 +5,9 @@
 #ifndef ADA_CHECKERS_H
 #define ADA_CHECKERS_H
 
-#include "ada/common_defs.h"
-
 #include <string_view>
-#include <cstring>
+
+#include "ada/common_defs.h"
 
 /**
  * These functions are not part of our public API and may

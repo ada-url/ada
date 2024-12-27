@@ -5,7 +5,9 @@
 #ifndef ADA_SCHEME_INL_H
 #define ADA_SCHEME_INL_H
 
-#include "ada/scheme.h"
+#include <string_view>
+
+#include "scheme.h"
 
 namespace ada::scheme {
 

@@ -6,15 +6,15 @@
 #ifndef ADA_IMPLEMENTATION_H
 #define ADA_IMPLEMENTATION_H
 
-#include <string>
 #include <optional>
+#include <string>
 
-#include "ada/parser.h"
-#include "ada/common_defs.h"
-#include "ada/encoding_type.h"
-#include "ada/url.h"
-#include "ada/state.h"
-#include "ada/url_aggregator.h"
+#include "common_defs.h"
+#include "encoding_type.h"
+#include "expected.h"
+#include "parser.h"
+#include "url.h"
+#include "url_aggregator.h"
 
 namespace ada {
 enum class errors { generic_error };
@@ -55,6 +55,11 @@ bool can_parse(std::string_view input,
  * @return a href string (starts with file:://)
  */
 std::string href_from_file(std::string_view path);
+
+/**
+ * @private
+ */
+ada_warn_unused std::string to_string(ada::encoding_type type);
 }  // namespace ada
 
 #endif  // ADA_IMPLEMENTATION_H

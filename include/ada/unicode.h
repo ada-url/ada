@@ -5,11 +5,11 @@
 #ifndef ADA_UNICODE_H
 #define ADA_UNICODE_H
 
-#include "ada/common_defs.h"
-#include "ada/ada_idna.h"
-
-#include <string>
 #include <optional>
+#include <string>
+
+#include "ada_idna.h"
+#include "common_defs.h"
 
 /**
  * Unicode operations. These functions are not part of our public API and may
