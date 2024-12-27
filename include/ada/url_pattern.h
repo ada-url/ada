@@ -17,14 +17,6 @@ namespace ada {
 
 enum class url_pattern_errors : uint8_t { type_error };
 
-namespace parser {
-template <typename result_type, typename url_pattern_init,
-          typename url_pattern_options>
-tl::expected<result_type, url_pattern_errors> parse_url_pattern_impl(
-    std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options);
-}
-
 // Important: C++20 allows us to use concept rather than `using` or `typedef
 // and allows functions with second argument, which is optional (using either
 // std::nullopt or a parameter with default value)
@@ -299,7 +291,6 @@ class url_pattern {
 
   std::string to_string() const;
 
- private:
   url_pattern_component protocol_component{};
   url_pattern_component username_component{};
   url_pattern_component password_component{};
@@ -309,13 +300,6 @@ class url_pattern {
   url_pattern_component search_component{};
   url_pattern_component hash_component{};
   bool ignore_case_ = false;
-
-  template <typename result_type, typename url_pattern_init,
-            typename url_pattern_options>
-  friend tl::expected<result_type, url_pattern_errors>
-  parser::parse_url_pattern_impl(
-      std::variant<std::string_view, url_pattern_init> input,
-      const std::string_view* base_url, const url_pattern_options* options);
 };
 
 }  // namespace ada

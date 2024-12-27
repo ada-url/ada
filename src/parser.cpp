@@ -899,10 +899,30 @@ result_type parse_url_impl(std::string_view user_input,
   return url;
 }
 
-template <>
-tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
+
+template url parse_url_impl(std::string_view user_input,
+                            const url* base_url = nullptr);
+template url_aggregator parse_url_impl(
+    std::string_view user_input, const url_aggregator* base_url = nullptr);
+
+template <class result_type>
+result_type parse_url(std::string_view user_input,
+                      const result_type* base_url) {
+  return parse_url_impl<result_type, true>(user_input, base_url);
+}
+
+template url parse_url<url>(std::string_view user_input,
+                            const url* base_url = nullptr);
+template url_aggregator parse_url<url_aggregator>(
+    std::string_view user_input, const url_aggregator* base_url = nullptr);
+}  // namespace ada::parser
+
+namespace ada {
+
+ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options) {
+
   // Let init be null.
   url_pattern_init init;
 
@@ -1000,7 +1020,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
             processed_init->protocol.value());
     return tl::unexpected(protocol_component.error());
   }
-  url_pattern_.protocol_component = std::move(*protocol_component);
+  url_pattern_.protocol_component = *protocol_component;
 
   // Set urlPattern’s username component to the result of compiling a component
   // given processedInit["username"], canonicalize a username, and default
@@ -1014,7 +1034,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
             processed_init->username.value());
     return tl::unexpected(username_component.error());
   }
-  url_pattern_.username_component = std::move(*username_component);
+  url_pattern_.username_component = *username_component;
 
   // Set urlPattern’s password component to the result of compiling a component
   // given processedInit["password"], canonicalize a password, and default
@@ -1028,7 +1048,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
             processed_init->password.value());
     return tl::unexpected(password_component.error());
   }
-  url_pattern_.password_component = std::move(*password_component);
+  url_pattern_.password_component = *password_component;
 
   // TODO: Optimization opportunity. The following if statement can be
   // simplified.
@@ -1050,7 +1070,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
               processed_init->hostname.value());
       return tl::unexpected(hostname_component.error());
     }
-    url_pattern_.hostname_component = std::move(*hostname_component);
+    url_pattern_.hostname_component = (*hostname_component);
   } else {
     // Otherwise, set urlPattern’s hostname component to the result of compiling
     // a component given processedInit["hostname"], canonicalize a hostname, and
@@ -1064,7 +1084,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
               processed_init->hostname.value());
       return tl::unexpected(hostname_component.error());
     }
-    url_pattern_.hostname_component = std::move(*hostname_component);
+    url_pattern_.hostname_component = *hostname_component;
   }
 
   // Set urlPattern’s port component to the result of compiling a component
@@ -1077,7 +1097,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
             processed_init->port.value());
     return tl::unexpected(port_component.error());
   }
-  url_pattern_.port_component = std::move(*port_component);
+  url_pattern_.port_component = *port_component;
 
   // Let compileOptions be a copy of the default options with the ignore case
   // property set to options["ignoreCase"].
@@ -1109,7 +1129,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
               processed_init->pathname.value());
       return tl::unexpected(pathname_component.error());
     }
-    url_pattern_.pathname_component = std::move(*pathname_component);
+    url_pattern_.pathname_component = *pathname_component;
   } else {
     // Otherwise set urlPattern’s pathname component to the result of compiling
     // a component given processedInit["pathname"], canonicalize an opaque
@@ -1122,7 +1142,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
               processed_init->pathname.value());
       return tl::unexpected(pathname_component.error());
     }
-    url_pattern_.pathname_component = std::move(*pathname_component);
+    url_pattern_.pathname_component = *pathname_component;
   }
 
   // Set urlPattern’s search component to the result of compiling a component
@@ -1135,7 +1155,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
             processed_init->search.value());
     return tl::unexpected(search_component.error());
   }
-  url_pattern_.search_component = std::move(*search_component);
+  url_pattern_.search_component = *search_component;
 
   // Set urlPattern’s hash component to the result of compiling a component
   // given processedInit["hash"], canonicalize a hash, and compileOptions.
@@ -1147,34 +1167,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
             processed_init->hash.value());
     return tl::unexpected(hash_component.error());
   }
-  url_pattern_.hash_component = std::move(*hash_component);
-
-  // Return urlPattern.
+  url_pattern_.hash_component = *hash_component;
   return url_pattern_;
 }
-
-template url parse_url_impl(std::string_view user_input,
-                            const url* base_url = nullptr);
-template url_aggregator parse_url_impl(
-    std::string_view user_input, const url_aggregator* base_url = nullptr);
-
-template <class result_type>
-result_type parse_url(std::string_view user_input,
-                      const result_type* base_url) {
-  return parse_url_impl<result_type, true>(user_input, base_url);
 }
-
-template url parse_url<url>(std::string_view user_input,
-                            const url* base_url = nullptr);
-template url_aggregator parse_url<url_aggregator>(
-    std::string_view user_input, const url_aggregator* base_url = nullptr);
-}  // namespace ada::parser
-
-namespace ada {
-ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
-    std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options) {
-  return ada::parser::parse_url_pattern_impl<url_pattern>(std::move(input),
-                                                          base_url, options);
-}
-}  // namespace ada
