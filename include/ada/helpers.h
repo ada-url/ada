@@ -139,7 +139,7 @@ ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
  * Removes leading and trailing C0 control and whitespace characters from
  * string.
  */
-ada_really_inline void trim_c0_whitespace(std::string_view& input) noexcept;
+void trim_c0_whitespace(std::string_view& input) noexcept;
 
 /**
  * @private
