@@ -218,8 +218,8 @@ class url_pattern_component {
 
  private:
   std::string pattern{};
-  std::regex_constants::syntax_option_type flags{};
-  std::regex regexp{};
+  std::regex_constants::syntax_option_type flags = std::regex::ECMAScript;
+  std::regex regexp{"*"};
   std::vector<std::string> group_name_list{};
 
   bool has_regexp_groups_ = false;
