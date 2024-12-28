@@ -325,7 +325,7 @@ generate_regular_expression_and_name_list(
     url_pattern_compile_component_options options);
 
 // @see https://urlpattern.spec.whatwg.org/#hostname-pattern-is-an-ipv6-address
-constexpr bool is_ipv6_address(std::string_view input) noexcept;
+bool is_ipv6_address(std::string_view input) noexcept;
 
 // @see
 // https://urlpattern.spec.whatwg.org/#protocol-component-matches-a-special-scheme
