@@ -219,7 +219,7 @@ class url_pattern_component {
  private:
   std::string pattern{};
   std::regex_constants::syntax_option_type flags = std::regex::ECMAScript;
-  std::regex regexp{"*"};
+  std::regex regexp{};
   std::vector<std::string> group_name_list{};
 
   bool has_regexp_groups_ = false;
@@ -299,7 +299,6 @@ class url_pattern {
 
   std::string to_string() const;
 
- private:
   url_pattern_component protocol_component{};
   url_pattern_component username_component{};
   url_pattern_component password_component{};
