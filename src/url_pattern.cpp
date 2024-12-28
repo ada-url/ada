@@ -679,7 +679,7 @@ generate_regular_expression_and_name_list(
   return {result, name_list};
 }
 
-constexpr bool is_ipv6_address(std::string_view input) noexcept {
+bool is_ipv6_address(std::string_view input) noexcept {
   // If input’s code point length is less than 2, then return false.
   if (input.size() < 2) return false;
 

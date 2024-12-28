@@ -299,7 +299,6 @@ class url_pattern {
 
   std::string to_string() const;
 
- private:
   url_pattern_component protocol_component{};
   url_pattern_component username_component{};
   url_pattern_component password_component{};
