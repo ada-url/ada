@@ -12,39 +12,14 @@
 
 namespace ada {
 
-inline bool url_pattern_component::has_regexp_groups() const noexcept
-    ada_lifetime_bound {
-  return has_regexp_groups_;
-}
-
 inline std::string url_pattern_component::to_string() const {
 #ifdef ADA_HAS_FORMAT
   return std::format(R"({{"pattern": "{}", "has_regexp_groups": {}}})", pattern,
-                     has_regexp_groups_ ? "true" : "false"  //,
+                     has_regexp_groups ? "true" : "false"  //,
   );
 #else
   return "";
 #endif
-}
-
-inline std::string_view url_pattern_component::get_pattern() const noexcept
-    ada_lifetime_bound {
-  return pattern;
-}
-
-inline const std::regex& url_pattern_component::get_regexp() const noexcept
-    ada_lifetime_bound {
-  return regexp;
-}
-
-inline std::regex_constants::syntax_option_type
-url_pattern_component::get_regexp_flags() const noexcept ada_lifetime_bound {
-  return flags;
-}
-
-inline const std::vector<std::string>&
-url_pattern_component::get_group_name_list() const noexcept ada_lifetime_bound {
-  return group_name_list;
 }
 
 inline url_pattern_component_result
@@ -89,51 +64,48 @@ inline std::string url_pattern::to_string() const {
 
 inline std::string_view url_pattern::get_protocol() const ada_lifetime_bound {
   // Return this's associated URL pattern's protocol component's pattern string.
-  return protocol_component.get_pattern();
+  return protocol_component.pattern;
 }
 inline std::string_view url_pattern::get_username() const ada_lifetime_bound {
   // Return this's associated URL pattern's username component's pattern string.
-  return username_component.get_pattern();
+  return username_component.pattern;
 }
 inline std::string_view url_pattern::get_password() const ada_lifetime_bound {
   // Return this's associated URL pattern's password component's pattern string.
-  return password_component.get_pattern();
+  return password_component.pattern;
 }
 inline std::string_view url_pattern::get_hostname() const ada_lifetime_bound {
   // Return this's associated URL pattern's hostname component's pattern string.
-  return hostname_component.get_pattern();
+  return hostname_component.pattern;
 }
 inline std::string_view url_pattern::get_port() const ada_lifetime_bound {
   // Return this's associated URL pattern's port component's pattern string.
-  return port_component.get_pattern();
+  return port_component.pattern;
 }
 inline std::string_view url_pattern::get_pathname() const ada_lifetime_bound {
   // Return this's associated URL pattern's pathname component's pattern string.
-  return pathname_component.get_pattern();
+  return pathname_component.pattern;
 }
 inline std::string_view url_pattern::get_search() const ada_lifetime_bound {
   // Return this's associated URL pattern's search component's pattern string.
-  return search_component.get_pattern();
+  return search_component.pattern;
 }
 inline std::string_view url_pattern::get_hash() const ada_lifetime_bound {
   // Return this's associated URL pattern's hash component's pattern string.
-  return hash_component.get_pattern();
+  return hash_component.pattern;
 }
 
-inline bool url_pattern::ignore_case() const ada_lifetime_bound {
-  return ignore_case_;
-}
+inline bool url_pattern::ignore_case() const { return ignore_case_; }
 
-inline bool url_pattern::has_regexp_groups() const ada_lifetime_bound {
+inline bool url_pattern::has_regexp_groups() const {
   // If this's associated URL pattern's has regexp groups, then return true.
-  return protocol_component.has_regexp_groups() ||
-         username_component.has_regexp_groups() ||
-         password_component.has_regexp_groups() ||
-         hostname_component.has_regexp_groups() ||
-         port_component.has_regexp_groups() ||
-         pathname_component.has_regexp_groups() ||
-         search_component.has_regexp_groups() ||
-         hash_component.has_regexp_groups();
+  return protocol_component.has_regexp_groups ||
+         username_component.has_regexp_groups ||
+         password_component.has_regexp_groups ||
+         hostname_component.has_regexp_groups ||
+         port_component.has_regexp_groups ||
+         pathname_component.has_regexp_groups ||
+         search_component.has_regexp_groups || hash_component.has_regexp_groups;
 }
 
 inline bool url_pattern_part::is_regexp() const noexcept {

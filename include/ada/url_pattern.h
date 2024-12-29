@@ -184,15 +184,15 @@ class url_pattern_component {
 
   // This function explicitly takes a std::string because it is moved.
   // To avoid unnecessary copy, move each value while calling the constructor.
-  url_pattern_component(std::string&& new_pattern, std::regex&& new_regexp,
-                        std::regex_constants::syntax_option_type&& new_flags,
+  url_pattern_component(std::string_view new_pattern, std::regex&& new_regexp,
+                        std::regex_constants::syntax_option_type new_flags,
                         std::vector<std::string>&& new_group_name_list,
                         bool new_has_regexp_groups)
-      : pattern(std::move(new_pattern)),
+      : regexp(new_regexp),
+        pattern(std::move(new_pattern)),
         flags(new_flags),
-        regexp(std::move(new_regexp)),
-        group_name_list(std::move(new_group_name_list)),
-        has_regexp_groups_(new_has_regexp_groups) {}
+        group_name_list(new_group_name_list),
+        has_regexp_groups(new_has_regexp_groups) {}
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
   template <url_pattern_encoding_callback F>
@@ -204,25 +204,13 @@ class url_pattern_component {
   url_pattern_component_result create_component_match_result(
       std::string_view input, const std::smatch& exec_result);
 
-  std::string_view get_pattern() const noexcept ada_lifetime_bound
-      ada_warn_unused;
-  const std::regex& get_regexp() const noexcept ada_lifetime_bound
-      ada_warn_unused;
-  std::regex_constants::syntax_option_type get_regexp_flags() const noexcept
-      ada_lifetime_bound ada_warn_unused;
-  const std::vector<std::string>& get_group_name_list() const noexcept
-      ada_lifetime_bound ada_warn_unused;
-  bool has_regexp_groups() const noexcept ada_lifetime_bound ada_warn_unused;
-
   std::string to_string() const;
 
- private:
+  std::regex regexp{};
   std::string pattern{};
   std::regex_constants::syntax_option_type flags = std::regex::ECMAScript;
-  std::regex regexp{};
   std::vector<std::string> group_name_list{};
-
-  bool has_regexp_groups_ = false;
+  bool has_regexp_groups = false;
 };
 
 using url_pattern_input = std::variant<url_aggregator, url_pattern_init>;
@@ -292,10 +280,10 @@ class url_pattern {
 
   // If ignoreCase is true, the JavaScript regular expression created for each
   // pattern must use the `vi` flag. Otherwise, they must use the `v` flag.
-  bool ignore_case() const ada_lifetime_bound;
+  bool ignore_case() const;
 
   // @see https://urlpattern.spec.whatwg.org/#url-pattern-has-regexp-groups
-  bool has_regexp_groups() const ada_lifetime_bound;
+  bool has_regexp_groups() const;
 
   std::string to_string() const;
 
