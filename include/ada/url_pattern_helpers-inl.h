@@ -519,11 +519,10 @@ url_pattern_parser<F>::maybe_add_part_from_the_pending_fixed_value() {
   pending_fixed_value.clear();
   // Let part be a new part whose type is "fixed-text", value is encoded value,
   // and modifier is "none".
-  url_pattern_part part{.type = url_pattern_part_type::FIXED_TEXT,
-                        .value = std::move(*encoded_value),
-                        .modifier = url_pattern_part_modifier::NONE};
   // Append part to parser’s part list.
-  parts.push_back(std::move(part));
+  parts.emplace_back(url_pattern_part_type::FIXED_TEXT,
+                     std::move(*encoded_value),
+                     url_pattern_part_modifier::NONE);
   return std::nullopt;
 }
 
@@ -574,11 +573,9 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
     }
     // Let part be a new part whose type is "fixed-text", value is encoded
     // value, and modifier is modifier.
-    url_pattern_part part{.type = url_pattern_part_type::FIXED_TEXT,
-                          .value = std::move(*encoded_value),
-                          .modifier = modifier};
     // Append part to parser’s part list.
-    parts.push_back(std::move(part));
+    parts.emplace_back(url_pattern_part_type::FIXED_TEXT,
+                       std::move(*encoded_value), modifier);
     return std::nullopt;
   }
   // Let regexp value be the empty string.
@@ -639,14 +636,9 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
   // Let part be a new part whose type is type, value is regexp value,
   // modifier is modifier, name is name, prefix is encoded prefix, and suffix
   // is encoded suffix.
-  auto part = url_pattern_part{.type = type,
-                               .value = std::move(regexp_value),
-                               .modifier = modifier,
-                               .name = std::move(name),
-                               .prefix = std::move(*encoded_prefix),
-                               .suffix = std::move(*encoded_suffix)};
   // Append part to parser’s part list.
-  parts.push_back(std::move(part));
+  parts.emplace_back(type, std::move(regexp_value), modifier, std::move(name),
+                     std::move(*encoded_prefix), std::move(*encoded_suffix));
   return std::nullopt;
 }
 

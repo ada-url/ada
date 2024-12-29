@@ -549,7 +549,7 @@ generate_regular_expression_and_name_list(
   std::string result = "^";
 
   // Let name list be a new list
-  std::vector<std::string> name_list;
+  std::vector<std::string> name_list{};
   const std::string full_wildcard_regexp_value = ".*";
 
   // For each part of part list:
