@@ -14,6 +14,23 @@ using namespace simdjson;
 constexpr std::string_view URL_PATTERN_TEST_DATA =
     "wpt/urlpatterntestdata.json";
 
+TEST(wpt_urlpattern_tests, basic_tests) {
+  auto init = ada::url_pattern_init{};
+  init.pathname = "/books";
+  auto url = ada::parse_url_pattern(init);
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_protocol(), "*");
+  ASSERT_EQ(url->get_hostname(), "*");
+  ASSERT_EQ(url->get_username(), "*");
+  ASSERT_EQ(url->get_password(), "*");
+  ASSERT_EQ(url->get_port(), "*");
+  ASSERT_EQ(url->get_pathname(), "/books");
+  ASSERT_EQ(url->get_search(), "*");
+  ASSERT_EQ(url->get_hash(), "*");
+  ASSERT_FALSE(url->has_regexp_groups());
+  SUCCEED();
+}
+
 // Tests are taken from WPT
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {

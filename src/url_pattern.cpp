@@ -505,9 +505,9 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   // Let flags be an empty string.
   // If options’s ignore case is true then set flags to "vi".
   // Otherwise set flags to "v"
-  std::regex_constants::syntax_option_type flags =
-      options.ignore_case ? std::regex::icase | std::regex_constants::ECMAScript
-                          : std::regex_constants::ECMAScript;
+  auto flags = options.ignore_case
+                   ? std::regex::icase | std::regex_constants::ECMAScript
+                   : std::regex_constants::ECMAScript;
 
   // Let pattern string be the result of running generate a pattern
   // string given part list and options.
@@ -536,9 +536,8 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
   // regexp groups is has regexp groups.
-  return url_pattern_component(std::move(pattern_string),
-                               std::move(regular_expression), std::move(flags),
-                               std::move(name_list), has_regexp_groups);
+  return url_pattern_component(pattern_string, std::move(regular_expression),
+                               flags, std::move(name_list), has_regexp_groups);
 }
 
 namespace url_pattern_helpers {
@@ -728,7 +727,7 @@ std::string generate_segment_wildcard_regexp(
 
 bool protocol_component_matches_special_scheme(
     url_pattern_component& component) {
-  const auto& regex = component.get_regexp();
+  auto regex = component.regexp;
   return std::regex_match("http", regex) || std::regex_match("https", regex) ||
          std::regex_match("ws", regex) || std::regex_match("wss", regex) ||
          std::regex_match("ftp", regex);
@@ -901,49 +900,49 @@ url_pattern::match(url_pattern_input&& input,
   // component's regular expression, protocol).
   std::smatch protocol_exec_result_value;
   auto protocol_exec_result = std::regex_match(
-      protocol, protocol_exec_result_value, protocol_component.get_regexp());
+      protocol, protocol_exec_result_value, protocol_component.regexp);
 
   // Let usernameExecResult be RegExpBuiltinExec(urlPattern’s username
   // component's regular expression, username).
   std::smatch username_exec_result_value;
   auto username_exec_result = std::regex_match(
-      username, username_exec_result_value, username_component.get_regexp());
+      username, username_exec_result_value, username_component.regexp);
 
   // Let passwordExecResult be RegExpBuiltinExec(urlPattern’s password
   // component's regular expression, password).
   std::smatch password_exec_result_value;
   auto password_exec_result = std::regex_match(
-      password, password_exec_result_value, password_component.get_regexp());
+      password, password_exec_result_value, password_component.regexp);
 
   // Let hostnameExecResult be RegExpBuiltinExec(urlPattern’s hostname
   // component's regular expression, hostname).
   std::smatch hostname_exec_result_value;
   auto hostname_exec_result = std::regex_match(
-      hostname, hostname_exec_result_value, hostname_component.get_regexp());
+      hostname, hostname_exec_result_value, hostname_component.regexp);
 
   // Let portExecResult be RegExpBuiltinExec(urlPattern’s port component's
   // regular expression, port).
   std::smatch port_exec_result_value;
-  auto port_exec_result = std::regex_match(port, port_exec_result_value,
-                                           port_component.get_regexp());
+  auto port_exec_result =
+      std::regex_match(port, port_exec_result_value, port_component.regexp);
 
   // Let pathnameExecResult be RegExpBuiltinExec(urlPattern’s pathname
   // component's regular expression, pathname).
   std::smatch pathname_exec_result_value;
   auto pathname_exec_result = std::regex_match(
-      pathname, pathname_exec_result_value, pathname_component.get_regexp());
+      pathname, pathname_exec_result_value, pathname_component.regexp);
 
   // Let searchExecResult be RegExpBuiltinExec(urlPattern’s search component's
   // regular expression, search).
   std::smatch search_exec_result_value;
   auto search_exec_result = std::regex_match(search, search_exec_result_value,
-                                             search_component.get_regexp());
+                                             search_component.regexp);
 
   // Let hashExecResult be RegExpBuiltinExec(urlPattern’s hash component's
   // regular expression, hash).
   std::smatch hash_exec_result_value;
-  auto hash_exec_result = std::regex_match(hash, hash_exec_result_value,
-                                           hash_component.get_regexp());
+  auto hash_exec_result =
+      std::regex_match(hash, hash_exec_result_value, hash_component.regexp);
 
   // If protocolExecResult, usernameExecResult, passwordExecResult,
   // hostnameExecResult, portExecResult, pathnameExecResult, searchExecResult,
