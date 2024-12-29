@@ -125,7 +125,21 @@ enum class url_pattern_part_modifier : uint8_t {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#part
-struct url_pattern_part {
+class url_pattern_part {
+ public:
+  url_pattern_part(url_pattern_part_type _type, std::string&& _value,
+                   url_pattern_part_modifier _modifier)
+      : type(_type), value(_value), modifier(_modifier) {}
+
+  url_pattern_part(url_pattern_part_type _type, std::string&& _value,
+                   url_pattern_part_modifier _modifier, std::string&& _name,
+                   std::string&& _prefix, std::string&& _suffix)
+      : type(_type),
+        value(_value),
+        modifier(_modifier),
+        name(_name),
+        prefix(_prefix),
+        suffix(_suffix) {}
   // A part has an associated type, a string, which must be set upon creation.
   url_pattern_part_type type;
   // A part has an associated value, a string, which must be set upon creation.
