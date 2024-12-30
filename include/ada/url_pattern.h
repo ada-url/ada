@@ -128,12 +128,12 @@ enum class url_pattern_part_modifier : uint8_t {
 class url_pattern_part {
  public:
   url_pattern_part(url_pattern_part_type _type, std::string&& _value,
-                   url_pattern_part_modifier _modifier)
+                   url_pattern_part_modifier _modifier) noexcept
       : type(_type), value(_value), modifier(_modifier) {}
 
   url_pattern_part(url_pattern_part_type _type, std::string&& _value,
                    url_pattern_part_modifier _modifier, std::string&& _name,
-                   std::string&& _prefix, std::string&& _suffix)
+                   std::string&& _prefix, std::string&& _suffix) noexcept
       : type(_type),
         value(_value),
         modifier(_modifier),
@@ -159,10 +159,10 @@ class url_pattern_part {
 
 // @see https://urlpattern.spec.whatwg.org/#options-header
 struct url_pattern_compile_component_options {
-  url_pattern_compile_component_options() = default;
+  url_pattern_compile_component_options() noexcept = default;
   explicit url_pattern_compile_component_options(
       std::optional<char> new_delimiter = std::nullopt,
-      std::optional<char> new_prefix = std::nullopt)
+      std::optional<char> new_prefix = std::nullopt) noexcept
       : delimiter(new_delimiter), prefix(new_prefix) {}
 
   std::string_view get_delimiter() const ada_warn_unused;
@@ -188,25 +188,25 @@ struct url_pattern_compile_component_options {
 // URLPatternComponentResult API is defined as part of the URLPattern
 // specification.
 struct url_pattern_component_result {
-  std::string input;
-  std::unordered_map<std::string, std::string> groups;
+  std::string input{};
+  std::unordered_map<std::string, std::string> groups{};
 };
 
 class url_pattern_component {
  public:
-  url_pattern_component() = default;
+  url_pattern_component() noexcept = default;
 
   // This function explicitly takes a std::string because it is moved.
   // To avoid unnecessary copy, move each value while calling the constructor.
-  url_pattern_component(std::string_view new_pattern, std::regex&& new_regexp,
+  url_pattern_component(std::string&& new_pattern, std::regex&& new_regexp,
                         std::regex_constants::syntax_option_type new_flags,
                         std::vector<std::string>&& new_group_name_list,
-                        bool new_has_regexp_groups)
-      : regexp(new_regexp),
+                        bool new_has_regexp_groups) noexcept
+      : has_regexp_groups(new_has_regexp_groups),
+        regexp(new_regexp),
+        group_name_list(std::move(new_group_name_list)),
         pattern(std::move(new_pattern)),
-        flags(new_flags),
-        group_name_list(new_group_name_list),
-        has_regexp_groups(new_has_regexp_groups) {}
+        flags(new_flags) {}
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
   template <url_pattern_encoding_callback F>
@@ -220,11 +220,11 @@ class url_pattern_component {
 
   std::string to_string() const;
 
+  bool has_regexp_groups{false};
   std::regex regexp{};
-  std::string pattern{};
-  std::regex_constants::syntax_option_type flags = std::regex::ECMAScript;
   std::vector<std::string> group_name_list{};
-  bool has_regexp_groups = false;
+  std::string pattern{};
+  std::regex_constants::syntax_option_type flags{std::regex::ECMAScript};
 };
 
 using url_pattern_input = std::variant<url_aggregator, url_pattern_init>;

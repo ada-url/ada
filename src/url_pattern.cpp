@@ -82,7 +82,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     // Set baseURL to the result of parsing init["baseURL"].
     auto parsing_result = ada::parse<url_aggregator>(*init.base_url);
     // If baseURL is failure, then throw a TypeError.
-    if (!parsing_result) {
+    if (!parsing_result.has_value()) {
       return tl::unexpected(url_pattern_errors::type_error);
     }
     base_url = std::move(*parsing_result);
@@ -177,7 +177,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   // process protocol for init given init["protocol"] and type.
   if (init.protocol) {
     auto process_result = process_protocol(*init.protocol, type);
-    if (!process_result) {
+    if (!process_result.has_value()) {
       return tl::unexpected(process_result.error());
     }
     result.protocol = std::move(*process_result);
@@ -187,7 +187,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   // process username for init given init["username"] and type.
   if (init.username.has_value()) {
     auto process_result = process_username(*init.username, type);
-    if (!process_result) {
+    if (!process_result.has_value()) {
       return tl::unexpected(process_result.error());
     }
     result.username = std::move(*process_result);
@@ -197,7 +197,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   // process password for init given init["password"] and type.
   if (init.password.has_value()) {
     auto process_result = process_password(*init.password, type);
-    if (!process_result) {
+    if (!process_result.has_value()) {
       return tl::unexpected(process_result.error());
     }
     result.password = std::move(*process_result);
@@ -207,7 +207,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   // process hostname for init given init["hostname"] and type.
   if (init.hostname.has_value()) {
     auto process_result = process_hostname(*init.hostname, type);
-    if (!process_result) {
+    if (!process_result.has_value()) {
       return tl::unexpected(process_result.error());
     }
     result.hostname = std::move(*process_result);
@@ -218,7 +218,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   if (init.port) {
     auto process_result =
         process_port(*init.port, result.protocol.value_or("fake"), type);
-    if (!process_result) {
+    if (!process_result.has_value()) {
       return tl::unexpected(process_result.error());
     }
     result.port = std::move(*process_result);
@@ -263,7 +263,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     // result["pathname"], result["protocol"], and type.
     auto pathname_processing_result = process_pathname(
         *result.pathname, result.protocol.value_or("fake"), type);
-    if (!pathname_processing_result) {
+    if (!pathname_processing_result.has_value()) {
       return tl::unexpected(pathname_processing_result.error());
     }
     result.pathname = std::move(*pathname_processing_result);
@@ -273,7 +273,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   // search for init given init["search"] and type.
   if (init.search) {
     auto process_result = process_search(*init.search, type);
-    if (!process_result) {
+    if (!process_result.has_value()) {
       return tl::unexpected(process_result.error());
     }
     result.search = std::move(*process_result);
@@ -283,7 +283,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   // hash for init given init["hash"] and type.
   if (init.hash) {
     auto process_result = process_hash(*init.hash, type);
-    if (!process_result) {
+    if (!process_result.has_value()) {
       return tl::unexpected(process_result.error());
     }
     result.hash = std::move(*process_result);
@@ -489,7 +489,7 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   auto part_list = url_pattern_helpers::parse_pattern_string(input, options,
                                                              encoding_callback);
 
-  if (!part_list) {
+  if (!part_list.has_value()) {
     ada_log("parse_pattern_string failed");
     return tl::unexpected(part_list.error());
   }
@@ -529,15 +529,17 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   // For each part of part list:
   // - If part’s type is "regexp", then set has regexp groups to true.
   const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
-  const bool has_regexp_groups = std::ranges::any_of(*part_list, has_regexp);
+  const bool has_regexp_groups =
+      std::ranges::any_of(part_list.value(), has_regexp);
 
   ada_log("has regexp groups: ", has_regexp_groups);
 
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
   // regexp groups is has regexp groups.
-  return url_pattern_component(pattern_string, std::move(regular_expression),
-                               flags, std::move(name_list), has_regexp_groups);
+  return tl::expected<url_pattern_component, url_pattern_errors>(
+      tl::in_place, std::move(pattern_string), std::move(regular_expression),
+      flags, std::move(name_list), has_regexp_groups);
 }
 
 namespace url_pattern_helpers {
@@ -550,7 +552,7 @@ generate_regular_expression_and_name_list(
 
   // Let name list be a new list
   std::vector<std::string> name_list{};
-  const std::string full_wildcard_regexp_value = ".*";
+  constexpr std::string_view full_wildcard_regexp_value = ".*";
 
   // For each part of part list:
   for (const url_pattern_part& part : part_list) {
@@ -836,7 +838,7 @@ url_pattern::match(url_pattern_input&& input,
       base_url = ada::parse<url_aggregator>(*base_url_string, nullptr);
 
       // If baseURL is failure, return null.
-      if (!base_url) {
+      if (!base_url.has_value()) {
         return std::nullopt;
       }
 
@@ -852,7 +854,7 @@ url_pattern::match(url_pattern_input&& input,
         ada::parse<url_aggregator>(url.get_href(), base_url_value);
 
     // If url is failure, return null.
-    if (!parsed_url) {
+    if (!parsed_url.has_value()) {
       return std::nullopt;
     }
 

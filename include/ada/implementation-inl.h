@@ -19,7 +19,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
     // Set init to the result of running parse a constructor string given input.
     auto parse_result = url_pattern_helpers::constructor_string_parser::parse(
         std::get<std::string_view>(input));
-    if (!parse_result) {
+    if (!parse_result.has_value()) {
       ada_log("constructor_string_parser::parse failed");
       return tl::unexpected(parse_result.error());
     }
@@ -53,7 +53,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
   auto processed_init = url_pattern_init::process(
       init, "pattern", std::nullopt, std::nullopt, std::nullopt, std::nullopt,
       std::nullopt, std::nullopt, std::nullopt, std::nullopt);
-  if (!processed_init) {
+  if (!processed_init.has_value()) {
     ada_log("url_pattern_init::process failed for init and 'pattern'");
     return tl::unexpected(processed_init.error());
   }
@@ -103,7 +103,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
       processed_init->protocol.value(),
       url_pattern_helpers::canonicalize_protocol,
       url_pattern_compile_component_options::DEFAULT);
-  if (!protocol_component) {
+  if (!protocol_component.has_value()) {
     ada_log("url_pattern_component::compile failed for protocol ",
             processed_init->protocol.value());
     return tl::unexpected(protocol_component.error());
@@ -117,7 +117,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
       processed_init->username.value(),
       url_pattern_helpers::canonicalize_username,
       url_pattern_compile_component_options::DEFAULT);
-  if (!username_component) {
+  if (!username_component.has_value()) {
     ada_log("url_pattern_component::compile failed for username ",
             processed_init->username.value());
     return tl::unexpected(username_component.error());
@@ -131,7 +131,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
       processed_init->password.value(),
       url_pattern_helpers::canonicalize_password,
       url_pattern_compile_component_options::DEFAULT);
-  if (!password_component) {
+  if (!password_component.has_value()) {
     ada_log("url_pattern_component::compile failed for password ",
             processed_init->password.value());
     return tl::unexpected(password_component.error());
@@ -153,7 +153,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
         processed_init->hostname.value(),
         url_pattern_helpers::canonicalize_ipv6_hostname,
         url_pattern_compile_component_options::DEFAULT);
-    if (!hostname_component) {
+    if (!hostname_component.has_value()) {
       ada_log("url_pattern_component::compile failed for ipv6 hostname ",
               processed_init->hostname.value());
       return tl::unexpected(hostname_component.error());
@@ -167,7 +167,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
         processed_init->hostname.value(),
         url_pattern_helpers::canonicalize_hostname,
         url_pattern_compile_component_options::HOSTNAME);
-    if (!hostname_component) {
+    if (!hostname_component.has_value()) {
       ada_log("url_pattern_component::compile failed for hostname ",
               processed_init->hostname.value());
       return tl::unexpected(hostname_component.error());
@@ -180,7 +180,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
   auto port_component = url_pattern_component::compile(
       processed_init->port.value(), url_pattern_helpers::canonicalize_port,
       url_pattern_compile_component_options::DEFAULT);
-  if (!port_component) {
+  if (!port_component.has_value()) {
     ada_log("url_pattern_component::compile failed for port ",
             processed_init->port.value());
     return tl::unexpected(port_component.error());
@@ -190,7 +190,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
   // Let compileOptions be a copy of the default options with the ignore case
   // property set to options["ignoreCase"].
   auto compile_options = url_pattern_compile_component_options::DEFAULT;
-  if (options) {
+  if (options != nullptr) {
     compile_options.ignore_case = options->ignore_case;
   }
 
@@ -212,7 +212,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
     auto pathname_component = url_pattern_component::compile(
         processed_init->pathname.value(),
         url_pattern_helpers::canonicalize_pathname, path_compile_options);
-    if (!pathname_component) {
+    if (!pathname_component.has_value()) {
       ada_log("url_pattern_component::compile failed for pathname ",
               processed_init->pathname.value());
       return tl::unexpected(pathname_component.error());
@@ -225,7 +225,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
     auto pathname_component = url_pattern_component::compile(
         processed_init->pathname.value(),
         url_pattern_helpers::canonicalize_opaque_pathname, compile_options);
-    if (!pathname_component) {
+    if (!pathname_component.has_value()) {
       ada_log("url_pattern_component::compile failed for opaque pathname ",
               processed_init->pathname.value());
       return tl::unexpected(pathname_component.error());
@@ -238,7 +238,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
   auto search_component = url_pattern_component::compile(
       processed_init->search.value(), url_pattern_helpers::canonicalize_search,
       compile_options);
-  if (!search_component) {
+  if (!search_component.has_value()) {
     ada_log("url_pattern_component::compile failed for search ",
             processed_init->search.value());
     return tl::unexpected(search_component.error());
@@ -250,7 +250,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
   auto hash_component = url_pattern_component::compile(
       processed_init->hash.value(), url_pattern_helpers::canonicalize_hash,
       compile_options);
-  if (!hash_component) {
+  if (!hash_component.has_value()) {
     ada_log("url_pattern_component::compile failed for hash ",
             processed_init->hash.value());
     return tl::unexpected(hash_component.error());

@@ -83,9 +83,9 @@ class url_pattern_parser {
   // @see https://urlpattern.spec.whatwg.org/#is-a-duplicate-name
   bool is_duplicate_name(std::string_view name);
 
-  std::vector<Token> tokens{};
   F encoding_callback;
   std::string segment_wildcard_regexp;
+  std::vector<Token> tokens{};
   std::vector<url_pattern_part> parts{};
   std::string pending_fixed_value{};
   size_t index = 0;
@@ -136,7 +136,8 @@ class Tokenizer {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
-struct constructor_string_parser {
+class constructor_string_parser {
+ public:
   explicit constructor_string_parser(std::string_view new_input,
                                      std::vector<Token>&& new_token_list)
       : input(new_input), token_list(std::move(new_token_list)) {}

@@ -18,7 +18,7 @@ TEST(wpt_urlpattern_tests, basic_tests) {
   auto init = ada::url_pattern_init{};
   init.pathname = "/books";
   auto url = ada::parse_url_pattern(init);
-  ASSERT_TRUE(url);
+  ASSERT_TRUE(url.has_value());
   ASSERT_EQ(url->get_protocol(), "*");
   ASSERT_EQ(url->get_hostname(), "*");
   ASSERT_EQ(url->get_username(), "*");

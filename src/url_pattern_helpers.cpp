@@ -20,7 +20,7 @@ constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
   auto protocol_component = url_pattern_component::compile(
       protocol_string, canonicalize_protocol,
       url_pattern_compile_component_options::DEFAULT);
-  if (!protocol_component) {
+  if (!protocol_component.has_value()) {
     ada_log("url_pattern_component::compile failed for protocol_string ",
             protocol_string);
     return protocol_component.error();
@@ -273,7 +273,7 @@ constructor_string_parser::parse(std::string_view input) {
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
   auto token_list = tokenize(input, token_policy::LENIENT);
-  if (!token_list) {
+  if (!token_list.has_value()) {
     return tl::unexpected(token_list.error());
   }
   auto parser = constructor_string_parser(input, std::move(*token_list));
@@ -927,7 +927,7 @@ parse_pattern_string(std::string_view input,
   // Set parser’s token list to the result of running tokenize given input and
   // "strict".
   auto tokenize_result = tokenize(input, token_policy::STRICT);
-  if (!tokenize_result) {
+  if (!tokenize_result.has_value()) {
     ada_log("parse_pattern_string tokenize failed");
     return tl::unexpected(tokenize_result.error());
   }
