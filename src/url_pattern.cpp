@@ -142,7 +142,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     // If init contains none of "protocol", "hostname", "port", and "pathname",
     // then set result["pathname"] to the result of processing a base URL string
     // given the result of URL path serializing baseURL and type.
-    if (!init.protocol && !init.hostname && !init.port) {
+    if (!init.protocol && !init.hostname && !init.port && !init.pathname) {
       ADA_ASSERT_TRUE(base_url.has_value());
       result.pathname = url_pattern_helpers::process_base_url_string(
           base_url->get_pathname(), type);
@@ -234,7 +234,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     // - baseURL has an opaque path; and
     // - the result of running is an absolute pathname given result["pathname"]
     // and type is false,
-    if (base_url.has_value() && base_url->has_opaque_path &&
+    if (base_url && base_url->has_opaque_path &&
         !url_pattern_helpers::is_absolute_pathname(*result.pathname, type)) {
       // Let baseURLPath be the result of running process a base URL string
       // given the result of URL path serializing baseURL and type.
@@ -259,10 +259,11 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
       }
     }
 
+    ADA_ASSERT_TRUE(result.protocol.has_value());
     // Set result["pathname"] to the result of process pathname for init given
     // result["pathname"], result["protocol"], and type.
-    auto pathname_processing_result = process_pathname(
-        *result.pathname, result.protocol.value_or("fake"), type);
+    auto pathname_processing_result =
+        process_pathname(*result.pathname, *result.protocol, type);
     if (!pathname_processing_result) {
       return tl::unexpected(pathname_processing_result.error());
     }
