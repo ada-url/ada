@@ -1,11 +1,13 @@
 /**
- * @file implementation-inline.h
+ * @file implementation-inl.h
  * @brief Definitions for user facing functions for parsing URL and it's
  * components.
  */
 #ifndef ADA_IMPLEMENTATION_INL_H
 #define ADA_IMPLEMENTATION_INL_H
 #include "ada/implementation.h"
+#include "ada/url_pattern_helpers-inl.h"
+
 namespace ada {
 inline ada_warn_unused tl::expected<url_pattern, url_pattern_errors>
 parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,

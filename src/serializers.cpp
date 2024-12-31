@@ -1,5 +1,3 @@
-#include "ada.h"
-
 #include <array>
 #include <string>
 
