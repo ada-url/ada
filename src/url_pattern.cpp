@@ -481,7 +481,7 @@ std::string url_pattern_init::to_string() const {
 
 template <url_pattern_encoding_callback F>
 tl::expected<url_pattern_component, url_pattern_errors>
-url_pattern_component::compile(std::string_view input, F encoding_callback,
+url_pattern_component::compile(std::string_view input, F& encoding_callback,
                                url_pattern_compile_component_options& options) {
   ada_log("url_pattern_component::compile input: ", input);
   // Let part list be the result of running parse a pattern string given input,
