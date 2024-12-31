@@ -54,7 +54,7 @@ struct Token {
 template <url_pattern_encoding_callback F>
 class url_pattern_parser {
  public:
-  url_pattern_parser(F&& encoding_callback_,
+  url_pattern_parser(F& encoding_callback_,
                      std::string_view segment_wildcard_regexp_)
       : encoding_callback(encoding_callback_),
         segment_wildcard_regexp(std::string(segment_wildcard_regexp_)) {}
@@ -84,7 +84,7 @@ class url_pattern_parser {
   bool is_duplicate_name(std::string_view name);
 
   std::vector<Token> tokens{};
-  F encoding_callback;
+  F& encoding_callback;
   std::string segment_wildcard_regexp;
   std::vector<url_pattern_part> parts{};
   std::string pending_fixed_value{};
@@ -310,7 +310,7 @@ template <url_pattern_encoding_callback F>
 tl::expected<std::vector<url_pattern_part>, url_pattern_errors>
 parse_pattern_string(std::string_view input,
                      url_pattern_compile_component_options& options,
-                     F&& encoding_callback);
+                     F& encoding_callback);
 
 // @see https://urlpattern.spec.whatwg.org/#generate-a-pattern-string
 std::string generate_pattern_string(
