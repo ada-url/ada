@@ -1,5 +1,6 @@
-#include "ada/character_sets-inl.h"
 #include "ada/common_defs.h"
+#include "ada/character_sets-inl.h"
+#include "ada/character_sets.h"
 #include "ada/unicode.h"
 #include "ada/log.h"
 
