@@ -536,8 +536,9 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
   // regexp groups is has regexp groups.
-  return url_pattern_component(pattern_string, std::move(regular_expression),
-                               flags, std::move(name_list), has_regexp_groups);
+  return url_pattern_component(std::move(pattern_string),
+                               std::move(regular_expression), flags,
+                               std::move(name_list), has_regexp_groups);
 }
 
 namespace url_pattern_helpers {
