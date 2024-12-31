@@ -237,7 +237,7 @@ struct constructor_string_parser {
   bool is_non_special_pattern_char(size_t index, std::string_view value);
 
   // @see https://urlpattern.spec.whatwg.org/#get-a-safe-token
-  const Token& get_safe_token(size_t index);
+  const Token* get_safe_token(size_t index);
 
   // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
   std::string_view make_component_string();
