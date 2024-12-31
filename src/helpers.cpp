@@ -1,4 +1,3 @@
-#include "ada.h"
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
 #include "ada/scheme.h"

@@ -1,4 +1,3 @@
-#include "ada.h"
 #include "checkers.cpp"
 #include "unicode.cpp"
 #include "serializers.cpp"

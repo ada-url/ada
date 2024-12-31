@@ -1,7 +1,7 @@
-#include "ada.h"
 #include "ada/character_sets-inl.h"
 #include "ada/common_defs.h"
 #include "ada/unicode.h"
+#include "ada/log.h"
 
 ADA_PUSH_DISABLE_ALL_WARNINGS
 #include "ada_idna.cpp"
