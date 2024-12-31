@@ -1,4 +1,5 @@
 #include "ada/checkers.h"
+#include "ada/unicode-inl.h"
 
 #include <algorithm>
 

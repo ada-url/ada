@@ -7,9 +7,8 @@
 
 #include "ada/character_sets.h"
 #include "ada/character_sets-inl.h"
-#include "ada/checkers-inl.h"
+#include "ada/checkers.h"
 #include "ada/helpers.h"
-#include "ada/unicode.h"
 #include "ada/unicode-inl.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"

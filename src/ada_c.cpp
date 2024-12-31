@@ -1,4 +1,5 @@
-#include "ada.h"
+#include "ada/url_aggregator-inl.h"
+#include "ada/url_search_params-inl.h"
 
 ada::result<ada::url_aggregator>& get_instance(void* result) noexcept {
   return *(ada::result<ada::url_aggregator>*)result;
