@@ -76,19 +76,20 @@ inline bool constructor_string_parser::is_search_prefix() {
   // - previous token’s type is "regexp".
   // - previous token’s type is "close".
   // - previous token’s type is "asterisk".
-  return !(previous_token.type == token_type::NAME ||
-           previous_token.type == token_type::REGEXP ||
-           previous_token.type == token_type::CLOSE ||
-           previous_token.type == token_type::ASTERISK);
+  return !(previous_token->type == token_type::NAME ||
+           previous_token->type == token_type::REGEXP ||
+           previous_token->type == token_type::CLOSE ||
+           previous_token->type == token_type::ASTERISK);
 }
 
 inline bool constructor_string_parser::is_non_special_pattern_char(
     size_t index, std::string_view value) {
   // Let token be the result of running get a safe token given parser and index.
   auto token = get_safe_token(index);
+  ADA_ASSERT_TRUE(token);
 
   // If token’s value is not value, then return false.
-  if (token.value != value) {
+  if (token->value != value) {
     return false;
   }
 
@@ -97,16 +98,16 @@ inline bool constructor_string_parser::is_non_special_pattern_char(
   // - token’s type is "escaped-char"; or
   // - token’s type is "invalid-char",
   // - then return true.
-  return token.type == token_type::CHAR ||
-         token.type == token_type::ESCAPED_CHAR ||
-         token.type == token_type::INVALID_CHAR;
+  return token->type == token_type::CHAR ||
+         token->type == token_type::ESCAPED_CHAR ||
+         token->type == token_type::INVALID_CHAR;
 }
 
-inline const Token& constructor_string_parser::get_safe_token(size_t index) {
+inline const Token* constructor_string_parser::get_safe_token(size_t index) {
   // If index is less than parser’s token list's size, then return parser’s
   // token list[index].
   if (index < token_list.size()) [[likely]] {
-    return token_list[index];
+    return &token_list[index];
   }
 
   // Assert: parser’s token list's size is greater than or equal to 1.
@@ -114,10 +115,10 @@ inline const Token& constructor_string_parser::get_safe_token(size_t index) {
 
   // Let token be parser’s token list[last index].
   // Assert: token’s type is "end".
-  ADA_ASSERT_TRUE(token_list.end()->type == token_type::END);
+  ADA_ASSERT_TRUE(token_list.back().type == token_type::END);
 
   // Return token.
-  return *token_list.end();
+  return &token_list.back();
 }
 
 inline bool constructor_string_parser::is_group_open() const {
@@ -260,8 +261,9 @@ inline std::string_view constructor_string_parser::make_component_string() {
   // Let component start token be the result of running get a safe token given
   // parser and parser’s component start.
   const auto component_start_token = get_safe_token(component_start);
+  ADA_ASSERT_TRUE(component_start_token);
   // Let component start input index be component start token’s index.
-  const auto component_start_input_index = component_start_token.index;
+  const auto component_start_input_index = component_start_token->index;
   // Let end index be token’s index.
   const auto end_index = token.index;
   // Return the code point substring from component start input index to end
