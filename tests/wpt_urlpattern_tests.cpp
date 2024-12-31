@@ -14,6 +14,21 @@ using namespace simdjson;
 constexpr std::string_view URL_PATTERN_TEST_DATA =
     "wpt/urlpatterntestdata.json";
 
+TEST(wpt_urlpattern_tests, parse_pattern_string_basic_tests) {
+  auto part_list = ada::url_pattern_helpers::parse_pattern_string(
+      "*", ada::url_pattern_compile_component_options::DEFAULT,
+      ada::url_pattern_helpers::canonicalize_protocol);
+
+  ASSERT_TRUE(part_list);
+}
+
+TEST(wpt_urlpattern_tests, compile_basic_tests) {
+  auto protocol_component = ada::url_pattern_component::compile(
+      "*", ada::url_pattern_helpers::canonicalize_protocol,
+      ada::url_pattern_compile_component_options::DEFAULT);
+  ASSERT_TRUE(protocol_component);
+}
+
 TEST(wpt_urlpattern_tests, basic_tests) {
   auto init = ada::url_pattern_init{};
   init.pathname = "/books";
