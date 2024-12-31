@@ -496,11 +496,11 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
 
   // Let (regular expression string, name list) be the result of running
   // generate a regular expression and name list given part list and options.
-  // auto [regular_expression_string, name_list] =
-  //  url_pattern_helpers::generate_regular_expression_and_name_list(*part_list,
-  //     options);
+  auto [regular_expression_string, name_list] =
+      url_pattern_helpers::generate_regular_expression_and_name_list(*part_list,
+                                                                     options);
 
-  //  ada_log("regular expression string: ", regular_expression_string);
+  ada_log("regular expression string: ", regular_expression_string);
 
   // Let flags be an empty string.
   // If options’s ignore case is true then set flags to "vi".
@@ -511,29 +511,28 @@ url_pattern_component::compile(std::string_view input, F encoding_callback,
 
   // Let pattern string be the result of running generate a pattern
   // string given part list and options.
-  auto pattern_string = "fds";
-  //      url_pattern_helpers::generate_pattern_string(*part_list, options);
+  auto pattern_string =
+      url_pattern_helpers::generate_pattern_string(*part_list, options);
 
   // Let regular expression be RegExpCreate(regular expression string,
   // flags). If this throws an exception, catch it, and throw a
   // TypeError.
   std::regex regular_expression;
-  // try {
-  // regular_expression = std::regex(regular_expression_string, flags);
-  // } catch (std::regex_error& error) {
-  // (void)error;
-  // ada_log("std::regex_error: ", error.what());
-  // return tl::unexpected(url_pattern_errors::type_error);
-  //}
+  try {
+    regular_expression = std::regex(regular_expression_string, flags);
+  } catch (std::regex_error& error) {
+    (void)error;
+    ada_log("std::regex_error: ", error.what());
+    return tl::unexpected(url_pattern_errors::type_error);
+  }
 
   // For each part of part list:
   // - If part’s type is "regexp", then set has regexp groups to true.
-  // const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
-  const bool has_regexp_groups =
-      true;  // std::ranges::any_of(*part_list, has_regexp);
+  const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
+  const bool has_regexp_groups = std::ranges::any_of(*part_list, has_regexp);
 
   ada_log("has regexp groups: ", has_regexp_groups);
-  std::vector<std::string> name_list;
+
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
   // regexp groups is has regexp groups.

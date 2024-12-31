@@ -101,8 +101,6 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
   // Set urlPattern’s protocol component to the result of compiling a component
   // given processedInit["protocol"], canonicalize a protocol, and default
   // options.
-  std::cout << "processed_init->protocol.value(): "
-            << processed_init->protocol.value() << std::endl;
   auto protocol_component = url_pattern_component::compile(
       processed_init->protocol.value(),
       url_pattern_helpers::canonicalize_protocol,
