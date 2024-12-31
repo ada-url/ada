@@ -259,11 +259,10 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
       }
     }
 
-    ADA_ASSERT_TRUE(result.protocol.has_value());
     // Set result["pathname"] to the result of process pathname for init given
     // result["pathname"], result["protocol"], and type.
-    auto pathname_processing_result =
-        process_pathname(*result.pathname, *result.protocol, type);
+    auto pathname_processing_result = process_pathname(
+        *result.pathname, result.protocol.value_or("fake"), type);
     if (!pathname_processing_result) {
       return tl::unexpected(pathname_processing_result.error());
     }
