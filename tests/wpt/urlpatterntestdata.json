@@ -1152,7 +1152,6 @@
   },
   {
     "pattern": [{ "protocol": "http", "port": "100000" }],
-    "inputs": [{ "protocol": "http", "port": "100000" }],
     "expected_obj": "error"
   },
   {
@@ -2370,6 +2369,7 @@
   },
   {
     "pattern": [{ "hostname": "bad#hostname" }],
+    "inputs": [{ "hostname": "bad" }],
     "expected_match": {
       "hostname": { "input": "bad", "groups": {} }
     }
@@ -2380,6 +2380,7 @@
   },
   {
     "pattern": [{ "hostname": "bad/hostname" }],
+    "inputs": [{ "hostname": "bad" }],
     "expected_match": {
       "hostname": { "input": "bad", "groups": {} }
     }
