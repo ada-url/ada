@@ -654,7 +654,7 @@ template <url_pattern_encoding_callback F>
 tl::expected<std::vector<url_pattern_part>, url_pattern_errors>
 parse_pattern_string(std::string_view input,
                      url_pattern_compile_component_options& options,
-                     F&& encoding_callback) {
+                     F& encoding_callback) {
   ada_log("parse_pattern_string input=", input);
   // Let parser be a new pattern parser whose encoding callback is encoding
   // callback and segment wildcard regexp is the result of running generate a
@@ -706,7 +706,7 @@ parse_pattern_string(std::string_view input,
       // Run add a part given parser, prefix, name token, regexp or wildcard
       // token, the empty string, and modifier token.
       if (auto error =
-              parser.add_part(prefix, name_token, regexp_or_wildcard_token, {},
+              parser.add_part(prefix, name_token, regexp_or_wildcard_token, "",
                               modifier_token)) {
         ada_log("parser.add_part failed");
         return tl::unexpected(*error);

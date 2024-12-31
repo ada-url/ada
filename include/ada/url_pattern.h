@@ -211,7 +211,7 @@ class url_pattern_component {
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
   template <url_pattern_encoding_callback F>
   static tl::expected<url_pattern_component, url_pattern_errors> compile(
-      std::string_view input, F encoding_callback,
+      std::string_view input, F& encoding_callback,
       url_pattern_compile_component_options& options);
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
