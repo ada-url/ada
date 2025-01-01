@@ -239,6 +239,28 @@ tl::expected<ada::url_pattern, ada::url_pattern_errors> parse_pattern(
       options.has_value() ? &options.value() : nullptr);
 }
 
+std::variant<std::string, ada::url_pattern_init> parse_inputs_array(
+    ondemand::array& inputs) {
+  size_t index = 0;
+  ada::url_pattern_init result{};
+
+  std::cout << "inputs: " << inputs.raw_json().value() << std::endl;
+  inputs.reset();
+
+  for (auto input : inputs) {
+    if (input.type() == ondemand::json_type::string && index == 0) {
+      std::string_view value;
+      EXPECT_FALSE(input.get_string().get(value));
+      return std::string(value);
+    }
+
+    // TODO: Construct url_pattern_result here
+    index++;
+  }
+
+  return result;
+}
+
 TEST(wpt_urlpattern_tests, urlpattern_test_data) {
   ondemand::parser parser;
   ASSERT_TRUE(std::filesystem::exists(URL_PATTERN_TEST_DATA));
@@ -346,6 +368,16 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
             FAIL() << "Unknown key in expected object: " << key << std::endl;
           }
         }
+      }
+
+      ondemand::array inputs;
+      if (!main_object["inputs"].get_array().get(inputs)) {
+        // Expected match can be:
+        // - "error"
+        // - null
+        // - {} // response here.
+        auto input_value = parse_inputs_array(inputs);
+        // TODO: Parse "expected_match" field here.
       }
     }
   } catch (simdjson_error& error) {
