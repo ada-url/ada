@@ -488,18 +488,12 @@ std::string url_pattern_parser<F>::consume_text() {
 }
 
 template <url_pattern_encoding_callback F>
-tl::expected<Token, url_pattern_errors>
-url_pattern_parser<F>::consume_required_token(token_type type) {
+bool url_pattern_parser<F>::consume_required_token(token_type type) {
   ada_log("url_pattern_parser::consume_required_token called with type=",
           to_string(type));
   // Let result be the result of running try to consume a token given parser and
   // type.
-  auto result = try_consume_token(type);
-  // If result is null, then throw a TypeError.
-  if (!result) {
-    return tl::unexpected(url_pattern_errors::type_error);
-  }
-  return *result;
+  return try_consume_token(type) != nullptr;
 }
 
 template <url_pattern_encoding_callback F>
