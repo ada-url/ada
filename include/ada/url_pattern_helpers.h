@@ -69,8 +69,7 @@ class url_pattern_parser {
   // @see https://urlpattern.spec.whatwg.org/#consume-text
   std::string consume_text();
   // @see https://urlpattern.spec.whatwg.org/#consume-a-required-token
-  tl::expected<Token, url_pattern_errors> consume_required_token(
-      token_type type);
+  bool consume_required_token(token_type type);
   // @see
   // https://urlpattern.spec.whatwg.org/#maybe-add-a-part-from-the-pending-fixed-value
   std::optional<url_pattern_errors>
