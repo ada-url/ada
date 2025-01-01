@@ -37,7 +37,11 @@ enum class token_policy {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#tokens
-struct Token {
+class Token {
+ public:
+  Token(token_type _type, size_t _index, std::string&& _value)
+      : type(_type), index(_index), value(std::move(_value)) {}
+
   // A token has an associated type, a string, initially "invalid-char".
   token_type type = token_type::INVALID_CHAR;
 
