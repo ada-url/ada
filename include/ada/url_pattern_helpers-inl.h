@@ -71,6 +71,7 @@ inline bool constructor_string_parser::is_search_prefix() {
   // Let previous token be the result of running get a safe token given parser
   // and previous index.
   auto previous_token = get_safe_token(previous_index);
+  ADA_ASSERT_TRUE(previous_token);
   // If any of the following are true, then return false:
   // - previous token’s type is "name".
   // - previous token’s type is "regexp".
@@ -252,24 +253,23 @@ inline void constructor_string_parser::change_state(State new_state,
   token_increment = 0;
 }
 
-inline std::string_view constructor_string_parser::make_component_string() {
+inline std::string constructor_string_parser::make_component_string() {
   // Assert: parser’s token index is less than parser’s token list's size.
   ADA_ASSERT_TRUE(token_index < token_list.size());
 
   // Let token be parser’s token list[parser’s token index].
-  const auto token = token_list[token_index];
+  // Let end index be token’s index.
+  const auto end_index = token_list[token_index].index;
   // Let component start token be the result of running get a safe token given
   // parser and parser’s component start.
   const auto component_start_token = get_safe_token(component_start);
   ADA_ASSERT_TRUE(component_start_token);
   // Let component start input index be component start token’s index.
   const auto component_start_input_index = component_start_token->index;
-  // Let end index be token’s index.
-  const auto end_index = token.index;
   // Return the code point substring from component start input index to end
   // index within parser’s input.
-  return std::string_view(input).substr(
-      component_start_input_index, end_index - component_start_input_index);
+  return input.substr(component_start_input_index,
+                      end_index - component_start_input_index);
 }
 
 inline bool constructor_string_parser::is_an_identity_terminator() {
