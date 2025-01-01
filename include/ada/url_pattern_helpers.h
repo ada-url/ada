@@ -61,7 +61,9 @@ class url_pattern_parser {
   url_pattern_parser(F& encoding_callback_,
                      std::string_view segment_wildcard_regexp_)
       : encoding_callback(encoding_callback_),
-        segment_wildcard_regexp(std::string(segment_wildcard_regexp_)) {}
+        segment_wildcard_regexp(segment_wildcard_regexp_) {}
+
+  bool can_continue() const { return index < tokens.size(); }
 
   // @see https://urlpattern.spec.whatwg.org/#try-to-consume-a-token
   Token* try_consume_token(token_type type);
@@ -123,9 +125,9 @@ class Tokenizer {
       size_t next_position, size_t value_position) ada_warn_unused;
 
   // has an associated input, a pattern string, initially the empty string.
-  std::string input{};
+  std::string input;
   // has an associated policy, a tokenize policy, initially "strict".
-  token_policy policy = token_policy::STRICT;
+  token_policy policy;
   // has an associated token list, a token list, initially an empty list.
   std::vector<Token> token_list{};
   // has an associated index, a number, initially 0.
