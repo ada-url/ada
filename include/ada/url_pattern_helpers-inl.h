@@ -375,12 +375,9 @@ inline void Tokenizer::add_token(token_type type, size_t next_position,
   // Set token’s index to tokenizer’s index.
   // Set token’s value to the code point substring from value position with
   // length value length within tokenizer’s input.
-  auto token = Token{.type = type,
-                     .index = index,
-                     .value = input.substr(value_position, value_length)};
-
   // Append token to the back of tokenizer’s token list.
-  token_list.push_back(std::move(token));
+  token_list.emplace_back(type, index,
+                          input.substr(value_position, value_length));
   // Set tokenizer’s index to next position.
   index = next_position;
 }
@@ -430,9 +427,8 @@ Token* url_pattern_parser<F>::try_consume_modifier_token() {
   if (token) return token;
   // Set token to the result of running try to consume a token given parser and
   // "asterisk".
-  token = try_consume_token(token_type::ASTERISK);
   // Return token.
-  return token;
+  return try_consume_token(token_type::ASTERISK);
 }
 
 template <url_pattern_encoding_callback F>
