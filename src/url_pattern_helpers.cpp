@@ -1008,7 +1008,7 @@ tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
 
   ada_log("tokenizer.token_list size is: ", tokenizer.token_list.size());
   // Return tokenizer’s token list.
-  return std::move(tokenizer.token_list);
+  return tokenizer.token_list;
 }
 
 std::string escape_pattern_string(std::string_view input) {
