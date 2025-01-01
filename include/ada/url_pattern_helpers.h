@@ -79,8 +79,6 @@ class url_pattern_parser {
       std::string_view prefix, Token* name_token,
       Token* regexp_or_wildcard_token, std::string_view suyffix,
       Token* modifier_token) ada_warn_unused;
-  // @see https://urlpattern.spec.whatwg.org/#is-a-duplicate-name
-  bool is_duplicate_name(std::string_view name);
 
   std::vector<Token> tokens{};
   F& encoding_callback;
