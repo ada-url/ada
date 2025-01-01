@@ -241,24 +241,22 @@ tl::expected<ada::url_pattern, ada::url_pattern_errors> parse_pattern(
 
 std::variant<std::string, ada::url_pattern_init> parse_inputs_array(
     ondemand::array& inputs) {
-  size_t index = 0;
-  ada::url_pattern_init result{};
-
   std::cout << "inputs: " << inputs.raw_json().value() << std::endl;
   inputs.reset();
 
   for (auto input : inputs) {
-    if (input.type() == ondemand::json_type::string && index == 0) {
+    if (input.type() == ondemand::json_type::string) {
       std::string_view value;
       EXPECT_FALSE(input.get_string().get(value));
       return std::string(value);
     }
 
-    // TODO: Construct url_pattern_result here
-    index++;
+    ondemand::object attribute;
+    EXPECT_FALSE(input.get_object().get(attribute));
+    return parse_init(attribute);
   }
 
-  return result;
+  return ada::url_pattern_init{};
 }
 
 TEST(wpt_urlpattern_tests, urlpattern_test_data) {
