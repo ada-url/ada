@@ -656,7 +656,7 @@ parse_pattern_string(std::string_view input,
   parser.tokens = std::move(*tokenize_result);
 
   // While parser’s index is less than parser’s token list's size:
-  while (parser.index < parser.tokens.size()) {
+  while (parser.can_continue()) {
     // Let char token be the result of running try to consume a token given
     // parser and "char".
     auto char_token = parser.try_consume_token(token_type::CHAR);
