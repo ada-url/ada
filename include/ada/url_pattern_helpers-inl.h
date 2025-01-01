@@ -618,7 +618,8 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
   }
   // If the result of running is a duplicate name given parser and name is
   // true, then throw a TypeError.
-  if (is_duplicate_name(name)) {
+  if (std::ranges::any_of(
+          parts, [&name](const auto& part) { return part.name == name; })) {
     return url_pattern_errors::type_error;
   }
   // Let encoded prefix be the result of running parser’s encoding callback
@@ -636,14 +637,6 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
   parts.emplace_back(type, std::move(regexp_value), modifier, std::move(name),
                      std::move(*encoded_prefix), std::move(*encoded_suffix));
   return std::nullopt;
-}
-
-template <url_pattern_encoding_callback F>
-bool url_pattern_parser<F>::is_duplicate_name(std::string_view name) {
-  // For each part of parser’s part list:
-  // If part’s name is name, then return true.
-  return std::ranges::any_of(
-      parts, [&name](const auto& part) { return part.name == name; });
 }
 
 template <url_pattern_encoding_callback F>
