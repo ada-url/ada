@@ -15,10 +15,8 @@ constexpr std::string_view URL_PATTERN_TEST_DATA =
     "wpt/urlpatterntestdata.json";
 
 TEST(wpt_urlpattern_tests, parser_tokenize_basic_tests) {
-  auto parser = ada::url_pattern_helpers::url_pattern_parser(
-      ada::url_pattern_helpers::canonicalize_protocol, ada::url_pattern_helpers::generate_segment_wildcard_regexp(ada::url_pattern_compile_component_options::DEFAULT));
-
-  auto tokenize_result = ada::url_pattern_helpers::tokenize("*",  ada::url_pattern_helpers::token_policy::STRICT);
+  auto tokenize_result =
+      tokenize("*", ada::url_pattern_helpers::token_policy::STRICT);
   ASSERT_TRUE(tokenize_result);
 }
 
