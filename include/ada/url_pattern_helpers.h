@@ -241,7 +241,7 @@ struct constructor_string_parser {
   const Token* get_safe_token(size_t index);
 
   // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
-  std::string_view make_component_string();
+  std::string make_component_string();
 };
 
 // @see https://urlpattern.spec.whatwg.org/#canonicalize-a-protocol
