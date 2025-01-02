@@ -394,7 +394,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
             ASSERT_FALSE(expected_match_value.get_object().get(expected_obj));
             std::cout << "Expected match is an object." << std::endl;
           } else {
-            std::cout << "Unexpected type for expected_match." << std::endl;
+            FAIL() << "Unexpected type for expected_match.";
           }
         }
       }
