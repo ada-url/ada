@@ -381,16 +381,17 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           if (expected_match_value.type() ==
               simdjson::ondemand::json_type::string) {
             std::string_view expected_match_str;
-            if (expected_match_value.get_string().get(expected_match_str)) {
-              std::cout << "Expected match (string): " << expected_match_str
-                        << std::endl;
-            }
+            ASSERT_FALSE(
+                expected_match_value.get_string().get(expected_match_str));
+            std::cout << "Expected match (string): " << expected_match_str
+                      << std::endl;
           } else if (expected_match_value.type() ==
                      simdjson::ondemand::json_type::null) {
             std::cout << "Expected match is null." << std::endl;
           } else if (expected_match_value.type() ==
                      simdjson::ondemand::json_type::object) {
-            auto expected_match_obj = expected_match_value.get_object();
+            ondemand::object expected_match_obj;
+            ASSERT_FALSE(expected_match_value.get_object().get(expected_obj));
             std::cout << "Expected match is an object." << std::endl;
           } else {
             std::cout << "Unexpected type for expected_match." << std::endl;
