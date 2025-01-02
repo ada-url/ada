@@ -463,3 +463,10 @@ TYPED_TEST(basic_tests, negativeport) {
   ASSERT_FALSE(url->set_port("-1"));
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, data_url) {
+    auto data_url = ada::data_url::parse_data_url("data:application/octet-stream;base64,YWJj");
+    ASSERT_TRUE(data_url.is_valid);
+    ASSERT_EQ(data_url.essence, "application/octet-stream");
+    ASSERT_EQ(data_url.body, "YWJj");
+}
