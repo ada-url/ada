@@ -396,9 +396,6 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           } else {
             std::cout << "Unexpected type for expected_match." << std::endl;
           }
-        } else {
-          std::cout << "Expected match field not found or invalid."
-                    << std::endl;
         }
       }
     }
