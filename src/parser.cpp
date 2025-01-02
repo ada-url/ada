@@ -1,11 +1,13 @@
+
 #include "ada/parser.h"
 
 #include <limits>
 
-#include "ada.h"
 #include "ada/character_sets-inl.h"
+#include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
 #include "ada/log.h"
+#include "ada/state.h"
 #include "ada/unicode.h"
 #include "ada/url-inl.h"
 
@@ -19,10 +21,9 @@ result_type parse_url_impl(std::string_view user_input,
   // means that doing if constexpr(result_type_is_ada_url) { something } else {
   // something else } is free (at runtime). This means that ada::url_aggregator
   // and ada::url **do not have to support the exact same API**.
-  constexpr bool result_type_is_ada_url =
-      std::is_same<ada::url, result_type>::value;
+  constexpr bool result_type_is_ada_url = std::is_same_v<ada::url, result_type>;
   constexpr bool result_type_is_ada_url_aggregator =
-      std::is_same<ada::url_aggregator, result_type>::value;
+      std::is_same_v<ada::url_aggregator, result_type>;
   static_assert(result_type_is_ada_url ||
                 result_type_is_ada_url_aggregator);  // We don't support
                                                      // anything else for now.

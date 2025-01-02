@@ -7,8 +7,9 @@
 #ifndef ADA_CHARACTER_SETS_H
 #define ADA_CHARACTER_SETS_H
 
-#include "ada/common_defs.h"
 #include <cstdint>
+
+#include "common_defs.h"
 
 /**
  * These functions are not part of our public API and may

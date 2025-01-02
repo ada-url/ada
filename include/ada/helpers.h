@@ -5,12 +5,11 @@
 #ifndef ADA_HELPERS_H
 #define ADA_HELPERS_H
 
-#include "ada/common_defs.h"
-#include "ada/state.h"
-#include "ada/url_base.h"
-
-#include <string_view>
 #include <optional>
+#include <string_view>
+
+#include "common_defs.h"
+#include "scheme-inl.h"
 
 #if ADA_DEVELOPMENT_CHECKS
 #include <iostream>

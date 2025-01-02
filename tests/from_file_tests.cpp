@@ -1,7 +1,9 @@
-#include "ada.h"
+#include <gtest/gtest.h>
+
 #include <cstdlib>
 #include <iostream>
-#include "gtest/gtest.h"
+
+#include "ada.h"
 
 std::string long_way(std::string path) {
   ada::result<ada::url> base = ada::parse<ada::url>("file://");

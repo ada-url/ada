@@ -1,13 +1,14 @@
+#include "ada/url_components.h"
+
+#include <gtest/gtest.h>
+#include <simdjson.h>
+
 #include <cstring>
 #include <filesystem>
 #include <iostream>
-#include <memory>
 #include <set>
 
-#include "simdjson.h"
-#include "gtest/gtest.h"
 #include "ada.h"
-#include "ada/url_components.h"
 
 using namespace simdjson;
 

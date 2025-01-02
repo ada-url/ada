@@ -5,19 +5,18 @@
 #ifndef ADA_URL_AGGREGATOR_INL_H
 #define ADA_URL_AGGREGATOR_INL_H
 
-#include "ada/character_sets.h"
-#include "ada/character_sets-inl.h"
-#include "ada/checkers-inl.h"
-#include "ada/helpers.h"
-#include "ada/unicode.h"
-#include "ada/unicode-inl.h"
-#include "ada/url_aggregator.h"
-#include "ada/url_components.h"
-#include "ada/scheme.h"
-#include "ada/log.h"
-
 #include <optional>
 #include <string_view>
+
+#include "character_sets-inl.h"
+#include "checkers-inl.h"
+#include "helpers.h"
+#include "log.h"
+#include "scheme.h"
+#include "unicode-inl.h"
+#include "unicode.h"
+#include "url_aggregator.h"
+#include "url_components.h"
 
 namespace ada {
 

@@ -1,5 +1,5 @@
 // gest is a C++ library so we are in C++.
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 extern "C" {
 #include "ada_c.h"
 }

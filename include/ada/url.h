@@ -12,14 +12,12 @@
 #include <string>
 #include <string_view>
 
-#include "ada/checkers.h"
-#include "ada/common_defs.h"
-#include "ada/log.h"
-#include "ada/scheme.h"
-#include "ada/serializers.h"
-#include "ada/unicode.h"
-#include "ada/url_base.h"
-#include "ada/url_components.h"
+#include "common_defs.h"
+#include "helpers.h"
+#include "implementation.h"
+#include "url_aggregator.h"
+#include "url_base.h"
+#include "url_components.h"
 
 namespace ada {
 

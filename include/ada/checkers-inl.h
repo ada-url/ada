@@ -8,6 +8,8 @@
 #include <bit>
 #include <string_view>
 
+#include "checkers.h"
+
 namespace ada::checkers {
 
 constexpr bool has_hex_prefix_unsafe(std::string_view input) {

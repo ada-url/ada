@@ -1,6 +1,7 @@
+#include <iostream>
+
 #include "ada.cpp"
 #include "ada.h"
-#include <iostream>
 
 int main(int, char *[]) {
   auto url = ada::parse<ada::url>("https://www.google.com");

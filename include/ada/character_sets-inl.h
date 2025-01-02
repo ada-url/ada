@@ -7,7 +7,7 @@
 #ifndef ADA_CHARACTER_SETS_INL_H
 #define ADA_CHARACTER_SETS_INL_H
 
-#include "ada/character_sets.h"
+#include "character_sets.h"
 
 /**
  * These functions are not part of our public API and may

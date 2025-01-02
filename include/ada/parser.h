@@ -5,12 +5,7 @@
 #ifndef ADA_PARSER_H
 #define ADA_PARSER_H
 
-#include <optional>
 #include <string_view>
-
-#include "ada/encoding_type.h"
-#include "ada/expected.h"
-#include "ada/state.h"
 
 /**
  * @private

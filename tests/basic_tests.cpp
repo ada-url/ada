@@ -1,7 +1,9 @@
-#include "ada.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include <cstdlib>
 #include <iostream>
+
+#include "ada.h"
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
 template <class T>
