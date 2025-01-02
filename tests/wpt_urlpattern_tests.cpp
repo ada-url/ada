@@ -385,13 +385,11 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
               std::cout << "Expected match (string): " << expected_match_str
                         << std::endl;
             }
-          }
-          else if (expected_match_value.type() ==
-                   simdjson::ondemand::json_type::null) {
+          } else if (expected_match_value.type() ==
+                     simdjson::ondemand::json_type::null) {
             std::cout << "Expected match is null." << std::endl;
-          }
-          else if (expected_match_value.type() ==
-                   simdjson::ondemand::json_type::object) {
+          } else if (expected_match_value.type() ==
+                     simdjson::ondemand::json_type::object) {
             try {
               auto expected_match_obj = expected_match_value.get_object();
               std::cout << "Expected match is an object." << std::endl;
