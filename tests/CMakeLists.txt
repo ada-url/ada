@@ -27,6 +27,8 @@ else()
   include(GoogleTest)
   add_executable(wpt_tests wpt_tests.cpp)
   add_executable(wpt_urlpattern_tests wpt_urlpattern_tests.cpp)
+  add_executable(simple_wpt_urlpattern_tests simple_wpt_urlpattern_tests.cpp)
+
   add_executable(url_components url_components.cpp)
   add_executable(basic_tests basic_tests.cpp)
   add_executable(from_file_tests from_file_tests.cpp)
