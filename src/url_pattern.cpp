@@ -512,28 +512,28 @@ tl::expected<url_pattern_component, errors> url_pattern_component::compile(
                                std::move(name_list), has_regexp_groups);
 }
 
-tl::expected<std::optional<url_pattern_result>, errors> url_pattern::exec(
-    url_pattern_input&& input, std::string_view* base_url = nullptr) {
+result<std::optional<url_pattern_result>> url_pattern::exec(
+    const url_pattern_input& input, std::string_view* base_url = nullptr) {
   // Return the result of match given this's associated URL pattern, input, and
   // baseURL if given.
-  return match(std::move(input), base_url);
+  return match(input, base_url);
 }
 
-bool url_pattern::test(url_pattern_input&& input,
+bool url_pattern::test(const url_pattern_input& input,
                        std::string_view* base_url = nullptr) {
   // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
   // Implement a fast path just like `can_parse()` in ada_url.
   // Let result be the result of match given this's associated URL pattern,
   // input, and baseURL if given.
   // If result is null, return false.
-  if (auto result = match(std::move(input), base_url); result.has_value()) {
+  if (auto result = match(input, base_url); result.has_value()) {
     return result->has_value();
   }
   return false;
 }
 
-tl::expected<std::optional<url_pattern_result>, errors> url_pattern::match(
-    url_pattern_input&& input, std::string_view* base_url_string) {
+result<std::optional<url_pattern_result>> url_pattern::match(
+    const url_pattern_input& input, std::string_view* base_url_string) {
   std::string protocol{};
   std::string username{};
   std::string password{};
@@ -549,8 +549,11 @@ tl::expected<std::optional<url_pattern_result>, errors> url_pattern::match(
 
   // If input is a URLPatternInit then:
   if (std::holds_alternative<url_pattern_init>(input)) {
+    ada_log(
+        "url_pattern::match called with url_pattern_init and base_url_string=",
+        base_url_string);
     // If baseURLString was given, throw a TypeError.
-    if (base_url_string != nullptr) {
+    if (base_url_string) {
       return tl::unexpected(errors::type_error);
     }
 
@@ -597,8 +600,12 @@ tl::expected<std::optional<url_pattern_result>, errors> url_pattern::match(
     ADA_ASSERT_TRUE(apply_result->hash.has_value());
     hash = apply_result->hash.value();
   } else {
-    // Let url be input.
-    auto url = std::get<url_aggregator>(input);
+    ADA_ASSERT_TRUE(std::holds_alternative<std::string_view>(input));
+    auto url_input = std::get<std::string_view>(input);
+    auto url = ada::parse<url_aggregator>(url_input);
+    if (!url) {
+      return tl::unexpected(errors::type_error);
+    }
 
     // Let baseURL be null.
     result<url_aggregator> base_url;
@@ -616,15 +623,15 @@ tl::expected<std::optional<url_pattern_result>, errors> url_pattern::match(
       }
 
       // Append baseURLString to inputs.
-      inputs.emplace_back(*base_url);
+      inputs.emplace_back(*base_url_string);
     }
 
     url_aggregator* base_url_value =
-        base_url.has_value() ? &*base_url : nullptr;
+        base_url.has_value() ? &base_url.value() : nullptr;
 
     // Set url to the result of parsing input given baseURL.
     auto parsed_url =
-        ada::parse<url_aggregator>(url.get_href(), base_url_value);
+        ada::parse<url_aggregator>(url->get_href(), base_url_value);
 
     // If url is failure, return null.
     if (!parsed_url) {
@@ -637,25 +644,25 @@ tl::expected<std::optional<url_pattern_result>, errors> url_pattern::match(
     // IMPORTANT: Not documented on the URLPattern spec, but protocol suffix ':'
     // is removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2038
-    protocol = url.get_protocol().substr(0, url.get_protocol().size() - 2);
+    protocol = url->get_protocol().substr(0, url->get_protocol().size() - 2);
     // Set username to url’s username.
-    username = url.get_username();
+    username = url->get_username();
     // Set password to url’s password.
-    password = url.get_password();
+    password = url->get_password();
     // Set hostname to url’s host, serialized, or the empty string if the value
     // is null.
-    hostname = url.get_hostname();
+    hostname = url->get_hostname();
     // Set port to url’s port, serialized, or the empty string if the value is
     // null.
-    port = url.get_port();
+    port = url->get_port();
     // Set pathname to the result of URL path serializing url.
-    pathname = url.get_pathname();
+    pathname = url->get_pathname();
     // Set search to url’s query or the empty string if the value is null.
     // IMPORTANT: Not documented on the URLPattern spec, but search prefix '?'
     // is removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2232
-    if (url.has_search()) {
-      search = url.get_search().substr(1);
+    if (url->has_search()) {
+      search = url->get_search().substr(1);
     } else {
       search = "";
     }
@@ -663,55 +670,66 @@ tl::expected<std::optional<url_pattern_result>, errors> url_pattern::match(
     // IMPORTANT: Not documented on the URLPattern spec, but hash prefix '#' is
     // removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2242
-    if (url.has_hash()) {
-      hash = url.get_hash().substr(1);
+    if (url->has_hash()) {
+      hash = url->get_hash().substr(1);
     } else {
       hash = "";
     }
   }
 
-  // TODO: Make this function pluggable using a parameter.
   // Let protocolExecResult be RegExpBuiltinExec(urlPattern’s protocol
   // component's regular expression, protocol).
   std::smatch protocol_exec_result_value;
-  auto protocol_exec_result = std::regex_match(
-      protocol, protocol_exec_result_value, protocol_component.regexp);
+  auto protocol_exec_result =
+      !protocol.empty() &&
+      std::regex_match(protocol, protocol_exec_result_value,
+                       protocol_component.regexp);
 
   // Let usernameExecResult be RegExpBuiltinExec(urlPattern’s username
   // component's regular expression, username).
   std::smatch username_exec_result_value;
-  auto username_exec_result = std::regex_match(
-      username, username_exec_result_value, username_component.regexp);
+  auto username_exec_result =
+      !username.empty() &&
+      std::regex_match(username, username_exec_result_value,
+                       username_component.regexp);
 
   // Let passwordExecResult be RegExpBuiltinExec(urlPattern’s password
   // component's regular expression, password).
   std::smatch password_exec_result_value;
-  auto password_exec_result = std::regex_match(
-      password, password_exec_result_value, password_component.regexp);
+  auto password_exec_result =
+      !password.empty() &&
+      std::regex_match(password, password_exec_result_value,
+                       password_component.regexp);
 
   // Let hostnameExecResult be RegExpBuiltinExec(urlPattern’s hostname
   // component's regular expression, hostname).
   std::smatch hostname_exec_result_value;
-  auto hostname_exec_result = std::regex_match(
-      hostname, hostname_exec_result_value, hostname_component.regexp);
+  auto hostname_exec_result =
+      !hostname.empty() &&
+      std::regex_match(hostname, hostname_exec_result_value,
+                       hostname_component.regexp);
 
   // Let portExecResult be RegExpBuiltinExec(urlPattern’s port component's
   // regular expression, port).
   std::smatch port_exec_result_value;
   auto port_exec_result =
+      !port.empty() &&
       std::regex_match(port, port_exec_result_value, port_component.regexp);
 
   // Let pathnameExecResult be RegExpBuiltinExec(urlPattern’s pathname
   // component's regular expression, pathname).
   std::smatch pathname_exec_result_value;
-  auto pathname_exec_result = std::regex_match(
-      pathname, pathname_exec_result_value, pathname_component.regexp);
+  auto pathname_exec_result =
+      !pathname.empty() &&
+      std::regex_match(pathname, pathname_exec_result_value,
+                       pathname_component.regexp);
 
   // Let searchExecResult be RegExpBuiltinExec(urlPattern’s search component's
   // regular expression, search).
   std::smatch search_exec_result_value;
-  auto search_exec_result = std::regex_match(search, search_exec_result_value,
-                                             search_component.regexp);
+  auto search_exec_result =
+      !search.empty() && std::regex_match(search, search_exec_result_value,
+                                          search_component.regexp);
 
   // Let hashExecResult be RegExpBuiltinExec(urlPattern’s hash component's
   // regular expression, hash).
@@ -721,7 +739,7 @@ tl::expected<std::optional<url_pattern_result>, errors> url_pattern::match(
 
   // If protocolExecResult, usernameExecResult, passwordExecResult,
   // hostnameExecResult, portExecResult, pathnameExecResult, searchExecResult,
-  // or hashExecResult are null then return null. if
+  // or hashExecResult are null then return null.
   if (!protocol_exec_result || !username_exec_result || !password_exec_result ||
       !hostname_exec_result || !port_exec_result || !pathname_exec_result ||
       !search_exec_result || !hash_exec_result) {
