@@ -940,9 +940,8 @@ tl::expected<url_pattern, errors> parse_url_pattern_impl(
 
   // Let processedInit be the result of process a URLPatternInit given init,
   // "pattern", null, null, null, null, null, null, null, and null.
-  auto processed_init = url_pattern_init::process(
-      init, "pattern", std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-      std::nullopt, std::nullopt, std::nullopt, std::nullopt);
+  // TODO: Make "pattern" an enum to avoid creating a string everytime.
+  auto processed_init = url_pattern_init::process(init, "pattern");
   if (!processed_init) {
     ada_log("url_pattern_init::process failed for init and 'pattern'");
     return tl::unexpected(processed_init.error());
