@@ -1405,6 +1405,15 @@
   },
   {
     "pattern": [{ "pathname": "/foo/bar" }],
+    "inputs": [ "./foo/bar", "https://example.com" ],
+    "expected_match": {
+      "hostname": { "input": "example.com", "groups": { "0": "example.com" } },
+      "pathname": { "input": "/foo/bar", "groups": {} },
+      "protocol": { "input": "https", "groups": { "0": "https" } }
+    }
+  },
+  {
+    "pattern": [{ "pathname": "/foo/bar" }],
     "inputs": [ { "pathname": "/foo/bar" }, "https://example.com" ],
     "expected_match": "error"
   },
@@ -2622,6 +2631,13 @@
     "inputs": [{ "pathname": "/FOO/BAR" }],
     "expected_match": {
       "pathname": { "input": "/FOO/BAR", "groups": {} }
+    }
+  },
+  {
+    "pattern": [{ "ignoreCase": true }],
+    "inputs": [{ "pathname": "/FOO/BAR" }],
+    "expected_match": {
+      "pathname": { "input": "/FOO/BAR", "groups": { "0": "/FOO/BAR" } }
     }
   },
   {

@@ -261,7 +261,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // Set result["pathname"] to the result of process pathname for init given
     // result["pathname"], result["protocol"], and type.
     auto pathname_processing_result = process_pathname(
-        *result.pathname, result.protocol.value_or("fake"), type);
+        *result.pathname, result.protocol.value_or(""), type);
     if (!pathname_processing_result) {
       return tl::unexpected(pathname_processing_result.error());
     }
