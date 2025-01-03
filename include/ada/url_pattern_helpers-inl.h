@@ -70,8 +70,6 @@ inline void Tokenizer::seek_and_get_next_code_point(size_t new_index) {
 
 inline void Tokenizer::add_token(token_type type, size_t next_position,
                                  size_t value_position, size_t value_length) {
-  ada_log("Tokenizer::add_token called with type=", to_string(type),
-          " next_position=", next_position, " value_position=", value_position);
   ADA_ASSERT_TRUE(next_position >= value_position);
 
   // Let token be a new token.
@@ -97,8 +95,6 @@ inline void Tokenizer::add_token_with_default_length(token_type type,
 }
 
 inline void Tokenizer::add_token_with_defaults(token_type type) {
-  ada_log("Tokenizer::add_token_with_defaults called with type=",
-          to_string(type));
   // Run add a token with default length given tokenizer, type, tokenizer’s next
   // index, and tokenizer’s index.
   add_token_with_default_length(type, next_index, index);

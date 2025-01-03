@@ -413,7 +413,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
 }
 
 constexpr void url_aggregator::clear_password() {
-  ada_log("url_aggregator::clear_password ", to_string(), "\n", to_diagram());
+  ada_log("url_aggregator::clear_password ", to_string(), "\n");
   ADA_ASSERT_TRUE(validate());
   if (!has_password()) {
     return;
