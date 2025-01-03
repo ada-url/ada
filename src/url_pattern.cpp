@@ -35,44 +35,28 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
   auto result = url_pattern_init{};
 
   // If protocol is not null, set result["protocol"] to protocol.
-  if (protocol.has_value()) {
-    result.protocol = *protocol;
-  }
+  if (protocol.has_value()) result.protocol = *protocol;
 
   // If username is not null, set result["username"] to username.
-  if (username.has_value()) {
-    result.username = *username;
-  }
+  if (username.has_value()) result.username = *username;
 
   // If password is not null, set result["password"] to password.
-  if (password.has_value()) {
-    result.password = *password;
-  }
+  if (password.has_value()) result.password = *password;
 
   // If hostname is not null, set result["hostname"] to hostname.
-  if (hostname.has_value()) {
-    result.hostname = *hostname;
-  }
+  if (hostname.has_value()) result.hostname = *hostname;
 
   // If port is not null, set result["port"] to port.
-  if (port.has_value()) {
-    result.port = *port;
-  }
+  if (port.has_value()) result.port = *port;
 
   // If pathname is not null, set result["pathname"] to pathname.
-  if (pathname.has_value()) {
-    result.pathname = *pathname;
-  }
+  if (pathname.has_value()) result.pathname = *pathname;
 
   // If search is not null, set result["search"] to search.
-  if (search.has_value()) {
-    result.search = *search;
-  }
+  if (search.has_value()) result.search = *search;
 
   // If hash is not null, set result["hash"] to hash.
-  if (hash.has_value()) {
-    result.hash = *hash;
-  }
+  if (hash.has_value()) result.hash = *hash;
 
   // Let baseURL be null.
   std::optional<url_aggregator> base_url{};
@@ -102,7 +86,6 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // result of processing a base URL string given baseURL’s username and type.
     if (type != "pattern" && !init.protocol && !init.hostname && !init.port &&
         !init.username) {
-      ADA_ASSERT_TRUE(base_url.has_value());
       result.username = url_pattern_helpers::process_base_url_string(
           base_url->get_username(), type);
     }
@@ -114,7 +97,6 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // baseURL’s password and type.
     if (type != "pattern" && !init.protocol && !init.hostname && !init.port &&
         !init.username && !init.password) {
-      ADA_ASSERT_TRUE(base_url.has_value());
       result.password = url_pattern_helpers::process_base_url_string(
           base_url->get_password(), type);
     }
@@ -132,17 +114,15 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
 
     // If init contains none of "protocol", "hostname", and "port", then:
     if (!init.protocol && !init.hostname && !init.port) {
-      ADA_ASSERT_TRUE(base_url.has_value());
       // If baseURL’s port is null, then set result["port"] to the empty string.
       // Otherwise, set result["port"] to baseURL’s port, serialized.
-      result.port = std::string(base_url->get_port());
+      result.port = base_url->get_port();
     }
 
     // If init contains none of "protocol", "hostname", "port", and "pathname",
     // then set result["pathname"] to the result of processing a base URL string
     // given the result of URL path serializing baseURL and type.
     if (!init.protocol && !init.hostname && !init.port && !init.pathname) {
-      ADA_ASSERT_TRUE(base_url.has_value());
       result.pathname = url_pattern_helpers::process_base_url_string(
           base_url->get_pathname(), type);
     }
@@ -151,7 +131,6 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // "search", then:
     if (!init.protocol && !init.hostname && !init.port && !init.pathname &&
         !init.search) {
-      ADA_ASSERT_TRUE(base_url.has_value());
       // Let baseQuery be baseURL’s query.
       // Set result["search"] to the result of processing a base URL string
       // given baseQuery and type.
@@ -163,7 +142,6 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // "search", and "hash", then:
     if (!init.protocol && !init.hostname && !init.port && !init.pathname &&
         !init.search && !init.hash) {
-      ADA_ASSERT_TRUE(base_url.has_value());
       // Let baseFragment be baseURL’s fragment.
       // Set result["hash"] to the result of processing a base URL string given
       // baseFragment and type.
@@ -260,8 +238,8 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
 
     // Set result["pathname"] to the result of process pathname for init given
     // result["pathname"], result["protocol"], and type.
-    auto pathname_processing_result = process_pathname(
-        *result.pathname, result.protocol.value_or(""), type);
+    auto pathname_processing_result =
+        process_pathname(*result.pathname, result.protocol.value_or(""), type);
     if (!pathname_processing_result) {
       return tl::unexpected(pathname_processing_result.error());
     }
