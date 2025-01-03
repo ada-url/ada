@@ -5,7 +5,6 @@
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_pattern.h"
-#include "ada/implementation-inl.h"
 
 namespace ada {
 
@@ -78,6 +77,12 @@ ada_warn_unused std::string to_string(ada::encoding_type type) {
     default:
       unreachable();
   }
+}
+
+ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
+    std::variant<std::string_view, url_pattern_init> input,
+    const std::string_view* base_url, const url_pattern_options* options) {
+  return parser::parse_url_pattern_impl(std::move(input), base_url, options);
 }
 
 }  // namespace ada
