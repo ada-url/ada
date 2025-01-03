@@ -105,12 +105,17 @@ TEST(wpt_urlpattern_tests, has_regexp_groups) {
   SUCCEED();
 }
 
-ada::url_pattern_init parse_init(ondemand::object& object) {
+std::variant<ada::url_pattern_init, ada::url_pattern_options> parse_init(
+    ondemand::object& object) {
   ada::url_pattern_init init{};
   for (auto field : object) {
     auto key = field.key().value();
     std::string_view value;
-    EXPECT_FALSE(field.value().get_string(value));
+    if (field.value().get_string(value)) {
+      bool value_true;
+      EXPECT_FALSE(field.value().get_bool().get(value_true));
+      return ada::url_pattern_options{.ignore_case = value_true};
+    }
     if (key == "protocol") {
       init.protocol = std::string(value);
     } else if (key == "username") {
@@ -177,8 +182,14 @@ parse_pattern_field(ondemand::array& patterns) {
       } else {
         EXPECT_TRUE(pattern.type() == ondemand::json_type::object);
         ondemand::object object = pattern.get_object();
-        // TODO: URLPattern({ ignoreCase: true }) should also work...
-        init_obj = parse_init(object);
+        auto init_result = parse_init(object);
+        if (std::holds_alternative<ada::url_pattern_init>(init_result)) {
+          init_obj = std::get<ada::url_pattern_init>(init_result);
+        } else {
+          init_obj = {};
+          options = std::get<ada::url_pattern_options>(init_result);
+          return std::tuple(*init_obj, base_url, options);
+        }
       }
     } else if (pattern_size == 1) {
       // The second value can be a base url or an option.
@@ -253,7 +264,8 @@ std::variant<std::string, ada::url_pattern_init> parse_inputs_array(
 
     ondemand::object attribute;
     EXPECT_FALSE(input.get_object().get(attribute));
-    return parse_init(attribute);
+    // We always know that this function is called with url pattern init.
+    return std::get<ada::url_pattern_init>(parse_init(attribute));
   }
 
   return ada::url_pattern_init{};
