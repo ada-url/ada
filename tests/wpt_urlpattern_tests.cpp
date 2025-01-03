@@ -250,25 +250,42 @@ tl::expected<ada::url_pattern, ada::errors> parse_pattern(
       options.has_value() ? &options.value() : nullptr);
 }
 
-std::variant<std::string, ada::url_pattern_init> parse_inputs_array(
-    ondemand::array& inputs) {
+std::tuple<std::variant<std::string, ada::url_pattern_init>,
+           std::optional<std::string>>
+parse_inputs_array(ondemand::array& inputs) {
   std::cout << "inputs: " << inputs.raw_json().value() << std::endl;
   inputs.reset();
 
+  std::variant<std::string, ada::url_pattern_init> first_param =
+      ada::url_pattern_init{};
+  std::optional<std::string> base_url{};
+
+  size_t index = 0;
   for (auto input : inputs) {
-    if (input.type() == ondemand::json_type::string) {
-      std::string_view value;
-      EXPECT_FALSE(input.get_string().get(value));
-      return std::string(value);
+    if (index == 0) {
+      if (input.type() == ondemand::json_type::string) {
+        std::string_view value;
+        EXPECT_FALSE(input.get_string().get(value));
+        first_param = std::string(value);
+        index++;
+        continue;
+      }
+
+      ondemand::object attribute;
+      EXPECT_FALSE(input.get_object().get(attribute));
+      // We always know that this function is called with url pattern init.
+      first_param = std::get<ada::url_pattern_init>(parse_init(attribute));
+      index++;
+      continue;
     }
 
-    ondemand::object attribute;
-    EXPECT_FALSE(input.get_object().get(attribute));
-    // We always know that this function is called with url pattern init.
-    return std::get<ada::url_pattern_init>(parse_init(attribute));
+    std::string_view value;
+    EXPECT_FALSE(input.get_string().get(value));
+    base_url = std::string(value);
+    index++;
   }
 
-  return ada::url_pattern_init{};
+  return {first_param, base_url};
 }
 
 TEST(wpt_urlpattern_tests, urlpattern_test_data) {
@@ -386,8 +403,41 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         // - "error"
         // - null
         // - {} // response here.
-        auto input_value = parse_inputs_array(inputs);
-        // TODO: Parse "expected_match" field here.
+        auto [input_value, base_url] = parse_inputs_array(inputs);
+        tl::expected<std::optional<ada::url_pattern_result>, ada::errors>
+            result;
+        std::string_view base_url_view;
+        std::string_view* opt_base_url = nullptr;
+        if (base_url) {
+          base_url_view = std::string_view(base_url.value());
+          opt_base_url = &base_url_view;
+        }
+        if (std::holds_alternative<std::string>(init_variant)) {
+          auto str = std::get<std::string>(init_variant);
+          ada_log("init_variant is str=", str);
+          result = parse_result->exec(std::string_view(str), opt_base_url);
+        } else {
+          ada_log("init_variant is url_pattern_init");
+          auto obj = std::get<ada::url_pattern_init>(init_variant);
+          result = parse_result->exec(obj, opt_base_url);
+        }
+
+        ondemand::value expected_match = main_object["expected_match"].value();
+        std::cout << "expected_match: " << expected_match.raw_json().value()
+                  << std::endl;
+        if (expected_match.type() == ondemand::json_type::string) {
+          // If it is a string, it will always be "error"
+          ASSERT_EQ(expected_match.get_string().value(), "error");
+          ASSERT_EQ(result.has_value(), false)
+              << "Expected error but exec() has_value= " << result->has_value();
+        } else if (expected_match.type() == ondemand::json_type::null) {
+          ASSERT_EQ(result.has_value(), true)
+              << "Expected non failure but it throws an error";
+          ASSERT_EQ(result->has_value(), false)
+              << "Expected null value but exec() returned a value ";
+        } else {
+          // TODO: Implement the case where expected_match is an object
+        }
       }
     }
   } catch (simdjson_error& error) {
