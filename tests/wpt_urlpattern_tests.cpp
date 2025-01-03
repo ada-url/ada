@@ -412,13 +412,13 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           base_url_view = std::string_view(base_url.value());
           opt_base_url = &base_url_view;
         }
-        if (std::holds_alternative<std::string>(init_variant)) {
-          auto str = std::get<std::string>(init_variant);
-          ada_log("init_variant is str=", str);
-          result = parse_result->exec(std::string_view(str), opt_base_url);
+        if (std::holds_alternative<std::string>(input_value)) {
+          auto str = std::get<std::string>(input_value);
+          ada_log("input_value is str=", str);
+          result = parse_result->exec(str, opt_base_url);
         } else {
-          ada_log("init_variant is url_pattern_init");
-          auto obj = std::get<ada::url_pattern_init>(init_variant);
+          ada_log("input_value is url_pattern_init");
+          auto obj = std::get<ada::url_pattern_init>(input_value);
           result = parse_result->exec(obj, opt_base_url);
         }
 
