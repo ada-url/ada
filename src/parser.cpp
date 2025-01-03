@@ -898,7 +898,7 @@ result_type parse_url_impl(std::string_view user_input,
   return url;
 }
 
-tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
+tl::expected<url_pattern, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options) {
   // Let init be null.
@@ -918,7 +918,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     // TypeError.
     if (!base_url && !init.protocol) {
       ada_log("base url is null and protocol is not set");
-      return tl::unexpected(url_pattern_errors::type_error);
+      return tl::unexpected(errors::type_error);
     }
 
     // If baseURL is not null, set init["baseURL"] to baseURL.
@@ -931,7 +931,7 @@ tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     // If baseURL is not null, then throw a TypeError.
     if (base_url) {
       ada_log("base url is not null");
-      return tl::unexpected(url_pattern_errors::type_error);
+      return tl::unexpected(errors::type_error);
     }
     // Optimization: Avoid copy by moving the input value.
     // Set init to input.

@@ -9,6 +9,7 @@
 #include "ada/expected.h"
 #include "ada/url_pattern.h"
 #include "ada/url_pattern_helpers.h"
+#include "ada/implementation.h"
 
 namespace ada::url_pattern_helpers {
 inline std::string to_string(token_type type) {
@@ -400,14 +401,14 @@ inline void Tokenizer::add_token_with_defaults(token_type type) {
   add_token_with_default_length(type, next_index, index);
 }
 
-inline ada_warn_unused std::optional<url_pattern_errors>
+inline ada_warn_unused std::optional<errors>
 Tokenizer::process_tokenizing_error(size_t next_position,
                                     size_t value_position) {
   // If tokenizer’s policy is "strict", then throw a TypeError.
   if (policy == token_policy::STRICT) {
     ada_log("process_tokenizing_error failed with next_position=",
             next_position, " value_position=", value_position);
-    return url_pattern_errors::type_error;
+    return errors::type_error;
   }
   // Assert: tokenizer’s policy is "lenient".
   ADA_ASSERT_TRUE(policy == token_policy::LENIENT);
@@ -493,7 +494,7 @@ bool url_pattern_parser<F>::consume_required_token(token_type type) {
 }
 
 template <url_pattern_encoding_callback F>
-std::optional<url_pattern_errors>
+std::optional<errors>
 url_pattern_parser<F>::maybe_add_part_from_the_pending_fixed_value() {
   // If parser’s pending fixed value is the empty string, then return.
   if (pending_fixed_value.empty()) {
@@ -519,7 +520,7 @@ url_pattern_parser<F>::maybe_add_part_from_the_pending_fixed_value() {
 }
 
 template <url_pattern_encoding_callback F>
-std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
+std::optional<errors> url_pattern_parser<F>::add_part(
     std::string_view prefix, Token* name_token, Token* regexp_or_wildcard_token,
     std::string_view suffix, Token* modifier_token) {
   // Let modifier be "none".
@@ -616,7 +617,7 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
   // true, then throw a TypeError.
   if (std::ranges::any_of(
           parts, [&name](const auto& part) { return part.name == name; })) {
-    return url_pattern_errors::type_error;
+    return errors::type_error;
   }
   // Let encoded prefix be the result of running parser’s encoding callback
   // given prefix.
@@ -636,10 +637,9 @@ std::optional<url_pattern_errors> url_pattern_parser<F>::add_part(
 }
 
 template <url_pattern_encoding_callback F>
-tl::expected<std::vector<url_pattern_part>, url_pattern_errors>
-parse_pattern_string(std::string_view input,
-                     url_pattern_compile_component_options& options,
-                     F& encoding_callback) {
+tl::expected<std::vector<url_pattern_part>, errors> parse_pattern_string(
+    std::string_view input, url_pattern_compile_component_options& options,
+    F& encoding_callback) {
   ada_log("parse_pattern_string input=", input);
   // Let parser be a new pattern parser whose encoding callback is encoding
   // callback and segment wildcard regexp is the result of running generate a
@@ -732,7 +732,7 @@ parse_pattern_string(std::string_view input,
       // Run consume a required token given parser and "close".
       if (!parser.consume_required_token(token_type::CLOSE)) {
         ada_log("parser.consume_required_token failed");
-        return tl::unexpected(url_pattern_errors::type_error);
+        return tl::unexpected(errors::type_error);
       }
       // Set modifier token to the result of running try to consume a modifier
       // token given parser.
@@ -754,7 +754,7 @@ parse_pattern_string(std::string_view input,
     }
     // Run consume a required token given parser and "end".
     if (!parser.consume_required_token(token_type::END)) {
-      return tl::unexpected(url_pattern_errors::type_error);
+      return tl::unexpected(errors::type_error);
     }
   }
   ada_log("parser.parts size is: ", parser.parts.size());

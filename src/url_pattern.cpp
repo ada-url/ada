@@ -21,7 +21,7 @@ url_pattern_compile_component_options
 url_pattern_compile_component_options
     url_pattern_compile_component_options::PATHNAME('/', '/');
 
-tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
+tl::expected<url_pattern_init, errors> url_pattern_init::process(
     url_pattern_init init, std::string_view type,
     std::optional<std::string_view> protocol,
     std::optional<std::string_view> username,
@@ -83,7 +83,7 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
     auto parsing_result = ada::parse<url_aggregator>(*init.base_url);
     // If baseURL is failure, then throw a TypeError.
     if (!parsing_result) {
-      return tl::unexpected(url_pattern_errors::type_error);
+      return tl::unexpected(errors::type_error);
     }
     base_url = std::move(*parsing_result);
 
@@ -292,9 +292,8 @@ tl::expected<url_pattern_init, url_pattern_errors> url_pattern_init::process(
   return result;
 }
 
-tl::expected<std::string, url_pattern_errors>
-url_pattern_init::process_protocol(std::string_view value,
-                                   std::string_view type) {
+tl::expected<std::string, errors> url_pattern_init::process_protocol(
+    std::string_view value, std::string_view type) {
   ada_log("process_protocol=", value, " [", type, "]");
   // Let strippedValue be the given value with a single trailing U+003A (:)
   // removed, if any.
@@ -309,9 +308,8 @@ url_pattern_init::process_protocol(std::string_view value,
   return url_pattern_helpers::canonicalize_protocol(value);
 }
 
-tl::expected<std::string, url_pattern_errors>
-url_pattern_init::process_username(std::string_view value,
-                                   std::string_view type) {
+tl::expected<std::string, errors> url_pattern_init::process_username(
+    std::string_view value, std::string_view type) {
   // If type is "pattern" then return value.
   if (type == "pattern") {
     return std::string(value);
@@ -320,9 +318,8 @@ url_pattern_init::process_username(std::string_view value,
   return url_pattern_helpers::canonicalize_username(value);
 }
 
-tl::expected<std::string, url_pattern_errors>
-url_pattern_init::process_password(std::string_view value,
-                                   std::string_view type) {
+tl::expected<std::string, errors> url_pattern_init::process_password(
+    std::string_view value, std::string_view type) {
   // If type is "pattern" then return value.
   if (type == "pattern") {
     return std::string(value);
@@ -331,9 +328,8 @@ url_pattern_init::process_password(std::string_view value,
   return url_pattern_helpers::canonicalize_password(value);
 }
 
-tl::expected<std::string, url_pattern_errors>
-url_pattern_init::process_hostname(std::string_view value,
-                                   std::string_view type) {
+tl::expected<std::string, errors> url_pattern_init::process_hostname(
+    std::string_view value, std::string_view type) {
   ada_log("process_hostname value=", value, " type=", type);
   // If type is "pattern" then return value.
   if (type == "pattern") {
@@ -343,7 +339,7 @@ url_pattern_init::process_hostname(std::string_view value,
   return url_pattern_helpers::canonicalize_hostname(value);
 }
 
-tl::expected<std::string, url_pattern_errors> url_pattern_init::process_port(
+tl::expected<std::string, errors> url_pattern_init::process_port(
     std::string_view port, std::string_view protocol, std::string_view type) {
   // If type is "pattern" then return portValue.
   if (type == "pattern") {
@@ -354,10 +350,8 @@ tl::expected<std::string, url_pattern_errors> url_pattern_init::process_port(
   return url_pattern_helpers::canonicalize_port_with_protocol(port, protocol);
 }
 
-tl::expected<std::string, url_pattern_errors>
-url_pattern_init::process_pathname(std::string_view value,
-                                   std::string_view protocol,
-                                   std::string_view type) {
+tl::expected<std::string, errors> url_pattern_init::process_pathname(
+    std::string_view value, std::string_view protocol, std::string_view type) {
   // If type is "pattern" then return pathnameValue.
   if (type == "pattern") {
     return std::string(value);
@@ -374,7 +368,7 @@ url_pattern_init::process_pathname(std::string_view value,
   return url_pattern_helpers::canonicalize_opaque_pathname(value);
 }
 
-tl::expected<std::string, url_pattern_errors> url_pattern_init::process_search(
+tl::expected<std::string, errors> url_pattern_init::process_search(
     std::string_view value, std::string_view type) {
   // Let strippedValue be the given value with a single leading U+003F (?)
   // removed, if any.
@@ -390,7 +384,7 @@ tl::expected<std::string, url_pattern_errors> url_pattern_init::process_search(
   return url_pattern_helpers::canonicalize_search(value);
 }
 
-tl::expected<std::string, url_pattern_errors> url_pattern_init::process_hash(
+tl::expected<std::string, errors> url_pattern_init::process_hash(
     std::string_view value, std::string_view type) {
   // Let strippedValue be the given value with a single leading U+0023 (#)
   // removed, if any.
@@ -480,9 +474,9 @@ std::string url_pattern_init::to_string() const {
 }
 
 template <url_pattern_encoding_callback F>
-tl::expected<url_pattern_component, url_pattern_errors>
-url_pattern_component::compile(std::string_view input, F& encoding_callback,
-                               url_pattern_compile_component_options& options) {
+tl::expected<url_pattern_component, errors> url_pattern_component::compile(
+    std::string_view input, F& encoding_callback,
+    url_pattern_compile_component_options& options) {
   ada_log("url_pattern_component::compile input: ", input);
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
@@ -523,7 +517,7 @@ url_pattern_component::compile(std::string_view input, F& encoding_callback,
   } catch (std::regex_error& error) {
     (void)error;
     ada_log("std::regex_error: ", error.what());
-    return tl::unexpected(url_pattern_errors::type_error);
+    return tl::unexpected(errors::type_error);
   }
 
   // For each part of part list:
@@ -541,9 +535,8 @@ url_pattern_component::compile(std::string_view input, F& encoding_callback,
                                std::move(name_list), has_regexp_groups);
 }
 
-tl::expected<std::optional<url_pattern_result>, url_pattern_errors>
-url_pattern::exec(url_pattern_input&& input,
-                  std::string_view* base_url = nullptr) {
+tl::expected<std::optional<url_pattern_result>, errors> url_pattern::exec(
+    url_pattern_input&& input, std::string_view* base_url = nullptr) {
   // Return the result of match given this's associated URL pattern, input, and
   // baseURL if given.
   return match(std::move(input), base_url);
@@ -562,9 +555,8 @@ bool url_pattern::test(url_pattern_input&& input,
   return false;
 }
 
-tl::expected<std::optional<url_pattern_result>, url_pattern_errors>
-url_pattern::match(url_pattern_input&& input,
-                   std::string_view* base_url_string) {
+tl::expected<std::optional<url_pattern_result>, errors> url_pattern::match(
+    url_pattern_input&& input, std::string_view* base_url_string) {
   std::string protocol{};
   std::string username{};
   std::string password{};
@@ -582,7 +574,7 @@ url_pattern::match(url_pattern_input&& input,
   if (std::holds_alternative<url_pattern_init>(input)) {
     // If baseURLString was given, throw a TypeError.
     if (base_url_string != nullptr) {
-      return tl::unexpected(url_pattern_errors::type_error);
+      return tl::unexpected(errors::type_error);
     }
 
     // Let applyResult be the result of process a URLPatternInit given input,

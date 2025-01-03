@@ -213,7 +213,7 @@ parse_pattern_field(ondemand::array& patterns) {
   return std::tuple(*init_str, base_url, options);
 }
 
-tl::expected<ada::url_pattern, ada::url_pattern_errors> parse_pattern(
+tl::expected<ada::url_pattern, ada::errors> parse_pattern(
     std::variant<std::string, ada::url_pattern_init, bool>& init_variant,
     std::optional<std::string>& base_url,
     std::optional<ada::url_pattern_options>& options) {
