@@ -21,12 +21,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ubuntu-build:
+  macos-build:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        include:
-          shared: [ON, OFF]
+  strategy:
+    matrix:
+      include:
+        - shared: ON
+        - shared: OFF
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Prepare
