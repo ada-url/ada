@@ -9,12 +9,12 @@
 namespace ada {
 
 template <class result_type>
-ada_warn_unused tl::expected<result_type, ada::errors> parse(
+ada_warn_unused tl::expected<result_type, errors> parse(
     std::string_view input, const result_type* base_url) {
   result_type u =
       ada::parser::parse_url_impl<result_type, true>(input, base_url);
   if (!u.is_valid) {
-    return tl::unexpected(errors::generic_error);
+    return tl::unexpected(errors::type_error);
   }
   return u;
 }
@@ -79,7 +79,7 @@ ada_warn_unused std::string to_string(ada::encoding_type type) {
   }
 }
 
-ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
+ada_warn_unused tl::expected<url_pattern, errors> parse_url_pattern(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options) {
   return parser::parse_url_pattern_impl(std::move(input), base_url, options);

@@ -15,12 +15,10 @@
 
 namespace ada {
 
-enum class url_pattern_errors : uint8_t { type_error };
-
 namespace parser {
 template <typename result_type, typename url_pattern_init,
           typename url_pattern_options>
-tl::expected<result_type, url_pattern_errors> parse_url_pattern_impl(
+tl::expected<result_type, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options);
 }
@@ -30,7 +28,7 @@ tl::expected<result_type, url_pattern_errors> parse_url_pattern_impl(
 // std::nullopt or a parameter with default value)
 template <typename F>
 concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
-  { f(sv) } -> std::same_as<tl::expected<std::string, url_pattern_errors>>;
+  { f(sv) } -> std::same_as<tl::expected<std::string, errors>>;
 };
 
 // A structure providing matching patterns for individual components
@@ -41,7 +39,7 @@ concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
 // API is defined as part of the URLPattern specification.
 struct url_pattern_init {
   // @see https://urlpattern.spec.whatwg.org/#process-a-urlpatterninit
-  static tl::expected<url_pattern_init, url_pattern_errors> process(
+  static tl::expected<url_pattern_init, errors> process(
       url_pattern_init init, std::string_view type,
       std::optional<std::string_view> protocol = std::nullopt,
       std::optional<std::string_view> username = std::nullopt,
@@ -53,36 +51,36 @@ struct url_pattern_init {
       std::optional<std::string_view> hash = std::nullopt);
 
   // @see https://urlpattern.spec.whatwg.org/#process-protocol-for-init
-  static tl::expected<std::string, url_pattern_errors> process_protocol(
+  static tl::expected<std::string, errors> process_protocol(
       std::string_view value, std::string_view type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-username-for-init
-  static tl::expected<std::string, url_pattern_errors> process_username(
+  static tl::expected<std::string, errors> process_username(
       std::string_view value, std::string_view type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-password-for-init
-  static tl::expected<std::string, url_pattern_errors> process_password(
+  static tl::expected<std::string, errors> process_password(
       std::string_view value, std::string_view type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-hostname-for-init
-  static tl::expected<std::string, url_pattern_errors> process_hostname(
+  static tl::expected<std::string, errors> process_hostname(
       std::string_view value, std::string_view type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-port-for-init
-  static tl::expected<std::string, url_pattern_errors> process_port(
+  static tl::expected<std::string, errors> process_port(
       std::string_view port, std::string_view protocol, std::string_view type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-pathname-for-init
-  static tl::expected<std::string, url_pattern_errors> process_pathname(
+  static tl::expected<std::string, errors> process_pathname(
       std::string_view value, std::string_view protocol, std::string_view type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-search-for-init
-  static tl::expected<std::string, url_pattern_errors> process_search(
+  static tl::expected<std::string, errors> process_search(
       std::string_view value, std::string_view type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-hash-for-init
-  static tl::expected<std::string, url_pattern_errors> process_hash(
-      std::string_view value, std::string_view type);
+  static tl::expected<std::string, errors> process_hash(std::string_view value,
+                                                        std::string_view type);
 
   [[nodiscard]] std::string to_string() const;
 
@@ -210,7 +208,7 @@ class url_pattern_component {
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
   template <url_pattern_encoding_callback F>
-  static tl::expected<url_pattern_component, url_pattern_errors> compile(
+  static tl::expected<url_pattern_component, errors> compile(
       std::string_view input, F& encoding_callback,
       url_pattern_compile_component_options& options);
 
@@ -263,7 +261,7 @@ class url_pattern {
                        std::optional<url_pattern_options>&& options);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
-  tl::expected<std::optional<url_pattern_result>, url_pattern_errors> exec(
+  tl::expected<std::optional<url_pattern_result>, errors> exec(
       url_pattern_input&& input, std::string_view* base_url);
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
   bool test(url_pattern_input&& input, std::string_view* base_url);
@@ -272,7 +270,7 @@ class url_pattern {
    * @see https://urlpattern.spec.whatwg.org/#url-pattern-match
    * This function expects a valid UTF-8 string if input is a string.
    */
-  tl::expected<std::optional<url_pattern_result>, url_pattern_errors> match(
+  tl::expected<std::optional<url_pattern_result>, errors> match(
       url_pattern_input&& input, std::string_view* base_url_string);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-protocol
@@ -313,8 +311,7 @@ class url_pattern {
 
   template <typename result_type, typename url_pattern_init,
             typename url_pattern_options>
-  friend tl::expected<result_type, url_pattern_errors>
-  parser::parse_url_pattern_impl(
+  friend tl::expected<result_type, errors> parser::parse_url_pattern_impl(
       std::variant<std::string_view, url_pattern_init> input,
       const std::string_view* base_url, const url_pattern_options* options);
 };

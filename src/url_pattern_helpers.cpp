@@ -198,7 +198,7 @@ bool protocol_component_matches_special_scheme(
          std::regex_match("ftp", regex);
 }
 
-inline std::optional<url_pattern_errors>
+inline std::optional<errors>
 constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
   ada_log(
       "constructor_string_parser::compute_protocol_matches_special_scheme_"
@@ -225,7 +225,7 @@ constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
   return std::nullopt;
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
+tl::expected<std::string, errors> canonicalize_protocol(
     std::string_view input) {
   ada_log("canonicalize_protocol called with input=", input);
   // If value is the empty string, return value.
@@ -250,10 +250,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
     return std::string(protocol);
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(url_pattern_errors::type_error);
+  return tl::unexpected(errors::type_error);
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_username(
+tl::expected<std::string, errors> canonicalize_username(
     std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -264,13 +264,13 @@ tl::expected<std::string, url_pattern_errors> canonicalize_username(
   ADA_ASSERT_TRUE(url.has_value());
   // Set the username given dummyURL and value.
   if (!url->set_username(input)) {
-    return tl::unexpected(url_pattern_errors::type_error);
+    return tl::unexpected(errors::type_error);
   }
   // Return dummyURL’s username.
   return std::string(url->get_username());
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_password(
+tl::expected<std::string, errors> canonicalize_password(
     std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -282,13 +282,13 @@ tl::expected<std::string, url_pattern_errors> canonicalize_password(
 
   ADA_ASSERT_TRUE(url.has_value());
   if (!url->set_password(input)) {
-    return tl::unexpected(url_pattern_errors::type_error);
+    return tl::unexpected(errors::type_error);
   }
   // Return dummyURL’s password.
   return std::string(url->get_password());
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
+tl::expected<std::string, errors> canonicalize_hostname(
     std::string_view input) {
   ada_log("canonicalize_hostname input=", input);
   // If value is the empty string, return value.
@@ -306,13 +306,13 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
   // if (!isValidHostnameInput(hostname)) return kj::none;
   if (!url->set_hostname(input)) {
     // If parseResult is failure, then throw a TypeError.
-    return tl::unexpected(url_pattern_errors::type_error);
+    return tl::unexpected(errors::type_error);
   }
   // Return dummyURL’s host, serialized, or empty string if it is null.
   return std::string(url->get_hostname());
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
+tl::expected<std::string, errors> canonicalize_ipv6_hostname(
     std::string_view input) {
   ada_log("canonicalize_ipv6_hostname input=", input);
   // TODO: Optimization opportunity: Use lookup table to speed up checking
@@ -320,7 +320,7 @@ tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
         return c != '[' && c != ']' && c != ':' &&
                !unicode::is_ascii_hex_digit(c);
       })) {
-    return tl::unexpected(url_pattern_errors::type_error);
+    return tl::unexpected(errors::type_error);
   }
   // Append the result of running ASCII lowercase given code point to the end of
   // result.
@@ -329,7 +329,7 @@ tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
   return hostname;
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_port(
+tl::expected<std::string, errors> canonicalize_port(
     std::string_view port_value) {
   // If portValue is the empty string, return portValue.
   if (port_value.empty()) [[unlikely]] {
@@ -346,10 +346,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_port(
     return std::string(url->get_port());
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(url_pattern_errors::type_error);
+  return tl::unexpected(errors::type_error);
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_port_with_protocol(
+tl::expected<std::string, errors> canonicalize_port_with_protocol(
     std::string_view port_value, std::string_view protocol) {
   // If portValue is the empty string, return portValue.
   if (port_value.empty()) [[unlikely]] {
@@ -370,10 +370,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_port_with_protocol(
     return std::string(url->get_port());
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(url_pattern_errors::type_error);
+  return tl::unexpected(errors::type_error);
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_pathname(
+tl::expected<std::string, errors> canonicalize_pathname(
     std::string_view input) {
   // If value is the empty string, then return value.
   if (input.empty()) [[unlikely]] {
@@ -395,10 +395,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_pathname(
                          : std::string(pathname.substr(2));
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(url_pattern_errors::type_error);
+  return tl::unexpected(errors::type_error);
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_opaque_pathname(
+tl::expected<std::string, errors> canonicalize_opaque_pathname(
     std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -414,11 +414,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_opaque_pathname(
     return std::string(url->get_pathname());
   }
   // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(url_pattern_errors::type_error);
+  return tl::unexpected(errors::type_error);
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_search(
-    std::string_view input) {
+tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
@@ -434,11 +433,10 @@ tl::expected<std::string, url_pattern_errors> canonicalize_search(
     const auto search = url->get_search();
     return std::string(search.substr(1));
   }
-  return tl::unexpected(url_pattern_errors::type_error);
+  return tl::unexpected(errors::type_error);
 }
 
-tl::expected<std::string, url_pattern_errors> canonicalize_hash(
-    std::string_view input) {
+tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
@@ -455,11 +453,11 @@ tl::expected<std::string, url_pattern_errors> canonicalize_hash(
     const auto hash = url->get_hash();
     return std::string(hash.substr(1));
   }
-  return tl::unexpected(url_pattern_errors::type_error);
+  return tl::unexpected(errors::type_error);
 }
 
-tl::expected<url_pattern_init, url_pattern_errors>
-constructor_string_parser::parse(std::string_view input) {
+tl::expected<url_pattern_init, errors> constructor_string_parser::parse(
+    std::string_view input) {
   ada_log("constructor_string_parser::parse input=", input);
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
@@ -707,8 +705,8 @@ constructor_string_parser::parse(std::string_view input) {
   return parser.result;
 }
 
-tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
-    std::string_view input, token_policy policy) {
+tl::expected<std::vector<Token>, errors> tokenize(std::string_view input,
+                                                  token_policy policy) {
   ada_log("tokenize input: ", input);
   // Let tokenizer be a new tokenizer.
   // Set tokenizer’s input to input.

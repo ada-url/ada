@@ -78,13 +78,13 @@ class url_pattern_parser {
   bool consume_required_token(token_type type);
   // @see
   // https://urlpattern.spec.whatwg.org/#maybe-add-a-part-from-the-pending-fixed-value
-  std::optional<url_pattern_errors>
-  maybe_add_part_from_the_pending_fixed_value() ada_warn_unused;
+  std::optional<errors> maybe_add_part_from_the_pending_fixed_value()
+      ada_warn_unused;
   // @see https://urlpattern.spec.whatwg.org/#add-a-part
-  std::optional<url_pattern_errors> add_part(
-      std::string_view prefix, Token* name_token,
-      Token* regexp_or_wildcard_token, std::string_view suyffix,
-      Token* modifier_token) ada_warn_unused;
+  std::optional<errors> add_part(std::string_view prefix, Token* name_token,
+                                 Token* regexp_or_wildcard_token,
+                                 std::string_view suyffix,
+                                 Token* modifier_token) ada_warn_unused;
 
   std::vector<Token> tokens{};
   F& encoding_callback;
@@ -121,7 +121,7 @@ class Tokenizer {
   void add_token_with_defaults(token_type type);
 
   // @see https://urlpattern.spec.whatwg.org/#process-a-tokenizing-error
-  std::optional<url_pattern_errors> process_tokenizing_error(
+  std::optional<errors> process_tokenizing_error(
       size_t next_position, size_t value_position) ada_warn_unused;
 
   // has an associated input, a pattern string, initially the empty string.
@@ -154,8 +154,7 @@ struct constructor_string_parser {
   bool is_search_prefix();
 
   // @see https://urlpattern.spec.whatwg.org/#parse-a-constructor-string
-  static tl::expected<url_pattern_init, url_pattern_errors> parse(
-      std::string_view input);
+  static tl::expected<url_pattern_init, errors> parse(std::string_view input);
 
   // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser-state
   enum class State {
@@ -186,8 +185,7 @@ struct constructor_string_parser {
 
   // @see
   // https://urlpattern.spec.whatwg.org/#compute-protocol-matches-a-special-scheme-flag
-  std::optional<url_pattern_errors>
-  compute_protocol_matches_special_scheme_flag();
+  std::optional<errors> compute_protocol_matches_special_scheme_flag();
 
   // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
   bool next_is_authority_slashes();
@@ -247,52 +245,44 @@ struct constructor_string_parser {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#canonicalize-a-protocol
-tl::expected<std::string, url_pattern_errors> canonicalize_protocol(
-    std::string_view input);
+tl::expected<std::string, errors> canonicalize_protocol(std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-username
-tl::expected<std::string, url_pattern_errors> canonicalize_username(
-    std::string_view input);
+tl::expected<std::string, errors> canonicalize_username(std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-password
-tl::expected<std::string, url_pattern_errors> canonicalize_password(
-    std::string_view input);
+tl::expected<std::string, errors> canonicalize_password(std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-password
-tl::expected<std::string, url_pattern_errors> canonicalize_hostname(
-    std::string_view input);
+tl::expected<std::string, errors> canonicalize_hostname(std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-an-ipv6-hostname
-tl::expected<std::string, url_pattern_errors> canonicalize_ipv6_hostname(
+tl::expected<std::string, errors> canonicalize_ipv6_hostname(
     std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-port
-tl::expected<std::string, url_pattern_errors> canonicalize_port(
-    std::string_view input);
+tl::expected<std::string, errors> canonicalize_port(std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-port
-tl::expected<std::string, url_pattern_errors> canonicalize_port_with_protocol(
+tl::expected<std::string, errors> canonicalize_port_with_protocol(
     std::string_view input, std::string_view protocol);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-pathname
-tl::expected<std::string, url_pattern_errors> canonicalize_pathname(
-    std::string_view input);
+tl::expected<std::string, errors> canonicalize_pathname(std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-an-opaque-pathname
-tl::expected<std::string, url_pattern_errors> canonicalize_opaque_pathname(
+tl::expected<std::string, errors> canonicalize_opaque_pathname(
     std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-search
-tl::expected<std::string, url_pattern_errors> canonicalize_search(
-    std::string_view input);
+tl::expected<std::string, errors> canonicalize_search(std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-hash
-tl::expected<std::string, url_pattern_errors> canonicalize_hash(
-    std::string_view input);
+tl::expected<std::string, errors> canonicalize_hash(std::string_view input);
 
 // @see https://urlpattern.spec.whatwg.org/#tokenize
-tl::expected<std::vector<Token>, url_pattern_errors> tokenize(
-    std::string_view input, token_policy policy);
+tl::expected<std::vector<Token>, errors> tokenize(std::string_view input,
+                                                  token_policy policy);
 
 // @see https://urlpattern.spec.whatwg.org/#process-a-base-url-string
 std::string process_base_url_string(std::string_view input,
@@ -310,10 +300,9 @@ constexpr bool is_absolute_pathname(std::string_view input,
 
 // @see https://urlpattern.spec.whatwg.org/#parse-a-pattern-string
 template <url_pattern_encoding_callback F>
-tl::expected<std::vector<url_pattern_part>, url_pattern_errors>
-parse_pattern_string(std::string_view input,
-                     url_pattern_compile_component_options& options,
-                     F& encoding_callback);
+tl::expected<std::vector<url_pattern_part>, errors> parse_pattern_string(
+    std::string_view input, url_pattern_compile_component_options& options,
+    F& encoding_callback);
 
 // @see https://urlpattern.spec.whatwg.org/#generate-a-pattern-string
 std::string generate_pattern_string(
