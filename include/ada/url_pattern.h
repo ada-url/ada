@@ -5,6 +5,7 @@
 #ifndef ADA_URL_PATTERN_H
 #define ADA_URL_PATTERN_H
 
+#include "ada/implementation.h"
 #include "ada/expected.h"
 
 #include <regex>
@@ -225,7 +226,7 @@ class url_pattern_component {
   bool has_regexp_groups = false;
 };
 
-using url_pattern_input = std::variant<url_aggregator, url_pattern_init>;
+using url_pattern_input = std::variant<std::string_view, url_pattern_init>;
 
 // A struct providing the URLPattern matching results for all
 // components of a URL. The URLPatternResult API is defined as
@@ -260,18 +261,23 @@ class url_pattern {
                        std::optional<std::string_view>&& base_url,
                        std::optional<url_pattern_options>&& options);
 
-  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
-  tl::expected<std::optional<url_pattern_result>, errors> exec(
-      url_pattern_input&& input, std::string_view* base_url);
-  // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
-  bool test(url_pattern_input&& input, std::string_view* base_url);
+  /**
+   * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
+   */
+  result<std::optional<url_pattern_result>> exec(const url_pattern_input& input,
+                                                 std::string_view* base_url);
+
+  /**
+   * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
+   */
+  bool test(const url_pattern_input& input, std::string_view* base_url);
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#url-pattern-match
    * This function expects a valid UTF-8 string if input is a string.
    */
-  tl::expected<std::optional<url_pattern_result>, errors> match(
-      url_pattern_input&& input, std::string_view* base_url_string);
+  result<std::optional<url_pattern_result>> match(
+      const url_pattern_input& input, std::string_view* base_url_string);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-protocol
   std::string_view get_protocol() const ada_lifetime_bound;
