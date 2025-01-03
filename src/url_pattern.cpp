@@ -120,8 +120,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     }
 
     // If init contains neither "protocol" nor "hostname", then:
-    if (!init.protocol || !init.hostname) {
-      ADA_ASSERT_TRUE(base_url.has_value());
+    if (!init.protocol && !init.hostname) {
       // Let baseHost be baseURL’s host.
       // If baseHost is null, then set baseHost to the empty string.
       auto base_host = base_url->get_hostname();
