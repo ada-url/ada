@@ -564,8 +564,9 @@ result<std::optional<url_pattern_result>> url_pattern::match(
         std::get<url_pattern_init>(input), "url", protocol, username, password,
         hostname, port, pathname, search, hash);
 
+    // If this throws an exception, catch it, and return null.
     if (!apply_result.has_value()) {
-      return tl::unexpected(apply_result.error());
+      return std::nullopt;
     }
 
     // Set protocol to applyResult["protocol"].
