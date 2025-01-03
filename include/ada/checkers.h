@@ -7,8 +7,8 @@
 
 #include "ada/common_defs.h"
 
-#include <string_view>
 #include <cstring>
+#include <string_view>
 
 /**
  * These functions are not part of our public API and may

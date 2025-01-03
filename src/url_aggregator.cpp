@@ -1,4 +1,3 @@
-#include "ada.h"
 #include "ada/checkers-inl.h"
 #include "ada/helpers.h"
 #include "ada/implementation.h"

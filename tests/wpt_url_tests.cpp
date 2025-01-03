@@ -52,8 +52,8 @@ const char *VERIFYDNSLENGTH_TESTS_JSON =
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
 template <class T>
-struct wpt_tests_typed : testing::Test {};
-TYPED_TEST_SUITE(wpt_tests_typed, Types);
+struct wpt_url_tests_typed : testing::Test {};
+TYPED_TEST_SUITE(wpt_url_tests_typed, Types);
 
 std::stringstream error_buffer;
 
@@ -70,7 +70,7 @@ bool file_exists(const char *filename) {
   }
 }
 
-TEST(wpt_tests, idna_test_v2_to_ascii) {
+TEST(wpt_url_tests, idna_test_v2_to_ascii) {
   ondemand::parser parser;
   ASSERT_TRUE(file_exists(IDNA_TEST_V2));
   padded_string json = padded_string::load(IDNA_TEST_V2);
@@ -106,7 +106,7 @@ TEST(wpt_tests, idna_test_v2_to_ascii) {
   SUCCEED();
 }
 
-TEST(wpt_tests, percent_encoding) {
+TEST(wpt_url_tests, percent_encoding) {
   ondemand::parser parser;
   size_t counter{0};
 
@@ -149,7 +149,7 @@ TEST(wpt_tests, percent_encoding) {
   SUCCEED();
 }
 
-TYPED_TEST(wpt_tests_typed, setters_tests_encoding) {
+TYPED_TEST(wpt_url_tests_typed, setters_tests_encoding) {
   for (auto source : {SETTERS_TESTS_JSON, ADA_SETTERS_TESTS_JSON}) {
     ondemand::parser parser;
     ASSERT_TRUE(file_exists(source));
@@ -255,7 +255,7 @@ TYPED_TEST(wpt_tests_typed, setters_tests_encoding) {
   SUCCEED();
 }
 
-TYPED_TEST(wpt_tests_typed, toascii_encoding) {
+TYPED_TEST(wpt_url_tests_typed, toascii_encoding) {
   ondemand::parser parser;
   ASSERT_TRUE(file_exists(TOASCII_JSON));
   padded_string json = padded_string::load(TOASCII_JSON);
@@ -335,7 +335,7 @@ TYPED_TEST(wpt_tests_typed, toascii_encoding) {
   SUCCEED();
 }
 
-TYPED_TEST(wpt_tests_typed, urltestdata_encoding) {
+TYPED_TEST(wpt_url_tests_typed, urltestdata_encoding) {
   for (auto source : {URLTESTDATA_JSON, ADA_URLTESTDATA_JSON}) {
     ondemand::parser parser;
     size_t counter{};
@@ -460,7 +460,7 @@ TYPED_TEST(wpt_tests_typed, urltestdata_encoding) {
   SUCCEED();
 }
 
-TEST(wpt_tests, verify_dns_length) {
+TEST(wpt_url_tests, verify_dns_length) {
   const char *source = VERIFYDNSLENGTH_TESTS_JSON;
   size_t counter{};
   ondemand::parser parser;

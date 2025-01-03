@@ -20,6 +20,7 @@
 #include "ada/unicode.h"
 #include "ada/url_base.h"
 #include "ada/url_components.h"
+#include "ada/helpers.h"
 
 namespace ada {
 

@@ -7,9 +7,8 @@
 
 #include "ada/character_sets.h"
 #include "ada/character_sets-inl.h"
-#include "ada/checkers-inl.h"
+#include "ada/checkers.h"
 #include "ada/helpers.h"
-#include "ada/unicode.h"
 #include "ada/unicode-inl.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
@@ -269,7 +268,6 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
 
   const bool begins_with_dashdash = input.starts_with("//");
   if (!begins_with_dashdash && has_dash_dot()) {
-    ada_log("url_aggregator::update_base_pathname has /.: \n", to_diagram());
     // We must delete the ./
     delete_dash_dot();
   }
@@ -292,8 +290,6 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
   if (components.hash_start != url_components::omitted) {
     components.hash_start += difference;
   }
-  ada_log("url_aggregator::update_base_pathname end '", input, "' [",
-          input.size(), " bytes] \n", to_diagram());
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -413,7 +409,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
 }
 
 constexpr void url_aggregator::clear_password() {
-  ada_log("url_aggregator::clear_password ", to_string(), "\n", to_diagram());
+  ada_log("url_aggregator::clear_password ", to_string());
   ADA_ASSERT_TRUE(validate());
   if (!has_password()) {
     return;

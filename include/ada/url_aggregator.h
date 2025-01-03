@@ -8,9 +8,11 @@
 #include <string>
 #include <string_view>
 
+#include "ada/url_pattern.h"
 #include "ada/common_defs.h"
 #include "ada/url_base.h"
 #include "ada/url_components.h"
+#include "ada/parser.h"
 
 namespace ada {
 
@@ -168,7 +170,7 @@ struct url_aggregator : url_base {
    * @see
    * https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
    */
-  [[nodiscard]] ada_really_inline const ada::url_components &get_components()
+  [[nodiscard]] ada_really_inline const url_components &get_components()
       const noexcept;
   /**
    * Returns a string representation of this URL.
@@ -208,15 +210,21 @@ struct url_aggregator : url_base {
   inline void clear_search() override;
 
  private:
-  friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
-      std::string_view, const ada::url_aggregator *);
-  friend void ada::helpers::strip_trailing_spaces_from_opaque_path<
-      ada::url_aggregator>(ada::url_aggregator &url) noexcept;
-  friend ada::url_aggregator ada::parser::parse_url_impl<
-      ada::url_aggregator, true>(std::string_view, const ada::url_aggregator *);
-  friend ada::url_aggregator
-  ada::parser::parse_url_impl<ada::url_aggregator, false>(
-      std::string_view, const ada::url_aggregator *);
+  // helper methods
+  friend void helpers::strip_trailing_spaces_from_opaque_path<url_aggregator>(
+      url_aggregator &url) noexcept;
+  // parse_url methods
+  friend url_aggregator parser::parse_url<url_aggregator>(
+      std::string_view, const url_aggregator *);
+
+  friend url_aggregator parser::parse_url_impl<url_aggregator, true>(
+      std::string_view, const url_aggregator *);
+  friend url_aggregator parser::parse_url_impl<url_aggregator, false>(
+      std::string_view, const url_aggregator *);
+  // url_pattern methods
+  friend tl::expected<url_pattern, errors> parse_url_pattern_impl(
+      std::variant<std::string_view, url_pattern_init> input,
+      const std::string_view *base_url, const url_pattern_options *options);
 
   std::string buffer{};
   url_components components{};
@@ -277,7 +285,7 @@ struct url_aggregator : url_base {
   ada_really_inline bool parse_host(std::string_view input);
 
   inline void update_base_authority(std::string_view base_buffer,
-                                    const ada::url_components &base);
+                                    const url_components &base);
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);
   inline void update_base_search(std::string_view input);
@@ -317,7 +325,7 @@ struct url_aggregator : url_base {
 
 };  // url_aggregator
 
-inline std::ostream &operator<<(std::ostream &out, const ada::url &u);
+inline std::ostream &operator<<(std::ostream &out, const url &u);
 }  // namespace ada
 
 #endif
