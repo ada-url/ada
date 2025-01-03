@@ -898,7 +898,6 @@ result_type parse_url_impl(std::string_view user_input,
   return url;
 }
 
-template <>
 tl::expected<url_pattern, url_pattern_errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options) {
