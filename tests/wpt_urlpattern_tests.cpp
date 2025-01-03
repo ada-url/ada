@@ -186,7 +186,7 @@ parse_pattern_field(ondemand::array& patterns) {
         if (std::holds_alternative<ada::url_pattern_init>(init_result)) {
           init_obj = std::get<ada::url_pattern_init>(init_result);
         } else {
-          init_obj = {};
+          init_obj = ada::url_pattern_init{};
           options = std::get<ada::url_pattern_options>(init_result);
           return std::tuple(*init_obj, base_url, options);
         }
