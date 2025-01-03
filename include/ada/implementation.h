@@ -17,7 +17,7 @@
 #include "ada/url_aggregator.h"
 
 namespace ada {
-enum class errors { generic_error };
+enum class errors { generic_error, type_error };
 
 template <class result_type = ada::url_aggregator>
 using result = tl::expected<result_type, ada::errors>;

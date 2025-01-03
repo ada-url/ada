@@ -117,6 +117,13 @@ ada_really_inline constexpr bool is_alnum_plus(char c) noexcept;
 
 /**
  * @private
+ * @details If a char is between U+0000 and U+007F inclusive, then it's an ASCII
+ * character.
+ */
+ada_really_inline constexpr bool is_ascii(char32_t c) noexcept;
+
+/**
+ * @private
  * @details An ASCII hex digit is an ASCII upper hex digit or ASCII lower hex
  * digit. An ASCII upper hex digit is an ASCII digit or a code point in the
  * range U+0041 (A) to U+0046 (F), inclusive. An ASCII lower hex digit is an
