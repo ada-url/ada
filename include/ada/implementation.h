@@ -17,7 +17,7 @@
 #include "ada/url_aggregator.h"
 
 namespace ada {
-enum class errors { generic_error };
+enum class errors : uint8_t { type_error };
 
 template <class result_type = ada::url_aggregator>
 using result = tl::expected<result_type, ada::errors>;
@@ -58,7 +58,7 @@ bool can_parse(std::string_view input,
  * @param options an optional url_pattern_options struct
  * @return url_pattern instance
  */
-ada_warn_unused tl::expected<url_pattern, url_pattern_errors> parse_url_pattern(
+ada_warn_unused tl::expected<url_pattern, errors> parse_url_pattern(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url = nullptr,
     const url_pattern_options* options = nullptr);
