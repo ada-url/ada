@@ -554,6 +554,7 @@ result<std::optional<url_pattern_result>> url_pattern::match(
         base_url_string);
     // If baseURLString was given, throw a TypeError.
     if (base_url_string) {
+      ada_log("failed to match because base_url_string was given");
       return tl::unexpected(errors::type_error);
     }
 
@@ -564,8 +565,10 @@ result<std::optional<url_pattern_result>> url_pattern::match(
         std::get<url_pattern_init>(input), "url", protocol, username, password,
         hostname, port, pathname, search, hash);
 
+    // If this throws an exception, catch it, and return null.
     if (!apply_result.has_value()) {
-      return tl::unexpected(apply_result.error());
+      ada_log("match returned std::nullopt because process threw");
+      return std::nullopt;
     }
 
     // Set protocol to applyResult["protocol"].
@@ -604,7 +607,8 @@ result<std::optional<url_pattern_result>> url_pattern::match(
     auto url_input = std::get<std::string_view>(input);
     auto url = ada::parse<url_aggregator>(url_input);
     if (!url) {
-      return tl::unexpected(errors::type_error);
+      ada_log("match throw because failed to parse url_input=", url_input);
+      return std::nullopt;
     }
 
     // Let baseURL be null.
@@ -619,6 +623,8 @@ result<std::optional<url_pattern_result>> url_pattern::match(
 
       // If baseURL is failure, return null.
       if (!base_url) {
+        ada_log("match returned std::nullopt because failed to parse base_url=",
+                *base_url_string);
         return std::nullopt;
       }
 
@@ -635,6 +641,7 @@ result<std::optional<url_pattern_result>> url_pattern::match(
 
     // If url is failure, return null.
     if (!parsed_url) {
+      ada_log("match returned std::nullopt because url failed");
       return std::nullopt;
     }
 
