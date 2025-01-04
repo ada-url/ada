@@ -295,27 +295,27 @@ ada::url_pattern_result parse_url_pattern_result(
   for (auto field : expected_obj) {
     auto key = field.key().value();
     std::string_view value;
-    EXPECT_FALSE(field.value().get_string(value));
-
-    if (key == "protocol") {
-      result.protocol = ada::url_pattern_component_result{std::string(value)};
-    } else if (key == "username") {
-      result.username = ada::url_pattern_component_result{std::string(value)};
-    } else if (key == "password") {
-      result.password = ada::url_pattern_component_result{std::string(value)};
-    } else if (key == "hostname") {
-      result.hostname = ada::url_pattern_component_result{std::string(value)};
-    } else if (key == "port") {
-      result.port = ada::url_pattern_component_result{std::string(value)};
-    } else if (key == "pathname") {
-      result.pathname = ada::url_pattern_component_result{std::string(value)};
-    } else if (key == "search") {
-      result.search = ada::url_pattern_component_result{std::string(value)};
-    } else if (key == "hash") {
-      result.hash = ada::url_pattern_component_result{std::string(value)};
-    } else {
-      ADD_FAILURE() << "Unknown key in expected object: " << key;
-      return ada::url_pattern_result{};
+    if (field.value().get_string(value)) {
+      if (key == "protocol") {
+        result.protocol = ada::url_pattern_component_result{std::string(value)};
+      } else if (key == "username") {
+        result.username = ada::url_pattern_component_result{std::string(value)};
+      } else if (key == "password") {
+        result.password = ada::url_pattern_component_result{std::string(value)};
+      } else if (key == "hostname") {
+        result.hostname = ada::url_pattern_component_result{std::string(value)};
+      } else if (key == "port") {
+        result.port = ada::url_pattern_component_result{std::string(value)};
+      } else if (key == "pathname") {
+        result.pathname = ada::url_pattern_component_result{std::string(value)};
+      } else if (key == "search") {
+        result.search = ada::url_pattern_component_result{std::string(value)};
+      } else if (key == "hash") {
+        result.hash = ada::url_pattern_component_result{std::string(value)};
+      } else {
+        ADD_FAILURE() << "Unknown key in expected object: " << key;
+        return ada::url_pattern_result{};
+      }
     }
   }
 
@@ -460,7 +460,6 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         std::cout << "expected_match: " << expected_match.raw_json().value()
                   << std::endl;
         if (expected_match.type() == ondemand::json_type::string) {
-          // If it is a string, it will always be "error"
           ASSERT_EQ(expected_match.get_string().value(), "error");
           ASSERT_EQ(result.has_value(), false)
               << "Expected error but exec() has_value= " << result->has_value();
@@ -473,37 +472,104 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           ondemand::value expected_match_value;
           auto error = main_object["expected_match"].get(expected_match_value);
 
-          if (!error) {
-            if (expected_match_value.type() ==
-                simdjson::ondemand::json_type::object) {
-              if (expected_match_value.type() ==
-                  simdjson::ondemand::json_type::null) {
-                std::cout << "Expected match is null." << std::endl;
-              } else if (expected_match_value.type() ==
-                         simdjson::ondemand::json_type::null) {
-                std::cout << "Expected match is null." << std::endl;
-              } else if (expected_match_value.type() ==
-                         simdjson::ondemand::json_type::object) {
-                ondemand::object expected_match_obj;
-                ASSERT_FALSE(
-                    expected_match_value.get_object().get(expected_match_obj));
-                std::cout << "Expected match is an object." << std::endl;
+          if (error) {
+            std::cerr << "Error reading 'expected_match': "
+                      << simdjson::error_message(error) << std::endl;
+            FAIL() << "Failed to read 'expected_match' field.";
+          }
 
-                ada::url_pattern_result result =
-                    parse_url_pattern_result(expected_match_obj);
-
-                ASSERT_EQ(result.protocol.input, "expected_protocol");
-                ASSERT_EQ(result.hostname.input, "expected_hostname");
-                ASSERT_EQ(result.username.input, "expected_username");
-                ASSERT_EQ(result.password.input, "expected_password");
-                ASSERT_EQ(result.port.input, "expected_port");
-                ASSERT_EQ(result.pathname.input, "expected_pathname");
-                ASSERT_EQ(result.search.input, "expected_search");
-                ASSERT_EQ(result.hash.input, "expected_hash");
-              } else {
-                FAIL() << "Unexpected type for expected_match.";
-              }
+          if (expected_match_value.type() ==
+              simdjson::ondemand::json_type::null) {
+            std::cout << "Expected match is null." << std::endl;
+          } else if (expected_match_value.type() ==
+                     simdjson::ondemand::json_type::object) {
+            ondemand::object expected_match_obj;
+            auto obj_error =
+                expected_match_value.get_object().get(expected_match_obj);
+            if (obj_error) {
+              std::cerr << "Error accessing 'expected_match' object: "
+                        << simdjson::error_message(obj_error) << std::endl;
+              FAIL() << "Expected match is not an object.";
             }
+
+            if (expected_match_obj["pathname"].error() == simdjson::SUCCESS) {
+              ondemand::object pathname_obj;
+              auto path_error =
+                  expected_match_obj["pathname"].get_object().get(pathname_obj);
+              if (path_error) {
+                std::cerr << "Error reading 'pathname': "
+                          << simdjson::error_message(path_error) << std::endl;
+                FAIL() << "'pathname' field is not an object.";
+              }
+
+              std::string_view input_value;
+              auto input_error =
+                  pathname_obj["input"].get_string().get(input_value);
+              if (input_error) {
+                std::cerr << "Error reading 'input' field: "
+                          << simdjson::error_message(input_error) << std::endl;
+                FAIL() << "'input' field is missing or invalid.";
+              }
+              std::cout << "Input value: " << input_value << std::endl;
+
+              if (pathname_obj["groups"].error() == simdjson::SUCCESS) {
+                ondemand::object groups_obj;
+                auto groups_error =
+                    pathname_obj["groups"].get_object().get(groups_obj);
+                if (groups_error) {
+                  std::cerr << "Error reading 'groups': "
+                            << simdjson::error_message(groups_error)
+                            << std::endl;
+                  FAIL() << "'groups' field is not an object.";
+                }
+              } else {
+                FAIL() << "'groups' field is missing.";
+              }
+            } else {
+              FAIL() << "Expected match 'pathname' field is missing.";
+            }
+
+            ada::url_pattern_result result =
+                parse_url_pattern_result(expected_match_obj);
+
+            std::string expected_protocol, expected_hostname, expected_username,
+                expected_password, expected_port, expected_pathname,
+                expected_search, expected_hash;
+
+            auto get_expected_value = [&](std::string_view key,
+                                          std::string& output) {
+              std::string_view temp_view;
+              auto field_error =
+                  expected_match_obj[key].get_string().get(temp_view);
+              if (!field_error) {
+                output = std::string(temp_view);
+              } else if (field_error != simdjson::error_code::NO_SUCH_FIELD) {
+                std::cerr << "Error reading '" << key
+                          << "' field: " << simdjson::error_message(field_error)
+                          << std::endl;
+              }
+            };
+
+            get_expected_value("protocol", expected_protocol);
+            get_expected_value("hostname", expected_hostname);
+            get_expected_value("username", expected_username);
+            get_expected_value("password", expected_password);
+            get_expected_value("port", expected_port);
+            get_expected_value("pathname", expected_pathname);
+            get_expected_value("search", expected_search);
+            get_expected_value("hash", expected_hash);
+
+            ASSERT_EQ(result.protocol.input, expected_protocol);
+            ASSERT_EQ(result.hostname.input, expected_hostname);
+            ASSERT_EQ(result.username.input, expected_username);
+            ASSERT_EQ(result.password.input, expected_password);
+            ASSERT_EQ(result.port.input, expected_port);
+            ASSERT_EQ(result.pathname.input, expected_pathname);
+            ASSERT_EQ(result.search.input, expected_search);
+            ASSERT_EQ(result.hash.input, expected_hash);
+
+          } else {
+            FAIL() << "Unexpected type for 'expected_match'.";
           }
         }
       }
