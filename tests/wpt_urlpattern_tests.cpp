@@ -408,40 +408,72 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         // - "error"
         // - null
         // - {} // response here.
-        auto input_value = parse_inputs_array(inputs);
+        auto [input_value, base_url] = parse_inputs_array(inputs);
+        tl::expected<std::optional<ada::url_pattern_result>, ada::errors>
+            result;
+        std::string_view base_url_view;
+        std::string_view* opt_base_url = nullptr;
+        if (base_url) {
+          base_url_view = std::string_view(base_url.value());
+          opt_base_url = &base_url_view;
+        }
+        if (std::holds_alternative<std::string>(init_variant)) {
+          auto str = std::get<std::string>(init_variant);
+          ada_log("init_variant is str=", str);
+          result = parse_result->exec(std::string_view(str), opt_base_url);
+        } else {
+          ada_log("init_variant is url_pattern_init");
+          auto obj = std::get<ada::url_pattern_init>(init_variant);
+          result = parse_result->exec(obj, opt_base_url);
+        }
 
-        ondemand::value expected_match_value;
-        auto error = main_object["expected_match"].get(expected_match_value);
+        ondemand::value expected_match = main_object["expected_match"].value();
+        std::cout << "expected_match: " << expected_match.raw_json().value()
+                  << std::endl;
+        if (expected_match.type() == ondemand::json_type::string) {
+          // If it is a string, it will always be "error"
+          ASSERT_EQ(expected_match.get_string().value(), "error");
+          ASSERT_EQ(result.has_value(), false)
+              << "Expected error but exec() has_value= " << result->has_value();
+        } else if (expected_match.type() == ondemand::json_type::null) {
+          ASSERT_EQ(result.has_value(), true)
+              << "Expected non failure but it throws an error";
+          ASSERT_EQ(result->has_value(), false)
+              << "Expected null value but exec() returned a value ";
+        } else {
+          ondemand::value expected_match_value;
+          auto error = main_object["expected_match"].get(expected_match_value);
 
-        if (!error) {
-          if (expected_match_value.type() ==
-              simdjson::ondemand::json_type::object) {
+          if (!error) {
             if (expected_match_value.type() ==
-                simdjson::ondemand::json_type::null) {
-              std::cout << "Expected match is null." << std::endl;
-            } else if (expected_match_value.type() ==
-                       simdjson::ondemand::json_type::null) {
-              std::cout << "Expected match is null." << std::endl;
-            } else if (expected_match_value.type() ==
-                       simdjson::ondemand::json_type::object) {
-              ondemand::object expected_match_obj;
-              ASSERT_FALSE(
-                  expected_match_value.get_object().get(expected_match_obj));
-              std::cout << "Expected match is an object." << std::endl;
+                simdjson::ondemand::json_type::object) {
+              if (expected_match_value.type() ==
+                  simdjson::ondemand::json_type::null) {
+                std::cout << "Expected match is null." << std::endl;
+              } else if (expected_match_value.type() ==
+                         simdjson::ondemand::json_type::null) {
+                std::cout << "Expected match is null." << std::endl;
+              } else if (expected_match_value.type() ==
+                         simdjson::ondemand::json_type::object) {
+                ondemand::object expected_match_obj;
+                ASSERT_FALSE(
+                    expected_match_value.get_object().get(expected_match_obj));
+                std::cout << "Expected match is an object." << std::endl;
 
-              ada::url_pattern_result result =
-                  parse_url_pattern_result(expected_match_obj);
+                ada::url_pattern_result result =
+                    parse_url_pattern_result(expected_match_obj);
 
-              ASSERT_EQ(result.protocol.input, "expected_protocol");
-              ASSERT_EQ(result.hostname.input, "expected_hostname");
-              ASSERT_EQ(result.username.input, "expected_username");
-              ASSERT_EQ(result.password.input, "expected_password");
-              ASSERT_EQ(result.port.input, "expected_port");
-              ASSERT_EQ(result.pathname.input, "expected_pathname");
-              ASSERT_EQ(result.search.input, "expected_search");
-              ASSERT_EQ(result.hash.input, "expected_hash");
-            } else {
-              FAIL() << "Unexpected type for expected_match.";
+                ASSERT_EQ(result.protocol.input, "expected_protocol");
+                ASSERT_EQ(result.hostname.input, "expected_hostname");
+                ASSERT_EQ(result.username.input, "expected_username");
+                ASSERT_EQ(result.password.input, "expected_password");
+                ASSERT_EQ(result.port.input, "expected_port");
+                ASSERT_EQ(result.pathname.input, "expected_pathname");
+                ASSERT_EQ(result.search.input, "expected_search");
+                ASSERT_EQ(result.hash.input, "expected_hash");
+              } else {
+                FAIL() << "Unexpected type for expected_match.";
+              }
             }
           }
         }
