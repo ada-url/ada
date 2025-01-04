@@ -460,6 +460,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         std::cout << "expected_match: " << expected_match.raw_json().value()
                   << std::endl;
         if (expected_match.type() == ondemand::json_type::string) {
+          // If it is a string, it will always be "error"
           ASSERT_EQ(expected_match.get_string().value(), "error");
           ASSERT_EQ(result.has_value(), false)
               << "Expected error but exec() has_value= " << result->has_value();
