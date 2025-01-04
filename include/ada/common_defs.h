@@ -250,8 +250,8 @@ namespace ada {
 #define ada_lifetime_bound
 #endif
 
-#ifdef __has_include
-#if __has_include(<format>)
+#ifdef __cpp_lib_format
+#if __cpp_lib_format >= 202110L
 #include <format>
 #define ADA_HAS_FORMAT 1
 #endif
