@@ -377,6 +377,12 @@ tl::expected<std::string, errors> canonicalize_port_with_protocol(
     // Return dummyURL’s port, serialized, or empty string if it is null.
     return std::string(url->get_port());
   }
+  // TODO: Remove this once the previous has_port() check is removed.
+  if (url) {
+    if (scheme::is_special(protocol) && url->get_port().empty()) {
+      return "";
+    }
+  }
   // If parseResult is failure, then throw a TypeError.
   return tl::unexpected(errors::type_error);
 }
