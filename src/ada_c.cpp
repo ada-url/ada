@@ -290,7 +290,19 @@ bool ada_set_port(ada_url result, const char* input, size_t length) noexcept {
   if (!r) {
     return false;
   }
-  return r->set_port(std::string_view(input, length));
+
+  std::string_view port_input(input, length);
+
+  if (port_input.find_first_not_of("0123456789") != std::string_view::npos) {
+    return false;
+  }
+
+  int port = std::stoi(std::string(port_input));
+  if (port < 1 || port > 65535) {
+    return false;
+  }
+
+  return r->set_port(port_input);
 }
 
 bool ada_set_pathname(ada_url result, const char* input,
