@@ -29,9 +29,8 @@ option(ADA_TESTING "Build tests" OFF)
 if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   include(cmake/CPM.cmake)
   # CPM requires git as an implicit dependency
-  find_package(Git QUIET)
   # We use googletest in the tests
-  if(Git_FOUND AND ADA_TESTING)
+  if(ADA_TESTING)
     CPMAddPackage(
       NAME GTest
       GITHUB_REPOSITORY google/googletest
@@ -40,11 +39,11 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
     )
   endif()
   # We use simdjson in both the benchmarks and tests
-  if(Git_FOUND AND (ADA_TESTING OR ADA_BENCHMARKS))
+  if(ADA_TESTING OR ADA_BENCHMARKS)
     CPMAddPackage("gh:simdjson/simdjson@3.10.1")
   endif()
   # We use Google Benchmark, but it does not build under several 32-bit systems.
-  if(Git_FOUND AND ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
+  if(ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
     CPMAddPackage(
       NAME benchmark
       GITHUB_REPOSITORY google/benchmark
@@ -57,13 +56,9 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   endif()
 
   if (ADA_TESTING AND NOT EMSCRIPTEN)
-    if(Git_FOUND)
-      set(CTEST_TEST_TIMEOUT 5)
-      message(STATUS "The tests are enabled.")
-      add_subdirectory(tests)
-    else()
-      message(STATUS "The tests are disabled because git was not found.")
-    endif()
+    set(CTEST_TEST_TIMEOUT 5)
+    message(STATUS "The tests are enabled.")
+    add_subdirectory(tests)
   else()
     if(is_top_project)
       message(STATUS "The tests are disabled.")
@@ -71,12 +66,8 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   endif(ADA_TESTING AND NOT EMSCRIPTEN)
 
   If(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
-    if(Git_FOUND)
-      message(STATUS "Ada benchmarks enabled.")
-      add_subdirectory(benchmarks)
-    else()
-      message(STATUS "The benchmarks are disabled because git was not found.")
-    endif()
+    message(STATUS "Ada benchmarks enabled.")
+    add_subdirectory(benchmarks)
   else(ADA_BENCHMARKS AND NOT EMSCRIPTEN)
     if(is_top_project)
       message(STATUS "Ada benchmarks disabled. Set ADA_BENCHMARKS=ON to enable them.")
@@ -106,11 +97,7 @@ if(NOT ADA_COVERAGE AND NOT EMSCRIPTEN)
 endif()
 
 if(ADA_TOOLS)
-  if(Git_FOUND)
-    add_subdirectory(tools)
-  else()
-    message(STATUS "The tools are disabled because git was not found.")
-  endif()
+  add_subdirectory(tools)
 endif()
 
 install(
