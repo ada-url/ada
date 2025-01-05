@@ -370,7 +370,10 @@ tl::expected<std::string, errors> canonicalize_port_with_protocol(
   // with dummyURL as url and port state as state override.
   auto url = ada::parse<url_aggregator>(std::string(protocol) + "://dummy.test",
                                         nullptr);
-  if (url && url->set_port(port_value)) {
+  // TODO: Remove has_port() check.
+  // This is actually a bug with url parser where set_port() returns true for
+  // "invalid80" port value.
+  if (url && url->set_port(port_value) && url->has_port()) {
     // Return dummyURL’s port, serialized, or empty string if it is null.
     return std::string(url->get_port());
   }
