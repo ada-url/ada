@@ -474,7 +474,35 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
               << "Expect match to succeed but it throw an error";
           ASSERT_EQ(result->has_value(), true)
               << "Expect match to succeed but it returned a null value";
-          // TODO: Implement the case where expected_match is an object
+
+          ondemand::object expected_match_obj = expected_match.get_object();
+          ada::url_pattern_result expected_result =
+              parse_url_pattern_result(expected_match_obj);
+          ASSERT_EQ(result->value(), expected_result);
+          if (expected_result.protocol) {
+            ASSERT_EQ(result->value().protocol, expected_result.protocol);
+          }
+          if (expected_result.username) {
+            ASSERT_EQ(result->value().username, expected_result.username);
+          }
+          if (expected_result.password) {
+            ASSERT_EQ(result->value().password, expected_result.password);
+          }
+          if (expected_result.hostname) {
+            ASSERT_EQ(result->value().hostname, expected_result.hostname);
+          }
+          if (expected_result.port) {
+            ASSERT_EQ(result->value().port, expected_result.port);
+          }
+          if (expected_result.pathname) {
+            ASSERT_EQ(result->value().pathname, expected_result.pathname);
+          }
+          if (expected_result.search) {
+            ASSERT_EQ(result->value().search, expected_result.search);
+          }
+          if (expected_result.hash) {
+            ASSERT_EQ(result->value().hash, expected_result.hash);
+          }
         }
       }
     }
