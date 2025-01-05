@@ -298,6 +298,13 @@ bool url_aggregator::set_port(const std::string_view input) {
   // Revert changes if parse_port fails.
   uint32_t previous_port = components.port;
   parse_port(trimmed);
+
+  std::string port_value = std::string(trimmed);
+  int port = std::stoi(port_value);
+  if (port < 1 || port > 65535) {
+    return false;
+  }
+
   if (is_valid) {
     return true;
   }
