@@ -5,6 +5,10 @@
 #ifndef ADA_COMMON_DEFS_H
 #define ADA_COMMON_DEFS_H
 
+// https://en.cppreference.com/w/cpp/feature_test#Library_features
+// detect C++20 features
+#include <version>
+
 #ifdef _MSC_VER
 #define ADA_VISUAL_STUDIO 1
 /**
@@ -250,8 +254,8 @@ namespace ada {
 #define ada_lifetime_bound
 #endif
 
-#ifdef __has_include
-#if __has_include(<format>)
+#ifdef __cpp_lib_format
+#if __cpp_lib_format >= 202110L
 #include <format>
 #define ADA_HAS_FORMAT 1
 #endif
