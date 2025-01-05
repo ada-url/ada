@@ -17,6 +17,7 @@ TYPED_TEST(basic_tests, insane_url) {
   ASSERT_EQ(r->get_hostname(), "");
   ASSERT_EQ(r->get_port(), "");
   ASSERT_EQ(r->get_pathname(), "@EEEEEEEEEE");
+  ASSERT_TRUE(r->is_valid);
   ASSERT_FALSE(r->set_port("invalid80"));
   SUCCEED();
 }
