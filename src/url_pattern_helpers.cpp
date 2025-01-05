@@ -356,7 +356,12 @@ tl::expected<std::string, errors> canonicalize_port_with_protocol(
     return "";
   }
 
-  if (protocol.ends_with(":")) {
+  // TODO: Remove this
+  // We have an empty protocol because get_protocol() returns an empty string
+  // We should handle this in the caller rather than here.
+  if (protocol.empty()) {
+    protocol = "fake";
+  } else if (protocol.ends_with(":")) {
     protocol.remove_suffix(1);
   }
   // Let dummyURL be a new URL record.
