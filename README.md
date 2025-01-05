@@ -324,7 +324,15 @@ With tests (requires git):
 - **Build**: `cmake -B build -DADA_TESTING=ON && cmake --build build`
 - **Test**: `ctest --output-on-failure --test-dir build`
 
+
+With tests (requires available local packages):
+
+- **Build**: `cmake -B build -DADA_TESTING=ON -D CPM_USE_LOCAL_PACKAGES=ON && cmake --build build`
+- **Test**: `ctest --output-on-failure --test-dir build`
+
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
+
+
 
 The project can also be built via docker using default docker file of repository with following commands.
 
