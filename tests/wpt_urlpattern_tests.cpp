@@ -470,11 +470,6 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           ASSERT_EQ(result->has_value(), false)
               << "Expected null value but exec() returned a value ";
         } else {
-                    ASSERT_EQ(result.has_value(), true)
-              << "Expect match to succeed but it throw an error";
-          ASSERT_EQ(result->has_value(), true)
-              << "Expect match to succeed but it returned a null value";
-
           ASSERT_EQ(result.has_value(), true)
               << "Expect match to succeed but it throw an error";
           ASSERT_EQ(result->has_value(), true)

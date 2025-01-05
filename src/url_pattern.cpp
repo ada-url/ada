@@ -568,7 +568,6 @@ result<std::optional<url_pattern_result>> url_pattern::match(
     // If this throws an exception, catch it, and return null.
     if (!apply_result.has_value()) {
       ada_log("match returned std::nullopt because process threw");
-  
       return std::nullopt;
     }
 
