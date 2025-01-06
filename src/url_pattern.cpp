@@ -604,19 +604,11 @@ result<std::optional<url_pattern_result>> url_pattern::match(
     hash = apply_result->hash.value();
   } else {
     ADA_ASSERT_TRUE(std::holds_alternative<std::string_view>(input));
-    auto url_input = std::get<std::string_view>(input);
-    auto url = ada::parse<url_aggregator>(url_input);
-    if (!url) {
-      ada_log("match throw because failed to parse url_input=", url_input);
-      return std::nullopt;
-    }
 
     // Let baseURL be null.
     result<url_aggregator> base_url;
 
-    // NOTE: We don't check for USVString here because we are already expecting
-    // a valid UTF-8 string. If input is a USVString: If baseURLString was
-    // given, then:
+    // If baseURLString was given, then:
     if (base_url_string) {
       // Let baseURL be the result of parsing baseURLString.
       base_url = ada::parse<url_aggregator>(*base_url_string, nullptr);
@@ -636,16 +628,14 @@ result<std::optional<url_pattern_result>> url_pattern::match(
         base_url.has_value() ? &base_url.value() : nullptr;
 
     // Set url to the result of parsing input given baseURL.
-    auto parsed_url =
-        ada::parse<url_aggregator>(url->get_href(), base_url_value);
+    auto url = ada::parse<url_aggregator>(std::get<std::string_view>(input),
+                                          base_url_value);
 
     // If url is failure, return null.
-    if (!parsed_url) {
+    if (!url) {
       ada_log("match returned std::nullopt because url failed");
       return std::nullopt;
     }
-
-    url = parsed_url.value();
 
     // Set protocol to url’s scheme.
     // IMPORTANT: Not documented on the URLPattern spec, but protocol suffix ':'
