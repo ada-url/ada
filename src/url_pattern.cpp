@@ -597,10 +597,12 @@ result<std::optional<url_pattern_result>> url_pattern::match(
 
     // Set search to applyResult["search"].
     ADA_ASSERT_TRUE(apply_result->search.has_value());
-    search = apply_result->search.value();
+    ADA_ASSERT_TRUE(apply_result->search->starts_with("?"));
+    search = apply_result->search->substr(1);
 
     // Set hash to applyResult["hash"].
     ADA_ASSERT_TRUE(apply_result->hash.has_value());
+    ADA_ASSERT_TRUE(!apply_result->hash->starts_with("#"));
     hash = apply_result->hash.value();
   } else {
     ADA_ASSERT_TRUE(std::holds_alternative<std::string_view>(input));
@@ -659,6 +661,7 @@ result<std::optional<url_pattern_result>> url_pattern::match(
     // is removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2232
     if (url->has_search()) {
+      ADA_ASSERT_TRUE(url->get_search().starts_with("?"));
       search = url->get_search().substr(1);
     } else {
       search = "";
@@ -668,6 +671,7 @@ result<std::optional<url_pattern_result>> url_pattern::match(
     // removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2242
     if (url->has_hash()) {
+      ADA_ASSERT_TRUE(url->get_hash().starts_with("#"));
       hash = url->get_hash().substr(1);
     } else {
       hash = "";
@@ -737,59 +741,43 @@ result<std::optional<url_pattern_result>> url_pattern::match(
   result.inputs = std::move(inputs);
   // Set result["protocol"] to the result of creating a component match result
   // given urlPattern’s protocol component, protocol, and protocolExecResult.
-  if (!protocol_exec_result_value.empty()) {
-    result.protocol = protocol_component.create_component_match_result(
-        protocol, protocol_exec_result_value);
-  }
+  result.protocol = protocol_component.create_component_match_result(
+      protocol, protocol_exec_result_value);
 
   // Set result["username"] to the result of creating a component match result
   // given urlPattern’s username component, username, and usernameExecResult.
-  if (!username_exec_result_value.empty()) {
-    result.username = username_component.create_component_match_result(
-        username, username_exec_result_value);
-  }
+  result.username = username_component.create_component_match_result(
+      username, username_exec_result_value);
 
   // Set result["password"] to the result of creating a component match result
   // given urlPattern’s password component, password, and passwordExecResult.
-  if (!password_exec_result_value.empty()) {
-    result.password = password_component.create_component_match_result(
-        password, password_exec_result_value);
-  }
+  result.password = password_component.create_component_match_result(
+      password, password_exec_result_value);
 
   // Set result["hostname"] to the result of creating a component match result
   // given urlPattern’s hostname component, hostname, and hostnameExecResult.
-  if (!hostname_exec_result_value.empty()) {
-    result.hostname = hostname_component.create_component_match_result(
-        hostname, hostname_exec_result_value);
-  }
+  result.hostname = hostname_component.create_component_match_result(
+      hostname, hostname_exec_result_value);
 
   // Set result["port"] to the result of creating a component match result given
   // urlPattern’s port component, port, and portExecResult.
-  if (!port_exec_result_value.empty()) {
-    result.port = port_component.create_component_match_result(
-        port, port_exec_result_value);
-  }
+  result.port = port_component.create_component_match_result(
+      port, port_exec_result_value);
 
   // Set result["pathname"] to the result of creating a component match result
   // given urlPattern’s pathname component, pathname, and pathnameExecResult.
-  if (!pathname_exec_result_value.empty()) {
-    result.pathname = pathname_component.create_component_match_result(
-        pathname, pathname_exec_result_value);
-  }
+  result.pathname = pathname_component.create_component_match_result(
+      pathname, pathname_exec_result_value);
 
   // Set result["search"] to the result of creating a component match result
   // given urlPattern’s search component, search, and searchExecResult.
-  if (!search_exec_result_value.empty()) {
-    result.search = search_component.create_component_match_result(
-        search, search_exec_result_value);
-  }
+  result.search = search_component.create_component_match_result(
+      search, search_exec_result_value);
 
   // Set result["hash"] to the result of creating a component match result given
   // urlPattern’s hash component, hash, and hashExecResult.
-  if (!hash_exec_result_value.empty()) {
-    result.hash = hash_component.create_component_match_result(
-        hash, hash_exec_result_value);
-  }
+  result.hash = hash_component.create_component_match_result(
+      hash, hash_exec_result_value);
 
   return result;
 }
