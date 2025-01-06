@@ -211,7 +211,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // - baseURL has an opaque path; and
     // - the result of running is an absolute pathname given result["pathname"]
     // and type is false,
-    if (base_url && base_url->has_opaque_path &&
+    if (base_url && !base_url->has_opaque_path &&
         !url_pattern_helpers::is_absolute_pathname(*result.pathname, type)) {
       // Let baseURLPath be the result of running process a base URL string
       // given the result of URL path serializing baseURL and type.
