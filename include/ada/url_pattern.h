@@ -85,6 +85,8 @@ struct url_pattern_init {
 
   [[nodiscard]] std::string to_string() const;
 
+  bool operator==(const url_pattern_init&) const;
+
   std::optional<std::string> protocol{};
   std::optional<std::string> username{};
   std::optional<std::string> password{};
@@ -189,6 +191,16 @@ struct url_pattern_compile_component_options {
 struct url_pattern_component_result {
   std::string input;
   std::unordered_map<std::string, std::string> groups;
+
+  bool operator==(const url_pattern_component_result&) const;
+
+#if ADA_TESTING
+  friend void PrintTo(const url_pattern_component_result& result,
+                      std::ostream* os) {
+    *os << "input: " << result.input
+        << ", groups_size: " << result.groups.size();
+  }
+#endif  // ADA_TESTING
 };
 
 class url_pattern_component {

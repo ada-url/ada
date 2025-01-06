@@ -288,6 +288,94 @@ parse_inputs_array(ondemand::array& inputs) {
   return {first_param, base_url};
 }
 
+ada::url_pattern_component_result parse_component_result(
+    ondemand::object& component) {
+  auto result = ada::url_pattern_component_result{};
+
+  for (auto element : component) {
+    auto key = element.key().value();
+
+    if (key == "input") {
+      // The value will always be string
+      std::string_view value;
+      EXPECT_FALSE(element.value().get_string().get(value));
+      result.input = std::string(value);
+    } else if (key == "groups") {
+      ondemand::object groups;
+      EXPECT_FALSE(element.value().get_object().get(groups));
+      for (auto group : groups) {
+        std::string_view group_key(group.key().value().raw());
+        std::string_view group_value;
+        EXPECT_FALSE(group.value().get(group_value));
+        result.groups.insert_or_assign(std::string(group_key),
+                                       std::string(group_value));
+      }
+    }
+  }
+
+  return result;
+}
+
+std::tuple<ada::url_pattern_result, bool> parse_exec_result(
+    ondemand::object& exec_result) {
+  auto result = ada::url_pattern_result{};
+  bool has_inputs = false;
+
+  for (auto field : exec_result) {
+    auto key = field.key().value();
+
+    if (key == "inputs") {
+      has_inputs = true;
+      // All values will be string or init object.
+      ondemand::array inputs;
+      EXPECT_FALSE(field.value().get_array().get(inputs));
+      for (auto input_field : inputs) {
+        if (input_field.type() == ondemand::json_type::string) {
+          std::string_view input_field_str;
+          EXPECT_FALSE(input_field.get_string().get(input_field_str));
+          result.inputs.emplace_back(std::string(input_field_str));
+        } else if (input_field.type() == ondemand::json_type::object) {
+          ondemand::object input_field_object;
+          EXPECT_FALSE(input_field.get_object().get(input_field_object));
+          auto parse_value = parse_init(input_field_object);
+          EXPECT_TRUE(
+              std::holds_alternative<ada::url_pattern_init>(parse_value));
+          result.inputs.emplace_back(
+              std::get<ada::url_pattern_init>(parse_value));
+        } else {
+          ADD_FAILURE() << "Unexpected input field type";
+        }
+      }
+    } else {
+      ondemand::object component;
+      EXPECT_FALSE(field.value().get_object().get(component));
+      auto component_result = parse_component_result(component);
+
+      if (key == "protocol") {
+        result.protocol = component_result;
+      } else if (key == "username") {
+        result.username = component_result;
+      } else if (key == "password") {
+        result.password = component_result;
+      } else if (key == "hostname") {
+        result.hostname = component_result;
+      } else if (key == "port") {
+        result.port = component_result;
+      } else if (key == "pathname") {
+        result.pathname = component_result;
+      } else if (key == "search") {
+        result.search = component_result;
+      } else if (key == "hash") {
+        result.hash = component_result;
+      } else {
+        ADD_FAILURE() << "Unexpected key in url_pattern_component_result";
+      }
+    }
+  }
+
+  return {result, has_inputs};
+}
+
 TEST(wpt_urlpattern_tests, urlpattern_test_data) {
   ondemand::parser parser;
   ASSERT_TRUE(std::filesystem::exists(URL_PATTERN_TEST_DATA));
@@ -405,7 +493,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         // - {} // response here.
         auto [input_value, base_url] = parse_inputs_array(inputs);
         tl::expected<std::optional<ada::url_pattern_result>, ada::errors>
-            result;
+            exec_result;
         std::string_view base_url_view;
         std::string_view* opt_base_url = nullptr;
         if (base_url) {
@@ -415,32 +503,52 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         if (std::holds_alternative<std::string>(input_value)) {
           auto str = std::get<std::string>(input_value);
           ada_log("input_value is str=", str);
-          result = parse_result->exec(str, opt_base_url);
+          exec_result = parse_result->exec(str, opt_base_url);
         } else {
           ada_log("input_value is url_pattern_init");
           auto obj = std::get<ada::url_pattern_init>(input_value);
-          result = parse_result->exec(obj, opt_base_url);
+          exec_result = parse_result->exec(obj, opt_base_url);
         }
 
         ondemand::value expected_match = main_object["expected_match"].value();
-        std::cout << "expected_match: " << expected_match.raw_json().value()
-                  << std::endl;
         if (expected_match.type() == ondemand::json_type::string) {
           // If it is a string, it will always be "error"
           ASSERT_EQ(expected_match.get_string().value(), "error");
-          ASSERT_EQ(result.has_value(), false)
-              << "Expected error but exec() has_value= " << result->has_value();
+          ASSERT_EQ(exec_result.has_value(), false)
+              << "Expected error but exec() has_value= "
+              << exec_result->has_value();
         } else if (expected_match.type() == ondemand::json_type::null) {
-          ASSERT_EQ(result.has_value(), true)
+          ASSERT_EQ(exec_result.has_value(), true)
               << "Expected non failure but it throws an error";
-          ASSERT_EQ(result->has_value(), false)
+          ASSERT_EQ(exec_result->has_value(), false)
               << "Expected null value but exec() returned a value ";
         } else {
-          ASSERT_EQ(result.has_value(), true)
+          ASSERT_EQ(exec_result.has_value(), true)
               << "Expect match to succeed but it throw an error";
-          ASSERT_EQ(result->has_value(), true)
+          ASSERT_EQ(exec_result->has_value(), true)
               << "Expect match to succeed but it returned a null value";
-          // TODO: Implement the case where expected_match is an object
+          auto exec_result_obj = expected_match.get_object().value();
+          auto [expected_exec_result, has_inputs] =
+              parse_exec_result(exec_result_obj);
+
+          // Some match_result data in JSON does not have any inputs output
+          if (has_inputs) {
+            ASSERT_EQ(exec_result->value().inputs, expected_exec_result.inputs);
+          }
+
+          ASSERT_EQ(exec_result->value().protocol,
+                    expected_exec_result.protocol);
+          ASSERT_EQ(exec_result->value().username,
+                    expected_exec_result.username);
+          ASSERT_EQ(exec_result->value().password,
+                    expected_exec_result.password);
+          ASSERT_EQ(exec_result->value().hostname,
+                    expected_exec_result.hostname);
+          ASSERT_EQ(exec_result->value().port, expected_exec_result.port);
+          ASSERT_EQ(exec_result->value().pathname,
+                    expected_exec_result.pathname);
+          ASSERT_EQ(exec_result->value().search, expected_exec_result.search);
+          ASSERT_EQ(exec_result->value().hash, expected_exec_result.hash);
         }
       }
     }

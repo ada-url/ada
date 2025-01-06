@@ -12,6 +12,18 @@
 
 namespace ada {
 
+inline bool url_pattern_init::operator==(const url_pattern_init& other) const {
+  return protocol == other.protocol && username == other.username &&
+         password == other.password && hostname == other.hostname &&
+         port == other.port && search == other.search && hash == other.hash &&
+         pathname == other.pathname;
+}
+
+inline bool url_pattern_component_result::operator==(
+    const url_pattern_component_result& other) const {
+  return input == other.input && groups == other.groups;
+}
+
 inline std::string url_pattern_component::to_string() const {
 #ifdef ADA_HAS_FORMAT
   return std::format(R"({{"pattern": "{}", "has_regexp_groups": {}}})", pattern,
