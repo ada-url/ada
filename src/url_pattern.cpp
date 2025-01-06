@@ -597,8 +597,11 @@ result<std::optional<url_pattern_result>> url_pattern::match(
 
     // Set search to applyResult["search"].
     ADA_ASSERT_TRUE(apply_result->search.has_value());
-    ADA_ASSERT_TRUE(apply_result->search->starts_with("?"));
-    search = apply_result->search->substr(1);
+    if (apply_result->search->starts_with("?")) {
+      search = apply_result->search->substr(1);
+    } else {
+      search = apply_result->search.value();
+    }
 
     // Set hash to applyResult["hash"].
     ADA_ASSERT_TRUE(apply_result->hash.has_value());
