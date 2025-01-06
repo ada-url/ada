@@ -11,6 +11,10 @@ if(ADA_LOGGING)
   add_compile_definitions(ADA_LOGGING=1)
 endif()
 
+if(ADA_TESTING)
+  add_compile_definitions(ADA_TESTING=1)
+endif()
+
 include(${PROJECT_SOURCE_DIR}/cmake/add-cpp-test.cmake)
 link_libraries(ada)
 
