@@ -304,11 +304,11 @@ ada::url_pattern_component_result parse_component_result(
       ondemand::object groups;
       EXPECT_FALSE(element.value().get_object().get(groups));
       for (auto group : groups) {
-        std::string_view group_key(group.key().value().raw());
+        auto group_key = group.escaped_key().value();
         std::string_view group_value;
-        EXPECT_FALSE(group.value().get(group_value));
+        EXPECT_FALSE(group.value().get_string(group_value));
         result.groups.insert_or_assign(std::string(group_key),
-                                       std::string(group_value));
+                                       group_value);
       }
     }
   }
