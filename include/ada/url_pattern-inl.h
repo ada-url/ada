@@ -52,7 +52,8 @@ url_pattern_component::create_component_match_result(
     // Let name be component’s group name list[index].
     // Let value be Get(execResult, ToString(index)).
     // Set groups[name] to value.
-    if (auto str = exec_result[index].str(); !str.empty()) {
+    auto match = exec_result[index];
+    if (auto str = match.str(); !str.empty()) {
       result.groups.insert({
           group_name_list[index],
           str,
