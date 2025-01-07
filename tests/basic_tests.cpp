@@ -463,3 +463,12 @@ TYPED_TEST(basic_tests, negativeport) {
   ASSERT_FALSE(url->set_port("-1"));
   SUCCEED();
 }
+
+// https://github.com/ada-url/ada/issues/826
+TYPED_TEST(basic_tests, set_invalid_port) {
+  auto url = ada::parse<TypeParam>("fake://dummy.test");
+  ASSERT_TRUE(url);
+  ASSERT_FALSE(url->set_port("invalid80"));
+  ASSERT_TRUE(url->is_valid);
+  SUCCEED();
+}

@@ -272,6 +272,10 @@ ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
          (c >= 'a' && c <= 'f');
 }
 
+ada_really_inline constexpr bool is_ascii_digit(const char c) noexcept {
+  return c >= '0' && c <= '9';
+}
+
 ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept {
   return (unsigned char)c <= ' ';
 }

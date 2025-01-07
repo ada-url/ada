@@ -290,8 +290,9 @@ bool url_aggregator::set_port(const std::string_view input) {
   if (ada::unicode::is_c0_control_or_space(trimmed.front())) {
     return false;
   }
-  // Input should contain at least one ascii digit.
-  if (input.find_first_of("0123456789") == std::string_view::npos) {
+
+  // Input should contain ascii digits.
+  if (!std::ranges::all_of(trimmed, ada::unicode::is_ascii_digit)) {
     return false;
   }
 
