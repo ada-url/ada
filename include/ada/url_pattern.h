@@ -197,8 +197,11 @@ struct url_pattern_component_result {
 #if ADA_TESTING
   friend void PrintTo(const url_pattern_component_result& result,
                       std::ostream* os) {
-    *os << "input: " << result.input
-        << ", groups_size: " << result.groups.size();
+    *os << "input: '" << result.input
+        << "', group: ";
+    for (const auto& group : result.groups) {
+      *os << "(" << group.first << ", " << group.second << ") ";
+    }
   }
 #endif  // ADA_TESTING
 };
