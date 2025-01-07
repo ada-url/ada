@@ -46,19 +46,21 @@ url_pattern_component::create_component_match_result(
   // Optimization: Let's reserve the size.
   result.groups.reserve(exec_result.size() - 1);
 
-  // Let index be 0.
+  size_t group_index = 0;
+  // Let index be 1.
   // While index is less than Get(execResult, "length"):
-  for (size_t index = 0; index < exec_result.size() - 1; index++) {
-    // Let name be component’s group name list[index].
+  for (size_t index = 1; index < exec_result.size(); index++) {
+    // Let name be component’s group name list[index - 1].
     // Let value be Get(execResult, ToString(index)).
     // Set groups[name] to value.
     auto match = exec_result[index];
-    if (auto str = match.str(); !str.empty()) {
-      result.groups.insert({
-          group_name_list[index],
-          str,
-      });
-    }
+    if (!match.matched || match.length() == 0) continue;
+    result.groups.insert({
+        group_name_list[group_index],
+        match.str(),
+    });
+
+    group_index++;
   }
   return result;
 }
