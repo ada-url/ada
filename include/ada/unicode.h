@@ -129,7 +129,6 @@ ada_really_inline constexpr bool is_ascii_hex_digit(char c) noexcept;
  */
 ada_really_inline constexpr bool is_ascii_digit(char c) noexcept;
 
-
 /**
  * @private
  * Checks if the input is a C0 control or space character.
