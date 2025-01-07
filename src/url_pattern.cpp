@@ -519,7 +519,7 @@ result<std::optional<url_pattern_result>> url_pattern::exec(
   return match(input, base_url);
 }
 
-bool url_pattern::test(const url_pattern_input& input,
+result<bool> url_pattern::test(const url_pattern_input& input,
                        std::string_view* base_url = nullptr) {
   // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
   // Implement a fast path just like `can_parse()` in ada_url.
@@ -529,7 +529,7 @@ bool url_pattern::test(const url_pattern_input& input,
   if (auto result = match(input, base_url); result.has_value()) {
     return result->has_value();
   }
-  return false;
+  return tl::unexpected(errors::type_error);
 }
 
 result<std::optional<url_pattern_result>> url_pattern::match(

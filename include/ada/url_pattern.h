@@ -285,7 +285,7 @@ class url_pattern {
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
    */
-  bool test(const url_pattern_input& input, std::string_view* base_url);
+  result<bool> test(const url_pattern_input& input, std::string_view* base_url);
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#url-pattern-match
