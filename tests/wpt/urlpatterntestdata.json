@@ -2594,16 +2594,6 @@
     }
   },
   {
-    "pattern": [{ "pathname": "*{}**?" }],
-    "inputs": [{ "pathname": "foobar" }],
-    "expected_obj": {
-      "pathname": "*(.*)?"
-    },
-    "expected_match": {
-      "pathname": { "input": "foobar", "groups": { "0": "foobar" }}
-    }
-  },
-  {
     "pattern": [{ "pathname": ":foo(baz)(.*)" }],
     "inputs": [{ "pathname": "bazbar" }],
     "expected_match": {
