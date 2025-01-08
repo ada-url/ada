@@ -43,6 +43,11 @@ url_pattern_component::create_component_match_result(
   auto result =
       url_pattern_component_result{.input = std::string(input), .groups = {}};
 
+  // If input is empty, then groups will always be empty.
+  if (input.empty()) {
+    return result;
+  }
+
   // Optimization: Let's reserve the size.
   result.groups.reserve(exec_result.size() - 1);
 
@@ -53,11 +58,11 @@ url_pattern_component::create_component_match_result(
     // Let name be component’s group name list[index - 1].
     // Let value be Get(execResult, ToString(index)).
     // Set groups[name] to value.
-    auto match = exec_result[index];
-    if (!match.matched || match.length() == 0) continue;
+    auto exec = exec_result[index];
+    if (!exec.matched) continue;
     result.groups.insert({
         group_name_list[group_index],
-        match.str(),
+        exec.str(),
     });
 
     group_index++;

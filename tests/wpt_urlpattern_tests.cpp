@@ -307,7 +307,8 @@ ada::url_pattern_component_result parse_component_result(
         auto group_key = group.unescaped_key().value();
         std::string_view group_value;
         EXPECT_FALSE(group.value().get_string(group_value));
-        result.groups.insert_or_assign(std::string(group_key), std::string(group_value));
+        result.groups.insert_or_assign(std::string(group_key),
+                                       std::string(group_value));
       }
     }
   }
