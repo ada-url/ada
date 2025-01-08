@@ -494,6 +494,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
         auto [input_value, base_url] = parse_inputs_array(inputs);
         tl::expected<std::optional<ada::url_pattern_result>, ada::errors>
             exec_result;
+        tl::expected<bool, ada::errors> test_result;
         std::string_view base_url_view;
         std::string_view* opt_base_url = nullptr;
         if (base_url) {
@@ -504,10 +505,12 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           auto str = std::get<std::string>(input_value);
           ada_log("input_value is str=", str);
           exec_result = parse_result->exec(str, opt_base_url);
+          test_result = parse_result->test(str, opt_base_url);
         } else {
           ada_log("input_value is url_pattern_init");
           auto obj = std::get<ada::url_pattern_init>(input_value);
           exec_result = parse_result->exec(obj, opt_base_url);
+          test_result = parse_result->test(obj, opt_base_url);
         }
 
         ondemand::value expected_match = main_object["expected_match"].value();
@@ -517,16 +520,24 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           ASSERT_EQ(exec_result.has_value(), false)
               << "Expected error but exec() has_value= "
               << exec_result->has_value();
+          ASSERT_FALSE(test_result)
+              << "Expected test() to throw, but it didn't";
         } else if (expected_match.type() == ondemand::json_type::null) {
           ASSERT_EQ(exec_result.has_value(), true)
               << "Expected non failure but it throws an error";
           ASSERT_EQ(exec_result->has_value(), false)
               << "Expected null value but exec() returned a value ";
+          ASSERT_FALSE(test_result.value())
+              << "Expected false for test() but received true";
         } else {
           ASSERT_EQ(exec_result.has_value(), true)
               << "Expect match to succeed but it throw an error";
           ASSERT_EQ(exec_result->has_value(), true)
               << "Expect match to succeed but it returned a null value";
+          ASSERT_TRUE(test_result)
+              << "Expected test() to not throw, but it did";
+          ASSERT_TRUE(test_result.value())
+              << "Expected true for test() but received false";
           auto exec_result_obj = expected_match.get_object().value();
           auto [expected_exec_result, has_inputs] =
               parse_exec_result(exec_result_obj);
