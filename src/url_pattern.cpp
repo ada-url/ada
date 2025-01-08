@@ -520,7 +520,7 @@ result<std::optional<url_pattern_result>> url_pattern::exec(
 }
 
 result<bool> url_pattern::test(const url_pattern_input& input,
-                       std::string_view* base_url = nullptr) {
+                               std::string_view* base_url = nullptr) {
   // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
   // Implement a fast path just like `can_parse()` in ada_url.
   // Let result be the result of match given this's associated URL pattern,
@@ -681,48 +681,48 @@ result<std::optional<url_pattern_result>> url_pattern::match(
     }
   }
 
-  auto regex_flags = std::regex_constants::match_continuous;
+  auto regex_flags = std::regex_constants::match_any;
 
   // Let protocolExecResult be RegExpBuiltinExec(urlPattern’s protocol
   // component's regular expression, protocol).
   std::smatch protocol_exec_result_value;
   auto protocol_exec_result =
       std::regex_search(protocol, protocol_exec_result_value,
-                       protocol_component.regexp, regex_flags);
+                        protocol_component.regexp, regex_flags);
 
   // Let usernameExecResult be RegExpBuiltinExec(urlPattern’s username
   // component's regular expression, username).
   std::smatch username_exec_result_value;
   auto username_exec_result =
       std::regex_search(username, username_exec_result_value,
-                       username_component.regexp, regex_flags);
+                        username_component.regexp, regex_flags);
 
   // Let passwordExecResult be RegExpBuiltinExec(urlPattern’s password
   // component's regular expression, password).
   std::smatch password_exec_result_value;
   auto password_exec_result =
       std::regex_search(password, password_exec_result_value,
-                       password_component.regexp, regex_flags);
+                        password_component.regexp, regex_flags);
 
   // Let hostnameExecResult be RegExpBuiltinExec(urlPattern’s hostname
   // component's regular expression, hostname).
   std::smatch hostname_exec_result_value;
   auto hostname_exec_result =
       std::regex_search(hostname, hostname_exec_result_value,
-                       hostname_component.regexp, regex_flags);
+                        hostname_component.regexp, regex_flags);
 
   // Let portExecResult be RegExpBuiltinExec(urlPattern’s port component's
   // regular expression, port).
   std::smatch port_exec_result_value;
   auto port_exec_result = std::regex_search(port, port_exec_result_value,
-                                           port_component.regexp, regex_flags);
+                                            port_component.regexp, regex_flags);
 
   // Let pathnameExecResult be RegExpBuiltinExec(urlPattern’s pathname
   // component's regular expression, pathname).
   std::smatch pathname_exec_result_value;
   auto pathname_exec_result =
       std::regex_search(pathname, pathname_exec_result_value,
-                       pathname_component.regexp, regex_flags);
+                        pathname_component.regexp, regex_flags);
 
   // Let searchExecResult be RegExpBuiltinExec(urlPattern’s search component's
   // regular expression, search).
@@ -734,7 +734,7 @@ result<std::optional<url_pattern_result>> url_pattern::match(
   // regular expression, hash).
   std::smatch hash_exec_result_value;
   auto hash_exec_result = std::regex_search(hash, hash_exec_result_value,
-                                           hash_component.regexp, regex_flags);
+                                            hash_component.regexp, regex_flags);
 
   // If protocolExecResult, usernameExecResult, passwordExecResult,
   // hostnameExecResult, portExecResult, pathnameExecResult, searchExecResult,
