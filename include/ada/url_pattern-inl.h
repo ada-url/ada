@@ -45,6 +45,7 @@ url_pattern_component::create_component_match_result(
 
   // If input is empty, then groups will always be empty.
   if (input.empty()) {
+    result.groups.insert({"0", ""});
     return result;
   }
 
