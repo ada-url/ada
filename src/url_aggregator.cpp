@@ -295,8 +295,7 @@ bool url_aggregator::set_port(const std::string_view input) {
   }
 
   uint16_t parsed_port{};
-  auto r = std::from_chars(trimmed.data(), trimmed.data() + trimmed.size(),
-                           parsed_port);
+  std::from_chars(trimmed.data(), trimmed.data() + trimmed.size(), parsed_port);
   if (parsed_port < 1) {
     return false;
   }
