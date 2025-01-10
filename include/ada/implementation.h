@@ -15,6 +15,7 @@
 #include "ada/url.h"
 #include "ada/state.h"
 #include "ada/url_aggregator.h"
+#include "ada/url_pattern_regex.h"
 
 namespace ada {
 enum class errors : uint8_t { type_error };
@@ -56,12 +57,15 @@ bool can_parse(std::string_view input,
  * @param input valid UTF-8 string or URLPatternInit struct
  * @param base_url an optional valid UTF-8 string
  * @param options an optional url_pattern_options struct
+ * @param regex_provider an optional regex provider. if not provided, it will
+ * use ada::url_pattern_regex::std_regex_provider
  * @return url_pattern instance
  */
 ada_warn_unused tl::expected<url_pattern, errors> parse_url_pattern(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url = nullptr,
-    const url_pattern_options* options = nullptr);
+    const url_pattern_options* options = nullptr,
+    std::optional<url_pattern_regex::provider> regex_provider = std::nullopt);
 
 /**
  * Computes a href string from a file path. The function assumes

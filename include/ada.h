@@ -30,6 +30,7 @@
 #include "ada/url_pattern-inl.h"
 #include "ada/url_pattern_helpers.h"
 #include "ada/url_pattern_helpers-inl.h"
+#include "ada/url_pattern_regex.h"
 
 // Public API
 #include "ada/ada_version.h"

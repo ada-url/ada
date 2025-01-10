@@ -81,8 +81,11 @@ ada_warn_unused std::string to_string(ada::encoding_type type) {
 
 ada_warn_unused tl::expected<url_pattern, errors> parse_url_pattern(
     std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options) {
-  return parser::parse_url_pattern_impl(std::move(input), base_url, options);
+    const std::string_view* base_url, const url_pattern_options* options,
+    std::optional<url_pattern_regex::provider> regex_provider) {
+  return parser::parse_url_pattern_impl(
+      std::move(input), base_url, options,
+      regex_provider.value_or(url_pattern_regex::std_regex_provider()));
 }
 
 }  // namespace ada

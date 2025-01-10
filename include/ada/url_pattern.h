@@ -7,6 +7,7 @@
 
 #include "ada/implementation.h"
 #include "ada/expected.h"
+#include "ada/url_pattern_regex.h"
 
 #include <regex>
 #include <string>
@@ -21,7 +22,8 @@ template <typename result_type, typename url_pattern_init,
           typename url_pattern_options>
 tl::expected<result_type, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options);
+    const std::string_view* base_url, const url_pattern_options* options,
+    url_pattern_regex::provider&& regex_provider);
 }
 
 // Important: C++20 allows us to use concept rather than `using` or `typedef
@@ -270,10 +272,8 @@ struct url_pattern_options {
 // https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
 class url_pattern {
  public:
-  url_pattern() = default;
-  explicit url_pattern(std::optional<url_pattern_input>&& input,
-                       std::optional<std::string_view>&& base_url,
-                       std::optional<url_pattern_options>&& options);
+  explicit url_pattern(url_pattern_regex::provider&& regex_provider)
+      : regex_provider_(std::move(regex_provider)) {}
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
@@ -328,12 +328,14 @@ class url_pattern {
   url_pattern_component search_component{};
   url_pattern_component hash_component{};
   bool ignore_case_ = false;
+  url_pattern_regex::provider regex_provider_;
 
   template <typename result_type, typename url_pattern_init,
             typename url_pattern_options>
   friend tl::expected<result_type, errors> parser::parse_url_pattern_impl(
       std::variant<std::string_view, url_pattern_init> input,
-      const std::string_view* base_url, const url_pattern_options* options);
+      const std::string_view* base_url, const url_pattern_options* options,
+      url_pattern_regex::provider&& regex_provider);
 };
 
 }  // namespace ada
