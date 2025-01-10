@@ -10,4 +10,5 @@
 #include "url_aggregator.cpp"
 #include "url_pattern.cpp"
 #include "url_pattern_helpers.cpp"
+#include "url_pattern_regex.cpp"
 #include "ada_c.cpp"

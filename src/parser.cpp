@@ -900,7 +900,8 @@ result_type parse_url_impl(std::string_view user_input,
 
 tl::expected<url_pattern, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options) {
+    const std::string_view* base_url, const url_pattern_options* options,
+    url_pattern_regex::provider&& regex_provider) {
   // Let init be null.
   url_pattern_init init;
 
@@ -983,7 +984,7 @@ tl::expected<url_pattern, errors> parse_url_pattern_impl(
   }
 
   // Let urlPattern be a new URL pattern.
-  auto url_pattern_ = url_pattern{};
+  auto url_pattern_ = url_pattern(std::move(regex_provider));
 
   // Set urlPattern’s protocol component to the result of compiling a component
   // given processedInit["protocol"], canonicalize a protocol, and default

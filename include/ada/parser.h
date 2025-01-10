@@ -9,6 +9,7 @@
 #include <variant>
 
 #include "ada/expected.h"
+#include "ada/url_pattern_regex.h"
 
 /**
  * @private
@@ -53,7 +54,8 @@ extern template url parse_url_impl<url>(std::string_view user_input,
 
 tl::expected<url_pattern, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options);
+    const std::string_view* base_url, const url_pattern_options* options,
+    url_pattern_regex::provider&& regex_provider);
 
 }  // namespace ada::parser
 
