@@ -862,13 +862,6 @@ ada_really_inline size_t url_aggregator::parse_port(
     is_valid = false;
     return 0;
   }
-
-  if(parsed_port < 1) {
-    ada_log("parse_port: port out of valid range (1-65535)");
-    is_valid = false;
-    return 0;
-  }
-
   ada_log("parse_port: ", parsed_port);
   const size_t consumed = size_t(r.ptr - view.data());
   ada_log("parse_port: consumed ", consumed);
