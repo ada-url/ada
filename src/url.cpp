@@ -782,6 +782,13 @@ bool url::set_port(const std::string_view input) {
     port = std::nullopt;
     return true;
   }
+
+  auto non_digit_pos = std::find_if_not(trimmed.begin(), trimmed.end(),
+                                        ada::unicode::is_ascii_digit);
+  if (non_digit_pos != trimmed.end()) {
+    trimmed.erase(non_digit_pos, trimmed.end());
+  }
+
   // Input should not start with control characters.
   if (ada::unicode::is_c0_control_or_space(trimmed.front())) {
     return false;
