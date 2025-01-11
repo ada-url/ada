@@ -783,6 +783,10 @@ bool url::set_port(const std::string_view input) {
     return true;
   }
 
+  if (!ada::unicode::is_ascii_digit(trimmed.front())) {
+    return false;
+  }
+
   auto non_digit_pos = std::find_if_not(trimmed.begin(), trimmed.end(),
                                         ada::unicode::is_ascii_digit);
   if (non_digit_pos != trimmed.end()) {
