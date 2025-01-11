@@ -11,3 +11,5 @@
 #include "url_pattern.cpp"
 #include "url_pattern_helpers.cpp"
 #include "ada_c.cpp"
+#include "ada_data_url.cpp"
+
