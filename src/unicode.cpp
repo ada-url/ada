@@ -276,7 +276,7 @@ ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
 ada_really_inline constexpr bool is_ascii_digit(const char c) noexcept {
   // An ASCII digit is a code point in the range U+0030 (0) to U+0039 (9),
   // inclusive.
-  return c >= '0' && c <= '9';
+  return (c >= '0' && c <= '9');
 }
 
 ada_really_inline constexpr bool is_ascii(const char32_t c) noexcept {
