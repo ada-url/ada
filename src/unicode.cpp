@@ -1,7 +1,8 @@
-#include "ada.h"
-#include "ada/character_sets-inl.h"
 #include "ada/common_defs.h"
+#include "ada/character_sets-inl.h"
+#include "ada/character_sets.h"
 #include "ada/unicode.h"
+#include "ada/log.h"
 
 ADA_PUSH_DISABLE_ALL_WARNINGS
 #include "ada_idna.cpp"
@@ -274,6 +275,12 @@ ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
 
 ada_really_inline constexpr bool is_ascii_digit(const char c) noexcept {
   return c >= '0' && c <= '9';
+}
+
+ada_really_inline constexpr bool is_ascii(const char32_t c) noexcept {
+  // If code point is between U+0000 and U+007F inclusive, then return true.
+  return c <= 0x7F;
+
 }
 
 ada_really_inline constexpr bool is_c0_control_or_space(const char c) noexcept {

@@ -40,6 +40,14 @@ $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_search_params.o \
 $CXX $CFLAGS $CXXFLAGS \
      -std=c++20 \
      -I build/singleheader \
+     -c fuzz/url_pattern.cc -o url_pattern.o
+
+$CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_pattern.o \
+     -o $OUT/url_pattern
+
+$CXX $CFLAGS $CXXFLAGS \
+     -std=c++20 \
+     -I build/singleheader \
      -c build/singleheader/ada.cpp -o ada.o
 
 $CC $CFLAGS $CXXFLAGS \

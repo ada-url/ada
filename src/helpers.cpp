@@ -1,4 +1,3 @@
-#include "ada.h"
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
 #include "ada/scheme.h"
@@ -539,7 +538,7 @@ ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
   return {location, found_colon};
 }
 
-ada_really_inline void trim_c0_whitespace(std::string_view& input) noexcept {
+void trim_c0_whitespace(std::string_view& input) noexcept {
   while (!input.empty() &&
          ada::unicode::is_c0_control_or_space(input.front())) {
     input.remove_prefix(1);

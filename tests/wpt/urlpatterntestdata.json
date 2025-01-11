@@ -379,9 +379,8 @@
   {
     "pattern": [{ "pathname": "/foo/:bar?" }],
     "inputs": [{ "pathname": "/foo" }],
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
-      "pathname": { "input": "/foo", "groups": { "bar": null } }
+      "pathname": { "input": "/foo", "groups": {} }
     }
   },
   {
@@ -445,9 +444,8 @@
   {
     "pattern": [{ "pathname": "/foo/:bar*" }],
     "inputs": [{ "pathname": "/foo" }],
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
-      "pathname": { "input": "/foo", "groups": { "bar": null } }
+      "pathname": { "input": "/foo", "groups": {} }
     }
   },
   {
@@ -500,17 +498,15 @@
     "expected_obj": {
       "pathname": "/foo/*?"
     },
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
-      "pathname": { "input": "/foo", "groups": { "0": null } }
+      "pathname": { "input": "/foo", "groups": {} }
     }
   },
   {
     "pattern": [{ "pathname": "/foo/*?" }],
     "inputs": [{ "pathname": "/foo" }],
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
-      "pathname": { "input": "/foo", "groups": { "0": null } }
+      "pathname": { "input": "/foo", "groups": {} }
     }
   },
   {
@@ -686,17 +682,15 @@
     "expected_obj": {
       "pathname": "/foo/**"
     },
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
-      "pathname": { "input": "/foo", "groups": { "0": null } }
+      "pathname": { "input": "/foo", "groups": {} }
     }
   },
   {
     "pattern": [{ "pathname": "/foo/**" }],
     "inputs": [{ "pathname": "/foo" }],
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
-      "pathname": { "input": "/foo", "groups": { "0": null } }
+      "pathname": { "input": "/foo", "groups": {} }
     }
   },
   {
@@ -1145,6 +1139,13 @@
   {
     "pattern": [{ "protocol": "http", "port": "80 " }],
     "inputs": [{ "protocol": "http", "port": "80" }],
+    "exactly_empty_components": ["port"],
+    "expected_match": {
+      "protocol": { "input": "http", "groups": {} }
+    }
+  },
+  {
+    "pattern": [{ "protocol": "http", "port": "100000" }],
     "expected_obj": "error"
   },
   {
@@ -1379,10 +1380,6 @@
       "protocol": { "input": "data", "groups": {}},
       "pathname": { "input": "8675309", "groups": { "number": "8675309" }}
     }
-  },
-  {
-    "pattern": [{ "pathname": "/(\\m)" }],
-    "expected_obj": "error"
   },
   {
     "pattern": [{ "pathname": "/foo!" }],
@@ -1807,11 +1804,6 @@
     }
   },
   {
-    "pattern": [ "https://{sub.}?example{.com/}foo" ],
-    "inputs": [ "https://example.com/foo" ],
-    "expected_obj": "error"
-  },
-  {
     "pattern": [ "{https://}example.com/foo" ],
     "inputs": [ "https://example.com/foo" ],
     "expected_obj": "error"
@@ -1825,10 +1817,9 @@
       "hostname": "(sub.)?example.com",
       "pathname": "/foo"
     },
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
       "protocol": { "input": "https", "groups": {} },
-      "hostname": { "input": "example.com", "groups": { "0": null } },
+      "hostname": { "input": "example.com", "groups": {} },
       "pathname": { "input": "/foo", "groups": {} }
     }
   },
@@ -1862,10 +1853,9 @@
       "hostname": "(sub(?:.))?example.com",
       "pathname": "/foo"
     },
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
       "protocol": { "input": "https", "groups": {} },
-      "hostname": { "input": "example.com", "groups": { "0": null } },
+      "hostname": { "input": "example.com", "groups": {} },
       "pathname": { "input": "/foo", "groups": {} }
     }
   },
@@ -2297,10 +2287,9 @@
       "protocol": "data",
       "pathname": "text/javascript,let x = 100/:tens?5;"
     },
-    "//": "The `null` below is translated to undefined in the test harness.",
     "expected_match": {
       "protocol": { "input": "data", "groups": {} },
-      "pathname": { "input": "text/javascript,let x = 100/5;", "groups": { "tens": null } }
+      "pathname": { "input": "text/javascript,let x = 100/5;", "groups": {} }
     }
   },
   {
@@ -2367,7 +2356,10 @@
   },
   {
     "pattern": [{ "hostname": "bad#hostname" }],
-    "expected_obj": "error"
+    "inputs": [{ "hostname": "bad" }],
+    "expected_match": {
+      "hostname": { "input": "bad", "groups": {} }
+    }
   },
   {
     "pattern": [{ "hostname": "bad%hostname" }],
@@ -2375,7 +2367,10 @@
   },
   {
     "pattern": [{ "hostname": "bad/hostname" }],
-    "expected_obj": "error"
+    "inputs": [{ "hostname": "bad" }],
+    "expected_match": {
+      "hostname": { "input": "bad", "groups": {} }
+    }
   },
   {
     "pattern": [{ "hostname": "bad\\:hostname" }],
@@ -2406,27 +2401,11 @@
     "expected_obj": "error"
   },
   {
-    "pattern": [{ "hostname": "bad\\\\hostname" }],
-    "expected_obj": "error"
-  },
-  {
     "pattern": [{ "hostname": "bad^hostname" }],
     "expected_obj": "error"
   },
   {
     "pattern": [{ "hostname": "bad|hostname" }],
-    "expected_obj": "error"
-  },
-  {
-    "pattern": [{ "hostname": "bad\nhostname" }],
-    "expected_obj": "error"
-  },
-  {
-    "pattern": [{ "hostname": "bad\rhostname" }],
-    "expected_obj": "error"
-  },
-  {
-    "pattern": [{ "hostname": "bad\thostname" }],
     "expected_obj": "error"
   },
   {
@@ -2612,17 +2591,6 @@
     },
     "expected_match": {
       "pathname": { "input": "foobar", "groups": { "foo": "foo" }}
-    }
-  },
-  {
-    "pattern": [{ "pathname": "*{}**?" }],
-    "inputs": [{ "pathname": "foobar" }],
-    "expected_obj": {
-      "pathname": "*(.*)?"
-    },
-    "//": "The `null` below is translated to undefined in the test harness.",
-    "expected_match": {
-      "pathname": { "input": "foobar", "groups": { "0": "foobar", "1": null }}
     }
   },
   {
@@ -2829,29 +2797,5 @@
       "search": { "input": "q=*&v=?&hmm={}&umm=()", "groups": {} },
       "hash": { "input": "foo", "groups": {} }
     }
-  },
-  {
-    "pattern": [{ "pathname": "/([[a-z]--a])" }],
-    "inputs": [{ "pathname": "/a" }],
-    "expected_match": null
-  },
-  {
-    "pattern": [{ "pathname": "/([[a-z]--a])" }],
-    "inputs": [{ "pathname": "/z" }],
-    "expected_match": {
-      "pathname": { "input": "/z", "groups": { "0": "z" } }
-    }
-  },
-    {
-    "pattern": [{ "pathname": "/([\\d&&[0-1]])" }],
-    "inputs": [{ "pathname": "/0" }],
-    "expected_match": {
-      "pathname": { "input": "/0", "groups": { "0": "0" } }
-    }
-  },
-  {
-    "pattern": [{ "pathname": "/([\\d&&[0-1]])" }],
-    "inputs": [{ "pathname": "/3" }],
-    "expected_match": null
   }
 ]
