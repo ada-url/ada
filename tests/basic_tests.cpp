@@ -470,7 +470,7 @@ TYPED_TEST(basic_tests, set_invalid_port) {
   ASSERT_TRUE(url);
   ASSERT_FALSE(url->set_port("invalid80"));
   ASSERT_EQ(url->get_port(), "");
-  ASSERT_FALSE(url->set_port("80valid"));
+  ASSERT_TRUE(url->set_port("80valid"));
   ASSERT_TRUE(url->is_valid);
   ASSERT_EQ(url->get_port(), "80");
   ASSERT_TRUE(url->is_valid);
