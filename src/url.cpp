@@ -788,11 +788,6 @@ bool url::set_port(const std::string_view input) {
     return false;
   }
 
-  // Input should not start with control characters.
-  if (ada::unicode::is_c0_control_or_space(trimmed.front())) {
-    return false;
-  }
-
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;
   parse_port(trimmed);
