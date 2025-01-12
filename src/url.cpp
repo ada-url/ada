@@ -782,12 +782,9 @@ bool url::set_port(const std::string_view input) {
     port = std::nullopt;
     return true;
   }
-  // Input should not start with control characters.
-  if (ada::unicode::is_c0_control_or_space(trimmed.front())) {
-    return false;
-  }
-  // Input should contain at least one ascii digit.
-  if (input.find_first_of("0123456789") == std::string_view::npos) {
+
+  // Input should not start with a non-digit character.
+  if (!ada::unicode::is_ascii_digit(trimmed.front())) {
     return false;
   }
 
