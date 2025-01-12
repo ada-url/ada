@@ -1,11 +1,17 @@
-#include "ada/url_pattern-inl.h"
+#include "url_pattern.h"
 
 #include <algorithm>
 #include <optional>
 #include <regex>
 #include <string>
 
+#include "helpers.h"
+#include "implementation.h"
+#include "url_aggregator-inl.h"
+#include "url_pattern_helpers.h"
+
 namespace ada {
+
 // The default options is an options struct with delimiter code point set to
 // the empty string and prefix code point set to the empty string.
 url_pattern_compile_component_options

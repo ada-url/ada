@@ -8,19 +8,9 @@
 #include <string_view>
 #include <variant>
 
-#include "ada/expected.h"
-
-/**
- * @private
- */
-namespace ada {
-struct url_aggregator;
-struct url;
-class url_pattern;
-struct url_pattern_options;
-struct url_pattern_init;
-enum class errors : uint8_t;
-}  // namespace ada
+#include "expected.h"
+#include "url.h"
+#include "url_aggregator.h"
 
 /**
  * @namespace ada::parser

@@ -5,10 +5,10 @@
 #ifndef ADA_URL_PATTERN_INL_H
 #define ADA_URL_PATTERN_INL_H
 
-#include "ada/common_defs.h"
-#include "ada/url_pattern.h"
-
 #include <string_view>
+
+#include "common_defs.h"
+#include "url_pattern.h"
 
 namespace ada {
 

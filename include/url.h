@@ -5,22 +5,16 @@
 #ifndef ADA_URL_H
 #define ADA_URL_H
 
-#include <algorithm>
 #include <charconv>
 #include <iostream>
 #include <optional>
 #include <string>
 #include <string_view>
 
-#include "ada/checkers.h"
-#include "ada/common_defs.h"
-#include "ada/log.h"
-#include "ada/scheme.h"
-#include "ada/serializers.h"
-#include "ada/unicode.h"
-#include "ada/url_base.h"
-#include "ada/url_components.h"
-#include "ada/helpers.h"
+#include "common_defs.h"
+#include "helpers.h"
+#include "url_base.h"
+#include "url_components.h"
 
 namespace ada {
 
@@ -357,9 +351,7 @@ struct url : url_base {
   ada_really_inline size_t parse_port(
       std::string_view view, bool check_trailing_content) noexcept override;
 
-  ada_really_inline size_t parse_port(std::string_view view) noexcept override {
-    return this->parse_port(view, false);
-  }
+  ada_really_inline size_t parse_port(std::string_view view) noexcept override;
 
   /**
    * Parse the host from the provided input. We assume that

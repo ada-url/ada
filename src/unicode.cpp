@@ -1,14 +1,12 @@
-#include "ada/common_defs.h"
-#include "ada/character_sets-inl.h"
-#include "ada/character_sets.h"
-#include "ada/unicode.h"
-#include "ada/log.h"
-
-ADA_PUSH_DISABLE_ALL_WARNINGS
-#include "ada_idna.cpp"
-ADA_POP_DISABLE_WARNINGS
+#include "unicode.h"
 
 #include <algorithm>
+
+#include "ada_idna.h"
+#include "character_sets-inl.h"
+#include "common_defs.h"
+#include "log.h"
+#include "unicode-inl.h"
 #if ADA_NEON
 #include <arm_neon.h>
 #elif ADA_SSE2
@@ -151,48 +149,6 @@ ada_really_inline bool has_tabs_or_newline(
   return running;
 }
 #endif
-
-// A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR,
-// U+0020 SPACE, U+0023 (#), U+002F (/), U+003A (:), U+003C (<), U+003E (>),
-// U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]), U+005E (^), or
-// U+007C (|).
-constexpr static std::array<uint8_t, 256> is_forbidden_host_code_point_table =
-    []() consteval {
-      std::array<uint8_t, 256> result{};
-      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
-                        '>', '?', '@', '[', '\\', ']', '^', '|'}) {
-        result[c] = true;
-      }
-      return result;
-    }();
-
-ada_really_inline constexpr bool is_forbidden_host_code_point(
-    const char c) noexcept {
-  return is_forbidden_host_code_point_table[uint8_t(c)];
-}
-
-constexpr static std::array<uint8_t, 256> is_forbidden_domain_code_point_table =
-    []() consteval {
-      std::array<uint8_t, 256> result{};
-      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
-                        '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
-        result[c] = true;
-      }
-      for (uint8_t c = 0; c <= 32; c++) {
-        result[c] = true;
-      }
-      for (size_t c = 127; c < 255; c++) {
-        result[c] = true;
-      }
-      return result;
-    }();
-
-static_assert(sizeof(is_forbidden_domain_code_point_table) == 256);
-
-ada_really_inline constexpr bool is_forbidden_domain_code_point(
-    const char c) noexcept {
-  return is_forbidden_domain_code_point_table[uint8_t(c)];
-}
 
 ada_really_inline constexpr bool contains_forbidden_domain_code_point(
     const char* input, size_t length) noexcept {

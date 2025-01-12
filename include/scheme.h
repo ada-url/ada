@@ -5,10 +5,10 @@
 #ifndef ADA_SCHEME_H
 #define ADA_SCHEME_H
 
-#include "ada/common_defs.h"
-
 #include <array>
 #include <string>
+
+#include "common_defs.h"
 
 /**
  * @namespace ada::scheme

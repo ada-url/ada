@@ -8,13 +8,18 @@
 #include <string>
 #include <string_view>
 
-#include "ada/url_pattern.h"
-#include "ada/common_defs.h"
-#include "ada/url_base.h"
-#include "ada/url_components.h"
-#include "ada/parser.h"
+#include "common_defs.h"
+#include "helpers.h"
+#include "url_base.h"
+#include "url_components.h"
+#include "url_pattern.h"
 
 namespace ada {
+/**
+ * @private
+ * Forward declaration of the URL class.
+ */
+struct url;
 
 /**
  * @brief Lightweight URL struct.
@@ -247,9 +252,7 @@ struct url_aggregator : url_base {
   ada_really_inline size_t parse_port(
       std::string_view view, bool check_trailing_content) noexcept override;
 
-  ada_really_inline size_t parse_port(std::string_view view) noexcept override {
-    return this->parse_port(view, false);
-  }
+  ada_really_inline size_t parse_port(std::string_view view) noexcept override;
 
   /**
    * Return true on success. The 'in_place' parameter indicates whether the

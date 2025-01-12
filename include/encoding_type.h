@@ -5,8 +5,9 @@
 #ifndef ADA_ENCODING_TYPE_H
 #define ADA_ENCODING_TYPE_H
 
-#include "ada/common_defs.h"
 #include <string>
+
+#include "common_defs.h"
 
 namespace ada {
 

@@ -6,12 +6,12 @@
 #include <set>
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "ada.h"
 #include "ada/character_sets-inl.h"
 #include "ada/parser.h"
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
+#include "gtest/gtest.h"
 
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect

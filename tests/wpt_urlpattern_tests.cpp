@@ -1,13 +1,13 @@
 #include <filesystem>
 #include <iostream>
 
-#include "ada/log.h"
 #include "gtest/gtest.h"
+#include "implementation.h"
+#include "log.h"
+#include "parser.h"
 #include "simdjson.h"
-
-#include "ada.h"
-#include "ada/url_pattern.h"
-#include "ada/parser.h"
+#include "url_pattern.h"
+#include "url_pattern_helpers-inl.h"
 
 using namespace simdjson;
 

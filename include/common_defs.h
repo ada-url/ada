@@ -5,6 +5,10 @@
 #ifndef ADA_COMMON_DEFS_H
 #define ADA_COMMON_DEFS_H
 
+#ifdef ADA_DEVELOPMENT_CHECKS
+#include <iostream>
+#endif
+
 // https://en.cppreference.com/w/cpp/feature_test#Library_features
 // detect C++20 features
 #include <version>

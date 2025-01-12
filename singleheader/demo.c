@@ -1,8 +1,9 @@
-#include "ada_c.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
+
+#include "ada_c.h"
 
 static void ada_print(ada_string string) {
   printf("%.*s\n", (int)string.length, string.data);

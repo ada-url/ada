@@ -1,9 +1,19 @@
-#include "ada/checkers-inl.h"
-#include "ada/common_defs.h"
-#include "ada/scheme.h"
+#include "helpers.h"
 
 #include <cstring>
 #include <sstream>
+
+#include "character_sets-inl.h"
+#include "checkers-inl.h"
+#include "common_defs.h"
+#include "log.h"
+#include "scheme-inl.h"
+#include "state.h"
+#include "unicode-inl.h"
+
+#if ADA_NEON
+#include <arm_neon.h>
+#endif
 
 namespace ada::helpers {
 

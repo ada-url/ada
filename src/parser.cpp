@@ -1,11 +1,17 @@
-#include "ada/parser.h"
+#include "parser.h"
 
 #include <limits>
 
-#include "ada/character_sets-inl.h"
-#include "ada/common_defs.h"
-#include "ada/log.h"
-#include "ada/unicode.h"
+#include "character_sets-inl.h"
+#include "checkers-inl.h"
+#include "common_defs.h"
+#include "helpers.h"
+#include "implementation.h"
+#include "log.h"
+#include "state.h"
+#include "unicode-inl.h"
+#include "url_aggregator-inl.h"
+#include "url_pattern_helpers-inl.h"
 
 namespace ada::parser {
 

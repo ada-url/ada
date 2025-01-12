@@ -1,11 +1,14 @@
-#include "ada/checkers-inl.h"
-#include "ada/checkers.h"
-#include "ada/unicode-inl.h"
-#include "ada/common_defs.h"
+#include "checkers.h"
 
 #include <algorithm>
 #include <array>
 #include <string_view>
+
+#include "checkers-inl.h"
+#include "checkers.h"
+#include "common_defs.h"
+#include "unicode-inl.h"
+#include "unicode.h"
 
 namespace ada::checkers {
 

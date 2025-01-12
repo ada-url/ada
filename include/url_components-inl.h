@@ -5,7 +5,7 @@
 #ifndef ADA_URL_COMPONENTS_INL_H
 #define ADA_URL_COMPONENTS_INL_H
 
-#include "ada/url_components.h"
+#include "url_components.h"
 
 namespace ada {
 

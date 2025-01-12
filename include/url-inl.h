@@ -5,12 +5,12 @@
 #ifndef ADA_URL_INL_H
 #define ADA_URL_INL_H
 
-#include "ada/checkers.h"
-#include "ada/url.h"
-#include "ada/url_components.h"
-
 #include <optional>
 #include <string>
+
+#include "checkers.h"
+#include "url.h"
+#include "url_components.h"
 #if ADA_REGULAR_VISUAL_STUDIO
 #include <intrin.h>
 #endif  // ADA_REGULAR_VISUAL_STUDIO
@@ -249,6 +249,10 @@ ada_really_inline size_t url::parse_port(std::string_view view,
                                                   : std::nullopt;
   }
   return consumed;
+}
+
+ada_really_inline size_t url::parse_port(std::string_view view) noexcept {
+  return parse_port(view, false);
 }
 
 }  // namespace ada
