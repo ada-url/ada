@@ -783,6 +783,7 @@ bool url::set_port(const std::string_view input) {
     return true;
   }
 
+  // Input should not start with a non-digit character.
   if (!ada::unicode::is_ascii_digit(trimmed.front())) {
     return false;
   }
