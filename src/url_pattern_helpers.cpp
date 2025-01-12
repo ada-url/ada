@@ -1,8 +1,15 @@
-#include "ada/url_pattern_helpers.h"
-
 #include <algorithm>
 #include <optional>
+#include <ranges>
 #include <string>
+
+#include "ada_idna.h"
+#include "common_defs.h"
+#include "log.h"
+#include "parser.h"
+#include "unicode.h"
+#include "url_aggregator-inl.h"
+#include "url_pattern_helpers-inl.h"
 
 namespace ada::url_pattern_helpers {
 

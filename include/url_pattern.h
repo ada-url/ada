@@ -5,16 +5,21 @@
 #ifndef ADA_URL_PATTERN_H
 #define ADA_URL_PATTERN_H
 
-#include "ada/implementation.h"
-#include "ada/expected.h"
-
 #include <regex>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
+#include "common_defs.h"
+#include "expected.h"
+
+#ifdef ADA_TESTING
+#include <ostream>
+#endif  // ADA_TESTING
+
 namespace ada {
+enum class errors : uint8_t;
 
 namespace parser {
 template <typename result_type, typename url_pattern_init,
@@ -278,19 +283,20 @@ class url_pattern {
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
    */
-  result<std::optional<url_pattern_result>> exec(const url_pattern_input& input,
-                                                 std::string_view* base_url);
+  tl::expected<std::optional<url_pattern_result>, errors> exec(
+      const url_pattern_input& input, std::string_view* base_url);
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
    */
-  result<bool> test(const url_pattern_input& input, std::string_view* base_url);
+  tl::expected<bool, errors> test(const url_pattern_input& input,
+                                  std::string_view* base_url);
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#url-pattern-match
    * This function expects a valid UTF-8 string if input is a string.
    */
-  result<std::optional<url_pattern_result>> match(
+  tl::expected<std::optional<url_pattern_result>, errors> match(
       const url_pattern_input& input, std::string_view* base_url_string);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-protocol

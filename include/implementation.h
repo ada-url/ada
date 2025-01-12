@@ -7,20 +7,27 @@
 #define ADA_IMPLEMENTATION_H
 
 #include <string>
-#include <optional>
 
-#include "ada/parser.h"
-#include "ada/common_defs.h"
-#include "ada/encoding_type.h"
-#include "ada/url.h"
-#include "ada/state.h"
-#include "ada/url_aggregator.h"
+#include "common_defs.h"
+#include "expected.h"
+
+/**
+ * @private
+ * Forward declarations.
+ */
+namespace ada {
+struct url_pattern_options;
+struct url_pattern_init;
+class url_pattern;
+struct url_aggregator;
+struct url;
+}  // namespace ada
 
 namespace ada {
 enum class errors : uint8_t { type_error };
 
-template <class result_type = ada::url_aggregator>
-using result = tl::expected<result_type, ada::errors>;
+template <class result_type = url_aggregator>
+using result = tl::expected<result_type, errors>;
 
 /**
  * The URL parser takes a scalar value string input, with an optional null or
@@ -31,13 +38,13 @@ using result = tl::expected<result_type, ada::errors>;
  * @param base_url the optional URL input to use as a base url.
  * @return a parsed URL.
  */
-template <class result_type = ada::url_aggregator>
-ada_warn_unused ada::result<result_type> parse(
+template <class result_type>
+ada_warn_unused result<result_type> parse(
     std::string_view input, const result_type* base_url = nullptr);
 
-extern template ada::result<url> parse<url>(std::string_view input,
-                                            const url* base_url);
-extern template ada::result<url_aggregator> parse<url_aggregator>(
+extern template result<url> parse<url>(std::string_view input,
+                                       const url* base_url);
+extern template result<url_aggregator> parse<url_aggregator>(
     std::string_view input, const url_aggregator* base_url);
 
 /**

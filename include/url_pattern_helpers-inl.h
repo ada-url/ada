@@ -5,11 +5,12 @@
 #ifndef ADA_URL_PATTERN_HELPERS_INL_H
 #define ADA_URL_PATTERN_HELPERS_INL_H
 
-#include "ada/common_defs.h"
-#include "ada/expected.h"
-#include "ada/url_pattern.h"
-#include "ada/url_pattern_helpers.h"
-#include "ada/implementation.h"
+#include "common_defs.h"
+#include "expected.h"
+#include "implementation.h"
+#include "log.h"
+#include "url_pattern.h"
+#include "url_pattern_helpers.h"
 
 namespace ada::url_pattern_helpers {
 inline std::string to_string(token_type type) {

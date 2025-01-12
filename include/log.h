@@ -5,7 +5,7 @@
  */
 #ifndef ADA_LOG_H
 #define ADA_LOG_H
-#include "ada/common_defs.h"
+#include "common_defs.h"
 
 // To enable logging, set ADA_LOGGING to 1:
 #ifndef ADA_LOGGING

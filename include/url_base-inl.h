@@ -5,16 +5,16 @@
 #ifndef ADA_URL_BASE_INL_H
 #define ADA_URL_BASE_INL_H
 
-#include "ada/url_aggregator.h"
-#include "ada/url_components.h"
-#include "ada/scheme.h"
-#include "ada/scheme-inl.h"
-#include "ada/log.h"
-#include "ada/checkers.h"
-#include "ada/url.h"
-
 #include <optional>
 #include <string>
+
+#include "checkers.h"
+#include "log.h"
+#include "scheme-inl.h"
+#include "scheme.h"
+#include "url.h"
+#include "url_aggregator.h"
+#include "url_components.h"
 #if ADA_REGULAR_VISUAL_STUDIO
 #include <intrin.h>
 #endif  // ADA_REGULAR_VISUAL_STUDIO

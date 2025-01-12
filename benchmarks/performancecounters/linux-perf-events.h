@@ -8,9 +8,8 @@
 
 #include <cerrno>   // for errno
 #include <cstring>  // for memset
-#include <stdexcept>
-
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 template <int TYPE = PERF_TYPE_HARDWARE>

@@ -1,6 +1,7 @@
-#include "ada.h"
 #include <cstdlib>
 #include <iostream>
+
+#include "ada.h"
 #include "gtest/gtest.h"
 
 std::string long_way(std::string path) {

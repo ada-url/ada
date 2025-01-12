@@ -1,7 +1,8 @@
+#include <fmt/os.h>
+
 #include <chrono>
 #include <cxxopts.hpp>
 #include <fstream>
-#include <fmt/os.h>
 
 #include "ada.h"
 #include "line_iterator.h"
