@@ -798,11 +798,6 @@ bool url::set_port(const std::string_view input) {
     return false;
   }
 
-  // Input should contain ascii digits.
-  if (!std::ranges::all_of(trimmed, ada::unicode::is_ascii_digit)) {
-    return false;
-  }
-
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;
   parse_port(trimmed);
