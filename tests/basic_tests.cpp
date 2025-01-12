@@ -469,6 +469,7 @@ TYPED_TEST(basic_tests, set_invalid_port) {
   auto url = ada::parse<TypeParam>("fake://dummy.test");
   ASSERT_TRUE(url);
   ASSERT_FALSE(url->set_port("invalid80"));
+  ASSERT_EQ(url->get_port(), "");
   ASSERT_TRUE(url->is_valid);
   SUCCEED();
 }
