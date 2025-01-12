@@ -295,11 +295,6 @@ bool url_aggregator::set_port(const std::string_view input) {
     return false;
   }
 
-  // Input should contain ascii digits.
-  if (!std::ranges::all_of(trimmed, ada::unicode::is_ascii_digit)) {
-    return false;
-  }
-
   // Revert changes if parse_port fails.
   uint32_t previous_port = components.port;
   parse_port(trimmed);
