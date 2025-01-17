@@ -24,15 +24,10 @@ namespace ada {
    *       `--------------------------------------------- protocol_end
    */
   // These conditions can be made more strict.
-  uint32_t index = 0;
-
   if (protocol_end == url_components::omitted) {
     return false;
   }
-  if (protocol_end < index) {
-    return false;
-  }
-  index = protocol_end;
+  uint32_t index = protocol_end;
 
   if (username_end == url_components::omitted) {
     return false;

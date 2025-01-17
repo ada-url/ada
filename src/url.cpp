@@ -716,7 +716,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
 
     bool succeeded = parse_host(host_view);
     if (!succeeded) {
-      host = previous_host;
+      host = std::move(previous_host);
       update_base_port(previous_port);
     }
     return succeeded;
@@ -733,13 +733,13 @@ bool url::set_host_or_hostname(const std::string_view input) {
   } else {
     // Let host be the result of host parsing buffer with url is not special.
     if (!parse_host(new_host)) {
-      host = previous_host;
+      host = std::move(previous_host);
       update_base_port(previous_port);
       return false;
     }
 
     // If host is "localhost", then set host to the empty string.
-    if (host.has_value() && host.value() == "localhost") {
+    if (host == "localhost") {
       host = "";
     }
   }
@@ -794,7 +794,7 @@ bool url::set_port(const std::string_view input) {
   if (is_valid) {
     return true;
   }
-  port = previous_port;
+  port = std::move(previous_port);
   is_valid = true;
   return false;
 }
@@ -835,7 +835,7 @@ bool url::set_pathname(const std::string_view input) {
   if (has_opaque_path) {
     return false;
   }
-  path = "";
+  path.clear();
   parse_path(input);
   return true;
 }
