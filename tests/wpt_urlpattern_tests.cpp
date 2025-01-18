@@ -29,16 +29,20 @@ TEST(wpt_urlpattern_tests, parse_pattern_string_basic_tests) {
 }
 
 TEST(wpt_urlpattern_tests, compile_basic_tests) {
-  auto protocol_component = ada::url_pattern_component::compile(
-      "*", ada::url_pattern_helpers::canonicalize_protocol,
-      ada::url_pattern_compile_component_options::DEFAULT);
+  auto provider = ada::url_pattern_regex::std_regex_provider();
+  auto protocol_component = ada::url_pattern_component<
+      ada::url_pattern_regex::std_regex_provider,
+      std::regex>::compile("*", ada::url_pattern_helpers::canonicalize_protocol,
+                           ada::url_pattern_compile_component_options::DEFAULT,
+                           provider);
   ASSERT_TRUE(protocol_component);
 }
 
 TEST(wpt_urlpattern_tests, basic_tests) {
   auto init = ada::url_pattern_init{};
   init.pathname = "/books";
-  auto url = ada::parse_url_pattern(init);
+  auto url = ada::parse_url_pattern<ada::url_pattern_regex::std_regex_provider,
+                                    std::regex>(init);
   ASSERT_TRUE(url);
   ASSERT_EQ(url->get_protocol(), "*");
   ASSERT_EQ(url->get_hostname(), "*");
@@ -55,8 +59,9 @@ TEST(wpt_urlpattern_tests, basic_tests) {
 // Tests are taken from WPT
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {
-  auto create_init = [](std::string_view component,
-                        std::string value) -> ada::url_pattern_init {
+  auto create_init = [](std::string_view component, std::string value)
+      -> ada::url_pattern_init<ada::url_pattern_regex::std_regex_provider,
+                               std::regex> {
     if (component == "protocol") return {.protocol = value};
     if (component == "username") return {.username = value};
     if (component == "password") return {.password = value};
@@ -224,7 +229,7 @@ parse_pattern_field(ondemand::array& patterns) {
   return std::tuple(*init_str, base_url, options);
 }
 
-tl::expected<ada::url_pattern, ada::errors> parse_pattern(
+tl::expected<ada::url_pattern<std::regex>, ada::errors> parse_pattern(
     std::variant<std::string, ada::url_pattern_init, bool>& init_variant,
     std::optional<std::string>& base_url,
     std::optional<ada::url_pattern_options>& options) {

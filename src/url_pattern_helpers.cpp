@@ -189,17 +189,22 @@ std::string generate_segment_wildcard_regexp(
   ada_log("generate_segment_wildcard_regexp result: ", result);
   return result;
 }
-
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
 bool protocol_component_matches_special_scheme(
-    url_pattern_component& component) {
+    url_pattern_component<regex_provider, regex_type>& component) {
   auto regex = component.regexp;
+  // TODO: Use provider.regex_match
   return std::regex_match("http", regex) || std::regex_match("https", regex) ||
          std::regex_match("ws", regex) || std::regex_match("wss", regex) ||
          std::regex_match("ftp", regex);
 }
 
-inline std::optional<errors>
-constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+inline std::optional<errors> constructor_string_parser<
+    regex_provider,
+    regex_type>::compute_protocol_matches_special_scheme_flag() {
   ada_log(
       "constructor_string_parser::compute_protocol_matches_special_scheme_"
       "flag");
@@ -208,9 +213,10 @@ constructor_string_parser::compute_protocol_matches_special_scheme_flag() {
   auto protocol_string = make_component_string();
   // Let protocol component be the result of compiling a component given
   // protocol string, canonicalize a protocol, and default options.
-  auto protocol_component = url_pattern_component::compile(
-      protocol_string, canonicalize_protocol,
-      url_pattern_compile_component_options::DEFAULT);
+  auto protocol_component =
+      url_pattern_component<regex_provider, regex_type>::compile(
+          protocol_string, canonicalize_protocol,
+          url_pattern_compile_component_options::DEFAULT);
   if (!protocol_component) {
     ada_log("url_pattern_component::compile failed for protocol_string ",
             protocol_string);
@@ -470,7 +476,10 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   return tl::unexpected(errors::type_error);
 }
 
-tl::expected<url_pattern_init, errors> constructor_string_parser::parse(
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+tl::expected<url_pattern_init, errors>
+constructor_string_parser<regex_provider, regex_type>::parse(
     std::string_view input) {
   ada_log("constructor_string_parser::parse input=", input);
   // Let parser be a new constructor string parser whose input is input and
@@ -564,7 +573,8 @@ tl::expected<url_pattern_init, errors> constructor_string_parser::parse(
         if (parser.is_protocol_suffix()) {
           // Run compute protocol matches a special scheme flag given parser.
           if (const auto error =
-                  parser.compute_protocol_matches_special_scheme_flag()) {
+                  parser.template compute_protocol_matches_special_scheme_flag<
+                      regex_type>()) {
             ada_log("compute_protocol_matches_special_scheme_flag failed");
             return tl::unexpected(*error);
           }
