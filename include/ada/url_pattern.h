@@ -19,11 +19,11 @@ namespace ada {
 
 namespace parser {
 template <typename result_type, typename url_pattern_init,
-          typename url_pattern_options>
+          typename url_pattern_options, typename regex_provider>
 tl::expected<result_type, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options,
-    url_pattern_regex::provider&& regex_provider);
+    regex_provider&& provider);
 }
 
 // Important: C++20 allows us to use concept rather than `using` or `typedef
@@ -207,19 +207,19 @@ struct url_pattern_component_result {
 #endif  // ADA_TESTING
 };
 
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
 class url_pattern_component {
  public:
   url_pattern_component() = default;
 
   // This function explicitly takes a std::string because it is moved.
   // To avoid unnecessary copy, move each value while calling the constructor.
-  url_pattern_component(std::string&& new_pattern, std::regex&& new_regexp,
-                        std::regex_constants::syntax_option_type new_flags,
+  url_pattern_component(std::string&& new_pattern, regex_type&& new_regexp,
                         std::vector<std::string>&& new_group_name_list,
                         bool new_has_regexp_groups)
       : regexp(std::move(new_regexp)),
         pattern(std::move(new_pattern)),
-        flags(new_flags),
         group_name_list(new_group_name_list),
         has_regexp_groups(new_has_regexp_groups) {}
 
@@ -227,7 +227,8 @@ class url_pattern_component {
   template <url_pattern_encoding_callback F>
   static tl::expected<url_pattern_component, errors> compile(
       std::string_view input, F& encoding_callback,
-      url_pattern_compile_component_options& options);
+      url_pattern_compile_component_options& options,
+      const regex_provider& provider);
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
@@ -235,9 +236,8 @@ class url_pattern_component {
 
   std::string to_string() const;
 
-  std::regex regexp{};
+  regex_type regexp{};
   std::string pattern{};
-  std::regex_constants::syntax_option_type flags = std::regex::ECMAScript;
   std::vector<std::string> group_name_list{};
   bool has_regexp_groups = false;
 };
@@ -270,10 +270,13 @@ struct url_pattern_options {
 // defined in https://wicg.github.io/urlpattern.
 // More information about the URL Pattern syntax can be found at
 // https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
 class url_pattern {
  public:
-  explicit url_pattern(url_pattern_regex::provider&& regex_provider)
-      : regex_provider_(std::move(regex_provider)) {}
+  explicit url_pattern(
+      url_pattern_regex::provider<regex_type>&& new_regex_provider)
+      : regex_provider_(std::move(new_regex_provider)) {}
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
@@ -294,48 +297,48 @@ class url_pattern {
       const url_pattern_input& input, std::string_view* base_url_string);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-protocol
-  std::string_view get_protocol() const ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_protocol() const ada_lifetime_bound;
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-username
-  std::string_view get_username() const ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_username() const ada_lifetime_bound;
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-password
-  std::string_view get_password() const ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_password() const ada_lifetime_bound;
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-hostname
-  std::string_view get_hostname() const ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_hostname() const ada_lifetime_bound;
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-port
-  std::string_view get_port() const ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_port() const ada_lifetime_bound;
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-pathname
-  std::string_view get_pathname() const ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_pathname() const ada_lifetime_bound;
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-search
-  std::string_view get_search() const ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_search() const ada_lifetime_bound;
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-hash
-  std::string_view get_hash() const ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_hash() const ada_lifetime_bound;
 
   // If ignoreCase is true, the JavaScript regular expression created for each
   // pattern must use the `vi` flag. Otherwise, they must use the `v` flag.
-  bool ignore_case() const;
+  [[nodiscard]] bool ignore_case() const;
 
   // @see https://urlpattern.spec.whatwg.org/#url-pattern-has-regexp-groups
-  bool has_regexp_groups() const;
+  [[nodiscard]] bool has_regexp_groups() const;
 
-  std::string to_string() const;
+  [[nodiscard]] std::string to_string() const;
 
-  url_pattern_component protocol_component{};
-  url_pattern_component username_component{};
-  url_pattern_component password_component{};
-  url_pattern_component hostname_component{};
-  url_pattern_component port_component{};
-  url_pattern_component pathname_component{};
-  url_pattern_component search_component{};
-  url_pattern_component hash_component{};
+  url_pattern_component<regex_provider, regex_type> protocol_component{};
+  url_pattern_component<regex_provider, regex_type> username_component{};
+  url_pattern_component<regex_provider, regex_type> password_component{};
+  url_pattern_component<regex_provider, regex_type> hostname_component{};
+  url_pattern_component<regex_provider, regex_type> port_component{};
+  url_pattern_component<regex_provider, regex_type> pathname_component{};
+  url_pattern_component<regex_provider, regex_type> search_component{};
+  url_pattern_component<regex_provider, regex_type> hash_component{};
   bool ignore_case_ = false;
-  url_pattern_regex::provider regex_provider_;
+  regex_provider regex_provider_;
 
   template <typename result_type, typename url_pattern_init,
-            typename url_pattern_options>
+            typename url_pattern_options, typename regex_provider_>
   friend tl::expected<result_type, errors> parser::parse_url_pattern_impl(
       std::variant<std::string_view, url_pattern_init> input,
       const std::string_view* base_url, const url_pattern_options* options,
-      url_pattern_regex::provider&& regex_provider);
+      regex_provider_&& provider);
 };
 
 }  // namespace ada

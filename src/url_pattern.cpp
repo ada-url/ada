@@ -450,10 +450,14 @@ std::string url_pattern_init::to_string() const {
   return answer;
 }
 
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
 template <url_pattern_encoding_callback F>
-tl::expected<url_pattern_component, errors> url_pattern_component::compile(
+tl::expected<url_pattern_component<regex_provider, regex_type>, errors>
+url_pattern_component<regex_provider, regex_type>::compile(
     std::string_view input, F& encoding_callback,
-    url_pattern_compile_component_options& options) {
+    url_pattern_compile_component_options& options,
+    const regex_provider& provider) {
   ada_log("url_pattern_component::compile input: ", input);
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
@@ -473,13 +477,6 @@ tl::expected<url_pattern_component, errors> url_pattern_component::compile(
 
   ada_log("regular expression string: ", regular_expression_string);
 
-  // Let flags be an empty string.
-  // If options’s ignore case is true then set flags to "vi".
-  // Otherwise set flags to "v"
-  auto flags = options.ignore_case
-                   ? std::regex::icase | std::regex_constants::ECMAScript
-                   : std::regex_constants::ECMAScript;
-
   // Let pattern string be the result of running generate a pattern
   // string given part list and options.
   auto pattern_string =
@@ -488,12 +485,10 @@ tl::expected<url_pattern_component, errors> url_pattern_component::compile(
   // Let regular expression be RegExpCreate(regular expression string,
   // flags). If this throws an exception, catch it, and throw a
   // TypeError.
-  std::regex regular_expression;
-  try {
-    regular_expression = std::regex(regular_expression_string, flags);
-  } catch (std::regex_error& error) {
-    (void)error;
-    ada_log("std::regex_error: ", error.what());
+  auto regular_expression =
+      provider.create_instance(regular_expression_string, options.ignore_case);
+
+  if (!regular_expression) {
     return tl::unexpected(errors::type_error);
   }
 
@@ -507,20 +502,25 @@ tl::expected<url_pattern_component, errors> url_pattern_component::compile(
   // Return a new component whose pattern string is pattern string, regular
   // expression is regular expression, group name list is name list, and has
   // regexp groups is has regexp groups.
-  return url_pattern_component(std::move(pattern_string),
-                               std::move(regular_expression), flags,
-                               std::move(name_list), has_regexp_groups);
+  return url_pattern_component<regex_provider, regex_type>(
+      std::move(pattern_string), std::move(regular_expression),
+      std::move(name_list), has_regexp_groups);
 }
 
-result<std::optional<url_pattern_result>> url_pattern::exec(
-    const url_pattern_input& input, std::string_view* base_url = nullptr) {
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+result<std::optional<url_pattern_result>>
+url_pattern<regex_provider, regex_type>::exec(const url_pattern_input& input,
+                                              std::string_view* base_url) {
   // Return the result of match given this's associated URL pattern, input, and
   // baseURL if given.
   return match(input, base_url);
 }
 
-result<bool> url_pattern::test(const url_pattern_input& input,
-                               std::string_view* base_url = nullptr) {
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+result<bool> url_pattern<regex_provider, regex_type>::test(
+    const url_pattern_input& input, std::string_view* base_url) {
   // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
   // Implement a fast path just like `can_parse()` in ada_url.
   // Let result be the result of match given this's associated URL pattern,
@@ -532,7 +532,10 @@ result<bool> url_pattern::test(const url_pattern_input& input,
   return tl::unexpected(errors::type_error);
 }
 
-result<std::optional<url_pattern_result>> url_pattern::match(
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+result<std::optional<url_pattern_result>>
+url_pattern<regex_provider, regex_type>::match(
     const url_pattern_input& input, std::string_view* base_url_string) {
   std::string protocol{};
   std::string username{};

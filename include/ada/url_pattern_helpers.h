@@ -139,6 +139,8 @@ class Tokenizer {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
 struct constructor_string_parser {
   explicit constructor_string_parser(std::string_view new_input,
                                      std::vector<Token>&& new_token_list)
@@ -321,8 +323,10 @@ bool is_ipv6_address(std::string_view input) noexcept;
 
 // @see
 // https://urlpattern.spec.whatwg.org/#protocol-component-matches-a-special-scheme
+template <class regex_provider, class regex_type>
+  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
 bool protocol_component_matches_special_scheme(
-    ada::url_pattern_component& input);
+    ada::url_pattern_component<regex_provider, regex_type>& input);
 
 // @see https://urlpattern.spec.whatwg.org/#convert-a-modifier-to-a-string
 std::string convert_modifier_to_string(url_pattern_part_modifier modifier);
