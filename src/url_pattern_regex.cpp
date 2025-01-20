@@ -26,8 +26,8 @@ std::vector<std::string> std_regex_provider::regex_search(
       input.begin(),
       input.end());  // Convert string_view to string for regex_search
   std::smatch match_result;
-
-  while (std::regex_search(input_str, match_result, pattern)) {
+  while (std::regex_search(input_str, match_result, pattern,
+                           std::regex_constants::match_any)) {
     matches.push_back(match_result.str());
     input_str = match_result.suffix().str();
   }
@@ -36,7 +36,7 @@ std::vector<std::string> std_regex_provider::regex_search(
 
 bool std_regex_provider::regex_match(std::string_view input,
                                      const std::regex& pattern) {
-  return std::regex_match(input.data(), input.begin(), pattern);
+      return std::regex_match(input.begin(), input.end(), pattern);
 }
 
 }  // namespace ada::url_pattern_regex
