@@ -1303,5 +1303,4 @@ std::string generate_pattern_string(
   // Return result.
   return result;
 }
-
 }  // namespace ada::url_pattern_helpers
