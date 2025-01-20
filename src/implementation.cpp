@@ -101,4 +101,14 @@ template result<std::optional<url_pattern_result>>
 url_pattern<url_pattern_regex::std_regex_provider>::exec(
     const url_pattern_input& input, std::string_view* base_url);
 
+template result<bool> url_pattern<url_pattern_regex::std_regex_provider>::test(
+    const url_pattern_input& input, std::string_view* base_url);
+namespace parser {
+template tl::expected<url_pattern<url_pattern_regex::std_regex_provider>,
+                      errors>
+parse_url_pattern_impl(std::variant<std::string_view, url_pattern_init> input,
+                       const std::string_view* base_url,
+                       const url_pattern_options* options,
+                       url_pattern_regex::std_regex_provider&& provider);
+}  // namespace parser
 }  // namespace ada
