@@ -215,7 +215,7 @@ class url_pattern_component {
   // This function explicitly takes a std::string because it is moved.
   // To avoid unnecessary copy, move each value while calling the constructor.
   url_pattern_component(std::string&& new_pattern,
-                        regex_provider::regex_type&& new_regexp,
+                        typename regex_provider::regex_type&& new_regexp,
                         std::vector<std::string>&& new_group_name_list,
                         bool new_has_regexp_groups)
       : regexp(std::move(new_regexp)),
