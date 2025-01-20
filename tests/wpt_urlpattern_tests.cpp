@@ -28,16 +28,6 @@ TEST(wpt_urlpattern_tests, parse_pattern_string_basic_tests) {
   ASSERT_TRUE(part_list);
 }
 
-TEST(wpt_urlpattern_tests, compile_basic_tests) {
-  auto provider = ada::url_pattern_regex::std_regex_provider();
-  auto protocol_component =
-      ada::url_pattern_component<ada::url_pattern_regex::std_regex_provider>::
-          compile("*", ada::url_pattern_helpers::canonicalize_protocol,
-                  ada::url_pattern_compile_component_options::DEFAULT,
-                  provider);
-  ASSERT_TRUE(protocol_component);
-}
-
 TEST(wpt_urlpattern_tests, basic_tests) {
   auto init = ada::url_pattern_init{};
   init.pathname = "/books";

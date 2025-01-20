@@ -111,4 +111,5 @@ parse_url_pattern_impl(std::variant<std::string_view, url_pattern_init> input,
                        const url_pattern_options* options,
                        url_pattern_regex::std_regex_provider&& provider);
 }  // namespace parser
+
 }  // namespace ada
