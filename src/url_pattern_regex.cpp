@@ -21,16 +21,17 @@ std::optional<std::regex> std_regex_provider::create_instance(
 
 std::vector<std::string> std_regex_provider::regex_search(
     std::string_view input, const std::regex& pattern) {
+  std::vector<std::string> matches;
+  std::string input_str(
+      input.begin(),
+      input.end());  // Convert string_view to string for regex_search
+  std::smatch match_result;
 
-    std::vector<std::string> matches;
-    std::string input_str(input.begin(), input.end());  // Convert string_view to string for regex_search
-    std::smatch match_result;
-
-    while (std::regex_search(input_str, match_result, pattern)) {
-        matches.push_back(match_result.str());
-        input_str = match_result.suffix().str();
-    }
-    return matches;
+  while (std::regex_search(input_str, match_result, pattern)) {
+    matches.push_back(match_result.str());
+    input_str = match_result.suffix().str();
+  }
+  return matches;
 }
 
 bool std_regex_provider::regex_match(std::string_view input,
