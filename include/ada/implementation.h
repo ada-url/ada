@@ -58,7 +58,7 @@ bool can_parse(std::string_view input,
  * use ada::url_pattern_regex::std_regex_provider
  * @return url_pattern instance
  */
-template <class regex_provider, class regex_type>
+template <class regex_provider = ada::url_pattern_regex::std_regex_provider, class regex_type = std::regex>
   requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
 ada_warn_unused tl::expected<url_pattern<regex_provider, regex_type>, errors>
 parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,

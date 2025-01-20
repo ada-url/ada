@@ -60,8 +60,7 @@ TEST(wpt_urlpattern_tests, basic_tests) {
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {
   auto create_init = [](std::string_view component, std::string value)
-      -> ada::url_pattern_init<ada::url_pattern_regex::std_regex_provider,
-                               std::regex> {
+      -> ada::url_pattern_init {
     if (component == "protocol") return {.protocol = value};
     if (component == "username") return {.username = value};
     if (component == "password") return {.password = value};
@@ -229,7 +228,7 @@ parse_pattern_field(ondemand::array& patterns) {
   return std::tuple(*init_str, base_url, options);
 }
 
-tl::expected<ada::url_pattern<std::regex>, ada::errors> parse_pattern(
+tl::expected<ada::url_pattern<ada::url_pattern_regex::std_regex_provider, std::regex>, ada::errors> parse_pattern(
     std::variant<std::string, ada::url_pattern_init, bool>& init_variant,
     std::optional<std::string>& base_url,
     std::optional<ada::url_pattern_options>& options) {
