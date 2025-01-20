@@ -79,16 +79,26 @@ ada_warn_unused std::string to_string(ada::encoding_type type) {
   }
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-ada_warn_unused tl::expected<url_pattern<regex_provider, regex_type>, errors>
+template <url_pattern_regex::regex_concept regex_provider>
+ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
 parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
                   const std::string_view* base_url,
                   const url_pattern_options* options,
                   std::optional<regex_provider> provider) {
-  return parser::parse_url_pattern_impl<regex_provider, regex_type>(
+  return parser::parse_url_pattern_impl<regex_provider>(
       std::move(input), base_url, options,
       provider.value_or(url_pattern_regex::std_regex_provider()));
 }
+
+template ada_warn_unused
+    tl::expected<url_pattern<url_pattern_regex::std_regex_provider>, errors>
+    parse_url_pattern(
+        std::variant<std::string_view, url_pattern_init> input,
+        const std::string_view* base_url, const url_pattern_options* options,
+        std::optional<url_pattern_regex::std_regex_provider> provider);
+
+template result<std::optional<url_pattern_result>>
+url_pattern<url_pattern_regex::std_regex_provider>::exec(
+    const url_pattern_input& input, std::string_view* base_url);
 
 }  // namespace ada

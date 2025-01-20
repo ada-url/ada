@@ -17,8 +17,7 @@
 namespace ada {
 struct url_aggregator;
 struct url;
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+template <url_pattern_regex::regex_concept regex_provider>
 class url_pattern;
 struct url_pattern_options;
 struct url_pattern_init;
@@ -54,13 +53,11 @@ extern template url_aggregator parse_url_impl<url_aggregator>(
 extern template url parse_url_impl<url>(std::string_view user_input,
                                         const url* base_url);
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-tl::expected<url_pattern<regex_provider, regex_type>, errors>
-parse_url_pattern_impl(std::variant<std::string_view, url_pattern_init> input,
-                       const std::string_view* base_url,
-                       const url_pattern_options* options,
-                       regex_provider&& provider);
+template <url_pattern_regex::regex_concept regex_provider>
+tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
+    std::variant<std::string_view, url_pattern_init> input,
+    const std::string_view* base_url, const url_pattern_options* options,
+    regex_provider&& provider);
 
 }  // namespace ada::parser
 
