@@ -10,33 +10,43 @@
 
 namespace ada::url_pattern_regex {
 
-template <class T>
-class provider {
- public:
-  using regex_type = T;
+template <typename T>
+concept regex_concept = requires(T t, std::string_view pattern,
+                                 bool ignore_case, std::string_view input) {
+  // Ensure the class has a type alias 'regex_type'
+  typename T::regex_type;
 
-  virtual ~provider() = default;
-  virtual std::optional<regex_type> create_instance(std::string_view pattern,
-                                                    bool ignore_case) = 0;
-  virtual std::optional<std::vector<std::string>> regex_search(
-      std::string_view input, const regex_type& pattern) = 0;
-  virtual bool regex_match(std::string_view input,
-                           const regex_type& pattern) = 0;
+  // Function to create a regex instance
+  {
+    T::create_instance(pattern, ignore_case)
+  } -> std::same_as<std::optional<typename T::regex_type>>;
+
+  // Function to perform regex search
+  {
+    t.regex_search(input, std::declval<typename T::regex_type&>())
+  } -> std::same_as<std::optional<std::vector<std::string>>>;
+
+  // Function to match regex pattern
+  {
+    t.regex_match(input, std::declval<typename T::regex_type&>())
+  } -> std::same_as<bool>;
+
+  // Copy constructor
+  { T(std::declval<const T&>()) } -> std::same_as<T>;
+
+  // Move constructor
+  { T(std::declval<T&&>()) } -> std::same_as<T>;
 };
 
-template <class derived_class, typename type>
-concept derived_from_provider =
-    std::is_base_of_v<provider<type>, derived_class>;
-
-class std_regex_provider : public provider<std::regex> {
+class std_regex_provider {
  public:
   std_regex_provider() = default;
   using regex_type = std::regex;
-  std::optional<regex_type> create_instance(std::string_view pattern,
-                                            bool ignore_case) override;
+  static std::optional<regex_type> create_instance(std::string_view pattern,
+                                                   bool ignore_case);
   std::optional<std::vector<std::string>> regex_search(
-      std::string_view input, const regex_type& pattern) override;
-  bool regex_match(std::string_view input, const regex_type& pattern) override;
+      std::string_view input, const regex_type& pattern);
+  bool regex_match(std::string_view input, const regex_type& pattern);
 };
 
 }  // namespace ada::url_pattern_regex

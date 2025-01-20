@@ -39,26 +39,23 @@ inline std::string to_string(token_type type) {
   }
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-void constructor_string_parser<regex_provider, regex_type>::rewind() {
+template <url_pattern_regex::regex_concept regex_provider>
+void constructor_string_parser<regex_provider>::rewind() {
   // Set parser’s token index to parser’s component start.
   token_index = component_start;
   // Set parser’s token increment to 0.
   token_increment = 0;
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider, regex_type>::is_hash_prefix() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_hash_prefix() {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index and "#".
   return is_non_special_pattern_char(token_index, "#");
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider, regex_type>::is_search_prefix() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_search_prefix() {
   // If result of running is a non-special pattern char given parser, parser’s
   // token index and "?" is true, then return true.
   if (is_non_special_pattern_char(token_index, "?")) {
@@ -90,10 +87,9 @@ bool constructor_string_parser<regex_provider, regex_type>::is_search_prefix() {
            previous_token->type == token_type::ASTERISK);
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider, regex_type>::
-    is_non_special_pattern_char(size_t index, std::string_view value) {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_non_special_pattern_char(
+    size_t index, std::string_view value) {
   // Let token be the result of running get a safe token given parser and index.
   auto token = get_safe_token(index);
   ADA_ASSERT_TRUE(token);
@@ -113,10 +109,8 @@ bool constructor_string_parser<regex_provider, regex_type>::
          token->type == token_type::INVALID_CHAR;
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-const Token*
-constructor_string_parser<regex_provider, regex_type>::get_safe_token(
+template <url_pattern_regex::regex_concept regex_provider>
+const Token* constructor_string_parser<regex_provider>::get_safe_token(
     size_t index) {
   // If index is less than parser’s token list's size, then return parser’s
   // token list[index].
@@ -135,28 +129,22 @@ constructor_string_parser<regex_provider, regex_type>::get_safe_token(
   return &token_list.back();
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider, regex_type>::is_group_open()
-    const {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_group_open() const {
   // If parser’s token list[parser’s token index]'s type is "open", then return
   // true.
   return token_list[token_index].type == token_type::OPEN;
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider, regex_type>::is_group_close()
-    const {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_group_close() const {
   // If parser’s token list[parser’s token index]'s type is "close", then return
   // true.
   return token_list[token_index].type == token_type::CLOSE;
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider,
-                               regex_type>::next_is_authority_slashes() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::next_is_authority_slashes() {
   // If the result of running is a non-special pattern char given parser,
   // parser’s token index + 1, and "/" is false, then return false.
   if (!is_non_special_pattern_char(token_index + 1, "/")) {
@@ -170,19 +158,16 @@ bool constructor_string_parser<regex_provider,
   return true;
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider,
-                               regex_type>::is_protocol_suffix() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_protocol_suffix() {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and ":".
   return is_non_special_pattern_char(token_index, ":");
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-void constructor_string_parser<regex_provider, regex_type>::change_state(
-    State new_state, size_t skip) {
+template <url_pattern_regex::regex_concept regex_provider>
+void constructor_string_parser<regex_provider>::change_state(State new_state,
+                                                             size_t skip) {
   // If parser’s state is not "init", not "authority", and not "done", then set
   // parser’s result[parser’s state] to the result of running make a component
   // string given parser.
@@ -280,10 +265,8 @@ void constructor_string_parser<regex_provider, regex_type>::change_state(
   token_increment = 0;
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string
-constructor_string_parser<regex_provider, regex_type>::make_component_string() {
+template <url_pattern_regex::regex_concept regex_provider>
+std::string constructor_string_parser<regex_provider>::make_component_string() {
   // Assert: parser’s token index is less than parser’s token list's size.
   ADA_ASSERT_TRUE(token_index < token_list.size());
 
@@ -302,52 +285,43 @@ constructor_string_parser<regex_provider, regex_type>::make_component_string() {
                       end_index - component_start_input_index);
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider,
-                               regex_type>::is_an_identity_terminator() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_an_identity_terminator() {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and "@".
   return is_non_special_pattern_char(token_index, "@");
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider,
-                               regex_type>::is_pathname_start() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_pathname_start() {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and "/".
   return is_non_special_pattern_char(token_index, "/");
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider,
-                               regex_type>::is_password_prefix() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_password_prefix() {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and ":".
   return is_non_special_pattern_char(token_index, ":");
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider, regex_type>::is_an_ipv6_open() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_an_ipv6_open() {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and "[".
   return is_non_special_pattern_char(token_index, "[");
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider, regex_type>::is_an_ipv6_close() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_an_ipv6_close() {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and "]".
   return is_non_special_pattern_char(token_index, "]");
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool constructor_string_parser<regex_provider, regex_type>::is_port_prefix() {
+template <url_pattern_regex::regex_concept regex_provider>
+bool constructor_string_parser<regex_provider>::is_port_prefix() {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and ":".
   return is_non_special_pattern_char(token_index, ":");

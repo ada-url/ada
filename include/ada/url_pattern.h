@@ -207,15 +207,15 @@ struct url_pattern_component_result {
 #endif  // ADA_TESTING
 };
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+template <url_pattern_regex::regex_concept regex_provider>
 class url_pattern_component {
  public:
   url_pattern_component() = default;
 
   // This function explicitly takes a std::string because it is moved.
   // To avoid unnecessary copy, move each value while calling the constructor.
-  url_pattern_component(std::string&& new_pattern, regex_type&& new_regexp,
+  url_pattern_component(std::string&& new_pattern,
+                        regex_provider::regex_type&& new_regexp,
                         std::vector<std::string>&& new_group_name_list,
                         bool new_has_regexp_groups)
       : regexp(std::move(new_regexp)),
@@ -236,7 +236,7 @@ class url_pattern_component {
 
   std::string to_string() const;
 
-  regex_type regexp{};
+  regex_provider::regex_type regexp{};
   std::string pattern{};
   std::vector<std::string> group_name_list{};
   bool has_regexp_groups = false;
@@ -270,13 +270,11 @@ struct url_pattern_options {
 // defined in https://wicg.github.io/urlpattern.
 // More information about the URL Pattern syntax can be found at
 // https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+template <url_pattern_regex::regex_concept regex_provider>
 class url_pattern {
  public:
-  explicit url_pattern(
-      url_pattern_regex::provider<regex_type>&& new_regex_provider)
-      : regex_provider_(std::move(new_regex_provider)) {}
+  explicit url_pattern(regex_provider&& new_regex_provider)
+      : regex_provider_(new_regex_provider) {}
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
@@ -322,14 +320,14 @@ class url_pattern {
 
   [[nodiscard]] std::string to_string() const;
 
-  url_pattern_component<regex_provider, regex_type> protocol_component{};
-  url_pattern_component<regex_provider, regex_type> username_component{};
-  url_pattern_component<regex_provider, regex_type> password_component{};
-  url_pattern_component<regex_provider, regex_type> hostname_component{};
-  url_pattern_component<regex_provider, regex_type> port_component{};
-  url_pattern_component<regex_provider, regex_type> pathname_component{};
-  url_pattern_component<regex_provider, regex_type> search_component{};
-  url_pattern_component<regex_provider, regex_type> hash_component{};
+  url_pattern_component<regex_provider> protocol_component{};
+  url_pattern_component<regex_provider> username_component{};
+  url_pattern_component<regex_provider> password_component{};
+  url_pattern_component<regex_provider> hostname_component{};
+  url_pattern_component<regex_provider> port_component{};
+  url_pattern_component<regex_provider> pathname_component{};
+  url_pattern_component<regex_provider> search_component{};
+  url_pattern_component<regex_provider> hash_component{};
   bool ignore_case_ = false;
   regex_provider regex_provider_;
 

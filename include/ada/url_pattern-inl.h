@@ -24,10 +24,8 @@ inline bool url_pattern_component_result::operator==(
   return input == other.input && groups == other.groups;
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string url_pattern_component<regex_provider, regex_type>::to_string()
-    const {
+template <url_pattern_regex::regex_concept regex_provider>
+std::string url_pattern_component<regex_provider>::to_string() const {
 #ifdef ADA_HAS_FORMAT
   return std::format(R"({{"pattern": "{}", "has_regexp_groups": {}}})", pattern,
                      has_regexp_groups ? "true" : "false"  //,
@@ -37,11 +35,10 @@ std::string url_pattern_component<regex_provider, regex_type>::to_string()
 #endif
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-url_pattern_component_result url_pattern_component<regex_provider, regex_type>::
-    create_component_match_result(std::string_view input,
-                                  const std::smatch& exec_result) {
+template <url_pattern_regex::regex_concept regex_provider>
+url_pattern_component_result
+url_pattern_component<regex_provider>::create_component_match_result(
+    std::string_view input, const std::smatch& exec_result) {
   // Let result be a new URLPatternComponentResult.
   // Set result["input"] to input.
   // Let groups be a record<USVString, (USVString or undefined)>.
@@ -75,9 +72,8 @@ url_pattern_component_result url_pattern_component<regex_provider, regex_type>::
   return result;
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string url_pattern<regex_provider, regex_type>::to_string() const {
+template <url_pattern_regex::regex_concept regex_provider>
+std::string url_pattern<regex_provider>::to_string() const {
 #ifdef ADA_HAS_FORMAT
   return std::format(
       R"({{"protocol_component": "{}", "username_component": {}, "password_component": {}, "hostname_component": {}, "port_component": {}, "pathname_component": {}, "search_component": {}, "hash_component": {}, "ignore_case": {}}})",
@@ -91,70 +87,60 @@ std::string url_pattern<regex_provider, regex_type>::to_string() const {
 #endif
 }
 
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string_view url_pattern<regex_provider, regex_type>::get_protocol() const
+template <url_pattern_regex::regex_concept regex_provider>
+std::string_view url_pattern<regex_provider>::get_protocol() const
     ada_lifetime_bound {
   // Return this's associated URL pattern's protocol component's pattern string.
   return protocol_component.pattern;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string_view url_pattern<regex_provider, regex_type>::get_username() const
+template <url_pattern_regex::regex_concept regex_provider>
+std::string_view url_pattern<regex_provider>::get_username() const
     ada_lifetime_bound {
   // Return this's associated URL pattern's username component's pattern string.
   return username_component.pattern;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string_view url_pattern<regex_provider, regex_type>::get_password() const
+template <url_pattern_regex::regex_concept regex_provider>
+std::string_view url_pattern<regex_provider>::get_password() const
     ada_lifetime_bound {
   // Return this's associated URL pattern's password component's pattern string.
   return password_component.pattern;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string_view url_pattern<regex_provider, regex_type>::get_hostname() const
+template <url_pattern_regex::regex_concept regex_provider>
+std::string_view url_pattern<regex_provider>::get_hostname() const
     ada_lifetime_bound {
   // Return this's associated URL pattern's hostname component's pattern string.
   return hostname_component.pattern;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string_view url_pattern<regex_provider, regex_type>::get_port() const
+template <url_pattern_regex::regex_concept regex_provider>
+std::string_view url_pattern<regex_provider>::get_port() const
     ada_lifetime_bound {
   // Return this's associated URL pattern's port component's pattern string.
   return port_component.pattern;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string_view url_pattern<regex_provider, regex_type>::get_pathname() const
+template <url_pattern_regex::regex_concept regex_provider>
+std::string_view url_pattern<regex_provider>::get_pathname() const
     ada_lifetime_bound {
   // Return this's associated URL pattern's pathname component's pattern string.
   return pathname_component.pattern;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string_view url_pattern<regex_provider, regex_type>::get_search() const
+template <url_pattern_regex::regex_concept regex_provider>
+std::string_view url_pattern<regex_provider>::get_search() const
     ada_lifetime_bound {
   // Return this's associated URL pattern's search component's pattern string.
   return search_component.pattern;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-std::string_view url_pattern<regex_provider, regex_type>::get_hash() const
+template <url_pattern_regex::regex_concept regex_provider>
+std::string_view url_pattern<regex_provider>::get_hash() const
     ada_lifetime_bound {
   // Return this's associated URL pattern's hash component's pattern string.
   return hash_component.pattern;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool url_pattern<regex_provider, regex_type>::ignore_case() const {
+template <url_pattern_regex::regex_concept regex_provider>
+bool url_pattern<regex_provider>::ignore_case() const {
   return ignore_case_;
 }
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
-bool url_pattern<regex_provider, regex_type>::has_regexp_groups() const {
+template <url_pattern_regex::regex_concept regex_provider>
+bool url_pattern<regex_provider>::has_regexp_groups() const {
   // If this's associated URL pattern's has regexp groups, then return true.
   return protocol_component.has_regexp_groups ||
          username_component.has_regexp_groups ||

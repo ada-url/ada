@@ -139,8 +139,7 @@ class Tokenizer {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+template <url_pattern_regex::regex_concept regex_provider>
 struct constructor_string_parser {
   explicit constructor_string_parser(std::string_view new_input,
                                      std::vector<Token>&& new_token_list)
@@ -156,7 +155,8 @@ struct constructor_string_parser {
   bool is_search_prefix();
 
   // @see https://urlpattern.spec.whatwg.org/#parse-a-constructor-string
-  static tl::expected<url_pattern_init, errors> parse(std::string_view input);
+  static tl::expected<url_pattern_init, errors> parse(std::string_view input,
+                                                      regex_provider provider);
 
   // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser-state
   enum class State {
@@ -187,7 +187,8 @@ struct constructor_string_parser {
 
   // @see
   // https://urlpattern.spec.whatwg.org/#compute-protocol-matches-a-special-scheme-flag
-  std::optional<errors> compute_protocol_matches_special_scheme_flag();
+  std::optional<errors> compute_protocol_matches_special_scheme_flag(
+      regex_provider provider);
 
   // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
   bool next_is_authority_slashes();
@@ -323,10 +324,9 @@ bool is_ipv6_address(std::string_view input) noexcept;
 
 // @see
 // https://urlpattern.spec.whatwg.org/#protocol-component-matches-a-special-scheme
-template <class regex_provider, class regex_type>
-  requires url_pattern_regex::derived_from_provider<regex_provider, regex_type>
+template <url_pattern_regex::regex_concept regex_provider>
 bool protocol_component_matches_special_scheme(
-    ada::url_pattern_component<regex_provider, regex_type>& input);
+    ada::url_pattern_component<regex_provider>& input);
 
 // @see https://urlpattern.spec.whatwg.org/#convert-a-modifier-to-a-string
 std::string convert_modifier_to_string(url_pattern_part_modifier modifier);
