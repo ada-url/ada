@@ -236,7 +236,7 @@ class url_pattern_component {
 
   std::string to_string() const;
 
-  regex_provider::regex_type regexp{};
+  typename regex_provider::regex_type regexp{};
   std::string pattern{};
   std::vector<std::string> group_name_list{};
   bool has_regexp_groups = false;
