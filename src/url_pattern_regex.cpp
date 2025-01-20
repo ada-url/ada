@@ -36,7 +36,7 @@ std::vector<std::string> std_regex_provider::regex_search(
 
 bool std_regex_provider::regex_match(std::string_view input,
                                      const std::regex& pattern) {
-      return std::regex_match(input.begin(), input.end(), pattern);
+  return std::regex_match(input.begin(), input.end(), pattern);
 }
 
 }  // namespace ada::url_pattern_regex
