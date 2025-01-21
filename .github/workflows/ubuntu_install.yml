@@ -2,24 +2,25 @@ name: Ubuntu 24.04 (Installation)
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
+      - "**.md"
+      - docs/**
   push:
     branches:
       - main
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-
+      - "**.md"
+      - docs/**
 permissions:
   contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   ubuntu-build:
     runs-on: ubuntu-24.04
@@ -39,8 +40,10 @@ jobs:
       - name: Install
         run: cmake --install build
       - name: Prepare test package
-        run: cmake -DCMAKE_INSTALL_PREFIX:PATH=../../destination -S tests/installation -B buildbabyada
+        run: cmake -DCMAKE_INSTALL_PREFIX:PATH=../../destination -S tests/installation |
+          -B buildbabyada
       - name: Build test package
         run: cmake --build buildbabyada
       - name: Run example
         run: ./buildbabyada/main
+
