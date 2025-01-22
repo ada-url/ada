@@ -193,10 +193,11 @@ template <url_pattern_regex::regex_concept regex_provider>
 bool protocol_component_matches_special_scheme(
     url_pattern_component<regex_provider>& component) {
   auto regex = component.regexp;
-  // TODO: Use provider.regex_match
-  return std::regex_match("http", regex) || std::regex_match("https", regex) ||
-         std::regex_match("ws", regex) || std::regex_match("wss", regex) ||
-         std::regex_match("ftp", regex);
+  return regex_provider::regex_match("http", regex) ||
+         regex_provider::regex_match("https", regex) ||
+         regex_provider::regex_match("ws", regex) ||
+         regex_provider::regex_match("wss", regex) ||
+         regex_provider::regex_match("ftp", regex);
 }
 
 template <url_pattern_regex::regex_concept regex_provider>

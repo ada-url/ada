@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <optional>
-#include <regex>
 #include <string>
 
 namespace ada {
@@ -678,60 +677,45 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     }
   }
 
-  auto regex_flags = std::regex_constants::match_any;
-
   // Let protocolExecResult be RegExpBuiltinExec(urlPattern’s protocol
   // component's regular expression, protocol).
-  std::smatch protocol_exec_result_value;
   auto protocol_exec_result =
-      std::regex_search(protocol, protocol_exec_result_value,
-                        protocol_component.regexp, regex_flags);
+      regex_provider::regex_search(protocol, protocol_component.regexp);
 
   // Let usernameExecResult be RegExpBuiltinExec(urlPattern’s username
   // component's regular expression, username).
-  std::smatch username_exec_result_value;
   auto username_exec_result =
-      std::regex_search(username, username_exec_result_value,
-                        username_component.regexp, regex_flags);
+      regex_provider::regex_search(username, username_component.regexp);
 
   // Let passwordExecResult be RegExpBuiltinExec(urlPattern’s password
   // component's regular expression, password).
-  std::smatch password_exec_result_value;
   auto password_exec_result =
-      std::regex_search(password, password_exec_result_value,
-                        password_component.regexp, regex_flags);
+      regex_provider::regex_search(password, password_component.regexp);
 
   // Let hostnameExecResult be RegExpBuiltinExec(urlPattern’s hostname
   // component's regular expression, hostname).
-  std::smatch hostname_exec_result_value;
   auto hostname_exec_result =
-      std::regex_search(hostname, hostname_exec_result_value,
-                        hostname_component.regexp, regex_flags);
+      regex_provider::regex_search(hostname, hostname_component.regexp);
 
   // Let portExecResult be RegExpBuiltinExec(urlPattern’s port component's
   // regular expression, port).
-  std::smatch port_exec_result_value;
-  auto port_exec_result = std::regex_search(port, port_exec_result_value,
-                                            port_component.regexp, regex_flags);
+  auto port_exec_result =
+      regex_provider::regex_search(port, port_component.regexp);
 
   // Let pathnameExecResult be RegExpBuiltinExec(urlPattern’s pathname
   // component's regular expression, pathname).
-  std::smatch pathname_exec_result_value;
   auto pathname_exec_result =
-      std::regex_search(pathname, pathname_exec_result_value,
-                        pathname_component.regexp, regex_flags);
+      regex_provider::regex_search(pathname, pathname_component.regexp);
 
   // Let searchExecResult be RegExpBuiltinExec(urlPattern’s search component's
   // regular expression, search).
-  std::smatch search_exec_result_value;
-  auto search_exec_result = std::regex_search(
-      search, search_exec_result_value, search_component.regexp, regex_flags);
+  auto search_exec_result =
+      regex_provider::regex_search(search, search_component.regexp);
 
   // Let hashExecResult be RegExpBuiltinExec(urlPattern’s hash component's
   // regular expression, hash).
-  std::smatch hash_exec_result_value;
-  auto hash_exec_result = std::regex_search(hash, hash_exec_result_value,
-                                            hash_component.regexp, regex_flags);
+  auto hash_exec_result =
+      regex_provider::regex_search(hash, hash_component.regexp);
 
   // If protocolExecResult, usernameExecResult, passwordExecResult,
   // hostnameExecResult, portExecResult, pathnameExecResult, searchExecResult,
@@ -749,42 +733,42 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   // Set result["protocol"] to the result of creating a component match result
   // given urlPattern’s protocol component, protocol, and protocolExecResult.
   result.protocol = protocol_component.create_component_match_result(
-      protocol, protocol_exec_result_value);
+      protocol, *protocol_exec_result);
 
   // Set result["username"] to the result of creating a component match result
   // given urlPattern’s username component, username, and usernameExecResult.
   result.username = username_component.create_component_match_result(
-      username, username_exec_result_value);
+      username, *username_exec_result);
 
   // Set result["password"] to the result of creating a component match result
   // given urlPattern’s password component, password, and passwordExecResult.
   result.password = password_component.create_component_match_result(
-      password, password_exec_result_value);
+      password, *password_exec_result);
 
   // Set result["hostname"] to the result of creating a component match result
   // given urlPattern’s hostname component, hostname, and hostnameExecResult.
   result.hostname = hostname_component.create_component_match_result(
-      hostname, hostname_exec_result_value);
+      hostname, *hostname_exec_result);
 
   // Set result["port"] to the result of creating a component match result given
   // urlPattern’s port component, port, and portExecResult.
-  result.port = port_component.create_component_match_result(
-      port, port_exec_result_value);
+  result.port =
+      port_component.create_component_match_result(port, *port_exec_result);
 
   // Set result["pathname"] to the result of creating a component match result
   // given urlPattern’s pathname component, pathname, and pathnameExecResult.
   result.pathname = pathname_component.create_component_match_result(
-      pathname, pathname_exec_result_value);
+      pathname, *pathname_exec_result);
 
   // Set result["search"] to the result of creating a component match result
   // given urlPattern’s search component, search, and searchExecResult.
   result.search = search_component.create_component_match_result(
-      search, search_exec_result_value);
+      search, *search_exec_result);
 
   // Set result["hash"] to the result of creating a component match result given
   // urlPattern’s hash component, hash, and hashExecResult.
-  result.hash = hash_component.create_component_match_result(
-      hash, hash_exec_result_value);
+  result.hash =
+      hash_component.create_component_match_result(hash, *hash_exec_result);
 
   return result;
 }
