@@ -1,4 +1,4 @@
 [libfuzzer]
 dict = url.dict
 max_len = 512
-rss_limit_mb = 3000
+rss_limit_mb = 10000
