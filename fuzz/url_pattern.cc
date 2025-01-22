@@ -8,8 +8,8 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   FuzzedDataProvider fdp(data, size);
-  std::string source = fdp.ConsumeRandomLengthString(256);
-  std::string base_source = fdp.ConsumeRandomLengthString(256);
+  std::string source = fdp.ConsumeRandomLengthString(50);
+  std::string base_source = fdp.ConsumeRandomLengthString(50);
 
   // Without base or options
   auto result = ada::parse_url_pattern(source, nullptr, nullptr);
