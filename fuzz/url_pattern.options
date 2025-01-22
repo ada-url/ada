@@ -2,3 +2,4 @@
 dict = url.dict
 max_len = 100
 rss_limit_mb = 16000
+timeout = 60
