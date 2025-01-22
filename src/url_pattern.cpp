@@ -733,42 +733,42 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   // Set result["protocol"] to the result of creating a component match result
   // given urlPattern’s protocol component, protocol, and protocolExecResult.
   result.protocol = protocol_component.create_component_match_result(
-      protocol, *protocol_exec_result);
+      protocol, std::move(*protocol_exec_result));
 
   // Set result["username"] to the result of creating a component match result
   // given urlPattern’s username component, username, and usernameExecResult.
   result.username = username_component.create_component_match_result(
-      username, *username_exec_result);
+      username, std::move(*username_exec_result));
 
   // Set result["password"] to the result of creating a component match result
   // given urlPattern’s password component, password, and passwordExecResult.
   result.password = password_component.create_component_match_result(
-      password, *password_exec_result);
+      password, std::move(*password_exec_result));
 
   // Set result["hostname"] to the result of creating a component match result
   // given urlPattern’s hostname component, hostname, and hostnameExecResult.
   result.hostname = hostname_component.create_component_match_result(
-      hostname, *hostname_exec_result);
+      hostname, std::move(*hostname_exec_result));
 
   // Set result["port"] to the result of creating a component match result given
   // urlPattern’s port component, port, and portExecResult.
-  result.port =
-      port_component.create_component_match_result(port, *port_exec_result);
+  result.port = port_component.create_component_match_result(
+      port, std::move(*port_exec_result));
 
   // Set result["pathname"] to the result of creating a component match result
   // given urlPattern’s pathname component, pathname, and pathnameExecResult.
   result.pathname = pathname_component.create_component_match_result(
-      pathname, *pathname_exec_result);
+      pathname, std::move(*pathname_exec_result));
 
   // Set result["search"] to the result of creating a component match result
   // given urlPattern’s search component, search, and searchExecResult.
   result.search = search_component.create_component_match_result(
-      search, *search_exec_result);
+      search, std::move(*search_exec_result));
 
   // Set result["hash"] to the result of creating a component match result given
   // urlPattern’s hash component, hash, and hashExecResult.
-  result.hash =
-      hash_component.create_component_match_result(hash, *hash_exec_result);
+  result.hash = hash_component.create_component_match_result(
+      hash, std::move(*hash_exec_result));
 
   return result;
 }

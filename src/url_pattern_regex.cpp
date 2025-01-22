@@ -30,10 +30,13 @@ std::optional<std::vector<std::string>> std_regex_provider::regex_search(
     return std::nullopt;
   }
   std::vector<std::string> matches;
-  matches.reserve(match_result.size() - 1);
-  for (const auto& match : match_result) {
-    if (match.matched) {
-      matches.push_back(match.str());
+  if (match_result.empty()) {
+    return matches;
+  }
+  matches.reserve(match_result.size());
+  for (size_t i = 1; i < match_result.size(); ++i) {
+    if (auto entry = match_result[i]; entry.matched) {
+      matches.emplace_back(entry.str());
     }
   }
   return matches;

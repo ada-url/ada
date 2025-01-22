@@ -231,7 +231,7 @@ class url_pattern_component {
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
-      std::string_view input, const std::vector<std::string>& exec_result);
+      std::string_view input, std::vector<std::string>&& exec_result);
 
   std::string to_string() const;
 

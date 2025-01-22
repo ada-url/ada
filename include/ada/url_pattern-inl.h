@@ -38,7 +38,7 @@ std::string url_pattern_component<regex_provider>::to_string() const {
 template <url_pattern_regex::regex_concept regex_provider>
 url_pattern_component_result
 url_pattern_component<regex_provider>::create_component_match_result(
-    std::string_view input, const std::vector<std::string>& exec_result) {
+    std::string_view input, std::vector<std::string>&& exec_result) {
   // Let result be a new URLPatternComponentResult.
   // Set result["input"] to input.
   // Let groups be a record<USVString, (USVString or undefined)>.
@@ -46,26 +46,21 @@ url_pattern_component<regex_provider>::create_component_match_result(
       url_pattern_component_result{.input = std::string(input), .groups = {}};
 
   // If input is empty, then groups will always be empty.
-  if (input.empty()) {
+  if (input.empty() || exec_result.empty()) {
     return result;
   }
 
   // Optimization: Let's reserve the size.
   result.groups.reserve(exec_result.size() - 1);
 
-  size_t group_index = 0;
-  // Let index be 1.
-  // While index is less than Get(execResult, "length"):
-  for (size_t index = 1; index < exec_result.size(); index++) {
-    // Let name be component’s group name list[index - 1].
-    // Let value be Get(execResult, ToString(index)).
-    // Set groups[name] to value.
+  // We explicitly start iterating from 0 even though the spec
+  // says we should start from 1. This case is handled by the
+  // std_regex_provider.
+  for (size_t index = 0; index < exec_result.size(); index++) {
     result.groups.insert({
-        group_name_list[group_index],
-        exec_result[index],
+        group_name_list[index],
+        std::move(exec_result[index]),
     });
-
-    group_index++;
   }
   return result;
 }
