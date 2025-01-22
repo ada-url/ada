@@ -7,27 +7,31 @@
 #include "ada.h"
 
 std::string bytesToAlphanumeric(const std::string& source) {
-    static const char alphanumeric[] =
-        "abcdefghijklmnopqrstuvwxyz"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "0123456789";
+  static const char alphanumeric[] =
+      "abcdefghijklmnopqrstuvwxyz"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      "0123456789";
 
-    std::string result;
-    result.reserve(source.size());
+  std::string result;
+  result.reserve(source.size());
 
-    for (char byte : source) {
-        int index = static_cast<unsigned char>(byte) % (sizeof(alphanumeric) - 1);
-        result.push_back(alphanumeric[index]);
-    }
+  for (char byte : source) {
+    int index = static_cast<unsigned char>(byte) % (sizeof(alphanumeric) - 1);
+    result.push_back(alphanumeric[index]);
+  }
 
-    return result;
+  return result;
 }
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   FuzzedDataProvider fdp(data, size);
   // We do not want to trigger arbitrary regex matching.
-  std::string source = "/"+ bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50)) + "/" + bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50));
-  std::string base_source = "/"+ bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50)) + "/" + bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50));
+  std::string source =
+      "/" + bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50)) + "/" +
+      bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50));
+  std::string base_source =
+      "/" + bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50)) + "/" +
+      bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50));
 
   // Without base or options
   auto result = ada::parse_url_pattern(source, nullptr, nullptr);
