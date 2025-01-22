@@ -9,7 +9,6 @@
 #include "ada/expected.h"
 #include "ada/url_pattern_regex.h"
 
-#include <regex>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -232,7 +231,7 @@ class url_pattern_component {
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
-      std::string_view input, const std::smatch& exec_result);
+      std::string_view input, const std::vector<std::string>& exec_result);
 
   std::string to_string() const;
 

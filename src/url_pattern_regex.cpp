@@ -19,17 +19,22 @@ std::optional<std::regex> std_regex_provider::create_instance(
   }
 }
 
-std::vector<std::string> std_regex_provider::regex_search(
+std::optional<std::vector<std::string>> std_regex_provider::regex_search(
     std::string_view input, const std::regex& pattern) {
-  std::vector<std::string> matches;
   std::string input_str(
       input.begin(),
       input.end());  // Convert string_view to string for regex_search
   std::smatch match_result;
-  while (std::regex_search(input_str, match_result, pattern,
-                           std::regex_constants::match_any)) {
-    matches.push_back(match_result.str());
-    input_str = match_result.suffix().str();
+  if (!std::regex_search(input_str, match_result, pattern,
+                         std::regex_constants::match_any)) {
+    return std::nullopt;
+  }
+  std::vector<std::string> matches;
+  matches.reserve(match_result.size() - 1);
+  for (const auto& match : match_result) {
+    if (match.matched) {
+      matches.push_back(match.str());
+    }
   }
   return matches;
 }

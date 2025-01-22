@@ -23,12 +23,12 @@ concept regex_concept = requires(T t, std::string_view pattern,
 
   // Function to perform regex search
   {
-    t.regex_search(input, std::declval<typename T::regex_type&>())
-  } -> std::same_as<std::vector<std::string>>;
+    T::regex_search(input, std::declval<typename T::regex_type&>())
+  } -> std::same_as<std::optional<std::vector<std::string>>>;
 
   // Function to match regex pattern
   {
-    t.regex_match(input, std::declval<typename T::regex_type&>())
+    T::regex_match(input, std::declval<typename T::regex_type&>())
   } -> std::same_as<bool>;
 
   // Copy constructor
@@ -44,9 +44,9 @@ class std_regex_provider {
   using regex_type = std::regex;
   static std::optional<regex_type> create_instance(std::string_view pattern,
                                                    bool ignore_case);
-  std::vector<std::string> regex_search(std::string_view input,
-                                        const regex_type& pattern);
-  bool regex_match(std::string_view input, const regex_type& pattern);
+  static std::optional<std::vector<std::string>> regex_search(
+      std::string_view input, const regex_type& pattern);
+  static bool regex_match(std::string_view input, const regex_type& pattern);
 };
 
 }  // namespace ada::url_pattern_regex

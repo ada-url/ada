@@ -38,7 +38,7 @@ std::string url_pattern_component<regex_provider>::to_string() const {
 template <url_pattern_regex::regex_concept regex_provider>
 url_pattern_component_result
 url_pattern_component<regex_provider>::create_component_match_result(
-    std::string_view input, const std::smatch& exec_result) {
+    std::string_view input, const std::vector<std::string>& exec_result) {
   // Let result be a new URLPatternComponentResult.
   // Set result["input"] to input.
   // Let groups be a record<USVString, (USVString or undefined)>.
@@ -60,11 +60,9 @@ url_pattern_component<regex_provider>::create_component_match_result(
     // Let name be component’s group name list[index - 1].
     // Let value be Get(execResult, ToString(index)).
     // Set groups[name] to value.
-    auto exec = exec_result[index];
-    if (!exec.matched) continue;
     result.groups.insert({
         group_name_list[group_index],
-        exec.str(),
+        exec_result[index],
     });
 
     group_index++;
