@@ -1,5 +1,6 @@
 # Protocols
 "ftp:"
+"file:///"
 "file:"
 "http:"
 "https:"

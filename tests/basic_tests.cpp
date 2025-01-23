@@ -476,3 +476,10 @@ TYPED_TEST(basic_tests, set_invalid_port) {
   ASSERT_TRUE(url->is_valid);
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, test_possible_asan) {
+  auto url = ada::parse<TypeParam>("file:///");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_protocol(), "file:");
+  SUCCEED();
+}
