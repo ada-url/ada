@@ -23,7 +23,7 @@ concurrency:
 jobs:
   ci:
     name: windows-vs17
-    runs-on: windows-latest
+    runs-on: windows-2025
     strategy:
       fail-fast: false
       matrix:
