@@ -5,9 +5,11 @@
 #ifndef ADA_URL_PATTERN_HELPERS_INL_H
 #define ADA_URL_PATTERN_HELPERS_INL_H
 
+#include <optional>
+#include <string_view>
+
 #include "ada/common_defs.h"
 #include "ada/expected.h"
-#include "ada/url_pattern.h"
 #include "ada/url_pattern_helpers.h"
 #include "ada/implementation.h"
 
@@ -778,6 +780,297 @@ tl::expected<std::vector<url_pattern_part>, errors> parse_pattern_string(
   ada_log("parser.parts size is: ", parser.parts.size());
   // Return parser’s part list.
   return parser.parts;
+}
+
+template <url_pattern_regex::regex_concept regex_provider>
+bool protocol_component_matches_special_scheme(
+    url_pattern_component<regex_provider>& component) {
+  auto regex = component.regexp;
+  return regex_provider::regex_match("http", regex) ||
+         regex_provider::regex_match("https", regex) ||
+         regex_provider::regex_match("ws", regex) ||
+         regex_provider::regex_match("wss", regex) ||
+         regex_provider::regex_match("ftp", regex);
+}
+
+template <url_pattern_regex::regex_concept regex_provider>
+inline std::optional<errors> constructor_string_parser<regex_provider>::
+    compute_protocol_matches_special_scheme_flag(regex_provider provider) {
+  ada_log(
+      "constructor_string_parser::compute_protocol_matches_special_scheme_"
+      "flag");
+  // Let protocol string be the result of running make a component string given
+  // parser.
+  auto protocol_string = make_component_string();
+  // Let protocol component be the result of compiling a component given
+  // protocol string, canonicalize a protocol, and default options.
+  auto protocol_component = url_pattern_component<regex_provider>::compile(
+      protocol_string, canonicalize_protocol,
+      url_pattern_compile_component_options::DEFAULT, provider);
+  if (!protocol_component) {
+    ada_log("url_pattern_component::compile failed for protocol_string ",
+            protocol_string);
+    return protocol_component.error();
+  }
+  // If the result of running protocol component matches a special scheme given
+  // protocol component is true, then set parser’s protocol matches a special
+  // scheme flag to true.
+  if (protocol_component_matches_special_scheme(*protocol_component)) {
+    protocol_matches_a_special_scheme_flag = true;
+  }
+  return std::nullopt;
+}
+
+template <url_pattern_regex::regex_concept regex_provider>
+tl::expected<url_pattern_init, errors>
+constructor_string_parser<regex_provider>::parse(std::string_view input,
+                                                 regex_provider provider) {
+  ada_log("constructor_string_parser::parse input=", input);
+  // Let parser be a new constructor string parser whose input is input and
+  // token list is the result of running tokenize given input and "lenient".
+  auto token_list = tokenize(input, token_policy::LENIENT);
+  if (!token_list) {
+    return tl::unexpected(token_list.error());
+  }
+  auto parser = constructor_string_parser(input, std::move(*token_list));
+
+  // While parser’s token index is less than parser’s token list size:
+  while (parser.token_index < parser.token_list.size()) {
+    // Set parser’s token increment to 1.
+    parser.token_increment = 1;
+
+    // If parser’s token list[parser’s token index]'s type is "end" then:
+    if (parser.token_list[parser.token_index].type == token_type::END) {
+      // If parser’s state is "init":
+      if (parser.state == State::INIT) {
+        // Run rewind given parser.
+        parser.rewind();
+        // If the result of running is a hash prefix given parser is true, then
+        // run change state given parser, "hash" and 1.
+        if (parser.is_hash_prefix()) {
+          parser.change_state(State::HASH, 1);
+        } else if (parser.is_search_prefix()) {
+          // Otherwise if the result of running is a search prefix given parser
+          // is true: Run change state given parser, "search" and 1.
+          parser.change_state(State::SEARCH, 1);
+        } else {
+          // Run change state given parser, "pathname" and 0.
+          parser.change_state(State::PATHNAME, 0);
+        }
+        // Increment parser’s token index by parser’s token increment.
+        parser.token_index += parser.token_increment;
+        // Continue.
+        continue;
+      }
+
+      if (parser.state == State::AUTHORITY) {
+        // If parser’s state is "authority":
+        // Run rewind and set state given parser, and "hostname".
+        parser.rewind();
+        parser.change_state(State::HOSTNAME, 0);
+        // Increment parser’s token index by parser’s token increment.
+        parser.token_index += parser.token_increment;
+        // Continue.
+        continue;
+      }
+
+      // Run change state given parser, "done" and 0.
+      parser.change_state(State::DONE, 0);
+      // Break.
+      break;
+    }
+
+    // If the result of running is a group open given parser is true:
+    if (parser.is_group_open()) {
+      // Increment parser’s group depth by 1.
+      parser.group_depth += 1;
+      // Increment parser’s token index by parser’s token increment.
+      parser.token_index += parser.token_increment;
+    }
+
+    // If parser’s group depth is greater than 0:
+    if (parser.group_depth > 0) {
+      // If the result of running is a group close given parser is true, then
+      // decrement parser’s group depth by 1.
+      if (parser.is_group_close()) {
+        parser.group_depth -= 1;
+      } else {
+        // Increment parser’s token index by parser’s token increment.
+        parser.token_index += parser.token_increment;
+        continue;
+      }
+    }
+
+    // Switch on parser’s state and run the associated steps:
+    switch (parser.state) {
+      case State::INIT: {
+        // If the result of running is a protocol suffix given parser is true:
+        if (parser.is_protocol_suffix()) {
+          // Run rewind and set state given parser and "protocol".
+          parser.rewind();
+          parser.change_state(State::PROTOCOL, 0);
+        }
+        break;
+      }
+      case State::PROTOCOL: {
+        // If the result of running is a protocol suffix given parser is true:
+        if (parser.is_protocol_suffix()) {
+          // Run compute protocol matches a special scheme flag given parser.
+          if (const auto error =
+                  parser.compute_protocol_matches_special_scheme_flag(
+                      provider)) {
+            ada_log("compute_protocol_matches_special_scheme_flag failed");
+            return tl::unexpected(*error);
+          }
+          // Let next state be "pathname".
+          auto next_state = State::PATHNAME;
+          // Let skip be 1.
+          auto skip = 1;
+          // If the result of running next is authority slashes given parser is
+          // true:
+          if (parser.next_is_authority_slashes()) {
+            // Set next state to "authority".
+            next_state = State::AUTHORITY;
+            // Set skip to 3.
+            skip = 3;
+          } else if (parser.protocol_matches_a_special_scheme_flag) {
+            // Otherwise if parser’s protocol matches a special scheme flag is
+            // true, then set next state to "authority".
+            next_state = State::AUTHORITY;
+          }
+
+          // Run change state given parser, next state, and skip.
+          parser.change_state(next_state, skip);
+        }
+        break;
+      }
+      case State::AUTHORITY: {
+        // If the result of running is an identity terminator given parser is
+        // true, then run rewind and set state given parser and "username".
+        if (parser.is_an_identity_terminator()) {
+          parser.rewind();
+          parser.change_state(State::USERNAME, 0);
+        } else if (parser.is_pathname_start() || parser.is_search_prefix() ||
+                   parser.is_hash_prefix()) {
+          // Otherwise if any of the following are true:
+          // - the result of running is a pathname start given parser;
+          // - the result of running is a search prefix given parser; or
+          // - the result of running is a hash prefix given parser,
+          // then run rewind and set state given parser and "hostname".
+          parser.rewind();
+          parser.change_state(State::HOSTNAME, 0);
+        }
+        break;
+      }
+      case State::USERNAME: {
+        // If the result of running is a password prefix given parser is true,
+        // then run change state given parser, "password", and 1.
+        if (parser.is_password_prefix()) {
+          parser.change_state(State::PASSWORD, 1);
+        } else if (parser.is_an_identity_terminator()) {
+          // Otherwise if the result of running is an identity terminator given
+          // parser is true, then run change state given parser, "hostname",
+          // and 1.
+          parser.change_state(State::HOSTNAME, 1);
+        }
+        break;
+      }
+      case State::PASSWORD: {
+        // If the result of running is an identity terminator given parser is
+        // true, then run change state given parser, "hostname", and 1.
+        if (parser.is_an_identity_terminator()) {
+          parser.change_state(State::HOSTNAME, 1);
+        }
+        break;
+      }
+      case State::HOSTNAME: {
+        // If the result of running is an IPv6 open given parser is true, then
+        // increment parser’s hostname IPv6 bracket depth by 1.
+        if (parser.is_an_ipv6_open()) {
+          parser.hostname_ipv6_bracket_depth += 1;
+        } else if (parser.is_an_ipv6_close()) {
+          // Otherwise if the result of running is an IPv6 close given parser is
+          // true, then decrement parser’s hostname IPv6 bracket depth by 1.
+          parser.hostname_ipv6_bracket_depth -= 1;
+        } else if (parser.is_port_prefix() &&
+                   parser.hostname_ipv6_bracket_depth == 0) {
+          // Otherwise if the result of running is a port prefix given parser is
+          // true and parser’s hostname IPv6 bracket depth is zero, then run
+          // change state given parser, "port", and 1.
+          parser.change_state(State::PORT, 1);
+        } else if (parser.is_pathname_start()) {
+          // Otherwise if the result of running is a pathname start given parser
+          // is true, then run change state given parser, "pathname", and 0.
+          parser.change_state(State::PATHNAME, 0);
+        } else if (parser.is_search_prefix()) {
+          // Otherwise if the result of running is a search prefix given parser
+          // is true, then run change state given parser, "search", and 1.
+          parser.change_state(State::SEARCH, 1);
+        } else if (parser.is_hash_prefix()) {
+          // Otherwise if the result of running is a hash prefix given parser is
+          // true, then run change state given parser, "hash", and 1.
+          parser.change_state(State::HASH, 1);
+        }
+
+        break;
+      }
+      case State::PORT: {
+        // If the result of running is a pathname start given parser is true,
+        // then run change state given parser, "pathname", and 0.
+        if (parser.is_pathname_start()) {
+          parser.change_state(State::PATHNAME, 0);
+        } else if (parser.is_search_prefix()) {
+          // Otherwise if the result of running is a search prefix given parser
+          // is true, then run change state given parser, "search", and 1.
+          parser.change_state(State::SEARCH, 1);
+        } else if (parser.is_hash_prefix()) {
+          // Otherwise if the result of running is a hash prefix given parser is
+          // true, then run change state given parser, "hash", and 1.
+          parser.change_state(State::HASH, 1);
+        }
+        break;
+      }
+      case State::PATHNAME: {
+        // If the result of running is a search prefix given parser is true,
+        // then run change state given parser, "search", and 1.
+        if (parser.is_search_prefix()) {
+          parser.change_state(State::SEARCH, 1);
+        } else if (parser.is_hash_prefix()) {
+          // Otherwise if the result of running is a hash prefix given parser is
+          // true, then run change state given parser, "hash", and 1.
+          parser.change_state(State::HASH, 1);
+        }
+        break;
+      }
+      case State::SEARCH: {
+        // If the result of running is a hash prefix given parser is true, then
+        // run change state given parser, "hash", and 1.
+        if (parser.is_hash_prefix()) {
+          parser.change_state(State::HASH, 1);
+        }
+      }
+      case State::HASH: {
+        // Do nothing
+        break;
+      }
+      default: {
+        // Assert: This step is never reached.
+        unreachable();
+      }
+    }
+
+    // Increment parser’s token index by parser’s token increment.
+    parser.token_index += parser.token_increment;
+  }
+
+  // If parser’s result contains "hostname" and not "port", then set parser’s
+  // result["port"] to the empty string.
+  if (parser.result.hostname && !parser.result.port) {
+    parser.result.port = "";
+  }
+
+  // Return parser’s result.
+  return parser.result;
 }
 
 }  // namespace ada::url_pattern_helpers

@@ -59,6 +59,13 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     const std::string_view* base_url, const url_pattern_options* options,
     regex_provider&& provider);
 
+extern template tl::expected<url_pattern<url_pattern_regex::std_regex_provider>,
+                             errors>
+parse_url_pattern_impl(std::variant<std::string_view, url_pattern_init> input,
+                       const std::string_view* base_url,
+                       const url_pattern_options* options,
+                       url_pattern_regex::std_regex_provider&& provider);
+
 }  // namespace ada::parser
 
 #endif  // ADA_PARSER_H

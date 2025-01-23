@@ -7,14 +7,15 @@
 
 #include <string>
 #include <string_view>
+#include <variant>
 
-#include "ada/url_pattern.h"
 #include "ada/common_defs.h"
 #include "ada/url_base.h"
 #include "ada/url_components.h"
-#include "ada/parser.h"
 
 namespace ada {
+
+namespace parser {}
 
 /**
  * @brief Lightweight URL struct.

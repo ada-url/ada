@@ -5,9 +5,7 @@
 #ifndef ADA_URL_AGGREGATOR_INL_H
 #define ADA_URL_AGGREGATOR_INL_H
 
-#include "ada/character_sets.h"
 #include "ada/character_sets-inl.h"
-#include "ada/checkers.h"
 #include "ada/helpers.h"
 #include "ada/unicode-inl.h"
 #include "ada/url_aggregator.h"
@@ -15,7 +13,7 @@
 #include "ada/scheme.h"
 #include "ada/log.h"
 
-#include <optional>
+#include <charconv>
 #include <string_view>
 
 namespace ada {

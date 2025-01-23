@@ -6,11 +6,16 @@
 #define ADA_URL_PATTERN_HELPERS_H
 
 #include "ada/expected.h"
+#include "ada/common_defs.h"
 #include "ada/url_pattern.h"
 
 #include <string>
 #include <tuple>
 #include <vector>
+
+namespace ada {
+enum class errors : uint8_t;
+}
 
 namespace ada::url_pattern_helpers {
 

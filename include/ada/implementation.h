@@ -6,13 +6,11 @@
 #ifndef ADA_IMPLEMENTATION_H
 #define ADA_IMPLEMENTATION_H
 
-#include <string>
+#include <string_view>
 #include <optional>
 
-#include "ada/parser.h"
-#include "ada/common_defs.h"
 #include "ada/url.h"
-#include "ada/url_pattern_regex.h"
+#include "ada/common_defs.h"
 
 namespace ada {
 enum class errors : uint8_t { type_error };
@@ -54,7 +52,7 @@ bool can_parse(std::string_view input,
  * @param input valid UTF-8 string or URLPatternInit struct
  * @param base_url an optional valid UTF-8 string
  * @param options an optional url_pattern_options struct
- * @param regex_provider an optional regex provider. if not provided, it will
+ * @param provider an optional regex provider. if not provided, it will
  * use ada::url_pattern_regex::std_regex_provider
  * @return url_pattern instance
  */

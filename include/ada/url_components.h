@@ -5,11 +5,6 @@
 #ifndef ADA_URL_COMPONENTS_H
 #define ADA_URL_COMPONENTS_H
 
-#include "ada/common_defs.h"
-
-#include <optional>
-#include <string_view>
-
 namespace ada {
 
 /**

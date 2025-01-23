@@ -7,12 +7,15 @@
 
 #include "ada/implementation.h"
 #include "ada/expected.h"
-#include "ada/url_pattern_regex.h"
 
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
+
+#if ADA_TESTING
+#include <iostream>
+#endif  // ADA_TESTING
 
 namespace ada {
 

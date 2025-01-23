@@ -5,7 +5,6 @@
 #ifndef ADA_URL_SEARCH_PARAMS_INL_H
 #define ADA_URL_SEARCH_PARAMS_INL_H
 
-#include "ada.h"
 #include "ada/character_sets-inl.h"
 #include "ada/unicode.h"
 #include "ada/url_search_params.h"
