@@ -785,7 +785,8 @@ tl::expected<std::vector<url_pattern_part>, errors> parse_pattern_string(
 template <url_pattern_regex::regex_concept regex_provider>
 bool protocol_component_matches_special_scheme(
     url_pattern_component<regex_provider>& component) {
-  auto regex = component.regexp;
+  // let's avoid unnecessary copy here.
+  auto& regex = component.regexp;
   return regex_provider::regex_match("http", regex) ||
          regex_provider::regex_match("https", regex) ||
          regex_provider::regex_match("ws", regex) ||
