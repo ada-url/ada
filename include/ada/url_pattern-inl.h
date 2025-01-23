@@ -170,8 +170,7 @@ template <url_pattern_encoding_callback F>
 tl::expected<url_pattern_component<regex_provider>, errors>
 url_pattern_component<regex_provider>::compile(
     std::string_view input, F& encoding_callback,
-    url_pattern_compile_component_options& options,
-    const regex_provider& provider) {
+    url_pattern_compile_component_options& options) {
   ada_log("url_pattern_component::compile input: ", input);
   // Let part list be the result of running parse a pattern string given input,
   // options, and encoding callback.
@@ -200,7 +199,8 @@ url_pattern_component<regex_provider>::compile(
   // flags). If this throws an exception, catch it, and throw a
   // TypeError.
   std::optional<typename regex_provider::regex_type> regular_expression =
-      provider.create_instance(regular_expression_string, options.ignore_case);
+      regex_provider::create_instance(regular_expression_string,
+                                      options.ignore_case);
 
   if (!regular_expression) {
     return tl::unexpected(errors::type_error);

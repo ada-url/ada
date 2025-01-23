@@ -61,8 +61,7 @@ template <url_pattern_regex::regex_concept regex_provider =
 ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
 parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
                   const std::string_view* base_url = nullptr,
-                  const url_pattern_options* options = nullptr,
-                  std::optional<regex_provider> provider = std::nullopt);
+                  const url_pattern_options* options = nullptr);
 
 /**
  * Computes a href string from a file path. The function assumes

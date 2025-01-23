@@ -16,8 +16,7 @@ namespace ada::parser {
 template <url_pattern_regex::regex_concept regex_provider>
 tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options,
-    regex_provider&& provider) {
+    const std::string_view* base_url, const url_pattern_options* options) {
   // Let init be null.
   url_pattern_init init;
 
@@ -26,7 +25,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     // Set init to the result of running parse a constructor string given input.
     auto parse_result =
         url_pattern_helpers::constructor_string_parser<regex_provider>::parse(
-            std::get<std::string_view>(input), provider);
+            std::get<std::string_view>(input));
     if (!parse_result) {
       ada_log("constructor_string_parser::parse failed");
       return tl::unexpected(parse_result.error());
@@ -101,7 +100,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   }
 
   // Let urlPattern be a new URL pattern.
-  url_pattern<regex_provider> url_pattern_(std::move(provider));
+  url_pattern<regex_provider> url_pattern_{};
 
   // Set urlPattern’s protocol component to the result of compiling a component
   // given processedInit["protocol"], canonicalize a protocol, and default
@@ -109,7 +108,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   auto protocol_component = url_pattern_component<regex_provider>::compile(
       processed_init->protocol.value(),
       url_pattern_helpers::canonicalize_protocol,
-      url_pattern_compile_component_options::DEFAULT, provider);
+      url_pattern_compile_component_options::DEFAULT);
   if (!protocol_component) {
     ada_log("url_pattern_component::compile failed for protocol ",
             processed_init->protocol.value());
@@ -123,7 +122,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   auto username_component = url_pattern_component<regex_provider>::compile(
       processed_init->username.value(),
       url_pattern_helpers::canonicalize_username,
-      url_pattern_compile_component_options::DEFAULT, provider);
+      url_pattern_compile_component_options::DEFAULT);
   if (!username_component) {
     ada_log("url_pattern_component::compile failed for username ",
             processed_init->username.value());
@@ -137,7 +136,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   auto password_component = url_pattern_component<regex_provider>::compile(
       processed_init->password.value(),
       url_pattern_helpers::canonicalize_password,
-      url_pattern_compile_component_options::DEFAULT, provider);
+      url_pattern_compile_component_options::DEFAULT);
   if (!password_component) {
     ada_log("url_pattern_component::compile failed for password ",
             processed_init->password.value());
@@ -159,7 +158,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     auto hostname_component = url_pattern_component<regex_provider>::compile(
         processed_init->hostname.value(),
         url_pattern_helpers::canonicalize_ipv6_hostname,
-        url_pattern_compile_component_options::DEFAULT, provider);
+        url_pattern_compile_component_options::DEFAULT);
     if (!hostname_component) {
       ada_log("url_pattern_component::compile failed for ipv6 hostname ",
               processed_init->hostname.value());
@@ -173,7 +172,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     auto hostname_component = url_pattern_component<regex_provider>::compile(
         processed_init->hostname.value(),
         url_pattern_helpers::canonicalize_hostname,
-        url_pattern_compile_component_options::HOSTNAME, provider);
+        url_pattern_compile_component_options::HOSTNAME);
     if (!hostname_component) {
       ada_log("url_pattern_component::compile failed for hostname ",
               processed_init->hostname.value());
@@ -186,7 +185,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   // given processedInit["port"], canonicalize a port, and default options.
   auto port_component = url_pattern_component<regex_provider>::compile(
       processed_init->port.value(), url_pattern_helpers::canonicalize_port,
-      url_pattern_compile_component_options::DEFAULT, provider);
+      url_pattern_compile_component_options::DEFAULT);
   if (!port_component) {
     ada_log("url_pattern_component::compile failed for port ",
             processed_init->port.value());
@@ -218,8 +217,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     // pathCompileOptions.
     auto pathname_component = url_pattern_component<regex_provider>::compile(
         processed_init->pathname.value(),
-        url_pattern_helpers::canonicalize_pathname, path_compile_options,
-        provider);
+        url_pattern_helpers::canonicalize_pathname, path_compile_options);
     if (!pathname_component) {
       ada_log("url_pattern_component::compile failed for pathname ",
               processed_init->pathname.value());
@@ -232,8 +230,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     // pathname, and compileOptions.
     auto pathname_component = url_pattern_component<regex_provider>::compile(
         processed_init->pathname.value(),
-        url_pattern_helpers::canonicalize_opaque_pathname, compile_options,
-        provider);
+        url_pattern_helpers::canonicalize_opaque_pathname, compile_options);
     if (!pathname_component) {
       ada_log("url_pattern_component::compile failed for opaque pathname ",
               processed_init->pathname.value());
@@ -246,7 +243,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   // given processedInit["search"], canonicalize a search, and compileOptions.
   auto search_component = url_pattern_component<regex_provider>::compile(
       processed_init->search.value(), url_pattern_helpers::canonicalize_search,
-      compile_options, provider);
+      compile_options);
   if (!search_component) {
     ada_log("url_pattern_component::compile failed for search ",
             processed_init->search.value());
@@ -258,7 +255,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   // given processedInit["hash"], canonicalize a hash, and compileOptions.
   auto hash_component = url_pattern_component<regex_provider>::compile(
       processed_init->hash.value(), url_pattern_helpers::canonicalize_hash,
-      compile_options, provider);
+      compile_options);
   if (!hash_component) {
     ada_log("url_pattern_component::compile failed for hash ",
             processed_init->hash.value());
@@ -274,8 +271,7 @@ template tl::expected<url_pattern<url_pattern_regex::std_regex_provider>,
                       errors>
 parse_url_pattern_impl(std::variant<std::string_view, url_pattern_init> input,
                        const std::string_view* base_url,
-                       const url_pattern_options* options,
-                       url_pattern_regex::std_regex_provider&& provider);
+                       const url_pattern_options* options);
 }  // namespace ada::parser
 
 #endif  // ADA_PARSER_INL_H

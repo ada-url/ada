@@ -160,8 +160,7 @@ struct constructor_string_parser {
   bool is_search_prefix();
 
   // @see https://urlpattern.spec.whatwg.org/#parse-a-constructor-string
-  static tl::expected<url_pattern_init, errors> parse(std::string_view input,
-                                                      regex_provider provider);
+  static tl::expected<url_pattern_init, errors> parse(std::string_view input);
 
   // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser-state
   enum class State {
@@ -192,8 +191,7 @@ struct constructor_string_parser {
 
   // @see
   // https://urlpattern.spec.whatwg.org/#compute-protocol-matches-a-special-scheme-flag
-  std::optional<errors> compute_protocol_matches_special_scheme_flag(
-      regex_provider provider);
+  std::optional<errors> compute_protocol_matches_special_scheme_flag();
 
   // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
   bool next_is_authority_slashes();

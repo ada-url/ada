@@ -24,8 +24,7 @@ template <typename result_type, typename url_pattern_init,
           typename url_pattern_options, typename regex_provider>
 tl::expected<result_type, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options,
-    regex_provider&& provider);
+    const std::string_view* base_url, const url_pattern_options* options);
 }
 
 // Important: C++20 allows us to use concept rather than `using` or `typedef
@@ -229,8 +228,7 @@ class url_pattern_component {
   template <url_pattern_encoding_callback F>
   static tl::expected<url_pattern_component, errors> compile(
       std::string_view input, F& encoding_callback,
-      url_pattern_compile_component_options& options,
-      const regex_provider& provider);
+      url_pattern_compile_component_options& options);
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
@@ -275,8 +273,7 @@ struct url_pattern_options {
 template <url_pattern_regex::regex_concept regex_provider>
 class url_pattern {
  public:
-  explicit url_pattern(regex_provider&& new_regex_provider)
-      : regex_provider_(new_regex_provider) {}
+  url_pattern() = default;
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
@@ -331,14 +328,12 @@ class url_pattern {
   url_pattern_component<regex_provider> search_component{};
   url_pattern_component<regex_provider> hash_component{};
   bool ignore_case_ = false;
-  regex_provider regex_provider_;
 
   template <typename result_type, typename url_pattern_init,
-            typename url_pattern_options, typename regex_provider_>
+            typename url_pattern_options>
   friend tl::expected<result_type, errors> parser::parse_url_pattern_impl(
       std::variant<std::string_view, url_pattern_init> input,
-      const std::string_view* base_url, const url_pattern_options* options,
-      regex_provider_&& provider);
+      const std::string_view* base_url, const url_pattern_options* options);
 };
 
 }  // namespace ada

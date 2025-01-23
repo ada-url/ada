@@ -794,8 +794,8 @@ bool protocol_component_matches_special_scheme(
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-inline std::optional<errors> constructor_string_parser<regex_provider>::
-    compute_protocol_matches_special_scheme_flag(regex_provider provider) {
+inline std::optional<errors> constructor_string_parser<
+    regex_provider>::compute_protocol_matches_special_scheme_flag() {
   ada_log(
       "constructor_string_parser::compute_protocol_matches_special_scheme_"
       "flag");
@@ -806,7 +806,7 @@ inline std::optional<errors> constructor_string_parser<regex_provider>::
   // protocol string, canonicalize a protocol, and default options.
   auto protocol_component = url_pattern_component<regex_provider>::compile(
       protocol_string, canonicalize_protocol,
-      url_pattern_compile_component_options::DEFAULT, provider);
+      url_pattern_compile_component_options::DEFAULT);
   if (!protocol_component) {
     ada_log("url_pattern_component::compile failed for protocol_string ",
             protocol_string);
@@ -823,8 +823,7 @@ inline std::optional<errors> constructor_string_parser<regex_provider>::
 
 template <url_pattern_regex::regex_concept regex_provider>
 tl::expected<url_pattern_init, errors>
-constructor_string_parser<regex_provider>::parse(std::string_view input,
-                                                 regex_provider provider) {
+constructor_string_parser<regex_provider>::parse(std::string_view input) {
   ada_log("constructor_string_parser::parse input=", input);
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
@@ -917,8 +916,7 @@ constructor_string_parser<regex_provider>::parse(std::string_view input,
         if (parser.is_protocol_suffix()) {
           // Run compute protocol matches a special scheme flag given parser.
           if (const auto error =
-                  parser.compute_protocol_matches_special_scheme_flag(
-                      provider)) {
+                  parser.compute_protocol_matches_special_scheme_flag()) {
             ada_log("compute_protocol_matches_special_scheme_flag failed");
             return tl::unexpected(*error);
           }
