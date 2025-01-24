@@ -24,7 +24,7 @@ template <typename result_type, typename url_pattern_init,
 tl::expected<result_type, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
     const std::string_view* base_url, const url_pattern_options* options);
-} // namespace parser
+}  // namespace parser
 
 enum class url_pattern_part_type : uint8_t {
   // The part represents a simple fixed text string.
@@ -255,13 +255,11 @@ class url_pattern {
   bool ignore_case_ = false;
 
   template <typename result_type, typename url_pattern_init,
-            typename url_pattern_options, typename regex_provider>
+            typename url_pattern_options, typename regex_provider_for_parse_url>
   friend tl::expected<result_type, errors> parser::parse_url_pattern_impl(
       std::variant<std::string_view, url_pattern_init> input,
       const std::string_view* base_url, const url_pattern_options* options);
 };
-
-
 
 }  // namespace ada
 
