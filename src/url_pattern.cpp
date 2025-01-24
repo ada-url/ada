@@ -5,20 +5,6 @@
 #include <string>
 
 namespace ada {
-// The default options is an options struct with delimiter code point set to
-// the empty string and prefix code point set to the empty string.
-url_pattern_compile_component_options
-    url_pattern_compile_component_options::DEFAULT(std::nullopt, std::nullopt);
-
-// The hostname options is an options struct with delimiter code point set
-// "." and prefix code point set to the empty string.
-url_pattern_compile_component_options
-    url_pattern_compile_component_options::HOSTNAME('.', std::nullopt);
-
-// The pathname options is an options struct with delimiter code point set
-// "/" and prefix code point set to "/".
-url_pattern_compile_component_options
-    url_pattern_compile_component_options::PATHNAME('/', '/');
 
 tl::expected<url_pattern_init, errors> url_pattern_init::process(
     url_pattern_init init, std::string_view type,
