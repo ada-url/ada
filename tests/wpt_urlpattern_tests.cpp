@@ -14,6 +14,32 @@ using namespace simdjson;
 constexpr std::string_view URL_PATTERN_TEST_DATA =
     "wpt/urlpatterntestdata.json";
 
+TEST(wpt_urlpattern_tests, test_regex_difference) {
+  // {
+  //   "pattern": [{ "pathname": "/foo/bar" }],
+  //   "inputs": [{ "pathname": "/foo/bar" }],
+  //   "expected_match": {
+  //     "pathname": { "input": "/foo/bar", "groups": {} }
+  //   }
+  // }
+  auto init = ada::url_pattern_init{};
+  init.pathname = "/foo/bar";
+  auto u =
+      ada::parse_url_pattern<ada::url_pattern_regex::std_regex_provider>(init);
+  ASSERT_TRUE(u);
+  auto match = u->exec(init, nullptr);
+  ASSERT_TRUE(match);
+  ASSERT_TRUE(match->has_value());
+
+  std::unordered_map<std::string, std::optional<std::string>> empty_object{};
+
+  ASSERT_EQ(match->value().protocol.input, "");
+  ASSERT_EQ(match->value().protocol.groups, empty_object);
+  ASSERT_EQ(match->value().pathname.input, "/foo/bar");
+  ASSERT_EQ(match->value().pathname.groups, empty_object);
+  SUCCEED();
+}
+
 TEST(wpt_urlpattern_tests, parser_tokenize_basic_tests) {
   auto tokenize_result =
       tokenize("*", ada::url_pattern_helpers::token_policy::STRICT);
