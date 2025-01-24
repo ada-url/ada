@@ -11,9 +11,10 @@
 
 #include "ada/url.h"
 #include "ada/common_defs.h"
+#include "ada/errors.h"
+#include "ada/url_pattern_init.h"
 
 namespace ada {
-enum class errors : uint8_t { type_error };
 
 template <class result_type = ada::url_aggregator>
 using result = tl::expected<result_type, ada::errors>;

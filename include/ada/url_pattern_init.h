@@ -1,0 +1,91 @@
+/**
+ * @file url_pattern_init.h
+ * @brief Declaration for the url_pattern_init implementation.
+ */
+#ifndef ADA_URL_PATTERN_INIT_H
+#define ADA_URL_PATTERN_INIT_H
+
+#include "ada/expected.h"
+#include "ada/errors.h"
+#include <string_view>
+#include <string>
+#include <optional>
+
+namespace ada {
+
+// Important: C++20 allows us to use concept rather than `using` or `typedef
+// and allows functions with second argument, which is optional (using either
+// std::nullopt or a parameter with default value)
+template <typename F>
+concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
+  { f(sv) } -> std::same_as<tl::expected<std::string, errors>>;
+};
+
+// A structure providing matching patterns for individual components
+// of a URL. When a URLPattern is created, or when a URLPattern is
+// used to match or test against a URL, the input can be given as
+// either a string or a URLPatternInit struct. If a string is given,
+// it will be parsed to create a URLPatternInit. The URLPatternInit
+// API is defined as part of the URLPattern specification.
+struct url_pattern_init {
+  // @see https://urlpattern.spec.whatwg.org/#process-a-urlpatterninit
+  static tl::expected<url_pattern_init, errors> process(
+      url_pattern_init init, std::string_view type,
+      std::optional<std::string_view> protocol = std::nullopt,
+      std::optional<std::string_view> username = std::nullopt,
+      std::optional<std::string_view> password = std::nullopt,
+      std::optional<std::string_view> hostname = std::nullopt,
+      std::optional<std::string_view> port = std::nullopt,
+      std::optional<std::string_view> pathname = std::nullopt,
+      std::optional<std::string_view> search = std::nullopt,
+      std::optional<std::string_view> hash = std::nullopt);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-protocol-for-init
+  static tl::expected<std::string, errors> process_protocol(
+      std::string_view value, std::string_view type);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-username-for-init
+  static tl::expected<std::string, errors> process_username(
+      std::string_view value, std::string_view type);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-password-for-init
+  static tl::expected<std::string, errors> process_password(
+      std::string_view value, std::string_view type);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-hostname-for-init
+  static tl::expected<std::string, errors> process_hostname(
+      std::string_view value, std::string_view type);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-port-for-init
+  static tl::expected<std::string, errors> process_port(
+      std::string_view port, std::string_view protocol, std::string_view type);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-pathname-for-init
+  static tl::expected<std::string, errors> process_pathname(
+      std::string_view value, std::string_view protocol, std::string_view type);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-search-for-init
+  static tl::expected<std::string, errors> process_search(
+      std::string_view value, std::string_view type);
+
+  // @see https://urlpattern.spec.whatwg.org/#process-hash-for-init
+  static tl::expected<std::string, errors> process_hash(std::string_view value,
+                                                        std::string_view type);
+
+  [[nodiscard]] std::string to_string() const;
+
+  bool operator==(const url_pattern_init&) const;
+
+  std::optional<std::string> protocol{};
+  std::optional<std::string> username{};
+  std::optional<std::string> password{};
+  std::optional<std::string> hostname{};
+  std::optional<std::string> port{};
+  std::optional<std::string> pathname{};
+  std::optional<std::string> search{};
+  std::optional<std::string> hash{};
+  std::optional<std::string> base_url{};
+};
+}  // namespace ada
+
+#endif  // ADA_URL_PATTERN_INIT_H

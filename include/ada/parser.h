@@ -10,6 +10,7 @@
 
 #include "ada/expected.h"
 #include "ada/url_pattern_regex.h"
+#include "ada/url_pattern_init.h"
 
 /**
  * @private
@@ -20,7 +21,6 @@ struct url;
 template <url_pattern_regex::regex_concept regex_provider>
 class url_pattern;
 struct url_pattern_options;
-struct url_pattern_init;
 enum class errors : uint8_t;
 }  // namespace ada
 
