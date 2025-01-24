@@ -6,7 +6,6 @@
 #define ADA_URL_BASE_H
 
 #include "ada/common_defs.h"
-#include "ada/url_components.h"
 #include "ada/scheme.h"
 
 #include <string_view>

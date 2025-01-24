@@ -1,10 +1,11 @@
+#include "ada/implementation-inl.h"
+
 #include <string_view>
 
 #include "ada/common_defs.h"
 #include "ada/parser.h"
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
-#include "ada/url_pattern.h"
 
 namespace ada {
 
@@ -78,38 +79,5 @@ ada_warn_unused std::string to_string(ada::encoding_type type) {
       unreachable();
   }
 }
-
-template <url_pattern_regex::regex_concept regex_provider>
-ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
-parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
-                  const std::string_view* base_url,
-                  const url_pattern_options* options,
-                  std::optional<regex_provider> provider) {
-  return parser::parse_url_pattern_impl<regex_provider>(
-      std::move(input), base_url, options,
-      provider.value_or(url_pattern_regex::std_regex_provider()));
-}
-
-template ada_warn_unused
-    tl::expected<url_pattern<url_pattern_regex::std_regex_provider>, errors>
-    parse_url_pattern(
-        std::variant<std::string_view, url_pattern_init> input,
-        const std::string_view* base_url, const url_pattern_options* options,
-        std::optional<url_pattern_regex::std_regex_provider> provider);
-
-template result<std::optional<url_pattern_result>>
-url_pattern<url_pattern_regex::std_regex_provider>::exec(
-    const url_pattern_input& input, std::string_view* base_url);
-
-template result<bool> url_pattern<url_pattern_regex::std_regex_provider>::test(
-    const url_pattern_input& input, std::string_view* base_url);
-namespace parser {
-template tl::expected<url_pattern<url_pattern_regex::std_regex_provider>,
-                      errors>
-parse_url_pattern_impl(std::variant<std::string_view, url_pattern_init> input,
-                       const std::string_view* base_url,
-                       const url_pattern_options* options,
-                       url_pattern_regex::std_regex_provider&& provider);
-}  // namespace parser
 
 }  // namespace ada

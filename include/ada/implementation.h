@@ -6,16 +6,15 @@
 #ifndef ADA_IMPLEMENTATION_H
 #define ADA_IMPLEMENTATION_H
 
-#include <string>
+#include <string_view>
 #include <optional>
 
-#include "ada/parser.h"
-#include "ada/common_defs.h"
 #include "ada/url.h"
-#include "ada/url_pattern_regex.h"
+#include "ada/common_defs.h"
+#include "ada/errors.h"
+#include "ada/url_pattern_init.h"
 
 namespace ada {
-enum class errors : uint8_t { type_error };
 
 template <class result_type = ada::url_aggregator>
 using result = tl::expected<result_type, ada::errors>;
@@ -54,7 +53,7 @@ bool can_parse(std::string_view input,
  * @param input valid UTF-8 string or URLPatternInit struct
  * @param base_url an optional valid UTF-8 string
  * @param options an optional url_pattern_options struct
- * @param regex_provider an optional regex provider. if not provided, it will
+ * @param provider an optional regex provider. if not provided, it will
  * use ada::url_pattern_regex::std_regex_provider
  * @return url_pattern instance
  */
@@ -63,8 +62,7 @@ template <url_pattern_regex::regex_concept regex_provider =
 ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
 parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
                   const std::string_view* base_url = nullptr,
-                  const url_pattern_options* options = nullptr,
-                  std::optional<regex_provider> provider = std::nullopt);
+                  const url_pattern_options* options = nullptr);
 
 /**
  * Computes a href string from a file path. The function assumes

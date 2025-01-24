@@ -10,6 +10,7 @@
 
 #include "ada/expected.h"
 #include "ada/url_pattern_regex.h"
+#include "ada/url_pattern_init.h"
 
 /**
  * @private
@@ -20,7 +21,6 @@ struct url;
 template <url_pattern_regex::regex_concept regex_provider>
 class url_pattern;
 struct url_pattern_options;
-struct url_pattern_init;
 enum class errors : uint8_t;
 }  // namespace ada
 
@@ -56,8 +56,13 @@ extern template url parse_url_impl<url>(std::string_view user_input,
 template <url_pattern_regex::regex_concept regex_provider>
 tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options,
-    regex_provider&& provider);
+    const std::string_view* base_url, const url_pattern_options* options);
+
+extern template tl::expected<url_pattern<url_pattern_regex::std_regex_provider>,
+                             errors>
+parse_url_pattern_impl(std::variant<std::string_view, url_pattern_init> input,
+                       const std::string_view* base_url,
+                       const url_pattern_options* options);
 
 }  // namespace ada::parser
 

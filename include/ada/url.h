@@ -6,23 +6,28 @@
 #define ADA_URL_H
 
 #include <algorithm>
-#include <charconv>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <string_view>
 
 #include "ada/checkers.h"
 #include "ada/common_defs.h"
-#include "ada/log.h"
-#include "ada/scheme.h"
-#include "ada/serializers.h"
-#include "ada/unicode.h"
 #include "ada/url_base.h"
 #include "ada/url_components.h"
 #include "ada/helpers.h"
 
 namespace ada {
+
+struct url_aggregator;
+
+// namespace parser {
+// template <typename result_type>
+// result_type parse_url(std::string_view user_input,
+//                       const result_type* base_url = nullptr);
+// template <typename result_type, bool store_values>
+// result_type parse_url_impl(std::string_view user_input,
+//                            const result_type* base_url = nullptr);
+// }
 
 /**
  * @brief Generic URL struct reliant on std::string instantiation.

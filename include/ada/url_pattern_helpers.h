@@ -6,11 +6,16 @@
 #define ADA_URL_PATTERN_HELPERS_H
 
 #include "ada/expected.h"
+#include "ada/common_defs.h"
 #include "ada/url_pattern.h"
 
 #include <string>
 #include <tuple>
 #include <vector>
+
+namespace ada {
+enum class errors : uint8_t;
+}
 
 namespace ada::url_pattern_helpers {
 
@@ -37,9 +42,9 @@ enum class token_policy {
 };
 
 // @see https://urlpattern.spec.whatwg.org/#tokens
-class Token {
+class token {
  public:
-  Token(token_type _type, size_t _index, std::string&& _value)
+  token(token_type _type, size_t _index, std::string&& _value)
       : type(_type), index(_index), value(std::move(_value)) {}
 
   // A token has an associated type, a string, initially "invalid-char".
@@ -66,12 +71,12 @@ class url_pattern_parser {
   bool can_continue() const { return index < tokens.size(); }
 
   // @see https://urlpattern.spec.whatwg.org/#try-to-consume-a-token
-  Token* try_consume_token(token_type type);
+  token* try_consume_token(token_type type);
   // @see https://urlpattern.spec.whatwg.org/#try-to-consume-a-modifier-token
-  Token* try_consume_modifier_token();
+  token* try_consume_modifier_token();
   // @see
   // https://urlpattern.spec.whatwg.org/#try-to-consume-a-regexp-or-wildcard-token
-  Token* try_consume_regexp_or_wildcard_token(Token* name_token);
+  token* try_consume_regexp_or_wildcard_token(const token* name_token);
   // @see https://urlpattern.spec.whatwg.org/#consume-text
   std::string consume_text();
   // @see https://urlpattern.spec.whatwg.org/#consume-a-required-token
@@ -81,12 +86,12 @@ class url_pattern_parser {
   std::optional<errors> maybe_add_part_from_the_pending_fixed_value()
       ada_warn_unused;
   // @see https://urlpattern.spec.whatwg.org/#add-a-part
-  std::optional<errors> add_part(std::string_view prefix, Token* name_token,
-                                 Token* regexp_or_wildcard_token,
+  std::optional<errors> add_part(std::string_view prefix, token* name_token,
+                                 token* regexp_or_wildcard_token,
                                  std::string_view suyffix,
-                                 Token* modifier_token) ada_warn_unused;
+                                 token* modifier_token) ada_warn_unused;
 
-  std::vector<Token> tokens{};
+  std::vector<token> tokens{};
   F& encoding_callback;
   std::string segment_wildcard_regexp;
   std::vector<url_pattern_part> parts{};
@@ -129,7 +134,7 @@ class Tokenizer {
   // has an associated policy, a tokenize policy, initially "strict".
   token_policy policy;
   // has an associated token list, a token list, initially an empty list.
-  std::vector<Token> token_list{};
+  std::vector<token> token_list{};
   // has an associated index, a number, initially 0.
   size_t index = 0;
   // has an associated next index, a number, initially 0.
@@ -142,7 +147,7 @@ class Tokenizer {
 template <url_pattern_regex::regex_concept regex_provider>
 struct constructor_string_parser {
   explicit constructor_string_parser(std::string_view new_input,
-                                     std::vector<Token>&& new_token_list)
+                                     std::vector<token>&& new_token_list)
       : input(new_input), token_list(std::move(new_token_list)) {}
 
   // @see https://urlpattern.spec.whatwg.org/#rewind
@@ -155,8 +160,7 @@ struct constructor_string_parser {
   bool is_search_prefix();
 
   // @see https://urlpattern.spec.whatwg.org/#parse-a-constructor-string
-  static tl::expected<url_pattern_init, errors> parse(std::string_view input,
-                                                      regex_provider provider);
+  static tl::expected<url_pattern_init, errors> parse(std::string_view input);
 
   // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser-state
   enum class State {
@@ -187,8 +191,7 @@ struct constructor_string_parser {
 
   // @see
   // https://urlpattern.spec.whatwg.org/#compute-protocol-matches-a-special-scheme-flag
-  std::optional<errors> compute_protocol_matches_special_scheme_flag(
-      regex_provider provider);
+  std::optional<errors> compute_protocol_matches_special_scheme_flag();
 
   // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
   bool next_is_authority_slashes();
@@ -215,7 +218,7 @@ struct constructor_string_parser {
   std::string input;
   // has an associated token list, a token list, which must be set upon
   // creation.
-  std::vector<Token> token_list;
+  std::vector<token> token_list;
   // has an associated result, a URLPatternInit, initially set to a new
   // URLPatternInit.
   url_pattern_init result{};
@@ -241,7 +244,7 @@ struct constructor_string_parser {
   bool is_non_special_pattern_char(size_t index, std::string_view value);
 
   // @see https://urlpattern.spec.whatwg.org/#get-a-safe-token
-  const Token* get_safe_token(size_t index);
+  const token* get_safe_token(size_t index);
 
   // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
   std::string make_component_string();
@@ -284,7 +287,7 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input);
 tl::expected<std::string, errors> canonicalize_hash(std::string_view input);
 
 // @see https://urlpattern.spec.whatwg.org/#tokenize
-tl::expected<std::vector<Token>, errors> tokenize(std::string_view input,
+tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
                                                   token_policy policy);
 
 // @see https://urlpattern.spec.whatwg.org/#process-a-base-url-string
@@ -316,7 +319,7 @@ std::string generate_pattern_string(
 // https://urlpattern.spec.whatwg.org/#generate-a-regular-expression-and-name-list
 std::tuple<std::string, std::vector<std::string>>
 generate_regular_expression_and_name_list(
-    std::vector<url_pattern_part>& part_list,
+    const std::vector<url_pattern_part>& part_list,
     url_pattern_compile_component_options options);
 
 // @see https://urlpattern.spec.whatwg.org/#hostname-pattern-is-an-ipv6-address
