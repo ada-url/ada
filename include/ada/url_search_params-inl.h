@@ -150,7 +150,8 @@ inline void url_search_params::set(const std::string_view key,
 }
 
 inline void url_search_params::remove(const std::string_view key) {
-  std::erase_if(params, [&key](const auto &param) { return param.first == key; });
+  std::erase_if(params,
+                [&key](const auto &param) { return param.first == key; });
 }
 
 inline void url_search_params::remove(const std::string_view key,
