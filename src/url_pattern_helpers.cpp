@@ -8,7 +8,7 @@ namespace ada::url_pattern_helpers {
 
 std::tuple<std::string, std::vector<std::string>>
 generate_regular_expression_and_name_list(
-    std::vector<url_pattern_part>& part_list,
+    const std::vector<url_pattern_part>& part_list,
     url_pattern_compile_component_options options) {
   // Let result be "^"
   std::string result = "^";
@@ -435,7 +435,7 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   return tl::unexpected(errors::type_error);
 }
 
-tl::expected<std::vector<Token>, errors> tokenize(std::string_view input,
+tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
                                                   token_policy policy) {
   ada_log("tokenize input: ", input);
   // Let tokenizer be a new tokenizer.

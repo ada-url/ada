@@ -112,7 +112,7 @@ bool constructor_string_parser<regex_provider>::is_non_special_pattern_char(
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-const Token* constructor_string_parser<regex_provider>::get_safe_token(
+const token* constructor_string_parser<regex_provider>::get_safe_token(
     size_t index) {
   // If index is less than parser’s token list's size, then return parser’s
   // token list[index].
@@ -440,7 +440,7 @@ Tokenizer::process_tokenizing_error(size_t next_position,
 }
 
 template <url_pattern_encoding_callback F>
-Token* url_pattern_parser<F>::try_consume_modifier_token() {
+token* url_pattern_parser<F>::try_consume_modifier_token() {
   // Let token be the result of running try to consume a token given parser and
   // "other-modifier".
   auto token = try_consume_token(token_type::OTHER_MODIFIER);
@@ -453,8 +453,8 @@ Token* url_pattern_parser<F>::try_consume_modifier_token() {
 }
 
 template <url_pattern_encoding_callback F>
-Token* url_pattern_parser<F>::try_consume_regexp_or_wildcard_token(
-    Token* name_token) {
+token* url_pattern_parser<F>::try_consume_regexp_or_wildcard_token(
+    const token* name_token) {
   // Let token be the result of running try to consume a token given parser and
   // "regexp".
   auto token = try_consume_token(token_type::REGEXP);
@@ -468,7 +468,7 @@ Token* url_pattern_parser<F>::try_consume_regexp_or_wildcard_token(
 }
 
 template <url_pattern_encoding_callback F>
-Token* url_pattern_parser<F>::try_consume_token(token_type type) {
+token* url_pattern_parser<F>::try_consume_token(token_type type) {
   ada_log("url_pattern_parser::try_consume_token called with type=",
           to_string(type));
   // Assert: parser’s index is less than parser’s token list size.
@@ -541,8 +541,8 @@ url_pattern_parser<F>::maybe_add_part_from_the_pending_fixed_value() {
 
 template <url_pattern_encoding_callback F>
 std::optional<errors> url_pattern_parser<F>::add_part(
-    std::string_view prefix, Token* name_token, Token* regexp_or_wildcard_token,
-    std::string_view suffix, Token* modifier_token) {
+    std::string_view prefix, token* name_token, token* regexp_or_wildcard_token,
+    std::string_view suffix, token* modifier_token) {
   // Let modifier be "none".
   auto modifier = url_pattern_part_modifier::NONE;
   // If modifier token is not null:

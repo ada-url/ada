@@ -94,8 +94,8 @@ struct url_pattern_compile_component_options {
       std::optional<char> new_prefix = std::nullopt)
       : delimiter(new_delimiter), prefix(new_prefix) {}
 
-  std::string_view get_delimiter() const ada_warn_unused;
-  std::string_view get_prefix() const ada_warn_unused;
+  inline std::string_view get_delimiter() const ada_warn_unused;
+  inline std::string_view get_prefix() const ada_warn_unused;
 
   // @see https://urlpattern.spec.whatwg.org/#options-ignore-case
   bool ignore_case = false;
