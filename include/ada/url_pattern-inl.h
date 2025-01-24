@@ -47,11 +47,6 @@ url_pattern_component<regex_provider>::create_component_match_result(
   auto result =
       url_pattern_component_result{.input = std::string(input), .groups = {}};
 
-  // If input is empty, then groups will always be empty.
-  if (input.empty()) {
-    return result;
-  }
-
   // Optimization: Let's reserve the size.
   result.groups.reserve(exec_result.size());
 

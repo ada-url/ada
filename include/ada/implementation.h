@@ -53,8 +53,6 @@ bool can_parse(std::string_view input,
  * @param input valid UTF-8 string or URLPatternInit struct
  * @param base_url an optional valid UTF-8 string
  * @param options an optional url_pattern_options struct
- * @param provider an optional regex provider. if not provided, it will
- * use ada::url_pattern_regex::std_regex_provider
  * @return url_pattern instance
  */
 template <url_pattern_regex::regex_concept regex_provider =

@@ -31,7 +31,8 @@ std_regex_provider::regex_search(std::string_view input,
     return std::nullopt;
   }
   std::vector<std::optional<std::string>> matches;
-  if (match_result.empty()) {
+  // If input is empty, let's assume the result will be empty as well.
+  if (input.empty() || match_result.empty()) {
     return matches;
   }
   matches.reserve(match_result.size());
