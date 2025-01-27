@@ -19,8 +19,9 @@ std::optional<std::regex> std_regex_provider::create_instance(
   }
 }
 
-std::optional<std::vector<std::string>> std_regex_provider::regex_search(
-    std::string_view input, const std::regex& pattern) {
+std::optional<std::vector<std::optional<std::string>>>
+std_regex_provider::regex_search(std::string_view input,
+                                 const std::regex& pattern) {
   std::string input_str(
       input.begin(),
       input.end());  // Convert string_view to string for regex_search
@@ -29,7 +30,7 @@ std::optional<std::vector<std::string>> std_regex_provider::regex_search(
                          std::regex_constants::match_any)) {
     return std::nullopt;
   }
-  std::vector<std::string> matches;
+  std::vector<std::optional<std::string>> matches;
   if (match_result.empty()) {
     return matches;
   }

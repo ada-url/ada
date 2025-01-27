@@ -39,7 +39,8 @@ std::string url_pattern_component<regex_provider>::to_string() const {
 template <url_pattern_regex::regex_concept regex_provider>
 url_pattern_component_result
 url_pattern_component<regex_provider>::create_component_match_result(
-    std::string_view input, std::vector<std::string>&& exec_result) {
+    std::string_view input,
+    std::vector<std::optional<std::string>>&& exec_result) {
   // Let result be a new URLPatternComponentResult.
   // Set result["input"] to input.
   // Let groups be a record<USVString, (USVString or undefined)>.
@@ -47,7 +48,7 @@ url_pattern_component<regex_provider>::create_component_match_result(
       url_pattern_component_result{.input = std::string(input), .groups = {}};
 
   // If input is empty, then groups will always be empty.
-  if (input.empty() || exec_result.empty()) {
+  if (input.empty()) {
     return result;
   }
 

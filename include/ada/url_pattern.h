@@ -133,7 +133,7 @@ inline url_pattern_compile_component_options
 // specification.
 struct url_pattern_component_result {
   std::string input;
-  std::unordered_map<std::string, std::string> groups;
+  std::unordered_map<std::string, std::optional<std::string>> groups;
 
   bool operator==(const url_pattern_component_result&) const;
 
@@ -142,7 +142,8 @@ struct url_pattern_component_result {
                       std::ostream* os) {
     *os << "input: '" << result.input << "', group: ";
     for (const auto& group : result.groups) {
-      *os << "(" << group.first << ", " << group.second << ") ";
+      *os << "(" << group.first << ", " << group.second.value_or("undefined")
+          << ") ";
     }
   }
 #endif  // ADA_TESTING
@@ -172,7 +173,8 @@ class url_pattern_component {
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
-      std::string_view input, std::vector<std::string>&& exec_result);
+      std::string_view input,
+      std::vector<std::optional<std::string>>&& exec_result);
 
   std::string to_string() const;
 
