@@ -53,7 +53,7 @@ url_pattern_component<regex_provider>::create_component_match_result(
   }
 
   // Optimization: Let's reserve the size.
-  result.groups.reserve(exec_result.size() - 1);
+  result.groups.reserve(exec_result.size());
 
   // We explicitly start iterating from 0 even though the spec
   // says we should start from 1. This case is handled by the
