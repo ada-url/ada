@@ -11,6 +11,10 @@
 #include <string>
 #include <optional>
 
+#if ADA_TESTING
+#include <iostream>
+#endif  // ADA_TESTING
+
 namespace ada {
 
 // Important: C++20 allows us to use concept rather than `using` or `typedef
@@ -72,7 +76,19 @@ struct url_pattern_init {
   static tl::expected<std::string, errors> process_hash(std::string_view value,
                                                         std::string_view type);
 
-  [[nodiscard]] std::string to_string() const;
+#if ADA_TESTING
+  friend void PrintTo(const url_pattern_init& init, std::ostream* os) {
+    *os << "protocol: '" << init.protocol.value_or("undefined") << "', ";
+    *os << "username: '" << init.username.value_or("undefined") << "', ";
+    *os << "password: '" << init.password.value_or("undefined") << "', ";
+    *os << "hostname: '" << init.hostname.value_or("undefined") << "', ";
+    *os << "port: '" << init.port.value_or("undefined") << "', ";
+    *os << "pathname: '" << init.pathname.value_or("undefined") << "', ";
+    *os << "search: '" << init.search.value_or("undefined") << "', ";
+    *os << "hash: '" << init.hash.value_or("undefined") << "', ";
+    *os << "base_url: '" << init.base_url.value_or("undefined") << "', ";
+  }
+#endif  // ADA_TESTING
 
   bool operator==(const url_pattern_init&) const;
 

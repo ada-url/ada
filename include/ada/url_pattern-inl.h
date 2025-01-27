@@ -26,17 +26,6 @@ inline bool url_pattern_component_result::operator==(
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-std::string url_pattern_component<regex_provider>::to_string() const {
-#ifdef ADA_HAS_FORMAT
-  return std::format(R"({{"pattern": "{}", "has_regexp_groups": {}}})", pattern,
-                     has_regexp_groups ? "true" : "false"  //,
-  );
-#else
-  return "";
-#endif
-}
-
-template <url_pattern_regex::regex_concept regex_provider>
 url_pattern_component_result
 url_pattern_component<regex_provider>::create_component_match_result(
     std::string_view input,
@@ -60,21 +49,6 @@ url_pattern_component<regex_provider>::create_component_match_result(
     });
   }
   return result;
-}
-
-template <url_pattern_regex::regex_concept regex_provider>
-std::string url_pattern<regex_provider>::to_string() const {
-#ifdef ADA_HAS_FORMAT
-  return std::format(
-      R"({{"protocol_component": "{}", "username_component": {}, "password_component": {}, "hostname_component": {}, "port_component": {}, "pathname_component": {}, "search_component": {}, "hash_component": {}, "ignore_case": {}}})",
-      protocol_component.to_string(), username_component.to_string(),
-      password_component.to_string(), hostname_component.to_string(),
-      port_component.to_string(), pathname_component.to_string(),
-      search_component.to_string(), hash_component.to_string(),
-      ignore_case_ ? "true" : "false");
-#else
-  return "";
-#endif
 }
 
 template <url_pattern_regex::regex_concept regex_provider>

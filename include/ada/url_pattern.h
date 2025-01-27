@@ -176,7 +176,17 @@ class url_pattern_component {
       std::string_view input,
       std::vector<std::optional<std::string>>&& exec_result);
 
-  std::string to_string() const;
+#if ADA_TESTING
+  friend void PrintTo(const url_pattern_component& component,
+                      std::ostream* os) {
+    *os << "pattern: '" << component.pattern
+        << "', has_regexp_groups: " << component.has_regexp_groups
+        << "group_name_list: ";
+    for (const auto& name : component.group_name_list) {
+      *os << name << ", ";
+    }
+  }
+#endif  // ADA_TESTING
 
   typename regex_provider::regex_type regexp{};
   std::string pattern{};
@@ -204,7 +214,11 @@ struct url_pattern_result {
 struct url_pattern_options {
   bool ignore_case = false;
 
-  std::string to_string() const;
+#if ADA_TESTING
+  friend void PrintTo(const url_pattern_options& options, std::ostream* os) {
+    *os << "ignore_case: '" << options.ignore_case;
+  }
+#endif  // ADA_TESTING
 };
 
 // URLPattern is a Web Platform standard API for matching URLs against a
@@ -259,7 +273,18 @@ class url_pattern {
   // @see https://urlpattern.spec.whatwg.org/#url-pattern-has-regexp-groups
   [[nodiscard]] bool has_regexp_groups() const;
 
-  [[nodiscard]] std::string to_string() const;
+#if ADA_TESTING
+  friend void PrintTo(const url_pattern& c, std::ostream* os) {
+    *os << "protocol_component: '" << c.get_protocol() << ", ";
+    *os << "username_component: '" << c.get_username() << ", ";
+    *os << "password_component: '" << c.get_password() << ", ";
+    *os << "hostname_component: '" << c.get_hostname() << ", ";
+    *os << "port_component: '" << c.get_port() << ", ";
+    *os << "pathname_component: '" << c.get_pathname() << ", ";
+    *os << "search_component: '" << c.get_search() << ", ";
+    *os << "hash_component: '" << c.get_hash();
+  }
+#endif  // ADA_TESTING
 
   url_pattern_component<regex_provider> protocol_component{};
   url_pattern_component<regex_provider> username_component{};
