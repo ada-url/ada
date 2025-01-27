@@ -1,7 +1,8 @@
-#include <regex>
 #include "ada/url_pattern_regex.h"
 
 namespace ada::url_pattern_regex {
+
+#ifdef ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 std::optional<std::regex> std_regex_provider::create_instance(
     std::string_view pattern, bool ignore_case) {
   // Let flags be an empty string.
@@ -48,5 +49,7 @@ bool std_regex_provider::regex_match(std::string_view input,
                                      const std::regex& pattern) {
   return std::regex_match(input.begin(), input.end(), pattern);
 }
+
+#endif  // ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 
 }  // namespace ada::url_pattern_regex
