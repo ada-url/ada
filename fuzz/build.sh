@@ -37,12 +37,23 @@ $CXX $CFLAGS $CXXFLAGS \
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_search_params.o \
      -o $OUT/url_search_params
 
-$CXX $CFLAGS $CXXFLAGS \
+# IMPORTANT
+#
+# We use std_regex_provider for testing purposes.
+# It is not encouraged or recommended to be used within production
+# environments due to security problems.
+#
+# Please do not enable it on production systems!
+#
+$CXX -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=1 \
+     $CFLAGS $CXXFLAGS \
      -std=c++20 \
      -I build/singleheader \
      -c fuzz/url_pattern.cc -o url_pattern.o
 
-$CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_pattern.o \
+$CXX -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=1 \
+     $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE \
+     url_pattern.o \
      -o $OUT/url_pattern
 
 $CXX $CFLAGS $CXXFLAGS \

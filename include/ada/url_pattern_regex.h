@@ -6,7 +6,10 @@
 #define ADA_URL_PATTERN_REGEX_H
 
 #include <concepts>
+
+#ifdef ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 #include <regex>
+#endif  // ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 
 namespace ada::url_pattern_regex {
 
@@ -38,6 +41,7 @@ concept regex_concept = requires(T t, std::string_view pattern,
   { T(std::declval<T&&>()) } -> std::same_as<T>;
 };
 
+#ifdef ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 class std_regex_provider {
  public:
   std_regex_provider() = default;
@@ -48,6 +52,7 @@ class std_regex_provider {
       std::string_view input, const regex_type& pattern);
   static bool regex_match(std::string_view input, const regex_type& pattern);
 };
+#endif  // ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 
 }  // namespace ada::url_pattern_regex
 

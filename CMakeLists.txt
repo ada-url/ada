@@ -13,14 +13,9 @@ include(GNUInstallDirs)
 include(CTest)
 include(cmake/ada-flags.cmake)
 
-set(ADA_SOURCE_DIR src)
-
 add_subdirectory(src)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
-
-option(ADA_BENCHMARKS "Build benchmarks" OFF)
-option(ADA_TESTING "Build tests" OFF)
 
 # There are cases where when embedding ada as a dependency for other CMake
 # projects as submodules or subdirectories (via FetchContent) can lead to
@@ -57,6 +52,7 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
 
   if (ADA_TESTING AND NOT EMSCRIPTEN)
     set(CTEST_TEST_TIMEOUT 5)
+    set(ADA_USE_UNSAFE_STD_REGEX_PROVIDER ON)
     message(STATUS "The tests are enabled.")
     add_subdirectory(tests)
   else()
@@ -81,6 +77,16 @@ endif()
 
 
 add_library(ada::ada ALIAS ada)
+
+if(ADA_TESTING)
+  # IMPORTANT!
+  #
+  # We enable std_regex_provider for testing purposes
+  # It is not recommended to enable this flag and use std::regex under
+  # production environments due to several security issues.
+  #
+  target_compile_definitions(ada PUBLIC ADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON)
+endif()
 
 set_target_properties(
   ada PROPERTIES
