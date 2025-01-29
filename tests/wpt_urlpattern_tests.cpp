@@ -43,7 +43,7 @@ TEST(wpt_urlpattern_tests, test_regex_difference) {
 
 TEST(wpt_urlpattern_tests, parser_tokenize_basic_tests) {
   auto tokenize_result =
-      tokenize("*", ada::url_pattern_helpers::token_policy::STRICT);
+      tokenize("*", ada::url_pattern_helpers::token_policy::strict);
   ASSERT_TRUE(tokenize_result);
 }
 

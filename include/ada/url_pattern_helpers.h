@@ -37,8 +37,8 @@ std::string to_string(token_type type);
 
 // @see https://urlpattern.spec.whatwg.org/#tokenize-policy
 enum class token_policy {
-  STRICT,
-  LENIENT,
+  strict,
+  lenient,
 };
 
 // @see https://urlpattern.spec.whatwg.org/#tokens

@@ -425,13 +425,13 @@ inline ada_warn_unused std::optional<errors>
 Tokenizer::process_tokenizing_error(size_t next_position,
                                     size_t value_position) {
   // If tokenizer’s policy is "strict", then throw a TypeError.
-  if (policy == token_policy::STRICT) {
+  if (policy == token_policy::strict) {
     ada_log("process_tokenizing_error failed with next_position=",
             next_position, " value_position=", value_position);
     return errors::type_error;
   }
   // Assert: tokenizer’s policy is "lenient".
-  ADA_ASSERT_TRUE(policy == token_policy::LENIENT);
+  ADA_ASSERT_TRUE(policy == token_policy::lenient);
   // Run add a token with default length given tokenizer, "invalid-char", next
   // position, and value position.
   add_token_with_default_length(token_type::INVALID_CHAR, next_position,
@@ -535,7 +535,7 @@ url_pattern_parser<F>::maybe_add_part_from_the_pending_fixed_value() {
   // Append part to parser’s part list.
   parts.emplace_back(url_pattern_part_type::FIXED_TEXT,
                      std::move(*encoded_value),
-                     url_pattern_part_modifier::NONE);
+                     url_pattern_part_modifier::none);
   return std::nullopt;
 }
 
@@ -544,26 +544,26 @@ std::optional<errors> url_pattern_parser<F>::add_part(
     std::string_view prefix, token* name_token, token* regexp_or_wildcard_token,
     std::string_view suffix, token* modifier_token) {
   // Let modifier be "none".
-  auto modifier = url_pattern_part_modifier::NONE;
+  auto modifier = url_pattern_part_modifier::none;
   // If modifier token is not null:
   if (modifier_token) {
     // If modifier token’s value is "?" then set modifier to "optional".
     if (modifier_token->value == "?") {
-      modifier = url_pattern_part_modifier::OPTIONAL;
+      modifier = url_pattern_part_modifier::optional;
     } else if (modifier_token->value == "*") {
       // Otherwise if modifier token’s value is "*" then set modifier to
       // "zero-or-more".
-      modifier = url_pattern_part_modifier::ZERO_OR_MORE;
+      modifier = url_pattern_part_modifier::zero_or_more;
     } else if (modifier_token->value == "+") {
       // Otherwise if modifier token’s value is "+" then set modifier to
       // "one-or-more".
-      modifier = url_pattern_part_modifier::ONE_OR_MORE;
+      modifier = url_pattern_part_modifier::one_or_more;
     }
   }
   // If name token is null and regexp or wildcard token is null and modifier
   // is "none":
   if (!name_token && !regexp_or_wildcard_token &&
-      modifier == url_pattern_part_modifier::NONE) {
+      modifier == url_pattern_part_modifier::none) {
     // Append prefix to the end of parser’s pending fixed value.
     pending_fixed_value.append(prefix);
     return std::nullopt;
@@ -668,7 +668,7 @@ tl::expected<std::vector<url_pattern_part>, errors> parse_pattern_string(
       encoding_callback, generate_segment_wildcard_regexp(options));
   // Set parser’s token list to the result of running tokenize given input and
   // "strict".
-  auto tokenize_result = tokenize(input, token_policy::STRICT);
+  auto tokenize_result = tokenize(input, token_policy::strict);
   if (!tokenize_result) {
     ada_log("parse_pattern_string tokenize failed");
     return tl::unexpected(tokenize_result.error());
@@ -828,7 +828,7 @@ constructor_string_parser<regex_provider>::parse(std::string_view input) {
   ada_log("constructor_string_parser::parse input=", input);
   // Let parser be a new constructor string parser whose input is input and
   // token list is the result of running tokenize given input and "lenient".
-  auto token_list = tokenize(input, token_policy::LENIENT);
+  auto token_list = tokenize(input, token_policy::lenient);
   if (!token_list) {
     return tl::unexpected(token_list.error());
   }

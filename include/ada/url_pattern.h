@@ -42,15 +42,15 @@ enum class url_pattern_part_type : uint8_t {
 
 enum class url_pattern_part_modifier : uint8_t {
   // The part does not have a modifier.
-  NONE,
+  none,
   // The part has an optional modifier indicated by the U+003F (?) code point.
-  OPTIONAL,
+  optional,
   // The part has a "zero or more" modifier indicated by the U+002A (*) code
   // point.
-  ZERO_OR_MORE,
+  zero_or_more,
   // The part has a "one or more" modifier indicated by the U+002B (+) code
   // point.
-  ONE_OR_MORE,
+  one_or_more,
 };
 
 // @see https://urlpattern.spec.whatwg.org/#part

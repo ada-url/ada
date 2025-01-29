@@ -22,7 +22,7 @@ generate_regular_expression_and_name_list(
     // If part's type is "fixed-text":
     if (part.type == url_pattern_part_type::FIXED_TEXT) {
       // If part's modifier is "none"
-      if (part.modifier == url_pattern_part_modifier::NONE) {
+      if (part.modifier == url_pattern_part_modifier::none) {
         // Append the result of running escape a regexp string given part's
         // value
         result += escape_regexp_string(part.value);
@@ -68,8 +68,8 @@ generate_regular_expression_and_name_list(
     // string
     if (part.prefix.empty() && part.suffix.empty()) {
       // If part's modifier is "none" or "optional"
-      if (part.modifier == url_pattern_part_modifier::NONE ||
-          part.modifier == url_pattern_part_modifier::OPTIONAL) {
+      if (part.modifier == url_pattern_part_modifier::none ||
+          part.modifier == url_pattern_part_modifier::optional) {
         // (<regexp value>)<modifier>
         result += "(" + regexp_value + ")" +
                   convert_modifier_to_string(part.modifier);
@@ -82,8 +82,8 @@ generate_regular_expression_and_name_list(
     }
 
     // If part's modifier is "none" or "optional"
-    if (part.modifier == url_pattern_part_modifier::NONE ||
-        part.modifier == url_pattern_part_modifier::OPTIONAL) {
+    if (part.modifier == url_pattern_part_modifier::none ||
+        part.modifier == url_pattern_part_modifier::optional) {
       // (?:<prefix>(<regexp value>)<suffix>)<modifier>
       result += "(?:" + escape_regexp_string(part.prefix) + "(" + regexp_value +
                 ")" + escape_regexp_string(part.suffix) + ")" +
@@ -92,8 +92,8 @@ generate_regular_expression_and_name_list(
     }
 
     // Assert: part's modifier is "zero-or-more" or "one-or-more"
-    ADA_ASSERT_TRUE(part.modifier == url_pattern_part_modifier::ZERO_OR_MORE ||
-                    part.modifier == url_pattern_part_modifier::ONE_OR_MORE);
+    ADA_ASSERT_TRUE(part.modifier == url_pattern_part_modifier::zero_or_more ||
+                    part.modifier == url_pattern_part_modifier::one_or_more);
 
     // Assert: part's prefix is not the empty string or part's suffix is not the
     // empty string
@@ -131,7 +131,7 @@ generate_regular_expression_and_name_list(
     result.append(")");
 
     // If part's modifier is "zero-or-more" then append "?" to the end of result
-    if (part.modifier == url_pattern_part_modifier::ZERO_OR_MORE) {
+    if (part.modifier == url_pattern_part_modifier::zero_or_more) {
       result += "?";
     }
   }
@@ -162,13 +162,13 @@ std::string convert_modifier_to_string(url_pattern_part_modifier modifier) {
   // TODO: Optimize this.
   switch (modifier) {
       // If modifier is "zero-or-more", then return "*".
-    case url_pattern_part_modifier::ZERO_OR_MORE:
+    case url_pattern_part_modifier::zero_or_more:
       return "*";
     // If modifier is "optional", then return "?".
-    case url_pattern_part_modifier::OPTIONAL:
+    case url_pattern_part_modifier::optional:
       return "?";
     // If modifier is "one-or-more", then return "+".
-    case url_pattern_part_modifier::ONE_OR_MORE:
+    case url_pattern_part_modifier::one_or_more:
       return "+";
     // Return the empty string.
     default:
@@ -855,7 +855,7 @@ std::string generate_pattern_string(
     // If part’s type is "fixed-text" then:
     if (part.type == url_pattern_part_type::FIXED_TEXT) {
       // If part’s modifier is "none" then:
-      if (part.modifier == url_pattern_part_modifier::NONE) {
+      if (part.modifier == url_pattern_part_modifier::none) {
         // Append the result of running escape a pattern string given part’s
         // value to the end of result.
         result.append(escape_pattern_string(part.value));
@@ -895,7 +895,7 @@ std::string generate_pattern_string(
     // - next part’s suffix is the empty string
     if (!needs_grouping && custom_name &&
         part.type == url_pattern_part_type::SEGMENT_WILDCARD &&
-        part.modifier == url_pattern_part_modifier::NONE &&
+        part.modifier == url_pattern_part_modifier::none &&
         next_part.has_value() && next_part->prefix.empty() &&
         next_part->suffix.empty()) {
       // If next part’s type is "fixed-text":
@@ -978,7 +978,7 @@ std::string generate_pattern_string(
       if (!custom_name &&
           (!previous_part.has_value() ||
            previous_part->type == url_pattern_part_type::FIXED_TEXT ||
-           previous_part->modifier != url_pattern_part_modifier::NONE ||
+           previous_part->modifier != url_pattern_part_modifier::none ||
            needs_grouping || !part.prefix.empty())) {
         result.append("*");
       } else {
