@@ -289,15 +289,59 @@ class url_pattern {
       std::variant<std::string_view, url_pattern_init> input,
       const std::string_view* base_url, const url_pattern_options* options);
 
- private:
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   url_pattern_component<regex_provider> protocol_component{};
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   url_pattern_component<regex_provider> username_component{};
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   url_pattern_component<regex_provider> password_component{};
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   url_pattern_component<regex_provider> hostname_component{};
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   url_pattern_component<regex_provider> port_component{};
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   url_pattern_component<regex_provider> pathname_component{};
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   url_pattern_component<regex_provider> search_component{};
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   url_pattern_component<regex_provider> hash_component{};
+  /**
+   * @private
+   * We can not make this private due to a LLVM bug.
+   * Ref: https://github.com/ada-url/ada/pull/859
+   */
   bool ignore_case_ = false;
 };
 
