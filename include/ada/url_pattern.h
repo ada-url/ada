@@ -284,11 +284,9 @@ class url_pattern {
   }
 #endif  // ADA_TESTING
 
-  template <url_pattern_regex::regex_concept P>
-  friend tl::expected<url_pattern<P>, errors> parser::parse_url_pattern_impl(
+  friend tl::expected<url_pattern<regex_provider>, errors> parser::parse_url_pattern_impl(
       std::variant<std::string_view, url_pattern_init> input,
       const std::string_view* base_url, const url_pattern_options* options);
-
  private:
   url_pattern_component<regex_provider> protocol_component{};
   url_pattern_component<regex_provider> username_component{};
