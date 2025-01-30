@@ -193,15 +193,15 @@ url_pattern_component<regex_provider>::compile(
 
 template <url_pattern_regex::regex_concept regex_provider>
 result<std::optional<url_pattern_result>> url_pattern<regex_provider>::exec(
-    const url_pattern_input& input, std::string_view* base_url) {
+    const url_pattern_input& input, const std::string_view* base_url) {
   // Return the result of match given this's associated URL pattern, input, and
   // baseURL if given.
   return match(input, base_url);
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-result<bool> url_pattern<regex_provider>::test(const url_pattern_input& input,
-                                               std::string_view* base_url) {
+result<bool> url_pattern<regex_provider>::test(
+    const url_pattern_input& input, const std::string_view* base_url) {
   // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
   // Implement a fast path just like `can_parse()` in ada_url.
   // Let result be the result of match given this's associated URL pattern,
@@ -215,7 +215,7 @@ result<bool> url_pattern<regex_provider>::test(const url_pattern_input& input,
 
 template <url_pattern_regex::regex_concept regex_provider>
 result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
-    const url_pattern_input& input, std::string_view* base_url_string) {
+    const url_pattern_input& input, const std::string_view* base_url_string) {
   std::string protocol{};
   std::string username{};
   std::string password{};

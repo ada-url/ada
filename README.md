@@ -10,6 +10,9 @@ Ada is a fast and spec-compliant URL parser written in C++.
 Specification for URL parser can be found from the
 [WHATWG](https://url.spec.whatwg.org/#url-parsing) website.
 
+Ada library also includes a [URLPattern](https://url.spec.whatwg.org/#urlpattern) implementation
+that is compatible with the [web-platform tests](https://github.com/web-platform-tests/wpt/tree/master/urlpattern).
+
 The Ada library passes the full range of tests from the specification,
 across a wide range of platforms (e.g., Windows, Linux, macOS). It fully
 supports the relevant [Unicode Technical Standard](https://www.unicode.org/reports/tr46/#ToUnicode).
@@ -19,16 +22,11 @@ The WHATWG URL specification has been adopted by most browsers.  Other tools, su
 standard libraries, follow the RFC 3986. The following table illustrates possible differences in practice
 (encoding of the host, encoding of the path):
 
-| string source | string value |
-|:--------------|:--------------|
-| input string | https://www.7‑Eleven.com/Home/Privacy/Montréal |
+| string source           | string value                                                |
+|:------------------------|:------------------------------------------------------------|
+| input string            | https://www.7‑Eleven.com/Home/Privacy/Montréal              |
 | ada's normalized string | https://www.xn--7eleven-506c.com/Home/Privacy/Montr%C3%A9al |
-| curl 7.87 | (returns the original unchanged) |
-
-### Requirements
-
-The project is otherwise self-contained and it has no dependency.
-A recent C++ compiler supporting C++20. We test GCC 12 or better, LLVM 12 or better and Microsoft Visual Studio 2022.
+| curl 7.87               | (returns the original unchanged)                            |
 
 ## Ada is fast.
 
@@ -50,9 +48,12 @@ Ada has improved the performance of the popular JavaScript environment Node.js:
 
 The Ada library is used by important systems besides Node.js such as Redpanda, Kong, Telegram and Cloudflare Workers.
 
-
-
 [![the ada library](http://img.youtube.com/vi/tQ-6OWRDsZg/0.jpg)](https://www.youtube.com/watch?v=tQ-6OWRDsZg)<br />
+
+### Requirements
+
+The project is otherwise self-contained and it has no dependency.
+A recent C++ compiler supporting C++20. We test GCC 12 or better, LLVM 14 or better and Microsoft Visual Studio 2022.
 
 ## Installation
 
@@ -67,8 +68,8 @@ Linux or macOS users might follow the following instructions if they have a rece
 
 1. Pull the library in a directory
    ```
-   wget https://github.com/ada-url/ada/releases/download/v2.6.10/ada.cpp
-   wget https://github.com/ada-url/ada/releases/download/v2.6.10/ada.h
+   wget https://github.com/ada-url/ada/releases/download/v3.0.0/ada.cpp
+   wget https://github.com/ada-url/ada/releases/download/v3.0.00/ada.h
    ```
 2. Create a new file named `demo.cpp` with this content:
    ```C++
@@ -131,7 +132,7 @@ components (path, host, and so forth).
 - Parse and validate a URL from an ASCII or a valid UTF-8 string.
 
 ```cpp
-auto url = ada::parse("https://www.google.com");
+auto url = ada::parse<ada::url_aggregator>("https://www.google.com");
 if (url) { /* URL is valid */ }
 ```
 
@@ -140,89 +141,45 @@ accessing it when you are not sure that it will succeed. The following
 code is unsafe:
 
 ```cpp
-auto url = ada::parse("some bad url");
+auto> url = ada::parse<ada::url_aggregator>("some bad url");
 url->get_href();
-```
-
-You should do...
-
-```cpp
-auto url = ada::parse("some bad url");
-if(url) {
-  // next line is now safe:
-  url->get_href();
-} else {
-  // report a parsing failure
-}
 ```
 
 For simplicity, in the examples below, we skip the check because
 we know that parsing succeeds. All strings are assumed to be valid
 UTF-8 strings.
 
-### Examples
+## Examples
 
-- Get/Update credentials
+## URL Parser
 
-```cpp
-auto url = ada::parse("https://www.google.com");
-url->set_username("username");
+```c++
+auto url = ada::parse<ada::url_aggregator>("https://www.google.com");
+
+url->set_username("username"); // Update credentials
 url->set_password("password");
 // ada->get_href() will return "https://username:password@www.google.com/"
-```
 
-- Get/Update Protocol
-
-```cpp
-auto url = ada::parse("https://www.google.com");
-url->set_protocol("wss");
+url->set_protocol("wss"); // Update protocol
 // url->get_protocol() will return "wss:"
-// url->get_href() will return "wss://www.google.com/"
-```
 
-- Get/Update host
-
-```cpp
-auto url = ada::parse("https://www.google.com");
-url->set_host("github.com");
+url->set_host("github.com"); // Update host
 // url->get_host() will return "github.com"
-// you can use `url.set_hostname` depending on your usage.
-```
 
-- Get/Update port
-
-```cpp
-auto url = ada::parse("https://www.google.com");
-url->set_port("8080");
+url->set_port("8080"); // Update port
 // url->get_port() will return "8080"
-```
 
-- Get/Update pathname
-
-```cpp
-auto url = ada::parse("https://www.google.com");
-url->set_pathname("/my-super-long-path")
+url->set_pathname("/my-super-long-path"); // Update pathname
 // url->get_pathname() will return "/my-super-long-path"
-```
 
-- Get/Update search/query
-
-```cpp
-auto url = ada::parse("https://www.google.com");
-url->set_search("target=self");
+url->set_search("target=self"); // Update search
 // url->get_search() will return "?target=self"
-```
 
-- Get/Update hash/fragment
-
-```cpp
-auto url = ada::parse("https://www.google.com");
-url->set_hash("is-this-the-real-life");
+url->set_hash("is-this-the-real-life"); // Update hash/fragment
 // url->get_hash() will return "#is-this-the-real-life"
 ```
-For more information about command-line options, please refer to the [CLI documentation](docs/cli.md).
 
-- URL search params
+### URL Search Params
 
 ```cpp
 ada::url_search_params search_params("a=b&c=d&e=f");
@@ -234,6 +191,40 @@ auto keys = search_params.get_keys();
 while (keys.has_next()) {
   auto key = keys.next();  // "a", "c", "e", "g"
 }
+```
+
+### URLPattern
+
+Our implementation doesn't provide a regex engine and leaves the decision of choosing the right engine to the user.
+This is done as a security measure since the default std::regex engine is not safe and open to DDOS attacks.
+Runtimes like Node.js and Cloudflare Workers use the V8 regex engine, which is safe and performant.
+
+```cpp
+// Define a regex engine that conforms to the following interface
+// For example we will use v8 regex engine
+
+class v8_regex_provider {
+ public:
+  v8_regex_provider() = default;
+  using regex_type = v8::Global<v8::RegExp>;
+  static std::optional<regex_type> create_instance(std::string_view pattern,
+                                                   bool ignore_case);
+  static std::optional<std::vector<std::optional<std::string>>> regex_search(
+      std::string_view input, const regex_type& pattern);
+  static bool regex_match(std::string_view input, const regex_type& pattern);
+};
+
+// Define a URLPattern
+auto pattern = ada::parse_url_pattern<v8_regex_provider>("/books/:id(\\d+)", "https://example.com");
+
+// Check validity
+if (!pattern) { return EXIT_FAILURE; }
+
+// Match a URL
+auto match = pattern->match("https://example.com/books/123");
+
+// Test a URL
+auto matched = pattern->test("https://example.com/books/123");
 ```
 
 ### C wrapper
@@ -298,23 +289,21 @@ c++ demo.o ada.o -o cdemo
 ./cdemo
 ```
 
+### Command-line interface
+
+For more information about command-line options, please refer to the [CLI documentation](docs/cli.md).
+
 ### CMake dependency
 
 See the file `tests/installation/CMakeLists.txt` for an example of how you might use ada from your own
 CMake project, after having installed ada on your system.
 
-## Installation
-
-### Homebrew
-
-Ada is available through [Homebrew](https://formulae.brew.sh/formula/ada-url#default).
-You can install Ada using `brew install ada-url`.
-
 ## Contributing
 
 ### Building
 
-Ada uses cmake as a build system. It's recommended you to run the following commands to build it locally.
+Ada uses cmake as a build system, but also supports Bazel. It's recommended you to run the following 
+commands to build it locally.
 
 Without tests:
 
@@ -325,15 +314,12 @@ With tests (requires git):
 - **Build**: `cmake -B build -DADA_TESTING=ON && cmake --build build`
 - **Test**: `ctest --output-on-failure --test-dir build`
 
-
 With tests (requires available local packages):
 
 - **Build**: `cmake -B build -DADA_TESTING=ON -D CPM_USE_LOCAL_PACKAGES=ON && cmake --build build`
 - **Test**: `ctest --output-on-failure --test-dir build`
 
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
-
-
 
 The project can also be built via docker using default docker file of repository with following commands.
 
@@ -351,6 +337,5 @@ This code is made available under the Apache License 2.0 as well as the MIT lice
 Our tests include third-party code and data. The benchmarking code includes third-party code: it is provided for research purposes only and not part of the library.
 
 ### Further reading
-
 
 * Yagiz Nizipli, Daniel Lemire, [Parsing Millions of URLs per Second](https://doi.org/10.1002/spe.3296), Software: Practice and Experience 54(5) May 2024.

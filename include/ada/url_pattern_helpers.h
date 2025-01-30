@@ -129,6 +129,10 @@ class Tokenizer {
   std::optional<errors> process_tokenizing_error(
       size_t next_position, size_t value_position) ada_warn_unused;
 
+  friend tl::expected<std::vector<token>, errors> tokenize(
+      std::string_view input, token_policy policy);
+
+ private:
   // has an associated input, a pattern string, initially the empty string.
   std::string input;
   // has an associated policy, a tokenize policy, initially "strict".
@@ -214,6 +218,15 @@ struct constructor_string_parser {
   // @see https://urlpattern.spec.whatwg.org/#is-a-port-prefix
   bool is_port_prefix();
 
+ private:
+  // @see https://urlpattern.spec.whatwg.org/#is-a-non-special-pattern-char
+  bool is_non_special_pattern_char(size_t index, std::string_view value);
+
+  // @see https://urlpattern.spec.whatwg.org/#get-a-safe-token
+  const token* get_safe_token(size_t index);
+
+  // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
+  std::string make_component_string();
   // has an associated input, a string, which must be set upon creation.
   std::string input;
   // has an associated token list, a token list, which must be set upon
@@ -238,16 +251,6 @@ struct constructor_string_parser {
   bool protocol_matches_a_special_scheme_flag = false;
   // has an associated state, a string, initially set to "init".
   State state = State::INIT;
-
- private:
-  // @see https://urlpattern.spec.whatwg.org/#is-a-non-special-pattern-char
-  bool is_non_special_pattern_char(size_t index, std::string_view value);
-
-  // @see https://urlpattern.spec.whatwg.org/#get-a-safe-token
-  const token* get_safe_token(size_t index);
-
-  // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
-  std::string make_component_string();
 };
 
 // @see https://urlpattern.spec.whatwg.org/#canonicalize-a-protocol

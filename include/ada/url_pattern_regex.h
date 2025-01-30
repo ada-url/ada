@@ -5,8 +5,6 @@
 #ifndef ADA_URL_PATTERN_REGEX_H
 #define ADA_URL_PATTERN_REGEX_H
 
-#include <concepts>
-
 #ifdef ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 #include <regex>
 #endif  // ADA_USE_UNSAFE_STD_REGEX_PROVIDER
