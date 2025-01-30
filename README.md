@@ -201,7 +201,7 @@ Runtimes like Node.js and Cloudflare Workers use the V8 regex engine, which is s
 
 ```cpp
 // Define a regex engine that conforms to the following interface
-// For eample we will use v8 regex engine
+// For example we will use v8 regex engine
 
 class v8_regex_provider {
  public:
@@ -215,7 +215,7 @@ class v8_regex_provider {
 };
 
 // Define a URLPattern
-auto pattern = ada::parse_url_pattern<v8_regex_provider>(("/books/:id(\\d+)", "https://example.com");
+auto pattern = ada::parse_url_pattern<v8_regex_provider>("/books/:id(\\d+)", "https://example.com");
 
 // Check validity
 if (!pattern) { return EXIT_FAILURE; }
