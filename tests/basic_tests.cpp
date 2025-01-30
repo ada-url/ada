@@ -94,6 +94,12 @@ TYPED_TEST(basic_tests, readme) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, readmefree) {
+  auto url = ada::parse("https://www.google.com");
+  ASSERT_TRUE(bool(url));
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, readme2) {
   auto url = ada::parse<TypeParam>("https://www.google.com");
   url->set_username("username");
@@ -102,8 +108,24 @@ TYPED_TEST(basic_tests, readme2) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, readme2free) {
+  auto url = ada::parse("https://www.google.com");
+  url->set_username("username");
+  url->set_password("password");
+  ASSERT_EQ(url->get_href(), "https://username:password@www.google.com/");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, readme3) {
   auto url = ada::parse<TypeParam>("https://www.google.com");
+  ASSERT_EQ(url->set_protocol("wss"), true);
+  ASSERT_EQ(url->get_protocol(), "wss:");
+  ASSERT_EQ(url->get_href(), "wss://www.google.com/");
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, readme3free) {
+  auto url = ada::parse("https://www.google.com");
   ASSERT_EQ(url->set_protocol("wss"), true);
   ASSERT_EQ(url->get_protocol(), "wss:");
   ASSERT_EQ(url->get_href(), "wss://www.google.com/");
