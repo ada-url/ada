@@ -21,7 +21,7 @@ jobs:
       contents: write
       pull-requests: write
     needs: release-script-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-arm
     if: ${{ needs.release-script-test.result == 'success' }}
     env:
       CXX: clang++-14
