@@ -7,6 +7,8 @@
 
 #include "ada/implementation.h"
 #include "ada/expected.h"
+#include "ada/parser.h"
+#include "ada/url_pattern_init.h"
 
 #include <string>
 #include <unordered_map>
@@ -18,13 +20,6 @@
 #endif  // ADA_TESTING
 
 namespace ada {
-namespace parser {
-template <typename result_type, typename url_pattern_init,
-          typename url_pattern_options, typename regex_provider>
-tl::expected<result_type, errors> parse_url_pattern_impl(
-    std::variant<std::string_view, url_pattern_init> input,
-    const std::string_view* base_url, const url_pattern_options* options);
-}  // namespace parser
 
 enum class url_pattern_part_type : uint8_t {
   // The part represents a simple fixed text string.
@@ -234,20 +229,23 @@ class url_pattern {
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
    */
-  result<std::optional<url_pattern_result>> exec(const url_pattern_input& input,
-                                                 std::string_view* base_url);
+  result<std::optional<url_pattern_result>> exec(
+      const url_pattern_input& input,
+      const std::string_view* base_url = nullptr);
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
    */
-  result<bool> test(const url_pattern_input& input, std::string_view* base_url);
+  result<bool> test(const url_pattern_input& input,
+                    const std::string_view* base_url = nullptr);
 
   /**
    * @see https://urlpattern.spec.whatwg.org/#url-pattern-match
    * This function expects a valid UTF-8 string if input is a string.
    */
   result<std::optional<url_pattern_result>> match(
-      const url_pattern_input& input, std::string_view* base_url_string);
+      const url_pattern_input& input,
+      const std::string_view* base_url_string = nullptr);
 
   // @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-protocol
   [[nodiscard]] std::string_view get_protocol() const ada_lifetime_bound;
@@ -286,6 +284,11 @@ class url_pattern {
   }
 #endif  // ADA_TESTING
 
+  friend tl::expected<url_pattern, errors> parser::parse_url_pattern_impl(
+      std::variant<std::string_view, url_pattern_init> input,
+      const std::string_view* base_url, const url_pattern_options* options);
+
+ private:
   url_pattern_component<regex_provider> protocol_component{};
   url_pattern_component<regex_provider> username_component{};
   url_pattern_component<regex_provider> password_component{};
@@ -295,12 +298,6 @@ class url_pattern {
   url_pattern_component<regex_provider> search_component{};
   url_pattern_component<regex_provider> hash_component{};
   bool ignore_case_ = false;
-
-  template <typename result_type, typename url_pattern_init,
-            typename url_pattern_options, typename regex_provider_for_parse_url>
-  friend tl::expected<result_type, errors> parser::parse_url_pattern_impl(
-      std::variant<std::string_view, url_pattern_init> input,
-      const std::string_view* base_url, const url_pattern_options* options);
 };
 
 }  // namespace ada
