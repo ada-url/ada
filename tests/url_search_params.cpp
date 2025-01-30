@@ -123,6 +123,19 @@ TEST(url_search_params, sort) {
   SUCCEED();
 }
 
+// Taken from
+// https://github.com/web-platform-tests/wpt/blob/d5085f61e2d949bc9fb24b04f4c6a47bdf6d3be9/url/urlsearchparams-sort.any.js#L11
+TEST(url_search_params, sort_unicode_code_units) {
+  ada::url_search_params search_params(
+      "ﬃ&🌈");  // 🌈 > code point, but < code unit because two code units
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "🌈");
+  ASSERT_EQ(keys.next(), "ﬃ");
+  SUCCEED();
+}
+
 TEST(url_search_params, string_constructor) {
   auto p = ada::url_search_params("?a=b");
   ASSERT_EQ(p.to_string(), "a=b");
