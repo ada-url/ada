@@ -166,7 +166,8 @@ inline void url_search_params::sort() {
                                       const key_value_pair &rhs) {
     size_t i = 0, j = 0;
     uint32_t low_surrogate1 = 0, low_surrogate2 = 0;
-    while (i < lhs.first.size() && j < rhs.first.size()) {
+    while ((i < lhs.first.size() || low_surrogate1 != 0) &&
+           (j < rhs.first.size() || low_surrogate2 != 0)) {
       uint32_t codePoint1 = 0, codePoint2 = 0;
 
       if (low_surrogate1 != 0) {
@@ -232,7 +233,6 @@ inline void url_search_params::sort() {
         return (codePoint1 < codePoint2);
       }
     }
-
     return (i < lhs.first.size());
   });
 }
