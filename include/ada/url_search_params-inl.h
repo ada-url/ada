@@ -162,10 +162,79 @@ inline void url_search_params::remove(const std::string_view key,
 }
 
 inline void url_search_params::sort() {
-  std::ranges::stable_sort(
-      params, [](const key_value_pair &lhs, const key_value_pair &rhs) {
-        return lhs.first < rhs.first;
-      });
+  std::ranges::stable_sort(params, [](const key_value_pair &lhs,
+                                      const key_value_pair &rhs) {
+    size_t i = 0, j = 0;
+    uint32_t low_surrogate1 = 0, low_surrogate2 = 0;
+    while ((i < lhs.first.size() || low_surrogate1 != 0) &&
+           (j < rhs.first.size() || low_surrogate2 != 0)) {
+      uint32_t codePoint1 = 0, codePoint2 = 0;
+
+      if (low_surrogate1 != 0) {
+        codePoint1 = low_surrogate1;
+        low_surrogate1 = 0;
+      } else {
+        uint8_t c1 = uint8_t(lhs.first[i]);
+        if (c1 <= 0x7F) {
+          codePoint1 = c1;
+          i++;
+        } else if (c1 <= 0xDF) {
+          codePoint1 = ((c1 & 0x1F) << 6) | (uint8_t(lhs.first[i + 1]) & 0x3F);
+          i += 2;
+        } else if (c1 <= 0xEF) {
+          codePoint1 = ((c1 & 0x0F) << 12) |
+                       ((uint8_t(lhs.first[i + 1]) & 0x3F) << 6) |
+                       (uint8_t(lhs.first[i + 2]) & 0x3F);
+          i += 3;
+        } else {
+          codePoint1 = ((c1 & 0x07) << 18) |
+                       ((uint8_t(lhs.first[i + 1]) & 0x3F) << 12) |
+                       ((uint8_t(lhs.first[i + 2]) & 0x3F) << 6) |
+                       (uint8_t(lhs.first[i + 3]) & 0x3F);
+          i += 4;
+
+          codePoint1 -= 0x10000;
+          uint16_t high_surrogate = uint16_t(0xD800 + (codePoint1 >> 10));
+          low_surrogate1 = uint16_t(0xDC00 + (codePoint1 & 0x3FF));
+          codePoint1 = high_surrogate;
+        }
+      }
+
+      if (low_surrogate2 != 0) {
+        codePoint2 = low_surrogate2;
+        low_surrogate2 = 0;
+      } else {
+        uint8_t c2 = uint8_t(rhs.first[j]);
+        if (c2 <= 0x7F) {
+          codePoint2 = c2;
+          j++;
+        } else if (c2 <= 0xDF) {
+          codePoint2 = ((c2 & 0x1F) << 6) | (uint8_t(rhs.first[j + 1]) & 0x3F);
+          j += 2;
+        } else if (c2 <= 0xEF) {
+          codePoint2 = ((c2 & 0x0F) << 12) |
+                       ((uint8_t(rhs.first[j + 1]) & 0x3F) << 6) |
+                       (uint8_t(rhs.first[j + 2]) & 0x3F);
+          j += 3;
+        } else {
+          codePoint2 = ((c2 & 0x07) << 18) |
+                       ((uint8_t(rhs.first[j + 1]) & 0x3F) << 12) |
+                       ((uint8_t(rhs.first[j + 2]) & 0x3F) << 6) |
+                       (uint8_t(rhs.first[j + 3]) & 0x3F);
+          j += 4;
+          codePoint2 -= 0x10000;
+          uint16_t high_surrogate = uint16_t(0xD800 + (codePoint2 >> 10));
+          low_surrogate2 = uint16_t(0xDC00 + (codePoint2 & 0x3FF));
+          codePoint2 = high_surrogate;
+        }
+      }
+
+      if (codePoint1 != codePoint2) {
+        return (codePoint1 < codePoint2);
+      }
+    }
+    return (j < rhs.first.size() || low_surrogate2 != 0);
+  });
 }
 
 inline url_search_params_keys_iter url_search_params::get_keys() {

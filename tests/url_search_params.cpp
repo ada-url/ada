@@ -257,3 +257,26 @@ TEST(url_search_params, test_character_set) {
   }
   SUCCEED();
 }
+
+// Taken from
+// https://github.com/web-platform-tests/wpt/blob/d5085f61e2d949bc9fb24b04f4c6a47bdf6d3be9/url/urlsearchparams-sort.any.js#L11
+TEST(url_search_params, sort_unicode_code_units) {
+  ada::url_search_params search_params("\xef\xac\x83&\xf0\x9f\x8c\x88");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "\xf0\x9f\x8c\x88");
+  ASSERT_EQ(keys.next(), "\xef\xac\x83");
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_unicode_code_units_edge_case) {
+  ada::url_search_params search_params(
+      "\xf0\x9f\x8c\x88\xef\xac\x83&\xf0\x9f\x8c\x88");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "\xf0\x9f\x8c\x88");
+  ASSERT_EQ(keys.next(), "\xf0\x9f\x8c\x88\xef\xac\x83");
+  SUCCEED();
+}
