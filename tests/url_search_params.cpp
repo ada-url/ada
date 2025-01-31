@@ -269,3 +269,13 @@ TEST(url_search_params, sort_unicode_code_units) {
   ASSERT_EQ(keys.next(), "\xef\xac\x83");
   SUCCEED();
 }
+
+TEST(url_search_params, sort_unicode_code_units_edge_case) {
+  ada::url_search_params search_params("\xf0\x9f\x8c\x88\xef\xac\x83&\xf0\x9f\x8c\x88");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "\xf0\x9f\x8c\x88");
+  ASSERT_EQ(keys.next(), "\xf0\x9f\x8c\x88\xef\xac\x83");
+  SUCCEED();
+}

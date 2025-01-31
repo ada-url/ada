@@ -233,7 +233,7 @@ inline void url_search_params::sort() {
         return (codePoint1 < codePoint2);
       }
     }
-    return (i < lhs.first.size());
+    return (j < rhs.first.size() || low_surrogate2 != 0);
   });
 }
 
