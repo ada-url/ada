@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install theme
         run: ./tools/prepare-doxygen.sh
-      - uses: mattnotmitt/doxygen-action@e0c8cd4cd05e28b88e723b25b30188ecf2505b40 # edge
+      - uses: mattnotmitt/doxygen-action@ded75d963c260fd8489801611a5079d149ebcc07 # edge
         with:
           doxyfile-path: './doxygen'
       - name: Deploy to GitHub Pages
