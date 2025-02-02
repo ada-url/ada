@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['ipv4_0',['IPV4',['../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39',1,'ada']]],
-  ['ipv6_1',['IPV6',['../dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee',1,'ada']]]
+  ['keys_0',['KEYS',['../dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243',1,'ada']]]
 ];

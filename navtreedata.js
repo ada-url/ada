@@ -25,33 +25,36 @@
 var NAVTREE =
 [
   [ "Ada", "index.html", [
-    [ "Ada is fast.", "index.html#autotoc_md13", null ],
+    [ "Ada is fast.", "index.html#autotoc_md12", [
+      [ "Requirements", "index.html#autotoc_md13", null ]
+    ] ],
     [ "Installation", "index.html#autotoc_md14", null ],
     [ "Quick Start", "index.html#autotoc_md15", null ],
     [ "Bindings of Ada", "index.html#autotoc_md16", [
-      [ "Requirements", "index.html#autotoc_md12", null ],
       [ "Community maintained", "index.html#autotoc_md17", null ]
     ] ],
     [ "Usage", "index.html#autotoc_md18", [
-      [ "Parsing & Validation", "index.html#autotoc_md19", null ],
-      [ "Examples", "index.html#autotoc_md20", null ],
-      [ "C wrapper", "index.html#autotoc_md21", null ],
-      [ "CMake dependency", "index.html#autotoc_md22", null ]
+      [ "Parsing & Validation", "index.html#autotoc_md19", null ]
     ] ],
-    [ "Installation", "index.html#autotoc_md23", [
-      [ "Homebrew", "index.html#autotoc_md24", null ]
+    [ "Examples", "index.html#autotoc_md20", null ],
+    [ "URL Parser", "index.html#autotoc_md21", [
+      [ "URL Search Params", "index.html#autotoc_md22", null ],
+      [ "URLPattern", "index.html#autotoc_md23", null ],
+      [ "C wrapper", "index.html#autotoc_md24", null ],
+      [ "Command-line interface", "index.html#autotoc_md25", null ],
+      [ "CMake dependency", "index.html#autotoc_md26", null ]
     ] ],
-    [ "Contributing", "index.html#autotoc_md25", [
-      [ "Building", "index.html#autotoc_md26", null ],
-      [ "Amalgamation", "index.html#autotoc_md27", null ],
-      [ "License", "index.html#autotoc_md28", null ],
-      [ "Further reading", "index.html#autotoc_md29", null ]
+    [ "Contributing", "index.html#autotoc_md27", [
+      [ "Building", "index.html#autotoc_md28", null ],
+      [ "Amalgamation", "index.html#autotoc_md29", null ],
+      [ "License", "index.html#autotoc_md30", null ],
+      [ "Further reading", "index.html#autotoc_md31", null ]
     ] ],
     [ "Command line interface (CLI)", "db/d8a/md_docs_2cli.html", null ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
-        [ "All", "namespacemembers.html", null ],
+        [ "All", "namespacemembers.html", "namespacemembers_dup" ],
         [ "Functions", "namespacemembers_func.html", null ],
         [ "Variables", "namespacemembers_vars.html", null ],
         [ "Typedefs", "namespacemembers_type.html", null ],
@@ -59,14 +62,16 @@ var NAVTREE =
         [ "Enumerator", "namespacemembers_eval.html", null ]
       ] ]
     ] ],
+    [ "Concepts", "concepts.html", "concepts" ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
-        [ "All", "functions.html", null ],
-        [ "Functions", "functions_func.html", null ],
+        [ "All", "functions.html", "functions_dup" ],
+        [ "Functions", "functions_func.html", "functions_func" ],
         [ "Variables", "functions_vars.html", null ],
+        [ "Enumerations", "functions_enum.html", null ],
         [ "Related Symbols", "functions_rela.html", null ]
       ] ]
     ] ],
@@ -85,11 +90,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"d5/df0/ada__c_8c_source.html",
-"db/d2e/ada__idna_8cpp.html#a0d1e1182a7cae8b4c1063dbc7614f88f",
-"dd/d4c/ada__idna_8h.html#aaa7c2ae34181ce7dd06159e254304596",
-"df/d1e/structada__owned__string.html#a1ea9760fddfc53d557c8cf3bfb8d15b8"
+"d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a2663fffcdcceba94ba88f30bd982ea12a0f544d682c3a664870f025f48c4b04b5",
+"d8/d13/idna_8cc_source.html",
+"dc/dcc/namespaceada_1_1url__pattern__helpers.html#a08428af23d47d86fae555cdff86b92aca63d39b0a9b213833297bf073435f6c3d",
+"dd/dcb/structada_1_1url__search__params.html#a550bfb0fc88e0392ede1a69a8e52b2d7",
+"functions_e.html"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';

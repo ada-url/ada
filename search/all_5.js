@@ -1,12 +1,20 @@
 var searchData=
 [
   ['en_0',['EN',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda96f4cb1c26cd9e6384d907f30d089c5a',1,'ada::idna']]],
-  ['encoding_5ftype_1',['encoding_type',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b',1,'ada']]],
-  ['encoding_5ftype_2eh_2',['encoding_type.h',['../d0/dbb/encoding__type_8h.html',1,'']]],
-  ['end_3',['end',['../dd/dcb/structada_1_1url__search__params.html#a16cffaa76ab8493f05496e905bf858ce',1,'ada::url_search_params']]],
-  ['entries_4',['ENTRIES',['../dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33',1,'ada']]],
-  ['errors_5',['errors',['../dd/d64/namespaceada.html#a6e2c9c4694121664afd9db2d56453cb2',1,'ada']]],
-  ['es_6',['ES',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda6d0675a048f080298c4f41c07abe26e0',1,'ada::idna']]],
-  ['et_7',['ET',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddafc48151aee9d9d0dce07468e47f7fd7a',1,'ada::idna']]],
-  ['examples_8',['Examples',['../index.html#autotoc_md20',1,'Examples'],['../db/d8a/md_docs_2cli.html#autotoc_md4',1,'Usage/Examples']]]
+  ['encoding_5fcallback_1',['encoding_callback',['../da/d74/classada_1_1url__pattern__helpers_1_1url__pattern__parser.html#a1c7cf6aff6a5dfe810a32d952dfda2a5',1,'ada::url_pattern_helpers::url_pattern_parser']]],
+  ['encoding_5ftype_2',['encoding_type',['../dd/d64/namespaceada.html#a96c85482f6cab61fbc1724a23426d40b',1,'ada']]],
+  ['encoding_5ftype_2eh_3',['encoding_type.h',['../d0/dbb/encoding__type_8h.html',1,'']]],
+  ['end_4',['END',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a08428af23d47d86fae555cdff86b92acab1a326c06d88bf042f73d70f50197905',1,'ada::url_pattern_helpers']]],
+  ['end_5',['end',['../dd/dcb/structada_1_1url__search__params.html#a16cffaa76ab8493f05496e905bf858ce',1,'ada::url_search_params']]],
+  ['entries_6',['ENTRIES',['../dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33',1,'ada']]],
+  ['errors_7',['errors',['../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361',1,'ada']]],
+  ['errors_2eh_8',['errors.h',['../de/d45/errors_8h.html',1,'']]],
+  ['es_9',['ES',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda6d0675a048f080298c4f41c07abe26e0',1,'ada::idna']]],
+  ['escape_5fpattern_5fstring_10',['escape_pattern_string',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a2ca86a984b8dda7de6845e88baefac1c',1,'ada::url_pattern_helpers']]],
+  ['escape_5fregexp_5fstring_11',['escape_regexp_string',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ab639c08b86a66c0907ebb9bd1dab7bad',1,'ada::url_pattern_helpers']]],
+  ['escape_5fregexp_5ftable_12',['escape_regexp_table',['../d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html#ac384b54122eeb5a7ec1eed58757c6aa6',1,'ada::url_pattern_helpers::anonymous_namespace{url_pattern_helpers.cpp}']]],
+  ['escaped_5fchar_13',['ESCAPED_CHAR',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a08428af23d47d86fae555cdff86b92aca5e62b8ffc20eb302a92511168982fee6',1,'ada::url_pattern_helpers']]],
+  ['et_14',['ET',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddafc48151aee9d9d0dce07468e47f7fd7a',1,'ada::idna']]],
+  ['examples_15',['Examples',['../index.html#autotoc_md20',1,'Examples'],['../db/d8a/md_docs_2cli.html#autotoc_md4',1,'Usage/Examples']]],
+  ['exec_16',['exec',['../d0/d1e/classada_1_1url__pattern.html#aef310d805ee6e4b1694a2e8a76eae5e7',1,'ada::url_pattern']]]
 ];

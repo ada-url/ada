@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mappings_0',['mappings',['../d5/ddb/namespaceada_1_1idna.html#ad39325463bccb5615ad4aafb3f45ddd6',1,'ada::idna']]]
+  ['key_0',['key',['../d0/d63/structada__string__pair.html#a86b27d28bf2581b7bb7de3c806415ef5',1,'ada_string_pair']]]
 ];

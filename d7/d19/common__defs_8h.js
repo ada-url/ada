@@ -30,5 +30,5 @@ var common__defs_8h =
     [ "ADA_TRY", "d7/d19/common__defs_8h.html#a88089db9c1afc7d6a3ccd6334ff6f287", null ],
     [ "ada_unused", "d7/d19/common__defs_8h.html#a157b2f0935f72bb3dd766c4e9b03f4ea", null ],
     [ "ada_warn_unused", "d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34", null ],
-    [ "unreachable", "d7/d19/common__defs_8h.html#ad3a5d67b58ebecc2e711d4b444408f2d", null ]
+    [ "ada::unreachable", "dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d", null ]
 ];

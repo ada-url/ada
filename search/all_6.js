@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['fast_0',['Ada is fast.',['../index.html#autotoc_md13',1,'']]],
+  ['fast_0',['Ada is fast.',['../index.html#autotoc_md12',1,'']]],
   ['file_1',['FILE',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9',1,'ada::scheme::FILE'],['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9fc5887c030f7a3e19821ebec457e719',1,'ada::FILE']]],
   ['file_20system_2',['Saving result to file system',['../db/d8a/md_docs_2cli.html#autotoc_md9',1,'']]],
   ['file_5fhost_3',['FILE_HOST',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a8de3c990e78108965db7c3f38cc5fca7',1,'ada']]],
@@ -12,12 +12,14 @@ var searchData=
   ['find_5fnext_5fhost_5fdelimiter_9',['find_next_host_delimiter',['../d7/d6c/namespaceada_1_1helpers.html#a2a58f86cdd1531639773044c45320fa7',1,'ada::helpers']]],
   ['find_5fnext_5fhost_5fdelimiter_5fspecial_10',['find_next_host_delimiter_special',['../d7/d6c/namespaceada_1_1helpers.html#a507c70c395c7a5a152cc214f7a335fe5',1,'ada::helpers']]],
   ['find_5frange_5findex_11',['find_range_index',['../d5/ddb/namespaceada_1_1idna.html#a2544de17d530836df29f7c7311f97d5e',1,'ada::idna']]],
-  ['formatted_20url_12',['Well-formatted URL',['../db/d8a/md_docs_2cli.html#autotoc_md5',1,'']]],
-  ['fragment_13',['FRAGMENT',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a7345a249ed5c2f850d85dc1727c24716',1,'ada']]],
-  ['fragment_5fpercent_5fencode_14',['FRAGMENT_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67',1,'ada::character_sets']]],
-  ['from_5fascii_5fto_5fascii_15',['from_ascii_to_ascii',['../d5/ddb/namespaceada_1_1idna.html#a939fc0c16e2a4fe433685bcd44ad9c75',1,'ada::idna']]],
-  ['front_16',['front',['../dd/dcb/structada_1_1url__search__params.html#a2a13ee0da6cbc197c4fa398b7fcbe75b',1,'ada::url_search_params']]],
-  ['fsi_17',['FSI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda73df67ab66bd491a7f2227fd6f071b86',1,'ada::idna']]],
-  ['ftp_18',['FTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf',1,'ada::scheme']]],
-  ['further_20reading_19',['Further reading',['../index.html#autotoc_md29',1,'']]]
+  ['fixed_5ftext_12',['FIXED_TEXT',['../dd/d64/namespaceada.html#a44f26778adba563fa22a9e1372a72b4cac1867c67c2283acccf0c8bbca42af6f0',1,'ada']]],
+  ['formatted_20url_13',['Well-formatted URL',['../db/d8a/md_docs_2cli.html#autotoc_md5',1,'']]],
+  ['fragment_14',['FRAGMENT',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a7345a249ed5c2f850d85dc1727c24716',1,'ada']]],
+  ['fragment_5fpercent_5fencode_15',['FRAGMENT_PERCENT_ENCODE',['../d7/d35/namespaceada_1_1character__sets.html#aaa092568a49a0dd61e367d88d18b4b67',1,'ada::character_sets']]],
+  ['from_5fascii_5fto_5fascii_16',['from_ascii_to_ascii',['../d5/ddb/namespaceada_1_1idna.html#a939fc0c16e2a4fe433685bcd44ad9c75',1,'ada::idna']]],
+  ['front_17',['front',['../dd/dcb/structada_1_1url__search__params.html#a2a13ee0da6cbc197c4fa398b7fcbe75b',1,'ada::url_search_params']]],
+  ['fsi_18',['FSI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda73df67ab66bd491a7f2227fd6f071b86',1,'ada::idna']]],
+  ['ftp_19',['FTP',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf',1,'ada::scheme']]],
+  ['full_5fwildcard_20',['FULL_WILDCARD',['../dd/d64/namespaceada.html#a44f26778adba563fa22a9e1372a72b4cafafa680e3cc7226e4517ac5ed8f87333',1,'ada']]],
+  ['further_20reading_21',['Further reading',['../index.html#autotoc_md31',1,'']]]
 ];

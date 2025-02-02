@@ -45,8 +45,9 @@ var structada_1_1url__aggregator =
     [ "to_diagram", "d8/d3b/structada_1_1url__aggregator.html#a797ff3cd4b1202306424fd847927e096", null ],
     [ "to_string", "d8/d3b/structada_1_1url__aggregator.html#a516d5b8a33529dc8b8c95d52abc6e7de", null ],
     [ "validate", "d8/d3b/structada_1_1url__aggregator.html#a0f52858c3f10fee8bbb4ecc1b9d49a71", null ],
-    [ "ada::helpers::strip_trailing_spaces_from_opaque_path", "d8/d3b/structada_1_1url__aggregator.html#a466937634b0dbea9a3d6888ed310baaf", null ],
-    [ "ada::parser::parse_url", "d8/d3b/structada_1_1url__aggregator.html#a490db078b24eaca0d12c874fcd741b69", null ],
-    [ "ada::parser::parse_url_impl", "d8/d3b/structada_1_1url__aggregator.html#aeb5d0e3b419d0a0ec50dffbbe96bcfa3", null ],
-    [ "ada::parser::parse_url_impl", "d8/d3b/structada_1_1url__aggregator.html#aeb5d0e3b419d0a0ec50dffbbe96bcfa3", null ]
+    [ "helpers::strip_trailing_spaces_from_opaque_path", "d8/d3b/structada_1_1url__aggregator.html#a28b8818deaba1f2f0a2280368303053e", null ],
+    [ "parse_url_pattern_impl", "d8/d3b/structada_1_1url__aggregator.html#ab685e99f335a38d3b8789dc340725fc0", null ],
+    [ "parser::parse_url", "d8/d3b/structada_1_1url__aggregator.html#a34b21b95d1a7c2d7ff167f87f183c8ec", null ],
+    [ "parser::parse_url_impl", "d8/d3b/structada_1_1url__aggregator.html#a6f3bce04c76ca3a9ed07bb72c4a6a484", null ],
+    [ "parser::parse_url_impl", "d8/d3b/structada_1_1url__aggregator.html#a6f3bce04c76ca3a9ed07bb72c4a6a484", null ]
 ];
