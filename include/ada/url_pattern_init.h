@@ -32,7 +32,9 @@ concept url_pattern_encoding_callback = requires(F f, std::string_view sv) {
 // either a string or a URLPatternInit struct. If a string is given,
 // it will be parsed to create a URLPatternInit. The URLPatternInit
 // API is defined as part of the URLPattern specification.
+// All provided strings must be valid UTF-8.
 struct url_pattern_init {
+  // All strings must be valid UTF-8.
   // @see https://urlpattern.spec.whatwg.org/#process-a-urlpatterninit
   static tl::expected<url_pattern_init, errors> process(
       url_pattern_init init, std::string_view type,
@@ -92,15 +94,23 @@ struct url_pattern_init {
 #endif  // ADA_TESTING
 
   bool operator==(const url_pattern_init&) const;
-
+  // If present, must be valid UTF-8.
   std::optional<std::string> protocol{};
+  // If present, must be valid UTF-8.
   std::optional<std::string> username{};
+  // If present, must be valid UTF-8.
   std::optional<std::string> password{};
+  // If present, must be valid UTF-8.
   std::optional<std::string> hostname{};
+  // If present, must be valid UTF-8.
   std::optional<std::string> port{};
+  // If present, must be valid UTF-8.
   std::optional<std::string> pathname{};
+  // If present, must be valid UTF-8.
   std::optional<std::string> search{};
+  // If present, must be valid UTF-8.
   std::optional<std::string> hash{};
+  // If present, must be valid UTF-8.
   std::optional<std::string> base_url{};
 };
 }  // namespace ada
