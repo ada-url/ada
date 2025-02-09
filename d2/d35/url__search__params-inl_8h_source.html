@@ -293,142 +293,143 @@ $(function(){initNavTree('d2/d35/url__search__params-inl_8h_source.html','../../
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
 <div class="foldopen" id="foldopen00164" data-start="{" data-end="}">
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="../../dd/dcb/structada_1_1url__search__params.html#a6d30f86d34538840cc97d988248a6f5f">  164</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/dcb/structada_1_1url__search__params.html#a6d30f86d34538840cc97d988248a6f5f">url_search_params::sort</a>() {</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>  std::ranges::stable_sort(params, [](<span class="keyword">const</span> key_value_pair &amp;lhs,</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>                                      <span class="keyword">const</span> key_value_pair &amp;rhs) {</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="keywordtype">size_t</span> i = 0, j = 0;</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    uint32_t low_surrogate1 = 0, low_surrogate2 = 0;</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="keywordflow">while</span> ((i &lt; lhs.first.size() || low_surrogate1 != 0) &amp;&amp;</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>           (j &lt; rhs.first.size() || low_surrogate2 != 0)) {</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>      uint32_t codePoint1 = 0, codePoint2 = 0;</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>      <span class="keywordflow">if</span> (low_surrogate1 != 0) {</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        codePoint1 = low_surrogate1;</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        low_surrogate1 = 0;</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>      } <span class="keywordflow">else</span> {</div>
-<div class="foldopen" id="foldopen00177" data-start="{" data-end="}">
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">  177</a></span>        uint8_t c1 = uint8_t(lhs.first[i]);</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="keywordflow">if</span> (c1 &lt;= 0x7F) {</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>          codePoint1 = c1;</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>          i++;</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c1 &lt;= 0xDF) {</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>          codePoint1 = ((c1 &amp; 0x1F) &lt;&lt; 6) | (uint8_t(lhs.first[i + 1]) &amp; 0x3F);</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>          i += 2;</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c1 &lt;= 0xEF) {</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>          codePoint1 = ((c1 &amp; 0x0F) &lt;&lt; 12) |</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>                       ((uint8_t(lhs.first[i + 1]) &amp; 0x3F) &lt;&lt; 6) |</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>                       (uint8_t(lhs.first[i + 2]) &amp; 0x3F);</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>          i += 3;</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>          codePoint1 = ((c1 &amp; 0x07) &lt;&lt; 18) |</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>                       ((uint8_t(lhs.first[i + 1]) &amp; 0x3F) &lt;&lt; 12) |</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                       ((uint8_t(lhs.first[i + 2]) &amp; 0x3F) &lt;&lt; 6) |</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                       (uint8_t(lhs.first[i + 3]) &amp; 0x3F);</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>          i += 4;</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>          codePoint1 -= 0x10000;</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>          uint16_t high_surrogate = uint16_t(0xD800 + (codePoint1 &gt;&gt; 10));</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>          low_surrogate1 = uint16_t(0xDC00 + (codePoint1 &amp; 0x3FF));</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>          codePoint1 = high_surrogate;</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        }</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>      }</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>      <span class="keywordflow">if</span> (low_surrogate2 != 0) {</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        codePoint2 = low_surrogate2;</div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        low_surrogate2 = 0;</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>      } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        uint8_t c2 = uint8_t(rhs.first[j]);</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        <span class="keywordflow">if</span> (c2 &lt;= 0x7F) {</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>          codePoint2 = c2;</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>          j++;</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c2 &lt;= 0xDF) {</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>          codePoint2 = ((c2 &amp; 0x1F) &lt;&lt; 6) | (uint8_t(rhs.first[j + 1]) &amp; 0x3F);</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>          j += 2;</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c2 &lt;= 0xEF) {</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>          codePoint2 = ((c2 &amp; 0x0F) &lt;&lt; 12) |</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>                       ((uint8_t(rhs.first[j + 1]) &amp; 0x3F) &lt;&lt; 6) |</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>                       (uint8_t(rhs.first[j + 2]) &amp; 0x3F);</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>          j += 3;</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>          codePoint2 = ((c2 &amp; 0x07) &lt;&lt; 18) |</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>                       ((uint8_t(rhs.first[j + 1]) &amp; 0x3F) &lt;&lt; 12) |</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>                       ((uint8_t(rhs.first[j + 2]) &amp; 0x3F) &lt;&lt; 6) |</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>                       (uint8_t(rhs.first[j + 3]) &amp; 0x3F);</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>          j += 4;</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>          codePoint2 -= 0x10000;</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>          uint16_t high_surrogate = uint16_t(0xD800 + (codePoint2 &gt;&gt; 10));</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>          low_surrogate2 = uint16_t(0xDC00 + (codePoint2 &amp; 0x3FF));</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>          codePoint2 = high_surrogate;</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        }</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>      }</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>      <span class="keywordflow">if</span> (codePoint1 != codePoint2) {</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordflow">return</span> (codePoint1 &lt; codePoint2);</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>      }</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    }</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    <span class="keywordflow">return</span> (j &lt; rhs.first.size() || low_surrogate2 != 0);</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>  });</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>}</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
-<div class="foldopen" id="foldopen00240" data-start="{" data-end="}">
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno"><a class="line" href="../../dd/dcb/structada_1_1url__search__params.html#a69f6a7d66691e3bcda4621467cf5508a">  240</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a663e90222ab2aa9380ddf76bf055b2ad">url_search_params_keys_iter</a> <a class="code hl_function" href="../../dd/dcb/structada_1_1url__search__params.html#a69f6a7d66691e3bcda4621467cf5508a">url_search_params::get_keys</a>() {</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a663e90222ab2aa9380ddf76bf055b2ad">url_search_params_keys_iter</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>}</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>  <span class="comment">// We rely on the fact that the content is valid UTF-8.</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>  std::ranges::stable_sort(params, [](<span class="keyword">const</span> key_value_pair &amp;lhs,</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>                                      <span class="keyword">const</span> key_value_pair &amp;rhs) {</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="keywordtype">size_t</span> i = 0, j = 0;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    uint32_t low_surrogate1 = 0, low_surrogate2 = 0;</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="keywordflow">while</span> ((i &lt; lhs.first.size() || low_surrogate1 != 0) &amp;&amp;</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>           (j &lt; rhs.first.size() || low_surrogate2 != 0)) {</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>      uint32_t codePoint1 = 0, codePoint2 = 0;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>      <span class="keywordflow">if</span> (low_surrogate1 != 0) {</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        codePoint1 = low_surrogate1;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        low_surrogate1 = 0;</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>      } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        uint8_t c1 = uint8_t(lhs.first[i]);</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        <span class="keywordflow">if</span> (c1 &lt;= 0x7F) {</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>          codePoint1 = c1;</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>          i++;</div>
+<div class="foldopen" id="foldopen00182" data-start="{" data-end="}">
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">  182</a></span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c1 &lt;= 0xDF) {</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>          codePoint1 = ((c1 &amp; 0x1F) &lt;&lt; 6) | (uint8_t(lhs.first[i + 1]) &amp; 0x3F);</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>          i += 2;</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c1 &lt;= 0xEF) {</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>          codePoint1 = ((c1 &amp; 0x0F) &lt;&lt; 12) |</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>                       ((uint8_t(lhs.first[i + 1]) &amp; 0x3F) &lt;&lt; 6) |</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>                       (uint8_t(lhs.first[i + 2]) &amp; 0x3F);</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>          i += 3;</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>          codePoint1 = ((c1 &amp; 0x07) &lt;&lt; 18) |</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                       ((uint8_t(lhs.first[i + 1]) &amp; 0x3F) &lt;&lt; 12) |</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                       ((uint8_t(lhs.first[i + 2]) &amp; 0x3F) &lt;&lt; 6) |</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>                       (uint8_t(lhs.first[i + 3]) &amp; 0x3F);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>          i += 4;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>          codePoint1 -= 0x10000;</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>          uint16_t high_surrogate = uint16_t(0xD800 + (codePoint1 &gt;&gt; 10));</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>          low_surrogate1 = uint16_t(0xDC00 + (codePoint1 &amp; 0x3FF));</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>          codePoint1 = high_surrogate;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        }</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>      }</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>      <span class="keywordflow">if</span> (low_surrogate2 != 0) {</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        codePoint2 = low_surrogate2;</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        low_surrogate2 = 0;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>      } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        uint8_t c2 = uint8_t(rhs.first[j]);</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        <span class="keywordflow">if</span> (c2 &lt;= 0x7F) {</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>          codePoint2 = c2;</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>          j++;</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c2 &lt;= 0xDF) {</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>          codePoint2 = ((c2 &amp; 0x1F) &lt;&lt; 6) | (uint8_t(rhs.first[j + 1]) &amp; 0x3F);</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>          j += 2;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c2 &lt;= 0xEF) {</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>          codePoint2 = ((c2 &amp; 0x0F) &lt;&lt; 12) |</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>                       ((uint8_t(rhs.first[j + 1]) &amp; 0x3F) &lt;&lt; 6) |</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>                       (uint8_t(rhs.first[j + 2]) &amp; 0x3F);</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>          j += 3;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>          codePoint2 = ((c2 &amp; 0x07) &lt;&lt; 18) |</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>                       ((uint8_t(rhs.first[j + 1]) &amp; 0x3F) &lt;&lt; 12) |</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>                       ((uint8_t(rhs.first[j + 2]) &amp; 0x3F) &lt;&lt; 6) |</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>                       (uint8_t(rhs.first[j + 3]) &amp; 0x3F);</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>          j += 4;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>          codePoint2 -= 0x10000;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>          uint16_t high_surrogate = uint16_t(0xD800 + (codePoint2 &gt;&gt; 10));</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>          low_surrogate2 = uint16_t(0xDC00 + (codePoint2 &amp; 0x3FF));</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>          codePoint2 = high_surrogate;</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        }</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>      }</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>      <span class="keywordflow">if</span> (codePoint1 != codePoint2) {</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="keywordflow">return</span> (codePoint1 &lt; codePoint2);</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>      }</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    }</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keywordflow">return</span> (j &lt; rhs.first.size() || low_surrogate2 != 0);</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>  });</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>}</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
+<div class="foldopen" id="foldopen00241" data-start="{" data-end="}">
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno"><a class="line" href="../../dd/dcb/structada_1_1url__search__params.html#a69f6a7d66691e3bcda4621467cf5508a">  241</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a663e90222ab2aa9380ddf76bf055b2ad">url_search_params_keys_iter</a> <a class="code hl_function" href="../../dd/dcb/structada_1_1url__search__params.html#a69f6a7d66691e3bcda4621467cf5508a">url_search_params::get_keys</a>() {</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a663e90222ab2aa9380ddf76bf055b2ad">url_search_params_keys_iter</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>}</div>
 </div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span></div>
-<div class="foldopen" id="foldopen00247" data-start="{" data-end="}">
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="../../dd/dcb/structada_1_1url__search__params.html#aa8bd7f6fad5ad0c12879605b2d6f65ea">  247</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a0221646aa68b66f5dd447ea589c988a3">url_search_params_values_iter</a> <a class="code hl_function" href="../../dd/dcb/structada_1_1url__search__params.html#aa8bd7f6fad5ad0c12879605b2d6f65ea">url_search_params::get_values</a>() {</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a0221646aa68b66f5dd447ea589c988a3">url_search_params_values_iter</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>}</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span></div>
+<div class="foldopen" id="foldopen00248" data-start="{" data-end="}">
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="../../dd/dcb/structada_1_1url__search__params.html#aa8bd7f6fad5ad0c12879605b2d6f65ea">  248</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a0221646aa68b66f5dd447ea589c988a3">url_search_params_values_iter</a> <a class="code hl_function" href="../../dd/dcb/structada_1_1url__search__params.html#aa8bd7f6fad5ad0c12879605b2d6f65ea">url_search_params::get_values</a>() {</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a0221646aa68b66f5dd447ea589c988a3">url_search_params_values_iter</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>}</div>
 </div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span></div>
-<div class="foldopen" id="foldopen00254" data-start="{" data-end="}">
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno"><a class="line" href="../../dd/dcb/structada_1_1url__search__params.html#a557ab94c0ed4f2e96cdf748171dcc3cc">  254</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a27b44c690edb4b609f8d0a2d7e7475ae">url_search_params_entries_iter</a> <a class="code hl_function" href="../../dd/dcb/structada_1_1url__search__params.html#a557ab94c0ed4f2e96cdf748171dcc3cc">url_search_params::get_entries</a>() {</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a27b44c690edb4b609f8d0a2d7e7475ae">url_search_params_entries_iter</a>(*<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>}</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span></div>
+<div class="foldopen" id="foldopen00255" data-start="{" data-end="}">
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno"><a class="line" href="../../dd/dcb/structada_1_1url__search__params.html#a557ab94c0ed4f2e96cdf748171dcc3cc">  255</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a27b44c690edb4b609f8d0a2d7e7475ae">url_search_params_entries_iter</a> <a class="code hl_function" href="../../dd/dcb/structada_1_1url__search__params.html#a557ab94c0ed4f2e96cdf748171dcc3cc">url_search_params::get_entries</a>() {</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#a27b44c690edb4b609f8d0a2d7e7475ae">url_search_params_entries_iter</a>(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>}</div>
 </div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, url_search_params_iter_type Type&gt;</div>
-<div class="foldopen" id="foldopen00259" data-start="{" data-end="}">
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">  259</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">url_search_params_iter&lt;T, Type&gt;::has_next</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>  <span class="keywordflow">return</span> pos &lt; params.params.size();</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>}</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, url_search_params_iter_type Type&gt;</div>
+<div class="foldopen" id="foldopen00260" data-start="{" data-end="}">
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">  260</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">url_search_params_iter&lt;T, Type&gt;::has_next</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>  <span class="keywordflow">return</span> pos &lt; params.params.size();</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>}</div>
 </div>
 </div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span><span class="keyword">template</span> &lt;&gt;</div>
-<div class="foldopen" id="foldopen00264" data-start="{" data-end="}">
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">  264</a></span><span class="keyword">inline</span> std::optional&lt;std::string_view&gt; <a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">url_search_params_keys_iter::next</a>() {</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">has_next</a>()) {</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="keywordflow">return</span> std::nullopt;</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>  }</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>  <span class="keywordflow">return</span> params.params[pos++].first;</div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>}</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span><span class="keyword">template</span> &lt;&gt;</div>
+<div class="foldopen" id="foldopen00265" data-start="{" data-end="}">
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">  265</a></span><span class="keyword">inline</span> std::optional&lt;std::string_view&gt; <a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">url_search_params_keys_iter::next</a>() {</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">has_next</a>()) {</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>  }</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>  <span class="keywordflow">return</span> params.params[pos++].first;</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>}</div>
 </div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span><span class="keyword">template</span> &lt;&gt;</div>
-<div class="foldopen" id="foldopen00272" data-start="{" data-end="}">
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">  272</a></span><span class="keyword">inline</span> std::optional&lt;std::string_view&gt; <a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">url_search_params_values_iter::next</a>() {</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">has_next</a>()) {</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    <span class="keywordflow">return</span> std::nullopt;</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>  }</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>  <span class="keywordflow">return</span> params.params[pos++].second;</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>}</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span><span class="keyword">template</span> &lt;&gt;</div>
+<div class="foldopen" id="foldopen00273" data-start="{" data-end="}">
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">  273</a></span><span class="keyword">inline</span> std::optional&lt;std::string_view&gt; <a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">url_search_params_values_iter::next</a>() {</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">has_next</a>()) {</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>  }</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>  <span class="keywordflow">return</span> params.params[pos++].second;</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>}</div>
 </div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="keyword">inline</span> std::optional&lt;key_value_view_pair&gt;</div>
-<div class="foldopen" id="foldopen00281" data-start="{" data-end="}">
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">  281</a></span><a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">url_search_params_entries_iter::next</a>() {</div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">has_next</a>()) {</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    <span class="keywordflow">return</span> std::nullopt;</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>  }</div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>  <span class="keywordflow">return</span> params.params[pos++];</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>}</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span><span class="keyword">inline</span> std::optional&lt;key_value_view_pair&gt;</div>
+<div class="foldopen" id="foldopen00282" data-start="{" data-end="}">
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno"><a class="line" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">  282</a></span><a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">url_search_params_entries_iter::next</a>() {</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">has_next</a>()) {</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>  }</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>  <span class="keywordflow">return</span> params.params[pos++];</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>}</div>
 </div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>}  <span class="comment">// namespace ada</span></div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_URL_SEARCH_PARAMS_INL_H</span></div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span> </div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_URL_SEARCH_PARAMS_INL_H</span></div>
 </div>
 <div class="ttc" id="acharacter__sets-inl_8h_html"><div class="ttname"><a href="../../da/d69/character__sets-inl_8h.html">character_sets-inl.h</a></div><div class="ttdoc">Definitions of the character sets used by unicode functions.</div></div>
 <div class="ttc" id="anamespaceada_1_1character__sets_html_aec120154efccb7b70bd36785bf6a71b7"><div class="ttname"><a href="../../d7/d35/namespaceada_1_1character__sets.html#aec120154efccb7b70bd36785bf6a71b7">ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE</a></div><div class="ttdeci">constexpr uint8_t WWW_FORM_URLENCODED_PERCENT_ENCODE[32]</div><div class="ttdef"><b>Definition</b> <a href="../../da/d69/character__sets-inl_8h_source.html#l00449">character_sets-inl.h:449</a></div></div>
@@ -436,19 +437,19 @@ $(function(){initNavTree('d2/d35/url__search__params-inl_8h_source.html','../../
 <div class="ttc" id="anamespaceada_html_a0221646aa68b66f5dd447ea589c988a3"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a0221646aa68b66f5dd447ea589c988a3">ada::url_search_params_values_iter</a></div><div class="ttdeci">url_search_params_iter&lt; std::string_view, url_search_params_iter_type::VALUES &gt; url_search_params_values_iter</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00028">url_search_params.h:28</a></div></div>
 <div class="ttc" id="anamespaceada_html_a27b44c690edb4b609f8d0a2d7e7475ae"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a27b44c690edb4b609f8d0a2d7e7475ae">ada::url_search_params_entries_iter</a></div><div class="ttdeci">url_search_params_iter&lt; key_value_view_pair, url_search_params_iter_type::ENTRIES &gt; url_search_params_entries_iter</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00031">url_search_params.h:31</a></div></div>
 <div class="ttc" id="anamespaceada_html_a663e90222ab2aa9380ddf76bf055b2ad"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a663e90222ab2aa9380ddf76bf055b2ad">ada::url_search_params_keys_iter</a></div><div class="ttdeci">url_search_params_iter&lt; std::string_view, url_search_params_iter_type::KEYS &gt; url_search_params_keys_iter</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00026">url_search_params.h:26</a></div></div>
-<div class="ttc" id="astructada_1_1url__search__params__iter_html_ac2ae3ce2dfc8c934ec95450d0edbcdfd"><div class="ttname"><a href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">ada::url_search_params_iter&lt; std::string_view, url_search_params_iter_type::KEYS &gt;::next</a></div><div class="ttdeci">std::optional&lt; std::string_view &gt; next()</div><div class="ttdef"><b>Definition</b> <a href="#l00264">url_search_params-inl.h:264</a></div></div>
-<div class="ttc" id="astructada_1_1url__search__params__iter_html_aeb4019bf7d63735d667a10eed0900e21"><div class="ttname"><a href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">ada::url_search_params_iter::has_next</a></div><div class="ttdeci">bool has_next() const</div><div class="ttdef"><b>Definition</b> <a href="#l00259">url_search_params-inl.h:259</a></div></div>
-<div class="ttc" id="astructada_1_1url__search__params_html"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00038">url_search_params.h:38</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params__iter_html_ac2ae3ce2dfc8c934ec95450d0edbcdfd"><div class="ttname"><a href="../../dd/dc7/structada_1_1url__search__params__iter.html#ac2ae3ce2dfc8c934ec95450d0edbcdfd">ada::url_search_params_iter&lt; std::string_view, url_search_params_iter_type::KEYS &gt;::next</a></div><div class="ttdeci">std::optional&lt; std::string_view &gt; next()</div><div class="ttdef"><b>Definition</b> <a href="#l00265">url_search_params-inl.h:265</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params__iter_html_aeb4019bf7d63735d667a10eed0900e21"><div class="ttname"><a href="../../dd/dc7/structada_1_1url__search__params__iter.html#aeb4019bf7d63735d667a10eed0900e21">ada::url_search_params_iter::has_next</a></div><div class="ttdeci">bool has_next() const</div><div class="ttdef"><b>Definition</b> <a href="#l00260">url_search_params-inl.h:260</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params_html"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00040">url_search_params.h:40</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_a0522cadf80856b340315bf0cce00c239"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a0522cadf80856b340315bf0cce00c239">ada::url_search_params::set</a></div><div class="ttdeci">void set(std::string_view key, std::string_view value)</div><div class="ttdef"><b>Definition</b> <a href="#l00137">url_search_params-inl.h:137</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_a237c957e3dabce7ea53655b7fabbff85"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a237c957e3dabce7ea53655b7fabbff85">ada::url_search_params::get_all</a></div><div class="ttdeci">std::vector&lt; std::string &gt; get_all(std::string_view key)</div><div class="ttdef"><b>Definition</b> <a href="#l00089">url_search_params-inl.h:89</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_a48cc19a3e4d157b10b39c8f1f803c2b6"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a48cc19a3e4d157b10b39c8f1f803c2b6">ada::url_search_params::remove</a></div><div class="ttdeci">void remove(std::string_view key)</div><div class="ttdef"><b>Definition</b> <a href="#l00152">url_search_params-inl.h:152</a></div></div>
-<div class="ttc" id="astructada_1_1url__search__params_html_a557ab94c0ed4f2e96cdf748171dcc3cc"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a557ab94c0ed4f2e96cdf748171dcc3cc">ada::url_search_params::get_entries</a></div><div class="ttdeci">url_search_params_entries_iter get_entries()</div><div class="ttdef"><b>Definition</b> <a href="#l00254">url_search_params-inl.h:254</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params_html_a557ab94c0ed4f2e96cdf748171dcc3cc"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a557ab94c0ed4f2e96cdf748171dcc3cc">ada::url_search_params::get_entries</a></div><div class="ttdeci">url_search_params_entries_iter get_entries()</div><div class="ttdef"><b>Definition</b> <a href="#l00255">url_search_params-inl.h:255</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_a5bdd9ca945f9adf5f720ee6be57c29d6"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a5bdd9ca945f9adf5f720ee6be57c29d6">ada::url_search_params::to_string</a></div><div class="ttdeci">std::string to_string() const</div><div class="ttdef"><b>Definition</b> <a href="#l00116">url_search_params-inl.h:116</a></div></div>
-<div class="ttc" id="astructada_1_1url__search__params_html_a69f6a7d66691e3bcda4621467cf5508a"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a69f6a7d66691e3bcda4621467cf5508a">ada::url_search_params::get_keys</a></div><div class="ttdeci">url_search_params_keys_iter get_keys()</div><div class="ttdef"><b>Definition</b> <a href="#l00240">url_search_params-inl.h:240</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params_html_a69f6a7d66691e3bcda4621467cf5508a"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a69f6a7d66691e3bcda4621467cf5508a">ada::url_search_params::get_keys</a></div><div class="ttdeci">url_search_params_keys_iter get_keys()</div><div class="ttdef"><b>Definition</b> <a href="#l00241">url_search_params-inl.h:241</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_a6c6bf0d199260a0ceaaf2270df3cceda"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a6c6bf0d199260a0ceaaf2270df3cceda">ada::url_search_params::size</a></div><div class="ttdeci">size_t size() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00075">url_search_params-inl.h:75</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_a6d30f86d34538840cc97d988248a6f5f"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a6d30f86d34538840cc97d988248a6f5f">ada::url_search_params::sort</a></div><div class="ttdeci">void sort()</div><div class="ttdef"><b>Definition</b> <a href="#l00164">url_search_params-inl.h:164</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_a99663e8026d089177c53ce2133812ef2"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#a99663e8026d089177c53ce2133812ef2">ada::url_search_params::append</a></div><div class="ttdeci">void append(std::string_view key, std::string_view value)</div><div class="ttdef"><b>Definition</b> <a href="#l00070">url_search_params-inl.h:70</a></div></div>
-<div class="ttc" id="astructada_1_1url__search__params_html_aa8bd7f6fad5ad0c12879605b2d6f65ea"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#aa8bd7f6fad5ad0c12879605b2d6f65ea">ada::url_search_params::get_values</a></div><div class="ttdeci">url_search_params_values_iter get_values()</div><div class="ttdef"><b>Definition</b> <a href="#l00247">url_search_params-inl.h:247</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params_html_aa8bd7f6fad5ad0c12879605b2d6f65ea"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#aa8bd7f6fad5ad0c12879605b2d6f65ea">ada::url_search_params::get_values</a></div><div class="ttdeci">url_search_params_values_iter get_values()</div><div class="ttdef"><b>Definition</b> <a href="#l00248">url_search_params-inl.h:248</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_adb8e4aa1e6c1f5718525e70114833f8c"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#adb8e4aa1e6c1f5718525e70114833f8c">ada::url_search_params::get</a></div><div class="ttdeci">std::optional&lt; std::string_view &gt; get(std::string_view key)</div><div class="ttdef"><b>Definition</b> <a href="#l00077">url_search_params-inl.h:77</a></div></div>
 <div class="ttc" id="astructada_1_1url__search__params_html_afa98a51817cae43855f917268aaaf83d"><div class="ttname"><a href="../../dd/dcb/structada_1_1url__search__params.html#afa98a51817cae43855f917268aaaf83d">ada::url_search_params::has</a></div><div class="ttdeci">bool has(std::string_view key) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00102">url_search_params-inl.h:102</a></div></div>
 <div class="ttc" id="aunicode_8h_html"><div class="ttname"><a href="../../dd/d90/unicode_8h.html">unicode.h</a></div><div class="ttdoc">Definitions for all unicode specific functions.</div></div>
