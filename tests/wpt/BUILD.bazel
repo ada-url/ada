@@ -1,0 +1,5 @@
+filegroup(
+    name = "wpt",
+    srcs = glob(["*.json"]),
+    visibility = ["//visibility:public"],
+)

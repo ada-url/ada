@@ -1,1 +1,9 @@
+new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+
 bazel_dep(name = "googletest", version = "1.15.2", dev_dependency = True)
+new_git_repository(
+  name = "simdjson",
+  branch = "master",
+  remote = "https://github.com/simdjson/simdjson.git",
+  build_file = "//:tests/bazel/BUILD.simdjson"
+)

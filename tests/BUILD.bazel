@@ -1,3 +1,35 @@
+
+
+cc_test(
+    name = "ada_c",
+    srcs = ["ada_c.cpp"],
+    deps = [
+        "//:ada",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "basic_tests",
+    srcs = ["basic_tests.cpp"],
+    deps = [
+        "//:ada",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "from_file_tests",
+    srcs = ["from_file_tests.cpp"],
+    deps = [
+        "//:ada",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
 cc_test(
     name = "url_search_params",
     srcs = ["url_search_params.cpp"],
@@ -9,11 +41,26 @@ cc_test(
 )
 
 cc_test(
-    name = "ada_c",
-    srcs = ["ada_c.cpp"],
+    name = "wpt_url_tests",
+    srcs = ["wpt_url_tests.cpp"],
+    data = ["//tests/wpt"],
     deps = [
         "//:ada",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
+        "@simdjson",
+    ],
+)
+
+cc_test(
+    name = "wpt_urlpattern_tests",
+    srcs = ["wpt_urlpattern_tests.cpp"],
+    defines = ['ADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON'],
+    data = ["//tests/wpt"],
+    deps = [
+        "//:ada",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+        "@simdjson",
     ],
 )

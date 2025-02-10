@@ -6,12 +6,16 @@
 #include <set>
 #include <sstream>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include "ada.h"
 #include "ada/character_sets-inl.h"
 #include "ada/parser.h"
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
+
+#include "simdjson.h"
+
+using namespace simdjson;
 
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
@@ -31,10 +35,6 @@ template ada::result<ada::url> ada_parse(std::string_view view,
                                          const ada::url *base);
 template ada::result<ada::url_aggregator> ada_parse(
     std::string_view view, const ada::url_aggregator *base);
-
-#include "simdjson.h"
-
-using namespace simdjson;
 
 #ifndef WPT_DATA_DIR
 #define WPT_DATA_DIR "wpt/"
