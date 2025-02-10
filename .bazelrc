@@ -1,1 +1,6 @@
-build --cxxopt="-std=c++20"
+common --enable_platform_specific_config
+build --verbose_failures
+
+build:macos --cxxopt="-std=c++20"
+build:linux --cxxopt="-std=c++20"
+build:windows --cxxopt='/std:c++20' --host_cxxopt='/std:c++20' --compiler=clang-cl

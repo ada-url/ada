@@ -22,6 +22,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  windows:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: bazel-contrib/setup-bazel@bbf8fe8b219f642c7f8bc673215f28eb1d9dec51 # v0.10.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}-${{ runner.os }}
+          repository-cache: true
+      - name: Build & Test
+        run: bazel test //...
   macos:
     runs-on: macos-latest
     steps:
@@ -29,7 +40,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@bbf8fe8b219f642c7f8bc673215f28eb1d9dec51 # v0.10.0
         with:
           bazelisk-cache: true
-          disk-cache: ${{ github.workflow }}
+          disk-cache: ${{ github.workflow }}-${{ runner.os }}
           repository-cache: true
       - name: Build & Test
         run: bazel test //...
@@ -45,7 +56,7 @@ jobs:
       - uses: bazel-contrib/setup-bazel@bbf8fe8b219f642c7f8bc673215f28eb1d9dec51 # v0.10.0
         with:
           bazelisk-cache: true
-          disk-cache: ${{ github.workflow }}
+          disk-cache: ${{ github.workflow }}-${{ runner.os }}
           repository-cache: true
       - name: Build & Test
         run: bazel test //...

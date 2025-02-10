@@ -7,3 +7,13 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "ada_c",
+    srcs = ["ada_c.cpp"],
+    deps = [
+        "//:ada",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
