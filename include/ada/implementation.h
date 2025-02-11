@@ -6,6 +6,7 @@
 #ifndef ADA_IMPLEMENTATION_H
 #define ADA_IMPLEMENTATION_H
 
+#include <string>
 #include <string_view>
 #include <optional>
 

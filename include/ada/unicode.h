@@ -9,6 +9,7 @@
 #include "ada/ada_idna.h"
 
 #include <string>
+#include <string_view>
 #include <optional>
 
 /**

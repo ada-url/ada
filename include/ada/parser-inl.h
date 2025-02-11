@@ -9,6 +9,7 @@
 #include "ada/url_pattern_helpers.h"
 #include "ada/parser.h"
 
+#include <string>
 #include <string_view>
 #include <variant>
 

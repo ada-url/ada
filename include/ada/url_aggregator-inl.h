@@ -14,6 +14,7 @@
 #include "ada/log.h"
 
 #include <charconv>
+#include <ostream>
 #include <string_view>
 
 namespace ada {

@@ -8,6 +8,7 @@
 #include "ada/common_defs.h"
 #include "ada/scheme.h"
 
+#include <string>
 #include <string_view>
 
 namespace ada {

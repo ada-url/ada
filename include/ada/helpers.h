@@ -8,6 +8,7 @@
 #include "ada/common_defs.h"
 #include "ada/url_base.h"
 
+#include <string>
 #include <string_view>
 #include <optional>
 
