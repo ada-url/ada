@@ -10,7 +10,9 @@
 #include "ada/parser.h"
 #include "ada/url_pattern_init.h"
 
+#include <ostream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <variant>
 #include <vector>

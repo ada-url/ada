@@ -5,6 +5,7 @@
 #ifndef ADA_URL_AGGREGATOR_H
 #define ADA_URL_AGGREGATOR_H
 
+#include <ostream>
 #include <string>
 #include <string_view>
 #include <variant>
