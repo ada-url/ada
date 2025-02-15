@@ -23,6 +23,7 @@ concurrency:
 jobs:
   macos-build:
     strategy:
+      fail-fast: false
       matrix:
         shared: [OFF]
         runs-on: [macos-13, macos-14, macos-15]
