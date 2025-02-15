@@ -295,7 +295,7 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
 
 // @see https://urlpattern.spec.whatwg.org/#process-a-base-url-string
 std::string process_base_url_string(std::string_view input,
-                                    std::string_view type);
+                                    url_pattern_init::process_type type);
 
 // @see https://urlpattern.spec.whatwg.org/#escape-a-pattern-string
 std::string escape_pattern_string(std::string_view input);
@@ -304,8 +304,8 @@ std::string escape_pattern_string(std::string_view input);
 std::string escape_regexp_string(std::string_view input);
 
 // @see https://urlpattern.spec.whatwg.org/#is-an-absolute-pathname
-constexpr bool is_absolute_pathname(std::string_view input,
-                                    std::string_view type) noexcept;
+constexpr bool is_absolute_pathname(
+    std::string_view input, url_pattern_init::process_type type) noexcept;
 
 // @see https://urlpattern.spec.whatwg.org/#parse-a-pattern-string
 template <url_pattern_encoding_callback F>

@@ -58,8 +58,8 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
 
   // Let processedInit be the result of process a URLPatternInit given init,
   // "pattern", null, null, null, null, null, null, null, and null.
-  // TODO: Make "pattern" an enum to avoid creating a string everytime.
-  auto processed_init = url_pattern_init::process(init, "pattern");
+  auto processed_init =
+      url_pattern_init::process(init, url_pattern_init::process_type::pattern);
   if (!processed_init) {
     ada_log("url_pattern_init::process failed for init and 'pattern'");
     return tl::unexpected(processed_init.error());
