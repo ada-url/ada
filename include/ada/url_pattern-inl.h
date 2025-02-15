@@ -244,8 +244,8 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     // "url", protocol, username, password, hostname, port, pathname, search,
     // and hash.
     auto apply_result = url_pattern_init::process(
-        std::get<url_pattern_init>(input), "url", protocol, username, password,
-        hostname, port, pathname, search, hash);
+        std::get<url_pattern_init>(input), url_pattern_init::process_type::url,
+        protocol, username, password, hostname, port, pathname, search, hash);
 
     // If this throws an exception, catch it, and return null.
     if (!apply_result.has_value()) {

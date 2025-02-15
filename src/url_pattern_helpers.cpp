@@ -803,17 +803,17 @@ std::string escape_regexp_string(std::string_view input) {
 }
 
 std::string process_base_url_string(std::string_view input,
-                                    std::string_view type) {
+                                    url_pattern_init::process_type type) {
   // If type is not "pattern" return input.
-  if (type != "pattern") {
+  if (type != url_pattern_init::process_type::pattern) {
     return std::string(input);
   }
   // Return the result of escaping a pattern string given input.
   return escape_pattern_string(input);
 }
 
-constexpr bool is_absolute_pathname(std::string_view input,
-                                    std::string_view type) noexcept {
+constexpr bool is_absolute_pathname(
+    std::string_view input, url_pattern_init::process_type type) noexcept {
   // If input is the empty string, then return false.
   if (input.empty()) [[unlikely]] {
     return false;
@@ -821,7 +821,7 @@ constexpr bool is_absolute_pathname(std::string_view input,
   // If input[0] is U+002F (/), then return true.
   if (input.starts_with("/")) return true;
   // If type is "url", then return false.
-  if (type == "url") return false;
+  if (type == url_pattern_init::process_type::url) return false;
   // If input’s code point length is less than 2, then return false.
   if (input.size() < 2) return false;
   // If input[0] is U+005C (\) and input[1] is U+002F (/), then return true.
