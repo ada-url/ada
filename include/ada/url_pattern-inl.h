@@ -28,13 +28,13 @@ inline bool url_pattern_component_result::operator==(
 template <url_pattern_regex::regex_concept regex_provider>
 url_pattern_component_result
 url_pattern_component<regex_provider>::create_component_match_result(
-    std::string_view input,
+    std::string&& input,
     std::vector<std::optional<std::string>>&& exec_result) {
   // Let result be a new URLPatternComponentResult.
   // Set result["input"] to input.
   // Let groups be a record<USVString, (USVString or undefined)>.
   auto result =
-      url_pattern_component_result{.input = std::string(input), .groups = {}};
+      url_pattern_component_result{.input = std::move(input), .groups = {}};
 
   // Optimization: Let's reserve the size.
   result.groups.reserve(exec_result.size());
@@ -255,40 +255,40 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
 
     // Set protocol to applyResult["protocol"].
     ADA_ASSERT_TRUE(apply_result->protocol.has_value());
-    protocol = apply_result->protocol.value();
+    protocol = std::move(apply_result->protocol.value());
 
     // Set username to applyResult["username"].
     ADA_ASSERT_TRUE(apply_result->username.has_value());
-    username = apply_result->username.value();
+    username = std::move(apply_result->username.value());
 
     // Set password to applyResult["password"].
     ADA_ASSERT_TRUE(apply_result->password.has_value());
-    password = apply_result->password.value();
+    password = std::move(apply_result->password.value());
 
     // Set hostname to applyResult["hostname"].
     ADA_ASSERT_TRUE(apply_result->hostname.has_value());
-    hostname = apply_result->hostname.value();
+    hostname = std::move(apply_result->hostname.value());
 
     // Set port to applyResult["port"].
     ADA_ASSERT_TRUE(apply_result->port.has_value());
-    port = apply_result->port.value();
+    port = std::move(apply_result->port.value());
 
     // Set pathname to applyResult["pathname"].
     ADA_ASSERT_TRUE(apply_result->pathname.has_value());
-    pathname = apply_result->pathname.value();
+    pathname = std::move(apply_result->pathname.value());
 
     // Set search to applyResult["search"].
     ADA_ASSERT_TRUE(apply_result->search.has_value());
     if (apply_result->search->starts_with("?")) {
       search = apply_result->search->substr(1);
     } else {
-      search = apply_result->search.value();
+      search = std::move(apply_result->search.value());
     }
 
     // Set hash to applyResult["hash"].
     ADA_ASSERT_TRUE(apply_result->hash.has_value());
     ADA_ASSERT_TRUE(!apply_result->hash->starts_with("#"));
-    hash = apply_result->hash.value();
+    hash = std::move(apply_result->hash.value());
   } else {
     ADA_ASSERT_TRUE(std::holds_alternative<std::string_view>(input));
 
@@ -312,7 +312,7 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     }
 
     url_aggregator* base_url_value =
-        base_url.has_value() ? &base_url.value() : nullptr;
+        base_url.has_value() ? &*base_url : nullptr;
 
     // Set url to the result of parsing input given baseURL.
     auto url = ada::parse<url_aggregator>(std::get<std::string_view>(input),
@@ -368,47 +368,70 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   auto protocol_exec_result =
       regex_provider::regex_search(protocol, protocol_component.regexp);
 
+  if (!protocol_exec_result) {
+    return std::nullopt;
+  }
+
   // Let usernameExecResult be RegExpBuiltinExec(urlPattern’s username
   // component's regular expression, username).
   auto username_exec_result =
       regex_provider::regex_search(username, username_component.regexp);
+
+  if (!username_exec_result) {
+    return std::nullopt;
+  }
 
   // Let passwordExecResult be RegExpBuiltinExec(urlPattern’s password
   // component's regular expression, password).
   auto password_exec_result =
       regex_provider::regex_search(password, password_component.regexp);
 
+  if (!password_exec_result) {
+    return std::nullopt;
+  }
+
   // Let hostnameExecResult be RegExpBuiltinExec(urlPattern’s hostname
   // component's regular expression, hostname).
   auto hostname_exec_result =
       regex_provider::regex_search(hostname, hostname_component.regexp);
+
+  if (!hostname_exec_result) {
+    return std::nullopt;
+  }
 
   // Let portExecResult be RegExpBuiltinExec(urlPattern’s port component's
   // regular expression, port).
   auto port_exec_result =
       regex_provider::regex_search(port, port_component.regexp);
 
+  if (!port_exec_result) {
+    return std::nullopt;
+  }
+
   // Let pathnameExecResult be RegExpBuiltinExec(urlPattern’s pathname
   // component's regular expression, pathname).
   auto pathname_exec_result =
       regex_provider::regex_search(pathname, pathname_component.regexp);
+
+  if (!pathname_exec_result) {
+    return std::nullopt;
+  }
 
   // Let searchExecResult be RegExpBuiltinExec(urlPattern’s search component's
   // regular expression, search).
   auto search_exec_result =
       regex_provider::regex_search(search, search_component.regexp);
 
+  if (!search_exec_result) {
+    return std::nullopt;
+  }
+
   // Let hashExecResult be RegExpBuiltinExec(urlPattern’s hash component's
   // regular expression, hash).
   auto hash_exec_result =
       regex_provider::regex_search(hash, hash_component.regexp);
 
-  // If protocolExecResult, usernameExecResult, passwordExecResult,
-  // hostnameExecResult, portExecResult, pathnameExecResult, searchExecResult,
-  // or hashExecResult are null then return null.
-  if (!protocol_exec_result || !username_exec_result || !password_exec_result ||
-      !hostname_exec_result || !port_exec_result || !pathname_exec_result ||
-      !search_exec_result || !hash_exec_result) {
+  if (!hash_exec_result) {
     return std::nullopt;
   }
 
@@ -419,42 +442,42 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   // Set result["protocol"] to the result of creating a component match result
   // given urlPattern’s protocol component, protocol, and protocolExecResult.
   result.protocol = protocol_component.create_component_match_result(
-      protocol, std::move(*protocol_exec_result));
+      std::move(protocol), std::move(*protocol_exec_result));
 
   // Set result["username"] to the result of creating a component match result
   // given urlPattern’s username component, username, and usernameExecResult.
   result.username = username_component.create_component_match_result(
-      username, std::move(*username_exec_result));
+      std::move(username), std::move(*username_exec_result));
 
   // Set result["password"] to the result of creating a component match result
   // given urlPattern’s password component, password, and passwordExecResult.
   result.password = password_component.create_component_match_result(
-      password, std::move(*password_exec_result));
+      std::move(password), std::move(*password_exec_result));
 
   // Set result["hostname"] to the result of creating a component match result
   // given urlPattern’s hostname component, hostname, and hostnameExecResult.
   result.hostname = hostname_component.create_component_match_result(
-      hostname, std::move(*hostname_exec_result));
+      std::move(hostname), std::move(*hostname_exec_result));
 
   // Set result["port"] to the result of creating a component match result given
   // urlPattern’s port component, port, and portExecResult.
   result.port = port_component.create_component_match_result(
-      port, std::move(*port_exec_result));
+      std::move(port), std::move(*port_exec_result));
 
   // Set result["pathname"] to the result of creating a component match result
   // given urlPattern’s pathname component, pathname, and pathnameExecResult.
   result.pathname = pathname_component.create_component_match_result(
-      pathname, std::move(*pathname_exec_result));
+      std::move(pathname), std::move(*pathname_exec_result));
 
   // Set result["search"] to the result of creating a component match result
   // given urlPattern’s search component, search, and searchExecResult.
   result.search = search_component.create_component_match_result(
-      search, std::move(*search_exec_result));
+      std::move(search), std::move(*search_exec_result));
 
   // Set result["hash"] to the result of creating a component match result given
   // urlPattern’s hash component, hash, and hashExecResult.
   result.hash = hash_component.create_component_match_result(
-      hash, std::move(*hash_exec_result));
+      std::move(hash), std::move(*hash_exec_result));
 
   return result;
 }

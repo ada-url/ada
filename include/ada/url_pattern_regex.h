@@ -43,7 +43,7 @@ concept regex_concept = requires(T t, std::string_view pattern,
 };
 
 #ifdef ADA_USE_UNSAFE_STD_REGEX_PROVIDER
-class std_regex_provider {
+class std_regex_provider final {
  public:
   std_regex_provider() = default;
   using regex_type = std::regex;

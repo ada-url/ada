@@ -170,7 +170,7 @@ class url_pattern_component {
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
-      std::string_view input,
+      std::string&& input,
       std::vector<std::optional<std::string>>&& exec_result);
 
 #if ADA_TESTING
