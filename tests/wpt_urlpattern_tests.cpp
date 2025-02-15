@@ -15,6 +15,16 @@ using regex_provider = ada::url_pattern_regex::std_regex_provider;
 constexpr std::string_view URL_PATTERN_TEST_DATA =
     "wpt/urlpatterntestdata.json";
 
+// Ref: https://github.com/nodejs/node/issues/57043
+TEST(wpt_urlpattern_tests, test_std_out_of_range) {
+  std::string_view base = "http://example.com";
+  auto u = ada::parse_url_pattern<regex_provider>("/foo", &base);
+  ASSERT_TRUE(u);
+  auto match = u->exec("?", nullptr);
+  ASSERT_TRUE(match);
+  SUCCEED();
+}
+
 TEST(wpt_urlpattern_tests, test_regex_difference) {
   // {
   //   "pattern": [{ "pathname": "/foo/bar" }],
@@ -25,8 +35,7 @@ TEST(wpt_urlpattern_tests, test_regex_difference) {
   // }
   auto init = ada::url_pattern_init{};
   init.pathname = "/foo/bar";
-  auto u =
-      ada::parse_url_pattern<ada::url_pattern_regex::std_regex_provider>(init);
+  auto u = ada::parse_url_pattern<regex_provider>(init);
   ASSERT_TRUE(u);
   auto match = u->exec(init, nullptr);
   ASSERT_TRUE(match);
@@ -58,8 +67,7 @@ TEST(wpt_urlpattern_tests, parse_pattern_string_basic_tests) {
 TEST(wpt_urlpattern_tests, basic_tests) {
   auto init = ada::url_pattern_init{};
   init.pathname = "/books";
-  auto url =
-      ada::parse_url_pattern<ada::url_pattern_regex::std_regex_provider>(init);
+  auto url = ada::parse_url_pattern<regex_provider>(init);
   ASSERT_TRUE(url);
   ASSERT_EQ(url->get_protocol(), "*");
   ASSERT_EQ(url->get_hostname(), "*");
@@ -250,9 +258,7 @@ parse_pattern_field(ondemand::array& patterns) {
   return std::tuple(*init_str, base_url, options);
 }
 
-tl::expected<ada::url_pattern<ada::url_pattern_regex::std_regex_provider>,
-             ada::errors>
-parse_pattern(
+tl::expected<ada::url_pattern<regex_provider>, ada::errors> parse_pattern(
     std::variant<std::string, ada::url_pattern_init, bool>& init_variant,
     std::optional<std::string>& base_url,
     std::optional<ada::url_pattern_options>& options) {

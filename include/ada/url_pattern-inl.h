@@ -346,8 +346,8 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     // is removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2232
     if (url->has_search()) {
-      ADA_ASSERT_TRUE(url->get_search().starts_with("?"));
-      search = url->get_search().substr(1);
+      auto view = url->get_search();
+      search = view.starts_with("?") ? url->get_search().substr(1) : view;
     } else {
       search = "";
     }
@@ -356,8 +356,8 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     // removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2242
     if (url->has_hash()) {
-      ADA_ASSERT_TRUE(url->get_hash().starts_with("#"));
-      hash = url->get_hash().substr(1);
+      auto view = url->get_hash();
+      hash = view.starts_with("#") ? url->get_hash().substr(1) : view;
     } else {
       hash = "";
     }
