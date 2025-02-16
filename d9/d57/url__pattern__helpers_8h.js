@@ -37,11 +37,10 @@ var url__pattern__helpers_8h =
     [ "ada::url_pattern_helpers::generate_pattern_string", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#a921cf2f1093ad9deefc910358a769567", null ],
     [ "ada::url_pattern_helpers::generate_regular_expression_and_name_list", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#af2cb69c78ee9095cc7f6cd16042e05b9", null ],
     [ "ada::url_pattern_helpers::generate_segment_wildcard_regexp", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#a70ebd270b8d85721a05ec9be95c44972", null ],
-    [ "ada::url_pattern_helpers::is_absolute_pathname", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#a34d7997f4479334745a07a83e7b247be", null ],
+    [ "ada::url_pattern_helpers::is_absolute_pathname", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#ae8600b6d666a2dcbe00ce24e45bbb996", null ],
     [ "ada::url_pattern_helpers::is_ipv6_address", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac67d971d3f3f3aacd5e6fffb5e414bb6", null ],
     [ "ada::url_pattern_helpers::parse_pattern_string", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#a790d77c0734c59ae3305c099e52f189b", null ],
-    [ "ada::url_pattern_helpers::process_base_url_string", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#a5934b933f30d7752aa8657a6b1ce5535", null ],
+    [ "ada::url_pattern_helpers::process_base_url_string", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#af4d90936b53b4e0cc4bf55a4ed3fa026", null ],
     [ "ada::url_pattern_helpers::protocol_component_matches_special_scheme", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#a3efe783c5a0b1b9c5959672a1bc287fb", null ],
-    [ "ada::url_pattern_helpers::to_string", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#a371668afeecb90b19ba3a7b4aadc75ed", null ],
     [ "ada::url_pattern_helpers::tokenize", "dc/dcc/namespaceada_1_1url__pattern__helpers.html#a4fc3dc4fb7eda789d35bfe20c90acf0b", null ]
 ];

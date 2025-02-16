@@ -5,7 +5,7 @@ var searchData=
   ['unicode_2eh_2',['unicode.h',['../dd/d90/unicode_8h.html',1,'']]],
   ['unreachable_3',['unreachable',['../dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d',1,'ada']]],
   ['url_4',['Well-formatted URL',['../db/d8a/md_docs_2cli.html#autotoc_md5',1,'']]],
-  ['url_5',['url',['../dd/d03/structada_1_1url.html',1,'ada::url'],['../dd/d03/structada_1_1url.html#a842ca2e00db267baba8f0b5a08d7a130',1,'ada::url::url()=default'],['../dd/d03/structada_1_1url.html#a7c686183f4195f5059993e97e64fd537',1,'ada::url::url(const url &amp;u)=default'],['../dd/d03/structada_1_1url.html#a17a7a9b5775703722bfc70dd192aeab1',1,'ada::url::url(url &amp;&amp;u) noexcept=default']]],
+  ['url_5',['url',['../dd/d03/structada_1_1url.html',1,'ada::url'],['../dd/d03/structada_1_1url.html#a842ca2e00db267baba8f0b5a08d7a130',1,'ada::url::url()=default'],['../dd/d03/structada_1_1url.html#a7c686183f4195f5059993e97e64fd537',1,'ada::url::url(const url &amp;u)=default'],['../dd/d03/structada_1_1url.html#a17a7a9b5775703722bfc70dd192aeab1',1,'ada::url::url(url &amp;&amp;u) noexcept=default'],['../d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92a572d4e421e5e6b9bc11d815e8a027112',1,'ada::url_pattern_init::url']]],
   ['url_20parser_6',['URL Parser',['../index.html#autotoc_md21',1,'']]],
   ['url_20search_20params_7',['URL Search Params',['../index.html#autotoc_md22',1,'']]],
   ['url_2dinl_2eh_8',['url-inl.h',['../df/ddc/url-inl_8h.html',1,'']]],

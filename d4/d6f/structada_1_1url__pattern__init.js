@@ -1,15 +1,19 @@
 var structada_1_1url__pattern__init =
 [
+    [ "process_type", "d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92", [
+      [ "url", "d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92a572d4e421e5e6b9bc11d815e8a027112", null ],
+      [ "pattern", "d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92a240bf022e685b0ee30ad9fe9e1fb5d5b", null ]
+    ] ],
     [ "operator==", "d4/d6f/structada_1_1url__pattern__init.html#a6debb878dd345dda8c710fefc2e64eb6", null ],
-    [ "process", "d4/d6f/structada_1_1url__pattern__init.html#a53358b7baa18bc139e0194576c2d4cff", null ],
-    [ "process_hash", "d4/d6f/structada_1_1url__pattern__init.html#a6c2db70cd301924a518d1d9ea2a9edaf", null ],
-    [ "process_hostname", "d4/d6f/structada_1_1url__pattern__init.html#a4a6c2dd03ec74a26e8bba77dde361aca", null ],
-    [ "process_password", "d4/d6f/structada_1_1url__pattern__init.html#a704a7145c4ba053fcfb98c455110a914", null ],
-    [ "process_pathname", "d4/d6f/structada_1_1url__pattern__init.html#a1ffa1ea246b1b83bd08850cd0d8e6461", null ],
-    [ "process_port", "d4/d6f/structada_1_1url__pattern__init.html#a39eebaadd4ff7149cf1263b779371e33", null ],
-    [ "process_protocol", "d4/d6f/structada_1_1url__pattern__init.html#ae364e39b8a295330b593ce03ee58a9ca", null ],
-    [ "process_search", "d4/d6f/structada_1_1url__pattern__init.html#acd081793e5a56db5dad00b031cb50ef6", null ],
-    [ "process_username", "d4/d6f/structada_1_1url__pattern__init.html#a380602ad134b50b03fc8b53b7ccdda12", null ],
+    [ "process", "d4/d6f/structada_1_1url__pattern__init.html#a578da90ef890b0aafdfe3b3986d94fd5", null ],
+    [ "process_hash", "d4/d6f/structada_1_1url__pattern__init.html#aabb58239839c007e0bbaef777ece9219", null ],
+    [ "process_hostname", "d4/d6f/structada_1_1url__pattern__init.html#af9392cd7824e1212b2ffcd268cd53174", null ],
+    [ "process_password", "d4/d6f/structada_1_1url__pattern__init.html#a9ef1b494d3e55596f8086cf0e73c1eb1", null ],
+    [ "process_pathname", "d4/d6f/structada_1_1url__pattern__init.html#a36a5a89bed555849fd45e8c1871daff3", null ],
+    [ "process_port", "d4/d6f/structada_1_1url__pattern__init.html#aa446d6ff22a3d3292cce185482e3e275", null ],
+    [ "process_protocol", "d4/d6f/structada_1_1url__pattern__init.html#a83822ebd6aaa70b442bc2694ba3acab5", null ],
+    [ "process_search", "d4/d6f/structada_1_1url__pattern__init.html#af2f0ba6f0aafa8f38c2a170e5a0c8de9", null ],
+    [ "process_username", "d4/d6f/structada_1_1url__pattern__init.html#a860ab4e70c09bce675790bf0f5239c3c", null ],
     [ "base_url", "d4/d6f/structada_1_1url__pattern__init.html#a6220869ca5b2dd9edfb078bac5f8be96", null ],
     [ "hash", "d4/d6f/structada_1_1url__pattern__init.html#ad4c097a2c06a7945c4ee92870f722d3d", null ],
     [ "hostname", "d4/d6f/structada_1_1url__pattern__init.html#a661bec0a6eab09cb1510c16e51ecec8d", null ],
