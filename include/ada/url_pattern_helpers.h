@@ -33,7 +33,9 @@ enum class token_type : uint8_t {
   END,             // 9
 };
 
+#ifdef ADA_TESTING
 std::string to_string(token_type type);
+#endif  // ADA_TESTING
 
 // @see https://urlpattern.spec.whatwg.org/#tokenize-policy
 enum class token_policy {
@@ -191,39 +193,39 @@ struct constructor_string_parser {
   bool is_group_close() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-a-protocol-suffix
-  bool is_protocol_suffix();
+  bool is_protocol_suffix() const;
 
   // @see
   // https://urlpattern.spec.whatwg.org/#compute-protocol-matches-a-special-scheme-flag
   std::optional<errors> compute_protocol_matches_special_scheme_flag();
 
   // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
-  bool next_is_authority_slashes();
+  bool next_is_authority_slashes() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-an-identity-terminator
-  bool is_an_identity_terminator();
+  bool is_an_identity_terminator() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-a-pathname-start
-  bool is_pathname_start();
+  bool is_pathname_start() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-a-password-prefix
-  bool is_password_prefix();
+  bool is_password_prefix() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-an-ipv6-open
-  bool is_an_ipv6_open();
+  bool is_an_ipv6_open() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-an-ipv6-close
-  bool is_an_ipv6_close();
+  bool is_an_ipv6_close() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-a-port-prefix
-  bool is_port_prefix();
+  bool is_port_prefix() const;
 
  private:
   // @see https://urlpattern.spec.whatwg.org/#is-a-non-special-pattern-char
-  bool is_non_special_pattern_char(size_t index, std::string_view value);
+  bool is_non_special_pattern_char(size_t index, std::string_view value) const;
 
   // @see https://urlpattern.spec.whatwg.org/#get-a-safe-token
-  const token* get_safe_token(size_t index);
+  const token* get_safe_token(size_t index) const;
 
   // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
   std::string make_component_string();
