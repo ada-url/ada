@@ -14,6 +14,7 @@
 #include "ada/implementation.h"
 
 namespace ada::url_pattern_helpers {
+#ifdef ADA_TESTING
 inline std::string to_string(token_type type) {
   switch (type) {
     case token_type::INVALID_CHAR:
@@ -40,6 +41,7 @@ inline std::string to_string(token_type type) {
       ada::unreachable();
   }
 }
+#endif  // ADA_TESTING
 
 template <url_pattern_regex::regex_concept regex_provider>
 void constructor_string_parser<regex_provider>::rewind() {
@@ -91,7 +93,7 @@ bool constructor_string_parser<regex_provider>::is_search_prefix() {
 
 template <url_pattern_regex::regex_concept regex_provider>
 bool constructor_string_parser<regex_provider>::is_non_special_pattern_char(
-    size_t index, std::string_view value) {
+    size_t index, std::string_view value) const {
   // Let token be the result of running get a safe token given parser and index.
   auto token = get_safe_token(index);
   ADA_ASSERT_TRUE(token);
@@ -113,7 +115,7 @@ bool constructor_string_parser<regex_provider>::is_non_special_pattern_char(
 
 template <url_pattern_regex::regex_concept regex_provider>
 const token* constructor_string_parser<regex_provider>::get_safe_token(
-    size_t index) {
+    size_t index) const {
   // If index is less than parser’s token list's size, then return parser’s
   // token list[index].
   if (index < token_list.size()) [[likely]] {
@@ -146,7 +148,8 @@ bool constructor_string_parser<regex_provider>::is_group_close() const {
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-bool constructor_string_parser<regex_provider>::next_is_authority_slashes() {
+bool constructor_string_parser<regex_provider>::next_is_authority_slashes()
+    const {
   // If the result of running is a non-special pattern char given parser,
   // parser’s token index + 1, and "/" is false, then return false.
   if (!is_non_special_pattern_char(token_index + 1, "/")) {
@@ -161,7 +164,7 @@ bool constructor_string_parser<regex_provider>::next_is_authority_slashes() {
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-bool constructor_string_parser<regex_provider>::is_protocol_suffix() {
+bool constructor_string_parser<regex_provider>::is_protocol_suffix() const {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and ":".
   return is_non_special_pattern_char(token_index, ":");
@@ -288,42 +291,43 @@ std::string constructor_string_parser<regex_provider>::make_component_string() {
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-bool constructor_string_parser<regex_provider>::is_an_identity_terminator() {
+bool constructor_string_parser<regex_provider>::is_an_identity_terminator()
+    const {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and "@".
   return is_non_special_pattern_char(token_index, "@");
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-bool constructor_string_parser<regex_provider>::is_pathname_start() {
+bool constructor_string_parser<regex_provider>::is_pathname_start() const {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and "/".
   return is_non_special_pattern_char(token_index, "/");
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-bool constructor_string_parser<regex_provider>::is_password_prefix() {
+bool constructor_string_parser<regex_provider>::is_password_prefix() const {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and ":".
   return is_non_special_pattern_char(token_index, ":");
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-bool constructor_string_parser<regex_provider>::is_an_ipv6_open() {
+bool constructor_string_parser<regex_provider>::is_an_ipv6_open() const {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and "[".
   return is_non_special_pattern_char(token_index, "[");
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-bool constructor_string_parser<regex_provider>::is_an_ipv6_close() {
+bool constructor_string_parser<regex_provider>::is_an_ipv6_close() const {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and "]".
   return is_non_special_pattern_char(token_index, "]");
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
-bool constructor_string_parser<regex_provider>::is_port_prefix() {
+bool constructor_string_parser<regex_provider>::is_port_prefix() const {
   // Return the result of running is a non-special pattern char given parser,
   // parser’s token index, and ":".
   return is_non_special_pattern_char(token_index, ":");
@@ -625,10 +629,9 @@ std::optional<errors> url_pattern_parser<F>::add_part(
   // If name token is not null, then set name to name token’s value.
   if (name_token) {
     name = name_token->value;
-  } else if (regexp_or_wildcard_token) {
+  } else if (regexp_or_wildcard_token != nullptr) {
     // Otherwise if regexp or wildcard token is not null:
     // Set name to parser’s next numeric name, serialized.
-    // TODO: Make sure this is correct.
     name = std::to_string(next_numeric_name);
     // Increment parser’s next numeric name by 1.
     next_numeric_name++;
