@@ -200,6 +200,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
         !url_pattern_helpers::is_absolute_pathname(*result.pathname, type)) {
       // Let baseURLPath be the result of running process a base URL string
       // given the result of URL path serializing baseURL and type.
+      // TODO: Optimization opportunity: Avoid returning a string if no slash exist.
       std::string base_url_path = url_pattern_helpers::process_base_url_string(
           base_url->get_pathname(), type);
 
