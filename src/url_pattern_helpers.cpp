@@ -15,7 +15,6 @@ generate_regular_expression_and_name_list(
 
   // Let name list be a new list
   std::vector<std::string> name_list{};
-  const std::string full_wildcard_regexp_value = ".*";
 
   // For each part of part list:
   for (const url_pattern_part& part : part_list) {
@@ -61,7 +60,7 @@ generate_regular_expression_and_name_list(
     // Otherwise if part's type is "full-wildcard"
     else if (part.type == url_pattern_part_type::FULL_WILDCARD) {
       // then set regexp value to full wildcard regexp value.
-      regexp_value = full_wildcard_regexp_value;
+      regexp_value = ".*";
     }
 
     // If part's prefix is the empty string and part's suffix is the empty
@@ -140,7 +139,7 @@ generate_regular_expression_and_name_list(
   result += "$";
 
   // Return (result, name list)
-  return {result, name_list};
+  return {std::move(result), std::move(name_list)};
 }
 
 bool is_ipv6_address(std::string_view input) noexcept {
