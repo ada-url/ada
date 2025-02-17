@@ -212,12 +212,12 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
       if (slash_index != std::string::npos) {
         // Let new pathname be the code point substring from 0 to slash index +
         // 1 within baseURLPath.
-        std::string new_pathname = base_url_path.substr(0, slash_index + 1);
+        base_url_path.resize(slash_index + 1);
         // Append result["pathname"] to the end of new pathname.
         ADA_ASSERT_TRUE(result.pathname.has_value());
-        new_pathname.append(result.pathname.value());
+        base_url_path.append(std::move(*result.pathname));
         // Set result["pathname"] to new pathname.
-        result.pathname = std::move(new_pathname);
+        result.pathname = std::move(base_url_path);
       }
     }
 
