@@ -222,7 +222,7 @@ struct constructor_string_parser {
 
  private:
   // @see https://urlpattern.spec.whatwg.org/#is-a-non-special-pattern-char
-  bool is_non_special_pattern_char(size_t index, std::string_view value) const;
+  bool is_non_special_pattern_char(size_t index, uint32_t value) const;
 
   // @see https://urlpattern.spec.whatwg.org/#get-a-safe-token
   const token* get_safe_token(size_t index) const;
