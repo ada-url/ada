@@ -825,11 +825,9 @@ constexpr bool is_absolute_pathname(
   // If input’s code point length is less than 2, then return false.
   if (input.size() < 2) return false;
   // If input[0] is U+005C (\) and input[1] is U+002F (/), then return true.
-  if (input.starts_with("\\/")) return true;
   // If input[0] is U+007B ({) and input[1] is U+002F (/), then return true.
-  if (input.starts_with("{/")) return true;
   // Return false.
-  return false;
+  return input[1] == '/' && (input[0] == '\\' || input[0] == '{');
 }
 
 std::string generate_pattern_string(
