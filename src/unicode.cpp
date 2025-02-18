@@ -15,6 +15,8 @@ ADA_POP_DISABLE_WARNINGS
 #include <emmintrin.h>
 #endif
 
+#include "ada/percent_decoder.h"
+
 namespace ada::unicode {
 
 constexpr bool is_tabs_or_newline(char c) noexcept {
@@ -461,7 +463,13 @@ bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
   std::string percent_decoded_buffer;
   std::string_view input = plain;
   if (first_percent != std::string_view::npos) {
-    percent_decoded_buffer = unicode::percent_decode(plain, first_percent);
+    // The indeed code does full percent decoding (over all of plain),
+    // but it seems more suitable to skip over the prefix before the first "%"
+    // since in many cases, we might expect percent encoding to be sparse.
+    percent_decoded_buffer.assign(input.substr(0, first_percent));
+    percent_decoded_buffer.resize(plain.size());
+    size_t output_size = percent_decoder::percent_decode(plain.data() + first_percent, plain.size() - first_percent, percent_decoded_buffer.data() + first_percent);
+    percent_decoded_buffer.resize(output_size + first_percent);
     input = percent_decoded_buffer;
   }
   // input is a non-empty UTF-8 string, must be percent decoded
