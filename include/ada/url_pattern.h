@@ -10,7 +10,9 @@
 #include "ada/parser.h"
 #include "ada/url_pattern_init.h"
 
+#include <ostream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -168,7 +170,7 @@ class url_pattern_component {
 
   // @see https://urlpattern.spec.whatwg.org/#create-a-component-match-result
   url_pattern_component_result create_component_match_result(
-      std::string_view input,
+      std::string&& input,
       std::vector<std::optional<std::string>>&& exec_result);
 
 #if ADA_TESTING
@@ -189,6 +191,8 @@ class url_pattern_component {
   bool has_regexp_groups = false;
 };
 
+// A URLPattern input can be either a string or a URLPatternInit object.
+// If it is a string, it must be a valid UTF-8 string.
 using url_pattern_input = std::variant<std::string_view, url_pattern_init>;
 
 // A struct providing the URLPattern matching results for all
@@ -221,12 +225,16 @@ struct url_pattern_options {
 // defined in https://wicg.github.io/urlpattern.
 // More information about the URL Pattern syntax can be found at
 // https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
+//
+// We require all strings to be valid UTF-8: it is the user's responsibility
+// to ensure that the provided strings are valid UTF-8.
 template <url_pattern_regex::regex_concept regex_provider>
 class url_pattern {
  public:
   url_pattern() = default;
 
   /**
+   * If non-null, base_url must pointer at a valid UTF-8 string.
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-exec
    */
   result<std::optional<url_pattern_result>> exec(
@@ -234,6 +242,7 @@ class url_pattern {
       const std::string_view* base_url = nullptr);
 
   /**
+   * If non-null, base_url must pointer at a valid UTF-8 string.
    * @see https://urlpattern.spec.whatwg.org/#dom-urlpattern-test
    */
   result<bool> test(const url_pattern_input& input,

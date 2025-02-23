@@ -1,9 +1,0 @@
-cc_test(
-    name = "url_search_params",
-    srcs = ["url_search_params.cpp"],
-    deps = [
-        "//:ada",
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)

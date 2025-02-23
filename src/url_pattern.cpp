@@ -7,7 +7,7 @@
 namespace ada {
 
 tl::expected<url_pattern_init, errors> url_pattern_init::process(
-    url_pattern_init init, std::string_view type,
+    url_pattern_init init, url_pattern_init::process_type type,
     std::optional<std::string_view> protocol,
     std::optional<std::string_view> username,
     std::optional<std::string_view> password,
@@ -69,8 +69,8 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // If type is not "pattern" and init contains none of "protocol",
     // "hostname", "port" and "username", then set result["username"] to the
     // result of processing a base URL string given baseURL’s username and type.
-    if (type != "pattern" && !init.protocol && !init.hostname && !init.port &&
-        !init.username) {
+    if (type != process_type::pattern && !init.protocol && !init.hostname &&
+        !init.port && !init.username) {
       result.username = url_pattern_helpers::process_base_url_string(
           base_url->get_username(), type);
     }
@@ -80,8 +80,8 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // "hostname", "port", "username" and "password", then set
     // result["password"] to the result of processing a base URL string given
     // baseURL’s password and type.
-    if (type != "pattern" && !init.protocol && !init.hostname && !init.port &&
-        !init.username && !init.password) {
+    if (type != process_type::pattern && !init.protocol && !init.hostname &&
+        !init.port && !init.username && !init.password) {
       result.password = url_pattern_helpers::process_base_url_string(
           base_url->get_password(), type);
     }
@@ -200,6 +200,8 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
         !url_pattern_helpers::is_absolute_pathname(*result.pathname, type)) {
       // Let baseURLPath be the result of running process a base URL string
       // given the result of URL path serializing baseURL and type.
+      // TODO: Optimization opportunity: Avoid returning a string if no slash
+      // exist.
       std::string base_url_path = url_pattern_helpers::process_base_url_string(
           base_url->get_pathname(), type);
 
@@ -212,12 +214,12 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
       if (slash_index != std::string::npos) {
         // Let new pathname be the code point substring from 0 to slash index +
         // 1 within baseURLPath.
-        std::string new_pathname = base_url_path.substr(0, slash_index + 1);
+        base_url_path.resize(slash_index + 1);
         // Append result["pathname"] to the end of new pathname.
         ADA_ASSERT_TRUE(result.pathname.has_value());
-        new_pathname.append(result.pathname.value());
+        base_url_path.append(std::move(*result.pathname));
         // Set result["pathname"] to new pathname.
-        result.pathname = std::move(new_pathname);
+        result.pathname = std::move(base_url_path);
       }
     }
 
@@ -255,7 +257,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
 }
 
 tl::expected<std::string, errors> url_pattern_init::process_protocol(
-    std::string_view value, std::string_view type) {
+    std::string_view value, process_type type) {
   ada_log("process_protocol=", value, " [", type, "]");
   // Let strippedValue be the given value with a single trailing U+003A (:)
   // removed, if any.
@@ -263,7 +265,7 @@ tl::expected<std::string, errors> url_pattern_init::process_protocol(
     value.remove_suffix(1);
   }
   // If type is "pattern" then return strippedValue.
-  if (type == "pattern") {
+  if (type == process_type::pattern) {
     return std::string(value);
   }
   // Return the result of running canonicalize a protocol given strippedValue.
@@ -271,9 +273,9 @@ tl::expected<std::string, errors> url_pattern_init::process_protocol(
 }
 
 tl::expected<std::string, errors> url_pattern_init::process_username(
-    std::string_view value, std::string_view type) {
+    std::string_view value, process_type type) {
   // If type is "pattern" then return value.
-  if (type == "pattern") {
+  if (type == process_type::pattern) {
     return std::string(value);
   }
   // Return the result of running canonicalize a username given value.
@@ -281,9 +283,9 @@ tl::expected<std::string, errors> url_pattern_init::process_username(
 }
 
 tl::expected<std::string, errors> url_pattern_init::process_password(
-    std::string_view value, std::string_view type) {
+    std::string_view value, process_type type) {
   // If type is "pattern" then return value.
-  if (type == "pattern") {
+  if (type == process_type::pattern) {
     return std::string(value);
   }
   // Return the result of running canonicalize a password given value.
@@ -291,10 +293,10 @@ tl::expected<std::string, errors> url_pattern_init::process_password(
 }
 
 tl::expected<std::string, errors> url_pattern_init::process_hostname(
-    std::string_view value, std::string_view type) {
+    std::string_view value, process_type type) {
   ada_log("process_hostname value=", value, " type=", type);
   // If type is "pattern" then return value.
-  if (type == "pattern") {
+  if (type == process_type::pattern) {
     return std::string(value);
   }
   // Return the result of running canonicalize a hostname given value.
@@ -302,9 +304,9 @@ tl::expected<std::string, errors> url_pattern_init::process_hostname(
 }
 
 tl::expected<std::string, errors> url_pattern_init::process_port(
-    std::string_view port, std::string_view protocol, std::string_view type) {
+    std::string_view port, std::string_view protocol, process_type type) {
   // If type is "pattern" then return portValue.
-  if (type == "pattern") {
+  if (type == process_type::pattern) {
     return std::string(port);
   }
   // Return the result of running canonicalize a port given portValue and
@@ -313,9 +315,9 @@ tl::expected<std::string, errors> url_pattern_init::process_port(
 }
 
 tl::expected<std::string, errors> url_pattern_init::process_pathname(
-    std::string_view value, std::string_view protocol, std::string_view type) {
+    std::string_view value, std::string_view protocol, process_type type) {
   // If type is "pattern" then return pathnameValue.
-  if (type == "pattern") {
+  if (type == process_type::pattern) {
     return std::string(value);
   }
 
@@ -331,7 +333,7 @@ tl::expected<std::string, errors> url_pattern_init::process_pathname(
 }
 
 tl::expected<std::string, errors> url_pattern_init::process_search(
-    std::string_view value, std::string_view type) {
+    std::string_view value, process_type type) {
   // Let strippedValue be the given value with a single leading U+003F (?)
   // removed, if any.
   if (value.starts_with("?")) {
@@ -339,7 +341,7 @@ tl::expected<std::string, errors> url_pattern_init::process_search(
   }
   ADA_ASSERT_TRUE(!value.starts_with("?"));
   // If type is "pattern" then return strippedValue.
-  if (type == "pattern") {
+  if (type == process_type::pattern) {
     return std::string(value);
   }
   // Return the result of running canonicalize a search given strippedValue.
@@ -347,7 +349,7 @@ tl::expected<std::string, errors> url_pattern_init::process_search(
 }
 
 tl::expected<std::string, errors> url_pattern_init::process_hash(
-    std::string_view value, std::string_view type) {
+    std::string_view value, process_type type) {
   // Let strippedValue be the given value with a single leading U+0023 (#)
   // removed, if any.
   if (value.starts_with("#")) {
@@ -355,7 +357,7 @@ tl::expected<std::string, errors> url_pattern_init::process_hash(
   }
   ADA_ASSERT_TRUE(!value.starts_with("#"));
   // If type is "pattern" then return strippedValue.
-  if (type == "pattern") {
+  if (type == process_type::pattern) {
     return std::string(value);
   }
   // Return the result of running canonicalize a hash given strippedValue.

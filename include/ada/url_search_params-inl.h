@@ -162,6 +162,7 @@ inline void url_search_params::remove(const std::string_view key,
 }
 
 inline void url_search_params::sort() {
+  // We rely on the fact that the content is valid UTF-8.
   std::ranges::stable_sort(params, [](const key_value_pair &lhs,
                                       const key_value_pair &rhs) {
     size_t i = 0, j = 0;

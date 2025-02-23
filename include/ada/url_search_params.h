@@ -33,6 +33,8 @@ using url_search_params_entries_iter =
                            url_search_params_iter_type::ENTRIES>;
 
 /**
+ * We require all strings to be valid UTF-8. It is the user's responsibility to
+ * ensure that the provided strings are valid UTF-8.
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
  */
 struct url_search_params {
@@ -55,6 +57,7 @@ struct url_search_params {
   [[nodiscard]] inline size_t size() const noexcept;
 
   /**
+   * Both key and value must be valid UTF-8.
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-append
    */
   inline void append(std::string_view key, std::string_view value);
@@ -82,6 +85,7 @@ struct url_search_params {
   inline bool has(std::string_view key, std::string_view value) noexcept;
 
   /**
+   * Both key and value must be valid UTF-8.
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-set
    */
   inline void set(std::string_view key, std::string_view value);
@@ -145,6 +149,7 @@ struct url_search_params {
   std::vector<key_value_pair> params{};
 
   /**
+   * The init parameter must be valid UTF-8.
    * @see https://url.spec.whatwg.org/#concept-urlencoded-parser
    */
   void initialize(std::string_view init);
