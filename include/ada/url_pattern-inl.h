@@ -332,25 +332,24 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2038
     protocol = url->get_protocol().substr(0, url->get_protocol().size() - 1);
     // Set username to url’s username.
-    username = std::move(url->get_username());
+    username = url->get_username();
     // Set password to url’s password.
-    password = std::move(url->get_password());
+    password = url->get_password();
     // Set hostname to url’s host, serialized, or the empty string if the value
     // is null.
-    hostname = std::move(url->get_hostname());
+    hostname = url->get_hostname();
     // Set port to url’s port, serialized, or the empty string if the value is
     // null.
-    port = std::move(url->get_port());
+    port = url->get_port();
     // Set pathname to the result of URL path serializing url.
-    pathname = std::move(url->get_pathname());
+    pathname = url->get_pathname();
     // Set search to url’s query or the empty string if the value is null.
     // IMPORTANT: Not documented on the URLPattern spec, but search prefix '?'
     // is removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2232
     if (url->has_search()) {
       auto view = url->get_search();
-      search =
-          view.starts_with("?") ? url->get_search().substr(1) : std::move(view);
+      search = view.starts_with("?") ? url->get_search().substr(1) : view;
     }
     // Set hash to url’s fragment or the empty string if the value is null.
     // IMPORTANT: Not documented on the URLPattern spec, but hash prefix '#' is
@@ -358,8 +357,7 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2242
     if (url->has_hash()) {
       auto view = url->get_hash();
-      hash =
-          view.starts_with("#") ? url->get_hash().substr(1) : std::move(view);
+      hash = view.starts_with("#") ? url->get_hash().substr(1) : view;
     }
   }
 
