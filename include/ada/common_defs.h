@@ -99,7 +99,8 @@
   ADA_DISABLE_GCC_WARNING("-Wreturn-type")          \
   ADA_DISABLE_GCC_WARNING("-Wshadow")               \
   ADA_DISABLE_GCC_WARNING("-Wunused-parameter")     \
-  ADA_DISABLE_GCC_WARNING("-Wunused-variable")
+  ADA_DISABLE_GCC_WARNING("-Wunused-variable")      \
+  ADA_DISABLE_GCC_WARNING("-Wsign-compare")
 #define ADA_PRAGMA(P) _Pragma(#P)
 #define ADA_DISABLE_GCC_WARNING(WARNING) \
   ADA_PRAGMA(GCC diagnostic ignored WARNING)
