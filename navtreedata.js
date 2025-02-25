@@ -69,7 +69,7 @@ var NAVTREE =
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
-        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", null ],
         [ "Enumerations", "functions_enum.html", null ],
         [ "Related Symbols", "functions_rela.html", null ]
@@ -91,10 +91,10 @@ var NAVTREEINDEX =
 [
 "annotated.html",
 "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a1913bb586502b3141587901b9c4c9814",
-"d7/d80/ada__version_8h.html#acda294c331e5f138143097bf9f60069c",
-"dc/dcc/namespaceada_1_1url__pattern__helpers.html",
-"dd/dcb/structada_1_1url__search__params.html#a4b71a749e9595f68e9fc57e09dd8c1cc",
-"functions.html"
+"d8/d3b/structada_1_1url__aggregator.html#a34b21b95d1a7c2d7ff167f87f183c8ec",
+"dc/dcc/namespaceada_1_1url__pattern__helpers.html#ab639c08b86a66c0907ebb9bd1dab7bad",
+"dd/dcb/structada_1_1url__search__params.html#aa8bd7f6fad5ad0c12879605b2d6f65ea",
+"globals.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

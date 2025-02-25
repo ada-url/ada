@@ -13,9 +13,8 @@ var searchData=
   ['requirements_10',['Requirements',['../index.html#autotoc_md13',1,'']]],
   ['result_11',['result',['../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b',1,'ada']]],
   ['result_20to_20file_20system_12',['Saving result to file system',['../db/d8a/md_docs_2cli.html#autotoc_md9',1,'']]],
-  ['rewind_13',['rewind',['../d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a1c283479240ae707622d12d2b04f5cdc',1,'ada::url_pattern_helpers::constructor_string_parser']]],
-  ['rle_14',['RLE',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda51bb048b78806aaea1522df1a2eeb5d4',1,'ada::idna']]],
-  ['rli_15',['RLI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddae67f79836e686d27f598076f417de917',1,'ada::idna']]],
-  ['rlo_16',['RLO',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddaac89a080f4a412d2e92dfe8a9485d904',1,'ada::idna']]],
-  ['runner_17',['Benchmark Runner',['../db/d8a/md_docs_2cli.html#autotoc_md8',1,'']]]
+  ['rle_13',['RLE',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda51bb048b78806aaea1522df1a2eeb5d4',1,'ada::idna']]],
+  ['rli_14',['RLI',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddae67f79836e686d27f598076f417de917',1,'ada::idna']]],
+  ['rlo_15',['RLO',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddaac89a080f4a412d2e92dfe8a9485d904',1,'ada::idna']]],
+  ['runner_16',['Benchmark Runner',['../db/d8a/md_docs_2cli.html#autotoc_md8',1,'']]]
 ];

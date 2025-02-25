@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.1.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.1.1</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -143,55 +143,82 @@ $(function(){initNavTree('df/d2c/url__pattern_8cc_source.html','../../'); initRe
 </div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="foldopen" id="foldopen00028" data-start="{" data-end="}">
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="../../df/d2c/url__pattern_8cc.html#a91ce7c16e9840492202299da2b451e60">   28</a></span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput</a>(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> size) {</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  FuzzedDataProvider fdp(data, size);</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="comment">// We do not want to trigger arbitrary regex matching.</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  std::string source =</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>      <span class="stringliteral">&quot;/&quot;</span> + <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a>(fdp.ConsumeRandomLengthString(50)) + <span class="stringliteral">&quot;/&quot;</span> +</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>      <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a>(fdp.ConsumeRandomLengthString(50));</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  std::string base_source =</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>      <span class="stringliteral">&quot;/&quot;</span> + <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a>(fdp.ConsumeRandomLengthString(50)) + <span class="stringliteral">&quot;/&quot;</span> +</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>      <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a>(fdp.ConsumeRandomLengthString(50));</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="comment">// Without base or options</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keyword">auto</span> result =</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>      <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(source, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  (void)result;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="comment">// Testing with base_url</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  std::string_view base_source_view(base_source.data(), base_source.length());</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keyword">auto</span> result_with_base = <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>      source, &amp;base_source_view, <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  (void)result_with_base;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="comment">// Testing with base_url and options</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <a class="code hl_struct" href="../../d8/dfb/structada_1_1url__pattern__options.html">ada::url_pattern_options</a> options{.ignore_case = <span class="keyword">true</span>};</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keyword">auto</span> result_with_base_and_options = <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>      source, &amp;base_source_view, &amp;options);</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  (void)result_with_base_and_options;</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="comment">// Testing with url_pattern_init and base url.</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <a class="code hl_struct" href="../../d4/d6f/structada_1_1url__pattern__init.html">ada::url_pattern_init</a> init{.protocol = source,</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>                             .username = source,</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>                             .password = source,</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                             .hostname = source,</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>                             .port = source,</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>                             .pathname = source,</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>                             .search = source,</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>                             .hash = source};</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keyword">auto</span> result_with_init =</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>      <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(init, &amp;base_source_view, <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  (void)result_with_init;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">   28</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(<span class="keyword">auto</span> result) {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  (void)result.get_protocol();</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  (void)result.get_username();</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  (void)result.get_password();</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  (void)result.get_hostname();</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  (void)result.get_port();</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  (void)result.get_pathname();</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  (void)result.get_search();</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  (void)result.get_hash();</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  (void)result.ignore_case();</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  (void)result.has_regexp_groups();</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../df/d2c/url__pattern_8cc.html#a91ce7c16e9840492202299da2b451e60">   41</a></span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput</a>(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> size) {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  FuzzedDataProvider fdp(data, size);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="comment">// We do not want to trigger arbitrary regex matching.</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  std::string source_1 =</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>      <span class="stringliteral">&quot;/&quot;</span> + <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a>(fdp.ConsumeRandomLengthString(50)) + <span class="stringliteral">&quot;/&quot;</span> +</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>      <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a>(fdp.ConsumeRandomLengthString(50));</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  std::string base_source_1 =</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>      <span class="stringliteral">&quot;/&quot;</span> + <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a>(fdp.ConsumeRandomLengthString(50)) + <span class="stringliteral">&quot;/&quot;</span> +</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>      <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a>(fdp.ConsumeRandomLengthString(50));</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  std::string source_2 = <span class="stringliteral">&quot;https://ada-url.com/*&quot;</span>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  std::string base_source_2 = <span class="stringliteral">&quot;https://ada-url.com&quot;</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  std::array&lt;std::pair&lt;std::string, std::string&gt;, 2&gt; sources = {{</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>      {source_1, base_source_1},</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>      {source_2, base_source_2},</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  }};</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; [source, base_source] : sources) {</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">// Without base or options</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keyword">auto</span> result =</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(source, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordflow">if</span> (result) <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(*result);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="comment">// Testing with base_url</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    std::string_view base_source_view(base_source.data(), base_source.length());</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">auto</span> result_with_base = <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        source, &amp;base_source_view, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordflow">if</span> (result_with_base) <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(*result_with_base);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="comment">// Testing with base_url and options</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <a class="code hl_struct" href="../../d8/dfb/structada_1_1url__pattern__options.html">ada::url_pattern_options</a> options{.ignore_case = fdp.ConsumeBool()};</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keyword">auto</span> result_with_base_and_options = <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        source, &amp;base_source_view, &amp;options);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">if</span> (result_with_base_and_options)</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>      <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(*result_with_base_and_options);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="comment">// Testing with url_pattern_init and base url.</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <a class="code hl_struct" href="../../d4/d6f/structada_1_1url__pattern__init.html">ada::url_pattern_init</a> init{.protocol = source,</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                               .username = source,</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                               .password = source,</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                               .hostname = source,</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>                               .port = source,</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                               .pathname = source,</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                               .search = source,</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                               .hash = source};</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keyword">auto</span> result_with_init = <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        init, &amp;base_source_view, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keywordflow">if</span> (result_with_init) <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(*result_with_init);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  }</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>}</div>
 </div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="../../d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
 <div class="ttc" id="anamespaceada_html_a403c6e9eba6d4868ef39294f833c3b58"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern</a></div><div class="ttdeci">ada_warn_unused tl::expected&lt; url_pattern&lt; regex_provider &gt;, errors &gt; parse_url_pattern(std::variant&lt; std::string_view, url_pattern_init &gt; input, const std::string_view *base_url, const url_pattern_options *options)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d29/implementation-inl_8h_source.html#l00018">implementation-inl.h:18</a></div></div>
 <div class="ttc" id="astructada_1_1url__pattern__init_html"><div class="ttname"><a href="../../d4/d6f/structada_1_1url__pattern__init.html">ada::url_pattern_init</a></div><div class="ttdef"><b>Definition</b> <a href="../../de/d87/url__pattern__init_8h_source.html#l00036">url_pattern_init.h:36</a></div></div>
 <div class="ttc" id="astructada_1_1url__pattern__options_html"><div class="ttname"><a href="../../d8/dfb/structada_1_1url__pattern__options.html">ada::url_pattern_options</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d70/url__pattern_8h_source.html#l00213">url_pattern.h:213</a></div></div>
-<div class="ttc" id="aurl__pattern_8cc_html_a91ce7c16e9840492202299da2b451e60"><div class="ttname"><a href="../../df/d2c/url__pattern_8cc.html#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput</a></div><div class="ttdeci">int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)</div><div class="ttdef"><b>Definition</b> <a href="#l00028">url_pattern.cc:28</a></div></div>
+<div class="ttc" id="aurl__pattern_8cc_html_a8c80ef3e17081bf7a1eb71cfddb6f87f"><div class="ttname"><a href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a></div><div class="ttdeci">void exercise_result(auto result)</div><div class="ttdef"><b>Definition</b> <a href="#l00028">url_pattern.cc:28</a></div></div>
+<div class="ttc" id="aurl__pattern_8cc_html_a91ce7c16e9840492202299da2b451e60"><div class="ttname"><a href="../../df/d2c/url__pattern_8cc.html#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput</a></div><div class="ttdeci">int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)</div><div class="ttdef"><b>Definition</b> <a href="#l00041">url_pattern.cc:41</a></div></div>
 <div class="ttc" id="aurl__pattern_8cc_html_aa4f36dc7cce3c5dfeaf57d1ce3e0b9be"><div class="ttname"><a href="../../df/d2c/url__pattern_8cc.html#aa4f36dc7cce3c5dfeaf57d1ce3e0b9be">bytesToAlphanumeric</a></div><div class="ttdeci">std::string bytesToAlphanumeric(const std::string &amp;source)</div><div class="ttdef"><b>Definition</b> <a href="#l00011">url_pattern.cc:11</a></div></div>
 <div class="ttc" id="aurl__pattern_8cc_html_af2acdb320b4d86f85480919f1c81f26d"><div class="ttname"><a href="../../df/d2c/url__pattern_8cc.html#af2acdb320b4d86f85480919f1c81f26d">regex_provider</a></div><div class="ttdeci">ada::url_pattern_regex::std_regex_provider regex_provider</div><div class="ttdef"><b>Definition</b> <a href="#l00009">url_pattern.cc:9</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

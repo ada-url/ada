@@ -16,5 +16,6 @@ var searchData=
   ['escaped_5fchar_13',['ESCAPED_CHAR',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a08428af23d47d86fae555cdff86b92aca5e62b8ffc20eb302a92511168982fee6',1,'ada::url_pattern_helpers']]],
   ['et_14',['ET',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548ddafc48151aee9d9d0dce07468e47f7fd7a',1,'ada::idna']]],
   ['examples_15',['Examples',['../index.html#autotoc_md20',1,'Examples'],['../db/d8a/md_docs_2cli.html#autotoc_md4',1,'Usage/Examples']]],
-  ['exec_16',['exec',['../d0/d1e/classada_1_1url__pattern.html#aef310d805ee6e4b1694a2e8a76eae5e7',1,'ada::url_pattern']]]
+  ['exec_16',['exec',['../d0/d1e/classada_1_1url__pattern.html#aef310d805ee6e4b1694a2e8a76eae5e7',1,'ada::url_pattern']]],
+  ['exercise_5fresult_17',['exercise_result',['../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f',1,'url_pattern.cc']]]
 ];

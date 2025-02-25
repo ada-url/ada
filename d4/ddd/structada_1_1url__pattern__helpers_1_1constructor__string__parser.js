@@ -14,20 +14,6 @@ var structada_1_1url__pattern__helpers_1_1constructor__string__parser =
       [ "DONE", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a2663fffcdcceba94ba88f30bd982ea12a2ba22e58ca17bb728d522bba36cf8350", null ]
     ] ],
     [ "constructor_string_parser", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a1913bb586502b3141587901b9c4c9814", null ],
-    [ "change_state", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a8c7803e97efddbc59d3d589b06785cba", null ],
     [ "compute_protocol_matches_special_scheme_flag", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a07f0c0c593d4af292f62cb850d5a1332", null ],
-    [ "is_an_identity_terminator", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a298896285424843f773727a84f6e2b44", null ],
-    [ "is_an_ipv6_close", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a74ce2264a7e8055561f1f0062feeaa3b", null ],
-    [ "is_an_ipv6_open", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a27d39f4ac452daccb880ac9f8ee4eeaa", null ],
-    [ "is_group_close", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a948f8fd9c761b06533dc59d3bbd020db", null ],
-    [ "is_group_open", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a898dc6478a7c25ffff75a86e3f82ed36", null ],
-    [ "is_hash_prefix", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#afecab4b36cfdb23590dadefe6a30467f", null ],
-    [ "is_password_prefix", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#afc6df2048d514ae45878fc588de088c7", null ],
-    [ "is_pathname_start", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a56ffeed356e0150d926dda720ab3369d", null ],
-    [ "is_port_prefix", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#af21743e72f4fe344757b4e092bcc2519", null ],
-    [ "is_protocol_suffix", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#ab7a92262204b76222bfd1a95d0ee6c84", null ],
-    [ "is_search_prefix", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a50c0a9226d0e19232904c99ccb82a3ac", null ],
-    [ "next_is_authority_slashes", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a7f90bd0dfe065f8eab71d5c499e2ee57", null ],
-    [ "parse", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a6575ecee66cffc4adcc1b6f9e7aa92d7", null ],
-    [ "rewind", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a1c283479240ae707622d12d2b04f5cdc", null ]
+    [ "parse", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a6575ecee66cffc4adcc1b6f9e7aa92d7", null ]
 ];
