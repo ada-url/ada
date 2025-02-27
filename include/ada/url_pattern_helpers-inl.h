@@ -102,7 +102,8 @@ constructor_string_parser<regex_provider>::is_non_special_pattern_char(
   // If token’s value is not value, then return false.
   // TODO: Remove this once we make sure get_safe_token returns a non-empty
   // string.
-  if (!token->value.empty() && token->value[0] != value) {
+  if (!token->value.empty() &&
+      static_cast<uint32_t>(token->value[0]) != value) {
     return false;
   }
 

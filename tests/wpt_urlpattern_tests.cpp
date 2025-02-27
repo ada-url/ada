@@ -146,9 +146,9 @@ std::variant<ada::url_pattern_init, ada::url_pattern_options> parse_init(
     auto key = field.key().value();
     std::string_view value;
     if (field.value().get_string(value)) {
-      bool value_true;
-      EXPECT_FALSE(field.value().get_bool().get(value_true));
-      return ada::url_pattern_options{.ignore_case = value_true};
+      bool ignore_case = false;
+      EXPECT_FALSE(field.value().get_bool().get(ignore_case));
+      return ada::url_pattern_options{.ignore_case = ignore_case};
     }
     if (key == "protocol") {
       init.protocol = std::string(value);
