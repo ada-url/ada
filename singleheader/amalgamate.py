@@ -11,40 +11,29 @@ import os
 import re
 import shutil
 import datetime
+from typing import TextIO
 
 if sys.version_info[0] < 3:
     sys.stdout.write('Sorry, requires Python 3.x or better\n')
     sys.exit(1)
 
-SCRIPTPATH = os.path.dirname(os.path.abspath(sys.argv[0]))
-PROJECTPATH = os.path.dirname(SCRIPTPATH)
-print(f'SCRIPTPATH={SCRIPTPATH} PROJECTPATH={PROJECTPATH}')
+SCRIPT_PATH = os.path.dirname(os.path.abspath(sys.argv[0]))
+PROJECT_PATH = os.path.dirname(SCRIPT_PATH)
+print(f'SCRIPT_PATH={SCRIPT_PATH} PROJECT_PATH={PROJECT_PATH}')
 
-if 'AMALGAMATE_SOURCE_PATH' not in os.environ:
-    AMALGAMATE_SOURCE_PATH = os.path.join(PROJECTPATH, 'src')
-else:
-    AMALGAMATE_SOURCE_PATH = os.environ['AMALGAMATE_SOURCE_PATH']
-if 'AMALGAMATE_INCLUDE_PATH' not in os.environ:
-    AMALGAMATE_INCLUDE_PATH = os.path.join(PROJECTPATH, 'include')
-else:
-    AMALGAMATE_INCLUDE_PATH = os.environ['AMALGAMATE_INCLUDE_PATH']
-if 'AMALGAMATE_OUTPUT_PATH' not in os.environ:
-    AMALGAMATE_OUTPUT_PATH = os.path.join(SCRIPTPATH)
-else:
-    AMALGAMATE_OUTPUT_PATH = os.environ['AMALGAMATE_OUTPUT_PATH']
+AMALGAMATE_SOURCE_PATH = os.environ.get('AMALGAMATE_SOURCE_PATH') or os.path.join(PROJECT_PATH, 'src')
+AMALGAMATE_INCLUDE_PATH = os.environ.get('AMALGAMATE_INCLUDE_PATH') or os.path.join(PROJECT_PATH, 'include')
+AMALGAMATE_OUTPUT_PATH = os.environ.get('AMALGAMATE_OUTPUT_PATH') or os.path.join(SCRIPT_PATH)
 
 # this list excludes the "src/generic headers"
-ALLCFILES = ['ada.cpp']
+ALL_C_FILES = ['ada.cpp']
 
 # order matters
-ALLCHEADERS = ['ada.h']
+ALL_C_HEADERS = ['ada.h']
 
 found_includes = []
 
-current_implementation = ''
-
-
-def doinclude(fid: str, file: str, line: str, origin: str) -> None:
+def doinclude(fid: TextIO, file: str, line: str, origin: str) -> None:
     p = os.path.join(AMALGAMATE_INCLUDE_PATH, file)
     pi = os.path.join(AMALGAMATE_SOURCE_PATH, file)
 
@@ -52,23 +41,19 @@ def doinclude(fid: str, file: str, line: str, origin: str) -> None:
         if file not in found_includes:
             found_includes.append(file)
             dofile(fid, AMALGAMATE_INCLUDE_PATH, file)
-        else:
-            pass
     elif os.path.exists(pi):
         if file not in found_includes:
             found_includes.append(file)
             dofile(fid, AMALGAMATE_SOURCE_PATH, file)
-        else:
-            pass
     else:
         # If we don't recognize it, just emit the #include
         print('unrecognized:', file, ' from ', line, ' in ', origin)
         print(line, file=fid)
 
 
-def dofile(fid: str, prepath: str, filename: str) -> None:
+def dofile(fid: TextIO, prepath: str, filename: str) -> None:
     file = os.path.join(prepath, filename)
-    RELFILE = os.path.relpath(file, PROJECTPATH)
+    RELFILE = os.path.relpath(file, PROJECT_PATH)
     # Last lines are always ignored. Files should end by an empty lines.
     print(f'/* begin file {RELFILE} */', file=fid)
     includepattern = re.compile('\\s*#\\s*include "(.*)"')
@@ -114,27 +99,25 @@ DEMOCPP = os.path.join(AMALGAMATE_OUTPUT_PATH, 'cpp')
 README = os.path.join(AMALGAMATE_OUTPUT_PATH, 'README.md')
 
 print(f'Creating {AMAL_H}')
-amal_h = open(AMAL_H, 'w')
+amal_h = open(AMAL_H, mode='w', encoding='utf8')
 print(f'/* auto-generated on {timestamp}. Do not edit! */', file=amal_h)
-for h in ALLCHEADERS:
+for h in ALL_C_HEADERS:
     doinclude(amal_h, h, f'ERROR {h} not found', h)
 
 amal_h.close()
-print()
-print()
 print(f'Creating {AMAL_C}')
-amal_c = open(AMAL_C, 'w')
+amal_c = open(AMAL_C, mode='w', encoding='utf8')
 print(f'/* auto-generated on {timestamp}. Do not edit! */', file=amal_c)
-for c in ALLCFILES:
+for c in ALL_C_FILES:
     doinclude(amal_c, c, f'ERROR {c} not found', c)
 
 amal_c.close()
 
 # copy the README and DEMOCPP
-if SCRIPTPATH != AMALGAMATE_OUTPUT_PATH:
-    shutil.copy2(os.path.join(SCRIPTPATH, 'demo.cpp'), AMALGAMATE_OUTPUT_PATH)
-    shutil.copy2(os.path.join(SCRIPTPATH, 'demo.c'), AMALGAMATE_OUTPUT_PATH)
-    shutil.copy2(os.path.join(SCRIPTPATH, 'README.md'), AMALGAMATE_OUTPUT_PATH)
+if SCRIPT_PATH != AMALGAMATE_OUTPUT_PATH:
+    shutil.copy2(os.path.join(SCRIPT_PATH, 'demo.cpp'), AMALGAMATE_OUTPUT_PATH)
+    shutil.copy2(os.path.join(SCRIPT_PATH, 'demo.c'), AMALGAMATE_OUTPUT_PATH)
+    shutil.copy2(os.path.join(SCRIPT_PATH, 'README.md'), AMALGAMATE_OUTPUT_PATH)
 
 shutil.copy2(os.path.join(AMALGAMATE_INCLUDE_PATH, 'ada_c.h'), AMALGAMATE_OUTPUT_PATH)
 
