@@ -163,7 +163,7 @@ TEST(ada_c, ada_copy) {
 }
 
 TEST(ada_c, ada_idna) {
-  std::string_view ascii_input = "straße.de";
+  std::string_view ascii_input = "stra\xDFe.de";
   std::string_view unicode_input = "xn--strae-oqa.de";
   ada_owned_string ascii =
       ada_idna_to_ascii(ascii_input.data(), ascii_input.length());

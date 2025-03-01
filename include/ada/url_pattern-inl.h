@@ -177,7 +177,7 @@ url_pattern_component<regex_provider>::compile(
   }
 
   // For each part of part list:
-  // - If part’s type is "regexp", then set has regexp groups to true.
+  // - If part's type is "regexp", then set has regexp groups to true.
   const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
   const bool has_regexp_groups = std::ranges::any_of(*part_list, has_regexp);
 
@@ -324,24 +324,24 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
       return std::nullopt;
     }
 
-    // Set protocol to url’s scheme.
+    // Set protocol to url's scheme.
     // IMPORTANT: Not documented on the URLPattern spec, but protocol suffix ':'
     // is removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2038
     protocol = url->get_protocol().substr(0, url->get_protocol().size() - 1);
-    // Set username to url’s username.
+    // Set username to url's username.
     username = url->get_username();
-    // Set password to url’s password.
+    // Set password to url's password.
     password = url->get_password();
-    // Set hostname to url’s host, serialized, or the empty string if the value
+    // Set hostname to url's host, serialized, or the empty string if the value
     // is null.
     hostname = url->get_hostname();
-    // Set port to url’s port, serialized, or the empty string if the value is
+    // Set port to url's port, serialized, or the empty string if the value is
     // null.
     port = url->get_port();
     // Set pathname to the result of URL path serializing url.
     pathname = url->get_pathname();
-    // Set search to url’s query or the empty string if the value is null.
+    // Set search to url's query or the empty string if the value is null.
     // IMPORTANT: Not documented on the URLPattern spec, but search prefix '?'
     // is removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2232
@@ -351,7 +351,7 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     } else {
       search = "";
     }
-    // Set hash to url’s fragment or the empty string if the value is null.
+    // Set hash to url's fragment or the empty string if the value is null.
     // IMPORTANT: Not documented on the URLPattern spec, but hash prefix '#' is
     // removed. Similar work was done on workerd:
     // https://github.com/cloudflare/workerd/blob/8620d14012513a6ce04d079e401d3becac3c67bd/src/workerd/jsg/url.c%2B%2B#L2242
@@ -363,42 +363,42 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     }
   }
 
-  // Let protocolExecResult be RegExpBuiltinExec(urlPattern’s protocol
+  // Let protocolExecResult be RegExpBuiltinExec(urlPattern's protocol
   // component's regular expression, protocol).
   auto protocol_exec_result =
       regex_provider::regex_search(protocol, protocol_component.regexp);
 
-  // Let usernameExecResult be RegExpBuiltinExec(urlPattern’s username
+  // Let usernameExecResult be RegExpBuiltinExec(urlPattern's username
   // component's regular expression, username).
   auto username_exec_result =
       regex_provider::regex_search(username, username_component.regexp);
 
-  // Let passwordExecResult be RegExpBuiltinExec(urlPattern’s password
+  // Let passwordExecResult be RegExpBuiltinExec(urlPattern's password
   // component's regular expression, password).
   auto password_exec_result =
       regex_provider::regex_search(password, password_component.regexp);
 
-  // Let hostnameExecResult be RegExpBuiltinExec(urlPattern’s hostname
+  // Let hostnameExecResult be RegExpBuiltinExec(urlPattern's hostname
   // component's regular expression, hostname).
   auto hostname_exec_result =
       regex_provider::regex_search(hostname, hostname_component.regexp);
 
-  // Let portExecResult be RegExpBuiltinExec(urlPattern’s port component's
+  // Let portExecResult be RegExpBuiltinExec(urlPattern's port component's
   // regular expression, port).
   auto port_exec_result =
       regex_provider::regex_search(port, port_component.regexp);
 
-  // Let pathnameExecResult be RegExpBuiltinExec(urlPattern’s pathname
+  // Let pathnameExecResult be RegExpBuiltinExec(urlPattern's pathname
   // component's regular expression, pathname).
   auto pathname_exec_result =
       regex_provider::regex_search(pathname, pathname_component.regexp);
 
-  // Let searchExecResult be RegExpBuiltinExec(urlPattern’s search component's
+  // Let searchExecResult be RegExpBuiltinExec(urlPattern's search component's
   // regular expression, search).
   auto search_exec_result =
       regex_provider::regex_search(search, search_component.regexp);
 
-  // Let hashExecResult be RegExpBuiltinExec(urlPattern’s hash component's
+  // Let hashExecResult be RegExpBuiltinExec(urlPattern's hash component's
   // regular expression, hash).
   auto hash_exec_result =
       regex_provider::regex_search(hash, hash_component.regexp);
@@ -417,42 +417,42 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   // Set result["inputs"] to inputs.
   result.inputs = std::move(inputs);
   // Set result["protocol"] to the result of creating a component match result
-  // given urlPattern’s protocol component, protocol, and protocolExecResult.
+  // given urlPattern's protocol component, protocol, and protocolExecResult.
   result.protocol = protocol_component.create_component_match_result(
       protocol, std::move(*protocol_exec_result));
 
   // Set result["username"] to the result of creating a component match result
-  // given urlPattern’s username component, username, and usernameExecResult.
+  // given urlPattern's username component, username, and usernameExecResult.
   result.username = username_component.create_component_match_result(
       username, std::move(*username_exec_result));
 
   // Set result["password"] to the result of creating a component match result
-  // given urlPattern’s password component, password, and passwordExecResult.
+  // given urlPattern's password component, password, and passwordExecResult.
   result.password = password_component.create_component_match_result(
       password, std::move(*password_exec_result));
 
   // Set result["hostname"] to the result of creating a component match result
-  // given urlPattern’s hostname component, hostname, and hostnameExecResult.
+  // given urlPattern's hostname component, hostname, and hostnameExecResult.
   result.hostname = hostname_component.create_component_match_result(
       hostname, std::move(*hostname_exec_result));
 
   // Set result["port"] to the result of creating a component match result given
-  // urlPattern’s port component, port, and portExecResult.
+  // urlPattern's port component, port, and portExecResult.
   result.port = port_component.create_component_match_result(
       port, std::move(*port_exec_result));
 
   // Set result["pathname"] to the result of creating a component match result
-  // given urlPattern’s pathname component, pathname, and pathnameExecResult.
+  // given urlPattern's pathname component, pathname, and pathnameExecResult.
   result.pathname = pathname_component.create_component_match_result(
       pathname, std::move(*pathname_exec_result));
 
   // Set result["search"] to the result of creating a component match result
-  // given urlPattern’s search component, search, and searchExecResult.
+  // given urlPattern's search component, search, and searchExecResult.
   result.search = search_component.create_component_match_result(
       search, std::move(*search_exec_result));
 
   // Set result["hash"] to the result of creating a component match result given
-  // urlPattern’s hash component, hash, and hashExecResult.
+  // urlPattern's hash component, hash, and hashExecResult.
   result.hash = hash_component.create_component_match_result(
       hash, std::move(*hash_exec_result));
 

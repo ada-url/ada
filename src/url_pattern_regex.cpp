@@ -6,7 +6,7 @@ namespace ada::url_pattern_regex {
 std::optional<std::regex> std_regex_provider::create_instance(
     std::string_view pattern, bool ignore_case) {
   // Let flags be an empty string.
-  // If options’s ignore case is true then set flags to "vi".
+  // If options's ignore case is true then set flags to "vi".
   // Otherwise set flags to "v"
   auto flags = ignore_case
                    ? std::regex::icase | std::regex_constants::ECMAScript

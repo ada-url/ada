@@ -57,7 +57,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     base_url = std::move(*parsing_result);
 
     // If init["protocol"] does not exist, then set result["protocol"] to the
-    // result of processing a base URL string given baseURL’s scheme and type.
+    // result of processing a base URL string given baseURL's scheme and type.
     if (!init.protocol.has_value()) {
       ADA_ASSERT_TRUE(base_url.has_value());
       std::string_view base_url_protocol = base_url->get_protocol();
@@ -68,7 +68,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
 
     // If type is not "pattern" and init contains none of "protocol",
     // "hostname", "port" and "username", then set result["username"] to the
-    // result of processing a base URL string given baseURL’s username and type.
+    // result of processing a base URL string given baseURL's username and type.
     if (type != "pattern" && !init.protocol && !init.hostname && !init.port &&
         !init.username) {
       result.username = url_pattern_helpers::process_base_url_string(
@@ -79,7 +79,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // If type is not "pattern" and init contains none of "protocol",
     // "hostname", "port", "username" and "password", then set
     // result["password"] to the result of processing a base URL string given
-    // baseURL’s password and type.
+    // baseURL's password and type.
     if (type != "pattern" && !init.protocol && !init.hostname && !init.port &&
         !init.username && !init.password) {
       result.password = url_pattern_helpers::process_base_url_string(
@@ -88,7 +88,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
 
     // If init contains neither "protocol" nor "hostname", then:
     if (!init.protocol && !init.hostname) {
-      // Let baseHost be baseURL’s host.
+      // Let baseHost be baseURL's host.
       // If baseHost is null, then set baseHost to the empty string.
       auto base_host = base_url->get_hostname();
       // Set result["hostname"] to the result of processing a base URL string
@@ -99,8 +99,8 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
 
     // If init contains none of "protocol", "hostname", and "port", then:
     if (!init.protocol && !init.hostname && !init.port) {
-      // If baseURL’s port is null, then set result["port"] to the empty string.
-      // Otherwise, set result["port"] to baseURL’s port, serialized.
+      // If baseURL's port is null, then set result["port"] to the empty string.
+      // Otherwise, set result["port"] to baseURL's port, serialized.
       result.port = base_url->get_port();
     }
 
@@ -116,7 +116,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // "search", then:
     if (!init.protocol && !init.hostname && !init.port && !init.pathname &&
         !init.search) {
-      // Let baseQuery be baseURL’s query.
+      // Let baseQuery be baseURL's query.
       // Set result["search"] to the result of processing a base URL string
       // given baseQuery and type.
       result.search = url_pattern_helpers::process_base_url_string(
@@ -127,7 +127,7 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // "search", and "hash", then:
     if (!init.protocol && !init.hostname && !init.port && !init.pathname &&
         !init.search && !init.hash) {
-      // Let baseFragment be baseURL’s fragment.
+      // Let baseFragment be baseURL's fragment.
       // Set result["hash"] to the result of processing a base URL string given
       // baseFragment and type.
       result.hash = url_pattern_helpers::process_base_url_string(

@@ -9,7 +9,7 @@ size_t N = 1000;
 
 #include <benchmark/benchmark.h>
 
-std::string examples[] = {"á|", "other:9818274x1!!",
+std::string examples[] = {"\xE1|", "other:9818274x1!!",
                           "ref=web-twc-ao-gbl-adsinfo&utm_source=twc&utm_",
                           "connect_timeout=10&application_name=myapp"};
 

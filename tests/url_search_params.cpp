@@ -28,13 +28,13 @@ TEST(url_search_params, to_string) {
 
 TEST(url_search_params, with_accents) {
   auto search_params = ada::url_search_params();
-  search_params.append("key1", "été");
-  search_params.append("key2", "Céline Dion++");
+  search_params.append("key1", "\xe9t\xe9");
+  search_params.append("key2", "C\xe9line Dion++");
   ASSERT_EQ(search_params.size(), 2);
   ASSERT_EQ(search_params.to_string(),
             "key1=%C3%A9t%C3%A9&key2=C%C3%A9line+Dion%2B%2B");
-  ASSERT_EQ(search_params.get("key1"), "été");
-  ASSERT_EQ(search_params.get("key2"), "Céline Dion++");
+  ASSERT_EQ(search_params.get("key1"), "\xe9t\xe9");
+  ASSERT_EQ(search_params.get("key2"), "C\xe9line Dion++");
   SUCCEED();
 }
 
@@ -319,7 +319,7 @@ TEST(url_search_params, string_constructor_with_edge_cases) {
   ASSERT_TRUE(p.has(" "));
   ASSERT_TRUE(!p.has("c"));
   ASSERT_TRUE(p.has(" c"));
-  ASSERT_TRUE(p.has("møø"));
+  ASSERT_TRUE(p.has("m\xf8\xf8"));
   SUCCEED();
 }
 
