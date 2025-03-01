@@ -1,3 +1,5 @@
+#if ADA_INCLUDE_URL_PATTERN
+
 #include "ada/url_pattern_regex.h"
 
 namespace ada::url_pattern_regex {
@@ -53,3 +55,5 @@ bool std_regex_provider::regex_match(std::string_view input,
 #endif  // ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 
 }  // namespace ada::url_pattern_regex
+
+#endif  // ADA_INCLUDE_URL_PATTERN

@@ -5,8 +5,10 @@
 #define ADA_PARSER_INL_H
 
 #include "ada/expected.h"
+#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern.h"
 #include "ada/url_pattern_helpers.h"
+#endif  // ADA_INCLUDE_URL_PATTERN
 #include "ada/parser.h"
 
 #include <string>
@@ -14,6 +16,7 @@
 #include <variant>
 
 namespace ada::parser {
+#if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>
 tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     std::variant<std::string_view, url_pattern_init> input,
@@ -267,6 +270,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   // Return urlPattern.
   return url_pattern_;
 }
+#endif  // ADA_INCLUDE_URL_PATTERN
 
 }  // namespace ada::parser
 

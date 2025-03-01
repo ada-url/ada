@@ -19,6 +19,7 @@ option(ADA_TOOLS "Build cli tools (adaparse)" OFF)
 option(ADA_BENCHMARKS "Build benchmarks" OFF)
 option(ADA_TESTING "Build tests" OFF)
 option(ADA_USE_UNSAFE_STD_REGEX_PROVIDER "Enable unsafe regex provider that uses std::regex" OFF)
+option(ADA_INCLUDE_URL_PATTERN "Include URL pattern implementation" ON)
 
 if (ADA_COVERAGE)
     message(STATUS "You want to compute coverage. We assume that you have installed gcovr.")
