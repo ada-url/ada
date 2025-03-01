@@ -1,3 +1,18 @@
+#
+# Source files should be just ASCII
+#
+find_program(FIND find)
+find_program(FILE file)
+find_program(GREP grep)
+if(FIND AND FILE AND GREP)
+  add_test(
+      NAME just_ascii
+      COMMAND sh -c "\
+${FIND} include src tests tools benchmarks  -name '*.h' -o -name '*.txt' -o -name '*.cpp' -type f -exec ${FILE} '{}' \; | ${GREP} -qv ASCII || exit 0  && exit 1"
+      WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+  )
+endif()
+
 add_subdirectory(wpt)
 
 set(ADA_TEST_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)

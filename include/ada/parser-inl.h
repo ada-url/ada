@@ -65,7 +65,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     return tl::unexpected(processed_init.error());
   }
 
-  // For each componentName of « "protocol", "username", "password", "hostname",
+  // For each componentName of  "protocol", "username", "password", "hostname",
   // "port", "pathname", "search", "hash" If processedInit[componentName] does
   // not exist, then set processedInit[componentName] to "*".
   ADA_ASSERT_TRUE(processed_init.has_value());
@@ -103,7 +103,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   // Let urlPattern be a new URL pattern.
   url_pattern<regex_provider> url_pattern_{};
 
-  // Set urlPattern’s protocol component to the result of compiling a component
+  // Set urlPattern's protocol component to the result of compiling a component
   // given processedInit["protocol"], canonicalize a protocol, and default
   // options.
   auto protocol_component = url_pattern_component<regex_provider>::compile(
@@ -117,7 +117,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   }
   url_pattern_.protocol_component = std::move(*protocol_component);
 
-  // Set urlPattern’s username component to the result of compiling a component
+  // Set urlPattern's username component to the result of compiling a component
   // given processedInit["username"], canonicalize a username, and default
   // options.
   auto username_component = url_pattern_component<regex_provider>::compile(
@@ -131,7 +131,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   }
   url_pattern_.username_component = std::move(*username_component);
 
-  // Set urlPattern’s password component to the result of compiling a component
+  // Set urlPattern's password component to the result of compiling a component
   // given processedInit["password"], canonicalize a password, and default
   // options.
   auto password_component = url_pattern_component<regex_provider>::compile(
@@ -148,12 +148,12 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   // TODO: Optimization opportunity. The following if statement can be
   // simplified.
   // If the result running hostname pattern is an IPv6 address given
-  // processedInit["hostname"] is true, then set urlPattern’s hostname component
+  // processedInit["hostname"] is true, then set urlPattern's hostname component
   // to the result of compiling a component given processedInit["hostname"],
   // canonicalize an IPv6 hostname, and hostname options.
   if (url_pattern_helpers::is_ipv6_address(processed_init->hostname.value())) {
     ada_log("processed_init->hostname is ipv6 address");
-    // then set urlPattern’s hostname component to the result of compiling a
+    // then set urlPattern's hostname component to the result of compiling a
     // component given processedInit["hostname"], canonicalize an IPv6 hostname,
     // and hostname options.
     auto hostname_component = url_pattern_component<regex_provider>::compile(
@@ -167,7 +167,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     }
     url_pattern_.hostname_component = std::move(*hostname_component);
   } else {
-    // Otherwise, set urlPattern’s hostname component to the result of compiling
+    // Otherwise, set urlPattern's hostname component to the result of compiling
     // a component given processedInit["hostname"], canonicalize a hostname, and
     // hostname options.
     auto hostname_component = url_pattern_component<regex_provider>::compile(
@@ -182,7 +182,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     url_pattern_.hostname_component = std::move(*hostname_component);
   }
 
-  // Set urlPattern’s port component to the result of compiling a component
+  // Set urlPattern's port component to the result of compiling a component
   // given processedInit["port"], canonicalize a port, and default options.
   auto port_component = url_pattern_component<regex_provider>::compile(
       processed_init->port.value(), url_pattern_helpers::canonicalize_port,
@@ -203,7 +203,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
 
   // TODO: Optimization opportunity: Simplify this if statement.
   // If the result of running protocol component matches a special scheme given
-  // urlPattern’s protocol component is true, then:
+  // urlPattern's protocol component is true, then:
   if (url_pattern_helpers::protocol_component_matches_special_scheme<
           regex_provider>(url_pattern_.protocol_component)) {
     // Let pathCompileOptions be copy of the pathname options with the ignore
@@ -213,7 +213,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
       path_compile_options.ignore_case = options->ignore_case;
     }
 
-    // Set urlPattern’s pathname component to the result of compiling a
+    // Set urlPattern's pathname component to the result of compiling a
     // component given processedInit["pathname"], canonicalize a pathname, and
     // pathCompileOptions.
     auto pathname_component = url_pattern_component<regex_provider>::compile(
@@ -226,7 +226,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     }
     url_pattern_.pathname_component = std::move(*pathname_component);
   } else {
-    // Otherwise set urlPattern’s pathname component to the result of compiling
+    // Otherwise set urlPattern's pathname component to the result of compiling
     // a component given processedInit["pathname"], canonicalize an opaque
     // pathname, and compileOptions.
     auto pathname_component = url_pattern_component<regex_provider>::compile(
@@ -240,7 +240,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
     url_pattern_.pathname_component = std::move(*pathname_component);
   }
 
-  // Set urlPattern’s search component to the result of compiling a component
+  // Set urlPattern's search component to the result of compiling a component
   // given processedInit["search"], canonicalize a search, and compileOptions.
   auto search_component = url_pattern_component<regex_provider>::compile(
       processed_init->search.value(), url_pattern_helpers::canonicalize_search,
@@ -252,7 +252,7 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   }
   url_pattern_.search_component = std::move(*search_component);
 
-  // Set urlPattern’s hash component to the result of compiling a component
+  // Set urlPattern's hash component to the result of compiling a component
   // given processedInit["hash"], canonicalize a hash, and compileOptions.
   auto hash_component = url_pattern_component<regex_provider>::compile(
       processed_init->hash.value(), url_pattern_helpers::canonicalize_hash,
