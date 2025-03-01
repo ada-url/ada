@@ -201,6 +201,12 @@ int piped_file(Callable&& adaparse_print, const cxxopts::ParseResult result,
 int main(int argc, char** argv) {
   std::ios::sync_with_stdio(false);
 
+#ifdef _WIN32
+  const char* devnull = "nul";
+#else
+  const char* devnull = "/dev/null";
+#endif
+
   cxxopts::Options options("adaparse",
                            "Command-line version of the Ada URL parser");
 
@@ -211,7 +217,7 @@ int main(int argc, char** argv) {
     ("g,get", "Get a specific part of the URL (e.g., 'origin', 'host', etc.)",  cxxopts::value<std::string>())
     ("b,benchmark", "Display chronometer for piped_file function", cxxopts::value<bool>()->default_value("false"))
     ("p,path", "Takes in a path to a file and process all the URL within", cxxopts::value<std::string>())
-    ("o,output", "Takes in a path and outputs to a text file.", cxxopts::value<std::string>()->default_value("/dev/null"))
+    ("o,output", "Takes in a path and outputs to a text file.", cxxopts::value<std::string>()->default_value(devnull))
     ("h,help", "Print usage");
   // clang-format on
 
