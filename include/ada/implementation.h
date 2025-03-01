@@ -13,7 +13,10 @@
 #include "ada/url.h"
 #include "ada/common_defs.h"
 #include "ada/errors.h"
+
+#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern_init.h"
+#endif  // ADA_INCLUDE_URL_PATTERN
 
 namespace ada {
 
@@ -47,6 +50,7 @@ extern template ada::result<url_aggregator> parse<url_aggregator>(
 bool can_parse(std::string_view input,
                const std::string_view* base_input = nullptr);
 
+#if ADA_INCLUDE_URL_PATTERN
 /**
  * Implementation of the URL pattern parsing algorithm.
  * @see https://urlpattern.spec.whatwg.org
@@ -61,6 +65,7 @@ ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
 parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
                   const std::string_view* base_url = nullptr,
                   const url_pattern_options* options = nullptr);
+#endif  // ADA_INCLUDE_URL_PATTERN
 
 /**
  * Computes a href string from a file path. The function assumes

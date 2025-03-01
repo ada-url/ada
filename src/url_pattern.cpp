@@ -1,3 +1,5 @@
+#if ADA_INCLUDE_URL_PATTERN
+
 #include "ada/url_pattern-inl.h"
 
 #include <algorithm>
@@ -365,3 +367,5 @@ tl::expected<std::string, errors> url_pattern_init::process_hash(
 }
 
 }  // namespace ada
+
+#endif  // ADA_INCLUDE_URL_PATTERN

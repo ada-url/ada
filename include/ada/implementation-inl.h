@@ -4,7 +4,10 @@
 #ifndef ADA_IMPLEMENTATION_INL_H
 #define ADA_IMPLEMENTATION_INL_H
 
+#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern_regex.h"
+#endif  // ADA_INCLUDE_URL_PATTERN
+
 #include "ada/expected.h"
 #include "ada/implementation.h"
 
@@ -13,6 +16,7 @@
 
 namespace ada {
 
+#if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>
 ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
 parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
@@ -21,6 +25,7 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
   return parser::parse_url_pattern_impl<regex_provider>(std::move(input),
                                                         base_url, options);
 }
+#endif  // ADA_INCLUDE_URL_PATTERN
 
 }  // namespace ada
 

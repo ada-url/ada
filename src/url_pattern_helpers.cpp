@@ -1,3 +1,4 @@
+#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern_helpers-inl.h"
 
 #include <algorithm>
@@ -1012,3 +1013,5 @@ std::string generate_pattern_string(
   return result;
 }
 }  // namespace ada::url_pattern_helpers
+
+#endif  // ADA_INCLUDE_URL_PATTERN

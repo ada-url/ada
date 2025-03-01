@@ -223,12 +223,15 @@ struct url_aggregator : url_base {
       std::string_view, const url_aggregator *);
   friend url_aggregator parser::parse_url_impl<url_aggregator, false>(
       std::string_view, const url_aggregator *);
+
+#if ADA_INCLUDE_URL_PATTERN
   // url_pattern methods
   template <url_pattern_regex::regex_concept regex_provider>
   friend tl::expected<url_pattern<regex_provider>, errors>
   parse_url_pattern_impl(std::variant<std::string_view, url_pattern_init> input,
                          const std::string_view *base_url,
                          const url_pattern_options *options);
+#endif  // ADA_INCLUDE_URL_PATTERN
 
   std::string buffer{};
   url_components components{};
