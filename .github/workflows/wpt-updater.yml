@@ -20,23 +20,27 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [url, urlpattern]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Fetch tests
-        run: tools/update-wpt.sh
+        run: tools/update-wpt.sh ${{matrix.module}}
       - name: Open pull request
         uses: peter-evans/create-pull-request@6d6857d36972b65feb161a90e484f2984215f83e #v6.0.5
         with:
-          token: ${{ secrets.GH_PAT }}
+          token: ${{secrets.GH_PAT}}
           commit-message: "test: update web platform tests"
-          branch: "automatic-update-wpt"
-          title: "Update web platform tests"
+          branch: automatic-update-wpt-${{matrix.module}}
+          title: Update web platform tests (${{matrix.module}})
           body: |
             This is an automated pull request for updating the WPT.
 
             - [Web Platform Tests](https://github.com/web-platform-tests/wpt/tree/master/url)
             - [Commit History](https://github.com/web-platform-tests/wpt/commits/master/url/resources)
-            
+
             cc @anonrig @lemire
           team-reviewers: core
           delete-branch: true

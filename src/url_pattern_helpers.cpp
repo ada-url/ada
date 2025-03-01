@@ -15,7 +15,6 @@ generate_regular_expression_and_name_list(
 
   // Let name list be a new list
   std::vector<std::string> name_list{};
-  const std::string full_wildcard_regexp_value = ".*";
 
   // For each part of part list:
   for (const url_pattern_part& part : part_list) {
@@ -61,7 +60,7 @@ generate_regular_expression_and_name_list(
     // Otherwise if part's type is "full-wildcard"
     else if (part.type == url_pattern_part_type::FULL_WILDCARD) {
       // then set regexp value to full wildcard regexp value.
-      regexp_value = full_wildcard_regexp_value;
+      regexp_value = ".*";
     }
 
     // If part's prefix is the empty string and part's suffix is the empty
@@ -140,7 +139,7 @@ generate_regular_expression_and_name_list(
   result += "$";
 
   // Return (result, name list)
-  return {result, name_list};
+  return {std::move(result), std::move(name_list)};
 }
 
 bool is_ipv6_address(std::string_view input) noexcept {
@@ -803,17 +802,17 @@ std::string escape_regexp_string(std::string_view input) {
 }
 
 std::string process_base_url_string(std::string_view input,
-                                    std::string_view type) {
+                                    url_pattern_init::process_type type) {
   // If type is not "pattern" return input.
-  if (type != "pattern") {
+  if (type != url_pattern_init::process_type::pattern) {
     return std::string(input);
   }
   // Return the result of escaping a pattern string given input.
   return escape_pattern_string(input);
 }
 
-constexpr bool is_absolute_pathname(std::string_view input,
-                                    std::string_view type) noexcept {
+constexpr bool is_absolute_pathname(
+    std::string_view input, url_pattern_init::process_type type) noexcept {
   // If input is the empty string, then return false.
   if (input.empty()) [[unlikely]] {
     return false;
@@ -821,15 +820,13 @@ constexpr bool is_absolute_pathname(std::string_view input,
   // If input[0] is U+002F (/), then return true.
   if (input.starts_with("/")) return true;
   // If type is "url", then return false.
-  if (type == "url") return false;
+  if (type == url_pattern_init::process_type::url) return false;
   // If input's code point length is less than 2, then return false.
   if (input.size() < 2) return false;
   // If input[0] is U+005C (\) and input[1] is U+002F (/), then return true.
-  if (input.starts_with("\\/")) return true;
   // If input[0] is U+007B ({) and input[1] is U+002F (/), then return true.
-  if (input.starts_with("{/")) return true;
   // Return false.
-  return false;
+  return input[1] == '/' && (input[0] == '\\' || input[0] == '{');
 }
 
 std::string generate_pattern_string(

@@ -33,7 +33,9 @@ enum class token_type : uint8_t {
   END,             // 9
 };
 
+#ifdef ADA_TESTING
 std::string to_string(token_type type);
+#endif  // ADA_TESTING
 
 // @see https://urlpattern.spec.whatwg.org/#tokenize-policy
 enum class token_policy {
@@ -107,10 +109,10 @@ class Tokenizer {
       : input(new_input), policy(new_policy) {}
 
   // @see https://urlpattern.spec.whatwg.org/#get-the-next-code-point
-  void get_next_code_point();
+  constexpr void get_next_code_point();
 
   // @see https://urlpattern.spec.whatwg.org/#seek-and-get-the-next-code-point
-  void seek_and_get_next_code_point(size_t index);
+  constexpr void seek_and_get_next_code_point(size_t index);
 
   // @see https://urlpattern.spec.whatwg.org/#add-a-token
 
@@ -153,16 +155,6 @@ struct constructor_string_parser {
   explicit constructor_string_parser(std::string_view new_input,
                                      std::vector<token>&& new_token_list)
       : input(new_input), token_list(std::move(new_token_list)) {}
-
-  // @see https://urlpattern.spec.whatwg.org/#rewind
-  void rewind();
-
-  // @see https://urlpattern.spec.whatwg.org/#is-a-hash-prefix
-  bool is_hash_prefix();
-
-  // @see https://urlpattern.spec.whatwg.org/#is-a-search-prefix
-  bool is_search_prefix();
-
   // @see https://urlpattern.spec.whatwg.org/#parse-a-constructor-string
   static tl::expected<url_pattern_init, errors> parse(std::string_view input);
 
@@ -181,49 +173,59 @@ struct constructor_string_parser {
     DONE,
   };
 
-  // @see https://urlpattern.spec.whatwg.org/#change-state
-  void change_state(State state, size_t skip);
-
-  // @see https://urlpattern.spec.whatwg.org/#is-a-group-open
-  bool is_group_open() const;
-
-  // @see https://urlpattern.spec.whatwg.org/#is-a-group-close
-  bool is_group_close() const;
-
-  // @see https://urlpattern.spec.whatwg.org/#is-a-protocol-suffix
-  bool is_protocol_suffix();
-
   // @see
   // https://urlpattern.spec.whatwg.org/#compute-protocol-matches-a-special-scheme-flag
   std::optional<errors> compute_protocol_matches_special_scheme_flag();
 
+ private:
+  // @see https://urlpattern.spec.whatwg.org/#rewind
+  constexpr void rewind();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-hash-prefix
+  constexpr bool is_hash_prefix();
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-search-prefix
+  constexpr bool is_search_prefix();
+
+  // @see https://urlpattern.spec.whatwg.org/#change-state
+  void change_state(State state, size_t skip);
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-group-open
+  constexpr bool is_group_open() const;
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-group-close
+  constexpr bool is_group_close() const;
+
+  // @see https://urlpattern.spec.whatwg.org/#is-a-protocol-suffix
+  constexpr bool is_protocol_suffix() const;
+
   // @see https://urlpattern.spec.whatwg.org/#next-is-authority-slashes
-  bool next_is_authority_slashes();
+  constexpr bool next_is_authority_slashes() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-an-identity-terminator
-  bool is_an_identity_terminator();
+  constexpr bool is_an_identity_terminator() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-a-pathname-start
-  bool is_pathname_start();
+  constexpr bool is_pathname_start() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-a-password-prefix
-  bool is_password_prefix();
+  constexpr bool is_password_prefix() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-an-ipv6-open
-  bool is_an_ipv6_open();
+  constexpr bool is_an_ipv6_open() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-an-ipv6-close
-  bool is_an_ipv6_close();
+  constexpr bool is_an_ipv6_close() const;
 
   // @see https://urlpattern.spec.whatwg.org/#is-a-port-prefix
-  bool is_port_prefix();
+  constexpr bool is_port_prefix() const;
 
- private:
   // @see https://urlpattern.spec.whatwg.org/#is-a-non-special-pattern-char
-  bool is_non_special_pattern_char(size_t index, std::string_view value);
+  constexpr bool is_non_special_pattern_char(size_t index,
+                                             uint32_t value) const;
 
   // @see https://urlpattern.spec.whatwg.org/#get-a-safe-token
-  const token* get_safe_token(size_t index);
+  constexpr const token* get_safe_token(size_t index) const;
 
   // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
   std::string make_component_string();
@@ -295,7 +297,7 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
 
 // @see https://urlpattern.spec.whatwg.org/#process-a-base-url-string
 std::string process_base_url_string(std::string_view input,
-                                    std::string_view type);
+                                    url_pattern_init::process_type type);
 
 // @see https://urlpattern.spec.whatwg.org/#escape-a-pattern-string
 std::string escape_pattern_string(std::string_view input);
@@ -304,8 +306,8 @@ std::string escape_pattern_string(std::string_view input);
 std::string escape_regexp_string(std::string_view input);
 
 // @see https://urlpattern.spec.whatwg.org/#is-an-absolute-pathname
-constexpr bool is_absolute_pathname(std::string_view input,
-                                    std::string_view type) noexcept;
+constexpr bool is_absolute_pathname(
+    std::string_view input, url_pattern_init::process_type type) noexcept;
 
 // @see https://urlpattern.spec.whatwg.org/#parse-a-pattern-string
 template <url_pattern_encoding_callback F>
