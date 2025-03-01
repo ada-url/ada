@@ -4,7 +4,7 @@
         "",
         "This file contains a JSON object.",
         "Other than 'comment', each key is an attribute of the `URL` interface",
-        "defined in WHATWG's URL Standard.",
+        "defined in WHATWG’s URL Standard.",
         "The values are arrays of test case objects for that attribute.",
         "",
         "To run a test case for the attribute `attr`:",
@@ -110,7 +110,7 @@
             }
         },
         {
-            "comment": "Can't switch from URL containing username/password/port to file",
+            "comment": "Can’t switch from URL containing username/password/port to file",
             "href": "http://test@example.net",
             "new_value": "file",
             "expected": {
@@ -135,7 +135,7 @@
             }
         },
         {
-            "comment": "Can't switch from file URL with no host",
+            "comment": "Can’t switch from file URL with no host",
             "href": "file://localhost/",
             "new_value": "http",
             "expected": {
@@ -160,7 +160,7 @@
             }
         },
         {
-            "comment": "Can't switch from special scheme to non-special",
+            "comment": "Can’t switch from special scheme to non-special",
             "href": "http://example.net",
             "new_value": "b",
             "expected": {
@@ -193,7 +193,7 @@
             }
         },
         {
-            "comment": "Cannot-be-a-base URL doesn't have a host, but URL in a special scheme must.",
+            "comment": "Cannot-be-a-base URL doesn’t have a host, but URL in a special scheme must.",
             "href": "mailto:me@example.net",
             "new_value": "http",
             "expected": {
@@ -202,7 +202,7 @@
             }
         },
         {
-            "comment": "Can't switch from non-special scheme to special",
+            "comment": "Can’t switch from non-special scheme to special",
             "href": "ssh://me@example.net",
             "new_value": "http",
             "expected": {
