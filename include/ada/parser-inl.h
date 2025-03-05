@@ -19,7 +19,7 @@ namespace ada::parser {
 #if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>
 tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
-    std::variant<std::string_view, url_pattern_init> input,
+    std::variant<std::string_view, url_pattern_init>&& input,
     const std::string_view* base_url, const url_pattern_options* options) {
   // Let init be null.
   url_pattern_init init;

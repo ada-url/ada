@@ -9,7 +9,7 @@
 namespace ada {
 
 tl::expected<url_pattern_init, errors> url_pattern_init::process(
-    url_pattern_init init, url_pattern_init::process_type type,
+    const url_pattern_init& init, url_pattern_init::process_type type,
     std::optional<std::string_view> protocol,
     std::optional<std::string_view> username,
     std::optional<std::string_view> password,

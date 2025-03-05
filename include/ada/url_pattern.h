@@ -55,17 +55,17 @@ class url_pattern_part {
  public:
   url_pattern_part(url_pattern_part_type _type, std::string&& _value,
                    url_pattern_part_modifier _modifier)
-      : type(_type), value(_value), modifier(_modifier) {}
+      : type(_type), value(std::move(_value)), modifier(_modifier) {}
 
   url_pattern_part(url_pattern_part_type _type, std::string&& _value,
                    url_pattern_part_modifier _modifier, std::string&& _name,
                    std::string&& _prefix, std::string&& _suffix)
       : type(_type),
-        value(_value),
+        value(std::move(_value)),
         modifier(_modifier),
-        name(_name),
-        prefix(_prefix),
-        suffix(_suffix) {}
+        name(std::move(_name)),
+        prefix(std::move(_prefix)),
+        suffix(std::move(_suffix)) {}
   // A part has an associated type, a string, which must be set upon creation.
   url_pattern_part_type type;
   // A part has an associated value, a string, which must be set upon creation.
@@ -159,7 +159,7 @@ class url_pattern_component {
                         bool new_has_regexp_groups)
       : regexp(std::move(new_regexp)),
         pattern(std::move(new_pattern)),
-        group_name_list(new_group_name_list),
+        group_name_list(std::move(new_group_name_list)),
         has_regexp_groups(new_has_regexp_groups) {}
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
@@ -295,7 +295,7 @@ class url_pattern {
 
   template <url_pattern_regex::regex_concept P>
   friend tl::expected<url_pattern<P>, errors> parser::parse_url_pattern_impl(
-      std::variant<std::string_view, url_pattern_init> input,
+      std::variant<std::string_view, url_pattern_init>&& input,
       const std::string_view* base_url, const url_pattern_options* options);
 
   /**
