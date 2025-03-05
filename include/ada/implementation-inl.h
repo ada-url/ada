@@ -19,7 +19,7 @@ namespace ada {
 #if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>
 ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
-parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
+parse_url_pattern(std::variant<std::string_view, url_pattern_init>&& input,
                   const std::string_view* base_url,
                   const url_pattern_options* options) {
   return parser::parse_url_pattern_impl<regex_provider>(std::move(input),

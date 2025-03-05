@@ -42,7 +42,7 @@ struct url_pattern_init {
   // All strings must be valid UTF-8.
   // @see https://urlpattern.spec.whatwg.org/#process-a-urlpatterninit
   static tl::expected<url_pattern_init, errors> process(
-      url_pattern_init init, process_type type,
+      const url_pattern_init& init, process_type type,
       std::optional<std::string_view> protocol = std::nullopt,
       std::optional<std::string_view> username = std::nullopt,
       std::optional<std::string_view> password = std::nullopt,
