@@ -62,7 +62,7 @@ bool can_parse(std::string_view input,
  */
 template <url_pattern_regex::regex_concept regex_provider>
 ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
-parse_url_pattern(std::variant<std::string_view, url_pattern_init> input,
+parse_url_pattern(std::variant<std::string_view, url_pattern_init>&& input,
                   const std::string_view* base_url = nullptr,
                   const url_pattern_options* options = nullptr);
 #endif  // ADA_INCLUDE_URL_PATTERN

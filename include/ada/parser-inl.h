@@ -19,7 +19,7 @@ namespace ada::parser {
 #if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>
 tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
-    std::variant<std::string_view, url_pattern_init> input,
+    std::variant<std::string_view, url_pattern_init>&& input,
     const std::string_view* base_url, const url_pattern_options* options) {
   // Let init be null.
   url_pattern_init init;
@@ -61,8 +61,8 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
 
   // Let processedInit be the result of process a URLPatternInit given init,
   // "pattern", null, null, null, null, null, null, null, and null.
-  auto processed_init =
-      url_pattern_init::process(init, url_pattern_init::process_type::pattern);
+  auto processed_init = url_pattern_init::process(
+      init, url_pattern_init::process_type::pattern);
   if (!processed_init) {
     ada_log("url_pattern_init::process failed for init and 'pattern'");
     return tl::unexpected(processed_init.error());
