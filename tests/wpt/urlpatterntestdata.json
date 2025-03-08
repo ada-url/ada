@@ -1146,6 +1146,7 @@
   },
   {
     "pattern": [{ "protocol": "http", "port": "100000" }],
+    "inputs": [{ "protocol": "http", "port": "100000" }],
     "expected_obj": "error"
   },
   {
@@ -2401,12 +2402,38 @@
     "expected_obj": "error"
   },
   {
+    "pattern": [{ "hostname": "bad\\\\hostname" }],
+    "inputs": [{ "hostname": "badhostname" }],
+    "expected_match": null
+  },
+  {
     "pattern": [{ "hostname": "bad^hostname" }],
     "expected_obj": "error"
   },
   {
     "pattern": [{ "hostname": "bad|hostname" }],
     "expected_obj": "error"
+  },
+  {
+    "pattern": [{ "hostname": "bad\nhostname" }],
+    "inputs": [{ "hostname": "badhostname" }],
+    "expected_match": {
+      "hostname": { "input": "badhostname", "groups": {} }
+    }
+  },
+  {
+    "pattern": [{ "hostname": "bad\rhostname" }],
+    "inputs": [{ "hostname": "badhostname" }],
+    "expected_match": {
+      "hostname": { "input": "badhostname", "groups": {} }
+    }
+  },
+  {
+    "pattern": [{ "hostname": "bad\thostname" }],
+    "inputs": [{ "hostname": "badhostname" }],
+    "expected_match": {
+      "hostname": { "input": "badhostname", "groups": {} }
+    }
   },
   {
     "pattern": [{}],
