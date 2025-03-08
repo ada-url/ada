@@ -8508,6 +8508,21 @@
     "username": ""
   },
   {
+    "input": "non-special:cannot-be-a-base-url-!\"$%&'()*+,-.;<=>@[\\]^_`{|}~@/",
+    "base": null,
+    "hash": "",
+    "host": "",
+    "hostname": "",
+    "href": "non-special:cannot-be-a-base-url-!\"$%&'()*+,-.;<=>@[\\]^_`{|}~@/",
+    "origin": "null",
+    "password": "",
+    "pathname": "cannot-be-a-base-url-!\"$%&'()*+,-.;<=>@[\\]^_`{|}~@/",
+    "port": "",
+    "protocol": "non-special:",
+    "search": "",
+    "username": ""
+  },
+  {
     "input": "https://www.example.com/path{\u007Fpath.html?query'\u007F=query#fragment<\u007Ffragment",
     "base": null,
     "hash": "#fragment%3C%7Ffragment",
