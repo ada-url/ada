@@ -1062,6 +1062,7 @@ constructor_string_parser<regex_provider>::parse(std::string_view input) {
         if (parser.is_hash_prefix()) {
           parser.change_state(State::HASH, 1);
         }
+        break;
       }
       case State::HASH: {
         // Do nothing
