@@ -1550,6 +1550,16 @@
     "output": "(4).four"
   },
   {
+    "comment": "V7; A3",
+    "input": "a\ud900z",
+    "output": null
+  },
+  {
+    "comment": "V7; A3",
+    "input": "A\ud900Z",
+    "output": null
+  },
+  {
     "comment": "P4; A4_1 (ignored); A4_2 (ignored)",
     "input": "xn--",
     "output": null
