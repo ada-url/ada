@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['id_5fcontinue_0',['id_continue',['../d5/ddb/namespaceada_1_1idna.html#a47aada681d4780c3eb5c5c511d90070d',1,'ada::idna']]],
-  ['id_5fstart_1',['id_start',['../d5/ddb/namespaceada_1_1idna.html#a3188969a08d1397ff790ffb806ea70e2',1,'ada::idna']]],
+  ['id_5fcontinue_0',['id_continue',['../d5/ddb/namespaceada_1_1idna.html#a1f0df00cd3de3776a736b852dc53043b',1,'ada::idna']]],
+  ['id_5fstart_1',['id_start',['../d5/ddb/namespaceada_1_1idna.html#ae4e5db0662ed8d36b33f56966b8bf7ad',1,'ada::idna']]],
   ['idna_2ecc_2',['idna.cc',['../d8/d13/idna_8cc.html',1,'']]],
   ['ignore_5fcase_3',['ignore_case',['../de/d21/structada_1_1url__pattern__compile__component__options.html#ab6f5869f9a8017366026e10f3f8539ff',1,'ada::url_pattern_compile_component_options::ignore_case'],['../d8/dfb/structada_1_1url__pattern__options.html#aa8ab698e8acea2f01afe7b5931785b2e',1,'ada::url_pattern_options::ignore_case'],['../d0/d1e/classada_1_1url__pattern.html#a94c667d3ac7d514bc390c564b1f85940',1,'ada::url_pattern::ignore_case()']]],
   ['implementation_2dinl_2eh_4',['implementation-inl.h',['../de/d29/implementation-inl_8h.html',1,'']]],
@@ -26,8 +26,8 @@ var searchData=
   ['is_5falnum_5fplus_5ftable_23',['is_alnum_plus_table',['../d2/dc3/namespaceada_1_1unicode.html#aa96be0c7e7a403dc114665734796702e',1,'ada::unicode']]],
   ['is_5falpha_24',['is_alpha',['../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5',1,'ada::checkers']]],
   ['is_5fascii_25',['is_ascii',['../d5/ddb/namespaceada_1_1idna.html#a66015ea551d99b27023cc184e74ba63d',1,'ada::idna::is_ascii(std::u32string_view view)'],['../d5/ddb/namespaceada_1_1idna.html#a256324be086f84ee56e21f9bff4acacf',1,'ada::idna::is_ascii(std::string_view view)']]],
-  ['is_5fascii_5fletter_26',['is_ascii_letter',['../d5/ddb/namespaceada_1_1idna.html#ad85111b0492c9043a7e12417046e4a4c',1,'ada::idna']]],
-  ['is_5fascii_5fletter_5for_5fdigit_27',['is_ascii_letter_or_digit',['../d5/ddb/namespaceada_1_1idna.html#a60c339d5aee7371059eb48a85c56cc5b',1,'ada::idna']]],
+  ['is_5fascii_5fletter_26',['is_ascii_letter',['../d5/ddb/namespaceada_1_1idna.html#a99a78891068910040b0da4db285c8d67',1,'ada::idna']]],
+  ['is_5fascii_5fletter_5for_5fdigit_27',['is_ascii_letter_or_digit',['../d5/ddb/namespaceada_1_1idna.html#aebe8e9c96ecf78495360b363873bf450',1,'ada::idna']]],
   ['is_5fdigit_28',['is_digit',['../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6',1,'ada::checkers']]],
   ['is_5fforbidden_5fdomain_5fcode_5fpoint_29',['is_forbidden_domain_code_point',['../d5/ddb/namespaceada_1_1idna.html#aa9d13586049e9e107a2d372eeb81ddfc',1,'ada::idna']]],
   ['is_5fforbidden_5fdomain_5fcode_5fpoint_5ftable_30',['is_forbidden_domain_code_point_table',['../d5/ddb/namespaceada_1_1idna.html#a63497445165fe20b9ecc26c791f1de55',1,'ada::idna::is_forbidden_domain_code_point_table'],['../d2/dc3/namespaceada_1_1unicode.html#a1820f38f00f21a80cf55f662b4b5985c',1,'ada::unicode::is_forbidden_domain_code_point_table']]],

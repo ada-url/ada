@@ -8,7 +8,6 @@ var ada__idna_8h =
     [ "ADA_IDNA_TO_UNICODE_H", "dd/d4c/ada__idna_8h.html#a9662a57a85b4be7cbefd946734024fe6", null ],
     [ "ADA_IDNA_UNICODE_TRANSCODING_H", "dd/d4c/ada__idna_8h.html#a7c51f02c4cff8d8f66171c2c8716f5df", null ],
     [ "ADA_IDNA_VALIDITY_H", "dd/d4c/ada__idna_8h.html#a0d819d87708524de1f5a4515f7f9f6d4", null ],
-    [ "ada::idna::ascii_has_upper_case", "d5/ddb/namespaceada_1_1idna.html#ac6f73440f8dc6ef6ecd14b7a3a836b21", null ],
     [ "ada::idna::ascii_map", "d5/ddb/namespaceada_1_1idna.html#a10ef8e085520b93791eef38bdabf5941", null ],
     [ "ada::idna::contains_forbidden_domain_code_point", "d5/ddb/namespaceada_1_1idna.html#ac7ad7c23c6223982a88d1f079a2e6e97", null ],
     [ "ada::idna::is_ascii", "d5/ddb/namespaceada_1_1idna.html#a256324be086f84ee56e21f9bff4acacf", null ],
@@ -24,6 +23,6 @@ var ada__idna_8h =
     [ "ada::idna::utf32_to_utf8", "d5/ddb/namespaceada_1_1idna.html#a43b333f48581059d57dbbba4e5b13e9a", null ],
     [ "ada::idna::utf8_length_from_utf32", "d5/ddb/namespaceada_1_1idna.html#abf65afb975393474b917637a8ae045bb", null ],
     [ "ada::idna::utf8_to_utf32", "d5/ddb/namespaceada_1_1idna.html#ae3fa7abe424f63e3595039e90e3c316a", null ],
-    [ "ada::idna::valid_name_code_point", "d5/ddb/namespaceada_1_1idna.html#a617c679adf4f55f18d3cd997d98c9136", null ],
+    [ "ada::idna::valid_name_code_point", "d5/ddb/namespaceada_1_1idna.html#a9c7efc538c577a280118e2c476444a0b", null ],
     [ "ada::idna::verify_punycode", "d5/ddb/namespaceada_1_1idna.html#af593f5293a356a9fc9bb3878a96b3eae", null ]
 ];

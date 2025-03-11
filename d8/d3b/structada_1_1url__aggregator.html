@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.1.1</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.1</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -240,9 +240,6 @@ Friends</h2></td></tr>
 <tr class="separator:a6f3bce04c76ca3a9ed07bb72c4a6a484"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f3bce04c76ca3a9ed07bb72c4a6a484" id="r_a6f3bce04c76ca3a9ed07bb72c4a6a484"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f3bce04c76ca3a9ed07bb72c4a6a484">parser::parse_url_impl</a> (std::string_view, const <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a> *)</td></tr>
 <tr class="separator:a6f3bce04c76ca3a9ed07bb72c4a6a484"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab685e99f335a38d3b8789dc340725fc0" id="r_ab685e99f335a38d3b8789dc340725fc0"><td class="memTemplParams" colspan="2">template&lt;url_pattern_regex::regex_concept regex_provider&gt; </td></tr>
-<tr class="memitem:ab685e99f335a38d3b8789dc340725fc0"><td class="memTemplItemLeft" align="right" valign="top">tl::expected&lt; <a class="el" href="../../d0/d1e/classada_1_1url__pattern.html">url_pattern</a>&lt; <a class="el" href="../../df/d2c/url__pattern_8cc.html#af2acdb320b4d86f85480919f1c81f26d">regex_provider</a> &gt;, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ab685e99f335a38d3b8789dc340725fc0">parse_url_pattern_impl</a> (std::variant&lt; std::string_view, <a class="el" href="../../d4/d6f/structada_1_1url__pattern__init.html">url_pattern_init</a> &gt; input, const std::string_view *base_url, const <a class="el" href="../../d8/dfb/structada_1_1url__pattern__options.html">url_pattern_options</a> *options)</td></tr>
-<tr class="separator:ab685e99f335a38d3b8789dc340725fc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -1607,48 +1604,6 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="ab685e99f335a38d3b8789dc340725fc0" name="ab685e99f335a38d3b8789dc340725fc0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab685e99f335a38d3b8789dc340725fc0">&#9670;&#160;</a></span>parse_url_pattern_impl</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;url_pattern_regex::regex_concept regex_provider&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">tl::expected&lt; <a class="el" href="../../d0/d1e/classada_1_1url__pattern.html">url_pattern</a>&lt; <a class="el" href="../../df/d2c/url__pattern_8cc.html#af2acdb320b4d86f85480919f1c81f26d">regex_provider</a> &gt;, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt; parse_url_pattern_impl </td>
-          <td>(</td>
-          <td class="paramtype">std::variant&lt; std::string_view, <a class="el" href="../../d4/d6f/structada_1_1url__pattern__init.html">url_pattern_init</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>input</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string_view *</td>          <td class="paramname"><span class="paramname"><em>base_url</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d8/dfb/structada_1_1url__pattern__options.html">url_pattern_options</a> *</td>          <td class="paramname"><span class="paramname"><em>options</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel friend">friend</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d22/parser-inl_8h_source.html#l00018">18</a> of file <a class="el" href="../../d4/d22/parser-inl_8h_source.html">parser-inl.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, <a class="el" href="../../d4/d6f/structada_1_1url__pattern__init.html#a6220869ca5b2dd9edfb078bac5f8be96">ada::url_pattern_init::base_url</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#abe27dac2f3ba297acd40b2e8407b9a53">ada::url_pattern_helpers::canonicalize_hash()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a8316a44c3201fda7f07b58a9e6394872">ada::url_pattern_helpers::canonicalize_hostname()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aeb92bac209ec726411d3b2d706ff9fc1">ada::url_pattern_helpers::canonicalize_ipv6_hostname()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a189ad89a8e7f56417157fe1443d0f74b">ada::url_pattern_helpers::canonicalize_opaque_pathname()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a42c981e590eac369c673031669999add">ada::url_pattern_helpers::canonicalize_password()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a1bd5befa28658d2f38387b28f15c4921">ada::url_pattern_helpers::canonicalize_pathname()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac66d3ec9c982f50015d47cbb11804c85">ada::url_pattern_helpers::canonicalize_port()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a74f515111bc53cd1433917739b4620a0">ada::url_pattern_helpers::canonicalize_protocol()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#adb75e144cf79659370cc0477c08ffffc">ada::url_pattern_helpers::canonicalize_search()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aeba9772a2abdbf810b8ab9146f7af15b">ada::url_pattern_helpers::canonicalize_username()</a>, <a class="el" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">ada::url_pattern_component&lt; regex_provider &gt;::compile()</a>, <a class="el" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ad8681b32ec00954663e463df8a81503d">ada::url_pattern_compile_component_options::DEFAULT</a>, <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde">ada::scheme::get_special_port()</a>, <a class="el" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#a755ed26fbce77cc0782031ecd260af55">ada::url_pattern_compile_component_options::HOSTNAME</a>, <a class="el" href="../../d8/dfb/structada_1_1url__pattern__options.html#aa8ab698e8acea2f01afe7b5931785b2e">ada::url_pattern_options::ignore_case</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac67d971d3f3f3aacd5e6fffb5e414bb6">ada::url_pattern_helpers::is_ipv6_address()</a>, <a class="el" href="../../d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a6575ecee66cffc4adcc1b6f9e7aa92d7">ada::url_pattern_helpers::constructor_string_parser&lt; regex_provider &gt;::parse()</a>, <a class="el" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ac72c7cd1e397ff0172216be448eec427">ada::url_pattern_compile_component_options::PATHNAME</a>, <a class="el" href="../../d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92a240bf022e685b0ee30ad9fe9e1fb5d5b">ada::url_pattern_init::pattern</a>, <a class="el" href="../../d4/d6f/structada_1_1url__pattern__init.html#a578da90ef890b0aafdfe3b3986d94fd5">ada::url_pattern_init::process()</a>, <a class="el" href="../../d4/d6f/structada_1_1url__pattern__init.html#a4c5661ee75c89ea2f8b2767c44f31474">ada::url_pattern_init::protocol</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a3efe783c5a0b1b9c5959672a1bc287fb">ada::url_pattern_helpers::protocol_component_matches_special_scheme()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9">ada::type_error</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="#a6f3bce04c76ca3a9ed07bb72c4a6a484">parser::parse_url_impl</a>.</p>
-
-</div>
-</div>
 <a id="a34b21b95d1a7c2d7ff167f87f183c8ec" name="a34b21b95d1a7c2d7ff167f87f183c8ec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a34b21b95d1a7c2d7ff167f87f183c8ec">&#9670;&#160;</a></span>parser::parse_url</h2>
 
@@ -1742,7 +1697,7 @@ template&lt;url_pattern_regex::regex_concept regex_provider&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">References <a class="el" href="#ab685e99f335a38d3b8789dc340725fc0">parse_url_pattern_impl</a>, <a class="el" href="#a6f3bce04c76ca3a9ed07bb72c4a6a484">parser::parse_url_impl</a>, and <a class="el" href="#a3149c703e5274694782d25995662f60b">url_aggregator()</a>.</p>
+<p class="reference">References <a class="el" href="#a6f3bce04c76ca3a9ed07bb72c4a6a484">parser::parse_url_impl</a>, and <a class="el" href="#a3149c703e5274694782d25995662f60b">url_aggregator()</a>.</p>
 
 </div>
 </div>

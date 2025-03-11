@@ -40,8 +40,7 @@ var namespaceada =
       [ "parse_url_impl", "d6/da3/namespaceada_1_1parser.html#afbe28af279b530ec8c2d818908dd7494", null ],
       [ "parse_url_impl", "d6/da3/namespaceada_1_1parser.html#a5d1f94698c00dbe0004d372c9a3a785d", null ],
       [ "parse_url_impl< url >", "d6/da3/namespaceada_1_1parser.html#a9a6388eded52cafa5e3c87fb1f03037a", null ],
-      [ "parse_url_impl< url_aggregator >", "d6/da3/namespaceada_1_1parser.html#aa565135765e7cc4893c30a2bc41d5324", null ],
-      [ "parse_url_pattern_impl", "d6/da3/namespaceada_1_1parser.html#a620b06da1bbeb15d55cae938c87fe065", null ]
+      [ "parse_url_impl< url_aggregator >", "d6/da3/namespaceada_1_1parser.html#aa565135765e7cc4893c30a2bc41d5324", null ]
     ] ],
     [ "scheme", "d2/d63/namespaceada_1_1scheme.html", "d2/d63/namespaceada_1_1scheme" ],
     [ "serializers", "d9/dea/namespaceada_1_1serializers.html", [
@@ -143,7 +142,6 @@ var namespaceada =
     [ "parse", "dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b", null ],
     [ "parse< url >", "dd/d64/namespaceada.html#a157c96a61731a76b1c222eafad465828", null ],
     [ "parse< url_aggregator >", "dd/d64/namespaceada.html#a803aed58b90d68562c44c76eaf5e9c90", null ],
-    [ "parse_url_pattern", "dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58", null ],
     [ "to_string", "dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6", null ],
     [ "to_string", "dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7", null ],
     [ "unreachable", "dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d", null ],

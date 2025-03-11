@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.1.1</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.1</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -110,81 +110,11 @@ $(function(){initNavTree('d3/d86/url__pattern__helpers_8cpp.html','../../'); ini
 </div>
 
 <div class="header">
-  <div class="summary">
-<a href="#namespaces">Namespaces</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">url_pattern_helpers.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../db/de6/url__pattern__helpers-inl_8h_source.html">ada/url_pattern_helpers-inl.h</a>&quot;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
-<code>#include &lt;optional&gt;</code><br />
-<code>#include &lt;string&gt;</code><br />
-</div>
+
 <p><a href="../../d3/d86/url__pattern__helpers_8cpp_source.html">Go to the source code of this file.</a></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
-Namespaces</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d64/namespaceada.html">ada</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html">ada::url_pattern_helpers</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html">ada::url_pattern_helpers::anonymous_namespace{url_pattern_helpers.cpp}</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:af2cb69c78ee9095cc7f6cd16042e05b9" id="r_af2cb69c78ee9095cc7f6cd16042e05b9"><td class="memItemLeft" align="right" valign="top">std::tuple&lt; std::string, std::vector&lt; std::string &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#af2cb69c78ee9095cc7f6cd16042e05b9">ada::url_pattern_helpers::generate_regular_expression_and_name_list</a> (const std::vector&lt; <a class="el" href="../../d8/d9f/classada_1_1url__pattern__part.html">url_pattern_part</a> &gt; &amp;part_list, <a class="el" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html">url_pattern_compile_component_options</a> options)</td></tr>
-<tr class="separator:af2cb69c78ee9095cc7f6cd16042e05b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac67d971d3f3f3aacd5e6fffb5e414bb6" id="r_ac67d971d3f3f3aacd5e6fffb5e414bb6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac67d971d3f3f3aacd5e6fffb5e414bb6">ada::url_pattern_helpers::is_ipv6_address</a> (std::string_view input) noexcept</td></tr>
-<tr class="separator:ac67d971d3f3f3aacd5e6fffb5e414bb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c0108e1d71d788882ff0db260ad33e2" id="r_a3c0108e1d71d788882ff0db260ad33e2"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a3c0108e1d71d788882ff0db260ad33e2">ada::url_pattern_helpers::convert_modifier_to_string</a> (<a class="el" href="../../dd/d64/namespaceada.html#a2369e4c9d2c5efb683c90d17fc56c85b">url_pattern_part_modifier</a> modifier)</td></tr>
-<tr class="separator:a3c0108e1d71d788882ff0db260ad33e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a70ebd270b8d85721a05ec9be95c44972" id="r_a70ebd270b8d85721a05ec9be95c44972"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a70ebd270b8d85721a05ec9be95c44972">ada::url_pattern_helpers::generate_segment_wildcard_regexp</a> (<a class="el" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html">url_pattern_compile_component_options</a> options)</td></tr>
-<tr class="separator:a70ebd270b8d85721a05ec9be95c44972"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74f515111bc53cd1433917739b4620a0" id="r_a74f515111bc53cd1433917739b4620a0"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a74f515111bc53cd1433917739b4620a0">ada::url_pattern_helpers::canonicalize_protocol</a> (std::string_view input)</td></tr>
-<tr class="separator:a74f515111bc53cd1433917739b4620a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeba9772a2abdbf810b8ab9146f7af15b" id="r_aeba9772a2abdbf810b8ab9146f7af15b"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aeba9772a2abdbf810b8ab9146f7af15b">ada::url_pattern_helpers::canonicalize_username</a> (std::string_view input)</td></tr>
-<tr class="separator:aeba9772a2abdbf810b8ab9146f7af15b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42c981e590eac369c673031669999add" id="r_a42c981e590eac369c673031669999add"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a42c981e590eac369c673031669999add">ada::url_pattern_helpers::canonicalize_password</a> (std::string_view input)</td></tr>
-<tr class="separator:a42c981e590eac369c673031669999add"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8316a44c3201fda7f07b58a9e6394872" id="r_a8316a44c3201fda7f07b58a9e6394872"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a8316a44c3201fda7f07b58a9e6394872">ada::url_pattern_helpers::canonicalize_hostname</a> (std::string_view input)</td></tr>
-<tr class="separator:a8316a44c3201fda7f07b58a9e6394872"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb92bac209ec726411d3b2d706ff9fc1" id="r_aeb92bac209ec726411d3b2d706ff9fc1"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aeb92bac209ec726411d3b2d706ff9fc1">ada::url_pattern_helpers::canonicalize_ipv6_hostname</a> (std::string_view input)</td></tr>
-<tr class="separator:aeb92bac209ec726411d3b2d706ff9fc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac66d3ec9c982f50015d47cbb11804c85" id="r_ac66d3ec9c982f50015d47cbb11804c85"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac66d3ec9c982f50015d47cbb11804c85">ada::url_pattern_helpers::canonicalize_port</a> (std::string_view input)</td></tr>
-<tr class="separator:ac66d3ec9c982f50015d47cbb11804c85"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa1cb5263e6c1db9825ee9a716455eb5" id="r_aaa1cb5263e6c1db9825ee9a716455eb5"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aaa1cb5263e6c1db9825ee9a716455eb5">ada::url_pattern_helpers::canonicalize_port_with_protocol</a> (std::string_view input, std::string_view protocol)</td></tr>
-<tr class="separator:aaa1cb5263e6c1db9825ee9a716455eb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bd5befa28658d2f38387b28f15c4921" id="r_a1bd5befa28658d2f38387b28f15c4921"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a1bd5befa28658d2f38387b28f15c4921">ada::url_pattern_helpers::canonicalize_pathname</a> (std::string_view input)</td></tr>
-<tr class="separator:a1bd5befa28658d2f38387b28f15c4921"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a189ad89a8e7f56417157fe1443d0f74b" id="r_a189ad89a8e7f56417157fe1443d0f74b"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a189ad89a8e7f56417157fe1443d0f74b">ada::url_pattern_helpers::canonicalize_opaque_pathname</a> (std::string_view input)</td></tr>
-<tr class="separator:a189ad89a8e7f56417157fe1443d0f74b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb75e144cf79659370cc0477c08ffffc" id="r_adb75e144cf79659370cc0477c08ffffc"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#adb75e144cf79659370cc0477c08ffffc">ada::url_pattern_helpers::canonicalize_search</a> (std::string_view input)</td></tr>
-<tr class="separator:adb75e144cf79659370cc0477c08ffffc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe27dac2f3ba297acd40b2e8407b9a53" id="r_abe27dac2f3ba297acd40b2e8407b9a53"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::string, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#abe27dac2f3ba297acd40b2e8407b9a53">ada::url_pattern_helpers::canonicalize_hash</a> (std::string_view input)</td></tr>
-<tr class="separator:abe27dac2f3ba297acd40b2e8407b9a53"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fc3dc4fb7eda789d35bfe20c90acf0b" id="r_a4fc3dc4fb7eda789d35bfe20c90acf0b"><td class="memItemLeft" align="right" valign="top">tl::expected&lt; std::vector&lt; <a class="el" href="../../d0/dda/classada_1_1url__pattern__helpers_1_1token.html">token</a> &gt;, <a class="el" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a4fc3dc4fb7eda789d35bfe20c90acf0b">ada::url_pattern_helpers::tokenize</a> (std::string_view input, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a69afa4e12ca8d3eaec47f96ded89ea40">token_policy</a> policy)</td></tr>
-<tr class="separator:a4fc3dc4fb7eda789d35bfe20c90acf0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ca86a984b8dda7de6845e88baefac1c" id="r_a2ca86a984b8dda7de6845e88baefac1c"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a2ca86a984b8dda7de6845e88baefac1c">ada::url_pattern_helpers::escape_pattern_string</a> (std::string_view input)</td></tr>
-<tr class="separator:a2ca86a984b8dda7de6845e88baefac1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33a6091c88d4f2a03e78793f0ee57fde" id="r_a33a6091c88d4f2a03e78793f0ee57fde"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html#a33a6091c88d4f2a03e78793f0ee57fde">ada::url_pattern_helpers::anonymous_namespace{url_pattern_helpers.cpp}::should_escape_regexp_char</a> (char c)</td></tr>
-<tr class="separator:a33a6091c88d4f2a03e78793f0ee57fde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab639c08b86a66c0907ebb9bd1dab7bad" id="r_ab639c08b86a66c0907ebb9bd1dab7bad"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ab639c08b86a66c0907ebb9bd1dab7bad">ada::url_pattern_helpers::escape_regexp_string</a> (std::string_view input)</td></tr>
-<tr class="separator:ab639c08b86a66c0907ebb9bd1dab7bad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4d90936b53b4e0cc4bf55a4ed3fa026" id="r_af4d90936b53b4e0cc4bf55a4ed3fa026"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#af4d90936b53b4e0cc4bf55a4ed3fa026">ada::url_pattern_helpers::process_base_url_string</a> (std::string_view input, <a class="el" href="../../d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92">url_pattern_init::process_type</a> type)</td></tr>
-<tr class="separator:af4d90936b53b4e0cc4bf55a4ed3fa026"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae8600b6d666a2dcbe00ce24e45bbb996" id="r_ae8600b6d666a2dcbe00ce24e45bbb996"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ae8600b6d666a2dcbe00ce24e45bbb996">ada::url_pattern_helpers::is_absolute_pathname</a> (std::string_view input, <a class="el" href="../../d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92">url_pattern_init::process_type</a> type) noexcept</td></tr>
-<tr class="separator:ae8600b6d666a2dcbe00ce24e45bbb996"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a921cf2f1093ad9deefc910358a769567" id="r_a921cf2f1093ad9deefc910358a769567"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a921cf2f1093ad9deefc910358a769567">ada::url_pattern_helpers::generate_pattern_string</a> (std::vector&lt; <a class="el" href="../../d8/d9f/classada_1_1url__pattern__part.html">url_pattern_part</a> &gt; &amp;part_list, <a class="el" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html">url_pattern_compile_component_options</a> &amp;options)</td></tr>
-<tr class="separator:a921cf2f1093ad9deefc910358a769567"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:ac384b54122eeb5a7ec1eed58757c6aa6" id="r_ac384b54122eeb5a7ec1eed58757c6aa6"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint8_t, 256 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html#ac384b54122eeb5a7ec1eed58757c6aa6">ada::url_pattern_helpers::anonymous_namespace{url_pattern_helpers.cpp}::escape_regexp_table</a></td></tr>
-<tr class="separator:ac384b54122eeb5a7ec1eed58757c6aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->

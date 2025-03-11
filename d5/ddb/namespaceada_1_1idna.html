@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.1.1</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.1</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -172,8 +172,6 @@ Functions</h2></td></tr>
 <tr class="separator:a43b333f48581059d57dbbba4e5b13e9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10ef8e085520b93791eef38bdabf5941" id="r_a10ef8e085520b93791eef38bdabf5941"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10ef8e085520b93791eef38bdabf5941">ascii_map</a> (char *input, size_t length)</td></tr>
 <tr class="separator:a10ef8e085520b93791eef38bdabf5941"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6f73440f8dc6ef6ecd14b7a3a836b21" id="r_ac6f73440f8dc6ef6ecd14b7a3a836b21"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6f73440f8dc6ef6ecd14b7a3a836b21">ascii_has_upper_case</a> (char *input, size_t length)</td></tr>
-<tr class="separator:ac6f73440f8dc6ef6ecd14b7a3a836b21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc44ee8cb1484d14560236b659e12565" id="r_acc44ee8cb1484d14560236b659e12565"><td class="memItemLeft" align="right" valign="top">std::u32string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acc44ee8cb1484d14560236b659e12565">map</a> (std::u32string_view input)</td></tr>
 <tr class="separator:acc44ee8cb1484d14560236b659e12565"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66bd7d6170f3e06b968c739e40a35967" id="r_a66bd7d6170f3e06b968c739e40a35967"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a66bd7d6170f3e06b968c739e40a35967">normalize</a> (std::u32string &amp;input)</td></tr>
@@ -196,8 +194,8 @@ Functions</h2></td></tr>
 <tr class="separator:a256324be086f84ee56e21f9bff4acacf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d9aecb5815cce8db291ed12d5d1774f" id="r_a7d9aecb5815cce8db291ed12d5d1774f"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d9aecb5815cce8db291ed12d5d1774f">to_unicode</a> (std::string_view input)</td></tr>
 <tr class="separator:a7d9aecb5815cce8db291ed12d5d1774f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a617c679adf4f55f18d3cd997d98c9136" id="r_a617c679adf4f55f18d3cd997d98c9136"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a617c679adf4f55f18d3cd997d98c9136">valid_name_code_point</a> (char32_t input, bool first)</td></tr>
-<tr class="separator:a617c679adf4f55f18d3cd997d98c9136"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c7efc538c577a280118e2c476444a0b" id="r_a9c7efc538c577a280118e2c476444a0b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9c7efc538c577a280118e2c476444a0b">valid_name_code_point</a> (char32_t code_point, bool first)</td></tr>
+<tr class="separator:a9c7efc538c577a280118e2c476444a0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2544de17d530836df29f7c7311f97d5e" id="r_a2544de17d530836df29f7c7311f97d5e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2544de17d530836df29f7c7311f97d5e">find_range_index</a> (uint32_t key)</td></tr>
 <tr class="separator:a2544de17d530836df29f7c7311f97d5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac50c30d0d051c6f5b6463cedd5eda8e1" id="r_ac50c30d0d051c6f5b6463cedd5eda8e1"><td class="memItemLeft" align="right" valign="top">std::pair&lt; bool, size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac50c30d0d051c6f5b6463cedd5eda8e1">compute_decomposition_length</a> (const std::u32string_view input) noexcept</td></tr>
@@ -228,19 +226,17 @@ Functions</h2></td></tr>
 <tr class="separator:aa9d13586049e9e107a2d372eeb81ddfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a939fc0c16e2a4fe433685bcd44ad9c75" id="r_a939fc0c16e2a4fe433685bcd44ad9c75"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a939fc0c16e2a4fe433685bcd44ad9c75">from_ascii_to_ascii</a> (std::string_view ut8_string)</td></tr>
 <tr class="separator:a939fc0c16e2a4fe433685bcd44ad9c75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ee9e70c95df8a80f8b639c0c210ba13" id="r_a6ee9e70c95df8a80f8b639c0c210ba13"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6ee9e70c95df8a80f8b639c0c210ba13">get_first_code_point</a> (std::string_view input)</td></tr>
-<tr class="separator:a6ee9e70c95df8a80f8b639c0c210ba13"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad85111b0492c9043a7e12417046e4a4c" id="r_ad85111b0492c9043a7e12417046e4a4c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad85111b0492c9043a7e12417046e4a4c">is_ascii_letter</a> (char32_t c)</td></tr>
-<tr class="separator:ad85111b0492c9043a7e12417046e4a4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60c339d5aee7371059eb48a85c56cc5b" id="r_a60c339d5aee7371059eb48a85c56cc5b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a60c339d5aee7371059eb48a85c56cc5b">is_ascii_letter_or_digit</a> (char32_t c)</td></tr>
-<tr class="separator:a60c339d5aee7371059eb48a85c56cc5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99a78891068910040b0da4db285c8d67" id="r_a99a78891068910040b0da4db285c8d67"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a99a78891068910040b0da4db285c8d67">is_ascii_letter</a> (char32_t c) noexcept</td></tr>
+<tr class="separator:a99a78891068910040b0da4db285c8d67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebe8e9c96ecf78495360b363873bf450" id="r_aebe8e9c96ecf78495360b363873bf450"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aebe8e9c96ecf78495360b363873bf450">is_ascii_letter_or_digit</a> (char32_t c) noexcept</td></tr>
+<tr class="separator:aebe8e9c96ecf78495360b363873bf450"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a286fd1cff995b131e2b42adec0b1fd78" id="r_a286fd1cff995b131e2b42adec0b1fd78"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a286fd1cff995b131e2b42adec0b1fd78">mappings</a> [5165]</td></tr>
-<tr class="separator:a286fd1cff995b131e2b42adec0b1fd78"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e62e4eec9bc158c48bea8ee79e298d1" id="r_a8e62e4eec9bc158c48bea8ee79e298d1"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e62e4eec9bc158c48bea8ee79e298d1">table</a> [8002][2]</td></tr>
-<tr class="separator:a8e62e4eec9bc158c48bea8ee79e298d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54bb219c892892d46fc36741cd3611c6" id="r_a54bb219c892892d46fc36741cd3611c6"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a54bb219c892892d46fc36741cd3611c6">mappings</a> [5236]</td></tr>
+<tr class="separator:a54bb219c892892d46fc36741cd3611c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fb9833c90451c74eed6de800c181382" id="r_a9fb9833c90451c74eed6de800c181382"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9fb9833c90451c74eed6de800c181382">table</a> [8150][2]</td></tr>
+<tr class="separator:a9fb9833c90451c74eed6de800c181382"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76ba8c375d368a14a5b009138b882859" id="r_a76ba8c375d368a14a5b009138b882859"><td class="memItemLeft" align="right" valign="top">const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a76ba8c375d368a14a5b009138b882859">decomposition_index</a> [4352]</td></tr>
 <tr class="separator:a76ba8c375d368a14a5b009138b882859"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a8649da4131912025f71c76e5483c6e" id="r_a2a8649da4131912025f71c76e5483c6e"><td class="memItemLeft" align="right" valign="top">const uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a8649da4131912025f71c76e5483c6e">decomposition_block</a> [67][257]</td></tr>
@@ -293,10 +289,10 @@ Variables</h2></td></tr>
 <tr class="separator:a750c9c5e17eb8805d72a7a64c652c60c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63497445165fe20b9ecc26c791f1de55" id="r_a63497445165fe20b9ecc26c791f1de55"><td class="memItemLeft" align="right" valign="top">static constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a63497445165fe20b9ecc26c791f1de55">is_forbidden_domain_code_point_table</a> []</td></tr>
 <tr class="separator:a63497445165fe20b9ecc26c791f1de55"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a47aada681d4780c3eb5c5c511d90070d" id="r_a47aada681d4780c3eb5c5c511d90070d"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a47aada681d4780c3eb5c5c511d90070d">id_continue</a> [1344][2]</td></tr>
-<tr class="separator:a47aada681d4780c3eb5c5c511d90070d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3188969a08d1397ff790ffb806ea70e2" id="r_a3188969a08d1397ff790ffb806ea70e2"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3188969a08d1397ff790ffb806ea70e2">id_start</a> [740][2]</td></tr>
-<tr class="separator:a3188969a08d1397ff790ffb806ea70e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f0df00cd3de3776a736b852dc53043b" id="r_a1f0df00cd3de3776a736b852dc53043b"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f0df00cd3de3776a736b852dc53043b">id_continue</a> [1393][2]</td></tr>
+<tr class="separator:a1f0df00cd3de3776a736b852dc53043b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4e5db0662ed8d36b33f56966b8bf7ad" id="r_ae4e5db0662ed8d36b33f56966b8bf7ad"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae4e5db0662ed8d36b33f56966b8bf7ad">id_start</a> [763][2]</td></tr>
+<tr class="separator:ae4e5db0662ed8d36b33f56966b8bf7ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Unicode Standard Annex #15</p>
@@ -341,7 +337,7 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="ac7495198fe0aa95543b347ac9cc548ddabb23dfa68106b68b977e46321c8b7535" name="ac7495198fe0aa95543b347ac9cc548ddabb23dfa68106b68b977e46321c8b7535"></a>LRE&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08056">8056</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08081">8081</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 </div>
 </div>
@@ -378,36 +374,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07853">7853</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07872">7872</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a0d1e1182a7cae8b4c1063dbc7614f88f">base</a>, <a class="el" href="#aa916f8c8a88981da489e29cd954047c5">damp</a>, <a class="el" href="#ab156a495c05e66e0ed42a69d71d2c588">skew</a>, <a class="el" href="#ad2a2a6422a2c30b768e64caa35c39020">tmax</a>, and <a class="el" href="#a4137d2ecd3d2921846af696d6611aed9">tmin</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>, <a class="el" href="#a742b05e0aba2245da3ac0ffd9ec678b6">utf32_to_punycode()</a>, and <a class="el" href="#af593f5293a356a9fc9bb3878a96b3eae">verify_punycode()</a>.</p>
-
-</div>
-</div>
-<a id="ac6f73440f8dc6ef6ecd14b7a3a836b21" name="ac6f73440f8dc6ef6ecd14b7a3a836b21"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6f73440f8dc6ef6ecd14b7a3a836b21">&#9670;&#160;</a></span>ascii_has_upper_case()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ada::idna::ascii_has_upper_case </td>
-          <td>(</td>
-          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>input</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>length</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02620">2620</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d8/d13/idna_8cc.html#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput()</a>.</p>
 
 </div>
 </div>
@@ -430,7 +401,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02644">2644</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02663">2663</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a939fc0c16e2a4fe433685bcd44ad9c75">from_ascii_to_ascii()</a>.</p>
 
@@ -459,7 +430,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07843">7843</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07862">7862</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>, and <a class="el" href="#af593f5293a356a9fc9bb3878a96b3eae">verify_punycode()</a>.</p>
 
@@ -481,7 +452,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Compose the domain_name string to Unicode Normalization Form C. </p><dl class="section see"><dt>See also</dt><dd><a href="https://www.unicode.org/reports/tr46/#ProcessingStepCompose">https://www.unicode.org/reports/tr46/#ProcessingStepCompose</a></dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07737">7737</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07756">7756</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a7a9b9104fed112133289d3f67bb94b0a">composition_block</a>, <a class="el" href="#a2504167b83ba3ae4819f5d250ec0806d">composition_data</a>, <a class="el" href="#a04152d08ff9b28a79096f98f9741ab8a">composition_index</a>, <a class="el" href="#a8c81c2acabc058ce6376560052072984">get_ccc()</a>, <a class="el" href="#a4af64ef680c616c7ce410932d8474afa">hangul_lbase</a>, <a class="el" href="#a6b4fd5ad887b44c75b6961aab3698bdb">hangul_lcount</a>, <a class="el" href="#a75ee37a3911b0ce4d2563842a654a920">hangul_sbase</a>, <a class="el" href="#a6d4de1059fd64ba439f93e082d39e49b">hangul_scount</a>, <a class="el" href="#ae3c6519de00a8711290d24453721b0e7">hangul_tbase</a>, <a class="el" href="#a07dc07ec6be862cf01e910353dcb481e">hangul_tcount</a>, <a class="el" href="#a7f00835963b691723cdc2383bb362199">hangul_vbase</a>, and <a class="el" href="#ad4ec90e439aa4453a705d0e4e26d493d">hangul_vcount</a>.</p>
 
@@ -512,7 +483,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07630">7630</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07649">7649</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a2a8649da4131912025f71c76e5483c6e">decomposition_block</a>, <a class="el" href="#a76ba8c375d368a14a5b009138b882859">decomposition_index</a>, <a class="el" href="#a75ee37a3911b0ce4d2563842a654a920">hangul_sbase</a>, <a class="el" href="#a6d4de1059fd64ba439f93e082d39e49b">hangul_scount</a>, and <a class="el" href="#a07dc07ec6be862cf01e910353dcb481e">hangul_tcount</a>.</p>
 
@@ -535,7 +506,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09427">9427</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09453">9453</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#aa9d13586049e9e107a2d372eeb81ddfc">is_forbidden_domain_code_point()</a>.</p>
 
@@ -560,7 +531,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07660">7660</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07679">7679</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a2a8649da4131912025f71c76e5483c6e">decomposition_block</a>, <a class="el" href="#ab0f41d0b74696b2698bab08f36251526">decomposition_data</a>, <a class="el" href="#a76ba8c375d368a14a5b009138b882859">decomposition_index</a>, <a class="el" href="#a4af64ef680c616c7ce410932d8474afa">hangul_lbase</a>, <a class="el" href="#a3d7c9bfeb83a88063623160ae2887574">hangul_ncount</a>, <a class="el" href="#a75ee37a3911b0ce4d2563842a654a920">hangul_sbase</a>, <a class="el" href="#a6d4de1059fd64ba439f93e082d39e49b">hangul_scount</a>, <a class="el" href="#ae3c6519de00a8711290d24453721b0e7">hangul_tbase</a>, <a class="el" href="#a07dc07ec6be862cf01e910353dcb481e">hangul_tcount</a>, and <a class="el" href="#a7f00835963b691723cdc2383bb362199">hangul_vbase</a>.</p>
 
@@ -584,7 +555,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Decompose the domain_name string to Unicode Normalization Form C. </p><dl class="section see"><dt>See also</dt><dd><a href="https://www.unicode.org/reports/tr46/#ProcessingStepDecompose">https://www.unicode.org/reports/tr46/#ProcessingStepDecompose</a></dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07724">7724</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07743">7743</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#ac50c30d0d051c6f5b6463cedd5eda8e1">compute_decomposition_length()</a>, <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>, and <a class="el" href="#a50bfbde0795e1b69056b441b888f3514">sort_marks()</a>.</p>
 
@@ -615,7 +586,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07849">7849</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07868">7868</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a742b05e0aba2245da3ac0ffd9ec678b6">utf32_to_punycode()</a>.</p>
 
@@ -644,7 +615,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08818">8818</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08843">8843</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a750c9c5e17eb8805d72a7a64c652c60c">dir_table</a>, <a class="el" href="../../d2/dec/structada_1_1idna_1_1directions.html#a62bf568024033084f8c723006b676b3c">ada::idna::directions::final_code</a>, and <a class="el" href="#ac7495198fe0aa95543b347ac9cc548ddac9f65cb69f001440b334cff56faee94f">NONE</a>.</p>
 
@@ -675,7 +646,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08834">8834</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08859">8859</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a705c21b2e695ed27a12de6e7419cb540">find_direction()</a>, and <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda30c6bda4bdb26fb36fb63a5c0d024b91">NSM</a>.</p>
 
@@ -698,9 +669,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02598">2598</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02641">2641</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="#a8e62e4eec9bc158c48bea8ee79e298d1">table</a>.</p>
+<p class="reference">References <a class="el" href="#a9fb9833c90451c74eed6de800c181382">table</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#acc44ee8cb1484d14560236b659e12565">map()</a>.</p>
 
@@ -729,9 +700,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09433">9433</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09458">9458</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="#a10ef8e085520b93791eef38bdabf5941">ascii_map()</a>, <a class="el" href="#ac39ccead632e6f2bf5049d1b643c5e1c">is_label_valid()</a>, <a class="el" href="#acc44ee8cb1484d14560236b659e12565">map()</a>, <a class="el" href="#a66bd7d6170f3e06b968c739e40a35967">normalize()</a>, and <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>.</p>
+<p class="reference">References <a class="el" href="#a10ef8e085520b93791eef38bdabf5941">ascii_map()</a>, <a class="el" href="#a66015ea551d99b27023cc184e74ba63d">is_ascii()</a>, <a class="el" href="#ac39ccead632e6f2bf5049d1b643c5e1c">is_label_valid()</a>, <a class="el" href="#acc44ee8cb1484d14560236b659e12565">map()</a>, <a class="el" href="#a66bd7d6170f3e06b968c739e40a35967">normalize()</a>, and <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a7d88f623d0a7e056cc89920b20e13dde">to_ascii()</a>.</p>
 
@@ -760,30 +731,11 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07702">7702</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07721">7721</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a59287719010e9172d71163ba81d20d71">canonical_combining_class_block</a>, and <a class="el" href="#a43afa026d0aeb1a48e7ed8e2ca90d387">canonical_combining_class_index</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>, and <a class="el" href="#a50bfbde0795e1b69056b441b888f3514">sort_marks()</a>.</p>
-
-</div>
-</div>
-<a id="a6ee9e70c95df8a80f8b639c0c210ba13" name="a6ee9e70c95df8a80f8b639c0c210ba13"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6ee9e70c95df8a80f8b639c0c210ba13">&#9670;&#160;</a></span>get_first_code_point()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint32_t ada::idna::get_first_code_point </td>
-          <td>(</td>
-          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>input</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l10186">10186</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 </div>
 </div>
@@ -810,7 +762,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09399">9399</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09425">9425</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 </div>
 </div>
@@ -837,17 +789,20 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09390">9390</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09416">9416</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a2ca86a984b8dda7de6845e88baefac1c">ada::url_pattern_helpers::escape_pattern_string()</a>, <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ab639c08b86a66c0907ebb9bd1dab7bad">ada::url_pattern_helpers::escape_regexp_string()</a>, <a class="el" href="#a7d88f623d0a7e056cc89920b20e13dde">to_ascii()</a>, and <a class="el" href="#a7d9aecb5815cce8db291ed12d5d1774f">to_unicode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="#a939fc0c16e2a4fe433685bcd44ad9c75">from_ascii_to_ascii()</a>, <a class="el" href="#a7d88f623d0a7e056cc89920b20e13dde">to_ascii()</a>, and <a class="el" href="#a7d9aecb5815cce8db291ed12d5d1774f">to_unicode()</a>.</p>
 
 </div>
 </div>
-<a id="ad85111b0492c9043a7e12417046e4a4c" name="ad85111b0492c9043a7e12417046e4a4c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad85111b0492c9043a7e12417046e4a4c">&#9670;&#160;</a></span>is_ascii_letter()</h2>
+<a id="a99a78891068910040b0da4db285c8d67" name="a99a78891068910040b0da4db285c8d67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99a78891068910040b0da4db285c8d67">&#9670;&#160;</a></span>is_ascii_letter()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">bool ada::idna::is_ascii_letter </td>
@@ -856,19 +811,27 @@ Variables</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l10230">10230</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l10239">10239</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="#a617c679adf4f55f18d3cd997d98c9136">valid_name_code_point()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="#a9c7efc538c577a280118e2c476444a0b">valid_name_code_point()</a>.</p>
 
 </div>
 </div>
-<a id="a60c339d5aee7371059eb48a85c56cc5b" name="a60c339d5aee7371059eb48a85c56cc5b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a60c339d5aee7371059eb48a85c56cc5b">&#9670;&#160;</a></span>is_ascii_letter_or_digit()</h2>
+<a id="aebe8e9c96ecf78495360b363873bf450" name="aebe8e9c96ecf78495360b363873bf450"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebe8e9c96ecf78495360b363873bf450">&#9670;&#160;</a></span>is_ascii_letter_or_digit()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">bool ada::idna::is_ascii_letter_or_digit </td>
@@ -877,11 +840,16 @@ Variables</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l10234">10234</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l10243">10243</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="#a617c679adf4f55f18d3cd997d98c9136">valid_name_code_point()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="#a9c7efc538c577a280118e2c476444a0b">valid_name_code_point()</a>.</p>
 
 </div>
 </div>
@@ -908,7 +876,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09423">9423</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09449">9449</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a63497445165fe20b9ecc26c791f1de55">is_forbidden_domain_code_point_table</a>.</p>
 
@@ -932,7 +900,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section see"><dt>See also</dt><dd><a href="https://www.unicode.org/reports/tr46/#Validity_Criteria">https://www.unicode.org/reports/tr46/#Validity_Criteria</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08855">8855</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08880">8880</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda831b2be749a96dc44d52a2a4f157cc4a">AL</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda057b30dd2eafb32307e5a4f76ba371c1">AN</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548ddaeb2cbb55b27f9f73c1655413f1df1d19">BN</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda994c4dd22eee0900705a2f51fa1e8efc">CS</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda96f4cb1c26cd9e6384d907f30d089c5a">EN</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda6d0675a048f080298c4f41c07abe26e0">ES</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548ddafc48151aee9d9d0dce07468e47f7fd7a">ET</a>, <a class="el" href="#a705c21b2e695ed27a12de6e7419cb540">find_direction()</a>, <a class="el" href="#aa39f46b87bed904cd88981b4531d475f">find_last_not_of_nsm()</a>, <a class="el" href="#a164d095ce497ec0086fcd41e3f7e311e">is_rtl_label()</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda4a022b59c5ef2d6b3e1f19d3b920c6ac">L</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda30c6bda4bdb26fb36fb63a5c0d024b91">NSM</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda22fa19d0cae8249a34f5a1ebb8e14dc4">ON</a>, and <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda311346d58b6d078f57fd93dc14c5c9b3">R</a>.</p>
 
@@ -963,7 +931,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08844">8844</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08869">8869</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda831b2be749a96dc44d52a2a4f157cc4a">AL</a>, <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda057b30dd2eafb32307e5a4f76ba371c1">AN</a>, <a class="el" href="#a705c21b2e695ed27a12de6e7419cb540">find_direction()</a>, and <a class="el" href="#ac7495198fe0aa95543b347ac9cc548dda311346d58b6d078f57fd93dc14c5c9b3">R</a>.</p>
 
@@ -986,9 +954,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02670">2670</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02689">2689</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="#a2544de17d530836df29f7c7311f97d5e">find_range_index()</a>, <a class="el" href="#a286fd1cff995b131e2b42adec0b1fd78">mappings</a>, and <a class="el" href="#a8e62e4eec9bc158c48bea8ee79e298d1">table</a>.</p>
+<p class="reference">References <a class="el" href="#a2544de17d530836df29f7c7311f97d5e">find_range_index()</a>, <a class="el" href="#a54bb219c892892d46fc36741cd3611c6">mappings</a>, and <a class="el" href="#a9fb9833c90451c74eed6de800c181382">table</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a939fc0c16e2a4fe433685bcd44ad9c75">from_ascii_to_ascii()</a>, and <a class="el" href="#a7d88f623d0a7e056cc89920b20e13dde">to_ascii()</a>.</p>
 
@@ -1010,7 +978,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Normalize the domain_name string to Unicode Normalization Form C. </p><dl class="section see"><dt>See also</dt><dd><a href="https://www.unicode.org/reports/tr46/#ProcessingStepNormalize">https://www.unicode.org/reports/tr46/#ProcessingStepNormalize</a></dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07818">7818</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07837">7837</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>, and <a class="el" href="#a28e25a08ef5ab3b8c5e25f77e9340566">decompose_nfc()</a>.</p>
 
@@ -1037,7 +1005,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07868">7868</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07887">7887</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a28815dfd4e31facb82c56c817dd1067f">adapt()</a>, <a class="el" href="#a0d1e1182a7cae8b4c1063dbc7614f88f">base</a>, <a class="el" href="#ac48f13e12efe5af075e58ca8ed4690ae">char_to_digit_value()</a>, <a class="el" href="#acdcde57bdbb6064aa3958878ae5f62f6">initial_bias</a>, <a class="el" href="#ab4504379d0bcd88ac427b8b70062d166">initial_n</a>, and <a class="el" href="#ad2a2a6422a2c30b768e64caa35c39020">tmax</a>.</p>
 
@@ -1060,7 +1028,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07708">7708</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07727">7727</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a8c81c2acabc058ce6376560052072984">get_ccc()</a>.</p>
 
@@ -1083,7 +1051,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09489">9489</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09520">9520</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a939fc0c16e2a4fe433685bcd44ad9c75">from_ascii_to_ascii()</a>, <a class="el" href="#a66015ea551d99b27023cc184e74ba63d">is_ascii()</a>, <a class="el" href="#ac39ccead632e6f2bf5049d1b643c5e1c">is_label_valid()</a>, <a class="el" href="#acc44ee8cb1484d14560236b659e12565">map()</a>, <a class="el" href="#a66bd7d6170f3e06b968c739e40a35967">normalize()</a>, <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>, <a class="el" href="#a3f4b1dede3010b9e5173fd8c91227ec0">utf32_length_from_utf8()</a>, <a class="el" href="#a742b05e0aba2245da3ac0ffd9ec678b6">utf32_to_punycode()</a>, and <a class="el" href="#ae3fa7abe424f63e3595039e90e3c316a">utf8_to_utf32()</a>.</p>
 
@@ -1106,7 +1074,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09586">9586</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09623">9623</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a66015ea551d99b27023cc184e74ba63d">is_ascii()</a>, <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>, <a class="el" href="#a43b333f48581059d57dbbba4e5b13e9a">utf32_to_utf8()</a>, <a class="el" href="#abf65afb975393474b917637a8ae045bb">utf8_length_from_utf32()</a>, and <a class="el" href="#af593f5293a356a9fc9bb3878a96b3eae">verify_punycode()</a>.</p>
 
@@ -1158,7 +1126,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07987">7987</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08012">8012</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a28815dfd4e31facb82c56c817dd1067f">adapt()</a>, <a class="el" href="#a0d1e1182a7cae8b4c1063dbc7614f88f">base</a>, <a class="el" href="#a273eb4809ead730a5835f426c059e7c7">digit_to_char()</a>, <a class="el" href="#acdcde57bdbb6064aa3958878ae5f62f6">initial_bias</a>, <a class="el" href="#ab4504379d0bcd88ac427b8b70062d166">initial_n</a>, and <a class="el" href="#ad2a2a6422a2c30b768e64caa35c39020">tmax</a>.</p>
 
@@ -1251,8 +1219,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a617c679adf4f55f18d3cd997d98c9136" name="a617c679adf4f55f18d3cd997d98c9136"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a617c679adf4f55f18d3cd997d98c9136">&#9670;&#160;</a></span>valid_name_code_point()</h2>
+<a id="a9c7efc538c577a280118e2c476444a0b" name="a9c7efc538c577a280118e2c476444a0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c7efc538c577a280118e2c476444a0b">&#9670;&#160;</a></span>valid_name_code_point()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1260,7 +1228,7 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">bool ada::idna::valid_name_code_point </td>
           <td>(</td>
-          <td class="paramtype">char32_t</td>          <td class="paramname"><span class="paramname"><em>input</em></span>, </td>
+          <td class="paramtype">char32_t</td>          <td class="paramname"><span class="paramname"><em>code_point</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1270,11 +1238,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l10239">10239</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l10248">10248</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="#a47aada681d4780c3eb5c5c511d90070d">id_continue</a>, <a class="el" href="#a3188969a08d1397ff790ffb806ea70e2">id_start</a>, <a class="el" href="#ad85111b0492c9043a7e12417046e4a4c">is_ascii_letter()</a>, and <a class="el" href="#a60c339d5aee7371059eb48a85c56cc5b">is_ascii_letter_or_digit()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a921cf2f1093ad9deefc910358a769567">ada::url_pattern_helpers::generate_pattern_string()</a>, and <a class="el" href="../../d2/da2/classada_1_1url__pattern__helpers_1_1Tokenizer.html#afc87fb810923ca39cdd13f873c1c5c4e">ada::url_pattern_helpers::Tokenizer::tokenize</a>.</p>
+<p class="reference">References <a class="el" href="#a1f0df00cd3de3776a736b852dc53043b">id_continue</a>, <a class="el" href="#ae4e5db0662ed8d36b33f56966b8bf7ad">id_start</a>, <a class="el" href="#a99a78891068910040b0da4db285c8d67">is_ascii_letter()</a>, and <a class="el" href="#aebe8e9c96ecf78495360b363873bf450">is_ascii_letter_or_digit()</a>.</p>
 
 </div>
 </div>
@@ -1293,7 +1259,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07929">7929</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07951">7951</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a28815dfd4e31facb82c56c817dd1067f">adapt()</a>, <a class="el" href="#a0d1e1182a7cae8b4c1063dbc7614f88f">base</a>, <a class="el" href="#ac48f13e12efe5af075e58ca8ed4690ae">char_to_digit_value()</a>, <a class="el" href="#acdcde57bdbb6064aa3958878ae5f62f6">initial_bias</a>, <a class="el" href="#ab4504379d0bcd88ac427b8b70062d166">initial_n</a>, and <a class="el" href="#ad2a2a6422a2c30b768e64caa35c39020">tmax</a>.</p>
 
@@ -1322,7 +1288,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07835">7835</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07854">7854</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a28815dfd4e31facb82c56c817dd1067f">adapt()</a>, <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>, <a class="el" href="#a742b05e0aba2245da3ac0ffd9ec678b6">utf32_to_punycode()</a>, and <a class="el" href="#af593f5293a356a9fc9bb3878a96b3eae">verify_punycode()</a>.</p>
 
@@ -1340,7 +1306,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l05856">5856</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l05875">5875</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a8c81c2acabc058ce6376560052072984">get_ccc()</a>.</p>
 
@@ -1358,7 +1324,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l05625">5625</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l05644">5644</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a8c81c2acabc058ce6376560052072984">get_ccc()</a>.</p>
 
@@ -1376,7 +1342,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l06931">6931</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l06950">6950</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>.</p>
 
@@ -1394,7 +1360,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07437">7437</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07456">7456</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>.</p>
 
@@ -1412,7 +1378,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l06732">6732</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l06751">6751</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>.</p>
 
@@ -1438,7 +1404,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07839">7839</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07858">7858</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a28815dfd4e31facb82c56c817dd1067f">adapt()</a>.</p>
 
@@ -1456,7 +1422,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02967">2967</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02986">2986</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#ac50c30d0d051c6f5b6463cedd5eda8e1">compute_decomposition_length()</a>, and <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1474,7 +1440,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l04611">4611</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l04630">4630</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1492,7 +1458,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02735">2735</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l02754">2754</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#ac50c30d0d051c6f5b6463cedd5eda8e1">compute_decomposition_length()</a>, and <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1518,7 +1484,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08089">8089</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l08114">8114</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a705c21b2e695ed27a12de6e7419cb540">find_direction()</a>.</p>
 
@@ -1544,7 +1510,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07622">7622</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07641">7641</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>, and <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1570,7 +1536,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07623">7623</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07642">7642</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>.</p>
 
@@ -1596,7 +1562,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07626">7626</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07645">7645</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1622,7 +1588,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07619">7619</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07638">7638</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>, <a class="el" href="#ac50c30d0d051c6f5b6463cedd5eda8e1">compute_decomposition_length()</a>, and <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1649,11 +1615,11 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">=</div>
 <div class="line">    <a class="code hl_variable" href="#a6b4fd5ad887b44c75b6961aab3698bdb">hangul_lcount</a> * <a class="code hl_variable" href="#ad4ec90e439aa4453a705d0e4e26d493d">hangul_vcount</a> * <a class="code hl_variable" href="#a07dc07ec6be862cf01e910353dcb481e">hangul_tcount</a></div>
-<div class="ttc" id="anamespaceada_1_1idna_html_a07dc07ec6be862cf01e910353dcb481e"><div class="ttname"><a href="#a07dc07ec6be862cf01e910353dcb481e">ada::idna::hangul_tcount</a></div><div class="ttdeci">constexpr char32_t hangul_tcount</div><div class="ttdef"><b>Definition</b> <a href="../../db/d2e/ada__idna_8cpp_source.html#l07625">ada_idna.cpp:7625</a></div></div>
-<div class="ttc" id="anamespaceada_1_1idna_html_a6b4fd5ad887b44c75b6961aab3698bdb"><div class="ttname"><a href="#a6b4fd5ad887b44c75b6961aab3698bdb">ada::idna::hangul_lcount</a></div><div class="ttdeci">constexpr char32_t hangul_lcount</div><div class="ttdef"><b>Definition</b> <a href="../../db/d2e/ada__idna_8cpp_source.html#l07623">ada_idna.cpp:7623</a></div></div>
-<div class="ttc" id="anamespaceada_1_1idna_html_ad4ec90e439aa4453a705d0e4e26d493d"><div class="ttname"><a href="#ad4ec90e439aa4453a705d0e4e26d493d">ada::idna::hangul_vcount</a></div><div class="ttdeci">constexpr char32_t hangul_vcount</div><div class="ttdef"><b>Definition</b> <a href="../../db/d2e/ada__idna_8cpp_source.html#l07624">ada_idna.cpp:7624</a></div></div>
+<div class="ttc" id="anamespaceada_1_1idna_html_a07dc07ec6be862cf01e910353dcb481e"><div class="ttname"><a href="#a07dc07ec6be862cf01e910353dcb481e">ada::idna::hangul_tcount</a></div><div class="ttdeci">constexpr char32_t hangul_tcount</div><div class="ttdef"><b>Definition</b> <a href="../../db/d2e/ada__idna_8cpp_source.html#l07644">ada_idna.cpp:7644</a></div></div>
+<div class="ttc" id="anamespaceada_1_1idna_html_a6b4fd5ad887b44c75b6961aab3698bdb"><div class="ttname"><a href="#a6b4fd5ad887b44c75b6961aab3698bdb">ada::idna::hangul_lcount</a></div><div class="ttdeci">constexpr char32_t hangul_lcount</div><div class="ttdef"><b>Definition</b> <a href="../../db/d2e/ada__idna_8cpp_source.html#l07642">ada_idna.cpp:7642</a></div></div>
+<div class="ttc" id="anamespaceada_1_1idna_html_ad4ec90e439aa4453a705d0e4e26d493d"><div class="ttname"><a href="#ad4ec90e439aa4453a705d0e4e26d493d">ada::idna::hangul_vcount</a></div><div class="ttdeci">constexpr char32_t hangul_vcount</div><div class="ttdef"><b>Definition</b> <a href="../../db/d2e/ada__idna_8cpp_source.html#l07643">ada_idna.cpp:7643</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07627">7627</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07646">7646</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>, <a class="el" href="#ac50c30d0d051c6f5b6463cedd5eda8e1">compute_decomposition_length()</a>, and <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1679,7 +1645,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07620">7620</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07639">7639</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>, and <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1705,7 +1671,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07625">7625</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07644">7644</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>, <a class="el" href="#ac50c30d0d051c6f5b6463cedd5eda8e1">compute_decomposition_length()</a>, and <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1731,7 +1697,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07621">7621</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07640">7640</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>, and <a class="el" href="#a1273085e8773bf04ccd97128cd3db1e0">decompose()</a>.</p>
 
@@ -1757,45 +1723,45 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07624">7624</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07643">7643</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a03db2791270405a5c682305c18c5d1cf">compose()</a>.</p>
 
 </div>
 </div>
-<a id="a47aada681d4780c3eb5c5c511d90070d" name="a47aada681d4780c3eb5c5c511d90070d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a47aada681d4780c3eb5c5c511d90070d">&#9670;&#160;</a></span>id_continue</h2>
+<a id="a1f0df00cd3de3776a736b852dc53043b" name="a1f0df00cd3de3776a736b852dc53043b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f0df00cd3de3776a736b852dc53043b">&#9670;&#160;</a></span>id_continue</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const uint32_t ada::idna::id_continue[1344][2]</td>
+          <td class="memname">const uint32_t ada::idna::id_continue[1393][2]</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09649">9649</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09686">9686</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="#a617c679adf4f55f18d3cd997d98c9136">valid_name_code_point()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="#a9c7efc538c577a280118e2c476444a0b">valid_name_code_point()</a>.</p>
 
 </div>
 </div>
-<a id="a3188969a08d1397ff790ffb806ea70e2" name="a3188969a08d1397ff790ffb806ea70e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3188969a08d1397ff790ffb806ea70e2">&#9670;&#160;</a></span>id_start</h2>
+<a id="ae4e5db0662ed8d36b33f56966b8bf7ad" name="ae4e5db0662ed8d36b33f56966b8bf7ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4e5db0662ed8d36b33f56966b8bf7ad">&#9670;&#160;</a></span>id_start</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const uint32_t ada::idna::id_start[740][2]</td>
+          <td class="memname">const uint32_t ada::idna::id_start[763][2]</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09988">9988</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l10038">10038</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="#a617c679adf4f55f18d3cd997d98c9136">valid_name_code_point()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="#a9c7efc538c577a280118e2c476444a0b">valid_name_code_point()</a>.</p>
 
 </div>
 </div>
@@ -1819,7 +1785,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07840">7840</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07859">7859</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>, <a class="el" href="#a742b05e0aba2245da3ac0ffd9ec678b6">utf32_to_punycode()</a>, and <a class="el" href="#af593f5293a356a9fc9bb3878a96b3eae">verify_punycode()</a>.</p>
 
@@ -1845,7 +1811,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07841">7841</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07860">7860</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>, <a class="el" href="#a742b05e0aba2245da3ac0ffd9ec678b6">utf32_to_punycode()</a>, and <a class="el" href="#af593f5293a356a9fc9bb3878a96b3eae">verify_punycode()</a>.</p>
 
@@ -1883,20 +1849,20 @@ Variables</h2></td></tr>
 <div class="line">    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,</div>
 <div class="line">    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09408">9408</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l09434">9434</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#aa9d13586049e9e107a2d372eeb81ddfc">is_forbidden_domain_code_point()</a>.</p>
 
 </div>
 </div>
-<a id="a286fd1cff995b131e2b42adec0b1fd78" name="a286fd1cff995b131e2b42adec0b1fd78"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a286fd1cff995b131e2b42adec0b1fd78">&#9670;&#160;</a></span>mappings</h2>
+<a id="a54bb219c892892d46fc36741cd3611c6" name="a54bb219c892892d46fc36741cd3611c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54bb219c892892d46fc36741cd3611c6">&#9670;&#160;</a></span>mappings</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const uint32_t ada::idna::mappings[5165]</td>
+          <td class="memname">const uint32_t ada::idna::mappings[5236]</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1927,25 +1893,25 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07838">7838</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07857">7857</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a28815dfd4e31facb82c56c817dd1067f">adapt()</a>.</p>
 
 </div>
 </div>
-<a id="a8e62e4eec9bc158c48bea8ee79e298d1" name="a8e62e4eec9bc158c48bea8ee79e298d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8e62e4eec9bc158c48bea8ee79e298d1">&#9670;&#160;</a></span>table</h2>
+<a id="a9fb9833c90451c74eed6de800c181382" name="a9fb9833c90451c74eed6de800c181382"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fb9833c90451c74eed6de800c181382">&#9670;&#160;</a></span>table</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const uint32_t ada::idna::table[8002][2]</td>
+          <td class="memname">const uint32_t ada::idna::table[8150][2]</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l00584">584</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l00590">590</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a2544de17d530836df29f7c7311f97d5e">find_range_index()</a>, and <a class="el" href="#acc44ee8cb1484d14560236b659e12565">map()</a>.</p>
 
@@ -1971,7 +1937,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07837">7837</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07856">7856</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a28815dfd4e31facb82c56c817dd1067f">adapt()</a>, <a class="el" href="#a2cfd434e37cade8764f29cc4d722b70f">punycode_to_utf32()</a>, <a class="el" href="#a742b05e0aba2245da3ac0ffd9ec678b6">utf32_to_punycode()</a>, and <a class="el" href="#af593f5293a356a9fc9bb3878a96b3eae">verify_punycode()</a>.</p>
 
@@ -1997,7 +1963,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07836">7836</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html#l07855">7855</a> of file <a class="el" href="../../db/d2e/ada__idna_8cpp_source.html">ada_idna.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a28815dfd4e31facb82c56c817dd1067f">adapt()</a>.</p>
 

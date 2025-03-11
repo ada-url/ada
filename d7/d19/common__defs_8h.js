@@ -15,6 +15,7 @@ var common__defs_8h =
     [ "ADA_DLLIMPORTEXPORT", "d7/d19/common__defs_8h.html#a41927ee5072cb509f59dd20742a67a30", null ],
     [ "ADA_END_DEBUG_BLOCK", "d7/d19/common__defs_8h.html#af35beca8a7c5e657d7e0ff6bc26e8ffb", null ],
     [ "ADA_FAIL", "d7/d19/common__defs_8h.html#a71028de8e23116c43559a4580619bac9", null ],
+    [ "ADA_INCLUDE_URL_PATTERN", "d7/d19/common__defs_8h.html#aaef1518dbdecd450d8377ca1716371ad", null ],
     [ "ADA_ISALIGNED_N", "d7/d19/common__defs_8h.html#a6a069f0d3d1400c28a80a8e5db9859bb", null ],
     [ "ada_lifetime_bound", "d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60", null ],
     [ "ada_never_inline", "d7/d19/common__defs_8h.html#a0349da887815dc7cf3b4229a6bb45669", null ],

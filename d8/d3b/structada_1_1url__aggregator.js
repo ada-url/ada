@@ -46,7 +46,6 @@ var structada_1_1url__aggregator =
     [ "to_string", "d8/d3b/structada_1_1url__aggregator.html#a516d5b8a33529dc8b8c95d52abc6e7de", null ],
     [ "validate", "d8/d3b/structada_1_1url__aggregator.html#a0f52858c3f10fee8bbb4ecc1b9d49a71", null ],
     [ "helpers::strip_trailing_spaces_from_opaque_path", "d8/d3b/structada_1_1url__aggregator.html#a28b8818deaba1f2f0a2280368303053e", null ],
-    [ "parse_url_pattern_impl", "d8/d3b/structada_1_1url__aggregator.html#ab685e99f335a38d3b8789dc340725fc0", null ],
     [ "parser::parse_url", "d8/d3b/structada_1_1url__aggregator.html#a34b21b95d1a7c2d7ff167f87f183c8ec", null ],
     [ "parser::parse_url_impl", "d8/d3b/structada_1_1url__aggregator.html#a6f3bce04c76ca3a9ed07bb72c4a6a484", null ],
     [ "parser::parse_url_impl", "d8/d3b/structada_1_1url__aggregator.html#a6f3bce04c76ca3a9ed07bb72c4a6a484", null ]

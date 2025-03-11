@@ -11,6 +11,5 @@ var searchData=
   ['ada_3a_3aserializers_8',['serializers',['../d9/dea/namespaceada_1_1serializers.html',1,'ada']]],
   ['ada_3a_3aunicode_9',['unicode',['../d2/dc3/namespaceada_1_1unicode.html',1,'ada']]],
   ['ada_3a_3aurl_5fpattern_5fhelpers_10',['url_pattern_helpers',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html',1,'ada']]],
-  ['ada_3a_3aurl_5fpattern_5fhelpers_3a_3aanonymous_5fnamespace_7burl_5fpattern_5fhelpers_2ecpp_7d_11',['anonymous_namespace{url_pattern_helpers.cpp}',['../d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html',1,'ada::url_pattern_helpers']]],
-  ['ada_3a_3aurl_5fpattern_5fregex_12',['url_pattern_regex',['../d5/d90/namespaceada_1_1url__pattern__regex.html',1,'ada']]]
+  ['ada_3a_3aurl_5fpattern_5fregex_11',['url_pattern_regex',['../d5/d90/namespaceada_1_1url__pattern__regex.html',1,'ada']]]
 ];

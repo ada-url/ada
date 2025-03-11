@@ -1,9 +1,5 @@
 var namespaceada_1_1url__pattern__helpers =
 [
-    [ "anonymous_namespace{url_pattern_helpers.cpp}", "d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html", [
-      [ "should_escape_regexp_char", "d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html#a33a6091c88d4f2a03e78793f0ee57fde", null ],
-      [ "escape_regexp_table", "d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html#ac384b54122eeb5a7ec1eed58757c6aa6", null ]
-    ] ],
     [ "constructor_string_parser", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html", "d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser" ],
     [ "token", "d0/dda/classada_1_1url__pattern__helpers_1_1token.html", "d0/dda/classada_1_1url__pattern__helpers_1_1token" ],
     [ "Tokenizer", "d2/da2/classada_1_1url__pattern__helpers_1_1Tokenizer.html", "d2/da2/classada_1_1url__pattern__helpers_1_1Tokenizer" ],

@@ -1,13 +1,5 @@
 var NAVTREEINDEX5 =
 {
-"globals.html":[12,1,0,0],
-"globals_a.html":[12,1,0,1],
-"globals_b.html":[12,1,0,2],
-"globals_defs.html":[12,1,3],
-"globals_e.html":[12,1,0,3],
-"globals_func.html":[12,1,1],
-"globals_g.html":[12,1,0,4],
-"globals_i.html":[12,1,0,5],
 "globals_l.html":[12,1,0,6],
 "globals_r.html":[12,1,0,7],
 "globals_type.html":[12,1,2],

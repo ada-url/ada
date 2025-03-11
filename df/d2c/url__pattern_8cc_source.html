@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.1.1</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.1</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -179,18 +179,18 @@ $(function(){initNavTree('df/d2c/url__pattern_8cc_source.html','../../'); initRe
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; [source, base_source] : sources) {</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">// Without base or options</span></div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keyword">auto</span> result =</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(source, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        ada::parse_url_pattern&lt;regex_provider&gt;(source, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>);</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordflow">if</span> (result) <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(*result);</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="comment">// Testing with base_url</span></div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    std::string_view base_source_view(base_source.data(), base_source.length());</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">auto</span> result_with_base = <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">auto</span> result_with_base = ada::parse_url_pattern&lt;regex_provider&gt;(</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        source, &amp;base_source_view, <span class="keyword">nullptr</span>);</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordflow">if</span> (result_with_base) <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(*result_with_base);</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="comment">// Testing with base_url and options</span></div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <a class="code hl_struct" href="../../d8/dfb/structada_1_1url__pattern__options.html">ada::url_pattern_options</a> options{.ignore_case = fdp.ConsumeBool()};</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keyword">auto</span> result_with_base_and_options = <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keyword">auto</span> result_with_base_and_options = ada::parse_url_pattern&lt;regex_provider&gt;(</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        source, &amp;base_source_view, &amp;options);</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">if</span> (result_with_base_and_options)</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>      <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(*result_with_base_and_options);</div>
@@ -204,7 +204,7 @@ $(function(){initNavTree('df/d2c/url__pattern_8cc_source.html','../../'); initRe
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                               .pathname = source,</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                               .search = source,</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                               .hash = source};</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keyword">auto</span> result_with_init = <a class="code hl_function" href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;regex_provider&gt;</a>(</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keyword">auto</span> result_with_init = ada::parse_url_pattern&lt;regex_provider&gt;(</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        init, &amp;base_source_view, <span class="keyword">nullptr</span>);</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keywordflow">if</span> (result_with_init) <a class="code hl_function" href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a>(*result_with_init);</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  }</div>
@@ -214,7 +214,6 @@ $(function(){initNavTree('df/d2c/url__pattern_8cc_source.html','../../'); initRe
 </div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="../../d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
 <div class="ttc" id="aada_8h_html"><div class="ttname"><a href="../../d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
-<div class="ttc" id="anamespaceada_html_a403c6e9eba6d4868ef39294f833c3b58"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern</a></div><div class="ttdeci">ada_warn_unused tl::expected&lt; url_pattern&lt; regex_provider &gt;, errors &gt; parse_url_pattern(std::variant&lt; std::string_view, url_pattern_init &gt; input, const std::string_view *base_url, const url_pattern_options *options)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d29/implementation-inl_8h_source.html#l00018">implementation-inl.h:18</a></div></div>
 <div class="ttc" id="astructada_1_1url__pattern__init_html"><div class="ttname"><a href="../../d4/d6f/structada_1_1url__pattern__init.html">ada::url_pattern_init</a></div><div class="ttdef"><b>Definition</b> <a href="../../de/d87/url__pattern__init_8h_source.html#l00036">url_pattern_init.h:36</a></div></div>
 <div class="ttc" id="astructada_1_1url__pattern__options_html"><div class="ttname"><a href="../../d8/dfb/structada_1_1url__pattern__options.html">ada::url_pattern_options</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d70/url__pattern_8h_source.html#l00213">url_pattern.h:213</a></div></div>
 <div class="ttc" id="aurl__pattern_8cc_html_a8c80ef3e17081bf7a1eb71cfddb6f87f"><div class="ttname"><a href="../../df/d2c/url__pattern_8cc.html#a8c80ef3e17081bf7a1eb71cfddb6f87f">exercise_result</a></div><div class="ttdeci">void exercise_result(auto result)</div><div class="ttdef"><b>Definition</b> <a href="#l00028">url_pattern.cc:28</a></div></div>

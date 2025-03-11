@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.1.1</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.1</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -272,7 +272,7 @@ URLPattern</h2>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Define a URLPattern</span></div>
-<div class="line"><span class="keyword">auto</span> pattern = <a class="code hl_function" href="dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern&lt;v8_regex_provider&gt;</a>(<span class="stringliteral">&quot;/books/:id(\\d+)&quot;</span>, <span class="stringliteral">&quot;https://example.com&quot;</span>);</div>
+<div class="line"><span class="keyword">auto</span> pattern = ada::parse_url_pattern&lt;v8_regex_provider&gt;(<span class="stringliteral">&quot;/books/:id(\\d+)&quot;</span>, <span class="stringliteral">&quot;https://example.com&quot;</span>);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Check validity</span></div>
 <div class="line"><span class="keywordflow">if</span> (!pattern) { <span class="keywordflow">return</span> EXIT_FAILURE; }</div>
@@ -282,7 +282,6 @@ URLPattern</h2>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Test a URL</span></div>
 <div class="line"><span class="keyword">auto</span> matched = pattern-&gt;test(<span class="stringliteral">&quot;https://example.com/books/123&quot;</span>);</div>
-<div class="ttc" id="anamespaceada_html_a403c6e9eba6d4868ef39294f833c3b58"><div class="ttname"><a href="dd/d64/namespaceada.html#a403c6e9eba6d4868ef39294f833c3b58">ada::parse_url_pattern</a></div><div class="ttdeci">ada_warn_unused tl::expected&lt; url_pattern&lt; regex_provider &gt;, errors &gt; parse_url_pattern(std::variant&lt; std::string_view, url_pattern_init &gt; input, const std::string_view *base_url, const url_pattern_options *options)</div><div class="ttdef"><b>Definition</b> <a href="de/d29/implementation-inl_8h_source.html#l00018">implementation-inl.h:18</a></div></div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md24"></a>
 C wrapper</h2>
 <p>See the file <code><a class="el" href="df/d61/ada__c_8h.html" title="Includes the C definitions for Ada. This is a C file, not C++.">include/ada_c.h</a></code> for our C interface. We expect ASCII or UTF-8 strings.</p>
@@ -350,7 +349,7 @@ C wrapper</h2>
 <div class="ttc" id="aada__c_8h_html_ada26e66474296e31335e8642678aef5b"><div class="ttname"><a href="df/d61/ada__c_8h.html#ada26e66474296e31335e8642678aef5b">ada_set_protocol</a></div><div class="ttdeci">bool ada_set_protocol(ada_url result, const char *input, size_t length)</div><div class="ttdef"><b>Definition</b> <a href="dd/dd6/ada__c_8cpp_source.html#l00262">ada_c.cpp:262</a></div></div>
 <div class="ttc" id="aada__c_8h_html_aea81956480d2eb9af02d30a72b1ce85b"><div class="ttname"><a href="df/d61/ada__c_8h.html#aea81956480d2eb9af02d30a72b1ce85b">ada_get_search</a></div><div class="ttdeci">ada_string ada_get_search(ada_url result)</div><div class="ttdef"><b>Definition</b> <a href="dd/dd6/ada__c_8cpp_source.html#l00203">ada_c.cpp:203</a></div></div>
 <div class="ttc" id="aada__c_8h_html_af7b3afce219ea6e237ffe07044e8604e"><div class="ttname"><a href="df/d61/ada__c_8h.html#af7b3afce219ea6e237ffe07044e8604e">ada_set_hash</a></div><div class="ttdeci">void ada_set_hash(ada_url result, const char *input, size_t length)</div><div class="ttdef"><b>Definition</b> <a href="dd/dd6/ada__c_8cpp_source.html#l00327">ada_c.cpp:327</a></div></div>
-<div class="ttc" id="anamespaceada_html_ae493e1ddb3e9a7bc3fd4f8935cd67b3b"><div class="ttname"><a href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a></div><div class="ttdeci">tl::expected&lt; result_type, ada::errors &gt; result</div><div class="ttdef"><b>Definition</b> <a href="dd/d6b/implementation_8h_source.html#l00021">implementation.h:21</a></div></div>
+<div class="ttc" id="anamespaceada_html_ae493e1ddb3e9a7bc3fd4f8935cd67b3b"><div class="ttname"><a href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a></div><div class="ttdeci">tl::expected&lt; result_type, ada::errors &gt; result</div><div class="ttdef"><b>Definition</b> <a href="dd/d6b/implementation_8h_source.html#l00024">implementation.h:24</a></div></div>
 <div class="ttc" id="astructada__owned__string_html"><div class="ttname"><a href="df/d1e/structada__owned__string.html">ada_owned_string</a></div><div class="ttdef"><b>Definition</b> <a href="df/d61/ada__c_8h_source.html#l00023">ada_c.h:23</a></div></div>
 <div class="ttc" id="astructada__string_html"><div class="ttname"><a href="d2/daa/structada__string.html">ada_string</a></div><div class="ttdef"><b>Definition</b> <a href="df/d61/ada__c_8h_source.html#l00017">ada_c.h:17</a></div></div>
 <div class="ttc" id="astructada__string_html_a091d98b7661f46d311cff4f06ab8889d"><div class="ttname"><a href="d2/daa/structada__string.html#a091d98b7661f46d311cff4f06ab8889d">ada_string::data</a></div><div class="ttdeci">const char * data</div><div class="ttdef"><b>Definition</b> <a href="df/d61/ada__c_8h_source.html#l00018">ada_c.h:18</a></div></div>

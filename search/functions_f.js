@@ -12,8 +12,7 @@ var searchData=
   ['set_5fprotocol_9',['set_protocol',['../dd/d03/structada_1_1url.html#acd6eb9a82c5039488ada48662eb4e2b6',1,'ada::url::set_protocol()'],['../d8/d3b/structada_1_1url__aggregator.html#a7f7b07f9fbc22f2af50b5399c7f2e11d',1,'ada::url_aggregator::set_protocol()']]],
   ['set_5fsearch_10',['set_search',['../dd/d03/structada_1_1url.html#a44cb7763da97c53b94dcd80f7384d7f4',1,'ada::url::set_search()'],['../d8/d3b/structada_1_1url__aggregator.html#acfcd384f47db823d3a11e3f535149a65',1,'ada::url_aggregator::set_search()']]],
   ['set_5fusername_11',['set_username',['../dd/d03/structada_1_1url.html#a6b33a760d59a23d11d62a304d7ae9882',1,'ada::url::set_username()'],['../d8/d3b/structada_1_1url__aggregator.html#afe3807fc6a0c1d7e7618a4d33037a603',1,'ada::url_aggregator::set_username()']]],
-  ['should_5fescape_5fregexp_5fchar_12',['should_escape_regexp_char',['../d4/d7b/namespaceada_1_1url__pattern__helpers_1_1anonymous__namespace_02url__pattern__helpers_8cpp_03.html#a33a6091c88d4f2a03e78793f0ee57fde',1,'ada::url_pattern_helpers::anonymous_namespace{url_pattern_helpers.cpp}']]],
-  ['size_13',['size',['../dd/dcb/structada_1_1url__search__params.html#a6c6bf0d199260a0ceaaf2270df3cceda',1,'ada::url_search_params']]],
-  ['sort_14',['sort',['../dd/dcb/structada_1_1url__search__params.html#a6d30f86d34538840cc97d988248a6f5f',1,'ada::url_search_params']]],
-  ['sort_5fmarks_15',['sort_marks',['../d5/ddb/namespaceada_1_1idna.html#a50bfbde0795e1b69056b441b888f3514',1,'ada::idna']]]
+  ['size_12',['size',['../dd/dcb/structada_1_1url__search__params.html#a6c6bf0d199260a0ceaaf2270df3cceda',1,'ada::url_search_params']]],
+  ['sort_13',['sort',['../dd/dcb/structada_1_1url__search__params.html#a6d30f86d34538840cc97d988248a6f5f',1,'ada::url_search_params']]],
+  ['sort_5fmarks_14',['sort_marks',['../d5/ddb/namespaceada_1_1idna.html#a50bfbde0795e1b69056b441b888f3514',1,'ada::idna']]]
 ];

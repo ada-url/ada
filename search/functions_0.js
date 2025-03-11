@@ -82,6 +82,5 @@ var searchData=
   ['add_5ftoken_5fwith_5fdefault_5flength_79',['add_token_with_default_length',['../d2/da2/classada_1_1url__pattern__helpers_1_1Tokenizer.html#a01c55407dd189c8464890d0e1f95bb71',1,'ada::url_pattern_helpers::Tokenizer']]],
   ['add_5ftoken_5fwith_5fdefaults_80',['add_token_with_defaults',['../d2/da2/classada_1_1url__pattern__helpers_1_1Tokenizer.html#a8953856436fe28247cfd3a58e6215569',1,'ada::url_pattern_helpers::Tokenizer']]],
   ['append_81',['append',['../dd/dcb/structada_1_1url__search__params.html#a99663e8026d089177c53ce2133812ef2',1,'ada::url_search_params']]],
-  ['ascii_5fhas_5fupper_5fcase_82',['ascii_has_upper_case',['../d5/ddb/namespaceada_1_1idna.html#ac6f73440f8dc6ef6ecd14b7a3a836b21',1,'ada::idna']]],
-  ['ascii_5fmap_83',['ascii_map',['../d5/ddb/namespaceada_1_1idna.html#a10ef8e085520b93791eef38bdabf5941',1,'ada::idna']]]
+  ['ascii_5fmap_82',['ascii_map',['../d5/ddb/namespaceada_1_1idna.html#a10ef8e085520b93791eef38bdabf5941',1,'ada::idna']]]
 ];
