@@ -23,6 +23,17 @@ std::string url_examples[] = {
     "20220908-1153-091014d07889c842a7bdc06e00fa711c9e04f049/modules/vendor/"
     "bower/modernizr/modernizr.js"};
 
+std::vector<std::pair<std::string_view, std::string>> url_pattern_examples = {
+    {"https://example.com/foo/bar", "/foo/bar"},
+    {"https://example.com/foo/bar/baz", "/foo/bar"},
+    {"https://example.com/foo.html", ":name.html"},
+    {"https://sub.example.com/foo/bar",
+     "http{s}?://{*.}?example.com/:product/:endpoint"},
+    {"https://example.com/?foo", "https://example.com?foo"},
+    {"https://example.com:8080/?foo", "https://example.com:8080?foo"},
+    {"https://example.com/?foo", "https://example.com/*\\?foo"},
+    {"https://example.com/bar?foo", "https://example.com/:name?foo"}};
+
 void init_data(const char* v = nullptr) {}
 
 double url_examples_bytes = []() -> double {

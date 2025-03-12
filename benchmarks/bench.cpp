@@ -26,6 +26,17 @@ std::string url_examples_default[] = {
 
 std::vector<std::string> url_examples;
 
+std::vector<std::pair<std::string_view, std::string>> url_pattern_examples = {
+    {"https://example.com/foo/bar", "/foo/bar"},
+    {"https://example.com/foo/bar/baz", "/foo/bar"},
+    {"https://example.com/foo.html", ":name.html"},
+    {"https://sub.example.com/foo/bar",
+     "http{s}?://{*.}?example.com/:product/:endpoint"},
+    {"https://example.com/?foo", "https://example.com?foo"},
+    {"https://example.com:8080/?foo", "https://example.com:8080?foo"},
+    {"https://example.com/?foo", "https://example.com/*\\?foo"},
+    {"https://example.com/bar?foo", "https://example.com/:name?foo"}};
+
 double url_examples_bytes = []() -> double {
   size_t bytes{0};
   for (std::string& url_string : url_examples) {
