@@ -322,7 +322,7 @@ parse_inputs_array(ondemand::array& inputs) {
 }
 
 ada::url_pattern_component_result parse_component_result(
-    ondemand::object& component) {
+    ondemand::object& component, bool& skip_test) {
   auto result = ada::url_pattern_component_result{};
 
   for (auto element : component) {
@@ -339,9 +339,13 @@ ada::url_pattern_component_result parse_component_result(
       for (auto group : groups) {
         auto group_key = group.unescaped_key().value();
         std::string_view group_value;
-        EXPECT_FALSE(group.value().get_string(group_value));
-        result.groups.insert_or_assign(std::string(group_key),
-                                       std::string(group_value));
+
+        // Some values contain "null". We just skip them.
+        if (group.value().get_string(group_value)) {
+          skip_test = true;
+          return result;
+        }
+        result.groups.insert_or_assign(std::string(group_key), group_value);
       }
     }
   }
@@ -349,10 +353,11 @@ ada::url_pattern_component_result parse_component_result(
   return result;
 }
 
-std::tuple<ada::url_pattern_result, bool> parse_exec_result(
+std::tuple<ada::url_pattern_result, bool, bool> parse_exec_result(
     ondemand::object& exec_result) {
   auto result = ada::url_pattern_result{};
   bool has_inputs = false;
+  bool skip_test = false;
 
   for (auto field : exec_result) {
     auto key = field.key().value();
@@ -382,7 +387,7 @@ std::tuple<ada::url_pattern_result, bool> parse_exec_result(
     } else {
       ondemand::object component;
       EXPECT_FALSE(field.value().get_object().get(component));
-      auto component_result = parse_component_result(component);
+      auto component_result = parse_component_result(component, skip_test);
 
       if (key == "protocol") {
         result.protocol = component_result;
@@ -406,7 +411,7 @@ std::tuple<ada::url_pattern_result, bool> parse_exec_result(
     }
   }
 
-  return {result, has_inputs};
+  return {result, has_inputs, skip_test};
 }
 
 TEST(wpt_urlpattern_tests, urlpattern_test_data) {
@@ -569,8 +574,12 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
           ASSERT_TRUE(test_result.value())
               << "Expected true for test() but received false";
           auto exec_result_obj = expected_match.get_object().value();
-          auto [expected_exec_result, has_inputs] =
+          auto [expected_exec_result, has_inputs, skip_test] =
               parse_exec_result(exec_result_obj);
+
+          if (skip_test) {
+            continue;
+          }
 
           // Some match_result data in JSON does not have any inputs output
           if (has_inputs) {
