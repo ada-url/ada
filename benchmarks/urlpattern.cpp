@@ -69,9 +69,31 @@ size_t count_urlpattern_exec_invalid() {
   auto pattern =
       ada::parse_url_pattern<ada::url_pattern_regex::std_regex_provider>(
           "https://*example.com/*");
+  if (!pattern) {
+    return std::size(url_examples);
+  }
 
   for (const std::string& url_example : url_examples) {
     auto result = pattern->exec(url_example);
+    if (!result) {
+      how_many++;
+    }
+  }
+
+  return how_many;
+}
+
+size_t count_urlpattern_test_invalid() {
+  size_t how_many = 0;
+  auto pattern =
+      ada::parse_url_pattern<ada::url_pattern_regex::std_regex_provider>(
+          "https://*example.com/*");
+  if (!pattern) {
+    return std::size(url_examples);
+  }
+
+  for (const std::string& url_example : url_examples) {
+    auto result = pattern->test(url_example);
     if (!result) {
       how_many++;
     }
@@ -212,10 +234,79 @@ static void BasicBench_AdaURL_URLPattern_Exec(benchmark::State& state) {
 
 BENCHMARK(BasicBench_AdaURL_URLPattern_Exec);
 
+static void BasicBench_AdaURL_URLPattern_Test(benchmark::State& state) {
+  auto pattern =
+      ada::parse_url_pattern<ada::url_pattern_regex::std_regex_provider>(
+          "https://*example.com/*");
+  if (!pattern) {
+    state.SkipWithError("Failed to parse test pattern");
+    return;
+  }
+
+  // volatile to prevent optimizations.
+  volatile size_t success = 0;
+
+  for (auto _ : state) {
+    for (std::string& url_example : url_examples) {
+      auto result = pattern->test(url_example);
+      if (result) {
+        success++;
+      }
+    }
+  }
+  if (collector.has_events()) {
+    event_aggregate aggregate{};
+    for (size_t i = 0; i < N; i++) {
+      std::atomic_thread_fence(std::memory_order_acquire);
+      collector.start();
+      for (std::string& url_example : url_examples) {
+        auto result = pattern->test(url_example);
+        if (result) {
+          success++;
+        }
+      }
+      std::atomic_thread_fence(std::memory_order_release);
+      event_count allocate_count = collector.end();
+      aggregate << allocate_count;
+    }
+    state.counters["cycles/url"] =
+        aggregate.best.cycles() / std::size(url_examples);
+    state.counters["instructions/url"] =
+        aggregate.best.instructions() / std::size(url_examples);
+    state.counters["instructions/cycle"] =
+        aggregate.best.instructions() / aggregate.best.cycles();
+    state.counters["instructions/byte"] =
+        aggregate.best.instructions() / url_examples_bytes;
+    state.counters["instructions/ns"] =
+        aggregate.best.instructions() / aggregate.best.elapsed_ns();
+    state.counters["GHz"] =
+        aggregate.best.cycles() / aggregate.best.elapsed_ns();
+    state.counters["ns/url"] =
+        aggregate.best.elapsed_ns() / std::size(url_examples);
+    state.counters["cycle/byte"] = aggregate.best.cycles() / url_examples_bytes;
+  }
+  (void)success;
+  state.counters["time/byte"] = benchmark::Counter(
+      url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate |
+                              benchmark::Counter::kInvert);
+  state.counters["time/url"] =
+      benchmark::Counter(double(std::size(url_examples)),
+                         benchmark::Counter::kIsIterationInvariantRate |
+                             benchmark::Counter::kInvert);
+  state.counters["speed"] = benchmark::Counter(
+      url_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+  state.counters["url/s"] =
+      benchmark::Counter(double(std::size(url_examples)),
+                         benchmark::Counter::kIsIterationInvariantRate);
+}
+
+BENCHMARK(BasicBench_AdaURL_URLPattern_Test);
+
 int main(int argc, char** argv) {
   init_data();
   size_t urlpattern_parse_bad_urls = count_urlpattern_parse_invalid();
   size_t urlpattern_exec_bad_urls = count_urlpattern_exec_invalid();
+  size_t urlpattern_test_bad_urls = count_urlpattern_test_invalid();
 
 #if (__APPLE__ && __aarch64__) || defined(__linux__)
   if (!collector.has_events()) {
@@ -241,6 +332,8 @@ int main(int argc, char** argv) {
             << std::to_string(urlpattern_parse_bad_urls) << "\n";
   badcounts << "urlpattern-exec---count of bad URLs       "
             << std::to_string(urlpattern_exec_bad_urls) << "\n";
+  badcounts << "urlpattern-test---count of bad URLs       "
+            << std::to_string(urlpattern_test_bad_urls) << "\n";
   benchmark::AddCustomContext("bad url patterns", badcounts.str());
 
   if (collector.has_events()) {
