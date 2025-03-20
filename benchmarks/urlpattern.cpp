@@ -34,9 +34,7 @@ std::string url_examples[] = {
 
 double url_examples_bytes;
 
-const char* default_file = nullptr;
-
-size_t init_data(const char* input = default_file) {
+size_t init_data() {
   // compute the number of bytes.
   auto compute = []() -> double {
     size_t bytes{0};
