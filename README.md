@@ -113,7 +113,7 @@ The following libraries are maintained by the Ada team and available under [Ada 
 - [R](https://github.com/schochastics/adaR): R wrapper for Ada
 - [PHP](https://github.com/lnear-dev/ada-url): PHP Wrapper for Ada URL
 - [LuaJIT](https://github.com/bungle/lua-resty-ada): LuaJIT FFI bindings for Ada
-- [Zig](https://github.com/alperencantez/zigada): Unofficial Zig bindings for Ada
+- [Zig](https://github.com/braheezy/ada-zig): Unofficial Zig bindings for Ada
 - [Python](https://github.com/TkTech/can_ada): Python bindings for Ada
 - [React Native](https://github.com/KusStar/react-native-fast-url): A Fast URL and URLSearchParams polyfill for React Native.
 - [D](https://github.com/kassane/ada-d): D bindings for Ada, `@nogc`, `nothrow` and `@safe` compat.
