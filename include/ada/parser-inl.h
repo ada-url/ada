@@ -96,7 +96,6 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   // TODO: Optimization opportunity.
   if (scheme::is_special(*processed_init->protocol)) {
     std::string_view port = processed_init->port.value();
-    helpers::trim_c0_whitespace(port);
     if (std::to_string(scheme::get_special_port(*processed_init->protocol)) ==
         port) {
       processed_init->port->clear();
