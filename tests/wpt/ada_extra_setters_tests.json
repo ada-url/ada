@@ -127,7 +127,7 @@
       "new_value": "",
       "expected": {
         "search": "",
-        "pathname": "space"
+        "pathname": "space   %20"
       }
     }
   ]
