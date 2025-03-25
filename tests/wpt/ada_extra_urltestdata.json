@@ -224,7 +224,7 @@
   {
     "input": "data:space    ?test#test",
     "base": "about:blank",
-    "href": "data:space    ?test#test",
+    "href": "data:space   %20?test#test",
     "origin": "null",
     "protocol": "data:",
     "username": "",
@@ -232,7 +232,7 @@
     "host": "",
     "hostname": "",
     "port": "",
-    "pathname": "space    ",
+    "pathname": "space   %20",
     "search": "?test",
     "hash": "#test"
   },

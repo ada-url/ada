@@ -196,8 +196,8 @@ TYPED_TEST(basic_tests, nodejs2) {
   ASSERT_EQ(url->get_search(), "?test");
   url->set_search("");
   ASSERT_EQ(url->get_search(), "");
-  ASSERT_EQ(url->get_pathname(), "space");
-  ASSERT_EQ(url->get_href(), "data:space");
+  ASSERT_EQ(url->get_pathname(), "space   %20");
+  ASSERT_EQ(url->get_href(), "data:space   %20");
   SUCCEED();
 }
 
@@ -206,8 +206,8 @@ TYPED_TEST(basic_tests, nodejs3) {
   ASSERT_EQ(url->get_search(), "?test");
   url->set_search("");
   ASSERT_EQ(url->get_search(), "");
-  ASSERT_EQ(url->get_pathname(), "space    ");
-  ASSERT_EQ(url->get_href(), "data:space    #test");
+  ASSERT_EQ(url->get_pathname(), "space   %20");
+  ASSERT_EQ(url->get_href(), "data:space   %20#test");
   SUCCEED();
 }
 
