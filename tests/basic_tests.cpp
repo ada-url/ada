@@ -505,3 +505,10 @@ TYPED_TEST(basic_tests, test_possible_asan) {
   ASSERT_EQ(url->get_protocol(), "file:");
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, test_issue_935) {
+  auto url = ada::parse<TypeParam>("file:///foo/.bar/../baz.js");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_pathname(), "/foo/baz.js");
+  SUCCEED();
+}
