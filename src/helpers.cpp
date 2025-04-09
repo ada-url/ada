@@ -586,10 +586,9 @@ ada_really_inline void parse_prepared_path(std::string_view input,
           break;
         } else {  // uncommon
           // only three cases matter: /./, /.. or a final /
-          trivial_path &=
-              !(slashdot + 2 == input.size() || input[slashdot + 2] == '.' ||
-                input[slashdot + 2] == '/');
           slashdot += 2;
+          trivial_path &= !(slashdot == input.size() ||
+                            input[slashdot] == '.' || input[slashdot] == '/');
         }
       }
     }
