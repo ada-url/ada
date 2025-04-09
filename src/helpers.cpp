@@ -578,14 +578,19 @@ ada_really_inline void parse_prepared_path(std::string_view input,
     // Note: input cannot be empty, it must at least contain one character ('.')
     // Note: we know that '\' is not present.
     if (input[0] != '.') {
-      size_t slashdot = input.find("/.");
-      if (slashdot == std::string_view::npos) {  // common case
-        trivial_path = true;
-      } else {  // uncommon
-        // only three cases matter: /./, /.. or a final /
-        trivial_path =
-            !(slashdot + 2 == input.size() || input[slashdot + 2] == '.' ||
-              input[slashdot + 2] == '/');
+      size_t slashdot = 0;
+      for (;;) {
+        slashdot = input.find("/.", slashdot);
+        if (slashdot == std::string_view::npos) {  // common case
+          trivial_path &= true;
+          break;
+        } else {  // uncommon
+          // only three cases matter: /./, /.. or a final /
+          trivial_path &=
+              !(slashdot + 2 == input.size() || input[slashdot + 2] == '.' ||
+                input[slashdot + 2] == '/');
+          slashdot += 2;
+        }
       }
     }
   }
