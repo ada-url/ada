@@ -5,7 +5,7 @@
 In order to release a new version of Ada, please update the
 following documents:
 
-- [CmakeLists.txt](../CmakeLists.txt)
+- [CMakeLists.txt](../CMakeLists.txt)
 - [Doxygen](../doxygen)
 - [ada_version.h](../include/ada/ada_version.h)
 
