@@ -26,4 +26,4 @@ jobs:
         cmake --install build
 
     - name: Test pkg-config
-      run: pkg-config --cflags --libs ada-url
+      run: pkg-config --cflags --libs ada
