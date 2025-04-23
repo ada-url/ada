@@ -2,10 +2,6 @@ name: Debian pkg-config
 
 on: [push, pull_request]
 
-defaults:
-  run:
-    shell: sh
-
 permissions:
   contents: read
 
@@ -21,11 +17,11 @@ jobs:
     - name: Install dependencies
       run: |
         apt -y update
-        apt -y --no-install-recommends install g++ cmake make pkg-config ninja
+        apt -y --no-install-recommends install g++ cmake make pkg-config
 
     - name: Build and install
       run: |
-        cmake -B build -G Ninja
+        cmake -B build
         cmake --build build
         cmake --install build
 

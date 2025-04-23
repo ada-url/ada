@@ -171,8 +171,8 @@ join_paths(PKGCONFIG_LIBDIR "\${prefix}" "${CMAKE_INSTALL_LIBDIR}")
 
 configure_file("ada-url.pc.in" "ada-url.pc" @ONLY)
 install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/ada-url.pc"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/ada-url.pc"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )
 
 if(is_top_project)
