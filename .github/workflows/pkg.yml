@@ -9,7 +9,7 @@ jobs:
   pkg-config:
     runs-on: ubuntu-latest
     container:
-      image: debian:11
+      image: debian:12
 
     steps:
     - uses: actions/checkout@v3
