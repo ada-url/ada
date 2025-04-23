@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         apt -y update
-        apt -y --no-install-recommends install g++ cmake make pkg-config
+        apt -y --no-install-recommends install g++ cmake make pkg-config ninja
 
     - name: Build and install
       run: |
