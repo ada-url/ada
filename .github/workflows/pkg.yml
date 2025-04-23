@@ -25,7 +25,7 @@ jobs:
 
     - name: Build and install
       run: |
-        cmake -B build
+        cmake -B build -G Ninja
         cmake --build build
         cmake --install build
 
