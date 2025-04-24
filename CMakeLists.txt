@@ -163,6 +163,18 @@ install(
   COMPONENT example_development
 )
 
+
+# pkg-config
+include(cmake/JoinPaths.cmake)
+join_paths(PKGCONFIG_INCLUDEDIR "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
+join_paths(PKGCONFIG_LIBDIR "\${prefix}" "${CMAKE_INSTALL_LIBDIR}")
+
+configure_file("ada.pc.in" "ada.pc" @ONLY)
+install(
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/ada.pc"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
+
 if(is_top_project)
   set(CPACK_PACKAGE_VENDOR "Ada Authors")
   set(CPACK_PACKAGE_CONTACT "yagiz@nizipli.com")
