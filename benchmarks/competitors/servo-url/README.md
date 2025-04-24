@@ -6,7 +6,7 @@ This folder includes FFI bindings for servo/url.
 
 - https://github.com/eqrion/cbindgen/blob/master/docs.md
 - https://gist.github.com/zbraniecki/b251714d77ffebbc73c03447f2b2c69f
-- https://michael-f-bryan.github.io/rust-ffi-guide/setting_up.html
+- https://github.com/Michael-F-Bryan/rust-ffi-guide/blob/master/book/setting_up.md
 
 ### Building
 
