@@ -15,6 +15,8 @@ ADA_POP_DISABLE_WARNINGS
 #include <emmintrin.h>
 #endif
 
+#include <ranges>
+
 namespace ada::unicode {
 
 constexpr bool is_tabs_or_newline(char c) noexcept {

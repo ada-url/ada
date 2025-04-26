@@ -8,6 +8,7 @@
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
 
+#include <ranges>
 #include <string>
 #include <string_view>
 
