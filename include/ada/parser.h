@@ -10,10 +10,8 @@
 
 #include "ada/expected.h"
 
-#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern_regex.h"
 #include "ada/url_pattern_init.h"
-#endif  // ADA_INCLUDE_URL_PATTERN
 
 /**
  * @private

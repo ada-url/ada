@@ -21,6 +21,7 @@
 #include <iostream>
 #endif  // ADA_TESTING
 
+#if ADA_INCLUDE_URL_PATTERN
 namespace ada {
 
 enum class url_pattern_part_type : uint8_t {
@@ -353,7 +354,6 @@ class url_pattern {
    */
   bool ignore_case_ = false;
 };
-
 }  // namespace ada
-
+#endif // ADA_INCLUDE_URL_PATTERN
 #endif

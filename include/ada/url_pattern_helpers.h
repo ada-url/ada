@@ -13,6 +13,8 @@
 #include <tuple>
 #include <vector>
 
+
+#if ADA_INCLUDE_URL_PATTERN
 namespace ada {
 enum class errors : uint8_t;
 }
@@ -344,5 +346,5 @@ std::string generate_segment_wildcard_regexp(
     url_pattern_compile_component_options options);
 
 }  // namespace ada::url_pattern_helpers
-
+#endif // ADA_INCLUDE_URL_PATTERN
 #endif

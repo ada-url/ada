@@ -4,9 +4,7 @@
 #ifndef ADA_IMPLEMENTATION_INL_H
 #define ADA_IMPLEMENTATION_INL_H
 
-#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern_regex.h"
-#endif  // ADA_INCLUDE_URL_PATTERN
 
 #include "ada/expected.h"
 #include "ada/implementation.h"
