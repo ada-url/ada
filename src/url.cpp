@@ -4,6 +4,7 @@
 
 #include <numeric>
 #include <algorithm>
+#include <ranges>
 #include <string>
 #include <string_view>
 
@@ -11,8 +12,7 @@ namespace ada {
 
 bool url::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
-  if (std::ranges::any_of(input.begin(), input.end(),
-                          ada::unicode::is_forbidden_host_code_point)) {
+  if (std::ranges::any_of(input, ada::unicode::is_forbidden_host_code_point)) {
     return is_valid = false;
   }
 

@@ -15,6 +15,8 @@ ADA_POP_DISABLE_WARNINGS
 #include <emmintrin.h>
 #endif
 
+#include <ranges>
+
 namespace ada::unicode {
 
 constexpr bool is_tabs_or_newline(char c) noexcept {
@@ -55,8 +57,7 @@ ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
-    return std::any_of(user_input.begin(), user_input.end(),
-                       is_tabs_or_newline);
+    return std::ranges::any_of(user_input, is_tabs_or_newline);
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
@@ -94,8 +95,7 @@ ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
-    return std::any_of(user_input.begin(), user_input.end(),
-                       is_tabs_or_newline);
+    return std::ranges::any_of(user_input, is_tabs_or_newline);
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
@@ -426,10 +426,9 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
-  auto pointer =
-      std::find_if(input.begin(), input.end(), [character_set](const char c) {
-        return character_sets::bit_at(character_set, c);
-      });
+  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
+    return character_sets::bit_at(character_set, c);
+  });
   ada_log("percent_encode done checking, moved to ",
           std::distance(input.begin(), pointer));
 

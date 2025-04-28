@@ -8,6 +8,7 @@
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
 
+#include <ranges>
 #include <string>
 #include <string_view>
 
@@ -227,7 +228,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 
   if (pointer != view.end() && *pointer == ':') {
     return parse_scheme_with_colon<true>(
-        std::string_view(view.data(), pointer - view.begin() + 1));
+        view.substr(0, pointer - view.begin() + 1));
   }
   return false;
 }
@@ -489,8 +490,8 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   ada_log("parse_host to_ascii succeeded ", *host, " [", host->size(),
           " bytes]");
 
-  if (std::any_of(host.value().begin(), host.value().end(),
-                  ada::unicode::is_forbidden_domain_code_point)) {
+  if (std::ranges::any_of(host.value(),
+                          ada::unicode::is_forbidden_domain_code_point)) {
     return is_valid = false;
   }
 
@@ -1182,8 +1183,7 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  if (std::any_of(input.begin(), input.end(),
-                  ada::unicode::is_forbidden_host_code_point)) {
+  if (std::ranges::any_of(input, ada::unicode::is_forbidden_host_code_point)) {
     return is_valid = false;
   }
 
