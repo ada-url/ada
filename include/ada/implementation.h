@@ -13,10 +13,7 @@
 #include "ada/url.h"
 #include "ada/common_defs.h"
 #include "ada/errors.h"
-
-#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern_init.h"
-#endif  // ADA_INCLUDE_URL_PATTERN
 
 namespace ada {
 

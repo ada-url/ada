@@ -30,13 +30,11 @@
 #include "ada/url_search_params.h"
 #include "ada/url_search_params-inl.h"
 
-#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern.h"
 #include "ada/url_pattern-inl.h"
 #include "ada/url_pattern_helpers.h"
 #include "ada/url_pattern_helpers-inl.h"
 #include "ada/url_pattern_regex.h"
-#endif  // ADA_INCLUDE_URL_PATTERN
 
 // Public API
 #include "ada/ada_version.h"

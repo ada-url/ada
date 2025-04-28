@@ -5,10 +5,8 @@
 #define ADA_PARSER_INL_H
 
 #include "ada/expected.h"
-#if ADA_INCLUDE_URL_PATTERN
 #include "ada/url_pattern.h"
 #include "ada/url_pattern_helpers.h"
-#endif  // ADA_INCLUDE_URL_PATTERN
 #include "ada/parser.h"
 
 #include <string>

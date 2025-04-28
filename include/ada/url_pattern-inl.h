@@ -13,6 +13,7 @@
 #include <string_view>
 #include <utility>
 
+#if ADA_INCLUDE_URL_PATTERN
 namespace ada {
 
 inline bool url_pattern_init::operator==(const url_pattern_init& other) const {
@@ -481,5 +482,5 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
 }
 
 }  // namespace ada
-
+#endif  // ADA_INCLUDE_URL_PATTERN
 #endif

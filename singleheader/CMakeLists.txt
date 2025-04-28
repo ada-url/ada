@@ -55,7 +55,11 @@ if (Python3_Interpreter_FOUND)
     add_executable(demo $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.cpp>)
     target_link_libraries(demo ada-singleheader-include-source)
 
-    add_test(demo demo)
+    add_executable(demo_no_url_pattern $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.cpp>)
+    target_link_libraries(demo_no_url_pattern ada-singleheader-include-source)
+    target_compile_definitions(demo_no_url_pattern PRIVATE ADA_INCLUDE_URL_PATTERN=0)
+
+    add_test(demo_no_url_pattern demo_no_url_pattern)
 
     add_executable(cdemo $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.c>)
     target_link_libraries(cdemo ada-singleheader-lib)

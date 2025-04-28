@@ -13,6 +13,7 @@
 #include "ada/url_pattern_helpers.h"
 #include "ada/implementation.h"
 
+#if ADA_INCLUDE_URL_PATTERN
 namespace ada::url_pattern_helpers {
 #ifdef ADA_TESTING
 inline std::string to_string(token_type type) {
@@ -1089,5 +1090,5 @@ constructor_string_parser<regex_provider>::parse(std::string_view input) {
 }
 
 }  // namespace ada::url_pattern_helpers
-
+#endif  // ADA_INCLUDE_URL_PATTERN
 #endif
