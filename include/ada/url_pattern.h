@@ -355,5 +355,5 @@ class url_pattern {
   bool ignore_case_ = false;
 };
 }  // namespace ada
-#endif // ADA_INCLUDE_URL_PATTERN
+#endif  // ADA_INCLUDE_URL_PATTERN
 #endif

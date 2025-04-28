@@ -120,5 +120,5 @@ struct url_pattern_init {
   std::optional<std::string> base_url{};
 };
 }  // namespace ada
-#endif // ADA_INCLUDE_URL_PATTERN
+#endif  // ADA_INCLUDE_URL_PATTERN
 #endif  // ADA_URL_PATTERN_INIT_H

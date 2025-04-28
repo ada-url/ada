@@ -57,5 +57,5 @@ class std_regex_provider final {
 #endif  // ADA_USE_UNSAFE_STD_REGEX_PROVIDER
 
 }  // namespace ada::url_pattern_regex
-#endif // ADA_INCLUDE_URL_PATTERN
+#endif  // ADA_INCLUDE_URL_PATTERN
 #endif  // ADA_URL_PATTERN_REGEX_H

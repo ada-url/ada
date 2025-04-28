@@ -1090,5 +1090,5 @@ constructor_string_parser<regex_provider>::parse(std::string_view input) {
 }
 
 }  // namespace ada::url_pattern_helpers
-#endif // ADA_INCLUDE_URL_PATTERN
+#endif  // ADA_INCLUDE_URL_PATTERN
 #endif

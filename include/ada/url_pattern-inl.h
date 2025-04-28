@@ -482,5 +482,5 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
 }
 
 }  // namespace ada
-#endif // ADA_INCLUDE_URL_PATTERN
+#endif  // ADA_INCLUDE_URL_PATTERN
 #endif
