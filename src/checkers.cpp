@@ -56,8 +56,8 @@ ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept {
   }
   // We have 0x followed by some characters, we need to check that they are
   // hexadecimals.
-  return std::ranges::all_of(view | std::views::drop(2),
-                             ada::unicode::is_lowercase_hex);
+  view.remove_prefix(2);
+  return std::ranges::all_of(view, ada::unicode::is_lowercase_hex);
 }
 
 // for use with path_signature, we include all characters that need percent

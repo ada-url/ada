@@ -624,7 +624,8 @@ result_type parse_url_impl(std::string_view user_input,
         // This is a really unlikely scenario in real world. We should not seek
         // to optimize it.
         if (view.ends_with(' ')) {
-          std::string modified_view = std::string(view.substr(0, view.size() - 1)) + "%20";
+          std::string modified_view =
+              std::string(view.substr(0, view.size() - 1)) + "%20";
           url.update_base_pathname(unicode::percent_encode(
               modified_view, character_sets::C0_CONTROL_PERCENT_ENCODE));
         } else {
