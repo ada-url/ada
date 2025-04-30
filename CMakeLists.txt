@@ -16,7 +16,10 @@ include(cmake/ada-flags.cmake)
 add_subdirectory(src)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
-
+option(ADA_TESTING "Whether to build tests." OFF)
+option(ADA_BENCHMARKS "Whether to build benchmarks." OFF)
+option(ADA_TOOLS "Whether to build tools." OFF)
+option(ADA_BUILD_SINGLE_HEADER_LIB "Whether to build the lib from the single-header files" OFF)
 # There are cases where when embedding ada as a dependency for other CMake
 # projects as submodules or subdirectories (via FetchContent) can lead to
 # errors due to CPM, so this is here to support disabling all the testing
