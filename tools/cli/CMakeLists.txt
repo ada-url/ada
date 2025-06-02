@@ -1,6 +1,35 @@
 add_executable(adaparse adaparse.cpp line_iterator.h)
 target_link_libraries(adaparse PRIVATE ada)
 target_include_directories(adaparse PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    # We are on an Apple platform, so we can use dead_strip and LTO
+    # to reduce the size of the final binary.
+    message(STATUS "Apple platform detected, using dead_strip and LTO")
+    target_link_options(adaparse PRIVATE "-Wl,-dead_strip")
+    target_compile_options(adaparse PRIVATE "-flto")
+    target_link_options(adaparse PRIVATE "-flto")
+endif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-libgcc-file-name OUTPUT_VARIABLE ADA_GCC_LIB)
+  get_filename_component(ADA_GCC_DIR "${ADA_GCC_LIB}" DIRECTORY)
+  message(STATUS "looking for static C++ library in " ${ADA_GCC_DIR})
+  find_library(LIBSTDCPP libstdc++.a PATHS "${ADA_GCC_DIR}")
+  if(LIBSTDCPP)
+    # static linkink for speed
+    message(STATUS "libstdc++.a found")
+    target_link_options(adaparse PRIVATE "-static-libstdc++")
+  else()
+    message(STATUS "libstdc++.a not found")
+  endif()
+  # Note that we are not under Apple at this time.
+  # We can use the -Wl,--gc-sections option to remove unused sections
+  # from the final binary, which can reduce the size of the binary.
+  target_link_options(adaparse PRIVATE "-Wl,--gc-sections")
+endif()
+
 if(MSVC AND BUILD_SHARED_LIBS)
   # Copy the ada dll into the directory
   add_custom_command(TARGET adaparse POST_BUILD        # Adds a post-build event
