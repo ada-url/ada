@@ -6,6 +6,7 @@
 #include "ada/parser.h"
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
+#include "ada/helpers.h"
 
 namespace ada {
 
@@ -49,6 +50,10 @@ std::string href_from_file(std::string_view input) {
 }
 
 bool can_parse(std::string_view input, const std::string_view* base_input) {
+  if (helpers::is_windows_file_path(input)) {
+    return false;
+  }
+
   ada::url_aggregator base_aggregator;
   ada::url_aggregator* base_pointer = nullptr;
 

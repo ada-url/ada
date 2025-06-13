@@ -388,6 +388,13 @@ TEST(basic_tests, can_parse) {
   std::string_view invalid_base = "!!!!!!!1";
   ASSERT_FALSE(ada::can_parse("/hello", &invalid_base));
   ASSERT_FALSE(ada::can_parse("!!!"));
+
+  ASSERT_FALSE(ada::can_parse("C:\\path\\file.node"));
+  ASSERT_FALSE(ada::can_parse("D:\\folder\\file.exe"));
+  ASSERT_FALSE(ada::can_parse("C:/path/file.node"));
+  ASSERT_TRUE(ada::can_parse("file:///C:/path/file.node"));
+  ASSERT_TRUE(ada::can_parse("https://example.com"));
+
   SUCCEED();
 }
 

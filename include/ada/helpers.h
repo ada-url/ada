@@ -231,6 +231,22 @@ inline int fast_digit_count(uint32_t x) noexcept {
       42949672960, 42949672960};
   return int((x + table[int_log2(x)]) >> 32);
 }
+
+/**
+ * Checks if the given input string is a Windows file path.
+ * A Windows file path starts with a drive letter followed by a colon and a backslash or forward slash.
+ * Example: "C:\path\file.node" or "D:/folder/file.exe"
+ * 
+ * @param input The string to check
+ * @return true if the input is a Windows file path, false otherwise
+ */
+inline bool is_windows_file_path(std::string_view input) noexcept {
+  return input.length() >= 3 && 
+         std::isalpha(input[0]) && 
+         input[1] == ':' && 
+         (input[2] == '\\' || input[2] == '/');
+}
+
 }  // namespace ada::helpers
 
 #endif  // ADA_HELPERS_H
