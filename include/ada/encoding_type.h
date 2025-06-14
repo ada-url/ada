@@ -25,7 +25,7 @@ enum class encoding_type {
 /**
  * Convert a encoding_type to string.
  */
-ada_warn_unused std::string to_string(encoding_type type);
+ada_warn_unused std::string_view to_string(encoding_type type);
 
 }  // namespace ada
 
