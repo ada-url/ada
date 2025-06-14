@@ -67,7 +67,7 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
   return result.is_valid;
 }
 
-ada_warn_unused std::string to_string(ada::encoding_type type) {
+ada_warn_unused std::string_view to_string(ada::encoding_type type) {
   switch (type) {
     case ada::encoding_type::UTF8:
       return "UTF-8";
