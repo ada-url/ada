@@ -929,12 +929,9 @@ final:
     // don't need to do anything.
   } else {
     ada_log("url_aggregator::parse_ipv4 completed and we need to update it");
-    // Optimization opportunity: Get rid of unnecessary string return in ipv4
-    // serializer.
-    // TODO: This is likely a bug because it goes back update_base_hostname, not
-    // what we want to do.
-    update_base_hostname(
-        ada::serializers::ipv4(ipv4));  // We have to reserialize the address.
+    std::string serialized_ipv4 = ada::serializers::ipv4(ipv4);
+
+    update_base_hostname(serialized_ipv4);
   }
   host_type = IPV4;
   ADA_ASSERT_TRUE(validate());
