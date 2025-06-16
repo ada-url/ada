@@ -12,6 +12,8 @@ target_compile_features(ada PUBLIC cxx_std_20)
 target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
 target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
+target_link_libraries(ada PRIVATE simdutf)
+
 if(MSVC)
   if("${MSVC_TOOLSET_VERSION}" STREQUAL "140")
     target_compile_options(ada INTERFACE /W0 /sdl)

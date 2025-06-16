@@ -6,6 +6,9 @@
 #include <cstdint>
 #include <cstring>
 
+#include "simdutf.h"
+
+
 namespace ada::idna {
 
 size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output) {
@@ -9523,11 +9526,13 @@ std::string to_ascii(std::string_view ut8_string) {
   }
   static const std::string error = "";
   // We convert to UTF-32
-  size_t utf32_length =
-      ada::idna::utf32_length_from_utf8(ut8_string.data(), ut8_string.size());
+  // size_t utf32_length =
+  //     ada::idna::utf32_length_from_utf8(ut8_string.data(), ut8_string.size());
+  size_t utf32_length = simdutf::utf32_length_from_utf8(ut8_string.data(), ut8_string.size());
   std::u32string utf32(utf32_length, '\0');
-  size_t actual_utf32_length = ada::idna::utf8_to_utf32(
-      ut8_string.data(), ut8_string.size(), utf32.data());
+  // size_t actual_utf32_length = ada::idna::utf8_to_utf32(
+  //     ut8_string.data(), ut8_string.size(), utf32.data());
+  size_t actual_utf32_length = simdutf::convert_utf8_to_utf32(ut8_string.data(), ut8_string.size(), utf32.data());
   if (actual_utf32_length == 0) {
     return error;
   }

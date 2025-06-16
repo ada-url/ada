@@ -44,21 +44,26 @@ if (Python3_Interpreter_FOUND)
   #
   add_library(ada-singleheader-include-source INTERFACE)
   target_include_directories(ada-singleheader-include-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  target_include_directories(ada-singleheader-include-source INTERFACE ${simdutf_SOURCE_DIR}/include)
   add_dependencies(ada-singleheader-include-source ada-singleheader-files)
 
   add_library(ada-singleheader-source INTERFACE)
   target_sources(ada-singleheader-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/ada.cpp>)
   target_link_libraries(ada-singleheader-source INTERFACE ada-singleheader-include-source)
+  target_link_libraries(ada-singleheader-source INTERFACE simdutf)
+
   if (ADA_TESTING OR ADA_BUILD_SINGLE_HEADER_LIB)
     add_library(ada-singleheader-lib STATIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/ada.cpp>)
+    target_link_libraries(ada-singleheader-lib simdutf)
+    target_include_directories(ada-singleheader-lib PRIVATE ${simdutf_SOURCE_DIR}/include)
   endif(ADA_TESTING OR ADA_BUILD_SINGLE_HEADER_LIB)
 
   if (ADA_TESTING)
     add_executable(demo $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.cpp>)
-    target_link_libraries(demo ada-singleheader-include-source)
+    target_link_libraries(demo ada-singleheader-include-source simdutf)
 
     add_executable(demo_no_url_pattern $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.cpp>)
-    target_link_libraries(demo_no_url_pattern ada-singleheader-include-source)
+    target_link_libraries(demo_no_url_pattern ada-singleheader-include-source simdutf)
     target_compile_definitions(demo_no_url_pattern PRIVATE ADA_INCLUDE_URL_PATTERN=0)
 
     add_test(demo_no_url_pattern demo_no_url_pattern)

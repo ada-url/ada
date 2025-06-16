@@ -78,6 +78,12 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   endif(ADA_TESTING AND EMSCRIPTEN)
 endif()
 
+CPMAddPackage(
+  NAME simdutf
+  GITHUB_REPOSITORY simdutf/simdutf
+  VERSION 7.0.0
+  OPTIONS "SIMDUTF_TESTS OFF" "SIMDUTF_TOOLS OFF"
+)
 
 add_library(ada::ada ALIAS ada)
 
