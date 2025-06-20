@@ -6,8 +6,9 @@
 #include <cstdint>
 #include <cstring>
 
+#ifdef ADA_USE_SIMDUTF
 #include "simdutf.h"
-
+#endif
 
 namespace ada::idna {
 
@@ -9526,13 +9527,21 @@ std::string to_ascii(std::string_view ut8_string) {
   }
   static const std::string error = "";
   // We convert to UTF-32
-  // size_t utf32_length =
-  //     ada::idna::utf32_length_from_utf8(ut8_string.data(), ut8_string.size());
+
+#ifdef ADA_USE_SIMDUTF
   size_t utf32_length = simdutf::utf32_length_from_utf8(ut8_string.data(), ut8_string.size());
+#else
+  size_t utf32_length = ada::idna::utf32_length_from_utf8(ut8_string.data(), ut8_string.size());
+#endif
+
   std::u32string utf32(utf32_length, '\0');
-  // size_t actual_utf32_length = ada::idna::utf8_to_utf32(
-  //     ut8_string.data(), ut8_string.size(), utf32.data());
+
+#ifdef ADA_USE_SIMDUTF
   size_t actual_utf32_length = simdutf::convert_utf8_to_utf32(ut8_string.data(), ut8_string.size(), utf32.data());
+#else
+  size_t actual_utf32_length = ada::idna::utf8_to_utf32(ut8_string.data(), ut8_string.size(), utf32.data());
+#endif
+
   if (actual_utf32_length == 0) {
     return error;
   }
@@ -9645,8 +9654,13 @@ std::string to_unicode(std::string_view input) {
           auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
                                                              tmp_buffer.size());
           std::string final_utf8(utf8_size, '\0');
+#ifdef ADA_USE_SIMDUTF
+          simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(), final_utf8.data())
+#else
           ada::idna::utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
                                    final_utf8.data());
+#endif
+
           output.append(final_utf8);
         } else {
           // ToUnicode never fails.  If any step fails, then the original input

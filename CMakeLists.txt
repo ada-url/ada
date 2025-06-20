@@ -20,6 +20,7 @@ option(ADA_TESTING "Whether to build tests." OFF)
 option(ADA_BENCHMARKS "Whether to build benchmarks." OFF)
 option(ADA_TOOLS "Whether to build tools." OFF)
 option(ADA_BUILD_SINGLE_HEADER_LIB "Whether to build the lib from the single-header files" OFF)
+option(ADA_USE_SIMDUTF "Whether to use SIMDUTF for IDNA" OFF)
 # There are cases where when embedding ada as a dependency for other CMake
 # projects as submodules or subdirectories (via FetchContent) can lead to
 # errors due to CPM, so this is here to support disabling all the testing
@@ -78,12 +79,14 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   endif(ADA_TESTING AND EMSCRIPTEN)
 endif()
 
-CPMAddPackage(
-  NAME simdutf
-  GITHUB_REPOSITORY simdutf/simdutf
-  VERSION 7.0.0
-  OPTIONS "SIMDUTF_TESTS OFF" "SIMDUTF_TOOLS OFF"
-)
+if(ADA_USE_SIMDUTF)
+  CPMAddPackage(
+    NAME simdutf
+    GITHUB_REPOSITORY simdutf/simdutf
+    VERSION 7.0.0
+    OPTIONS "SIMDUTF_TESTS OFF" "SIMDUTF_TOOLS OFF"
+  )
+endif()
 
 add_library(ada::ada ALIAS ada)
 
