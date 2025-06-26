@@ -776,10 +776,16 @@ bool url::set_port(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+
+  if (input.empty()) {
+    port = std::nullopt;
+    return true;
+  }
+
   std::string trimmed(input);
   helpers::remove_ascii_tab_or_newline(trimmed);
+
   if (trimmed.empty()) {
-    port = std::nullopt;
     return true;
   }
 
@@ -788,9 +794,14 @@ bool url::set_port(const std::string_view input) {
     return false;
   }
 
+  size_t len = 0;
+  while (len < trimmed.length() && ada::unicode::is_ascii_digit(trimmed[len])) {
+    len++;
+  }
+  std::string_view digits_to_parse = std::string_view(trimmed.data(), len);
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;
-  parse_port(trimmed);
+  parse_port(digits_to_parse);
   if (is_valid) {
     return true;
   }
