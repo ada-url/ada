@@ -298,11 +298,11 @@ bool url_aggregator::set_port(const std::string_view input) {
     return false;
   }
 
-  size_t len = 0;
-  while (len < trimmed.length() && ada::unicode::is_ascii_digit(trimmed[len])) {
-    len++;
-  }
-  std::string_view digits_to_parse = std::string_view(trimmed.data(), len);
+  // Find the first non-digit character to determine the length of digits
+  auto first_non_digit =
+      std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
+  std::string_view digits_to_parse =
+      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
 
   // Revert changes if parse_port fails.
   uint32_t previous_port = components.port;
