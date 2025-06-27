@@ -776,10 +776,16 @@ bool url::set_port(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+
+  if (input.empty()) {
+    port = std::nullopt;
+    return true;
+  }
+
   std::string trimmed(input);
   helpers::remove_ascii_tab_or_newline(trimmed);
+
   if (trimmed.empty()) {
-    port = std::nullopt;
     return true;
   }
 
@@ -788,9 +794,15 @@ bool url::set_port(const std::string_view input) {
     return false;
   }
 
+  // Find the first non-digit character to determine the length of digits
+  auto first_non_digit =
+      std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
+  std::string_view digits_to_parse =
+      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
+
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;
-  parse_port(trimmed);
+  parse_port(digits_to_parse);
   if (is_valid) {
     return true;
   }
