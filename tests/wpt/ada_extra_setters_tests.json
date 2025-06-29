@@ -144,5 +144,16 @@
         "pathname": "space   %20"
       }
     }
+  ],
+  "host": [
+    {
+      "href": "foo://path/to",
+      "new_value": ":80",
+      "expected": {
+        "href": "foo://path/to",
+        "host": "path",
+        "port": ""
+      }
+    }
   ]
 }
