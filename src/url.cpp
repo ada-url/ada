@@ -691,35 +691,67 @@ bool url::set_host_or_hostname(const std::string_view input) {
     // Note: the 'found_colon' value is true if and only if a colon was
     // encountered while not inside brackets.
     if (found_colon) {
+      // If buffer is the empty string, host-missing validation error, return
+      // failure.
+      std::string_view buffer = host_view.substr(0, location);
+      if (buffer.empty()) {
+        return false;
+      }
+
+      // If state override is given and state override is hostname state, then
+      // return failure.
       if constexpr (override_hostname) {
         return false;
       }
-      std::string_view buffer = new_host.substr(location + 1);
-      if (!buffer.empty()) {
-        set_port(buffer);
-      }
-    }
-    // If url is special and host_view is the empty string, validation error,
-    // return failure. Otherwise, if state override is given, host_view is the
-    // empty string, and either url includes credentials or url's port is
-    // non-null, return.
-    else if (host_view.empty() &&
-             (is_special() || has_credentials() || port.has_value())) {
-      return false;
-    }
 
-    // Let host be the result of host parsing host_view with url is not special.
-    if (host_view.empty() && !is_special()) {
-      host = "";
+      // Let host be the result of host parsing buffer with url is not special.
+      bool succeeded = parse_host(buffer);
+      if (!succeeded) {
+        host = std::move(previous_host);
+        update_base_port(previous_port);
+        return false;
+      }
+
+      // Set url's host to host, buffer to the empty string, and state to port
+      // state.
+      std::string_view port_buffer = new_host.substr(location + 1);
+      if (!port_buffer.empty()) {
+        set_port(port_buffer);
+      }
       return true;
     }
+    // Otherwise, if one of the following is true:
+    // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
+    // - url is special and c is U+005C (\)
+    else {
+      // If url is special and host_view is the empty string, host-missing
+      // validation error, return failure.
+      if (host_view.empty() && is_special()) {
+        return false;
+      }
 
-    bool succeeded = parse_host(host_view);
-    if (!succeeded) {
-      host = std::move(previous_host);
-      update_base_port(previous_port);
+      // Otherwise, if state override is given, host_view is the empty string,
+      // and either url includes credentials or url's port is non-null, then
+      // return failure.
+      if (host_view.empty() && (has_credentials() || port.has_value())) {
+        return false;
+      }
+
+      // Let host be the result of host parsing host_view with url is not
+      // special.
+      if (host_view.empty() && !is_special()) {
+        host = "";
+        return true;
+      }
+
+      bool succeeded = parse_host(host_view);
+      if (!succeeded) {
+        host = std::move(previous_host);
+        update_base_port(previous_port);
+        return false;
+      }
+      return true;
     }
-    return succeeded;
   }
 
   size_t location = new_host.find_first_of("/\\?");
@@ -776,10 +808,16 @@ bool url::set_port(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+
+  if (input.empty()) {
+    port = std::nullopt;
+    return true;
+  }
+
   std::string trimmed(input);
   helpers::remove_ascii_tab_or_newline(trimmed);
+
   if (trimmed.empty()) {
-    port = std::nullopt;
     return true;
   }
 
@@ -788,9 +826,15 @@ bool url::set_port(const std::string_view input) {
     return false;
   }
 
+  // Find the first non-digit character to determine the length of digits
+  auto first_non_digit =
+      std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
+  std::string_view digits_to_parse =
+      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
+
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;
-  parse_port(trimmed);
+  parse_port(digits_to_parse);
   if (is_valid) {
     return true;
   }
