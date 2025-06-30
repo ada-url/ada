@@ -83,7 +83,7 @@ if(ADA_USE_SIMDUTF)
   CPMAddPackage(
     NAME simdutf
     GITHUB_REPOSITORY simdutf/simdutf
-    VERSION 7.0.0
+    VERSION 7.3.2
     OPTIONS "SIMDUTF_TESTS OFF" "SIMDUTF_TOOLS OFF"
   )
 endif()
