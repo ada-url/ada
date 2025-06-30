@@ -65,3 +65,8 @@ if(ADA_INCLUDE_URL_PATTERN)
 else()
   target_compile_definitions(ada PRIVATE ADA_INCLUDE_URL_PATTERN=0)
 endif()
+
+if (ADA_USE_SIMDUTF)
+  target_link_libraries(ada PRIVATE simdutf)
+  target_compile_definitions(ada PRIVATE ADA_USE_SIMDUTF)
+endif()
