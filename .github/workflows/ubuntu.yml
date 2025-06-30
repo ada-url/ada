@@ -28,13 +28,14 @@ jobs:
         shared: [ON, OFF]
         cxx: [g++-12, clang++-15]
         runs-on: [ubuntu-22.04, ubuntu-22.04-arm]
+        simdutf: [OFF, ON]
     runs-on: ${{matrix.runs-on}}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
       - name: Prepare
-        run: cmake -D ADA_TESTING=ON -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -G Ninja -B build
+        run: cmake -D ADA_TESTING=ON -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -D ADA_USE_SIMDUTF=${{matrix.simdutf}} -G Ninja -B build
         env:
           CXX: ${{matrix.cxx}}
       - name: Build

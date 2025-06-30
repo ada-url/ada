@@ -1,4 +1,4 @@
-/* auto-generated on 2025-03-08 13:17:11 -0500. Do not edit! */
+/* auto-generated on 2025-06-26 23:04:30 -0300. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 
@@ -8021,7 +8021,7 @@ bool utf32_to_punycode(std::u32string_view input, std::string &out) {
       ++h;
       out.push_back(char(c));
     }
-    if (c > 0x10ffff || (c >= 0xd880 && c < 0xe000)) {
+    if (c > 0x10ffff || (c >= 0xd800 && c < 0xe000)) {
       return false;
     }
   }
@@ -9411,6 +9411,10 @@ bool is_label_valid(const std::u32string_view label) {
 #include <ranges>
 
 
+#ifdef ADA_USE_SIMDUTF
+#include "simdutf.h"
+#endif
+
 namespace ada::idna {
 
 bool constexpr is_ascii(std::u32string_view view) {
@@ -9523,11 +9527,20 @@ std::string to_ascii(std::string_view ut8_string) {
   }
   static const std::string error = "";
   // We convert to UTF-32
+
+#ifdef ADA_USE_SIMDUTF
+  size_t utf32_length =
+      simdutf::utf32_length_from_utf8(ut8_string.data(), ut8_string.size());
+  std::u32string utf32(utf32_length, '\0');
+  size_t actual_utf32_length = simdutf::convert_utf8_to_utf32(
+      ut8_string.data(), ut8_string.size(), utf32.data());
+#else
   size_t utf32_length =
       ada::idna::utf32_length_from_utf8(ut8_string.data(), ut8_string.size());
   std::u32string utf32(utf32_length, '\0');
   size_t actual_utf32_length = ada::idna::utf8_to_utf32(
       ut8_string.data(), ut8_string.size(), utf32.data());
+#endif
   if (actual_utf32_length == 0) {
     return error;
   }
@@ -9619,6 +9632,10 @@ std::string to_ascii(std::string_view ut8_string) {
 #include <string>
 
 
+#ifdef ADA_USE_SIMDUTF
+#include "simdutf.h"
+#endif
+
 namespace ada::idna {
 std::string to_unicode(std::string_view input) {
   std::string output;
@@ -9637,11 +9654,19 @@ std::string to_unicode(std::string_view input) {
       if (ada::idna::verify_punycode(label_view)) {
         std::u32string tmp_buffer;
         if (ada::idna::punycode_to_utf32(label_view, tmp_buffer)) {
+#ifdef ADA_USE_SIMDUTF
+          auto utf8_size = simdutf::utf8_length_from_utf32(tmp_buffer.data(),
+                                                           tmp_buffer.size());
+          std::string final_utf8(utf8_size, '\0');
+          simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
+                                         final_utf8.data());
+#else
           auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
                                                              tmp_buffer.size());
           std::string final_utf8(utf8_size, '\0');
           ada::idna::utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
                                    final_utf8.data());
+#endif
           output.append(final_utf8);
         } else {
           // ToUnicode never fails.  If any step fails, then the original input
