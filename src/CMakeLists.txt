@@ -14,6 +14,7 @@ target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/i
 
 if (ADA_USE_SIMDUTF)
   target_link_libraries(ada PRIVATE simdutf)
+  target_compile_definitions(ada PRIVATE ADA_USE_SIMDUTF)
 endif()
 
 if(MSVC)
