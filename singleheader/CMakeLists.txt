@@ -66,13 +66,15 @@ if (Python3_Interpreter_FOUND)
 
   if (ADA_TESTING)
     add_executable(demo $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.cpp>)
+    target_link_libraries(demo ada-singleheader-include-source)
     if (ADA_USE_SIMDUTF)
-      target_link_libraries(demo ada-singleheader-include-source simdutf)
+      target_link_libraries(demo simdutf)
     endif()
 
     add_executable(demo_no_url_pattern $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/demo.cpp>)
+    target_link_libraries(demo_no_url_pattern ada-singleheader-include-source)
     if (ADA_USE_SIMDUTF)
-      target_link_libraries(demo_no_url_pattern ada-singleheader-include-source simdutf)
+      target_link_libraries(demo_no_url_pattern simdutf)
     endif()
     target_compile_definitions(demo_no_url_pattern PRIVATE ADA_INCLUDE_URL_PATTERN=0)
 
