@@ -319,6 +319,12 @@ With tests (requires available local packages):
 - **Build**: `cmake -B build -DADA_TESTING=ON -D CPM_USE_LOCAL_PACKAGES=ON && cmake --build build`
 - **Test**: `ctest --output-on-failure --test-dir build`
 
+### Build options
+
+Ada provides several CMake options to customize the build:
+
+- `ADA_USE_SIMDUTF`: Enables SIMD-accelerated Unicode processing via simdutf (default: OFF)
+
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
 
 The project can also be built via docker using default docker file of repository with following commands.
