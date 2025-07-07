@@ -516,3 +516,10 @@ TYPED_TEST(basic_tests, test_issue_935) {
   ASSERT_EQ(no_dot->get_pathname(), "/foo/bar/baz.js");
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, test_issue_970) {
+  auto url = ada::parse<TypeParam>("http://foo/bar^baz");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_pathname(), "/bar%5Ebaz");
+  SUCCEED();
+}
