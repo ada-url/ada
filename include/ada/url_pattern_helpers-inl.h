@@ -15,7 +15,7 @@
 
 #if ADA_INCLUDE_URL_PATTERN
 namespace ada::url_pattern_helpers {
-#ifdef ADA_TESTING
+#if defined(ADA_TESTING) || defined(ADA_LOGGING)
 inline std::string to_string(token_type type) {
   switch (type) {
     case token_type::INVALID_CHAR:
@@ -42,7 +42,7 @@ inline std::string to_string(token_type type) {
       ada::unreachable();
   }
 }
-#endif  // ADA_TESTING
+#endif  // defined(ADA_TESTING) || defined(ADA_LOGGING)
 
 template <url_pattern_regex::regex_concept regex_provider>
 constexpr void constructor_string_parser<regex_provider>::rewind() {
