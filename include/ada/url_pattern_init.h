@@ -11,6 +11,7 @@
 #include <string_view>
 #include <string>
 #include <optional>
+#include <iostream>
 
 #if ADA_TESTING
 #include <iostream>
@@ -39,6 +40,17 @@ struct url_pattern_init {
     url,
     pattern,
   };
+
+  friend std::ostream& operator<<(std::ostream& os, process_type type) {
+    switch (type) {
+      case process_type::url:
+        return os << "url";
+      case process_type::pattern:
+        return os << "pattern";
+      default:
+        return os << "unknown";
+    }
+  }
 
   // All strings must be valid UTF-8.
   // @see https://urlpattern.spec.whatwg.org/#process-a-urlpatterninit
