@@ -13,6 +13,8 @@ ADA_POP_DISABLE_WARNINGS
 #include <arm_neon.h>
 #elif ADA_SSE2
 #include <emmintrin.h>
+#elif ADA_LSX
+#include <lsxintrin.h>
 #endif
 
 #include <ranges>
@@ -120,6 +122,38 @@ ada_really_inline bool has_tabs_or_newline(
         _mm_cmpeq_epi8(word, mask3));
   }
   return _mm_movemask_epi8(running) != 0;
+}
+#elif ADA_LSX
+ada_really_inline bool has_tabs_or_newline(
+    std::string_view user_input) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (user_input.size() < 16) {  // slow path
+    return std::ranges::any_of(user_input, is_tabs_or_newline);
+  }
+  // fast path for long strings (expected to be common)
+  size_t i = 0;
+  const __m128i mask1 = __lsx_vrepli_b('\r');
+  const __m128i mask2 = __lsx_vrepli_b('\n');
+  const __m128i mask3 = __lsx_vrepli_b('\t');
+  // If we supported SSSE3, we could use the algorithm that we use for NEON.
+  __m128i running{0};
+  for (; i + 15 < user_input.size(); i += 16) {
+    __m128i word = __lsx_vld((const __m128i*)(user_input.data() + i), 0);
+    running = __lsx_vor_v(
+        __lsx_vor_v(running, __lsx_vor_v(__lsx_vseq_b(word, mask1),
+                                         __lsx_vseq_b(word, mask2))),
+        __lsx_vseq_b(word, mask3));
+  }
+  if (i < user_input.size()) {
+    __m128i word = __lsx_vld(
+        (const __m128i*)(user_input.data() + user_input.length() - 16), 0);
+    running = __lsx_vor_v(
+        __lsx_vor_v(running, __lsx_vor_v(__lsx_vseq_b(word, mask1),
+                                         __lsx_vseq_b(word, mask2))),
+        __lsx_vseq_b(word, mask3));
+  }
+  if (__lsx_bz_v(running)) return false;
+  return true;
 }
 #else
 ada_really_inline bool has_tabs_or_newline(
