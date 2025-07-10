@@ -243,6 +243,10 @@ namespace ada {
 #define ADA_NEON 1
 #endif
 
+#if defined(__loongarch_sx)
+#define ADA_LSX 1
+#endif
+
 #ifndef __has_cpp_attribute
 #define ada_lifetime_bound
 #elif __has_cpp_attribute(msvc::lifetimebound)

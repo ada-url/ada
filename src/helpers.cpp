@@ -303,6 +303,58 @@ ada_really_inline size_t find_next_host_delimiter_special(
   }
   return size_t(view.length());
 }
+#elif ADA_LSX
+ada_really_inline size_t find_next_host_delimiter_special(
+    std::string_view view, size_t location) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (view.size() - location < 16) {  // slow path
+    for (size_t i = location; i < view.size(); i++) {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '\\' ||
+          view[i] == '?' || view[i] == '[') {
+        return i;
+      }
+    }
+    return size_t(view.size());
+  }
+  // fast path for long strings (expected to be common)
+  size_t i = location;
+  const __m128i mask1 = __lsx_vrepli_b(':');
+  const __m128i mask2 = __lsx_vrepli_b('/');
+  const __m128i mask3 = __lsx_vrepli_b('\\');
+  const __m128i mask4 = __lsx_vrepli_b('?');
+  const __m128i mask5 = __lsx_vrepli_b('[');
+
+  for (; i + 15 < view.size(); i += 16) {
+    __m128i word = __lsx_vld((const __m128i*)(view.data() + i), 0);
+    __m128i m1 = __lsx_vseq_b(word, mask1);
+    __m128i m2 = __lsx_vseq_b(word, mask2);
+    __m128i m3 = __lsx_vseq_b(word, mask3);
+    __m128i m4 = __lsx_vseq_b(word, mask4);
+    __m128i m5 = __lsx_vseq_b(word, mask5);
+    __m128i m =
+        __lsx_vor_v(__lsx_vor_v(__lsx_vor_v(m1, m2), __lsx_vor_v(m3, m4)), m5);
+    int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
+    if (mask != 0) {
+      return i + trailing_zeroes(mask);
+    }
+  }
+  if (i < view.size()) {
+    __m128i word =
+        __lsx_vld((const __m128i*)(view.data() + view.length() - 16), 0);
+    __m128i m1 = __lsx_vseq_b(word, mask1);
+    __m128i m2 = __lsx_vseq_b(word, mask2);
+    __m128i m3 = __lsx_vseq_b(word, mask3);
+    __m128i m4 = __lsx_vseq_b(word, mask4);
+    __m128i m5 = __lsx_vseq_b(word, mask5);
+    __m128i m =
+        __lsx_vor_v(__lsx_vor_v(__lsx_vor_v(m1, m2), __lsx_vor_v(m3, m4)), m5);
+    int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(mask);
+    }
+  }
+  return size_t(view.length());
+}
 #else
 // : / [ \\ ?
 static constexpr std::array<uint8_t, 256> special_host_delimiters =
@@ -430,6 +482,53 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     __m128i m5 = _mm_cmpeq_epi8(word, mask5);
     __m128i m = _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m4, m5));
     int mask = _mm_movemask_epi8(m);
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(mask);
+    }
+  }
+  return size_t(view.length());
+}
+#elif ADA_LSX
+ada_really_inline size_t find_next_host_delimiter(std::string_view view,
+                                                  size_t location) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (view.size() - location < 16) {  // slow path
+    for (size_t i = location; i < view.size(); i++) {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '?' ||
+          view[i] == '[') {
+        return i;
+      }
+    }
+    return size_t(view.size());
+  }
+  // fast path for long strings (expected to be common)
+  size_t i = location;
+  const __m128i mask1 = __lsx_vrepli_b(':');
+  const __m128i mask2 = __lsx_vrepli_b('/');
+  const __m128i mask4 = __lsx_vrepli_b('?');
+  const __m128i mask5 = __lsx_vrepli_b('[');
+
+  for (; i + 15 < view.size(); i += 16) {
+    __m128i word = __lsx_vld((const __m128i*)(view.data() + i), 0);
+    __m128i m1 = __lsx_vseq_b(word, mask1);
+    __m128i m2 = __lsx_vseq_b(word, mask2);
+    __m128i m4 = __lsx_vseq_b(word, mask4);
+    __m128i m5 = __lsx_vseq_b(word, mask5);
+    __m128i m = __lsx_vor_v(__lsx_vor_v(m1, m2), __lsx_vor_v(m4, m5));
+    int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
+    if (mask != 0) {
+      return i + trailing_zeroes(mask);
+    }
+  }
+  if (i < view.size()) {
+    __m128i word =
+        __lsx_vld((const __m128i*)(view.data() + view.length() - 16), 0);
+    __m128i m1 = __lsx_vseq_b(word, mask1);
+    __m128i m2 = __lsx_vseq_b(word, mask2);
+    __m128i m4 = __lsx_vseq_b(word, mask4);
+    __m128i m5 = __lsx_vseq_b(word, mask5);
+    __m128i m = __lsx_vor_v(__lsx_vor_v(m1, m2), __lsx_vor_v(m4, m5));
+    int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
     if (mask != 0) {
       return view.length() - 16 + trailing_zeroes(mask);
     }
