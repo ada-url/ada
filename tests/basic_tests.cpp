@@ -375,8 +375,8 @@ TYPED_TEST(basic_tests, node_issue_47889) {
   auto url = ada::parse<TypeParam>("..#", &*urlbase);
   ASSERT_TRUE(url);
   ASSERT_TRUE(url->has_opaque_path);
-  ASSERT_EQ(url->get_href(), "a:b#");
-  ASSERT_EQ(url->get_pathname(), "b");
+  ASSERT_EQ(url->get_href(), "a:b/#");
+  ASSERT_EQ(url->get_pathname(), "b/");
   SUCCEED();
 }
 

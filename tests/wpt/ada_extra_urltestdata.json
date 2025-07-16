@@ -274,7 +274,7 @@
   {
     "input": "..#",
     "base": "a:b",
-    "href": "a:b#",
+    "href": "a:b/#",
     "origin": null,
     "protocol": "a:",
     "username": "",
@@ -282,7 +282,7 @@
     "host": "",
     "hostname": "",
     "port": "",
-    "pathname": "b",
+    "pathname": "b/",
     "search": "",
     "hash": ""
   }
