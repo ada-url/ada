@@ -55,6 +55,7 @@ inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
   out.protocol_end = uint32_t(get_protocol().size());
 
   // Trailing index is always the next character of the current one.
+  // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
   size_t running_index = out.protocol_end;
 
   if (host.has_value()) {
