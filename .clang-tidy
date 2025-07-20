@@ -1,0 +1,17 @@
+Checks: >
+  bugprone-*,
+  -bugprone-assignment-in-if-condition,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-exception-escape,
+  -bugprone-implicit-widening-of-multiplication-result,
+  -bugprone-narrowing-conversions,
+  -bugprone-suspicious-include,
+  -bugprone-unhandled-exception-at-new,
+  clang-analyzer-*,
+
+# Turn all the warnings from the checks above into errors.
+WarningsAsErrors: '*'
+# Check first-party (non-system, non-vendored) headers.
+HeaderFilterRegex: '.*'
+ExcludeHeaderFilterRegex: 'build/_deps/'
+SystemHeaders: false

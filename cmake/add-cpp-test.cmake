@@ -30,6 +30,7 @@ function(add_cpp_test TEST_NAME)
     add_library(${TEST_NAME} STATIC ${ARGS_SOURCES})
   else(ARGS_LIBRARY)
     add_executable(${TEST_NAME} ${ARGS_SOURCES})
+    set_source_files_properties(${ARGS_SOURCES} PROPERTIES SKIP_LINTING ON)
   endif(ARGS_LIBRARY)
 
   # Add test

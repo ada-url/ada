@@ -393,6 +393,7 @@ result_type parse_url_impl(std::string_view user_input,
         url.copy_scheme(*base_url);
 
         // If c is U+002F (/), then set state to relative slash state.
+        // NOLINTBEGIN(bugprone-branch-clone)
         if ((input_position != input_size) &&
             (url_data[input_position] == '/')) {
           ada_log(
@@ -459,6 +460,7 @@ result_type parse_url_impl(std::string_view user_input,
             break;
           }
         }
+        // NOLINTEND(bugprone-branch-clone)
         input_position++;
         break;
       }

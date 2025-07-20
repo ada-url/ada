@@ -566,6 +566,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
   if (has_search()) {
     answer.append(",\n");
     answer.append("\t\"query\":\"");
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     helpers::encode_json(query.value(), back);
     answer.append("\"");
   }
