@@ -39,7 +39,7 @@ jobs:
 
       - name: Run clang-tidy
         run: >
-          cmake -B build -DADA_TESTING=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy &&
+          cmake -B build -DADA_TESTING=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-17 &&
           cmake --build build -j=4
         env:
-          CXX: clang++
+          CXX: clang++-17
