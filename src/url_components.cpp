@@ -1,6 +1,7 @@
 #include "ada/helpers.h"
 #include "ada/url_components-inl.h"
 
+#include <iterator>
 #include <string>
 
 namespace ada {
