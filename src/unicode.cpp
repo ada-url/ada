@@ -476,6 +476,7 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
   }
   ada_log("percent_encode appending ", std::distance(input.begin(), pointer),
           " bytes");
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   out.append(input.data(), std::distance(input.begin(), pointer));
   ada_log("percent_encode processing ", std::distance(pointer, input.end()),
           " bytes");
@@ -510,6 +511,7 @@ bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[], size_t index) {
   std::string out;
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   out.append(input.data(), index);
   auto pointer = input.begin() + index;
   for (; pointer != input.end(); pointer++) {

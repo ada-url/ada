@@ -9374,12 +9374,14 @@ bool is_label_valid(const std::u32string_view label) {
       for (size_t i = 0; i <= last_non_nsm_char; i++) {
         const direction d = find_direction(label[i]);
 
+        // NOLINTBEGIN(bugprone-assignment-in-if-condition)
         // In an RTL label, if an EN is present, no AN may be present, and vice
         // versa.
         if ((d == direction::EN && ((has_en = true) && has_an)) ||
             (d == direction::AN && ((has_an = true) && has_en))) {
           return false;
         }
+        // NOLINTEND(bugprone-assignment-in-if-condition)
 
         if (!(d == direction::R || d == direction::AL || d == direction::AN ||
               d == direction::EN || d == direction::ES || d == direction::CS ||

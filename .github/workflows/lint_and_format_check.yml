@@ -36,3 +36,10 @@ jobs:
         name: Lint with Ruff
         with:
           version: 0.6.0
+
+      - name: Run clang-tidy
+        run: >
+          cmake -B build -DADA_TESTING=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-17 &&
+          cmake --build build -j=4
+        env:
+          CXX: clang++-17
