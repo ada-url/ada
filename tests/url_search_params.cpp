@@ -412,8 +412,9 @@ TEST(url_search_params, test_character_set) {
   // - The userinfo percent-encode set is the path percent-encode set and U+002F
   // (/), U+003A (:), U+003B (;), U+003D (=), U+0040 (@), U+005B ([) to U+005E
   // (^), inclusive, and U+007C (|).
-  std::vector<char> unique_keys = {'/', ':', ';', '=', '@', '[',  ']', '^', '|',
-                                   '$', '&', '+', ',', '!', '\'', ')', '~'};
+  std::vector<char> unique_keys = {'/', ':', ';',  '=', '@', '[',
+                                   ']', '^', '|',  '$', '&', '+',
+                                   ',', '!', '\'', ')', '~', '\\'};
   for (auto& unique_key : unique_keys) {
     auto value = "value" + std::string(1, unique_key);
     search_params.set("key", value);
