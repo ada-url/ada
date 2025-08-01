@@ -1,2 +1,2 @@
-PyGithub==2.6.1
+PyGithub==2.7.0
 pytest==8.4.1
