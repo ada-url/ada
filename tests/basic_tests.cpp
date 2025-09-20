@@ -523,3 +523,31 @@ TYPED_TEST(basic_tests, test_issue_970) {
   ASSERT_EQ(url->get_pathname(), "/bar%5Ebaz");
   SUCCEED();
 }
+
+
+
+TYPED_TEST(basic_tests, test_workerd_issue_5144_1) {
+  auto url = ada::parse<TypeParam>("https://example.sub.com/??");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_search(), "??");
+  ASSERT_EQ(url->get_href(), "https://example.sub.com/??");
+
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, test_workerd_issue_5144_2) {
+  auto url = ada::parse<TypeParam>("https://example.sub.com/???");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_search(), "???");
+  ASSERT_EQ(url->get_href(), "https://example.sub.com/???");
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, test_workerd_issue_5144_3) {
+  auto url = ada::parse<TypeParam>("https://example.sub.com/????");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_search(), "????");
+  ASSERT_EQ(url->get_href(), "https://example.sub.com/????");
+  SUCCEED();
+}
+
