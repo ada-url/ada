@@ -523,3 +523,41 @@ TYPED_TEST(basic_tests, test_issue_970) {
   ASSERT_EQ(url->get_pathname(), "/bar%5Ebaz");
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, test_workerd_issue_5144_1) {
+  auto url = ada::parse<TypeParam>("https://example.sub.com/??");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_search(), "??");
+  ASSERT_EQ(url->get_href(), "https://example.sub.com/??");
+
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, test_workerd_issue_5144_2) {
+  auto url = ada::parse<TypeParam>("https://example.sub.com/???");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_search(), "???");
+  ASSERT_EQ(url->get_href(), "https://example.sub.com/???");
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, test_workerd_issue_5144_3) {
+  auto url = ada::parse<TypeParam>("https://example.sub.com/????");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_search(), "????");
+  ASSERT_EQ(url->get_href(), "https://example.sub.com/????");
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, test_workerd_issue_5144_4) {
+  using regex_provider = ada::url_pattern_regex::std_regex_provider;
+  auto init = ada::url_pattern_init{};
+  init.hostname = ":subdomain.:domain.:tld";
+  auto pattern = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(pattern);
+  ASSERT_TRUE(pattern->match("https://example.com"));
+  ASSERT_TRUE(pattern->match("https://example.com/?"));
+  ASSERT_TRUE(pattern->match("https://example.com/??"));
+
+  SUCCEED();
+}
