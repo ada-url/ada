@@ -410,7 +410,7 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   url->set_search(input);
   if (url->has_search()) {
     const auto search = url->get_search();
-    if (search.size() > 1) {
+    if (!search.empty()) {
       return std::string(search.substr(1));
     }
     return "";
