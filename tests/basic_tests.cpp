@@ -524,6 +524,7 @@ TYPED_TEST(basic_tests, test_issue_970) {
   SUCCEED();
 }
 
+// Ref: https://github.com/cloudflare/workerd/issues/5144
 TYPED_TEST(basic_tests, test_workerd_issue_5144_1) {
   auto url = ada::parse<TypeParam>("https://example.sub.com/??");
   ASSERT_TRUE(url);
@@ -533,6 +534,7 @@ TYPED_TEST(basic_tests, test_workerd_issue_5144_1) {
   SUCCEED();
 }
 
+// Ref: https://github.com/cloudflare/workerd/issues/5144
 TYPED_TEST(basic_tests, test_workerd_issue_5144_2) {
   auto url = ada::parse<TypeParam>("https://example.sub.com/???");
   ASSERT_TRUE(url);
@@ -541,6 +543,7 @@ TYPED_TEST(basic_tests, test_workerd_issue_5144_2) {
   SUCCEED();
 }
 
+// Ref: https://github.com/cloudflare/workerd/issues/5144
 TYPED_TEST(basic_tests, test_workerd_issue_5144_3) {
   auto url = ada::parse<TypeParam>("https://example.sub.com/????");
   ASSERT_TRUE(url);
@@ -549,6 +552,7 @@ TYPED_TEST(basic_tests, test_workerd_issue_5144_3) {
   SUCCEED();
 }
 
+// Ref: https://github.com/cloudflare/workerd/issues/5144
 TYPED_TEST(basic_tests, test_workerd_issue_5144_4) {
   using regex_provider = ada::url_pattern_regex::std_regex_provider;
   auto init = ada::url_pattern_init{};
@@ -559,5 +563,8 @@ TYPED_TEST(basic_tests, test_workerd_issue_5144_4) {
   ASSERT_TRUE(pattern->match("https://example.com/?"));
   ASSERT_TRUE(pattern->match("https://example.com/??"));
 
+  auto dummy_init = ada::url_pattern_init{};
+  dummy_init.search = "???";
+  ASSERT_TRUE(pattern->exec(std::move(dummy_init)));
   SUCCEED();
 }
