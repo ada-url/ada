@@ -410,7 +410,10 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   url->set_search(input);
   if (url->has_search()) {
     const auto search = url->get_search();
-    return std::string(search.substr(1));
+    if (search.size() > 1) {
+      return std::string(search.substr(1));
+    }
+    return "";
   }
   return tl::unexpected(errors::type_error);
 }
@@ -430,7 +433,10 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   // Return dummyURL's fragment.
   if (url->has_hash()) {
     const auto hash = url->get_hash();
-    return std::string(hash.substr(1));
+    if (hash.size() > 1) {
+      return std::string(hash.substr(1));
+    }
+    return "";
   }
   return tl::unexpected(errors::type_error);
 }
