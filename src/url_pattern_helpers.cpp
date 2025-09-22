@@ -433,7 +433,7 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   // Return dummyURL's fragment.
   if (url->has_hash()) {
     const auto hash = url->get_hash();
-    if (hash.size() > 1) {
+    if (!hash.empty()) {
       return std::string(hash.substr(1));
     }
     return "";
