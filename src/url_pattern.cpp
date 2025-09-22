@@ -341,7 +341,7 @@ tl::expected<std::string, errors> url_pattern_init::process_search(
   if (value.starts_with("?")) {
     value.remove_prefix(1);
   }
-  // We cannot assert that the value is not longer starting with a single
+  // We cannot assert that the value is no longer starting with a single
   // question mark because technically it can start. The question is whether or
   // not we should remove the first question mark. Ref:
   // https://github.com/ada-url/ada/pull/992 The spec is not clear on this.
