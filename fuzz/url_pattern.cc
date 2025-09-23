@@ -32,12 +32,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   };
   FuzzedDataProvider fdp(data, size);
   // We do not want to trigger arbitrary regex matching.
-  std::string source_1 =
-      "/" + to_ascii(fdp.ConsumeRandomLengthString(50)) + "/" +
-      to_ascii(fdp.ConsumeRandomLengthString(50));
-  std::string base_source_1 =
-      "/" + to_ascii(fdp.ConsumeRandomLengthString(50)) + "/" +
-      to_ascii(fdp.ConsumeRandomLengthString(50));
+  std::string source_1 = "/" + to_ascii(fdp.ConsumeRandomLengthString(50)) +
+                         "/" + to_ascii(fdp.ConsumeRandomLengthString(50));
+  std::string base_source_1 = "/" +
+                              to_ascii(fdp.ConsumeRandomLengthString(50)) +
+                              "/" + to_ascii(fdp.ConsumeRandomLengthString(50));
 
   std::string source_2 = "https://ada-url.com/*";
   std::string base_source_2 = "https://ada-url.com";
@@ -71,14 +70,30 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     std::string random_value = to_ascii(fdp.ConsumeRandomLengthString(50));
     ada::url_pattern_init init{};
     switch (field_index) {
-    case 0: init.protocol = random_value; break;
-    case 1: init.username = random_value; break;
-    case 2: init.password = random_value; break;
-    case 3: init.hostname = random_value; break;
-    case 4: init.port = random_value; break;
-    case 5: init.pathname = random_value; break;
-    case 6: init.search = random_value; break;
-    case 7: init.hash = random_value; break;
+      case 0:
+        init.protocol = random_value;
+        break;
+      case 1:
+        init.username = random_value;
+        break;
+      case 2:
+        init.password = random_value;
+        break;
+      case 3:
+        init.hostname = random_value;
+        break;
+      case 4:
+        init.port = random_value;
+        break;
+      case 5:
+        init.pathname = random_value;
+        break;
+      case 6:
+        init.search = random_value;
+        break;
+      case 7:
+        init.hash = random_value;
+        break;
     }
     auto result_with_init = ada::parse_url_pattern<regex_provider>(
         init, &base_source_view, nullptr);
