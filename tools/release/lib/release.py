@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import re
-from github import Repository, GitRelease
+from github.Repository import Repository
+from github.GitRelease import GitRelease
 
 
 def is_valid_tag(tag: str) -> bool:
@@ -15,7 +16,7 @@ def create_release(repository: Repository, tag: str) -> GitRelease:
 
     try:
         return repository.create_git_release(
-            tag=tag, name=tag, draft=False, prerelease=False, generate_release_notes=True
+            tag=tag, name=tag, draft=True, prerelease=False, generate_release_notes=True
         )
     except Exception as exp:
         raise Exception(f'create_release: Error creating release/tag {tag}: {exp!s}') from exp
