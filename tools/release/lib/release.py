@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import re
-from github import Repository, GitRelease
+from github.Repository import Repository
+from github.GitRelease import GitRelease
 
 
 def is_valid_tag(tag: str) -> bool:
