@@ -8,23 +8,6 @@
 
 using regex_provider = ada::url_pattern_regex::std_regex_provider;
 
-std::string bytesToAlphanumeric(const std::string& source) {
-  static const char alphanumeric[] =
-      "abcdefghijklmnopqrstuvwxyz"
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-      "0123456789";
-
-  std::string result;
-  result.reserve(source.size());
-
-  for (char byte : source) {
-    int index = static_cast<unsigned char>(byte) % (sizeof(alphanumeric) - 1);
-    result.push_back(alphanumeric[index]);
-  }
-
-  return result;
-}
-
 void exercise_result(auto result) {
   (void)result.get_protocol();
   (void)result.get_username();
@@ -39,14 +22,21 @@ void exercise_result(auto result) {
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+  auto to_ascii = [](const std::string& source) -> std::string {
+    std::string result;
+    result.reserve(source.size());
+    for (char c : source) {
+      result.push_back(static_cast<unsigned char>(c) % 128);
+    }
+    return result;
+  };
   FuzzedDataProvider fdp(data, size);
   // We do not want to trigger arbitrary regex matching.
-  std::string source_1 =
-      "/" + bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50)) + "/" +
-      bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50));
-  std::string base_source_1 =
-      "/" + bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50)) + "/" +
-      bytesToAlphanumeric(fdp.ConsumeRandomLengthString(50));
+  std::string source_1 = "/" + to_ascii(fdp.ConsumeRandomLengthString(50)) +
+                         "/" + to_ascii(fdp.ConsumeRandomLengthString(50));
+  std::string base_source_1 = "/" +
+                              to_ascii(fdp.ConsumeRandomLengthString(50)) +
+                              "/" + to_ascii(fdp.ConsumeRandomLengthString(50));
 
   std::string source_2 = "https://ada-url.com/*";
   std::string base_source_2 = "https://ada-url.com";
@@ -76,14 +66,35 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       exercise_result(*result_with_base_and_options);
 
     // Testing with url_pattern_init and base url.
-    ada::url_pattern_init init{.protocol = source,
-                               .username = source,
-                               .password = source,
-                               .hostname = source,
-                               .port = source,
-                               .pathname = source,
-                               .search = source,
-                               .hash = source};
+    int field_index = fdp.ConsumeIntegralInRange(0, 7);
+    std::string random_value = to_ascii(fdp.ConsumeRandomLengthString(50));
+    ada::url_pattern_init init{};
+    switch (field_index) {
+      case 0:
+        init.protocol = random_value;
+        break;
+      case 1:
+        init.username = random_value;
+        break;
+      case 2:
+        init.password = random_value;
+        break;
+      case 3:
+        init.hostname = random_value;
+        break;
+      case 4:
+        init.port = random_value;
+        break;
+      case 5:
+        init.pathname = random_value;
+        break;
+      case 6:
+        init.search = random_value;
+        break;
+      case 7:
+        init.hash = random_value;
+        break;
+    }
     auto result_with_init = ada::parse_url_pattern<regex_provider>(
         init, &base_source_view, nullptr);
     if (result_with_init) exercise_result(*result_with_init);
