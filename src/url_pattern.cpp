@@ -261,13 +261,13 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
 tl::expected<std::string, errors> url_pattern_init::process_protocol(
     std::string_view value, process_type type) {
   ada_log("process_protocol=", value, " [", type, "]");
-  // Let strippedValue be the given value with a single trailing U+003A (:)
-  // removed, if any.
-  if (value.ends_with(":")) {
-    value.remove_suffix(1);
-  }
   // If type is "pattern" then return strippedValue.
   if (type == process_type::pattern) {
+    // Let strippedValue be the given value with a single trailing U+003A (:)
+    // removed, if any.
+    if (value.ends_with(":")) {
+      value.remove_suffix(1);
+    }
     return std::string(value);
   }
   // Return the result of running canonicalize a protocol given strippedValue.
@@ -336,18 +336,17 @@ tl::expected<std::string, errors> url_pattern_init::process_pathname(
 
 tl::expected<std::string, errors> url_pattern_init::process_search(
     std::string_view value, process_type type) {
-  // Let strippedValue be the given value with a single leading U+003F (?)
-  // removed, if any.
-  if (value.starts_with("?")) {
-    value.remove_prefix(1);
-  }
-  // We cannot assert that the value is no longer starting with a single
-  // question mark because technically it can start. The question is whether or
-  // not we should remove the first question mark. Ref:
-  // https://github.com/ada-url/ada/pull/992 The spec is not clear on this.
-
   // If type is "pattern" then return strippedValue.
   if (type == process_type::pattern) {
+    // Let strippedValue be the given value with a single leading U+003F (?)
+    // removed, if any.
+    if (value.starts_with("?")) {
+      value.remove_prefix(1);
+    }
+    // We cannot assert that the value is no longer starting with a single
+    // question mark because technically it can start. The question is whether
+    // or not we should remove the first question mark. Ref:
+    // https://github.com/ada-url/ada/pull/992 The spec is not clear on this.
     return std::string(value);
   }
   // Return the result of running canonicalize a search given strippedValue.
@@ -356,14 +355,13 @@ tl::expected<std::string, errors> url_pattern_init::process_search(
 
 tl::expected<std::string, errors> url_pattern_init::process_hash(
     std::string_view value, process_type type) {
-  // Let strippedValue be the given value with a single leading U+0023 (#)
-  // removed, if any.
-  if (value.starts_with("#")) {
-    value.remove_prefix(1);
-  }
-  ADA_ASSERT_TRUE(!value.starts_with("#"));
   // If type is "pattern" then return strippedValue.
   if (type == process_type::pattern) {
+    // Let strippedValue be the given value with a single leading U+0023 (#)
+    // removed, if any.
+    if (value.starts_with("#")) {
+      value.remove_prefix(1);
+    }
     return std::string(value);
   }
   // Return the result of running canonicalize a hash given strippedValue.
