@@ -1,7 +1,8 @@
-#include "ada/common_defs.h"
+#include "ada/unicode.h"
+
 #include "ada/character_sets-inl.h"
 #include "ada/character_sets.h"
-#include "ada/unicode.h"
+#include "ada/common_defs.h"
 #include "ada/log.h"
 
 ADA_PUSH_DISABLE_ALL_WARNINGS
@@ -15,6 +16,8 @@ ADA_POP_DISABLE_WARNINGS
 #include <emmintrin.h>
 #elif ADA_LSX
 #include <lsxintrin.h>
+#elif ADA_RVV
+#include <riscv_vector.h>
 #endif
 
 #include <ranges>
@@ -154,6 +157,22 @@ ada_really_inline bool has_tabs_or_newline(
   }
   if (__lsx_bz_v(running)) return false;
   return true;
+}
+#elif ADA_RVV
+ada_really_inline bool has_tabs_or_newline(
+    std::string_view user_input) noexcept {
+  uint8_t* src = (uint8_t*)user_input.data();
+  for (size_t vl, n = user_input.size(); n > 0; n -= vl, src += vl) {
+    vl = __riscv_vsetvl_e8m1(n);
+    vuint8m1_t v = __riscv_vle8_v_u8m1(src, vl);
+    vbool8_t m1 = __riscv_vmseq(v, '\r', vl);
+    vbool8_t m2 = __riscv_vmseq(v, '\n', vl);
+    vbool8_t m3 = __riscv_vmseq(v, '\t', vl);
+    vbool8_t m = __riscv_vmor(__riscv_vmor(m1, m2, vl), m3, vl);
+    long idx = __riscv_vfirst(m, vl);
+    if (idx >= 0) return true;
+  }
+  return false;
 }
 #else
 ada_really_inline bool has_tabs_or_newline(
