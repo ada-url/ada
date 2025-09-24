@@ -248,6 +248,7 @@ namespace ada {
 #endif
 
 #if defined(__riscv_v) && __riscv_v_intrinsic >= 11000
+// Support RVV intrinsics v0.11 and above
 #define ADA_RVV 1
 #endif
 
