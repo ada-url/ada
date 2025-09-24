@@ -1,9 +1,9 @@
+#include <cstring>
+#include <sstream>
+
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
 #include "ada/scheme.h"
-
-#include <cstring>
-#include <sstream>
 
 namespace ada::helpers {
 
@@ -355,6 +355,42 @@ ada_really_inline size_t find_next_host_delimiter_special(
   }
   return size_t(view.length());
 }
+#elif ADA_RVV
+ada_really_inline size_t find_next_host_delimiter_special(
+    std::string_view view, size_t location) noexcept {
+  // The LUT approach was a bit slower on the SpacemiT X60, but I could see it
+  // beeing faster on future hardware.
+#if 0
+  // LUT generated using: s=":/\\?["; list(zip([((ord(c)>>2)&0xF)for c in s],s))
+  static const uint8_t tbl[16] = {
+    0xF, 0, 0, 0, 0, 0, '[', '\\', 0, 0, 0, '/', 0, 0, ':', '?'
+  };
+  vuint8m1_t vtbl = __riscv_vle8_v_u8m1(tbl, 16);
+#endif
+  uint8_t* src = (uint8_t*)view.data() + location;
+  for (size_t vl, n = view.size() - location; n > 0;
+       n -= vl, src += vl, location += vl) {
+    vl = __riscv_vsetvl_e8m1(n);
+    vuint8m1_t v = __riscv_vle8_v_u8m1(src, vl);
+#if 0
+    vuint8m1_t vidx = __riscv_vand(__riscv_vsrl(v, 2, vl), 0xF, vl);
+    vuint8m1_t vlut = __riscv_vrgather(vtbl, vidx, vl);
+    vbool8_t m = __riscv_vmseq(v, vlut, vl);
+#else
+    vbool8_t m1 = __riscv_vmseq(v, ':', vl);
+    vbool8_t m2 = __riscv_vmseq(v, '/', vl);
+    vbool8_t m3 = __riscv_vmseq(v, '?', vl);
+    vbool8_t m4 = __riscv_vmseq(v, '[', vl);
+    vbool8_t m5 = __riscv_vmseq(v, '\\', vl);
+    vbool8_t m = __riscv_vmor(
+        __riscv_vmor(__riscv_vmor(m1, m2, vl), __riscv_vmor(m3, m4, vl), vl),
+        m5, vl);
+#endif
+    long idx = __riscv_vfirst(m, vl);
+    if (idx >= 0) return location + idx;
+  }
+  return size_t(view.size());
+}
 #else
 // : / [ \\ ?
 static constexpr std::array<uint8_t, 256> special_host_delimiters =
@@ -534,6 +570,25 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     }
   }
   return size_t(view.length());
+}
+#elif ADA_RVV
+ada_really_inline size_t find_next_host_delimiter(std::string_view view,
+                                                  size_t location) noexcept {
+  uint8_t* src = (uint8_t*)view.data() + location;
+  for (size_t vl, n = view.size() - location; n > 0;
+       n -= vl, src += vl, location += vl) {
+    vl = __riscv_vsetvl_e8m1(n);
+    vuint8m1_t v = __riscv_vle8_v_u8m1(src, vl);
+    vbool8_t m1 = __riscv_vmseq(v, ':', vl);
+    vbool8_t m2 = __riscv_vmseq(v, '/', vl);
+    vbool8_t m3 = __riscv_vmseq(v, '?', vl);
+    vbool8_t m4 = __riscv_vmseq(v, '[', vl);
+    vbool8_t m =
+        __riscv_vmor(__riscv_vmor(m1, m2, vl), __riscv_vmor(m3, m4, vl), vl);
+    long idx = __riscv_vfirst(m, vl);
+    if (idx >= 0) return location + idx;
+  }
+  return size_t(view.size());
 }
 #else
 // : / [ ?

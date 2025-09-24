@@ -247,6 +247,10 @@ namespace ada {
 #define ADA_LSX 1
 #endif
 
+#if defined(__riscv_v) && __riscv_v_intrinsic >= 11000
+#define ADA_RVV 1
+#endif
+
 #ifndef __has_cpp_attribute
 #define ada_lifetime_bound
 #elif __has_cpp_attribute(msvc::lifetimebound)
