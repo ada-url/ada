@@ -97,7 +97,22 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     }
     auto result_with_init = ada::parse_url_pattern<regex_provider>(
         init, &base_source_view, nullptr);
-    if (result_with_init) exercise_result(*result_with_init);
+    if (result_with_init) {
+      exercise_result(*result_with_init);
+    }
+
+    ada::url_pattern_init hostname_init{};
+    hostname_init.hostname = "*";
+    auto valid_urlpattern =
+        ada::parse_url_pattern<regex_provider>(hostname_init, nullptr, nullptr);
+    std::string_view valid_input =
+        "https://www.yagiz.co/???this-is-my-search#####this-is-hash";
+    (void)valid_urlpattern->exec(valid_input, nullptr);
+    (void)valid_urlpattern->exec(valid_input, &base_source_view);
+    (void)valid_urlpattern->exec(base_source_view, nullptr);
+    (void)valid_urlpattern->test(valid_input, nullptr);
+    (void)valid_urlpattern->test(valid_input, &base_source_view);
+    (void)valid_urlpattern->test(base_source_view, nullptr);
   }
 
   return 0;
