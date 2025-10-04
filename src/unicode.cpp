@@ -10,7 +10,9 @@ ADA_PUSH_DISABLE_ALL_WARNINGS
 ADA_POP_DISABLE_WARNINGS
 
 #include <algorithm>
-#if ADA_NEON
+#if ADA_SVE
+#include <arm_sve.h>
+#elif ADA_NEON
 #include <arm_neon.h>
 #elif ADA_SSE2
 #include <emmintrin.h>
@@ -57,7 +59,26 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   }
   return non_ascii == 0;
 }
-#if ADA_NEON
+#if ADA_SVE
+ada_really_inline bool has_tabs_or_newline(
+    std::string_view user_input) noexcept {
+  const svuint8_t mask1 = svdup_n_u8('\r');
+  const svuint8_t mask2 = svdup_n_u8('\n');
+  const svuint8_t mask3 = svdup_n_u8('\t');
+  svbool_t running = svdup_n_b8(false);
+  const size_t lanes = svcntb();
+  for (size_t i = 0; i < user_input.size(); i += lanes) {
+    const svbool_t mask = svwhilelt_b8_u64(i, user_input.size());
+    svuint8_t word = svld1_u8(mask, (const uint8_t*)user_input.data() + i);
+    running = svorr_b_z(mask,
+                        svorr_b_z(mask, running,
+                                  svorr_b_z(mask, svcmpeq_u8(mask, word, mask1),
+                                            svcmpeq_u8(mask, word, mask2))),
+                        svcmpeq_u8(mask, word, mask3));
+  }
+  return svptest_any(svptrue_b8(), running);
+}
+#elif ADA_NEON
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
