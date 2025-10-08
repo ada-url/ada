@@ -45,9 +45,8 @@ ada_url ada_parse(const char* input, size_t length);
 ada_url ada_parse_with_base(const char* input, size_t input_length,
                             const char* base, size_t base_length);
 
-// ada_reparse and ada_reparse_with_base reparse
-// work just like ada_parse and ada_parse_with_base, except that
-// they reuse the memory allocated for the ada_url instance.
+// The ada_reparse and ada_reparse_with_base functions reparse a URL, working just like
+// ada_parse and ada_parse_with_base, except that they reuse the memory allocated for the ada_url instance.
 // This is more efficient if you want to parse many URLs.
 ada_url ada_reparse(ada_url result, const char* input, size_t length);
 ada_url ada_reparse_with_base(ada_url result, const char* input,
