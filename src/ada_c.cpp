@@ -70,15 +70,12 @@ ada_url ada_parse(const char* input, size_t length) noexcept {
       ada::parse<ada::url_aggregator>(std::string_view(input, length)));
 }
 
-
 ada_url ada_reparse(ada_url result, const char* input, size_t length) noexcept {
   using url_type = ada::result<ada::url_aggregator>;
   static_cast<url_type*>(result)->~url_type();
   return new (result) url_type(
       ada::parse<ada::url_aggregator>(std::string_view(input, length)));
 }
-
-
 
 ada_url ada_parse_with_base(const char* input, size_t input_length,
                             const char* base, size_t base_length) noexcept {
@@ -93,8 +90,9 @@ ada_url ada_parse_with_base(const char* input, size_t input_length,
       std::string_view(input, input_length), &base_out.value()));
 }
 
-ada_url ada_reparse_with_base(ada_url result, const char* input, size_t input_length,
-                            const char* base, size_t base_length) noexcept {
+ada_url ada_reparse_with_base(ada_url result, const char* input,
+                              size_t input_length, const char* base,
+                              size_t base_length) noexcept {
   using url_type = ada::result<ada::url_aggregator>;
   static_cast<url_type*>(result)->~url_type();
 
@@ -105,8 +103,9 @@ ada_url ada_reparse_with_base(ada_url result, const char* input, size_t input_le
     return new (result) ada::result<ada::url_aggregator>(base_out);
   }
 
-  return new (result) ada::result<ada::url_aggregator>(ada::parse<ada::url_aggregator>(
-      std::string_view(input, input_length), &base_out.value()));
+  return new (result)
+      ada::result<ada::url_aggregator>(ada::parse<ada::url_aggregator>(
+          std::string_view(input, input_length), &base_out.value()));
 }
 
 bool ada_can_parse(const char* input, size_t length) noexcept {
