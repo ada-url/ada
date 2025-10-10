@@ -239,6 +239,10 @@ namespace ada {
 #define ADA_SSE2 1
 #endif
 
+#if defined(__ARM_FEATURE_SVE)
+#define ADA_SVE 1
+#endif
+
 #if defined(__aarch64__) || defined(_M_ARM64)
 #define ADA_NEON 1
 #endif
