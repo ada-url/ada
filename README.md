@@ -69,7 +69,7 @@ Linux or macOS users might follow the following instructions if they have a rece
 1. Pull the library in a directory
    ```
    wget https://github.com/ada-url/ada/releases/download/v3.0.0/ada.cpp
-   wget https://github.com/ada-url/ada/releases/download/v3.0.00/ada.h
+   wget https://github.com/ada-url/ada/releases/download/v3.0.0/ada.h
    ```
 2. Create a new file named `demo.cpp` with this content:
    ```C++
