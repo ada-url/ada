@@ -741,4 +741,20 @@ bool ada_search_params_entries_iter_has_next(
   return (*r)->has_next();
 }
 
+typedef struct {
+  int major;
+  int minor;
+  int revision;
+} ada_version_components;
+
+const char* ada_get_version() { return ADA_VERSION; }
+
+ada_version_components ada_get_version_components() {
+  return ada_version_components{
+      .major = ada::ADA_VERSION_MAJOR,
+      .minor = ada::ADA_VERSION_MINOR,
+      .revision = ada::ADA_VERSION_REVISION,
+  };
+}
+
 }  // extern "C"

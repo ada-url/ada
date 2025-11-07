@@ -356,3 +356,15 @@ TEST(ada_c, ada_url_search_params) {
 
   SUCCEED();
 }
+
+TEST(ada_c, ada_get_version) {
+  std::string_view raw = ada_get_version();
+  ada_version_components parsed = ada_get_version_components();
+
+  char buffer[32];
+  snprintf(buffer, 32, "%d.%d.%d", parsed.major, parsed.minor, parsed.revision);
+
+  ASSERT_EQ(raw, std::string_view(buffer));
+
+  SUCCEED();
+}
