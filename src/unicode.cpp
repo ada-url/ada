@@ -10,7 +10,9 @@ ADA_PUSH_DISABLE_ALL_WARNINGS
 ADA_POP_DISABLE_WARNINGS
 
 #include <algorithm>
-#if ADA_NEON
+#if ADA_SSSE3
+#include <tmmintrin.h>
+#elif ADA_NEON
 #include <arm_neon.h>
 #elif ADA_SSE2
 #include <emmintrin.h>
@@ -57,7 +59,39 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   }
   return non_ascii == 0;
 }
-#if ADA_NEON
+#if ADA_SSSE3
+ada_really_inline bool has_tabs_or_newline(
+    std::string_view user_input) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (user_input.size() < 16) {  // slow path
+    return std::ranges::any_of(user_input, is_tabs_or_newline);
+  }
+  // fast path for long strings (expected to be common)
+  // Using SSSE3's _mm_shuffle_epi8 for table lookup (same approach as NEON)
+  size_t i = 0;
+  // Lookup table where positions 9, 10, 13 contain their own values
+  // Everything else is set to 1 so it won't match
+  const __m128i rnt =
+      _mm_setr_epi8(1, 0, 0, 0, 0, 0, 0, 0, 0, 9, 10, 0, 0, 13, 0, 0);
+  __m128i running = _mm_setzero_si128();
+  for (; i + 15 < user_input.size(); i += 16) {
+    __m128i word = _mm_loadu_si128((const __m128i*)(user_input.data() + i));
+    // Shuffle the lookup table using input bytes as indices
+    __m128i shuffled = _mm_shuffle_epi8(rnt, word);
+    // Compare: if shuffled value matches input, we found \t, \n, or \r
+    __m128i matches = _mm_cmpeq_epi8(shuffled, word);
+    running = _mm_or_si128(running, matches);
+  }
+  if (i < user_input.size()) {
+    __m128i word = _mm_loadu_si128(
+        (const __m128i*)(user_input.data() + user_input.length() - 16));
+    __m128i shuffled = _mm_shuffle_epi8(rnt, word);
+    __m128i matches = _mm_cmpeq_epi8(shuffled, word);
+    running = _mm_or_si128(running, matches);
+  }
+  return _mm_movemask_epi8(running) != 0;
+}
+#elif ADA_NEON
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
