@@ -10,7 +10,9 @@ ADA_PUSH_DISABLE_ALL_WARNINGS
 ADA_POP_DISABLE_WARNINGS
 
 #include <algorithm>
-#if ADA_NEON
+#if ADA_AVX512
+#include <immintrin.h>
+#elif ADA_NEON
 #include <arm_neon.h>
 #elif ADA_SSE2
 #include <emmintrin.h>
@@ -57,7 +59,35 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   }
   return non_ascii == 0;
 }
-#if ADA_NEON
+#if ADA_AVX512
+ada_really_inline bool has_tabs_or_newline(
+    std::string_view user_input) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (user_input.size() < 64) {  // slow path
+    return std::ranges::any_of(user_input, is_tabs_or_newline);
+  }
+  // fast path for long strings (expected to be common)
+  size_t i = 0;
+  const __m512i mask1 = _mm512_set1_epi8('\r');
+  const __m512i mask2 = _mm512_set1_epi8('\n');
+  const __m512i mask3 = _mm512_set1_epi8('\t');
+  __mmask64 running = 0;
+  for (; i + 63 < user_input.size(); i += 64) {
+    __m512i word = _mm512_loadu_si512((const __m512i*)(user_input.data() + i));
+    running |= _mm512_cmpeq_epi8_mask(word, mask1) |
+               _mm512_cmpeq_epi8_mask(word, mask2) |
+               _mm512_cmpeq_epi8_mask(word, mask3);
+  }
+  if (i < user_input.size()) {
+    __m512i word = _mm512_loadu_si512(
+        (const __m512i*)(user_input.data() + user_input.length() - 64));
+    running |= _mm512_cmpeq_epi8_mask(word, mask1) |
+               _mm512_cmpeq_epi8_mask(word, mask2) |
+               _mm512_cmpeq_epi8_mask(word, mask3);
+  }
+  return running != 0;
+}
+#elif ADA_NEON
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
