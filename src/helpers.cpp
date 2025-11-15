@@ -5,6 +5,10 @@
 #include "ada/common_defs.h"
 #include "ada/scheme.h"
 
+#if ADA_AVX512
+#include <immintrin.h>
+#endif
+
 namespace ada::helpers {
 
 template <typename out_iter>
@@ -175,10 +179,69 @@ ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
 #endif  // ADA_REGULAR_VISUAL_STUDIO
 }
 
+// 64-bit version for AVX512
+ada_really_inline int trailing_zeroes(uint64_t input_num) noexcept {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+  unsigned long ret;
+  _BitScanForward64(&ret, input_num);
+  return (int)ret;
+#else   // ADA_REGULAR_VISUAL_STUDIO
+  return __builtin_ctzll(input_num);
+#endif  // ADA_REGULAR_VISUAL_STUDIO
+}
+
 // starting at index location, this finds the next location of a character
 // :, /, \\, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
-#if ADA_NEON
+#if ADA_AVX512
+ada_really_inline size_t find_next_host_delimiter_special(
+    std::string_view view, size_t location) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (view.size() - location < 64) {  // slow path
+    for (size_t i = location; i < view.size(); i++) {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '\\' ||
+          view[i] == '?' || view[i] == '[') {
+        return i;
+      }
+    }
+    return size_t(view.size());
+  }
+  // fast path for long strings (expected to be common)
+  size_t i = location;
+  const __m512i mask1 = _mm512_set1_epi8(':');
+  const __m512i mask2 = _mm512_set1_epi8('/');
+  const __m512i mask3 = _mm512_set1_epi8('\\');
+  const __m512i mask4 = _mm512_set1_epi8('?');
+  const __m512i mask5 = _mm512_set1_epi8('[');
+
+  for (; i + 63 < view.size(); i += 64) {
+    __m512i word = _mm512_loadu_si512((const __m512i*)(view.data() + i));
+    __mmask64 m1 = _mm512_cmpeq_epi8_mask(word, mask1);
+    __mmask64 m2 = _mm512_cmpeq_epi8_mask(word, mask2);
+    __mmask64 m3 = _mm512_cmpeq_epi8_mask(word, mask3);
+    __mmask64 m4 = _mm512_cmpeq_epi8_mask(word, mask4);
+    __mmask64 m5 = _mm512_cmpeq_epi8_mask(word, mask5);
+    __mmask64 m = m1 | m2 | m3 | m4 | m5;
+    if (m != 0) {
+      return i + trailing_zeroes(static_cast<uint64_t>(m));
+    }
+  }
+  if (i < view.size()) {
+    __m512i word =
+        _mm512_loadu_si512((const __m512i*)(view.data() + view.length() - 64));
+    __mmask64 m1 = _mm512_cmpeq_epi8_mask(word, mask1);
+    __mmask64 m2 = _mm512_cmpeq_epi8_mask(word, mask2);
+    __mmask64 m3 = _mm512_cmpeq_epi8_mask(word, mask3);
+    __mmask64 m4 = _mm512_cmpeq_epi8_mask(word, mask4);
+    __mmask64 m5 = _mm512_cmpeq_epi8_mask(word, mask5);
+    __mmask64 m = m1 | m2 | m3 | m4 | m5;
+    if (m != 0) {
+      return view.length() - 64 + trailing_zeroes(static_cast<uint64_t>(m));
+    }
+  }
+  return size_t(view.length());
+}
+#elif ADA_NEON
 // The ada_make_uint8x16_t macro is necessary because Visual Studio does not
 // support direct initialization of uint8x16_t. See
 // https://developercommunity.visualstudio.com/t/error-C2078:-too-many-initializers-whe/402911?q=backend+neon
@@ -233,7 +296,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
-      return i + trailing_zeroes(is_non_zero);
+      return i + trailing_zeroes(static_cast<uint32_t>(is_non_zero));
     }
   }
 
@@ -246,7 +309,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
-      return view.length() - 16 + trailing_zeroes(is_non_zero);
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(is_non_zero));
     }
   }
   return size_t(view.size());
@@ -283,7 +346,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
         _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m3, m4)), m5);
     int mask = _mm_movemask_epi8(m);
     if (mask != 0) {
-      return i + trailing_zeroes(mask);
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   if (i < view.size()) {
@@ -298,7 +361,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
         _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m3, m4)), m5);
     int mask = _mm_movemask_epi8(m);
     if (mask != 0) {
-      return view.length() - 16 + trailing_zeroes(mask);
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   return size_t(view.length());
@@ -335,7 +398,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
         __lsx_vor_v(__lsx_vor_v(__lsx_vor_v(m1, m2), __lsx_vor_v(m3, m4)), m5);
     int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
     if (mask != 0) {
-      return i + trailing_zeroes(mask);
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   if (i < view.size()) {
@@ -350,7 +413,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
         __lsx_vor_v(__lsx_vor_v(__lsx_vor_v(m1, m2), __lsx_vor_v(m3, m4)), m5);
     int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
     if (mask != 0) {
-      return view.length() - 16 + trailing_zeroes(mask);
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   return size_t(view.length());
@@ -417,7 +480,52 @@ ada_really_inline size_t find_next_host_delimiter_special(
 // starting at index location, this finds the next location of a character
 // :, /, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
-#if ADA_NEON
+#if ADA_AVX512
+ada_really_inline size_t find_next_host_delimiter(std::string_view view,
+                                                  size_t location) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (view.size() - location < 64) {  // slow path
+    for (size_t i = location; i < view.size(); i++) {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '?' ||
+          view[i] == '[') {
+        return i;
+      }
+    }
+    return size_t(view.size());
+  }
+  // fast path for long strings (expected to be common)
+  size_t i = location;
+  const __m512i mask1 = _mm512_set1_epi8(':');
+  const __m512i mask2 = _mm512_set1_epi8('/');
+  const __m512i mask3 = _mm512_set1_epi8('?');
+  const __m512i mask4 = _mm512_set1_epi8('[');
+
+  for (; i + 63 < view.size(); i += 64) {
+    __m512i word = _mm512_loadu_si512((const __m512i*)(view.data() + i));
+    __mmask64 m1 = _mm512_cmpeq_epi8_mask(word, mask1);
+    __mmask64 m2 = _mm512_cmpeq_epi8_mask(word, mask2);
+    __mmask64 m3 = _mm512_cmpeq_epi8_mask(word, mask3);
+    __mmask64 m4 = _mm512_cmpeq_epi8_mask(word, mask4);
+    __mmask64 m = m1 | m2 | m3 | m4;
+    if (m != 0) {
+      return i + trailing_zeroes(static_cast<uint64_t>(m));
+    }
+  }
+  if (i < view.size()) {
+    __m512i word =
+        _mm512_loadu_si512((const __m512i*)(view.data() + view.length() - 64));
+    __mmask64 m1 = _mm512_cmpeq_epi8_mask(word, mask1);
+    __mmask64 m2 = _mm512_cmpeq_epi8_mask(word, mask2);
+    __mmask64 m3 = _mm512_cmpeq_epi8_mask(word, mask3);
+    __mmask64 m4 = _mm512_cmpeq_epi8_mask(word, mask4);
+    __mmask64 m = m1 | m2 | m3 | m4;
+    if (m != 0) {
+      return view.length() - 64 + trailing_zeroes(static_cast<uint64_t>(m));
+    }
+  }
+  return size_t(view.length());
+}
+#elif ADA_NEON
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
                                                   size_t location) noexcept {
   // first check for short strings in which case we do it naively.
@@ -459,7 +567,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
-      return i + trailing_zeroes(is_non_zero);
+      return i + trailing_zeroes(static_cast<uint32_t>(is_non_zero));
     }
   }
 
@@ -472,7 +580,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
       uint16_t is_non_zero = ~to_bitmask(is_zero);
-      return view.length() - 16 + trailing_zeroes(is_non_zero);
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(is_non_zero));
     }
   }
   return size_t(view.size());
@@ -506,7 +614,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     __m128i m = _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m4, m5));
     int mask = _mm_movemask_epi8(m);
     if (mask != 0) {
-      return i + trailing_zeroes(mask);
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   if (i < view.size()) {
@@ -519,7 +627,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     __m128i m = _mm_or_si128(_mm_or_si128(m1, m2), _mm_or_si128(m4, m5));
     int mask = _mm_movemask_epi8(m);
     if (mask != 0) {
-      return view.length() - 16 + trailing_zeroes(mask);
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   return size_t(view.length());
@@ -553,7 +661,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     __m128i m = __lsx_vor_v(__lsx_vor_v(m1, m2), __lsx_vor_v(m4, m5));
     int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
     if (mask != 0) {
-      return i + trailing_zeroes(mask);
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   if (i < view.size()) {
@@ -566,7 +674,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     __m128i m = __lsx_vor_v(__lsx_vor_v(m1, m2), __lsx_vor_v(m4, m5));
     int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
     if (mask != 0) {
-      return view.length() - 16 + trailing_zeroes(mask);
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   return size_t(view.length());
