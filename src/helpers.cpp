@@ -5,6 +5,10 @@
 #include "ada/common_defs.h"
 #include "ada/scheme.h"
 
+#if ADA_SSSE3
+#include <tmmintrin.h>
+#endif
+
 namespace ada::helpers {
 
 template <typename out_iter>
@@ -178,7 +182,64 @@ ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
 // starting at index location, this finds the next location of a character
 // :, /, \\, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
-#if ADA_NEON
+#if ADA_SSSE3
+ada_really_inline size_t find_next_host_delimiter_special(
+    std::string_view view, size_t location) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (view.size() - location < 16) {  // slow path
+    for (size_t i = location; i < view.size(); i++) {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '\\' ||
+          view[i] == '?' || view[i] == '[') {
+        return i;
+      }
+    }
+    return size_t(view.size());
+  }
+  // fast path for long strings (expected to be common)
+  // Using SSSE3's _mm_shuffle_epi8 for table lookup (same approach as NEON)
+  size_t i = location;
+  const __m128i low_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x01, 0x04, 0x04, 0x00, 0x00, 0x03);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
+  for (; i + 15 < view.size(); i += 16) {
+    __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    __m128i lowpart = _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    __m128i classify = _mm_and_si128(lowpart, highpart);
+    __m128i is_zero = _mm_cmpeq_epi8(classify, zero);
+    // _mm_movemask_epi8 returns a 16-bit mask in bits 0-15, with bits 16-31
+    // zero. After NOT (~), bits 16-31 become 1. We must mask to 16 bits to
+    // avoid false positives.
+    int mask = ~_mm_movemask_epi8(is_zero) & 0xFFFF;
+    if (mask != 0) {
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  if (i < view.size()) {
+    __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    __m128i lowpart = _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    __m128i classify = _mm_and_si128(lowpart, highpart);
+    __m128i is_zero = _mm_cmpeq_epi8(classify, zero);
+    // _mm_movemask_epi8 returns a 16-bit mask in bits 0-15, with bits 16-31
+    // zero. After NOT (~), bits 16-31 become 1. We must mask to 16 bits to
+    // avoid false positives.
+    int mask = ~_mm_movemask_epi8(is_zero) & 0xFFFF;
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  return size_t(view.size());
+}
+#elif ADA_NEON
 // The ada_make_uint8x16_t macro is necessary because Visual Studio does not
 // support direct initialization of uint8x16_t. See
 // https://developercommunity.visualstudio.com/t/error-C2078:-too-many-initializers-whe/402911?q=backend+neon
@@ -417,7 +478,70 @@ ada_really_inline size_t find_next_host_delimiter_special(
 // starting at index location, this finds the next location of a character
 // :, /, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
-#if ADA_NEON
+#if ADA_SSSE3
+ada_really_inline size_t find_next_host_delimiter(std::string_view view,
+                                                  size_t location) noexcept {
+  // first check for short strings in which case we do it naively.
+  if (view.size() - location < 16) {  // slow path
+    for (size_t i = location; i < view.size(); i++) {
+      if (view[i] == ':' || view[i] == '/' || view[i] == '?' ||
+          view[i] == '[') {
+        return i;
+      }
+    }
+    return size_t(view.size());
+  }
+  // fast path for long strings (expected to be common)
+  size_t i = location;
+  // Lookup tables for bit classification:
+  // ':' (0x3A): low[0xA]=0x01, high[0x3]=0x01 -> match
+  // '/' (0x2F): low[0xF]=0x02, high[0x2]=0x02 -> match
+  // '?' (0x3F): low[0xF]=0x01, high[0x3]=0x01 -> match
+  // '[' (0x5B): low[0xB]=0x04, high[0x5]=0x04 -> match
+  const __m128i low_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x01, 0x04, 0x00, 0x00, 0x00, 0x03);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
+
+  for (; i + 15 < view.size(); i += 16) {
+    __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    __m128i lowpart = _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    __m128i classify = _mm_and_si128(lowpart, highpart);
+    __m128i is_zero = _mm_cmpeq_epi8(classify, zero);
+    // _mm_movemask_epi8 returns a 16-bit mask in bits 0-15, with bits 16-31
+    // zero. After NOT (~), bits 16-31 become 1. We must mask to 16 bits to
+    // avoid false positives.
+    int mask = ~_mm_movemask_epi8(is_zero) & 0xFFFF;
+    if (mask != 0) {
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+
+  if (i < view.size()) {
+    __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    __m128i lowpart = _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    __m128i classify = _mm_and_si128(lowpart, highpart);
+    __m128i is_zero = _mm_cmpeq_epi8(classify, zero);
+    // _mm_movemask_epi8 returns a 16-bit mask in bits 0-15, with bits 16-31
+    // zero. After NOT (~), bits 16-31 become 1. We must mask to 16 bits to
+    // avoid false positives.
+    int mask = ~_mm_movemask_epi8(is_zero) & 0xFFFF;
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  return size_t(view.size());
+}
+#elif ADA_NEON
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
                                                   size_t location) noexcept {
   // first check for short strings in which case we do it naively.
