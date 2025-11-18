@@ -1122,6 +1122,41 @@
     }
   },
   {
+    "pattern": ["http://\uD83D\uDEB2.com/"],
+    "inputs": ["http://\uD83D\uDEB2.com/"],
+    "exactly_empty_components": [ "port" ],
+    "expected_obj": {
+      "protocol": "http",
+      "hostname": "xn--h78h.com",
+      "pathname": "/"
+    },
+    "expected_match": {
+      "protocol": { "input": "http", "groups": {}},
+      "hostname": { "input": "xn--h78h.com", "groups": {}},
+      "pathname": { "input": "/", "groups": {}}
+    }
+  },
+  {
+    "pattern": ["http://\uD83D \uDEB2"],
+    "expected_obj": "error"
+  },
+  {
+    "pattern": [{"hostname":"\uD83D \uDEB2"}],
+    "expected_obj": "error"
+  },
+  {
+    "pattern": [{"pathname":"\uD83D \uDEB2"}],
+    "inputs": [],
+    "expected_obj": {
+      "pathname": "%EF%BF%BD%20%EF%BF%BD"
+    },
+    "expected_match": null
+  },
+  {
+    "pattern": [{"pathname":":\uD83D \uDEB2"}],
+    "expected_obj": "error"
+  },
+  {
     "pattern": [{"pathname":":a\uDB40\uDD00b"}],
     "inputs": [],
     "expected_obj": {
@@ -1438,6 +1473,10 @@
       "protocol": { "input": "data", "groups": {}},
       "pathname": { "input": "8675309", "groups": { "number": "8675309" }}
     }
+  },
+  {
+    "pattern": [{ "pathname": "/(\\m)" }],
+    "expected_obj": "error"
   },
   {
     "pattern": [{ "pathname": "/foo!" }],
@@ -2927,6 +2966,147 @@
       "protocol": { "input": "https", "groups": {} },
       "search": { "input": "q=*&v=?&hmm={}&umm=()", "groups": {} },
       "hash": { "input": "foo", "groups": {} }
+    }
+  },
+  {
+    "pattern": [{ "pathname": "/([[a-z]--a])" }],
+    "inputs": [{ "pathname": "/a" }],
+    "expected_match": null
+  },
+  {
+    "pattern": [{ "pathname": "/([[a-z]--a])" }],
+    "inputs": [{ "pathname": "/z" }],
+    "expected_match": {
+      "pathname": { "input": "/z", "groups": { "0": "z" } }
+    }
+  },
+    {
+    "pattern": [{ "pathname": "/([\\d&&[0-1]])" }],
+    "inputs": [{ "pathname": "/0" }],
+    "expected_match": {
+      "pathname": { "input": "/0", "groups": { "0": "0" } }
+    }
+  },
+  {
+    "pattern": [{ "pathname": "/([\\d&&[0-1]])" }],
+    "inputs": [{ "pathname": "/3" }],
+    "expected_match": null
+  },
+  {
+    "pattern": [{ "protocol": "http", "hostname": "example.com/ignoredpath" }],
+    "inputs": ["http://example.com/"],
+    "expected_obj": {
+      "protocol": "http",
+      "hostname": "example.com",
+      "pathname": "*"
+    },
+    "expected_match": {
+      "protocol": { "input": "http", "groups": {} },
+      "hostname": { "input": "example.com", "groups": {} },
+      "pathname": { "input": "/", "groups": { "0": "/" } }
+    }
+  },
+  {
+    "pattern": [{ "protocol": "http", "hostname": "example.com\\?ignoredsearch" }],
+    "inputs": ["http://example.com/"],
+    "expected_obj": {
+      "protocol": "http",
+      "hostname": "example.com",
+      "search": "*"
+    },
+    "expected_match": {
+      "protocol": { "input": "http", "groups": {} },
+      "hostname": { "input": "example.com", "groups": {} },
+      "pathname": { "input": "/", "groups": { "0": "/" } }
+    }
+  },
+  {
+    "pattern": [{ "protocol": "http", "hostname": "example.com#ignoredhash" }],
+    "inputs": ["http://example.com/"],
+    "expected_obj": {
+      "protocol": "http",
+      "hostname": "example.com",
+      "hash": "*"
+    },
+    "expected_match": {
+      "protocol": { "input": "http", "groups": {} },
+      "hostname": { "input": "example.com", "groups": {} },
+      "pathname": { "input": "/", "groups": { "0": "/" } }
+    }
+  },
+  {
+    "pattern": ["https://www.example.com/*"],
+    "inputs": ["https://www.example.com/x"],
+    "exactly_empty_components": ["port"],
+    "expected_obj": {
+      "protocol": "https",
+      "hostname": "www.example.com",
+      "pathname": "/*"
+    },
+    "expected_match": {
+      "protocol": { "input": "https", "groups": {} },
+      "hostname": { "input": "www.example.com", "groups": {} },
+      "pathname": { "input": "/x", "groups": { "0": "x" } }
+    }
+  },
+  {
+    "pattern": ["https://www.example.com/*"],
+    "inputs": ["https://www.example.com/xyz"],
+    "exactly_empty_components": ["port"],
+    "expected_obj": {
+      "protocol": "https",
+      "hostname": "www.example.com",
+      "pathname": "/*"
+    },
+    "expected_match": {
+      "protocol": { "input": "https", "groups": {} },
+      "hostname": { "input": "www.example.com", "groups": {} },
+      "pathname": { "input": "/xyz", "groups": { "0": "xyz" } }
+    }
+  },
+  {
+    "pattern": ["https://www.example.com/*"],
+    "inputs": ["https://www.example.com/example"],
+    "exactly_empty_components": ["port"],
+    "expected_obj": {
+      "protocol": "https",
+      "hostname": "www.example.com",
+      "pathname": "/*"
+    },
+    "expected_match": {
+      "protocol": { "input": "https", "groups": {} },
+      "hostname": { "input": "www.example.com", "groups": {} },
+      "pathname": { "input": "/example", "groups": { "0": "example" } }
+    }
+  },
+  {
+    "pattern": ["https://www.example.com/*"],
+    "inputs": ["https://www.example.com/text"],
+    "exactly_empty_components": ["port"],
+    "expected_obj": {
+      "protocol": "https",
+      "hostname": "www.example.com",
+      "pathname": "/*"
+    },
+    "expected_match": {
+      "protocol": { "input": "https", "groups": {} },
+      "hostname": { "input": "www.example.com", "groups": {} },
+      "pathname": { "input": "/text", "groups": { "0": "text" } }
+    }
+  },
+  {
+    "pattern": ["https://www.example.com/*"],
+    "inputs": ["https://www.example.com/path/with/x"],
+    "exactly_empty_components": ["port"],
+    "expected_obj": {
+      "protocol": "https",
+      "hostname": "www.example.com",
+      "pathname": "/*"
+    },
+    "expected_match": {
+      "protocol": { "input": "https", "groups": {} },
+      "hostname": { "input": "www.example.com", "groups": {} },
+      "pathname": { "input": "/path/with/x", "groups": { "0": "path/with/x" } }
     }
   }
 ]
