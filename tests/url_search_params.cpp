@@ -448,3 +448,49 @@ TEST(url_search_params, sort_unicode_code_units_edge_case) {
   ASSERT_EQ(keys.next(), "\xf0\x9f\x8c\x88\xef\xac\x83");
   SUCCEED();
 }
+
+TEST(url_search_params, to_raw_string_no_normalization) {
+  auto params = ada::url_search_params();
+  params.append("a", "b c");
+  // to_string normalizes space to +
+  ASSERT_EQ(params.to_string(), "a=b+c");
+  // to_raw_string preserves %20 encoding
+  ASSERT_EQ(params.to_raw_string(), "a=b%20c");
+  SUCCEED();
+}
+
+TEST(url_search_params, to_raw_string_with_special_chars) {
+  auto params = ada::url_search_params();
+  params.append("key1", "value with spaces");
+  params.append("key2", "another value");
+  // to_string normalizes spaces to +
+  ASSERT_EQ(params.to_string(), "key1=value+with+spaces&key2=another+value");
+  // to_raw_string preserves %20 encoding
+  ASSERT_EQ(params.to_raw_string(),
+            "key1=value%20with%20spaces&key2=another%20value");
+  SUCCEED();
+}
+
+TEST(url_search_params, to_raw_string_with_accents) {
+  auto params = ada::url_search_params();
+  params.append("key1", "\u00E9t\u00E9");
+  params.append("key2", "C\u00E9line Dion++");
+  // Both should encode accents the same way
+  // to_string normalizes spaces to +, to_raw_string uses %20
+  // Note: + signs are not encoded by QUERY_PERCENT_ENCODE
+  ASSERT_EQ(params.to_string(),
+            "key1=%C3%A9t%C3%A9&key2=C%C3%A9line+Dion%2B%2B");
+  ASSERT_EQ(params.to_raw_string(),
+            "key1=%C3%A9t%C3%A9&key2=C%C3%A9line%20Dion++");
+  SUCCEED();
+}
+
+TEST(url_search_params, to_raw_string_empty_values) {
+  auto params = ada::url_search_params();
+  params.append("a", "");
+  params.append("", "b");
+  params.append("", "");
+  ASSERT_EQ(params.to_raw_string(), "a=&=b&=");
+  ASSERT_EQ(params.to_string(), "a=&=b&=");
+  SUCCEED();
+}

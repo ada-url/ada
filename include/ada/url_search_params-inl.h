@@ -134,6 +134,23 @@ inline std::string url_search_params::to_string() const {
   return out;
 }
 
+inline std::string url_search_params::to_raw_string() const {
+  auto character_set = ada::character_sets::QUERY_PERCENT_ENCODE;
+  std::string out{};
+  for (size_t i = 0; i < params.size(); i++) {
+    auto key = ada::unicode::percent_encode(params[i].first, character_set);
+    auto value = ada::unicode::percent_encode(params[i].second, character_set);
+
+    if (i != 0) {
+      out += "&";
+    }
+    out.append(key);
+    out += "=";
+    out.append(value);
+  }
+  return out;
+}
+
 inline void url_search_params::set(const std::string_view key,
                                    const std::string_view value) {
   const auto find = [&key](const auto &param) { return param.first == key; };
