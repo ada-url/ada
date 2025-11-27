@@ -124,6 +124,12 @@ function(ada_set_project_warnings target_name)
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(${target_name} PRIVATE ${GCC_WARNINGS_TO_USE})
 
+    # Suppress variable tracking notes in debug builds (prevents verbose "retrying without" messages)
+    # This affects large files like wpt_urlpattern_tests.cpp that exceed variable tracking limits
+    target_compile_options(${target_name} PRIVATE
+      $<$<CONFIG:Debug>:-fno-var-tracking-assignments>
+    )
+
     # Workaround for GCC poor AVX load/store code generation on x86
     # Skip this workaround when clang-tidy is enabled (it's Clang-based and doesn't support these flags)
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$" AND NOT ADA_ENABLE_CLANG_TIDY)
