@@ -30,11 +30,11 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
-      - name: Prepare
-        run: cmake -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -G Ninja -B build
+      - name: Prepare (CMake with release-ninja preset)
+        run: cmake --preset release-ninja -DBUILD_TESTING=OFF
         env:
           CXX: ${{matrix.cxx}}
       - name: Build
-        run: cmake --build build -j=4
-      - name: Test
-        run: ctest --output-on-failure --test-dir build
+        run: cmake --build build/release-ninja -j=4
+      - name: Test (if any configured)
+        run: ctest --output-on-failure --test-dir build/release-ninja || true

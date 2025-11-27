@@ -303,6 +303,43 @@ Development checks add runtime overhead:
 cmake --preset benchmark  # Checks auto-disabled
 ```
 
+## CI/CD Integration
+
+The Ada project's GitHub Actions workflows have been updated to use CMake presets:
+
+### Updated Workflows
+
+**ubuntu.yml** - Main Ubuntu CI
+```yaml
+- name: Prepare (CMake with ci preset)
+  run: cmake --preset ci -DBUILD_SHARED_LIBS=${{matrix.shared}} -DADA_USE_SIMDUTF=${{matrix.simdutf}} -DADA_BENCHMARKS=ON
+```
+
+**ubuntu-sanitized.yml** - Address Sanitizer
+```yaml
+- name: Prepare (CMake with sanitize-address preset)
+  run: cmake --preset sanitize-address -DBUILD_SHARED_LIBS=${{matrix.shared}}
+```
+
+**ubuntu-undef.yml** - Undefined Behavior Sanitizer
+```yaml
+- name: Prepare (CMake with sanitize-undefined preset)
+  run: cmake --preset sanitize-undefined -DBUILD_SHARED_LIBS=${{matrix.shared}}
+```
+
+**ubuntu-release.yml** - Release Builds
+```yaml
+- name: Prepare (CMake with release-ninja preset)
+  run: cmake --preset release-ninja -DBUILD_TESTING=OFF
+```
+
+### Benefits in CI
+
+- **Consistency**: Same preset configurations locally and in CI
+- **Maintainability**: Less duplication of CMake flags
+- **Clarity**: Preset names document intent (ci, sanitize-address, etc.)
+- **Flexibility**: Can still override options via `-D` flags
+
 ## Further Reading
 
 - [Modern CMake](https://cliutils.gitlab.io/modern-cmake/)
