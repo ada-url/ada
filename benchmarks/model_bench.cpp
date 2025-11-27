@@ -192,48 +192,27 @@ void print(const stat_numbers& n) {
   std::cout << std::setw(15) << (n.href == n.url_string);
 }
 void print(const std::vector<stat_numbers> numbers) {
-  std::cout << std::setw(15) << "input_size"
-            << ",";
-  std::cout << std::setw(15) << "best_cycles"
-            << ",";
-  std::cout << std::setw(15) << "mean_cycles"
-            << ",";
-  std::cout << std::setw(15) << "best_instr"
-            << ",";
-  std::cout << std::setw(15) << "mean_instr"
-            << ",";
-  std::cout << std::setw(15) << "is_valid"
-            << ",";
-  std::cout << std::setw(15) << "href_size"
-            << ",";
-  std::cout << std::setw(15) << "hash_size"
-            << ",";
-  std::cout << std::setw(15) << "search_size"
-            << ",";
-  std::cout << std::setw(15) << "path_size"
-            << ",";
-  std::cout << std::setw(15) << "port_size"
-            << ",";
-  std::cout << std::setw(15) << "host_size"
-            << ",";
-  std::cout << std::setw(15) << "credential_size"
-            << ",";
-  std::cout << std::setw(15) << "protocol_type"
-            << ",";
-  std::cout << std::setw(15) << "has_port"
-            << ",";
-  std::cout << std::setw(15) << "has_authority"
-            << ",";
-  std::cout << std::setw(15) << "has_fragment"
-            << ",";
-  std::cout << std::setw(15) << "has_search"
-            << ",";
-  std::cout << std::setw(15) << "non_ascii_bytes"
-            << ",";
-  std::cout << std::setw(15) << "href_non_ascii_bytes"
-            << ",";
-  std::cout << std::setw(15) << "is_ascii"
-            << ",";
+  std::cout << std::setw(15) << "input_size" << ",";
+  std::cout << std::setw(15) << "best_cycles" << ",";
+  std::cout << std::setw(15) << "mean_cycles" << ",";
+  std::cout << std::setw(15) << "best_instr" << ",";
+  std::cout << std::setw(15) << "mean_instr" << ",";
+  std::cout << std::setw(15) << "is_valid" << ",";
+  std::cout << std::setw(15) << "href_size" << ",";
+  std::cout << std::setw(15) << "hash_size" << ",";
+  std::cout << std::setw(15) << "search_size" << ",";
+  std::cout << std::setw(15) << "path_size" << ",";
+  std::cout << std::setw(15) << "port_size" << ",";
+  std::cout << std::setw(15) << "host_size" << ",";
+  std::cout << std::setw(15) << "credential_size" << ",";
+  std::cout << std::setw(15) << "protocol_type" << ",";
+  std::cout << std::setw(15) << "has_port" << ",";
+  std::cout << std::setw(15) << "has_authority" << ",";
+  std::cout << std::setw(15) << "has_fragment" << ",";
+  std::cout << std::setw(15) << "has_search" << ",";
+  std::cout << std::setw(15) << "non_ascii_bytes" << ",";
+  std::cout << std::setw(15) << "href_non_ascii_bytes" << ",";
+  std::cout << std::setw(15) << "is_ascii" << ",";
   std::cout << std::setw(15) << "input_is_href";
 
   std::cout << std::endl;

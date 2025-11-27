@@ -44,10 +44,10 @@
 #endif
 
 // Align to N-byte boundary
-#define ADA_ROUNDUP_N(a, n) (((a) + ((n)-1)) & ~((n)-1))
-#define ADA_ROUNDDOWN_N(a, n) ((a) & ~((n)-1))
+#define ADA_ROUNDUP_N(a, n) (((a) + ((n) - 1)) & ~((n) - 1))
+#define ADA_ROUNDDOWN_N(a, n) ((a) & ~((n) - 1))
 
-#define ADA_ISALIGNED_N(ptr, n) (((uintptr_t)(ptr) & ((n)-1)) == 0)
+#define ADA_ISALIGNED_N(ptr, n) (((uintptr_t)(ptr) & ((n) - 1)) == 0)
 
 #if defined(ADA_REGULAR_VISUAL_STUDIO)
 
@@ -205,12 +205,13 @@ namespace ada {
     std::cerr << "FAIL: " << (MESSAGE) << std::endl; \
     abort();                                         \
   } while (0);
-#define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)                                    \
-  do {                                                                         \
-    if ((LHS) != (RHS)) {                                                      \
-      std::cerr << "Mismatch: '" << (LHS) << "' - '" << (RHS) << "'" << std::endl; \
-      ADA_FAIL(MESSAGE);                                                       \
-    }                                                                          \
+#define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)                          \
+  do {                                                               \
+    if ((LHS) != (RHS)) {                                            \
+      std::cerr << "Mismatch: '" << (LHS) << "' - '" << (RHS) << "'" \
+                << std::endl;                                        \
+      ADA_FAIL(MESSAGE);                                             \
+    }                                                                \
   } while (0);
 #define ADA_ASSERT_TRUE(COND)                                               \
   do {                                                                      \
