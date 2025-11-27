@@ -9,22 +9,30 @@ set(ADA_LIB_VERSION "3.4.1" CACHE STRING "ada library version")
 set(ADA_LIB_SOVERSION "3" CACHE STRING "ada library soversion")
 
 include(GNUInstallDirs)
-
 include(CTest)
+
+# ============================================================================
+# Project Options & Configuration
+# ============================================================================
+# Include centralized project options (all build options defined here)
+include(cmake/ProjectOptions.cmake)
+
+# Include compiler configuration (applies options from ProjectOptions.cmake)
 include(cmake/ada-flags.cmake)
 
+# ============================================================================
+# Build Targets
+# ============================================================================
 add_subdirectory(src)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake)
-option(ADA_TESTING "Whether to build tests." OFF)
-option(ADA_BENCHMARKS "Whether to build benchmarks." OFF)
-option(ADA_TOOLS "Whether to build tools." OFF)
-option(ADA_BUILD_SINGLE_HEADER_LIB "Whether to build the lib from the single-header files" OFF)
-option(ADA_USE_SIMDUTF "Whether to use SIMDUTF for IDNA" OFF)
-# There are cases where when embedding ada as a dependency for other CMake
-# projects as submodules or subdirectories (via FetchContent) can lead to
-# errors due to CPM, so this is here to support disabling all the testing
-# and tooling for ada if one only wishes to use the ada library.
+
+# ============================================================================
+# Dependencies
+# ============================================================================
+# Only include CPM and fetch dependencies when needed. This prevents issues
+# when Ada is embedded as a subdirectory/FetchContent dependency and the
+# parent project only wants the library without tests/benchmarks/tools.
 if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   include(cmake/CPM.cmake)
   # CPM requires git as an implicit dependency
@@ -101,6 +109,9 @@ if(ADA_USE_SIMDUTF)
   )
 endif()
 
+# ============================================================================
+# Library Alias & Configuration
+# ============================================================================
 add_library(ada::ada ALIAS ada)
 
 if(ADA_TESTING OR ADA_USE_UNSAFE_STD_REGEX_PROVIDER)
@@ -123,6 +134,9 @@ set_target_properties(
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
+# ============================================================================
+# Additional Build Targets
+# ============================================================================
 if(NOT ADA_COVERAGE AND NOT EMSCRIPTEN)
   add_subdirectory(singleheader)
 endif()
@@ -131,6 +145,9 @@ if(ADA_TOOLS)
   add_subdirectory(tools)
 endif()
 
+# ============================================================================
+# Installation Rules
+# ============================================================================
 install(
   FILES include/ada.h include/ada_c.h
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
@@ -188,6 +205,10 @@ install(
   COMPONENT example_development
 )
 
+
+# ============================================================================
+# Package Configuration
+# ============================================================================
 
 # pkg-config
 include(cmake/JoinPaths.cmake)

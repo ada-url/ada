@@ -1,0 +1,251 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "dev-base",
+      "hidden": true,
+      "inherits": "base",
+      "cacheVariables": {
+        "ADA_DEVELOPER_MODE": "ON"
+      }
+    },
+    {
+      "name": "dev",
+      "displayName": "Development",
+      "description": "Development build with tests and all quality checks enabled",
+      "inherits": "dev-base",
+      "cacheVariables": {
+        "ADA_TESTING": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "dev-ninja",
+      "displayName": "Development (Ninja)",
+      "description": "Development build using Ninja generator for faster builds",
+      "inherits": "dev",
+      "generator": "Ninja"
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Release build with optimizations, library only",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ADA_TESTING": "OFF",
+        "ADA_BENCHMARKS": "OFF",
+        "ADA_TOOLS": "OFF"
+      }
+    },
+    {
+      "name": "release-ninja",
+      "displayName": "Release (Ninja)",
+      "description": "Release build using Ninja generator",
+      "inherits": "release",
+      "generator": "Ninja"
+    },
+    {
+      "name": "test",
+      "displayName": "Testing",
+      "description": "Build with tests and development checks enabled",
+      "inherits": "dev-base",
+      "cacheVariables": {
+        "ADA_TESTING": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "test-ninja",
+      "displayName": "Testing (Ninja)",
+      "description": "Testing build using Ninja generator",
+      "inherits": "test",
+      "generator": "Ninja"
+    },
+    {
+      "name": "benchmark",
+      "displayName": "Benchmarks",
+      "description": "Release build with benchmarks (development checks disabled)",
+      "inherits": "base",
+      "cacheVariables": {
+        "ADA_BENCHMARKS": "ON",
+        "ADA_USE_UNSAFE_STD_REGEX_PROVIDER": "ON",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "benchmark-ninja",
+      "displayName": "Benchmarks (Ninja)",
+      "description": "Benchmark build using Ninja generator",
+      "inherits": "benchmark",
+      "generator": "Ninja"
+    },
+    {
+      "name": "sanitize-address",
+      "displayName": "Address Sanitizer",
+      "description": "Build with Address Sanitizer for memory error detection",
+      "inherits": "dev-base",
+      "cacheVariables": {
+        "ADA_TESTING": "ON",
+        "ADA_SANITIZE": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "sanitize-undefined",
+      "displayName": "Undefined Behavior Sanitizer",
+      "description": "Build with UBSan for undefined behavior detection",
+      "inherits": "dev-base",
+      "cacheVariables": {
+        "ADA_TESTING": "ON",
+        "ADA_SANITIZE_UNDEFINED": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "sanitize-all",
+      "displayName": "All Sanitizers",
+      "description": "Build with Address and UBSan enabled",
+      "inherits": "dev-base",
+      "cacheVariables": {
+        "ADA_TESTING": "ON",
+        "ADA_SANITIZE": "ON",
+        "ADA_SANITIZE_UNDEFINED": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "coverage",
+      "displayName": "Code Coverage",
+      "description": "Build with code coverage instrumentation",
+      "inherits": "dev-base",
+      "cacheVariables": {
+        "ADA_COVERAGE": "ON",
+        "ADA_TESTING": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "tools",
+      "displayName": "CLI Tools",
+      "description": "Build with CLI tools (adaparse)",
+      "inherits": "base",
+      "cacheVariables": {
+        "ADA_TOOLS": "ON",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "single-header",
+      "displayName": "Single Header",
+      "description": "Build single-header amalgamation",
+      "inherits": "base",
+      "cacheVariables": {
+        "ADA_BUILD_SINGLE_HEADER_LIB": "ON",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "ci",
+      "displayName": "CI Build",
+      "description": "Continuous Integration build with all checks",
+      "inherits": "dev-base",
+      "cacheVariables": {
+        "ADA_TESTING": "ON",
+        "ADA_SANITIZE": "ON",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "displayName": "Development Build",
+      "description": "Build development configuration"
+    },
+    {
+      "name": "dev-ninja",
+      "configurePreset": "dev-ninja",
+      "displayName": "Development Build (Ninja)"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "displayName": "Release Build"
+    },
+    {
+      "name": "release-ninja",
+      "configurePreset": "release-ninja",
+      "displayName": "Release Build (Ninja)"
+    },
+    {
+      "name": "test",
+      "configurePreset": "test",
+      "displayName": "Test Build"
+    },
+    {
+      "name": "test-ninja",
+      "configurePreset": "test-ninja",
+      "displayName": "Test Build (Ninja)"
+    },
+    {
+      "name": "benchmark",
+      "configurePreset": "benchmark",
+      "displayName": "Benchmark Build"
+    },
+    {
+      "name": "benchmark-ninja",
+      "configurePreset": "benchmark-ninja",
+      "displayName": "Benchmark Build (Ninja)"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "displayName": "Development Tests",
+      "description": "Run all tests in development mode",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "test",
+      "configurePreset": "test",
+      "displayName": "Run Tests",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "sanitize-address",
+      "configurePreset": "sanitize-address",
+      "displayName": "Tests with ASan",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "sanitize-undefined",
+      "configurePreset": "sanitize-undefined",
+      "displayName": "Tests with UBSan",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
