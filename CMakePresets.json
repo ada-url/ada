@@ -102,6 +102,7 @@
       "cacheVariables": {
         "ADA_TESTING": "ON",
         "ADA_SANITIZE": "ON",
+        "ADA_ENABLE_CLANG_TIDY": "OFF",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
@@ -114,6 +115,7 @@
       "cacheVariables": {
         "ADA_TESTING": "ON",
         "ADA_SANITIZE_UNDEFINED": "ON",
+        "ADA_ENABLE_CLANG_TIDY": "OFF",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
@@ -127,6 +129,7 @@
         "ADA_TESTING": "ON",
         "ADA_SANITIZE": "ON",
         "ADA_SANITIZE_UNDEFINED": "ON",
+        "ADA_ENABLE_CLANG_TIDY": "OFF",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
@@ -139,6 +142,7 @@
       "cacheVariables": {
         "ADA_COVERAGE": "ON",
         "ADA_TESTING": "ON",
+        "ADA_ENABLE_CLANG_TIDY": "OFF",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
@@ -171,6 +175,7 @@
       "cacheVariables": {
         "ADA_TESTING": "ON",
         "ADA_SANITIZE": "ON",
+        "ADA_ENABLE_CLANG_TIDY": "OFF",
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     }
