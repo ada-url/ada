@@ -125,7 +125,8 @@ function(ada_set_project_warnings target_name)
     target_compile_options(${target_name} PRIVATE ${GCC_WARNINGS_TO_USE})
 
     # Workaround for GCC poor AVX load/store code generation on x86
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$")
+    # Skip this workaround when clang-tidy is enabled (it's Clang-based and doesn't support these flags)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$" AND NOT ADA_ENABLE_CLANG_TIDY)
       target_compile_options(${target_name} PRIVATE
         -mno-avx256-split-unaligned-load
         -mno-avx256-split-unaligned-store
