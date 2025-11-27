@@ -98,6 +98,7 @@
       "displayName": "Address Sanitizer",
       "description": "Build with Address Sanitizer for memory error detection",
       "inherits": "dev-base",
+      "generator": "Ninja",
       "cacheVariables": {
         "ADA_TESTING": "ON",
         "ADA_SANITIZE": "ON",
@@ -109,6 +110,7 @@
       "displayName": "Undefined Behavior Sanitizer",
       "description": "Build with UBSan for undefined behavior detection",
       "inherits": "dev-base",
+      "generator": "Ninja",
       "cacheVariables": {
         "ADA_TESTING": "ON",
         "ADA_SANITIZE_UNDEFINED": "ON",
@@ -120,6 +122,7 @@
       "displayName": "All Sanitizers",
       "description": "Build with Address and UBSan enabled",
       "inherits": "dev-base",
+      "generator": "Ninja",
       "cacheVariables": {
         "ADA_TESTING": "ON",
         "ADA_SANITIZE": "ON",
@@ -132,6 +135,7 @@
       "displayName": "Code Coverage",
       "description": "Build with code coverage instrumentation",
       "inherits": "dev-base",
+      "generator": "Ninja",
       "cacheVariables": {
         "ADA_COVERAGE": "ON",
         "ADA_TESTING": "ON",
@@ -163,6 +167,7 @@
       "displayName": "CI Build",
       "description": "Continuous Integration build with all checks",
       "inherits": "dev-base",
+      "generator": "Ninja",
       "cacheVariables": {
         "ADA_TESTING": "ON",
         "ADA_SANITIZE": "ON",
