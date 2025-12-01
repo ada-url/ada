@@ -494,7 +494,6 @@ TEST(url_search_params, to_raw_string_empty_values) {
   SUCCEED();
 }
 
-
 TEST(url_search_params, with_ampersands) {
   auto params = ada::url_search_params();
   params.append("a", "&");
