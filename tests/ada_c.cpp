@@ -367,9 +367,9 @@ TEST(ada_c, ada_search_params_to_raw_string) {
   ASSERT_EQ(convert_string(str), "a=b+c&d=e+f");
   ada_free_owned_string(str);
 
-  // to_raw_string preserves %20 encoding for spaces
+  // to_raw_string outputs raw key/value without any encoding
   ada_owned_string raw_str = ada_search_params_to_raw_string(out);
-  ASSERT_EQ(convert_string(raw_str), "a=b%20c&d=e%20f");
+  ASSERT_EQ(convert_string(raw_str), "a=b c&d=e f");
   ada_free_owned_string(raw_str);
 
   ada_free_search_params(out);
@@ -377,8 +377,7 @@ TEST(ada_c, ada_search_params_to_raw_string) {
   SUCCEED();
 }
 
-TEST(ada_c, ada_search_params_to_raw_string_remove_preserves_encoding) {
-  // Test the exact scenario from the issue
+TEST(ada_c, ada_search_params_to_raw_string_remove) {
   std::string input("a=%20&b=remove&c=2");
   auto params = ada_parse_search_params(input.c_str(), input.length());
 
@@ -390,9 +389,9 @@ TEST(ada_c, ada_search_params_to_raw_string_remove_preserves_encoding) {
   ASSERT_EQ(convert_string(str), "a=+&c=2");
   ada_free_owned_string(str);
 
-  // to_raw_string preserves %20 encoding for spaces
+  // to_raw_string outputs raw key/value without any encoding
   ada_owned_string raw_str = ada_search_params_to_raw_string(params);
-  ASSERT_EQ(convert_string(raw_str), "a=%20&c=2");
+  ASSERT_EQ(convert_string(raw_str), "a= &c=2");
   ada_free_owned_string(raw_str);
 
   ada_free_search_params(params);
