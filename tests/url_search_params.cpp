@@ -493,3 +493,14 @@ TEST(url_search_params, to_raw_string_empty_values) {
   ASSERT_EQ(params.to_string(), "a=&=b&=");
   SUCCEED();
 }
+
+
+TEST(url_search_params, with_ampersands) {
+  auto params = ada::url_search_params();
+  params.append("a", "&");
+  params.append("b", "?");
+  params.append("b", "+");
+  ASSERT_EQ(params.to_string(), "a=%26&b=%3F&b=%2B");
+  ASSERT_EQ(params.to_raw_string(), "a=&&b=?&b=+");
+  SUCCEED();
+}
