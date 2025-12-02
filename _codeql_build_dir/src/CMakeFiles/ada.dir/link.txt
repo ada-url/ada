@@ -1,0 +1,2 @@
+/usr/bin/ar qc libada.a CMakeFiles/ada.dir/ada.cpp.o
+/usr/bin/ranlib libada.a
