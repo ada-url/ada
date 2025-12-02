@@ -1,5 +1,6 @@
 # common build directory
 build
+_codeql_build_dir
 *-build-*
 
 # Python cache

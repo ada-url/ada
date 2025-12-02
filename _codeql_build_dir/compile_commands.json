@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/home/runner/work/ada/ada/_codeql_build_dir/src",
-  "command": "/home/runner/work/ada/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -DADA_INCLUDE_URL_PATTERN=1 -I/home/runner/work/ada/ada/src -I/home/runner/work/ada/ada/include -O3 -DNDEBUG -std=c++20 -fPIC -Wall -Wextra -Weffc++ -Wsuggest-override -Wfatal-errors -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self -Wconversion -Wno-sign-conversion -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store -o CMakeFiles/ada.dir/ada.cpp.o -c /home/runner/work/ada/ada/src/ada.cpp",
-  "file": "/home/runner/work/ada/ada/src/ada.cpp",
-  "output": "src/CMakeFiles/ada.dir/ada.cpp.o"
-}
-]

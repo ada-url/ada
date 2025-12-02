@@ -487,7 +487,8 @@ ada_owned_string ada_search_params_to_string(ada_url_search_params result) {
   return owned;
 }
 
-ada_owned_string ada_search_params_to_unsafe_string(ada_url_search_params result) {
+ada_owned_string ada_search_params_to_unsafe_string(
+    ada_url_search_params result) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
   if (!r) return ada_owned_string{nullptr, 0};
