@@ -134,7 +134,7 @@ inline std::string url_search_params::to_string() const {
   return out;
 }
 
-inline std::string url_search_params::to_raw_string() const {
+inline std::string url_search_params::to_unsafe_string() const {
   std::string out{};
   for (const auto &[key, value] : params) {
     if (!out.empty()) {

@@ -357,7 +357,7 @@ TEST(ada_c, ada_url_search_params) {
   SUCCEED();
 }
 
-TEST(ada_c, ada_search_params_to_raw_string) {
+TEST(ada_c, ada_search_params_to_unsafe_string) {
   std::string input("a=b c&d=e+f");
   auto out = ada_parse_search_params(input.c_str(), input.length());
 
@@ -367,8 +367,8 @@ TEST(ada_c, ada_search_params_to_raw_string) {
   ASSERT_EQ(convert_string(str), "a=b+c&d=e+f");
   ada_free_owned_string(str);
 
-  // to_raw_string outputs raw key/value without any encoding
-  ada_owned_string raw_str = ada_search_params_to_raw_string(out);
+  // to_unsafe_string outputs raw key/value without any encoding
+  ada_owned_string raw_str = ada_search_params_to_unsafe_string(out);
   ASSERT_EQ(convert_string(raw_str), "a=b c&d=e f");
   ada_free_owned_string(raw_str);
 
@@ -377,7 +377,7 @@ TEST(ada_c, ada_search_params_to_raw_string) {
   SUCCEED();
 }
 
-TEST(ada_c, ada_search_params_to_raw_string_remove) {
+TEST(ada_c, ada_search_params_to_unsafe_string_remove) {
   std::string input("a=%20&b=remove&c=2");
   auto params = ada_parse_search_params(input.c_str(), input.length());
 
@@ -389,8 +389,8 @@ TEST(ada_c, ada_search_params_to_raw_string_remove) {
   ASSERT_EQ(convert_string(str), "a=+&c=2");
   ada_free_owned_string(str);
 
-  // to_raw_string outputs raw key/value without any encoding
-  ada_owned_string raw_str = ada_search_params_to_raw_string(params);
+  // to_unsafe_string outputs raw key/value without any encoding
+  ada_owned_string raw_str = ada_search_params_to_unsafe_string(params);
   ASSERT_EQ(convert_string(raw_str), "a= &c=2");
   ada_free_owned_string(raw_str);
 

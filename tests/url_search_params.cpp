@@ -449,47 +449,47 @@ TEST(url_search_params, sort_unicode_code_units_edge_case) {
   SUCCEED();
 }
 
-TEST(url_search_params, to_raw_string_no_normalization) {
+TEST(url_search_params, to_unsafe_string_no_normalization) {
   auto params = ada::url_search_params();
   params.append("a", "b c");
   // to_string normalizes space to +
   ASSERT_EQ(params.to_string(), "a=b+c");
-  // to_raw_string outputs raw key/value without any encoding
-  ASSERT_EQ(params.to_raw_string(), "a=b c");
+  // to_unsafe_string outputs raw key/value without any encoding
+  ASSERT_EQ(params.to_unsafe_string(), "a=b c");
   SUCCEED();
 }
 
-TEST(url_search_params, to_raw_string_with_special_chars) {
+TEST(url_search_params, to_unsafe_string_with_special_chars) {
   auto params = ada::url_search_params();
   params.append("key1", "value with spaces");
   params.append("key2", "another value");
   // to_string normalizes spaces to +
   ASSERT_EQ(params.to_string(), "key1=value+with+spaces&key2=another+value");
-  // to_raw_string outputs raw key/value without any encoding
-  ASSERT_EQ(params.to_raw_string(),
+  // to_unsafe_string outputs raw key/value without any encoding
+  ASSERT_EQ(params.to_unsafe_string(),
             "key1=value with spaces&key2=another value");
   SUCCEED();
 }
 
-TEST(url_search_params, to_raw_string_with_accents) {
+TEST(url_search_params, to_unsafe_string_with_accents) {
   auto params = ada::url_search_params();
   params.append("key1", "\u00E9t\u00E9");
   params.append("key2", "C\u00E9line Dion++");
   // to_string percent-encodes and normalizes spaces to +
   ASSERT_EQ(params.to_string(),
             "key1=%C3%A9t%C3%A9&key2=C%C3%A9line+Dion%2B%2B");
-  // to_raw_string outputs raw key/value without any encoding
-  ASSERT_EQ(params.to_raw_string(),
+  // to_unsafe_string outputs raw key/value without any encoding
+  ASSERT_EQ(params.to_unsafe_string(),
             "key1=\u00E9t\u00E9&key2=C\u00E9line Dion++");
   SUCCEED();
 }
 
-TEST(url_search_params, to_raw_string_empty_values) {
+TEST(url_search_params, to_unsafe_string_empty_values) {
   auto params = ada::url_search_params();
   params.append("a", "");
   params.append("", "b");
   params.append("", "");
-  ASSERT_EQ(params.to_raw_string(), "a=&=b&=");
+  ASSERT_EQ(params.to_unsafe_string(), "a=&=b&=");
   ASSERT_EQ(params.to_string(), "a=&=b&=");
   SUCCEED();
 }
@@ -500,6 +500,6 @@ TEST(url_search_params, with_ampersands) {
   params.append("b", "?");
   params.append("b", "+");
   ASSERT_EQ(params.to_string(), "a=%26&b=%3F&b=%2B");
-  ASSERT_EQ(params.to_raw_string(), "a=&&b=?&b=+");
+  ASSERT_EQ(params.to_unsafe_string(), "a=&&b=?&b=+");
   SUCCEED();
 }

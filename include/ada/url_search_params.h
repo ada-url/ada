@@ -103,9 +103,10 @@ struct url_search_params {
   /**
    * Returns a serialized query string without normalizing the key-value pairs.
    * Unlike to_string(), this method does not apply additional transformations
-   * to the percent-encoded output.
+   * to the percent-encoded output. The result is not standard compliant and
+   * is therefore unsafe.
    */
-  inline std::string to_raw_string() const;
+  inline std::string to_unsafe_string() const;
 
   /**
    * Returns a simple JS-style iterator over all of the keys in this
