@@ -26,7 +26,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -DADA_TESTING=OFF -DADA_DEVELOPMENT_CHECKS=OFF -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DADA_BENCHMARKS=ON -DCODSPEED_MODE=simulation -G Ninja -B build
           cmake --build build -j
         env:
-          CXX: clang++-14
+          CXX: clang++-17
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v4
         with:
