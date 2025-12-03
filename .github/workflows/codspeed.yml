@@ -25,6 +25,8 @@ jobs:
         run: |
           cmake -DADA_TESTING=ON -DADA_BENCHMARKS=ON -DCODSPEED_MODE=simulation -G Ninja -B build
           cmake --build build -j
+        env:
+          CXX: g++-12
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v4
         with:
