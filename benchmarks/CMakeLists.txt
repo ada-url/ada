@@ -64,6 +64,21 @@ target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
 target_link_libraries(bench_search_params PRIVATE benchmark::benchmark)
 target_link_libraries(urlpattern PRIVATE benchmark::benchmark)
 
+set(BENCHMARKS wpt_bench bench benchdata bbc_bench percent_encode bench_search_params urlpattern)
+
+add_custom_target(run_all_benchmarks
+        COMMAND ${CMAKE_COMMAND} -E echo "Running all benchmarks..."
+)
+foreach(benchmark IN LISTS BENCHMARKS)
+    add_custom_command(
+            TARGET run_all_benchmarks
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "Running ${benchmark}..."
+            COMMAND $<TARGET_FILE:${benchmark}> --benchmark_min_time=1s
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+endforeach()
+
 option(ADA_COMPETITION "Whether to install various competitors." OFF)
 
 # We only build url_whatwg if ICU is found, so we need to make
