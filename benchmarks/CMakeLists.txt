@@ -74,7 +74,7 @@ foreach(benchmark IN LISTS BENCHMARKS)
             TARGET run_all_benchmarks
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Running ${benchmark}..."
-            COMMAND $<TARGET_FILE:${benchmark}> --benchmark_min_time=1.0
+            COMMAND $<TARGET_FILE:${benchmark}> --benchmark_min_time=1s
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 endforeach()
