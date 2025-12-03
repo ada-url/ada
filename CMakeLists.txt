@@ -103,7 +103,7 @@ endif()
 
 add_library(ada::ada ALIAS ada)
 
-if(ADA_TESTING)
+if(ADA_TESTING OR ADA_USE_UNSAFE_STD_REGEX_PROVIDER)
   # IMPORTANT!
   #
   # We enable std_regex_provider for testing purposes

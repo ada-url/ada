@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Build the benchmark target(s)
         run: |
-          cmake -DADA_TESTING=OFF -DADA_DEVELOPMENT_CHECKS=OFF -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DADA_BENCHMARKS=ON -DCODSPEED_MODE=simulation -G Ninja -B build
+          cmake -DCMAKE_BUILD_TYPE=Release -DADA_TESTING=OFF -DADA_DEVELOPMENT_CHECKS=OFF -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DADA_BENCHMARKS=ON -DCODSPEED_MODE=simulation -G Ninja -B build
           cmake --build build -j
         env:
           CXX: clang++-14
