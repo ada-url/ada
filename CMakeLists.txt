@@ -43,16 +43,28 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   endif()
   # We use Google Benchmark, but it does not build under several 32-bit systems.
   if(ADA_BENCHMARKS AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
-    CPMAddPackage(
-      NAME benchmark
-      GITHUB_REPOSITORY CodSpeedHQ/codspeed-cpp
-      VERSION 2.0.0
-      SOURCE_SUBDIR google_benchmark
-      OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
-              "BENCHMARK_ENABLE_INSTALL OFF"
-              "BENCHMARK_ENABLE_WERROR OFF"
-
-    )
+    if(DEFINED CODSPEED_MODE)
+      message(STATUS "Using CodSpeed-instrumented Google Benchmark")
+      CPMAddPackage(
+        NAME benchmark
+        GITHUB_REPOSITORY CodSpeedHQ/codspeed-cpp
+        VERSION 2.0.0
+        SOURCE_SUBDIR google_benchmark
+        OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
+                "BENCHMARK_ENABLE_INSTALL OFF"
+                "BENCHMARK_ENABLE_WERROR OFF"
+      )
+    else()
+      message(STATUS "Using standard Google Benchmark")
+      CPMAddPackage(
+        NAME benchmark
+        GITHUB_REPOSITORY google/benchmark
+        VERSION 1.9.0
+        OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
+                "BENCHMARK_ENABLE_INSTALL OFF"
+                "BENCHMARK_ENABLE_WERROR OFF"
+      )
+    endif()
   endif()
 
   if (ADA_TESTING AND NOT EMSCRIPTEN)
