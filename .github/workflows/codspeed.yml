@@ -18,12 +18,12 @@ permissions:
 jobs:
   benchmarks:
     name: Run benchmarks
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6.0.0
       - name: Build the benchmark target(s)
         run: |
-          cmake -DADA_TESTING=ON -DADA_BENCHMARKS=ON -DCODSPEED_MODE=simulation -G Ninja -B build
+          cmake -DADA_TESTING=OFF -DADA_DEVELOPMENT_CHECKS=OFF -DADA_BENCHMARKS=ON -DCODSPEED_MODE=simulation -G Ninja -B build
           cmake --build build -j
         env:
           CXX: g++-12
