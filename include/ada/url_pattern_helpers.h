@@ -47,8 +47,8 @@ enum class token_policy {
 // @see https://urlpattern.spec.whatwg.org/#tokens
 class token {
  public:
-  token(token_type _type, size_t _index, std::string&& _value)
-      : type(_type), index(_index), value(std::move(_value)) {}
+  token(token_type _type, size_t _index, std::string_view _value)
+      : type(_type), index(_index), value(_value) {}
 
   // A token has an associated type, a string, initially "invalid-char".
   token_type type = token_type::INVALID_CHAR;
@@ -59,7 +59,7 @@ class token {
 
   // A token has an associated value, a string, initially the empty string. It
   // contains the code points from the pattern string represented by the token.
-  std::string value{};
+  std::string_view value{};
 };
 
 // @see https://urlpattern.spec.whatwg.org/#pattern-parser
@@ -137,7 +137,7 @@ class Tokenizer {
 
  private:
   // has an associated input, a pattern string, initially the empty string.
-  std::string input;
+  std::string_view input;
   // has an associated policy, a tokenize policy, initially "strict".
   token_policy policy;
   // has an associated token list, a token list, initially an empty list.
@@ -231,7 +231,7 @@ struct constructor_string_parser {
   // @see https://urlpattern.spec.whatwg.org/#make-a-component-string
   std::string make_component_string();
   // has an associated input, a string, which must be set upon creation.
-  std::string input;
+  std::string_view input;
   // has an associated token list, a token list, which must be set upon
   // creation.
   std::vector<token> token_list;
