@@ -294,8 +294,8 @@ std::string constructor_string_parser<regex_provider>::make_component_string() {
   const auto component_start_input_index = component_start_token->index;
   // Return the code point substring from component start input index to end
   // index within parser's input.
-  return input.substr(component_start_input_index,
-                      end_index - component_start_input_index);
+  return std::string(input.substr(component_start_input_index,
+                                  end_index - component_start_input_index));
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
