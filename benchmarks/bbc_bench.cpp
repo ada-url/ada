@@ -33,4 +33,6 @@ double url_examples_bytes = []() -> double {
   return double(bytes);
 }();
 
+#define BENCHMARK_PREFIX BBC_
+#define BENCHMARK_PREFIX_STR "BBC_"
 #include "benchmark_template.cpp"

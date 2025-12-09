@@ -27,6 +27,8 @@ target_link_libraries(benchdata PRIVATE ada)
 target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 target_compile_definitions(benchdata PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
+target_compile_definitions(benchdata PRIVATE BENCHMARK_PREFIX=BenchData_)
+target_compile_definitions(benchdata PRIVATE BENCHMARK_PREFIX_STR="BenchData_")
 
 
 # BBC Bench
