@@ -28,8 +28,11 @@ pub extern "C" fn parse_url_to_href(raw_input: *const c_char, raw_input_length: 
   }
 }
 
+/// # Safety
+///
+/// This function is unsafe because it takes ownership of the pointer and drops it.
 #[unsafe(no_mangle)]
-pub extern "C" fn free_url(raw: *mut Url) {
+pub unsafe extern "C" fn free_url(raw: *mut Url) {
   if raw.is_null() {
     return;
   }
@@ -37,8 +40,11 @@ pub extern "C" fn free_url(raw: *mut Url) {
   unsafe { drop(Box::from_raw(raw)) }
 }
 
+/// # Safety
+///
+/// This function is unsafe because it takes ownership of the pointer and drops it.
 #[unsafe(no_mangle)]
-pub unsafe extern fn free_string(ptr: *const c_char) {
+pub unsafe extern "C" fn free_string(ptr: *const c_char) {
     // Take the ownership back to rust and drop the owner
     let _ = unsafe { std::ffi::CString::from_raw(ptr as *mut _) };
 }

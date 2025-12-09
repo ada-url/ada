@@ -69,4 +69,9 @@ size_t init_data(const char* input = default_file) {
   url_examples_bytes = compute();
   return url_examples.size();
 }
+
+#ifndef BENCHMARK_PREFIX
+#define BENCHMARK_PREFIX Bench_
+#define BENCHMARK_PREFIX_STR "Bench_"
+#endif
 #include "benchmark_template.cpp"

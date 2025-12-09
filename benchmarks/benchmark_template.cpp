@@ -83,13 +83,36 @@ static void BasicBench_AdaURL(benchmark::State& state) {
                          benchmark::Counter::kIsIterationInvariantRate);
 }
 
-auto BasicBench_AdaURL_href = BasicBench_AdaURL<PARSE_AND_HREF, ada::url>;
-BENCHMARK(BasicBench_AdaURL_href);
-auto BasicBench_AdaURL_aggregator_href =
-    BasicBench_AdaURL<PARSE_AND_HREF, ada::url_aggregator>;
-BENCHMARK(BasicBench_AdaURL_aggregator_href);
+#ifndef BENCHMARK_PREFIX
+#define BENCHMARK_PREFIX
+#endif
 
-static void BasicBench_AdaURL_CanParse(benchmark::State& state) {
+#ifndef BENCHMARK_PREFIX_STR
+#define BENCHMARK_PREFIX_STR ""
+#endif
+
+#define CONCAT_IMPL(x, y) x##y
+#define CONCAT(x, y) CONCAT_IMPL(x, y)
+#define BENCHMARK_NAME(name) CONCAT(BENCHMARK_PREFIX, name)
+
+auto BENCHMARK_NAME(BasicBench_AdaURL_href) =
+    BasicBench_AdaURL<PARSE_AND_HREF, ada::url>;
+static auto* CONCAT(benchmark_register_,
+                    BENCHMARK_NAME(BasicBench_AdaURL_href)) =
+    ::benchmark::RegisterBenchmark(BENCHMARK_PREFIX_STR
+                                   "BasicBench_AdaURL_href",
+                                   BENCHMARK_NAME(BasicBench_AdaURL_href));
+
+auto BENCHMARK_NAME(BasicBench_AdaURL_aggregator_href) =
+    BasicBench_AdaURL<PARSE_AND_HREF, ada::url_aggregator>;
+static auto* CONCAT(benchmark_register_,
+                    BENCHMARK_NAME(BasicBench_AdaURL_aggregator_href)) =
+    ::benchmark::RegisterBenchmark(
+        BENCHMARK_PREFIX_STR "BasicBench_AdaURL_aggregator_href",
+        BENCHMARK_NAME(BasicBench_AdaURL_aggregator_href));
+
+static void BENCHMARK_NAME(BasicBench_AdaURL_CanParse)(
+    benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;
 
@@ -147,7 +170,11 @@ static void BasicBench_AdaURL_CanParse(benchmark::State& state) {
                          benchmark::Counter::kIsIterationInvariantRate);
 }
 
-BENCHMARK(BasicBench_AdaURL_CanParse);
+static auto* CONCAT(benchmark_register_,
+                    BENCHMARK_NAME(BasicBench_AdaURL_CanParse)) =
+    ::benchmark::RegisterBenchmark(BENCHMARK_PREFIX_STR
+                                   "BasicBench_AdaURL_CanParse",
+                                   BENCHMARK_NAME(BasicBench_AdaURL_CanParse));
 
 #if ADA_url_whatwg_ENABLED
 size_t count_whatwg_invalid() {
