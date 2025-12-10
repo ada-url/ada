@@ -25,11 +25,9 @@ std::optional<std::regex> std_regex_provider::create_instance(
 std::optional<std::vector<std::optional<std::string>>>
 std_regex_provider::regex_search(std::string_view input,
                                  const std::regex& pattern) {
-  std::string input_str(
-      input.begin(),
-      input.end());  // Convert string_view to string for regex_search
-  std::smatch match_result;
-  if (!std::regex_search(input_str, match_result, pattern,
+  // Use iterator-based regex_search to avoid string allocation
+  std::match_results<std::string_view::const_iterator> match_result;
+  if (!std::regex_search(input.begin(), input.end(), match_result, pattern,
                          std::regex_constants::match_any)) {
     return std::nullopt;
   }
