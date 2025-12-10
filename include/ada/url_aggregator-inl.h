@@ -20,7 +20,7 @@
 namespace ada {
 
 inline void url_aggregator::update_base_authority(
-    std::string_view base_buffer, const ada::url_components &base) {
+    std::string_view base_buffer, const ada::url_components& base) {
   std::string_view input = base_buffer.substr(
       base.protocol_end, base.host_start - base.protocol_end);
   ada_log("url_aggregator::update_base_authority ", input);
@@ -722,7 +722,7 @@ constexpr bool url_aggregator::cannot_have_credentials_or_port() const {
          components.host_start == components.host_end;
 }
 
-[[nodiscard]] ada_really_inline const ada::url_components &
+[[nodiscard]] ada_really_inline const ada::url_components&
 url_aggregator::get_components() const noexcept {
   return components;
 }
@@ -1100,8 +1100,8 @@ constexpr void url_aggregator::set_protocol_as_file() {
   return helpers::substring(buffer, components.pathname_start, ending_index);
 }
 
-inline std::ostream &operator<<(std::ostream &out,
-                                const ada::url_aggregator &u) {
+inline std::ostream& operator<<(std::ostream& out,
+                                const ada::url_aggregator& u) {
   return out << u.to_string();
 }
 

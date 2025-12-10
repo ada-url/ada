@@ -2,7 +2,7 @@
 #include "ada.h"
 #include <iostream>
 
-int main(int, char *[]) {
+int main(int, char*[]) {
   auto url = ada::parse<ada::url>("https://www.google.com");
   if (!url) {
     std::cout << "failure" << std::endl;

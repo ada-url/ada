@@ -9,7 +9,7 @@
 #include "performancecounters/event_counter.h"
 event_collector collector;
 
-bool file_exists(const char *filename) {
+bool file_exists(const char* filename) {
   namespace fs = std::filesystem;
   std::filesystem::path f{filename};
   if (std::filesystem::exists(filename)) {
@@ -33,7 +33,7 @@ std::string read_file(std::string filename) {
   return out;
 }
 
-std::vector<std::string> split_string(const std::string &str) {
+std::vector<std::string> split_string(const std::string& str) {
   auto result = std::vector<std::string>{};
   std::stringstream ss{str};
   for (std::string line; std::getline(ss, line, '\n');) {
@@ -65,7 +65,7 @@ struct stat_numbers {
   bool has_search = false;
 };
 
-size_t count_ascii_bytes(const std::string &s) {
+size_t count_ascii_bytes(const std::string& s) {
   size_t counter = 0;
   for (uint8_t c : s) {
     if (c < 128) {
@@ -77,7 +77,7 @@ size_t count_ascii_bytes(const std::string &s) {
 
 template <class result_type = ada::url_aggregator>
 std::vector<stat_numbers> collect_values(
-    const std::vector<std::string> &url_examples, size_t trials) {
+    const std::vector<std::string>& url_examples, size_t trials) {
   std::vector<stat_numbers> numbers(url_examples.size());
   for (size_t i = 0; i < url_examples.size(); i++) {
     numbers[i].url_string = url_examples[i];
@@ -96,7 +96,7 @@ std::vector<stat_numbers> collect_values(
   }
   volatile size_t href_size = 0;
   for (size_t i = 0; i < trials; i++) {
-    for (stat_numbers &n : numbers) {
+    for (stat_numbers& n : numbers) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
       ada::result<result_type> url = ada::parse<result_type>(n.url_string);
@@ -112,12 +112,12 @@ std::vector<stat_numbers> collect_values(
 }
 
 #ifdef ADA_URL_FILE
-const char *default_file = ADA_URL_FILE;
+const char* default_file = ADA_URL_FILE;
 #else
-const char *default_file = nullptr;
+const char* default_file = nullptr;
 #endif
 
-std::vector<std::string> init_data(const char *input = default_file) {
+std::vector<std::string> init_data(const char* input = default_file) {
   std::vector<std::string> input_urls;
   if (input == nullptr) {
     return input_urls;
@@ -133,7 +133,7 @@ std::vector<std::string> init_data(const char *input = default_file) {
   return input_urls;
 }
 
-void print(const stat_numbers &n) {
+void print(const stat_numbers& n) {
   std::cout << std::setw(15) << n.url_string.size() << ",";
   std::cout << std::setw(15) << n.counters.best.cycles() << "," << std::setw(15)
             << size_t(n.counters.cycles()) << ",";
@@ -238,13 +238,13 @@ void print(const std::vector<stat_numbers> numbers) {
 
   std::cout << std::endl;
 
-  for (const stat_numbers &n : numbers) {
+  for (const stat_numbers& n : numbers) {
     print(n);
     std::cout << std::endl;
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   std::vector<std::string> input_urls;
   if (argc == 1) {
     input_urls = init_data();

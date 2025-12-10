@@ -18,7 +18,7 @@
 // an out-of-bound access.
 template <class result_type = ada::url_aggregator>
 ada::result<result_type> ada_parse(std::string_view view,
-                                   const result_type *base = nullptr) {
+                                   const result_type* base = nullptr) {
   std::cout << "about to parse '" << view << "' [" << view.size() << " bytes]"
             << std::endl;
   std::unique_ptr<char[]> buffer(new char[view.size()]);
@@ -28,9 +28,9 @@ ada::result<result_type> ada_parse(std::string_view view,
 }
 
 template ada::result<ada::url> ada_parse(std::string_view view,
-                                         const ada::url *base);
+                                         const ada::url* base);
 template ada::result<ada::url_aggregator> ada_parse(
-    std::string_view view, const ada::url_aggregator *base);
+    std::string_view view, const ada::url_aggregator* base);
 
 #include "simdjson.h"
 
@@ -39,15 +39,15 @@ using namespace simdjson;
 #ifndef WPT_DATA_DIR
 #define WPT_DATA_DIR "wpt/"
 #endif
-const char *PERCENT_ENCODING_JSON = WPT_DATA_DIR "percent-encoding.json";
-const char *SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
-const char *ADA_SETTERS_TESTS_JSON =
+const char* PERCENT_ENCODING_JSON = WPT_DATA_DIR "percent-encoding.json";
+const char* SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
+const char* ADA_SETTERS_TESTS_JSON =
     WPT_DATA_DIR "ada_extra_setters_tests.json";
-const char *TOASCII_JSON = WPT_DATA_DIR "toascii.json";
-const char *IDNA_TEST_V2 = WPT_DATA_DIR "IdnaTestV2.json";
-const char *URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
-const char *ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
-const char *VERIFYDNSLENGTH_TESTS_JSON =
+const char* TOASCII_JSON = WPT_DATA_DIR "toascii.json";
+const char* IDNA_TEST_V2 = WPT_DATA_DIR "IdnaTestV2.json";
+const char* URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
+const char* ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
+const char* VERIFYDNSLENGTH_TESTS_JSON =
     WPT_DATA_DIR "verifydnslength_tests.json";
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
@@ -57,7 +57,7 @@ TYPED_TEST_SUITE(wpt_url_tests_typed, Types);
 
 std::stringstream error_buffer;
 
-bool file_exists(const char *filename) {
+bool file_exists(const char* filename) {
   namespace fs = std::filesystem;
   std::filesystem::path f{filename};
   if (std::filesystem::exists(filename)) {
@@ -98,7 +98,7 @@ TEST(wpt_url_tests, idna_test_v2_to_ascii) {
         ASSERT_EQ(str_expected_output, given_output);
       }
     }
-  } catch (simdjson::simdjson_error &error) {
+  } catch (simdjson::simdjson_error& error) {
     // Some tests include invalid unicode characters. Let's omit the errors.
     // FAIL() << "JSON error: " << error.what() << " near "
     //        << doc.current_location() << " in " << IDNA_TEST_V2 << std::endl;
@@ -140,7 +140,7 @@ TEST(wpt_url_tests, percent_encoding) {
         counter++;
       }
     }
-  } catch (simdjson::simdjson_error &error) {
+  } catch (simdjson::simdjson_error& error) {
     std::cerr << "JSON error: " << error.what() << " near "
               << doc.current_location() << " in " << TOASCII_JSON << std::endl;
     FAIL();
@@ -246,7 +246,7 @@ TYPED_TEST(wpt_url_tests_typed, setters_tests_encoding) {
           }
         }
       }
-    } catch (simdjson::simdjson_error &error) {
+    } catch (simdjson::simdjson_error& error) {
       std::cerr << "JSON error: " << error.what() << " near "
                 << doc.current_location() << " in " << source << std::endl;
       FAIL();
@@ -327,7 +327,7 @@ TYPED_TEST(wpt_url_tests_typed, toascii_encoding) {
         }
       }
     }
-  } catch (simdjson::simdjson_error &error) {
+  } catch (simdjson::simdjson_error& error) {
     std::cerr << "JSON error: " << error.what() << " near "
               << doc.current_location() << " in " << TOASCII_JSON << std::endl;
     FAIL();
@@ -450,7 +450,7 @@ TYPED_TEST(wpt_url_tests_typed, urltestdata_encoding) {
           }
         }
       }
-    } catch (simdjson::simdjson_error &error) {
+    } catch (simdjson::simdjson_error& error) {
       std::cerr << "JSON error: " << error.what() << " near "
                 << doc.current_location() << " in " << source << std::endl;
       FAIL();
@@ -461,7 +461,7 @@ TYPED_TEST(wpt_url_tests_typed, urltestdata_encoding) {
 }
 
 TEST(wpt_url_tests, verify_dns_length) {
-  const char *source = VERIFYDNSLENGTH_TESTS_JSON;
+  const char* source = VERIFYDNSLENGTH_TESTS_JSON;
   size_t counter{};
   ondemand::parser parser;
   ASSERT_TRUE(file_exists(source));
@@ -486,7 +486,7 @@ TEST(wpt_url_tests, verify_dns_length) {
         counter++;
       }
     }
-  } catch (simdjson::simdjson_error &error) {
+  } catch (simdjson::simdjson_error& error) {
     std::cerr << "JSON error: " << error.what() << " near "
               << doc.current_location() << " in " << source << std::endl;
     FAIL();

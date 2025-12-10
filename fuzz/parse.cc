@@ -7,8 +7,8 @@
 #include "ada.cpp"
 #include "ada.h"
 
-bool is_valid_utf8_string(const char *buf, size_t len) {
-  const uint8_t *data = reinterpret_cast<const uint8_t *>(buf);
+bool is_valid_utf8_string(const char* buf, size_t len) {
+  const uint8_t* data = reinterpret_cast<const uint8_t*>(buf);
   uint64_t pos = 0;
   uint32_t code_point = 0;
   while (pos < len) {
@@ -91,7 +91,7 @@ bool is_valid_utf8_string(const char *buf, size_t len) {
   return true;
 }
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   FuzzedDataProvider fdp(data, size);
   std::string source = fdp.ConsumeRandomLengthString(256);
 

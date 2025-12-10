@@ -11,7 +11,7 @@ struct parse_result {
   ada::url_components components;
 };
 
-parse_result parse(const std::string &input) {
+parse_result parse(const std::string& input) {
   auto out = ada::parse<ada::url_aggregator>(input);
   parse_result result;
   if (!out.has_value()) {

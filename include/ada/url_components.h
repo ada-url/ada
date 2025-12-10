@@ -19,10 +19,10 @@ struct url_components {
   constexpr static uint32_t omitted = uint32_t(-1);
 
   url_components() = default;
-  url_components(const url_components &u) = default;
-  url_components(url_components &&u) noexcept = default;
-  url_components &operator=(url_components &&u) noexcept = default;
-  url_components &operator=(const url_components &u) = default;
+  url_components(const url_components& u) = default;
+  url_components(url_components&& u) noexcept = default;
+  url_components& operator=(url_components&& u) noexcept = default;
+  url_components& operator=(const url_components& u) = default;
   ~url_components() = default;
 
   /*

@@ -44,10 +44,10 @@ struct url_aggregator;
  */
 struct url : url_base {
   url() = default;
-  url(const url &u) = default;
-  url(url &&u) noexcept = default;
-  url &operator=(url &&u) noexcept = default;
-  url &operator=(const url &u) = default;
+  url(const url& u) = default;
+  url(url&& u) noexcept = default;
+  url& operator=(url&& u) noexcept = default;
+  url& operator=(const url& u) = default;
   ~url() override = default;
 
   /**
@@ -178,7 +178,7 @@ struct url : url_base {
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  [[nodiscard]] const std::string &get_username() const noexcept;
+  [[nodiscard]] const std::string& get_username() const noexcept;
 
   /**
    * @return Returns true on successful operation.
@@ -244,7 +244,7 @@ struct url : url_base {
    * @return a constant reference to the underlying string.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  [[nodiscard]] const std::string &get_password() const noexcept;
+  [[nodiscard]] const std::string& get_password() const noexcept;
 
   /**
    * Return this's URL's port, serialized.
@@ -296,22 +296,22 @@ struct url : url_base {
 
  private:
   friend ada::url ada::parser::parse_url<ada::url>(std::string_view,
-                                                   const ada::url *);
+                                                   const ada::url*);
   friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
-      std::string_view, const ada::url_aggregator *);
+      std::string_view, const ada::url_aggregator*);
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
-      ada::url &url) noexcept;
+      ada::url& url) noexcept;
 
   friend ada::url ada::parser::parse_url_impl<ada::url, true>(std::string_view,
-                                                              const ada::url *);
+                                                              const ada::url*);
   friend ada::url_aggregator ada::parser::parse_url_impl<
-      ada::url_aggregator, true>(std::string_view, const ada::url_aggregator *);
+      ada::url_aggregator, true>(std::string_view, const ada::url_aggregator*);
 
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);
   inline void update_base_search(std::string_view input,
                                  const uint8_t query_percent_encode_set[]);
-  inline void update_base_search(std::optional<std::string> &&input);
+  inline void update_base_search(std::optional<std::string>&& input);
   inline void update_base_pathname(std::string_view input);
   inline void update_base_username(std::string_view input);
   inline void update_base_password(std::string_view input);
@@ -401,23 +401,23 @@ struct url : url_base {
    * scheme string, be lower-cased, not contain spaces or tabs. It should
    * have no spurious trailing or leading content.
    */
-  inline void set_scheme(std::string &&new_scheme) noexcept;
+  inline void set_scheme(std::string&& new_scheme) noexcept;
 
   /**
    * Take the scheme from another URL. The scheme string is moved from the
    * provided url.
    */
-  constexpr void copy_scheme(ada::url &&u) noexcept;
+  constexpr void copy_scheme(ada::url&& u) noexcept;
 
   /**
    * Take the scheme from another URL. The scheme string is copied from the
    * provided url.
    */
-  constexpr void copy_scheme(const ada::url &u);
+  constexpr void copy_scheme(const ada::url& u);
 
 };  // struct url
 
-inline std::ostream &operator<<(std::ostream &out, const ada::url &u);
+inline std::ostream& operator<<(std::ostream& out, const ada::url& u);
 }  // namespace ada
 
 #endif  // ADA_URL_H

@@ -76,7 +76,7 @@ class LinuxEvents {
     }
   }
 
-  inline void end(std::vector<unsigned long long> &results) {
+  inline void end(std::vector<unsigned long long>& results) {
     if (fd != -1) {
       if (ioctl(fd, PERF_EVENT_IOC_DISABLE, PERF_IOC_FLAG_GROUP) == -1) {
         report_error("ioctl(PERF_EVENT_IOC_DISABLE)");
@@ -100,6 +100,6 @@ class LinuxEvents {
   bool is_working() { return working; }
 
  private:
-  void report_error(const std::string &) { working = false; }
+  void report_error(const std::string&) { working = false; }
 };
 #endif

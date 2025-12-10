@@ -5,10 +5,10 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 MAINSOURCE=$SCRIPTPATH/..
 ALL_ADA_FILES=$(cd $MAINSOURCE && git ls-tree --full-tree --name-only -r HEAD | grep -e ".*\.\(c\|h\|cc\|cpp\|hh\)\$")
 
-if clang-format-17 --version  2>/dev/null | grep -qF 'version 17.'; then
-  cd $MAINSOURCE; clang-format-17 --style=file --verbose -i "$@" $ALL_ADA_FILES
+if clang-format-21 --version  2>/dev/null | grep -qF 'version 21.'; then
+  cd $MAINSOURCE; clang-format-21 --style=file --verbose -i "$@" $ALL_ADA_FILES
   exit 0
-elif clang-format --version  2>/dev/null | grep -qF 'version 17.'; then
+elif clang-format --version  2>/dev/null | grep -qF 'version 21.'; then
   cd $MAINSOURCE; clang-format --style=file --verbose -i "$@" $ALL_ADA_FILES
   exit 0
 fi
@@ -17,6 +17,6 @@ command -v docker >/dev/null 2>&1 || { echo >&2 "Please install docker. E.g., go
 docker info >/dev/null 2>&1 || { echo >&2 "Docker server is not running? type 'docker info'."; exit 1; }
 
 if [ -t 0 ]; then DOCKER_ARGS=-it; fi
-docker pull kszonek/clang-format-17
+docker pull xianpengshen/clang-tools:21
 
-docker run --rm $DOCKER_ARGS -v "$MAINSOURCE":"$MAINSOURCE":Z  -w "$MAINSOURCE" -u "$(id -u $USER):$(id -g $USER)" kszonek/clang-format-17 --style=file --verbose -i "$@" $ALL_ADA_FILES
+docker run --rm $DOCKER_ARGS -v "$MAINSOURCE":"$MAINSOURCE":Z  -w "$MAINSOURCE" -u "$(id -u $USER):$(id -g $USER)" xianpengshen/clang-tools:21 clang-format-21 --style=file --verbose -i "$@" $ALL_ADA_FILES

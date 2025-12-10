@@ -48,10 +48,10 @@ struct url_search_params {
     initialize(input);
   }
 
-  url_search_params(const url_search_params &u) = default;
-  url_search_params(url_search_params &&u) noexcept = default;
-  url_search_params &operator=(url_search_params &&u) noexcept = default;
-  url_search_params &operator=(const url_search_params &u) = default;
+  url_search_params(const url_search_params& u) = default;
+  url_search_params(url_search_params&& u) noexcept = default;
+  url_search_params& operator=(url_search_params&& u) noexcept = default;
+  url_search_params& operator=(const url_search_params& u) = default;
   ~url_search_params() = default;
 
   [[nodiscard]] inline size_t size() const noexcept;
@@ -167,11 +167,11 @@ struct url_search_params {
 template <typename T, url_search_params_iter_type Type>
 struct url_search_params_iter {
   inline url_search_params_iter() : params(EMPTY) {}
-  url_search_params_iter(const url_search_params_iter &u) = default;
-  url_search_params_iter(url_search_params_iter &&u) noexcept = default;
-  url_search_params_iter &operator=(url_search_params_iter &&u) noexcept =
+  url_search_params_iter(const url_search_params_iter& u) = default;
+  url_search_params_iter(url_search_params_iter&& u) noexcept = default;
+  url_search_params_iter& operator=(url_search_params_iter&& u) noexcept =
       default;
-  url_search_params_iter &operator=(const url_search_params_iter &u) = default;
+  url_search_params_iter& operator=(const url_search_params_iter& u) = default;
   ~url_search_params_iter() = default;
 
   /**
@@ -183,9 +183,9 @@ struct url_search_params_iter {
 
  private:
   static url_search_params EMPTY;
-  inline url_search_params_iter(url_search_params &params_) : params(params_) {}
+  inline url_search_params_iter(url_search_params& params_) : params(params_) {}
 
-  url_search_params &params;
+  url_search_params& params;
   size_t pos = 0;
 
   friend struct url_search_params;

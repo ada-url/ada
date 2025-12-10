@@ -6,7 +6,7 @@
 struct line_iterator {
   std::string_view all_text{};
   size_t next_end_of_line{0};
-  line_iterator(const char *_buffer, size_t _len) : all_text(_buffer, _len) {}
+  line_iterator(const char* _buffer, size_t _len) : all_text(_buffer, _len) {}
 
   inline bool find_another_complete_line() noexcept {
     next_end_of_line = all_text.find('\n');

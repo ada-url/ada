@@ -29,7 +29,7 @@ jobs:
       - name: Run clang-format
         uses: jidicula/clang-format-action@6cd220de46c89139a0365edae93eee8eb30ca8fe # v4.16.0
         with:
-          clang-format-version: '17'
+          clang-format-version: '21'
           fallback-style: 'Google'
 
       - uses: chartboost/ruff-action@e18ae971ccee1b2d7bbef113930f00c670b78da4 # v1.0.0
@@ -39,7 +39,7 @@ jobs:
 
       - name: Run clang-tidy
         run: >
-          cmake -B build -DADA_TESTING=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-17 &&
+          cmake -B build -DADA_TESTING=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-21 &&
           cmake --build build -j=4
         env:
-          CXX: clang++-17
+          CXX: clang++-21

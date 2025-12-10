@@ -35,7 +35,7 @@ namespace ada {
 [[nodiscard]] inline bool url::has_hostname() const noexcept {
   return host.has_value();
 }
-inline std::ostream &operator<<(std::ostream &out, const ada::url &u) {
+inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
   return out << u.to_string();
 }
 
@@ -133,7 +133,7 @@ inline void url::update_base_search(std::string_view input,
   query = ada::unicode::percent_encode(input, query_percent_encode_set);
 }
 
-inline void url::update_base_search(std::optional<std::string> &&input) {
+inline void url::update_base_search(std::optional<std::string>&& input) {
   query = std::move(input);
 }
 
@@ -167,7 +167,7 @@ constexpr void url::clear_search() { query = std::nullopt; }
 
 constexpr void url::set_protocol_as_file() { type = ada::scheme::type::FILE; }
 
-inline void url::set_scheme(std::string &&new_scheme) noexcept {
+inline void url::set_scheme(std::string&& new_scheme) noexcept {
   type = ada::scheme::get_scheme_type(new_scheme);
   // We only move the 'scheme' if it is non-special.
   if (!is_special()) {
@@ -175,12 +175,12 @@ inline void url::set_scheme(std::string &&new_scheme) noexcept {
   }
 }
 
-constexpr void url::copy_scheme(ada::url &&u) noexcept {
+constexpr void url::copy_scheme(ada::url&& u) noexcept {
   non_special_scheme = u.non_special_scheme;
   type = u.type;
 }
 
-constexpr void url::copy_scheme(const ada::url &u) {
+constexpr void url::copy_scheme(const ada::url& u) {
   non_special_scheme = u.non_special_scheme;
   type = u.type;
 }
