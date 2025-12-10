@@ -189,7 +189,7 @@ size_t count_whatwg_invalid() {
 }
 
 template <bool just_parse = PARSE_AND_HREF>
-static void BasicBench_whatwg(benchmark::State& state) {
+static void BENCHMARK_NAME(BasicBench_whatwg)(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;
   volatile size_t href_size = 0;
@@ -251,7 +251,10 @@ static void BasicBench_whatwg(benchmark::State& state) {
   state.counters["url/s"] = benchmark::Counter(
       std::size(url_examples), benchmark::Counter::kIsIterationInvariantRate);
 }
-BENCHMARK(BasicBench_whatwg);
+static auto* CONCAT(benchmark_register_, BENCHMARK_NAME(BasicBench_whatwg)) =
+    ::benchmark::RegisterBenchmark(BENCHMARK_PREFIX_STR "BasicBench_whatwg",
+                                   BENCHMARK_NAME(BasicBench_whatwg));
+
 // There is no need for BasicBench_whatwg_just_parse because whatwg appears to
 // provide the href at a minimal cost, probably because it is already
 // materialized. auto BasicBench_whatwg_just_parse =
