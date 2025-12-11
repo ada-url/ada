@@ -46,10 +46,8 @@ url_pattern_component<regex_provider>::create_component_match_result(
   // says we should start from 1. This case is handled by the
   // std_regex_provider.
   for (size_t index = 0; index < exec_result.size(); index++) {
-    result.groups.insert({
-        group_name_list[index],
-        std::move(exec_result[index]),
-    });
+    result.groups.emplace(group_name_list[index],
+                          std::move(exec_result[index]));
   }
   return result;
 }
