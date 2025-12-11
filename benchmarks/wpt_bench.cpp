@@ -144,16 +144,17 @@ static void BasicBench_AdaURL(benchmark::State &state) {
       benchmark::Counter(double(std::size(url_examples)),
                          benchmark::Counter::kIsIterationInvariantRate);
 }
-auto BasicBench_AdaURL_url = BasicBench_AdaURL<ada::url>;
-BENCHMARK(BasicBench_AdaURL_url);
-auto BasicBench_AdaURL_url_aggregator = BasicBench_AdaURL<ada::url_aggregator>;
-BENCHMARK(BasicBench_AdaURL_url_aggregator);
+auto WptBench_BasicBench_AdaURL_url = BasicBench_AdaURL<ada::url>;
+BENCHMARK(WptBench_BasicBench_AdaURL_url);
+auto WptBench_BasicBench_AdaURL_url_aggregator =
+    BasicBench_AdaURL<ada::url_aggregator>;
+BENCHMARK(WptBench_BasicBench_AdaURL_url_aggregator);
 
 #if ADA_url_whatwg_ENABLED
 
 #include <upa/url.h>
 
-static void BasicBench_whatwg(benchmark::State &state) {
+static void WptBench_BasicBench_whatwg(benchmark::State &state) {
   volatile size_t success{};
   for (auto _ : state) {
     for (const std::pair<std::string, std::string> &url_strings :
@@ -224,7 +225,7 @@ static void BasicBench_whatwg(benchmark::State &state) {
       benchmark::Counter(double(std::size(url_examples)),
                          benchmark::Counter::kIsIterationInvariantRate);
 }
-BENCHMARK(BasicBench_whatwg);
+BENCHMARK(WptBench_BasicBench_whatwg);
 #endif  // ADA_url_whatwg_ENABLED
 
 int main(int argc, char **argv) {
