@@ -328,22 +328,25 @@ tl::expected<std::string, errors> canonicalize_port(
   std::string_view digits_to_parse =
       std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
 
-  // Parse the port number
-  uint16_t parsed_port{};
-  auto result = std::from_chars(digits_to_parse.data(),
-                                digits_to_parse.data() + digits_to_parse.size(),
-                                parsed_port);
-
-  if (result.ec == std::errc::result_out_of_range) {
+  // Here we have that a range of ASCII digit characters identified
+  // by digits_to_parse. It is none empty.
+  // We want to determine whether it is a valid port number (0-65535).
+  // Clearly, if the length is greater than 5, it is invalid.
+  // If the length is 5, we need to compare lexicographically to "65535".
+  // Otherwise it is valid.
+  if (digits_to_parse.size() == 5) {
+    if (digits_to_parse > "65535") {
+      return tl::unexpected(errors::type_error);
+    }
+  } else if (digits_to_parse.size() > 5) {
     return tl::unexpected(errors::type_error);
   }
-
-  if (result.ec == std::errc()) {
-    // Successfully parsed, return as string
-    return std::to_string(parsed_port);
+  if (digits_to_parse[0] == '0' && digits_to_parse.size() > 1) {
+    // Leading zeros are not allowed for multi-digit ports
+    return tl::unexpected(errors::type_error);
   }
-
-  return tl::unexpected(errors::type_error);
+  // It is valid! Most times, we do not need to parse it into an integer.
+  return std::string(digits_to_parse);
 }
 
 tl::expected<std::string, errors> canonicalize_port_with_protocol(
