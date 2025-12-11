@@ -2,8 +2,15 @@
 #include "ada/url_pattern_helpers-inl.h"
 
 #include <algorithm>
+#include <charconv>
 #include <optional>
+#include <ranges>
 #include <string>
+
+#include "ada/character_sets.h"
+#include "ada/helpers.h"
+#include "ada/scheme.h"
+#include "ada/unicode.h"
 
 namespace ada::url_pattern_helpers {
 
@@ -224,15 +231,16 @@ tl::expected<std::string, errors> canonicalize_username(
   if (input.empty()) [[unlikely]] {
     return "";
   }
-  // Let dummyURL be a new URL record.
-  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
-  ADA_ASSERT_TRUE(url.has_value());
-  // Set the username given dummyURL and value.
-  if (!url->set_username(input)) {
-    return tl::unexpected(errors::type_error);
+  // Percent-encode the input using the userinfo percent-encode set.
+  size_t idx = ada::unicode::percent_encode_index(
+      input, character_sets::USERINFO_PERCENT_ENCODE);
+  if (idx == input.size()) {
+    // No encoding needed, return input as-is
+    return std::string(input);
   }
-  // Return dummyURL's username.
-  return std::string(url->get_username());
+  // Percent-encode from the first character that needs encoding
+  return ada::unicode::percent_encode(
+      input, character_sets::USERINFO_PERCENT_ENCODE, idx);
 }
 
 tl::expected<std::string, errors> canonicalize_password(
@@ -241,16 +249,16 @@ tl::expected<std::string, errors> canonicalize_password(
   if (input.empty()) [[unlikely]] {
     return "";
   }
-  // Let dummyURL be a new URL record.
-  // Set the password given dummyURL and value.
-  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
-
-  ADA_ASSERT_TRUE(url.has_value());
-  if (!url->set_password(input)) {
-    return tl::unexpected(errors::type_error);
+  // Percent-encode the input using the userinfo percent-encode set.
+  size_t idx = ada::unicode::percent_encode_index(
+      input, character_sets::USERINFO_PERCENT_ENCODE);
+  if (idx == input.size()) {
+    // No encoding needed, return input as-is
+    return std::string(input);
   }
-  // Return dummyURL's password.
-  return std::string(url->get_password());
+  // Percent-encode from the first character that needs encoding
+  return ada::unicode::percent_encode(
+      input, character_sets::USERINFO_PERCENT_ENCODE, idx);
 }
 
 tl::expected<std::string, errors> canonicalize_hostname(
@@ -300,17 +308,41 @@ tl::expected<std::string, errors> canonicalize_port(
   if (port_value.empty()) [[unlikely]] {
     return "";
   }
-  // Let dummyURL be a new URL record.
-  // If protocolValue was given, then set dummyURL's scheme to protocolValue.
-  // Let parseResult be the result of running basic URL parser given portValue
-  // with dummyURL as url and port state as state override.
-  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
-  ADA_ASSERT_TRUE(url);
-  if (url->set_port(port_value)) {
-    // Return dummyURL's port, serialized, or empty string if it is null.
-    return std::string(url->get_port());
+
+  // Remove ASCII tab or newline characters
+  std::string trimmed(port_value);
+  helpers::remove_ascii_tab_or_newline(trimmed);
+
+  if (trimmed.empty()) {
+    return "";
   }
-  // If parseResult is failure, then throw a TypeError.
+
+  // Input should start with a digit character
+  if (!unicode::is_ascii_digit(trimmed.front())) {
+    return tl::unexpected(errors::type_error);
+  }
+
+  // Find the first non-digit character
+  auto first_non_digit =
+      std::ranges::find_if_not(trimmed, unicode::is_ascii_digit);
+  std::string_view digits_to_parse =
+      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
+
+  // Parse the port number
+  uint16_t parsed_port{};
+  auto result = std::from_chars(digits_to_parse.data(),
+                                digits_to_parse.data() + digits_to_parse.size(),
+                                parsed_port);
+
+  if (result.ec == std::errc::result_out_of_range) {
+    return tl::unexpected(errors::type_error);
+  }
+
+  if (result.ec == std::errc()) {
+    // Successfully parsed, return as string
+    return std::to_string(parsed_port);
+  }
+
   return tl::unexpected(errors::type_error);
 }
 
@@ -321,34 +353,55 @@ tl::expected<std::string, errors> canonicalize_port_with_protocol(
     return "";
   }
 
-  // TODO: Remove this
-  // We have an empty protocol because get_protocol() returns an empty string
-  // We should handle this in the caller rather than here.
+  // Handle empty or trailing colon in protocol
   if (protocol.empty()) {
     protocol = "fake";
   } else if (protocol.ends_with(":")) {
     protocol.remove_suffix(1);
   }
-  // Let dummyURL be a new URL record.
-  // If protocolValue was given, then set dummyURL's scheme to protocolValue.
-  // Let parseResult be the result of running basic URL parser given portValue
-  // with dummyURL as url and port state as state override.
-  auto url = ada::parse<url_aggregator>(std::string(protocol) + "://dummy.test",
-                                        nullptr);
-  // TODO: Remove has_port() check.
-  // This is actually a bug with url parser where set_port() returns true for
-  // "invalid80" port value.
-  if (url && url->set_port(port_value) && url->has_port()) {
-    // Return dummyURL's port, serialized, or empty string if it is null.
-    return std::string(url->get_port());
+
+  // Remove ASCII tab or newline characters
+  std::string trimmed(port_value);
+  helpers::remove_ascii_tab_or_newline(trimmed);
+
+  if (trimmed.empty()) {
+    return "";
   }
-  // TODO: Remove this once the previous has_port() check is removed.
-  if (url) {
-    if (scheme::is_special(protocol) && url->get_port().empty()) {
+
+  // Input should start with a digit character
+  if (!unicode::is_ascii_digit(trimmed.front())) {
+    return tl::unexpected(errors::type_error);
+  }
+
+  // Find the first non-digit character
+  auto first_non_digit =
+      std::ranges::find_if_not(trimmed, unicode::is_ascii_digit);
+  std::string_view digits_to_parse =
+      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
+
+  // Parse the port number
+  uint16_t parsed_port{};
+  auto result = std::from_chars(digits_to_parse.data(),
+                                digits_to_parse.data() + digits_to_parse.size(),
+                                parsed_port);
+
+  if (result.ec == std::errc::result_out_of_range) {
+    return tl::unexpected(errors::type_error);
+  }
+
+  if (result.ec == std::errc()) {
+    // Check if this is the default port for the scheme
+    uint16_t default_port = scheme::get_special_port(protocol);
+
+    // If it's the default port for a special scheme, return empty string
+    if (default_port != 0 && default_port == parsed_port) {
       return "";
     }
+
+    // Successfully parsed, return as string
+    return std::to_string(parsed_port);
   }
-  // If parseResult is failure, then throw a TypeError.
+
   return tl::unexpected(errors::type_error);
 }
 
@@ -401,21 +454,28 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   if (input.empty()) [[unlikely]] {
     return "";
   }
-  // Let dummyURL be a new URL record.
-  // Set dummyURL's query to the empty string.
-  // Let parseResult be the result of running basic URL parser given value with
-  // dummyURL as url and query state as state override.
-  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
-  ADA_ASSERT_TRUE(url.has_value());
-  url->set_search(input);
-  if (url->has_search()) {
-    const auto search = url->get_search();
-    if (!search.empty()) {
-      return std::string(search.substr(1));
-    }
+  // Remove leading '?' if present
+  std::string new_value;
+  new_value = input[0] == '?' ? input.substr(1) : input;
+  // Remove ASCII tab or newline characters
+  helpers::remove_ascii_tab_or_newline(new_value);
+
+  if (new_value.empty()) {
     return "";
   }
-  return tl::unexpected(errors::type_error);
+
+  // Percent-encode using QUERY_PERCENT_ENCODE (for non-special URLs)
+  // Note: "fake://dummy.test" is not a special URL, so we use
+  // QUERY_PERCENT_ENCODE
+  size_t idx = ada::unicode::percent_encode_index(
+      new_value, character_sets::QUERY_PERCENT_ENCODE);
+  if (idx == new_value.size()) {
+    // No encoding needed
+    return new_value;
+  }
+  // Percent-encode from the first character that needs encoding
+  return ada::unicode::percent_encode(
+      new_value, character_sets::QUERY_PERCENT_ENCODE, idx);
 }
 
 tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
@@ -423,22 +483,26 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   if (input.empty()) [[unlikely]] {
     return "";
   }
-  // Let dummyURL be a new URL record.
-  // Set dummyURL's fragment to the empty string.
-  // Let parseResult be the result of running basic URL parser given value with
-  // dummyURL as url and fragment state as state override.
-  auto url = ada::parse<url_aggregator>("fake://dummy.test", nullptr);
-  ADA_ASSERT_TRUE(url.has_value());
-  url->set_hash(input);
-  // Return dummyURL's fragment.
-  if (url->has_hash()) {
-    const auto hash = url->get_hash();
-    if (!hash.empty()) {
-      return std::string(hash.substr(1));
-    }
+  // Remove leading '#' if present
+  std::string new_value;
+  new_value = input[0] == '#' ? input.substr(1) : input;
+  // Remove ASCII tab or newline characters
+  helpers::remove_ascii_tab_or_newline(new_value);
+
+  if (new_value.empty()) {
     return "";
   }
-  return tl::unexpected(errors::type_error);
+
+  // Percent-encode using FRAGMENT_PERCENT_ENCODE
+  size_t idx = ada::unicode::percent_encode_index(
+      new_value, character_sets::FRAGMENT_PERCENT_ENCODE);
+  if (idx == new_value.size()) {
+    // No encoding needed
+    return new_value;
+  }
+  // Percent-encode from the first character that needs encoding
+  return ada::unicode::percent_encode(
+      new_value, character_sets::FRAGMENT_PERCENT_ENCODE, idx);
 }
 
 tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
