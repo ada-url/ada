@@ -341,6 +341,10 @@ tl::expected<std::string, errors> canonicalize_port(
   } else if (digits_to_parse.size() > 5) {
     return tl::unexpected(errors::type_error);
   }
+  if(digits_to_parse[0] == '0' && digits_to_parse.size() > 1) {
+    // Leading zeros are not allowed for multi-digit ports
+    return tl::unexpected(errors::type_error);
+  }
   // It is valid! Most times, we do not need to parse it into an integer.
   return std::string(digits_to_parse);
 }
