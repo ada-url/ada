@@ -14,10 +14,7 @@ size_t count_ada_invalid() {
   return how_many;
 }
 
-enum { JUST_PARSE = 1, PARSE_AND_HREF = 0 };
-
-template <bool just_parse = PARSE_AND_HREF,
-          class result_type = ada::url_aggregator>
+template <bool just_parse = false, class result_type = ada::url_aggregator>
 static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;
@@ -96,7 +93,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
 #define BENCHMARK_NAME(name) CONCAT(BENCHMARK_PREFIX, name)
 
 auto BENCHMARK_NAME(BasicBench_AdaURL_href) =
-    BasicBench_AdaURL<PARSE_AND_HREF, ada::url>;
+    BasicBench_AdaURL<false, ada::url>;
 static auto* CONCAT(benchmark_register_,
                     BENCHMARK_NAME(BasicBench_AdaURL_href)) =
     ::benchmark::RegisterBenchmark(BENCHMARK_PREFIX_STR
@@ -104,7 +101,7 @@ static auto* CONCAT(benchmark_register_,
                                    BENCHMARK_NAME(BasicBench_AdaURL_href));
 
 auto BENCHMARK_NAME(BasicBench_AdaURL_aggregator_href) =
-    BasicBench_AdaURL<PARSE_AND_HREF, ada::url_aggregator>;
+    BasicBench_AdaURL<false, ada::url_aggregator>;
 static auto* CONCAT(benchmark_register_,
                     BENCHMARK_NAME(BasicBench_AdaURL_aggregator_href)) =
     ::benchmark::RegisterBenchmark(
@@ -188,8 +185,8 @@ size_t count_whatwg_invalid() {
   return how_many;
 }
 
-template <bool just_parse = PARSE_AND_HREF>
-static void BENCHMARK_NAME(BasicBench_whatwg)(benchmark::State& state) {
+template <bool just_parse = false>
+static void BasicBench_whatwg(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t success = 0;
   volatile size_t href_size = 0;
@@ -198,7 +195,7 @@ static void BENCHMARK_NAME(BasicBench_whatwg)(benchmark::State& state) {
       upa::url url;
       if (upa::success(url.parse(url_string, nullptr))) {
         success++;
-        if (!just_parse) {
+        if constexpr (!just_parse) {
           href_size += url.href().size();
         }
       }
@@ -213,7 +210,7 @@ static void BENCHMARK_NAME(BasicBench_whatwg)(benchmark::State& state) {
         upa::url url;
         if (upa::success(url.parse(url_string, nullptr))) {
           success++;
-          if (!just_parse) {
+          if constexpr (!just_parse) {
             href_size += url.href().size();
           }
         }
@@ -258,7 +255,7 @@ static auto* CONCAT(benchmark_register_, BENCHMARK_NAME(BasicBench_whatwg)) =
 // There is no need for BasicBench_whatwg_just_parse because whatwg appears to
 // provide the href at a minimal cost, probably because it is already
 // materialized. auto BasicBench_whatwg_just_parse =
-// BasicBench_whatwg<JUST_PARSE>; BENCHMARK(BasicBench_whatwg_just_parse);
+// BasicBench_whatwg<true>; BENCHMARK(BasicBench_whatwg_just_parse);
 
 #endif  // ADA_url_whatwg_ENABLED
 
@@ -293,7 +290,7 @@ static void BasicBench_CURL(benchmark::State& state) {
       // Returns a CURLUcode error value, which is (0) if everything went fine.
       if (rc == 0) {
         success++;
-        if (!just_parse) {
+        if constexpr (!just_parse) {
           char* buffer;
           // When asked to return the full URL, curl_url_get will return a
           // normalized and possibly cleaned up version of what was previously
@@ -316,7 +313,7 @@ static void BasicBench_CURL(benchmark::State& state) {
         CURLUcode rc = curl_url_set(url, CURLUPART_URL, url_string.c_str(), 0);
         // Returns a CURLUcode error value, which is (0) if everything went
         // fine.
-        if (!just_parse) {
+        if constexpr (!just_parse) {
           char* buffer;
           rc = curl_url_get(url, CURLUPART_URL, &buffer, 0);
           if (rc == 0) {
@@ -360,7 +357,7 @@ static void BasicBench_CURL(benchmark::State& state) {
 }
 BENCHMARK(BasicBench_CURL);
 // 'just parsing' is faster with curl, but maybe not so important for us.
-// auto BasicBench_CURL_just_parse = BasicBench_CURL<JUST_PARSE>;
+// auto BasicBench_CURL_just_parse = BasicBench_CURL<true>;
 // BENCHMARK(BasicBench_CURL_just_parse);
 #endif
 
@@ -394,7 +391,7 @@ static void BasicBench_BoostURL(benchmark::State& state) {
         url u(url_string);
         u.normalize();
         success++;
-        if (!just_parse) {
+        if constexpr (!just_parse) {
           href_size += u.buffer().size();
         }
       } catch (...) {
@@ -411,7 +408,7 @@ static void BasicBench_BoostURL(benchmark::State& state) {
           url u(url_string);
           u.normalize();
           success++;
-          if (!just_parse) {
+          if constexpr (!just_parse) {
             href_size += u.buffer().size();
           }
         } catch (...) {
@@ -453,7 +450,7 @@ static void BasicBench_BoostURL(benchmark::State& state) {
 }
 BENCHMARK(BasicBench_BoostURL);
 // There is no need for 'just_parse' because BoostURL materializes the href.
-// auto BasicBench_BoostURL_just_parse = BasicBench_BoostURL<JUST_PARSE>;
+// auto BasicBench_BoostURL_just_parse = BasicBench_BoostURL<true>;
 // BENCHMARK(BasicBench_BoostURL_just_parse);
 #endif  // ADA_BOOST_ENABLED
 
