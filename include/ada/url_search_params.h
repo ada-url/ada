@@ -101,6 +101,13 @@ struct url_search_params {
   inline std::string to_string() const;
 
   /**
+   * Returns a serialized query string without normalizing the key-value pairs.
+   * Unlike to_string(), this method does not apply additional transformations
+   * to the percent-encoded output.
+   */
+  inline std::string to_raw_string() const;
+
+  /**
    * Returns a simple JS-style iterator over all of the keys in this
    * url_search_params. The keys in the iterator are not unique. The valid
    * lifespan of the iterator is tied to the url_search_params. The iterator

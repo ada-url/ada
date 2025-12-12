@@ -134,6 +134,19 @@ inline std::string url_search_params::to_string() const {
   return out;
 }
 
+inline std::string url_search_params::to_raw_string() const {
+  std::string out{};
+  for (const auto &[key, value] : params) {
+    if (!out.empty()) {
+      out += "&";
+    }
+    out.append(key);
+    out += "=";
+    out.append(value);
+  }
+  return out;
+}
+
 inline void url_search_params::set(const std::string_view key,
                                    const std::string_view value) {
   const auto find = [&key](const auto &param) { return param.first == key; };

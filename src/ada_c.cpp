@@ -487,6 +487,18 @@ ada_owned_string ada_search_params_to_string(ada_url_search_params result) {
   return owned;
 }
 
+ada_owned_string ada_search_params_to_raw_string(ada_url_search_params result) {
+  ada::result<ada::url_search_params>& r =
+      *(ada::result<ada::url_search_params>*)result;
+  if (!r) return ada_owned_string{nullptr, 0};
+  std::string out = r->to_raw_string();
+  ada_owned_string owned{};
+  owned.length = out.size();
+  owned.data = new char[owned.length];
+  memcpy((void*)owned.data, out.data(), owned.length);
+  return owned;
+}
+
 size_t ada_search_params_size(ada_url_search_params result) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
