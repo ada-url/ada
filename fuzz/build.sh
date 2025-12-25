@@ -69,3 +69,9 @@ $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE ./ada.o ada_c.o \
      -o $OUT/ada_c
 
 cp $SRC/ada-url/fuzz/*.dict $SRC/ada-url/fuzz/*.options $OUT/
+
+# Build unit test
+mkdir build-tests
+cd build-tests
+cmake -DADA_TESTING=True ..
+make
