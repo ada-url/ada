@@ -38,6 +38,19 @@ enum class url_pattern_part_type : uint8_t {
   FULL_WILDCARD,
 };
 
+// Pattern type for fast-path matching optimization.
+// This allows skipping expensive regex evaluation for common simple patterns.
+enum class url_pattern_component_type : uint8_t {
+  // Pattern is "^$" - only matches empty string
+  EMPTY,
+  // Pattern is "^<literal>$" - exact string match (no regex needed)
+  EXACT_MATCH,
+  // Pattern is "^(.*)$" - matches anything (full wildcard)
+  FULL_WILDCARD,
+  // Pattern requires actual regex evaluation
+  REGEXP,
+};
+
 enum class url_pattern_part_modifier : uint8_t {
   // The part does not have a modifier.
   none,
@@ -157,11 +170,15 @@ class url_pattern_component {
   url_pattern_component(std::string&& new_pattern,
                         typename regex_provider::regex_type&& new_regexp,
                         std::vector<std::string>&& new_group_name_list,
-                        bool new_has_regexp_groups)
+                        bool new_has_regexp_groups,
+                        url_pattern_component_type new_type,
+                        std::string&& new_exact_match_value = {})
       : regexp(std::move(new_regexp)),
         pattern(std::move(new_pattern)),
         group_name_list(std::move(new_group_name_list)),
-        has_regexp_groups(new_has_regexp_groups) {}
+        exact_match_value(std::move(new_exact_match_value)),
+        has_regexp_groups(new_has_regexp_groups),
+        type(new_type) {}
 
   // @see https://urlpattern.spec.whatwg.org/#compile-a-component
   template <url_pattern_encoding_callback F>
@@ -173,6 +190,16 @@ class url_pattern_component {
   url_pattern_component_result create_component_match_result(
       std::string&& input,
       std::vector<std::optional<std::string>>&& exec_result);
+
+  // Fast path test that returns true/false without constructing result groups.
+  // Uses cached pattern type to skip regex evaluation for simple patterns.
+  bool fast_test(std::string_view input) const noexcept;
+
+  // Fast path match that returns capture groups without regex for simple
+  // patterns. Returns nullopt if pattern doesn't match, otherwise returns
+  // capture groups.
+  std::optional<std::vector<std::optional<std::string>>> fast_match(
+      std::string_view input) const;
 
 #if ADA_TESTING
   friend void PrintTo(const url_pattern_component& component,
@@ -189,7 +216,11 @@ class url_pattern_component {
   typename regex_provider::regex_type regexp{};
   std::string pattern{};
   std::vector<std::string> group_name_list{};
+  // For EXACT_MATCH type: the literal string to compare against
+  std::string exact_match_value{};
   bool has_regexp_groups = false;
+  // Cached pattern type for fast-path optimization
+  url_pattern_component_type type = url_pattern_component_type::REGEXP;
 };
 
 // A URLPattern input can be either a string or a URLPatternInit object.
@@ -280,6 +311,13 @@ class url_pattern {
 
   // @see https://urlpattern.spec.whatwg.org/#url-pattern-has-regexp-groups
   [[nodiscard]] bool has_regexp_groups() const;
+
+  // Helper to test all components at once. Returns true if all match.
+  [[nodiscard]] bool test_components(
+      std::string_view protocol, std::string_view username,
+      std::string_view password, std::string_view hostname,
+      std::string_view port, std::string_view pathname, std::string_view search,
+      std::string_view hash) const;
 
 #if ADA_TESTING
   friend void PrintTo(const url_pattern& c, std::ostream* os) {

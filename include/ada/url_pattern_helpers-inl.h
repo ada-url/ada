@@ -801,13 +801,31 @@ tl::expected<std::vector<url_pattern_part>, errors> parse_pattern_string(
 template <url_pattern_regex::regex_concept regex_provider>
 bool protocol_component_matches_special_scheme(
     url_pattern_component<regex_provider>& component) {
-  // let's avoid unnecessary copy here.
-  auto& regex = component.regexp;
-  return regex_provider::regex_match("http", regex) ||
-         regex_provider::regex_match("https", regex) ||
-         regex_provider::regex_match("ws", regex) ||
-         regex_provider::regex_match("wss", regex) ||
-         regex_provider::regex_match("ftp", regex);
+  // Optimization: Use fast_test for simple patterns to avoid regex overhead
+  switch (component.type) {
+    case url_pattern_component_type::EMPTY:
+      // Empty pattern can't match any special scheme
+      return false;
+    case url_pattern_component_type::EXACT_MATCH:
+      // Direct string comparison for exact match patterns
+      return component.exact_match_value == "http" ||
+             component.exact_match_value == "https" ||
+             component.exact_match_value == "ws" ||
+             component.exact_match_value == "wss" ||
+             component.exact_match_value == "ftp";
+    case url_pattern_component_type::FULL_WILDCARD:
+      // Full wildcard matches everything including special schemes
+      return true;
+    case url_pattern_component_type::REGEXP:
+      // Fall back to regex matching for complex patterns
+      auto& regex = component.regexp;
+      return regex_provider::regex_match("http", regex) ||
+             regex_provider::regex_match("https", regex) ||
+             regex_provider::regex_match("ws", regex) ||
+             regex_provider::regex_match("wss", regex) ||
+             regex_provider::regex_match("ftp", regex);
+  }
+  ada::unreachable();
 }
 
 template <url_pattern_regex::regex_concept regex_provider>

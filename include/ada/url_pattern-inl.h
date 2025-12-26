@@ -153,43 +153,112 @@ url_pattern_component<regex_provider>::compile(
     return tl::unexpected(part_list.error());
   }
 
-  // Let (regular expression string, name list) be the result of running
-  // generate a regular expression and name list given part list and options.
+  // Detect pattern type early to potentially skip expensive regex compilation
+  const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
+  const bool has_regexp_groups = std::ranges::any_of(*part_list, has_regexp);
+
+  url_pattern_component_type component_type =
+      url_pattern_component_type::REGEXP;
+  std::string exact_match_value{};
+
+  if (part_list->empty()) {
+    component_type = url_pattern_component_type::EMPTY;
+  } else if (part_list->size() == 1) {
+    const auto& part = (*part_list)[0];
+    if (part.type == url_pattern_part_type::FIXED_TEXT &&
+        part.modifier == url_pattern_part_modifier::none &&
+        !options.ignore_case) {
+      component_type = url_pattern_component_type::EXACT_MATCH;
+      exact_match_value = part.value;
+    } else if (part.type == url_pattern_part_type::FULL_WILDCARD &&
+               part.modifier == url_pattern_part_modifier::none &&
+               part.prefix.empty() && part.suffix.empty()) {
+      component_type = url_pattern_component_type::FULL_WILDCARD;
+    }
+  }
+
+  // For simple patterns, skip regex generation and compilation entirely
+  if (component_type != url_pattern_component_type::REGEXP) {
+    auto pattern_string =
+        url_pattern_helpers::generate_pattern_string(*part_list, options);
+    // For FULL_WILDCARD, we need the group name from
+    // generate_regular_expression
+    std::vector<std::string> name_list;
+    if (component_type == url_pattern_component_type::FULL_WILDCARD &&
+        !part_list->empty()) {
+      name_list.push_back((*part_list)[0].name);
+    }
+    return url_pattern_component<regex_provider>(
+        std::move(pattern_string), typename regex_provider::regex_type{},
+        std::move(name_list), has_regexp_groups, component_type,
+        std::move(exact_match_value));
+  }
+
+  // Generate regex for complex patterns
   auto [regular_expression_string, name_list] =
       url_pattern_helpers::generate_regular_expression_and_name_list(*part_list,
                                                                      options);
-
-  ada_log("regular expression string: ", regular_expression_string);
-
-  // Let pattern string be the result of running generate a pattern
-  // string given part list and options.
   auto pattern_string =
       url_pattern_helpers::generate_pattern_string(*part_list, options);
 
-  // Let regular expression be RegExpCreate(regular expression string,
-  // flags). If this throws an exception, catch it, and throw a
-  // TypeError.
   std::optional<typename regex_provider::regex_type> regular_expression =
       regex_provider::create_instance(regular_expression_string,
                                       options.ignore_case);
-
   if (!regular_expression) {
     return tl::unexpected(errors::type_error);
   }
 
-  // For each part of part list:
-  // - If part's type is "regexp", then set has regexp groups to true.
-  const auto has_regexp = [](const auto& part) { return part.is_regexp(); };
-  const bool has_regexp_groups = std::ranges::any_of(*part_list, has_regexp);
-
-  ada_log("has regexp groups: ", has_regexp_groups);
-
-  // Return a new component whose pattern string is pattern string, regular
-  // expression is regular expression, group name list is name list, and has
-  // regexp groups is has regexp groups.
   return url_pattern_component<regex_provider>(
       std::move(pattern_string), std::move(*regular_expression),
-      std::move(name_list), has_regexp_groups);
+      std::move(name_list), has_regexp_groups, component_type,
+      std::move(exact_match_value));
+}
+
+template <url_pattern_regex::regex_concept regex_provider>
+bool url_pattern_component<regex_provider>::fast_test(
+    std::string_view input) const noexcept {
+  // Fast path for simple patterns - avoid regex evaluation
+  // Using if-else for better branch prediction on common cases
+  if (type == url_pattern_component_type::FULL_WILDCARD) {
+    return true;
+  }
+  if (type == url_pattern_component_type::EXACT_MATCH) {
+    return input == exact_match_value;
+  }
+  if (type == url_pattern_component_type::EMPTY) {
+    return input.empty();
+  }
+  // type == REGEXP
+  return regex_provider::regex_match(input, regexp);
+}
+
+template <url_pattern_regex::regex_concept regex_provider>
+std::optional<std::vector<std::optional<std::string>>>
+url_pattern_component<regex_provider>::fast_match(
+    std::string_view input) const {
+  // Handle each type directly without redundant checks
+  if (type == url_pattern_component_type::FULL_WILDCARD) {
+    // FULL_WILDCARD always matches
+    // Match regex_search behavior: empty input returns empty groups
+    if (input.empty() || group_name_list.empty()) {
+      return std::vector<std::optional<std::string>>{};
+    }
+    return std::vector<std::optional<std::string>>{std::string(input)};
+  }
+  if (type == url_pattern_component_type::EXACT_MATCH) {
+    if (input == exact_match_value) {
+      return std::vector<std::optional<std::string>>{};
+    }
+    return std::nullopt;
+  }
+  if (type == url_pattern_component_type::EMPTY) {
+    if (input.empty()) {
+      return std::vector<std::optional<std::string>>{};
+    }
+    return std::nullopt;
+  }
+  // type == REGEXP - use regex
+  return regex_provider::regex_search(input, regexp);
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
@@ -201,17 +270,87 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::exec(
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
+bool url_pattern<regex_provider>::test_components(
+    std::string_view protocol, std::string_view username,
+    std::string_view password, std::string_view hostname, std::string_view port,
+    std::string_view pathname, std::string_view search,
+    std::string_view hash) const {
+  return protocol_component.fast_test(protocol) &&
+         username_component.fast_test(username) &&
+         password_component.fast_test(password) &&
+         hostname_component.fast_test(hostname) &&
+         port_component.fast_test(port) &&
+         pathname_component.fast_test(pathname) &&
+         search_component.fast_test(search) && hash_component.fast_test(hash);
+}
+
+template <url_pattern_regex::regex_concept regex_provider>
 result<bool> url_pattern<regex_provider>::test(
-    const url_pattern_input& input, const std::string_view* base_url) {
-  // TODO: Optimization opportunity. Rather than returning `url_pattern_result`
-  // Implement a fast path just like `can_parse()` in ada_url.
-  // Let result be the result of match given this's associated URL pattern,
-  // input, and baseURL if given.
-  // If result is null, return false.
-  if (auto result = match(input, base_url); result.has_value()) {
-    return result->has_value();
+    const url_pattern_input& input, const std::string_view* base_url_string) {
+  // If input is a URLPatternInit
+  if (std::holds_alternative<url_pattern_init>(input)) {
+    if (base_url_string) {
+      return tl::unexpected(errors::type_error);
+    }
+
+    std::string protocol{}, username{}, password{}, hostname{};
+    std::string port{}, pathname{}, search{}, hash{};
+
+    auto apply_result = url_pattern_init::process(
+        std::get<url_pattern_init>(input), url_pattern_init::process_type::url,
+        protocol, username, password, hostname, port, pathname, search, hash);
+
+    if (!apply_result) {
+      return false;
+    }
+
+    std::string_view search_view = *apply_result->search;
+    if (search_view.starts_with("?")) {
+      search_view.remove_prefix(1);
+    }
+
+    return test_components(*apply_result->protocol, *apply_result->username,
+                           *apply_result->password, *apply_result->hostname,
+                           *apply_result->port, *apply_result->pathname,
+                           search_view, *apply_result->hash);
   }
-  return tl::unexpected(errors::type_error);
+
+  // URL string input path
+  result<url_aggregator> base_url;
+  if (base_url_string) {
+    base_url = ada::parse<url_aggregator>(*base_url_string, nullptr);
+    if (!base_url) {
+      return false;
+    }
+  }
+
+  auto url =
+      ada::parse<url_aggregator>(std::get<std::string_view>(input),
+                                 base_url.has_value() ? &*base_url : nullptr);
+  if (!url) {
+    return false;
+  }
+
+  // Extract components as string_view
+  auto protocol_view = url->get_protocol();
+  if (protocol_view.ends_with(":")) {
+    protocol_view.remove_suffix(1);
+  }
+
+  auto search_view = url->get_search();
+  if (search_view.starts_with("?")) {
+    search_view.remove_prefix(1);
+  }
+
+  auto hash_view = url->get_hash();
+  if (hash_view.starts_with("#")) {
+    hash_view.remove_prefix(1);
+  }
+
+  return test_components(protocol_view, url->get_username(),
+                         url->get_password(), url->get_hostname(),
+                         url->get_port(), url->get_pathname(), search_view,
+                         hash_view);
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
@@ -360,74 +499,61 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
     }
   }
 
+  // Use fast_match which skips regex for simple patterns (EMPTY, EXACT_MATCH,
+  // FULL_WILDCARD) and only falls back to regex for complex REGEXP patterns.
+
   // Let protocolExecResult be RegExpBuiltinExec(urlPattern's protocol
   // component's regular expression, protocol).
-  auto protocol_exec_result =
-      regex_provider::regex_search(protocol, protocol_component.regexp);
-
+  auto protocol_exec_result = protocol_component.fast_match(protocol);
   if (!protocol_exec_result) {
     return std::nullopt;
   }
 
   // Let usernameExecResult be RegExpBuiltinExec(urlPattern's username
   // component's regular expression, username).
-  auto username_exec_result =
-      regex_provider::regex_search(username, username_component.regexp);
-
+  auto username_exec_result = username_component.fast_match(username);
   if (!username_exec_result) {
     return std::nullopt;
   }
 
   // Let passwordExecResult be RegExpBuiltinExec(urlPattern's password
   // component's regular expression, password).
-  auto password_exec_result =
-      regex_provider::regex_search(password, password_component.regexp);
-
+  auto password_exec_result = password_component.fast_match(password);
   if (!password_exec_result) {
     return std::nullopt;
   }
 
   // Let hostnameExecResult be RegExpBuiltinExec(urlPattern's hostname
   // component's regular expression, hostname).
-  auto hostname_exec_result =
-      regex_provider::regex_search(hostname, hostname_component.regexp);
-
+  auto hostname_exec_result = hostname_component.fast_match(hostname);
   if (!hostname_exec_result) {
     return std::nullopt;
   }
 
   // Let portExecResult be RegExpBuiltinExec(urlPattern's port component's
   // regular expression, port).
-  auto port_exec_result =
-      regex_provider::regex_search(port, port_component.regexp);
-
+  auto port_exec_result = port_component.fast_match(port);
   if (!port_exec_result) {
     return std::nullopt;
   }
 
   // Let pathnameExecResult be RegExpBuiltinExec(urlPattern's pathname
   // component's regular expression, pathname).
-  auto pathname_exec_result =
-      regex_provider::regex_search(pathname, pathname_component.regexp);
-
+  auto pathname_exec_result = pathname_component.fast_match(pathname);
   if (!pathname_exec_result) {
     return std::nullopt;
   }
 
   // Let searchExecResult be RegExpBuiltinExec(urlPattern's search component's
   // regular expression, search).
-  auto search_exec_result =
-      regex_provider::regex_search(search, search_component.regexp);
-
+  auto search_exec_result = search_component.fast_match(search);
   if (!search_exec_result) {
     return std::nullopt;
   }
 
   // Let hashExecResult be RegExpBuiltinExec(urlPattern's hash component's
   // regular expression, hash).
-  auto hash_exec_result =
-      regex_provider::regex_search(hash, hash_component.regexp);
-
+  auto hash_exec_result = hash_component.fast_match(hash);
   if (!hash_exec_result) {
     return std::nullopt;
   }
