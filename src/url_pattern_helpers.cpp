@@ -2,6 +2,7 @@
 #include "ada/url_pattern_helpers-inl.h"
 
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <optional>
 #include <ranges>
@@ -20,9 +21,15 @@ generate_regular_expression_and_name_list(
     url_pattern_compile_component_options options) {
   // Let result be "^"
   std::string result = "^";
+  // Reserve capacity to reduce reallocations
+  result.reserve(part_list.size() * 16);
 
   // Let name list be a new list
   std::vector<std::string> name_list{};
+  name_list.reserve(part_list.size());
+
+  // Pre-generate segment wildcard regexp if needed (avoids repeated generation)
+  std::string segment_wildcard_regexp;
 
   // For each part of part list:
   for (const url_pattern_part& part : part_list) {
@@ -30,21 +37,12 @@ generate_regular_expression_and_name_list(
     if (part.type == url_pattern_part_type::FIXED_TEXT) {
       // If part's modifier is "none"
       if (part.modifier == url_pattern_part_modifier::none) {
-        // Append the result of running escape a regexp string given part's
-        // value
-        result += escape_regexp_string(part.value);
-      } else {
-        // A "fixed-text" part with a modifier uses a non capturing group
-        // (?:<fixed text>)<modifier>
-        // Append "(?:" to the end of result.
-        result.append("(?:");
-        // Append the result of running escape a regexp string given part's
-        // value to the end of result.
         result.append(escape_regexp_string(part.value));
-        // Append ")" to the end of result.
-        result.append(")");
-        // Append the result of running convert a modifier to a string given
-        // part's modifier to the end of result.
+      } else {
+        // (?:<fixed text>)<modifier>
+        result.append("(?:");
+        result.append(escape_regexp_string(part.value));
+        result.push_back(')');
         result.append(convert_modifier_to_string(part.modifier));
       }
       continue;
@@ -52,22 +50,18 @@ generate_regular_expression_and_name_list(
 
     // Assert: part's name is not the empty string
     ADA_ASSERT_TRUE(!part.name.empty());
-
-    // Append part's name to name list
     name_list.push_back(part.name);
 
-    // Let regexp value be part's value
-    std::string regexp_value = part.value;
+    // Use string_view to avoid copies where possible
+    std::string_view regexp_value = part.value;
 
-    // If part's type is "segment-wildcard"
     if (part.type == url_pattern_part_type::SEGMENT_WILDCARD) {
-      // then set regexp value to the result of running generate a segment
-      // wildcard regexp given options.
-      regexp_value = generate_segment_wildcard_regexp(options);
-    }
-    // Otherwise if part's type is "full-wildcard"
-    else if (part.type == url_pattern_part_type::FULL_WILDCARD) {
-      // then set regexp value to full wildcard regexp value.
+      // Lazy generate segment wildcard regexp
+      if (segment_wildcard_regexp.empty()) {
+        segment_wildcard_regexp = generate_segment_wildcard_regexp(options);
+      }
+      regexp_value = segment_wildcard_regexp;
+    } else if (part.type == url_pattern_part_type::FULL_WILDCARD) {
       regexp_value = ".*";
     }
 
@@ -78,12 +72,17 @@ generate_regular_expression_and_name_list(
       if (part.modifier == url_pattern_part_modifier::none ||
           part.modifier == url_pattern_part_modifier::optional) {
         // (<regexp value>)<modifier>
-        result += "(" + regexp_value + ")" +
-                  convert_modifier_to_string(part.modifier);
+        result.push_back('(');
+        result.append(regexp_value);
+        result.push_back(')');
+        result.append(convert_modifier_to_string(part.modifier));
       } else {
         // ((?:<regexp value>)<modifier>)
-        result += "((?:" + regexp_value + ")" +
-                  convert_modifier_to_string(part.modifier) + ")";
+        result.append("((?:");
+        result.append(regexp_value);
+        result.push_back(')');
+        result.append(convert_modifier_to_string(part.modifier));
+        result.push_back(')');
       }
       continue;
     }
@@ -92,9 +91,14 @@ generate_regular_expression_and_name_list(
     if (part.modifier == url_pattern_part_modifier::none ||
         part.modifier == url_pattern_part_modifier::optional) {
       // (?:<prefix>(<regexp value>)<suffix>)<modifier>
-      result += "(?:" + escape_regexp_string(part.prefix) + "(" + regexp_value +
-                ")" + escape_regexp_string(part.suffix) + ")" +
-                convert_modifier_to_string(part.modifier);
+      result.append("(?:");
+      result.append(escape_regexp_string(part.prefix));
+      result.push_back('(');
+      result.append(regexp_value);
+      result.push_back(')');
+      result.append(escape_regexp_string(part.suffix));
+      result.push_back(')');
+      result.append(convert_modifier_to_string(part.modifier));
       continue;
     }
 
@@ -165,8 +169,8 @@ bool is_ipv6_address(std::string_view input) noexcept {
   return input.starts_with("\\[");
 }
 
-std::string convert_modifier_to_string(url_pattern_part_modifier modifier) {
-  // TODO: Optimize this.
+std::string_view convert_modifier_to_string(
+    url_pattern_part_modifier modifier) {
   switch (modifier) {
       // If modifier is "zero-or-more", then return "*".
     case url_pattern_part_modifier::zero_or_more:
@@ -197,32 +201,74 @@ std::string generate_segment_wildcard_regexp(
   return result;
 }
 
+namespace {
+// Unified lookup table for URL pattern character classification
+// Bit flags for different character types
+constexpr uint8_t CHAR_SCHEME = 1;  // valid in scheme (a-z, A-Z, 0-9, +, -, .)
+constexpr uint8_t CHAR_UPPER = 2;   // uppercase letter (needs lowercasing)
+constexpr uint8_t CHAR_SIMPLE_HOSTNAME = 4;  // simple hostname (a-z, 0-9, -, .)
+constexpr uint8_t CHAR_SIMPLE_PATHNAME =
+    8;  // simple pathname (a-z, A-Z, 0-9, /, -, _, ~)
+
+constexpr std::array<uint8_t, 256> char_class_table = []() consteval {
+  std::array<uint8_t, 256> table{};
+  for (int c = 'a'; c <= 'z'; c++)
+    table[c] = CHAR_SCHEME | CHAR_SIMPLE_HOSTNAME | CHAR_SIMPLE_PATHNAME;
+  for (int c = 'A'; c <= 'Z'; c++)
+    table[c] = CHAR_SCHEME | CHAR_UPPER | CHAR_SIMPLE_PATHNAME;
+  for (int c = '0'; c <= '9'; c++)
+    table[c] = CHAR_SCHEME | CHAR_SIMPLE_HOSTNAME | CHAR_SIMPLE_PATHNAME;
+  table['+'] = CHAR_SCHEME;
+  table['-'] = CHAR_SCHEME | CHAR_SIMPLE_HOSTNAME | CHAR_SIMPLE_PATHNAME;
+  table['.'] =
+      CHAR_SCHEME | CHAR_SIMPLE_HOSTNAME;  // not pathname (needs normalization)
+  table['/'] = CHAR_SIMPLE_PATHNAME;
+  table['_'] = CHAR_SIMPLE_PATHNAME;
+  table['~'] = CHAR_SIMPLE_PATHNAME;
+  return table;
+}();
+}  // namespace
+
 tl::expected<std::string, errors> canonicalize_protocol(
     std::string_view input) {
   ada_log("canonicalize_protocol called with input=", input);
-  // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
   }
 
-  // IMPORTANT: Deviation from the spec. We remove the trailing ':' here.
   if (input.ends_with(":")) {
     input.remove_suffix(1);
   }
 
-  // Let dummyURL be a new URL record.
-  // Let parseResult be the result of running the basic URL parser given value
-  // followed by "://dummy.test", with dummyURL as url.
-  if (auto dummy_url = ada::parse<url_aggregator>(
-          std::string(input) + "://dummy.test", nullptr)) {
-    // IMPORTANT: Deviation from the spec. We remove the trailing ':' here.
-    // Since URL parser always return protocols ending with `:`
-    auto protocol = dummy_url->get_protocol();
-    protocol.remove_suffix(1);
-    return std::string(protocol);
+  // Fast path: special schemes are already canonical
+  if (scheme::is_special(input)) {
+    return std::string(input);
   }
-  // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(errors::type_error);
+
+  // Fast path: validate scheme chars and check for uppercase
+  // First char must be alpha (not +, -, ., or digit)
+  uint8_t first_flags = char_class_table[static_cast<uint8_t>(input[0])];
+  if (!(first_flags & CHAR_SCHEME) || input[0] == '+' || input[0] == '-' ||
+      input[0] == '.' || unicode::is_ascii_digit(input[0])) {
+    return tl::unexpected(errors::type_error);
+  }
+
+  uint8_t needs_lowercase = first_flags & CHAR_UPPER;
+  for (size_t i = 1; i < input.size(); i++) {
+    uint8_t flags = char_class_table[static_cast<uint8_t>(input[i])];
+    if (!(flags & CHAR_SCHEME)) {
+      return tl::unexpected(errors::type_error);
+    }
+    needs_lowercase |= flags & CHAR_UPPER;
+  }
+
+  if (needs_lowercase == 0) {
+    return std::string(input);
+  }
+
+  std::string result(input);
+  unicode::to_lower_ascii(result.data(), result.size());
+  return result;
 }
 
 tl::expected<std::string, errors> canonicalize_username(
@@ -264,10 +310,20 @@ tl::expected<std::string, errors> canonicalize_password(
 tl::expected<std::string, errors> canonicalize_hostname(
     std::string_view input) {
   ada_log("canonicalize_hostname input=", input);
-  // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
   }
+
+  // Fast path: simple hostnames (lowercase ASCII, digits, -, .) need no IDNA
+  bool needs_processing = false;
+  for (char c : input) {
+    needs_processing |=
+        !(char_class_table[static_cast<uint8_t>(c)] & CHAR_SIMPLE_HOSTNAME);
+  }
+  if (!needs_processing) {
+    return std::string(input);
+  }
+
   // Let dummyURL be a new URL record.
   // Let parseResult be the result of running the basic URL parser given value
   // with dummyURL as url and hostname state as state override.
@@ -410,10 +466,21 @@ tl::expected<std::string, errors> canonicalize_port_with_protocol(
 
 tl::expected<std::string, errors> canonicalize_pathname(
     std::string_view input) {
-  // If value is the empty string, then return value.
   if (input.empty()) [[unlikely]] {
     return "";
   }
+
+  // Fast path: simple pathnames (no . which needs normalization) can be
+  // returned as-is
+  bool needs_processing = false;
+  for (char c : input) {
+    needs_processing |=
+        !(char_class_table[static_cast<uint8_t>(c)] & CHAR_SIMPLE_PATHNAME);
+  }
+  if (!needs_processing) {
+    return std::string(input);
+  }
+
   // Let leading slash be true if the first code point in value is U+002F (/)
   // and otherwise false.
   const bool leading_slash = input.starts_with("/");
@@ -812,6 +879,20 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
   return tokenizer.token_list;
 }
 
+namespace {
+constexpr std::array<uint8_t, 256> escape_pattern_table = []() consteval {
+  std::array<uint8_t, 256> out{};
+  for (auto& c : {'+', '*', '?', ':', '{', '}', '(', ')', '\\'}) {
+    out[c] = 1;
+  }
+  return out;
+}();
+
+constexpr bool should_escape_pattern_char(char c) {
+  return escape_pattern_table[static_cast<uint8_t>(c)];
+}
+}  // namespace
+
 std::string escape_pattern_string(std::string_view input) {
   ada_log("escape_pattern_string called with input=", input);
   if (input.empty()) [[unlikely]] {
@@ -821,23 +902,17 @@ std::string escape_pattern_string(std::string_view input) {
   ADA_ASSERT_TRUE(ada::idna::is_ascii(input));
   // Let result be the empty string.
   std::string result{};
-  result.reserve(input.size());
-
-  // TODO: Optimization opportunity: Use a lookup table
-  constexpr auto should_escape = [](const char c) {
-    return c == '+' || c == '*' || c == '?' || c == ':' || c == '{' ||
-           c == '}' || c == '(' || c == ')' || c == '\\';
-  };
+  // Reserve extra space for potential escapes
+  result.reserve(input.size() * 2);
 
   // While index is less than input's length:
-  for (const auto& c : input) {
-    if (should_escape(c)) {
-      // then append U+005C (\) to the end of result.
-      result.append("\\");
+  for (const char c : input) {
+    if (should_escape_pattern_char(c)) {
+      // Append U+005C (\) to the end of result.
+      result.push_back('\\');
     }
-
     // Append c to the end of result.
-    result += c;
+    result.push_back(c);
   }
   // Return result.
   return result;
@@ -863,11 +938,13 @@ std::string escape_regexp_string(std::string_view input) {
   ADA_ASSERT_TRUE(idna::is_ascii(input));
   // Let result be the empty string.
   std::string result{};
-  result.reserve(input.size());
-  for (const auto& c : input) {
-    // TODO: Optimize this even further
+  // Reserve extra space for potential escapes (worst case: all chars escaped)
+  result.reserve(input.size() * 2);
+  for (const char c : input) {
     if (should_escape_regexp_char(c)) {
-      result.append(std::string("\\") + c);
+      // Avoid temporary string allocation - directly append characters
+      result.push_back('\\');
+      result.push_back(c);
     } else {
       result.push_back(c);
     }
@@ -912,17 +989,17 @@ std::string generate_pattern_string(
   // For each index of index list:
   for (size_t index = 0; index < part_list.size(); index++) {
     // Let part be part list[index].
-    auto part = part_list[index];
+    // Use reference to avoid copy
+    const auto& part = part_list[index];
     // Let previous part be part list[index - 1] if index is greater than 0,
     // otherwise let it be null.
-    // TODO: Optimization opportunity. Find a way to avoid making a copy here.
-    std::optional<url_pattern_part> previous_part =
-        index == 0 ? std::nullopt : std::optional(part_list[index - 1]);
+    // Use pointer to avoid copy
+    const url_pattern_part* previous_part =
+        index == 0 ? nullptr : &part_list[index - 1];
     // Let next part be part list[index + 1] if index is less than index list's
     // size - 1, otherwise let it be null.
-    std::optional<url_pattern_part> next_part =
-        index < part_list.size() - 1 ? std::optional(part_list[index + 1])
-                                     : std::nullopt;
+    const url_pattern_part* next_part =
+        index < part_list.size() - 1 ? &part_list[index + 1] : nullptr;
     // If part's type is "fixed-text" then:
     if (part.type == url_pattern_part_type::FIXED_TEXT) {
       // If part's modifier is "none" then:
@@ -966,9 +1043,8 @@ std::string generate_pattern_string(
     // - next part's suffix is the empty string
     if (!needs_grouping && custom_name &&
         part.type == url_pattern_part_type::SEGMENT_WILDCARD &&
-        part.modifier == url_pattern_part_modifier::none &&
-        next_part.has_value() && next_part->prefix.empty() &&
-        next_part->suffix.empty()) {
+        part.modifier == url_pattern_part_modifier::none && next_part &&
+        next_part->prefix.empty() && next_part->suffix.empty()) {
       // If next part's type is "fixed-text":
       if (next_part->type == url_pattern_part_type::FIXED_TEXT) {
         // Set needs grouping to true if the result of running is a valid name
@@ -991,7 +1067,7 @@ std::string generate_pattern_string(
     // - previous part's type is "fixed-text"; and
     // - previous part's value's last code point is options's prefix code point.
     // then set needs grouping to true.
-    if (!needs_grouping && part.prefix.empty() && previous_part.has_value() &&
+    if (!needs_grouping && part.prefix.empty() && previous_part &&
         previous_part->type == url_pattern_part_type::FIXED_TEXT &&
         !options.get_prefix().empty() &&
         previous_part->value.at(previous_part->value.size() - 1) ==
@@ -1047,7 +1123,7 @@ std::string generate_pattern_string(
       // - part's prefix is not the empty string
       // - then append "*" to the end of result.
       if (!custom_name &&
-          (!previous_part.has_value() ||
+          (!previous_part ||
            previous_part->type == url_pattern_part_type::FIXED_TEXT ||
            previous_part->modifier != url_pattern_part_modifier::none ||
            needs_grouping || !part.prefix.empty())) {

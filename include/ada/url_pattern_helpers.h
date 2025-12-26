@@ -338,7 +338,7 @@ bool protocol_component_matches_special_scheme(
     ada::url_pattern_component<regex_provider>& input);
 
 // @see https://urlpattern.spec.whatwg.org/#convert-a-modifier-to-a-string
-std::string convert_modifier_to_string(url_pattern_part_modifier modifier);
+std::string_view convert_modifier_to_string(url_pattern_part_modifier modifier);
 
 // @see https://urlpattern.spec.whatwg.org/#generate-a-segment-wildcard-regexp
 std::string generate_segment_wildcard_regexp(
