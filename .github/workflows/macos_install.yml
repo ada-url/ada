@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         shared: [OFF]
-        runs-on: [macos-13, macos-14, macos-15]
+        runs-on: [macos-14, macos-15, macos-26]
     runs-on: ${{matrix.runs-on}}
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
