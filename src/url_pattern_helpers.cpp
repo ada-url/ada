@@ -201,32 +201,74 @@ std::string generate_segment_wildcard_regexp(
   return result;
 }
 
+namespace {
+// Unified lookup table for URL pattern character classification
+// Bit flags for different character types
+constexpr uint8_t CHAR_SCHEME = 1;  // valid in scheme (a-z, A-Z, 0-9, +, -, .)
+constexpr uint8_t CHAR_UPPER = 2;   // uppercase letter (needs lowercasing)
+constexpr uint8_t CHAR_SIMPLE_HOSTNAME = 4;  // simple hostname (a-z, 0-9, -, .)
+constexpr uint8_t CHAR_SIMPLE_PATHNAME =
+    8;  // simple pathname (a-z, A-Z, 0-9, /, -, _, ~)
+
+constexpr std::array<uint8_t, 256> char_class_table = []() consteval {
+  std::array<uint8_t, 256> table{};
+  for (int c = 'a'; c <= 'z'; c++)
+    table[c] = CHAR_SCHEME | CHAR_SIMPLE_HOSTNAME | CHAR_SIMPLE_PATHNAME;
+  for (int c = 'A'; c <= 'Z'; c++)
+    table[c] = CHAR_SCHEME | CHAR_UPPER | CHAR_SIMPLE_PATHNAME;
+  for (int c = '0'; c <= '9'; c++)
+    table[c] = CHAR_SCHEME | CHAR_SIMPLE_HOSTNAME | CHAR_SIMPLE_PATHNAME;
+  table['+'] = CHAR_SCHEME;
+  table['-'] = CHAR_SCHEME | CHAR_SIMPLE_HOSTNAME | CHAR_SIMPLE_PATHNAME;
+  table['.'] =
+      CHAR_SCHEME | CHAR_SIMPLE_HOSTNAME;  // not pathname (needs normalization)
+  table['/'] = CHAR_SIMPLE_PATHNAME;
+  table['_'] = CHAR_SIMPLE_PATHNAME;
+  table['~'] = CHAR_SIMPLE_PATHNAME;
+  return table;
+}();
+}  // namespace
+
 tl::expected<std::string, errors> canonicalize_protocol(
     std::string_view input) {
   ada_log("canonicalize_protocol called with input=", input);
-  // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
   }
 
-  // IMPORTANT: Deviation from the spec. We remove the trailing ':' here.
   if (input.ends_with(":")) {
     input.remove_suffix(1);
   }
 
-  // Let dummyURL be a new URL record.
-  // Let parseResult be the result of running the basic URL parser given value
-  // followed by "://dummy.test", with dummyURL as url.
-  if (auto dummy_url = ada::parse<url_aggregator>(
-          std::string(input) + "://dummy.test", nullptr)) {
-    // IMPORTANT: Deviation from the spec. We remove the trailing ':' here.
-    // Since URL parser always return protocols ending with `:`
-    auto protocol = dummy_url->get_protocol();
-    protocol.remove_suffix(1);
-    return std::string(protocol);
+  // Fast path: special schemes are already canonical
+  if (scheme::is_special(input)) {
+    return std::string(input);
   }
-  // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(errors::type_error);
+
+  // Fast path: validate scheme chars and check for uppercase
+  // First char must be alpha (not +, -, ., or digit)
+  uint8_t first_flags = char_class_table[static_cast<uint8_t>(input[0])];
+  if (!(first_flags & CHAR_SCHEME) || input[0] == '+' || input[0] == '-' ||
+      input[0] == '.' || unicode::is_ascii_digit(input[0])) {
+    return tl::unexpected(errors::type_error);
+  }
+
+  uint8_t needs_lowercase = first_flags & CHAR_UPPER;
+  for (size_t i = 1; i < input.size(); i++) {
+    uint8_t flags = char_class_table[static_cast<uint8_t>(input[i])];
+    if (!(flags & CHAR_SCHEME)) {
+      return tl::unexpected(errors::type_error);
+    }
+    needs_lowercase |= flags & CHAR_UPPER;
+  }
+
+  if (needs_lowercase == 0) {
+    return std::string(input);
+  }
+
+  std::string result(input);
+  unicode::to_lower_ascii(result.data(), result.size());
+  return result;
 }
 
 tl::expected<std::string, errors> canonicalize_username(
@@ -268,10 +310,20 @@ tl::expected<std::string, errors> canonicalize_password(
 tl::expected<std::string, errors> canonicalize_hostname(
     std::string_view input) {
   ada_log("canonicalize_hostname input=", input);
-  // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
     return "";
   }
+
+  // Fast path: simple hostnames (lowercase ASCII, digits, -, .) need no IDNA
+  bool needs_processing = false;
+  for (char c : input) {
+    needs_processing |=
+        !(char_class_table[static_cast<uint8_t>(c)] & CHAR_SIMPLE_HOSTNAME);
+  }
+  if (!needs_processing) {
+    return std::string(input);
+  }
+
   // Let dummyURL be a new URL record.
   // Let parseResult be the result of running the basic URL parser given value
   // with dummyURL as url and hostname state as state override.
@@ -414,10 +466,21 @@ tl::expected<std::string, errors> canonicalize_port_with_protocol(
 
 tl::expected<std::string, errors> canonicalize_pathname(
     std::string_view input) {
-  // If value is the empty string, then return value.
   if (input.empty()) [[unlikely]] {
     return "";
   }
+
+  // Fast path: simple pathnames (no . which needs normalization) can be
+  // returned as-is
+  bool needs_processing = false;
+  for (char c : input) {
+    needs_processing |=
+        !(char_class_table[static_cast<uint8_t>(c)] & CHAR_SIMPLE_PATHNAME);
+  }
+  if (!needs_processing) {
+    return std::string(input);
+  }
+
   // Let leading slash be true if the first code point in value is U+002F (/)
   // and otherwise false.
   const bool leading_slash = input.starts_with("/");
