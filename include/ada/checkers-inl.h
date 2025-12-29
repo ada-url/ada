@@ -7,6 +7,7 @@
 
 #include <bit>
 #include <string_view>
+#include "ada/checkers.h"
 
 namespace ada::checkers {
 
@@ -47,6 +48,64 @@ constexpr bool is_windows_drive_letter(std::string_view input) noexcept {
 constexpr bool is_normalized_windows_drive_letter(
     std::string_view input) noexcept {
   return input.size() >= 2 && (is_alpha(input[0]) && (input[1] == ':'));
+}
+
+ada_really_inline constexpr uint64_t try_parse_ipv4_fast(
+    std::string_view input) noexcept {
+  const char* p = input.data();
+  const char* const pend = p + input.size();
+
+  uint32_t ipv4 = 0;
+
+  for (int i = 0; i < 4; ++i) {
+    if (p == pend) {
+      return ipv4_fast_fail;
+    }
+
+    uint32_t val;
+    char c = *p;
+    if (c >= '0' && c <= '9') {
+      val = c - '0';
+      p++;
+    } else {
+      return ipv4_fast_fail;
+    }
+
+    if (p < pend) {
+      c = *p;
+      if (c >= '0' && c <= '9') {
+        if (val == 0) return ipv4_fast_fail;
+        val = val * 10 + (c - '0');
+        p++;
+        if (p < pend) {
+          c = *p;
+          if (c >= '0' && c <= '9') {
+            val = val * 10 + (c - '0');
+            p++;
+            if (val > 255) return ipv4_fast_fail;
+          }
+        }
+      }
+    }
+
+    ipv4 = (ipv4 << 8) | val;
+
+    if (i < 3) {
+      if (p == pend || *p != '.') {
+        return ipv4_fast_fail;
+      }
+      p++;
+    }
+  }
+
+  if (p != pend) {
+    if (p == pend - 1 && *p == '.') {
+      return ipv4;
+    }
+    return ipv4_fast_fail;
+  }
+
+  return ipv4;
 }
 
 }  // namespace ada::checkers
