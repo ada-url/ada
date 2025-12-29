@@ -262,7 +262,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -274,7 +274,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =

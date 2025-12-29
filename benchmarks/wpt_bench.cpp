@@ -11,7 +11,7 @@ enum {
   ALL_URLS = -1,
 };
 
-size_t init_data(const char *source, int which_url) {
+size_t init_data(const char* source, int which_url) {
   ondemand::parser parser;
   std::vector<std::pair<std::string, std::string>> answer;
 
@@ -66,15 +66,15 @@ size_t init_data(const char *source, int which_url) {
 }
 
 template <class result>
-static void BasicBench_AdaURL(benchmark::State &state) {
+static void BasicBench_AdaURL(benchmark::State& state) {
   // volatile to prevent optimizations.
   volatile size_t href_size = 0;
 
   for (auto _ : state) {
-    for (const std::pair<std::string, std::string> &url_strings :
+    for (const std::pair<std::string, std::string>& url_strings :
          url_examples) {
       ada::result<result> base;
-      result *base_ptr = nullptr;
+      result* base_ptr = nullptr;
       if (!url_strings.second.empty()) {
         base = ada::parse<result>(url_strings.second);
         if (base) {
@@ -90,14 +90,14 @@ static void BasicBench_AdaURL(benchmark::State &state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
-      for (const std::pair<std::string, std::string> &url_strings :
+      for (const std::pair<std::string, std::string>& url_strings :
            url_examples) {
         ada::result<result> base;
-        result *base_ptr = nullptr;
+        result* base_ptr = nullptr;
         if (!url_strings.second.empty()) {
           base = ada::parse<result>(url_strings.second);
           if (base) {
@@ -112,7 +112,7 @@ static void BasicBench_AdaURL(benchmark::State &state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -154,13 +154,13 @@ BENCHMARK(WptBench_BasicBench_AdaURL_url_aggregator);
 
 #include <upa/url.h>
 
-static void WptBench_BasicBench_whatwg(benchmark::State &state) {
+static void WptBench_BasicBench_whatwg(benchmark::State& state) {
   volatile size_t success{};
   for (auto _ : state) {
-    for (const std::pair<std::string, std::string> &url_strings :
+    for (const std::pair<std::string, std::string>& url_strings :
          url_examples) {
       upa::url base;
-      upa::url *base_ptr = nullptr;
+      upa::url* base_ptr = nullptr;
       if (!url_strings.second.empty()) {
         if (upa::success(base.parse(url_strings.second, nullptr))) {
           base_ptr = &base;
@@ -173,14 +173,14 @@ static void WptBench_BasicBench_whatwg(benchmark::State &state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
-      for (const std::pair<std::string, std::string> &url_strings :
+      for (const std::pair<std::string, std::string>& url_strings :
            url_examples) {
         upa::url base;
-        upa::url *base_ptr = nullptr;
+        upa::url* base_ptr = nullptr;
         if (!url_strings.second.empty()) {
           if (upa::success(base.parse(url_strings.second, nullptr))) {
             base_ptr = &base;
@@ -192,7 +192,7 @@ static void WptBench_BasicBench_whatwg(benchmark::State &state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     (void)success;
@@ -228,7 +228,7 @@ static void WptBench_BasicBench_whatwg(benchmark::State &state) {
 BENCHMARK(WptBench_BasicBench_whatwg);
 #endif  // ADA_url_whatwg_ENABLED
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   int which_url = ALL_URLS;
   if (argc > 3 && std::string_view(argv[2]) == "--select") {
     which_url = std::atoi(argv[3]);
