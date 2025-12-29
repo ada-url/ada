@@ -3,8 +3,8 @@
 #include "ada.h"
 #include "ada/character_sets.h"
 #include "ada/unicode.h"
-#include "performancecounters/event_counter.h"
-event_collector collector;
+#include "counters/event_counter.h"
+counters::event_collector collector;
 size_t N = 1000;
 
 #include <benchmark/benchmark.h>
@@ -31,7 +31,7 @@ static void Fragment(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -40,7 +40,7 @@ static void Fragment(benchmark::State& state) {
             url_string, ada::character_sets::FRAGMENT_PERCENT_ENCODE));
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["instructions/url"] =
@@ -75,7 +75,7 @@ static void Query(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -84,7 +84,7 @@ static void Query(benchmark::State& state) {
             url_string, ada::character_sets::QUERY_PERCENT_ENCODE));
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["instructions/url"] =
@@ -119,7 +119,7 @@ static void SpecialQuery(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -128,7 +128,7 @@ static void SpecialQuery(benchmark::State& state) {
             url_string, ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE));
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["instructions/url"] =
@@ -163,7 +163,7 @@ static void UserInfo(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -172,7 +172,7 @@ static void UserInfo(benchmark::State& state) {
             url_string, ada::character_sets::USERINFO_PERCENT_ENCODE));
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["instructions/url"] =
@@ -207,7 +207,7 @@ static void C0Control(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -216,7 +216,7 @@ static void C0Control(benchmark::State& state) {
             url_string, ada::character_sets::C0_CONTROL_PERCENT_ENCODE));
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["instructions/url"] =

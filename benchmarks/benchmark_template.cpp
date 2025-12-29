@@ -32,7 +32,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -46,7 +46,7 @@ static void BasicBench_AdaURL(benchmark::State& state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -122,7 +122,7 @@ static void BENCHMARK_NAME(BasicBench_AdaURL_CanParse)(
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -133,7 +133,7 @@ static void BENCHMARK_NAME(BasicBench_AdaURL_CanParse)(
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -202,7 +202,7 @@ static void BENCHMARK_NAME(BasicBench_whatwg)(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -216,7 +216,7 @@ static void BENCHMARK_NAME(BasicBench_whatwg)(benchmark::State& state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -305,7 +305,7 @@ static void BasicBench_CURL(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -323,7 +323,7 @@ static void BasicBench_CURL(benchmark::State& state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -399,7 +399,7 @@ static void BasicBench_BoostURL(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -415,7 +415,7 @@ static void BasicBench_BoostURL(benchmark::State& state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -490,7 +490,7 @@ static void BasicBench_ZURI(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -508,7 +508,7 @@ static void BasicBench_ZURI(benchmark::State& state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -561,7 +561,7 @@ static void BasicBench_uriparser_just_parse(benchmark::State& state) {
     std::cout << "uri-parser: invalid? " << std::endl;
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -570,7 +570,7 @@ static void BasicBench_uriparser_just_parse(benchmark::State& state) {
                      URI_SUCCESS);
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
