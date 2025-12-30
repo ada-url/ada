@@ -420,7 +420,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
 ada_really_inline size_t find_next_host_delimiter_special(
     std::string_view view, size_t location) noexcept {
   // The LUT approach was a bit slower on the SpacemiT X60, but I could see it
-  // beeing faster on future hardware.
+  // being faster on future hardware.
 #if 0
   // LUT generated using: s=":/\\?["; list(zip([((ord(c)>>2)&0xF)for c in s],s))
   static const uint8_t tbl[16] = {
@@ -1027,7 +1027,7 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special =
 ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
   // performance note: we might be able to gain further performance
-  // with SIMD instrinsics.
+  // with SIMD intrinsics.
   for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (authority_delimiter_special[(uint8_t)*pos]) {
       return pos - view.begin();
