@@ -46,7 +46,7 @@ target_include_directories(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_
 
 # Percent Encode
 add_executable(percent_encode percent_encode.cpp)
-target_link_libraries(percent_encode PRIVATE ada)
+target_link_libraries(percent_encode PRIVATE ada counters::counters)
 target_include_directories(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 if(MSVC AND BUILD_SHARED_LIBS)
