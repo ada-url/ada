@@ -44,12 +44,12 @@ target_link_libraries(bbc_bench PRIVATE ada counters::counters)
 target_include_directories(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
-# bench_url
-add_executable(bench_url bench_url.cpp)
-target_link_libraries(bench_url PRIVATE ada counters::counters)
-target_include_directories(bench_url PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
-target_include_directories(bench_url PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
-target_compile_definitions(bench_url PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
+# bench_ipv4
+add_executable(bench_ipv4 bench_ipv4.cpp)
+target_link_libraries(bench_ipv4 PRIVATE ada counters::counters)
+target_include_directories(bench_ipv4 PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(bench_ipv4 PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
+target_compile_definitions(bench_ipv4 PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
 
 # Percent Encode
 add_executable(percent_encode percent_encode.cpp)
@@ -72,12 +72,12 @@ target_link_libraries(wpt_bench PRIVATE benchmark::benchmark)
 target_link_libraries(bench PRIVATE benchmark::benchmark)
 target_link_libraries(benchdata PRIVATE benchmark::benchmark)
 target_link_libraries(bbc_bench PRIVATE benchmark::benchmark)
-target_link_libraries(bench_url PRIVATE benchmark::benchmark)
+target_link_libraries(bench_ipv4 PRIVATE benchmark::benchmark)
 target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
 target_link_libraries(bench_search_params PRIVATE benchmark::benchmark)
 target_link_libraries(urlpattern PRIVATE benchmark::benchmark)
 
-set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_url percent_encode bench_search_params urlpattern)
+set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_ipv4 percent_encode bench_search_params urlpattern)
 
 add_custom_target(run_all_benchmarks
         COMMAND ${CMAKE_COMMAND} -E echo "Running all benchmarks..."
