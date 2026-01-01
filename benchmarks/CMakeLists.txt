@@ -1,29 +1,36 @@
+# Performance counters
+CPMAddPackage(
+  NAME counters
+  GITHUB_REPOSITORY lemire/counters
+  GIT_TAG v2.2.0
+)
+
 # bench_search_params
 add_executable(bench_search_params bench_search_params.cpp)
-target_link_libraries(bench_search_params PRIVATE ada)
+target_link_libraries(bench_search_params PRIVATE ada counters::counters)
 
 add_executable(urlpattern urlpattern.cpp)
-target_link_libraries(urlpattern PRIVATE ada)
+target_link_libraries(urlpattern PRIVATE ada counters::counters)
 target_include_directories(urlpattern PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(urlpattern PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
 # Bench
 add_executable(wpt_bench wpt_bench.cpp)
-target_link_libraries(wpt_bench PRIVATE ada)
+target_link_libraries(wpt_bench PRIVATE ada counters::counters)
 target_link_libraries(wpt_bench PRIVATE simdjson)
 target_include_directories(wpt_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(wpt_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
 # Bench
 add_executable(bench bench.cpp)
-target_link_libraries(bench PRIVATE ada)
+target_link_libraries(bench PRIVATE ada counters::counters)
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
 # Benchdata
 CPMAddPackage("gh:ada-url/url-dataset#9749b92c13e970e70409948fa862461191504ccc")
 add_executable(benchdata bench.cpp)
-target_link_libraries(benchdata PRIVATE ada)
+target_link_libraries(benchdata PRIVATE ada counters::counters)
 target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(benchdata PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 target_compile_definitions(benchdata PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
@@ -33,13 +40,13 @@ target_compile_definitions(benchdata PRIVATE BENCHMARK_PREFIX_STR="BenchData_")
 
 # BBC Bench
 add_executable(bbc_bench bbc_bench.cpp)
-target_link_libraries(bbc_bench PRIVATE ada)
+target_link_libraries(bbc_bench PRIVATE ada counters::counters)
 target_include_directories(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(bbc_bench PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
 # Percent Encode
 add_executable(percent_encode percent_encode.cpp)
-target_link_libraries(percent_encode PRIVATE ada)
+target_link_libraries(percent_encode PRIVATE ada counters::counters)
 target_include_directories(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(percent_encode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 if(MSVC AND BUILD_SHARED_LIBS)
@@ -50,13 +57,9 @@ if(MSVC AND BUILD_SHARED_LIBS)
         "$<TARGET_FILE_DIR:percent_encode>")                 # <--this is out-file path
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-    # The model_bench program requires accurate/low-overhead performance counters.
-    # We only have such support under Linux.
-    add_executable(model_bench model_bench.cpp)
-    target_link_libraries(model_bench PRIVATE ada)
-    target_compile_definitions(model_bench PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
-endif()
+add_executable(model_bench model_bench.cpp)
+target_link_libraries(model_bench PRIVATE ada counters::counters)
+target_compile_definitions(model_bench PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
 
 target_link_libraries(wpt_bench PRIVATE benchmark::benchmark)
 target_link_libraries(bench PRIVATE benchmark::benchmark)

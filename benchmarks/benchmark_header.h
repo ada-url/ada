@@ -15,8 +15,8 @@
 #endif
 
 #include "ada.h"
-#include "performancecounters/event_counter.h"
-event_collector collector;
+#include "counters/event_counter.h"
+counters::event_collector collector;
 size_t N = 1000;
 
 #include <benchmark/benchmark.h>
