@@ -469,6 +469,21 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   // Often, the input does not contain any forbidden code points, and no upper
   // case ASCII letter, then we can just copy it to the buffer. We want to
   // optimize for such a common case.
+
+  // Fast path: try to parse as pure decimal IPv4(a.b.c.d) first.
+  const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
+  if (fast_result < checkers::ipv4_fast_fail) {
+    // Fast path succeeded - input is pure decimal IPv4
+    if (!input.empty() && input.back() == '.') {
+      update_base_hostname(input.substr(0, input.size() - 1));
+    } else {
+      update_base_hostname(input);
+    }
+    host_type = IPV4;
+    ada_log("parse_host fast path decimal ipv4");
+    ADA_ASSERT_TRUE(validate());
+    return true;
+  }
   uint8_t is_forbidden_or_upper =
       unicode::contains_forbidden_domain_code_point_or_upper(input.data(),
                                                              input.size());
@@ -482,6 +497,8 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
       input.find("xn-") == std::string_view::npos) {
     // fast path
     update_base_hostname(input);
+
+    // Check for other IPv4 formats (hex, octal, etc.)
     if (checkers::is_ipv4(get_hostname())) {
       ada_log("parse_host fast path ipv4");
       return parse_ipv4(get_hostname(), true);

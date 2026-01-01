@@ -448,6 +448,20 @@ ada_really_inline bool url::parse_host(std::string_view input) {
   if (!is_special()) {
     return parse_opaque_host(input);
   }
+
+  // Fast path: try to parse as pure decimal IPv4(a.b.c.d) first.
+  const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
+  if (fast_result < checkers::ipv4_fast_fail) {
+    // Fast path succeeded - input is pure decimal IPv4
+    if (!input.empty() && input.back() == '.') {
+      host = input.substr(0, input.size() - 1);
+    } else {
+      host = input;
+    }
+    host_type = IPV4;
+    ada_log("parse_host fast path decimal ipv4");
+    return true;
+  }
   // Let domain be the result of running UTF-8 decode without BOM on the
   // percent-decoding of input. Let asciiDomain be the result of running domain
   // to ASCII with domain and false. The most common case is an ASCII input, in
@@ -463,6 +477,8 @@ ada_really_inline bool url::parse_host(std::string_view input) {
   if (is_forbidden == 0 && buffer.find("xn-") == std::string_view::npos) {
     // fast path
     host = std::move(buffer);
+
+    // Check for other IPv4 formats (hex, octal, etc.)
     if (checkers::is_ipv4(host.value())) {
       ada_log("parse_host fast path ipv4");
       return parse_ipv4(host.value());
