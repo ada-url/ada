@@ -357,6 +357,48 @@ TEST(ada_c, ada_url_search_params) {
   SUCCEED();
 }
 
+TEST(ada_c, ada_search_params_to_raw_string) {
+  std::string input("a=b c&d=e+f");
+  auto out = ada_parse_search_params(input.c_str(), input.length());
+
+  // Note: + in input is decoded to space during parsing
+  // to_string normalizes spaces to +
+  ada_owned_string str = ada_search_params_to_string(out);
+  ASSERT_EQ(convert_string(str), "a=b+c&d=e+f");
+  ada_free_owned_string(str);
+
+  // to_raw_string outputs raw key/value without any encoding
+  ada_owned_string raw_str = ada_search_params_to_raw_string(out);
+  ASSERT_EQ(convert_string(raw_str), "a=b c&d=e f");
+  ada_free_owned_string(raw_str);
+
+  ada_free_search_params(out);
+
+  SUCCEED();
+}
+
+TEST(ada_c, ada_search_params_to_raw_string_remove) {
+  std::string input("a=%20&b=remove&c=2");
+  auto params = ada_parse_search_params(input.c_str(), input.length());
+
+  // Remove parameter "b"
+  ada_search_params_remove(params, "b", 1);
+
+  // to_string normalizes space to +
+  ada_owned_string str = ada_search_params_to_string(params);
+  ASSERT_EQ(convert_string(str), "a=+&c=2");
+  ada_free_owned_string(str);
+
+  // to_raw_string outputs raw key/value without any encoding
+  ada_owned_string raw_str = ada_search_params_to_raw_string(params);
+  ASSERT_EQ(convert_string(raw_str), "a= &c=2");
+  ada_free_owned_string(raw_str);
+
+  ada_free_search_params(params);
+
+  SUCCEED();
+}
+
 TEST(ada_c, ada_get_version) {
   std::string_view raw = ada_get_version();
   ada_version_components parsed = ada_get_version_components();
