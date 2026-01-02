@@ -46,9 +46,16 @@ const std::string_view kIpv4NonDecimalUrls[] = {
     "http://0.01.0x02.3"};
 
 const std::string_view kDnsFallbackUrls[] = {
-    "http://example.com",   "http://www.google.com", "http://localhost",
-    "http://foo.bar",       "http://github.com",     "http://microsoft.com",
-    "http://aws.amazon.com"};
+    "http://example.com",       "http://www.google.com",
+    "http://localhost",         "http://foo.bar",
+    "http://github.com",        "http://microsoft.com",
+    "http://aws.amazon.com",    "http://adaparser.com",
+    "http://www.wikipedia.org", "http://www.apple.com",
+    "http://www.amazon.com",    "http://www.facebook.com",
+    "http://www.twitter.com",   "http://www.instagram.com",
+    "http://www.linkedin.com",  "http://www.reddit.com",
+    "http://www.netflix.com",   "http://www.youtube.com",
+    "http://www.bing.com",      "http://www.yahoo.com"};
 
 #ifdef ADA_URL_FILE
 const char* default_dns_file = ADA_URL_FILE;
@@ -124,19 +131,25 @@ void run_benchmark(benchmark::State& state,
   auto strides = make_strides(count);
 
   size_t iter = 0;
+  volatile size_t success = 0;
   for (auto _ : state) {
     size_t stride = strides[iter % strides.size()];
     size_t pos = iter % count;
 
     for (size_t i = 0; i < count; ++i) {
       auto result = ada::parse<ResultType>(urls[order[pos]]);
+      if (result) {
+        success++;
+      }
       benchmark::DoNotOptimize(result);
 
       pos += stride;
       if (pos >= count) pos -= count;
     }
+    benchmark::ClobberMemory();
     ++iter;
   }
+  (void)success;
 
   if (collector.has_events()) {
     counters::event_aggregate aggregate{};
@@ -147,6 +160,9 @@ void run_benchmark(benchmark::State& state,
       size_t pos = i % count;
       for (size_t j = 0; j < count; ++j) {
         auto result = ada::parse<ResultType>(urls[order[pos]]);
+        if (result) {
+          success++;
+        }
         benchmark::DoNotOptimize(result);
         pos += stride;
         if (pos >= count) pos -= count;
@@ -155,6 +171,9 @@ void run_benchmark(benchmark::State& state,
       counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
+    state.counters["branch_misses/url"] =
+        aggregate.best.branch_misses() / count;
+    state.counters["branches/url"] = aggregate.best.branches() / count;
     state.counters["cycles/url"] = aggregate.best.cycles() / count;
     state.counters["instructions/url"] = aggregate.best.instructions() / count;
     state.counters["instructions/cycle"] =
@@ -187,7 +206,7 @@ struct DataGenerator {
   static const std::vector<std::string_view>& GetDecimalWorkload() {
     static DataGenerator instance = []() {
       DataGenerator gen;
-      constexpr size_t count = 2000;
+      constexpr size_t count = 5000;
       std::mt19937 rng(42);
       std::uniform_int_distribution<int> octet(0, 255);
 
