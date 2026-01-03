@@ -56,6 +56,15 @@ TYPED_TEST(basic_tests, pluses) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, overlap_test) {
+  auto url = ada::parse<TypeParam>("http://example.com/very_long_path_string");
+  ASSERT_TRUE(url);
+  // This triggers assertion failure in debug mode for url_aggregator
+  // because get_pathname() returns a view into the buffer, and set_hostname() modifies it.
+  url->set_hostname(url->get_pathname());
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_host_should_return_false_sometimes) {
   auto r = ada::parse<TypeParam>("mailto:a@b.com");
   ASSERT_FALSE(r->set_host("something"));
