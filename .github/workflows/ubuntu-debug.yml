@@ -1,0 +1,44 @@
+name: Ubuntu 22.04 Debug
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ubuntu-build-debug:
+    strategy:
+      fail-fast: false
+      matrix:
+        shared: [OFF]
+        cxx: [g++-12, clang++-15]
+        runs-on: [ubuntu-22.04]
+        simdutf: [OFF, ON]
+    runs-on: ${{matrix.runs-on}}
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Setup Ninja
+        run: sudo apt-get install ninja-build
+      - name: Prepare
+        run: cmake -DCMAKE_BUILD_TYPE=Debug -D ADA_TESTING=ON -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -D ADA_USE_SIMDUTF=${{matrix.simdutf}} -G Ninja -B build
+        env:
+          CXX: ${{matrix.cxx}}
+      - name: Build
+        run: cmake --build build -j=4
+      - name: Test
+        run: ctest --output-on-failure --test-dir build
