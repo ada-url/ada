@@ -285,5 +285,20 @@
     "pathname": "b/",
     "search": "",
     "hash": ""
+  },
+  {
+    "input": "http://user:pass@1.2.3.4",
+    "base": "about:blank",
+    "href": "http://user:pass@1.2.3.4/",
+    "origin": "http://1.2.3.4",
+    "protocol": "http:",
+    "username": "user",
+    "password": "pass",
+    "host": "1.2.3.4",
+    "hostname": "1.2.3.4",
+    "port": "",
+    "pathname": "/",
+    "search": "",
+    "hash": ""
   }
 ]
