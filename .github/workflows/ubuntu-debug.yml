@@ -41,4 +41,4 @@ jobs:
       - name: Build
         run: cmake --build build -j=4
       - name: Test
-        run: ctest --output-on-failure --test-dir build
+        run: ctest --output-on-failure --test-dir build --timeout 300
