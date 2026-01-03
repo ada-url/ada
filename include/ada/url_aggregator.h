@@ -24,7 +24,8 @@ namespace parser {}
  * @details The url_aggregator class aims to minimize temporary memory
  * allocation while representing a parsed URL. Internally, it contains a single
  * normalized URL (the href), and it makes available the components, mostly
- * using std::string_view.
+ * using std::string_view. These views are only valid as long as the
+ * url_aggregator is not modified or deleted.
  */
 struct url_aggregator : url_base {
   url_aggregator() = default;
@@ -34,6 +35,25 @@ struct url_aggregator : url_base {
   url_aggregator &operator=(const url_aggregator &u) = default;
   ~url_aggregator() override = default;
 
+  /**
+   * The setter functions follow the steps defined in the URL Standard.
+   *
+   * The url_aggregator has a single buffer that contains the entire normalized
+   * URL. The various components are represented as offsets into that buffer.
+   * When you call get_pathname(), for example, you get a std::string_view that
+   * points into that buffer. If the url_aggregator is modified, the buffer may
+   * be reallocated, and the std::string_view you obtained earlier may become
+   * invalid. In particular, this implies that you cannot modify the URL using
+   * a setter function with a std::string_view that points into the
+   * url_aggregator E.g., the following is incorrect:
+   * url->set_hostname(url->get_pathname()).
+   * You must first copy the pathname to a separate string.
+   * std::string pathname(url->get_pathname());
+   * url->set_hostname(pathname);
+   *
+   * The caller is responsible for ensuring that the url_aggregator is not
+   * modified while any std::string_view obtained from it is in use.
+   */
   bool set_href(std::string_view input);
   bool set_host(std::string_view input);
   bool set_hostname(std::string_view input);
@@ -57,6 +77,8 @@ struct url_aggregator : url_base {
    * Return the normalized string.
    * This function does not allocate memory.
    * It is highly efficient.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * @return a constant reference to the underlying normalized URL.
    * @see https://url.spec.whatwg.org/#dom-url-href
    * @see https://url.spec.whatwg.org/#concept-url-serializer
@@ -66,6 +88,8 @@ struct url_aggregator : url_base {
   /**
    * The username getter steps are to return this's URL's username.
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
@@ -74,6 +98,8 @@ struct url_aggregator : url_base {
   /**
    * The password getter steps are to return this's URL's password.
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
@@ -82,6 +108,8 @@ struct url_aggregator : url_base {
   /**
    * Return this's URL's port, serialized.
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
@@ -89,6 +117,8 @@ struct url_aggregator : url_base {
   /**
    * Return U+0023 (#), followed by this's URL's fragment.
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * @return a lightweight std::string_view..
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
@@ -97,6 +127,8 @@ struct url_aggregator : url_base {
    * Return url's host, serialized, followed by U+003A (:) and url's port,
    * serialized.
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * When there is no host, this function returns the empty view.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-host
@@ -105,6 +137,8 @@ struct url_aggregator : url_base {
   /**
    * Return this's URL's host, serialized.
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * When there is no host, this function returns the empty view.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
@@ -115,6 +149,8 @@ struct url_aggregator : url_base {
    * The pathname getter steps are to return the result of URL path serializing
    * this's URL.
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
@@ -130,6 +166,8 @@ struct url_aggregator : url_base {
   /**
    * Return U+003F (?), followed by this's URL's query.
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
@@ -138,6 +176,8 @@ struct url_aggregator : url_base {
    * The protocol getter steps are to return this's URL's scheme, followed by
    * U+003A (:).
    * This function does not allocate memory.
+   * Note that the returned view
+   * becomes invalid if the url_aggregator is modified or deleted.
    * @return a lightweight std::string_view.
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
