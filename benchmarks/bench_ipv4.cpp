@@ -229,7 +229,7 @@ struct DataGenerator {
   static const std::vector<std::string_view>& GetNonDecimalWorkload() {
     static DataGenerator instance = []() {
       DataGenerator gen;
-      constexpr size_t count = 2000;
+      constexpr size_t count = 5000;
       size_t src_len = std::size(kIpv4NonDecimalUrls);
       gen.views.reserve(count);
       for (size_t i = 0; i < count; ++i) {
