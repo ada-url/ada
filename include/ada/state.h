@@ -1,6 +1,11 @@
 /**
  * @file state.h
- * @brief Definitions for the states of the URL state machine.
+ * @brief URL parser state machine states.
+ *
+ * Defines the states used by the URL parsing state machine as specified
+ * in the WHATWG URL Standard.
+ *
+ * @see https://url.spec.whatwg.org/#url-parsing
  */
 #ifndef ADA_STATE_H
 #define ADA_STATE_H
@@ -12,6 +17,11 @@
 namespace ada {
 
 /**
+ * @brief States in the URL parsing state machine.
+ *
+ * The URL parser processes input through a sequence of states, each handling
+ * a specific part of the URL syntax.
+ *
  * @see https://url.spec.whatwg.org/#url-parsing
  */
 enum class state {
@@ -117,7 +127,9 @@ enum class state {
 };
 
 /**
- * Stringify a URL state machine state.
+ * Converts a parser state to its string name for debugging.
+ * @param s The state to convert.
+ * @return A string representation of the state.
  */
 ada_warn_unused std::string to_string(ada::state s);
 

@@ -1,6 +1,12 @@
 /**
  * @file parser.h
- * @brief Definitions for the parser.
+ * @brief Low-level URL parsing functions.
+ *
+ * This header provides the internal URL parsing implementation. Most users
+ * should use `ada::parse()` from implementation.h instead of these functions
+ * directly.
+ *
+ * @see implementation.h for the recommended public API
  */
 #ifndef ADA_PARSER_H
 #define ADA_PARSER_H
@@ -13,9 +19,7 @@
 #include "ada/url_pattern_regex.h"
 #include "ada/url_pattern_init.h"
 
-/**
- * @private
- */
+/** @private Forward declarations */
 namespace ada {
 struct url_aggregator;
 struct url;
@@ -29,14 +33,24 @@ enum class errors : uint8_t;
 
 /**
  * @namespace ada::parser
- * @brief Includes the definitions for supported parsers
+ * @brief Internal URL parsing implementation.
+ *
+ * Contains the core URL parsing algorithm as specified by the WHATWG URL
+ * Standard. These functions are used internally by `ada::parse()`.
  */
 namespace ada::parser {
 /**
- * Parses a url. The parameter user_input is the input to be parsed:
- * it should be a valid UTF-8 string. The parameter base_url is an optional
- * parameter that can be used to resolve relative URLs. If the base_url is
- * provided, the user_input is resolved against the base_url.
+ * Parses a URL string into a URL object.
+ *
+ * @tparam result_type The type of URL object to create (url or url_aggregator).
+ *
+ * @param user_input The URL string to parse (must be valid UTF-8).
+ * @param base_url Optional base URL for resolving relative URLs.
+ *
+ * @return The parsed URL object. Check `is_valid` to determine if parsing
+ *         succeeded.
+ *
+ * @see https://url.spec.whatwg.org/#concept-basic-url-parser
  */
 template <typename result_type = url_aggregator>
 result_type parse_url(std::string_view user_input,

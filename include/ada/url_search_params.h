@@ -1,6 +1,12 @@
 /**
  * @file url_search_params.h
- * @brief Declaration for the URL Search Params
+ * @brief URL query string parameter manipulation.
+ *
+ * This file provides the `url_search_params` class for parsing, manipulating,
+ * and serializing URL query strings. It implements the URLSearchParams API
+ * from the WHATWG URL Standard.
+ *
+ * @see https://url.spec.whatwg.org/#interface-urlsearchparams
  */
 #ifndef ADA_URL_SEARCH_PARAMS_H
 #define ADA_URL_SEARCH_PARAMS_H
@@ -12,37 +18,51 @@
 
 namespace ada {
 
+/**
+ * @brief Iterator types for url_search_params iteration.
+ */
 enum class url_search_params_iter_type {
-  KEYS,
-  VALUES,
-  ENTRIES,
+  KEYS,    /**< Iterate over parameter keys only */
+  VALUES,  /**< Iterate over parameter values only */
+  ENTRIES, /**< Iterate over key-value pairs */
 };
 
 template <typename T, url_search_params_iter_type Type>
 struct url_search_params_iter;
 
+/** Type alias for a key-value pair of string views. */
 typedef std::pair<std::string_view, std::string_view> key_value_view_pair;
 
+/** Iterator over search parameter keys. */
 using url_search_params_keys_iter =
     url_search_params_iter<std::string_view, url_search_params_iter_type::KEYS>;
+/** Iterator over search parameter values. */
 using url_search_params_values_iter =
     url_search_params_iter<std::string_view,
                            url_search_params_iter_type::VALUES>;
+/** Iterator over search parameter key-value pairs. */
 using url_search_params_entries_iter =
     url_search_params_iter<key_value_view_pair,
                            url_search_params_iter_type::ENTRIES>;
 
 /**
- * We require all strings to be valid UTF-8. It is the user's responsibility to
- * ensure that the provided strings are valid UTF-8.
+ * @brief Class for parsing and manipulating URL query strings.
+ *
+ * The `url_search_params` class provides methods to parse, modify, and
+ * serialize URL query parameters (the part after '?' in a URL). It handles
+ * percent-encoding and decoding automatically.
+ *
+ * All string inputs must be valid UTF-8. The caller is responsible for
+ * ensuring UTF-8 validity.
+ *
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
  */
 struct url_search_params {
   url_search_params() = default;
 
   /**
-   * @see
-   * https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-constructor.any.js
+   * Constructs url_search_params by parsing a query string.
+   * @param input A query string (with or without leading '?'). Must be UTF-8.
    */
   explicit url_search_params(const std::string_view input) {
     initialize(input);
@@ -54,75 +74,106 @@ struct url_search_params {
   url_search_params &operator=(const url_search_params &u) = default;
   ~url_search_params() = default;
 
+  /**
+   * Returns the number of key-value pairs.
+   * @return The total count of parameters.
+   */
   [[nodiscard]] inline size_t size() const noexcept;
 
   /**
-   * Both key and value must be valid UTF-8.
+   * Appends a new key-value pair to the parameter list.
+   * @param key The parameter name (must be valid UTF-8).
+   * @param value The parameter value (must be valid UTF-8).
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-append
    */
   inline void append(std::string_view key, std::string_view value);
 
   /**
+   * Removes all pairs with the given key.
+   * @param key The parameter name to remove.
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-delete
    */
   inline void remove(std::string_view key);
+
+  /**
+   * Removes all pairs with the given key and value.
+   * @param key The parameter name.
+   * @param value The parameter value to match.
+   */
   inline void remove(std::string_view key, std::string_view value);
 
   /**
+   * Returns the value of the first pair with the given key.
+   * @param key The parameter name to search for.
+   * @return The value if found, or std::nullopt if not present.
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-get
    */
   inline std::optional<std::string_view> get(std::string_view key);
 
   /**
+   * Returns all values for pairs with the given key.
+   * @param key The parameter name to search for.
+   * @return A vector of all matching values (may be empty).
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-getall
    */
   inline std::vector<std::string> get_all(std::string_view key);
 
   /**
+   * Checks if any pair has the given key.
+   * @param key The parameter name to search for.
+   * @return `true` if at least one pair has this key.
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-has
    */
   inline bool has(std::string_view key) noexcept;
+
+  /**
+   * Checks if any pair matches the given key and value.
+   * @param key The parameter name to search for.
+   * @param value The parameter value to match.
+   * @return `true` if a matching pair exists.
+   */
   inline bool has(std::string_view key, std::string_view value) noexcept;
 
   /**
-   * Both key and value must be valid UTF-8.
+   * Sets a parameter value, replacing any existing pairs with the same key.
+   * @param key The parameter name (must be valid UTF-8).
+   * @param value The parameter value (must be valid UTF-8).
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-set
    */
   inline void set(std::string_view key, std::string_view value);
 
   /**
+   * Sorts all key-value pairs by their keys using code unit comparison.
    * @see https://url.spec.whatwg.org/#dom-urlsearchparams-sort
    */
   inline void sort();
 
   /**
+   * Serializes the parameters to a query string (without leading '?').
+   * @return The percent-encoded query string.
    * @see https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior
    */
   inline std::string to_string() const;
 
   /**
-   * Returns a simple JS-style iterator over all of the keys in this
-   * url_search_params. The keys in the iterator are not unique. The valid
-   * lifespan of the iterator is tied to the url_search_params. The iterator
-   * must be freed when you're done with it.
-   * @see https://url.spec.whatwg.org/#interface-urlsearchparams
+   * Returns an iterator over all parameter keys.
+   * Keys may repeat if there are duplicate parameters.
+   * @return An iterator yielding string_view keys.
+   * @note The iterator is invalidated if this object is modified.
    */
   inline url_search_params_keys_iter get_keys();
 
   /**
-   * Returns a simple JS-style iterator over all of the values in this
-   * url_search_params. The valid lifespan of the iterator is tied to the
-   * url_search_params. The iterator must be freed when you're done with it.
-   * @see https://url.spec.whatwg.org/#interface-urlsearchparams
+   * Returns an iterator over all parameter values.
+   * @return An iterator yielding string_view values.
+   * @note The iterator is invalidated if this object is modified.
    */
   inline url_search_params_values_iter get_values();
 
   /**
-   * Returns a simple JS-style iterator over all of the entries in this
-   * url_search_params. The entries are pairs of keys and corresponding values.
-   * The valid lifespan of the iterator is tied to the url_search_params. The
-   * iterator must be freed when you're done with it.
-   * @see https://url.spec.whatwg.org/#interface-urlsearchparams
+   * Returns an iterator over all key-value pairs.
+   * @return An iterator yielding key-value pair views.
+   * @note The iterator is invalidated if this object is modified.
    */
   inline url_search_params_entries_iter get_entries();
 
@@ -159,8 +210,13 @@ struct url_search_params {
 };  // url_search_params
 
 /**
- * Implements a non-conventional iterator pattern that is closer in style to
- * JavaScript's definition of an iterator.
+ * @brief JavaScript-style iterator for url_search_params.
+ *
+ * Provides a `next()` method that returns successive values until exhausted.
+ * This matches the iterator pattern used in the Web Platform.
+ *
+ * @tparam T The type of value returned by the iterator.
+ * @tparam Type The type of iteration (KEYS, VALUES, or ENTRIES).
  *
  * @see https://webidl.spec.whatwg.org/#idl-iterable
  */
@@ -175,10 +231,15 @@ struct url_search_params_iter {
   ~url_search_params_iter() = default;
 
   /**
-   * Return the next item in the iterator or std::nullopt if done.
+   * Returns the next value in the iteration sequence.
+   * @return The next value, or std::nullopt if iteration is complete.
    */
   inline std::optional<T> next();
 
+  /**
+   * Checks if more values are available.
+   * @return `true` if `next()` will return a value, `false` if exhausted.
+   */
   inline bool has_next() const;
 
  private:

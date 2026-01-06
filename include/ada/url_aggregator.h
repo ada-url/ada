@@ -1,6 +1,12 @@
 /**
  * @file url_aggregator.h
- * @brief Declaration for the basic URL definitions
+ * @brief Declaration for the `ada::url_aggregator` class.
+ *
+ * This file contains the `ada::url_aggregator` struct which represents a parsed
+ * URL using a single buffer with component offsets. This is the default and
+ * most memory-efficient URL representation in Ada.
+ *
+ * @see url.h for an alternative representation using separate strings
  */
 #ifndef ADA_URL_AGGREGATOR_H
 #define ADA_URL_AGGREGATOR_H
@@ -19,13 +25,23 @@ namespace ada {
 namespace parser {}
 
 /**
- * @brief Lightweight URL struct.
+ * @brief Memory-efficient URL representation using a single buffer.
  *
- * @details The url_aggregator class aims to minimize temporary memory
- * allocation while representing a parsed URL. Internally, it contains a single
- * normalized URL (the href), and it makes available the components, mostly
- * using std::string_view. These views are only valid as long as the
- * url_aggregator is not modified or deleted.
+ * The `url_aggregator` stores the entire normalized URL in a single string
+ * buffer and tracks component boundaries using offsets. This design minimizes
+ * memory allocations and is ideal for read-mostly access patterns.
+ *
+ * Getter methods return `std::string_view` pointing into the internal buffer.
+ * These views are lightweight (no allocation) but become invalid if the
+ * url_aggregator is modified or destroyed.
+ *
+ * @warning Views returned by getters (e.g., `get_pathname()`) are invalidated
+ * when any setter is called. Do not use a getter's result as input to a
+ * setter on the same object without copying first.
+ *
+ * @note This is the default URL type returned by `ada::parse()`.
+ *
+ * @see url For an alternative using separate std::string instances
  */
 struct url_aggregator : url_base {
   url_aggregator() = default;
@@ -65,135 +81,134 @@ struct url_aggregator : url_base {
   void set_search(std::string_view input);
   void set_hash(std::string_view input);
 
-  [[nodiscard]] bool has_valid_domain() const noexcept override;
   /**
-   * The origin getter steps are to return the serialization of this's URL's
-   * origin. [HTML]
-   * @return a newly allocated string.
+   * Validates whether the hostname is a valid domain according to RFC 1034.
+   * @return `true` if the domain is valid, `false` otherwise.
+   */
+  [[nodiscard]] bool has_valid_domain() const noexcept override;
+
+  /**
+   * Returns the URL's origin (scheme + host + port for special URLs).
+   * @return A newly allocated string containing the serialized origin.
    * @see https://url.spec.whatwg.org/#concept-url-origin
    */
   [[nodiscard]] std::string get_origin() const noexcept override;
+
   /**
-   * Return the normalized string.
-   * This function does not allocate memory.
-   * It is highly efficient.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * @return a constant reference to the underlying normalized URL.
+   * Returns the full serialized URL (the href) as a string_view.
+   * Does not allocate memory. The returned view becomes invalid if this
+   * url_aggregator is modified or destroyed.
+   * @return A string_view into the internal buffer.
    * @see https://url.spec.whatwg.org/#dom-url-href
-   * @see https://url.spec.whatwg.org/#concept-url-serializer
    */
   [[nodiscard]] constexpr std::string_view get_href() const noexcept
       ada_lifetime_bound;
+
   /**
-   * The username getter steps are to return this's URL's username.
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * @return a lightweight std::string_view.
+   * Returns the URL's username component.
+   * Does not allocate memory. The returned view becomes invalid if this
+   * url_aggregator is modified or destroyed.
+   * @return A string_view of the username.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
   [[nodiscard]] std::string_view get_username() const noexcept
       ada_lifetime_bound;
+
   /**
-   * The password getter steps are to return this's URL's password.
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * @return a lightweight std::string_view.
+   * Returns the URL's password component.
+   * Does not allocate memory. The returned view becomes invalid if this
+   * url_aggregator is modified or destroyed.
+   * @return A string_view of the password.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
   [[nodiscard]] std::string_view get_password() const noexcept
       ada_lifetime_bound;
+
   /**
-   * Return this's URL's port, serialized.
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * @return a lightweight std::string_view.
+   * Returns the URL's port as a string (e.g., "8080").
+   * Does not allocate memory. Returns empty view if no port is set.
+   * The returned view becomes invalid if this url_aggregator is modified.
+   * @return A string_view of the port.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
   [[nodiscard]] std::string_view get_port() const noexcept ada_lifetime_bound;
+
   /**
-   * Return U+0023 (#), followed by this's URL's fragment.
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * @return a lightweight std::string_view..
+   * Returns the URL's fragment prefixed with '#' (e.g., "#section").
+   * Does not allocate memory. Returns empty view if no fragment is set.
+   * The returned view becomes invalid if this url_aggregator is modified.
+   * @return A string_view of the hash.
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
   [[nodiscard]] std::string_view get_hash() const noexcept ada_lifetime_bound;
+
   /**
-   * Return url's host, serialized, followed by U+003A (:) and url's port,
-   * serialized.
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * When there is no host, this function returns the empty view.
-   * @return a lightweight std::string_view.
+   * Returns the URL's host and port (e.g., "example.com:8080").
+   * Does not allocate memory. Returns empty view if no host is set.
+   * The returned view becomes invalid if this url_aggregator is modified.
+   * @return A string_view of host:port.
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
   [[nodiscard]] std::string_view get_host() const noexcept ada_lifetime_bound;
+
   /**
-   * Return this's URL's host, serialized.
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * When there is no host, this function returns the empty view.
-   * @return a lightweight std::string_view.
+   * Returns the URL's hostname (without port).
+   * Does not allocate memory. Returns empty view if no host is set.
+   * The returned view becomes invalid if this url_aggregator is modified.
+   * @return A string_view of the hostname.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
    */
   [[nodiscard]] std::string_view get_hostname() const noexcept
       ada_lifetime_bound;
+
   /**
-   * The pathname getter steps are to return the result of URL path serializing
-   * this's URL.
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * @return a lightweight std::string_view.
+   * Returns the URL's path component.
+   * Does not allocate memory. The returned view becomes invalid if this
+   * url_aggregator is modified or destroyed.
+   * @return A string_view of the pathname.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
   [[nodiscard]] constexpr std::string_view get_pathname() const noexcept
       ada_lifetime_bound;
+
   /**
-   * Compute the pathname length in bytes without instantiating a view or a
-   * string.
-   * @return size of the pathname in bytes
+   * Returns the byte length of the pathname without creating a string.
+   * @return Size of the pathname in bytes.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
   [[nodiscard]] ada_really_inline uint32_t get_pathname_length() const noexcept;
+
   /**
-   * Return U+003F (?), followed by this's URL's query.
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * @return a lightweight std::string_view.
+   * Returns the URL's query string prefixed with '?' (e.g., "?foo=bar").
+   * Does not allocate memory. Returns empty view if no query is set.
+   * The returned view becomes invalid if this url_aggregator is modified.
+   * @return A string_view of the search/query.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
   [[nodiscard]] std::string_view get_search() const noexcept ada_lifetime_bound;
+
   /**
-   * The protocol getter steps are to return this's URL's scheme, followed by
-   * U+003A (:).
-   * This function does not allocate memory.
-   * Note that the returned view
-   * becomes invalid if the url_aggregator is modified or deleted.
-   * @return a lightweight std::string_view.
+   * Returns the URL's scheme followed by a colon (e.g., "https:").
+   * Does not allocate memory. The returned view becomes invalid if this
+   * url_aggregator is modified or destroyed.
+   * @return A string_view of the protocol.
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
   [[nodiscard]] std::string_view get_protocol() const noexcept
       ada_lifetime_bound;
 
   /**
-   * A URL includes credentials if its username or password is not the empty
-   * string.
+   * Checks if the URL has credentials (non-empty username or password).
+   * @return `true` if username or password is non-empty, `false` otherwise.
    */
   [[nodiscard]] ada_really_inline constexpr bool has_credentials()
       const noexcept;
 
   /**
-   * Useful for implementing efficient serialization for the URL.
+   * Returns the URL component offsets for efficient serialization.
    *
+   * The components represent byte offsets into the serialized URL:
+   * ```
    * https://user:pass@example.com:1234/foo/bar?baz#quux
    *       |     |    |          | ^^^^|       |   |
    *       |     |    |          | |   |       |   `----- hash_start
@@ -204,51 +219,93 @@ struct url_aggregator : url_base {
    *       |     |    `---------------------------------- host_start
    *       |     `--------------------------------------- username_end
    *       `--------------------------------------------- protocol_end
-   *
-   * Inspired after servo/url
-   *
-   * @return a constant reference to the underlying component attribute.
-   *
-   * @see
-   * https://github.com/servo/rust-url/blob/b65a45515c10713f6d212e6726719a020203cc98/url/src/quirks.rs#L31
+   * ```
+   * @return A constant reference to the url_components struct.
+   * @see https://github.com/servo/rust-url
    */
   [[nodiscard]] ada_really_inline const url_components &get_components()
       const noexcept;
+
   /**
-   * Returns a string representation of this URL.
+   * Returns a JSON string representation of this URL for debugging.
+   * @return A JSON-formatted string with all URL components.
    */
   [[nodiscard]] std::string to_string() const override;
+
   /**
-   * Returns a string diagram of this URL.
+   * Returns a visual diagram showing component boundaries in the URL.
+   * Useful for debugging and understanding URL structure.
+   * @return A multi-line string diagram.
    */
   [[nodiscard]] std::string to_diagram() const;
 
   /**
-   * Verifies that the parsed URL could be valid. Useful for debugging purposes.
-   * @return true if the URL is valid, otherwise return true of the offsets are
-   * possible.
+   * Validates internal consistency of component offsets (for debugging).
+   * @return `true` if offsets are consistent, `false` if corrupted.
    */
   [[nodiscard]] constexpr bool validate() const noexcept;
 
-  /** @return true if it has an host but it is the empty string */
+  /**
+   * Checks if the URL has an empty hostname (host is set but empty string).
+   * @return `true` if host exists but is empty, `false` otherwise.
+   */
   [[nodiscard]] constexpr bool has_empty_hostname() const noexcept;
-  /** @return true if it has a host (included an empty host) */
+
+  /**
+   * Checks if the URL has a hostname (including empty hostnames).
+   * @return `true` if host is present, `false` otherwise.
+   */
   [[nodiscard]] constexpr bool has_hostname() const noexcept;
-  /** @return true if the URL has a non-empty username */
+
+  /**
+   * Checks if the URL has a non-empty username.
+   * @return `true` if username is non-empty, `false` otherwise.
+   */
   [[nodiscard]] constexpr bool has_non_empty_username() const noexcept;
-  /** @return true if the URL has a non-empty password */
+
+  /**
+   * Checks if the URL has a non-empty password.
+   * @return `true` if password is non-empty, `false` otherwise.
+   */
   [[nodiscard]] constexpr bool has_non_empty_password() const noexcept;
-  /** @return true if the URL has a (non default) port */
+
+  /**
+   * Checks if the URL has a non-default port explicitly specified.
+   * @return `true` if a port is present, `false` otherwise.
+   */
   [[nodiscard]] constexpr bool has_port() const noexcept;
-  /** @return true if the URL has a password */
+
+  /**
+   * Checks if the URL has a password component (may be empty).
+   * @return `true` if password is present, `false` otherwise.
+   */
   [[nodiscard]] constexpr bool has_password() const noexcept;
-  /** @return true if the URL has a hash component */
+
+  /**
+   * Checks if the URL has a fragment/hash component.
+   * @return `true` if hash is present, `false` otherwise.
+   */
   [[nodiscard]] constexpr bool has_hash() const noexcept override;
-  /** @return true if the URL has a search component */
+
+  /**
+   * Checks if the URL has a query/search component.
+   * @return `true` if query is present, `false` otherwise.
+   */
   [[nodiscard]] constexpr bool has_search() const noexcept override;
 
+  /**
+   * Removes the port from the URL.
+   */
   inline void clear_port();
+
+  /**
+   * Removes the hash/fragment from the URL.
+   */
   inline void clear_hash();
+
+  /**
+   * Removes the query/search string from the URL.
+   */
   inline void clear_search() override;
 
  private:
