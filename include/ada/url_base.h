@@ -1,6 +1,10 @@
 /**
  * @file url_base.h
- * @brief Declaration for the basic URL definitions
+ * @brief Base class and common definitions for URL types.
+ *
+ * This file defines the `url_base` abstract base class from which both
+ * `ada::url` and `ada::url_aggregator` inherit. It also defines common
+ * enumerations like `url_host_type`.
  */
 #ifndef ADA_URL_BASE_H
 #define ADA_URL_BASE_H
@@ -14,112 +18,112 @@
 namespace ada {
 
 /**
- * Type of URL host as an enum.
+ * @brief Enum representing the type of host in a URL.
+ *
+ * Used to distinguish between regular domain names, IPv4 addresses,
+ * and IPv6 addresses for proper parsing and serialization.
  */
 enum url_host_type : uint8_t {
-  /**
-   * Represents common URLs such as "https://www.google.com"
-   */
+  /** Regular domain name (e.g., "www.example.com") */
   DEFAULT = 0,
-  /**
-   * Represents ipv4 addresses such as "http://127.0.0.1"
-   */
+  /** IPv4 address (e.g., "127.0.0.1") */
   IPV4 = 1,
-  /**
-   * Represents ipv6 addresses such as
-   * "http://[2001:db8:3333:4444:5555:6666:7777:8888]"
-   */
+  /** IPv6 address (e.g., "[::1]" or "[2001:db8::1]") */
   IPV6 = 2,
 };
 
 /**
- * @brief Base class of URL implementations
+ * @brief Abstract base class for URL representations.
  *
- * @details A url_base contains a few attributes: is_valid, has_opaque_path and
- * type. All non-trivial implementation details are in derived classes such as
- * ada::url and ada::url_aggregator.
+ * The `url_base` class provides the common interface and state shared by
+ * both `ada::url` and `ada::url_aggregator`. It contains basic URL attributes
+ * like validity status and scheme type, but delegates component storage and
+ * access to derived classes.
  *
- * It is an abstract class that cannot be instantiated directly.
+ * @note This is an abstract class and cannot be instantiated directly.
+ *       Use `ada::url` or `ada::url_aggregator` instead.
+ *
+ * @see url
+ * @see url_aggregator
  */
 struct url_base {
   virtual ~url_base() = default;
 
   /**
-   * Used for returning the validity from the result of the URL parser.
+   * Indicates whether the URL was successfully parsed.
+   * Set to `false` if parsing failed (e.g., invalid URL syntax).
    */
   bool is_valid{true};
 
   /**
-   * A URL has an opaque path if its path is a string.
+   * Indicates whether the URL has an opaque path (non-hierarchical).
+   * Opaque paths occur in non-special URLs like `mailto:` or `javascript:`.
    */
   bool has_opaque_path{false};
 
   /**
-   * URL hosts type
+   * The type of the URL's host (domain, IPv4, or IPv6).
    */
   url_host_type host_type = url_host_type::DEFAULT;
 
   /**
    * @private
+   * Internal representation of the URL's scheme type.
    */
   ada::scheme::type type{ada::scheme::type::NOT_SPECIAL};
 
   /**
-   * A URL is special if its scheme is a special scheme. A URL is not special if
-   * its scheme is not a special scheme.
+   * Checks if the URL has a special scheme (http, https, ws, wss, ftp, file).
+   * Special schemes have specific parsing rules and default ports.
+   * @return `true` if the scheme is special, `false` otherwise.
    */
   [[nodiscard]] ada_really_inline constexpr bool is_special() const noexcept;
 
   /**
-   * The origin getter steps are to return the serialization of this's URL's
-   * origin. [HTML]
-   * @return a newly allocated string.
+   * Returns the URL's origin (scheme + host + port for special URLs).
+   * @return A newly allocated string containing the serialized origin.
    * @see https://url.spec.whatwg.org/#concept-url-origin
    */
   [[nodiscard]] virtual std::string get_origin() const noexcept = 0;
 
   /**
-   * Returns true if this URL has a valid domain as per RFC 1034 and
-   * corresponding specifications. Among other things, it requires
-   * that the domain string has fewer than 255 octets.
+   * Validates whether the hostname is a valid domain according to RFC 1034.
+   * Checks that the domain and its labels have valid lengths.
+   * @return `true` if the domain is valid, `false` otherwise.
    */
   [[nodiscard]] virtual bool has_valid_domain() const noexcept = 0;
 
   /**
    * @private
-   *
-   * Return the 'special port' if the URL is special and not 'file'.
-   * Returns 0 otherwise.
+   * Returns the default port for special schemes (e.g., 443 for https).
+   * Returns 0 for file:// URLs or non-special schemes.
    */
   [[nodiscard]] inline uint16_t get_special_port() const noexcept;
 
   /**
    * @private
-   *
-   * Get the default port if the url's scheme has one, returns 0 otherwise.
+   * Returns the default port for the URL's scheme, or 0 if none.
    */
   [[nodiscard]] ada_really_inline uint16_t scheme_default_port() const noexcept;
 
   /**
    * @private
-   *
-   * Parse a port (16-bit decimal digit) from the provided input.
-   * We assume that the input does not contain spaces or tabs
-   * within the ASCII digits.
-   * It returns how many bytes were consumed when a number is successfully
-   * parsed.
-   * @return On failure, it returns zero.
-   * @see https://url.spec.whatwg.org/#host-parsing
+   * Parses a port number from the input string.
+   * @param view The string containing the port to parse.
+   * @param check_trailing_content Whether to validate no trailing characters.
+   * @return Number of bytes consumed on success, 0 on failure.
    */
   virtual size_t parse_port(std::string_view view,
                             bool check_trailing_content) noexcept = 0;
 
+  /** @private */
   virtual ada_really_inline size_t parse_port(std::string_view view) noexcept {
     return this->parse_port(view, false);
   }
 
   /**
-   * Returns a JSON string representation of this URL.
+   * Returns a JSON string representation of this URL for debugging.
+   * @return A JSON-formatted string with URL information.
    */
   [[nodiscard]] virtual std::string to_string() const = 0;
 

@@ -1,6 +1,13 @@
 /**
  * @file url_pattern.h
- * @brief Declaration for the URLPattern implementation.
+ * @brief URLPattern API implementation.
+ *
+ * This header provides the URLPattern API as specified by the WHATWG URL
+ * Pattern Standard. URLPattern allows matching URLs against patterns with
+ * wildcards and named groups, similar to how regular expressions match strings.
+ *
+ * @see https://urlpattern.spec.whatwg.org/
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
  */
 #ifndef ADA_URL_PATTERN_H
 #define ADA_URL_PATTERN_H
@@ -252,14 +259,28 @@ struct url_pattern_options {
 #endif  // ADA_TESTING
 };
 
-// URLPattern is a Web Platform standard API for matching URLs against a
-// pattern syntax (think of it as a regular expression for URLs). It is
-// defined in https://wicg.github.io/urlpattern.
-// More information about the URL Pattern syntax can be found at
-// https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
-//
-// We require all strings to be valid UTF-8: it is the user's responsibility
-// to ensure that the provided strings are valid UTF-8.
+/**
+ * @brief URL pattern matching class implementing the URLPattern API.
+ *
+ * URLPattern provides a way to match URLs against patterns with wildcards
+ * and named capture groups. It's useful for routing, URL-based dispatching,
+ * and URL validation.
+ *
+ * Pattern syntax supports:
+ * - Literal text matching
+ * - Named groups: `:name` (matches up to the next separator)
+ * - Wildcards: `*` (matches everything)
+ * - Custom regex: `(pattern)`
+ * - Optional segments: `:name?`
+ * - Repeated segments: `:name+`, `:name*`
+ *
+ * @tparam regex_provider The regex implementation to use for pattern matching.
+ *         Must satisfy the url_pattern_regex::regex_concept.
+ *
+ * @note All string inputs must be valid UTF-8.
+ *
+ * @see https://urlpattern.spec.whatwg.org/
+ */
 template <url_pattern_regex::regex_concept regex_provider>
 class url_pattern {
  public:

@@ -1,6 +1,10 @@
 /**
  * @file common_defs.h
- * @brief Common definitions for cross-platform compiler support.
+ * @brief Cross-platform compiler macros and common definitions.
+ *
+ * This header provides compiler-specific macros for optimization hints,
+ * platform detection, SIMD support detection, and development/debug utilities.
+ * It ensures consistent behavior across different compilers (GCC, Clang, MSVC).
  */
 #ifndef ADA_COMMON_DEFS_H
 #define ADA_COMMON_DEFS_H
