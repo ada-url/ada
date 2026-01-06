@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.2</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -131,6 +131,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d63/structada__string__pair.html">ada_string_pair</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d69/structada__url__components.html">ada_url_components</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/ded/structada__version__components.html">ada_version_components</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
@@ -304,6 +306,10 @@ Functions</h2></td></tr>
 <tr class="separator:ab0e5d6ab2ec2e266d746acf5ad523512"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a974f17ad16f39f1d7212e2e4e13ba211" id="r_a974f17ad16f39f1d7212e2e4e13ba211"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a974f17ad16f39f1d7212e2e4e13ba211">ada_search_params_entries_iter_has_next</a> (<a class="el" href="../../df/d61/ada__c_8h.html#a333e532a4f2756d8c8a6d3d6f56bc2b1">ada_url_search_params_entries_iter</a> result)</td></tr>
 <tr class="separator:a974f17ad16f39f1d7212e2e4e13ba211"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4007f5e2d905946ff573f9aea979f242" id="r_a4007f5e2d905946ff573f9aea979f242"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4007f5e2d905946ff573f9aea979f242">ada_get_version</a> ()</td></tr>
+<tr class="separator:a4007f5e2d905946ff573f9aea979f242"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4125292b54605bd4ecbcdba2bb8c594e" id="r_a4125292b54605bd4ecbcdba2bb8c594e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/ded/structada__version__components.html">ada_version_components</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4125292b54605bd4ecbcdba2bb8c594e">ada_get_version_components</a> ()</td></tr>
+<tr class="separator:a4125292b54605bd4ecbcdba2bb8c594e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
 <a id="a4550dceefee7ecce927304912ddfb9f4" name="a4550dceefee7ecce927304912ddfb9f4"></a>
@@ -1191,6 +1197,48 @@ Functions</h2></td></tr>
 <p class="reference">References <a class="el" href="#a54aa4bf9b91403fe2fb4f5b9d1fcf201">ada_string_create()</a>, and <a class="el" href="#a5649d9beb5e8b4fcbb78d274d85c3b69">get_instance()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d5/df0/ada__c_8c.html#a91ce7c16e9840492202299da2b451e60">LLVMFuzzerTestOneInput()</a>.</p>
+
+</div>
+</div>
+<a id="a4007f5e2d905946ff573f9aea979f242" name="a4007f5e2d905946ff573f9aea979f242"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4007f5e2d905946ff573f9aea979f242">&#9670;&#160;</a></span>ada_get_version()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * ada_get_version </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html#l00750">750</a> of file <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html">ada_c.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d80/ada__version_8h.html#acda294c331e5f138143097bf9f60069c">ADA_VERSION</a>.</p>
+
+</div>
+</div>
+<a id="a4125292b54605bd4ecbcdba2bb8c594e" name="a4125292b54605bd4ecbcdba2bb8c594e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4125292b54605bd4ecbcdba2bb8c594e">&#9670;&#160;</a></span>ada_get_version_components()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d4/ded/structada__version__components.html">ada_version_components</a> ada_get_version_components </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html#l00752">752</a> of file <a class="el" href="../../dd/dd6/ada__c_8cpp_source.html">ada_c.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dd/d64/namespaceada.html#ae6b952c1590570d7d6de051157a64005aa7ef0c46d29935786a977df9508ccd15">ada::ADA_VERSION_MAJOR</a>, <a class="el" href="../../dd/d64/namespaceada.html#ae6b952c1590570d7d6de051157a64005a03d1a99d518d05ee8221fbea0051b56c">ada::ADA_VERSION_MINOR</a>, and <a class="el" href="../../dd/d64/namespaceada.html#ae6b952c1590570d7d6de051157a64005a574e2fbf1c698b45963d68dcc9b4863a">ada::ADA_VERSION_REVISION</a>.</p>
 
 </div>
 </div>

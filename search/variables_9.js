@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['key_0',['key',['../d0/d63/structada__string__pair.html#a86b27d28bf2581b7bb7de3c806415ef5',1,'ada_string_pair']]]
+  ['major_0',['major',['../d4/ded/structada__version__components.html#ac27639dc8db90e9ad6526857997761b2',1,'ada_version_components']]],
+  ['mappings_1',['mappings',['../d5/ddb/namespaceada_1_1idna.html#a54bb219c892892d46fc36741cd3611c6',1,'ada::idna']]],
+  ['minor_2',['minor',['../d4/ded/structada__version__components.html#abe3088cb7d636e3b0035a89efc9173d9',1,'ada_version_components']]]
 ];

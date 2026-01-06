@@ -1,17 +1,6 @@
 var searchData=
 [
-  ['of_20ada_0',['Bindings of Ada',['../index.html#autotoc_md16',1,'']]],
-  ['omitted_1',['omitted',['../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47',1,'ada::url_components']]],
-  ['on_2',['ON',['../d5/ddb/namespaceada_1_1idna.html#ac7495198fe0aa95543b347ac9cc548dda22fa19d0cae8249a34f5a1ebb8e14dc4',1,'ada::idna']]],
-  ['one_5for_5fmore_3',['one_or_more',['../dd/d64/namespaceada.html#a2369e4c9d2c5efb683c90d17fc56c85ba6ef720567b1860990b3d5b851d7e5d8d',1,'ada']]],
-  ['opaque_5fpath_4',['OPAQUE_PATH',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574a9ce94bb26dfbd81fc3975b2e7af5cedd',1,'ada']]],
-  ['open_5',['OPEN',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a08428af23d47d86fae555cdff86b92acaa38bd5138bf35514df41a1795ebbf5c3',1,'ada::url_pattern_helpers']]],
-  ['operator_6',['Pipe Operator',['../db/d8a/md_docs_2cli.html#autotoc_md7',1,'']]],
-  ['operator_3c_3c_7',['operator&lt;&lt;',['../dd/d64/namespaceada.html#a4e483bbc60c5905f8885c2dc134a30ed',1,'ada::operator&lt;&lt;(std::ostream &amp;out, const ada::url &amp;u)'],['../dd/d64/namespaceada.html#a1d9c438eb5078b59b136314467c3dd27',1,'ada::operator&lt;&lt;(std::ostream &amp;out, const ada::url_aggregator &amp;u)']]],
-  ['operator_3d_8',['operator=',['../dd/d03/structada_1_1url.html#a38e998e7cf59025409e7e7cd4157e544',1,'ada::url::operator=(url &amp;&amp;u) noexcept=default'],['../dd/d03/structada_1_1url.html#a3cc4e67cc46625eef41979275167183d',1,'ada::url::operator=(const url &amp;u)=default'],['../d8/d3b/structada_1_1url__aggregator.html#a02551d16fc5d83cc640934405c0831e5',1,'ada::url_aggregator::operator=(url_aggregator &amp;&amp;u) noexcept=default'],['../d8/d3b/structada_1_1url__aggregator.html#a01fc389f9f1141adfd7e20260e1cb674',1,'ada::url_aggregator::operator=(const url_aggregator &amp;u)=default'],['../d3/d43/structada_1_1url__components.html#a3df693b93819a6307aa6d193e59c6d0c',1,'ada::url_components::operator=(url_components &amp;&amp;u) noexcept=default'],['../d3/d43/structada_1_1url__components.html#ade8e8cbb87ac562d1c2e1c2b0247c57a',1,'ada::url_components::operator=(const url_components &amp;u)=default'],['../dd/dcb/structada_1_1url__search__params.html#a6818adec6aa0cad0766c2a7d087015dd',1,'ada::url_search_params::operator=(url_search_params &amp;&amp;u) noexcept=default'],['../dd/dcb/structada_1_1url__search__params.html#a8a13971c945e7ca210303a0c5edc3872',1,'ada::url_search_params::operator=(const url_search_params &amp;u)=default'],['../dd/dc7/structada_1_1url__search__params__iter.html#aaf248512f7d5fefc0cf550f51dfd95c3',1,'ada::url_search_params_iter::operator=(url_search_params_iter &amp;&amp;u) noexcept=default'],['../dd/dc7/structada_1_1url__search__params__iter.html#af8b1732eaf20e2480de3b18c9afe189a',1,'ada::url_search_params_iter::operator=(const url_search_params_iter &amp;u)=default']]],
-  ['operator_3d_3d_9',['operator==',['../d9/ddd/structada_1_1url__pattern__component__result.html#ade6bf7099699b9482c72878d5c019978',1,'ada::url_pattern_component_result::operator==()'],['../d4/d6f/structada_1_1url__pattern__init.html#a6debb878dd345dda8c710fefc2e64eb6',1,'ada::url_pattern_init::operator==()']]],
-  ['operator_5b_5d_10',['operator[]',['../dd/dcb/structada_1_1url__search__params.html#a550bfb0fc88e0392ede1a69a8e52b2d7',1,'ada::url_search_params']]],
-  ['optional_11',['optional',['../dd/d64/namespaceada.html#a2369e4c9d2c5efb683c90d17fc56c85bad57c24f3fe52d16e7169b912dd647f0d',1,'ada']]],
-  ['options_12',['Command line options',['../db/d8a/md_docs_2cli.html#autotoc_md1',1,'']]],
-  ['other_5fmodifier_13',['OTHER_MODIFIER',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a08428af23d47d86fae555cdff86b92aca00a8aa35e993435102486bb1f2d2b62f',1,'ada::url_pattern_helpers']]]
+  ['key_0',['key',['../d0/d63/structada__string__pair.html#a86b27d28bf2581b7bb7de3c806415ef5',1,'ada_string_pair']]],
+  ['key_5fvalue_5fview_5fpair_1',['key_value_view_pair',['../dd/d64/namespaceada.html#ac15176b2a757ccdfdec97ec4ca67ba88',1,'ada']]],
+  ['keys_2',['KEYS',['../dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243',1,'ada']]]
 ];

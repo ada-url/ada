@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.2</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -113,9 +113,9 @@ $(function(){initNavTree('db/d8a/md_docs_2cli.html','../../'); initResizable(tru
   <div class="headertitle"><div class="title">Command line interface (CLI)</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md0"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md33"></a></p>
 <p>The adaparse command tool takes URL strings (ASCII/UTF-8) and it validates, normalizes and queries them efficiently.</p>
-<h2><a class="anchor" id="autotoc_md1"></a>
+<h2><a class="anchor" id="autotoc_md34"></a>
 Command line options</h2>
 <ul>
 <li>Options:<ul>
@@ -129,7 +129,7 @@ Command line options</h2>
 </ul>
 </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md2"></a>
+<h2><a class="anchor" id="autotoc_md35"></a>
 Performance</h2>
 <p>Our <code>adaparse</code> tool may outperform other popular alternatives. We offer a <a href="https://github.com/ada-url/url-various-datasets">collection of sets of URLs</a> for benchmarking purposes. The following results are on a MacBook Air 2022 (M2 processor) using LLVM 14. We compare against <a href="https://github.com/curl/trurl">trurl</a> version 0.6 (libcurl/7.87.0).</p>
 <details >
@@ -155,7 +155,7 @@ With the top100 dataset, the adaparse tool is <b>twice as fast as the trurl</b>.
 <div class="line">cat url-various-datasets/top100/top100.txt  0,00s user 0,01s system 11% cpu 0,062 total</div>
 <div class="line">./build/tools/cli/adaparse -g href &amp;&gt; /dev/null  0,05s user 0,00s system 94% cpu 0,061 total</div>
 </div><!-- fragment --> </details>
-<h3><a class="anchor" id="autotoc_md3"></a>
+<h3><a class="anchor" id="autotoc_md36"></a>
 Comparison</h3>
 <div class="fragment"><div class="line">wikipedia 100k</div>
 <div class="line">ada ▏   55 ms ███████▋</div>
@@ -165,14 +165,14 @@ Comparison</h3>
 <div class="line">ada ▏   61 ms █████████████▍</div>
 <div class="line">trurl ▏  113 ms █████████████████████████</div>
 </div><!-- fragment --><p>The results will vary depending on your system. We invite you to run your own benchmarks.</p>
-<h2><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="autotoc_md37"></a>
 Usage/Examples</h2>
-<h3><a class="anchor" id="autotoc_md5"></a>
+<h3><a class="anchor" id="autotoc_md38"></a>
 Well-formatted URL</h3>
 <div class="fragment"><div class="line">adaparse &quot;http://www.google.com&quot;</div>
 </div><!-- fragment --><p> Output:</p>
 <div class="fragment"><div class="line">http://www.google.com</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md6"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md39"></a>
 Diagram</h3>
 <div class="fragment"><div class="line">adaparse -d http://www.google.com/bal\?a\=\=11\#fddfds</div>
 </div><!-- fragment --><p>Output:</p>
@@ -185,7 +185,7 @@ Diagram</h3>
 <div class="line">     | `------------------------------ host_start 7</div>
 <div class="line">     | `------------------------------ username_end 7</div>
 <div class="line">     `-------------------------------- protocol_end 5</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md7"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md40"></a>
 Pipe Operator</h3>
 <p>Ada can process URLs from piped input, making it easy to integrate with other command-line tools that produce ASCII or UTF-8 outputs. Here's an example of how to pipe the output of another command into Ada. Given a list of URLs, one by line, we may query the normalized URL string (<code>href</code>) and detect any malformed URL:</p>
 <div class="fragment"><div class="line">cat dragonball_url.txt | adaparse --get href</div>
@@ -198,7 +198,7 @@ Pipe Operator</h3>
 <div class="line">www.vegeta.com</div>
 <div class="line">www.gohan.com</div>
 </div><!-- fragment --><p>If you omit <code>-g</code>, it will only provide a list of invalid URLs. This might be useful if you want to valid quickly a list of URLs.</p>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md41"></a>
 Benchmark Runner</h2>
 <p>The benchmark flag can be used to output the time it takes to process piped input:</p>
 <div class="fragment"><div class="line">cat wikipedia_100k.txt | adaparse -b</div>
@@ -217,13 +217,13 @@ Benchmark Runner</h2>
 <div class="line">Invalid URL: Q53%3A31</div>
 <div class="line">read 5209265 bytes in 32819917 ns using 100000 lines, used 160 loads</div>
 <div class="line">0.1587226744053009 GB/s</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md9"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md42"></a>
 Saving result to file system</h3>
 <p>There is an option to output to a file on disk:</p>
 <div class="fragment"><div class="line">cat wikipedia_100k.txt | adaparse -o wiki_output.txt</div>
 </div><!-- fragment --><p>As well as read in from a file on disk without going through cat:</p>
 <div class="fragment"><div class="line">adaparse -p wikipedia_top_100_txt</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md10"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md43"></a>
 Advanced Usage</h3>
 <p>You may also combine different flags together. E.g. Say one wishes to extract only the host from URLs stored in wikipedia.txt and output it to the test_write.txt file:</p>
 <div class="fragment"><div class="line">adaparse&quot; -p wikipedia_top100.txt -o test_write.txt -g host -b</div>

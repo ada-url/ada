@@ -59,26 +59,14 @@ var namespaceada =
       [ "is_forbidden_host_code_point_table", "d2/dc3/namespaceada_1_1unicode.html#a9e8b3ffd5313024ee058b6ce32e185bf", null ],
       [ "table_is_double_dot_path_segment", "d2/dc3/namespaceada_1_1unicode.html#a7c997c07906bb9e6ce09e5bab8e8364f", null ]
     ] ],
-    [ "url_pattern_helpers", "dc/dcc/namespaceada_1_1url__pattern__helpers.html", "dc/dcc/namespaceada_1_1url__pattern__helpers" ],
-    [ "url_pattern_regex", "d5/d90/namespaceada_1_1url__pattern__regex.html", "d5/d90/namespaceada_1_1url__pattern__regex" ],
     [ "url", "dd/d03/structada_1_1url.html", "dd/d03/structada_1_1url" ],
     [ "url_aggregator", "d8/d3b/structada_1_1url__aggregator.html", "d8/d3b/structada_1_1url__aggregator" ],
     [ "url_base", "db/d75/structada_1_1url__base.html", "db/d75/structada_1_1url__base" ],
     [ "url_components", "d3/d43/structada_1_1url__components.html", "d3/d43/structada_1_1url__components" ],
-    [ "url_pattern", "d0/d1e/classada_1_1url__pattern.html", "d0/d1e/classada_1_1url__pattern" ],
-    [ "url_pattern_compile_component_options", "de/d21/structada_1_1url__pattern__compile__component__options.html", "de/d21/structada_1_1url__pattern__compile__component__options" ],
-    [ "url_pattern_component", "d5/d0a/classada_1_1url__pattern__component.html", "d5/d0a/classada_1_1url__pattern__component" ],
-    [ "url_pattern_component_result", "d9/ddd/structada_1_1url__pattern__component__result.html", "d9/ddd/structada_1_1url__pattern__component__result" ],
-    [ "url_pattern_init", "d4/d6f/structada_1_1url__pattern__init.html", "d4/d6f/structada_1_1url__pattern__init" ],
-    [ "url_pattern_options", "d8/dfb/structada_1_1url__pattern__options.html", "d8/dfb/structada_1_1url__pattern__options" ],
-    [ "url_pattern_part", "d8/d9f/classada_1_1url__pattern__part.html", "d8/d9f/classada_1_1url__pattern__part" ],
-    [ "url_pattern_result", "d3/d62/structada_1_1url__pattern__result.html", "d3/d62/structada_1_1url__pattern__result" ],
     [ "url_search_params", "dd/dcb/structada_1_1url__search__params.html", "dd/dcb/structada_1_1url__search__params" ],
     [ "url_search_params_iter", "dd/dc7/structada_1_1url__search__params__iter.html", "dd/dc7/structada_1_1url__search__params__iter" ],
-    [ "url_pattern_encoding_callback", "d8/ddd/conceptada_1_1url__pattern__encoding__callback.html", null ],
     [ "key_value_view_pair", "dd/d64/namespaceada.html#ac15176b2a757ccdfdec97ec4ca67ba88", null ],
     [ "result", "dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b", null ],
-    [ "url_pattern_input", "dd/d64/namespaceada.html#ae89775aa7915821280caf356eb834a4c", null ],
     [ "url_search_params_entries_iter", "dd/d64/namespaceada.html#a27b44c690edb4b609f8d0a2d7e7475ae", null ],
     [ "url_search_params_keys_iter", "dd/d64/namespaceada.html#a663e90222ab2aa9380ddf76bf055b2ad", null ],
     [ "url_search_params_values_iter", "dd/d64/namespaceada.html#a0221646aa68b66f5dd447ea589c988a3", null ],
@@ -117,18 +105,6 @@ var namespaceada =
       [ "IPV4", "dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39", null ],
       [ "IPV6", "dd/d64/namespaceada.html#a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee", null ]
     ] ],
-    [ "url_pattern_part_modifier", "dd/d64/namespaceada.html#a2369e4c9d2c5efb683c90d17fc56c85b", [
-      [ "none", "dd/d64/namespaceada.html#a2369e4c9d2c5efb683c90d17fc56c85ba334c4a4c42fdb79d7ebc3e73b517e6f8", null ],
-      [ "optional", "dd/d64/namespaceada.html#a2369e4c9d2c5efb683c90d17fc56c85bad57c24f3fe52d16e7169b912dd647f0d", null ],
-      [ "zero_or_more", "dd/d64/namespaceada.html#a2369e4c9d2c5efb683c90d17fc56c85bae89b690003f9258b7d29dd2e5e172505", null ],
-      [ "one_or_more", "dd/d64/namespaceada.html#a2369e4c9d2c5efb683c90d17fc56c85ba6ef720567b1860990b3d5b851d7e5d8d", null ]
-    ] ],
-    [ "url_pattern_part_type", "dd/d64/namespaceada.html#a44f26778adba563fa22a9e1372a72b4c", [
-      [ "FIXED_TEXT", "dd/d64/namespaceada.html#a44f26778adba563fa22a9e1372a72b4cac1867c67c2283acccf0c8bbca42af6f0", null ],
-      [ "REGEXP", "dd/d64/namespaceada.html#a44f26778adba563fa22a9e1372a72b4ca63d39b0a9b213833297bf073435f6c3d", null ],
-      [ "SEGMENT_WILDCARD", "dd/d64/namespaceada.html#a44f26778adba563fa22a9e1372a72b4ca5c479f1a7d13019e93631b5faccdac6f", null ],
-      [ "FULL_WILDCARD", "dd/d64/namespaceada.html#a44f26778adba563fa22a9e1372a72b4cafafa680e3cc7226e4517ac5ed8f87333", null ]
-    ] ],
     [ "url_search_params_iter_type", "dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23", [
       [ "KEYS", "dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243", null ],
       [ "VALUES", "dd/d64/namespaceada.html#aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598", null ],
@@ -143,7 +119,7 @@ var namespaceada =
     [ "parse< url >", "dd/d64/namespaceada.html#a157c96a61731a76b1c222eafad465828", null ],
     [ "parse< url_aggregator >", "dd/d64/namespaceada.html#a803aed58b90d68562c44c76eaf5e9c90", null ],
     [ "to_string", "dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6", null ],
-    [ "to_string", "dd/d64/namespaceada.html#a51224d0fd7b3f84be3ee3c5b44be0bd7", null ],
+    [ "to_string", "dd/d64/namespaceada.html#aadf8f2765d3d60f8612a8dfccc844a36", null ],
     [ "unreachable", "dd/d64/namespaceada.html#ad3a5d67b58ebecc2e711d4b444408f2d", null ],
     [ "url_search_params_iter< T, Type >::EMPTY", "dd/d64/namespaceada.html#a448179ed747c740ca7cf4dff75d22a95", null ]
 ];

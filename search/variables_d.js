@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['omitted_0',['omitted',['../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47',1,'ada::url_components']]]
+  ['revision_0',['revision',['../d4/ded/structada__version__components.html#aac796b13ddb668080199edfc0e74d535',1,'ada_version_components']]]
 ];

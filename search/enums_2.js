@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['process_5ftype_0',['process_type',['../d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92',1,'ada::url_pattern_init']]]
+  ['state_0',['state',['../dd/d64/namespaceada.html#a7a6e382cd6d05da70cf566a2cf636574',1,'ada']]]
 ];

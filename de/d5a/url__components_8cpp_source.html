@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.2</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -116,60 +116,61 @@ $(function(){initNavTree('de/d5a/url__components_8cpp_source.html','../../'); in
 <a href="../../de/d5a/url__components_8cpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &quot;<a class="code" href="../../d1/d98/helpers_8h.html">ada/helpers.h</a>&quot;</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d78/url__components-inl_8h.html">ada/url_components-inl.h</a>&quot;</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a> {</div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="foldopen" id="foldopen00008" data-start="{" data-end="}">
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="../../d3/d43/structada_1_1url__components.html#a3447204dcec368c7c52d925d98bffc4c">    8</a></span>[[nodiscard]] std::string <a class="code hl_function" href="../../d3/d43/structada_1_1url__components.html#a3447204dcec368c7c52d925d98bffc4c">url_components::to_string</a>()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>  std::string answer;</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>  <span class="keyword">auto</span> back = std::back_insert_iterator(answer);</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>  answer.append(<span class="stringliteral">&quot;{\n&quot;</span>);</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;protocol_end\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a>), back);</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;username_end\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#adadba3810c11d983d8551d6a267bb34b">username_end</a>), back);</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;host_start\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f">host_start</a>), back);</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;host_end\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b">host_end</a>), back);</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;port\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a094bca845b1356fd7a345ca69e604e94">port</a>), back);</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;pathname_start\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a01a782b2fc7b613f7d3b3bb2a48c5095">pathname_start</a>), back);</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;search_start\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a61a69ee2ef2cb82b399b5668b6b8a43c">search_start</a>), back);</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;hash_start\&quot;:\&quot;&quot;</span>);</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a06f265e421e6cf2eff0d280ad6170226">hash_start</a>), back);</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  answer.append(<span class="stringliteral">&quot;\n}&quot;</span>);</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="keywordflow">return</span> answer;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>}</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../dd/d64/namespaceada.html">ada</a> {</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="foldopen" id="foldopen00009" data-start="{" data-end="}">
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../d3/d43/structada_1_1url__components.html#a3447204dcec368c7c52d925d98bffc4c">    9</a></span>[[nodiscard]] std::string <a class="code hl_function" href="../../d3/d43/structada_1_1url__components.html#a3447204dcec368c7c52d925d98bffc4c">url_components::to_string</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>  std::string answer;</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>  <span class="keyword">auto</span> back = std::back_insert_iterator(answer);</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>  answer.append(<span class="stringliteral">&quot;{\n&quot;</span>);</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;protocol_end\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a>), back);</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;username_end\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#adadba3810c11d983d8551d6a267bb34b">username_end</a>), back);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;host_start\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#ae8cf218f01add9023bf4d5812009523f">host_start</a>), back);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;host_end\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b">host_end</a>), back);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;port\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a094bca845b1356fd7a345ca69e604e94">port</a>), back);</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;pathname_start\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a01a782b2fc7b613f7d3b3bb2a48c5095">pathname_start</a>), back);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;search_start\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a61a69ee2ef2cb82b399b5668b6b8a43c">search_start</a>), back);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  answer.append(<span class="stringliteral">&quot;\t\&quot;hash_start\&quot;:\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  helpers::encode_json(std::to_string(<a class="code hl_variable" href="../../d3/d43/structada_1_1url__components.html#a06f265e421e6cf2eff0d280ad6170226">hash_start</a>), back);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  answer.append(<span class="stringliteral">&quot;\&quot;,\n&quot;</span>);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  answer.append(<span class="stringliteral">&quot;\n}&quot;</span>);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keywordflow">return</span> answer;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>}</div>
 </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>}  <span class="comment">// namespace ada</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>}  <span class="comment">// namespace ada</span></div>
 <div class="ttc" id="ahelpers_8h_html"><div class="ttname"><a href="../../d1/d98/helpers_8h.html">helpers.h</a></div><div class="ttdoc">Definitions for helper functions used within Ada.</div></div>
 <div class="ttc" id="anamespaceada_html"><div class="ttname"><a href="../../dd/d64/namespaceada.html">ada</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4c/ada__idna_8h_source.html#l00013">ada_idna.h:13</a></div></div>
 <div class="ttc" id="astructada_1_1url__components_html_a01a782b2fc7b613f7d3b3bb2a48c5095"><div class="ttname"><a href="../../d3/d43/structada_1_1url__components.html#a01a782b2fc7b613f7d3b3bb2a48c5095">ada::url_components::pathname_start</a></div><div class="ttdeci">uint32_t pathname_start</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00052">url_components.h:52</a></div></div>
 <div class="ttc" id="astructada_1_1url__components_html_a06f265e421e6cf2eff0d280ad6170226"><div class="ttname"><a href="../../d3/d43/structada_1_1url__components.html#a06f265e421e6cf2eff0d280ad6170226">ada::url_components::hash_start</a></div><div class="ttdeci">uint32_t hash_start</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00054">url_components.h:54</a></div></div>
 <div class="ttc" id="astructada_1_1url__components_html_a094bca845b1356fd7a345ca69e604e94"><div class="ttname"><a href="../../d3/d43/structada_1_1url__components.html#a094bca845b1356fd7a345ca69e604e94">ada::url_components::port</a></div><div class="ttdeci">uint32_t port</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00051">url_components.h:51</a></div></div>
-<div class="ttc" id="astructada_1_1url__components_html_a3447204dcec368c7c52d925d98bffc4c"><div class="ttname"><a href="../../d3/d43/structada_1_1url__components.html#a3447204dcec368c7c52d925d98bffc4c">ada::url_components::to_string</a></div><div class="ttdeci">std::string to_string() const</div><div class="ttdef"><b>Definition</b> <a href="#l00008">url_components.cpp:8</a></div></div>
+<div class="ttc" id="astructada_1_1url__components_html_a3447204dcec368c7c52d925d98bffc4c"><div class="ttname"><a href="../../d3/d43/structada_1_1url__components.html#a3447204dcec368c7c52d925d98bffc4c">ada::url_components::to_string</a></div><div class="ttdeci">std::string to_string() const</div><div class="ttdef"><b>Definition</b> <a href="#l00009">url_components.cpp:9</a></div></div>
 <div class="ttc" id="astructada_1_1url__components_html_a4546ac9d1e4d7403fe7d8c8d3934395b"><div class="ttname"><a href="../../d3/d43/structada_1_1url__components.html#a4546ac9d1e4d7403fe7d8c8d3934395b">ada::url_components::protocol_end</a></div><div class="ttdeci">uint32_t protocol_end</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00043">url_components.h:43</a></div></div>
 <div class="ttc" id="astructada_1_1url__components_html_a61a69ee2ef2cb82b399b5668b6b8a43c"><div class="ttname"><a href="../../d3/d43/structada_1_1url__components.html#a61a69ee2ef2cb82b399b5668b6b8a43c">ada::url_components::search_start</a></div><div class="ttdeci">uint32_t search_start</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00053">url_components.h:53</a></div></div>
 <div class="ttc" id="astructada_1_1url__components_html_a92d6016cfd14a4396ee09d602aafd79b"><div class="ttname"><a href="../../d3/d43/structada_1_1url__components.html#a92d6016cfd14a4396ee09d602aafd79b">ada::url_components::host_end</a></div><div class="ttdeci">uint32_t host_end</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00050">url_components.h:50</a></div></div>

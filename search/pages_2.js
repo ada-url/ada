@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['interface_20cli_0',['Command line interface (CLI)',['../db/d8a/md_docs_2cli.html',1,'']]]
+  ['development_20guide_20for_20claude_0',['Ada Development Guide for Claude',['../d8/d00/md_CLAUDE.html',1,'']]]
 ];

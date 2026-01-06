@@ -12,8 +12,7 @@ var searchData=
   ['has_5fnon_5fempty_5fusername_9',['has_non_empty_username',['../d8/d3b/structada_1_1url__aggregator.html#af8d97282ee4b1765874cf3cab6ca4259',1,'ada::url_aggregator']]],
   ['has_5fpassword_10',['has_password',['../d8/d3b/structada_1_1url__aggregator.html#a9cfbfb9c81d8aa551f3591759253b6f7',1,'ada::url_aggregator']]],
   ['has_5fport_11',['has_port',['../dd/d03/structada_1_1url.html#a2b45b42592bbee7b8878ec22827c6bcf',1,'ada::url::has_port()'],['../d8/d3b/structada_1_1url__aggregator.html#ad73fc9a615691d299ed73878240bbbf0',1,'ada::url_aggregator::has_port()']]],
-  ['has_5fregexp_5fgroups_12',['has_regexp_groups',['../d0/d1e/classada_1_1url__pattern.html#a02dfd43d4f61aa99b842dc0c116f8645',1,'ada::url_pattern']]],
-  ['has_5fsearch_13',['has_search',['../dd/d03/structada_1_1url.html#adcc25f201cd0ee1d8cd302b062baf8e6',1,'ada::url::has_search()'],['../d8/d3b/structada_1_1url__aggregator.html#a84729fbfea7553a6477a8d16adb96311',1,'ada::url_aggregator::has_search()']]],
-  ['has_5fvalid_5fdomain_14',['has_valid_domain',['../dd/d03/structada_1_1url.html#af0ca7312c87ba04b6029137804fbae99',1,'ada::url::has_valid_domain()'],['../d8/d3b/structada_1_1url__aggregator.html#aa59278dafbdcfe7786654b660758bb29',1,'ada::url_aggregator::has_valid_domain()'],['../db/d75/structada_1_1url__base.html#a4aea4f500f80bbd26994985e54d28c86',1,'ada::url_base::has_valid_domain()']]],
-  ['href_5ffrom_5ffile_15',['href_from_file',['../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70',1,'ada']]]
+  ['has_5fsearch_12',['has_search',['../dd/d03/structada_1_1url.html#adcc25f201cd0ee1d8cd302b062baf8e6',1,'ada::url::has_search()'],['../d8/d3b/structada_1_1url__aggregator.html#a84729fbfea7553a6477a8d16adb96311',1,'ada::url_aggregator::has_search()']]],
+  ['has_5fvalid_5fdomain_13',['has_valid_domain',['../dd/d03/structada_1_1url.html#af0ca7312c87ba04b6029137804fbae99',1,'ada::url::has_valid_domain()'],['../d8/d3b/structada_1_1url__aggregator.html#aa59278dafbdcfe7786654b660758bb29',1,'ada::url_aggregator::has_valid_domain()'],['../db/d75/structada_1_1url__base.html#a4aea4f500f80bbd26994985e54d28c86',1,'ada::url_base::has_valid_domain()']]],
+  ['href_5ffrom_5ffile_14',['href_from_file',['../dd/d64/namespaceada.html#a4796e4f266c83d76b490d423c8336a70',1,'ada']]]
 ];

@@ -9,7 +9,5 @@ var searchData=
   ['ada_3a_3ascheme_6',['scheme',['../d2/d63/namespaceada_1_1scheme.html',1,'ada']]],
   ['ada_3a_3ascheme_3a_3adetails_7',['details',['../d1/dfb/namespaceada_1_1scheme_1_1details.html',1,'ada::scheme']]],
   ['ada_3a_3aserializers_8',['serializers',['../d9/dea/namespaceada_1_1serializers.html',1,'ada']]],
-  ['ada_3a_3aunicode_9',['unicode',['../d2/dc3/namespaceada_1_1unicode.html',1,'ada']]],
-  ['ada_3a_3aurl_5fpattern_5fhelpers_10',['url_pattern_helpers',['../dc/dcc/namespaceada_1_1url__pattern__helpers.html',1,'ada']]],
-  ['ada_3a_3aurl_5fpattern_5fregex_11',['url_pattern_regex',['../d5/d90/namespaceada_1_1url__pattern__regex.html',1,'ada']]]
+  ['ada_3a_3aunicode_9',['unicode',['../d2/dc3/namespaceada_1_1unicode.html',1,'ada']]]
 ];

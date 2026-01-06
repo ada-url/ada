@@ -29,11 +29,11 @@ var dir_34d9464866e8421e4e78493bdf5982a5 =
     [ "url_components-inl.h", "d7/d78/url__components-inl_8h.html", null ],
     [ "url_components.h", "d3/d2a/url__components_8h.html", "d3/d2a/url__components_8h" ],
     [ "url_pattern-inl.h", "d1/de9/url__pattern-inl_8h.html", null ],
-    [ "url_pattern.h", "df/d70/url__pattern_8h.html", "df/d70/url__pattern_8h" ],
-    [ "url_pattern_helpers-inl.h", "db/de6/url__pattern__helpers-inl_8h.html", "db/de6/url__pattern__helpers-inl_8h" ],
-    [ "url_pattern_helpers.h", "d9/d57/url__pattern__helpers_8h.html", "d9/d57/url__pattern__helpers_8h" ],
-    [ "url_pattern_init.h", "de/d87/url__pattern__init_8h.html", "de/d87/url__pattern__init_8h" ],
-    [ "url_pattern_regex.h", "dc/d2a/url__pattern__regex_8h.html", "dc/d2a/url__pattern__regex_8h" ],
+    [ "url_pattern.h", "df/d70/url__pattern_8h.html", null ],
+    [ "url_pattern_helpers-inl.h", "db/de6/url__pattern__helpers-inl_8h.html", null ],
+    [ "url_pattern_helpers.h", "d9/d57/url__pattern__helpers_8h.html", null ],
+    [ "url_pattern_init.h", "de/d87/url__pattern__init_8h.html", null ],
+    [ "url_pattern_regex.h", "dc/d2a/url__pattern__regex_8h.html", null ],
     [ "url_search_params-inl.h", "d2/d35/url__search__params-inl_8h.html", "d2/d35/url__search__params-inl_8h" ],
     [ "url_search_params.h", "da/dac/url__search__params_8h.html", "da/dac/url__search__params_8h" ]
 ];

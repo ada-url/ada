@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.2</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -118,308 +118,281 @@ $(function(){initNavTree('d4/d22/parser-inl_8h_source.html','../../'); initResiz
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#define ADA_PARSER_INL_H</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;ada/expected.h&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#if ADA_INCLUDE_URL_PATTERN</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d70/url__pattern_8h.html">ada/url_pattern.h</a>&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d57/url__pattern__helpers_8h.html">ada/url_pattern_helpers.h</a>&quot;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_INCLUDE_URL_PATTERN</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d36/parser_8h.html">ada/parser.h</a>&quot;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;variant&gt;</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="foldopen" id="foldopen00018" data-start="{" data-end="}">
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="../../d6/da3/namespaceada_1_1parser.html">   18</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d6/da3/namespaceada_1_1parser.html">ada::parser</a> {</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#if ADA_INCLUDE_URL_PATTERN</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">template</span> &lt;url_pattern_regex::regex_concept regex_prov<span class="keywordtype">id</span>er&gt;</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>tl::expected&lt;url_pattern&lt;regex_provider&gt;, <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a>&gt; parse_url_pattern_impl(</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    std::variant&lt;std::string_view, url_pattern_init&gt;&amp;&amp; input,</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">const</span> std::string_view* base_url, <span class="keyword">const</span> <a class="code hl_struct" href="../../d8/dfb/structada_1_1url__pattern__options.html">url_pattern_options</a>* options) {</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  <span class="comment">// Let init be null.</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <a class="code hl_struct" href="../../d4/d6f/structada_1_1url__pattern__init.html">url_pattern_init</a> init;</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  <span class="comment">// If input is a scalar value string then:</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <span class="keywordflow">if</span> (std::holds_alternative&lt;std::string_view&gt;(input)) {</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="comment">// Set init to the result of running parse a constructor string given input.</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keyword">auto</span> parse_result =</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <a class="code hl_function" href="../../d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a6575ecee66cffc4adcc1b6f9e7aa92d7">url_pattern_helpers::constructor_string_parser&lt;regex_provider&gt;::parse</a>(</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>            std::get&lt;std::string_view&gt;(input));</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordflow">if</span> (!parse_result) {</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>      ada_log(<span class="stringliteral">&quot;constructor_string_parser::parse failed&quot;</span>);</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>      <span class="keywordflow">return</span> tl::unexpected(parse_result.error());</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    }</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    init = std::move(*parse_result);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="comment">// If baseURL is null and init[&quot;protocol&quot;] does not exist, then throw a</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">// TypeError.</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">if</span> (!base_url &amp;&amp; !init.<a class="code hl_variable" href="../../d4/d6f/structada_1_1url__pattern__init.html#a4c5661ee75c89ea2f8b2767c44f31474">protocol</a>) {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>      ada_log(<span class="stringliteral">&quot;base url is null and protocol is not set&quot;</span>);</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>      <span class="keywordflow">return</span> tl::unexpected(<a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9">errors::type_error</a>);</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    }</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="comment">// If baseURL is not null, set init[&quot;baseURL&quot;] to baseURL.</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordflow">if</span> (base_url) {</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>      init.<a class="code hl_variable" href="../../d4/d6f/structada_1_1url__pattern__init.html#a6220869ca5b2dd9edfb078bac5f8be96">base_url</a> = std::string(*base_url);</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// Assert: input is a URLPatternInit.</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(std::holds_alternative&lt;url_pattern_init&gt;(input));</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// If baseURL is not null, then throw a TypeError.</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">if</span> (base_url) {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>      ada_log(<span class="stringliteral">&quot;base url is not null&quot;</span>);</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>      <span class="keywordflow">return</span> tl::unexpected(<a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9">errors::type_error</a>);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    }</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="comment">// Optimization: Avoid copy by moving the input value.</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="comment">// Set init to input.</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    init = std::move(std::get&lt;url_pattern_init&gt;(input));</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  }</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  <span class="comment">// Let processedInit be the result of process a URLPatternInit given init,</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  <span class="comment">// &quot;pattern&quot;, null, null, null, null, null, null, null, and null.</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keyword">auto</span> processed_init =</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>      <a class="code hl_function" href="../../d4/d6f/structada_1_1url__pattern__init.html#a92612b0209c1081466a846ebc5ec2b57">url_pattern_init::process</a>(init, <a class="code hl_enumvalue" href="../../d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92a240bf022e685b0ee30ad9fe9e1fb5d5b">url_pattern_init::process_type::pattern</a>);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  <span class="keywordflow">if</span> (!processed_init) {</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    ada_log(<span class="stringliteral">&quot;url_pattern_init::process failed for init and &#39;pattern&#39;&quot;</span>);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">return</span> tl::unexpected(processed_init.error());</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  }</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="comment">// For each componentName of  &quot;protocol&quot;, &quot;username&quot;, &quot;password&quot;, &quot;hostname&quot;,</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  <span class="comment">// &quot;port&quot;, &quot;pathname&quot;, &quot;search&quot;, &quot;hash&quot; If processedInit[componentName] does</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <span class="comment">// not exist, then set processedInit[componentName] to &quot;*&quot;.</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(processed_init.has_value());</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keywordflow">if</span> (!processed_init-&gt;protocol) processed_init-&gt;protocol = <span class="stringliteral">&quot;*&quot;</span>;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="keywordflow">if</span> (!processed_init-&gt;username) processed_init-&gt;username = <span class="stringliteral">&quot;*&quot;</span>;</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keywordflow">if</span> (!processed_init-&gt;password) processed_init-&gt;password = <span class="stringliteral">&quot;*&quot;</span>;</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="keywordflow">if</span> (!processed_init-&gt;hostname) processed_init-&gt;hostname = <span class="stringliteral">&quot;*&quot;</span>;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keywordflow">if</span> (!processed_init-&gt;port) processed_init-&gt;port = <span class="stringliteral">&quot;*&quot;</span>;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keywordflow">if</span> (!processed_init-&gt;pathname) processed_init-&gt;pathname = <span class="stringliteral">&quot;*&quot;</span>;</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keywordflow">if</span> (!processed_init-&gt;search) processed_init-&gt;search = <span class="stringliteral">&quot;*&quot;</span>;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <span class="keywordflow">if</span> (!processed_init-&gt;hash) processed_init-&gt;hash = <span class="stringliteral">&quot;*&quot;</span>;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;protocol: &quot;</span>, processed_init-&gt;protocol.value());</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;username: &quot;</span>, processed_init-&gt;username.value());</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;password: &quot;</span>, processed_init-&gt;password.value());</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;hostname: &quot;</span>, processed_init-&gt;hostname.value());</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;port: &quot;</span>, processed_init-&gt;port.value());</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;pathname: &quot;</span>, processed_init-&gt;pathname.value());</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;search: &quot;</span>, processed_init-&gt;search.value());</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;hash: &quot;</span>, processed_init-&gt;hash.value());</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="comment">// If processedInit[&quot;protocol&quot;] is a special scheme and processedInit[&quot;port&quot;]</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <span class="comment">// is a string which represents its corresponding default port in radix-10</span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <span class="comment">// using ASCII digits then set processedInit[&quot;port&quot;] to the empty string.</span></div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="comment">// TODO: Optimization opportunity.</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <span class="keywordflow">if</span> (scheme::is_special(*processed_init-&gt;protocol)) {</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    std::string_view port = processed_init-&gt;port.value();</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keywordflow">if</span> (std::to_string(<a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde">scheme::get_special_port</a>(*processed_init-&gt;protocol)) ==</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        port) {</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>      processed_init-&gt;port-&gt;clear();</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    }</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  }</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="comment">// Let urlPattern be a new URL pattern.</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <a class="code hl_class" href="../../d0/d1e/classada_1_1url__pattern.html">url_pattern&lt;regex_provider&gt;</a> url_pattern_{};</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="comment">// Set urlPattern&#39;s protocol component to the result of compiling a component</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="comment">// given processedInit[&quot;protocol&quot;], canonicalize a protocol, and default</span></div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <span class="comment">// options.</span></div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  <span class="keyword">auto</span> protocol_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>      processed_init-&gt;protocol.value(),</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>      <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a74f515111bc53cd1433917739b4620a0">url_pattern_helpers::canonicalize_protocol</a>,</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>      <a class="code hl_variable" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ad8681b32ec00954663e463df8a81503d">url_pattern_compile_component_options::DEFAULT</a>);</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <span class="keywordflow">if</span> (!protocol_component) {</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for protocol &quot;</span>,</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>            processed_init-&gt;protocol.value());</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordflow">return</span> tl::unexpected(protocol_component.error());</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  }</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  url_pattern_.protocol_component = std::move(*protocol_component);</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  <span class="comment">// Set urlPattern&#39;s username component to the result of compiling a component</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  <span class="comment">// given processedInit[&quot;username&quot;], canonicalize a username, and default</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="comment">// options.</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  <span class="keyword">auto</span> username_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>      processed_init-&gt;username.value(),</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>      <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aeba9772a2abdbf810b8ab9146f7af15b">url_pattern_helpers::canonicalize_username</a>,</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>      <a class="code hl_variable" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ad8681b32ec00954663e463df8a81503d">url_pattern_compile_component_options::DEFAULT</a>);</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  <span class="keywordflow">if</span> (!username_component) {</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for username &quot;</span>,</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>            processed_init-&gt;username.value());</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordflow">return</span> tl::unexpected(username_component.error());</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  }</div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  url_pattern_.username_component = std::move(*username_component);</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>  <span class="comment">// Set urlPattern&#39;s password component to the result of compiling a component</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  <span class="comment">// given processedInit[&quot;password&quot;], canonicalize a password, and default</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  <span class="comment">// options.</span></div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  <span class="keyword">auto</span> password_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>      processed_init-&gt;password.value(),</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>      <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a42c981e590eac369c673031669999add">url_pattern_helpers::canonicalize_password</a>,</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>      <a class="code hl_variable" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ad8681b32ec00954663e463df8a81503d">url_pattern_compile_component_options::DEFAULT</a>);</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>  <span class="keywordflow">if</span> (!password_component) {</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for password &quot;</span>,</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>            processed_init-&gt;password.value());</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="keywordflow">return</span> tl::unexpected(password_component.error());</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>  }</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>  url_pattern_.password_component = std::move(*password_component);</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>  <span class="comment">// TODO: Optimization opportunity. The following if statement can be</span></div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  <span class="comment">// simplified.</span></div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  <span class="comment">// If the result running hostname pattern is an IPv6 address given</span></div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>  <span class="comment">// processedInit[&quot;hostname&quot;] is true, then set urlPattern&#39;s hostname component</span></div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  <span class="comment">// to the result of compiling a component given processedInit[&quot;hostname&quot;],</span></div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>  <span class="comment">// canonicalize an IPv6 hostname, and hostname options.</span></div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  <span class="keywordflow">if</span> (<a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac67d971d3f3f3aacd5e6fffb5e414bb6">url_pattern_helpers::is_ipv6_address</a>(processed_init-&gt;hostname.value())) {</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    ada_log(<span class="stringliteral">&quot;processed_init-&gt;hostname is ipv6 address&quot;</span>);</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="comment">// then set urlPattern&#39;s hostname component to the result of compiling a</span></div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="comment">// component given processedInit[&quot;hostname&quot;], canonicalize an IPv6 hostname,</span></div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <span class="comment">// and hostname options.</span></div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="keyword">auto</span> hostname_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        processed_init-&gt;hostname.value(),</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aeb92bac209ec726411d3b2d706ff9fc1">url_pattern_helpers::canonicalize_ipv6_hostname</a>,</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        <a class="code hl_variable" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ad8681b32ec00954663e463df8a81503d">url_pattern_compile_component_options::DEFAULT</a>);</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keywordflow">if</span> (!hostname_component) {</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>      ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for ipv6 hostname &quot;</span>,</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>              processed_init-&gt;hostname.value());</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>      <span class="keywordflow">return</span> tl::unexpected(hostname_component.error());</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    }</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    url_pattern_.hostname_component = std::move(*hostname_component);</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="comment">// Otherwise, set urlPattern&#39;s hostname component to the result of compiling</span></div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="comment">// a component given processedInit[&quot;hostname&quot;], canonicalize a hostname, and</span></div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    <span class="comment">// hostname options.</span></div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <span class="keyword">auto</span> hostname_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        processed_init-&gt;hostname.value(),</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a8316a44c3201fda7f07b58a9e6394872">url_pattern_helpers::canonicalize_hostname</a>,</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <a class="code hl_variable" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#a755ed26fbce77cc0782031ecd260af55">url_pattern_compile_component_options::HOSTNAME</a>);</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="keywordflow">if</span> (!hostname_component) {</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>      ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for hostname &quot;</span>,</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>              processed_init-&gt;hostname.value());</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>      <span class="keywordflow">return</span> tl::unexpected(hostname_component.error());</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    }</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    url_pattern_.hostname_component = std::move(*hostname_component);</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>  }</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>  <span class="comment">// Set urlPattern&#39;s port component to the result of compiling a component</span></div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>  <span class="comment">// given processedInit[&quot;port&quot;], canonicalize a port, and default options.</span></div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>  <span class="keyword">auto</span> port_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>      processed_init-&gt;port.value(), <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac66d3ec9c982f50015d47cbb11804c85">url_pattern_helpers::canonicalize_port</a>,</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>      <a class="code hl_variable" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ad8681b32ec00954663e463df8a81503d">url_pattern_compile_component_options::DEFAULT</a>);</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>  <span class="keywordflow">if</span> (!port_component) {</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for port &quot;</span>,</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>            processed_init-&gt;port.value());</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="keywordflow">return</span> tl::unexpected(port_component.error());</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>  }</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  url_pattern_.port_component = std::move(*port_component);</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>  <span class="comment">// Let compileOptions be a copy of the default options with the ignore case</span></div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>  <span class="comment">// property set to options[&quot;ignoreCase&quot;].</span></div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>  <span class="keyword">auto</span> compile_options = <a class="code hl_variable" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ad8681b32ec00954663e463df8a81503d">url_pattern_compile_component_options::DEFAULT</a>;</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>  <span class="keywordflow">if</span> (options) {</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    compile_options.ignore_case = options-&gt;<a class="code hl_variable" href="../../d8/dfb/structada_1_1url__pattern__options.html#aa8ab698e8acea2f01afe7b5931785b2e">ignore_case</a>;</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>  }</div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  <span class="comment">// TODO: Optimization opportunity: Simplify this if statement.</span></div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>  <span class="comment">// If the result of running protocol component matches a special scheme given</span></div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>  <span class="comment">// urlPattern&#39;s protocol component is true, then:</span></div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>  <span class="keywordflow">if</span> (<a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a3efe783c5a0b1b9c5959672a1bc287fb">url_pattern_helpers::protocol_component_matches_special_scheme</a>&lt;</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>          <a class="code hl_typedef" href="../../df/d2c/url__pattern_8cc.html#af2acdb320b4d86f85480919f1c81f26d">regex_provider</a>&gt;(url_pattern_.protocol_component)) {</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="comment">// Let pathCompileOptions be copy of the pathname options with the ignore</span></div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    <span class="comment">// case property set to options[&quot;ignoreCase&quot;].</span></div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="keyword">auto</span> path_compile_options = <a class="code hl_variable" href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ac72c7cd1e397ff0172216be448eec427">url_pattern_compile_component_options::PATHNAME</a>;</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    <span class="keywordflow">if</span> (options) {</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>      path_compile_options.ignore_case = options-&gt;<a class="code hl_variable" href="../../d8/dfb/structada_1_1url__pattern__options.html#aa8ab698e8acea2f01afe7b5931785b2e">ignore_case</a>;</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    }</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    <span class="comment">// Set urlPattern&#39;s pathname component to the result of compiling a</span></div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="comment">// component given processedInit[&quot;pathname&quot;], canonicalize a pathname, and</span></div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    <span class="comment">// pathCompileOptions.</span></div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    <span class="keyword">auto</span> pathname_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        processed_init-&gt;pathname.value(),</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a1bd5befa28658d2f38387b28f15c4921">url_pattern_helpers::canonicalize_pathname</a>, path_compile_options);</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="keywordflow">if</span> (!pathname_component) {</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>      ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for pathname &quot;</span>,</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>              processed_init-&gt;pathname.value());</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>      <span class="keywordflow">return</span> tl::unexpected(pathname_component.error());</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    }</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    url_pattern_.pathname_component = std::move(*pathname_component);</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <span class="comment">// Otherwise set urlPattern&#39;s pathname component to the result of compiling</span></div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="comment">// a component given processedInit[&quot;pathname&quot;], canonicalize an opaque</span></div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    <span class="comment">// pathname, and compileOptions.</span></div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="keyword">auto</span> pathname_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        processed_init-&gt;pathname.value(),</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a189ad89a8e7f56417157fe1443d0f74b">url_pattern_helpers::canonicalize_opaque_pathname</a>, compile_options);</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keywordflow">if</span> (!pathname_component) {</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>      ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for opaque pathname &quot;</span>,</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>              processed_init-&gt;pathname.value());</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>      <span class="keywordflow">return</span> tl::unexpected(pathname_component.error());</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    }</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    url_pattern_.pathname_component = std::move(*pathname_component);</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>  }</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>  <span class="comment">// Set urlPattern&#39;s search component to the result of compiling a component</span></div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>  <span class="comment">// given processedInit[&quot;search&quot;], canonicalize a search, and compileOptions.</span></div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>  <span class="keyword">auto</span> search_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>      processed_init-&gt;search.value(), <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#adb75e144cf79659370cc0477c08ffffc">url_pattern_helpers::canonicalize_search</a>,</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>      compile_options);</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>  <span class="keywordflow">if</span> (!search_component) {</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for search &quot;</span>,</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>            processed_init-&gt;search.value());</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <span class="keywordflow">return</span> tl::unexpected(search_component.error());</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>  }</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>  url_pattern_.search_component = std::move(*search_component);</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>  <span class="comment">// Set urlPattern&#39;s hash component to the result of compiling a component</span></div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>  <span class="comment">// given processedInit[&quot;hash&quot;], canonicalize a hash, and compileOptions.</span></div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>  <span class="keyword">auto</span> hash_component = <a class="code hl_function" href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">url_pattern_component&lt;regex_provider&gt;::compile</a>(</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>      processed_init-&gt;hash.value(), <a class="code hl_function" href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#abe27dac2f3ba297acd40b2e8407b9a53">url_pattern_helpers::canonicalize_hash</a>,</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>      compile_options);</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>  <span class="keywordflow">if</span> (!hash_component) {</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for hash &quot;</span>,</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>            processed_init-&gt;hash.value());</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keywordflow">return</span> tl::unexpected(hash_component.error());</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>  }</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>  url_pattern_.hash_component = std::move(*hash_component);</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>  <span class="comment">// Return urlPattern.</span></div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>  <span class="keywordflow">return</span> url_pattern_;</div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>}</div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_INCLUDE_URL_PATTERN</span></div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>}  <span class="comment">// namespace ada::parser</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d70/url__pattern_8h.html">ada/url_pattern.h</a>&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d57/url__pattern__helpers_8h.html">ada/url_pattern_helpers.h</a>&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d36/parser_8h.html">ada/parser.h</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;variant&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="}">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="../../d6/da3/namespaceada_1_1parser.html">   16</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d6/da3/namespaceada_1_1parser.html">ada::parser</a> {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#if ADA_INCLUDE_URL_PATTERN</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">template</span> &lt;url_pattern_regex::regex_concept regex_prov<span class="keywordtype">id</span>er&gt;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>tl::expected&lt;url_pattern&lt;regex_provider&gt;, <a class="code hl_enumeration" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a>&gt; parse_url_pattern_impl(</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    std::variant&lt;std::string_view, url_pattern_init&gt;&amp;&amp; input,</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">const</span> std::string_view* base_url, <span class="keyword">const</span> url_pattern_options* options) {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  <span class="comment">// Let init be null.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  url_pattern_init init;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <span class="comment">// If input is a scalar value string then:</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="keywordflow">if</span> (std::holds_alternative&lt;std::string_view&gt;(input)) {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="comment">// Set init to the result of running parse a constructor string given input.</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">auto</span> parse_result =</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        url_pattern_helpers::constructor_string_parser&lt;regex_provider&gt;::parse(</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>            std::get&lt;std::string_view&gt;(input));</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keywordflow">if</span> (!parse_result) {</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>      ada_log(<span class="stringliteral">&quot;constructor_string_parser::parse failed&quot;</span>);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>      <span class="keywordflow">return</span> tl::unexpected(parse_result.error());</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    }</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    init = std::move(*parse_result);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// If baseURL is null and init[&quot;protocol&quot;] does not exist, then throw a</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// TypeError.</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">if</span> (!base_url &amp;&amp; !init.protocol) {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>      ada_log(<span class="stringliteral">&quot;base url is null and protocol is not set&quot;</span>);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>      <span class="keywordflow">return</span> tl::unexpected(<a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9">errors::type_error</a>);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// If baseURL is not null, set init[&quot;baseURL&quot;] to baseURL.</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordflow">if</span> (base_url) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>      init.base_url = std::string(*base_url);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// Assert: input is a URLPatternInit.</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(std::holds_alternative&lt;url_pattern_init&gt;(input));</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// If baseURL is not null, then throw a TypeError.</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">if</span> (base_url) {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>      ada_log(<span class="stringliteral">&quot;base url is not null&quot;</span>);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>      <span class="keywordflow">return</span> tl::unexpected(<a class="code hl_enumvalue" href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9">errors::type_error</a>);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="comment">// Optimization: Avoid copy by moving the input value.</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="comment">// Set init to input.</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    init = std::move(std::get&lt;url_pattern_init&gt;(input));</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  }</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="comment">// Let processedInit be the result of process a URLPatternInit given init,</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="comment">// &quot;pattern&quot;, null, null, null, null, null, null, null, and null.</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  <span class="keyword">auto</span> processed_init =</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      url_pattern_init::process(init, url_pattern_init::process_type::pattern);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keywordflow">if</span> (!processed_init) {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    ada_log(<span class="stringliteral">&quot;url_pattern_init::process failed for init and &#39;pattern&#39;&quot;</span>);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">return</span> tl::unexpected(processed_init.error());</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  }</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  <span class="comment">// For each componentName of  &quot;protocol&quot;, &quot;username&quot;, &quot;password&quot;, &quot;hostname&quot;,</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <span class="comment">// &quot;port&quot;, &quot;pathname&quot;, &quot;search&quot;, &quot;hash&quot; If processedInit[componentName] does</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="comment">// not exist, then set processedInit[componentName] to &quot;*&quot;.</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  <a class="code hl_define" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>(processed_init.has_value());</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <span class="keywordflow">if</span> (!processed_init-&gt;protocol) processed_init-&gt;protocol = <span class="stringliteral">&quot;*&quot;</span>;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="keywordflow">if</span> (!processed_init-&gt;username) processed_init-&gt;username = <span class="stringliteral">&quot;*&quot;</span>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  <span class="keywordflow">if</span> (!processed_init-&gt;password) processed_init-&gt;password = <span class="stringliteral">&quot;*&quot;</span>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="keywordflow">if</span> (!processed_init-&gt;hostname) processed_init-&gt;hostname = <span class="stringliteral">&quot;*&quot;</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keywordflow">if</span> (!processed_init-&gt;port) processed_init-&gt;port = <span class="stringliteral">&quot;*&quot;</span>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="keywordflow">if</span> (!processed_init-&gt;pathname) processed_init-&gt;pathname = <span class="stringliteral">&quot;*&quot;</span>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keywordflow">if</span> (!processed_init-&gt;search) processed_init-&gt;search = <span class="stringliteral">&quot;*&quot;</span>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keywordflow">if</span> (!processed_init-&gt;hash) processed_init-&gt;hash = <span class="stringliteral">&quot;*&quot;</span>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;protocol: &quot;</span>, processed_init-&gt;protocol.value());</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;username: &quot;</span>, processed_init-&gt;username.value());</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;password: &quot;</span>, processed_init-&gt;password.value());</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;hostname: &quot;</span>, processed_init-&gt;hostname.value());</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;port: &quot;</span>, processed_init-&gt;port.value());</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;pathname: &quot;</span>, processed_init-&gt;pathname.value());</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;search: &quot;</span>, processed_init-&gt;search.value());</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  ada_log(<span class="stringliteral">&quot;-- processed_init-&gt;hash: &quot;</span>, processed_init-&gt;hash.value());</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="comment">// If processedInit[&quot;protocol&quot;] is a special scheme and processedInit[&quot;port&quot;]</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="comment">// is a string which represents its corresponding default port in radix-10</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="comment">// using ASCII digits then set processedInit[&quot;port&quot;] to the empty string.</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  <span class="comment">// TODO: Optimization opportunity.</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <span class="keywordflow">if</span> (scheme::is_special(*processed_init-&gt;protocol)) {</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    std::string_view port = processed_init-&gt;port.value();</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordflow">if</span> (std::to_string(<a class="code hl_function" href="../../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde">scheme::get_special_port</a>(*processed_init-&gt;protocol)) ==</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        port) {</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>      processed_init-&gt;port-&gt;clear();</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    }</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  }</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  <span class="comment">// Let urlPattern be a new URL pattern.</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  url_pattern&lt;regex_provider&gt; url_pattern_{};</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="comment">// Set urlPattern&#39;s protocol component to the result of compiling a component</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <span class="comment">// given processedInit[&quot;protocol&quot;], canonicalize a protocol, and default</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="comment">// options.</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="keyword">auto</span> protocol_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>      processed_init-&gt;protocol.value(),</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>      url_pattern_helpers::canonicalize_protocol,</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>      url_pattern_compile_component_options::DEFAULT);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keywordflow">if</span> (!protocol_component) {</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for protocol &quot;</span>,</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>            processed_init-&gt;protocol.value());</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordflow">return</span> tl::unexpected(protocol_component.error());</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  }</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  url_pattern_.protocol_component = std::move(*protocol_component);</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  <span class="comment">// Set urlPattern&#39;s username component to the result of compiling a component</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>  <span class="comment">// given processedInit[&quot;username&quot;], canonicalize a username, and default</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  <span class="comment">// options.</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  <span class="keyword">auto</span> username_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>      processed_init-&gt;username.value(),</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>      url_pattern_helpers::canonicalize_username,</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>      url_pattern_compile_component_options::DEFAULT);</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>  <span class="keywordflow">if</span> (!username_component) {</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for username &quot;</span>,</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>            processed_init-&gt;username.value());</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">return</span> tl::unexpected(username_component.error());</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  }</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  url_pattern_.username_component = std::move(*username_component);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  <span class="comment">// Set urlPattern&#39;s password component to the result of compiling a component</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  <span class="comment">// given processedInit[&quot;password&quot;], canonicalize a password, and default</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>  <span class="comment">// options.</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  <span class="keyword">auto</span> password_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>      processed_init-&gt;password.value(),</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>      url_pattern_helpers::canonicalize_password,</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>      url_pattern_compile_component_options::DEFAULT);</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  <span class="keywordflow">if</span> (!password_component) {</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for password &quot;</span>,</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>            processed_init-&gt;password.value());</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="keywordflow">return</span> tl::unexpected(password_component.error());</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  }</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>  url_pattern_.password_component = std::move(*password_component);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>  <span class="comment">// TODO: Optimization opportunity. The following if statement can be</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  <span class="comment">// simplified.</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>  <span class="comment">// If the result running hostname pattern is an IPv6 address given</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  <span class="comment">// processedInit[&quot;hostname&quot;] is true, then set urlPattern&#39;s hostname component</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  <span class="comment">// to the result of compiling a component given processedInit[&quot;hostname&quot;],</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>  <span class="comment">// canonicalize an IPv6 hostname, and hostname options.</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  <span class="keywordflow">if</span> (url_pattern_helpers::is_ipv6_address(processed_init-&gt;hostname.value())) {</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    ada_log(<span class="stringliteral">&quot;processed_init-&gt;hostname is ipv6 address&quot;</span>);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <span class="comment">// then set urlPattern&#39;s hostname component to the result of compiling a</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="comment">// component given processedInit[&quot;hostname&quot;], canonicalize an IPv6 hostname,</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="comment">// and hostname options.</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keyword">auto</span> hostname_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        processed_init-&gt;hostname.value(),</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        url_pattern_helpers::canonicalize_ipv6_hostname,</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        url_pattern_compile_component_options::DEFAULT);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="keywordflow">if</span> (!hostname_component) {</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>      ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for ipv6 hostname &quot;</span>,</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>              processed_init-&gt;hostname.value());</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>      <span class="keywordflow">return</span> tl::unexpected(hostname_component.error());</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    }</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    url_pattern_.hostname_component = std::move(*hostname_component);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="comment">// Otherwise, set urlPattern&#39;s hostname component to the result of compiling</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="comment">// a component given processedInit[&quot;hostname&quot;], canonicalize a hostname, and</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="comment">// hostname options.</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keyword">auto</span> hostname_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        processed_init-&gt;hostname.value(),</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        url_pattern_helpers::canonicalize_hostname,</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        url_pattern_compile_component_options::HOSTNAME);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <span class="keywordflow">if</span> (!hostname_component) {</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>      ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for hostname &quot;</span>,</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>              processed_init-&gt;hostname.value());</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>      <span class="keywordflow">return</span> tl::unexpected(hostname_component.error());</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    }</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    url_pattern_.hostname_component = std::move(*hostname_component);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>  }</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>  <span class="comment">// Set urlPattern&#39;s port component to the result of compiling a component</span></div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>  <span class="comment">// given processedInit[&quot;port&quot;], canonicalize a port, and default options.</span></div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>  <span class="keyword">auto</span> port_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>      processed_init-&gt;port.value(), url_pattern_helpers::canonicalize_port,</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>      url_pattern_compile_component_options::DEFAULT);</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>  <span class="keywordflow">if</span> (!port_component) {</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for port &quot;</span>,</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>            processed_init-&gt;port.value());</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="keywordflow">return</span> tl::unexpected(port_component.error());</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>  }</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>  url_pattern_.port_component = std::move(*port_component);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  <span class="comment">// Let compileOptions be a copy of the default options with the ignore case</span></div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>  <span class="comment">// property set to options[&quot;ignoreCase&quot;].</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>  <span class="keyword">auto</span> compile_options = url_pattern_compile_component_options::DEFAULT;</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>  <span class="keywordflow">if</span> (options) {</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    compile_options.ignore_case = options-&gt;ignore_case;</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>  }</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>  <span class="comment">// TODO: Optimization opportunity: Simplify this if statement.</span></div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>  <span class="comment">// If the result of running protocol component matches a special scheme given</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  <span class="comment">// urlPattern&#39;s protocol component is true, then:</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>  <span class="keywordflow">if</span> (url_pattern_helpers::protocol_component_matches_special_scheme&lt;</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>          <a class="code hl_typedef" href="../../df/d2c/url__pattern_8cc.html#af2acdb320b4d86f85480919f1c81f26d">regex_provider</a>&gt;(url_pattern_.protocol_component)) {</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    <span class="comment">// Let pathCompileOptions be copy of the pathname options with the ignore</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    <span class="comment">// case property set to options[&quot;ignoreCase&quot;].</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="keyword">auto</span> path_compile_options = url_pattern_compile_component_options::PATHNAME;</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    <span class="keywordflow">if</span> (options) {</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>      path_compile_options.ignore_case = options-&gt;ignore_case;</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    }</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    <span class="comment">// Set urlPattern&#39;s pathname component to the result of compiling a</span></div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    <span class="comment">// component given processedInit[&quot;pathname&quot;], canonicalize a pathname, and</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    <span class="comment">// pathCompileOptions.</span></div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="keyword">auto</span> pathname_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        processed_init-&gt;pathname.value(),</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        url_pattern_helpers::canonicalize_pathname, path_compile_options);</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="keywordflow">if</span> (!pathname_component) {</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>      ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for pathname &quot;</span>,</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>              processed_init-&gt;pathname.value());</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>      <span class="keywordflow">return</span> tl::unexpected(pathname_component.error());</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    }</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    url_pattern_.pathname_component = std::move(*pathname_component);</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <span class="comment">// Otherwise set urlPattern&#39;s pathname component to the result of compiling</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="comment">// a component given processedInit[&quot;pathname&quot;], canonicalize an opaque</span></div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <span class="comment">// pathname, and compileOptions.</span></div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keyword">auto</span> pathname_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        processed_init-&gt;pathname.value(),</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        url_pattern_helpers::canonicalize_opaque_pathname, compile_options);</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <span class="keywordflow">if</span> (!pathname_component) {</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>      ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for opaque pathname &quot;</span>,</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>              processed_init-&gt;pathname.value());</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>      <span class="keywordflow">return</span> tl::unexpected(pathname_component.error());</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    }</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    url_pattern_.pathname_component = std::move(*pathname_component);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>  }</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>  <span class="comment">// Set urlPattern&#39;s search component to the result of compiling a component</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>  <span class="comment">// given processedInit[&quot;search&quot;], canonicalize a search, and compileOptions.</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>  <span class="keyword">auto</span> search_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>      processed_init-&gt;search.value(), url_pattern_helpers::canonicalize_search,</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>      compile_options);</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>  <span class="keywordflow">if</span> (!search_component) {</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for search &quot;</span>,</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>            processed_init-&gt;search.value());</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    <span class="keywordflow">return</span> tl::unexpected(search_component.error());</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>  }</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>  url_pattern_.search_component = std::move(*search_component);</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>  <span class="comment">// Set urlPattern&#39;s hash component to the result of compiling a component</span></div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>  <span class="comment">// given processedInit[&quot;hash&quot;], canonicalize a hash, and compileOptions.</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>  <span class="keyword">auto</span> hash_component = url_pattern_component&lt;regex_provider&gt;::compile(</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>      processed_init-&gt;hash.value(), url_pattern_helpers::canonicalize_hash,</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>      compile_options);</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>  <span class="keywordflow">if</span> (!hash_component) {</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    ada_log(<span class="stringliteral">&quot;url_pattern_component::compile failed for hash &quot;</span>,</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>            processed_init-&gt;hash.value());</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    <span class="keywordflow">return</span> tl::unexpected(hash_component.error());</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>  }</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>  url_pattern_.hash_component = std::move(*hash_component);</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>  <span class="comment">// Return urlPattern.</span></div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>  <span class="keywordflow">return</span> url_pattern_;</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>}</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_INCLUDE_URL_PATTERN</span></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>}  <span class="comment">// namespace ada::parser</span></div>
 </div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_PARSER_INL_H</span></div>
-<div class="ttc" id="aclassada_1_1url__pattern__component_html_a91228b0565e3f92774a1f41a3054879f"><div class="ttname"><a href="../../d5/d0a/classada_1_1url__pattern__component.html#a91228b0565e3f92774a1f41a3054879f">ada::url_pattern_component::compile</a></div><div class="ttdeci">static tl::expected&lt; url_pattern_component, errors &gt; compile(std::string_view input, F &amp;encoding_callback, url_pattern_compile_component_options &amp;options)</div></div>
-<div class="ttc" id="aclassada_1_1url__pattern_html"><div class="ttname"><a href="../../d0/d1e/classada_1_1url__pattern.html">ada::url_pattern</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d70/url__pattern_8h_source.html#l00232">url_pattern.h:232</a></div></div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_PARSER_INL_H</span></div>
 <div class="ttc" id="acommon__defs_8h_html_a01049db9fae71eba18915fc0cb376c72"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a></div><div class="ttdeci">#define ADA_ASSERT_TRUE(COND)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d19/common__defs_8h_source.html#l00211">common_defs.h:211</a></div></div>
-<div class="ttc" id="anamespaceada_1_1parser_html"><div class="ttname"><a href="../../d6/da3/namespaceada_1_1parser.html">ada::parser</a></div><div class="ttdoc">Includes the definitions for supported parsers.</div><div class="ttdef"><b>Definition</b> <a href="#l00018">parser-inl.h:18</a></div></div>
+<div class="ttc" id="anamespaceada_1_1parser_html"><div class="ttname"><a href="../../d6/da3/namespaceada_1_1parser.html">ada::parser</a></div><div class="ttdoc">Includes the definitions for supported parsers.</div><div class="ttdef"><b>Definition</b> <a href="#l00016">parser-inl.h:16</a></div></div>
 <div class="ttc" id="anamespaceada_1_1scheme_html_ab67b7bc4789cda1d068df8d5b49d4fde"><div class="ttname"><a href="../../d2/d63/namespaceada_1_1scheme.html#ab67b7bc4789cda1d068df8d5b49d4fde">ada::scheme::get_special_port</a></div><div class="ttdeci">constexpr uint16_t get_special_port(std::string_view scheme) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dcf/scheme-inl_8h_source.html#l00057">scheme-inl.h:57</a></div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_a189ad89a8e7f56417157fe1443d0f74b"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a189ad89a8e7f56417157fe1443d0f74b">ada::url_pattern_helpers::canonicalize_opaque_pathname</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_opaque_pathname(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_a1bd5befa28658d2f38387b28f15c4921"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a1bd5befa28658d2f38387b28f15c4921">ada::url_pattern_helpers::canonicalize_pathname</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_pathname(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_a3efe783c5a0b1b9c5959672a1bc287fb"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a3efe783c5a0b1b9c5959672a1bc287fb">ada::url_pattern_helpers::protocol_component_matches_special_scheme</a></div><div class="ttdeci">bool protocol_component_matches_special_scheme(url_pattern_component&lt; regex_provider &gt; &amp;component)</div><div class="ttdef"><b>Definition</b> <a href="../../db/de6/url__pattern__helpers-inl_8h_source.html#l00801">url_pattern_helpers-inl.h:801</a></div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_a42c981e590eac369c673031669999add"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a42c981e590eac369c673031669999add">ada::url_pattern_helpers::canonicalize_password</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_password(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_a74f515111bc53cd1433917739b4620a0"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a74f515111bc53cd1433917739b4620a0">ada::url_pattern_helpers::canonicalize_protocol</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_protocol(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_a8316a44c3201fda7f07b58a9e6394872"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#a8316a44c3201fda7f07b58a9e6394872">ada::url_pattern_helpers::canonicalize_hostname</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_hostname(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_abe27dac2f3ba297acd40b2e8407b9a53"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#abe27dac2f3ba297acd40b2e8407b9a53">ada::url_pattern_helpers::canonicalize_hash</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_hash(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_ac66d3ec9c982f50015d47cbb11804c85"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac66d3ec9c982f50015d47cbb11804c85">ada::url_pattern_helpers::canonicalize_port</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_port(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_ac67d971d3f3f3aacd5e6fffb5e414bb6"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#ac67d971d3f3f3aacd5e6fffb5e414bb6">ada::url_pattern_helpers::is_ipv6_address</a></div><div class="ttdeci">bool is_ipv6_address(std::string_view input) noexcept</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_adb75e144cf79659370cc0477c08ffffc"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#adb75e144cf79659370cc0477c08ffffc">ada::url_pattern_helpers::canonicalize_search</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_search(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_aeb92bac209ec726411d3b2d706ff9fc1"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aeb92bac209ec726411d3b2d706ff9fc1">ada::url_pattern_helpers::canonicalize_ipv6_hostname</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_ipv6_hostname(std::string_view input)</div></div>
-<div class="ttc" id="anamespaceada_1_1url__pattern__helpers_html_aeba9772a2abdbf810b8ab9146f7af15b"><div class="ttname"><a href="../../dc/dcc/namespaceada_1_1url__pattern__helpers.html#aeba9772a2abdbf810b8ab9146f7af15b">ada::url_pattern_helpers::canonicalize_username</a></div><div class="ttdeci">tl::expected&lt; std::string, errors &gt; canonicalize_username(std::string_view input)</div></div>
 <div class="ttc" id="anamespaceada_html_a58b3bbe144c3efdf2e4e06fc1cd5a361"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361">ada::errors</a></div><div class="ttdeci">errors</div><div class="ttdef"><b>Definition</b> <a href="../../de/d45/errors_8h_source.html#l00010">errors.h:10</a></div></div>
 <div class="ttc" id="anamespaceada_html_a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9"><div class="ttname"><a href="../../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9">ada::errors::type_error</a></div><div class="ttdeci">@ type_error</div><div class="ttdef"><b>Definition</b> <a href="../../de/d45/errors_8h_source.html#l00010">errors.h:10</a></div></div>
 <div class="ttc" id="aparser_8h_html"><div class="ttname"><a href="../../d5/d36/parser_8h.html">parser.h</a></div><div class="ttdoc">Definitions for the parser.</div></div>
-<div class="ttc" id="astructada_1_1url__pattern__compile__component__options_html_a755ed26fbce77cc0782031ecd260af55"><div class="ttname"><a href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#a755ed26fbce77cc0782031ecd260af55">ada::url_pattern_compile_component_options::HOSTNAME</a></div><div class="ttdeci">static url_pattern_compile_component_options HOSTNAME</div><div class="ttdef"><b>Definition</b> <a href="../../df/d70/url__pattern_8h_source.html#l00101">url_pattern.h:101</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__compile__component__options_html_ac72c7cd1e397ff0172216be448eec427"><div class="ttname"><a href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ac72c7cd1e397ff0172216be448eec427">ada::url_pattern_compile_component_options::PATHNAME</a></div><div class="ttdeci">static url_pattern_compile_component_options PATHNAME</div><div class="ttdef"><b>Definition</b> <a href="../../df/d70/url__pattern_8h_source.html#l00102">url_pattern.h:102</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__compile__component__options_html_ad8681b32ec00954663e463df8a81503d"><div class="ttname"><a href="../../de/d21/structada_1_1url__pattern__compile__component__options.html#ad8681b32ec00954663e463df8a81503d">ada::url_pattern_compile_component_options::DEFAULT</a></div><div class="ttdeci">static url_pattern_compile_component_options DEFAULT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d70/url__pattern_8h_source.html#l00100">url_pattern.h:100</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__helpers_1_1constructor__string__parser_html_a6575ecee66cffc4adcc1b6f9e7aa92d7"><div class="ttname"><a href="../../d4/ddd/structada_1_1url__pattern__helpers_1_1constructor__string__parser.html#a6575ecee66cffc4adcc1b6f9e7aa92d7">ada::url_pattern_helpers::constructor_string_parser::parse</a></div><div class="ttdeci">static tl::expected&lt; url_pattern_init, errors &gt; parse(std::string_view input)</div><div class="ttdef"><b>Definition</b> <a href="../../db/de6/url__pattern__helpers-inl_8h_source.html#l00842">url_pattern_helpers-inl.h:842</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__init_html"><div class="ttname"><a href="../../d4/d6f/structada_1_1url__pattern__init.html">ada::url_pattern_init</a></div><div class="ttdef"><b>Definition</b> <a href="../../de/d87/url__pattern__init_8h_source.html#l00036">url_pattern_init.h:36</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__init_html_a4c5661ee75c89ea2f8b2767c44f31474"><div class="ttname"><a href="../../d4/d6f/structada_1_1url__pattern__init.html#a4c5661ee75c89ea2f8b2767c44f31474">ada::url_pattern_init::protocol</a></div><div class="ttdeci">std::optional&lt; std::string &gt; protocol</div><div class="ttdef"><b>Definition</b> <a href="../../de/d87/url__pattern__init_8h_source.html#l00103">url_pattern_init.h:103</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__init_html_a6220869ca5b2dd9edfb078bac5f8be96"><div class="ttname"><a href="../../d4/d6f/structada_1_1url__pattern__init.html#a6220869ca5b2dd9edfb078bac5f8be96">ada::url_pattern_init::base_url</a></div><div class="ttdeci">std::optional&lt; std::string &gt; base_url</div><div class="ttdef"><b>Definition</b> <a href="../../de/d87/url__pattern__init_8h_source.html#l00119">url_pattern_init.h:119</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__init_html_a92612b0209c1081466a846ebc5ec2b57"><div class="ttname"><a href="../../d4/d6f/structada_1_1url__pattern__init.html#a92612b0209c1081466a846ebc5ec2b57">ada::url_pattern_init::process</a></div><div class="ttdeci">static tl::expected&lt; url_pattern_init, errors &gt; process(const url_pattern_init &amp;init, process_type type, std::optional&lt; std::string_view &gt; protocol=std::nullopt, std::optional&lt; std::string_view &gt; username=std::nullopt, std::optional&lt; std::string_view &gt; password=std::nullopt, std::optional&lt; std::string_view &gt; hostname=std::nullopt, std::optional&lt; std::string_view &gt; port=std::nullopt, std::optional&lt; std::string_view &gt; pathname=std::nullopt, std::optional&lt; std::string_view &gt; search=std::nullopt, std::optional&lt; std::string_view &gt; hash=std::nullopt)</div></div>
-<div class="ttc" id="astructada_1_1url__pattern__init_html_aba8feb02718aae6afd28be2a9ed80a92a240bf022e685b0ee30ad9fe9e1fb5d5b"><div class="ttname"><a href="../../d4/d6f/structada_1_1url__pattern__init.html#aba8feb02718aae6afd28be2a9ed80a92a240bf022e685b0ee30ad9fe9e1fb5d5b">ada::url_pattern_init::process_type::pattern</a></div><div class="ttdeci">@ pattern</div><div class="ttdef"><b>Definition</b> <a href="../../de/d87/url__pattern__init_8h_source.html#l00039">url_pattern_init.h:39</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__options_html"><div class="ttname"><a href="../../d8/dfb/structada_1_1url__pattern__options.html">ada::url_pattern_options</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d70/url__pattern_8h_source.html#l00213">url_pattern.h:213</a></div></div>
-<div class="ttc" id="astructada_1_1url__pattern__options_html_aa8ab698e8acea2f01afe7b5931785b2e"><div class="ttname"><a href="../../d8/dfb/structada_1_1url__pattern__options.html#aa8ab698e8acea2f01afe7b5931785b2e">ada::url_pattern_options::ignore_case</a></div><div class="ttdeci">bool ignore_case</div><div class="ttdef"><b>Definition</b> <a href="../../df/d70/url__pattern_8h_source.html#l00214">url_pattern.h:214</a></div></div>
 <div class="ttc" id="aurl__pattern_8cc_html_af2acdb320b4d86f85480919f1c81f26d"><div class="ttname"><a href="../../df/d2c/url__pattern_8cc.html#af2acdb320b4d86f85480919f1c81f26d">regex_provider</a></div><div class="ttdeci">ada::url_pattern_regex::std_regex_provider regex_provider</div><div class="ttdef"><b>Definition</b> <a href="../../df/d2c/url__pattern_8cc_source.html#l00009">url_pattern.cc:9</a></div></div>
 <div class="ttc" id="aurl__pattern_8h_html"><div class="ttname"><a href="../../df/d70/url__pattern_8h.html">url_pattern.h</a></div><div class="ttdoc">Declaration for the URLPattern implementation.</div></div>
 <div class="ttc" id="aurl__pattern__helpers_8h_html"><div class="ttname"><a href="../../d9/d57/url__pattern__helpers_8h.html">url_pattern_helpers.h</a></div><div class="ttdoc">Declaration for the URLPattern helpers.</div></div>

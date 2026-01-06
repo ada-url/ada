@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.2.2</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -253,9 +253,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Lightweight URL struct. </p>
-<p>The <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> class aims to minimize temporary memory allocation while representing a parsed URL. Internally, it contains a single normalized URL (the href), and it makes available the components, mostly using std::string_view. </p>
+<p>The <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> class aims to minimize temporary memory allocation while representing a parsed URL. Internally, it contains a single normalized URL (the href), and it makes available the components, mostly using std::string_view. These views are only valid as long as the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is not modified or deleted. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d3d/url__aggregator_8h_source.html#l00029">29</a> of file <a class="el" href="../../d6/d3d/url__aggregator_8h_source.html">url_aggregator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d3d/url__aggregator_8h_source.html#l00030">30</a> of file <a class="el" href="../../d6/d3d/url__aggregator_8h_source.html">url_aggregator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a3149c703e5274694782d25995662f60b" name="a3149c703e5274694782d25995662f60b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3149c703e5274694782d25995662f60b">&#9670;&#160;</a></span>url_aggregator() <span class="overload">[1/3]</span></h2>
@@ -517,10 +517,10 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Return U+0023 (#), followed by this's URL's fragment. This function does not allocate memory. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view.. </dd></dl>
+<p>Return U+0023 (#), followed by this's URL's fragment. This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view.. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-hash">https://url.spec.whatwg.org/#dom-url-hash</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00675">675</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00721">721</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">ada_lifetime_bound</a>, and <a class="el" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">ada::url_components::omitted</a>.</p>
 
@@ -550,10 +550,10 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Return url's host, serialized, followed by U+003A (:) and url's port, serialized. This function does not allocate memory. When there is no host, this function returns the empty view. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
+<p>Return url's host, serialized, followed by U+003A (:) and url's port, serialized. This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. When there is no host, this function returns the empty view. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-host">https://url.spec.whatwg.org/#dom-url-host</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00689">689</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00735">735</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">ada_lifetime_bound</a>.</p>
 
@@ -583,10 +583,10 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Return this's URL's host, serialized. This function does not allocate memory. When there is no host, this function returns the empty view. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
+<p>Return this's URL's host, serialized. This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. When there is no host, this function returns the empty view. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-hostname">https://url.spec.whatwg.org/#dom-url-hostname</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00708">708</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00754">754</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">ada_lifetime_bound</a>.</p>
 
@@ -616,7 +616,7 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Return the normalized string. This function does not allocate memory. It is highly efficient. </p><dl class="section return"><dt>Returns</dt><dd>a constant reference to the underlying normalized URL. </dd></dl>
+<p>Return the normalized string. This function does not allocate memory. It is highly efficient. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. </p><dl class="section return"><dt>Returns</dt><dd>a constant reference to the underlying normalized URL. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-href">https://url.spec.whatwg.org/#dom-url-href</a> </dd>
 <dd>
 <a href="https://url.spec.whatwg.org/#concept-url-serializer">https://url.spec.whatwg.org/#concept-url-serializer</a> </dd></dl>
@@ -656,7 +656,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/d75/structada_1_1url__base.html#a874d2fc09624f92a89942bdccd101dd1">ada::url_base</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00618">618</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00664">664</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">ada::scheme::FILE</a>, <a class="el" href="#af41ffb106efdd85cb33ed1f4d6908754">get_host()</a>, <a class="el" href="#ab1971757fcd98cf4218eab011f663e32">get_pathname()</a>, <a class="el" href="#abbb93dee2506c90e1b675052812abc7c">get_protocol()</a>, <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c">ada::scheme::HTTP</a>, <a class="el" href="../../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0">ada::scheme::HTTPS</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a0fd9855b9e1b961e3a26887f81bb9b77">ada::url_base::is_special()</a>, and <a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a>.</p>
 
@@ -686,10 +686,10 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>The password getter steps are to return this's URL's password. This function does not allocate memory. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
+<p>The password getter steps are to return this's URL's password. This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-password">https://url.spec.whatwg.org/#dom-url-password</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00655">655</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00701">701</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">ada_lifetime_bound</a>, and <a class="el" href="#a08ebb60380c2cabdf6e25f3084f78b7d">has_non_empty_password()</a>.</p>
 
@@ -719,7 +719,7 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>The pathname getter steps are to return the result of URL path serializing this's URL. This function does not allocate memory. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
+<p>The pathname getter steps are to return the result of URL path serializing this's URL. This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-pathname">https://url.spec.whatwg.org/#dom-url-pathname</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d61/url__aggregator-inl_8h_source.html#l01088">1088</a> of file <a class="el" href="../../d9/d61/url__aggregator-inl_8h_source.html">url_aggregator-inl.h</a>.</p>
@@ -785,10 +785,10 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Return this's URL's port, serialized. This function does not allocate memory. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
+<p>Return this's URL's port, serialized. This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-port">https://url.spec.whatwg.org/#dom-url-port</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00665">665</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00711">711</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">ada_lifetime_bound</a>, and <a class="el" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">ada::url_components::omitted</a>.</p>
 
@@ -818,10 +818,10 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>The protocol getter steps are to return this's URL's scheme, followed by U+003A (:). This function does not allocate memory. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
+<p>The protocol getter steps are to return this's URL's scheme, followed by U+003A (:). This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-protocol">https://url.spec.whatwg.org/#dom-url-protocol</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00741">741</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00787">787</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">ada_lifetime_bound</a>.</p>
 
@@ -851,10 +851,10 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Return U+003F (?), followed by this's URL's query. This function does not allocate memory. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
+<p>Return U+003F (?), followed by this's URL's query. This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-search">https://url.spec.whatwg.org/#dom-url-search</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00723">723</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00769">769</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">ada_lifetime_bound</a>, and <a class="el" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">ada::url_components::omitted</a>.</p>
 
@@ -884,10 +884,10 @@ Additional Inherited Members</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>The username getter steps are to return this's URL's username. This function does not allocate memory. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
+<p>The username getter steps are to return this's URL's username. This function does not allocate memory. Note that the returned view becomes invalid if the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified or deleted. </p><dl class="section return"><dt>Returns</dt><dd>a lightweight std::string_view. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-username">https://url.spec.whatwg.org/#dom-url-username</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00645">645</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00691">691</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a2a06cbe98bee7bd6a4cb4b7607ce5b60">ada_lifetime_bound</a>, and <a class="el" href="#af8d97282ee4b1765874cf3cab6ca4259">has_non_empty_username()</a>.</p>
 
@@ -1205,7 +1205,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/d75/structada_1_1url__base.html#a4aea4f500f80bbd26994985e54d28c86">ada::url_base</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00840">840</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00886">886</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a377ba64f15df200c03b5754fac70d5d6">get_hostname()</a>.</p>
 
@@ -1280,7 +1280,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00386">386</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00400">400</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, <a class="el" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">ada::url_components::omitted</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1301,7 +1301,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00604">604</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00650">650</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1322,7 +1322,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00611">611</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00657">657</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1342,8 +1342,11 @@ Additional Inherited Members</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>The setter functions follow the steps defined in the URL Standard.</p>
+<p>The <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> has a single buffer that contains the entire normalized URL. The various components are represented as offsets into that buffer. When you call <a class="el" href="#ab1971757fcd98cf4218eab011f663e32">get_pathname()</a>, for example, you get a std::string_view that points into that buffer. If the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is modified, the buffer may be reallocated, and the std::string_view you obtained earlier may become invalid. In particular, this implies that you cannot modify the URL using a setter function with a std::string_view that points into the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> E.g., the following is incorrect: url-&gt;set_hostname(url-&gt;<a class="el" href="#ab1971757fcd98cf4218eab011f663e32">get_pathname()</a>). You must first copy the pathname to a separate string. std::string pathname(url-&gt;<a class="el" href="#ab1971757fcd98cf4218eab011f663e32">get_pathname()</a>); url-&gt;set_hostname(pathname);</p>
+<p>The caller is responsible for ensuring that the <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">url_aggregator</a> is not modified while any std::string_view obtained from it is in use. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00406">406</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00420">420</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, and <a class="el" href="../../dd/d64/namespaceada.html#a803aed58b90d68562c44c76eaf5e9c90">ada::parse&lt; url_aggregator &gt;()</a>.</p>
 
@@ -1364,7 +1367,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00255">255</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00257">257</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a2c259cbcbfcbab3faa8f3f1d31ea553c">ada::unicode::percent_encode_index()</a>, <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da">ada::character_sets::USERINFO_PERCENT_ENCODE</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1385,7 +1388,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00306">306</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00320">320</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, <a class="el" href="#ab1971757fcd98cf4218eab011f663e32">get_pathname()</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">ada::url_base::has_opaque_path</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1406,7 +1409,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00275">275</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00277">277</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, <a class="el" href="#a6a95befd4f86f76712b235b93eaa822c">clear_port()</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a5b7742e4d4d63f7829dd1e510eba88b0">ada::url_base::is_valid</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1427,7 +1430,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00208">208</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00210">210</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, <a class="el" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">ada::checkers::is_alpha()</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1448,7 +1451,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00364">364</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00378">378</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, <a class="el" href="#a1fe20c2ceed925359fa53a459d42f789">clear_search()</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a0fd9855b9e1b961e3a26887f81bb9b77">ada::url_base::is_special()</a>, <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#a18aa23e2f62732f939016a46b0b5e94b">ada::character_sets::QUERY_PERCENT_ENCODE</a>, <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#a2a5253f4fefdf61c146c4daf9a3633b9">ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1469,7 +1472,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00235">235</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00237">237</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a01049db9fae71eba18915fc0cb376c72">ADA_ASSERT_TRUE</a>, <a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html#a2c259cbcbfcbab3faa8f3f1d31ea553c">ada::unicode::percent_encode_index()</a>, <a class="el" href="../../d7/d35/namespaceada_1_1character__sets.html#aa0650c53a444901d784cc471f99f79da">ada::character_sets::USERINFO_PERCENT_ENCODE</a>, and <a class="el" href="#a0f52858c3f10fee8bbb4ecc1b9d49a71">validate()</a>.</p>
 
@@ -1499,7 +1502,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 <p>Returns a string diagram of this URL. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l01205">1205</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l01250">1250</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../db/d75/structada_1_1url__base.html#a5b7742e4d4d63f7829dd1e510eba88b0">ada::url_base::is_valid</a>, and <a class="el" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">ada::url_components::omitted</a>.</p>
 
@@ -1533,7 +1536,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/d75/structada_1_1url__base.html#ad16a4dd43fc9d8e08afdaa4a95dbac26">ada::url_base</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00747">747</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html#l00793">793</a> of file <a class="el" href="../../dd/dc8/url__aggregator_8cpp_source.html">url_aggregator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="#a5a4e8069f9f27778c92e7ffd06883aca">get_hash()</a>, <a class="el" href="#af41ffb106efdd85cb33ed1f4d6908754">get_host()</a>, <a class="el" href="#ac18107cf642f4fcb290c277f801a8ae8">get_password()</a>, <a class="el" href="#ab1971757fcd98cf4218eab011f663e32">get_pathname()</a>, <a class="el" href="#abbb93dee2506c90e1b675052812abc7c">get_protocol()</a>, <a class="el" href="#aa307a2126d2e4f2422dc22cc9f462a7b">get_search()</a>, <a class="el" href="#afd442943b3aa1a6e36a0f0914c090c24">get_username()</a>, <a class="el" href="#ad933426053e805d3b0f33e5ef4e104ae">has_credentials()</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a9996c7aa6d12a6b61c05304fb51c98e2">ada::url_base::has_opaque_path</a>, <a class="el" href="../../db/d75/structada_1_1url__base.html#a5b7742e4d4d63f7829dd1e510eba88b0">ada::url_base::is_valid</a>, and <a class="el" href="../../d3/d43/structada_1_1url__components.html#a349f97d415dff91410c4a4b222795b47">ada::url_components::omitted</a>.</p>
 
