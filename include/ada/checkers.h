@@ -111,6 +111,23 @@ ada_really_inline constexpr uint8_t path_signature(
 ada_really_inline constexpr bool verify_dns_length(
     std::string_view input) noexcept;
 
+/**
+ * @private
+ * Fast-path parser for pure decimal IPv4 addresses (e.g., "192.168.1.1").
+ * Returns the packed 32-bit IPv4 address on success, or a value > 0xFFFFFFFF
+ * to indicate failure (caller should fall back to general parser).
+ * This is optimized for the common case where the input is a well-formed
+ * decimal IPv4 address with exactly 4 octets.
+ */
+ada_really_inline constexpr uint64_t try_parse_ipv4_fast(
+    std::string_view input) noexcept;
+
+/**
+ * Sentinel value indicating try_parse_ipv4_fast() did not succeed.
+ * Any value > 0xFFFFFFFF indicates the fast path should not be used.
+ */
+constexpr uint64_t ipv4_fast_fail = uint64_t(1) << 32;
+
 }  // namespace ada::checkers
 
 #endif  // ADA_CHECKERS_H
