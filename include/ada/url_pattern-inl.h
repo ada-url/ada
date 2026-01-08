@@ -238,11 +238,12 @@ url_pattern_component<regex_provider>::fast_match(
     std::string_view input) const {
   // Handle each type directly without redundant checks
   if (type == url_pattern_component_type::FULL_WILDCARD) {
-    // FULL_WILDCARD always matches
-    // Match regex_search behavior: empty input returns empty groups
-    if (input.empty() || group_name_list.empty()) {
+    // FULL_WILDCARD always matches - capture the input (even if empty)
+    // If there's no group name, return empty groups
+    if (group_name_list.empty()) {
       return std::vector<std::optional<std::string>>{};
     }
+    // Capture the matched input (including empty strings)
     return std::vector<std::optional<std::string>>{std::string(input)};
   }
   if (type == url_pattern_component_type::EXACT_MATCH) {

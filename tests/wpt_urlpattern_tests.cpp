@@ -1,6 +1,7 @@
 #include <array>
 #include <filesystem>
 #include <iostream>
+#include <unordered_set>
 
 #include "ada/log.h"
 #include "gtest/gtest.h"
@@ -96,11 +97,114 @@ TEST(wpt_urlpattern_tests, test_regex_difference) {
   ASSERT_TRUE(match->has_value());
 
   std::unordered_map<std::string, std::optional<std::string>> empty_object{};
+  // Wildcard patterns matching empty strings capture in groups["0"]
+  std::unordered_map<std::string, std::optional<std::string>>
+      wildcard_empty_groups{{"0", ""}};
 
+  // Protocol is "*" (wildcard) matching empty string - captures in groups["0"]
   ASSERT_EQ(match->value().protocol.input, "");
-  ASSERT_EQ(match->value().protocol.groups, empty_object);
+  ASSERT_EQ(match->value().protocol.groups, wildcard_empty_groups);
+  // Pathname is literal "/foo/bar" - no capture groups
   ASSERT_EQ(match->value().pathname.input, "/foo/bar");
   ASSERT_EQ(match->value().pathname.groups, empty_object);
+  SUCCEED();
+}
+
+// Regression test: When a wildcard pattern (*) matches an empty string,
+// the groups should still contain {"0": ""} not an empty object.
+// This ensures FULL_WILDCARD components capture empty strings correctly.
+// See: https://github.com/user/node/issues/XXX
+TEST(wpt_urlpattern_tests, wildcard_empty_string_capture) {
+  // When pattern only specifies pathname, other components default to "*"
+  // (FULL_WILDCARD). When matching against an input that only provides
+  // pathname, the wildcard components match empty strings and should
+  // capture them in groups["0"].
+  auto init = ada::url_pattern_init{};
+  init.pathname = "/foo/bar";
+  auto u = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(u);
+
+  // Input only provides pathname - protocol, username, etc. are empty
+  auto input = ada::url_pattern_init{};
+  input.pathname = "/foo/bar";
+  auto match = u->exec(input, nullptr);
+  ASSERT_TRUE(match);
+  ASSERT_TRUE(match->has_value());
+
+  // Expected: wildcard components matching empty strings should have
+  // groups = {"0": ""}, not groups = {}
+  std::unordered_map<std::string, std::optional<std::string>>
+      wildcard_empty_groups{{"0", ""}};
+  std::unordered_map<std::string, std::optional<std::string>> empty_groups{};
+
+  // Protocol pattern is "*" (wildcard), matching empty string ""
+  // Should capture the empty string in groups["0"]
+  ASSERT_EQ(match->value().protocol.input, "");
+  ASSERT_EQ(match->value().protocol.groups, wildcard_empty_groups)
+      << "Wildcard pattern matching empty string should capture in groups[0]";
+
+  // Username pattern is "*" (wildcard), matching empty string ""
+  ASSERT_EQ(match->value().username.input, "");
+  ASSERT_EQ(match->value().username.groups, wildcard_empty_groups)
+      << "Wildcard pattern matching empty string should capture in groups[0]";
+
+  // Password pattern is "*" (wildcard), matching empty string ""
+  ASSERT_EQ(match->value().password.input, "");
+  ASSERT_EQ(match->value().password.groups, wildcard_empty_groups)
+      << "Wildcard pattern matching empty string should capture in groups[0]";
+
+  // Hostname pattern is "*" (wildcard), matching empty string ""
+  ASSERT_EQ(match->value().hostname.input, "");
+  ASSERT_EQ(match->value().hostname.groups, wildcard_empty_groups)
+      << "Wildcard pattern matching empty string should capture in groups[0]";
+
+  // Port pattern is "*" (wildcard), matching empty string ""
+  ASSERT_EQ(match->value().port.input, "");
+  ASSERT_EQ(match->value().port.groups, wildcard_empty_groups)
+      << "Wildcard pattern matching empty string should capture in groups[0]";
+
+  // Pathname pattern is "/foo/bar" (literal), so groups should be empty
+  ASSERT_EQ(match->value().pathname.input, "/foo/bar");
+  ASSERT_EQ(match->value().pathname.groups, empty_groups)
+      << "Literal pattern should have empty groups";
+
+  // Search pattern is "*" (wildcard), matching empty string ""
+  ASSERT_EQ(match->value().search.input, "");
+  ASSERT_EQ(match->value().search.groups, wildcard_empty_groups)
+      << "Wildcard pattern matching empty string should capture in groups[0]";
+
+  // Hash pattern is "*" (wildcard), matching empty string ""
+  ASSERT_EQ(match->value().hash.input, "");
+  ASSERT_EQ(match->value().hash.groups, wildcard_empty_groups)
+      << "Wildcard pattern matching empty string should capture in groups[0]";
+
+  SUCCEED();
+}
+
+// Test that wildcard patterns correctly capture non-empty strings too
+TEST(wpt_urlpattern_tests, wildcard_nonempty_string_capture) {
+  auto init = ada::url_pattern_init{};
+  init.pathname = "/foo/bar";
+  auto u = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(u);
+
+  // Match against a full URL string
+  auto match = u->exec("https://example.com/foo/bar", nullptr);
+  ASSERT_TRUE(match);
+  ASSERT_TRUE(match->has_value());
+
+  // Protocol "*" matches "https" - should capture in groups["0"]
+  std::unordered_map<std::string, std::optional<std::string>> protocol_groups{
+      {"0", "https"}};
+  ASSERT_EQ(match->value().protocol.input, "https");
+  ASSERT_EQ(match->value().protocol.groups, protocol_groups);
+
+  // Hostname "*" matches "example.com" - should capture in groups["0"]
+  std::unordered_map<std::string, std::optional<std::string>> hostname_groups{
+      {"0", "example.com"}};
+  ASSERT_EQ(match->value().hostname.input, "example.com");
+  ASSERT_EQ(match->value().hostname.groups, hostname_groups);
+
   SUCCEED();
 }
 
@@ -432,13 +536,17 @@ ada::url_pattern_component_result parse_component_result(
 }
 
 std::tuple<ada::url_pattern_result, bool, bool> parse_exec_result(
-    ondemand::object& exec_result) {
+    ondemand::object& exec_result,
+    const std::unordered_set<std::string>& exactly_empty_components) {
   auto result = ada::url_pattern_result{};
   bool has_inputs = false;
   bool skip_test = false;
 
+  // Track which components are explicitly specified in expected_match
+  std::unordered_set<std::string> specified_components;
+
   for (auto field : exec_result) {
-    auto key = field.key().value();
+    auto key = field.unescaped_key().value();
 
     if (key == "inputs") {
       has_inputs = true;
@@ -467,6 +575,7 @@ std::tuple<ada::url_pattern_result, bool, bool> parse_exec_result(
         }
       }
     } else {
+      specified_components.insert(std::string(key));
       ondemand::object component;
       EXPECT_FALSE(field.value().get_object().get(component));
       auto component_result = parse_component_result(component, skip_test);
@@ -492,6 +601,32 @@ std::tuple<ada::url_pattern_result, bool, bool> parse_exec_result(
       }
     }
   }
+
+  // Auto-generate expected values for components not explicitly specified
+  // Per WPT spec: if component not in expected_match:
+  //   - input: ""
+  //   - groups: {} if in exactly_empty_components
+  //   - groups: {"0": ""} otherwise (wildcard pattern)
+  auto auto_fill_component = [&](ada::url_pattern_component_result& comp,
+                                 const std::string& name) {
+    if (!specified_components.contains(name)) {
+      comp.input = "";
+      if (!exactly_empty_components.contains(name)) {
+        // Wildcard pattern: groups should have {"0": ""}
+        comp.groups["0"] = "";
+      }
+      // else: exactly empty, groups stay empty {}
+    }
+  };
+
+  auto_fill_component(result.protocol, "protocol");
+  auto_fill_component(result.username, "username");
+  auto_fill_component(result.password, "password");
+  auto_fill_component(result.hostname, "hostname");
+  auto_fill_component(result.port, "port");
+  auto_fill_component(result.pathname, "pathname");
+  auto_fill_component(result.search, "search");
+  auto_fill_component(result.hash, "hash");
 
   return {result, has_inputs, skip_test};
 }
@@ -573,12 +708,17 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
       ada_log("  pathname: '", parse_result->get_pathname(), "'");
       ada_log("  search: '", parse_result->get_search(), "'");
       ada_log("  hash: '", parse_result->get_hash(), "'");
+
+      // Parse exactly_empty_components into a set for use with
+      // parse_exec_result
+      std::unordered_set<std::string> exactly_empty_set;
       ondemand::array exactly_empty_components;
       if (!main_object["exactly_empty_components"].get_array().get(
               exactly_empty_components)) {
         for (auto component : exactly_empty_components) {
           std::string_view key;
           ASSERT_FALSE(component.get_string().get(key));
+          exactly_empty_set.insert(std::string(key));
           if (key == "hash") {
             ASSERT_TRUE(parse_result->get_hash().empty());
           } else if (key == "hostname") {
@@ -685,7 +825,7 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
               << "Expected true for test() but received false";
           auto exec_result_obj = expected_match.get_object().value();
           auto [expected_exec_result, has_inputs, skip_test] =
-              parse_exec_result(exec_result_obj);
+              parse_exec_result(exec_result_obj, exactly_empty_set);
 
           if (skip_test) {
             continue;
