@@ -18,6 +18,7 @@ var searchData=
   ['to_5funicode_15',['to_unicode',['../d5/ddb/namespaceada_1_1idna.html#a7d9aecb5815cce8db291ed12d5d1774f',1,'ada::idna']]],
   ['trailing_5fzeroes_16',['trailing_zeroes',['../d7/d6c/namespaceada_1_1helpers.html#ac933d028f7c550fa819c4ccac98c1ea3',1,'ada::helpers']]],
   ['troubleshooting_17',['Troubleshooting',['../d8/d00/md_CLAUDE.html#autotoc_md25',1,'']]],
-  ['type_18',['type',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3b',1,'ada::scheme']]],
-  ['type_5ferror_19',['type_error',['../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9',1,'ada']]]
+  ['try_5fparse_5fipv4_5ffast_18',['try_parse_ipv4_fast',['../d3/dbe/namespaceada_1_1checkers.html#af010226b2bc21d9be8eaf75b549cbc06',1,'ada::checkers']]],
+  ['type_19',['type',['../d2/d63/namespaceada_1_1scheme.html#aad13381a250ed0cf04d1cff0a6ae4a3b',1,'ada::scheme']]],
+  ['type_5ferror_20',['type_error',['../dd/d64/namespaceada.html#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9',1,'ada']]]
 ];

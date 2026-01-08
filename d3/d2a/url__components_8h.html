@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -125,7 +125,7 @@ $(function(){initNavTree('d3/d2a/url__components_8h.html','../../'); initResizab
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d43/structada_1_1url__components.html">ada::url_components</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">URL Component representations using offsets.  <a href="../../d3/d43/structada_1_1url__components.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores byte offsets for URL components within a buffer.  <a href="../../d3/d43/structada_1_1url__components.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -135,6 +135,8 @@ Namespaces</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Declaration for the URL Components. </p>
+<p>URL component offset representation for url_aggregator.</p>
+<p>This file defines the <code>url_components</code> struct which stores byte offsets into a URL string buffer. It is used internally by <code>url_aggregator</code> to efficiently locate URL components without storing separate strings. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 </div></div><!-- contents -->

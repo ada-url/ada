@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -118,6 +118,9 @@ $(function(){initNavTree('dd/dcb/structada_1_1url__search__params.html','../../'
 </div><!--header-->
 <div class="contents">
 
+<p>Class for parsing and manipulating URL query strings.  
+ <a href="#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -182,9 +185,12 @@ Friends</h2></td></tr>
 <tr class="separator:a53f535d30c5994d41ec590a7edb4d15c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>We require all strings to be valid UTF-8. It is the user's responsibility to ensure that the provided strings are valid UTF-8. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a> </dd></dl>
+<div class="textblock"><p>Class for parsing and manipulating URL query strings. </p>
+<p>The <code><a class="el" href="../../dd/dcb/structada_1_1url__search__params.html" title="Class for parsing and manipulating URL query strings.">url_search_params</a></code> class provides methods to parse, modify, and serialize URL query parameters (the part after '?' in a URL). It handles percent-encoding and decoding automatically.</p>
+<p>All string inputs must be valid UTF-8. The caller is responsible for ensuring UTF-8 validity.</p>
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00040">40</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00060">60</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a5856374a58b7635376ceb7249d624cbd" name="a5856374a58b7635376ceb7249d624cbd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5856374a58b7635376ceb7249d624cbd">&#9670;&#160;</a></span>url_search_params() <span class="overload">[1/4]</span></h2>
@@ -235,9 +241,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a href="https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-constructor.any.js">https://github.com/web-platform-tests/wpt/blob/master/url/urlsearchparams-constructor.any.js</a> </dd></dl>
+<p>Constructs <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html" title="Class for parsing and manipulating URL query strings.">url_search_params</a> by parsing a query string. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">input</td><td>A query string (with or without leading '?'). Must be UTF-8. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00047">47</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00067">67</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -349,7 +360,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Both key and value must be valid UTF-8. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-append">https://url.spec.whatwg.org/#dom-urlsearchparams-append</a> </dd></dl>
+<p>Appends a new key-value pair to the parameter list. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>The parameter name (must be valid UTF-8). </td></tr>
+    <tr><td class="paramname">value</td><td>The parameter value (must be valid UTF-8). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-append">https://url.spec.whatwg.org/#dom-urlsearchparams-append</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00070">70</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -380,7 +398,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00136">136</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00187">187</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -408,7 +426,7 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 <p>C++ style conventional iterator support. const only because we do not really want the params to be modified via the iterator. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00133">133</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00184">184</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 <p class="reference">References <a class="el" href="#a0f1a43af8f4f062deeff1453383d3c90">begin()</a>.</p>
 
@@ -439,7 +457,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00134">134</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00185">185</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -466,7 +484,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00135">135</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00186">186</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -492,6 +510,13 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Returns the value of the first pair with the given key. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>The parameter name to search for. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The value if found, or std::nullopt if not present. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-get">https://url.spec.whatwg.org/#dom-urlsearchparams-get</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00077">77</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
@@ -522,6 +547,13 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Returns all values for pairs with the given key. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>The parameter name to search for. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A vector of all matching values (may be empty). </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-getall">https://url.spec.whatwg.org/#dom-urlsearchparams-getall</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00089">89</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
@@ -552,9 +584,9 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns a simple JS-style iterator over all of the entries in this <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html">url_search_params</a>. The entries are pairs of keys and corresponding values. The valid lifespan of the iterator is tied to the <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html">url_search_params</a>. The iterator must be freed when you're done with it. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a></dd>
-<dd>
-<a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a> </dd></dl>
+<p>Returns an iterator over all key-value pairs. </p><dl class="section return"><dt>Returns</dt><dd>An iterator yielding key-value pair views. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The iterator is invalidated if this object is modified.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00255">255</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -584,7 +616,8 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns a simple JS-style iterator over all of the keys in this <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html">url_search_params</a>. The keys in the iterator are not unique. The valid lifespan of the iterator is tied to the <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html">url_search_params</a>. The iterator must be freed when you're done with it. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a> </dd></dl>
+<p>Returns an iterator over all parameter keys. Keys may repeat if there are duplicate parameters. </p><dl class="section return"><dt>Returns</dt><dd>An iterator yielding string_view keys. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The iterator is invalidated if this object is modified. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00241">241</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -614,9 +647,9 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns a simple JS-style iterator over all of the values in this <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html">url_search_params</a>. The valid lifespan of the iterator is tied to the <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html">url_search_params</a>. The iterator must be freed when you're done with it. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a></dd>
-<dd>
-<a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a> </dd></dl>
+<p>Returns an iterator over all parameter values. </p><dl class="section return"><dt>Returns</dt><dd>An iterator yielding string_view values. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The iterator is invalidated if this object is modified.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#interface-urlsearchparams">https://url.spec.whatwg.org/#interface-urlsearchparams</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00248">248</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -646,6 +679,13 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Checks if any pair has the given key. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>The parameter name to search for. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if at least one pair has this key. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-has">https://url.spec.whatwg.org/#dom-urlsearchparams-has</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00102">102</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
@@ -680,6 +720,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Checks if any pair matches the given key and value. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>The parameter name to search for. </td></tr>
+    <tr><td class="paramname">value</td><td>The parameter value to match. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if a matching pair exists. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00108">108</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -762,7 +810,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00137">137</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00188">188</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -788,6 +836,12 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Removes all pairs with the given key. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>The parameter name to remove. </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-delete">https://url.spec.whatwg.org/#dom-urlsearchparams-delete</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00152">152</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
@@ -822,6 +876,13 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Removes all pairs with the given key and value. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>The parameter name. </td></tr>
+    <tr><td class="paramname">value</td><td>The parameter value to match. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00157">157</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -853,7 +914,14 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Both key and value must be valid UTF-8. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-set">https://url.spec.whatwg.org/#dom-urlsearchparams-set</a> </dd></dl>
+<p>Sets a parameter value, replacing any existing pairs with the same key. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">key</td><td>The parameter name (must be valid UTF-8). </td></tr>
+    <tr><td class="paramname">value</td><td>The parameter value (must be valid UTF-8). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-set">https://url.spec.whatwg.org/#dom-urlsearchparams-set</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00137">137</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -883,6 +951,7 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Returns the number of key-value pairs. </p><dl class="section return"><dt>Returns</dt><dd>The total count of parameters. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00075">75</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -910,7 +979,7 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-sort">https://url.spec.whatwg.org/#dom-urlsearchparams-sort</a> </dd></dl>
+<p>Sorts all key-value pairs by their keys using code unit comparison. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-urlsearchparams-sort">https://url.spec.whatwg.org/#dom-urlsearchparams-sort</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00164">164</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
 
@@ -940,6 +1009,7 @@ Friends</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Serializes the parameters to a query string (without leading '?'). </p><dl class="section return"><dt>Returns</dt><dd>The percent-encoded query string. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior">https://url.spec.whatwg.org/#urlsearchparams-stringification-behavior</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html#l00116">116</a> of file <a class="el" href="../../d2/d35/url__search__params-inl_8h_source.html">url_search_params-inl.h</a>.</p>
@@ -973,7 +1043,7 @@ template&lt;typename T, <a class="el" href="../../dd/d64/namespaceada.html#aae48
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00158">158</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00209">209</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 <p class="reference">References <a class="el" href="#a53f535d30c5994d41ec590a7edb4d15c">url_search_params_iter</a>.</p>
 

@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -119,7 +119,7 @@ $(function(){initNavTree('d3/d43/structada_1_1url__components.html','../../'); i
 </div><!--header-->
 <div class="contents">
 
-<p>URL Component representations using offsets.  
+<p>Stores byte offsets for URL components within a buffer.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>&gt;</code></p>
@@ -168,11 +168,31 @@ Static Public Attributes</h2></td></tr>
 <tr class="separator:a349f97d415dff91410c4a4b222795b47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>URL Component representations using offsets. </p>
-<p>We design the <a class="el" href="../../d3/d43/structada_1_1url__components.html" title="URL Component representations using offsets.">url_components</a> struct so that it is as small and simple as possible. This version uses 32 bytes.</p>
-<p>This struct is used to extract components from a single 'href'. </p>
+<div class="textblock"><p>Stores byte offsets for URL components within a buffer. </p>
+<p>The <code><a class="el" href="../../d3/d43/structada_1_1url__components.html" title="Stores byte offsets for URL components within a buffer.">url_components</a></code> struct uses 32-bit offsets to track the boundaries of each URL component within a single string buffer. This enables efficient component extraction without additional memory allocations.</p>
+<p>Component layout in a URL: </p><div class="fragment"><div class="line">https:<span class="comment">//user:pass@example.com:1234/foo/bar?baz#quux</span></div>
+<div class="line">      |     |    |          | ^^^^|       |   |</div>
+<div class="line">      |     |    |          | |   |       |   `----- <a class="code hl_variable" href="#a06f265e421e6cf2eff0d280ad6170226">hash_start</a></div>
+<div class="line">      |     |    |          | |   |       `--------- <a class="code hl_variable" href="#a61a69ee2ef2cb82b399b5668b6b8a43c">search_start</a></div>
+<div class="line">      |     |    |          | |   `----------------- <a class="code hl_variable" href="#a01a782b2fc7b613f7d3b3bb2a48c5095">pathname_start</a></div>
+<div class="line">      |     |    |          | `--------------------- <a class="code hl_variable" href="#a094bca845b1356fd7a345ca69e604e94">port</a></div>
+<div class="line">      |     |    |          `----------------------- <a class="code hl_variable" href="#a92d6016cfd14a4396ee09d602aafd79b">host_end</a></div>
+<div class="line">      |     |    `---------------------------------- <a class="code hl_variable" href="#ae8cf218f01add9023bf4d5812009523f">host_start</a></div>
+<div class="line">      |     `--------------------------------------- <a class="code hl_variable" href="#adadba3810c11d983d8551d6a267bb34b">username_end</a></div>
+<div class="line">      `--------------------------------------------- <a class="code hl_variable" href="#a4546ac9d1e4d7403fe7d8c8d3934395b">protocol_end</a></div>
+<div class="ttc" id="astructada_1_1url__components_html_a01a782b2fc7b613f7d3b3bb2a48c5095"><div class="ttname"><a href="#a01a782b2fc7b613f7d3b3bb2a48c5095">ada::url_components::pathname_start</a></div><div class="ttdeci">uint32_t pathname_start</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00069">url_components.h:69</a></div></div>
+<div class="ttc" id="astructada_1_1url__components_html_a06f265e421e6cf2eff0d280ad6170226"><div class="ttname"><a href="#a06f265e421e6cf2eff0d280ad6170226">ada::url_components::hash_start</a></div><div class="ttdeci">uint32_t hash_start</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00075">url_components.h:75</a></div></div>
+<div class="ttc" id="astructada_1_1url__components_html_a094bca845b1356fd7a345ca69e604e94"><div class="ttname"><a href="#a094bca845b1356fd7a345ca69e604e94">ada::url_components::port</a></div><div class="ttdeci">uint32_t port</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00066">url_components.h:66</a></div></div>
+<div class="ttc" id="astructada_1_1url__components_html_a4546ac9d1e4d7403fe7d8c8d3934395b"><div class="ttname"><a href="#a4546ac9d1e4d7403fe7d8c8d3934395b">ada::url_components::protocol_end</a></div><div class="ttdeci">uint32_t protocol_end</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00051">url_components.h:51</a></div></div>
+<div class="ttc" id="astructada_1_1url__components_html_a61a69ee2ef2cb82b399b5668b6b8a43c"><div class="ttname"><a href="#a61a69ee2ef2cb82b399b5668b6b8a43c">ada::url_components::search_start</a></div><div class="ttdeci">uint32_t search_start</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00072">url_components.h:72</a></div></div>
+<div class="ttc" id="astructada_1_1url__components_html_a92d6016cfd14a4396ee09d602aafd79b"><div class="ttname"><a href="#a92d6016cfd14a4396ee09d602aafd79b">ada::url_components::host_end</a></div><div class="ttdeci">uint32_t host_end</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00063">url_components.h:63</a></div></div>
+<div class="ttc" id="astructada_1_1url__components_html_adadba3810c11d983d8551d6a267bb34b"><div class="ttname"><a href="#adadba3810c11d983d8551d6a267bb34b">ada::url_components::username_end</a></div><div class="ttdeci">uint32_t username_end</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00057">url_components.h:57</a></div></div>
+<div class="ttc" id="astructada_1_1url__components_html_ae8cf218f01add9023bf4d5812009523f"><div class="ttname"><a href="#ae8cf218f01add9023bf4d5812009523f">ada::url_components::host_start</a></div><div class="ttdeci">uint32_t host_start</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d2a/url__components_8h_source.html#l00060">url_components.h:60</a></div></div>
+</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>The 32-bit offsets limit URLs to 4GB in length. </dd>
+<dd>
+A value of <code>omitted</code> (UINT32_MAX) indicates the component is not present. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00018">18</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00039">39</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a92548c7baec71cb42d0878dd32444df5" name="a92548c7baec71cb42d0878dd32444df5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a92548c7baec71cb42d0878dd32444df5">&#9670;&#160;</a></span>url_components() <span class="overload">[1/3]</span></h2>
@@ -303,7 +323,7 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Check the following conditions: protocol_end &lt; username_end &lt; ... &lt; hash_start, expect when a value is omitted. It also computes a lower bound on the possible string length that may match these offsets. </p><dl class="section return"><dt>Returns</dt><dd>true if the offset values are consistent with a possible URL string </dd></dl>
+<p>Validates that offsets are in ascending order and consistent. Useful for debugging to detect internal corruption. </p><dl class="section return"><dt>Returns</dt><dd><code>true</code> if offsets are consistent, <code>false</code> otherwise. </dd></dl>
 <p><a href="https://user:pass@example.com:1234/foo/bar?baz#quux">https://user:pass@example.com:1234/foo/bar?baz#quux</a> | | | | ^^^^| | | | | | | | | | <code>----- hash_start | | | | | |</code>------&mdash; search_start | | | | | <code>----------------- pathname_start | | | |</code>------------------&mdash; port | | | <code>----------------------- host_end | |</code>-------------------------------&mdash; host_start | <code>--------------------------------------- username_end </code>------------------------------------------&mdash; protocol_end</p>
 
 <p class="definition">Definition at line <a class="el" href="../../d7/d78/url__components-inl_8h_source.html#l00012">12</a> of file <a class="el" href="../../d7/d78/url__components-inl_8h_source.html">url_components-inl.h</a>.</p>
@@ -388,7 +408,7 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Converts a <a class="el" href="../../d3/d43/structada_1_1url__components.html" title="URL Component representations using offsets.">url_components</a> to JSON stringified version. </p>
+<p>Returns a JSON string representation of the offsets for debugging. </p><dl class="section return"><dt>Returns</dt><dd>A JSON-formatted string with all offset values. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d5a/url__components_8cpp_source.html#l00009">9</a> of file <a class="el" href="../../de/d5a/url__components_8cpp_source.html">url_components.cpp</a>.</p>
 
@@ -408,8 +428,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Offset of the '#' starting the fragment, or <code>omitted</code> if no fragment. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00054">54</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00075">75</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3b0f3015cf29d7317b42f8ee9173ae09">check_offset_consistency()</a>, and <a class="el" href="#a3447204dcec368c7c52d925d98bffc4c">to_string()</a>.</p>
 
@@ -426,8 +447,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Offset of the end of the host. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00050">50</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00063">63</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3447204dcec368c7c52d925d98bffc4c">to_string()</a>.</p>
 
@@ -444,8 +466,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Offset of the start of the host. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00049">49</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00060">60</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3b0f3015cf29d7317b42f8ee9173ae09">check_offset_consistency()</a>, and <a class="el" href="#a3447204dcec368c7c52d925d98bffc4c">to_string()</a>.</p>
 
@@ -470,8 +493,9 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Sentinel value indicating a component is not present. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00019">19</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00041">41</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3b0f3015cf29d7317b42f8ee9173ae09">check_offset_consistency()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#adc26e4ed02d6f9cda87405083b20a9a8">ada::url_aggregator::clear_hash()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a6a95befd4f86f76712b235b93eaa822c">ada::url_aggregator::clear_port()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a1fe20c2ceed925359fa53a459d42f789">ada::url_aggregator::clear_search()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a5a4e8069f9f27778c92e7ffd06883aca">ada::url_aggregator::get_hash()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#ab1971757fcd98cf4218eab011f663e32">ada::url_aggregator::get_pathname()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#aa3264f4885233ee5bdcdc5cfddd16305">ada::url_aggregator::get_pathname_length()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#ad2006ecd37ce4e450bb1d8638d1b9964">ada::url_aggregator::get_port()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#aa307a2126d2e4f2422dc22cc9f462a7b">ada::url_aggregator::get_search()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#aca6ac37dadbe760da699befb947fd9f5">ada::url_aggregator::has_hash()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a84729fbfea7553a6477a8d16adb96311">ada::url_aggregator::has_search()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a0a723da4af19c3f484d814b7a8ee2a3b">ada::url_aggregator::set_hash()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a797ff3cd4b1202306424fd847927e096">ada::url_aggregator::to_diagram()</a>, <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a516d5b8a33529dc8b8c95d52abc6e7de">ada::url_aggregator::to_string()</a>, and <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html#a0f52858c3f10fee8bbb4ecc1b9d49a71">ada::url_aggregator::validate()</a>.</p>
 
@@ -488,8 +512,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Offset of the start of the pathname. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00052">52</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00069">69</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3b0f3015cf29d7317b42f8ee9173ae09">check_offset_consistency()</a>, and <a class="el" href="#a3447204dcec368c7c52d925d98bffc4c">to_string()</a>.</p>
 
@@ -506,8 +531,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Port number, or <code>omitted</code> if no port is specified. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00051">51</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00066">66</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3b0f3015cf29d7317b42f8ee9173ae09">check_offset_consistency()</a>, and <a class="el" href="#a3447204dcec368c7c52d925d98bffc4c">to_string()</a>.</p>
 
@@ -524,8 +550,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Offset of the end of the protocol/scheme (position of ':'). </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00043">43</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00051">51</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3b0f3015cf29d7317b42f8ee9173ae09">check_offset_consistency()</a>, <a class="el" href="../../dd/d03/structada_1_1url.html#a166c9ff1373a6c292ba887355bb8407f">ada::url::get_components()</a>, and <a class="el" href="#a3447204dcec368c7c52d925d98bffc4c">to_string()</a>.</p>
 
@@ -542,8 +569,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Offset of the '?' starting the query, or <code>omitted</code> if no query. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00053">53</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00072">72</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3b0f3015cf29d7317b42f8ee9173ae09">check_offset_consistency()</a>, and <a class="el" href="#a3447204dcec368c7c52d925d98bffc4c">to_string()</a>.</p>
 
@@ -560,9 +588,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Username end is not <code>omitted</code> by default to make username and password getters less costly to implement. </p>
+<p>Offset of the end of the username. Initialized to 0 (not <code>omitted</code>) to simplify username/password getters. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00048">48</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d2a/url__components_8h_source.html#l00057">57</a> of file <a class="el" href="../../d3/d2a/url__components_8h_source.html">url_components.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a3b0f3015cf29d7317b42f8ee9173ae09">check_offset_consistency()</a>, and <a class="el" href="#a3447204dcec368c7c52d925d98bffc4c">to_string()</a>.</p>
 

@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -116,7 +116,7 @@ $(function(){initNavTree('d6/da3/namespaceada_1_1parser.html','../../'); initRes
 </div><!--header-->
 <div class="contents">
 
-<p>Includes the definitions for supported parsers.  
+<p>Internal URL parsing implementation.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -141,7 +141,8 @@ Functions</h2></td></tr>
 <tr class="separator:a5d1f94698c00dbe0004d372c9a3a785d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Includes the definitions for supported parsers. </p>
+<div class="textblock"><p>Internal URL parsing implementation. </p>
+<p>Contains the core URL parsing algorithm as specified by the WHATWG URL Standard. These functions are used internally by <code><a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a></code>. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="a2b0835f0dceec1161ca5e13bfffdf598" name="a2b0835f0dceec1161ca5e13bfffdf598"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2b0835f0dceec1161ca5e13bfffdf598">&#9670;&#160;</a></span>parse_url()</h2>
@@ -163,7 +164,22 @@ template&lt;typename result_type = url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Parses a url. The parameter user_input is the input to be parsed: it should be a valid UTF-8 string. The parameter base_url is an optional parameter that can be used to resolve relative URLs. If the base_url is provided, the user_input is resolved against the base_url. </p>
+<p>Parses a URL string into a URL object.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">result_type</td><td>The type of URL object to create (url or <a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Memory-efficient URL representation using a single buffer.">url_aggregator</a>).</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">user_input</td><td>The URL string to parse (must be valid UTF-8). </td></tr>
+    <tr><td class="paramname">base_url</td><td>Optional base URL for resolving relative URLs.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The parsed URL object. Check <code>is_valid</code> to determine if parsing succeeded.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#concept-basic-url-parser">https://url.spec.whatwg.org/#concept-basic-url-parser</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../dc/ddd/parser_8cpp_source.html#l00917">917</a> of file <a class="el" href="../../dc/ddd/parser_8cpp_source.html">parser.cpp</a>.</p>
 

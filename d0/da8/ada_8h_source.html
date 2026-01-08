@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -114,72 +114,72 @@ $(function(){initNavTree('d0/da8/ada_8h_source.html','../../'); initResizable(tr
 </div><!--header-->
 <div class="contents">
 <a href="../../d0/da8/ada_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#ifndef ADA_H</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#define ADA_H</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d4c/ada__idna_8h.html">ada/ada_idna.h</a>&quot;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d4e/character__sets_8h.html">ada/character_sets.h</a>&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/d69/character__sets-inl_8h.html">ada/character_sets-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d46/checkers-inl_8h.html">ada/checkers-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d19/common__defs_8h.html">ada/common_defs.h</a>&quot;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;ada/log.h&quot;</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/dbb/encoding__type_8h.html">ada/encoding_type.h</a>&quot;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="../../d1/d98/helpers_8h.html">ada/helpers.h</a>&quot;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d36/parser_8h.html">ada/parser.h</a>&quot;</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d22/parser-inl_8h.html">ada/parser-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d64/scheme_8h.html">ada/scheme.h</a>&quot;</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/dcf/scheme-inl_8h.html">ada/scheme-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d2e/serializers_8h.html">ada/serializers.h</a>&quot;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d3b/state_8h.html">ada/state.h</a>&quot;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d90/unicode_8h.html">ada/unicode.h</a>&quot;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d07/url__base_8h.html">ada/url_base.h</a>&quot;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d6f/url__base-inl_8h.html">ada/url_base-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/ddc/url-inl_8h.html">ada/url-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d2a/url__components_8h.html">ada/url_components.h</a>&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d78/url__components-inl_8h.html">ada/url_components-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d3d/url__aggregator_8h.html">ada/url_aggregator.h</a>&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d61/url__aggregator-inl_8h.html">ada/url_aggregator-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/dac/url__search__params_8h.html">ada/url_search_params.h</a>&quot;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d35/url__search__params-inl_8h.html">ada/url_search_params-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d70/url__pattern_8h.html">ada/url_pattern.h</a>&quot;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;<a class="code" href="../../d1/de9/url__pattern-inl_8h.html">ada/url_pattern-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d57/url__pattern__helpers_8h.html">ada/url_pattern_helpers.h</a>&quot;</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/de6/url__pattern__helpers-inl_8h.html">ada/url_pattern_helpers-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d2a/url__pattern__regex_8h.html">ada/url_pattern_regex.h</a>&quot;</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">// Public API</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d80/ada__version_8h.html">ada/ada_version.h</a>&quot;</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d6b/implementation_8h.html">ada/implementation.h</a>&quot;</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#include &quot;<a class="code" href="../../de/d29/implementation-inl_8h.html">ada/implementation-inl.h</a>&quot;</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_H</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#ifndef ADA_H</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#define ADA_H</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d4c/ada__idna_8h.html">ada/ada_idna.h</a>&quot;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d4e/character__sets_8h.html">ada/character_sets.h</a>&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/d69/character__sets-inl_8h.html">ada/character_sets-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d46/checkers-inl_8h.html">ada/checkers-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d19/common__defs_8h.html">ada/common_defs.h</a>&quot;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &quot;ada/log.h&quot;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/dbb/encoding__type_8h.html">ada/encoding_type.h</a>&quot;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &quot;<a class="code" href="../../d1/d98/helpers_8h.html">ada/helpers.h</a>&quot;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d36/parser_8h.html">ada/parser.h</a>&quot;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d22/parser-inl_8h.html">ada/parser-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d64/scheme_8h.html">ada/scheme.h</a>&quot;</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/dcf/scheme-inl_8h.html">ada/scheme-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d2e/serializers_8h.html">ada/serializers.h</a>&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d3b/state_8h.html">ada/state.h</a>&quot;</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d90/unicode_8h.html">ada/unicode.h</a>&quot;</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d07/url__base_8h.html">ada/url_base.h</a>&quot;</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d6f/url__base-inl_8h.html">ada/url_base-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/ddc/url-inl_8h.html">ada/url-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d2a/url__components_8h.html">ada/url_components.h</a>&quot;</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d78/url__components-inl_8h.html">ada/url_components-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d3d/url__aggregator_8h.html">ada/url_aggregator.h</a>&quot;</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d61/url__aggregator-inl_8h.html">ada/url_aggregator-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/dac/url__search__params_8h.html">ada/url_search_params.h</a>&quot;</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d35/url__search__params-inl_8h.html">ada/url_search_params-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d70/url__pattern_8h.html">ada/url_pattern.h</a>&quot;</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &quot;<a class="code" href="../../d1/de9/url__pattern-inl_8h.html">ada/url_pattern-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d57/url__pattern__helpers_8h.html">ada/url_pattern_helpers.h</a>&quot;</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/de6/url__pattern__helpers-inl_8h.html">ada/url_pattern_helpers-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d2a/url__pattern__regex_8h.html">ada/url_pattern_regex.h</a>&quot;</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">// Public API</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d80/ada__version_8h.html">ada/ada_version.h</a>&quot;</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d6b/implementation_8h.html">ada/implementation.h</a>&quot;</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#include &quot;<a class="code" href="../../de/d29/implementation-inl_8h.html">ada/implementation-inl.h</a>&quot;</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_H</span></div>
 <div class="ttc" id="aada__idna_8h_html"><div class="ttname"><a href="../../dd/d4c/ada__idna_8h.html">ada_idna.h</a></div></div>
 <div class="ttc" id="aada__version_8h_html"><div class="ttname"><a href="../../d7/d80/ada__version_8h.html">ada_version.h</a></div><div class="ttdoc">Definitions for Ada&#39;s version number.</div></div>
 <div class="ttc" id="acharacter__sets-inl_8h_html"><div class="ttname"><a href="../../da/d69/character__sets-inl_8h.html">character_sets-inl.h</a></div><div class="ttdoc">Definitions of the character sets used by unicode functions.</div></div>
 <div class="ttc" id="acharacter__sets_8h_html"><div class="ttname"><a href="../../d3/d4e/character__sets_8h.html">character_sets.h</a></div><div class="ttdoc">Declaration of the character sets used by unicode functions.</div></div>
 <div class="ttc" id="acheckers-inl_8h_html"><div class="ttname"><a href="../../d4/d46/checkers-inl_8h.html">checkers-inl.h</a></div><div class="ttdoc">Definitions for URL specific checkers used within Ada.</div></div>
-<div class="ttc" id="acommon__defs_8h_html"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html">common_defs.h</a></div><div class="ttdoc">Common definitions for cross-platform compiler support.</div></div>
-<div class="ttc" id="aencoding__type_8h_html"><div class="ttname"><a href="../../d0/dbb/encoding__type_8h.html">encoding_type.h</a></div><div class="ttdoc">Definition for supported encoding types.</div></div>
+<div class="ttc" id="acommon__defs_8h_html"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html">common_defs.h</a></div><div class="ttdoc">Cross-platform compiler macros and common definitions.</div></div>
+<div class="ttc" id="aencoding__type_8h_html"><div class="ttname"><a href="../../d0/dbb/encoding__type_8h.html">encoding_type.h</a></div><div class="ttdoc">Character encoding type definitions.</div></div>
 <div class="ttc" id="ahelpers_8h_html"><div class="ttname"><a href="../../d1/d98/helpers_8h.html">helpers.h</a></div><div class="ttdoc">Definitions for helper functions used within Ada.</div></div>
 <div class="ttc" id="aimplementation-inl_8h_html"><div class="ttname"><a href="../../de/d29/implementation-inl_8h.html">implementation-inl.h</a></div></div>
-<div class="ttc" id="aimplementation_8h_html"><div class="ttname"><a href="../../dd/d6b/implementation_8h.html">implementation.h</a></div><div class="ttdoc">Definitions for user facing functions for parsing URL and it&#39;s components.</div></div>
+<div class="ttc" id="aimplementation_8h_html"><div class="ttname"><a href="../../dd/d6b/implementation_8h.html">implementation.h</a></div><div class="ttdoc">User-facing functions for URL parsing and manipulation.</div></div>
 <div class="ttc" id="aparser-inl_8h_html"><div class="ttname"><a href="../../d4/d22/parser-inl_8h.html">parser-inl.h</a></div></div>
-<div class="ttc" id="aparser_8h_html"><div class="ttname"><a href="../../d5/d36/parser_8h.html">parser.h</a></div><div class="ttdoc">Definitions for the parser.</div></div>
+<div class="ttc" id="aparser_8h_html"><div class="ttname"><a href="../../d5/d36/parser_8h.html">parser.h</a></div><div class="ttdoc">Low-level URL parsing functions.</div></div>
 <div class="ttc" id="ascheme-inl_8h_html"><div class="ttname"><a href="../../d7/dcf/scheme-inl_8h.html">scheme-inl.h</a></div><div class="ttdoc">Definitions for the URL scheme.</div></div>
-<div class="ttc" id="ascheme_8h_html"><div class="ttname"><a href="../../d2/d64/scheme_8h.html">scheme.h</a></div><div class="ttdoc">Declarations for the URL scheme.</div></div>
-<div class="ttc" id="aserializers_8h_html"><div class="ttname"><a href="../../d7/d2e/serializers_8h.html">serializers.h</a></div><div class="ttdoc">Definitions for the URL serializers.</div></div>
-<div class="ttc" id="astate_8h_html"><div class="ttname"><a href="../../db/d3b/state_8h.html">state.h</a></div><div class="ttdoc">Definitions for the states of the URL state machine.</div></div>
+<div class="ttc" id="ascheme_8h_html"><div class="ttname"><a href="../../d2/d64/scheme_8h.html">scheme.h</a></div><div class="ttdoc">URL scheme type definitions and utilities.</div></div>
+<div class="ttc" id="aserializers_8h_html"><div class="ttname"><a href="../../d7/d2e/serializers_8h.html">serializers.h</a></div><div class="ttdoc">IP address serialization utilities.</div></div>
+<div class="ttc" id="astate_8h_html"><div class="ttname"><a href="../../db/d3b/state_8h.html">state.h</a></div><div class="ttdoc">URL parser state machine states.</div></div>
 <div class="ttc" id="aunicode_8h_html"><div class="ttname"><a href="../../dd/d90/unicode_8h.html">unicode.h</a></div><div class="ttdoc">Definitions for all unicode specific functions.</div></div>
 <div class="ttc" id="aurl-inl_8h_html"><div class="ttname"><a href="../../df/ddc/url-inl_8h.html">url-inl.h</a></div><div class="ttdoc">Definitions for the URL.</div></div>
 <div class="ttc" id="aurl__aggregator-inl_8h_html"><div class="ttname"><a href="../../d9/d61/url__aggregator-inl_8h.html">url_aggregator-inl.h</a></div><div class="ttdoc">Inline functions for url aggregator.</div></div>
-<div class="ttc" id="aurl__aggregator_8h_html"><div class="ttname"><a href="../../d6/d3d/url__aggregator_8h.html">url_aggregator.h</a></div><div class="ttdoc">Declaration for the basic URL definitions.</div></div>
+<div class="ttc" id="aurl__aggregator_8h_html"><div class="ttname"><a href="../../d6/d3d/url__aggregator_8h.html">url_aggregator.h</a></div><div class="ttdoc">Declaration for the ada::url_aggregator class.</div></div>
 <div class="ttc" id="aurl__base-inl_8h_html"><div class="ttname"><a href="../../d2/d6f/url__base-inl_8h.html">url_base-inl.h</a></div><div class="ttdoc">Inline functions for url base.</div></div>
-<div class="ttc" id="aurl__base_8h_html"><div class="ttname"><a href="../../d9/d07/url__base_8h.html">url_base.h</a></div><div class="ttdoc">Declaration for the basic URL definitions.</div></div>
+<div class="ttc" id="aurl__base_8h_html"><div class="ttname"><a href="../../d9/d07/url__base_8h.html">url_base.h</a></div><div class="ttdoc">Base class and common definitions for URL types.</div></div>
 <div class="ttc" id="aurl__components-inl_8h_html"><div class="ttname"><a href="../../d7/d78/url__components-inl_8h.html">url_components-inl.h</a></div></div>
 <div class="ttc" id="aurl__components_8h_html"><div class="ttname"><a href="../../d3/d2a/url__components_8h.html">url_components.h</a></div><div class="ttdoc">Declaration for the URL Components.</div></div>
 <div class="ttc" id="aurl__pattern-inl_8h_html"><div class="ttname"><a href="../../d1/de9/url__pattern-inl_8h.html">url_pattern-inl.h</a></div><div class="ttdoc">Declaration for the URLPattern inline functions.</div></div>
-<div class="ttc" id="aurl__pattern_8h_html"><div class="ttname"><a href="../../df/d70/url__pattern_8h.html">url_pattern.h</a></div><div class="ttdoc">Declaration for the URLPattern implementation.</div></div>
+<div class="ttc" id="aurl__pattern_8h_html"><div class="ttname"><a href="../../df/d70/url__pattern_8h.html">url_pattern.h</a></div><div class="ttdoc">URLPattern API implementation.</div></div>
 <div class="ttc" id="aurl__pattern__helpers-inl_8h_html"><div class="ttname"><a href="../../db/de6/url__pattern__helpers-inl_8h.html">url_pattern_helpers-inl.h</a></div><div class="ttdoc">Declaration for the URLPattern helpers.</div></div>
 <div class="ttc" id="aurl__pattern__helpers_8h_html"><div class="ttname"><a href="../../d9/d57/url__pattern__helpers_8h.html">url_pattern_helpers.h</a></div><div class="ttdoc">Declaration for the URLPattern helpers.</div></div>
 <div class="ttc" id="aurl__pattern__regex_8h_html"><div class="ttname"><a href="../../dc/d2a/url__pattern__regex_8h.html">url_pattern_regex.h</a></div></div>

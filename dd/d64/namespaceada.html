@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -135,13 +135,13 @@ Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/ddb/namespaceada_1_1idna.html">idna</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/da3/namespaceada_1_1parser.html">parser</a></td></tr>
-<tr class="memdesc:d6/da3/namespaceada_1_1parser"><td class="mdescLeft">&#160;</td><td class="mdescRight">Includes the definitions for supported parsers. <br /></td></tr>
+<tr class="memdesc:d6/da3/namespaceada_1_1parser"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal URL parsing implementation. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d63/namespaceada_1_1scheme.html">scheme</a></td></tr>
-<tr class="memdesc:d2/d63/namespaceada_1_1scheme"><td class="mdescLeft">&#160;</td><td class="mdescRight">Includes the scheme declarations. <br /></td></tr>
+<tr class="memdesc:d2/d63/namespaceada_1_1scheme"><td class="mdescLeft">&#160;</td><td class="mdescRight">URL scheme utilities and constants. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/dea/namespaceada_1_1serializers.html">serializers</a></td></tr>
-<tr class="memdesc:d9/dea/namespaceada_1_1serializers"><td class="mdescLeft">&#160;</td><td class="mdescRight">Includes the definitions for URL serializers. <br /></td></tr>
+<tr class="memdesc:d9/dea/namespaceada_1_1serializers"><td class="mdescLeft">&#160;</td><td class="mdescRight">IP address serialization functions. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/dc3/namespaceada_1_1unicode.html">unicode</a></td></tr>
 <tr class="memdesc:d2/dc3/namespaceada_1_1unicode"><td class="mdescLeft">&#160;</td><td class="mdescRight">Includes the declarations for unicode operations. <br /></td></tr>
@@ -150,20 +150,22 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d03/structada_1_1url.html">url</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic URL struct reliant on std::string instantiation.  <a href="../../dd/d03/structada_1_1url.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a parsed URL with individual string components.  <a href="../../dd/d03/structada_1_1url.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html">url_aggregator</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lightweight URL struct.  <a href="../../d8/d3b/structada_1_1url__aggregator.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Memory-efficient URL representation using a single buffer.  <a href="../../d8/d3b/structada_1_1url__aggregator.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d75/structada_1_1url__base.html">url_base</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base class of URL implementations.  <a href="../../db/d75/structada_1_1url__base.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for URL representations.  <a href="../../db/d75/structada_1_1url__base.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d43/structada_1_1url__components.html">url_components</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">URL Component representations using offsets.  <a href="../../d3/d43/structada_1_1url__components.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores byte offsets for URL components within a buffer.  <a href="../../d3/d43/structada_1_1url__components.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dcb/structada_1_1url__search__params.html">url_search_params</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Class for parsing and manipulating URL query strings.  <a href="../../dd/dcb/structada_1_1url__search__params.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dc7/structada_1_1url__search__params__iter.html">url_search_params_iter</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">JavaScript-style iterator for <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html" title="Class for parsing and manipulating URL query strings.">url_search_params</a>.  <a href="../../dd/dc7/structada_1_1url__search__params__iter.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
@@ -183,7 +185,7 @@ Typedefs</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr class="memitem:ae6b952c1590570d7d6de051157a64005" id="r_ae6b952c1590570d7d6de051157a64005"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <a class="el" href="#ae6b952c1590570d7d6de051157a64005aa7ef0c46d29935786a977df9508ccd15">ADA_VERSION_MAJOR</a> = 3
-, <a class="el" href="#ae6b952c1590570d7d6de051157a64005a03d1a99d518d05ee8221fbea0051b56c">ADA_VERSION_MINOR</a> = 3
+, <a class="el" href="#ae6b952c1590570d7d6de051157a64005a03d1a99d518d05ee8221fbea0051b56c">ADA_VERSION_MINOR</a> = 4
 , <a class="el" href="#ae6b952c1590570d7d6de051157a64005a574e2fbf1c698b45963d68dcc9b4863a">ADA_VERSION_REVISION</a> = 0
  }</td></tr>
 <tr class="separator:ae6b952c1590570d7d6de051157a64005"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -191,9 +193,11 @@ Enumerations</h2></td></tr>
 , <a class="el" href="#a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240">UTF_16LE</a>
 , <a class="el" href="#a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84">UTF_16BE</a>
  }</td></tr>
+<tr class="memdesc:a96c85482f6cab61fbc1724a23426d40b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Character encoding types for URL processing.  <a href="#a96c85482f6cab61fbc1724a23426d40b">More...</a><br /></td></tr>
 <tr class="separator:a96c85482f6cab61fbc1724a23426d40b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58b3bbe144c3efdf2e4e06fc1cd5a361" id="r_a58b3bbe144c3efdf2e4e06fc1cd5a361"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58b3bbe144c3efdf2e4e06fc1cd5a361">errors</a> : uint8_t { <a class="el" href="#a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9">type_error</a>
  }</td></tr>
+<tr class="memdesc:a58b3bbe144c3efdf2e4e06fc1cd5a361"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error codes for URL parsing operations.  <a href="#a58b3bbe144c3efdf2e4e06fc1cd5a361">More...</a><br /></td></tr>
 <tr class="separator:a58b3bbe144c3efdf2e4e06fc1cd5a361"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a6e382cd6d05da70cf566a2cf636574" id="r_a7a6e382cd6d05da70cf566a2cf636574"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7a6e382cd6d05da70cf566a2cf636574">state</a> { <br />
 &#160;&#160;<a class="el" href="#a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39">AUTHORITY</a>
@@ -222,16 +226,19 @@ Enumerations</h2></td></tr>
 , <a class="el" href="#a7a6e382cd6d05da70cf566a2cf636574a463c00141b4c3a7f76acd3540052f8f5">PORT</a>
 <br />
  }</td></tr>
+<tr class="memdesc:a7a6e382cd6d05da70cf566a2cf636574"><td class="mdescLeft">&#160;</td><td class="mdescRight">States in the URL parsing state machine.  <a href="#a7a6e382cd6d05da70cf566a2cf636574">More...</a><br /></td></tr>
 <tr class="separator:a7a6e382cd6d05da70cf566a2cf636574"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e149bc8d41c410d99157e11227013e7" id="r_a5e149bc8d41c410d99157e11227013e7"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5e149bc8d41c410d99157e11227013e7">url_host_type</a> : uint8_t { <a class="el" href="#a5e149bc8d41c410d99157e11227013e7af3a60367cbbc6f2f9f571353fa0a6429">DEFAULT</a> = 0
 , <a class="el" href="#a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39">IPV4</a> = 1
 , <a class="el" href="#a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee">IPV6</a> = 2
  }</td></tr>
+<tr class="memdesc:a5e149bc8d41c410d99157e11227013e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum representing the type of host in a URL.  <a href="#a5e149bc8d41c410d99157e11227013e7">More...</a><br /></td></tr>
 <tr class="separator:a5e149bc8d41c410d99157e11227013e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae48bce1c55d1bfd1b41bd2a64d5eb23" id="r_aae48bce1c55d1bfd1b41bd2a64d5eb23"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae48bce1c55d1bfd1b41bd2a64d5eb23">url_search_params_iter_type</a> { <a class="el" href="#aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243">KEYS</a>
 , <a class="el" href="#aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598">VALUES</a>
 , <a class="el" href="#aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33">ENTRIES</a>
  }</td></tr>
+<tr class="memdesc:aae48bce1c55d1bfd1b41bd2a64d5eb23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator types for url_search_params iteration.  <a href="#aae48bce1c55d1bfd1b41bd2a64d5eb23">More...</a><br /></td></tr>
 <tr class="separator:aae48bce1c55d1bfd1b41bd2a64d5eb23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -267,7 +274,9 @@ Variables</h2></td></tr>
 <tr class="memitem:a448179ed747c740ca7cf4dff75d22a95"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../dd/dcb/structada_1_1url__search__params.html">url_search_params</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a448179ed747c740ca7cf4dff75d22a95">url_search_params_iter&lt; T, Type &gt;::EMPTY</a></td></tr>
 <tr class="separator:a448179ed747c740ca7cf4dff75d22a95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Typedef Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Forward declarations </p>
+</div><h2 class="groupheader">Typedef Documentation</h2>
 <a id="ac15176b2a757ccdfdec97ec4ca67ba88" name="ac15176b2a757ccdfdec97ec4ca67ba88"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac15176b2a757ccdfdec97ec4ca67ba88">&#9670;&#160;</a></span>key_value_view_pair</h2>
 
@@ -279,8 +288,9 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<p>Type alias for a key-value pair of string views. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00024">24</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00034">34</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -297,8 +307,10 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/d9a/_2github_2workspace_2include_2ada_2implementation_8h-example.html#a0">/github/workspace/include/ada/implementation.h</a>.</dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d6b/implementation_8h_source.html#l00021">21</a> of file <a class="el" href="../../dd/d6b/implementation_8h_source.html">implementation.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d6b/implementation_8h_source.html#l00044">44</a> of file <a class="el" href="../../dd/d6b/implementation_8h_source.html">implementation.h</a>.</p>
 
 </div>
 </div>
@@ -316,11 +328,12 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
 <b>Initial value:</b><div class="fragment"><div class="line"> </div>
 <div class="line">    <a class="code hl_struct" href="../../dd/dc7/structada_1_1url__search__params__iter.html">url_search_params_iter</a>&lt;<a class="code hl_typedef" href="#ac15176b2a757ccdfdec97ec4ca67ba88">key_value_view_pair</a>,</div>
 <div class="line">                           <a class="code hl_enumvalue" href="#aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33">url_search_params_iter_type::ENTRIES</a>&gt;</div>
-<div class="ttc" id="anamespaceada_html_aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33"><div class="ttname"><a href="#aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33">ada::url_search_params_iter_type::ENTRIES</a></div><div class="ttdeci">@ ENTRIES</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00018">url_search_params.h:18</a></div></div>
-<div class="ttc" id="anamespaceada_html_ac15176b2a757ccdfdec97ec4ca67ba88"><div class="ttname"><a href="#ac15176b2a757ccdfdec97ec4ca67ba88">ada::key_value_view_pair</a></div><div class="ttdeci">std::pair&lt; std::string_view, std::string_view &gt; key_value_view_pair</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00024">url_search_params.h:24</a></div></div>
-<div class="ttc" id="astructada_1_1url__search__params__iter_html"><div class="ttname"><a href="../../dd/dc7/structada_1_1url__search__params__iter.html">ada::url_search_params_iter</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00168">url_search_params.h:168</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00031">31</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<div class="ttc" id="anamespaceada_html_aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33"><div class="ttname"><a href="#aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33">ada::url_search_params_iter_type::ENTRIES</a></div><div class="ttdeci">@ ENTRIES</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00027">url_search_params.h:27</a></div></div>
+<div class="ttc" id="anamespaceada_html_ac15176b2a757ccdfdec97ec4ca67ba88"><div class="ttname"><a href="#ac15176b2a757ccdfdec97ec4ca67ba88">ada::key_value_view_pair</a></div><div class="ttdeci">std::pair&lt; std::string_view, std::string_view &gt; key_value_view_pair</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00034">url_search_params.h:34</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params__iter_html"><div class="ttname"><a href="../../dd/dc7/structada_1_1url__search__params__iter.html">ada::url_search_params_iter</a></div><div class="ttdoc">JavaScript-style iterator for url_search_params.</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00224">url_search_params.h:224</a></div></div>
+</div><!-- fragment --><p>Iterator over search parameter key-value pairs. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00044">44</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -337,8 +350,9 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line"> </div>
 <div class="line">    <a class="code hl_struct" href="../../dd/dc7/structada_1_1url__search__params__iter.html">url_search_params_iter&lt;std::string_view, url_search_params_iter_type::KEYS&gt;</a></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00026">26</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+</div><!-- fragment --><p>Iterator over search parameter keys. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00037">37</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -356,9 +370,10 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
 <b>Initial value:</b><div class="fragment"><div class="line"> </div>
 <div class="line">    <a class="code hl_struct" href="../../dd/dc7/structada_1_1url__search__params__iter.html">url_search_params_iter</a>&lt;std::string_view,</div>
 <div class="line">                           <a class="code hl_enumvalue" href="#aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598">url_search_params_iter_type::VALUES</a>&gt;</div>
-<div class="ttc" id="anamespaceada_html_aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598"><div class="ttname"><a href="#aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598">ada::url_search_params_iter_type::VALUES</a></div><div class="ttdeci">@ VALUES</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00017">url_search_params.h:17</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00028">28</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<div class="ttc" id="anamespaceada_html_aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598"><div class="ttname"><a href="#aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598">ada::url_search_params_iter_type::VALUES</a></div><div class="ttdeci">@ VALUES</div><div class="ttdef"><b>Definition</b> <a href="../../da/dac/url__search__params_8h_source.html#l00026">url_search_params.h:26</a></div></div>
+</div><!-- fragment --><p>Iterator over search parameter values. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00040">40</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -403,15 +418,20 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>This specification defines three encodings with the same names as encoding schemes defined in the Unicode standard: UTF-8, UTF-16LE, and UTF-16BE.</p>
+
+<p>Character encoding types for URL processing. </p>
+<p>Specifies the character encoding used for percent-decoding and other string operations. UTF-8 is the most commonly used encoding for URLs.</p>
 <dl class="section see"><dt>See also</dt><dd><a href="https://encoding.spec.whatwg.org/#encodings">https://encoding.spec.whatwg.org/#encodings</a> </dd></dl>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1" name="a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1"></a>UTF8&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240" name="a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240"></a>UTF_16LE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84" name="a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84"></a>UTF_16BE&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1" name="a96c85482f6cab61fbc1724a23426d40baeb7ee0fb585e2ac64fdc086466c474b1"></a>UTF8&#160;</td><td class="fielddoc"><p>UTF-8 encoding (default for URLs) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240" name="a96c85482f6cab61fbc1724a23426d40ba986a072862269ae269f8e5d5d528a240"></a>UTF_16LE&#160;</td><td class="fielddoc"><p>UTF-16 Little Endian encoding </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84" name="a96c85482f6cab61fbc1724a23426d40baf0353e63e27d6fc7704373c223db6d84"></a>UTF_16BE&#160;</td><td class="fielddoc"><p>UTF-16 Big Endian encoding </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/dbb/encoding__type_8h_source.html#l00019">19</a> of file <a class="el" href="../../d0/dbb/encoding__type_8h_source.html">encoding_type.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/dbb/encoding__type_8h_source.html#l00025">25</a> of file <a class="el" href="../../d0/dbb/encoding__type_8h_source.html">encoding_type.h</a>.</p>
 
 </div>
 </div>
@@ -434,11 +454,17 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9" name="a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9"></a>type_error&#160;</td><td class="fielddoc"></td></tr>
-</table>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d45/errors_8h_source.html#l00010">10</a> of file <a class="el" href="../../de/d45/errors_8h_source.html">errors.h</a>.</p>
+<p>Error codes for URL parsing operations. </p>
+<p>Used with <code>tl::expected</code> to indicate why a URL parsing operation failed. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9" name="a58b3bbe144c3efdf2e4e06fc1cd5a361a63d90030105a2579466d8531df2336c9"></a>type_error&#160;</td><td class="fielddoc"><p>A type error occurred (e.g., invalid URL syntax). </p>
+</td></tr>
+</table>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/d9a/_2github_2workspace_2include_2ada_2implementation_8h-example.html#a4">/github/workspace/include/ada/implementation.h</a>.</dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="../../de/d45/errors_8h_source.html#l00017">17</a> of file <a class="el" href="../../de/d45/errors_8h_source.html">errors.h</a>.</p>
 
 </div>
 </div>
@@ -461,6 +487,9 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>States in the URL parsing state machine. </p>
+<p>The URL parser processes input through a sequence of states, each handling a specific part of the URL syntax.</p>
 <dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#url-parsing">https://url.spec.whatwg.org/#url-parsing</a> </dd></dl>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39" name="a7a6e382cd6d05da70cf566a2cf636574aeaab57fe760f0fcdb813e98df850bd39"></a>AUTHORITY&#160;</td><td class="fielddoc"><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#authority-state">https://url.spec.whatwg.org/#authority-state</a> </dd></dl>
@@ -505,7 +534,7 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d3b/state_8h_source.html#l00017">17</a> of file <a class="el" href="../../db/d3b/state_8h_source.html">state.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d3b/state_8h_source.html#l00027">27</a> of file <a class="el" href="../../db/d3b/state_8h_source.html">state.h</a>.</p>
 
 </div>
 </div>
@@ -520,17 +549,19 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Type of URL host as an enum. </p>
+
+<p>Enum representing the type of host in a URL. </p>
+<p>Used to distinguish between regular domain names, IPv4 addresses, and IPv6 addresses for proper parsing and serialization. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a5e149bc8d41c410d99157e11227013e7af3a60367cbbc6f2f9f571353fa0a6429" name="a5e149bc8d41c410d99157e11227013e7af3a60367cbbc6f2f9f571353fa0a6429"></a>DEFAULT&#160;</td><td class="fielddoc"><p>Represents common URLs such as "https://www.google.com" </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a5e149bc8d41c410d99157e11227013e7af3a60367cbbc6f2f9f571353fa0a6429" name="a5e149bc8d41c410d99157e11227013e7af3a60367cbbc6f2f9f571353fa0a6429"></a>DEFAULT&#160;</td><td class="fielddoc"><p>Regular domain name (e.g., "www.example.com") </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39" name="a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39"></a>IPV4&#160;</td><td class="fielddoc"><p>Represents ipv4 addresses such as "http://127.0.0.1" </p>
+<tr><td class="fieldname"><a id="a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39" name="a5e149bc8d41c410d99157e11227013e7abbf1c55887639191f690fea428e5ee39"></a>IPV4&#160;</td><td class="fielddoc"><p>IPv4 address (e.g., "127.0.0.1") </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee" name="a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee"></a>IPV6&#160;</td><td class="fielddoc"><p>Represents ipv6 addresses such as "http://[2001:db8:3333:4444:5555:6666:7777:8888]" </p>
+<tr><td class="fieldname"><a id="a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee" name="a5e149bc8d41c410d99157e11227013e7a13bc24ab0da1d44ed69a2db217aac7ee"></a>IPV6&#160;</td><td class="fielddoc"><p>IPv6 address (e.g., "[::1]" or "[2001:db8::1]") </p>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00019">19</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d07/url__base_8h_source.html#l00026">26</a> of file <a class="el" href="../../d9/d07/url__base_8h_source.html">url_base.h</a>.</p>
 
 </div>
 </div>
@@ -553,13 +584,18 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Iterator types for <a class="el" href="../../dd/dcb/structada_1_1url__search__params.html" title="Class for parsing and manipulating URL query strings.">url_search_params</a> iteration. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243" name="aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243"></a>KEYS&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598" name="aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598"></a>VALUES&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33" name="aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33"></a>ENTRIES&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243" name="aae48bce1c55d1bfd1b41bd2a64d5eb23a48fb38e1f876fa3dc9c8cd6cad73c243"></a>KEYS&#160;</td><td class="fielddoc"><p>Iterate over parameter keys only </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598" name="aae48bce1c55d1bfd1b41bd2a64d5eb23ab7db4588385c4fc7ed5211c35c711598"></a>VALUES&#160;</td><td class="fielddoc"><p>Iterate over parameter values only </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33" name="aae48bce1c55d1bfd1b41bd2a64d5eb23a16120b23bf34ca6ac1ab8c5dee69bf33"></a>ENTRIES&#160;</td><td class="fielddoc"><p>Iterate over key-value pairs </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00015">15</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dac/url__search__params_8h_source.html#l00024">24</a> of file <a class="el" href="../../da/dac/url__search__params_8h_source.html">url_search_params.h</a>.</p>
 
 </div>
 </div>
@@ -582,8 +618,8 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Verifies whether the URL strings can be parsed. The function assumes that the inputs are valid ASCII or UTF-8 strings. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#dom-url-canparse">https://url.spec.whatwg.org/#dom-url-canparse</a> </dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>If URL can be parsed or not. </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/d9a/_2github_2workspace_2include_2ada_2implementation_8h-example.html#a3">/github/workspace/include/ada/implementation.h</a>.</dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00051">51</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
@@ -607,7 +643,17 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Computes a href string from a file path. The function assumes that the input is a valid ASCII or UTF-8 string. </p><dl class="section return"><dt>Returns</dt><dd>a href string (starts with <a href="file:://">file:://</a>) </dd></dl>
+<p>Converts a file system path to a <a href="file://">file://</a> URL.</p>
+<p>Creates a properly formatted file URL from a local file system path. Handles platform-specific path separators and percent-encoding.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>The file system path to convert. Must be valid ASCII or UTF-8.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <a href="file://">file://</a> URL string representing the given path. </dd></dl>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/d9a/_2github_2workspace_2include_2ada_2implementation_8h-example.html#a5">/github/workspace/include/ada/implementation.h</a>.</dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00028">28</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
@@ -699,19 +745,10 @@ template&lt;class result_type&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const result_type *</td>          <td class="paramname"><span class="paramname"><em>base_url</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
+          <td class="paramtype">const result_type *</td>          <td class="paramname"><span class="paramname"><em>base_url</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The URL parser takes a scalar value string input, with an optional null or base URL base (default null). The parser assumes the input is a valid ASCII or UTF-8 string.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">input</td><td>the string input to analyze (must be valid ASCII or UTF-8) </td></tr>
-    <tr><td class="paramname">base_url</td><td>the optional URL input to use as a base url. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>a parsed URL. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00013">13</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
@@ -741,15 +778,8 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The URL parser takes a scalar value string input, with an optional null or base URL base (default null). The parser assumes the input is a valid ASCII or UTF-8 string.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">input</td><td>the string input to analyze (must be valid ASCII or UTF-8) </td></tr>
-    <tr><td class="paramname">base_url</td><td>the optional URL input to use as a base url. </td></tr>
-  </table>
-  </dd>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../dd/d60/_2github_2workspace_2include_2ada_8h-example.html#a0">/github/workspace/include/ada.h</a>, and <a class="el" href="../../db/d9a/_2github_2workspace_2include_2ada_2implementation_8h-example.html#a0">/github/workspace/include/ada/implementation.h</a>.</dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a parsed URL. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00013">13</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
@@ -785,6 +815,8 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/d9a/_2github_2workspace_2include_2ada_2implementation_8h-example.html#a1">/github/workspace/include/ada/implementation.h</a>.</dd>
+</dl>
 
 </div>
 </div>
@@ -814,6 +846,8 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/d9a/_2github_2workspace_2include_2ada_2implementation_8h-example.html#a2">/github/workspace/include/ada/implementation.h</a>.</dd>
+</dl>
 
 <p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#a8756815190bd85a52b1a14af2fa17a34">ada_warn_unused</a>.</p>
 
@@ -835,7 +869,13 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Stringify a URL state machine state. </p>
+<p>Converts a parser state to its string name for debugging. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>The state to convert. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A string representation of the state. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/df4/helpers_8cpp_source.html#l01063">1063</a> of file <a class="el" href="../../d2/df4/helpers_8cpp_source.html">helpers.cpp</a>.</p>
 
@@ -857,7 +897,13 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Convert a <a class="el" href="#a96c85482f6cab61fbc1724a23426d40b">encoding_type</a> to string. </p>
+<p>Converts an <a class="el" href="#a96c85482f6cab61fbc1724a23426d40b" title="Character encoding types for URL processing.">encoding_type</a> to its string representation. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>The encoding type to convert. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A string view of the encoding name. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/df6/implementation_8cpp_source.html#l00070">70</a> of file <a class="el" href="../../d8/df6/implementation_8cpp_source.html">implementation.cpp</a>.</p>
 
@@ -890,7 +936,7 @@ template&lt;class result_type = ada::url_aggregator&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d19/common__defs_8h_source.html#l00157">157</a> of file <a class="el" href="../../d7/d19/common__defs_8h_source.html">common_defs.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d19/common__defs_8h_source.html#l00161">161</a> of file <a class="el" href="../../d7/d19/common__defs_8h_source.html">common_defs.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d6/da3/namespaceada_1_1parser.html#ae5bc0e565c8d7db76f6bdc7f7243c6ef">ada::parser::parse_url_impl()</a>, and <a class="el" href="#aadf8f2765d3d60f8612a8dfccc844a36">to_string()</a>.</p>
 

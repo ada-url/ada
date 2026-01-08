@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -136,9 +136,13 @@ Functions</h2></td></tr>
 <tr class="separator:a56afc8de56c96291388a49bdee9e6aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53d7ea2ae8deb63a37be60d56121ca3b" id="r_a53d7ea2ae8deb63a37be60d56121ca3b"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a53d7ea2ae8deb63a37be60d56121ca3b">is_normalized_windows_drive_letter</a> (std::string_view input) noexcept</td></tr>
 <tr class="separator:a53d7ea2ae8deb63a37be60d56121ca3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af010226b2bc21d9be8eaf75b549cbc06" id="r_af010226b2bc21d9be8eaf75b549cbc06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af010226b2bc21d9be8eaf75b549cbc06">try_parse_ipv4_fast</a> (std::string_view input) noexcept</td></tr>
+<tr class="separator:af010226b2bc21d9be8eaf75b549cbc06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
+<tr class="memitem:a82b3367e1bf86dcf018bd4c05c293092" id="r_a82b3367e1bf86dcf018bd4c05c293092"><td class="memItemLeft" align="right" valign="top">constexpr uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a82b3367e1bf86dcf018bd4c05c293092">ipv4_fast_fail</a> = uint64_t(1) &lt;&lt; 32</td></tr>
+<tr class="separator:a82b3367e1bf86dcf018bd4c05c293092"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73198c595770108974913b10664004b3" id="r_a73198c595770108974913b10664004b3"><td class="memItemLeft" align="right" valign="top">static constexpr std::array&lt; uint8_t, 256 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73198c595770108974913b10664004b3">path_signature_table</a></td></tr>
 <tr class="separator:a73198c595770108974913b10664004b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -170,7 +174,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Check whether a string starts with 0x or 0X. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00028">28</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00029">29</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="#a078ffb35a09d688f031537ea728fe3ae">has_hex_prefix_unsafe()</a>.</p>
 
@@ -201,7 +205,7 @@ Variables</h2></td></tr>
 <p>Check whether a string starts with 0x or 0X. The function is only safe if input.size() &gt;=2.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a34d5be12630bcce5a782ef2f8b5e1e48">has_hex_prefix</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00013">13</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00014">14</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#a34d5be12630bcce5a782ef2f8b5e1e48">has_hex_prefix()</a>.</p>
 
@@ -232,7 +236,7 @@ Variables</h2></td></tr>
 <p>Returns true if the character is an ASCII letter. Equivalent to std::isalpha but more likely to be inlined by the compiler.</p>
 <dl class="section attention"><dt>Attention</dt><dd>std::isalpha is not constexpr generally. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00036">36</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00037">37</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="#a5fc18eced396380017dff3e03cbea20b">to_lower()</a>.</p>
 
@@ -264,7 +268,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>Check whether x is an ASCII digit. More likely to be inlined than std::isdigit. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00032">32</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00033">33</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
 
 </div>
 </div>
@@ -292,7 +296,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <p>A normalized Windows drive letter is a Windows drive letter of which the second code point is U+003A (:). </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00047">47</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00048">48</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha()</a>.</p>
 
@@ -330,7 +334,7 @@ Variables</h2></td></tr>
 </ul>
 <p><a href="https://url.spec.whatwg.org/#start-with-a-windows-drive-letter">https://url.spec.whatwg.org/#start-with-a-windows-drive-letter</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00040">40</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00041">41</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
 
 <p class="reference">References <a class="el" href="#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha()</a>.</p>
 
@@ -363,13 +367,70 @@ Variables</h2></td></tr>
 <p>Assuming that x is an ASCII letter, this function returns the lower case equivalent.</p>
 <p>More likely to be inlined by the compiler and constexpr. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00034">34</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00035">35</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha()</a>.</p>
 
 </div>
 </div>
+<a id="af010226b2bc21d9be8eaf75b549cbc06" name="af010226b2bc21d9be8eaf75b549cbc06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af010226b2bc21d9be8eaf75b549cbc06">&#9670;&#160;</a></span>try_parse_ipv4_fast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> constexpr uint64_t ada::checkers::try_parse_ipv4_fast </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>input</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Fast-path parser for pure decimal IPv4 addresses (e.g., "192.168.1.1"). Returns the packed 32-bit IPv4 address on success, or a value &gt; 0xFFFFFFFF to indicate failure (caller should fall back to general parser). This is optimized for the common case where the input is a well-formed decimal IPv4 address with exactly 4 octets. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/checkers-inl_8h_source.html#l00053">53</a> of file <a class="el" href="../../d4/d46/checkers-inl_8h_source.html">checkers-inl.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a>, and <a class="el" href="#a82b3367e1bf86dcf018bd4c05c293092">ipv4_fast_fail</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Variable Documentation</h2>
+<a id="a82b3367e1bf86dcf018bd4c05c293092" name="a82b3367e1bf86dcf018bd4c05c293092"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82b3367e1bf86dcf018bd4c05c293092">&#9670;&#160;</a></span>ipv4_fast_fail</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t ada::checkers::ipv4_fast_fail = uint64_t(1) &lt;&lt; 32</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Sentinel value indicating <a class="el" href="#af010226b2bc21d9be8eaf75b549cbc06">try_parse_ipv4_fast()</a> did not succeed. Any value &gt; 0xFFFFFFFF indicates the fast path should not be used. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d4/dec/checkers_8h_source.html#l00129">129</a> of file <a class="el" href="../../d4/dec/checkers_8h_source.html">checkers.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="#af010226b2bc21d9be8eaf75b549cbc06">try_parse_ipv4_fast()</a>.</p>
+
+</div>
+</div>
 <a id="a73198c595770108974913b10664004b3" name="a73198c595770108974913b10664004b3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a73198c595770108974913b10664004b3">&#9670;&#160;</a></span>path_signature_table</h2>
 
@@ -409,7 +470,7 @@ Variables</h2></td></tr>
 <div class="line">      }</div>
 <div class="line">      <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">result</a>;</div>
 <div class="line">    }()</div>
-<div class="ttc" id="anamespaceada_html_ae493e1ddb3e9a7bc3fd4f8935cd67b3b"><div class="ttname"><a href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a></div><div class="ttdeci">tl::expected&lt; result_type, ada::errors &gt; result</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d6b/implementation_8h_source.html#l00021">implementation.h:21</a></div></div>
+<div class="ttc" id="anamespaceada_html_ae493e1ddb3e9a7bc3fd4f8935cd67b3b"><div class="ttname"><a href="../../dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a></div><div class="ttdeci">tl::expected&lt; result_type, ada::errors &gt; result</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d6b/implementation_8h_source.html#l00044">implementation.h:44</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="../../d4/dd6/checkers_8cpp_source.html#l00065">65</a> of file <a class="el" href="../../d4/dd6/checkers_8cpp_source.html">checkers.cpp</a>.</p>
 

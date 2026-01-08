@@ -5,5 +5,6 @@ var searchData=
   ['to_5flower_2',['to_lower',['../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b',1,'ada::checkers']]],
   ['to_5fstring_3',['to_string',['../dd/d03/structada_1_1url.html#adfb7b5e6efd80467c30c81e6e6a4651a',1,'ada::url::to_string()'],['../d8/d3b/structada_1_1url__aggregator.html#a516d5b8a33529dc8b8c95d52abc6e7de',1,'ada::url_aggregator::to_string()'],['../db/d75/structada_1_1url__base.html#ad16a4dd43fc9d8e08afdaa4a95dbac26',1,'ada::url_base::to_string()'],['../d3/d43/structada_1_1url__components.html#a3447204dcec368c7c52d925d98bffc4c',1,'ada::url_components::to_string()'],['../dd/dcb/structada_1_1url__search__params.html#a5bdd9ca945f9adf5f720ee6be57c29d6',1,'ada::url_search_params::to_string()'],['../dd/d64/namespaceada.html#aadf8f2765d3d60f8612a8dfccc844a36',1,'ada::to_string(encoding_type type)'],['../dd/d64/namespaceada.html#a3b7cc372b3ac372722c850ca149215d6',1,'ada::to_string(ada::state s)']]],
   ['to_5funicode_4',['to_unicode',['../d5/ddb/namespaceada_1_1idna.html#a7d9aecb5815cce8db291ed12d5d1774f',1,'ada::idna']]],
-  ['trailing_5fzeroes_5',['trailing_zeroes',['../d7/d6c/namespaceada_1_1helpers.html#ac933d028f7c550fa819c4ccac98c1ea3',1,'ada::helpers']]]
+  ['trailing_5fzeroes_5',['trailing_zeroes',['../d7/d6c/namespaceada_1_1helpers.html#ac933d028f7c550fa819c4ccac98c1ea3',1,'ada::helpers']]],
+  ['try_5fparse_5fipv4_5ffast_6',['try_parse_ipv4_fast',['../d3/dbe/namespaceada_1_1checkers.html#af010226b2bc21d9be8eaf75b549cbc06',1,'ada::checkers']]]
 ];

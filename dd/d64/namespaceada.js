@@ -19,6 +19,8 @@ var namespaceada =
       [ "is_normalized_windows_drive_letter", "d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b", null ],
       [ "is_windows_drive_letter", "d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca", null ],
       [ "to_lower", "d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b", null ],
+      [ "try_parse_ipv4_fast", "d3/dbe/namespaceada_1_1checkers.html#af010226b2bc21d9be8eaf75b549cbc06", null ],
+      [ "ipv4_fast_fail", "d3/dbe/namespaceada_1_1checkers.html#a82b3367e1bf86dcf018bd4c05c293092", null ],
       [ "path_signature_table", "d3/dbe/namespaceada_1_1checkers.html#a73198c595770108974913b10664004b3", null ]
     ] ],
     [ "helpers", "d7/d6c/namespaceada_1_1helpers.html", [

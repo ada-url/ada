@@ -6,5 +6,6 @@ var checkers_inl_8h =
     [ "ada::checkers::is_digit", "d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6", null ],
     [ "ada::checkers::is_normalized_windows_drive_letter", "d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b", null ],
     [ "ada::checkers::is_windows_drive_letter", "d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca", null ],
-    [ "ada::checkers::to_lower", "d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b", null ]
+    [ "ada::checkers::to_lower", "d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b", null ],
+    [ "ada::checkers::try_parse_ipv4_fast", "d3/dbe/namespaceada_1_1checkers.html#af010226b2bc21d9be8eaf75b549cbc06", null ]
 ];

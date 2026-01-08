@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -172,7 +172,7 @@ Quick Start</h1>
 <div class="line">  <span class="keywordflow">return</span> EXIT_SUCCESS;</div>
 <div class="line">}</div>
 <div class="ttc" id="aada_8cpp_html"><div class="ttname"><a href="d8/d50/ada_8cpp.html">ada.cpp</a></div></div>
-<div class="ttc" id="aada_8h_html"><div class="ttname"><a href="d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Includes all definitions for Ada.</div></div>
+<div class="ttc" id="aada_8h_html"><div class="ttname"><a href="d0/da8/ada_8h.html">ada.h</a></div><div class="ttdoc">Main header for the Ada URL parser library.</div></div>
 <div class="ttc" id="anamespaceada_html_af64c23f52049411702be65b780947d8b"><div class="ttname"><a href="dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse</a></div><div class="ttdeci">ada_warn_unused ada::result&lt; result_type &gt; parse(std::string_view input, const result_type *base_url=nullptr)</div><div class="ttdef"><b>Definition</b> <a href="d8/df6/implementation_8cpp_source.html#l00013">implementation.cpp:13</a></div></div>
 </div><!-- fragment --></li>
 <li>Compile <div class="fragment"><div class="line">c++ -std=c++20 -o demo demo.cpp</div>
@@ -204,7 +204,7 @@ Community maintained</h2>
 </ul>
 <h1><a class="anchor" id="autotoc_md51"></a>
 Usage</h1>
-<p>Ada supports two types of URL instances, <code><a class="el" href="dd/d03/structada_1_1url.html" title="Generic URL struct reliant on std::string instantiation.">ada::url</a></code> and <code><a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">ada::url_aggregator</a></code>. The usage is the same in either case: we have an parsing function template <code><a class="el" href="dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse</a></code> which can return either a result of type <code><a class="el" href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a>&lt;<a class="el" href="dd/d03/structada_1_1url.html" title="Generic URL struct reliant on std::string instantiation.">ada::url</a>&gt;</code> or of type <code><a class="el" href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a>&lt;<a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">ada::url_aggregator</a>&gt;</code> depending on your needs. The <code><a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Lightweight URL struct.">ada::url_aggregator</a></code> class is smaller and it is backed by a precomputed serialized URL string. The <code><a class="el" href="dd/d03/structada_1_1url.html" title="Generic URL struct reliant on std::string instantiation.">ada::url</a></code> class is made of several separate strings for the various components (path, host, and so forth).</p>
+<p>Ada supports two types of URL instances, <code><a class="el" href="dd/d03/structada_1_1url.html" title="Represents a parsed URL with individual string components.">ada::url</a></code> and <code><a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Memory-efficient URL representation using a single buffer.">ada::url_aggregator</a></code>. The usage is the same in either case: we have an parsing function template <code><a class="el" href="dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse</a></code> which can return either a result of type <code><a class="el" href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a>&lt;<a class="el" href="dd/d03/structada_1_1url.html" title="Represents a parsed URL with individual string components.">ada::url</a>&gt;</code> or of type <code><a class="el" href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a>&lt;<a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Memory-efficient URL representation using a single buffer.">ada::url_aggregator</a>&gt;</code> depending on your needs. The <code><a class="el" href="d8/d3b/structada_1_1url__aggregator.html" title="Memory-efficient URL representation using a single buffer.">ada::url_aggregator</a></code> class is smaller and it is backed by a precomputed serialized URL string. The <code><a class="el" href="dd/d03/structada_1_1url.html" title="Represents a parsed URL with individual string components.">ada::url</a></code> class is made of several separate strings for the various components (path, host, and so forth).</p>
 <h2><a class="anchor" id="autotoc_md52"></a>
 Parsing &amp; Validation</h2>
 <ul>
@@ -254,7 +254,7 @@ URL Search Params</h2>
 <div class="line"><span class="keywordflow">while</span> (keys.has_next()) {</div>
 <div class="line">  <span class="keyword">auto</span> key = keys.next();  <span class="comment">// &quot;a&quot;, &quot;c&quot;, &quot;e&quot;, &quot;g&quot;</span></div>
 <div class="line">}</div>
-<div class="ttc" id="astructada_1_1url__search__params_html"><div class="ttname"><a href="dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a></div><div class="ttdef"><b>Definition</b> <a href="da/dac/url__search__params_8h_source.html#l00040">url_search_params.h:40</a></div></div>
+<div class="ttc" id="astructada_1_1url__search__params_html"><div class="ttname"><a href="dd/dcb/structada_1_1url__search__params.html">ada::url_search_params</a></div><div class="ttdoc">Class for parsing and manipulating URL query strings.</div><div class="ttdef"><b>Definition</b> <a href="da/dac/url__search__params_8h_source.html#l00060">url_search_params.h:60</a></div></div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md56"></a>
 URLPattern</h2>
 <p>Our implementation doesn't provide a regex engine and leaves the decision of choosing the right engine to the user. This is done as a security measure since the default std::regex engine is not safe and open to DDOS attacks. Runtimes like Node.js and Cloudflare Workers use the V8 regex engine, which is safe and performant.</p>
@@ -350,13 +350,13 @@ C wrapper</h2>
 <div class="ttc" id="aada__c_8h_html_ada26e66474296e31335e8642678aef5b"><div class="ttname"><a href="df/d61/ada__c_8h.html#ada26e66474296e31335e8642678aef5b">ada_set_protocol</a></div><div class="ttdeci">bool ada_set_protocol(ada_url result, const char *input, size_t length)</div><div class="ttdef"><b>Definition</b> <a href="dd/dd6/ada__c_8cpp_source.html#l00262">ada_c.cpp:262</a></div></div>
 <div class="ttc" id="aada__c_8h_html_aea81956480d2eb9af02d30a72b1ce85b"><div class="ttname"><a href="df/d61/ada__c_8h.html#aea81956480d2eb9af02d30a72b1ce85b">ada_get_search</a></div><div class="ttdeci">ada_string ada_get_search(ada_url result)</div><div class="ttdef"><b>Definition</b> <a href="dd/dd6/ada__c_8cpp_source.html#l00203">ada_c.cpp:203</a></div></div>
 <div class="ttc" id="aada__c_8h_html_af7b3afce219ea6e237ffe07044e8604e"><div class="ttname"><a href="df/d61/ada__c_8h.html#af7b3afce219ea6e237ffe07044e8604e">ada_set_hash</a></div><div class="ttdeci">void ada_set_hash(ada_url result, const char *input, size_t length)</div><div class="ttdef"><b>Definition</b> <a href="dd/dd6/ada__c_8cpp_source.html#l00327">ada_c.cpp:327</a></div></div>
-<div class="ttc" id="anamespaceada_html_ae493e1ddb3e9a7bc3fd4f8935cd67b3b"><div class="ttname"><a href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a></div><div class="ttdeci">tl::expected&lt; result_type, ada::errors &gt; result</div><div class="ttdef"><b>Definition</b> <a href="dd/d6b/implementation_8h_source.html#l00021">implementation.h:21</a></div></div>
+<div class="ttc" id="anamespaceada_html_ae493e1ddb3e9a7bc3fd4f8935cd67b3b"><div class="ttname"><a href="dd/d64/namespaceada.html#ae493e1ddb3e9a7bc3fd4f8935cd67b3b">ada::result</a></div><div class="ttdeci">tl::expected&lt; result_type, ada::errors &gt; result</div><div class="ttdef"><b>Definition</b> <a href="dd/d6b/implementation_8h_source.html#l00044">implementation.h:44</a></div></div>
 <div class="ttc" id="astructada__owned__string_html"><div class="ttname"><a href="df/d1e/structada__owned__string.html">ada_owned_string</a></div><div class="ttdef"><b>Definition</b> <a href="df/d61/ada__c_8h_source.html#l00023">ada_c.h:23</a></div></div>
 <div class="ttc" id="astructada__string_html"><div class="ttname"><a href="d2/daa/structada__string.html">ada_string</a></div><div class="ttdef"><b>Definition</b> <a href="df/d61/ada__c_8h_source.html#l00017">ada_c.h:17</a></div></div>
 <div class="ttc" id="astructada__string_html_a091d98b7661f46d311cff4f06ab8889d"><div class="ttname"><a href="d2/daa/structada__string.html#a091d98b7661f46d311cff4f06ab8889d">ada_string::data</a></div><div class="ttdeci">const char * data</div><div class="ttdef"><b>Definition</b> <a href="df/d61/ada__c_8h_source.html#l00018">ada_c.h:18</a></div></div>
 <div class="ttc" id="astructada__string_html_a9493413d41e1003fd0da00457fccd94f"><div class="ttname"><a href="d2/daa/structada__string.html#a9493413d41e1003fd0da00457fccd94f">ada_string::length</a></div><div class="ttdeci">size_t length</div><div class="ttdef"><b>Definition</b> <a href="df/d61/ada__c_8h_source.html#l00019">ada_c.h:19</a></div></div>
 </div><!-- fragment --><p>When linking against the ada library from C++, be minding that ada requires access to the standard C++ library. E.g., you may link with the C++ compiler.</p>
-<p>E.g., if you grab our single-header C++ files (<code><a class="el" href="d8/d50/ada_8cpp.html">ada.cpp</a></code> and <code><a class="el" href="d0/da8/ada_8h.html" title="Includes all definitions for Ada.">ada.h</a></code>), as well as the C header (<code><a class="el" href="df/d61/ada__c_8h.html" title="Includes the C definitions for Ada. This is a C file, not C++.">ada_c.h</a></code>), you can often compile a C program (<code>demo.c</code>) as follows under Linux/macOS systems:</p>
+<p>E.g., if you grab our single-header C++ files (<code><a class="el" href="d8/d50/ada_8cpp.html">ada.cpp</a></code> and <code><a class="el" href="d0/da8/ada_8h.html" title="Main header for the Ada URL parser library.">ada.h</a></code>), as well as the C header (<code><a class="el" href="df/d61/ada__c_8h.html" title="Includes the C definitions for Ada. This is a C file, not C++.">ada_c.h</a></code>), you can often compile a C program (<code>demo.c</code>) as follows under Linux/macOS systems:</p>
 <div class="fragment"><div class="line">c++ -c ada.cpp -std=c++20</div>
 <div class="line">cc -c demo.c</div>
 <div class="line">c++ demo.o ada.o -o cdemo</div>
@@ -397,7 +397,7 @@ Build options</h2>
 <p><code>docker build -t ada-builder . &amp;&amp; docker run --rm -it -v ${PWD}:/repo ada-builder</code></p>
 <h2><a class="anchor" id="autotoc_md63"></a>
 Amalgamation</h2>
-<p>You may amalgamate all source files into only two files (<code><a class="el" href="d0/da8/ada_8h.html" title="Includes all definitions for Ada.">ada.h</a></code> and <code><a class="el" href="d8/d50/ada_8cpp.html">ada.cpp</a></code>) by typing executing the Python 3 script <code>singleheader/amalgamate.py</code>. By default, the files are created in the <code>singleheader</code> directory.</p>
+<p>You may amalgamate all source files into only two files (<code><a class="el" href="d0/da8/ada_8h.html" title="Main header for the Ada URL parser library.">ada.h</a></code> and <code><a class="el" href="d8/d50/ada_8cpp.html">ada.cpp</a></code>) by typing executing the Python 3 script <code>singleheader/amalgamate.py</code>. By default, the files are created in the <code>singleheader</code> directory.</p>
 <h2><a class="anchor" id="autotoc_md64"></a>
 License</h2>
 <p>This code is made available under the Apache License 2.0 as well as the MIT license.</p>

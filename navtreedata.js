@@ -122,16 +122,17 @@ var NAVTREE =
         [ "Typedefs", "globals_type.html", null ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
-    ] ]
+    ] ],
+    [ "Examples", "examples.html", "examples" ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
 "annotated.html",
-"d7/d19/common__defs_8h.html#a5b870e3ef7880a24d95d224e6587305d",
-"dc/ddd/parser_8cpp.html",
-"dd/dd6/ada__c_8cpp.html#a333e532a4f2756d8c8a6d3d6f56bc2b1"
+"d7/d19/common__defs_8h.html#a54667c5b6f1fc49a96ba9e0d20981a1e",
+"dc/d69/structada__url__components.html#afdbe58a41d73db4faa282654a172d376",
+"dd/dd6/ada__c_8cpp.html#a2ff63854fd9243b04cee594765824d0f"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -118,7 +118,7 @@ $(function(){initNavTree('d2/d63/namespaceada_1_1scheme.html','../../'); initRes
 </div><!--header-->
 <div class="contents">
 
-<p>Includes the scheme declarations.  
+<p>URL scheme utilities and constants.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -140,6 +140,7 @@ Enumerations</h2></td></tr>
 , <a class="el" href="#aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9">FILE</a> = 6
 <br />
  }</td></tr>
+<tr class="memdesc:aad13381a250ed0cf04d1cff0a6ae4a3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration of URL scheme types.  <a href="#aad13381a250ed0cf04d1cff0a6ae4a3b">More...</a><br /></td></tr>
 <tr class="separator:aad13381a250ed0cf04d1cff0a6ae4a3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -152,7 +153,8 @@ Functions</h2></td></tr>
 <tr class="separator:a5e6e7cb90bb372cd1554c6bebb944de6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Includes the scheme declarations. </p>
+<div class="textblock"><p>URL scheme utilities and constants. </p>
+<p>Provides functions for working with URL schemes, including identification of special schemes and retrieval of default port numbers. </p>
 </div><h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="aad13381a250ed0cf04d1cff0a6ae4a3b" name="aad13381a250ed0cf04d1cff0a6ae4a3b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aad13381a250ed0cf04d1cff0a6ae4a3b">&#9670;&#160;</a></span>type</h2>
@@ -165,18 +167,35 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Type of the scheme as an enum. Using strings to represent a scheme type is not ideal because checking for types involves string comparisons. It is faster to use a simple integer. In C++11, we are allowed to specify the underlying type of the enum. We pick an 8-bit integer (which allows up to 256 types). Specifying the type of the enum may help integration with other systems if the type variable is exposed (since its value will not depend on the compiler). </p>
+
+<p>Enumeration of URL scheme types. </p>
+<p>Special schemes have specific parsing rules and default ports. Using an enum allows efficient scheme comparisons without string operations.</p>
+<p>Default ports:</p><ul>
+<li>HTTP: 80</li>
+<li>HTTPS: 443</li>
+<li>WS: 80</li>
+<li>WSS: 443</li>
+<li>FTP: 21</li>
+<li>FILE: (none) </li>
+</ul>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c" name="aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c"></a>HTTP&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3baaff84b9b3b0f0f7c8f56b9a01f3107af" name="aad13381a250ed0cf04d1cff0a6ae4a3baaff84b9b3b0f0f7c8f56b9a01f3107af"></a>NOT_SPECIAL&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0" name="aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0"></a>HTTPS&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3ba1b6522b40511ec15ca60df3eb3858df2" name="aad13381a250ed0cf04d1cff0a6ae4a3ba1b6522b40511ec15ca60df3eb3858df2"></a>WS&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf" name="aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf"></a>FTP&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3bac48a95c337aa2775b07339cf74cf903d" name="aad13381a250ed0cf04d1cff0a6ae4a3bac48a95c337aa2775b07339cf74cf903d"></a>WSS&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9" name="aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9"></a>FILE&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c" name="aad13381a250ed0cf04d1cff0a6ae4a3ba96c100d8fef9b4f39cdf795b587c2d4c"></a>HTTP&#160;</td><td class="fielddoc"><p><a href="http://">http://</a> scheme (port 80) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3baaff84b9b3b0f0f7c8f56b9a01f3107af" name="aad13381a250ed0cf04d1cff0a6ae4a3baaff84b9b3b0f0f7c8f56b9a01f3107af"></a>NOT_SPECIAL&#160;</td><td class="fielddoc"><p>Non-special scheme (no default port) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0" name="aad13381a250ed0cf04d1cff0a6ae4a3baf73362b3cc4c1413ba3d52e4a6931df0"></a>HTTPS&#160;</td><td class="fielddoc"><p><a href="https://">https://</a> scheme (port 443) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3ba1b6522b40511ec15ca60df3eb3858df2" name="aad13381a250ed0cf04d1cff0a6ae4a3ba1b6522b40511ec15ca60df3eb3858df2"></a>WS&#160;</td><td class="fielddoc"><p>ws:// WebSocket scheme (port 80) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf" name="aad13381a250ed0cf04d1cff0a6ae4a3ba187c62659589aaf7d9cbfbd1df04aabf"></a>FTP&#160;</td><td class="fielddoc"><p><a href="ftp://">ftp://</a> scheme (port 21) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3bac48a95c337aa2775b07339cf74cf903d" name="aad13381a250ed0cf04d1cff0a6ae4a3bac48a95c337aa2775b07339cf74cf903d"></a>WSS&#160;</td><td class="fielddoc"><p>wss:// secure WebSocket scheme (port 443) </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9" name="aad13381a250ed0cf04d1cff0a6ae4a3baa91172408b4da5f073ceca3f39e9acf9"></a>FILE&#160;</td><td class="fielddoc"><p><a href="file://">file://</a> scheme (no default port) </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/d64/scheme_8h_source.html#l00028">28</a> of file <a class="el" href="../../d2/d64/scheme_8h_source.html">scheme.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d2/d64/scheme_8h_source.html#l00041">41</a> of file <a class="el" href="../../d2/d64/scheme_8h_source.html">scheme.h</a>.</p>
 
 </div>
 </div>
@@ -203,7 +222,13 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the scheme of an input, or NOT_SPECIAL if it's not a special scheme defined by the spec. </p>
+<p>Converts a scheme string to its type enum. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">scheme</td><td>The scheme string to convert. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The corresponding scheme type, or NOT_SPECIAL if not recognized. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00072">72</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
 
@@ -233,7 +258,14 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the port number of a special scheme. </p><dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#special-scheme">https://url.spec.whatwg.org/#special-scheme</a> </dd></dl>
+<p>Returns the default port for a scheme type. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>The scheme type enum value. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The default port number, or 0 if not applicable. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#special-scheme">https://url.spec.whatwg.org/#special-scheme</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00069">69</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
 
@@ -263,15 +295,14 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>A special scheme is an ASCII string that is listed in the first column of the following table. The default port for a special scheme is listed in the second column on the same row. The default port for any other ASCII string is null.</p>
-<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#url-miscellaneous">https://url.spec.whatwg.org/#url-miscellaneous</a> </dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Returns the default port for a special scheme string. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">scheme</td><td></td></tr>
+    <tr><td class="paramname">scheme</td><td>The scheme string (e.g., "http", "https"). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The special port </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The default port number, or 0 if not a special scheme. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a href="https://url.spec.whatwg.org/#special-scheme">https://url.spec.whatwg.org/#special-scheme</a> </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html#l00057">57</a> of file <a class="el" href="../../d7/dcf/scheme-inl_8h_source.html">scheme-inl.h</a>.</p>
 

@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -114,7 +114,7 @@ $(function(){initNavTree('d0/da8/ada_8h.html','../../'); initResizable(true); })
 </div><!--header-->
 <div class="contents">
 
-<p>Includes all definitions for Ada.  
+<p>Main header for the Ada URL parser library.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="../../dd/d4c/ada__idna_8h_source.html">ada/ada_idna.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/d4e/character__sets_8h_source.html">ada/character_sets.h</a>&quot;</code><br />
@@ -151,7 +151,15 @@ $(function(){initNavTree('d0/da8/ada_8h.html','../../'); initResizable(true); })
 </div>
 <p><a href="../../d0/da8/ada_8h_source.html">Go to the source code of this file.</a></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Includes all definitions for Ada. </p>
+<div class="textblock"><p>Main header for the Ada URL parser library. </p>
+<p>This is the primary entry point for the Ada URL parser library. Including this single header provides access to the complete Ada API, including:</p>
+<ul>
+<li>URL parsing via <code><a class="el" href="../../dd/d64/namespaceada.html#af64c23f52049411702be65b780947d8b">ada::parse()</a></code> function</li>
+<li>Two URL representations: <code><a class="el" href="../../dd/d03/structada_1_1url.html" title="Represents a parsed URL with individual string components.">ada::url</a></code> and <code><a class="el" href="../../d8/d3b/structada_1_1url__aggregator.html" title="Memory-efficient URL representation using a single buffer.">ada::url_aggregator</a></code></li>
+<li>URL search parameters via <code><a class="el" href="../../dd/dcb/structada_1_1url__search__params.html" title="Class for parsing and manipulating URL query strings.">ada::url_search_params</a></code></li>
+<li>URL pattern matching via <code>ada::url_pattern</code> (URLPattern API)</li>
+<li>IDNA (Internationalized Domain Names) support </li>
+</ul>
 
 <p class="definition">Definition in file <a class="el" href="../../d0/da8/ada_8h_source.html">ada.h</a>.</p>
 </div></div><!-- contents -->

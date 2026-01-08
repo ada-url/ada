@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"dc/d69/structada__url__components.html#afdbe58a41d73db4faa282654a172d376":[12,0,4,2],
 "dc/ddd/parser_8cpp.html":[13,0,4,6],
 "dc/ddd/parser_8cpp_source.html":[13,0,4,6],
 "dd/d03/structada_1_1url.html":[11,0,0,8],
@@ -98,6 +99,7 @@ var NAVTREEINDEX2 =
 "dd/d4c/ada__idna_8h.html#a9942f3702efabf632ba34ecd609e211c":[13,0,3,0,0,4],
 "dd/d4c/ada__idna_8h.html#aaa7c2ae34181ce7dd06159e254304596":[13,0,3,0,0,3],
 "dd/d4c/ada__idna_8h_source.html":[13,0,3,0,0],
+"dd/d60/_2github_2workspace_2include_2ada_8h-example.html":[14,0],
 "dd/d64/namespaceada.html":[11,0,0],
 "dd/d64/namespaceada.html#a0221646aa68b66f5dd447ea589c988a3":[11,0,0,18],
 "dd/d64/namespaceada.html#a03693ff0509e3c177d242205bc8f2748":[11,0,0,24],
@@ -247,7 +249,5 @@ var NAVTREEINDEX2 =
 "dd/dd6/ada__c_8cpp.html#a20f8ed9f3a14eb3736b55740799ac99e":[13,0,4,1,21],
 "dd/dd6/ada__c_8cpp.html#a263e83fb079f6d6b2af85b3cbaba5af2":[13,0,4,1,13],
 "dd/dd6/ada__c_8cpp.html#a29527a5451c1f2a937920c7e7a4f7d1f":[13,0,4,1,64],
-"dd/dd6/ada__c_8cpp.html#a2e674e127d8f8957372263788fd2c65d":[13,0,4,1,23],
-"dd/dd6/ada__c_8cpp.html#a2ff63854fd9243b04cee594765824d0f":[13,0,4,1,55],
-"dd/dd6/ada__c_8cpp.html#a3159e29f9b1b57af1bb747bd61aa9184":[13,0,4,1,60]
+"dd/dd6/ada__c_8cpp.html#a2e674e127d8f8957372263788fd2c65d":[13,0,4,1,23]
 };

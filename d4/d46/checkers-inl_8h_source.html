@@ -40,7 +40,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Ada<span id="projectnumber">&#160;3.3.0</span>
+   <div id="projectname">Ada<span id="projectnumber">&#160;3.4.0</span>
    </div>
    <div id="projectbrief">Fast spec-compliant URL parser</div>
   </td>
@@ -119,71 +119,136 @@ $(function(){initNavTree('d4/d46/checkers-inl_8h_source.html','../../'); initRes
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;bit&gt;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="foldopen" id="foldopen00011" data-start="{" data-end="}">
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html">   11</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d3/dbe/namespaceada_1_1checkers.html">ada::checkers</a> {</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="foldopen" id="foldopen00013" data-start="{" data-end="}">
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">   13</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">has_hex_prefix_unsafe</a>(std::string_view input) {</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>  <span class="comment">// This is actually efficient code, see has_hex_prefix for the assembly.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> is_little_endian = std::endian::native == std::endian::little;</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>  <span class="keyword">constexpr</span> uint16_t word0x = 0x7830;</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>  uint16_t two_first_bytes =</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>      <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(input[0]) |</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>      <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>((<span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(input[1]) &lt;&lt; 8));</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (is_little_endian) {</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    two_first_bytes |= 0x2000;</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    two_first_bytes |= 0x020;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  }</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  <span class="keywordflow">return</span> two_first_bytes == word0x;</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>}</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/dec/checkers_8h.html">ada/checkers.h</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="foldopen" id="foldopen00012" data-start="{" data-end="}">
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html">   12</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d3/dbe/namespaceada_1_1checkers.html">ada::checkers</a> {</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="foldopen" id="foldopen00014" data-start="{" data-end="}">
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">   14</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">has_hex_prefix_unsafe</a>(std::string_view input) {</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  <span class="comment">// This is actually efficient code, see has_hex_prefix for the assembly.</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>  <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> is_little_endian = std::endian::native == std::endian::little;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>  <span class="keyword">constexpr</span> uint16_t word0x = 0x7830;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>  uint16_t two_first_bytes =</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>      <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(input[0]) |</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>      <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>((<span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(input[1]) &lt;&lt; 8));</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (is_little_endian) {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    two_first_bytes |= 0x2000;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    two_first_bytes |= 0x020;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  }</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <span class="keywordflow">return</span> two_first_bytes == word0x;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>}</div>
 </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="foldopen" id="foldopen00028" data-start="{" data-end="}">
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a34d5be12630bcce5a782ef2f8b5e1e48">   28</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a34d5be12630bcce5a782ef2f8b5e1e48">has_hex_prefix</a>(std::string_view input) {</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="keywordflow">return</span> input.size() &gt;= 2 &amp;&amp; <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">has_hex_prefix_unsafe</a>(input);</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>}</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a34d5be12630bcce5a782ef2f8b5e1e48">   29</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a34d5be12630bcce5a782ef2f8b5e1e48">has_hex_prefix</a>(std::string_view input) {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="keywordflow">return</span> input.size() &gt;= 2 &amp;&amp; <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">has_hex_prefix_unsafe</a>(input);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>}</div>
 </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">   32</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">is_digit</a>(<span class="keywordtype">char</span> x) <span class="keyword">noexcept</span> { <span class="keywordflow">return</span> (x &gt;= <span class="charliteral">&#39;0&#39;</span>) &amp; (x &lt;= <span class="charliteral">&#39;9&#39;</span>); }</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">   34</a></span><span class="keyword">constexpr</span> <span class="keywordtype">char</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">to_lower</a>(<span class="keywordtype">char</span> x) <span class="keyword">noexcept</span> { <span class="keywordflow">return</span> (x | 0x20); }</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="foldopen" id="foldopen00036" data-start="{" data-end="}">
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">   36</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha</a>(<span class="keywordtype">char</span> x) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keywordflow">return</span> (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">to_lower</a>(x) &gt;= <span class="charliteral">&#39;a&#39;</span>) &amp;&amp; (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">to_lower</a>(x) &lt;= <span class="charliteral">&#39;z&#39;</span>);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>}</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">   33</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">is_digit</a>(<span class="keywordtype">char</span> x) <span class="keyword">noexcept</span> { <span class="keywordflow">return</span> (x &gt;= <span class="charliteral">&#39;0&#39;</span>) &amp; (x &lt;= <span class="charliteral">&#39;9&#39;</span>); }</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">   35</a></span><span class="keyword">constexpr</span> <span class="keywordtype">char</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">to_lower</a>(<span class="keywordtype">char</span> x) <span class="keyword">noexcept</span> { <span class="keywordflow">return</span> (x | 0x20); }</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="}">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">   37</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha</a>(<span class="keywordtype">char</span> x) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keywordflow">return</span> (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">to_lower</a>(x) &gt;= <span class="charliteral">&#39;a&#39;</span>) &amp;&amp; (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">to_lower</a>(x) &lt;= <span class="charliteral">&#39;z&#39;</span>);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
 </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="foldopen" id="foldopen00040" data-start="{" data-end="}">
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">   40</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">is_windows_drive_letter</a>(std::string_view input) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keywordflow">return</span> input.size() &gt;= 2 &amp;&amp;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>         (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha</a>(input[0]) &amp;&amp; ((input[1] == <span class="charliteral">&#39;:&#39;</span>) || (input[1] == <span class="charliteral">&#39;|&#39;</span>))) &amp;&amp;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>         ((input.size() == 2) || (input[2] == <span class="charliteral">&#39;/&#39;</span> || input[2] == <span class="charliteral">&#39;\\&#39;</span> ||</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>                                  input[2] == <span class="charliteral">&#39;?&#39;</span> || input[2] == <span class="charliteral">&#39;#&#39;</span>));</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>}</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">   41</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">is_windows_drive_letter</a>(std::string_view input) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="keywordflow">return</span> input.size() &gt;= 2 &amp;&amp;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>         (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha</a>(input[0]) &amp;&amp; ((input[1] == <span class="charliteral">&#39;:&#39;</span>) || (input[1] == <span class="charliteral">&#39;|&#39;</span>))) &amp;&amp;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>         ((input.size() == 2) || (input[2] == <span class="charliteral">&#39;/&#39;</span> || input[2] == <span class="charliteral">&#39;\\&#39;</span> ||</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>                                  input[2] == <span class="charliteral">&#39;?&#39;</span> || input[2] == <span class="charliteral">&#39;#&#39;</span>));</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}</div>
 </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="foldopen" id="foldopen00047" data-start="{" data-end="}">
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">   47</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">is_normalized_windows_drive_letter</a>(</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    std::string_view input) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keywordflow">return</span> input.size() &gt;= 2 &amp;&amp; (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha</a>(input[0]) &amp;&amp; (input[1] == <span class="charliteral">&#39;:&#39;</span>));</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>}</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="foldopen" id="foldopen00048" data-start="{" data-end="}">
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">   48</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">is_normalized_windows_drive_letter</a>(</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    std::string_view input) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keywordflow">return</span> input.size() &gt;= 2 &amp;&amp; (<a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">is_alpha</a>(input[0]) &amp;&amp; (input[1] == <span class="charliteral">&#39;:&#39;</span>));</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>}</div>
 </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}  <span class="comment">// namespace ada::checkers</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d3/dbe/namespaceada_1_1checkers.html#af010226b2bc21d9be8eaf75b549cbc06">   53</a></span><a class="code hl_define" href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a> <span class="keyword">constexpr</span> uint64_t <a class="code hl_function" href="../../d3/dbe/namespaceada_1_1checkers.html#af010226b2bc21d9be8eaf75b549cbc06">try_parse_ipv4_fast</a>(</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    std::string_view input) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* p = input.data();</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keyword">const</span> pend = p + input.size();</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  uint32_t ipv4 = 0;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 4; ++i) {</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordflow">if</span> (p == pend) {</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>      <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a82b3367e1bf86dcf018bd4c05c293092">ipv4_fast_fail</a>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    }</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    uint32_t val;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordtype">char</span> c = *p;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keywordflow">if</span> (c &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>      val = c - <span class="charliteral">&#39;0&#39;</span>;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>      p++;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>      <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a82b3367e1bf86dcf018bd4c05c293092">ipv4_fast_fail</a>;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    }</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordflow">if</span> (p &lt; pend) {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>      c = *p;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>      <span class="keywordflow">if</span> (c &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordflow">if</span> (val == 0) <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a82b3367e1bf86dcf018bd4c05c293092">ipv4_fast_fail</a>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        val = val * 10 + (c - <span class="charliteral">&#39;0&#39;</span>);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        p++;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordflow">if</span> (p &lt; pend) {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>          c = *p;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>          <span class="keywordflow">if</span> (c &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; c &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            val = val * 10 + (c - <span class="charliteral">&#39;0&#39;</span>);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            p++;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            <span class="keywordflow">if</span> (val &gt; 255) <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a82b3367e1bf86dcf018bd4c05c293092">ipv4_fast_fail</a>;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>          }</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        }</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>      }</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    }</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    ipv4 = (ipv4 &lt;&lt; 8) | val;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordflow">if</span> (i &lt; 3) {</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>      <span class="keywordflow">if</span> (p == pend || *p != <span class="charliteral">&#39;.&#39;</span>) {</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a82b3367e1bf86dcf018bd4c05c293092">ipv4_fast_fail</a>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>      }</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>      p++;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    }</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  }</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <span class="keywordflow">if</span> (p != pend) {</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keywordflow">if</span> (p == pend - 1 &amp;&amp; *p == <span class="charliteral">&#39;.&#39;</span>) {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>      <span class="keywordflow">return</span> ipv4;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    }</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d3/dbe/namespaceada_1_1checkers.html#a82b3367e1bf86dcf018bd4c05c293092">ipv4_fast_fail</a>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  }</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordflow">return</span> ipv4;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
 </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_CHECKERS_INL_H</span></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html">ada::checkers</a></div><div class="ttdoc">Includes the definitions for validation functions.</div><div class="ttdef"><b>Definition</b> <a href="#l00011">checkers-inl.h:11</a></div></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html_a078ffb35a09d688f031537ea728fe3ae"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">ada::checkers::has_hex_prefix_unsafe</a></div><div class="ttdeci">constexpr bool has_hex_prefix_unsafe(std::string_view input)</div><div class="ttdef"><b>Definition</b> <a href="#l00013">checkers-inl.h:13</a></div></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html_a34d5be12630bcce5a782ef2f8b5e1e48"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a34d5be12630bcce5a782ef2f8b5e1e48">ada::checkers::has_hex_prefix</a></div><div class="ttdeci">constexpr bool has_hex_prefix(std::string_view input)</div><div class="ttdef"><b>Definition</b> <a href="#l00028">checkers-inl.h:28</a></div></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html_a53d7ea2ae8deb63a37be60d56121ca3b"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">ada::checkers::is_normalized_windows_drive_letter</a></div><div class="ttdeci">constexpr bool is_normalized_windows_drive_letter(std::string_view input) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00047">checkers-inl.h:47</a></div></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html_a56afc8de56c96291388a49bdee9e6aca"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">ada::checkers::is_windows_drive_letter</a></div><div class="ttdeci">constexpr bool is_windows_drive_letter(std::string_view input) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00040">checkers-inl.h:40</a></div></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html_a5fc18eced396380017dff3e03cbea20b"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">ada::checkers::to_lower</a></div><div class="ttdeci">constexpr char to_lower(char x) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00034">checkers-inl.h:34</a></div></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html_aa3b3e3b2213de5a7a71a6005e2d4f1f5"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">ada::checkers::is_alpha</a></div><div class="ttdeci">constexpr bool is_alpha(char x) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00036">checkers-inl.h:36</a></div></div>
-<div class="ttc" id="anamespaceada_1_1checkers_html_ad5d849fea825255d7156a2d0749db7b6"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">ada::checkers::is_digit</a></div><div class="ttdeci">constexpr bool is_digit(char x) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00032">checkers-inl.h:32</a></div></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}  <span class="comment">// namespace ada::checkers</span></div>
+</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#endif  </span><span class="comment">// ADA_CHECKERS_INL_H</span></div>
+<div class="ttc" id="acheckers_8h_html"><div class="ttname"><a href="../../d4/dec/checkers_8h.html">checkers.h</a></div><div class="ttdoc">Declarations for URL specific checkers used within Ada.</div></div>
+<div class="ttc" id="acommon__defs_8h_html_ae21678219694a2566d0bd2111d958f17"><div class="ttname"><a href="../../d7/d19/common__defs_8h.html#ae21678219694a2566d0bd2111d958f17">ada_really_inline</a></div><div class="ttdeci">#define ada_really_inline</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d19/common__defs_8h_source.html#l00085">common_defs.h:85</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html">ada::checkers</a></div><div class="ttdoc">Includes the definitions for validation functions.</div><div class="ttdef"><b>Definition</b> <a href="#l00012">checkers-inl.h:12</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_a078ffb35a09d688f031537ea728fe3ae"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a078ffb35a09d688f031537ea728fe3ae">ada::checkers::has_hex_prefix_unsafe</a></div><div class="ttdeci">constexpr bool has_hex_prefix_unsafe(std::string_view input)</div><div class="ttdef"><b>Definition</b> <a href="#l00014">checkers-inl.h:14</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_a34d5be12630bcce5a782ef2f8b5e1e48"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a34d5be12630bcce5a782ef2f8b5e1e48">ada::checkers::has_hex_prefix</a></div><div class="ttdeci">constexpr bool has_hex_prefix(std::string_view input)</div><div class="ttdef"><b>Definition</b> <a href="#l00029">checkers-inl.h:29</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_a53d7ea2ae8deb63a37be60d56121ca3b"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a53d7ea2ae8deb63a37be60d56121ca3b">ada::checkers::is_normalized_windows_drive_letter</a></div><div class="ttdeci">constexpr bool is_normalized_windows_drive_letter(std::string_view input) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00048">checkers-inl.h:48</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_a56afc8de56c96291388a49bdee9e6aca"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a56afc8de56c96291388a49bdee9e6aca">ada::checkers::is_windows_drive_letter</a></div><div class="ttdeci">constexpr bool is_windows_drive_letter(std::string_view input) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00041">checkers-inl.h:41</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_a5fc18eced396380017dff3e03cbea20b"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a5fc18eced396380017dff3e03cbea20b">ada::checkers::to_lower</a></div><div class="ttdeci">constexpr char to_lower(char x) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00035">checkers-inl.h:35</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_a82b3367e1bf86dcf018bd4c05c293092"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#a82b3367e1bf86dcf018bd4c05c293092">ada::checkers::ipv4_fast_fail</a></div><div class="ttdeci">constexpr uint64_t ipv4_fast_fail</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dec/checkers_8h_source.html#l00129">checkers.h:129</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_aa3b3e3b2213de5a7a71a6005e2d4f1f5"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#aa3b3e3b2213de5a7a71a6005e2d4f1f5">ada::checkers::is_alpha</a></div><div class="ttdeci">constexpr bool is_alpha(char x) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00037">checkers-inl.h:37</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_ad5d849fea825255d7156a2d0749db7b6"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#ad5d849fea825255d7156a2d0749db7b6">ada::checkers::is_digit</a></div><div class="ttdeci">constexpr bool is_digit(char x) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00033">checkers-inl.h:33</a></div></div>
+<div class="ttc" id="anamespaceada_1_1checkers_html_af010226b2bc21d9be8eaf75b549cbc06"><div class="ttname"><a href="../../d3/dbe/namespaceada_1_1checkers.html#af010226b2bc21d9be8eaf75b549cbc06">ada::checkers::try_parse_ipv4_fast</a></div><div class="ttdeci">ada_really_inline constexpr uint64_t try_parse_ipv4_fast(std::string_view input) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00053">checkers-inl.h:53</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.6-->
