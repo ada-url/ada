@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.16)
 project(ada
   DESCRIPTION "Fast spec-compliant URL parser"
   LANGUAGES C CXX
-  VERSION 3.4.0
+  VERSION 3.4.1
 )
-set(ADA_LIB_VERSION "3.4.0" CACHE STRING "ada library version")
+set(ADA_LIB_VERSION "3.4.1" CACHE STRING "ada library version")
 set(ADA_LIB_SOVERSION "3" CACHE STRING "ada library soversion")
 
 include(GNUInstallDirs)
