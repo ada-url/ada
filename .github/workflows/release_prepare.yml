@@ -45,13 +45,14 @@ jobs:
         run: ctest --output-on-failure --test-dir build
 
       - name: Create PR with code updates for new release
-        uses: peter-evans/create-pull-request@f3a21bf3404eae73a97f65817ab35f351a1a63fe #v5.0.0
+        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 #v8.0.0
         with:
           commit-message: "chore: release ${{ env.NEXT_RELEASE_TAG }}"
           branch: "release/${{ env.NEXT_RELEASE_TAG }}"
           title: "chore: release ${{ env.NEXT_RELEASE_TAG }}"
-          token: ${{ env.GITHUB_TOKEN }}
           body: |
             This pull PR updates the source code version to ${{ env.NEXT_RELEASE_TAG }}
           delete-branch: true
           reviewers: "lemire,anonrig"
+          assignees: "lemire,anonrig"
+          sign-commits: true
