@@ -2,6 +2,7 @@
 #include "ada.h"
 #include <iostream>
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int, char *[]) {
   auto url = ada::parse<ada::url>("https://www.google.com");
   if (!url) {

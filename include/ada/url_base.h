@@ -84,7 +84,7 @@ struct url_base {
    * @return A newly allocated string containing the serialized origin.
    * @see https://url.spec.whatwg.org/#concept-url-origin
    */
-  [[nodiscard]] virtual std::string get_origin() const noexcept = 0;
+  [[nodiscard]] virtual std::string get_origin() const = 0;
 
   /**
    * Validates whether the hostname is a valid domain according to RFC 1034.
@@ -114,10 +114,10 @@ struct url_base {
    * @return Number of bytes consumed on success, 0 on failure.
    */
   virtual size_t parse_port(std::string_view view,
-                            bool check_trailing_content) noexcept = 0;
+                            bool check_trailing_content) = 0;
 
   /** @private */
-  virtual ada_really_inline size_t parse_port(std::string_view view) noexcept {
+  virtual ada_really_inline size_t parse_port(std::string_view view) {
     return this->parse_port(view, false);
   }
 

@@ -604,7 +604,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
   return checkers::verify_dns_length(host.value());
 }
 
-[[nodiscard]] std::string url::get_origin() const noexcept {
+[[nodiscard]] std::string url::get_origin() const {
   if (is_special()) {
     // Return a new opaque origin.
     if (type == scheme::FILE) {
@@ -630,7 +630,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
   return "null";
 }
 
-[[nodiscard]] std::string url::get_protocol() const noexcept {
+[[nodiscard]] std::string url::get_protocol() const {
   if (is_special()) {
     return helpers::concat(ada::scheme::details::is_special_list[type], ":");
   }
@@ -638,7 +638,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
   return helpers::concat(non_special_scheme, ":");
 }
 
-[[nodiscard]] std::string url::get_host() const noexcept {
+[[nodiscard]] std::string url::get_host() const {
   // If url's host is null, then return the empty string.
   // If url's port is null, return url's host, serialized.
   // Return url's host, serialized, followed by U+003A (:) and url's port,
@@ -652,11 +652,11 @@ ada_really_inline void url::parse_path(std::string_view input) {
   return host.value();
 }
 
-[[nodiscard]] std::string url::get_hostname() const noexcept {
+[[nodiscard]] std::string url::get_hostname() const {
   return host.value_or("");
 }
 
-[[nodiscard]] std::string url::get_search() const noexcept {
+[[nodiscard]] std::string url::get_search() const {
   // If this's URL's query is either null or the empty string, then return the
   // empty string. Return U+003F (?), followed by this's URL's query.
   return (!query.has_value() || (query.value().empty())) ? ""
@@ -671,11 +671,11 @@ ada_really_inline void url::parse_path(std::string_view input) {
   return password;
 }
 
-[[nodiscard]] std::string url::get_port() const noexcept {
+[[nodiscard]] std::string url::get_port() const {
   return port.has_value() ? std::to_string(port.value()) : "";
 }
 
-[[nodiscard]] std::string url::get_hash() const noexcept {
+[[nodiscard]] std::string url::get_hash() const {
   // If this's URL's fragment is either null or the empty string, then return
   // the empty string. Return U+0023 (#), followed by this's URL's fragment.
   return (!hash.has_value() || (hash.value().empty())) ? ""

@@ -37,9 +37,12 @@ jobs:
         with:
           version: 0.6.0
 
+      - name: Install clang-tidy and libc++
+        run: sudo apt-get update && sudo apt-get install -y clang-tidy-20 libc++-20-dev libc++abi-20-dev
+
       - name: Run clang-tidy
         run: >
-          cmake -B build -DADA_TESTING=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-17 &&
+          cmake -B build -DADA_TESTING=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-20 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" &&
           cmake --build build -j=4
         env:
-          CXX: clang++-17
+          CXX: clang++-20

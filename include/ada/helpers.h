@@ -54,8 +54,7 @@ ada_really_inline std::optional<std::string_view> prune_hash(
  * @see https://url.spec.whatwg.org/#shorten-a-urls-path
  * @returns Returns true if path is shortened.
  */
-ada_really_inline bool shorten_path(std::string& path,
-                                    ada::scheme::type type) noexcept;
+ada_really_inline bool shorten_path(std::string& path, ada::scheme::type type);
 
 /**
  * @private
@@ -64,7 +63,7 @@ ada_really_inline bool shorten_path(std::string& path,
  * @returns Returns true if path is shortened.
  */
 ada_really_inline bool shorten_path(std::string_view& path,
-                                    ada::scheme::type type) noexcept;
+                                    ada::scheme::type type);
 
 /**
  * @private
@@ -85,15 +84,14 @@ ada_really_inline void parse_prepared_path(std::string_view input,
  * @private
  * Remove and mutate all ASCII tab or newline characters from an input.
  */
-ada_really_inline void remove_ascii_tab_or_newline(std::string& input) noexcept;
+ada_really_inline void remove_ascii_tab_or_newline(std::string& input);
 
 /**
  * @private
  * Return the substring from input going from index pos to the end.
- * This function cannot throw.
  */
 ada_really_inline constexpr std::string_view substring(std::string_view input,
-                                                       size_t pos) noexcept;
+                                                       size_t pos);
 
 /**
  * @private
@@ -108,7 +106,7 @@ bool overlaps(std::string_view input1, const std::string& input2) noexcept;
  */
 ada_really_inline constexpr std::string_view substring(std::string_view input,
                                                        size_t pos1,
-                                                       size_t pos2) noexcept {
+                                                       size_t pos2) {
 #if ADA_DEVELOPMENT_CHECKS
   if (pos2 < pos1) {
     std::cerr << "Negative-length substring: [" << pos1 << " to " << pos2 << ")"
@@ -147,8 +145,7 @@ void trim_c0_whitespace(std::string_view& input) noexcept;
  * https://url.spec.whatwg.org/#potentially-strip-trailing-spaces-from-an-opaque-path
  */
 template <class url_type>
-ada_really_inline void strip_trailing_spaces_from_opaque_path(
-    url_type& url) noexcept;
+ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url);
 
 /**
  * @private

@@ -1,3 +1,5 @@
+// NOLINTBEGIN(bugprone-exception-escape,
+// bugprone-suspicious-stringview-data-usage)
 #include "ada/url_aggregator-inl.h"
 #include "ada/url_search_params-inl.h"
 
@@ -758,3 +760,5 @@ ada_version_components ada_get_version_components() {
 }
 
 }  // extern "C"
+// NOLINTEND(bugprone-exception-escape,
+// bugprone-suspicious-stringview-data-usage)
