@@ -152,7 +152,7 @@ struct url : url_base {
    * @return The complete URL string (allocates a new string).
    * @see https://url.spec.whatwg.org/#dom-url-href
    */
-  [[nodiscard]] ada_really_inline std::string get_href() const noexcept;
+  [[nodiscard]] ada_really_inline std::string get_href() const;
 
   /**
    * Returns the URL's origin as a string (scheme + host + port for special
@@ -160,14 +160,14 @@ struct url : url_base {
    * @return A newly allocated string containing the serialized origin.
    * @see https://url.spec.whatwg.org/#concept-url-origin
    */
-  [[nodiscard]] std::string get_origin() const noexcept override;
+  [[nodiscard]] std::string get_origin() const override;
 
   /**
    * Returns the URL's scheme followed by a colon (e.g., "https:").
    * @return A newly allocated string with the protocol.
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
-  [[nodiscard]] std::string get_protocol() const noexcept;
+  [[nodiscard]] std::string get_protocol() const;
 
   /**
    * Returns the URL's host and port (e.g., "example.com:8080").
@@ -175,7 +175,7 @@ struct url : url_base {
    * @return A newly allocated string with host:port.
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
-  [[nodiscard]] std::string get_host() const noexcept;
+  [[nodiscard]] std::string get_host() const;
 
   /**
    * Returns the URL's hostname (without port).
@@ -183,7 +183,7 @@ struct url : url_base {
    * @return A newly allocated string with the hostname.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
    */
-  [[nodiscard]] std::string get_hostname() const noexcept;
+  [[nodiscard]] std::string get_hostname() const;
 
   /**
    * Returns the URL's path component.
@@ -205,7 +205,7 @@ struct url : url_base {
    * @return A newly allocated string with the search/query.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
-  [[nodiscard]] std::string get_search() const noexcept;
+  [[nodiscard]] std::string get_search() const;
 
   /**
    * Returns the URL's username component.
@@ -305,7 +305,7 @@ struct url : url_base {
    * @return A newly allocated string with the port.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
-  [[nodiscard]] std::string get_port() const noexcept;
+  [[nodiscard]] std::string get_port() const;
 
   /**
    * Returns the URL's fragment prefixed with '#' (e.g., "#section").
@@ -313,7 +313,7 @@ struct url : url_base {
    * @return A newly allocated string with the hash.
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
-  [[nodiscard]] std::string get_hash() const noexcept;
+  [[nodiscard]] std::string get_hash() const;
 
   /**
    * Checks if the URL has credentials (non-empty username or password).
@@ -361,7 +361,7 @@ struct url : url_base {
   friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
       std::string_view, const ada::url_aggregator *);
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
-      ada::url &url) noexcept;
+      ada::url &url);
 
   friend ada::url ada::parser::parse_url_impl<ada::url, true>(std::string_view,
                                                               const ada::url *);
@@ -468,7 +468,7 @@ struct url : url_base {
    * Take the scheme from another URL. The scheme string is moved from the
    * provided url.
    */
-  constexpr void copy_scheme(ada::url &&u) noexcept;
+  constexpr void copy_scheme(ada::url &&u);
 
   /**
    * Take the scheme from another URL. The scheme string is copied from the

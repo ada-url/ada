@@ -737,7 +737,7 @@ url_aggregator::get_components() const noexcept {
                             components.protocol_end + 2) == "//";
 }
 
-inline void ada::url_aggregator::add_authority_slashes_if_needed() noexcept {
+inline void ada::url_aggregator::add_authority_slashes_if_needed() {
   ada_log("url_aggregator::add_authority_slashes_if_needed");
   ADA_ASSERT_TRUE(validate());
   // Protocol setter will insert `http:` to the URL. It is up to hostname setter
@@ -846,8 +846,8 @@ constexpr bool url_aggregator::has_port() const noexcept {
   return buffer;
 }
 
-ada_really_inline size_t url_aggregator::parse_port(
-    std::string_view view, bool check_trailing_content) noexcept {
+ada_really_inline size_t
+url_aggregator::parse_port(std::string_view view, bool check_trailing_content) {
   ada_log("url_aggregator::parse_port('", view, "') ", view.size());
   if (!view.empty() && view[0] == '-') {
     ada_log("parse_port: view[0] == '0' && view.size() > 1");
@@ -1085,8 +1085,8 @@ constexpr void url_aggregator::set_protocol_as_file() {
   return true;
 }
 
-[[nodiscard]] constexpr std::string_view url_aggregator::get_pathname()
-    const noexcept ada_lifetime_bound {
+[[nodiscard]] constexpr std::string_view url_aggregator::get_pathname() const
+    ada_lifetime_bound {
   ada_log("url_aggregator::get_pathname pathname_start = ",
           components.pathname_start, " buffer.size() = ", buffer.size(),
           " components.search_start = ", components.search_start,
@@ -1105,8 +1105,7 @@ inline std::ostream &operator<<(std::ostream &out,
   return out << u.to_string();
 }
 
-void url_aggregator::update_host_to_base_host(
-    const std::string_view input) noexcept {
+void url_aggregator::update_host_to_base_host(const std::string_view input) {
   ada_log("url_aggregator::update_host_to_base_host ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));

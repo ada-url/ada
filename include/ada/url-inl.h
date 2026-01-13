@@ -175,7 +175,7 @@ inline void url::set_scheme(std::string &&new_scheme) noexcept {
   }
 }
 
-constexpr void url::copy_scheme(ada::url &&u) noexcept {
+constexpr void url::copy_scheme(ada::url &&u) {
   non_special_scheme = u.non_special_scheme;
   type = u.type;
 }
@@ -185,7 +185,7 @@ constexpr void url::copy_scheme(const ada::url &u) {
   type = u.type;
 }
 
-[[nodiscard]] ada_really_inline std::string url::get_href() const noexcept {
+[[nodiscard]] ada_really_inline std::string url::get_href() const {
   std::string output = get_protocol();
 
   if (host.has_value()) {

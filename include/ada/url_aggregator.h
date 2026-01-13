@@ -92,7 +92,7 @@ struct url_aggregator : url_base {
    * @return A newly allocated string containing the serialized origin.
    * @see https://url.spec.whatwg.org/#concept-url-origin
    */
-  [[nodiscard]] std::string get_origin() const noexcept override;
+  [[nodiscard]] std::string get_origin() const override;
 
   /**
    * Returns the full serialized URL (the href) as a string_view.
@@ -111,8 +111,7 @@ struct url_aggregator : url_base {
    * @return A string_view of the username.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  [[nodiscard]] std::string_view get_username() const noexcept
-      ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_username() const ada_lifetime_bound;
 
   /**
    * Returns the URL's password component.
@@ -121,8 +120,7 @@ struct url_aggregator : url_base {
    * @return A string_view of the password.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  [[nodiscard]] std::string_view get_password() const noexcept
-      ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_password() const ada_lifetime_bound;
 
   /**
    * Returns the URL's port as a string (e.g., "8080").
@@ -131,7 +129,7 @@ struct url_aggregator : url_base {
    * @return A string_view of the port.
    * @see https://url.spec.whatwg.org/#dom-url-port
    */
-  [[nodiscard]] std::string_view get_port() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_port() const ada_lifetime_bound;
 
   /**
    * Returns the URL's fragment prefixed with '#' (e.g., "#section").
@@ -140,7 +138,7 @@ struct url_aggregator : url_base {
    * @return A string_view of the hash.
    * @see https://url.spec.whatwg.org/#dom-url-hash
    */
-  [[nodiscard]] std::string_view get_hash() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_hash() const ada_lifetime_bound;
 
   /**
    * Returns the URL's host and port (e.g., "example.com:8080").
@@ -149,7 +147,7 @@ struct url_aggregator : url_base {
    * @return A string_view of host:port.
    * @see https://url.spec.whatwg.org/#dom-url-host
    */
-  [[nodiscard]] std::string_view get_host() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_host() const ada_lifetime_bound;
 
   /**
    * Returns the URL's hostname (without port).
@@ -158,8 +156,7 @@ struct url_aggregator : url_base {
    * @return A string_view of the hostname.
    * @see https://url.spec.whatwg.org/#dom-url-hostname
    */
-  [[nodiscard]] std::string_view get_hostname() const noexcept
-      ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_hostname() const ada_lifetime_bound;
 
   /**
    * Returns the URL's path component.
@@ -168,7 +165,7 @@ struct url_aggregator : url_base {
    * @return A string_view of the pathname.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  [[nodiscard]] constexpr std::string_view get_pathname() const noexcept
+  [[nodiscard]] constexpr std::string_view get_pathname() const
       ada_lifetime_bound;
 
   /**
@@ -185,7 +182,7 @@ struct url_aggregator : url_base {
    * @return A string_view of the search/query.
    * @see https://url.spec.whatwg.org/#dom-url-search
    */
-  [[nodiscard]] std::string_view get_search() const noexcept ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_search() const ada_lifetime_bound;
 
   /**
    * Returns the URL's scheme followed by a colon (e.g., "https:").
@@ -194,8 +191,7 @@ struct url_aggregator : url_base {
    * @return A string_view of the protocol.
    * @see https://url.spec.whatwg.org/#dom-url-protocol
    */
-  [[nodiscard]] std::string_view get_protocol() const noexcept
-      ada_lifetime_bound;
+  [[nodiscard]] std::string_view get_protocol() const ada_lifetime_bound;
 
   /**
    * Checks if the URL has credentials (non-empty username or password).
@@ -311,7 +307,7 @@ struct url_aggregator : url_base {
  private:
   // helper methods
   friend void helpers::strip_trailing_spaces_from_opaque_path<url_aggregator>(
-      url_aggregator &url) noexcept;
+      url_aggregator &url);
   // parse_url methods
   friend url_aggregator parser::parse_url<url_aggregator>(
       std::string_view, const url_aggregator *);
@@ -340,7 +336,7 @@ struct url_aggregator : url_base {
    */
   [[nodiscard]] ada_really_inline bool is_at_path() const noexcept;
 
-  inline void add_authority_slashes_if_needed() noexcept;
+  inline void add_authority_slashes_if_needed();
 
   /**
    * To optimize performance, you may indicate how much memory to allocate
@@ -348,10 +344,10 @@ struct url_aggregator : url_base {
    */
   constexpr void reserve(uint32_t capacity);
 
-  ada_really_inline size_t parse_port(
-      std::string_view view, bool check_trailing_content) noexcept override;
+  ada_really_inline size_t parse_port(std::string_view view,
+                                      bool check_trailing_content) override;
 
-  ada_really_inline size_t parse_port(std::string_view view) noexcept override {
+  ada_really_inline size_t parse_port(std::string_view view) override {
     return this->parse_port(view, false);
   }
 
@@ -416,16 +412,16 @@ struct url_aggregator : url_base {
                                                 std::string_view input);
   [[nodiscard]] constexpr bool has_authority() const noexcept;
   constexpr void set_protocol_as_file();
-  inline void set_scheme(std::string_view new_scheme) noexcept;
+  inline void set_scheme(std::string_view new_scheme);
   /**
    * Fast function to set the scheme from a view with a colon in the
    * buffer, does not change type.
    */
   inline void set_scheme_from_view_with_colon(
-      std::string_view new_scheme_with_colon) noexcept;
-  inline void copy_scheme(const url_aggregator &u) noexcept;
+      std::string_view new_scheme_with_colon);
+  inline void copy_scheme(const url_aggregator &u);
 
-  inline void update_host_to_base_host(const std::string_view input) noexcept;
+  inline void update_host_to_base_host(const std::string_view input);
 
 };  // url_aggregator
 

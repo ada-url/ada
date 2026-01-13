@@ -22,7 +22,7 @@ void find_longest_sequence_of_ipv6_pieces(
   }
 }
 
-std::string ipv6(const std::array<uint16_t, 8>& address) noexcept {
+std::string ipv6(const std::array<uint16_t, 8>& address) {
   size_t compress_length = 0;  // The length of a long sequence of zeros.
   size_t compress = 0;         // The start of a long sequence of zeros.
   find_longest_sequence_of_ipv6_pieces(address, compress, compress_length);
@@ -63,7 +63,7 @@ std::string ipv6(const std::array<uint16_t, 8>& address) noexcept {
   return output;
 }
 
-std::string ipv4(const uint64_t address) noexcept {
+std::string ipv4(const uint64_t address) {
   std::string output(15, '\0');
   char* point = output.data();
   char* point_end = output.data() + output.size();

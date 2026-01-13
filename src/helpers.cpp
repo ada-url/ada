@@ -1,9 +1,12 @@
+#include <cstdint>
 #include <cstring>
 #include <sstream>
 
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
+#include "ada/helpers.h"
 #include "ada/scheme.h"
+#include "ada/state.h"
 
 #if ADA_SSSE3
 #include <tmmintrin.h>
@@ -97,8 +100,7 @@ ada_really_inline std::optional<std::string_view> prune_hash(
   return hash;
 }
 
-ada_really_inline bool shorten_path(std::string& path,
-                                    ada::scheme::type type) noexcept {
+ada_really_inline bool shorten_path(std::string& path, ada::scheme::type type) {
   // Let path be url's path.
   // If url's scheme is "file", path's size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
@@ -121,7 +123,7 @@ ada_really_inline bool shorten_path(std::string& path,
 }
 
 ada_really_inline bool shorten_path(std::string_view& path,
-                                    ada::scheme::type type) noexcept {
+                                    ada::scheme::type type) {
   // Let path be url's path.
   // If url's scheme is "file", path's size is 1, and path[0] is a normalized
   // Windows drive letter, then return.
@@ -145,15 +147,14 @@ ada_really_inline bool shorten_path(std::string_view& path,
   return false;
 }
 
-ada_really_inline void remove_ascii_tab_or_newline(
-    std::string& input) noexcept {
+ada_really_inline void remove_ascii_tab_or_newline(std::string& input) {
   // if this ever becomes a performance issue, we could use an approach similar
   // to has_tabs_or_newline
   std::erase_if(input, ada::unicode::is_ascii_tab_or_newline);
 }
 
 ada_really_inline constexpr std::string_view substring(std::string_view input,
-                                                       size_t pos) noexcept {
+                                                       size_t pos) {
   ADA_ASSERT_TRUE(pos <= input.size());
   // The following is safer but unneeded if we have the above line:
   // return pos > input.size() ? std::string_view() : input.substr(pos);
@@ -1000,8 +1001,7 @@ bool overlaps(std::string_view input1, const std::string& input2) noexcept {
 }
 
 template <class url_type>
-ada_really_inline void strip_trailing_spaces_from_opaque_path(
-    url_type& url) noexcept {
+ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) {
   ada_log("helpers::strip_trailing_spaces_from_opaque_path");
   if (!url.has_opaque_path) return;
   if (url.has_hash()) return;

@@ -40,7 +40,7 @@ void find_longest_sequence_of_ipv6_pieces(
  * @return The serialized IPv6 string (e.g., "2001:db8::1").
  * @see https://url.spec.whatwg.org/#concept-ipv6-serializer
  */
-std::string ipv6(const std::array<uint16_t, 8>& address) noexcept;
+std::string ipv6(const std::array<uint16_t, 8>& address);
 
 /**
  * Serializes an IPv4 address to its dotted-decimal string representation.
@@ -49,7 +49,7 @@ std::string ipv6(const std::array<uint16_t, 8>& address) noexcept;
  * @return The serialized IPv4 string (e.g., "192.168.1.1").
  * @see https://url.spec.whatwg.org/#concept-ipv4-serializer
  */
-std::string ipv4(uint64_t address) noexcept;
+std::string ipv4(uint64_t address);
 
 }  // namespace ada::serializers
 

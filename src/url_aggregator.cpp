@@ -111,7 +111,7 @@ template <bool has_state_override>
   return true;
 }
 
-inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
+inline void url_aggregator::copy_scheme(const url_aggregator& u) {
   ada_log("url_aggregator::copy_scheme ", u.buffer);
   ADA_ASSERT_TRUE(validate());
   // next line could overflow but unsigned arithmetic has well-defined
@@ -142,7 +142,7 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) noexcept {
 }
 
 inline void url_aggregator::set_scheme_from_view_with_colon(
-    std::string_view new_scheme_with_colon) noexcept {
+    std::string_view new_scheme_with_colon) {
   ada_log("url_aggregator::set_scheme_from_view_with_colon ",
           new_scheme_with_colon);
   ADA_ASSERT_TRUE(validate());
@@ -175,7 +175,7 @@ inline void url_aggregator::set_scheme_from_view_with_colon(
   ADA_ASSERT_TRUE(validate());
 }
 
-inline void url_aggregator::set_scheme(std::string_view new_scheme) noexcept {
+inline void url_aggregator::set_scheme(std::string_view new_scheme) {
   ada_log("url_aggregator::set_scheme ", new_scheme);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(new_scheme.empty() || new_scheme.back() != ':');
@@ -678,7 +678,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return set_host_or_hostname<true>(input);
 }
 
-[[nodiscard]] std::string url_aggregator::get_origin() const noexcept {
+[[nodiscard]] std::string url_aggregator::get_origin() const {
   ada_log("url_aggregator::get_origin");
   if (is_special()) {
     // Return a new opaque origin.
@@ -705,7 +705,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return "null";
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_username() const noexcept
+[[nodiscard]] std::string_view url_aggregator::get_username() const
     ada_lifetime_bound {
   ada_log("url_aggregator::get_username");
   if (has_non_empty_username()) {
@@ -715,7 +715,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return "";
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_password() const noexcept
+[[nodiscard]] std::string_view url_aggregator::get_password() const
     ada_lifetime_bound {
   ada_log("url_aggregator::get_password");
   if (has_non_empty_password()) {
@@ -725,7 +725,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return "";
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_port() const noexcept
+[[nodiscard]] std::string_view url_aggregator::get_port() const
     ada_lifetime_bound {
   ada_log("url_aggregator::get_port");
   if (components.port == url_components::omitted) {
@@ -735,7 +735,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
                             components.pathname_start);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_hash() const noexcept
+[[nodiscard]] std::string_view url_aggregator::get_hash() const
     ada_lifetime_bound {
   ada_log("url_aggregator::get_hash");
   // If this's URL's fragment is either null or the empty string, then return
@@ -749,7 +749,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, components.hash_start);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_host() const noexcept
+[[nodiscard]] std::string_view url_aggregator::get_host() const
     ada_lifetime_bound {
   ada_log("url_aggregator::get_host");
   // Technically, we should check if there is a hostname, but
@@ -768,7 +768,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, start, components.pathname_start);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_hostname() const noexcept
+[[nodiscard]] std::string_view url_aggregator::get_hostname() const
     ada_lifetime_bound {
   ada_log("url_aggregator::get_hostname");
   // Technically, we should check if there is a hostname, but
@@ -783,7 +783,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, start, components.host_end);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_search() const noexcept
+[[nodiscard]] std::string_view url_aggregator::get_search() const
     ada_lifetime_bound {
   ada_log("url_aggregator::get_search");
   // If this's URL's query is either null or the empty string, then return the
@@ -801,7 +801,7 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   return helpers::substring(buffer, components.search_start, ending_index);
 }
 
-[[nodiscard]] std::string_view url_aggregator::get_protocol() const noexcept
+[[nodiscard]] std::string_view url_aggregator::get_protocol() const
     ada_lifetime_bound {
   ada_log("url_aggregator::get_protocol");
   return helpers::substring(buffer, 0, components.protocol_end);

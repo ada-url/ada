@@ -224,6 +224,52 @@ cmake -B build -DADA_DEVELOPMENT_CHECKS=1
 cmake -B build -DNDEBUG=1
 ```
 
+## Running Clang-Tidy
+
+Clang-tidy is used for static analysis. There are two ways to run it:
+
+### During Build (Recommended)
+
+Run clang-tidy automatically during compilation:
+
+```bash
+cmake -B build -DADA_TESTING=ON \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_CXX_CLANG_TIDY=clang-tidy \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build build
+```
+
+**Important:** You must use clang++ as the compiler when running clang-tidy during build. Using GCC will cause errors because clang-tidy doesn't understand GCC-specific flags like `-mno-avx256-split-unaligned-load`.
+
+### Standalone with compile_commands.json
+
+First, generate the compilation database:
+
+```bash
+cmake -B build -DADA_TESTING=ON \
+  -DCMAKE_CXX_COMPILER=clang++ \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build build
+```
+
+Then run clang-tidy on specific files:
+
+```bash
+clang-tidy -p build src/ada.cpp
+clang-tidy -p build src/ada_idna.cpp
+```
+
+The `-p build` flag tells clang-tidy to use the `compile_commands.json` from the build directory.
+
+### Clang-Tidy Configuration
+
+The `.clang-tidy` file in the project root configures which checks are enabled. Current configuration enables:
+- `bugprone-*` checks (with some exclusions)
+- `clang-analyzer-*` checks
+
+All warnings are treated as errors (`WarningsAsErrors: '*'`).
+
 ## Platform-Specific Notes
 
 ### Windows

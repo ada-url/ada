@@ -733,6 +733,7 @@ struct expected_operations_base : expected_storage_base<T, E> {
   }
 
   template <class Rhs>
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void construct_with(Rhs &&rhs) noexcept {
     new (std::addressof(this->m_val)) T(std::forward<Rhs>(rhs).get());
     this->m_has_val = true;
