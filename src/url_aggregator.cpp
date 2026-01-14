@@ -1141,7 +1141,8 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
           }
           // Otherwise, set ipv4Piece to ipv4Piece times 10 + number.
           else {
-            ipv4_piece = *ipv4_piece * 10 + number;
+            ADA_ASSERT_TRUE(ipv4_piece.has_value());
+            ipv4_piece = ipv4_piece.value() * 10 + number;
           }
 
           // If ipv4Piece is greater than 255, validation error, return failure.
@@ -1157,8 +1158,9 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
         // Set address[pieceIndex] to address[pieceIndex] times 0x100 +
         // ipv4Piece.
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
+        ADA_ASSERT_TRUE(ipv4_piece.has_value());
         address[piece_index] =
-            uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
+            uint16_t(address[piece_index] * 0x100 + ipv4_piece.value());
 
         // Increase numbersSeen by 1.
         numbers_seen++;

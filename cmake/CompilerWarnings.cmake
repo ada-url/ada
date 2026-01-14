@@ -126,9 +126,12 @@ function(ada_set_project_warnings target_name)
 
     # Suppress variable tracking notes in debug builds (prevents verbose "retrying without" messages)
     # This affects large files like wpt_urlpattern_tests.cpp that exceed variable tracking limits
-    target_compile_options(${target_name} PRIVATE
-      $<$<CONFIG:Debug>:-fno-var-tracking-assignments>
-    )
+    # Skip this when clang-tidy is enabled (it's Clang-based and doesn't recognize this flag)
+    if(NOT ADA_ENABLE_CLANG_TIDY)
+      target_compile_options(${target_name} PRIVATE
+        $<$<CONFIG:Debug>:-fno-var-tracking-assignments>
+      )
+    endif()
 
     # Workaround for GCC poor AVX load/store code generation on x86
     # Skip this workaround when clang-tidy is enabled (it's Clang-based and doesn't support these flags)
