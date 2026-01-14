@@ -1,17 +1,18 @@
-#include "ada/checkers-inl.h"
-#include "ada/helpers.h"
-#include "ada/implementation.h"
-#include "ada/scheme.h"
-#include "ada/unicode-inl.h"
-#include "ada/url_components.h"
-#include "ada/url_components-inl.h"
 #include "ada/url_aggregator.h"
-#include "ada/url_aggregator-inl.h"
 
 #include <iterator>
 #include <ranges>
 #include <string>
 #include <string_view>
+
+#include "ada/checkers-inl.h"
+#include "ada/helpers.h"
+#include "ada/implementation.h"
+#include "ada/scheme.h"
+#include "ada/unicode-inl.h"
+#include "ada/url_aggregator-inl.h"
+#include "ada/url_components-inl.h"
+#include "ada/url_components.h"
 
 namespace ada {
 template <bool has_state_override>
