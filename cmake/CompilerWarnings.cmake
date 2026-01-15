@@ -133,6 +133,15 @@ function(ada_set_project_warnings target_name)
       )
     endif()
 
+    # Workaround for GCC 12/13 false positive warning with std::function in <regex>
+    # When using std::regex with -Werror and optimization, GCC incorrectly reports
+    # "may be used uninitialized" for std::function::_M_invoker in regex_automaton.h
+    # This is a known GCC bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105562
+    if(ADA_USE_UNSAFE_STD_REGEX_PROVIDER)
+      target_compile_options(${target_name} PRIVATE -Wno-maybe-uninitialized)
+      message(STATUS "${target_name}: Disabled -Wmaybe-uninitialized (GCC std::regex false positive workaround)")
+    endif()
+
     # Workaround for GCC poor AVX load/store code generation on x86
     # Skip this workaround when clang-tidy is enabled (it's Clang-based and doesn't support these flags)
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$" AND NOT ADA_ENABLE_CLANG_TIDY)
