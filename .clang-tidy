@@ -12,5 +12,3 @@ Checks: >
 WarningsAsErrors: '*'
 # Check first-party (non-system, non-vendored) headers.
 HeaderFilterRegex: '.*'
-ExcludeHeaderFilterRegex: 'build/_deps/'
-SystemHeaders: false

@@ -1,72 +1,80 @@
+#
+# Ada Library Target Configuration
+#
+# This file configures the main Ada library target with:
+# - Compiler warnings (via CompilerWarnings.cmake)
+# - Static analyzers (via StaticAnalyzers.cmake)
+# - Sanitizers and development checks
+# - Platform-specific optimizations
+#
 
+# ============================================================================
+# Include Modern CMake Modules
+# ============================================================================
+include(${PROJECT_SOURCE_DIR}/cmake/CompilerWarnings.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/StaticAnalyzers.cmake)
+
+# ============================================================================
+# Build Information
+# ============================================================================
 message(STATUS "Compiler ID : " ${CMAKE_CXX_COMPILER_ID})
 message(STATUS "CMAKE_BUILD_TYPE : " ${CMAKE_BUILD_TYPE})
 
+# ============================================================================
+# Interface Libraries (for embedding)
+# ============================================================================
 add_library(ada-include-source INTERFACE)
 target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+
 add_library(ada-source INTERFACE)
 target_sources(ada-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/ada.cpp)
 target_link_libraries(ada-source INTERFACE ada-include-source)
+
+# ============================================================================
+# Main Ada Library Target
+# ============================================================================
 add_library(ada ada.cpp)
+
+# C++20 standard requirement
 target_compile_features(ada PUBLIC cxx_std_20)
-target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
+
+# Include directories
+target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+
+# Position Independent Code (for shared library compatibility)
 if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
-  # We default to ON for all targets, so that we can use the library in shared libraries.
   set_target_properties(ada PROPERTIES POSITION_INDEPENDENT_CODE ON)
-endif(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
-if(MSVC)
-  if("${MSVC_TOOLSET_VERSION}" STREQUAL "140")
-    target_compile_options(ada INTERFACE /W0 /sdl)
-    set(ADA_LEGACY_VISUAL_STUDIO TRUE)
-  else()
-    target_compile_options(ada PRIVATE /WX /W3 /sdl /w34714) # https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4714?view=vs-2019
-  endif()
-else(MSVC)
-  message(STATUS "Assuming GCC-like compiler.")
-  target_compile_options(ada PRIVATE -Wall -Wextra -Weffc++)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(ada PRIVATE -Wsuggest-override)
-  endif()
-  if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
-    target_compile_options(ada PRIVATE -Winconsistent-missing-override)
-  endif()
-  target_compile_options(ada PRIVATE -Wfatal-errors -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self -Wconversion -Wno-sign-conversion)
-endif(MSVC)
+endif()
+# ============================================================================
+# Compiler Warnings
+# ============================================================================
+# Apply systematic compiler warnings using modern CMake patterns
+ada_set_project_warnings(ada)
 
-# workaround for GNU GCC poor AVX load/store code generation
-if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$"))
-  target_compile_options(ada PRIVATE -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store)
-endif()
-if(ADA_DEVELOPMENT_CHECKS)
-  target_compile_definitions(ada PUBLIC ADA_DEVELOPMENT_CHECKS=1)
-endif()
+# ============================================================================
+# Static Analysis
+# ============================================================================
+# Enable clang-tidy and cppcheck if requested
+ada_enable_static_analyzers(ada)
+# ============================================================================
+# Standard Settings & Compile Definitions
+# ============================================================================
+# Apply standard Ada settings (development checks, logging, testing flags, etc.)
+ada_set_standard_settings(ada)
 
-if(ADA_SANITIZE)
-  target_compile_options(ada PUBLIC -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
-  target_compile_definitions(ada PUBLIC ASAN_OPTIONS=detect_leaks=1)
-  target_link_libraries(ada PUBLIC -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
-endif()
-if(ADA_SANITIZE_WITHOUT_LEAKS)
-  target_compile_options(ada PUBLIC -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
-  target_link_libraries(ada PUBLIC -fsanitize=address  -fno-omit-frame-pointer -fno-sanitize-recover=all)
-endif()
+# ============================================================================
+# Sanitizers
+# ============================================================================
+# Apply sanitizer flags if enabled
+ada_set_sanitizer_flags(ada)
 
-if(ADA_LOGGING)
-  target_compile_definitions(ada PRIVATE ADA_LOGGING=1)
-endif()
-
-if(ADA_TESTING)
-  target_compile_definitions(ada PRIVATE ADA_TESTING=1)
-endif()
-
-if(ADA_INCLUDE_URL_PATTERN)
-  target_compile_definitions(ada PRIVATE ADA_INCLUDE_URL_PATTERN=1)
-else()
-  target_compile_definitions(ada PRIVATE ADA_INCLUDE_URL_PATTERN=0)
-endif()
-
-if (ADA_USE_SIMDUTF)
+# ============================================================================
+# Optional Dependencies
+# ============================================================================
+# SIMDUTF for accelerated Unicode processing
+if(ADA_USE_SIMDUTF)
   target_link_libraries(ada PRIVATE simdutf)
   target_compile_definitions(ada PRIVATE ADA_USE_SIMDUTF)
+  message(STATUS "Ada library: SIMDUTF support enabled")
 endif()
