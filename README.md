@@ -301,7 +301,7 @@ CMake project, after having installed ada on your system.
 
 ## Contributing
 
-Contributors are encouraged to read our [AI Tool Policy](AIToolPolicy.md).
+Contributors are encouraged to read our [AI Tool Policy](AI_USAGE_POLICY.md).
 
 
 ### Building
