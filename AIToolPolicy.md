@@ -26,7 +26,7 @@ contributions:
 ## Extractive Contributions
 
 The reason for our "human-in-the-loop" contribution policy is that processing
-patches, PRs, RFCs, and comments to LLVM is not free -- it takes a lot of
+patches, PRs, RFCs, and comments is not free -- it takes a lot of
 maintainer time and energy to review those contributions! Sending the
 unreviewed output of an LLM to open source project maintainers *extracts* work
 from them in the form of design and code review, so we call this kind of
