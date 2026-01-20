@@ -301,6 +301,9 @@ CMake project, after having installed ada on your system.
 
 ## Contributing
 
+Contributors are encouraged to read our [AI Tool Policy](AIToolPolicy.md).
+
+
 ### Building
 
 Ada uses cmake as a build system, but also supports Bazel. It's recommended you to run the following 
