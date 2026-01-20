@@ -8,7 +8,7 @@ body:
 
         Please fill in as much of the following form as you're able.
 
-        Contributors are encouraged to read our AI Tool Policy, see AIToolPolicy.md.
+        Contributors are encouraged to read our AI Usage Policy, see AI_USAGE_POLICY.md.
   - type: input
     attributes:
       label: Version
