@@ -1,4 +1,4 @@
-# AI Tool Use Policy
+# AI Usage Policy
 
 Contributors can use whatever tools they would like to
 craft their contributions, but there must be a **human in the loop**.
