@@ -205,16 +205,17 @@ namespace ada {
     std::cerr << "FAIL: " << (MESSAGE) << std::endl; \
     abort();                                         \
   } while (0);
-#define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)                                    \
-  do {                                                                         \
-    if (LHS != RHS) {                                                          \
-      std::cerr << "Mismatch: '" << LHS << "' - '" << RHS << "'" << std::endl; \
-      ADA_FAIL(MESSAGE);                                                       \
-    }                                                                          \
+#define ADA_ASSERT_EQUAL(LHS, RHS, MESSAGE)                          \
+  do {                                                               \
+    if ((LHS) != (RHS)) {                                            \
+      std::cerr << "Mismatch: '" << (LHS) << "' - '" << (RHS) << "'" \
+                << std::endl;                                        \
+      ADA_FAIL(MESSAGE);                                             \
+    }                                                                \
   } while (0);
 #define ADA_ASSERT_TRUE(COND)                                               \
   do {                                                                      \
-    if (!(COND)) {                                                          \
+    if (!((COND))) {                                                        \
       std::cerr << "Assert at line " << __LINE__ << " of file " << __FILE__ \
                 << std::endl;                                               \
       ADA_FAIL(ADA_STR(COND));                                              \
@@ -227,11 +228,11 @@ namespace ada {
 #endif
 
 #ifdef ADA_VISUAL_STUDIO
-#define ADA_ASSUME(COND) __assume(COND)
+#define ADA_ASSUME(COND) __assume((COND))
 #else
 #define ADA_ASSUME(COND)       \
   do {                         \
-    if (!(COND)) {             \
+    if (!((COND))) {           \
       __builtin_unreachable(); \
     }                          \
   } while (0)

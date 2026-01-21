@@ -34,13 +34,13 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Setup Ninja
         run: sudo apt-get install ninja-build
-      - name: Prepare
-        run: cmake -D ADA_TESTING=ON -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -D ADA_USE_SIMDUTF=${{matrix.simdutf}} -G Ninja -B build
+      - name: Prepare (CMake with ci preset)
+        run: cmake --preset ci -DBUILD_SHARED_LIBS=${{matrix.shared}} -DADA_USE_SIMDUTF=${{matrix.simdutf}} -DADA_BENCHMARKS=ON
         env:
           CXX: ${{matrix.cxx}}
       - name: Build
-        run: cmake --build build -j=4
+        run: cmake --build build/ci -j=4
       - name: Test
-        run: ctest --output-on-failure --test-dir build
+        run: ctest --output-on-failure --test-dir build/ci
       - name: Run default benchmark
-        run: cd build && benchmarks/bench
+        run: cd build/ci && benchmarks/bench

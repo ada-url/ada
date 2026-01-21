@@ -9660,8 +9660,8 @@ std::string to_unicode(std::string_view input) {
           auto utf8_size = simdutf::utf8_length_from_utf32(tmp_buffer.data(),
                                                            tmp_buffer.size());
           std::string final_utf8(utf8_size, '\0');
-          simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
-                                         final_utf8.data());
+          [[maybe_unused]] auto converted_size = simdutf::convert_utf32_to_utf8(
+              tmp_buffer.data(), tmp_buffer.size(), final_utf8.data());
 #else
           auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
                                                              tmp_buffer.size());

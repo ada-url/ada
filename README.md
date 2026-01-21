@@ -306,8 +306,28 @@ Contributors are encouraged to read our [AI Tool Policy](AI_USAGE_POLICY.md).
 
 ### Building
 
-Ada uses cmake as a build system, but also supports Bazel. It's recommended you to run the following 
-commands to build it locally.
+Ada uses CMake as a build system (also supports Bazel). **Ada now provides CMake presets for simplified building!**
+
+#### Using CMake Presets (Recommended)
+
+```bash
+# Development build with tests and quality checks
+cmake --preset dev
+cmake --build build/dev
+ctest --test-dir build/dev
+
+# Release build (optimized, library only)
+cmake --preset release
+cmake --build build/release
+
+# With Ninja for faster builds
+cmake --preset dev-ninja
+cmake --build build/dev-ninja
+```
+
+See [CLAUDE.md](CLAUDE.md) for the full preset guide, or run `cmake --list-presets` to see all available presets.
+
+#### Traditional CMake (Still Supported)
 
 Without tests:
 
@@ -327,7 +347,13 @@ With tests (requires available local packages):
 
 Ada provides several CMake options to customize the build:
 
-- `ADA_USE_SIMDUTF`: Enables SIMD-accelerated Unicode processing via simdutf (default: OFF)
+- `ADA_DEVELOPER_MODE`: Enable all quality checks (warnings as errors, static analyzers, development checks) (default: OFF)
+- `ADA_TESTING`: Enable building tests (default: OFF)
+- `ADA_BENCHMARKS`: Enable building benchmarks (default: OFF)
+- `ADA_USE_SIMDUTF`: Enable SIMD-accelerated Unicode processing via simdutf (default: OFF)
+- `ADA_TOOLS`: Build CLI tools like adaparse (default: OFF)
+
+For a complete list of options, see [CLAUDE.md](CLAUDE.md) or [docs/CMAKE_BEST_PRACTICES.md](docs/CMAKE_BEST_PRACTICES.md).
 
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
 
