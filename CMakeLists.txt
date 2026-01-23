@@ -25,7 +25,7 @@ option(ADA_USE_SIMDUTF "Whether to use SIMDUTF for IDNA" OFF)
 # projects as submodules or subdirectories (via FetchContent) can lead to
 # errors due to CPM, so this is here to support disabling all the testing
 # and tooling for ada if one only wishes to use the ada library.
-if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
+if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS OR ADA_USE_SIMDUTF)
   include(cmake/CPM.cmake)
   # CPM requires git as an implicit dependency
   # We use googletest in the tests
@@ -90,15 +90,15 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS)
   if (ADA_TESTING AND EMSCRIPTEN)
     add_subdirectory(tests/wasm)
   endif(ADA_TESTING AND EMSCRIPTEN)
-endif()
 
-if(ADA_USE_SIMDUTF)
-  CPMAddPackage(
-    NAME simdutf
-    GITHUB_REPOSITORY simdutf/simdutf
-    VERSION 7.3.2
-    OPTIONS "SIMDUTF_TESTS OFF" "SIMDUTF_TOOLS OFF"
-  )
+  if(ADA_USE_SIMDUTF)
+    CPMAddPackage(
+      NAME simdutf
+      GITHUB_REPOSITORY simdutf/simdutf
+      VERSION 7.3.2
+      OPTIONS "SIMDUTF_TESTS OFF" "SIMDUTF_TOOLS OFF"
+    )
+  endif()
 endif()
 
 add_library(ada::ada ALIAS ada)
