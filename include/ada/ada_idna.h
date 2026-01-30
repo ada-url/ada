@@ -1,4 +1,4 @@
-/* auto-generated on 2025-03-08 13:17:11 -0500. Do not edit! */
+/* auto-generated on 2026-01-30 12:00:02 -0500. Do not edit! */
 /* begin file include/idna.h */
 #ifndef ADA_IDNA_H
 #define ADA_IDNA_H
