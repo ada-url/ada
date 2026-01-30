@@ -1,3 +1,4 @@
+// NOLINTBEGIN: this is an auto-generated file
 /* auto-generated on 2026-01-30 12:00:02 -0500. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
@@ -10323,3 +10324,4 @@ bool valid_name_code_point(char32_t code_point, bool first) {
 }  // namespace ada::idna
 /* end file src/identifier.cpp */
 /* end file src/idna.cpp */
+// NOLINTEND
