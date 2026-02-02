@@ -45,6 +45,10 @@ on:
         default: 'OFF'
 
       # Windows-specific
+      generator:
+        type: string
+        required: false
+        default: 'Ninja'
       arch:
         type: string
         required: false
@@ -130,13 +134,19 @@ jobs:
         if: ${{ !inputs.use_run_on_arch }}
         shell: bash
         run: |
-          CMAKE_ARGS="-G Ninja -B build"
+          CMAKE_ARGS="-G \"${{ inputs.generator }}\" -B build"
           CMAKE_ARGS="$CMAKE_ARGS -DADA_TESTING=${{ inputs.testing }}"
           CMAKE_ARGS="$CMAKE_ARGS -DADA_BENCHMARKS=${{ inputs.benchmarks }}"
           CMAKE_ARGS="$CMAKE_ARGS -DBUILD_SHARED_LIBS=${{ inputs.shared }}"
           CMAKE_ARGS="$CMAKE_ARGS -DADA_USE_SIMDUTF=${{ inputs.simdutf }}"
-          if [ -n "${{ inputs.build_type }}" ]; then
+          # For multi-config generators (Visual Studio), don't set CMAKE_BUILD_TYPE
+          # For single-config generators (Ninja, Make), set it
+          if [[ "${{ inputs.generator }}" != *"Visual Studio"* ]] && [ -n "${{ inputs.build_type }}" ]; then
             CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}"
+          fi
+          # Visual Studio generator: add architecture
+          if [ -n "${{ inputs.arch }}" ]; then
+            CMAKE_ARGS="$CMAKE_ARGS -A ${{ inputs.arch }}"
           fi
           if [ -n "${{ inputs.toolchain_file }}" ]; then
             CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${{ inputs.toolchain_file }}"
@@ -151,14 +161,21 @@ jobs:
             export QEMU_CPU="${{ inputs.qemu_cpu }}"
           fi
           echo "Running: cmake $CMAKE_ARGS"
-          cmake $CMAKE_ARGS
+          eval cmake $CMAKE_ARGS
         env:
           CXX: ${{ inputs.cxx }}
           CXXFLAGS: ${{ inputs.cxxflags }}
 
       - name: Build
         if: ${{ !inputs.use_run_on_arch }}
-        run: cmake --build build -j=4
+        shell: bash
+        run: |
+          BUILD_ARGS="--build build -j=4"
+          # For multi-config generators (Visual Studio), specify config at build time
+          if [[ "${{ inputs.generator }}" == *"Visual Studio"* ]] && [ -n "${{ inputs.build_type }}" ]; then
+            BUILD_ARGS="$BUILD_ARGS --config ${{ inputs.build_type }}"
+          fi
+          cmake $BUILD_ARGS
 
       - name: Test
         if: ${{ !inputs.use_run_on_arch && inputs.run_tests }}
@@ -170,7 +187,12 @@ jobs:
           if [ -n "${{ inputs.qemu_cpu }}" ]; then
             export QEMU_CPU="${{ inputs.qemu_cpu }}"
           fi
-          ctest --output-on-failure --test-dir build
+          TEST_ARGS="--output-on-failure --test-dir build"
+          # For multi-config generators (Visual Studio), specify config at test time
+          if [[ "${{ inputs.generator }}" == *"Visual Studio"* ]] && [ -n "${{ inputs.build_type }}" ]; then
+            TEST_ARGS="$TEST_ARGS -C ${{ inputs.build_type }}"
+          fi
+          ctest $TEST_ARGS
 
       - name: Run benchmarks
         if: ${{ !inputs.use_run_on_arch && inputs.run_benchmarks }}

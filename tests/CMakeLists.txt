@@ -52,7 +52,18 @@ endif()
 macro(add_gtest_test exe cpp)
   add_executable(${exe} ${cpp})
   target_link_libraries(${exe} PRIVATE simdjson GTest::gtest_main)
-  gtest_discover_tests(${exe} PROPERTIES TEST_DISCOVERY_TIMEOUT 600)
+  # Use PRE_TEST discovery mode for cross-compilation where the test binary
+  # cannot be executed at build time (e.g., LoongArch via QEMU).
+  # Use POST_BUILD (default) for native builds to avoid DLL/PATH issues on Windows.
+  if(CMAKE_CROSSCOMPILING)
+    set(GTEST_DISCOVERY_MODE PRE_TEST)
+  else()
+    set(GTEST_DISCOVERY_MODE POST_BUILD)
+  endif()
+  gtest_discover_tests(${exe}
+    DISCOVERY_MODE ${GTEST_DISCOVERY_MODE}
+    PROPERTIES TEST_DISCOVERY_TIMEOUT 600
+  )
   set_source_files_properties(${cpp} PROPERTIES SKIP_LINTING ON)
 endmacro()
 
