@@ -1,4 +1,4 @@
-name: Ubuntu 22.04
+name: Ubuntu
 
 on:
   pull_request:
@@ -21,26 +21,208 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ubuntu-build:
+  # Main build matrix (Ubuntu 22.04 x86_64 and ARM64)
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-22.04, ubuntu-22.04-arm]
+        shared: [ON, OFF]
+        cxx: [g++-12, clang++-15]
+        simdutf: [OFF, ON]
+    name: build (${{ matrix.runner }}, ${{ matrix.cxx }}, shared=${{ matrix.shared }}, simdutf=${{ matrix.simdutf }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ${{ matrix.runner }}
+      cxx: ${{ matrix.cxx }}
+      shared: ${{ matrix.shared }}
+      simdutf: ${{ matrix.simdutf }}
+      benchmarks: 'ON'
+      run_benchmarks: true
+
+  # Installation test (Ubuntu 24.04)
+  install:
     strategy:
       fail-fast: false
       matrix:
         shared: [ON, OFF]
-        cxx: [g++-12, clang++-15]
-        runs-on: [ubuntu-22.04, ubuntu-22.04-arm]
-        simdutf: [OFF, ON]
-    runs-on: ${{matrix.runs-on}}
+        cxx: [g++-12, clang++]
+    name: install (${{ matrix.cxx }}, shared=${{ matrix.shared }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ubuntu-24.04
+      cxx: ${{ matrix.cxx }}
+      shared: ${{ matrix.shared }}
+      cmake_args: '-DCMAKE_INSTALL_PREFIX:PATH=destination'
+      run_install: true
+
+  # Pedantic build - fails on compiler warnings
+  pedantic:
+    strategy:
+      fail-fast: false
+      matrix:
+        shared: [ON, OFF]
+    name: pedantic (shared=${{ matrix.shared }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ubuntu-22.04
+      cxx: g++-12
+      cxxflags: '-Werror -Wextra -Wno-unused-parameter -Wimplicit-fallthrough'
+      shared: ${{ matrix.shared }}
+
+  # Release build
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        cxx: [g++-12, clang++-14]
+    name: release (${{ matrix.cxx }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ubuntu-22.04
+      cxx: ${{ matrix.cxx }}
+      build_type: Release
+      testing: 'OFF'
+
+  # Address Sanitizer
+  sanitized:
+    strategy:
+      fail-fast: false
+      matrix:
+        shared: [ON, OFF]
+    name: asan (shared=${{ matrix.shared }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ubuntu-22.04
+      cxx: g++-12
+      shared: ${{ matrix.shared }}
+      cmake_args: '-DADA_SANITIZE=ON -DADA_DEVELOPMENT_CHECKS=ON'
+
+  # Undefined Behavior Sanitizer
+  sanitize-undefined:
+    strategy:
+      fail-fast: false
+      matrix:
+        shared: [ON, OFF]
+    name: ubsan (shared=${{ matrix.shared }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ubuntu-22.04
+      cxx: g++-12
+      shared: ${{ matrix.shared }}
+      cmake_args: '-DADA_SANITIZE_UNDEFINED=ON -DADA_DEVELOPMENT_CHECKS=ON'
+
+  # s390x via QEMU
+  s390x:
+    name: s390x
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ubuntu-latest
+      use_run_on_arch: true
+      run_on_arch_arch: s390x
+      run_on_arch_distro: ubuntu_latest
+      run_on_arch_install: |
+        apt-get update -q -y
+        apt-get install -y cmake make g++-12 gcc-12 git ninja-build
+      run_on_arch_run: |
+        CC=gcc-12 CXX=g++-12 cmake -D ADA_TESTING=ON -DCMAKE_BUILD_TYPE=Release -G Ninja -B build
+        rm -r -f dependencies
+        CC=gcc-12 CXX=g++-12 cmake --build build -j=4
+        ctest --output-on-failure --test-dir build
+
+  # LoongArch64 via cross-compilation + QEMU
+  loongarch64:
+    name: loongarch64
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ubuntu-24.04
+      toolchain_file: cmake/toolchains-dev/loongarch64.cmake
+      simdutf: 'ON'
+      build_type: Release
+      qemu_ld_prefix: '/usr/loongarch64-linux-gnu'
+      qemu_cpu: 'la464'
+      setup_script: |
+        sudo apt-get update -y
+        sudo apt-get install -y cmake curl ninja-build \
+                                g++-14-loongarch64-linux-gnu \
+                                gcc-14-loongarch64-linux-gnu-base \
+                                gcc-14-loongarch64-linux-gnu
+        sudo curl -L https://github.com/loongson/build-tools/releases/download/2025.06.06/qemu-loongarch64 --output /usr/local/bin/qemu-loongarch64
+        sudo chmod +x /usr/local/bin/qemu-loongarch64
+
+  # RISC-V Vector Extension via cross-compilation + QEMU
+  riscv64-rvv:
+    name: riscv64-rvv
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ubuntu-24.04
+      toolchain_file: cmake/toolchains-dev/riscv64-rvv.cmake
+      simdutf: 'ON'
+      build_type: Release
+      qemu_ld_prefix: '/usr/riscv64-linux-gnu'
+      qemu_cpu: 'rv64,v=on,vlen=128'
+      setup_script: |
+        sudo apt-get update -y
+        sudo apt-get install -y cmake curl ninja-build \
+                                g++-riscv64-linux-gnu \
+                                gcc-riscv64-linux-gnu \
+                                qemu-user-static qemu-user
+
+  # Emscripten (WebAssembly)
+  emscripten:
+    name: emscripten
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Setup Ninja
-        run: sudo apt-get install ninja-build
-      - name: Prepare
-        run: cmake -D ADA_TESTING=ON -D ADA_BENCHMARKS=ON -DBUILD_SHARED_LIBS=${{matrix.shared}} -D ADA_USE_SIMDUTF=${{matrix.simdutf}} -G Ninja -B build
-        env:
-          CXX: ${{matrix.cxx}}
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+      - uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
+      - name: Verify
+        run: emcc -v
+      - name: Configure
+        run: emcmake cmake -B build -DADA_TESTING=ON -DADA_TOOLS=OFF
       - name: Build
-        run: cmake --build build -j=4
+        run: cmake --build build
       - name: Test
-        run: ctest --output-on-failure --test-dir build
-      - name: Run default benchmark
-        run: cd build && benchmarks/bench
+        run: ctest --test-dir build
+
+  # Alpine Linux (musl libc)
+  alpine:
+    name: alpine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup Alpine container
+        run: |
+          docker run -w /src -dit --name alpine -v $PWD:/src alpine:latest
+          echo 'docker exec alpine "$@";' > ./alpine.sh
+          chmod +x ./alpine.sh
+      - name: Install packages
+        run: |
+          ./alpine.sh apk update
+          ./alpine.sh apk add build-base cmake g++ linux-headers git bash icu-dev
+      - name: Configure
+        run: ./alpine.sh cmake -DADA_TESTING=ON -DADA_BENCHMARKS=ON -B build
+      - name: Build
+        run: ./alpine.sh cmake --build build
+      - name: Test
+        run: ./alpine.sh ctest --output-on-failure --test-dir build
+
+  # Debian pkg-config test
+  pkg-config:
+    name: pkg-config
+    runs-on: ubuntu-latest
+    container:
+      image: debian:12
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install dependencies
+        run: |
+          apt -y update
+          apt -y --no-install-recommends install g++ cmake make pkg-config
+      - name: Build and install
+        run: |
+          cmake -B build
+          cmake --build build
+          cmake --install build
+      - name: Test pkg-config
+        run: pkg-config --cflags --libs ada
