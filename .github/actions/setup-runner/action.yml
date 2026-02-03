@@ -1,0 +1,23 @@
+name: 'Setup runner environment'
+description: 'Sets up runner environment with Ninja and proper toolchain for building Ada'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build
+
+    - name: Setup macOS
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install ninja
+
+    - name: Setup Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        choco install ninja

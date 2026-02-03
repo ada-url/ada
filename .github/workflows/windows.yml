@@ -1,0 +1,54 @@
+name: Windows
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # MSVC builds (use Visual Studio generator for native MSVC support)
+  msvc:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { build_type: Release, shared: OFF, arch: x64, cmake_args: '' }
+          - { build_type: Debug, shared: OFF, arch: x64, cmake_args: '-DADA_DEVELOPMENT_CHECKS=ON' }
+          - { build_type: Debug, shared: ON, arch: x64, cmake_args: '-DADA_DEVELOPMENT_CHECKS=ON' }
+    name: msvc (${{ matrix.build_type }}, shared=${{ matrix.shared }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: windows-2025
+      generator: 'Visual Studio 17 2022'
+      arch: ${{ matrix.arch }}
+      shared: ${{ matrix.shared }}
+      build_type: ${{ matrix.build_type }}
+      cmake_args: ${{ matrix.cmake_args }}
+
+  # ClangCL builds
+  clangcl:
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+    name: clangcl (${{ matrix.build_type }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: windows-2025
+      build_type: ${{ matrix.build_type }}
+      cmake_args: '-DADA_DEVELOPMENT_CHECKS=ON -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl'

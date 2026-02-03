@@ -1,0 +1,220 @@
+name: 'Build'
+
+on:
+  workflow_call:
+    inputs:
+      # Runner configuration
+      runner:
+        type: string
+        required: true
+
+      # Build configuration
+      cxx:
+        type: string
+        required: false
+        default: ''
+      cxxflags:
+        type: string
+        required: false
+        default: ''
+      shared:
+        type: string
+        required: false
+        default: 'OFF'
+      simdutf:
+        type: string
+        required: false
+        default: 'OFF'
+      build_type:
+        type: string
+        required: false
+        default: ''
+
+      # CMake options
+      cmake_args:
+        type: string
+        required: false
+        default: ''
+      testing:
+        type: string
+        required: false
+        default: 'ON'
+      benchmarks:
+        type: string
+        required: false
+        default: 'OFF'
+
+      # Windows-specific
+      generator:
+        type: string
+        required: false
+        default: 'Ninja'
+      arch:
+        type: string
+        required: false
+        default: ''
+      toolset:
+        type: string
+        required: false
+        default: ''
+
+      # Post-build actions
+      run_tests:
+        type: boolean
+        required: false
+        default: true
+      run_benchmarks:
+        type: boolean
+        required: false
+        default: false
+      run_install:
+        type: boolean
+        required: false
+        default: false
+
+      # Cross-compilation
+      toolchain_file:
+        type: string
+        required: false
+        default: ''
+      qemu_cpu:
+        type: string
+        required: false
+        default: ''
+      qemu_ld_prefix:
+        type: string
+        required: false
+        default: ''
+      setup_script:
+        type: string
+        required: false
+        default: ''
+
+      # run-on-arch-action (for s390x, etc.)
+      use_run_on_arch:
+        type: boolean
+        required: false
+        default: false
+      run_on_arch_arch:
+        type: string
+        required: false
+        default: ''
+      run_on_arch_distro:
+        type: string
+        required: false
+        default: ''
+      run_on_arch_install:
+        type: string
+        required: false
+        default: ''
+      run_on_arch_run:
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Runner
+        if: ${{ !inputs.use_run_on_arch }}
+        uses: ./.github/actions/setup-runner
+
+      - name: Setup environment
+        if: ${{ !inputs.use_run_on_arch && inputs.setup_script != '' }}
+        shell: bash
+        run: ${{ inputs.setup_script }}
+
+      - name: Configure
+        if: ${{ !inputs.use_run_on_arch }}
+        shell: bash
+        run: |
+          CMAKE_ARGS="-G \"${{ inputs.generator }}\" -B build"
+          CMAKE_ARGS="$CMAKE_ARGS -DADA_TESTING=${{ inputs.testing }}"
+          CMAKE_ARGS="$CMAKE_ARGS -DADA_BENCHMARKS=${{ inputs.benchmarks }}"
+          CMAKE_ARGS="$CMAKE_ARGS -DBUILD_SHARED_LIBS=${{ inputs.shared }}"
+          CMAKE_ARGS="$CMAKE_ARGS -DADA_USE_SIMDUTF=${{ inputs.simdutf }}"
+          # For multi-config generators (Visual Studio), don't set CMAKE_BUILD_TYPE
+          # For single-config generators (Ninja, Make), set it
+          if [[ "${{ inputs.generator }}" != *"Visual Studio"* ]] && [ -n "${{ inputs.build_type }}" ]; then
+            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}"
+          fi
+          # Visual Studio generator: add architecture
+          if [ -n "${{ inputs.arch }}" ]; then
+            CMAKE_ARGS="$CMAKE_ARGS -A ${{ inputs.arch }}"
+          fi
+          if [ -n "${{ inputs.toolchain_file }}" ]; then
+            CMAKE_ARGS="$CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${{ inputs.toolchain_file }}"
+          fi
+          if [ -n "${{ inputs.cmake_args }}" ]; then
+            CMAKE_ARGS="$CMAKE_ARGS ${{ inputs.cmake_args }}"
+          fi
+          if [ -n "${{ inputs.qemu_ld_prefix }}" ]; then
+            export QEMU_LD_PREFIX="${{ inputs.qemu_ld_prefix }}"
+          fi
+          if [ -n "${{ inputs.qemu_cpu }}" ]; then
+            export QEMU_CPU="${{ inputs.qemu_cpu }}"
+          fi
+          echo "Running: cmake $CMAKE_ARGS"
+          eval cmake $CMAKE_ARGS
+        env:
+          CXX: ${{ inputs.cxx }}
+          CXXFLAGS: ${{ inputs.cxxflags }}
+
+      - name: Build
+        if: ${{ !inputs.use_run_on_arch }}
+        shell: bash
+        run: |
+          BUILD_ARGS="--build build -j=4"
+          # For multi-config generators (Visual Studio), specify config at build time
+          if [[ "${{ inputs.generator }}" == *"Visual Studio"* ]] && [ -n "${{ inputs.build_type }}" ]; then
+            BUILD_ARGS="$BUILD_ARGS --config ${{ inputs.build_type }}"
+          fi
+          cmake $BUILD_ARGS
+
+      - name: Test
+        if: ${{ !inputs.use_run_on_arch && inputs.run_tests }}
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.qemu_ld_prefix }}" ]; then
+            export QEMU_LD_PREFIX="${{ inputs.qemu_ld_prefix }}"
+          fi
+          if [ -n "${{ inputs.qemu_cpu }}" ]; then
+            export QEMU_CPU="${{ inputs.qemu_cpu }}"
+          fi
+          TEST_ARGS="--output-on-failure --test-dir build"
+          # For multi-config generators (Visual Studio), specify config at test time
+          if [[ "${{ inputs.generator }}" == *"Visual Studio"* ]] && [ -n "${{ inputs.build_type }}" ]; then
+            TEST_ARGS="$TEST_ARGS -C ${{ inputs.build_type }}"
+          fi
+          ctest $TEST_ARGS
+
+      - name: Run benchmarks
+        if: ${{ !inputs.use_run_on_arch && inputs.run_benchmarks }}
+        shell: bash
+        run: cd build && benchmarks/bench
+
+      - name: Install and test
+        if: ${{ !inputs.use_run_on_arch && inputs.run_install }}
+        shell: bash
+        run: |
+          cmake --install build
+          cmake -DCMAKE_INSTALL_PREFIX:PATH=../../destination -S tests/installation -B build_install_test
+          cmake --build build_install_test
+          ./build_install_test/main
+
+      # run-on-arch path (for s390x and similar architectures)
+      - uses: uraimo/run-on-arch-action@d94c13912ea685de38fccc1109385b83fd79427d # v3.0.1
+        if: ${{ inputs.use_run_on_arch }}
+        name: Build and Test
+        with:
+          arch: ${{ inputs.run_on_arch_arch }}
+          distro: ${{ inputs.run_on_arch_distro }}
+          githubToken: ${{ github.token }}
+          install: ${{ inputs.run_on_arch_install }}
+          run: ${{ inputs.run_on_arch_run }}

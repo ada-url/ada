@@ -1,0 +1,36 @@
+name: macOS
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-14, macos-15, macos-26]
+        shared: [OFF]
+    name: build (${{ matrix.runner }}, shared=${{ matrix.shared }})
+    uses: ./.github/workflows/_build.yaml
+    with:
+      runner: ${{ matrix.runner }}
+      shared: ${{ matrix.shared }}
+      cmake_args: '-DCMAKE_INSTALL_PREFIX:PATH=destination'
+      run_install: true
