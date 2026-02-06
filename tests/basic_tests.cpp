@@ -568,3 +568,72 @@ TYPED_TEST(basic_tests, test_workerd_issue_5144_4) {
   ASSERT_TRUE(pattern->exec(std::move(dummy_init)));
   SUCCEED();
 }
+
+// https://github.com/ada-url/ada/issues/1076
+// Setting pathname to a "//" path on a non-special URL without authority but
+// with a query or hash component should not trigger a validate() assertion
+// failure caused by stale search_start/hash_start offsets after "/." insertion.
+TEST(basic_tests, issue_1076_set_pathname_dashdot_with_query) {
+  // Non-special URL with a query: no authority, has search component
+  auto url = ada::parse<ada::url_aggregator>("foo:/?q");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->validate());
+  ASSERT_TRUE(url->set_pathname("//bar"));
+  ASSERT_TRUE(url->validate());
+  ASSERT_EQ(url->get_pathname(), "//bar");
+  ASSERT_EQ(url->get_search(), "?q");
+  SUCCEED();
+}
+
+TEST(basic_tests, issue_1076_set_pathname_dashdot_with_hash) {
+  // Non-special URL with a hash: no authority, has hash component
+  auto url = ada::parse<ada::url_aggregator>("foo:/#h");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->validate());
+  ASSERT_TRUE(url->set_pathname("//bar"));
+  ASSERT_TRUE(url->validate());
+  ASSERT_EQ(url->get_pathname(), "//bar");
+  ASSERT_EQ(url->get_hash(), "#h");
+  SUCCEED();
+}
+
+TEST(basic_tests, issue_1076_set_pathname_dashdot_with_query_and_hash) {
+  // Non-special URL with both query and hash
+  auto url = ada::parse<ada::url_aggregator>("foo:/?q#h");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->validate());
+  ASSERT_TRUE(url->set_pathname("//bar"));
+  ASSERT_TRUE(url->validate());
+  ASSERT_EQ(url->get_pathname(), "//bar");
+  ASSERT_EQ(url->get_search(), "?q");
+  ASSERT_EQ(url->get_hash(), "#h");
+  SUCCEED();
+}
+
+TEST(basic_tests, issue_1076_blob_with_query) {
+  // blob: scheme with query - similar to existing path_setter_bug test
+  auto url = ada::parse<ada::url_aggregator>("blob:/?q");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->validate());
+  ASSERT_TRUE(url->set_pathname("//p"));
+  ASSERT_TRUE(url->validate());
+  ASSERT_EQ(url->get_pathname(), "//p");
+  ASSERT_EQ(url->get_search(), "?q");
+  SUCCEED();
+}
+
+TEST(basic_tests, issue_1076_setter_sequence) {
+  // Simulates the fuzzer scenario: parse a URL, then call multiple setters
+  // to put it into a vulnerable state before set_pathname
+  auto url = ada::parse<ada::url_aggregator>("foo://host/path?query#hash");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->validate());
+  // Clear the host to remove authority
+  url->set_hostname("");
+  url->set_host("");
+  ASSERT_TRUE(url->validate());
+  // Now set pathname to something starting with //
+  ASSERT_TRUE(url->set_pathname("//newpath"));
+  ASSERT_TRUE(url->validate());
+  SUCCEED();
+}

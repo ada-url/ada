@@ -278,6 +278,12 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
     // output.
     buffer.insert(components.pathname_start, "/.");
     components.pathname_start += 2;
+    if (components.search_start != url_components::omitted) {
+      components.search_start += 2;
+    }
+    if (components.hash_start != url_components::omitted) {
+      components.hash_start += 2;
+    }
   }
 
   uint32_t difference = replace_and_resize(
