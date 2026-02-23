@@ -39,13 +39,14 @@ url_pattern_component<regex_provider>::create_component_match_result(
   auto result =
       url_pattern_component_result{.input = std::move(input), .groups = {}};
 
-  // Optimization: Let's reserve the size.
-  result.groups.reserve(exec_result.size());
-
   // We explicitly start iterating from 0 even though the spec
   // says we should start from 1. This case is handled by the
-  // std_regex_provider.
-  for (size_t index = 0; index < exec_result.size(); index++) {
+  // std_regex_provider which removes the full match from index 0.
+  // Use min() to guard against potential mismatches between
+  // exec_result size and group_name_list size.
+  const size_t size = std::min(exec_result.size(), group_name_list.size());
+  result.groups.reserve(size);
+  for (size_t index = 0; index < size; index++) {
     result.groups.emplace(group_name_list[index],
                           std::move(exec_result[index]));
   }
