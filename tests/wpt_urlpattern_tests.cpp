@@ -80,6 +80,102 @@ TEST(wpt_urlpattern_tests, test_std_out_of_range) {
   SUCCEED();
 }
 
+// Test that patterns with multiple named groups correctly map values.
+// This ensures the capture group index tracking works properly when
+// there are multiple parts generating capture groups.
+TEST(wpt_urlpattern_tests, multiple_capture_groups_correct_mapping) {
+  // Pattern: /:a/:b - two named segments
+  // Should correctly map group "a" to first segment and "b" to second
+  {
+    auto init = ada::url_pattern_init{};
+    init.pathname = "/:a/:b";
+    auto pattern = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(pattern) << "Pattern should parse successfully";
+
+    auto input = ada::url_pattern_init{};
+    input.pathname = "/foo/bar";
+    auto result = pattern->exec(input, nullptr);
+    ASSERT_TRUE(result) << "exec should succeed";
+    ASSERT_TRUE(result->has_value()) << "should have a match";
+
+    auto& pathname_groups = result->value().pathname.groups;
+    ASSERT_EQ(pathname_groups.size(), 2u);
+    EXPECT_EQ(pathname_groups.at("a").value_or(""), "foo");
+    EXPECT_EQ(pathname_groups.at("b").value_or(""), "bar");
+  }
+
+  // Pattern: /:a([a-z]+)/:b - first segment with custom regex
+  {
+    auto init = ada::url_pattern_init{};
+    init.pathname = "/:a([a-z]+)/:b";
+    auto pattern = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(pattern) << "Pattern should parse successfully";
+
+    auto input = ada::url_pattern_init{};
+    input.pathname = "/hello/world";
+    auto result = pattern->exec(input, nullptr);
+    ASSERT_TRUE(result) << "exec should succeed";
+    ASSERT_TRUE(result->has_value()) << "should have a match";
+
+    auto& pathname_groups = result->value().pathname.groups;
+    ASSERT_EQ(pathname_groups.size(), 2u);
+    EXPECT_EQ(pathname_groups.at("a").value_or(""), "hello");
+    EXPECT_EQ(pathname_groups.at("b").value_or(""), "world");
+  }
+
+  // Pattern: /:a/:b/:c - three named segments
+  {
+    auto init = ada::url_pattern_init{};
+    init.pathname = "/:a/:b/:c";
+    auto pattern = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(pattern) << "Pattern should parse successfully";
+
+    auto input = ada::url_pattern_init{};
+    input.pathname = "/x/y/z";
+    auto result = pattern->exec(input, nullptr);
+    ASSERT_TRUE(result) << "exec should succeed";
+    ASSERT_TRUE(result->has_value()) << "should have a match";
+
+    auto& pathname_groups = result->value().pathname.groups;
+    ASSERT_EQ(pathname_groups.size(), 3u);
+    EXPECT_EQ(pathname_groups.at("a").value_or(""), "x");
+    EXPECT_EQ(pathname_groups.at("b").value_or(""), "y");
+    EXPECT_EQ(pathname_groups.at("c").value_or(""), "z");
+  }
+
+  SUCCEED();
+}
+
+// Verify that patterns with parentheses in regex values don't parse
+// (URLPattern spec doesn't allow unescaped parentheses in custom regex).
+// This documents the expected behavior and ensures we don't crash.
+TEST(wpt_urlpattern_tests, nested_parens_patterns_rejected) {
+  // These patterns should fail to parse because URLPattern doesn't allow
+  // unescaped parentheses inside custom regex values
+  {
+    auto init = ada::url_pattern_init{};
+    init.pathname = "/:id((.))";
+    auto pattern = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_FALSE(pattern) << "Pattern with nested parens should not parse";
+  }
+
+  {
+    auto init = ada::url_pattern_init{};
+    init.pathname = "/((.))";
+    auto pattern = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_FALSE(pattern) << "Pattern with nested parens should not parse";
+  }
+
+  {
+    auto init = ada::url_pattern_init{};
+    init.pathname = "/:id(a(b)c)";
+    auto pattern = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_FALSE(pattern) << "Pattern with nested parens should not parse";
+  }
+
+  SUCCEED();
+}
+
 TEST(wpt_urlpattern_tests, test_regex_difference) {
   // {
   //   "pattern": [{ "pathname": "/foo/bar" }],
