@@ -42,9 +42,8 @@ url_pattern_component<regex_provider>::create_component_match_result(
   // We explicitly start iterating from 0 even though the spec
   // says we should start from 1. This case is handled by the
   // std_regex_provider which removes the full match from index 0.
-  // Use min() to guard against potential mismatches between
-  // exec_result size and group_name_list size.
-  const size_t size = std::min(exec_result.size(), group_name_list.size());
+  ADA_ASSERT_EQUAL(exec_result.size(), group_name_list.size(), "exec_result and group_name_list size mismatch");
+  const size_t size = exec_result.size();
   result.groups.reserve(size);
   for (size_t index = 0; index < size; index++) {
     result.groups.emplace(group_name_list[index],

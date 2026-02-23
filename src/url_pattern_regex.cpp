@@ -38,8 +38,11 @@ std_regex_provider::regex_search(std::string_view input,
   }
   matches.reserve(match_result.size());
   for (size_t i = 1; i < match_result.size(); ++i) {
-    if (auto entry = match_result[i]; entry.matched) {
+    auto entry = match_result[i];
+    if (entry.matched) {
       matches.emplace_back(entry.str());
+    } else {
+      matches.emplace_back(std::nullopt);
     }
   }
   return matches;
