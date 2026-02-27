@@ -21,11 +21,17 @@ option(ADA_BENCHMARKS "Whether to build benchmarks." OFF)
 option(ADA_TOOLS "Whether to build tools." OFF)
 option(ADA_BUILD_SINGLE_HEADER_LIB "Whether to build the lib from the single-header files" OFF)
 option(ADA_USE_SIMDUTF "Whether to use SIMDUTF for IDNA" OFF)
+option(ADA_USE_SYSTEM_SIMDUTF "Whether to use system-installed simdutf" OFF)
 # There are cases where when embedding ada as a dependency for other CMake
 # projects as submodules or subdirectories (via FetchContent) can lead to
 # errors due to CPM, so this is here to support disabling all the testing
 # and tooling for ada if one only wishes to use the ada library.
-if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS OR ADA_USE_SIMDUTF)
+if(ADA_USE_SYSTEM_SIMDUTF AND NOT ADA_USE_SIMDUTF)
+  message(STATUS "ADA_USE_SYSTEM_SIMDUTF=ON implies ADA_USE_SIMDUTF=ON")
+  set(ADA_USE_SIMDUTF ON CACHE BOOL "Whether to use SIMDUTF for IDNA" FORCE)
+endif()
+
+if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS OR (ADA_USE_SIMDUTF AND NOT ADA_USE_SYSTEM_SIMDUTF))
   include(cmake/CPM.cmake)
   # CPM requires git as an implicit dependency
   # We use googletest in the tests
@@ -98,6 +104,13 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS OR ADA_USE_SIMDUTF)
       VERSION 7.3.2
       OPTIONS "SIMDUTF_TESTS OFF" "SIMDUTF_TOOLS OFF"
     )
+  endif()
+endif()
+
+if(ADA_USE_SIMDUTF AND ADA_USE_SYSTEM_SIMDUTF)
+  find_package(simdutf CONFIG REQUIRED)
+  if(TARGET simdutf::simdutf AND NOT TARGET simdutf)
+    add_library(simdutf ALIAS simdutf::simdutf)
   endif()
 endif()
 

@@ -328,6 +328,7 @@ With tests (requires available local packages):
 Ada provides several CMake options to customize the build:
 
 - `ADA_USE_SIMDUTF`: Enables SIMD-accelerated Unicode processing via simdutf (default: OFF)
+- `ADA_USE_SYSTEM_SIMDUTF`: Use system-installed simdutf via CMake config (default: OFF)
 
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
 
