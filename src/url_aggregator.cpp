@@ -670,16 +670,26 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   return true;
 }
 
-bool url_aggregator::set_host(const std::string_view input) {
+bool url_aggregator::set_host(std::string_view input) {
   ada_log("url_aggregator::set_host '", input, "'");
   ADA_ASSERT_TRUE(validate());
+  std::string tmp_buffer;
+  if (helpers::overlaps(input, buffer)) {
+    tmp_buffer = input;
+    input = tmp_buffer;
+  }
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<false>(input);
 }
 
-bool url_aggregator::set_hostname(const std::string_view input) {
+bool url_aggregator::set_hostname(std::string_view input) {
   ada_log("url_aggregator::set_hostname '", input, "'");
   ADA_ASSERT_TRUE(validate());
+  std::string tmp_buffer;
+  if (helpers::overlaps(input, buffer)) {
+    tmp_buffer = input;
+    input = tmp_buffer;
+  }
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<true>(input);
 }
@@ -1250,6 +1260,11 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
 bool url_aggregator::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
   ADA_ASSERT_TRUE(validate());
+  std::string tmp_buffer;
+  if (helpers::overlaps(input, buffer)) {
+    tmp_buffer = input;
+    input = tmp_buffer;
+  }
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (std::ranges::any_of(input, ada::unicode::is_forbidden_host_code_point)) {
     return is_valid = false;
