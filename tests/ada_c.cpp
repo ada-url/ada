@@ -1,8 +1,19 @@
-// gest is a C++ library so we are in C++.
+// gtest is a C++ library so we are in C++.
 #include "gtest/gtest.h"
+#include "simdjson.h"
+#include <filesystem>
 extern "C" {
 #include "ada_c.h"
 }
+
+#ifndef WPT_DATA_DIR
+#define WPT_DATA_DIR "wpt/"
+#endif
+
+static const char* URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
+static const char* ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
+static const char* SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
+static const char* ADA_SETTERS_TESTS_JSON = WPT_DATA_DIR "ada_extra_setters_tests.json";
 
 template <typename T>
 std::string convert_string(const T& input) {
@@ -366,5 +377,215 @@ TEST(ada_c, ada_get_version) {
 
   ASSERT_EQ(raw, std::string_view(buffer));
 
+  SUCCEED();
+}
+
+TEST(ada_c, urltestdata_encoding) {
+  using namespace simdjson;
+  for (auto source : {URLTESTDATA_JSON, ADA_URLTESTDATA_JSON}) {
+    ondemand::parser parser;
+    ASSERT_TRUE(std::filesystem::exists(source)) << "Missing: " << source;
+    padded_string json = padded_string::load(source);
+    ondemand::document doc = parser.iterate(json);
+    try {
+      for (auto element : doc.get_array()) {
+        if (element.type() == ondemand::json_type::string) {
+          continue;
+        } else if (element.type() == ondemand::json_type::object) {
+          ondemand::object object = element.get_object();
+          object.reset();
+
+          std::string_view input{};
+          bool allow_replacement_characters = true;
+          ASSERT_FALSE(object["input"]
+                           .get_string(allow_replacement_characters)
+                           .get(input));
+
+          std::string_view base;
+          ada_url base_url = nullptr;
+          bool has_base = !object["base"].get(base);
+          if (has_base) {
+            base_url = ada_parse(base.data(), base.size());
+            if (!ada_is_valid(base_url)) {
+              ada_free(base_url);
+              bool failure = false;
+              if (!object["failure"].get(failure) && failure == true) {
+                continue;
+              } else {
+                ASSERT_TRUE(false) << "base URL failed to parse: " << base;
+              }
+            }
+          }
+
+          ada_url input_url = has_base
+                                  ? ada_parse_with_base(input.data(),
+                                                        input.size(),
+                                                        base.data(), base.size())
+                                  : ada_parse(input.data(), input.size());
+
+          if (has_base) {
+            ada_free(base_url);
+          }
+
+          bool failure = false;
+          if (!object["failure"].get(failure) && failure == true) {
+            ASSERT_FALSE(ada_is_valid(input_url));
+            ada_free(input_url);
+            continue;
+          }
+
+          ASSERT_TRUE(ada_is_valid(input_url));
+
+          std::string_view protocol = object["protocol"].get_string();
+          ada_string got_protocol = ada_get_protocol(input_url);
+          ASSERT_EQ(std::string_view(got_protocol.data, got_protocol.length),
+                    protocol);
+
+          std::string_view username = object["username"].get_string();
+          ada_string got_username = ada_get_username(input_url);
+          ASSERT_EQ(std::string_view(got_username.data, got_username.length),
+                    username);
+
+          std::string_view password = object["password"].get_string();
+          ada_string got_password = ada_get_password(input_url);
+          ASSERT_EQ(std::string_view(got_password.data, got_password.length),
+                    password);
+
+          std::string_view host = object["host"].get_string();
+          ada_string got_host = ada_get_host(input_url);
+          ASSERT_EQ(std::string_view(got_host.data, got_host.length), host);
+
+          std::string_view hostname = object["hostname"].get_string();
+          ada_string got_hostname = ada_get_hostname(input_url);
+          ASSERT_EQ(std::string_view(got_hostname.data, got_hostname.length),
+                    hostname);
+
+          std::string_view port = object["port"].get_string();
+          ada_string got_port = ada_get_port(input_url);
+          ASSERT_EQ(std::string_view(got_port.data, got_port.length), port);
+
+          std::string_view pathname = object["pathname"].get_string();
+          ada_string got_pathname = ada_get_pathname(input_url);
+          ASSERT_EQ(std::string_view(got_pathname.data, got_pathname.length),
+                    pathname);
+
+          std::string_view search = object["search"].get_string();
+          ada_string got_search = ada_get_search(input_url);
+          ASSERT_EQ(std::string_view(got_search.data, got_search.length),
+                    search);
+
+          std::string_view hash = object["hash"].get_string();
+          ada_string got_hash = ada_get_hash(input_url);
+          ASSERT_EQ(std::string_view(got_hash.data, got_hash.length), hash);
+
+          std::string_view href = object["href"].get_string();
+          ada_string got_href = ada_get_href(input_url);
+          ASSERT_EQ(std::string_view(got_href.data, got_href.length), href);
+
+          std::string_view origin;
+          if (!object["origin"].get(origin)) {
+            ada_owned_string got_origin = ada_get_origin(input_url);
+            ASSERT_EQ(std::string_view(got_origin.data, got_origin.length),
+                      origin);
+            ada_free_owned_string(got_origin);
+          }
+
+          ada_free(input_url);
+        }
+      }
+    } catch (simdjson::simdjson_error& error) {
+      FAIL() << "JSON error: " << error.what() << " in " << source;
+    }
+  }
+  SUCCEED();
+}
+
+TEST(ada_c, setters_tests_encoding) {
+  using namespace simdjson;
+  for (auto source : {SETTERS_TESTS_JSON, ADA_SETTERS_TESTS_JSON}) {
+    ondemand::parser parser;
+    ASSERT_TRUE(std::filesystem::exists(source)) << "Missing: " << source;
+    padded_string json = padded_string::load(source);
+    ondemand::document doc = parser.iterate(json);
+    try {
+      ondemand::object main_object = doc.get_object();
+      for (auto mainfield : main_object) {
+        auto category = mainfield.key().value();
+        ondemand::array cases = mainfield.value();
+        if (category == "comment") {
+          continue;
+        }
+        for (auto element_value : cases) {
+          ondemand::object element = element_value;
+          element.reset();
+          std::string_view new_value = element["new_value"].get_string();
+          std::string_view href = element["href"];
+
+          ada_url base = ada_parse(href.data(), href.size());
+          ASSERT_TRUE(ada_is_valid(base));
+
+          if (category == "protocol") {
+            std::string_view expected = element["expected"]["protocol"];
+            ada_set_protocol(base, new_value.data(), new_value.size());
+            ada_string got = ada_get_protocol(base);
+            ASSERT_EQ(std::string_view(got.data, got.length), expected);
+          } else if (category == "username") {
+            std::string_view expected = element["expected"]["username"];
+            ada_set_username(base, new_value.data(), new_value.size());
+            ada_string got = ada_get_username(base);
+            ASSERT_EQ(std::string_view(got.data, got.length), expected);
+          } else if (category == "password") {
+            std::string_view expected = element["expected"]["password"];
+            ada_set_password(base, new_value.data(), new_value.size());
+            ada_string got = ada_get_password(base);
+            ASSERT_EQ(std::string_view(got.data, got.length), expected);
+          } else if (category == "host") {
+            std::string_view expected;
+            if (!element["expected"]["host"].get(expected)) {
+              ada_set_host(base, new_value.data(), new_value.size());
+              ada_string got = ada_get_host(base);
+              ASSERT_EQ(std::string_view(got.data, got.length), expected);
+            }
+          } else if (category == "hostname") {
+            std::string_view expected;
+            if (!element["expected"]["hostname"].get(expected)) {
+              ada_set_hostname(base, new_value.data(), new_value.size());
+              ada_string got = ada_get_hostname(base);
+              ASSERT_EQ(std::string_view(got.data, got.length), expected);
+            }
+          } else if (category == "port") {
+            std::string_view expected = element["expected"]["port"];
+            ada_set_port(base, new_value.data(), new_value.size());
+            ada_string got = ada_get_port(base);
+            ASSERT_EQ(std::string_view(got.data, got.length), expected);
+          } else if (category == "pathname") {
+            std::string_view expected = element["expected"]["pathname"];
+            ada_set_pathname(base, new_value.data(), new_value.size());
+            ada_string got = ada_get_pathname(base);
+            ASSERT_EQ(std::string_view(got.data, got.length), expected);
+          } else if (category == "search") {
+            std::string_view expected = element["expected"]["search"];
+            ada_set_search(base, new_value.data(), new_value.size());
+            ada_string got = ada_get_search(base);
+            ASSERT_EQ(std::string_view(got.data, got.length), expected);
+          } else if (category == "hash") {
+            std::string_view expected = element["expected"]["hash"];
+            ada_set_hash(base, new_value.data(), new_value.size());
+            ada_string got = ada_get_hash(base);
+            ASSERT_EQ(std::string_view(got.data, got.length), expected);
+          } else if (category == "href") {
+            std::string_view expected = element["expected"]["href"];
+            ada_set_href(base, new_value.data(), new_value.size());
+            ada_string got = ada_get_href(base);
+            ASSERT_EQ(std::string_view(got.data, got.length), expected);
+          }
+
+          ada_free(base);
+        }
+      }
+    } catch (simdjson::simdjson_error& error) {
+      FAIL() << "JSON error: " << error.what() << " in " << source;
+    }
+  }
   SUCCEED();
 }
