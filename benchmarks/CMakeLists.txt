@@ -2,8 +2,12 @@
 CPMAddPackage(
   NAME counters
   GITHUB_REPOSITORY lemire/counters
-  GIT_TAG v2.2.0
+  GIT_TAG v3.0.0
 )
+
+# bench_protocol
+add_executable(bench_protocol bench_protocol.cpp)
+target_link_libraries(bench_protocol PRIVATE ada counters::counters)
 
 # bench_search_params
 add_executable(bench_search_params bench_search_params.cpp)
