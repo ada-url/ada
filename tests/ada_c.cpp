@@ -11,9 +11,11 @@ extern "C" {
 #endif
 
 static const char* URLTESTDATA_JSON = WPT_DATA_DIR "urltestdata.json";
-static const char* ADA_URLTESTDATA_JSON = WPT_DATA_DIR "ada_extra_urltestdata.json";
+static const char* ADA_URLTESTDATA_JSON =
+    WPT_DATA_DIR "ada_extra_urltestdata.json";
 static const char* SETTERS_TESTS_JSON = WPT_DATA_DIR "setters_tests.json";
-static const char* ADA_SETTERS_TESTS_JSON = WPT_DATA_DIR "ada_extra_setters_tests.json";
+static const char* ADA_SETTERS_TESTS_JSON =
+    WPT_DATA_DIR "ada_extra_setters_tests.json";
 
 template <typename T>
 std::string convert_string(const T& input) {
@@ -417,11 +419,10 @@ TEST(ada_c, urltestdata_encoding) {
             }
           }
 
-          ada_url input_url = has_base
-                                  ? ada_parse_with_base(input.data(),
-                                                        input.size(),
-                                                        base.data(), base.size())
-                                  : ada_parse(input.data(), input.size());
+          ada_url input_url =
+              has_base ? ada_parse_with_base(input.data(), input.size(),
+                                             base.data(), base.size())
+                       : ada_parse(input.data(), input.size());
 
           if (has_base) {
             ada_free(base_url);
