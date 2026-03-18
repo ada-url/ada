@@ -5,6 +5,7 @@ CPMAddPackage(
   GIT_TAG v3.0.0
 )
 
+# bench_protocol
 add_executable(bench_protocol bench_protocol.cpp)
 target_link_libraries(bench_protocol PRIVATE ada counters::counters)
 

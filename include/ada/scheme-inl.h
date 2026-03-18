@@ -21,6 +21,7 @@ constexpr std::string_view is_special_list[] = {"http", " ",   "https", "ws",
 // for use with get_special_port
 constexpr uint16_t special_ports[] = {80, 0, 443, 80, 21, 443, 0, 0};
 
+// @private
 // convert a string_view to a 64-bit integer key for fast comparison
 constexpr uint64_t make_key(std::string_view sv) {
   uint64_t val = 0;
@@ -41,6 +42,7 @@ constexpr uint64_t scheme_keys[] = {
     0,                  // 7: sentinel
 };
 
+// @private
 // branchless load of up to 5 characters into a uint64_t, padding with zeros if
 // n < 5
 inline uint64_t branchless_load5(const char *p, size_t n) {
