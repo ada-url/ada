@@ -45,10 +45,10 @@ constexpr uint64_t scheme_keys[] = {
 // n < 5
 inline uint64_t branchless_load5(const char *p, size_t n) {
   uint64_t input = (uint8_t)p[0];
-  input |= ((uint64_t)(uint8_t)p[n > 1] << 8) & -(uint64_t)(n > 1);
-  input |= ((uint64_t)(uint8_t)p[(n > 2) * 2] << 16) & -(uint64_t)(n > 2);
-  input |= ((uint64_t)(uint8_t)p[(n > 3) * 3] << 24) & -(uint64_t)(n > 3);
-  input |= ((uint64_t)(uint8_t)p[(n > 4) * 4] << 32) & -(uint64_t)(n > 4);
+  input |= ((uint64_t)(uint8_t)p[n > 1] << 8) & (0 - (uint64_t)(n > 1));
+  input |= ((uint64_t)(uint8_t)p[(n > 2) * 2] << 16) & (0 - (uint64_t)(n > 2));
+  input |= ((uint64_t)(uint8_t)p[(n > 3) * 3] << 24) & (0 - (uint64_t)(n > 3));
+  input |= ((uint64_t)(uint8_t)p[(n > 4) * 4] << 32) & (0 - (uint64_t)(n > 4));
   return input;
 }
 }  // namespace details
