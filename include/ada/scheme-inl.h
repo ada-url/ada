@@ -41,6 +41,7 @@ constexpr uint64_t scheme_keys[] = {
     0,                  // 7: sentinel
 };
 
+// @private
 // branchless load of up to 5 characters into a uint64_t, padding with zeros if
 // n < 5
 inline uint64_t branchless_load5(const char *p, size_t n) {
