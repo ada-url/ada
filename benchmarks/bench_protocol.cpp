@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "ada.h"
 #include "counters/bench.h"
 
 
@@ -231,6 +232,14 @@ void collect_benchmark_results(size_t number_strings) {
   pretty_print("hand-tuned hash", number_strings, shuffle_bench(count_classic, shuffle));
   gen.seed(42); // reset seed to ensure same shuffle for all benchmarks
 
+  auto count_ada = [&strings, &expected_types]() {
+    for (size_t i = 0; i < strings.size(); i++) {
+      auto type = ada::scheme::get_scheme_type(strings[i]);
+      expected_types[i] = static_cast<SchemeType>(type);
+    }
+  };
+  pretty_print("ada", number_strings, shuffle_bench(count_ada, shuffle));
+  gen.seed(42); // reset seed to ensure same shuffle for all benchmarks
 
   auto count_std_map = [&strings, &expected_types]() {
     for (size_t i = 0; i < strings.size(); i++) {
