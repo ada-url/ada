@@ -80,10 +80,6 @@ ada_string ada_get_protocol(ada_url result);
 uint8_t ada_get_host_type(ada_url result);
 uint8_t ada_get_scheme_type(ada_url result);
 
-// Returns a heap-allocated copy of ada_get_host(result).
-// Caller must free with ada_free_owned_string.
-ada_owned_string ada_get_host_owned(ada_url result);
-
 // url_aggregator setters
 // if ada_is_valid(result)) is false, the setters have no effect
 // input should be a null terminated C string

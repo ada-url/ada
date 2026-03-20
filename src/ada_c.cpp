@@ -184,23 +184,6 @@ ada_string ada_get_host(ada_url result) noexcept {
   return ada_string_create(out.data(), out.length());
 }
 
-ada_owned_string ada_get_host_owned(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  ada_owned_string owned{};
-  if (!r) {
-    owned.data = nullptr;
-    owned.length = 0;
-    return owned;
-  }
-  std::string_view out = r->get_host();
-  owned.length = out.length();
-  char* copied = new char[owned.length + 1];
-  memcpy(copied, out.data(), owned.length);
-  copied[owned.length] = '\0';
-  owned.data = copied;
-  return owned;
-}
-
 ada_string ada_get_hostname(ada_url result) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
   if (!r) {
