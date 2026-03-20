@@ -191,6 +191,29 @@ TEST(ada_c, ada_idna) {
   SUCCEED();
 }
 
+TEST(ada_c, ada_get_host_owned_safe_after_mutation) {
+  std::string_view input = "https://www.google.com/path";
+  ada_url url = ada_parse(input.data(), input.size());
+  ASSERT_TRUE(ada_is_valid(url));
+
+  ada_owned_string original_host = ada_get_host_owned(url);
+  ASSERT_NE(original_host.data, nullptr);
+  ASSERT_EQ(std::string_view(original_host.data, original_host.length),
+            "www.google.com");
+  ASSERT_EQ(original_host.data[original_host.length], '\0');
+
+  ASSERT_TRUE(ada_set_host(url, "example.org", strlen("example.org")));
+  ASSERT_EQ(convert_string(ada_get_host(url)), "example.org");
+
+  // Owned copy should remain valid even after mutation.
+  ASSERT_EQ(std::string_view(original_host.data, original_host.length),
+            "www.google.com");
+
+  ada_free_owned_string(original_host);
+  ada_free(url);
+  SUCCEED();
+}
+
 TEST(ada_c, ada_clear_hash) {
   // Make sure a hash attribute with `#` is removed.
   std::string_view input = "https://www.google.com/hello-world?query=1#";

@@ -14,6 +14,12 @@
 #define ada_url_omitted 0xffffffff
 
 // string that is owned by the ada_url instance
+//
+// Lifetime rules:
+// - This pointer is borrowed from the underlying ada_url object.
+// - It remains valid only while the underlying ada_url is unchanged.
+// - Any mutation (e.g., ada_set_* and ada_clear_*) may invalidate previously
+//   returned ada_string pointers.
 typedef struct {
   const char* data;
   size_t length;
@@ -57,6 +63,9 @@ bool ada_is_valid(ada_url result);
 
 // url_aggregator getters
 // if ada_is_valid(result)) is false, an empty string is returned
+//
+// Important: all ada_string results below are borrowed views into internal
+// storage. They can become invalid after any mutation on the same ada_url.
 ada_owned_string ada_get_origin(ada_url result);
 ada_string ada_get_href(ada_url result);
 ada_string ada_get_username(ada_url result);
@@ -70,6 +79,10 @@ ada_string ada_get_search(ada_url result);
 ada_string ada_get_protocol(ada_url result);
 uint8_t ada_get_host_type(ada_url result);
 uint8_t ada_get_scheme_type(ada_url result);
+
+// Returns a heap-allocated copy of ada_get_host(result).
+// Caller must free with ada_free_owned_string.
+ada_owned_string ada_get_host_owned(ada_url result);
 
 // url_aggregator setters
 // if ada_is_valid(result)) is false, the setters have no effect
