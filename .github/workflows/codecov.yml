@@ -36,6 +36,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=g++-12
           -DADA_TESTING=ON
           -DADA_COVERAGE=ON
+          -DADA_DEVELOPMENT_CHECKS=ON
 
       - name: Build
         run: cmake --build build
