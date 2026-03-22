@@ -57,7 +57,13 @@ if (Python3_Interpreter_FOUND)
   endif()
 
   if (ADA_TESTING OR ADA_BUILD_SINGLE_HEADER_LIB)
-    add_library(ada-singleheader-lib STATIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/ada.cpp>)
+    add_library(ada-singleheader-lib STATIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/ada.cpp>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/ada_c.c>)
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/src/ada_c.c PROPERTIES LANGUAGE C)
+    target_include_directories(ada-singleheader-lib PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
     add_dependencies(ada-singleheader-lib ada-singleheader-files)
     if (ADA_USE_SIMDUTF)
       target_link_libraries(ada-singleheader-lib simdutf)

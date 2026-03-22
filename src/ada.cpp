@@ -15,4 +15,4 @@
 #include "url_pattern_regex.cpp"
 #endif  // ADA_INCLUDE_URL_PATTERN
 
-#include "ada_c.cpp"
+#include "ada_c_bridge.cpp"
