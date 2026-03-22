@@ -1,10 +1,26 @@
 // NOLINTBEGIN(bugprone-exception-escape,
 // bugprone-suspicious-stringview-data-usage)
+#include "ada/parser.h"
 #include "ada/url_aggregator-inl.h"
 #include "ada/url_search_params-inl.h"
 
-ada::result<ada::url_aggregator>& get_instance(void* result) noexcept {
-  return *(ada::result<ada::url_aggregator>*)result;
+/**
+ * Efficient C API implementation for ada URL parser.
+ *
+ * Each opaque handle is a raw pointer to the underlying C++ object, with no
+ * tl::expected<> wrapper layer.  Validity is tracked via
+ * url_aggregator::is_valid (inherited from url_base) rather than through the
+ * result type, which eliminates one heap allocation and one variant-copy per
+ * parse call.
+ *
+ *   ada_url               -> ada::url_aggregator*
+ *   ada_url_search_params -> ada::url_search_params*
+ *   ada_strings           -> std::vector<std::string>*
+ *   ada_url_search_params_*_iter -> ada::url_search_params_*_iter*
+ */
+
+static inline ada::url_aggregator& get_instance(void* result) noexcept {
+  return *static_cast<ada::url_aggregator*>(result);
 }
 
 extern "C" {
@@ -30,7 +46,8 @@ struct ada_string_pair {
   ada_string value;
 };
 
-ada_string ada_string_create(const char* data, size_t length) {
+static inline ada_string ada_string_create(const char* data,
+                                           size_t length) noexcept {
   ada_string out{};
   out.data = data;
   out.length = length;
@@ -68,21 +85,22 @@ struct ada_url_components {
 };
 
 ada_url ada_parse(const char* input, size_t length) noexcept {
-  return new ada::result<ada::url_aggregator>(
-      ada::parse<ada::url_aggregator>(std::string_view(input, length)));
+  return new ada::url_aggregator(
+      ada::parser::parse_url_impl<ada::url_aggregator>(
+          std::string_view(input, length)));
 }
 
 ada_url ada_parse_with_base(const char* input, size_t input_length,
                             const char* base, size_t base_length) noexcept {
-  auto base_out =
-      ada::parse<ada::url_aggregator>(std::string_view(base, base_length));
-
-  if (!base_out) {
-    return new ada::result<ada::url_aggregator>(base_out);
+  ada::url_aggregator base_url =
+      ada::parser::parse_url_impl<ada::url_aggregator>(
+          std::string_view(base, base_length));
+  if (!base_url.is_valid) {
+    return new ada::url_aggregator(std::move(base_url));
   }
-
-  return new ada::result<ada::url_aggregator>(ada::parse<ada::url_aggregator>(
-      std::string_view(input, input_length), &base_out.value()));
+  return new ada::url_aggregator(
+      ada::parser::parse_url_impl<ada::url_aggregator>(
+          std::string_view(input, input_length), &base_url));
 }
 
 bool ada_can_parse(const char* input, size_t length) noexcept {
@@ -96,30 +114,27 @@ bool ada_can_parse_with_base(const char* input, size_t input_length,
 }
 
 void ada_free(ada_url result) noexcept {
-  auto* r = (ada::result<ada::url_aggregator>*)result;
-  delete r;
+  delete static_cast<ada::url_aggregator*>(result);
 }
 
 ada_url ada_copy(ada_url input) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(input);
-  return new ada::result<ada::url_aggregator>(r);
+  return new ada::url_aggregator(get_instance(input));
 }
 
 bool ada_is_valid(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  return r.has_value();
+  return get_instance(result).is_valid;
 }
 
 // caller must free the result with ada_free_owned_string
 ada_owned_string ada_get_origin(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
+  ada::url_aggregator& r = get_instance(result);
   ada_owned_string owned{};
-  if (!r) {
+  if (!r.is_valid) {
     owned.data = nullptr;
     owned.length = 0;
     return owned;
   }
-  std::string out = r->get_origin();
+  std::string out = r.get_origin();
   owned.length = out.size();
   owned.data = new char[owned.length];
   memcpy((void*)owned.data, out.data(), owned.length);
@@ -131,178 +146,178 @@ void ada_free_owned_string(ada_owned_string owned) noexcept {
 }
 
 ada_string ada_get_href(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_href();
+  std::string_view out = r.get_href();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_username(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_username();
+  std::string_view out = r.get_username();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_password(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_password();
+  std::string_view out = r.get_password();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_port(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_port();
+  std::string_view out = r.get_port();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_hash(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_hash();
+  std::string_view out = r.get_hash();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_host(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_host();
+  std::string_view out = r.get_host();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_hostname(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_hostname();
+  std::string_view out = r.get_hostname();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_pathname(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_pathname();
+  std::string_view out = r.get_pathname();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_search(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_search();
+  std::string_view out = r.get_search();
   return ada_string_create(out.data(), out.length());
 }
 
 ada_string ada_get_protocol(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return ada_string_create(nullptr, 0);
   }
-  std::string_view out = r->get_protocol();
+  std::string_view out = r.get_protocol();
   return ada_string_create(out.data(), out.length());
 }
 
 uint8_t ada_get_host_type(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return 0;
   }
-  return r->host_type;
+  return r.host_type;
 }
 
 uint8_t ada_get_scheme_type(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return 0;
   }
-  return r->type;
+  return r.type;
 }
 
 bool ada_set_href(ada_url result, const char* input, size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->set_href(std::string_view(input, length));
+  return r.set_href(std::string_view(input, length));
 }
 
 bool ada_set_host(ada_url result, const char* input, size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->set_host(std::string_view(input, length));
+  return r.set_host(std::string_view(input, length));
 }
 
 bool ada_set_hostname(ada_url result, const char* input,
                       size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->set_hostname(std::string_view(input, length));
+  return r.set_hostname(std::string_view(input, length));
 }
 
 bool ada_set_protocol(ada_url result, const char* input,
                       size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->set_protocol(std::string_view(input, length));
+  return r.set_protocol(std::string_view(input, length));
 }
 
 bool ada_set_username(ada_url result, const char* input,
                       size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->set_username(std::string_view(input, length));
+  return r.set_username(std::string_view(input, length));
 }
 
 bool ada_set_password(ada_url result, const char* input,
                       size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->set_password(std::string_view(input, length));
+  return r.set_password(std::string_view(input, length));
 }
 
 bool ada_set_port(ada_url result, const char* input, size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->set_port(std::string_view(input, length));
+  return r.set_port(std::string_view(input, length));
 }
 
 bool ada_set_pathname(ada_url result, const char* input,
                       size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->set_pathname(std::string_view(input, length));
+  return r.set_pathname(std::string_view(input, length));
 }
 
 /**
@@ -313,9 +328,9 @@ bool ada_set_pathname(ada_url result, const char* input,
  * `ada_clear_search` method.
  */
 void ada_set_search(ada_url result, const char* input, size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (r) {
-    r->set_search(std::string_view(input, length));
+  ada::url_aggregator& r = get_instance(result);
+  if (r.is_valid) {
+    r.set_search(std::string_view(input, length));
   }
 }
 
@@ -327,16 +342,16 @@ void ada_set_search(ada_url result, const char* input, size_t length) noexcept {
  * `ada_clear_hash` method.
  */
 void ada_set_hash(ada_url result, const char* input, size_t length) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (r) {
-    r->set_hash(std::string_view(input, length));
+  ada::url_aggregator& r = get_instance(result);
+  if (r.is_valid) {
+    r.set_hash(std::string_view(input, length));
   }
 }
 
 void ada_clear_port(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (r) {
-    r->clear_port();
+  ada::url_aggregator& r = get_instance(result);
+  if (r.is_valid) {
+    r.clear_port();
   }
 }
 
@@ -347,9 +362,9 @@ void ada_clear_port(ada_url result) noexcept {
  * removal of the hash attribute, even if it has a value of `#`.
  */
 void ada_clear_hash(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (r) {
-    r->clear_hash();
+  ada::url_aggregator& r = get_instance(result);
+  if (r.is_valid) {
+    r.clear_hash();
   }
 }
 
@@ -360,92 +375,92 @@ void ada_clear_hash(ada_url result) noexcept {
  * removal of the search attribute, even if it has a value of `?`.
  */
 void ada_clear_search(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (r) {
-    r->clear_search();
+  ada::url_aggregator& r = get_instance(result);
+  if (r.is_valid) {
+    r.clear_search();
   }
 }
 
 bool ada_has_credentials(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_credentials();
+  return r.has_credentials();
 }
 
 bool ada_has_empty_hostname(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_empty_hostname();
+  return r.has_empty_hostname();
 }
 
 bool ada_has_hostname(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_hostname();
+  return r.has_hostname();
 }
 
 bool ada_has_non_empty_username(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_non_empty_username();
+  return r.has_non_empty_username();
 }
 
 bool ada_has_non_empty_password(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_non_empty_password();
+  return r.has_non_empty_password();
 }
 
 bool ada_has_port(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_port();
+  return r.has_port();
 }
 
 bool ada_has_password(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_password();
+  return r.has_password();
 }
 
 bool ada_has_hash(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_hash();
+  return r.has_hash();
 }
 
 bool ada_has_search(ada_url result) noexcept {
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return false;
   }
-  return r->has_search();
+  return r.has_search();
 }
 
 // returns a pointer to the internal url_aggregator::url_components
 const ada_url_components* ada_get_components(ada_url result) noexcept {
   static_assert(sizeof(ada_url_components) == sizeof(ada::url_components));
-  ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  ada::url_aggregator& r = get_instance(result);
+  if (!r.is_valid) {
     return nullptr;
   }
-  return reinterpret_cast<const ada_url_components*>(&r->get_components());
+  return reinterpret_cast<const ada_url_components*>(&r.get_components());
 }
 
 ada_owned_string ada_idna_to_unicode(const char* input, size_t length) {
@@ -468,20 +483,16 @@ ada_owned_string ada_idna_to_ascii(const char* input, size_t length) {
 
 ada_url_search_params ada_parse_search_params(const char* input,
                                               size_t length) {
-  return new ada::result<ada::url_search_params>(
-      ada::url_search_params(std::string_view(input, length)));
+  return new ada::url_search_params(std::string_view(input, length));
 }
 
 void ada_free_search_params(ada_url_search_params result) {
-  auto* r = (ada::result<ada::url_search_params>*)result;
-  delete r;
+  delete static_cast<ada::url_search_params*>(result);
 }
 
 ada_owned_string ada_search_params_to_string(ada_url_search_params result) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) return ada_owned_string{nullptr, 0};
-  std::string out = r->to_string();
+  ada::url_search_params& r = *static_cast<ada::url_search_params*>(result);
+  std::string out = r.to_string();
   ada_owned_string owned{};
   owned.length = out.size();
   owned.data = new char[owned.length];
@@ -490,103 +501,63 @@ ada_owned_string ada_search_params_to_string(ada_url_search_params result) {
 }
 
 size_t ada_search_params_size(ada_url_search_params result) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
-    return 0;
-  }
-  return r->size();
+  return static_cast<ada::url_search_params*>(result)->size();
 }
 
 void ada_search_params_sort(ada_url_search_params result) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (r) {
-    r->sort();
-  }
+  static_cast<ada::url_search_params*>(result)->sort();
 }
 
 void ada_search_params_reset(ada_url_search_params result, const char* input,
                              size_t length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (r) {
-    r->reset(std::string_view(input, length));
-  }
+  static_cast<ada::url_search_params*>(result)->reset(
+      std::string_view(input, length));
 }
 
 void ada_search_params_append(ada_url_search_params result, const char* key,
                               size_t key_length, const char* value,
                               size_t value_length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (r) {
-    r->append(std::string_view(key, key_length),
-              std::string_view(value, value_length));
-  }
+  static_cast<ada::url_search_params*>(result)->append(
+      std::string_view(key, key_length), std::string_view(value, value_length));
 }
 
 void ada_search_params_set(ada_url_search_params result, const char* key,
                            size_t key_length, const char* value,
                            size_t value_length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (r) {
-    r->set(std::string_view(key, key_length),
-           std::string_view(value, value_length));
-  }
+  static_cast<ada::url_search_params*>(result)->set(
+      std::string_view(key, key_length), std::string_view(value, value_length));
 }
 
 void ada_search_params_remove(ada_url_search_params result, const char* key,
                               size_t key_length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (r) {
-    r->remove(std::string_view(key, key_length));
-  }
+  static_cast<ada::url_search_params*>(result)->remove(
+      std::string_view(key, key_length));
 }
 
 void ada_search_params_remove_value(ada_url_search_params result,
                                     const char* key, size_t key_length,
                                     const char* value, size_t value_length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (r) {
-    r->remove(std::string_view(key, key_length),
-              std::string_view(value, value_length));
-  }
+  static_cast<ada::url_search_params*>(result)->remove(
+      std::string_view(key, key_length), std::string_view(value, value_length));
 }
 
 bool ada_search_params_has(ada_url_search_params result, const char* key,
                            size_t key_length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
-    return false;
-  }
-  return r->has(std::string_view(key, key_length));
+  return static_cast<ada::url_search_params*>(result)->has(
+      std::string_view(key, key_length));
 }
 
 bool ada_search_params_has_value(ada_url_search_params result, const char* key,
                                  size_t key_length, const char* value,
                                  size_t value_length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
-    return false;
-  }
-  return r->has(std::string_view(key, key_length),
-                std::string_view(value, value_length));
+  return static_cast<ada::url_search_params*>(result)->has(
+      std::string_view(key, key_length), std::string_view(value, value_length));
 }
 
 ada_string ada_search_params_get(ada_url_search_params result, const char* key,
                                  size_t key_length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
-    return ada_string_create(nullptr, 0);
-  }
-  auto found = r->get(std::string_view(key, key_length));
+  auto found = static_cast<ada::url_search_params*>(result)->get(
+      std::string_view(key, key_length));
   if (!found.has_value()) {
     return ada_string_create(nullptr, 0);
   }
@@ -595,83 +566,51 @@ ada_string ada_search_params_get(ada_url_search_params result, const char* key,
 
 ada_strings ada_search_params_get_all(ada_url_search_params result,
                                       const char* key, size_t key_length) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
-    return new ada::result<std::vector<std::string>>(
-        std::vector<std::string>());
-  }
-  return new ada::result<std::vector<std::string>>(
-      r->get_all(std::string_view(key, key_length)));
+  return new std::vector<std::string>(
+      static_cast<ada::url_search_params*>(result)->get_all(
+          std::string_view(key, key_length)));
 }
 
 ada_url_search_params_keys_iter ada_search_params_get_keys(
     ada_url_search_params result) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
-    return new ada::result<ada::url_search_params_keys_iter>(
-        ada::url_search_params_keys_iter());
-  }
-  return new ada::result<ada::url_search_params_keys_iter>(r->get_keys());
+  return new ada::url_search_params_keys_iter(
+      static_cast<ada::url_search_params*>(result)->get_keys());
 }
 
 ada_url_search_params_values_iter ada_search_params_get_values(
     ada_url_search_params result) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
-    return new ada::result<ada::url_search_params_values_iter>(
-        ada::url_search_params_values_iter());
-  }
-  return new ada::result<ada::url_search_params_values_iter>(r->get_values());
+  return new ada::url_search_params_values_iter(
+      static_cast<ada::url_search_params*>(result)->get_values());
 }
 
 ada_url_search_params_entries_iter ada_search_params_get_entries(
     ada_url_search_params result) {
-  ada::result<ada::url_search_params>& r =
-      *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
-    return new ada::result<ada::url_search_params_entries_iter>(
-        ada::url_search_params_entries_iter());
-  }
-  return new ada::result<ada::url_search_params_entries_iter>(r->get_entries());
+  return new ada::url_search_params_entries_iter(
+      static_cast<ada::url_search_params*>(result)->get_entries());
 }
 
 void ada_free_strings(ada_strings result) {
-  auto* r = (ada::result<std::vector<std::string>>*)result;
-  delete r;
+  delete static_cast<std::vector<std::string>*>(result);
 }
 
 size_t ada_strings_size(ada_strings result) {
-  auto* r = (ada::result<std::vector<std::string>>*)result;
-  if (!r) {
-    return 0;
-  }
-  return (*r)->size();
+  return static_cast<std::vector<std::string>*>(result)->size();
 }
 
 ada_string ada_strings_get(ada_strings result, size_t index) {
-  auto* r = (ada::result<std::vector<std::string>>*)result;
-  if (!r) {
-    return ada_string_create(nullptr, 0);
-  }
-  std::string_view view = (*r)->at(index);
+  std::string_view view =
+      static_cast<std::vector<std::string>*>(result)->at(index);
   return ada_string_create(view.data(), view.length());
 }
 
 void ada_free_search_params_keys_iter(ada_url_search_params_keys_iter result) {
-  auto* r = (ada::result<ada::url_search_params_keys_iter>*)result;
-  delete r;
+  delete static_cast<ada::url_search_params_keys_iter*>(result);
 }
 
 ada_string ada_search_params_keys_iter_next(
     ada_url_search_params_keys_iter result) {
-  auto* r = (ada::result<ada::url_search_params_keys_iter>*)result;
-  if (!r) {
-    return ada_string_create(nullptr, 0);
-  }
-  auto next = (*r)->next();
+  auto next =
+      static_cast<ada::url_search_params_keys_iter*>(result)->next();
   if (!next.has_value()) {
     return ada_string_create(nullptr, 0);
   }
@@ -680,26 +619,18 @@ ada_string ada_search_params_keys_iter_next(
 
 bool ada_search_params_keys_iter_has_next(
     ada_url_search_params_keys_iter result) {
-  auto* r = (ada::result<ada::url_search_params_keys_iter>*)result;
-  if (!r) {
-    return false;
-  }
-  return (*r)->has_next();
+  return static_cast<ada::url_search_params_keys_iter*>(result)->has_next();
 }
 
 void ada_free_search_params_values_iter(
     ada_url_search_params_values_iter result) {
-  auto* r = (ada::result<ada::url_search_params_values_iter>*)result;
-  delete r;
+  delete static_cast<ada::url_search_params_values_iter*>(result);
 }
 
 ada_string ada_search_params_values_iter_next(
     ada_url_search_params_values_iter result) {
-  auto* r = (ada::result<ada::url_search_params_values_iter>*)result;
-  if (!r) {
-    return ada_string_create(nullptr, 0);
-  }
-  auto next = (*r)->next();
+  auto next =
+      static_cast<ada::url_search_params_values_iter*>(result)->next();
   if (!next.has_value()) {
     return ada_string_create(nullptr, 0);
   }
@@ -708,24 +639,18 @@ ada_string ada_search_params_values_iter_next(
 
 bool ada_search_params_values_iter_has_next(
     ada_url_search_params_values_iter result) {
-  auto* r = (ada::result<ada::url_search_params_values_iter>*)result;
-  if (!r) {
-    return false;
-  }
-  return (*r)->has_next();
+  return static_cast<ada::url_search_params_values_iter*>(result)->has_next();
 }
 
 void ada_free_search_params_entries_iter(
     ada_url_search_params_entries_iter result) {
-  auto* r = (ada::result<ada::url_search_params_entries_iter>*)result;
-  delete r;
+  delete static_cast<ada::url_search_params_entries_iter*>(result);
 }
 
 ada_string_pair ada_search_params_entries_iter_next(
     ada_url_search_params_entries_iter result) {
-  auto* r = (ada::result<ada::url_search_params_entries_iter>*)result;
-  if (!r) return {ada_string_create(nullptr, 0), ada_string_create(nullptr, 0)};
-  auto next = (*r)->next();
+  auto next =
+      static_cast<ada::url_search_params_entries_iter*>(result)->next();
   if (!next.has_value()) {
     return {ada_string_create(nullptr, 0), ada_string_create(nullptr, 0)};
   }
@@ -736,11 +661,7 @@ ada_string_pair ada_search_params_entries_iter_next(
 
 bool ada_search_params_entries_iter_has_next(
     ada_url_search_params_entries_iter result) {
-  auto* r = (ada::result<ada::url_search_params_entries_iter>*)result;
-  if (!r) {
-    return false;
-  }
-  return (*r)->has_next();
+  return static_cast<ada::url_search_params_entries_iter*>(result)->has_next();
 }
 
 typedef struct {
