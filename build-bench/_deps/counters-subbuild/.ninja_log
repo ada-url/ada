@@ -1,0 +1,21 @@
+# ninja log v7
+0	5	1774203681875445103	counters-populate-prefix/src/counters-populate-stamp/counters-populate-mkdir	62bb3b55b37b7d7
+0	5	1774203681875445103	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-mkdir	62bb3b55b37b7d7
+5	370	1774203682240444296	counters-populate-prefix/src/counters-populate-stamp/counters-populate-download	8329bfb692baabbf
+5	370	1774203682240444296	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-download	8329bfb692baabbf
+370	379	1774203682241444299	counters-populate-prefix/src/counters-populate-stamp/counters-populate-update	7fbd5a49567f4a3e
+370	379	1774203682241444299	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-update	7fbd5a49567f4a3e
+379	382	1774203682253444325	counters-populate-prefix/src/counters-populate-stamp/counters-populate-patch	403bf86cf9658b5a
+379	382	1774203682253444325	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-patch	403bf86cf9658b5a
+382	386	1774203682257444334	counters-populate-prefix/src/counters-populate-stamp/counters-populate-configure	9e9bd8e33f89f8dd
+382	386	1774203682257444334	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-configure	9e9bd8e33f89f8dd
+386	390	1774203682260444341	counters-populate-prefix/src/counters-populate-stamp/counters-populate-build	1f3d91a0b0908237
+386	390	1774203682260444341	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-build	1f3d91a0b0908237
+390	394	1774203682264444349	counters-populate-prefix/src/counters-populate-stamp/counters-populate-install	28d14e3b9b1e7eea
+390	394	1774203682264444349	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-install	28d14e3b9b1e7eea
+394	397	1774203682268444358	counters-populate-prefix/src/counters-populate-stamp/counters-populate-test	6ef0a122b1df2c06
+394	397	1774203682268444358	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-test	6ef0a122b1df2c06
+398	403	1774203682273444369	CMakeFiles/counters-populate-complete	daaaa1b524b16f37
+398	403	1774203682273444369	counters-populate-prefix/src/counters-populate-stamp/counters-populate-done	daaaa1b524b16f37
+398	403	1774203682273444369	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/CMakeFiles/counters-populate-complete	daaaa1b524b16f37
+398	403	1774203682273444369	/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-done	daaaa1b524b16f37

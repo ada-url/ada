@@ -1,0 +1,14 @@
+# Target labels
+ corrosion-populate
+# Source files and their labels
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/CMakeFiles/corrosion-populate
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/CMakeFiles/corrosion-populate.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/CMakeFiles/corrosion-populate-complete.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-build.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-configure.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-download.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-install.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-mkdir.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-patch.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-test.rule
+/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-update.rule

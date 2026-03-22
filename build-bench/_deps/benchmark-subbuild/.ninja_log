@@ -1,0 +1,21 @@
+# ninja log v7
+0	4	1774203678176459324	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-mkdir	745b2d9029ea499d
+0	4	1774203678176459324	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-mkdir	745b2d9029ea499d
+4	578	1774203678750457117	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-download	473bd2dea6c25d37
+4	578	1774203678750457117	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-download	473bd2dea6c25d37
+578	588	1774203678750457117	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-update	dbbbc85212e47e35
+578	588	1774203678750457117	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-update	dbbbc85212e47e35
+588	591	1774203678763457067	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-patch	37a2d7ca6c60944b
+588	591	1774203678763457067	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-patch	37a2d7ca6c60944b
+591	595	1774203678767457052	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-configure	274f9fc09a71322a
+591	595	1774203678767457052	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-configure	274f9fc09a71322a
+595	599	1774203678770457040	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-build	fb48f9d45adef3cc
+595	599	1774203678770457040	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-build	fb48f9d45adef3cc
+599	603	1774203678774457024	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-install	d487e8644adf691c
+599	603	1774203678774457024	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-install	d487e8644adf691c
+603	606	1774203678778457009	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-test	5a15e3472048f308
+603	606	1774203678778457009	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-test	5a15e3472048f308
+606	612	1774203678784456986	CMakeFiles/benchmark-populate-complete	974fde54d922c29d
+606	612	1774203678784456986	benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-done	974fde54d922c29d
+606	612	1774203678784456986	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/CMakeFiles/benchmark-populate-complete	974fde54d922c29d
+606	612	1774203678784456986	/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-done	974fde54d922c29d

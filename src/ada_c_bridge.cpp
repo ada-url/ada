@@ -16,6 +16,7 @@
 #include "ada/url_aggregator-inl.h"
 #include "ada/url_search_params-inl.h"
 #include "ada/url_aggregator_c.h"
+#include "ada/implementation.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -146,6 +147,17 @@ ada_url_aggregator_t* ada_parse_with_base_impl(const char* input,
   ada::url_aggregator agg = ada::parser::parse_url_impl<ada::url_aggregator>(
       std::string_view(input, input_length), &base_agg);
   return to_c_aggregator(agg);
+}
+
+bool ada_can_parse_impl(const char* input, size_t length) noexcept {
+  return ada::can_parse(std::string_view(input, length));
+}
+
+bool ada_can_parse_with_base_impl(const char* input, size_t input_length,
+                                   const char* base,
+                                   size_t base_length) noexcept {
+  std::string_view base_sv(base, base_length);
+  return ada::can_parse(std::string_view(input, input_length), &base_sv);
 }
 
 // ---- Setters ----------------------------------------------------------------

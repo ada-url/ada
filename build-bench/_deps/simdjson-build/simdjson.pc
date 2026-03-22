@@ -1,0 +1,11 @@
+prefix=/usr/local
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: simdjson
+Description: Parsing gigabytes of JSON per second
+URL: https://simdjson.org/
+Version: 3.10.1
+Cflags: -I${includedir} -DSIMDJSON_THREADS_ENABLED=1
+Libs: -L${libdir} -lsimdjson
+

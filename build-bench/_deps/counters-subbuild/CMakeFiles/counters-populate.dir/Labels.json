@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/CMakeFiles/counters-populate"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/CMakeFiles/counters-populate.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/CMakeFiles/counters-populate-complete.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-build.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-configure.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-download.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-install.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-patch.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-test.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"counters-populate"
+		],
+		"name" : "counters-populate"
+	}
+}

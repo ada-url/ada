@@ -17,6 +17,19 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+/* ---- SIMD capability detection (mirrors ada/common_defs.h for C code) ---- */
+#if defined(__SSSE3__)
+#  define ADA_C_SSSE3 1
+#endif
+#if defined(__SSE2__) || defined(__x86_64__) || defined(__x86_64) || \
+    (defined(_M_AMD64) || defined(_M_X64) ||                         \
+     (defined(_M_IX86_FP) && _M_IX86_FP == 2))
+#  define ADA_C_SSE2 1
+#endif
+#if defined(__aarch64__) || defined(_M_ARM64)
+#  define ADA_C_NEON 1
+#endif
+
 /* Sentinel: indicates a URL component is absent (same as url_components::omitted). */
 #define ADA_URL_OMITTED 0xffffffffu
 
@@ -79,6 +92,13 @@ ada_url_aggregator_t* ada_parse_with_base_impl(const char* input,
                                                size_t input_length,
                                                const char* base,
                                                size_t base_length) ADA_NOEXCEPT;
+
+/* Allocation-free validity checks — use ada::can_parse internally.          */
+bool ada_can_parse_impl(const char* input,
+                        size_t length) ADA_NOEXCEPT;
+bool ada_can_parse_with_base_impl(const char* input, size_t input_length,
+                                  const char* base,
+                                  size_t base_length) ADA_NOEXCEPT;
 
 bool ada_set_href_impl(ada_url_aggregator_t* url, const char* input,
                        size_t length) ADA_NOEXCEPT;

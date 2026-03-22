@@ -1,0 +1,14 @@
+# Target labels
+ counters-populate
+# Source files and their labels
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/CMakeFiles/counters-populate
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/CMakeFiles/counters-populate.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/CMakeFiles/counters-populate-complete.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-build.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-configure.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-download.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-install.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-mkdir.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-patch.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-test.rule
+/home/runner/work/ada/ada/build-bench/_deps/counters-subbuild/counters-populate-prefix/src/counters-populate-stamp/counters-populate-update.rule
