@@ -6,22 +6,74 @@
 "https:"
 "ws:"
 "wss:"
+"blob:"
+"data:"
+"javascript:"
+"mailto:"
+"ssh:"
+"git:"
 
 # Suffixes
 ".com"
+".org"
+".net"
+".io"
+".co.uk"
+".localhost"
 
 # Full URLs
 "https://www.ada-url.com"
+"http://localhost:8080"
+"https://user:pass@example.com:443/path?query=value#hash"
+"file:///C:/path/to/file"
+"ftp://ftp.example.com/resource"
 
 # Encoded characters
 "%2f"
 "%40"
 "%26"
+"%3A"
+"%3F"
+"%23"
+"%20"
+"%25"
+"%2e"
+"%2F"
 
-# Misc
+# IPv4 addresses
+"192.168.1.1"
+"127.0.0.1"
+"0.0.0.0"
+"255.255.255.255"
+"[::1]"
+"[2001:db8::1]"
+
+# Misc URL syntax
 "://"
 "//"
 "\\"
 "../"
+"./"
+"/"
 ";type=a"
 "xn--"
+"@"
+":80"
+":443"
+":8080"
+"?foo=bar"
+"?foo=bar&baz=qux"
+"#section"
+"#"
+"?"
+
+# Relative URL patterns
+"../"
+"../../"
+"/path/to/resource"
+"//example.com/path"
+"./relative"
+
+# Punycode
+"xn--nxasmq6b.com"
+"xn--bcher-kva.example"

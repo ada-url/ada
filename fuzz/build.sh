@@ -68,6 +68,15 @@ $CC $CFLAGS $CXXFLAGS \
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE ./ada.o ada_c.o \
      -o $OUT/ada_c
 
+# url_with_base: focused fuzzer for relative URL resolution
+$CXX $CFLAGS $CXXFLAGS \
+     -std=c++20 \
+     -I build/singleheader \
+     -c fuzz/url_with_base.cc -o url_with_base.o
+
+$CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE url_with_base.o \
+     -o $OUT/url_with_base
+
 cp $SRC/ada-url/fuzz/*.dict $SRC/ada-url/fuzz/*.options $OUT/
 
 # Build unit test
