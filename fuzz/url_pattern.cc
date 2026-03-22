@@ -23,10 +23,9 @@ void exercise_result(auto result) {
 
 // Exercise exec() and test() on a parsed url_pattern with an ASCII input.
 // We restrict inputs to ASCII to avoid catastrophic regex backtracking.
-static void exercise_exec_and_test(
-    ada::url_pattern<regex_provider>& pattern,
-    const std::string& test_input,
-    const std::string& test_base) {
+static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
+                                   const std::string& test_input,
+                                   const std::string& test_base) {
   // test() with string input
   std::string_view test_view(test_input.data(), test_input.size());
   auto test_result = pattern.test(test_view, nullptr);
@@ -94,9 +93,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   std::string base_source_2 = "https://ada-url.com";
 
   // Additional test input for exec/test calls (also ASCII-only)
-  std::string test_input =
-      "https://" + to_ascii(fdp.ConsumeRandomLengthString(30)) + "/" +
-      to_ascii(fdp.ConsumeRandomLengthString(20));
+  std::string test_input = "https://" +
+                           to_ascii(fdp.ConsumeRandomLengthString(30)) + "/" +
+                           to_ascii(fdp.ConsumeRandomLengthString(20));
   std::string test_base = "https://ada-url.com";
 
   std::array<std::pair<std::string, std::string>, 2> sources = {{
@@ -179,8 +178,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     init_all.pathname = "/" + to_ascii(fdp.ConsumeRandomLengthString(20));
     init_all.search = to_ascii(fdp.ConsumeRandomLengthString(10));
     init_all.hash = to_ascii(fdp.ConsumeRandomLengthString(10));
-    auto result_with_init_all = ada::parse_url_pattern<regex_provider>(
-        init_all, nullptr, nullptr);
+    auto result_with_init_all =
+        ada::parse_url_pattern<regex_provider>(init_all, nullptr, nullptr);
     if (result_with_init_all) {
       exercise_result(*result_with_init_all);
       exercise_exec_and_test(*result_with_init_all, test_input, test_base);

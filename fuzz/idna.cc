@@ -63,8 +63,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
         ada::idna::utf32_length_from_utf8(source.data(), source.size());
     if (utf32_len > 0 && utf32_len < 1024) {
       std::vector<char32_t> utf32_buf(utf32_len + 1, 0);
-      size_t actual =
-          ada::idna::utf8_to_utf32(source.data(), source.size(), utf32_buf.data());
+      size_t actual = ada::idna::utf8_to_utf32(source.data(), source.size(),
+                                               utf32_buf.data());
       length += actual;
 
       // UTF-32 to UTF-8 round-trip
@@ -134,8 +134,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     (void)has_forbidden;
 
     // is_ascii checks
-    volatile bool is_ascii_str = ada::idna::is_ascii(
-        std::string_view(source.data(), source.size()));
+    volatile bool is_ascii_str =
+        ada::idna::is_ascii(std::string_view(source.data(), source.size()));
     (void)is_ascii_str;
   }
 

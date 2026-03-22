@@ -19,7 +19,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
    * This invariant must hold regardless of input encoding.
    */
 
-  // Test 1: can_parse(source) must equal parse<url_aggregator>(source).has_value()
+  // Test 1: can_parse(source) must equal
+  // parse<url_aggregator>(source).has_value()
   bool can_parse_result = ada::can_parse(source);
   auto parsed_agg = ada::parse<ada::url_aggregator>(source);
   if (can_parse_result != parsed_agg.has_value()) {
@@ -44,8 +45,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   // base).has_value()
   auto base_agg = ada::parse<ada::url_aggregator>(base_source);
   if (base_agg) {
-    auto parsed_with_base =
-        ada::parse<ada::url_aggregator>(source, &*base_agg);
+    auto parsed_with_base = ada::parse<ada::url_aggregator>(source, &*base_agg);
     if (can_parse_with_base != parsed_with_base.has_value()) {
       printf(
           "can_parse_with_base vs parse<url_aggregator> inconsistency for "
