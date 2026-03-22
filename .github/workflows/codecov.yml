@@ -47,12 +47,14 @@ jobs:
         run: >
           gcovr
           --root .
+          --exclude 'build/_deps/.*'
           --exclude 'build/dependencies/.*'
           --exclude 'dependencies/.*'
           --exclude 'tools/.*'
           --exclude 'singleheader/.*'
           --exclude 'benchmarks/.*'
           --exclude 'tests/.*'
+          --exclude 'include/ada/expected.h'
           --gcov-executable gcov-12
           --xml
           --output build/coverage.xml
