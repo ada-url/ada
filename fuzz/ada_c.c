@@ -121,9 +121,8 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   /* Consistency check: can_parse_with_base should match
    * ada_is_valid(ada_parse_with_base(...)) */
   if (can_parse_with_base != with_base_valid) {
-    printf(
-        "ada_can_parse_with_base inconsistency: can_parse=%d is_valid=%d\n",
-        can_parse_with_base, with_base_valid);
+    printf("ada_can_parse_with_base inconsistency: can_parse=%d is_valid=%d\n",
+           can_parse_with_base, with_base_valid);
     abort();
   }
 
@@ -188,8 +187,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     (void)got_len;
 
     /* get_all */
-    ada_strings all_vals =
-        ada_search_params_get_all(sp, input, input_len);
+    ada_strings all_vals = ada_search_params_get_all(sp, input, input_len);
     volatile size_t all_size = ada_strings_size(all_vals);
     for (size_t i = 0; i < all_size; i++) {
       ada_string s = ada_strings_get(all_vals, i);
@@ -208,8 +206,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     ada_free_owned_string(sp_str);
 
     /* keys iterator */
-    ada_url_search_params_keys_iter keys_iter =
-        ada_search_params_get_keys(sp);
+    ada_url_search_params_keys_iter keys_iter = ada_search_params_get_keys(sp);
     while (ada_search_params_keys_iter_has_next(keys_iter)) {
       ada_string k = ada_search_params_keys_iter_next(keys_iter);
       volatile size_t klen = k.length;
