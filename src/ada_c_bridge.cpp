@@ -66,6 +66,10 @@ static void sync_c_from_aggregator(ada_url_aggregator_t* out,
   if (static_cast<size_t>(len) + 1 > out->buffer_capacity) {
     char* nb = static_cast<char*>(
         realloc(out->buffer, static_cast<size_t>(len) + 1));
+    if (!nb) {
+      /* realloc failed; out->buffer still valid, leave struct unchanged. */
+      return;
+    }
     out->buffer          = nb;
     out->buffer_capacity = len + 1;
   }
