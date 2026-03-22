@@ -1,0 +1,20 @@
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: 80%
+
+ignore:
+  - "dependencies/**"
+  - "tools/**"
+  - "singleheader/**"
+  - "benchmarks/**"
+  - "tests/**"
+  - "docs/**"
