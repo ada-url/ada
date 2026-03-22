@@ -387,6 +387,40 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   }
 
   /**
+   * Chained relative URL resolution: parse source against base, then use the
+   * result as the base for a second parse. Exercises multi-level inheritance.
+   */
+  if (base_agg) {
+    auto level1 = ada::parse<ada::url_aggregator>(source, &*base_agg);
+    if (level1) {
+      std::string input2 = fdp.ConsumeRandomLengthString(128);
+      auto level2 = ada::parse<ada::url_aggregator>(input2, &*level1);
+      if (level2) {
+        length += level2->get_href().size();
+        volatile bool v = level2->validate();
+        (void)v;
+      }
+    }
+  }
+
+  /**
+   * Known-good base URL with fuzzed relative input. Using a fixed valid base
+   * lets the fuzzer focus entropy entirely on the relative-input code paths
+   * (path resolution, query/fragment inheritance, scheme-relative URLs, etc.)
+   */
+  {
+    auto known_base =
+        ada::parse<ada::url_aggregator>("https://example.com/a/b/c?query#hash");
+    if (known_base) {
+      auto result = ada::parse<ada::url_aggregator>(source, &*known_base);
+      if (result) {
+        length += result->get_href().size();
+        exercise_aggregator_predicates(*result);
+      }
+    }
+  }
+
+  /**
    * Node.js specific
    */
   length += ada::href_from_file(source).size();
