@@ -1,5 +1,6 @@
 # common build directory
 build
+build-*
 *-build-*
 
 # Python cache
