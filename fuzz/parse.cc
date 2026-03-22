@@ -1,5 +1,6 @@
 #include <fuzzer/FuzzedDataProvider.h>
 
+#include <cassert>
 #include <cstdio>
 #include <memory>
 #include <string>
@@ -91,9 +92,70 @@ bool is_valid_utf8_string(const char *buf, size_t len) {
   return true;
 }
 
+// Exercise all getters and boolean predicates on ada::url
+static void exercise_url_predicates(const ada::url &u) {
+  volatile size_t length = 0;
+  length += u.get_href().size();
+  length += u.get_origin().size();
+  length += u.get_protocol().size();
+  length += u.get_username().size();
+  length += u.get_password().size();
+  length += u.get_host().size();
+  length += u.get_hostname().size();
+  length += u.get_pathname().size();
+  length += u.get_search().size();
+  length += u.get_hash().size();
+  length += u.get_port().size();
+  length += u.to_string().size();
+  length += u.get_pathname_length();
+  (void)u.has_valid_domain();
+  (void)u.has_credentials();
+  (void)u.has_empty_hostname();
+  (void)u.has_hostname();
+  (void)u.has_port();
+  (void)u.has_hash();
+  (void)u.has_search();
+  (void)u.get_components();
+  printf("url predicates length: %zu\n", length);
+}
+
+// Exercise all getters and boolean predicates on ada::url_aggregator
+static void exercise_aggregator_predicates(const ada::url_aggregator &u) {
+  volatile size_t length = 0;
+  length += u.get_href().size();
+  length += u.get_origin().size();
+  length += u.get_protocol().size();
+  length += u.get_username().size();
+  length += u.get_password().size();
+  length += u.get_host().size();
+  length += u.get_hostname().size();
+  length += u.get_pathname().size();
+  length += u.get_search().size();
+  length += u.get_hash().size();
+  length += u.get_port().size();
+  length += u.to_string().size();
+  length += u.get_pathname_length();
+  (void)u.has_valid_domain();
+  (void)u.has_credentials();
+  (void)u.has_empty_hostname();
+  (void)u.has_hostname();
+  (void)u.has_non_empty_username();
+  (void)u.has_non_empty_password();
+  (void)u.has_password();
+  (void)u.has_port();
+  (void)u.has_hash();
+  (void)u.has_search();
+  (void)u.get_components();
+  volatile bool is_valid = u.validate();
+  (void)is_valid;
+  printf("diagram: %s\n", u.to_diagram().c_str());
+  printf("aggregator predicates length: %zu\n", length);
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   FuzzedDataProvider fdp(data, size);
   std::string source = fdp.ConsumeRandomLengthString(256);
+  std::string base = fdp.ConsumeRandomLengthString(256);
 
   // volatile forces the compiler to store the results without undue
   // optimizations
@@ -123,10 +185,61 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     assert(parse_url->get_protocol() == parse_url_aggregator->get_protocol());
     assert(parse_url->get_href() == parse_url_aggregator->get_href());
+    assert(std::string(parse_url->get_hostname()) ==
+           std::string(parse_url_aggregator->get_hostname()));
+    assert(std::string(parse_url->get_pathname()) ==
+           std::string(parse_url_aggregator->get_pathname()));
+    assert(std::string(parse_url->get_search()) ==
+           std::string(parse_url_aggregator->get_search()));
+    assert(std::string(parse_url->get_hash()) ==
+           std::string(parse_url_aggregator->get_hash()));
+    assert(std::string(parse_url->get_port()) ==
+           std::string(parse_url_aggregator->get_port()));
+    assert(parse_url->get_username() ==
+           std::string(parse_url_aggregator->get_username()));
+    assert(parse_url->get_password() ==
+           std::string(parse_url_aggregator->get_password()));
+    assert(std::string(parse_url->get_host()) ==
+           std::string(parse_url_aggregator->get_host()));
 
+    // Exercise all predicates on both types
+    exercise_url_predicates(*parse_url);
+    exercise_aggregator_predicates(*parse_url_aggregator);
+
+    // Test set_href consistency
     parse_url->set_href(source);
     parse_url_aggregator->set_href(source);
     assert(parse_url->get_href() == parse_url_aggregator->get_href());
+  }
+
+  /**
+   * Test copy and move semantics
+   */
+  if (parse_url) {
+    // Copy constructor
+    ada::url copied_url = *parse_url;
+    assert(copied_url.get_href() == parse_url->get_href());
+
+    // Copy assignment
+    ada::url assigned_url;
+    assigned_url = *parse_url;
+    assert(assigned_url.get_href() == parse_url->get_href());
+
+    // Move constructor
+    ada::url moved_url = std::move(copied_url);
+    assert(moved_url.get_href() == parse_url->get_href());
+  }
+
+  if (parse_url_aggregator) {
+    // Copy constructor
+    ada::url_aggregator copied_agg = *parse_url_aggregator;
+    assert(std::string(copied_agg.get_href()) ==
+           std::string(parse_url_aggregator->get_href()));
+
+    // Move constructor
+    ada::url_aggregator moved_agg = std::move(copied_agg);
+    assert(std::string(moved_agg.get_href()) ==
+           std::string(parse_url_aggregator->get_href()));
   }
 
   /**
@@ -156,8 +269,19 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     length += out_url->get_hash().size();
     length += out_url->get_origin().size();
     length += out_url->get_port().size();
+    length += out_url->get_pathname_length();
 
     length += out_url->to_string().size();
+
+    // boolean predicates after setters
+    (void)out_url->has_valid_domain();
+    (void)out_url->has_credentials();
+    (void)out_url->has_empty_hostname();
+    (void)out_url->has_hostname();
+    (void)out_url->has_port();
+    (void)out_url->has_hash();
+    (void)out_url->has_search();
+    (void)out_url->get_components();
   }
 
   /**
@@ -188,6 +312,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     length += out_aggregator->get_hash().size();
     length += out_aggregator->get_origin().size();
     length += out_aggregator->get_port().size();
+    length += out_aggregator->get_pathname_length();
 
     length += out_aggregator->to_string().size();
 
@@ -197,10 +322,68 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     // Printing due to dead-code elimination
     printf("diagram %s\n", out_aggregator->to_diagram().c_str());
 
+    // boolean predicates after setters
+    (void)out_aggregator->has_valid_domain();
+    (void)out_aggregator->has_credentials();
+    (void)out_aggregator->has_empty_hostname();
+    (void)out_aggregator->has_hostname();
+    (void)out_aggregator->has_non_empty_username();
+    (void)out_aggregator->has_non_empty_password();
+    (void)out_aggregator->has_password();
+    (void)out_aggregator->has_port();
+    (void)out_aggregator->has_hash();
+    (void)out_aggregator->has_search();
+    (void)out_aggregator->get_components();
+
     // clear methods
     out_aggregator->clear_port();
     out_aggregator->clear_search();
     out_aggregator->clear_hash();
+  }
+
+  /**
+   * Relative URL parsing with base (tests the base URL resolution code path)
+   */
+  auto base_url = ada::parse<ada::url>(base);
+  auto base_agg = ada::parse<ada::url_aggregator>(base);
+
+  if (base_url) {
+    auto result = ada::parse<ada::url>(source, &*base_url);
+    if (result) {
+      length += result->get_href().size();
+      length += result->get_origin().size();
+      exercise_url_predicates(*result);
+    }
+  }
+
+  if (base_agg) {
+    auto result = ada::parse<ada::url_aggregator>(source, &*base_agg);
+    if (result) {
+      length += result->get_href().size();
+      length += result->get_origin().size();
+      exercise_aggregator_predicates(*result);
+    }
+  }
+
+  // Cross-type consistency: relative URL parsing with a base should agree
+  // between url and url_aggregator representations for valid UTF-8 inputs.
+  if (is_valid_utf8_string(source.data(), source.length()) &&
+      is_valid_utf8_string(base.data(), base.length()) && base_url &&
+      base_agg) {
+    auto res_url = ada::parse<ada::url>(source, &*base_url);
+    auto res_agg = ada::parse<ada::url_aggregator>(source, &*base_agg);
+    if (res_url.has_value() ^ res_agg.has_value()) {
+      printf("Relative parse inconsistency for source=%s base=%s\n",
+             source.c_str(), base.c_str());
+      abort();
+    }
+    if (res_url && res_agg) {
+      if (res_url->get_href() != std::string(res_agg->get_href())) {
+        printf("Relative parse href mismatch for source=%s base=%s\n",
+               source.c_str(), base.c_str());
+        abort();
+      }
+    }
   }
 
   /**
