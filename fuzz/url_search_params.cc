@@ -172,5 +172,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   assigned = search_params;
   length += assigned.size();
 
+  // Test move constructor and move assignment
+  ada::url_search_params move_constructed = std::move(copied);
+  length += move_constructed.size();
+  ada::url_search_params move_assigned;
+  move_assigned = std::move(assigned);
+  length += move_assigned.size();
+
   return 0;
 }

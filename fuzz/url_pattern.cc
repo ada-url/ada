@@ -65,11 +65,31 @@ static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
     (void)len;
   }
 
-  // exec() with base URL
+  // exec() with base URL — exercise result groups, same as no-base case
   if (!test_base.empty()) {
     std::string_view base_view(test_base.data(), test_base.size());
     auto exec_with_base = pattern.exec(test_view, &base_view);
-    (void)exec_with_base;
+    if (exec_with_base && exec_with_base->has_value()) {
+      const ada::url_pattern_result& match = **exec_with_base;
+      volatile size_t len = 0;
+      auto exercise_component =
+          [&len](const ada::url_pattern_component_result& c) {
+            len += c.input.size();
+            for (const auto& [k, v] : c.groups) {
+              len += k.size();
+              if (v.has_value()) len += v->size();
+            }
+          };
+      exercise_component(match.protocol);
+      exercise_component(match.username);
+      exercise_component(match.password);
+      exercise_component(match.hostname);
+      exercise_component(match.port);
+      exercise_component(match.pathname);
+      exercise_component(match.search);
+      exercise_component(match.hash);
+      (void)len;
+    }
   }
 
   // test() with url_pattern_init input
@@ -77,6 +97,22 @@ static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
   init_input.pathname = test_input;
   auto test_with_init = pattern.test(init_input, nullptr);
   (void)test_with_init;
+
+  // test_components() — tests each URL component individually
+  {
+    // Split test_input into components by parsing it, then calling
+    // test_components() with the individual string pieces.
+    std::string_view sv(test_input.data(), test_input.size());
+    auto parsed = ada::parse<ada::url_aggregator>(sv);
+    if (parsed) {
+      volatile bool tc = pattern.test_components(
+          std::string(parsed->get_protocol()), std::string(parsed->get_username()),
+          std::string(parsed->get_password()), std::string(parsed->get_hostname()),
+          std::string(parsed->get_port()), std::string(parsed->get_pathname()),
+          std::string(parsed->get_search()), std::string(parsed->get_hash()));
+      (void)tc;
+    }
+  }
 
   // match() - internal method that exec() uses
   auto match_result = pattern.match(test_view, nullptr);

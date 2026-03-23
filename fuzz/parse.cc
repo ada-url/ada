@@ -234,9 +234,21 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     assert(std::string(copied_agg.get_href()) ==
            std::string(parse_url_aggregator->get_href()));
 
+    // Copy assignment
+    ada::url_aggregator assigned_agg;
+    assigned_agg = *parse_url_aggregator;
+    assert(std::string(assigned_agg.get_href()) ==
+           std::string(parse_url_aggregator->get_href()));
+
     // Move constructor
     ada::url_aggregator moved_agg = std::move(copied_agg);
     assert(std::string(moved_agg.get_href()) ==
+           std::string(parse_url_aggregator->get_href()));
+
+    // Move assignment
+    ada::url_aggregator move_assigned_agg;
+    move_assigned_agg = std::move(assigned_agg);
+    assert(std::string(move_assigned_agg.get_href()) ==
            std::string(parse_url_aggregator->get_href()));
   }
 
