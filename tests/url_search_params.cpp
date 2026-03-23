@@ -533,3 +533,48 @@ TEST(url_search_params, sort_truncated_utf8_4byte_rhs) {
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
 }
+
+// The next two tests exercise the second clause of the while-loop condition:
+//   (j < rhs.first.size() || low_surrogate2 != 0)
+// When rhs ends with a complete 4-byte (surrogate-pair) sequence, processing
+// it advances j to rhs.size() while leaving low_surrogate2 non-zero.  The
+// while check on the NEXT iteration evaluates the || because j < size is
+// FALSE, covering the previously-uncovered (0/2) branch on that condition.
+
+TEST(url_search_params, sort_surrogate_rhs_exhausted_pending) {
+  // lhs = "A" + rainbow-emoji + "B"  (6 bytes: A F0 9F 8C 88 B)
+  // rhs = "A" + rainbow-emoji        (5 bytes: A F0 9F 8C 88)
+  // Input order: lhs first, rhs second; after sort rhs (shorter) comes first.
+  // stable_sort calls comp(lhs, rhs): after processing the shared emoji both
+  // sides advance by 4 bytes, making j == rhs.size() while low_surrogate2 is
+  // still set (the low-surrogate half of the emoji).  The while check on the
+  // next iteration therefore evaluates (j < size || low2 != 0) with j >= size
+  // AND low2 != 0, taking the first branch.  On the subsequent check low2
+  // has been consumed and is 0, so it takes the second branch (loop exit).
+  ada::url_search_params search_params(
+      "A\xf0\x9f\x8c\x88" "B=x&A\xf0\x9f\x8c\x88=y");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "A\xf0\x9f\x8c\x88");
+  ASSERT_EQ(keys.next(), "A\xf0\x9f\x8c\x88" "B");
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_surrogate_lhs_exhausted_pending) {
+  // lhs = "A" + rainbow-emoji        (5 bytes)
+  // rhs = "A" + rainbow-emoji + "B"  (6 bytes)
+  // Input order: lhs first, rhs second (already in sorted order).
+  // stable_sort calls comp(lhs, rhs): after the shared emoji, i == lhs.size()
+  // while low_surrogate1 is still set.  The while check therefore evaluates
+  // (i < size || low1 != 0) with i >= size AND low1 != 0, covering the
+  // branch on the first clause (line 171) that previously showed 0%.
+  ada::url_search_params search_params(
+      "A\xf0\x9f\x8c\x88=y&A\xf0\x9f\x8c\x88" "B=x");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "A\xf0\x9f\x8c\x88");
+  ASSERT_EQ(keys.next(), "A\xf0\x9f\x8c\x88" "B");
+  SUCCEED();
+}
