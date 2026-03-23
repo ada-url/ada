@@ -661,6 +661,14 @@ TEST(basic_tests, url_pattern_canonicalize_pathname_traversal) {
       ada::parse_url_pattern<regex_provider>(init2, nullptr, nullptr);
   (void)result2;
 
+  // A simple relative pathname (no traversal) exercises the
+  // !leading_slash && pathname.size() >= 2 branch (returns substr(2)).
+  ada::url_pattern_init init3{};
+  init3.pathname = "simple";
+  auto result3 =
+      ada::parse_url_pattern<regex_provider>(init3, nullptr, nullptr);
+  (void)result3;
+
   SUCCEED();
 }
 #endif  // ADA_INCLUDE_URL_PATTERN

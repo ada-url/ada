@@ -505,3 +505,31 @@ TEST(url_search_params, sort_truncated_utf8_4byte_lhs) {
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
 }
+
+TEST(url_search_params, sort_truncated_utf8_2byte_rhs) {
+  // Put the truncated 2-byte key second so it appears as rhs in the
+  // comparator, exercising the c2 > 0x7F && c2 <= 0xDF branch with
+  // j+1 >= rhs.first.size() (truncated).
+  ada::url_search_params search_params("b=c&%C3=a");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_3byte_rhs) {
+  // Put the truncated 3-byte key second so it appears as rhs, exercising
+  // the c2 > 0xDF && c2 <= 0xEF branch with j+2 >= rhs.first.size().
+  ada::url_search_params search_params("b=c&%E2%82=a");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_4byte_rhs) {
+  // Put the truncated 4-byte key second so it appears as rhs, exercising
+  // the c2 > 0xEF && c2 <= 0xF7 branch with j+3 >= rhs.first.size().
+  ada::url_search_params search_params("b=c&%F0%9F%8C=a");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
