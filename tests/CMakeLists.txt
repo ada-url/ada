@@ -2,13 +2,12 @@
 # Source files should be just ASCII
 #
 find_program(FIND find)
-find_program(FILE file)
 find_program(GREP grep)
-if(FIND AND FILE AND GREP)
+if(FIND AND GREP)
   add_test(
       NAME just_ascii
       COMMAND sh -c "\
-${FIND} include src tests tools benchmarks  -name '*.h' -o -name '*.txt' -o -name '*.cpp' -type f -exec ${FILE} '{}' \; | ${GREP} -qv ASCII || exit 0  && exit 1"
+${FIND} include src tests tools benchmarks \\( -name '*.h' -o -name '*.txt' -o -name '*.cpp' \\) -type f -exec ${GREP} -lP '[^\\x00-\\x7F]' '{}' + | ${GREP} -q . && exit 1 || exit 0"
       WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   )
 endif()
