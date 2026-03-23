@@ -448,3 +448,33 @@ TEST(url_search_params, sort_unicode_code_units_edge_case) {
   ASSERT_EQ(keys.next(), "\xf0\x9f\x8c\x88\xef\xac\x83");
   SUCCEED();
 }
+
+// Regression test: heap-buffer-overflow in sort() comparator when keys contain
+// truncated (invalid) UTF-8 sequences produced by percent-decoding. The
+// comparator must not read continuation bytes beyond the end of the string.
+TEST(url_search_params, sort_truncated_utf8_2byte) {
+  // 0xC3 is the leading byte of a 2-byte sequence (e.g. U+00E9 é = 0xC3 0xA9),
+  // but here it appears alone at the end of the key with no continuation byte.
+  ada::url_search_params search_params("%C3=a&b=c");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_3byte) {
+  // 0xE2 0x82 is the start of a 3-byte sequence (e.g. U+20AC € = 0xE2 0x82
+  // 0xAC), but the third byte is missing.
+  ada::url_search_params search_params("%E2%82=a&b=c");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_4byte) {
+  // 0xF0 0x9F 0x8C is the start of a 4-byte sequence (e.g. U+1F308 🌈 =
+  // 0xF0 0x9F 0x8C 0x88), but the fourth byte is missing.
+  ada::url_search_params search_params("%F0%9F%8C=a&b=c");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
