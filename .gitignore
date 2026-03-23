@@ -1,6 +1,8 @@
 # common build directory
 build
+build-*/
 *-build-*
+_fuzz_check/
 
 # Python cache
 __pycache__
