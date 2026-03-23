@@ -1,7 +1,8 @@
 # common build directory
 build
-build-*
+build-*/
 *-build-*
+_fuzz_check/
 
 # Python cache
 __pycache__
@@ -30,3 +31,6 @@ benchmarks/competitors/servo-url/target
 
 # bazel output
 bazel-*
+
+# gcov coverage data files
+*.gcov

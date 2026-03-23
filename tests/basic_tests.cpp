@@ -637,3 +637,104 @@ TEST(basic_tests, issue_1076_setter_sequence) {
   ASSERT_TRUE(url->validate());
   SUCCEED();
 }
+
+// Regression test: parsing an empty string or no-scheme input relative to a
+// base URL with an empty query string ("?") must preserve the empty query in
+// both ada::url and ada::url_aggregator. Previously, url_aggregator would
+// drop the query entirely because update_base_search("") incorrectly cleared
+// it instead of preserving the "?" marker.
+TEST(basic_tests, empty_query_base_consistency) {
+  // FILE state: empty source against file:// base with empty query.
+  {
+    auto bu = ada::parse<ada::url>("file:///path?");
+    auto ba = ada::parse<ada::url_aggregator>("file:///path?");
+    ASSERT_TRUE(bu);
+    ASSERT_TRUE(ba);
+    auto ru = ada::parse<ada::url>("", &*bu);
+    auto ra = ada::parse<ada::url_aggregator>("", &*ba);
+    ASSERT_TRUE(ru);
+    ASSERT_TRUE(ra);
+    EXPECT_EQ(ru->get_href(), std::string(ra->get_href()));
+    EXPECT_TRUE(ru->has_search());
+    EXPECT_TRUE(ra->has_search());
+    EXPECT_EQ(ru->get_search(), "");
+    EXPECT_EQ(std::string(ra->get_search()), "");
+  }
+
+  // FILE state: original fuzzer crash input.
+  {
+    auto bu = ada::parse<ada::url>("file://e//.U./UU.//&eSe?");
+    auto ba = ada::parse<ada::url_aggregator>("file://e//.U./UU.//&eSe?");
+    ASSERT_TRUE(bu);
+    ASSERT_TRUE(ba);
+    auto ru = ada::parse<ada::url>("", &*bu);
+    auto ra = ada::parse<ada::url_aggregator>("", &*ba);
+    ASSERT_TRUE(ru);
+    ASSERT_TRUE(ra);
+    EXPECT_EQ(ru->get_href(), std::string(ra->get_href()));
+  }
+
+  // RELATIVE_SCHEME state: empty source against https:// base with empty query.
+  {
+    auto bu = ada::parse<ada::url>("https://example.com/path?");
+    auto ba = ada::parse<ada::url_aggregator>("https://example.com/path?");
+    ASSERT_TRUE(bu);
+    ASSERT_TRUE(ba);
+    auto ru = ada::parse<ada::url>("", &*bu);
+    auto ra = ada::parse<ada::url_aggregator>("", &*ba);
+    ASSERT_TRUE(ru);
+    ASSERT_TRUE(ra);
+    EXPECT_EQ(ru->get_href(), std::string(ra->get_href()));
+    EXPECT_TRUE(ru->has_search());
+    EXPECT_TRUE(ra->has_search());
+  }
+
+  // NO_SCHEME state: fragment-only input against opaque-path base with empty
+  // query.
+  {
+    auto bu = ada::parse<ada::url>("foo:bar?");
+    auto ba = ada::parse<ada::url_aggregator>("foo:bar?");
+    ASSERT_TRUE(bu);
+    ASSERT_TRUE(ba);
+    auto ru = ada::parse<ada::url>("#hash", &*bu);
+    auto ra = ada::parse<ada::url_aggregator>("#hash", &*ba);
+    ASSERT_TRUE(ru);
+    ASSERT_TRUE(ra);
+    EXPECT_EQ(ru->get_href(), std::string(ra->get_href()));
+  }
+}
+
+// Regression test: canonicalize_pathname with path traversal that reduces
+// the normalized pathname to fewer than 2 characters must not throw
+// std::out_of_range. Previously, "fake://fake-url/-../../" normalized to
+// pathname "/" (1 char) and the code called pathname.substr(2) which threw.
+#if ADA_INCLUDE_URL_PATTERN
+TEST(basic_tests, url_pattern_canonicalize_pathname_traversal) {
+  using regex_provider = ada::url_pattern_regex::std_regex_provider;
+  // These inputs have non-leading-slash pathnames that, after URL
+  // normalization of path traversal sequences, produce a pathname shorter
+  // than 2 characters.  They must return a failure (not crash).
+  ada::url_pattern_init init1{};
+  init1.pathname = "../../";
+  auto result1 =
+      ada::parse_url_pattern<regex_provider>(init1, nullptr, nullptr);
+  // Result may be success or failure, but must not crash.
+  (void)result1;
+
+  ada::url_pattern_init init2{};
+  init2.pathname = "../";
+  auto result2 =
+      ada::parse_url_pattern<regex_provider>(init2, nullptr, nullptr);
+  (void)result2;
+
+  // A simple relative pathname (no traversal) exercises the
+  // !leading_slash && pathname.size() >= 2 branch (returns substr(2)).
+  ada::url_pattern_init init3{};
+  init3.pathname = "simple";
+  auto result3 =
+      ada::parse_url_pattern<regex_provider>(init3, nullptr, nullptr);
+  (void)result3;
+
+  SUCCEED();
+}
+#endif  // ADA_INCLUDE_URL_PATTERN

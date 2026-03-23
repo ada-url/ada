@@ -268,7 +268,7 @@ constexpr static std::array<uint8_t, 256> is_forbidden_domain_code_point_table =
       for (uint8_t c = 0; c <= 32; c++) {
         result[c] = true;
       }
-      for (size_t c = 127; c < 255; c++) {
+      for (size_t c = 127; c < 256; c++) {
         result[c] = true;
       }
       return result;
@@ -310,7 +310,7 @@ constexpr static std::array<uint8_t, 256>
       for (uint8_t c = 0; c <= 32; c++) {
         result[c] = 1;
       }
-      for (size_t c = 127; c < 255; c++) {
+      for (size_t c = 127; c < 256; c++) {
         result[c] = 1;
       }
       return result;

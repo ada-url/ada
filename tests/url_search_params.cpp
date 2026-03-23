@@ -448,3 +448,136 @@ TEST(url_search_params, sort_unicode_code_units_edge_case) {
   ASSERT_EQ(keys.next(), "\xf0\x9f\x8c\x88\xef\xac\x83");
   SUCCEED();
 }
+
+// Regression test: heap-buffer-overflow in sort() comparator when keys contain
+// truncated (invalid) UTF-8 sequences produced by percent-decoding. The
+// comparator must not read continuation bytes beyond the end of the string.
+TEST(url_search_params, sort_truncated_utf8_2byte) {
+  // 0xC3 is the leading byte of a 2-byte sequence (e.g. U+00E9 = 0xC3 0xA9),
+  // but here it appears alone at the end of the key with no continuation byte.
+  ada::url_search_params search_params("%C3=a&b=c");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_3byte) {
+  // 0xE2 0x82 is the start of a 3-byte sequence (e.g. U+20AC = 0xE2 0x82
+  // 0xAC), but the third byte is missing.
+  ada::url_search_params search_params("%E2%82=a&b=c");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_4byte) {
+  // 0xF0 0x9F 0x8C is the start of a 4-byte sequence (e.g. U+1F308 =
+  // 0xF0 0x9F 0x8C 0x88), but the fourth byte is missing.
+  ada::url_search_params search_params("%F0%9F%8C=a&b=c");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_invalid_utf8_leading_byte) {
+  // 0xF8-0xFF are invalid UTF-8 leading bytes (no valid sequence starts with
+  // them in UTF-8). They should be treated as raw bytes.
+  // Place the invalid-byte key first so it is the lhs in the comparator.
+  ada::url_search_params search_params("%F8=a&b=c");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_invalid_utf8_leading_byte_rhs) {
+  // Same invalid byte, but placed second so it appears as the rhs.
+  ada::url_search_params search_params("b=c&%F8=a");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_4byte_lhs) {
+  // 0xF0 0x9F 0x8C appears as lhs (first element) so the truncated
+  // 4-byte branch is exercised on the lhs side.
+  ada::url_search_params search_params("%F0%9F%8C=a&%FF=b");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_2byte_rhs) {
+  // Put the truncated 2-byte key second so it appears as rhs in the
+  // comparator, exercising the c2 > 0x7F && c2 <= 0xDF branch with
+  // j+1 >= rhs.first.size() (truncated).
+  ada::url_search_params search_params("b=c&%C3=a");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_3byte_rhs) {
+  // Put the truncated 3-byte key second so it appears as rhs, exercising
+  // the c2 > 0xDF && c2 <= 0xEF branch with j+2 >= rhs.first.size().
+  ada::url_search_params search_params("b=c&%E2%82=a");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_4byte_rhs) {
+  // Put the truncated 4-byte key second so it appears as rhs, exercising
+  // the c2 > 0xEF && c2 <= 0xF7 branch with j+3 >= rhs.first.size().
+  ada::url_search_params search_params("b=c&%F0%9F%8C=a");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+// The next two tests exercise the second clause of the while-loop condition:
+//   (j < rhs.first.size() || low_surrogate2 != 0)
+// When rhs ends with a complete 4-byte (surrogate-pair) sequence, processing
+// it advances j to rhs.size() while leaving low_surrogate2 non-zero.  The
+// while check on the NEXT iteration evaluates the || because j < size is
+// FALSE, covering the previously-uncovered (0/2) branch on that condition.
+
+TEST(url_search_params, sort_surrogate_rhs_exhausted_pending) {
+  // lhs = "A" + rainbow-emoji + "B"  (6 bytes: A F0 9F 8C 88 B)
+  // rhs = "A" + rainbow-emoji        (5 bytes: A F0 9F 8C 88)
+  // Input order: lhs first, rhs second; after sort rhs (shorter) comes first.
+  // stable_sort calls comp(lhs, rhs): after processing the shared emoji both
+  // sides advance by 4 bytes, making j == rhs.size() while low_surrogate2 is
+  // still set (the low-surrogate half of the emoji).  The while check on the
+  // next iteration therefore evaluates (j < size || low2 != 0) with j >= size
+  // AND low2 != 0, taking the first branch.  On the subsequent check low2
+  // has been consumed and is 0, so it takes the second branch (loop exit).
+  // Octal escapes (\360\237\214\210 == U+1F308 rainbow emoji in UTF-8) are used
+  // instead of hex to avoid adjacent-string-literal clang-format issues and to
+  // prevent \x88B from being read as a single hex escape.
+  ada::url_search_params search_params(
+      "A\360\237\214\210B=x&A\360\237\214\210=y");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "A\360\237\214\210");
+  ASSERT_EQ(keys.next(), "A\360\237\214\210B");
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_surrogate_lhs_exhausted_pending) {
+  // lhs = "A" + rainbow-emoji        (5 bytes)
+  // rhs = "A" + rainbow-emoji + "B"  (6 bytes)
+  // Input order: lhs first, rhs second (already in sorted order).
+  // stable_sort calls comp(lhs, rhs): after the shared emoji, i == lhs.size()
+  // while low_surrogate1 is still set.  The while check therefore evaluates
+  // (i < size || low1 != 0) with i >= size AND low1 != 0, covering the
+  // branch on the first clause (line 171) that previously showed 0%.
+  ada::url_search_params search_params(
+      "A\360\237\214\210=y&A\360\237\214\210B=x");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  auto keys = search_params.get_keys();
+  ASSERT_EQ(keys.next(), "A\360\237\214\210");
+  ASSERT_EQ(keys.next(), "A\360\237\214\210B");
+  SUCCEED();
+}

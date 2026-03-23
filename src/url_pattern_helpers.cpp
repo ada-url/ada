@@ -493,8 +493,15 @@ tl::expected<std::string, errors> canonicalize_pathname(
     const auto pathname = url->get_pathname();
     // If leading slash is false, then set result to the code point substring
     // from 2 to the end of the string within result.
-    return leading_slash ? std::string(pathname)
-                         : std::string(pathname.substr(2));
+    if (!leading_slash) {
+      // pathname should start with "/-" but path traversal (e.g. "../../")
+      // can reduce it to just "/" which is shorter than 2 characters.
+      if (pathname.size() < 2) {
+        return tl::unexpected(errors::type_error);
+      }
+      return std::string(pathname.substr(2));
+    }
+    return std::string(pathname);
   }
   // If parseResult is failure, then throw a TypeError.
   return tl::unexpected(errors::type_error);
@@ -1031,7 +1038,8 @@ std::string generate_pattern_string(
     // point.
     bool needs_grouping =
         !part.suffix.empty() ||
-        (!part.prefix.empty() && part.prefix[0] != options.get_prefix()[0]);
+        (!part.prefix.empty() && !options.get_prefix().empty() &&
+         part.prefix[0] != options.get_prefix()[0]);
 
     // If all of the following are true:
     // - needs grouping is false; and
@@ -1069,9 +1077,8 @@ std::string generate_pattern_string(
     // then set needs grouping to true.
     if (!needs_grouping && part.prefix.empty() && previous_part &&
         previous_part->type == url_pattern_part_type::FIXED_TEXT &&
-        !options.get_prefix().empty() &&
-        previous_part->value.at(previous_part->value.size() - 1) ==
-            options.get_prefix()[0]) {
+        !previous_part->value.empty() && !options.get_prefix().empty() &&
+        previous_part->value.back() == options.get_prefix()[0]) {
       needs_grouping = true;
     }
 
