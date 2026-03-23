@@ -637,3 +637,28 @@ TEST(basic_tests, issue_1076_setter_sequence) {
   ASSERT_TRUE(url->validate());
   SUCCEED();
 }
+
+// Regression test: canonicalize_pathname with path traversal that reduces
+// the normalized pathname to fewer than 2 characters must not throw
+// std::out_of_range. Previously, "fake://fake-url/-../../" normalized to
+// pathname "/" (1 char) and the code called pathname.substr(2) which threw.
+#if ADA_INCLUDE_URL_PATTERN
+TEST(basic_tests, url_pattern_canonicalize_pathname_traversal) {
+  using regex_provider = ada::url_pattern_regex::std_regex_provider;
+  // These inputs have non-leading-slash pathnames that, after URL
+  // normalization of path traversal sequences, produce a pathname shorter
+  // than 2 characters.  They must return a failure (not crash).
+  ada::url_pattern_init init1{};
+  init1.pathname = "../../";
+  auto result1 = ada::parse_url_pattern<regex_provider>(init1, nullptr, nullptr);
+  // Result may be success or failure, but must not crash.
+  (void)result1;
+
+  ada::url_pattern_init init2{};
+  init2.pathname = "../";
+  auto result2 = ada::parse_url_pattern<regex_provider>(init2, nullptr, nullptr);
+  (void)result2;
+
+  SUCCEED();
+}
+#endif  // ADA_INCLUDE_URL_PATTERN

@@ -493,8 +493,15 @@ tl::expected<std::string, errors> canonicalize_pathname(
     const auto pathname = url->get_pathname();
     // If leading slash is false, then set result to the code point substring
     // from 2 to the end of the string within result.
-    return leading_slash ? std::string(pathname)
-                         : std::string(pathname.substr(2));
+    if (!leading_slash) {
+      // pathname should start with "/-" but path traversal (e.g. "../../")
+      // can reduce it to just "/" which is shorter than 2 characters.
+      if (pathname.size() < 2) {
+        return tl::unexpected(errors::type_error);
+      }
+      return std::string(pathname.substr(2));
+    }
+    return std::string(pathname);
   }
   // If parseResult is failure, then throw a TypeError.
   return tl::unexpected(errors::type_error);

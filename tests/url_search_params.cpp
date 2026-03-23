@@ -478,3 +478,30 @@ TEST(url_search_params, sort_truncated_utf8_4byte) {
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
 }
+
+TEST(url_search_params, sort_invalid_utf8_leading_byte) {
+  // 0xF8-0xFF are invalid UTF-8 leading bytes (no valid sequence starts with
+  // them in UTF-8). They should be treated as raw bytes.
+  // Place the invalid-byte key first so it is the lhs in the comparator.
+  ada::url_search_params search_params("%F8=a&b=c");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_invalid_utf8_leading_byte_rhs) {
+  // Same invalid byte, but placed second so it appears as the rhs.
+  ada::url_search_params search_params("b=c&%F8=a");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
+
+TEST(url_search_params, sort_truncated_utf8_4byte_lhs) {
+  // 0xF0 0x9F 0x8C appears as lhs (first element) so the truncated
+  // 4-byte branch is exercised on the lhs side.
+  ada::url_search_params search_params("%F0%9F%8C=a&%FF=b");
+  search_params.sort();
+  ASSERT_EQ(search_params.size(), 2);
+  SUCCEED();
+}
