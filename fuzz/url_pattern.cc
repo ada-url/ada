@@ -43,14 +43,25 @@ static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
   if (exec_result && exec_result->has_value()) {
     const ada::url_pattern_result& match = **exec_result;
     volatile size_t len = 0;
-    len += match.protocol.input.size();
-    len += match.username.input.size();
-    len += match.password.input.size();
-    len += match.hostname.input.size();
-    len += match.port.input.size();
-    len += match.pathname.input.size();
-    len += match.search.input.size();
-    len += match.hash.input.size();
+    // Exercise .input and .groups on every component result.
+    auto exercise_component =
+        [&len](const ada::url_pattern_component_result& c) {
+          len += c.input.size();
+          for (const auto& [k, v] : c.groups) {
+            len += k.size();
+            if (v.has_value()) {
+              len += v->size();
+            }
+          }
+        };
+    exercise_component(match.protocol);
+    exercise_component(match.username);
+    exercise_component(match.password);
+    exercise_component(match.hostname);
+    exercise_component(match.port);
+    exercise_component(match.pathname);
+    exercise_component(match.search);
+    exercise_component(match.hash);
     (void)len;
   }
 

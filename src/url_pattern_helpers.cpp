@@ -1038,7 +1038,8 @@ std::string generate_pattern_string(
     // point.
     bool needs_grouping =
         !part.suffix.empty() ||
-        (!part.prefix.empty() && part.prefix[0] != options.get_prefix()[0]);
+        (!part.prefix.empty() && !options.get_prefix().empty() &&
+         part.prefix[0] != options.get_prefix()[0]);
 
     // If all of the following are true:
     // - needs grouping is false; and
