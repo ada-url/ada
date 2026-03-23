@@ -31,3 +31,6 @@ benchmarks/competitors/servo-url/target
 
 # bazel output
 bazel-*
+
+# gcov coverage data files
+*.gcov
