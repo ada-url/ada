@@ -93,30 +93,6 @@ ada_url_aggregator_t* ada_parse_with_base_impl(const char* input,
                                                const char* base,
                                                size_t base_length) ADA_NOEXCEPT;
 
-bool ada_set_href_impl(ada_url_aggregator_t* url, const char* input,
-                       size_t length) ADA_NOEXCEPT;
-bool ada_set_host_impl(ada_url_aggregator_t* url, const char* input,
-                       size_t length) ADA_NOEXCEPT;
-bool ada_set_hostname_impl(ada_url_aggregator_t* url, const char* input,
-                           size_t length) ADA_NOEXCEPT;
-bool ada_set_protocol_impl(ada_url_aggregator_t* url, const char* input,
-                           size_t length) ADA_NOEXCEPT;
-bool ada_set_username_impl(ada_url_aggregator_t* url, const char* input,
-                           size_t length) ADA_NOEXCEPT;
-bool ada_set_password_impl(ada_url_aggregator_t* url, const char* input,
-                           size_t length) ADA_NOEXCEPT;
-bool ada_set_port_impl(ada_url_aggregator_t* url, const char* input,
-                       size_t length) ADA_NOEXCEPT;
-bool ada_set_pathname_impl(ada_url_aggregator_t* url, const char* input,
-                           size_t length) ADA_NOEXCEPT;
-void ada_set_search_impl(ada_url_aggregator_t* url, const char* input,
-                         size_t length) ADA_NOEXCEPT;
-void ada_set_hash_impl(ada_url_aggregator_t* url, const char* input,
-                       size_t length) ADA_NOEXCEPT;
-void ada_clear_port_impl(ada_url_aggregator_t* url) ADA_NOEXCEPT;
-void ada_clear_hash_impl(ada_url_aggregator_t* url) ADA_NOEXCEPT;
-void ada_clear_search_impl(ada_url_aggregator_t* url) ADA_NOEXCEPT;
-
 /* IDNA bridge. Returns a heap-allocated string; caller must free() it.      */
 char* ada_idna_to_unicode_impl(const char* input, size_t length,
                                size_t* out_length) ADA_NOEXCEPT;

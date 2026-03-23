@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /* ---- SIMD includes -------------------------------------------------------- */
 #if ADA_C_SSSE3
@@ -686,80 +687,437 @@ bool ada_has_search(ada_url result) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Setters (C++ bridge)                                                        */
+/* Internal helper: splice buffer[from..to) with prefix+repl, re-parse.      */
+/* -------------------------------------------------------------------------- */
+
+static bool ada_c_splice_reparse(ada_url_aggregator_t* r,
+                                  uint32_t from_off, uint32_t to_off,
+                                  const char* prefix, size_t prefix_len,
+                                  const char* repl,   size_t repl_len) {
+  if (from_off > r->buffer_length) from_off = r->buffer_length;
+  if (to_off   > r->buffer_length) to_off   = r->buffer_length;
+  if (to_off   < from_off)         to_off   = from_off;
+
+  size_t before  = from_off;
+  size_t after   = r->buffer_length - to_off;
+  size_t new_len = before + prefix_len + repl_len + after;
+
+  char* nb = (char*)malloc(new_len + 1);
+  if (!nb) return false;
+  memcpy(nb, r->buffer, before);
+  if (prefix_len) memcpy(nb + before,              prefix, prefix_len);
+  if (repl_len)   memcpy(nb + before + prefix_len, repl,   repl_len);
+  memcpy(nb + before + prefix_len + repl_len, r->buffer + to_off, after);
+  nb[new_len] = '\0';
+
+  ada_url_aggregator_t* nu = ada_parse_impl(nb, new_len);
+  free(nb);
+  if (!nu || !nu->is_valid) {
+    if (nu) { free(nu->buffer); free(nu); }
+    return false;
+  }
+  free(r->buffer);
+  *r  = *nu;
+  free(nu);
+  return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Scheme-type helpers                                                         */
+/* -------------------------------------------------------------------------- */
+
+/* Values from ada::scheme::type: HTTP=0, NOT_SPECIAL=1, HTTPS=2, WS=3,
+ * FTP=4, WSS=5, FILE=6 */
+#define ADA_C_SCHEME_NOT_SPECIAL 1u
+#define ADA_C_SCHEME_FILE        6u
+
+/* Returns 1 if the scheme name (before ':') is a WHATWG special scheme.
+ * Tabs (\t) and newlines (\r, \n) are stripped before comparison,
+ * because the URL parser strips them from input. */
+static int ada_c_is_special_scheme_name(const char* s, size_t len) {
+  char c[8];
+  size_t j = 0;
+  for (size_t i = 0; i < len && j < 7; i++) {
+    char ch = s[i];
+    if (ch == '\t' || ch == '\r' || ch == '\n') continue;
+    if (ch >= 'A' && ch <= 'Z') ch += 32;
+    c[j++] = ch;
+  }
+  if (j == 4 && c[0]=='h' && c[1]=='t' && c[2]=='t' && c[3]=='p') return 1;
+  if (j == 5 && c[0]=='h' && c[1]=='t' && c[2]=='t' && c[3]=='p' && c[4]=='s') return 1;
+  if (j == 2 && c[0]=='w' && c[1]=='s') return 1;
+  if (j == 3 && c[0]=='w' && c[1]=='s' && c[2]=='s') return 1;
+  if (j == 3 && c[0]=='f' && c[1]=='t' && c[2]=='p') return 1;
+  if (j == 4 && c[0]=='f' && c[1]=='i' && c[2]=='l' && c[3]=='e') return 1;
+  return 0;
+}
+
+/* Returns 1 if the scheme name (before ':') normalizes to "file". */
+static int ada_c_is_file_scheme_name(const char* s, size_t len) {
+  char c[5];
+  size_t j = 0;
+  for (size_t i = 0; i < len && j < 5; i++) {
+    char ch = s[i];
+    if (ch == '\t' || ch == '\r' || ch == '\n') continue;
+    if (ch >= 'A' && ch <= 'Z') ch += 32;
+    c[j++] = ch;
+  }
+  return j == 4 && c[0]=='f' && c[1]=='i' && c[2]=='l' && c[3]=='e';
+}
+
+/* -------------------------------------------------------------------------- */
+/* Userinfo percent-encode helper                                              */
+/* -------------------------------------------------------------------------- */
+
+static int ada_c_userinfo_needs_encode(unsigned char c) {
+  if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+      (c >= '0' && c <= '9'))
+    return 0;
+  switch (c) {
+    case '-': case '_': case '.': case '~':  /* unreserved */
+    case '!': case '$': case '%': case '&': case '\'':
+    case '(': case ')': case '*': case '+':
+    case ',': case ';':                      /* sub-delims (not '=') + '%' */
+      return 0;
+    default:
+      return 1;
+  }
+}
+
+static char* ada_c_percent_encode_userinfo(const char* input, size_t length,
+                                            size_t* out_len) {
+  static const char hex[] = "0123456789ABCDEF";
+  char* out = (char*)malloc(length * 3 + 1);
+  if (!out) { *out_len = 0; return NULL; }
+  size_t j = 0;
+  for (size_t i = 0; i < length; i++) {
+    unsigned char c = (unsigned char)input[i];
+    if (ada_c_userinfo_needs_encode(c)) {
+      out[j++] = '%';
+      out[j++] = hex[c >> 4];
+      out[j++] = hex[c & 0xf];
+    } else {
+      out[j++] = (char)c;
+    }
+  }
+  out[j] = '\0';
+  *out_len = j;
+  return out;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Setters (pure C)                                                            */
 /* -------------------------------------------------------------------------- */
 
 bool ada_set_href(ada_url result, const char* input, size_t length) {
   ada_url_aggregator_t* r = get_url(result);
-  if (!r || !r->is_valid) return false;
-  return ada_set_href_impl(r, input, length);
-}
-
-bool ada_set_host(ada_url result, const char* input, size_t length) {
-  ada_url_aggregator_t* r = get_url(result);
-  if (!r || !r->is_valid) return false;
-  return ada_set_host_impl(r, input, length);
-}
-
-bool ada_set_hostname(ada_url result, const char* input, size_t length) {
-  ada_url_aggregator_t* r = get_url(result);
-  if (!r || !r->is_valid) return false;
-  return ada_set_hostname_impl(r, input, length);
+  if (!r) return false;
+  ada_url_aggregator_t* nu = ada_parse_impl(input, length);
+  if (!nu || !nu->is_valid) {
+    if (nu) { free(nu->buffer); free(nu); }
+    return false;
+  }
+  free(r->buffer);
+  *r  = *nu;
+  free(nu);
+  return true;
 }
 
 bool ada_set_protocol(ada_url result, const char* input, size_t length) {
   ada_url_aggregator_t* r = get_url(result);
   if (!r || !r->is_valid) return false;
-  return ada_set_protocol_impl(r, input, length);
+  /* Per WHATWG: strip everything at and after first ':'. */
+  for (size_t i = 0; i < length; i++) {
+    if (input[i] == ':') { length = i; break; }
+  }
+  if (length == 0) return false;
+
+  /* Pre-check 1: special ↔ non-special change is not allowed. */
+  bool old_is_special = (r->scheme_type != ADA_C_SCHEME_NOT_SPECIAL);
+  int  new_is_special = ada_c_is_special_scheme_name(input, length);
+  if ((int)old_is_special != new_is_special) return false;
+
+  /* Pre-check 2: cannot switch to "file:" when URL has credentials or port. */
+  if (ada_c_is_file_scheme_name(input, length) &&
+      r->scheme_type != ADA_C_SCHEME_FILE) {
+    bool has_creds = (r->host_start > r->protocol_end + 2);
+    if (has_creds || r->port != ADA_URL_OMITTED) return false;
+  }
+
+  /* Pre-check 3 (WHATWG check 8): cannot change scheme of a file: URL that
+   * has a null / empty host; the URL would become structurally invalid. */
+  if (r->scheme_type == ADA_C_SCHEME_FILE &&
+      r->host_start == r->host_end) return false;
+
+  char* np = (char*)malloc(length + 2);
+  if (!np) return false;
+  memcpy(np, input, length);
+  np[length]     = ':';
+  np[length + 1] = '\0';
+  bool ok = ada_c_splice_reparse(r, 0, r->protocol_end, np, length + 1, "", 0);
+  free(np);
+  return ok;
 }
 
 bool ada_set_username(ada_url result, const char* input, size_t length) {
   ada_url_aggregator_t* r = get_url(result);
   if (!r || !r->is_valid) return false;
-  return ada_set_username_impl(r, input, length);
+  if (r->has_opaque_path) return false;
+
+  size_t enc_len = 0;
+  char* enc = ada_c_percent_encode_userinfo(input, length, &enc_len);
+  if (!enc && length > 0) return false;
+
+  bool has_creds = (r->host_start > r->protocol_end + 2);
+  bool ok;
+  if (has_creds) {
+    ok = ada_c_splice_reparse(r,
+          r->protocol_end + 2, r->username_end,
+          enc ? enc : "", enc_len, "", 0);
+  } else {
+    if (enc_len == 0) { free(enc); return true; }
+    ok = ada_c_splice_reparse(r,
+          r->protocol_end + 2, r->protocol_end + 2,
+          enc, enc_len, "@", 1);
+  }
+  free(enc);
+  return ok;
 }
 
 bool ada_set_password(ada_url result, const char* input, size_t length) {
   ada_url_aggregator_t* r = get_url(result);
   if (!r || !r->is_valid) return false;
-  return ada_set_password_impl(r, input, length);
+  if (r->has_opaque_path) return false;
+
+  size_t enc_len = 0;
+  char* enc = ada_c_percent_encode_userinfo(input, length, &enc_len);
+  if (!enc && length > 0) return false;
+
+  bool has_creds  = (r->host_start > r->protocol_end + 2);
+  /* '@' is at host_start when credentials exist; password follows ':' after username */
+  bool has_password = has_creds && (r->host_start > r->username_end + 1);
+  bool ok;
+
+  if (has_password) {
+    /* Replace [username_end+1 .. host_start) (skip ':') with encoded input */
+    ok = ada_c_splice_reparse(r,
+          r->username_end + 1, r->host_start,
+          enc ? enc : "", enc_len, "", 0);
+  } else if (has_creds) {
+    /* Username exists but no password; insert ":encoded" after username_end */
+    ok = ada_c_splice_reparse(r,
+          r->username_end, r->username_end,
+          ":", 1, enc ? enc : "", enc_len);
+  } else {
+    /* No credentials at all; insert ":encoded@" at protocol_end+2 */
+    size_t ins_len = 2 + enc_len;
+    char* ins = (char*)malloc(ins_len + 1);
+    if (!ins) { free(enc); return false; }
+    ins[0] = ':';
+    memcpy(ins + 1, enc ? enc : "", enc_len);
+    ins[1 + enc_len] = '@';
+    ins[ins_len]     = '\0';
+    ok = ada_c_splice_reparse(r,
+          r->protocol_end + 2, r->protocol_end + 2,
+          ins, ins_len, "", 0);
+    free(ins);
+  }
+  free(enc);
+  return ok;
+}
+
+bool ada_set_host(ada_url result, const char* input, size_t length) {
+  ada_url_aggregator_t* r = get_url(result);
+  if (!r || !r->is_valid) return false;
+  /* WHATWG: if url has an opaque path, return without modifying. */
+  if (r->has_opaque_path) return false;
+
+  /* Truncate at '/', '?', '#' — the URL host-state terminators.
+   * For special-scheme URLs backslash is also a terminator. */
+  int is_special = (r->scheme_type != ADA_C_SCHEME_NOT_SPECIAL);
+  size_t eff = 0;
+  int in_bracket = 0;
+  for (size_t i = 0; i < length; i++) {
+    if (input[i] == '[') in_bracket = 1;
+    else if (input[i] == ']') in_bracket = 0;
+    if (!in_bracket &&
+        (input[i] == '/' || input[i] == '?' || input[i] == '#' ||
+         (is_special && input[i] == '\\')))
+      break;
+    eff++;
+  }
+
+  uint32_t hs = r->host_start;
+  if (hs < r->buffer_length && r->buffer[hs] == '@') hs++;
+
+  /* Check whether the URL currently has an authority ("//"). */
+  bool has_authority = (r->protocol_end + 2 <= r->buffer_length &&
+                        r->buffer[r->protocol_end]     == '/' &&
+                        r->buffer[r->protocol_end + 1] == '/');
+
+  /* Find the hostname length and the start of the port digits. */
+  size_t hostname_len = eff;
+  size_t port_start   = eff;  /* index of ':' + 1 in input */
+  int    has_port_colon = 0;
+
+  if (eff > 0 && input[0] == '[') {
+    /* IPv6: hostname is everything up to (and including) ']'. */
+    const char* rb = memchr(input, ']', eff);
+    if (rb) {
+      hostname_len = (size_t)(rb - input) + 1;
+      if (hostname_len < eff && input[hostname_len] == ':') {
+        has_port_colon = 1;
+        port_start     = hostname_len + 1;
+      }
+    }
+  } else {
+    for (size_t i = 0; i < eff; i++) {
+      if (input[i] == ':') {
+        hostname_len   = i;
+        has_port_colon = 1;
+        port_start     = i + 1;
+        break;
+      }
+    }
+  }
+
+  /* Only count LEADING ASCII digits as valid port characters. */
+  size_t port_digit_len = 0;
+  if (has_port_colon) {
+    for (size_t i = port_start; i < eff; i++) {
+      if (input[i] >= '0' && input[i] <= '9') port_digit_len++;
+      else break;
+    }
+  }
+
+  /* Trim eff: hostname + (optional ":digits"). */
+  int has_real_port = has_port_colon && (port_digit_len > 0);
+  if (has_real_port)
+    eff = hostname_len + 1 + port_digit_len;  /* "host:NNNN" */
+  else
+    eff = hostname_len;                        /* hostname only */
+
+  if (!has_authority) {
+    /* URL has no authority: insert "//hostname" before the path. */
+    if (eff == 0) return false;
+    return ada_c_splice_reparse(r, r->protocol_end, r->protocol_end,
+                                "//", 2, input, eff);
+  }
+
+  if (has_real_port) {
+    /* Replace full host+port section. */
+    return ada_c_splice_reparse(r, hs, r->pathname_start, input, eff, "", 0);
+  } else {
+    /* Replace only the hostname; preserve any existing port. */
+    return ada_c_splice_reparse(r, hs, r->host_end, input, eff, "", 0);
+  }
+}
+
+bool ada_set_hostname(ada_url result, const char* input, size_t length) {
+  ada_url_aggregator_t* r = get_url(result);
+  if (!r || !r->is_valid) return false;
+  uint32_t hs = r->host_start;
+  if (hs < r->buffer_length && r->buffer[hs] == '@') hs++;
+  return ada_c_splice_reparse(r, hs, r->host_end, input, length, "", 0);
 }
 
 bool ada_set_port(ada_url result, const char* input, size_t length) {
   ada_url_aggregator_t* r = get_url(result);
   if (!r || !r->is_valid) return false;
-  return ada_set_port_impl(r, input, length);
+  if (length == 0) {
+    ada_clear_port(result);
+    return true;
+  }
+  return ada_c_splice_reparse(r,
+        r->host_end, r->pathname_start,
+        ":", 1, input, length);
 }
 
 bool ada_set_pathname(ada_url result, const char* input, size_t length) {
   ada_url_aggregator_t* r = get_url(result);
   if (!r || !r->is_valid) return false;
-  return ada_set_pathname_impl(r, input, length);
+  uint32_t path_end = r->buffer_length;
+  if (r->search_start != ADA_URL_OMITTED) path_end = r->search_start;
+  else if (r->hash_start != ADA_URL_OMITTED) path_end = r->hash_start;
+  /* WHATWG path-start state normalises the path to always start with '/'. */
+  if (length == 0 || input[0] != '/') {
+    return ada_c_splice_reparse(r, r->pathname_start, path_end,
+                                "/", 1, input, length);
+  }
+  return ada_c_splice_reparse(r, r->pathname_start, path_end,
+                              input, length, "", 0);
 }
 
 void ada_set_search(ada_url result, const char* input, size_t length) {
   ada_url_aggregator_t* r = get_url(result);
-  if (r && r->is_valid) ada_set_search_impl(r, input, length);
+  if (!r || !r->is_valid) return;
+  while (length > 0 && input[0] == '?') { input++; length--; }
+  if (length == 0) { ada_clear_search(result); return; }
+  uint32_t from = (r->search_start != ADA_URL_OMITTED)
+                      ? r->search_start
+                      : (r->hash_start != ADA_URL_OMITTED
+                             ? r->hash_start
+                             : r->buffer_length);
+  uint32_t to = (r->hash_start != ADA_URL_OMITTED) ? r->hash_start
+                                                    : r->buffer_length;
+  ada_c_splice_reparse(r, from, to, "?", 1, input, length);
 }
 
 void ada_set_hash(ada_url result, const char* input, size_t length) {
   ada_url_aggregator_t* r = get_url(result);
-  if (r && r->is_valid) ada_set_hash_impl(r, input, length);
+  if (!r || !r->is_valid) return;
+  while (length > 0 && input[0] == '#') { input++; length--; }
+  if (length == 0) { ada_clear_hash(result); return; }
+  uint32_t from = (r->hash_start != ADA_URL_OMITTED) ? r->hash_start
+                                                      : r->buffer_length;
+  ada_c_splice_reparse(r, from, r->buffer_length, "#", 1, input, length);
 }
+
+/* -------------------------------------------------------------------------- */
+/* Clear operations (pure C)                                                  */
+/* -------------------------------------------------------------------------- */
 
 void ada_clear_port(ada_url result) {
   ada_url_aggregator_t* r = get_url(result);
-  if (r && r->is_valid) ada_clear_port_impl(r);
+  if (!r || !r->is_valid) return;
+  if (r->port == ADA_URL_OMITTED) return;
+  uint32_t port_len = r->pathname_start - r->host_end;
+  if (port_len == 0) return;
+  uint32_t tail = r->buffer_length - r->pathname_start;
+  memmove(r->buffer + r->host_end,
+          r->buffer + r->pathname_start,
+          tail + 1);
+  r->pathname_start -= port_len;
+  if (r->search_start != ADA_URL_OMITTED) r->search_start -= port_len;
+  if (r->hash_start   != ADA_URL_OMITTED) r->hash_start   -= port_len;
+  r->buffer_length -= port_len;
+  r->port = ADA_URL_OMITTED;
 }
 
 void ada_clear_hash(ada_url result) {
   ada_url_aggregator_t* r = get_url(result);
-  if (r && r->is_valid) ada_clear_hash_impl(r);
+  if (!r || !r->is_valid) return;
+  if (r->hash_start == ADA_URL_OMITTED) return;
+  r->buffer[r->hash_start] = '\0';
+  r->buffer_length = r->hash_start;
+  r->hash_start = ADA_URL_OMITTED;
 }
 
 void ada_clear_search(ada_url result) {
   ada_url_aggregator_t* r = get_url(result);
-  if (r && r->is_valid) ada_clear_search_impl(r);
+  if (!r || !r->is_valid) return;
+  if (r->search_start == ADA_URL_OMITTED) return;
+  uint32_t search_end = (r->hash_start != ADA_URL_OMITTED) ? r->hash_start
+                                                            : r->buffer_length;
+  uint32_t search_len = search_end - r->search_start;
+  if (search_len == 0) { r->search_start = ADA_URL_OMITTED; return; }
+  uint32_t tail = r->buffer_length - search_end;
+  memmove(r->buffer + r->search_start,
+          r->buffer + search_end,
+          tail + 1);
+  if (r->hash_start != ADA_URL_OMITTED) r->hash_start -= search_len;
+  r->buffer_length -= search_len;
+  r->search_start = ADA_URL_OMITTED;
 }
 
 /* -------------------------------------------------------------------------- */
