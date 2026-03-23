@@ -207,7 +207,13 @@ result_type parse_url_impl(std::string_view user_input,
             url.query = base_url->query;
           } else {
             url.update_base_pathname(base_url->get_pathname());
-            url.update_base_search(base_url->get_search());
+            if (base_url->has_search()) {
+              // get_search() returns "" for an empty query string (URL ends
+              // with '?'). update_base_search("") would incorrectly clear the
+              // query, so pass "?" to preserve the empty query distinction.
+              auto s = base_url->get_search();
+              url.update_base_search(s.empty() ? std::string_view("?") : s);
+            }
           }
           url.update_unencoded_base_hash(*fragment);
           return url;
@@ -431,7 +437,13 @@ result_type parse_url_impl(std::string_view user_input,
             // cloning the base path includes cloning the has_opaque_path flag
             url.has_opaque_path = base_url->has_opaque_path;
             url.update_base_pathname(base_url->get_pathname());
-            url.update_base_search(base_url->get_search());
+            if (base_url->has_search()) {
+              // get_search() returns "" for an empty query string (URL ends
+              // with '?'). update_base_search("") would incorrectly clear the
+              // query, so pass "?" to preserve the empty query distinction.
+              auto s = base_url->get_search();
+              url.update_base_search(s.empty() ? std::string_view("?") : s);
+            }
           }
 
           url.has_opaque_path = base_url->has_opaque_path;
@@ -849,7 +861,13 @@ result_type parse_url_impl(std::string_view user_input,
           } else {
             url.update_host_to_base_host(base_url->get_hostname());
             url.update_base_pathname(base_url->get_pathname());
-            url.update_base_search(base_url->get_search());
+            if (base_url->has_search()) {
+              // get_search() returns "" for an empty query string (URL ends
+              // with '?'). update_base_search("") would incorrectly clear the
+              // query, so pass "?" to preserve the empty query distinction.
+              auto s = base_url->get_search();
+              url.update_base_search(s.empty() ? std::string_view("?") : s);
+            }
           }
           url.has_opaque_path = base_url->has_opaque_path;
 

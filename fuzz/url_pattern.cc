@@ -106,9 +106,11 @@ static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
     auto parsed = ada::parse<ada::url_aggregator>(sv);
     if (parsed) {
       volatile bool tc = pattern.test_components(
-          std::string(parsed->get_protocol()), std::string(parsed->get_username()),
-          std::string(parsed->get_password()), std::string(parsed->get_hostname()),
-          std::string(parsed->get_port()), std::string(parsed->get_pathname()),
+          std::string(parsed->get_protocol()),
+          std::string(parsed->get_username()),
+          std::string(parsed->get_password()),
+          std::string(parsed->get_hostname()), std::string(parsed->get_port()),
+          std::string(parsed->get_pathname()),
           std::string(parsed->get_search()), std::string(parsed->get_hash()));
       (void)tc;
     }
