@@ -177,18 +177,15 @@ inline void url_search_params::sort() {
         low_surrogate1 = 0;
       } else {
         uint8_t c1 = uint8_t(lhs.first[i]);
-        if (c1 <= 0x7F) {
-          codePoint1 = c1;
-          i++;
-        } else if (c1 <= 0xDF && i + 1 < lhs.first.size()) {
+        if (c1 > 0x7F && c1 <= 0xDF && i + 1 < lhs.first.size()) {
           codePoint1 = ((c1 & 0x1F) << 6) | (uint8_t(lhs.first[i + 1]) & 0x3F);
           i += 2;
-        } else if (c1 <= 0xEF && i + 2 < lhs.first.size()) {
+        } else if (c1 > 0xDF && c1 <= 0xEF && i + 2 < lhs.first.size()) {
           codePoint1 = ((c1 & 0x0F) << 12) |
                        ((uint8_t(lhs.first[i + 1]) & 0x3F) << 6) |
                        (uint8_t(lhs.first[i + 2]) & 0x3F);
           i += 3;
-        } else if (c1 <= 0xF7 && i + 3 < lhs.first.size()) {
+        } else if (c1 > 0xEF && c1 <= 0xF7 && i + 3 < lhs.first.size()) {
           codePoint1 = ((c1 & 0x07) << 18) |
                        ((uint8_t(lhs.first[i + 1]) & 0x3F) << 12) |
                        ((uint8_t(lhs.first[i + 2]) & 0x3F) << 6) |
@@ -200,7 +197,7 @@ inline void url_search_params::sort() {
           low_surrogate1 = uint16_t(0xDC00 + (codePoint1 & 0x3FF));
           codePoint1 = high_surrogate;
         } else {
-          // Truncated or invalid UTF-8: treat byte as its raw value and advance
+          // ASCII (c1 <= 0x7F) or truncated/invalid UTF-8: treat as raw byte
           codePoint1 = c1;
           i++;
         }
@@ -211,18 +208,15 @@ inline void url_search_params::sort() {
         low_surrogate2 = 0;
       } else {
         uint8_t c2 = uint8_t(rhs.first[j]);
-        if (c2 <= 0x7F) {
-          codePoint2 = c2;
-          j++;
-        } else if (c2 <= 0xDF && j + 1 < rhs.first.size()) {
+        if (c2 > 0x7F && c2 <= 0xDF && j + 1 < rhs.first.size()) {
           codePoint2 = ((c2 & 0x1F) << 6) | (uint8_t(rhs.first[j + 1]) & 0x3F);
           j += 2;
-        } else if (c2 <= 0xEF && j + 2 < rhs.first.size()) {
+        } else if (c2 > 0xDF && c2 <= 0xEF && j + 2 < rhs.first.size()) {
           codePoint2 = ((c2 & 0x0F) << 12) |
                        ((uint8_t(rhs.first[j + 1]) & 0x3F) << 6) |
                        (uint8_t(rhs.first[j + 2]) & 0x3F);
           j += 3;
-        } else if (c2 <= 0xF7 && j + 3 < rhs.first.size()) {
+        } else if (c2 > 0xEF && c2 <= 0xF7 && j + 3 < rhs.first.size()) {
           codePoint2 = ((c2 & 0x07) << 18) |
                        ((uint8_t(rhs.first[j + 1]) & 0x3F) << 12) |
                        ((uint8_t(rhs.first[j + 2]) & 0x3F) << 6) |
@@ -233,7 +227,7 @@ inline void url_search_params::sort() {
           low_surrogate2 = uint16_t(0xDC00 + (codePoint2 & 0x3FF));
           codePoint2 = high_surrogate;
         } else {
-          // Truncated or invalid UTF-8: treat byte as its raw value and advance
+          // ASCII (c2 <= 0x7F) or truncated/invalid UTF-8: treat as raw byte
           codePoint2 = c2;
           j++;
         }
