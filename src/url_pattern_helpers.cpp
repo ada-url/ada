@@ -1076,9 +1076,8 @@ std::string generate_pattern_string(
     // then set needs grouping to true.
     if (!needs_grouping && part.prefix.empty() && previous_part &&
         previous_part->type == url_pattern_part_type::FIXED_TEXT &&
-        !options.get_prefix().empty() &&
-        previous_part->value.at(previous_part->value.size() - 1) ==
-            options.get_prefix()[0]) {
+        !previous_part->value.empty() && !options.get_prefix().empty() &&
+        previous_part->value.back() == options.get_prefix()[0]) {
       needs_grouping = true;
     }
 
