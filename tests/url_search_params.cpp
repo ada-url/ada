@@ -551,13 +551,16 @@ TEST(url_search_params, sort_surrogate_rhs_exhausted_pending) {
   // next iteration therefore evaluates (j < size || low2 != 0) with j >= size
   // AND low2 != 0, taking the first branch.  On the subsequent check low2
   // has been consumed and is 0, so it takes the second branch (loop exit).
+  // Octal escapes (\360\237\214\210 == U+1F308 rainbow emoji in UTF-8) are used
+  // instead of hex to avoid adjacent-string-literal clang-format issues and to
+  // prevent \x88B from being read as a single hex escape.
   ada::url_search_params search_params(
-      "A\xf0\x9f\x8c\x88" "B=x&A\xf0\x9f\x8c\x88=y");
+      "A\360\237\214\210B=x&A\360\237\214\210=y");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   auto keys = search_params.get_keys();
-  ASSERT_EQ(keys.next(), "A\xf0\x9f\x8c\x88");
-  ASSERT_EQ(keys.next(), "A\xf0\x9f\x8c\x88" "B");
+  ASSERT_EQ(keys.next(), "A\360\237\214\210");
+  ASSERT_EQ(keys.next(), "A\360\237\214\210B");
   SUCCEED();
 }
 
@@ -570,11 +573,11 @@ TEST(url_search_params, sort_surrogate_lhs_exhausted_pending) {
   // (i < size || low1 != 0) with i >= size AND low1 != 0, covering the
   // branch on the first clause (line 171) that previously showed 0%.
   ada::url_search_params search_params(
-      "A\xf0\x9f\x8c\x88=y&A\xf0\x9f\x8c\x88" "B=x");
+      "A\360\237\214\210=y&A\360\237\214\210B=x");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   auto keys = search_params.get_keys();
-  ASSERT_EQ(keys.next(), "A\xf0\x9f\x8c\x88");
-  ASSERT_EQ(keys.next(), "A\xf0\x9f\x8c\x88" "B");
+  ASSERT_EQ(keys.next(), "A\360\237\214\210");
+  ASSERT_EQ(keys.next(), "A\360\237\214\210B");
   SUCCEED();
 }
