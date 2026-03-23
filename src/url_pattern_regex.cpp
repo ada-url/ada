@@ -27,8 +27,14 @@ std_regex_provider::regex_search(std::string_view input,
                                  const std::regex& pattern) {
   // Use iterator-based regex_search to avoid string allocation
   std::match_results<std::string_view::const_iterator> match_result;
-  if (!std::regex_search(input.begin(), input.end(), match_result, pattern,
-                         std::regex_constants::match_any)) {
+  try {
+    if (!std::regex_search(input.begin(), input.end(), match_result, pattern,
+                           std::regex_constants::match_any)) {
+      return std::nullopt;
+    }
+  } catch (const std::regex_error& e) {
+    (void)e;
+    ada_log("std_regex_provider::regex_search failed:", e.what());
     return std::nullopt;
   }
   std::vector<std::optional<std::string>> matches;
@@ -47,7 +53,13 @@ std_regex_provider::regex_search(std::string_view input,
 
 bool std_regex_provider::regex_match(std::string_view input,
                                      const std::regex& pattern) {
-  return std::regex_match(input.begin(), input.end(), pattern);
+  try {
+    return std::regex_match(input.begin(), input.end(), pattern);
+  } catch (const std::regex_error& e) {
+    (void)e;
+    ada_log("std_regex_provider::regex_match failed:", e.what());
+    return false;
+  }
 }
 
 #endif  // ADA_USE_UNSAFE_STD_REGEX_PROVIDER
