@@ -650,13 +650,15 @@ TEST(basic_tests, url_pattern_canonicalize_pathname_traversal) {
   // than 2 characters.  They must return a failure (not crash).
   ada::url_pattern_init init1{};
   init1.pathname = "../../";
-  auto result1 = ada::parse_url_pattern<regex_provider>(init1, nullptr, nullptr);
+  auto result1 =
+      ada::parse_url_pattern<regex_provider>(init1, nullptr, nullptr);
   // Result may be success or failure, but must not crash.
   (void)result1;
 
   ada::url_pattern_init init2{};
   init2.pathname = "../";
-  auto result2 = ada::parse_url_pattern<regex_provider>(init2, nullptr, nullptr);
+  auto result2 =
+      ada::parse_url_pattern<regex_provider>(init2, nullptr, nullptr);
   (void)result2;
 
   SUCCEED();
