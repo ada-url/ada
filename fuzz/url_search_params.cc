@@ -172,6 +172,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   assigned = search_params;
   length += assigned.size();
 
-  printf("url_search_params length: %zu\n", length);
   return 0;
 }

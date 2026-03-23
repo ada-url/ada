@@ -66,9 +66,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     }
   }
 
-  // Avoid dead-code elimination
-  printf("can_parse=%d can_parse_with_base=%d\n", can_parse_result,
-         can_parse_with_base);
+  (void)can_parse_result;
+  (void)can_parse_with_base;
 
   return 0;
 }

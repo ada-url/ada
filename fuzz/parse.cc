@@ -116,7 +116,6 @@ static void exercise_url_predicates(const ada::url &u) {
   (void)u.has_hash();
   (void)u.has_search();
   (void)u.get_components();
-  printf("url predicates length: %zu\n", length);
 }
 
 // Exercise all getters and boolean predicates on ada::url_aggregator
@@ -148,8 +147,7 @@ static void exercise_aggregator_predicates(const ada::url_aggregator &u) {
   (void)u.get_components();
   volatile bool is_valid = u.validate();
   (void)is_valid;
-  printf("diagram: %s\n", u.to_diagram().c_str());
-  printf("aggregator predicates length: %zu\n", length);
+  (void)u.to_diagram();
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
@@ -319,8 +317,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     volatile bool is_output_valid = false;
     is_output_valid = out_aggregator->validate();
 
-    // Printing due to dead-code elimination
-    printf("diagram %s\n", out_aggregator->to_diagram().c_str());
+    (void)out_aggregator->to_diagram();
 
     // boolean predicates after setters
     (void)out_aggregator->has_valid_domain();
@@ -430,13 +427,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
    */
   bool is_valid = ada::checkers::verify_dns_length(source);
 
-  // Only used for avoiding dead-code elimination
-  if (is_valid) {
-    printf("dns length is valid\n");
-  }
-
-  // Only used for avoiding dead-code elimination
-  printf("length of url is %zu\n", length);
+  (void)is_valid;
 
   return 0;
 }  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
