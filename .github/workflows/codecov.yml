@@ -1,0 +1,69 @@
+name: Code Coverage
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: coverage
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install dependencies
+        run: sudo apt-get update -y && sudo apt-get install -y gcovr ninja-build
+
+      - name: Configure
+        run: >
+          cmake -B build -G Ninja
+          -DCMAKE_CXX_COMPILER=g++-12
+          -DADA_TESTING=ON
+          -DADA_COVERAGE=ON
+          -DADA_DEVELOPMENT_CHECKS=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        run: ctest --output-on-failure --test-dir build
+
+      - name: Generate coverage report
+        run: >
+          gcovr
+          --root .
+          --exclude 'build/_deps/.*'
+          --exclude 'build/dependencies/.*'
+          --exclude 'dependencies/.*'
+          --exclude 'tools/.*'
+          --exclude 'singleheader/.*'
+          --exclude 'benchmarks/.*'
+          --exclude 'tests/.*'
+          --exclude 'include/ada/expected.h'
+          --gcov-executable gcov-12
+          --xml
+          --output build/coverage.xml
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5.4.3
+        with:
+          files: build/coverage.xml
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

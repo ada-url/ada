@@ -1,0 +1,36 @@
+# Codecov configuration for the Ada URL parser library.
+# See https://docs.codecov.com/docs/codecov-yaml for full reference.
+
+codecov:
+  # Only report coverage results after all CI jobs have passed.
+  require_ci_to_pass: true
+
+coverage:
+  status:
+    # Project-level coverage tracks the overall coverage of the entire codebase.
+    project:
+      default:
+        # Use the base commit's coverage as the target (no fixed threshold).
+        target: auto
+        # Allow coverage to drop by up to 1% before failing the check.
+        threshold: 1%
+    # Patch-level coverage tracks only the lines changed in a pull request.
+    patch:
+      default:
+        # Require at least 80% of new/changed lines to be covered by tests.
+        target: 80%
+
+# Exclude non-library directories from coverage reports.
+ignore:
+  # Third-party dependencies fetched by CPM.
+  - "dependencies/**"
+  # CLI tools (adaparse) are not part of the core library.
+  - "tools/**"
+  # Auto-generated single-header amalgamation.
+  - "singleheader/**"
+  # Benchmark harnesses are not library code.
+  - "benchmarks/**"
+  # Test files themselves should not count toward library coverage.
+  - "tests/**"
+  # Documentation sources.
+  - "docs/**"
