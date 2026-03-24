@@ -1,0 +1,8 @@
+# Suppress changes to standard library symbols that may be incidentally
+# emitted as weak symbols by different compiler inlining decisions.
+# These are not part of ada's public ABI.
+[suppress_function]
+  name_regexp = ^std::
+
+[suppress_type]
+  name_regexp = ^std::

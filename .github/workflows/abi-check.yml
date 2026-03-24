@@ -1,0 +1,71 @@
+name: ABI Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  abi-check:
+    name: ABI compatibility check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0  # need full history to find latest tag
+
+      - name: Install abigail-tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends abigail-tools cmake ninja-build g++
+
+      - name: Find latest release tag
+        id: baseline
+        run: |
+          # Find the most recent vX.Y.Z tag reachable from the current commit's history
+          LATEST_TAG=$(git tag --list 'v*.*.*' --sort=-version:refname | head -1)
+          echo "Latest release tag: $LATEST_TAG"
+          echo "tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build baseline (latest release)
+        run: |
+          git worktree add /tmp/ada-baseline ${{ steps.baseline.outputs.tag }}
+          cmake -G Ninja -B /tmp/ada-baseline-build /tmp/ada-baseline \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DBUILD_SHARED_LIBS=ON \
+            -DADA_TESTING=OFF
+          cmake --build /tmp/ada-baseline-build -j4
+
+      - name: Build current
+        run: |
+          cmake -G Ninja -B /tmp/ada-current-build \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DBUILD_SHARED_LIBS=ON \
+            -DADA_TESTING=OFF
+          cmake --build /tmp/ada-current-build -j4
+
+      - name: Compare ABI
+        run: |
+          abidiff \
+            --drop-private-types \
+            --no-added-syms \
+            --suppressions abi-suppressions.abignore \
+            --headers-dir1 /tmp/ada-baseline/include \
+            --headers-dir2 include \
+            /tmp/ada-baseline-build/src/libada.so \
+            /tmp/ada-current-build/src/libada.so
