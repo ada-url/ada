@@ -313,6 +313,46 @@ cmake --build build
 ls build/benchmarks/  # Check what was built
 ```
 
+## ABI Compatibility Rules
+
+Ada is a shared library used by downstream distributors (e.g., Debian packages). Breaking the ABI causes runtime failures for users who upgrade without recompiling.
+
+### Rules for Public API Changes
+
+- **Never remove or rename a public method** declared in `include/ada/`. Removing a method removes its exported symbol from the shared library, which is an ABI break.
+- **Never change the signature** of a public method (parameter types, return type, `const`/`noexcept` qualifiers).
+- **Never make a non-inline method inline** (or vice versa) if it is part of the public API — this changes whether the symbol is emitted in the `.so`.
+- Adding new public methods is always safe.
+
+### Keeping Methods Exported
+
+Internal-use methods that must remain exported (e.g., called from templates or inline functions in headers) **must be defined in a `.cpp` file**, not in a `*-inl.h` header. Inline definitions in headers produce weak symbols that the compiler may optimize away, silently breaking the ABI.
+
+### Checking for ABI Breakage
+
+CI runs `abidiff` (from `libabigail-tools`) to compare the shared library against the latest release tag. You can run the same check locally:
+
+```bash
+# Build the latest release tag
+git worktree add /tmp/ada-baseline <latest-tag>
+cmake -G Ninja -B /tmp/ada-baseline-build /tmp/ada-baseline \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DADA_TESTING=OFF
+cmake --build /tmp/ada-baseline-build -j4
+
+# Build the current code
+cmake -G Ninja -B /tmp/ada-current-build \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DADA_TESTING=OFF
+cmake --build /tmp/ada-current-build -j4
+
+# Compare ABIs (exit code non-zero = ABI break)
+abidiff \
+  --drop-private-types --no-added-syms \
+  --headers-dir1 /tmp/ada-baseline/include \
+  --headers-dir2 include \
+  /tmp/ada-baseline-build/src/libada.so \
+  /tmp/ada-current-build/src/libada.so
+```
+
 ## Additional Resources
 
 - **README.md**: General project overview and API usage
