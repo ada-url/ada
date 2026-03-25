@@ -105,6 +105,7 @@ The following libraries are maintained by the Ada team and available under [Ada 
 - [Rust](https://github.com/ada-url/rust): Rust bindings for Ada
 - [Go](https://github.com/ada-url/goada): Go bindings for Ada
 - [Python](https://github.com/ada-url/python): Python bindings for Ada
+- [Kotlin](https://github.com/ada-url/kotlin): Kotlin bindings for Ada
 
 ### Community maintained
 
