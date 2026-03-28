@@ -76,44 +76,44 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     /* Validate ada_url_components offsets: every non-omitted field offset
      * must be <= href.length, so the component sits within the href. */
     ada_string href_for_comps = ada_get_href(out);
-    ada_url_components comps = ada_get_components(out);
-    if (comps.protocol_end != ada_url_omitted)
-      if (comps.protocol_end > href_for_comps.length) {
+    const ada_url_components* comps = ada_get_components(out);
+    if (comps->protocol_end != ada_url_omitted)
+      if (comps->protocol_end > href_for_comps.length) {
         printf("ada_url_components.protocol_end out of bounds\n");
         abort();
       }
-    if (comps.username_end != ada_url_omitted)
-      if (comps.username_end > href_for_comps.length) {
+    if (comps->username_end != ada_url_omitted)
+      if (comps->username_end > href_for_comps.length) {
         printf("ada_url_components.username_end out of bounds\n");
         abort();
       }
-    if (comps.host_start != ada_url_omitted)
-      if (comps.host_start > href_for_comps.length) {
+    if (comps->host_start != ada_url_omitted)
+      if (comps->host_start > href_for_comps.length) {
         printf("ada_url_components.host_start out of bounds\n");
         abort();
       }
-    if (comps.host_end != ada_url_omitted)
-      if (comps.host_end > href_for_comps.length) {
+    if (comps->host_end != ada_url_omitted)
+      if (comps->host_end > href_for_comps.length) {
         printf("ada_url_components.host_end out of bounds\n");
         abort();
       }
-    if (comps.port != ada_url_omitted)
-      if (comps.port > href_for_comps.length) {
+    if (comps->port != ada_url_omitted)
+      if (comps->port > href_for_comps.length) {
         printf("ada_url_components.port out of bounds\n");
         abort();
       }
-    if (comps.pathname_start != ada_url_omitted)
-      if (comps.pathname_start > href_for_comps.length) {
+    if (comps->pathname_start != ada_url_omitted)
+      if (comps->pathname_start > href_for_comps.length) {
         printf("ada_url_components.pathname_start out of bounds\n");
         abort();
       }
-    if (comps.search_start != ada_url_omitted)
-      if (comps.search_start > href_for_comps.length) {
+    if (comps->search_start != ada_url_omitted)
+      if (comps->search_start > href_for_comps.length) {
         printf("ada_url_components.search_start out of bounds\n");
         abort();
       }
-    if (comps.hash_start != ada_url_omitted)
-      if (comps.hash_start > href_for_comps.length) {
+    if (comps->hash_start != ada_url_omitted)
+      if (comps->hash_start > href_for_comps.length) {
         printf("ada_url_components.hash_start out of bounds\n");
         abort();
       }
