@@ -97,11 +97,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         printf("ada_url_components.host_end out of bounds\n");
         abort();
       }
-    if (comps->port != ada_url_omitted)
-      if (comps->port > href_for_comps.length) {
-        printf("ada_url_components.port out of bounds\n");
-        abort();
-      }
+    /* NOTE: comps->port is a port NUMBER (0-65535), not an offset. Skip. */
     if (comps->pathname_start != ada_url_omitted)
       if (comps->pathname_start > href_for_comps.length) {
         printf("ada_url_components.pathname_start out of bounds\n");
