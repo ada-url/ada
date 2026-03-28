@@ -774,8 +774,8 @@ TEST(basic_tests, idna_mixed_label_xn_prefix_regression) {
 //   2. set_host("rf:1")     - host "rf" takes fast path; is_valid must become
 //                             true so that port 1 is accepted by parse_port.
 TYPED_TEST(basic_tests, set_host_fast_path_restores_is_valid) {
-  auto url =
-      ada::parse<TypeParam>("https://user:pass@example.com:8080/path?query=1#hash");
+  auto url = ada::parse<TypeParam>(
+      "https://user:pass@example.com:8080/path?query=1#hash");
   ASSERT_TRUE(url);
 
   // Step 1: fail with a forbidden code point in the host - sets is_valid=false.
