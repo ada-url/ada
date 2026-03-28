@@ -21,87 +21,101 @@ void exercise_result(auto result) {
   (void)result.has_regexp_groups();
 }
 
+// Shared helper: walk every field of a url_pattern_result.
+static void exercise_match_result(const ada::url_pattern_result& match) {
+  volatile size_t len = 0;
+  auto exercise_component =
+      [&len](const ada::url_pattern_component_result& c) {
+        len += c.input.size();
+        for (const auto& [k, v] : c.groups) {
+          len += k.size();
+          if (v.has_value()) len += v->size();
+        }
+      };
+  exercise_component(match.protocol);
+  exercise_component(match.username);
+  exercise_component(match.password);
+  exercise_component(match.hostname);
+  exercise_component(match.port);
+  exercise_component(match.pathname);
+  exercise_component(match.search);
+  exercise_component(match.hash);
+  // Exercise the 'inputs' vector (each element is a url_pattern_input
+  // variant holding either a string_view or url_pattern_init).
+  for (const auto& inp : match.inputs) {
+    if (std::holds_alternative<std::string_view>(inp)) {
+      len += std::get<std::string_view>(inp).size();
+    }
+  }
+  (void)len;
+}
+
 // Exercise exec() and test() on a parsed url_pattern with an ASCII input.
 // We restrict inputs to ASCII to avoid catastrophic regex backtracking.
 static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
                                    const std::string& test_input,
                                    const std::string& test_base) {
-  // test() with string input
   std::string_view test_view(test_input.data(), test_input.size());
+
+  // exec() and test() must agree: exec finds a match iff test returns true.
+  // Both operate on the same input so their answers must be consistent.
+  auto exec_result = pattern.exec(test_view, nullptr);
   auto test_result = pattern.test(test_view, nullptr);
-  (void)test_result;
+
+  bool exec_matched = exec_result && exec_result->has_value();
+  bool test_matched = test_result && *test_result;
+
+  if (exec_matched != test_matched) {
+    printf(
+        "exec/test inconsistency on input '%s': exec_matched=%d "
+        "test_matched=%d\n",
+        test_input.c_str(), exec_matched, test_matched);
+    abort();
+  }
+
+  if (exec_result && exec_result->has_value()) {
+    exercise_match_result(**exec_result);
+  }
 
   // test() with base URL
   if (!test_base.empty()) {
     std::string_view base_view(test_base.data(), test_base.size());
     auto test_result_with_base = pattern.test(test_view, &base_view);
-    (void)test_result_with_base;
-  }
-
-  // exec() with string input - returns match groups
-  auto exec_result = pattern.exec(test_view, nullptr);
-  if (exec_result && exec_result->has_value()) {
-    const ada::url_pattern_result& match = **exec_result;
-    volatile size_t len = 0;
-    // Exercise .input and .groups on every component result.
-    auto exercise_component =
-        [&len](const ada::url_pattern_component_result& c) {
-          len += c.input.size();
-          for (const auto& [k, v] : c.groups) {
-            len += k.size();
-            if (v.has_value()) {
-              len += v->size();
-            }
-          }
-        };
-    exercise_component(match.protocol);
-    exercise_component(match.username);
-    exercise_component(match.password);
-    exercise_component(match.hostname);
-    exercise_component(match.port);
-    exercise_component(match.pathname);
-    exercise_component(match.search);
-    exercise_component(match.hash);
-    (void)len;
-  }
-
-  // exec() with base URL — exercise result groups, same as no-base case
-  if (!test_base.empty()) {
-    std::string_view base_view(test_base.data(), test_base.size());
     auto exec_with_base = pattern.exec(test_view, &base_view);
+
+    bool exec_base_matched = exec_with_base && exec_with_base->has_value();
+    bool test_base_matched = test_result_with_base && *test_result_with_base;
+
+    if (exec_base_matched != test_base_matched) {
+      printf(
+          "exec/test inconsistency with base on input '%s': "
+          "exec_matched=%d test_matched=%d\n",
+          test_input.c_str(), exec_base_matched, test_base_matched);
+      abort();
+    }
+
     if (exec_with_base && exec_with_base->has_value()) {
-      const ada::url_pattern_result& match = **exec_with_base;
-      volatile size_t len = 0;
-      auto exercise_component =
-          [&len](const ada::url_pattern_component_result& c) {
-            len += c.input.size();
-            for (const auto& [k, v] : c.groups) {
-              len += k.size();
-              if (v.has_value()) len += v->size();
-            }
-          };
-      exercise_component(match.protocol);
-      exercise_component(match.username);
-      exercise_component(match.password);
-      exercise_component(match.hostname);
-      exercise_component(match.port);
-      exercise_component(match.pathname);
-      exercise_component(match.search);
-      exercise_component(match.hash);
-      (void)len;
+      exercise_match_result(**exec_with_base);
     }
   }
 
-  // test() with url_pattern_init input
+  // test() with url_pattern_init input (sets only the pathname component)
   ada::url_pattern_init init_input{};
   init_input.pathname = test_input;
   auto test_with_init = pattern.test(init_input, nullptr);
-  (void)test_with_init;
+  auto exec_with_init = pattern.exec(init_input, nullptr);
+  // exec and test must agree on the init-based input too.
+  if ((test_with_init && *test_with_init) !=
+      (exec_with_init && exec_with_init->has_value())) {
+    printf("exec/test inconsistency on url_pattern_init input\n");
+    abort();
+  }
+  if (exec_with_init && exec_with_init->has_value()) {
+    exercise_match_result(**exec_with_init);
+  }
 
   // test_components() — tests each URL component individually
   {
-    // Split test_input into components by parsing it, then calling
-    // test_components() with the individual string pieces.
     std::string_view sv(test_input.data(), test_input.size());
     auto parsed = ada::parse<ada::url_aggregator>(sv);
     if (parsed) {
@@ -116,7 +130,7 @@ static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
     }
   }
 
-  // match() - internal method that exec() uses
+  // match() — the internal method underlying exec(); must not crash.
   auto match_result = pattern.match(test_view, nullptr);
   (void)match_result;
 }
@@ -232,6 +246,71 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     if (result_with_init_all) {
       exercise_result(*result_with_init_all);
       exercise_exec_and_test(*result_with_init_all, test_input, test_base);
+    }
+
+    // Testing url_pattern_init with the base_url field set.
+    //
+    // url_pattern_init::base_url is a completely separate code path from the
+    // base_url *parameter* of parse_url_pattern. When base_url is embedded
+    // inside the init struct the spec processes it differently. This field
+    // was previously never exercised by any fuzzer.
+    {
+      ada::url_pattern_init init_base_url{};
+      init_base_url.pathname =
+          "/" + to_ascii(fdp.ConsumeRandomLengthString(20));
+      init_base_url.base_url = "https://example.com";
+      auto result_base_in_init =
+          ada::parse_url_pattern<regex_provider>(init_base_url, nullptr, nullptr);
+      if (result_base_in_init) {
+        exercise_result(*result_base_in_init);
+        exercise_exec_and_test(*result_base_in_init, test_input, test_base);
+      }
+
+      // Also fuzz the base_url field itself.
+      ada::url_pattern_init init_fuzz_base{};
+      init_fuzz_base.pathname =
+          "/" + to_ascii(fdp.ConsumeRandomLengthString(15));
+      init_fuzz_base.base_url =
+          "https://" + to_ascii(fdp.ConsumeRandomLengthString(20));
+      auto result_fuzz_base =
+          ada::parse_url_pattern<regex_provider>(init_fuzz_base, nullptr, nullptr);
+      if (result_fuzz_base) {
+        exercise_result(*result_fuzz_base);
+        exercise_exec_and_test(*result_fuzz_base, test_input, test_base);
+      }
+    }
+
+    // Testing url_pattern_init with a random subset (2–4) of fields set.
+    //
+    // The single-field case (switch above) and the all-fields case are covered
+    // above. Here we pick a random bitmask of fields so the parser sees every
+    // combination of present/absent components.
+    {
+      uint8_t field_mask = fdp.ConsumeIntegral<uint8_t>();
+      ada::url_pattern_init init_subset{};
+      if (field_mask & 0x01)
+        init_subset.protocol = to_ascii(fdp.ConsumeRandomLengthString(8));
+      if (field_mask & 0x02)
+        init_subset.hostname = to_ascii(fdp.ConsumeRandomLengthString(20));
+      if (field_mask & 0x04)
+        init_subset.port = to_ascii(fdp.ConsumeRandomLengthString(5));
+      if (field_mask & 0x08)
+        init_subset.pathname =
+            "/" + to_ascii(fdp.ConsumeRandomLengthString(20));
+      if (field_mask & 0x10)
+        init_subset.search = to_ascii(fdp.ConsumeRandomLengthString(10));
+      if (field_mask & 0x20)
+        init_subset.hash = to_ascii(fdp.ConsumeRandomLengthString(10));
+      if (field_mask & 0x40)
+        init_subset.username = to_ascii(fdp.ConsumeRandomLengthString(10));
+      if (field_mask & 0x80)
+        init_subset.password = to_ascii(fdp.ConsumeRandomLengthString(10));
+      auto result_subset =
+          ada::parse_url_pattern<regex_provider>(init_subset, nullptr, nullptr);
+      if (result_subset) {
+        exercise_result(*result_subset);
+        exercise_exec_and_test(*result_subset, test_input, test_base);
+      }
     }
   }
 

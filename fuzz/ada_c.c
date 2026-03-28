@@ -78,6 +78,40 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       (void)href_copy;
     }
     ada_free(out_copy);
+
+    /* Re-parse idempotency via C API.
+     *
+     * After all setter mutations the URL must still be in a consistent state.
+     * Whatever href it has now should be its own fixed point: parsing it
+     * again must succeed and produce the same href.
+     *
+     * We read the href before creating the second URL so that the pointer
+     * remains valid (we do not call any setter on 'out' after this point). */
+    {
+      ada_string final_href = ada_get_href(out);
+      ada_url reparsed = ada_parse(final_href.data, final_href.length);
+      if (ada_is_valid(reparsed)) {
+        ada_string reparsed_href = ada_get_href(reparsed);
+        if (reparsed_href.length != final_href.length ||
+            memcmp(reparsed_href.data, final_href.data, final_href.length) !=
+                0) {
+          printf(
+              "C API href idempotency failure!\n"
+              "  final:    %.*s\n  reparsed: %.*s\n",
+              (int)final_href.length, final_href.data,
+              (int)reparsed_href.length, reparsed_href.data);
+          ada_free(reparsed);
+          abort();
+        }
+      } else {
+        /* After only valid setter calls the URL must remain parseable. */
+        printf("C API re-parse of href failed: %.*s\n",
+               (int)final_href.length, final_href.data);
+        ada_free(reparsed);
+        abort();
+      }
+      ada_free(reparsed);
+    }
   }
 
   bool can_parse_result = ada_can_parse(input, input_len);

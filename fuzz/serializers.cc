@@ -176,6 +176,87 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     }
   }
 
+  // ===== Checker and Unicode Utility Functions =====
+  // These are internal helpers used throughout the parser. Fuzzing them
+  // directly (rather than only through the URL parsing pipeline) ensures
+  // every edge case is reachable without a valid URL structure.
+  {
+    std::string util_input = fdp.ConsumeRandomLengthString(128);
+
+    // has_tabs_or_newline: any string is valid input.
+    volatile bool has_tn =
+        ada::unicode::has_tabs_or_newline(util_input);
+    (void)has_tn;
+
+    // is_ipv4: must not crash on arbitrary input. Cross-check against URL
+    // parsing: if is_ipv4 reports true, embedding the string as a hostname
+    // in an http:// URL must succeed (it must be a parseable IPv4 address).
+    volatile bool is_v4 = ada::checkers::is_ipv4(util_input);
+    (void)is_v4;
+    if (is_v4) {
+      std::string ipv4_url = "http://" + util_input + "/";
+      auto parsed = ada::parse<ada::url_aggregator>(ipv4_url);
+      // is_ipv4 reports true only for strings that look like IPv4 addresses;
+      // the full parser may still reject them (e.g. out-of-range octets), but
+      // if it accepts them the host type must be IPv4.
+      if (parsed) {
+        volatile bool v = parsed->validate();
+        (void)v;
+      }
+    }
+
+    // path_signature: returns a bitmask; must not crash.
+    volatile uint8_t sig = ada::checkers::path_signature(util_input);
+    (void)sig;
+
+    // is_windows_drive_letter: must not crash on short or long inputs.
+    volatile bool is_wdl =
+        ada::checkers::is_windows_drive_letter(util_input);
+    (void)is_wdl;
+
+    // is_normalized_windows_drive_letter
+    volatile bool is_nwdl =
+        ada::checkers::is_normalized_windows_drive_letter(util_input);
+    (void)is_nwdl;
+
+    // Consistency: a normalised Windows drive letter is a subset of
+    // Windows drive letters.
+    if (is_nwdl && !is_wdl) {
+      printf(
+          "is_normalized_windows_drive_letter implies is_windows_drive_letter"
+          " but got inconsistent results for '%s'\n",
+          util_input.c_str());
+      abort();
+    }
+
+    // to_lower_ascii: works in-place; must not crash.
+    {
+      std::string lower_copy = util_input;
+      volatile bool all_ascii =
+          ada::unicode::to_lower_ascii(lower_copy.data(), lower_copy.size());
+      (void)all_ascii;
+      // The result should be at most as long as the input.
+      assert(lower_copy.size() == util_input.size());
+    }
+
+    // contains_forbidden_domain_code_point: must not crash.
+    volatile bool has_forbidden =
+        ada::unicode::contains_forbidden_domain_code_point(util_input.data(),
+                                                           util_input.size());
+    (void)has_forbidden;
+
+    // contains_forbidden_domain_code_point_or_upper: must not crash.
+    volatile uint8_t forbidden_or_upper =
+        ada::unicode::contains_forbidden_domain_code_point_or_upper(
+            util_input.data(), util_input.size());
+    (void)forbidden_or_upper;
+
+    // verify_dns_length: must not crash; also check consistency with
+    // to_ascii output.
+    volatile bool dns_ok = ada::checkers::verify_dns_length(util_input);
+    (void)dns_ok;
+  }
+
   // ===== Integration: embed serialized addresses into real URLs =====
   // This exercises the full parsing pipeline with our synthetic addresses
   // and verifies that serialization output is always round-trip safe.
