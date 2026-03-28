@@ -7901,9 +7901,13 @@ static constexpr int32_t adapt(int32_t d, int32_t n, bool firsttime) {
 
 bool punycode_to_utf32(std::string_view input, std::u32string &out) {
   // See https://github.com/whatwg/url/issues/803
-  if (input.starts_with("xn--")) {
-    return false;
-  }
+  // NOTE: We do NOT reject early if input.starts_with("xn--"). That early
+  // check was incorrect: Punycode always outputs all ASCII (basic) code points
+  // first, regardless of their position in the original label. A mixed label
+  // whose ASCII suffix is "xn--" (e.g. a label ending with the literal ASCII
+  // chars x,n,-,-) encodes to content starting with "xn--" even though the
+  // decoded label does NOT start with "xn--". Instead, we check the decoded
+  // output below to ensure the decoded label itself does not start with "xn--".
   int32_t written_out{0};
   out.reserve(out.size() + input.size());
   uint32_t n = initial_n;
@@ -7960,68 +7964,26 @@ bool punycode_to_utf32(std::string_view input, std::u32string &out) {
     written_out++;
     ++i;
   }
+  // Reject decoded labels that start with "xn--": such a label would be
+  // treated as another ACE-encoded label, creating invalid nested encoding.
+  // See https://github.com/whatwg/url/issues/803
+  if (out.size() >= 4 && out[0] == U'x' && out[1] == U'n' &&
+      out[2] == U'-' && out[3] == U'-') {
+    return false;
+  }
   return true;
 }
 
 bool verify_punycode(std::string_view input) {
-  if (input.starts_with("xn--")) {
-    return false;
-  }
-  size_t written_out{0};
-  uint32_t n = initial_n;
-  int32_t i = 0;
-  int32_t bias = initial_bias;
-  // grab ascii content
-  size_t end_of_ascii = input.find_last_of('-');
-  if (end_of_ascii != std::string_view::npos) {
-    for (uint8_t c : input.substr(0, end_of_ascii)) {
-      if (c >= 0x80) {
-        return false;
-      }
-      written_out++;
-    }
-    input.remove_prefix(end_of_ascii + 1);
-  }
-  while (!input.empty()) {
-    int32_t oldi = i;
-    int32_t w = 1;
-    for (int32_t k = base;; k += base) {
-      if (input.empty()) {
-        return false;
-      }
-      uint8_t code_point = input.front();
-      input.remove_prefix(1);
-      int32_t digit = char_to_digit_value(code_point);
-      if (digit < 0) {
-        return false;
-      }
-      if (digit > (0x7fffffff - i) / w) {
-        return false;
-      }
-      i = i + digit * w;
-      int32_t t = k <= bias ? tmin : k >= bias + tmax ? tmax : k - bias;
-      if (digit < t) {
-        break;
-      }
-      if (w > 0x7fffffff / (base - t)) {
-        return false;
-      }
-      w = w * (base - t);
-    }
-    bias = adapt(i - oldi, int32_t(written_out + 1), oldi == 0);
-    if (i / (written_out + 1) > 0x7fffffff - n) {
-      return false;
-    }
-    n = n + i / int32_t(written_out + 1);
-    i = i % int32_t(written_out + 1);
-    if (n < 0x80) {
-      return false;
-    }
-    written_out++;
-    ++i;
-  }
-
-  return true;
+  // Delegate to punycode_to_utf32, which performs the decode and applies the
+  // correct post-decode check for nested ACE labels. The old early check
+  // (input.starts_with("xn--") == true => return false) was incorrect for the
+  // same reason documented in punycode_to_utf32: basic chars appear first in
+  // the encoded stream, so a decoded label that does not start with "xn--" can
+  // still produce encoded content starting with "xn--".
+  // See https://github.com/whatwg/url/issues/803
+  std::u32string decoded;
+  return punycode_to_utf32(input, decoded);
 }
 
 bool utf32_to_punycode(std::u32string_view input, std::string &out) {
