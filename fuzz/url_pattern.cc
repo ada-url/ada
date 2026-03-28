@@ -24,14 +24,13 @@ void exercise_result(auto result) {
 // Shared helper: walk every field of a url_pattern_result.
 static void exercise_match_result(const ada::url_pattern_result& match) {
   volatile size_t len = 0;
-  auto exercise_component =
-      [&len](const ada::url_pattern_component_result& c) {
-        len += c.input.size();
-        for (const auto& [k, v] : c.groups) {
-          len += k.size();
-          if (v.has_value()) len += v->size();
-        }
-      };
+  auto exercise_component = [&len](const ada::url_pattern_component_result& c) {
+    len += c.input.size();
+    for (const auto& [k, v] : c.groups) {
+      len += k.size();
+      if (v.has_value()) len += v->size();
+    }
+  };
   exercise_component(match.protocol);
   exercise_component(match.username);
   exercise_component(match.password);
@@ -259,8 +258,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       init_base_url.pathname =
           "/" + to_ascii(fdp.ConsumeRandomLengthString(20));
       init_base_url.base_url = "https://example.com";
-      auto result_base_in_init =
-          ada::parse_url_pattern<regex_provider>(init_base_url, nullptr, nullptr);
+      auto result_base_in_init = ada::parse_url_pattern<regex_provider>(
+          init_base_url, nullptr, nullptr);
       if (result_base_in_init) {
         exercise_result(*result_base_in_init);
         exercise_exec_and_test(*result_base_in_init, test_input, test_base);
@@ -272,8 +271,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
           "/" + to_ascii(fdp.ConsumeRandomLengthString(15));
       init_fuzz_base.base_url =
           "https://" + to_ascii(fdp.ConsumeRandomLengthString(20));
-      auto result_fuzz_base =
-          ada::parse_url_pattern<regex_provider>(init_fuzz_base, nullptr, nullptr);
+      auto result_fuzz_base = ada::parse_url_pattern<regex_provider>(
+          init_fuzz_base, nullptr, nullptr);
       if (result_fuzz_base) {
         exercise_result(*result_fuzz_base);
         exercise_exec_and_test(*result_fuzz_base, test_input, test_base);

@@ -344,10 +344,36 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     (void)out_aggregator->has_search();
     (void)out_aggregator->get_components();
 
-    // clear methods
+    // clear methods + postcondition assertions
     out_aggregator->clear_port();
+    if (out_aggregator->has_port()) {
+      printf("clear_port() did not clear has_port()\n");
+      abort();
+    }
+    if (!out_aggregator->get_port().empty()) {
+      printf("clear_port() left non-empty get_port()\n");
+      abort();
+    }
+
     out_aggregator->clear_search();
+    if (out_aggregator->has_search()) {
+      printf("clear_search() did not clear has_search()\n");
+      abort();
+    }
+    if (!out_aggregator->get_search().empty()) {
+      printf("clear_search() left non-empty get_search()\n");
+      abort();
+    }
+
     out_aggregator->clear_hash();
+    if (out_aggregator->has_hash()) {
+      printf("clear_hash() did not clear has_hash()\n");
+      abort();
+    }
+    if (!out_aggregator->get_hash().empty()) {
+      printf("clear_hash() left non-empty get_hash()\n");
+      abort();
+    }
   }
 
   /**

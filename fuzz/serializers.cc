@@ -37,8 +37,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   // find_longest_sequence_of_ipv6_pieces: basic invariants must hold.
   size_t compress = 0, compress_length = 0;
-  ada::serializers::find_longest_sequence_of_ipv6_pieces(
-      ipv6_addr, compress, compress_length);
+  ada::serializers::find_longest_sequence_of_ipv6_pieces(ipv6_addr, compress,
+                                                         compress_length);
   // The longest run cannot exceed 8 pieces.
   assert(compress_length <= 8);
   // If a run was found (length > 0) its start index must be in-bounds.
@@ -101,8 +101,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       assert(encoded.size() >= source.size());
 
       // Three-argument percent_encode: starts encoding from a given index.
-      size_t start_idx =
-          fdp.ConsumeIntegralInRange<size_t>(0, source.size());
+      size_t start_idx = fdp.ConsumeIntegralInRange<size_t>(0, source.size());
       std::string encoded_from =
           ada::unicode::percent_encode(source, charset, start_idx);
       volatile size_t enf_len = encoded_from.size();
@@ -137,8 +136,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     {
       size_t pct_pos = source.find('%');
       if (pct_pos != std::string::npos) {
-        std::string decoded =
-            ada::unicode::percent_decode(source, pct_pos);
+        std::string decoded = ada::unicode::percent_decode(source, pct_pos);
         // Decoded output can't be longer than the input.
         assert(decoded.size() <= source.size());
         volatile size_t dec_len = decoded.size();
@@ -153,8 +151,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
           source, ada::character_sets::PATH_PERCENT_ENCODE);
       size_t pct_pos = encoded.find('%');
       if (pct_pos != std::string::npos) {
-        std::string decoded =
-            ada::unicode::percent_decode(encoded, pct_pos);
+        std::string decoded = ada::unicode::percent_decode(encoded, pct_pos);
         if (decoded != source) {
           printf(
               "percent_encode/decode round-trip failure!\n"
@@ -184,8 +181,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     std::string util_input = fdp.ConsumeRandomLengthString(128);
 
     // has_tabs_or_newline: any string is valid input.
-    volatile bool has_tn =
-        ada::unicode::has_tabs_or_newline(util_input);
+    volatile bool has_tn = ada::unicode::has_tabs_or_newline(util_input);
     (void)has_tn;
 
     // is_ipv4: must not crash on arbitrary input. Cross-check against URL
@@ -210,8 +206,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     (void)sig;
 
     // is_windows_drive_letter: must not crash on short or long inputs.
-    volatile bool is_wdl =
-        ada::checkers::is_windows_drive_letter(util_input);
+    volatile bool is_wdl = ada::checkers::is_windows_drive_letter(util_input);
     (void)is_wdl;
 
     // is_normalized_windows_drive_letter
@@ -291,8 +286,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         abort();
       }
       if (std::string(reparsed->get_href()) != href) {
-        printf("IPv6 URL re-parse href mismatch: '%s' vs '%s'\n",
-               href.c_str(), std::string(reparsed->get_href()).c_str());
+        printf("IPv6 URL re-parse href mismatch: '%s' vs '%s'\n", href.c_str(),
+               std::string(reparsed->get_href()).c_str());
         abort();
       }
     }

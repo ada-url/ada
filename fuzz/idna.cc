@@ -217,8 +217,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
     // verify_dns_length on the long input (already called for `source` above,
     // but we want to exercise the boundary cases separately).
-    volatile bool long_dns_ok =
-        ada::checkers::verify_dns_length(long_domain);
+    volatile bool long_dns_ok = ada::checkers::verify_dns_length(long_domain);
     (void)long_dns_ok;
 
     if (!long_ascii.empty()) {

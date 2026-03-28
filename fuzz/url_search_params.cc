@@ -41,10 +41,39 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   // Test sort() on initialized params
   initialized.sort();
 
-  // Test C++ range-for iteration
+  // Test C++ range-for iteration; also verify has(k) and has(k,v) consistency.
   for (const auto &pair : initialized) {
     length += pair.first.size();
     length += pair.second.size();
+
+    // Every key seen in iteration must be reported by has(key).
+    if (!initialized.has(pair.first)) {
+      printf(
+          "url_search_params: iteration yielded key '%s' but has(key) is "
+          "false\n",
+          std::string(pair.first).c_str());
+      abort();
+    }
+
+    // has(key, value) → has(key)
+    if (initialized.has(pair.first, pair.second) &&
+        !initialized.has(pair.first)) {
+      printf(
+          "url_search_params: has(key,value) is true but has(key) is false "
+          "for key '%s'\n",
+          std::string(pair.first).c_str());
+      abort();
+    }
+
+    // get(key) must return a value when the key exists.
+    auto got = initialized.get(pair.first);
+    if (!got.has_value()) {
+      printf(
+          "url_search_params: has(key) is true but get(key) returned nullopt "
+          "for key '%s'\n",
+          std::string(pair.first).c_str());
+      abort();
+    }
   }
 
   // Test index-based access
@@ -241,7 +270,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
       // Size and iteration must not crash.
       length += sp_from_url.size();
-      for (const auto& pair : sp_from_url) {
+      for (const auto &pair : sp_from_url) {
         length += pair.first.size();
         length += pair.second.size();
       }

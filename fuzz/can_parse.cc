@@ -101,9 +101,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     // url and url_aggregator must agree on whether the href is parseable.
     bool url_can_parse = ada::parse<ada::url>(href).has_value();
     if (url_can_parse != ada::can_parse(href)) {
-      printf(
-          "parse<url> vs can_parse disagreement on normalised href: '%s'\n",
-          href.c_str());
+      printf("parse<url> vs can_parse disagreement on normalised href: '%s'\n",
+             href.c_str());
       abort();
     }
   }
