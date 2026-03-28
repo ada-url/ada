@@ -68,6 +68,14 @@ $CC $CFLAGS $CXXFLAGS \
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE ./ada.o ada_c.o \
      -o $OUT/ada_c
 
+$CXX $CFLAGS $CXXFLAGS \
+     -std=c++20 \
+     -I build/singleheader \
+     -c fuzz/serializers.cc -o serializers.o
+
+$CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE serializers.o \
+     -o $OUT/serializers
+
 cp $SRC/ada-url/fuzz/*.dict $SRC/ada-url/fuzz/*.options $OUT/
 
 # Build unit test

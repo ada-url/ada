@@ -179,5 +179,91 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   move_assigned = std::move(assigned);
   length += move_assigned.size();
 
+  /**
+   * Serialisation idempotency.
+   *
+   * The application/x-www-form-urlencoded serialiser must be a fixed point:
+   * parsing the serialised form of any url_search_params and serialising
+   * again must produce the same string. This invariant is mandated by the
+   * WHATWG spec and must hold for all inputs.
+   *
+   * We test this on both the initialised params (constructed from fuzz input)
+   * and the mutated params (after append / set / remove / sort).
+   */
+
+  // Initialised params idempotency.
+  {
+    std::string s1 = initialized.to_string();
+    ada::url_search_params reparsed(s1);
+    std::string s2 = reparsed.to_string();
+    if (s1 != s2) {
+      printf(
+          "url_search_params serialisation not idempotent (initialized)!\n"
+          "  first:  %s\n  second: %s\n",
+          s1.c_str(), s2.c_str());
+      abort();
+    }
+  }
+
+  // Mutated params idempotency.
+  {
+    std::string s1 = move_assigned.to_string();
+    ada::url_search_params reparsed(s1);
+    std::string s2 = reparsed.to_string();
+    if (s1 != s2) {
+      printf(
+          "url_search_params serialisation not idempotent (mutated)!\n"
+          "  first:  %s\n  second: %s\n",
+          s1.c_str(), s2.c_str());
+      abort();
+    }
+  }
+
+  /**
+   * Round-trip via URL.
+   *
+   * Embed the fuzz input as the query component of a real URL, extract the
+   * search params from the parsed URL's search string, and verify that the
+   * resulting params serialise idempotently. This exercises the interface
+   * between URL parsing and search-params parsing.
+   */
+  {
+    std::string url_str = "https://example.com/?" + source;
+    auto parsed_url = ada::parse<ada::url_aggregator>(url_str);
+    if (parsed_url) {
+      std::string search_raw = std::string(parsed_url->get_search());
+      std::string_view search_view = search_raw;
+      if (!search_view.empty() && search_view[0] == '?') {
+        search_view = search_view.substr(1);
+      }
+
+      ada::url_search_params sp_from_url(search_view);
+
+      // Size and iteration must not crash.
+      length += sp_from_url.size();
+      for (const auto& pair : sp_from_url) {
+        length += pair.first.size();
+        length += pair.second.size();
+      }
+
+      // Idempotency check.
+      std::string t1 = sp_from_url.to_string();
+      ada::url_search_params sp2(t1);
+      std::string t2 = sp2.to_string();
+      if (t1 != t2) {
+        printf(
+            "url_search_params via URL round-trip not idempotent!\n"
+            "  first:  %s\n  second: %s\n",
+            t1.c_str(), t2.c_str());
+        abort();
+      }
+
+      // Set the serialised params back on the URL – must not crash.
+      parsed_url->set_search(t1);
+      volatile bool v = parsed_url->validate();
+      (void)v;
+    }
+  }
+
   return 0;
 }
