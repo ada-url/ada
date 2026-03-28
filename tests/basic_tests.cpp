@@ -738,3 +738,26 @@ TEST(basic_tests, url_pattern_canonicalize_pathname_traversal) {
   SUCCEED();
 }
 #endif  // ADA_INCLUDE_URL_PATTERN
+
+// Regression test for https://github.com/whatwg/url/issues/803
+// A mixed label whose ASCII chars happen to spell "xn--" must not be rejected
+// during Punycode decoding.  The label encodes to a Punycode sequence whose
+// encoded (ASCII-prefix) portion starts with "xn--", but the *decoded* label
+// does NOT start with "xn--" (it starts with a non-ASCII code point).
+// Before the fix, both punycode_to_utf32 and verify_punycode rejected these
+// inputs early by checking the encoded input instead of the decoded output,
+// causing href idempotency failures: parsing the serialised href of a valid
+// URL would return a different (invalid) result.
+TEST(basic_tests, idna_mixed_label_xn_prefix_regression) {
+  // "http://\u33ff\u33fdxn--./":
+  //   label "\u33ff\u33fdxn--" encodes to "xn--xn---ue6f785fgsonh6a"
+  //   which decodes back to "\u33ff\u33fdxn--" (starts with non-ASCII, valid).
+  auto r = ada::parse<ada::url>("http://\u33ff\u33fdxn--./");
+  ASSERT_TRUE(r) << "URL with mixed IDNA label ending in 'xn--' must parse";
+
+  // Re-parsing the serialised href must produce the same href (idempotency).
+  auto href = r->get_href();
+  auto r2 = ada::parse<ada::url>(href);
+  ASSERT_TRUE(r2) << "Re-parse of serialised href must succeed";
+  ASSERT_EQ(r2->get_href(), href) << "href must be idempotent after re-parse";
+}

@@ -7975,15 +7975,73 @@ bool punycode_to_utf32(std::string_view input, std::u32string &out) {
 }
 
 bool verify_punycode(std::string_view input) {
-  // Delegate to punycode_to_utf32, which performs the decode and applies the
-  // correct post-decode check for nested ACE labels. The old early check
-  // (input.starts_with("xn--") == true => return false) was incorrect for the
-  // same reason documented in punycode_to_utf32: basic chars appear first in
-  // the encoded stream, so a decoded label that does not start with "xn--" can
-  // still produce encoded content starting with "xn--".
+  // Allocation-free variant of punycode_to_utf32 that only tracks the first
+  // 4 decoded code points.  That is enough to apply the nested-ACE-label
+  // rejection check (https://github.com/whatwg/url/issues/803) without
+  // heap-allocating a full u32string.
+  int32_t written_out = 0;
+  uint32_t n = initial_n;
+  int32_t i = 0;
+  int32_t bias = initial_bias;
+
+  // first4[j] is the j-th code point of the decoded label (j < 4).
+  uint32_t first4[4] = {0, 0, 0, 0};
+
+  // Simulate insert-at-position while maintaining only the first 4 slots.
+  auto track = [&](int32_t pos, uint32_t cp) {
+    if (pos < 4) {
+      int32_t limit = (written_out < 4) ? written_out : 3;
+      for (int32_t j = limit; j > pos; --j) {
+        first4[j] = first4[j - 1];
+      }
+      first4[pos] = cp;
+    }
+    ++written_out;
+  };
+
+  // ASCII prefix: code points before the last '-'.
+  size_t end_of_ascii = input.find_last_of('-');
+  if (end_of_ascii != std::string_view::npos) {
+    for (uint8_t c : input.substr(0, end_of_ascii)) {
+      if (c >= 0x80) return false;
+      track(written_out, c);
+    }
+    input.remove_prefix(end_of_ascii + 1);
+  }
+
+  // Non-ASCII insertion loop (identical logic to punycode_to_utf32).
+  while (!input.empty()) {
+    int32_t oldi = i;
+    int32_t w = 1;
+    for (int32_t k = base;; k += base) {
+      if (input.empty()) return false;
+      uint8_t code_point = input.front();
+      input.remove_prefix(1);
+      int32_t digit = char_to_digit_value(code_point);
+      if (digit < 0) return false;
+      if (digit > (0x7fffffff - i) / w) return false;
+      i = i + digit * w;
+      int32_t t = k <= bias ? tmin : k >= bias + tmax ? tmax : k - bias;
+      if (digit < t) break;
+      if (w > 0x7fffffff / (base - t)) return false;
+      w = w * (base - t);
+    }
+    bias = adapt(i - oldi, written_out + 1, oldi == 0);
+    if (i / (written_out + 1) > int32_t(0x7fffffff - n)) return false;
+    n = n + i / (written_out + 1);
+    i = i % (written_out + 1);
+    if (n < 0x80) return false;
+    track(i, n);
+    ++i;
+  }
+
+  // Reject decoded labels that start with "xn--".
   // See https://github.com/whatwg/url/issues/803
-  std::u32string decoded;
-  return punycode_to_utf32(input, decoded);
+  if (written_out >= 4 && first4[0] == 'x' && first4[1] == 'n' &&
+      first4[2] == '-' && first4[3] == '-') {
+    return false;
+  }
+  return true;
 }
 
 bool utf32_to_punycode(std::u32string_view input, std::string &out) {
@@ -9628,30 +9686,25 @@ std::string to_unicode(std::string_view input) {
 
     if (label_view.starts_with("xn--") && ada::idna::is_ascii(label_view)) {
       label_view.remove_prefix(4);
-      if (ada::idna::verify_punycode(label_view)) {
-        std::u32string tmp_buffer;
-        if (ada::idna::punycode_to_utf32(label_view, tmp_buffer)) {
+      std::u32string tmp_buffer;
+      if (ada::idna::punycode_to_utf32(label_view, tmp_buffer)) {
 #ifdef ADA_USE_SIMDUTF
-          auto utf8_size = simdutf::utf8_length_from_utf32(tmp_buffer.data(),
-                                                           tmp_buffer.size());
-          std::string final_utf8(utf8_size, '\0');
-          simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
-                                         final_utf8.data());
+        auto utf8_size = simdutf::utf8_length_from_utf32(tmp_buffer.data(),
+                                                         tmp_buffer.size());
+        std::string final_utf8(utf8_size, '\0');
+        simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
+                                       final_utf8.data());
 #else
-          auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
-                                                             tmp_buffer.size());
-          std::string final_utf8(utf8_size, '\0');
-          ada::idna::utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
-                                   final_utf8.data());
+        auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
+                                                           tmp_buffer.size());
+        std::string final_utf8(utf8_size, '\0');
+        ada::idna::utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
+                                 final_utf8.data());
 #endif
-          output.append(final_utf8);
-        } else {
-          // ToUnicode never fails.  If any step fails, then the original input
-          // sequence is returned immediately in that step.
-          output.append(
-              std::string_view(input.data() + label_start, label_size));
-        }
+        output.append(final_utf8);
       } else {
+        // ToUnicode never fails.  If any step fails, then the original input
+        // sequence is returned immediately in that step.
         output.append(std::string_view(input.data() + label_start, label_size));
       }
     } else {
