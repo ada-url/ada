@@ -761,3 +761,30 @@ TEST(basic_tests, idna_mixed_label_xn_prefix_regression) {
   ASSERT_TRUE(r2) << "Re-parse of serialised href must succeed";
   ASSERT_EQ(r2->get_href(), href) << "href must be idempotent after re-parse";
 }
+
+// Regression test for parse_host fast paths not restoring is_valid=true.
+//
+// If a setter call fails (leaving is_valid=false) and a subsequent set_host
+// call succeeds via the fast path (lowercase ASCII, no forbidden code points),
+// is_valid would remain false. parse_port gates on is_valid, so the port
+// would silently not update - diverging url and url_aggregator state.
+//
+// Reproducer: start from https://user:pass@example.com:8080/path?query=1#hash
+//   1. set_host("@invalid") - fails (@ is forbidden), sets is_valid=false
+//   2. set_host("rf:1")     - host "rf" takes fast path; is_valid must become
+//                             true so that port 1 is accepted by parse_port.
+TYPED_TEST(basic_tests, set_host_fast_path_restores_is_valid) {
+  auto url =
+      ada::parse<TypeParam>("https://user:pass@example.com:8080/path?query=1#hash");
+  ASSERT_TRUE(url);
+
+  // Step 1: fail with a forbidden code point in the host - sets is_valid=false.
+  ASSERT_FALSE(url->set_host("@invalid"));
+
+  // Step 2: succeed with a lowercase ASCII host + port via the fast path.
+  // Port must be updated to 1, not silently left at 8080.
+  ASSERT_TRUE(url->set_host("rf:1"));
+  ASSERT_TRUE(url->is_valid);
+  ASSERT_EQ(url->get_hostname(), "rf");
+  ASSERT_EQ(url->get_port(), "1");
+}
