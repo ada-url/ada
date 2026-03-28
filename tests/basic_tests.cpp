@@ -738,3 +738,53 @@ TEST(basic_tests, url_pattern_canonicalize_pathname_traversal) {
   SUCCEED();
 }
 #endif  // ADA_INCLUDE_URL_PATTERN
+
+// Regression test for https://github.com/whatwg/url/issues/803
+// A mixed label whose ASCII chars happen to spell "xn--" must not be rejected
+// during Punycode decoding.  The label encodes to a Punycode sequence whose
+// encoded (ASCII-prefix) portion starts with "xn--", but the *decoded* label
+// does NOT start with "xn--" (it starts with a non-ASCII code point).
+// Before the fix, both punycode_to_utf32 and verify_punycode rejected these
+// inputs early by checking the encoded input instead of the decoded output,
+// causing href idempotency failures: parsing the serialised href of a valid
+// URL would return a different (invalid) result.
+TEST(basic_tests, idna_mixed_label_xn_prefix_regression) {
+  // "http://\u33ff\u33fdxn--./":
+  //   label "\u33ff\u33fdxn--" encodes to "xn--xn---ue6f785fgsonh6a"
+  //   which decodes back to "\u33ff\u33fdxn--" (starts with non-ASCII, valid).
+  auto r = ada::parse<ada::url>("http://\u33ff\u33fdxn--./");
+  ASSERT_TRUE(r) << "URL with mixed IDNA label ending in 'xn--' must parse";
+
+  // Re-parsing the serialised href must produce the same href (idempotency).
+  auto href = r->get_href();
+  auto r2 = ada::parse<ada::url>(href);
+  ASSERT_TRUE(r2) << "Re-parse of serialised href must succeed";
+  ASSERT_EQ(r2->get_href(), href) << "href must be idempotent after re-parse";
+}
+
+// Regression test for parse_host fast paths not restoring is_valid=true.
+//
+// If a setter call fails (leaving is_valid=false) and a subsequent set_host
+// call succeeds via the fast path (lowercase ASCII, no forbidden code points),
+// is_valid would remain false. parse_port gates on is_valid, so the port
+// would silently not update - diverging url and url_aggregator state.
+//
+// Reproducer: start from https://user:pass@example.com:8080/path?query=1#hash
+//   1. set_host("@invalid") - fails (@ is forbidden), sets is_valid=false
+//   2. set_host("rf:1")     - host "rf" takes fast path; is_valid must become
+//                             true so that port 1 is accepted by parse_port.
+TYPED_TEST(basic_tests, set_host_fast_path_restores_is_valid) {
+  auto url = ada::parse<TypeParam>(
+      "https://user:pass@example.com:8080/path?query=1#hash");
+  ASSERT_TRUE(url);
+
+  // Step 1: fail with a forbidden code point in the host - sets is_valid=false.
+  ASSERT_FALSE(url->set_host("@invalid"));
+
+  // Step 2: succeed with a lowercase ASCII host + port via the fast path.
+  // Port must be updated to 1, not silently left at 8080.
+  ASSERT_TRUE(url->set_host("rf:1"));
+  ASSERT_TRUE(url->is_valid);
+  ASSERT_EQ(url->get_hostname(), "rf");
+  ASSERT_EQ(url->get_port(), "1");
+}

@@ -66,6 +66,47 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     }
   }
 
+  // Test 6: href round-trip.
+  //
+  // If parse(source) succeeds, can_parse(href) must return true and
+  // re-parsing the href must produce the same href (idempotency).
+  // This verifies that the serialised form of every parsed URL is itself
+  // a valid absolute URL that round-trips perfectly.
+  if (parsed_agg) {
+    std::string href = std::string(parsed_agg->get_href());
+
+    // can_parse must accept the normalised href.
+    if (!ada::can_parse(href)) {
+      printf("can_parse rejected normalised href: '%s'\n", href.c_str());
+      abort();
+    }
+
+    // Re-parsing the href must succeed.
+    auto reparsed = ada::parse<ada::url_aggregator>(href);
+    if (!reparsed) {
+      printf("Re-parse of href failed: '%s'\n", href.c_str());
+      abort();
+    }
+
+    // The href of the re-parsed URL must equal the original href.
+    std::string href2 = std::string(reparsed->get_href());
+    if (href2 != href) {
+      printf(
+          "href idempotency failure!\n"
+          "  href1: %s\n  href2: %s\n",
+          href.c_str(), href2.c_str());
+      abort();
+    }
+
+    // url and url_aggregator must agree on whether the href is parseable.
+    bool url_can_parse = ada::parse<ada::url>(href).has_value();
+    if (url_can_parse != ada::can_parse(href)) {
+      printf("parse<url> vs can_parse disagreement on normalised href: '%s'\n",
+             href.c_str());
+      abort();
+    }
+  }
+
   (void)can_parse_result;
   (void)can_parse_with_base;
 

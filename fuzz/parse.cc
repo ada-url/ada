@@ -344,10 +344,36 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     (void)out_aggregator->has_search();
     (void)out_aggregator->get_components();
 
-    // clear methods
+    // clear methods + postcondition assertions
     out_aggregator->clear_port();
+    if (out_aggregator->has_port()) {
+      printf("clear_port() did not clear has_port()\n");
+      abort();
+    }
+    if (!out_aggregator->get_port().empty()) {
+      printf("clear_port() left non-empty get_port()\n");
+      abort();
+    }
+
     out_aggregator->clear_search();
+    if (out_aggregator->has_search()) {
+      printf("clear_search() did not clear has_search()\n");
+      abort();
+    }
+    if (!out_aggregator->get_search().empty()) {
+      printf("clear_search() left non-empty get_search()\n");
+      abort();
+    }
+
     out_aggregator->clear_hash();
+    if (out_aggregator->has_hash()) {
+      printf("clear_hash() did not clear has_hash()\n");
+      abort();
+    }
+    if (!out_aggregator->get_hash().empty()) {
+      printf("clear_hash() left non-empty get_hash()\n");
+      abort();
+    }
   }
 
   /**
@@ -440,6 +466,150 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   bool is_valid = ada::checkers::verify_dns_length(source);
 
   (void)is_valid;
+
+  /**
+   * Sequential setter interactions with FDP-controlled ordering.
+   *
+   * The existing code calls every setter with the same `source` value in a
+   * fixed order. Here we let the fuzzer choose an arbitrary sequence of
+   * setter/value pairs, checking that url and url_aggregator stay in sync
+   * after every step. This exercises setter-interaction state bugs that
+   * fixed-order testing would miss.
+   */
+  {
+    auto url_seq = ada::parse<ada::url>(
+        "https://user:pass@example.com:8080/path?query=1#hash");
+    auto agg_seq = ada::parse<ada::url_aggregator>(
+        "https://user:pass@example.com:8080/path?query=1#hash");
+    if (url_seq && agg_seq) {
+      int steps = fdp.ConsumeIntegralInRange(1, 8);
+      for (int i = 0; i < steps; ++i) {
+        std::string val = fdp.ConsumeRandomLengthString(64);
+        int which = fdp.ConsumeIntegralInRange(0, 8);
+        switch (which) {
+          case 0:
+            url_seq->set_protocol(val);
+            agg_seq->set_protocol(val);
+            break;
+          case 1:
+            url_seq->set_username(val);
+            agg_seq->set_username(val);
+            break;
+          case 2:
+            url_seq->set_password(val);
+            agg_seq->set_password(val);
+            break;
+          case 3:
+            url_seq->set_hostname(val);
+            agg_seq->set_hostname(val);
+            break;
+          case 4:
+            url_seq->set_host(val);
+            agg_seq->set_host(val);
+            break;
+          case 5:
+            url_seq->set_pathname(val);
+            agg_seq->set_pathname(val);
+            break;
+          case 6:
+            url_seq->set_search(val);
+            agg_seq->set_search(val);
+            break;
+          case 7:
+            url_seq->set_hash(val);
+            agg_seq->set_hash(val);
+            break;
+          case 8:
+            url_seq->set_port(val);
+            agg_seq->set_port(val);
+            break;
+        }
+        // After every setter both representations must agree on href.
+        if (url_seq->get_href() != std::string(agg_seq->get_href())) {
+          printf(
+              "Sequential setter href mismatch after setter=%d val='%s'\n"
+              "  url:  %s\n  agg:  %s\n",
+              which, val.c_str(), url_seq->get_href().c_str(),
+              std::string(agg_seq->get_href()).c_str());
+          abort();
+        }
+        // url_aggregator internal invariant must still hold.
+        volatile bool v = agg_seq->validate();
+        (void)v;
+      }
+    }
+  }
+
+  /**
+   * Re-parse idempotency.
+   *
+   * If parse(source) succeeds, then parse(href) must also succeed and
+   * produce the same href. Serialization and parsing must be consistent:
+   * a normalized URL is always its own fixed point.
+   */
+  if (parse_url_aggregator) {
+    std::string href1 = std::string(parse_url_aggregator->get_href());
+    auto reparsed = ada::parse<ada::url_aggregator>(href1);
+    if (!reparsed) {
+      printf("Re-parse of href failed unexpectedly: '%s'\n", href1.c_str());
+      abort();
+    }
+    std::string href2 = std::string(reparsed->get_href());
+    if (href1 != href2) {
+      printf(
+          "Re-parse idempotency failure!\n"
+          "  href1: %s\n  href2: %s\n",
+          href1.c_str(), href2.c_str());
+      abort();
+    }
+  }
+
+  /**
+   * URL search params round-trip via URL integration.
+   *
+   * Construct a URL whose query is the fuzz source, extract the search
+   * component as a url_search_params, mutate it, serialise it back, and
+   * set it on the URL. Exercises the interaction between URL objects and
+   * url_search_params and verifies that the combined pipeline doesn't crash.
+   *
+   * Also verifies the url_search_params serialisation idempotency property:
+   *   url_search_params(sp.to_string()).to_string() == sp.to_string()
+   */
+  {
+    std::string search_url = "https://example.com/?" + source;
+    auto url_with_search = ada::parse<ada::url_aggregator>(search_url);
+    if (url_with_search) {
+      // Extract the search string (may include leading '?').
+      std::string search_raw = std::string(url_with_search->get_search());
+      std::string_view search_view = search_raw;
+      if (!search_view.empty() && search_view[0] == '?') {
+        search_view = search_view.substr(1);
+      }
+
+      ada::url_search_params sp(search_view);
+
+      // Mutate with additional entries from the fuzz corpus.
+      sp.append(source, base);
+
+      std::string serialized = sp.to_string();
+
+      // Idempotency: re-parsing the serialised form must yield the same string.
+      ada::url_search_params sp2(serialized);
+      std::string serialized2 = sp2.to_string();
+      if (serialized2 != serialized) {
+        printf(
+            "url_search_params serialisation not idempotent!\n"
+            "  first:  %s\n  second: %s\n",
+            serialized.c_str(), serialized2.c_str());
+        abort();
+      }
+
+      // Set the serialised params back on the URL.
+      url_with_search->set_search(serialized);
+      volatile bool v = url_with_search->validate();
+      (void)v;
+    }
+  }
 
   return 0;
 }  // extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {

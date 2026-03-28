@@ -459,6 +459,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
       host = input;
     }
     host_type = IPV4;
+    is_valid = true;
     ada_log("parse_host fast path decimal ipv4");
     return true;
   }
@@ -484,6 +485,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
       return parse_ipv4(host.value());
     }
     ada_log("parse_host fast path ", *host);
+    is_valid = true;
     return true;
   }
   ada_log("parse_host calling to_ascii");

@@ -486,6 +486,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
       update_base_hostname(input);
     }
     host_type = IPV4;
+    is_valid = true;
     ada_log("parse_host fast path decimal ipv4");
     ADA_ASSERT_TRUE(validate());
     return true;
@@ -510,6 +511,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
       return parse_ipv4(get_hostname(), true);
     }
     ada_log("parse_host fast path ", get_hostname());
+    is_valid = true;
     return true;
   }
   // We have encountered at least one forbidden code point or the input contains

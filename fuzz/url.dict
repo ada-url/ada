@@ -77,3 +77,85 @@
 # Punycode
 "xn--nxasmq6b.com"
 "xn--bcher-kva.example"
+
+# Hex and octal IPv4 variants (non-decimal notations exercised by the parser)
+"0x7f000001"
+"0x7f.0x0.0x0.0x1"
+"0177.0.0.1"
+"010.010.010.010"
+"0x1"
+"0"
+
+# IPv4 with leading zeros
+"192.168.001.001"
+"127.00.00.01"
+
+# IPv4-mapped and special IPv6
+"[::ffff:192.168.1.1]"
+"[::ffff:c0a8:101]"
+"[fe80::1%25eth0]"
+"[2001:db8::1:0:0:1]"
+"[64:ff9b::192.0.2.33]"
+"[::]"
+
+# Windows-style paths for file: URLs
+"file:///C:\\Users\\test\\file.txt"
+"file:///C|/path/to/file"
+"file://localhost/C:/path"
+"file:////server/share/path"
+"file:///C:/path%20with%20spaces"
+
+# Data URIs with content types
+"data:text/plain,hello"
+"data:text/plain;charset=utf-8,hello"
+"data:text/html,<h1>hello</h1>"
+"data:application/octet-stream;base64,SGVsbG8="
+"data:,raw"
+"data:text/plain;base64,"
+
+# Tricky percent-encoded sequences
+"%c0%af"
+"%ef%bb%bf"
+"%00"
+"%2e%2e%2f"
+"%2e%2e%5c"
+"%252e"
+"%u0041"
+
+# C0 control characters in URLs
+"%01"
+"%09"
+"%0a"
+"%0d"
+"%1f"
+
+# Opaque host edge cases
+"non-special://host/"
+"non-special://[::1]/"
+"non-special:///path"
+"foo:///"
+
+# Query string patterns
+"?key=value&key=value2"
+"?=emptykey"
+"?key="
+"?%26=%26"
+"?+"
+"?%2B"
+
+# Fragment edge cases
+"#%00"
+"##"
+
+# Path traversal variants
+"%2e%2e/"
+".%2e/"
+"%2e."
+"..%2f"
+".."
+
+# Scheme edge cases
+"HTTP://example.com"
+"HtTpS://example.com"
+"javascript:void(0)"
+"mailto:user@example.com"

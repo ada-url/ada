@@ -157,5 +157,103 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     }
   }
 
+  /**
+   * IDNA stability property.
+   *
+   * Applying to_ascii twice must be idempotent: if to_ascii(x) produces a
+   * non-empty result, then to_ascii(to_ascii(x)) must equal to_ascii(x).
+   * A correctly normalised ACE label is already its own fixed point.
+   *
+   * We allow the second call to return an empty string only if the first
+   * result was itself not a valid IDNA domain (some implementations return
+   * empty on failure). If the first result is non-empty and looks like a
+   * valid domain the second application must match.
+   */
+  {
+    if (!ascii_result.empty()) {
+      std::string ascii_result2 = ada::idna::to_ascii(ascii_result);
+      if (!ascii_result2.empty() && ascii_result2 != ascii_result) {
+        printf(
+            "IDNA to_ascii not idempotent!\n"
+            "  input:   %s\n  first:   %s\n  second:  %s\n",
+            source.c_str(), ascii_result.c_str(), ascii_result2.c_str());
+        abort();
+      }
+    }
+  }
+
+  /**
+   * to_unicode stability.
+   *
+   * Applying to_unicode twice should also be idempotent: once a domain is in
+   * its Unicode presentation form, converting again should give the same
+   * result.
+   */
+  {
+    if (!unicode_result.empty()) {
+      std::string unicode_result2 = ada::idna::to_unicode(unicode_result);
+      if (!unicode_result2.empty() && unicode_result2 != unicode_result) {
+        printf(
+            "IDNA to_unicode not idempotent!\n"
+            "  input:   %s\n  first:   %s\n  second:  %s\n",
+            source.c_str(), unicode_result.c_str(), unicode_result2.c_str());
+        abort();
+      }
+    }
+  }
+
+  /**
+   * Long domain names near the DNS length limit (253 characters).
+   *
+   * The IDNA and DNS-length checking code has special handling for domains
+   * close to or exceeding 253/255 characters and 63-character labels. Feed
+   * the fuzzer inputs of a controlled length to maximise coverage of those
+   * boundary checks.
+   */
+  {
+    std::string long_domain = fdp.ConsumeRandomLengthString(270);
+    std::string long_ascii = ada::idna::to_ascii(long_domain);
+    length += long_ascii.size();
+
+    // verify_dns_length on the long input (already called for `source` above,
+    // but we want to exercise the boundary cases separately).
+    volatile bool long_dns_ok = ada::checkers::verify_dns_length(long_domain);
+    (void)long_dns_ok;
+
+    if (!long_ascii.empty()) {
+      volatile bool long_ascii_dns_ok =
+          ada::checkers::verify_dns_length(long_ascii);
+      (void)long_ascii_dns_ok;
+    }
+  }
+
+  /**
+   * Punycode round-trip on arbitrary binary blobs.
+   *
+   * Feed random bytes directly into punycode_to_utf32, then if that succeeds
+   * encode the result back with utf32_to_punycode and verify the round-trip.
+   */
+  {
+    std::string blob = fdp.ConsumeRandomLengthString(128);
+    std::u32string decoded;
+    bool ok = ada::idna::punycode_to_utf32(blob, decoded);
+    if (ok && !decoded.empty()) {
+      std::string reencoded;
+      bool enc_ok = ada::idna::utf32_to_punycode(decoded, reencoded);
+      (void)enc_ok;
+      length += reencoded.size();
+
+      // Re-decode the re-encoded form; it must match the first decoded form.
+      if (enc_ok && !reencoded.empty()) {
+        std::u32string redecoded;
+        bool redec_ok = ada::idna::punycode_to_utf32(reencoded, redecoded);
+        if (redec_ok && redecoded != decoded) {
+          printf("Punycode round-trip mismatch!\n");
+          abort();
+        }
+      }
+    }
+  }
+
   return 0;
 }

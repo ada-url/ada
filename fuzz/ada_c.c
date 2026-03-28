@@ -37,7 +37,13 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
     ada_get_hash(out);
     ada_get_host(out);
-    ada_get_host_type(out);
+    uint8_t host_type = ada_get_host_type(out);
+    /* host_type must be in [0, 2]: DEFAULT=0, IPV4=1, IPV6=2 */
+    if (host_type > 2) {
+      printf("ada_get_host_type returned out-of-range value: %u\n",
+             (unsigned)host_type);
+      abort();
+    }
     ada_get_hostname(out);
     ada_get_href(out);
     ada_owned_string out_get_origin = ada_get_origin(out);
@@ -47,7 +53,15 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     ada_get_protocol(out);
     ada_get_port(out);
     ada_get_search(out);
-    ada_get_scheme_type(out);
+
+    uint8_t scheme_type = ada_get_scheme_type(out);
+    /* scheme_type must be in [0, 6]: HTTP=0, NOT_SPECIAL=1, HTTPS=2,
+     * WS=3, FTP=4, WSS=5, FILE=6 */
+    if (scheme_type > 6) {
+      printf("ada_get_scheme_type returned out-of-range value: %u\n",
+             (unsigned)scheme_type);
+      abort();
+    }
 
     ada_has_credentials(out);
     ada_has_empty_hostname(out);
@@ -59,7 +73,46 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     ada_has_hash(out);
     ada_has_search(out);
 
-    ada_get_components(out);
+    /* Validate ada_url_components offsets: every non-omitted field offset
+     * must be <= href.length, so the component sits within the href. */
+    ada_string href_for_comps = ada_get_href(out);
+    const ada_url_components* comps = ada_get_components(out);
+    if (comps->protocol_end != ada_url_omitted)
+      if (comps->protocol_end > href_for_comps.length) {
+        printf("ada_url_components.protocol_end out of bounds\n");
+        abort();
+      }
+    if (comps->username_end != ada_url_omitted)
+      if (comps->username_end > href_for_comps.length) {
+        printf("ada_url_components.username_end out of bounds\n");
+        abort();
+      }
+    if (comps->host_start != ada_url_omitted)
+      if (comps->host_start > href_for_comps.length) {
+        printf("ada_url_components.host_start out of bounds\n");
+        abort();
+      }
+    if (comps->host_end != ada_url_omitted)
+      if (comps->host_end > href_for_comps.length) {
+        printf("ada_url_components.host_end out of bounds\n");
+        abort();
+      }
+    /* NOTE: comps->port is a port NUMBER (0-65535), not an offset. Skip. */
+    if (comps->pathname_start != ada_url_omitted)
+      if (comps->pathname_start > href_for_comps.length) {
+        printf("ada_url_components.pathname_start out of bounds\n");
+        abort();
+      }
+    if (comps->search_start != ada_url_omitted)
+      if (comps->search_start > href_for_comps.length) {
+        printf("ada_url_components.search_start out of bounds\n");
+        abort();
+      }
+    if (comps->hash_start != ada_url_omitted)
+      if (comps->hash_start > href_for_comps.length) {
+        printf("ada_url_components.hash_start out of bounds\n");
+        abort();
+      }
 
     ada_clear_port(out);
     ada_clear_hash(out);
@@ -78,6 +131,40 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       (void)href_copy;
     }
     ada_free(out_copy);
+
+    /* Re-parse idempotency via C API.
+     *
+     * After all setter mutations the URL must still be in a consistent state.
+     * Whatever href it has now should be its own fixed point: parsing it
+     * again must succeed and produce the same href.
+     *
+     * We read the href before creating the second URL so that the pointer
+     * remains valid (we do not call any setter on 'out' after this point). */
+    {
+      ada_string final_href = ada_get_href(out);
+      ada_url reparsed = ada_parse(final_href.data, final_href.length);
+      if (ada_is_valid(reparsed)) {
+        ada_string reparsed_href = ada_get_href(reparsed);
+        if (reparsed_href.length != final_href.length ||
+            memcmp(reparsed_href.data, final_href.data, final_href.length) !=
+                0) {
+          printf(
+              "C API href idempotency failure!\n"
+              "  final:    %.*s\n  reparsed: %.*s\n",
+              (int)final_href.length, final_href.data,
+              (int)reparsed_href.length, reparsed_href.data);
+          ada_free(reparsed);
+          abort();
+        }
+      } else {
+        /* After only valid setter calls the URL must remain parseable. */
+        printf("C API re-parse of href failed: %.*s\n", (int)final_href.length,
+               final_href.data);
+        ada_free(reparsed);
+        abort();
+      }
+      ada_free(reparsed);
+    }
   }
 
   bool can_parse_result = ada_can_parse(input, input_len);
