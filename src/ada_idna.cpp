@@ -9433,9 +9433,13 @@ bool is_label_valid(const std::u32string_view label) {
 
         // In an RTL label, if an EN is present, no AN may be present, and vice
         // versa.
-        if ((d == direction::EN && ((has_en = true) && has_an)) ||
-            (d == direction::AN && ((has_an = true) && has_en))) {
-          return false;
+        if (d == direction::EN) {
+          has_en = true;
+          if (has_an) { return false; }
+        }
+        if (d == direction::AN) {
+          has_an = true;
+          if (has_en) { return false; }
         }
 
         if (!(d == direction::R || d == direction::AL || d == direction::AN ||
