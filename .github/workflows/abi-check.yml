@@ -42,9 +42,28 @@ jobs:
           echo "Latest release tag: $LATEST_TAG"
           echo "tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Build baseline (latest release)
+      - name: Checkout baseline
         run: |
           git worktree add /tmp/ada-baseline ${{ steps.baseline.outputs.tag }}
+
+      - name: Check SOVERSION
+        id: soversion
+        run: |
+          BASELINE_SOVERSION=$(grep 'set(ADA_LIB_SOVERSION' /tmp/ada-baseline/CMakeLists.txt | grep -oP '"[^"]*"' | tr -d '"')
+          CURRENT_SOVERSION=$(grep 'set(ADA_LIB_SOVERSION' CMakeLists.txt | grep -oP '"[^"]*"' | tr -d '"')
+          echo "Baseline SOVERSION: $BASELINE_SOVERSION"
+          echo "Current SOVERSION:  $CURRENT_SOVERSION"
+          echo "baseline=$BASELINE_SOVERSION" >> "$GITHUB_OUTPUT"
+          echo "current=$CURRENT_SOVERSION" >> "$GITHUB_OUTPUT"
+          if [ "$BASELINE_SOVERSION" = "$CURRENT_SOVERSION" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build baseline (latest release)
+        if: steps.soversion.outputs.changed == 'false'
+        run: |
           cmake -G Ninja -B /tmp/ada-baseline-build /tmp/ada-baseline \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DBUILD_SHARED_LIBS=ON \
@@ -52,6 +71,7 @@ jobs:
           cmake --build /tmp/ada-baseline-build -j4
 
       - name: Build current
+        if: steps.soversion.outputs.changed == 'false'
         run: |
           cmake -G Ninja -B /tmp/ada-current-build \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -60,6 +80,7 @@ jobs:
           cmake --build /tmp/ada-current-build -j4
 
       - name: Compare ABI
+        if: steps.soversion.outputs.changed == 'false'
         run: |
           abidiff \
             --drop-private-types \
@@ -69,3 +90,9 @@ jobs:
             --headers-dir2 include \
             /tmp/ada-baseline-build/src/libada.so \
             /tmp/ada-current-build/src/libada.so
+
+      - name: ABI check skipped (SOVERSION bumped)
+        if: steps.soversion.outputs.changed == 'true'
+        run: |
+          echo "ADA_LIB_SOVERSION changed from ${{ steps.soversion.outputs.baseline }} to ${{ steps.soversion.outputs.current }}."
+          echo "Intentional ABI break acknowledged by SOVERSION bump — skipping abidiff."
