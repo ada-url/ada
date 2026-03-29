@@ -326,9 +326,9 @@ struct url_aggregator : url_base {
       const std::string_view* base_url, const url_pattern_options* options);
 #endif  // ADA_INCLUDE_URL_PATTERN
 
-  // components is declared before buffer so that all 8 offset fields
-  // (protocol_end through hash_start) land in the first cache line alongside
-  // url_base, avoiding a second cache-line fetch for any getter call.
+  // components is declared before buffer so that the offset fields land
+  // close to url_base in memory, improving cache locality for getter calls.
+  // Note: exact cache-line placement is implementation- and platform-dependent.
   url_components components{};
   std::string buffer{};
 

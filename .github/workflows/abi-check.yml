@@ -41,7 +41,7 @@ jobs:
           # Excluding HEAD ensures we compare against a previous release even when a
           # new release tag was just pushed to main alongside this workflow run.
           CURRENT_SHA=$(git rev-parse HEAD)
-          LATEST_TAG=$(git tag --list 'v*.*.*' --sort=-version:refname | while IFS= read -r tag; do
+          LATEST_TAG=$(git tag --merged HEAD --list 'v*.*.*' --sort=-version:refname | while IFS= read -r tag; do
             TAG_SHA=$(git rev-parse "${tag}^{}" 2>/dev/null)
             if [ "$TAG_SHA" != "$CURRENT_SHA" ]; then
               echo "$tag"

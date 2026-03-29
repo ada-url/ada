@@ -67,14 +67,13 @@ struct url : url_base {
   url& operator=(const url& u) = default;
   ~url() override = default;
 
-  // Fields are ordered by access frequency so that the most-used components
-  // occupy the earliest cache lines.
+  // Fields are ordered so that the most frequently accessed components
+  // tend to occupy earlier cache lines and remain close together in memory.
   //
-  // CL 0 (bytes  0-63): url_base(16) | host(40) | path[0..7](8)
-  // CL 1 (bytes 64-127): path[8..31](24) | query(40)
-  // CL 2 (bytes 128-191): hash(40) | port(4) | pad(4) | username[0..15](16)
-  // CL 3 (bytes 192-255): username[16..31](16) | password(32) | nss[0..15](16)
-  // CL 4 (bytes 256-271): nss[16..31](16)
+  // Note: The exact object layout (including cache-line boundaries, byte
+  // offsets, and member sizes) is implementation- and platform-dependent.
+  // This ordering expresses an intent for better cache locality but does not
+  // guarantee any specific in-memory layout.
 
   /**
    * @private
