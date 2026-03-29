@@ -1,4 +1,4 @@
-/* auto-generated on 2026-01-30 12:00:02 -0500. Do not edit! */
+/* auto-generated on 2026-03-29 12:09:27 -0400. Do not edit! */
 /* begin file include/idna.h */
 #ifndef ADA_IDNA_H
 #define ADA_IDNA_H
@@ -37,6 +37,10 @@ namespace ada::idna {
 void ascii_map(char* input, size_t length);
 // Map the characters according to IDNA, returning the empty string on error.
 std::u32string map(std::u32string_view input);
+// Map into an existing buffer (cleared on entry). Returns false if any code
+// point is disallowed. Reusing the buffer avoids repeated heap allocations
+// when called in a loop over multiple labels.
+bool map(std::u32string_view input, std::u32string& out);
 
 }  // namespace ada::idna
 
