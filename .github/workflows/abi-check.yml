@@ -49,8 +49,8 @@ jobs:
       - name: Check SOVERSION
         id: soversion
         run: |
-          BASELINE_SOVERSION=$(grep 'set(ADA_LIB_SOVERSION' /tmp/ada-baseline/CMakeLists.txt | grep -oP '"[^"]*"' | tr -d '"')
-          CURRENT_SOVERSION=$(grep 'set(ADA_LIB_SOVERSION' CMakeLists.txt | grep -oP '"[^"]*"' | tr -d '"')
+          BASELINE_SOVERSION=$(grep -oP 'set\(ADA_LIB_SOVERSION "\K[^"]+' /tmp/ada-baseline/CMakeLists.txt)
+          CURRENT_SOVERSION=$(grep -oP 'set\(ADA_LIB_SOVERSION "\K[^"]+' CMakeLists.txt)
           echo "Baseline SOVERSION: $BASELINE_SOVERSION"
           echo "Current SOVERSION:  $CURRENT_SOVERSION"
           echo "baseline=$BASELINE_SOVERSION" >> "$GITHUB_OUTPUT"
