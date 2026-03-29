@@ -129,4 +129,42 @@ ada_really_inline constexpr bool verify_dns_length(
 
   return true;
 }
+namespace {
+
+// Returns true if port_bytes (already tab/newline-free) is a valid ASCII
+// decimal port number in the range [0, 65535].  An empty string is accepted
+// and means "no port was specified".
+ada_really_inline bool validate_port(const uint8_t* port_bytes,
+                                     size_t length) noexcept {
+  if (length == 0) return true;
+  if (length > 5) return false;  // > 99999 can never be a valid port
+  uint32_t value = 0;
+  for (size_t i = 0; i < length; ++i) {
+    if (port_bytes[i] < '0' || port_bytes[i] > '9') return false;
+    value = value * 10 + (port_bytes[i] - '0');
+  }
+  return value <= 65535;
+}
+
+// Returns true if every byte between the '[' and ']' of an IPv6 literal
+// belongs to the allowed character set: hex digits (0-9, a-f, A-F), ':', '.',
+// and '%' (zone-ID prefix).  This is a character-set check only; structural
+// validation (correct group count, '::' placement, etc.) is left to the full
+// parser.
+ada_really_inline bool validate_ipv6_inner(const uint8_t* address_bytes,
+                                           size_t length) noexcept {
+  if (length == 0) return false;
+  for (size_t i = 0; i < length; ++i) {
+    const uint8_t byte = address_bytes[i];
+    if ((byte >= '0' && byte <= '9') || (byte >= 'a' && byte <= 'f') ||
+        (byte >= 'A' && byte <= 'F') || byte == ':' || byte == '.' ||
+        byte == '%')
+      continue;
+    return false;
+  }
+  return true;
+}
+
+}  // anonymous namespace
+
 }  // namespace ada::checkers

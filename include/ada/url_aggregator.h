@@ -326,8 +326,11 @@ struct url_aggregator : url_base {
       const std::string_view *base_url, const url_pattern_options *options);
 #endif  // ADA_INCLUDE_URL_PATTERN
 
-  std::string buffer{};
+  // components is declared before buffer so that all 8 offset fields
+  // (protocol_end through hash_start) land in the first cache line alongside
+  // url_base, avoiding a second cache-line fetch for any getter call.
   url_components components{};
+  std::string buffer{};
 
   /**
    * Returns true if neither the search, nor the hash nor the pathname

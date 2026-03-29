@@ -65,10 +65,12 @@ template <typename result_type = url_aggregator, bool store_values = true>
 result_type parse_url_impl(std::string_view user_input,
                            const result_type* base_url = nullptr);
 
-extern template url_aggregator parse_url_impl<url_aggregator>(
+extern template url_aggregator parse_url_impl<url_aggregator, true>(
     std::string_view user_input, const url_aggregator* base_url);
-extern template url parse_url_impl<url>(std::string_view user_input,
-                                        const url* base_url);
+extern template url_aggregator parse_url_impl<url_aggregator, false>(
+    std::string_view user_input, const url_aggregator* base_url);
+extern template url parse_url_impl<url, true>(std::string_view user_input,
+                                              const url* base_url);
 
 #if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>

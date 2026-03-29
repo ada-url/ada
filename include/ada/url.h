@@ -67,32 +67,20 @@ struct url : url_base {
   url &operator=(const url &u) = default;
   ~url() override = default;
 
-  /**
-   * @private
-   * A URL's username is an ASCII string identifying a username. It is initially
-   * the empty string.
-   */
-  std::string username{};
-
-  /**
-   * @private
-   * A URL's password is an ASCII string identifying a password. It is initially
-   * the empty string.
-   */
-  std::string password{};
+  // Fields are ordered by access frequency so that the most-used components
+  // occupy the earliest cache lines.
+  //
+  // CL 0 (bytes  0-63): url_base(16) | host(40) | path[0..7](8)
+  // CL 1 (bytes 64-127): path[8..31](24) | query(40)
+  // CL 2 (bytes 128-191): hash(40) | port(4) | pad(4) | username[0..15](16)
+  // CL 3 (bytes 192-255): username[16..31](16) | password(32) | nss[0..15](16)
+  // CL 4 (bytes 256-271): nss[16..31](16)
 
   /**
    * @private
    * A URL's host is null or a host. It is initially null.
    */
   std::optional<std::string> host{};
-
-  /**
-   * @private
-   * A URL's port is either null or a 16-bit unsigned integer that identifies a
-   * networking port. It is initially null.
-   */
-  std::optional<uint16_t> port{};
 
   /**
    * @private
@@ -114,6 +102,27 @@ struct url : url_base {
    * is initially null.
    */
   std::optional<std::string> hash{};
+
+  /**
+   * @private
+   * A URL's port is either null or a 16-bit unsigned integer that identifies a
+   * networking port. It is initially null.
+   */
+  std::optional<uint16_t> port{};
+
+  /**
+   * @private
+   * A URL's username is an ASCII string identifying a username. It is initially
+   * the empty string.
+   */
+  std::string username{};
+
+  /**
+   * @private
+   * A URL's password is an ASCII string identifying a password. It is initially
+   * the empty string.
+   */
+  std::string password{};
 
   /**
    * Checks if the URL has an empty hostname (host is set but empty string).
@@ -367,6 +376,9 @@ struct url : url_base {
                                                               const ada::url *);
   friend ada::url_aggregator ada::parser::parse_url_impl<
       ada::url_aggregator, true>(std::string_view, const ada::url_aggregator *);
+  friend ada::url_aggregator
+  ada::parser::parse_url_impl<ada::url_aggregator, false>(
+      std::string_view, const ada::url_aggregator *);
 
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);

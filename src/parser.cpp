@@ -7,6 +7,9 @@
 #include "ada/common_defs.h"
 #include "ada/log.h"
 #include "ada/unicode.h"
+#include "ada/url.h"
+#include "ada/url_aggregator.h"
+#include "ada/url_aggregator-inl.h"
 
 namespace ada::parser {
 
@@ -926,9 +929,11 @@ result_type parse_url_impl(std::string_view user_input,
   return url;
 }
 
-template url parse_url_impl(std::string_view user_input,
-                            const url* base_url = nullptr);
-template url_aggregator parse_url_impl(
+template url parse_url_impl<url, true>(std::string_view user_input,
+                                       const url* base_url = nullptr);
+template url_aggregator parse_url_impl<url_aggregator, true>(
+    std::string_view user_input, const url_aggregator* base_url = nullptr);
+template url_aggregator parse_url_impl<url_aggregator, false>(
     std::string_view user_input, const url_aggregator* base_url = nullptr);
 
 template <class result_type>
