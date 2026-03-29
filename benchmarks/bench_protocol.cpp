@@ -21,8 +21,8 @@
 #include "counters/bench.h"
 
 template <class Function1, class Function2>
-counters::event_aggregate shuffle_bench(Function1 &&function1,
-                                        Function2 &&function2,
+counters::event_aggregate shuffle_bench(Function1&& function1,
+                                        Function2&& function2,
                                         size_t min_repeat = 300,
                                         size_t min_time_ns = 400'000'000,
                                         size_t max_repeat = 1000000,
@@ -77,7 +77,7 @@ constexpr uint64_t scheme_keys[] = {
 
 // branchless load of up to 5 characters into a uint64_t, padding with zeros if
 // n < 5
-inline uint64_t branchless_load5(const char *p, size_t n) {
+inline uint64_t branchless_load5(const char* p, size_t n) {
   uint64_t input = (uint8_t)p[0];
   input |= ((uint64_t)(uint8_t)p[n > 1] << 8) & (0 - (uint64_t)(n > 1));
   input |= ((uint64_t)(uint8_t)p[(n > 2) * 2] << 16) & (0 - (uint64_t)(n > 2));
@@ -131,7 +131,7 @@ std::optional<SchemeType> get_scheme_type(std::string_view scheme) noexcept {
   return std::nullopt;
 }
 
-double pretty_print(const std::string &name, size_t num_values,
+double pretty_print(const std::string& name, size_t num_values,
                     counters::event_aggregate agg) {
   printf("%-50s : ", name.c_str());
   printf(" %5.3f ns ", agg.fastest_elapsed_ns() / double(num_values));
@@ -269,7 +269,7 @@ void collect_benchmark_results(size_t number_strings) {
   gen.seed(42);  // reset seed to ensure same shuffle for all benchmarks
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   if (!counters::has_performance_counters()) {
     printf(
         "Performance counters not available, you may need to run with sudo.\n");

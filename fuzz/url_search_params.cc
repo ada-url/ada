@@ -6,7 +6,7 @@
 #include "ada.cpp"
 #include "ada.h"
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   FuzzedDataProvider fdp(data, size);
   std::string source = fdp.ConsumeRandomLengthString(256);
   std::string base_source = fdp.ConsumeRandomLengthString(256);
@@ -33,7 +33,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
       length += val->size();
     }
     auto all_vals = initialized.get_all(source);
-    for (const auto &v : all_vals) {
+    for (const auto& v : all_vals) {
       length += v.size();
     }
   }
@@ -42,7 +42,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   initialized.sort();
 
   // Test C++ range-for iteration; also verify has(k) and has(k,v) consistency.
-  for (const auto &pair : initialized) {
+  for (const auto& pair : initialized) {
     length += pair.first.size();
     length += pair.second.size();
 
@@ -114,7 +114,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   {
     auto all_vals = search_params.get_all(source);
     length += all_vals.size();
-    for (const auto &v : all_vals) {
+    for (const auto& v : all_vals) {
       length += v.size();
     }
   }
@@ -170,7 +170,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   }
 
   // Test C++ range-for on the mutated params
-  for (const auto &pair : search_params) {
+  for (const auto& pair : search_params) {
     length += pair.first.size();
     length += pair.second.size();
   }
@@ -181,7 +181,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   length += search_params.size();
 
   // Test that reset() followed by iteration doesn't crash
-  for (const auto &pair : search_params) {
+  for (const auto& pair : search_params) {
     length += pair.first.size();
     length += pair.second.size();
   }
@@ -270,7 +270,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
 
       // Size and iteration must not crash.
       length += sp_from_url.size();
-      for (const auto &pair : sp_from_url) {
+      for (const auto& pair : sp_from_url) {
         length += pair.first.size();
         length += pair.second.size();
       }
