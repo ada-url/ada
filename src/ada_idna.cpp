@@ -232,8 +232,8 @@ constexpr uint32_t IDNA_HIGH_IGNORED_START = 0x000E0100;
 constexpr uint32_t IDNA_HIGH_IGNORED_END   = 0x000E01F0;  // exclusive
 
 // idna_stage1[cp >> 6]: one entry per 64-code-point block.
-// Bit 15 set  → lower 15 bits = index into idna_bool_blocks[].
-// Bit 15 clear → value = base offset into idna_stage2[] for this block.
+// Bit 15 set  -> lower 15 bits = index into idna_bool_blocks[].
+// Bit 15 clear -> value = base offset into idna_stage2[] for this block.
 const uint16_t idna_stage1[3282] = {
 	0x8000, 0x0000, 0x0040, 0x0080, 0x00C0, 0x0100, 0x0140, 0x0180, 0x01C0, 0x0200, 0x0240, 0x0280,
 	0x8000, 0x02C0, 0x0300, 0x0340, 0x0380, 0x03C0, 0x0400, 0x0440, 0x0480, 0x04C0, 0x0500, 0x8001,
@@ -1472,7 +1472,7 @@ const uint16_t idna_stage2[11456] = {
 };
 
 // idna_bool_blocks[]: one uint64_t per boolean block.
-// Bit k (0 = LSB) = 1 → (block_start + k) is VALID; 0 → DISALLOWED.
+// Bit k (0 = LSB) = 1 -> (block_start + k) is VALID; 0 -> DISALLOWED.
 const uint64_t idna_bool_blocks[225] = {
 	0xFFFFFFFFFFFFFFFFULL, 0x001F87FFFFFF00FFULL, 0xFFFFFFFFEFFFFFC0ULL, 0xFFFFFFFFDFFFFFFFULL,
 	0xFFFFFFFFFFFF3FFFULL, 0xFFFFFFFFFFFFE7FFULL, 0x0003FFFFFFFFFFFFULL, 0xE7FFFFFFFFFFFFFFULL,
@@ -2631,20 +2631,20 @@ const uint8_t idna_utf8_mappings[17383] = {
 
 namespace ada::idna {
 
-// ─── O(1) two-level table lookup ─────────────────────────────────────────────
+// --- O(1) two-level table lookup ---------------------------------------------
 //
 // Returns one of:
-//   IDNA_VALID      – keep code point in output unchanged
-//   IDNA_DISALLOWED – code point is not allowed (map() returns error)
-//   IDNA_IGNORED    – code point is ignored (index 0 = empty UTF-8 entry)
-//   other           – byte offset into idna_utf8_mappings[] (null-terminated)
+//   IDNA_VALID      - keep code point in output unchanged
+//   IDNA_DISALLOWED - code point is not allowed (map() returns error)
+//   IDNA_IGNORED    - code point is ignored (index 0 = empty UTF-8 entry)
+//   other           - byte offset into idna_utf8_mappings[] (null-terminated)
 //
 // The two-level table covers [0, IDNA_LOW_RANGE_END).  All constants
 // (LOW_RANGE_END, HIGH_IGNORED_*) are generated from the IDNA table itself;
 // no Unicode version-specific values are hardcoded here.
 //
 static uint16_t idna_lookup(uint32_t cp) noexcept {
-  // ── Two-level table covers the full active code-point range ───────────────
+  // -- Two-level table covers the full active code-point range ---------------
   if (cp < IDNA_LOW_RANGE_END) {
     uint16_t ref = idna_stage1[cp >> IDNA_BLOCK_BITS];
     if (ref & IDNA_BOOL_FLAG) {
@@ -2658,7 +2658,7 @@ static uint16_t idna_lookup(uint32_t cp) noexcept {
     return idna_stage2[ref + (cp & IDNA_BLOCK_MASK)];
   }
 
-  // ── Variation selectors supplement (U+E0100–U+E01EF): all ignored ─────────
+  // -- Variation selectors supplement (U+E0100-U+E01EF): all ignored ---------
   // Everything else above IDNA_LOW_RANGE_END is disallowed.
   if (cp >= IDNA_HIGH_IGNORED_START && cp < IDNA_HIGH_IGNORED_END) {
     return IDNA_IGNORED;
@@ -2667,7 +2667,7 @@ static uint16_t idna_lookup(uint32_t cp) noexcept {
   return IDNA_DISALLOWED;
 }
 
-// ─── Decode one UTF-8 code point ─────────────────────────────────────────────
+// --- Decode one UTF-8 code point ---------------------------------------------
 // Advances *ptr past the bytes consumed.  The mapping table is trusted to be
 // well-formed UTF-8, so no validity checking is performed.
 static char32_t utf8_next(const uint8_t*& ptr) noexcept {
@@ -2692,8 +2692,8 @@ static char32_t utf8_next(const uint8_t*& ptr) noexcept {
   return static_cast<char32_t>(cp);
 }
 
-// ─── ASCII fast path
-// ──────────────────────────────────────────────────────────
+// --- ASCII fast path
+// ----------------------------------------------------------
 void ascii_map(char* input, size_t length) {
   auto broadcast = [](uint8_t v) -> uint64_t {
     return 0x101010101010101ull * v;
@@ -2719,8 +2719,8 @@ void ascii_map(char* input, size_t length) {
   }
 }
 
-// ─── IDNA map
-// ───────────────────────────────────────────────────────────────── Maps each
+// --- IDNA map
+// ----------------------------------------------------------------- Maps each
 // code point according to IDNA processing. Returns an empty string on error
 // (disallowed code point encountered).
 bool map(std::u32string_view input, std::u32string& out) {
