@@ -348,8 +348,7 @@ struct url : url_base {
    * @return A newly constructed url_components struct.
    * @see https://github.com/servo/rust-url
    */
-  [[nodiscard]] ada_really_inline ada::url_components get_components()
-      const noexcept;
+  [[nodiscard]] ada_really_inline ada::url_components get_components() const;
 
   /**
    * Checks if the URL has a fragment/hash component.

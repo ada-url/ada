@@ -739,8 +739,8 @@ url_aggregator::get_components() const noexcept {
   // Performance: instead of doing this potentially expensive check, we could
   // have a boolean in the struct.
   return components.protocol_end + 2 <= components.host_start &&
-         helpers::substring(buffer, components.protocol_end,
-                            components.protocol_end + 2) == "//";
+         buffer[components.protocol_end] == '/' &&
+         buffer[components.protocol_end + 1] == '/';
 }
 
 inline void ada::url_aggregator::add_authority_slashes_if_needed() {

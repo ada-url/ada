@@ -30,7 +30,7 @@ namespace ada {
   if (!host.has_value()) {
     return false;
   }
-  return host.value().empty();
+  return host->empty();
 }
 [[nodiscard]] inline bool url::has_hostname() const noexcept {
   return host.has_value();
@@ -48,7 +48,7 @@ inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
 }
 
 [[nodiscard]] ada_really_inline ada::url_components url::get_components()
-    const noexcept {
+    const {
   url_components out{};
 
   // protocol ends with ':'. for example: "https:"
@@ -71,12 +71,12 @@ inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
         out.host_start += uint32_t(password.size() + 1);
       }
 
-      out.host_end = uint32_t(out.host_start + host.value().size());
+      out.host_end = uint32_t(out.host_start + host->size());
     } else {
       out.username_end = out.host_start;
 
       // Host does not start with "@" if it does not include credentials.
-      out.host_end = uint32_t(out.host_start + host.value().size()) - 1;
+      out.host_end = uint32_t(out.host_start + host->size()) - 1;
     }
 
     running_index = out.host_end + 1;

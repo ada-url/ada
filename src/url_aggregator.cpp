@@ -912,7 +912,14 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   if (components.host_start == components.host_end) {
     return false;
   }
-  return checkers::verify_dns_length(get_hostname());
+  // Avoid allocation: construct a string_view directly into the buffer.
+  size_t start = components.host_start;
+  if (components.host_end > components.host_start &&
+      buffer[components.host_start] == '@') {
+    start++;
+  }
+  return checkers::verify_dns_length(
+      std::string_view(buffer.data() + start, components.host_end - start));
 }
 
 bool url_aggregator::parse_ipv4(std::string_view input, bool in_place) {
@@ -1165,6 +1172,9 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
         // Set address[pieceIndex] to address[pieceIndex] times 0x100 +
         // ipv4Piece.
         // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
+        if (!ipv4_piece.has_value()) {
+          return is_valid = false;
+        }
         address[piece_index] =
             uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
 
