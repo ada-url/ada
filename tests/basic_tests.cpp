@@ -391,6 +391,34 @@ TEST(basic_tests, can_parse) {
   SUCCEED();
 }
 
+// Regression test: can_parse must agree with parse<url_aggregator> for all
+// inputs, including special-scheme URLs without "//". The href round-trip
+// must also be accepted by can_parse.
+TEST(basic_tests, can_parse_consistency) {
+  const std::vector<std::string> inputs = {
+      "ws:.",   "wss:.",  "http:.",  "https:.",
+      "ws:/./", "ws://.", "ws://./", "ws:./",
+  };
+  for (const auto& input : inputs) {
+    bool cp = ada::can_parse(input);
+    auto agg = ada::parse<ada::url_aggregator>(input);
+    ASSERT_EQ(cp, agg.has_value())
+        << "can_parse/parse<url_aggregator> mismatch for: " << input;
+
+    auto url = ada::parse<ada::url>(input);
+    ASSERT_EQ(cp, url.has_value())
+        << "can_parse/parse<url> mismatch for: " << input;
+
+    // If the URL parsed successfully, its href must also be can_parse-able.
+    if (agg) {
+      std::string href{agg->get_href()};
+      ASSERT_TRUE(ada::can_parse(href))
+          << "can_parse rejected normalised href '" << href
+          << "' derived from input: " << input;
+    }
+  }
+}
+
 TYPED_TEST(basic_tests, node_issue_48254) {
   auto base_url = ada::parse<TypeParam>("localhost:80");
   ASSERT_TRUE(base_url);

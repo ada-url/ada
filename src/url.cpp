@@ -490,7 +490,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
   }
   ada_log("parse_host calling to_ascii");
   is_valid = ada::unicode::to_ascii(host, input, input.find('%'));
-  if (!is_valid) {
+  if (!is_valid || !host.has_value()) {
     ada_log("parse_host to_ascii returns false");
     return is_valid = false;
   }

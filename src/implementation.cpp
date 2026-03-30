@@ -144,8 +144,14 @@ std::optional<bool> try_can_parse_absolute_fast(
       if (c != '.' && (c < '0' || c > '9')) all_dec_dots = false;
     }
     if (all_dec_dots) {
-      return checkers::try_parse_ipv4_fast({host_ptr, host_len}) !=
-             checkers::ipv4_fast_fail;
+      // If the fast IPv4 parser accepts it, the host is a valid decimal IPv4.
+      if (checkers::try_parse_ipv4_fast({host_ptr, host_len}) !=
+          checkers::ipv4_fast_fail) {
+        return true;
+      }
+      // Fast IPv4 parsing failed (e.g. host is ".", "..", "1.2.3.500").
+      // Such hosts may still be valid domain names; defer to the full parser.
+      return std::nullopt;
     }
 
     // Last-significant-character heuristic for non-decimal IPv4 (hex/octal):
