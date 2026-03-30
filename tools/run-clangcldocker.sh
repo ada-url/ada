@@ -36,7 +36,7 @@ require_docker() {
     echo >&2 "Docker daemon is not running (try: docker info)."
     exit 1
   }
-  docker pull "$DOCKER_IMAGE"
+  docker pull -q "$DOCKER_IMAGE" >/dev/null
 }
 
 docker_run() {
@@ -103,18 +103,22 @@ else
   docker run --rm \
     -v "$MAINSOURCE":"$MAINSOURCE":Z \
     -w "$MAINSOURCE" \
+    -e DEBIAN_FRONTEND=noninteractive \
+    -e CPM_SOURCE_CACHE="$MAINSOURCE/.cpm-cache" \
     --entrypoint bash \
     "$DOCKER_IMAGE" -c "
-      apt-get update -qq &&
+      apt-get update -qq >/dev/null 2>&1 &&
       apt-get install -y -qq --no-install-recommends \
-        cmake ninja-build git clang-22 libc++-22-dev libc++abi-22-dev &&
+        ca-certificates cmake ninja-build git clang-22 \
+        libc++-22-dev libc++abi-22-dev >/dev/null 2>&1 &&
       rm -rf build-clang-tidy &&
       CC=clang-22 CXX=clang++-22 cmake -B build-clang-tidy -G Ninja \
         -DADA_TESTING=ON \
         -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
         -DCMAKE_CXX_CLANG_TIDY=clang-tidy-22 \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DCMAKE_CXX_FLAGS='-stdlib=libc++' &&
+        -DCMAKE_CXX_FLAGS='-stdlib=libc++' \
+        -DCPM_SOURCE_CACHE=\"$MAINSOURCE/.cpm-cache\" &&
       cmake --build build-clang-tidy -j\$(nproc)
     "
 fi
