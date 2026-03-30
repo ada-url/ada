@@ -107,7 +107,7 @@ else
     "$DOCKER_IMAGE" -c "
       apt-get update -qq &&
       apt-get install -y -qq --no-install-recommends \
-        cmake ninja-build clang-22 libc++-22-dev libc++abi-22-dev &&
+        cmake ninja-build git clang-22 libc++-22-dev libc++abi-22-dev &&
       rm -rf build-clang-tidy &&
       CC=clang-22 CXX=clang++-22 cmake -B build-clang-tidy -G Ninja \
         -DADA_TESTING=ON \
