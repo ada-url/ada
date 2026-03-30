@@ -454,6 +454,33 @@ TEST(basic_tests, can_parse_consistency_percent_encoded_host) {
   }
 }
 
+// Regression: the pl>5 port-length guard in try_can_parse_absolute_fast did
+// not account for leading zeros.  Ports like "0000000000000" (= 0) and
+// "000000000" (= 0) are valid per WHATWG but have more than 5 characters,
+// so the fast path returned false while the full parser returned true.
+// OSS-Fuzz crashes: msan-202603300607, ubsan-202603300607.
+// Also covers the complex "many colons" crash (address-202603300607).
+TEST(basic_tests, can_parse_consistency_port_leading_zeros) {
+  for (const auto& input : std::vector<std::string>{
+           // exact msan crash:
+           "ws://000000000S:0000000000000\\SS:",
+           // exact ubsan crash:
+           "ws://L:000000000\\\x14\x44"
+           "\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x97"
+           "\x8c\x8c\x8c\x8c\x8c\x8c\x8c\x8c"
+           "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+           "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+           "ddddddddddddddddddddddddddddddddddddddd:",
+           // simpler leading-zero coverage:
+           "ws://host:0000001/",
+           "ws://host:0000000000000/",
+           "ws://host:065535/",
+           "ws://host:065536/",
+       }) {
+    assert_can_parse_consistent(input);
+  }
+}
+
 // Regression test: can_parse must agree with parse<url_aggregator> for all
 // inputs, including special-scheme URLs without "//". The href round-trip
 // must also be accepted by can_parse.

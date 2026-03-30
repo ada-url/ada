@@ -182,9 +182,15 @@ std::optional<bool> try_can_parse_absolute_fast(
   // -- Port validation -------------------------------------------------------
   if (port_colon != SIZE_MAX) {
     const uint8_t* pp = b + port_colon + 1;
-    const size_t pl = auth_end - port_colon - 1;
+    size_t pl = auth_end - port_colon - 1;
     if (pl > 0) {
-      if (pl > 5) return false;  // > 99999 cannot be a valid port
+      // Strip leading zeros: "0000001" == 1, "0000000000000" == 0, both valid.
+      // Only the significant digits count toward the 5-digit maximum.
+      while (pl > 0 && *pp == '0') {
+        ++pp;
+        --pl;
+      }
+      if (pl > 5) return false;  // significant digits > 99999
       uint32_t pv = 0;
       for (size_t i = 0; i < pl; ++i) {
         if (pp[i] < '0' || pp[i] > '9') return false;
