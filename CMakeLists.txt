@@ -34,6 +34,7 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS OR ADA_USE_SIMDUTF)
       NAME GTest
       GITHUB_REPOSITORY google/googletest
       VERSION 1.15.2
+      SYSTEM True
       OPTIONS  "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
     )
     # Disable clang-tidy for vendored GTest targets so that only ada's own
