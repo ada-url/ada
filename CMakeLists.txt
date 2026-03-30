@@ -36,13 +36,6 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS OR ADA_USE_SIMDUTF)
       VERSION 1.15.2
       OPTIONS  "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
     )
-    # Disable clang-tidy for vendored GTest targets so that only ada's own
-    # source files are analysed, not third-party test infrastructure.
-    foreach(_tgt gtest gtest_main)
-      if(TARGET ${_tgt})
-        set_target_properties(${_tgt} PROPERTIES CXX_CLANG_TIDY "")
-      endif()
-    endforeach()
   endif()
   # We use simdjson in both the benchmarks and tests
   if(ADA_TESTING OR ADA_BENCHMARKS)
