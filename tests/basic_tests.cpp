@@ -454,6 +454,24 @@ TEST(basic_tests, can_parse_consistency_percent_encoded_host) {
   }
 }
 
+// Regression: try_can_parse_absolute_fast returned true for a valid IPv4 host
+// without validating the port. For "wS://1.3.3.51.:+" the host "1.3.3.51."
+// passes the IPv4 fast path, but the port "+" is not a valid digit, so the
+// full parser correctly returns failure.  Fix: fall through to port validation
+// even when the IPv4 host check succeeds.
+// OSS-Fuzz crash: ubsan-202603300607.
+TEST(basic_tests, can_parse_consistency_ipv4_invalid_port) {
+  for (const auto& input : std::vector<std::string>{
+           "wS://1.3.3.51.:+",             // exact OSS-Fuzz ubsan crash
+           "ws://1.2.3.4:+",               // simpler variant
+           "ws://1.2.3.4:abc",             // letters in port
+           "ws://0.0.0.0:!",               // punctuation in port
+           "ws://255.255.255.255:65536a",  // overflow + trailing char
+       }) {
+    assert_can_parse_consistent(input);
+  }
+}
+
 // Regression: the pl>5 port-length guard in try_can_parse_absolute_fast did
 // not account for leading zeros.  Ports like "0000000000000" (= 0) and
 // "000000000" (= 0) are valid per WHATWG but have more than 5 characters,
