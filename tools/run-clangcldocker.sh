@@ -106,6 +106,7 @@ else
     --entrypoint bash \
     "$DOCKER_IMAGE" -c "
       apt-get update -q && apt-get install -y --no-install-recommends cmake ninja-build &&
+      rm -rf build-clang-tidy &&
       CXX=clang++-22 cmake -B build-clang-tidy -G Ninja \
         -DADA_TESTING=ON \
         -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
