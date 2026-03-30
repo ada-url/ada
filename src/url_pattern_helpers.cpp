@@ -440,6 +440,7 @@ tl::expected<std::string, errors> canonicalize_port_with_protocol(
 
   // Parse the port number
   uint16_t parsed_port{};
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   auto result = std::from_chars(digits_to_parse.data(),
                                 digits_to_parse.data() + digits_to_parse.size(),
                                 parsed_port);

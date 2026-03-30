@@ -2,6 +2,19 @@
 
 This guide provides instructions for building, testing, and benchmarking the Ada URL parser library using CMake.
 
+## Pre-commit Checklist
+
+Always run the clang-format and clang-tidy script before committing:
+
+```bash
+bash tools/run-clangcldocker.sh
+```
+
+This runs clang-format on all tracked source files and clang-tidy on `src/ada.cpp`
+(the single translation unit that includes all first-party code). The script uses
+the locally installed LLVM 22 toolchain when available, otherwise falls back to the
+`xianpengshen/clang-tools:22` Docker image automatically.
+
 ## Quick Reference
 
 ```bash

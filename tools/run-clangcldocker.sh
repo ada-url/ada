@@ -18,10 +18,10 @@ DOCKER_IMAGE=xianpengshen/clang-tools:22
 ALL_ADA_FILES=$(cd "$MAINSOURCE" && \
   git ls-tree --full-tree --name-only -r HEAD | grep -E '.*\.(c|h|cc|cpp|hh)$')
 
-# First-party source files for clang-tidy (relative paths, no ada_idna).
-TIDY_CPP_FILES=$(cd "$MAINSOURCE" && \
-  git ls-tree --full-tree --name-only -r HEAD | \
-  grep -E '^src/.*\.cpp$' | grep -v 'ada_idna')
+# ada.cpp is the single translation unit that #includes every other .cpp file.
+# Running clang-tidy on it covers all first-party code; HeaderFilterRegex in
+# .clang-tidy controls which included files generate diagnostics.
+TIDY_SRC=src/ada.cpp
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -58,9 +58,9 @@ elif have_tool_version clang-format; then
 else
   echo "clang-format 22 not found locally — using docker"
   require_docker
-  local it_flag=""
+  it_flag=""
   [ -t 0 ] && it_flag="-it"
-  # shellcheck disable=SC2086,SC2090
+  # shellcheck disable=SC2086
   docker run --rm $it_flag \
     -v "$MAINSOURCE":"$MAINSOURCE":Z \
     -w "$MAINSOURCE" \
@@ -85,8 +85,7 @@ run_tidy() {
     -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_CXX_FLAGS="-stdlib=libc++"
-  # shellcheck disable=SC2086
-  "$tidy" -p build-clang-tidy $TIDY_CPP_FILES
+  "$tidy" -p build-clang-tidy "$TIDY_SRC"
 }
 
 if have_tool_version clang-tidy-22 && command -v clang++-22 >/dev/null 2>&1; then
@@ -112,6 +111,6 @@ else
         -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
         -DCMAKE_CXX_FLAGS='-stdlib=libc++'
-      clang-tidy-22 -p build-clang-tidy $TIDY_CPP_FILES
+      clang-tidy-22 -p build-clang-tidy "$TIDY_SRC"
     "
 fi

@@ -145,6 +145,7 @@ result_type parse_url_impl(std::string_view user_input,
           ada_log("SCHEME the scheme is ", url.get_protocol());
 
           // If url's scheme is "file", then:
+          // NOLINTNEXTLINE(bugprone-branch-clone)
           if (url.type == scheme::type::FILE) {
             // Set state to file state.
             state = state::FILE;
@@ -223,6 +224,7 @@ result_type parse_url_impl(std::string_view user_input,
         }
         // Otherwise, if base's scheme is not "file", set state to relative
         // state and decrease pointer by 1.
+        // NOLINTNEXTLINE(bugprone-branch-clone)
         else if (base_url->type != scheme::type::FILE) {
           ada_log("NO_SCHEME non-file relative path");
           state = state::RELATIVE_SCHEME;
@@ -483,6 +485,7 @@ result_type parse_url_impl(std::string_view user_input,
                 helpers::substring(url_data, input_position));
 
         // If url is special and c is U+002F (/) or U+005C (\), then:
+        // NOLINTNEXTLINE(bugprone-branch-clone)
         if (url.is_special() && (input_position != input_size) &&
             (url_data[input_position] == '/' ||
              url_data[input_position] == '\\')) {
@@ -792,9 +795,8 @@ result_type parse_url_impl(std::string_view user_input,
         std::string_view view = url_data.substr(input_position);
 
         size_t location = view.find_first_of("/\\?");
-        std::string_view file_host_buffer(
-            view.data(),
-            (location != std::string_view::npos) ? location : view.size());
+        std::string_view file_host_buffer = view.substr(
+            0, (location != std::string_view::npos) ? location : view.size());
 
         if (checkers::is_windows_drive_letter(file_host_buffer)) {
           state = state::PATH;
