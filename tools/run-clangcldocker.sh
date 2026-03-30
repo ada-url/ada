@@ -101,6 +101,10 @@ gen_compile_commands() {
     exit 1
   }
   cd "$MAINSOURCE"
+  # Remove any stale cmake cache so that flags from a previous run (e.g.
+  # -stdlib=libc++ set when clang was the host compiler) do not carry over
+  # when the current host compiler is GCC.
+  rm -f build-clang-tidy/CMakeCache.txt
   # Do NOT pass -stdlib=libc++ here: compile_commands.json is generated with
   # whatever C++ compiler is on the host (often GCC), which does not accept
   # that flag.  clang-tidy inside Docker uses its own built-in headers, so
