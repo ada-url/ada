@@ -391,6 +391,44 @@ TEST(basic_tests, can_parse) {
   SUCCEED();
 }
 
+// Regression: extra slashes after "://" are consumed by
+// SPECIAL_AUTHORITY_IGNORE_SLASHES in the full parser, but
+// try_can_parse_absolute_fast stops at the first '/' after "//", making the
+// host appear empty and returning false even when the full parse succeeds.
+TEST(basic_tests, can_parse_consistency_extra_slashes) {
+  // Each entry: {source, description}.
+  // All must satisfy can_parse == parse.has_value() AND href round-trip.
+  const std::vector<std::string> inputs = {
+      // Original OSS-Fuzz crashes (address sanitizer, msan, ubsan):
+      "ws://////////00s:",
+      std::string("ws:///\xe3\x88\x8c\xe3\x88\x88"),
+      "ws://////5///\\Ws:",
+      // Additional coverage:
+      "ws:///host",
+      "http:////example.com",
+      "wss:///host/path",
+  };
+  for (const auto& input : inputs) {
+    bool cp = ada::can_parse(input);
+    auto agg = ada::parse<ada::url_aggregator>(input);
+    ASSERT_EQ(cp, agg.has_value())
+        << "can_parse/parse<url_aggregator> mismatch for input";
+    auto url = ada::parse<ada::url>(input);
+    ASSERT_EQ(cp, url.has_value()) << "can_parse/parse<url> mismatch for input";
+    // Href round-trip: if the URL parsed, its serialised form must also parse
+    // and produce an identical href.
+    if (agg) {
+      std::string href{agg->get_href()};
+      ASSERT_TRUE(ada::can_parse(href))
+          << "can_parse rejected normalised href derived from input";
+      auto reparsed = ada::parse<ada::url_aggregator>(href);
+      ASSERT_TRUE(reparsed.has_value()) << "re-parse of href failed";
+      ASSERT_EQ(std::string(reparsed->get_href()), href)
+          << "href idempotency failure";
+    }
+  }
+}
+
 // Regression test: can_parse must agree with parse<url_aggregator> for all
 // inputs, including special-scheme URLs without "//". The href round-trip
 // must also be accepted by can_parse.

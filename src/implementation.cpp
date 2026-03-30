@@ -88,6 +88,13 @@ std::optional<bool> try_can_parse_absolute_fast(
   }
   pos += 2;
 
+  // SPECIAL_AUTHORITY_IGNORE_SLASHES: the full parser skips any additional
+  // leading '/' or '\' after the initial "//".  Mirror that here so we don't
+  // mis-identify the host as empty when there are extra slashes.
+  while (pos < len && (b[pos] == '/' || b[pos] == '\\')) {
+    ++pos;
+  }
+
   // -- Single-pass authority scan --------------------------------------------
   const size_t auth_start = pos;
   size_t auth_end = pos;
