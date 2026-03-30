@@ -101,11 +101,14 @@ gen_compile_commands() {
     exit 1
   }
   cd "$MAINSOURCE"
+  # Do NOT pass -stdlib=libc++ here: compile_commands.json is generated with
+  # whatever C++ compiler is on the host (often GCC), which does not accept
+  # that flag.  clang-tidy inside Docker uses its own built-in headers, so
+  # the stdlib flag is irrelevant for the compilation database.
   cmake -B build-clang-tidy \
     -DADA_TESTING=ON \
     -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
-    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-    -DCMAKE_CXX_FLAGS="-stdlib=libc++"
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 }
 
 if have_tool_version clang-tidy-22 && command -v clang++-22 >/dev/null 2>&1; then
