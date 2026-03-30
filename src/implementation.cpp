@@ -106,6 +106,8 @@ std::optional<bool> try_can_parse_absolute_fast(
     if (c == '/' || c == '?' || c == '#' || c == '\\') break;
     if (c == '@') return std::nullopt;   // credentials -> full parse
     if (c >= 0x80) return std::nullopt;  // non-ASCII -> IDNA -> full parse
+    if (c == '%')
+      return std::nullopt;  // percent-encoded -> needs to_ascii -> full parse
     if (c == ':') {
       if (port_colon == SIZE_MAX) port_colon = auth_end;
       continue;

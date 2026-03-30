@@ -391,41 +391,66 @@ TEST(basic_tests, can_parse) {
   SUCCEED();
 }
 
+// Helper: assert can_parse == parse.has_value() for both url and
+// url_aggregator, and that the href round-trips cleanly if parsing succeeds.
+static void assert_can_parse_consistent(const std::string& input) {
+  bool cp = ada::can_parse(input);
+
+  auto agg = ada::parse<ada::url_aggregator>(input);
+  ASSERT_EQ(cp, agg.has_value())
+      << "can_parse/parse<url_aggregator> mismatch for: " << input;
+
+  auto url = ada::parse<ada::url>(input);
+  ASSERT_EQ(cp, url.has_value())
+      << "can_parse/parse<url> mismatch for: " << input;
+
+  if (agg) {
+    std::string href{agg->get_href()};
+    ASSERT_TRUE(ada::can_parse(href)) << "can_parse rejected normalised href '"
+                                      << href << "' derived from: " << input;
+    auto reparsed = ada::parse<ada::url_aggregator>(href);
+    ASSERT_TRUE(reparsed.has_value())
+        << "re-parse of href '" << href << "' failed";
+    ASSERT_EQ(std::string(reparsed->get_href()), href)
+        << "href idempotency failure for: " << input;
+  }
+}
+
 // Regression: extra slashes after "://" are consumed by
 // SPECIAL_AUTHORITY_IGNORE_SLASHES in the full parser, but
-// try_can_parse_absolute_fast stops at the first '/' after "//", making the
-// host appear empty and returning false even when the full parse succeeds.
+// try_can_parse_absolute_fast stopped at the first extra '/' after "//",
+// making the host appear empty and returning false when the full parse
+// succeeds. OSS-Fuzz crashes: address-202603300607, msan-202603300607,
+//                   ubsan-202603300607.
 TEST(basic_tests, can_parse_consistency_extra_slashes) {
-  // Each entry: {source, description}.
-  // All must satisfy can_parse == parse.has_value() AND href round-trip.
-  const std::vector<std::string> inputs = {
-      // Original OSS-Fuzz crashes (address sanitizer, msan, ubsan):
-      "ws://////////00s:",
-      std::string("ws:///\xe3\x88\x8c\xe3\x88\x88"),
-      "ws://////5///\\Ws:",
-      // Additional coverage:
-      "ws:///host",
-      "http:////example.com",
-      "wss:///host/path",
-  };
-  for (const auto& input : inputs) {
-    bool cp = ada::can_parse(input);
-    auto agg = ada::parse<ada::url_aggregator>(input);
-    ASSERT_EQ(cp, agg.has_value())
-        << "can_parse/parse<url_aggregator> mismatch for input";
-    auto url = ada::parse<ada::url>(input);
-    ASSERT_EQ(cp, url.has_value()) << "can_parse/parse<url> mismatch for input";
-    // Href round-trip: if the URL parsed, its serialised form must also parse
-    // and produce an identical href.
-    if (agg) {
-      std::string href{agg->get_href()};
-      ASSERT_TRUE(ada::can_parse(href))
-          << "can_parse rejected normalised href derived from input";
-      auto reparsed = ada::parse<ada::url_aggregator>(href);
-      ASSERT_TRUE(reparsed.has_value()) << "re-parse of href failed";
-      ASSERT_EQ(std::string(reparsed->get_href()), href)
-          << "href idempotency failure";
-    }
+  for (const auto& input : std::vector<std::string>{
+           "ws://////////00s:",  // address-sanitizer crash
+           std::string("ws:///\xe3\x88\x8c\xe3\x88\x88"),  // msan crash
+           "ws://////5///\\Ws:",                           // ubsan crash
+           "ws:///host",
+           "http:////example.com",
+           "wss:///host/path",
+       }) {
+    assert_can_parse_consistent(input);
+  }
+}
+
+// Regression: '%' in the authority triggered the forbidden-domain-code-point
+// check in try_can_parse_absolute_fast and returned false, but the full parser
+// calls to_ascii which percent-decodes the host first (e.g. %2E -> '.') and may
+// accept it.  Fix: return nullopt for '%' so the full parser always decides.
+// OSS-Fuzz crashes: address-202603300607, ubsan-202603300607.
+TEST(basic_tests, can_parse_consistency_percent_encoded_host) {
+  for (const auto& input : std::vector<std::string>{
+           "Ws://%2E",               // exact OSS-Fuzz ubsan crash input
+           "ws://%2E",               // lowercase variant
+           "http://%2E/",            // http scheme
+           "http://1%2E2%2E3%2E4/",  // percent-encoded IPv4 dots
+           "ws://host%2Eexample/",   // percent-encoded dot in domain
+           "ws://%00/",              // %00 -> forbidden after decode
+           "ws://%2F/",              // %2F -> '/' -> forbidden after decode
+       }) {
+    assert_can_parse_consistent(input);
   }
 }
 
