@@ -627,6 +627,12 @@ result_type parse_url_impl(std::string_view user_input,
       }
       case state::OPAQUE_PATH: {
         ada_log("OPAQUE_PATH ", helpers::substring(url_data, input_position));
+        // Opaque path, query, and fragment are structurally always valid:
+        // the parser would just percent-encode whatever is there. When we
+        // are not storing values (can_parse), we can return immediately.
+        if constexpr (!store_values) {
+          return url;
+        }
         std::string_view view = url_data.substr(input_position);
         // If c is U+003F (?), then set url's query to the empty string and
         // state to query state.
@@ -665,6 +671,13 @@ result_type parse_url_impl(std::string_view user_input,
       }
       case state::PATH_START: {
         ada_log("PATH_START ", helpers::substring(url_data, input_position));
+        // Path, query, and fragment are structurally always valid: the
+        // parser would just percent-encode whatever is there. When we are
+        // not storing values (can_parse), we can return immediately since
+        // no subsequent state can invalidate the URL.
+        if constexpr (!store_values) {
+          return url;
+        }
 
         // If url is special, then:
         if (url.is_special()) {
@@ -712,6 +725,13 @@ result_type parse_url_impl(std::string_view user_input,
       }
       case state::PATH: {
         ada_log("PATH ", helpers::substring(url_data, input_position));
+        // Path, query, and fragment are structurally always valid: the
+        // parser would just percent-encode whatever is there. When we are
+        // not storing values (can_parse), we can return immediately since
+        // no subsequent state can invalidate the URL.
+        if constexpr (!store_values) {
+          return url;
+        }
         std::string_view view = url_data.substr(input_position);
 
         // Most time, we do not need percent encoding.
