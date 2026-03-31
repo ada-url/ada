@@ -30,6 +30,11 @@ struct ada_string_pair {
   ada_string value;
 };
 
+ada_really_inline constexpr bool is_invalid_c_input(const char* input,
+                                                    size_t length) noexcept {
+  return input == nullptr && length != 0;
+}
+
 ada_string ada_string_create(const char* data, size_t length) {
   ada_string out{};
   out.data = data;
@@ -68,12 +73,21 @@ struct ada_url_components {
 };
 
 ada_url ada_parse(const char* input, size_t length) noexcept {
+  if (is_invalid_c_input(input, length)) {
+    return new ada::result<ada::url_aggregator>(
+        tl::unexpected(ada::errors::type_error));
+  }
   return new ada::result<ada::url_aggregator>(
       ada::parse<ada::url_aggregator>(std::string_view(input, length)));
 }
 
 ada_url ada_parse_with_base(const char* input, size_t input_length,
                             const char* base, size_t base_length) noexcept {
+  if (is_invalid_c_input(input, input_length) ||
+      is_invalid_c_input(base, base_length)) {
+    return new ada::result<ada::url_aggregator>(
+        tl::unexpected(ada::errors::type_error));
+  }
   auto base_out =
       ada::parse<ada::url_aggregator>(std::string_view(base, base_length));
 
@@ -86,11 +100,18 @@ ada_url ada_parse_with_base(const char* input, size_t input_length,
 }
 
 bool ada_can_parse(const char* input, size_t length) noexcept {
+  if (is_invalid_c_input(input, length)) {
+    return false;
+  }
   return ada::can_parse(std::string_view(input, length));
 }
 
 bool ada_can_parse_with_base(const char* input, size_t input_length,
                              const char* base, size_t base_length) noexcept {
+  if (is_invalid_c_input(input, input_length) ||
+      is_invalid_c_input(base, base_length)) {
+    return false;
+  }
   std::string_view base_view(base, base_length);
   return ada::can_parse(std::string_view(input, input_length), &base_view);
 }
@@ -238,7 +259,7 @@ uint8_t ada_get_scheme_type(ada_url result) noexcept {
 
 bool ada_set_href(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  if (!r || is_invalid_c_input(input, length)) {
     return false;
   }
   return r->set_href(std::string_view(input, length));
@@ -246,7 +267,7 @@ bool ada_set_href(ada_url result, const char* input, size_t length) noexcept {
 
 bool ada_set_host(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  if (!r || is_invalid_c_input(input, length)) {
     return false;
   }
   return r->set_host(std::string_view(input, length));
@@ -255,7 +276,7 @@ bool ada_set_host(ada_url result, const char* input, size_t length) noexcept {
 bool ada_set_hostname(ada_url result, const char* input,
                       size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  if (!r || is_invalid_c_input(input, length)) {
     return false;
   }
   return r->set_hostname(std::string_view(input, length));
@@ -264,7 +285,7 @@ bool ada_set_hostname(ada_url result, const char* input,
 bool ada_set_protocol(ada_url result, const char* input,
                       size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  if (!r || is_invalid_c_input(input, length)) {
     return false;
   }
   return r->set_protocol(std::string_view(input, length));
@@ -273,7 +294,7 @@ bool ada_set_protocol(ada_url result, const char* input,
 bool ada_set_username(ada_url result, const char* input,
                       size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  if (!r || is_invalid_c_input(input, length)) {
     return false;
   }
   return r->set_username(std::string_view(input, length));
@@ -282,7 +303,7 @@ bool ada_set_username(ada_url result, const char* input,
 bool ada_set_password(ada_url result, const char* input,
                       size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  if (!r || is_invalid_c_input(input, length)) {
     return false;
   }
   return r->set_password(std::string_view(input, length));
@@ -290,7 +311,7 @@ bool ada_set_password(ada_url result, const char* input,
 
 bool ada_set_port(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  if (!r || is_invalid_c_input(input, length)) {
     return false;
   }
   return r->set_port(std::string_view(input, length));
@@ -299,7 +320,7 @@ bool ada_set_port(ada_url result, const char* input, size_t length) noexcept {
 bool ada_set_pathname(ada_url result, const char* input,
                       size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (!r) {
+  if (!r || is_invalid_c_input(input, length)) {
     return false;
   }
   return r->set_pathname(std::string_view(input, length));
@@ -314,7 +335,7 @@ bool ada_set_pathname(ada_url result, const char* input,
  */
 void ada_set_search(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (r) {
+  if (r && !is_invalid_c_input(input, length)) {
     r->set_search(std::string_view(input, length));
   }
 }
@@ -328,7 +349,7 @@ void ada_set_search(ada_url result, const char* input, size_t length) noexcept {
  */
 void ada_set_hash(ada_url result, const char* input, size_t length) noexcept {
   ada::result<ada::url_aggregator>& r = get_instance(result);
-  if (r) {
+  if (r && !is_invalid_c_input(input, length)) {
     r->set_hash(std::string_view(input, length));
   }
 }
@@ -449,6 +470,9 @@ const ada_url_components* ada_get_components(ada_url result) noexcept {
 }
 
 ada_owned_string ada_idna_to_unicode(const char* input, size_t length) {
+  if (is_invalid_c_input(input, length)) {
+    return ada_owned_string{nullptr, 0};
+  }
   std::string out = ada::idna::to_unicode(std::string_view(input, length));
   ada_owned_string owned{};
   owned.length = out.length();
@@ -458,6 +482,9 @@ ada_owned_string ada_idna_to_unicode(const char* input, size_t length) {
 }
 
 ada_owned_string ada_idna_to_ascii(const char* input, size_t length) {
+  if (is_invalid_c_input(input, length)) {
+    return ada_owned_string{nullptr, 0};
+  }
   std::string out = ada::idna::to_ascii(std::string_view(input, length));
   ada_owned_string owned{};
   owned.length = out.size();
@@ -468,6 +495,10 @@ ada_owned_string ada_idna_to_ascii(const char* input, size_t length) {
 
 ada_url_search_params ada_parse_search_params(const char* input,
                                               size_t length) {
+  if (is_invalid_c_input(input, length)) {
+    return new ada::result<ada::url_search_params>(
+        tl::unexpected(ada::errors::type_error));
+  }
   return new ada::result<ada::url_search_params>(
       ada::url_search_params(std::string_view(input, length)));
 }
@@ -510,7 +541,7 @@ void ada_search_params_reset(ada_url_search_params result, const char* input,
                              size_t length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (r) {
+  if (r && !is_invalid_c_input(input, length)) {
     r->reset(std::string_view(input, length));
   }
 }
@@ -520,7 +551,8 @@ void ada_search_params_append(ada_url_search_params result, const char* key,
                               size_t value_length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (r) {
+  if (r && !is_invalid_c_input(key, key_length) &&
+      !is_invalid_c_input(value, value_length)) {
     r->append(std::string_view(key, key_length),
               std::string_view(value, value_length));
   }
@@ -531,7 +563,8 @@ void ada_search_params_set(ada_url_search_params result, const char* key,
                            size_t value_length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (r) {
+  if (r && !is_invalid_c_input(key, key_length) &&
+      !is_invalid_c_input(value, value_length)) {
     r->set(std::string_view(key, key_length),
            std::string_view(value, value_length));
   }
@@ -541,7 +574,7 @@ void ada_search_params_remove(ada_url_search_params result, const char* key,
                               size_t key_length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (r) {
+  if (r && !is_invalid_c_input(key, key_length)) {
     r->remove(std::string_view(key, key_length));
   }
 }
@@ -551,7 +584,8 @@ void ada_search_params_remove_value(ada_url_search_params result,
                                     const char* value, size_t value_length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (r) {
+  if (r && !is_invalid_c_input(key, key_length) &&
+      !is_invalid_c_input(value, value_length)) {
     r->remove(std::string_view(key, key_length),
               std::string_view(value, value_length));
   }
@@ -561,7 +595,7 @@ bool ada_search_params_has(ada_url_search_params result, const char* key,
                            size_t key_length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
+  if (!r || is_invalid_c_input(key, key_length)) {
     return false;
   }
   return r->has(std::string_view(key, key_length));
@@ -572,7 +606,8 @@ bool ada_search_params_has_value(ada_url_search_params result, const char* key,
                                  size_t value_length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
+  if (!r || is_invalid_c_input(key, key_length) ||
+      is_invalid_c_input(value, value_length)) {
     return false;
   }
   return r->has(std::string_view(key, key_length),
@@ -583,7 +618,7 @@ ada_string ada_search_params_get(ada_url_search_params result, const char* key,
                                  size_t key_length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
+  if (!r || is_invalid_c_input(key, key_length)) {
     return ada_string_create(nullptr, 0);
   }
   auto found = r->get(std::string_view(key, key_length));
@@ -597,7 +632,7 @@ ada_strings ada_search_params_get_all(ada_url_search_params result,
                                       const char* key, size_t key_length) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
-  if (!r) {
+  if (!r || is_invalid_c_input(key, key_length)) {
     return new ada::result<std::vector<std::string>>(
         std::vector<std::string>());
   }

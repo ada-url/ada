@@ -143,6 +143,64 @@ TEST(ada_c, can_parse) {
                                       input.length()));
 }
 
+TEST(ada_c, null_pointer_with_nonzero_length_parse_guards) {
+  ada_url out = ada_parse(nullptr, 1);
+  ASSERT_NE(out, nullptr);
+  ASSERT_FALSE(ada_is_valid(out));
+  ada_free(out);
+
+  out = ada_parse_with_base("/x", 2, nullptr, 1);
+  ASSERT_NE(out, nullptr);
+  ASSERT_FALSE(ada_is_valid(out));
+  ada_free(out);
+
+  out = ada_parse_with_base(nullptr, 1, "https://example.com", 19);
+  ASSERT_NE(out, nullptr);
+  ASSERT_FALSE(ada_is_valid(out));
+  ada_free(out);
+
+  ASSERT_FALSE(ada_can_parse(nullptr, 1));
+  ASSERT_FALSE(ada_can_parse(nullptr, 0));
+  ASSERT_FALSE(ada_can_parse_with_base("/x",strlen("/x"), nullptr, 1));
+  ASSERT_FALSE(ada_can_parse_with_base(nullptr, 1, "https://example.com", 19));
+}
+
+TEST(ada_c, null_pointer_with_nonzero_length_does_not_mutate_url) {
+  std::string_view input = "https://example.com/path?x=1#frag";
+  ada_url out = ada_parse(input.data(), input.size());
+  ASSERT_TRUE(ada_is_valid(out));
+
+  const std::string before = convert_string(ada_get_href(out));
+  ASSERT_FALSE(ada_set_href(out, nullptr, 5));
+  ASSERT_FALSE(ada_set_host(out, nullptr, 5));
+  ASSERT_FALSE(ada_set_pathname(out, nullptr, 3));
+  ada_set_search(out, nullptr, 9);
+  ada_set_hash(out, nullptr, 4);
+
+  ASSERT_EQ(convert_string(ada_get_href(out)), before);
+  ada_free(out);
+}
+
+TEST(ada_c, null_pointer_with_nonzero_length_fail_closed_idna_and_parse) {
+  ada_owned_string u = ada_idna_to_unicode(nullptr, 2);
+  ASSERT_EQ(u.data, nullptr);
+  ASSERT_EQ(u.length, 0);
+
+  ada_owned_string a = ada_idna_to_ascii(nullptr, 2);
+  ASSERT_EQ(a.data, nullptr);
+  ASSERT_EQ(a.length, 0);
+
+  ada_url out = ada_parse(nullptr, 2);
+  ASSERT_NE(out, nullptr);
+  ASSERT_FALSE(ada_is_valid(out));
+  ada_free(out);
+
+  ada_url_search_params params = ada_parse_search_params(nullptr, 2);
+  ASSERT_EQ(ada_search_params_size(params), 0);
+  ASSERT_FALSE(ada_search_params_has(params, nullptr, 2));
+  ada_free_search_params(params);
+}
+
 TEST(ada_c, ada_url_components) {
   std::string input = "https://www.google.com";
   ada_url url = ada_parse(input.data(), input.length());
