@@ -34,6 +34,9 @@ std::optional<bool> try_can_parse_absolute_fast(
   size_t len = input.size();
 
   // -- Inline C0 whitespace trim (no allocation) --------------------------
+  // Note: \t (0x09), \n (0x0a), \r (0x0d) are all <= 0x20, so any
+  // leading/trailing tabs or newlines are correctly stripped here, matching
+  // the WHATWG spec's "remove leading/trailing C0 control and space" step.
   while (len > 0 && b[0] <= 0x20) {
     b++;
     len--;
@@ -43,51 +46,73 @@ std::optional<bool> try_can_parse_absolute_fast(
   }
   if (len == 0) return false;
 
-  // Tabs/newlines are rare and require tmp_buffer allocation; defer to full
-  // parser.
-  if (unicode::has_tabs_or_newline({reinterpret_cast<const char*>(b), len})) {
-    return std::nullopt;
-  }
-
   // -- Scheme detection -----------------------------------------------------
-  if (!checkers::is_alpha(static_cast<char>(b[0]))) return false;
+  // Fast path for HTTP and HTTPS (covers ~90%+ of real-world URLs).
+  // Avoids the general scheme loop, buffer copy, and perfect hash lookup.
+  // We know HTTP and HTTPS are special non-file schemes, so no further
+  // scheme_type checks are needed on the fast path -- only `pos` matters.
+  size_t pos;
 
-  // Scan for ':' within the first 7 bytes. All special schemes are <= 5 chars
-  // ("https"), so any URL whose first ':' is beyond byte 6 is either
-  // non-special or relative -- both require the full parser.
-  size_t colon_pos = 0;
-  for (size_t i = 1;; ++i) {
-    if (i >= 7 || i >= len) return std::nullopt;
-    const char c = static_cast<char>(b[i]);
-    if (c == ':') {
-      colon_pos = i;
-      break;
+  if (len >= 7 && (b[0] | 0x20) == 'h' && (b[1] | 0x20) == 't' &&
+      (b[2] | 0x20) == 't' && (b[3] | 0x20) == 'p') {
+    if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
+      pos = 7;
+      goto skip_extra_slashes;
     }
-    if (!unicode::is_alnum_plus(c)) return false;
+    if (len >= 8 && (b[4] | 0x20) == 's' && b[5] == ':' && b[6] == '/' &&
+        b[7] == '/') {
+      pos = 8;
+      goto skip_extra_slashes;
+    }
+    // Fall through: could be "httpe://", tabs in scheme, etc.
   }
 
-  // Lowercase scheme bytes inline and classify via the existing perfect hash.
-  char scheme_buf[6];
-  scheme_buf[0] = static_cast<char>(b[0] | 0x20);
-  for (size_t i = 1; i < colon_pos; ++i)
-    scheme_buf[i] = static_cast<char>(b[i] | 0x20);
+  {
+    // General scheme detection for ws, wss, ftp, and edge cases.
+    if (!checkers::is_alpha(static_cast<char>(b[0]))) return false;
 
-  const ada::scheme::type scheme_type =
-      ada::scheme::get_scheme_type({scheme_buf, colon_pos});
+    // Scan for ':' within the first 7 bytes. All special schemes are <= 5
+    // chars ("https"), so any URL whose first ':' is beyond byte 6 is either
+    // non-special or relative -- both require the full parser.
+    size_t colon_pos = 0;
+    for (size_t i = 1;; ++i) {
+      if (i >= 7 || i >= len) return std::nullopt;
+      const char c = static_cast<char>(b[i]);
+      if (c == ':') {
+        colon_pos = i;
+        break;
+      }
+      // Tabs/newlines in the scheme require the full parser to strip them.
+      if (c == '\t' || c == '\n' || c == '\r') return std::nullopt;
+      if (!unicode::is_alnum_plus(c)) return false;
+    }
 
-  // Only handle special, non-file schemes.
-  if (scheme_type == ada::scheme::NOT_SPECIAL) return std::nullopt;
-  if (scheme_type == ada::scheme::FILE) return std::nullopt;
+    // Lowercase scheme bytes inline and classify via the existing perfect
+    // hash.
+    char scheme_buf[6];
+    scheme_buf[0] = static_cast<char>(b[0] | 0x20);
+    for (size_t i = 1; i < colon_pos; ++i)
+      scheme_buf[i] = static_cast<char>(b[i] | 0x20);
 
-  // Per WHATWG, special URLs don't require "//": "http:example.com" is valid
-  // (SPECIAL_AUTHORITY_IGNORE_SLASHES just skips leading slashes and proceeds
-  // to AUTHORITY).  Defer to the inline fallback for any input without "://".
-  size_t pos = colon_pos + 1;
-  if (pos + 2 > len || b[pos] != '/' || b[pos + 1] != '/') {
-    return std::nullopt;
+    const ada::scheme::type scheme_type =
+        ada::scheme::get_scheme_type({scheme_buf, colon_pos});
+
+    // Only handle special, non-file schemes.
+    if (scheme_type == ada::scheme::NOT_SPECIAL) return std::nullopt;
+    if (scheme_type == ada::scheme::FILE) return std::nullopt;
+
+    // Per WHATWG, special URLs don't require "//": "http:example.com" is valid
+    // (SPECIAL_AUTHORITY_IGNORE_SLASHES just skips leading slashes and
+    // proceeds to AUTHORITY).  Defer to the inline fallback for any input
+    // without "://".
+    pos = colon_pos + 1;
+    if (pos + 2 > len || b[pos] != '/' || b[pos + 1] != '/') {
+      return std::nullopt;
+    }
+    pos += 2;
   }
-  pos += 2;
 
+skip_extra_slashes:
   // SPECIAL_AUTHORITY_IGNORE_SLASHES: the full parser skips any additional
   // leading '/' or '\' after the initial "//".  Mirror that here so we don't
   // mis-identify the host as empty when there are extra slashes.
@@ -95,87 +120,110 @@ std::optional<bool> try_can_parse_absolute_fast(
     ++pos;
   }
 
-  // -- Single-pass authority scan --------------------------------------------
+  // Early IPv6 bail-out: if the authority starts with '[', it's an IPv6
+  // literal which requires the full parser.  Checking here avoids scanning
+  // the entire bracketed address only to bail out afterward.
+  if (pos < len && b[pos] == '[') return std::nullopt;
+
+  // -- Merged authority + host scan ------------------------------------------
+  // A single forward pass over the authority bytes that simultaneously:
+  //   - finds the authority end and port colon
+  //   - validates host characters (forbidden domain code points)
+  //   - tracks IPv4 indicators (all-decimal-dots, last non-dot char)
+  //   - detects xn-- prefixes (IDNA punycode)
+  //   - detects tabs/newlines (which require the full parser to strip)
+  // This replaces 4 separate scans over the host bytes.
   const size_t auth_start = pos;
   size_t auth_end = pos;
   size_t port_colon = SIZE_MAX;
-  bool has_x = false;
+  bool all_dec_dots = true;
+  uint8_t last_non_dot = 0;
 
   for (; auth_end < len; ++auth_end) {
     const uint8_t c = b[auth_end];
+
+    // Non-ASCII -> needs IDNA processing -> full parser.
+    if (c >= 0x80) return std::nullopt;
+
+    // Authority delimiters.
     if (c == '/' || c == '?' || c == '#' || c == '\\') break;
-    if (c == '@') return std::nullopt;   // credentials -> full parse
-    if (c >= 0x80) return std::nullopt;  // non-ASCII -> IDNA -> full parse
-    if (c == '%')
-      return std::nullopt;  // percent-encoded -> needs to_ascii -> full parse
+
+    // Port separator.
     if (c == ':') {
       if (port_colon == SIZE_MAX) port_colon = auth_end;
       continue;
     }
-    if (c == 'x' || c == 'X') has_x = true;
-  }
 
-  // IPv6 literal
-  if (auth_start < auth_end && b[auth_start] == '[') return std::nullopt;
+    // Credentials or percent-encoding -> full parser.
+    if (c == '@' || c == '%') return std::nullopt;
+
+    // Tabs/newlines anywhere in the authority require the full parser to
+    // strip them before validation.  Without this, a tab in the port (e.g.
+    // "http://host:8\t0/") would be mis-rejected by port validation.
+    if (c == '\t' || c == '\n' || c == '\r') return std::nullopt;
+
+    // Skip remaining host-specific checks for port bytes.  Port digits are
+    // validated separately below, and no forbidden-domain-code-point check
+    // is needed on port characters.
+    if (port_colon != SIZE_MAX) continue;
+
+    // -- Host byte validation (inlined) ------------------------------------
+    // Forbidden domain code points that are not already caught above:
+    //   C0 controls and space (0x00-0x20), DEL (0x7F), <, >, [, ], ^, |.
+    // Characters already caught: >= 0x80 (non-ASCII), '/' '?' '#' '\\'
+    // (delimiters), ':' (port), '@' '%' (bail), '\t' '\n' '\r' (bail).
+    if (c <= 0x20 || c == 0x7F || c == '<' || c == '>' || c == '[' ||
+        c == ']' || c == '^' || c == '|') {
+      return false;
+    }
+
+    // Track whether host is all decimal digits and dots (potential IPv4).
+    if (c != '.' && (c < '0' || c > '9')) all_dec_dots = false;
+
+    // Track last non-dot character for the IPv4 hex/octal heuristic.
+    if (c != '.') last_non_dot = c;
+
+    // Detect xn-- prefix inline (IDNA punycode -> needs full parser).
+    // Checking at every position mirrors the original behavior: any
+    // occurrence of "xn--" in the host (not just at label boundaries)
+    // triggers a bail-out to the full IDNA validator.
+    if ((c | 0x20) == 'x' && auth_end + 4 <= len &&
+        (b[auth_end + 1] | 0x20) == 'n' && b[auth_end + 2] == '-' &&
+        b[auth_end + 3] == '-') {
+      return std::nullopt;
+    }
+  }
 
   const size_t host_end = (port_colon != SIZE_MAX) ? port_colon : auth_end;
 
   // Empty host is invalid for special URLs.
   if (auth_start == host_end) return false;
 
+  // -- IPv4 handling ---------------------------------------------------------
   const char* host_ptr = reinterpret_cast<const char*>(b + auth_start);
   const size_t host_len = host_end - auth_start;
 
-  // -- Host validation -------------------------------------------------------
-  // Bit 0x01: forbidden domain code point -> invalid.
-  // Bit 0x02: uppercase letter -> still valid (parser lowercases), not checked
-  // here.
-  const uint8_t domain_check =
-      unicode::contains_forbidden_domain_code_point_or_upper(host_ptr,
-                                                             host_len);
-  if (domain_check & 0x01) return false;
-
-  // xn-- labels require full IDNA validation.
-  if (has_x) {
-    for (size_t i = 0; i + 4 <= host_len; ++i) {
-      if ((host_ptr[i] | 0x20) == 'x' && (host_ptr[i + 1] | 0x20) == 'n' &&
-          host_ptr[i + 2] == '-' && host_ptr[i + 3] == '-') {
-        return std::nullopt;
-      }
+  if (all_dec_dots) {
+    // Host is all decimal digits and dots -> try the fast IPv4 parser.
+    if (checkers::try_parse_ipv4_fast({host_ptr, host_len}) !=
+        checkers::ipv4_fast_fail) {
+      // Valid decimal IPv4 host.  Do NOT return true yet: the port still
+      // needs to be validated below before we can declare the URL valid.
+      goto validate_port;
     }
+    // Fast IPv4 parsing failed (e.g. host is ".", "..", "1.2.3.500").
+    // Such hosts may still be valid domain names; defer to the full parser.
+    return std::nullopt;
   }
 
-  // IPv4 detection: all-decimal-and-dot host -> try the fast IPv4 parser.
+  // Last-significant-character heuristic for non-decimal IPv4 (hex/octal):
+  // if the last non-dot char is a digit, 'a'-'f', or 'x' the host might be
+  // an IPv4 address that the fast path can't validate -- fall through.
+  // last_non_dot was tracked during the authority scan above.
   {
-    bool all_dec_dots = true;
-    for (size_t i = 0; i < host_len && all_dec_dots; ++i) {
-      const uint8_t c = static_cast<uint8_t>(host_ptr[i]);
-      if (c != '.' && (c < '0' || c > '9')) all_dec_dots = false;
-    }
-    if (all_dec_dots) {
-      if (checkers::try_parse_ipv4_fast({host_ptr, host_len}) !=
-          checkers::ipv4_fast_fail) {
-        // Valid decimal IPv4 host.  Do NOT return true yet: the port still
-        // needs to be validated below before we can declare the URL valid.
-        goto validate_port;
-      }
-      // Fast IPv4 parsing failed (e.g. host is ".", "..", "1.2.3.500").
-      // Such hosts may still be valid domain names; defer to the full parser.
-      return std::nullopt;
-    }
-
-    // Last-significant-character heuristic for non-decimal IPv4 (hex/octal):
-    // if the last non-dot char is a digit, 'a'-'f', or 'x' the host might be
-    // an IPv4 address that the fast path can't validate -- fall through.
-    uint8_t last = 0;
-    for (size_t i = host_len; i > 0; --i) {
-      if (host_ptr[i - 1] != '.') {
-        last = static_cast<uint8_t>(host_ptr[i - 1]);
-        break;
-      }
-    }
-    const uint8_t lc = last | 0x20;
-    if ((last >= '0' && last <= '9') || (lc >= 'a' && lc <= 'f') || lc == 'x') {
+    const uint8_t lc = last_non_dot | 0x20;
+    if ((last_non_dot >= '0' && last_non_dot <= '9') ||
+        (lc >= 'a' && lc <= 'f') || lc == 'x') {
       return std::nullopt;
     }
   }
