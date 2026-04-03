@@ -527,6 +527,22 @@ TEST(basic_tests, can_parse_consistency) {
   }
 }
 
+// Regression: can_parse("", &"W:") returned true while
+// parse<url_aggregator>("", base) returned false. The OPAQUE_PATH
+// early-return optimization did not set has_opaque_path = true before
+// returning, so when "" was resolved against base "W:" in NO_SCHEME,
+// the opaque-path check incorrectly passed.
+// OSS-Fuzz crashes: memory-202603310657
+TEST(basic_tests, can_parse_consistency_opaque_path) {
+  std::string_view base = "W:";
+  bool cp = ada::can_parse("", &base);
+  auto base_url = ada::parse<ada::url_aggregator>("W:");
+  ASSERT_TRUE(base_url.has_value());
+  auto agg = ada::parse<ada::url_aggregator>("", &*base_url);
+  ASSERT_EQ(cp, agg.has_value())
+      << "can_parse/parse<url_aggregator> mismatch for input='' base='W:'";
+}
+
 TYPED_TEST(basic_tests, node_issue_48254) {
   auto base_url = ada::parse<TypeParam>("localhost:80");
   ASSERT_TRUE(base_url);
