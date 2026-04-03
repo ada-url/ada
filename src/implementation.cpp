@@ -170,11 +170,13 @@ skip_extra_slashes:
     // -- Host byte validation (inlined) ------------------------------------
     // Forbidden domain code points that are not already caught above:
     //   C0 controls and space (0x00-0x20), DEL (0x7F), <, >, [, ], ^, |.
-    // Characters already caught: >= 0x80 (non-ASCII), '/' '?' '#' '\\'
+    // At this stage, the input may still be userinfo or be normalized later
+    // (e.g., percent-encoded), so we do not reject here and defer to the
+    // parser. Characters already caught: >= 0x80 (non-ASCII), '/' '?' '#' '\\'
     // (delimiters), ':' (port), '@' '%' (bail), '\t' '\n' '\r' (bail).
     if (c <= 0x20 || c == 0x7F || c == '<' || c == '>' || c == '[' ||
         c == ']' || c == '^' || c == '|') {
-      return false;
+      return std::nullopt;
     }
 
     // Track whether host is all decimal digits and dots (potential IPv4).

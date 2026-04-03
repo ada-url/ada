@@ -543,6 +543,17 @@ TEST(basic_tests, can_parse_consistency_opaque_path) {
       << "can_parse/parse<url_aggregator> mismatch for input='' base='W:'";
 }
 
+// Regression: can_parse disagreed with parse<url_aggregator> for ws:// URLs
+// containing spaces, non-ASCII bytes, and special characters in the authority.
+// OSS-Fuzz crash: memory-202604020601.
+TEST(basic_tests, can_parse_consistency_special_chars_in_authority) {
+  for (const auto& input : std::vector<std::string>{
+           "ws:// @@@@@@@@@@@@@@@@@@@@@@@@:@@@@\xf5@@@@@@@@@@@@5",
+       }) {
+    assert_can_parse_consistent(input);
+  }
+}
+
 TYPED_TEST(basic_tests, node_issue_48254) {
   auto base_url = ada::parse<TypeParam>("localhost:80");
   ASSERT_TRUE(base_url);
