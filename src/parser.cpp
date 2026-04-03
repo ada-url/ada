@@ -630,9 +630,10 @@ result_type parse_url_impl(std::string_view user_input,
         // Opaque path, query, and fragment are structurally always valid:
         // the parser would just percent-encode whatever is there. When we
         // are not storing values (can_parse), we can return immediately.
-        // We must set has_opaque_path = true before returning so that if this
-        // URL is later used as a base, NO_SCHEME correctly rejects relative
-        // inputs (e.g. can_parse("", &"W:") must return false).
+        // We must set has_opaque_path = true before returning so that when
+        // this URL is used as an internal base inside can_parse, NO_SCHEME
+        // correctly rejects relative inputs against an opaque-path base
+        // (e.g. can_parse("", &"W:") must return false).
         if constexpr (!store_values) {
           url.has_opaque_path = true;
           return url;
