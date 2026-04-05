@@ -67,10 +67,9 @@ result_type parse_url_impl(std::string_view user_input,
     // This rounds up to the next power of two.
     // We know that user_input.size() is in [0,
     // std::numeric_limits<uint32_t>::max).
-    reserve_capacity =
-        (0xFFFFFFFF >>
-         helpers::leading_zeroes(uint32_t(1 | user_input.size()))) +
-        1;
+    reserve_capacity = (0xFFFFFFFF >> helpers::leading_zeroes(
+                                          uint32_t(1 | user_input.size()))) +
+                       1;
     // Note: url.reserve(reserve_capacity) is called in the SCHEME state
     // below, after the scheme bytes have been written to the buffer.
   }
@@ -102,33 +101,6 @@ result_type parse_url_impl(std::string_view user_input,
   // It is illegal to access url_data at input_size.
   size_t input_position = 0;
   const size_t input_size = url_data.size();
-  // Helper used at every failure return point inside the state machine.
-  // It releases any heap memory that was allocated during partial parsing
-  // (the reserved buffer for url_aggregator, individual strings for url)
-  // so that the returned invalid URL object carries no unnecessary heap
-  // allocations.  The is_valid flag must already be false when this is
-  // called (it is set by parse_host / parse_port / the state machine
-  // itself before each early return).
-  auto return_invalid = [&url]() noexcept -> result_type {
-    if constexpr (result_type_is_ada_url_aggregator) {
-      // Swap with a default-constructed string to release the reserved
-      // capacity (potentially a large power-of-two allocation).
-      std::string{}.swap(url.buffer);
-      url.components = url_components{};
-    } else if constexpr (result_type_is_ada_url) {
-      // Release each individually allocated string component.
-      std::string{}.swap(url.non_special_scheme);
-      std::string{}.swap(url.username);
-      std::string{}.swap(url.password);
-      std::string{}.swap(url.path);
-      url.host.reset();
-      url.query.reset();
-      url.hash.reset();
-      url.port.reset();
-    }
-    return url;
-  };
-
   // Keep running the following state machine by switching on state.
   // If after a run pointer points to the EOF code point, go to the next step.
   // Otherwise, increase pointer by 1 and continue with the state machine.
@@ -167,13 +139,13 @@ result_type parse_url_impl(std::string_view user_input,
                   url_data.substr(0, input_position));
           if constexpr (result_type_is_ada_url) {
             if (!url.parse_scheme(url_data.substr(0, input_position))) {
-              return return_invalid();
+              return url;
             }
           } else {
             // we pass the colon along instead of painfully adding it back.
             if (!url.parse_scheme_with_colon(
                     url_data.substr(0, input_position + 1))) {
-              return return_invalid();
+              return url;
             }
             // Scheme written successfully.  Reserve buffer capacity for the
             // rest of the URL now that we know parsing is likely to succeed.
@@ -237,7 +209,7 @@ result_type parse_url_impl(std::string_view user_input,
             (base_url->has_opaque_path && !fragment.has_value())) {
           ada_log("NO_SCHEME validation error");
           url.is_valid = false;
-          return return_invalid();
+          return url;
         }
         // Otherwise, if base has an opaque path and c is U+0023 (#),
         // set url's scheme to base's scheme, url's path to base's path, url's
@@ -386,7 +358,7 @@ result_type parse_url_impl(std::string_view user_input,
             // validation error, return failure.
             if (at_sign_seen && authority_view.empty()) {
               url.is_valid = false;
-              return return_invalid();
+              return url;
             }
             state = state::HOST;
             break;
@@ -630,7 +602,7 @@ result_type parse_url_impl(std::string_view user_input,
           // special.
           ada_log("HOST parsing ", host_view);
           if (!url.parse_host(host_view)) {
-            return return_invalid();
+            return url;
           }
           ada_log("HOST parsing results in ", url.get_hostname());
           // Set url's host to host, buffer to the empty string, and state to
@@ -648,7 +620,7 @@ result_type parse_url_impl(std::string_view user_input,
           // error, return failure.
           if (host_view.empty() && url.is_special()) {
             url.is_valid = false;
-            return return_invalid();
+            return url;
           }
           ada_log("HOST parsing ", host_view, " href=", url.get_href());
           // Let host be the result of host parsing host_view with url is not
@@ -656,7 +628,7 @@ result_type parse_url_impl(std::string_view user_input,
           if (host_view.empty()) {
             url.update_base_hostname("");
           } else if (!url.parse_host(host_view)) {
-            return return_invalid();
+            return url;
           }
           ada_log("HOST parsing results in ", url.get_hostname(),
                   " href=", url.get_href());
@@ -711,7 +683,7 @@ result_type parse_url_impl(std::string_view user_input,
         std::string_view port_view = url_data.substr(input_position);
         input_position += url.parse_port(port_view, true);
         if (!url.is_valid) {
-          return return_invalid();
+          return url;
         }
         state = state::PATH_START;
         [[fallthrough]];
@@ -882,7 +854,7 @@ result_type parse_url_impl(std::string_view user_input,
           // Let host be the result of host parsing buffer with url is not
           // special.
           if (!url.parse_host(file_host_buffer)) {
-            return return_invalid();
+            return url;
           }
 
           if constexpr (result_type_is_ada_url) {
