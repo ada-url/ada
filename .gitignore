@@ -1,6 +1,7 @@
 # common build directory
 build
 build-*/
+build_*/
 *-build-*
 _fuzz_check/
 
