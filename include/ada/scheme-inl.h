@@ -45,7 +45,7 @@ constexpr uint64_t scheme_keys[] = {
 // @private
 // branchless load of up to 5 characters into a uint64_t, padding with zeros if
 // n < 5
-inline uint64_t branchless_load5(const char *p, size_t n) {
+inline uint64_t branchless_load5(const char* p, size_t n) {
   uint64_t input = (uint8_t)p[0];
   input |= ((uint64_t)(uint8_t)p[n > 1] << 8) & (0 - (uint64_t)(n > 1));
   input |= ((uint64_t)(uint8_t)p[(n > 2) * 2] << 16) & (0 - (uint64_t)(n > 2));

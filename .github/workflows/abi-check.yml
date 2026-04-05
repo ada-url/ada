@@ -37,8 +37,21 @@ jobs:
       - name: Find latest release tag
         id: baseline
         run: |
-          # Find the most recent vX.Y.Z tag reachable from the current commit's history
-          LATEST_TAG=$(git tag --list 'v*.*.*' --sort=-version:refname | head -1)
+          # Find the most recent vX.Y.Z tag that does NOT point to the current HEAD.
+          # Excluding HEAD ensures we compare against a previous release even when a
+          # new release tag was just pushed to main alongside this workflow run.
+          CURRENT_SHA=$(git rev-parse HEAD)
+          LATEST_TAG=$(git tag --merged HEAD --list 'v*.*.*' --sort=-version:refname | while IFS= read -r tag; do
+            TAG_SHA=$(git rev-parse "${tag}^{}" 2>/dev/null)
+            if [ "$TAG_SHA" != "$CURRENT_SHA" ]; then
+              echo "$tag"
+              break
+            fi
+          done)
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No previous release tag found — cannot establish a baseline."
+            exit 1
+          fi
           echo "Latest release tag: $LATEST_TAG"
           echo "tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
 

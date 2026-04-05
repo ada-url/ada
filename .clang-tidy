@@ -5,6 +5,7 @@ Checks: >
   -bugprone-narrowing-conversions,
   -bugprone-suspicious-include,
   -bugprone-unhandled-exception-at-new,
+  -bugprone-throwing-static-initialization,
   clang-analyzer-*,
   -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
 
@@ -12,5 +13,5 @@ Checks: >
 WarningsAsErrors: '*'
 # Check first-party (non-system, non-vendored) headers.
 HeaderFilterRegex: '.*'
-ExcludeHeaderFilterRegex: 'build/_deps/'
+ExcludeHeaderFilterRegex: '(build[^/]*/_deps/|\.cpm-cache/|/expected\.h$)'
 SystemHeaders: false

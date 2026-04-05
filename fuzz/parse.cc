@@ -8,8 +8,8 @@
 #include "ada.cpp"
 #include "ada.h"
 
-bool is_valid_utf8_string(const char *buf, size_t len) {
-  const uint8_t *data = reinterpret_cast<const uint8_t *>(buf);
+bool is_valid_utf8_string(const char* buf, size_t len) {
+  const uint8_t* data = reinterpret_cast<const uint8_t*>(buf);
   uint64_t pos = 0;
   uint32_t code_point = 0;
   while (pos < len) {
@@ -93,7 +93,7 @@ bool is_valid_utf8_string(const char *buf, size_t len) {
 }
 
 // Exercise all getters and boolean predicates on ada::url
-static void exercise_url_predicates(const ada::url &u) {
+static void exercise_url_predicates(const ada::url& u) {
   volatile size_t length = 0;
   length += u.get_href().size();
   length += u.get_origin().size();
@@ -119,7 +119,7 @@ static void exercise_url_predicates(const ada::url &u) {
 }
 
 // Exercise all getters and boolean predicates on ada::url_aggregator
-static void exercise_aggregator_predicates(const ada::url_aggregator &u) {
+static void exercise_aggregator_predicates(const ada::url_aggregator& u) {
   volatile size_t length = 0;
   length += u.get_href().size();
   length += u.get_origin().size();
@@ -150,7 +150,7 @@ static void exercise_aggregator_predicates(const ada::url_aggregator &u) {
   (void)u.to_diagram();
 }
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   FuzzedDataProvider fdp(data, size);
   std::string source = fdp.ConsumeRandomLengthString(256);
   std::string base = fdp.ConsumeRandomLengthString(256);

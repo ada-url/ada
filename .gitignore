@@ -4,6 +4,9 @@ build-*/
 *-build-*
 _fuzz_check/
 
+# CPM package cache (used by tools/run-clangcldocker.sh docker fallback)
+.cpm-cache/
+
 # Python cache
 __pycache__
 venv

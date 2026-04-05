@@ -490,14 +490,14 @@ ada_really_inline bool url::parse_host(std::string_view input) {
   }
   ada_log("parse_host calling to_ascii");
   is_valid = ada::unicode::to_ascii(host, input, input.find('%'));
-  if (!is_valid) {
+  if (!is_valid || !host.has_value()) {
     ada_log("parse_host to_ascii returns false");
     return is_valid = false;
   }
   ada_log("parse_host to_ascii succeeded ", *host, " [", host->size(),
           " bytes]");
 
-  if (std::any_of(host.value().begin(), host.value().end(),
+  if (std::any_of(host->begin(), host->end(),
                   ada::unicode::is_forbidden_domain_code_point)) {
     host = std::nullopt;
     return is_valid = false;
@@ -505,9 +505,9 @@ ada_really_inline bool url::parse_host(std::string_view input) {
 
   // If asciiDomain ends in a number, then return the result of IPv4 parsing
   // asciiDomain.
-  if (checkers::is_ipv4(host.value())) {
+  if (checkers::is_ipv4(*host)) {
     ada_log("parse_host got ipv4 ", *host);
-    return parse_ipv4(host.value());
+    return parse_ipv4(*host);
   }
 
   return true;
@@ -603,7 +603,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
   if (!host.has_value()) {
     return false;
   }
-  return checkers::verify_dns_length(host.value());
+  return checkers::verify_dns_length(*host);
 }
 
 [[nodiscard]] std::string url::get_origin() const {

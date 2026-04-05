@@ -34,7 +34,7 @@ ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept {
   size_t last_dot = view.rfind('.');
   if (last_dot != std::string_view::npos) {
     // We have at least one dot.
-    view = view.substr(last_dot + 1);
+    view.remove_prefix(last_dot + 1);
   }
   /** Optimization opportunity: we have basically identified the last number of
      the ipv4 if we return true here. We might as well parse it and have at
@@ -130,4 +130,5 @@ ada_really_inline constexpr bool verify_dns_length(
 
   return true;
 }
+
 }  // namespace ada::checkers

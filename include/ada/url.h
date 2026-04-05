@@ -61,38 +61,25 @@ struct url_aggregator;
  */
 struct url : url_base {
   url() = default;
-  url(const url &u) = default;
-  url(url &&u) noexcept = default;
-  url &operator=(url &&u) noexcept = default;
-  url &operator=(const url &u) = default;
+  url(const url& u) = default;
+  url(url&& u) noexcept = default;
+  url& operator=(url&& u) noexcept = default;
+  url& operator=(const url& u) = default;
   ~url() override = default;
 
-  /**
-   * @private
-   * A URL's username is an ASCII string identifying a username. It is initially
-   * the empty string.
-   */
-  std::string username{};
-
-  /**
-   * @private
-   * A URL's password is an ASCII string identifying a password. It is initially
-   * the empty string.
-   */
-  std::string password{};
+  // Fields are ordered so that the most frequently accessed components
+  // tend to occupy earlier cache lines and remain close together in memory.
+  //
+  // Note: The exact object layout (including cache-line boundaries, byte
+  // offsets, and member sizes) is implementation- and platform-dependent.
+  // This ordering expresses an intent for better cache locality but does not
+  // guarantee any specific in-memory layout.
 
   /**
    * @private
    * A URL's host is null or a host. It is initially null.
    */
   std::optional<std::string> host{};
-
-  /**
-   * @private
-   * A URL's port is either null or a 16-bit unsigned integer that identifies a
-   * networking port. It is initially null.
-   */
-  std::optional<uint16_t> port{};
 
   /**
    * @private
@@ -114,6 +101,27 @@ struct url : url_base {
    * is initially null.
    */
   std::optional<std::string> hash{};
+
+  /**
+   * @private
+   * A URL's port is either null or a 16-bit unsigned integer that identifies a
+   * networking port. It is initially null.
+   */
+  std::optional<uint16_t> port{};
+
+  /**
+   * @private
+   * A URL's username is an ASCII string identifying a username. It is initially
+   * the empty string.
+   */
+  std::string username{};
+
+  /**
+   * @private
+   * A URL's password is an ASCII string identifying a password. It is initially
+   * the empty string.
+   */
+  std::string password{};
 
   /**
    * Checks if the URL has an empty hostname (host is set but empty string).
@@ -212,7 +220,7 @@ struct url : url_base {
    * @return A constant reference to the username string.
    * @see https://url.spec.whatwg.org/#dom-url-username
    */
-  [[nodiscard]] const std::string &get_username() const noexcept;
+  [[nodiscard]] const std::string& get_username() const noexcept;
 
   /**
    * Sets the URL's username, percent-encoding special characters.
@@ -297,7 +305,7 @@ struct url : url_base {
    * @return A constant reference to the password string.
    * @see https://url.spec.whatwg.org/#dom-url-password
    */
-  [[nodiscard]] const std::string &get_password() const noexcept;
+  [[nodiscard]] const std::string& get_password() const noexcept;
 
   /**
    * Returns the URL's port as a string (e.g., "8080").
@@ -340,8 +348,7 @@ struct url : url_base {
    * @return A newly constructed url_components struct.
    * @see https://github.com/servo/rust-url
    */
-  [[nodiscard]] ada_really_inline ada::url_components get_components()
-      const noexcept;
+  [[nodiscard]] ada_really_inline ada::url_components get_components() const;
 
   /**
    * Checks if the URL has a fragment/hash component.
@@ -357,22 +364,24 @@ struct url : url_base {
 
  private:
   friend ada::url ada::parser::parse_url<ada::url>(std::string_view,
-                                                   const ada::url *);
+                                                   const ada::url*);
   friend ada::url_aggregator ada::parser::parse_url<ada::url_aggregator>(
-      std::string_view, const ada::url_aggregator *);
+      std::string_view, const ada::url_aggregator*);
   friend void ada::helpers::strip_trailing_spaces_from_opaque_path<ada::url>(
-      ada::url &url);
+      ada::url& url);
 
   friend ada::url ada::parser::parse_url_impl<ada::url, true>(std::string_view,
-                                                              const ada::url *);
+                                                              const ada::url*);
   friend ada::url_aggregator ada::parser::parse_url_impl<
-      ada::url_aggregator, true>(std::string_view, const ada::url_aggregator *);
+      ada::url_aggregator, true>(std::string_view, const ada::url_aggregator*);
+  friend ada::url_aggregator ada::parser::parse_url_impl<
+      ada::url_aggregator, false>(std::string_view, const ada::url_aggregator*);
 
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);
   inline void update_base_search(std::string_view input,
                                  const uint8_t query_percent_encode_set[]);
-  inline void update_base_search(std::optional<std::string> &&input);
+  inline void update_base_search(std::optional<std::string>&& input);
   inline void update_base_pathname(std::string_view input);
   inline void update_base_username(std::string_view input);
   inline void update_base_password(std::string_view input);
@@ -462,23 +471,23 @@ struct url : url_base {
    * scheme string, be lower-cased, not contain spaces or tabs. It should
    * have no spurious trailing or leading content.
    */
-  inline void set_scheme(std::string &&new_scheme) noexcept;
+  inline void set_scheme(std::string&& new_scheme) noexcept;
 
   /**
    * Take the scheme from another URL. The scheme string is moved from the
    * provided url.
    */
-  constexpr void copy_scheme(ada::url &&u);
+  constexpr void copy_scheme(ada::url&& u);
 
   /**
    * Take the scheme from another URL. The scheme string is copied from the
    * provided url.
    */
-  constexpr void copy_scheme(const ada::url &u);
+  constexpr void copy_scheme(const ada::url& u);
 
 };  // struct url
 
-inline std::ostream &operator<<(std::ostream &out, const ada::url &u);
+inline std::ostream& operator<<(std::ostream& out, const ada::url& u);
 }  // namespace ada
 
 #endif  // ADA_URL_H

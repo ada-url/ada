@@ -29,7 +29,7 @@ jobs:
       - name: Run clang-format
         uses: jidicula/clang-format-action@654a770daa28443dd111d133e4083e21c1075674 # v4.18.0
         with:
-          clang-format-version: '17'
+          clang-format-version: '22'
           fallback-style: 'Google'
 
       - uses: chartboost/ruff-action@e18ae971ccee1b2d7bbef113930f00c670b78da4 # v1.0.0
@@ -38,11 +38,15 @@ jobs:
           version: 0.6.0
 
       - name: Install clang-tidy and libc++
-        run: sudo apt-get update && sudo apt-get install -y clang-tidy-20 libc++-20-dev libc++abi-20-dev
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy-22 libc++-22-dev libc++abi-22-dev
 
       - name: Run clang-tidy
         run: >
-          cmake -B build -DADA_TESTING=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-20 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" &&
+          cmake -B build -DADA_TESTING=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-22 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" &&
           cmake --build build -j=4
         env:
-          CXX: clang++-20
+          CXX: clang++-22

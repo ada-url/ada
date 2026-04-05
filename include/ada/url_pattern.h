@@ -109,7 +109,7 @@ struct url_pattern_compile_component_options {
   url_pattern_compile_component_options() = default;
   explicit url_pattern_compile_component_options(
       std::optional<char> new_delimiter = std::nullopt,
-      std::optional<char> new_prefix = std::nullopt)
+      std::optional<char> new_prefix = std::nullopt) noexcept
       : delimiter(new_delimiter), prefix(new_prefix) {}
 
   inline std::string_view get_delimiter() const ada_warn_unused;
