@@ -22,8 +22,6 @@ ADA_POP_DISABLE_WARNINGS
 #include <riscv_vector.h>
 #endif
 
-#include <ranges>
-
 namespace ada::unicode {
 
 constexpr bool is_tabs_or_newline(char c) noexcept {
@@ -449,6 +447,123 @@ unsigned constexpr convert_hex_to_binary(const char c) noexcept {
   return hex_to_binary_table[c - '0'];
 }
 
+#if ADA_SSSE3
+size_t percent_encode_index(const std::string_view input,
+                            const uint8_t character_set[]) {
+  const char* data = input.data();
+  const size_t size = input.size();
+  if (size < 16) {
+    for (size_t i = 0; i < size; i++) {
+      if (character_sets::bit_at(character_set, data[i])) return i;
+    }
+    return size;
+  }
+  // Nibble decomposition: for byte v = (hi << 4) | lo  (v < 128),
+  //   lo_lut[lo] = bitmask of which hi nibbles (0-7) need encoding
+  //   hi_lut[hi] = (1 << hi) for hi < 8, else 0
+  // Bytes >= 128 always need encoding -- caught by sign bit check.
+  uint8_t lo_lut_data[16] = {0};
+  uint8_t hi_lut_data[16] = {0};
+  for (int h = 0; h < 8; h++) {
+    hi_lut_data[h] = uint8_t(1) << h;
+    for (int l = 0; l < 16; l++) {
+      if (character_sets::bit_at(character_set, (h << 4) | l)) {
+        lo_lut_data[l] |= uint8_t(1) << h;
+      }
+    }
+  }
+  __m128i lo_lut = _mm_loadu_si128((const __m128i*)lo_lut_data);
+  __m128i hi_lut = _mm_loadu_si128((const __m128i*)hi_lut_data);
+  __m128i mask_0f = _mm_set1_epi8(0x0F);
+
+  size_t i = 0;
+  for (; i + 15 < size; i += 16) {
+    __m128i word = _mm_loadu_si128((const __m128i*)(data + i));
+    int high_mask = _mm_movemask_epi8(word);
+    __m128i lo_nibbles = _mm_and_si128(word, mask_0f);
+    __m128i hi_nibbles = _mm_and_si128(_mm_srli_epi16(word, 4), mask_0f);
+    __m128i matches = _mm_and_si128(_mm_shuffle_epi8(lo_lut, lo_nibbles),
+                                    _mm_shuffle_epi8(hi_lut, hi_nibbles));
+    int match_mask = _mm_movemask_epi8(matches) | high_mask;
+    if (match_mask != 0) {
+      return i + __builtin_ctz(match_mask);
+    }
+  }
+  for (; i < size; i++) {
+    if (character_sets::bit_at(character_set, data[i])) return i;
+  }
+  return size;
+}
+#elif ADA_NEON
+size_t percent_encode_index(const std::string_view input,
+                            const uint8_t character_set[]) {
+  const char* data = input.data();
+  const size_t size = input.size();
+  if (size < 16) {
+    for (size_t i = 0; i < size; i++) {
+      if (character_sets::bit_at(character_set, data[i])) return i;
+    }
+    return size;
+  }
+  uint8x16x2_t cs_table;
+  cs_table.val[0] = vld1q_u8(character_set);
+  cs_table.val[1] = vld1q_u8(character_set + 16);
+  const uint8x16_t mask7 = vdupq_n_u8(7);
+  const uint8x16_t one = vdupq_n_u8(1);
+
+  size_t i = 0;
+  for (; i + 15 < size; i += 16) {
+    uint8x16_t word = vld1q_u8((const uint8_t*)(data + i));
+    uint8x16_t byte_idx = vshrq_n_u8(word, 3);
+    uint8x16_t cs_bytes = vqtbl2q_u8(cs_table, byte_idx);
+    uint8x16_t bit_idx = vandq_u8(word, mask7);
+    uint8x16_t bit_mask = vshlq_u8(one, vreinterpretq_s8_u8(bit_idx));
+    uint8x16_t result = vandq_u8(cs_bytes, bit_mask);
+    if (vmaxvq_u32(vreinterpretq_u32_u8(result)) != 0) {
+      for (size_t j = 0; j < 16; j++) {
+        if (character_sets::bit_at(character_set, data[i + j])) return i + j;
+      }
+    }
+  }
+  for (; i < size; i++) {
+    if (character_sets::bit_at(character_set, data[i])) return i;
+  }
+  return size;
+}
+#else
+size_t percent_encode_index(const std::string_view input,
+                            const uint8_t character_set[]) {
+  const char* data = input.data();
+  const size_t size = input.size();
+  size_t i = 0;
+  for (; i + 8 <= size; i += 8) {
+    unsigned char chunk[8];
+    std::memcpy(&chunk, data + i, 8);
+    for (size_t j = 0; j < 8; j++) {
+      if (character_sets::bit_at(character_set, chunk[j])) {
+        return i + j;
+      }
+    }
+  }
+  for (; i < size; i++) {
+    if (character_sets::bit_at(character_set, data[i])) {
+      return i;
+    }
+  }
+  return size;
+}
+#endif
+
+ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+  unsigned long ret;
+  _BitScanForward(&ret, input_num);
+  return (int)ret;
+#else
+  return __builtin_ctzl(input_num);
+#endif
+}
+
 std::string percent_decode(const std::string_view input, size_t first_percent) {
   // next line is for safety only, we expect users to avoid calling
   // percent_decode when first_percent is outside the range.
@@ -460,8 +575,123 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   dest.append(input.substr(0, first_percent));
   const char* pointer = input.data() + first_percent;
   const char* end = input.data() + input.size();
-  // Optimization opportunity: if the following code gets
-  // called often, it can be optimized quite a bit.
+
+  // SIMD fast path: scan 16 bytes at a time for '%'.
+  // When no '%' is found in a chunk, bulk-append all 16 bytes.
+#if ADA_SSSE3 || ADA_SSE2
+  const __m128i pct = _mm_set1_epi8('%');
+  while (pointer + 15 < end) {
+    __m128i word = _mm_loadu_si128((const __m128i*)pointer);
+    int mask = _mm_movemask_epi8(_mm_cmpeq_epi8(word, pct));
+    if (mask == 0) {
+      dest.append(pointer, 16);
+      pointer += 16;
+      continue;
+    }
+    int skip = trailing_zeroes(mask);
+    if (skip > 0) {
+      dest.append(pointer, skip);
+      pointer += skip;
+    }
+    size_t remaining = end - pointer - 1;
+    if (remaining >= 2 && is_ascii_hex_digit(pointer[1]) &&
+        is_ascii_hex_digit(pointer[2])) {
+      unsigned a = convert_hex_to_binary(pointer[1]);
+      unsigned b = convert_hex_to_binary(pointer[2]);
+      dest += static_cast<char>(a * 16 + b);
+      pointer += 3;
+    } else {
+      dest += pointer[0];
+      pointer++;
+    }
+  }
+#elif ADA_NEON
+  const uint8x16_t pct_vec = vdupq_n_u8('%');
+  while (pointer + 15 < end) {
+    uint8x16_t word = vld1q_u8((const uint8_t*)pointer);
+    uint8x16_t cmp = vceqq_u8(word, pct_vec);
+    if (vmaxvq_u32(vreinterpretq_u32_u8(cmp)) == 0) {
+      dest.append(pointer, 16);
+      pointer += 16;
+      continue;
+    }
+    size_t skip = 0;
+    while (skip < 16 && pointer[skip] != '%') skip++;
+    if (skip > 0) {
+      dest.append(pointer, skip);
+      pointer += skip;
+    }
+    size_t remaining = end - pointer - 1;
+    if (remaining >= 2 && is_ascii_hex_digit(pointer[1]) &&
+        is_ascii_hex_digit(pointer[2])) {
+      unsigned a = convert_hex_to_binary(pointer[1]);
+      unsigned b = convert_hex_to_binary(pointer[2]);
+      dest += static_cast<char>(a * 16 + b);
+      pointer += 3;
+    } else {
+      dest += pointer[0];
+      pointer++;
+    }
+  }
+#elif ADA_LSX
+  const __m128i pct = __lsx_vrepli_b('%');
+  while (pointer + 15 < end) {
+    __m128i word = __lsx_vld((const __m128i*)pointer, 0);
+    __m128i cmp = __lsx_vseq_b(word, pct);
+    if (__lsx_bz_v(cmp)) {
+      dest.append(pointer, 16);
+      pointer += 16;
+      continue;
+    }
+    int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(cmp), 0);
+    int skip = trailing_zeroes(mask);
+    if (skip > 0) {
+      dest.append(pointer, skip);
+      pointer += skip;
+    }
+    size_t remaining = end - pointer - 1;
+    if (remaining >= 2 && is_ascii_hex_digit(pointer[1]) &&
+        is_ascii_hex_digit(pointer[2])) {
+      unsigned a = convert_hex_to_binary(pointer[1]);
+      unsigned b = convert_hex_to_binary(pointer[2]);
+      dest += static_cast<char>(a * 16 + b);
+      pointer += 3;
+    } else {
+      dest += pointer[0];
+      pointer++;
+    }
+  }
+#elif ADA_RVV
+  while (pointer < end) {
+    size_t n = end - pointer;
+    size_t vl = __riscv_vsetvl_e8m1(n);
+    vuint8m1_t v = __riscv_vle8_v_u8m1((const uint8_t*)pointer, vl);
+    vbool8_t m = __riscv_vmseq(v, '%', vl);
+    long idx = __riscv_vfirst(m, vl);
+    if (idx < 0) {
+      dest.append(pointer, vl);
+      pointer += vl;
+      continue;
+    }
+    if (idx > 0) {
+      dest.append(pointer, idx);
+      pointer += idx;
+    }
+    size_t remaining = end - pointer - 1;
+    if (remaining >= 2 && is_ascii_hex_digit(pointer[1]) &&
+        is_ascii_hex_digit(pointer[2])) {
+      unsigned a = convert_hex_to_binary(pointer[1]);
+      unsigned b = convert_hex_to_binary(pointer[2]);
+      dest += static_cast<char>(a * 16 + b);
+      pointer += 3;
+    } else {
+      dest += pointer[0];
+      pointer++;
+    }
+  }
+#endif
+
+  // Scalar tail (also the complete path when no SIMD is available).
   while (pointer < end) {
     const char ch = pointer[0];
     size_t remaining = end - pointer - 1;
@@ -474,37 +704,109 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
     } else {
       unsigned a = convert_hex_to_binary(pointer[1]);
       unsigned b = convert_hex_to_binary(pointer[2]);
-      char c = static_cast<char>(a * 16 + b);
-      dest += c;
+      dest += static_cast<char>(a * 16 + b);
       pointer += 3;
     }
   }
   return dest;
 }
 
-std::string percent_encode(const std::string_view input,
-                           const uint8_t character_set[]) {
-  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
-    return character_sets::bit_at(character_set, c);
-  });
-  // Optimization: Don't iterate if percent encode is not required
-  if (pointer == input.end()) {
-    return std::string(input);
-  }
-
-  std::string result;
-  result.reserve(input.length());  // in the worst case, percent encoding might
-                                   // produce 3 characters.
-  result.append(input.substr(0, std::distance(input.begin(), pointer)));
-
-  for (; pointer != input.end(); pointer++) {
-    if (character_sets::bit_at(character_set, *pointer)) {
-      result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-    } else {
-      result += *pointer;
+// SIMD-accelerated encoding loop shared by all percent_encode overloads.
+// Scans [p, pend) for bytes matching character_set, encoding matches as %XX
+// and bulk-appending clean runs.
+static ada_really_inline void percent_encode_to(const char* p, const char* pend,
+                                                const uint8_t character_set[],
+                                                std::string& out) {
+#if ADA_SSSE3
+  // Nibble decomposition LUTs (same algorithm as percent_encode_index).
+  uint8_t lo_lut_data[16] = {0};
+  uint8_t hi_lut_data[16] = {0};
+  for (int h = 0; h < 8; h++) {
+    hi_lut_data[h] = uint8_t(1) << h;
+    for (int l = 0; l < 16; l++) {
+      if (character_sets::bit_at(character_set, (h << 4) | l)) {
+        lo_lut_data[l] |= uint8_t(1) << h;
+      }
     }
   }
+  __m128i lo_lut = _mm_loadu_si128((const __m128i*)lo_lut_data);
+  __m128i hi_lut = _mm_loadu_si128((const __m128i*)hi_lut_data);
+  __m128i mask_0f = _mm_set1_epi8(0x0F);
 
+  while (p + 15 < pend) {
+    __m128i word = _mm_loadu_si128((const __m128i*)p);
+    int high_mask = _mm_movemask_epi8(word);
+    __m128i lo_nibbles = _mm_and_si128(word, mask_0f);
+    __m128i hi_nibbles = _mm_and_si128(_mm_srli_epi16(word, 4), mask_0f);
+    __m128i matches = _mm_and_si128(_mm_shuffle_epi8(lo_lut, lo_nibbles),
+                                    _mm_shuffle_epi8(hi_lut, hi_nibbles));
+    int match_mask = _mm_movemask_epi8(matches) | high_mask;
+    if (match_mask == 0) {
+      out.append(p, 16);
+      p += 16;
+      continue;
+    }
+    int clean = trailing_zeroes(match_mask);
+    if (clean > 0) {
+      out.append(p, clean);
+      p += clean;
+    }
+    out.append(character_sets::hex + uint8_t(*p) * 4, 3);
+    p++;
+  }
+#elif ADA_NEON
+  uint8x16x2_t cs_table;
+  cs_table.val[0] = vld1q_u8(character_set);
+  cs_table.val[1] = vld1q_u8(character_set + 16);
+  const uint8x16_t mask7 = vdupq_n_u8(7);
+  const uint8x16_t one = vdupq_n_u8(1);
+
+  while (p + 15 < pend) {
+    uint8x16_t word = vld1q_u8((const uint8_t*)p);
+    uint8x16_t byte_idx = vshrq_n_u8(word, 3);
+    uint8x16_t cs_bytes = vqtbl2q_u8(cs_table, byte_idx);
+    uint8x16_t bit_idx = vandq_u8(word, mask7);
+    uint8x16_t bit_mask = vshlq_u8(one, vreinterpretq_s8_u8(bit_idx));
+    uint8x16_t hits = vandq_u8(cs_bytes, bit_mask);
+    if (vmaxvq_u32(vreinterpretq_u32_u8(hits)) == 0) {
+      out.append(p, 16);
+      p += 16;
+      continue;
+    }
+    size_t clean = 0;
+    while (clean < 16 && !character_sets::bit_at(character_set, p[clean])) {
+      clean++;
+    }
+    if (clean > 0) {
+      out.append(p, clean);
+      p += clean;
+    }
+    out.append(character_sets::hex + uint8_t(*p) * 4, 3);
+    p++;
+  }
+#endif
+  // Scalar tail for remaining < 16 bytes.
+  while (p < pend) {
+    if (character_sets::bit_at(character_set, *p)) {
+      out.append(character_sets::hex + uint8_t(*p) * 4, 3);
+    } else {
+      out += *p;
+    }
+    p++;
+  }
+}
+
+std::string percent_encode(const std::string_view input,
+                           const uint8_t character_set[]) {
+  size_t first_idx = percent_encode_index(input, character_set);
+  if (first_idx == input.size()) {
+    return std::string(input);
+  }
+  std::string result;
+  result.reserve(input.length());
+  result.append(input.substr(0, first_idx));
+  percent_encode_to(input.data() + first_idx, input.data() + input.size(),
+                    character_set, result);
   return result;
 }
 
@@ -513,33 +815,21 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
-  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
-    return character_sets::bit_at(character_set, c);
-  });
-  ada_log("percent_encode done checking, moved to ",
-          std::distance(input.begin(), pointer));
+  size_t first_idx = percent_encode_index(input, character_set);
+  ada_log("percent_encode done checking, moved to ", first_idx);
 
-  // Optimization: Don't iterate if percent encode is not required
-  if (pointer == input.end()) {
+  if (first_idx == input.size()) {
     ada_log("percent_encode encoding not needed.");
     return false;
   }
   if constexpr (!append) {
     out.clear();
   }
-  ada_log("percent_encode appending ", std::distance(input.begin(), pointer),
-          " bytes");
-  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-  out.append(input.data(), std::distance(input.begin(), pointer));
-  ada_log("percent_encode processing ", std::distance(pointer, input.end()),
-          " bytes");
-  for (; pointer != input.end(); pointer++) {
-    if (character_sets::bit_at(character_set, *pointer)) {
-      out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-    } else {
-      out += *pointer;
-    }
-  }
+  ada_log("percent_encode appending ", first_idx, " bytes");
+  out.append(input.substr(0, first_idx));
+  ada_log("percent_encode processing ", input.size() - first_idx, " bytes");
+  percent_encode_to(input.data() + first_idx, input.data() + input.size(),
+                    character_set, out);
   return true;
 }
 
@@ -564,16 +854,9 @@ bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[], size_t index) {
   std::string out;
-  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-  out.append(input.data(), index);
-  auto pointer = input.begin() + index;
-  for (; pointer != input.end(); pointer++) {
-    if (character_sets::bit_at(character_set, *pointer)) {
-      out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-    } else {
-      out += *pointer;
-    }
-  }
+  out.append(input.substr(0, index));
+  percent_encode_to(input.data() + index, input.data() + input.size(),
+                    character_set, out);
   return out;
 }
 
