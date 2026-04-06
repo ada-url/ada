@@ -735,8 +735,10 @@ bool url::set_host_or_hostname(const std::string_view input) {
       // Set url's host to host, buffer to the empty string, and state to port
       // state.
       std::string_view port_buffer = new_host.substr(location + 1);
-      if (!port_buffer.empty()) {
-        set_port(port_buffer);
+      if (!set_port(port_buffer)) {
+        host = std::move(previous_host);
+        update_base_port(previous_port);
+        return false;
       }
       return true;
     }

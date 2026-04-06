@@ -76,6 +76,28 @@ TYPED_TEST(basic_tests, set_host_should_return_true_sometimes) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, set_host_rejects_invalid_embedded_port) {
+  auto url = ada::parse<TypeParam>("https://example.com:1234/path");
+  ASSERT_TRUE(url);
+  const std::string previous_href(url->get_href());
+
+  ASSERT_FALSE(url->set_host("safe-host:+"));
+  ASSERT_EQ(url->get_href(), previous_href);
+  ASSERT_EQ(url->get_host(), "example.com:1234");
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, set_host_with_empty_embedded_port_clears_port) {
+  auto url = ada::parse<TypeParam>("https://example.com:1234/path");
+  ASSERT_TRUE(url);
+
+  ASSERT_TRUE(url->set_host("safe-host:"));
+  ASSERT_EQ(url->get_host(), "safe-host");
+  ASSERT_EQ(url->get_port(), "");
+  ASSERT_EQ(url->get_href(), "https://safe-host/path");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_hostname_should_return_false_sometimes) {
   auto r = ada::parse<TypeParam>("mailto:a@b.com");
   ASSERT_FALSE(r->set_hostname("something"));
