@@ -9,9 +9,104 @@
 #include "ada/url_aggregator-inl.h"
 
 #include <iterator>
+#include <limits>
+#include <optional>
 #include <ranges>
 #include <string>
 #include <string_view>
+
+namespace {
+
+constexpr uint32_t kMaxUrlComponentOffset =
+    std::numeric_limits<uint32_t>::max();
+
+struct shifted_non_scheme_offsets {
+  uint32_t username_end;
+  uint32_t host_start;
+  uint32_t host_end;
+  uint32_t pathname_start;
+  uint32_t search_start;
+  uint32_t hash_start;
+};
+
+[[nodiscard]] ada_really_inline bool checked_shift_offset(uint32_t offset,
+                                                          int64_t delta,
+                                                          uint32_t& out) {
+  if (delta >= 0) {
+    const uint64_t positive_delta = static_cast<uint64_t>(delta);
+    if (positive_delta >
+        static_cast<uint64_t>(kMaxUrlComponentOffset - offset)) {
+      return false;
+    }
+    out = offset + static_cast<uint32_t>(positive_delta);
+    return true;
+  }
+
+  const uint64_t negative_delta = static_cast<uint64_t>(-delta);
+  if (negative_delta > static_cast<uint64_t>(offset)) {
+    return false;
+  }
+  out = offset - static_cast<uint32_t>(negative_delta);
+  return true;
+}
+
+[[nodiscard]] std::optional<shifted_non_scheme_offsets>
+compute_shifted_non_scheme_offsets(const ada::url_components& components,
+                                   int64_t delta) {
+  shifted_non_scheme_offsets shifted{components.username_end,
+                                     components.host_start,
+                                     components.host_end,
+                                     components.pathname_start,
+                                     components.search_start,
+                                     components.hash_start};
+  if (delta == 0) {
+    return shifted;
+  }
+
+  if (!checked_shift_offset(components.username_end, delta,
+                            shifted.username_end) ||
+      !checked_shift_offset(components.host_start, delta, shifted.host_start) ||
+      !checked_shift_offset(components.host_end, delta, shifted.host_end) ||
+      !checked_shift_offset(components.pathname_start, delta,
+                            shifted.pathname_start)) {
+    return std::nullopt;
+  }
+
+  if (components.search_start != ada::url_components::omitted &&
+      !checked_shift_offset(components.search_start, delta,
+                            shifted.search_start)) {
+    return std::nullopt;
+  }
+
+  if (components.hash_start != ada::url_components::omitted &&
+      !checked_shift_offset(components.hash_start, delta, shifted.hash_start)) {
+    return std::nullopt;
+  }
+
+  return shifted;
+}
+
+ada_really_inline void apply_shifted_non_scheme_offsets(
+    ada::url_components& components,
+    const shifted_non_scheme_offsets& shifted) {
+  components.username_end = shifted.username_end;
+  components.host_start = shifted.host_start;
+  components.host_end = shifted.host_end;
+  components.pathname_start = shifted.pathname_start;
+  components.search_start = shifted.search_start;
+  components.hash_start = shifted.hash_start;
+}
+
+[[nodiscard]] ada_really_inline bool to_uint32_size(std::size_t value,
+                                                    uint32_t& out) {
+  if (value > static_cast<std::size_t>(kMaxUrlComponentOffset)) {
+    return false;
+  }
+  out = static_cast<uint32_t>(value);
+  return true;
+}
+
+}  // namespace
 
 namespace ada {
 template <bool has_state_override>
@@ -53,6 +148,9 @@ template <bool has_state_override>
 
     type = parsed_type;
     set_scheme_from_view_with_colon(input_with_colon);
+    if (!is_valid) {
+      return false;
+    }
 
     if constexpr (has_state_override) {
       // This is uncommon.
@@ -95,6 +193,9 @@ template <bool has_state_override>
     }
 
     set_scheme(_buffer);
+    if (!is_valid) {
+      return false;
+    }
 
     if constexpr (has_state_override) {
       // This is uncommon.
@@ -114,9 +215,16 @@ template <bool has_state_override>
 inline void url_aggregator::copy_scheme(const url_aggregator& u) {
   ada_log("url_aggregator::copy_scheme ", u.buffer);
   ADA_ASSERT_TRUE(validate());
-  // next line could overflow but unsigned arithmetic has well-defined
-  // overflows.
-  uint32_t new_difference = u.components.protocol_end - components.protocol_end;
+  const int64_t new_difference =
+      static_cast<int64_t>(u.components.protocol_end) -
+      static_cast<int64_t>(components.protocol_end);
+  std::optional<shifted_non_scheme_offsets> shifted_offsets =
+      compute_shifted_non_scheme_offsets(components, new_difference);
+  if (!shifted_offsets.has_value()) {
+    is_valid = false;
+    return;
+  }
+
   type = u.type;
   buffer.erase(0, components.protocol_end);
   buffer.insert(0, u.get_protocol());
@@ -127,17 +235,7 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) {
     return;
   }
 
-  // Update the rest of the components.
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += new_difference;
-  }
+  apply_shifted_non_scheme_offsets(components, *shifted_offsets);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -148,10 +246,20 @@ inline void url_aggregator::set_scheme_from_view_with_colon(
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!new_scheme_with_colon.empty() &&
                   new_scheme_with_colon.back() == ':');
-  // next line could overflow but unsigned arithmetic has well-defined
-  // overflows.
-  uint32_t new_difference =
-      uint32_t(new_scheme_with_colon.size()) - components.protocol_end;
+  uint32_t new_protocol_end = 0;
+  if (!to_uint32_size(new_scheme_with_colon.size(), new_protocol_end)) {
+    is_valid = false;
+    return;
+  }
+  const int64_t new_difference =
+      static_cast<int64_t>(new_protocol_end) -
+      static_cast<int64_t>(components.protocol_end);
+  std::optional<shifted_non_scheme_offsets> shifted_offsets =
+      compute_shifted_non_scheme_offsets(components, new_difference);
+  if (!shifted_offsets.has_value()) {
+    is_valid = false;
+    return;
+  }
 
   if (buffer.empty()) {
     buffer.append(new_scheme_with_colon);
@@ -159,18 +267,10 @@ inline void url_aggregator::set_scheme_from_view_with_colon(
     buffer.erase(0, components.protocol_end);
     buffer.insert(0, new_scheme_with_colon);
   }
-  components.protocol_end += new_difference;
+  components.protocol_end = new_protocol_end;
 
-  // Update the rest of the components.
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += new_difference;
+  if (new_difference != 0) {
+    apply_shifted_non_scheme_offsets(components, *shifted_offsets);
   }
   ADA_ASSERT_TRUE(validate());
 }
@@ -179,10 +279,21 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) {
   ada_log("url_aggregator::set_scheme ", new_scheme);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(new_scheme.empty() || new_scheme.back() != ':');
-  // next line could overflow but unsigned arithmetic has well-defined
-  // overflows.
-  uint32_t new_difference =
-      uint32_t(new_scheme.size()) - components.protocol_end + 1;
+  if (new_scheme.size() >
+      static_cast<std::size_t>(kMaxUrlComponentOffset - 1)) {
+    is_valid = false;
+    return;
+  }
+  const uint32_t new_protocol_end = static_cast<uint32_t>(new_scheme.size() + 1);
+  const int64_t new_difference =
+      static_cast<int64_t>(new_protocol_end) -
+      static_cast<int64_t>(components.protocol_end);
+  std::optional<shifted_non_scheme_offsets> shifted_offsets =
+      compute_shifted_non_scheme_offsets(components, new_difference);
+  if (!shifted_offsets.has_value()) {
+    is_valid = false;
+    return;
+  }
 
   type = ada::scheme::get_scheme_type(new_scheme);
   if (buffer.empty()) {
@@ -191,18 +302,10 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) {
     buffer.erase(0, components.protocol_end);
     buffer.insert(0, helpers::concat(new_scheme, ":"));
   }
-  components.protocol_end = uint32_t(new_scheme.size() + 1);
+  components.protocol_end = new_protocol_end;
 
-  // Update the rest of the components.
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += new_difference;
+  if (new_difference != 0) {
+    apply_shifted_non_scheme_offsets(components, *shifted_offsets);
   }
   ADA_ASSERT_TRUE(validate());
 }
