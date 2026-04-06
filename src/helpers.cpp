@@ -294,7 +294,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
     uint8x16_t classify = vandq_u8(lowpart, highpart);
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
-      uint16_t is_non_zero = ~to_bitmask(is_zero);
+      uint16_t is_non_zero = static_cast<uint16_t>(~to_bitmask(is_zero));
       return i + trailing_zeroes(is_non_zero);
     }
   }
@@ -307,7 +307,7 @@ ada_really_inline size_t find_next_host_delimiter_special(
     uint8x16_t classify = vandq_u8(lowpart, highpart);
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
-      uint16_t is_non_zero = ~to_bitmask(is_zero);
+      uint16_t is_non_zero = static_cast<uint16_t>(~to_bitmask(is_zero));
       return view.length() - 16 + trailing_zeroes(is_non_zero);
     }
   }
@@ -583,7 +583,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     uint8x16_t classify = vandq_u8(lowpart, highpart);
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
-      uint16_t is_non_zero = ~to_bitmask(is_zero);
+      uint16_t is_non_zero = static_cast<uint16_t>(~to_bitmask(is_zero));
       return i + trailing_zeroes(is_non_zero);
     }
   }
@@ -596,7 +596,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     uint8x16_t classify = vandq_u8(lowpart, highpart);
     if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
       uint8x16_t is_zero = vceqq_u8(classify, zero);
-      uint16_t is_non_zero = ~to_bitmask(is_zero);
+      uint16_t is_non_zero = static_cast<uint16_t>(~to_bitmask(is_zero));
       return view.length() - 16 + trailing_zeroes(is_non_zero);
     }
   }

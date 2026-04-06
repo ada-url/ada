@@ -31,7 +31,8 @@ TEST(unicode_tests, percent_encode_with_index_matches_full_encode) {
   const uint8_t* userinfo = ada::character_sets::USERINFO_PERCENT_ENCODE;
   const uint8_t* query = ada::character_sets::QUERY_PERCENT_ENCODE;
 
-  std::string needs_encoding = std::string(16, 'a') + "|" + std::string(16, 'b');
+  std::string needs_encoding =
+      std::string(16, 'a') + "|" + std::string(16, 'b');
   size_t first_idx =
       ada::unicode::percent_encode_index(needs_encoding, userinfo);
 
@@ -45,7 +46,8 @@ TEST(unicode_tests, percent_encode_with_index_matches_full_encode) {
 }
 
 TEST(unicode_tests, percent_decode_boundaries_and_invalid_sequences) {
-  std::string valid = std::string(15, 'a') + "%41" + std::string(16, 'b') + "%2F";
+  std::string valid =
+      std::string(15, 'a') + "%41" + std::string(16, 'b') + "%2F";
   EXPECT_EQ(ada::unicode::percent_decode(valid, valid.find('%')),
             std::string(15, 'a') + "A" + std::string(16, 'b') + "/");
 
@@ -53,15 +55,15 @@ TEST(unicode_tests, percent_decode_boundaries_and_invalid_sequences) {
   EXPECT_EQ(ada::unicode::percent_decode(valid_at_16, valid_at_16.find('%')),
             std::string(16, 'a') + " " + std::string(15, 'b'));
 
-  std::string invalid = std::string(15, 'a') + "%G1" + std::string(16, 'b') + "%";
+  std::string invalid =
+      std::string(15, 'a') + "%G1" + std::string(16, 'b') + "%";
   EXPECT_EQ(ada::unicode::percent_decode(invalid, invalid.find('%')), invalid);
 
   std::string truncated = std::string(16, 'a') + "%4";
   EXPECT_EQ(ada::unicode::percent_decode(truncated, truncated.find('%')),
             truncated);
 
-  EXPECT_EQ(ada::unicode::percent_decode("plain-text",
-                                         std::string_view::npos),
+  EXPECT_EQ(ada::unicode::percent_decode("plain-text", std::string_view::npos),
             "plain-text");
 }
 
@@ -84,7 +86,8 @@ TYPED_TEST(unicode_setter_tests, set_pathname_encodes_boundary_space) {
   auto url = ada::parse<TypeParam>("https://example.com/");
   ASSERT_TRUE(url);
 
-  std::string pathname = "/" + std::string(15, 'a') + " " + std::string(16, 'b');
+  std::string pathname =
+      "/" + std::string(15, 'a') + " " + std::string(16, 'b');
   url->set_pathname(pathname);
   EXPECT_EQ(url->get_pathname(),
             "/" + std::string(15, 'a') + "%20" + std::string(16, 'b'));
