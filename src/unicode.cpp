@@ -448,42 +448,47 @@ unsigned constexpr convert_hex_to_binary(const char c) noexcept {
 }
 
 #if ADA_SSSE3
-size_t percent_encode_index(const std::string_view input,
-                            const uint8_t character_set[]) {
-  const char* data = input.data();
-  const size_t size = input.size();
-  if (size < 16) {
-    for (size_t i = 0; i < size; i++) {
-      if (character_sets::bit_at(character_set, data[i])) return i;
-    }
-    return size;
-  }
-  // Nibble decomposition: for byte v = (hi << 4) | lo  (v < 128),
-  //   lo_lut[lo] = bitmask of which hi nibbles (0-7) need encoding
-  //   hi_lut[hi] = (1 << hi) for hi < 8, else 0
-  // Bytes >= 128 always need encoding -- caught by sign bit check.
-  uint8_t lo_lut_data[16] = {0};
-  uint8_t hi_lut_data[16] = {0};
-  for (int h = 0; h < 8; h++) {
-    hi_lut_data[h] = uint8_t(1) << h;
-    for (int l = 0; l < 16; l++) {
-      if (character_sets::bit_at(character_set, (h << 4) | l)) {
-        lo_lut_data[l] |= uint8_t(1) << h;
+// Prebuilt nibble-decomposition LUTs for SSSE3 percent-encode.
+// Constructed once from character_set, then shared across index + encode
+// to avoid the 128-iteration build cost being paid twice per call.
+struct ssse3_encode_luts {
+  __m128i lo_lut;
+  __m128i hi_lut;
+  __m128i mask_0f;
+  explicit ssse3_encode_luts(const uint8_t character_set[]) noexcept {
+    // For byte v = (hi << 4) | lo  (v < 128):
+    //   lo_lut[lo] = bitmask of which hi nibbles (0-7) need encoding
+    //   hi_lut[hi] = (1 << hi) for hi < 8, else 0
+    // Bytes >= 128 always need encoding -- caught by sign bit check.
+    uint8_t lo_data[16] = {0};
+    uint8_t hi_data[16] = {0};
+    for (int h = 0; h < 8; h++) {
+      hi_data[h] = uint8_t(1) << h;
+      for (int l = 0; l < 16; l++) {
+        if (character_sets::bit_at(character_set, (h << 4) | l)) {
+          lo_data[l] |= uint8_t(1) << h;
+        }
       }
     }
+    lo_lut = _mm_loadu_si128((const __m128i*)lo_data);
+    hi_lut = _mm_loadu_si128((const __m128i*)hi_data);
+    mask_0f = _mm_set1_epi8(0x0F);
   }
-  __m128i lo_lut = _mm_loadu_si128((const __m128i*)lo_lut_data);
-  __m128i hi_lut = _mm_loadu_si128((const __m128i*)hi_lut_data);
-  __m128i mask_0f = _mm_set1_epi8(0x0F);
+};
 
+static size_t percent_encode_index_simd(const std::string_view input,
+                                        const uint8_t character_set[],
+                                        const ssse3_encode_luts& luts) {
+  const char* data = input.data();
+  const size_t size = input.size();
   size_t i = 0;
   for (; i + 15 < size; i += 16) {
     __m128i word = _mm_loadu_si128((const __m128i*)(data + i));
     int high_mask = _mm_movemask_epi8(word);
-    __m128i lo_nibbles = _mm_and_si128(word, mask_0f);
-    __m128i hi_nibbles = _mm_and_si128(_mm_srli_epi16(word, 4), mask_0f);
-    __m128i matches = _mm_and_si128(_mm_shuffle_epi8(lo_lut, lo_nibbles),
-                                    _mm_shuffle_epi8(hi_lut, hi_nibbles));
+    __m128i lo_nibbles = _mm_and_si128(word, luts.mask_0f);
+    __m128i hi_nibbles = _mm_and_si128(_mm_srli_epi16(word, 4), luts.mask_0f);
+    __m128i matches = _mm_and_si128(_mm_shuffle_epi8(luts.lo_lut, lo_nibbles),
+                                    _mm_shuffle_epi8(luts.hi_lut, hi_nibbles));
     int match_mask = _mm_movemask_epi8(matches) | high_mask;
     if (match_mask != 0) {
       return i + __builtin_ctz(match_mask);
@@ -493,6 +498,19 @@ size_t percent_encode_index(const std::string_view input,
     if (character_sets::bit_at(character_set, data[i])) return i;
   }
   return size;
+}
+
+size_t percent_encode_index(const std::string_view input,
+                            const uint8_t character_set[]) {
+  const size_t size = input.size();
+  if (size < 16) {
+    for (size_t i = 0; i < size; i++) {
+      if (character_sets::bit_at(character_set, input.data()[i])) return i;
+    }
+    return size;
+  }
+  ssse3_encode_luts luts(character_set);
+  return percent_encode_index_simd(input, character_set, luts);
 }
 #elif ADA_NEON
 size_t percent_encode_index(const std::string_view input,
@@ -711,35 +729,19 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   return dest;
 }
 
-// SIMD-accelerated encoding loop shared by all percent_encode overloads.
-// Scans [p, pend) for bytes matching character_set, encoding matches as %XX
-// and bulk-appending clean runs.
-static ada_really_inline void percent_encode_to(const char* p, const char* pend,
-                                                const uint8_t character_set[],
-                                                std::string& out) {
+// SSSE3 encode loop that accepts prebuilt LUTs.
+// Self-contained: includes the scalar tail for remaining bytes.
 #if ADA_SSSE3
-  // Nibble decomposition LUTs (same algorithm as percent_encode_index).
-  uint8_t lo_lut_data[16] = {0};
-  uint8_t hi_lut_data[16] = {0};
-  for (int h = 0; h < 8; h++) {
-    hi_lut_data[h] = uint8_t(1) << h;
-    for (int l = 0; l < 16; l++) {
-      if (character_sets::bit_at(character_set, (h << 4) | l)) {
-        lo_lut_data[l] |= uint8_t(1) << h;
-      }
-    }
-  }
-  __m128i lo_lut = _mm_loadu_si128((const __m128i*)lo_lut_data);
-  __m128i hi_lut = _mm_loadu_si128((const __m128i*)hi_lut_data);
-  __m128i mask_0f = _mm_set1_epi8(0x0F);
-
+static ada_really_inline void percent_encode_to_simd(
+    const char* p, const char* pend, const uint8_t character_set[],
+    std::string& out, const ssse3_encode_luts& luts) {
   while (p + 15 < pend) {
     __m128i word = _mm_loadu_si128((const __m128i*)p);
     int high_mask = _mm_movemask_epi8(word);
-    __m128i lo_nibbles = _mm_and_si128(word, mask_0f);
-    __m128i hi_nibbles = _mm_and_si128(_mm_srli_epi16(word, 4), mask_0f);
-    __m128i matches = _mm_and_si128(_mm_shuffle_epi8(lo_lut, lo_nibbles),
-                                    _mm_shuffle_epi8(hi_lut, hi_nibbles));
+    __m128i lo_nibbles = _mm_and_si128(word, luts.mask_0f);
+    __m128i hi_nibbles = _mm_and_si128(_mm_srli_epi16(word, 4), luts.mask_0f);
+    __m128i matches = _mm_and_si128(_mm_shuffle_epi8(luts.lo_lut, lo_nibbles),
+                                    _mm_shuffle_epi8(luts.hi_lut, hi_nibbles));
     int match_mask = _mm_movemask_epi8(matches) | high_mask;
     if (match_mask == 0) {
       out.append(p, 16);
@@ -754,6 +756,27 @@ static ada_really_inline void percent_encode_to(const char* p, const char* pend,
     out.append(character_sets::hex + uint8_t(*p) * 4, 3);
     p++;
   }
+  while (p < pend) {
+    if (character_sets::bit_at(character_set, *p)) {
+      out.append(character_sets::hex + uint8_t(*p) * 4, 3);
+    } else {
+      out += *p;
+    }
+    p++;
+  }
+}
+#endif
+
+// Encoding loop for callers that don't have prebuilt LUTs (e.g.
+// percent_encode with a pre-known index). On SSSE3 this builds its own
+// LUTs and delegates; on NEON/scalar it runs inline.
+static ada_really_inline void percent_encode_to(const char* p, const char* pend,
+                                                const uint8_t character_set[],
+                                                std::string& out) {
+#if ADA_SSSE3
+  ssse3_encode_luts luts(character_set);
+  percent_encode_to_simd(p, pend, character_set, out, luts);
+  return;
 #elif ADA_NEON
   uint8x16x2_t cs_table;
   cs_table.val[0] = vld1q_u8(character_set);
@@ -798,6 +821,20 @@ static ada_really_inline void percent_encode_to(const char* p, const char* pend,
 
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
+#if ADA_SSSE3
+  if (input.size() >= 16) {
+    ssse3_encode_luts luts(character_set);
+    size_t first_idx = percent_encode_index_simd(input, character_set, luts);
+    if (first_idx == input.size()) return std::string(input);
+    std::string result;
+    result.reserve(input.length());
+    result.append(input.substr(0, first_idx));
+    percent_encode_to_simd(input.data() + first_idx,
+                           input.data() + input.size(), character_set, result,
+                           luts);
+    return result;
+  }
+#endif
   size_t first_idx = percent_encode_index(input, character_set);
   if (first_idx == input.size()) {
     return std::string(input);
@@ -815,6 +852,27 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
+#if ADA_SSSE3
+  if (input.size() >= 16) {
+    ssse3_encode_luts luts(character_set);
+    size_t first_idx = percent_encode_index_simd(input, character_set, luts);
+    ada_log("percent_encode done checking, moved to ", first_idx);
+    if (first_idx == input.size()) {
+      ada_log("percent_encode encoding not needed.");
+      return false;
+    }
+    if constexpr (!append) {
+      out.clear();
+    }
+    ada_log("percent_encode appending ", first_idx, " bytes");
+    out.append(input.substr(0, first_idx));
+    ada_log("percent_encode processing ", input.size() - first_idx, " bytes");
+    percent_encode_to_simd(input.data() + first_idx,
+                           input.data() + input.size(), character_set, out,
+                           luts);
+    return true;
+  }
+#endif
   size_t first_idx = percent_encode_index(input, character_set);
   ada_log("percent_encode done checking, moved to ", first_idx);
 
