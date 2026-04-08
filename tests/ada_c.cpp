@@ -614,8 +614,7 @@ TEST(ada_c, max_input_length) {
 
   // URL should be unchanged after failed setter.
   ada_string href = ada_get_href(result);
-  ASSERT_EQ(std::string_view(href.data, href.length),
-            "https://example.com/ok");
+  ASSERT_EQ(std::string_view(href.data, href.length), "https://example.com/ok");
 
   ada_free(result);
 
