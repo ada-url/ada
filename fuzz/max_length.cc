@@ -14,8 +14,8 @@ static constexpr uint32_t kMaxLength = 512;
 template <class T>
 static void check_length(const T& url, const char* context) {
   if (url.get_href_size() > kMaxLength) {
-    printf("FAIL [%s]: href_size=%zu exceeds limit %u\n  href: ",
-           context, url.get_href_size(), kMaxLength);
+    printf("FAIL [%s]: href_size=%zu exceeds limit %u\n  href: ", context,
+           url.get_href_size(), kMaxLength);
     if constexpr (std::is_same_v<T, ada::url_aggregator>) {
       printf("%.*s\n", (int)url.get_href().size(), url.get_href().data());
     } else {

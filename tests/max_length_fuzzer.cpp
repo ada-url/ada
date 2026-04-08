@@ -101,8 +101,7 @@ int main() {
       // Long hash
       "http://x/#" + std::string(500, 'h'),
       // Username/password
-      "http://" + std::string(200, 'u') + ":" + std::string(200, 'p') +
-          "@x/",
+      "http://" + std::string(200, 'u') + ":" + std::string(200, 'p') + "@x/",
       // Port edge cases
       "http://x:65535/",
       "http://x:0/",
@@ -180,8 +179,7 @@ int main() {
   for (const auto& input : inputs) {
     for (const auto& base : bases) {
       try_parse_with_base<ada::url>(input, base, "parse<url>(base)");
-      try_parse_with_base<ada::url_aggregator>(input, base,
-                                               "parse<agg>(base)");
+      try_parse_with_base<ada::url_aggregator>(input, base, "parse<agg>(base)");
     }
   }
 

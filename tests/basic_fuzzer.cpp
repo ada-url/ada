@@ -1,5 +1,6 @@
 #include "ada.h"
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <bit>
 
@@ -132,17 +133,16 @@ size_t length_fuzz(size_t N, size_t seed = 0) {
   auto check = [&](const result& url, const char* context) {
     if (url.get_href_size() > kMaxLength) {
       std::cerr << "length_fuzz FAIL [" << context
-                << "]: href_size=" << url.get_href_size()
-                << " exceeds limit " << kMaxLength << "\n";
+                << "]: href_size=" << url.get_href_size() << " exceeds limit "
+                << kMaxLength << "\n";
       std::abort();
     }
     checked++;
   };
 
   for (size_t trial = 0; trial < N; trial++) {
-    std::string base_str =
-        url_examples[(seed + trial) %
-                     (sizeof(url_examples) / sizeof(std::string))];
+    std::string base_str = url_examples[(seed + trial) % (sizeof(url_examples) /
+                                                          sizeof(std::string))];
 
     // Parse must respect the limit.
     auto url = ada::parse<result>(base_str);
@@ -157,9 +157,8 @@ size_t length_fuzz(size_t N, size_t seed = 0) {
     for (int step = 0; step < 20; step++) {
       // Build a pseudo-random value: take a slice of a URL example, possibly
       // containing characters that trigger percent-encoding expansion.
-      std::string val =
-          url_examples[(counter++) %
-                       (sizeof(url_examples) / sizeof(std::string))];
+      std::string val = url_examples[(counter++) % (sizeof(url_examples) /
+                                                    sizeof(std::string))];
       // Mutate: insert characters that expand under percent-encoding.
       size_t insert_pos = (counter * 7) % (val.size() + 1);
       size_t insert_len = (counter * 13) % 256;

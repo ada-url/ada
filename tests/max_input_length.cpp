@@ -159,7 +159,8 @@ TYPED_TEST(max_input_length_tests, percent_encoding_expansion_blocked) {
 }
 
 TYPED_TEST(max_input_length_tests, url_unchanged_after_rejected_set) {
-  auto result = ada::parse<TypeParam>("https://user:pass@example.com:8080/path?q=1#frag");
+  auto result =
+      ada::parse<TypeParam>("https://user:pass@example.com:8080/path?q=1#frag");
   ASSERT_TRUE(result);
   std::string original_href(result->get_href());
 
