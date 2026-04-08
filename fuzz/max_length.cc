@@ -2,7 +2,9 @@
 
 #include <cassert>
 #include <cstdio>
+#include <limits>
 #include <string>
+#include <type_traits>
 
 #include "ada.cpp"
 #include "ada.h"

@@ -972,10 +972,9 @@ TYPED_TEST(basic_tests, get_href_size_matches_get_href) {
   };
   for (const auto& input : urls) {
     auto url = ada::parse<TypeParam>(input);
-    if (url) {
-      ASSERT_EQ(url->get_href_size(), url->get_href().size())
-          << "Mismatch for: " << input;
-    }
+    ASSERT_TRUE(url) << "Failed to parse: " << input;
+    ASSERT_EQ(url->get_href_size(), url->get_href().size())
+        << "Mismatch for: " << input;
   }
 }
 

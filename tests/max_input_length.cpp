@@ -1,6 +1,7 @@
 #include "ada.h"
 #include "gtest/gtest.h"
 
+#include <limits>
 #include <string>
 
 // Use a small limit (1 KB) to test enforcement without huge allocations.

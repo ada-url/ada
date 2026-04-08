@@ -311,6 +311,18 @@ std::string href_from_file(std::string_view input) {
 }
 
 bool can_parse(std::string_view input, const std::string_view* base_input) {
+  // Reject inputs that exceed the configurable maximum length.
+  // Note: can_parse() does not perform normalization (percent-encoding, IDNA),
+  // so it cannot detect cases where a short input normalizes into a long URL.
+  // In such edge cases can_parse() may return true while parse() fails.
+  if (input.size() > ada::get_max_input_length()) {
+    return false;
+  }
+  if (base_input != nullptr &&
+      base_input->size() > ada::get_max_input_length()) {
+    return false;
+  }
+
   // Fast path: handles the overwhelming majority of inputs -- absolute special
   // URLs with an ASCII domain, no credentials, and no base -- with a single
   // forward scan and zero allocations.

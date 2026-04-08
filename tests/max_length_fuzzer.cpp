@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <limits>
 #include <string>
 
 // Tight limit to test enforcement without large allocations.

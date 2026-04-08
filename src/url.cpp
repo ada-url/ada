@@ -976,8 +976,8 @@ bool url::set_href(const std::string_view input) {
   ada::result<ada::url> out = ada::parse<ada::url>(input);
 
   if (out) {
-    // The parser enforces get_max_input_length() on the input.
-    // Check the resulting URL size as well.
+    // The parser enforces get_max_input_length() on both the input and the
+    // normalized result. This is a defense-in-depth check.
     if (out->get_href_size() > ada::get_max_input_length()) {
       return false;
     }

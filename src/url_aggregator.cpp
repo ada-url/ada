@@ -465,8 +465,8 @@ bool url_aggregator::set_href(const std::string_view input) {
   ada_log("url_aggregator::set_href, success :", out.has_value());
 
   if (out) {
-    // The parser enforces get_max_input_length() on the input.
-    // Check the resulting URL size as well.
+    // The parser enforces get_max_input_length() on both the input and the
+    // normalized result. This is a defense-in-depth check.
     if (out->buffer.size() > ada::get_max_input_length()) {
       return false;
     }

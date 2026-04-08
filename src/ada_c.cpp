@@ -743,6 +743,14 @@ bool ada_search_params_entries_iter_has_next(
   return (*r)->has_next();
 }
 
+void ada_set_max_input_length(uint32_t length) noexcept {
+  ada::set_max_input_length(length);
+}
+
+uint32_t ada_get_max_input_length() noexcept {
+  return ada::get_max_input_length();
+}
+
 typedef struct {
   int major;
   int minor;
