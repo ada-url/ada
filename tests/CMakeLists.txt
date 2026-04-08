@@ -39,6 +39,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/add-cpp-test.cmake)
 link_libraries(ada)
 
 add_cpp_test(basic_fuzzer)
+add_cpp_test(max_length_fuzzer)
 
 if(MSVC AND BUILD_SHARED_LIBS)
   # Copy the ada dll into the directory
@@ -80,6 +81,7 @@ else()
   add_gtest_test(from_file_tests from_file_tests.cpp)
   add_gtest_test(ada_c ada_c.cpp)
   add_gtest_test(url_search_params url_search_params.cpp)
+  add_gtest_test(max_input_length max_input_length.cpp)
 
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)

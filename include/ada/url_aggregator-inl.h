@@ -852,6 +852,10 @@ constexpr bool url_aggregator::has_port() const noexcept {
   return buffer;
 }
 
+[[nodiscard]] constexpr size_t url_aggregator::get_href_size() const noexcept {
+  return buffer.size();
+}
+
 ada_really_inline size_t
 url_aggregator::parse_port(std::string_view view, bool check_trailing_content) {
   ada_log("url_aggregator::parse_port('", view, "') ", view.size());

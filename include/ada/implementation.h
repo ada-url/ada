@@ -166,6 +166,25 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init>&& input,
  * @return A file:// URL string representing the given path.
  */
 std::string href_from_file(std::string_view path);
+
+/**
+ * Sets the maximum allowed length for URL inputs.
+ *
+ * Any URL string or setter input exceeding this length will be rejected.
+ * The value must fit in a uint32_t. The default is
+ * std::numeric_limits<uint32_t>::max() (approximately 4 GB).
+ *
+ * @param length The new maximum input length.
+ */
+void set_max_input_length(uint32_t length);
+
+/**
+ * Returns the current maximum allowed length for URL inputs.
+ *
+ * @return The current maximum input length.
+ */
+uint32_t get_max_input_length();
+
 }  // namespace ada
 
 #endif  // ADA_IMPLEMENTATION_H

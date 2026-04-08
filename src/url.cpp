@@ -1,10 +1,11 @@
 #include "ada/scheme-inl.h"
+#include "ada/implementation.h"
 #include "ada/log.h"
 #include "ada/unicode-inl.h"
 
-#include <numeric>
 #include <algorithm>
 #include <iterator>
+#include <numeric>
 #include <ranges>
 #include <string>
 #include <string_view>
@@ -690,6 +691,8 @@ bool url::set_host_or_hostname(const std::string_view input) {
     return false;
   }
 
+  url saved_url(*this);
+
   std::optional<std::string> previous_host = host;
   std::optional<uint16_t> previous_port = port;
 
@@ -699,6 +702,14 @@ bool url::set_host_or_hostname(const std::string_view input) {
                                       : input.size());
   helpers::remove_ascii_tab_or_newline(_host);
   std::string_view new_host(_host);
+
+  auto check_url_size = [&]() -> bool {
+    if (get_href_size() > ada::get_max_input_length()) {
+      *this = std::move(saved_url);
+      return false;
+    }
+    return true;
+  };
 
   // If url's scheme is "file", then set state to file host state, instead of
   // host state.
@@ -738,7 +749,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
       if (!port_buffer.empty()) {
         set_port(port_buffer);
       }
-      return true;
+      return check_url_size();
     }
     // Otherwise, if one of the following is true:
     // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
@@ -761,7 +772,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
       // special.
       if (host_view.empty() && !is_special()) {
         host = "";
-        return true;
+        return check_url_size();
       }
 
       bool succeeded = parse_host(host_view);
@@ -770,7 +781,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
         update_base_port(previous_port);
         return false;
       }
-      return true;
+      return check_url_size();
     }
   }
 
@@ -795,7 +806,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
       host = "";
     }
   }
-  return true;
+  return check_url_size();
 }
 
 bool url::set_host(const std::string_view input) {
@@ -810,8 +821,13 @@ bool url::set_username(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+  auto previous_username = std::move(username);
   username = ada::unicode::percent_encode(
       input, character_sets::USERINFO_PERCENT_ENCODE);
+  if (get_href_size() > ada::get_max_input_length()) {
+    username = std::move(previous_username);
+    return false;
+  }
   return true;
 }
 
@@ -819,8 +835,13 @@ bool url::set_password(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+  auto previous_password = std::move(password);
   password = ada::unicode::percent_encode(
       input, character_sets::USERINFO_PERCENT_ENCODE);
+  if (get_href_size() > ada::get_max_input_length()) {
+    password = std::move(previous_password);
+    return false;
+  }
   return true;
 }
 
@@ -856,6 +877,10 @@ bool url::set_port(const std::string_view input) {
   std::optional<uint16_t> previous_port = port;
   parse_port(digits_to_parse);
   if (is_valid) {
+    if (get_href_size() > ada::get_max_input_length()) {
+      port = std::move(previous_port);
+      return false;
+    }
     return true;
   }
   port = std::move(previous_port);
@@ -873,8 +898,12 @@ void url::set_hash(const std::string_view input) {
   std::string new_value;
   new_value = input[0] == '#' ? input.substr(1) : input;
   helpers::remove_ascii_tab_or_newline(new_value);
+  auto previous_hash = std::move(hash);
   hash = unicode::percent_encode(new_value,
                                  ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+  if (get_href_size() > ada::get_max_input_length()) {
+    hash = std::move(previous_hash);
+  }
 }
 
 void url::set_search(const std::string_view input) {
@@ -892,15 +921,24 @@ void url::set_search(const std::string_view input) {
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
                    : ada::character_sets::QUERY_PERCENT_ENCODE;
 
+  auto previous_query = std::move(query);
   query = ada::unicode::percent_encode(new_value, query_percent_encode_set);
+  if (get_href_size() > ada::get_max_input_length()) {
+    query = std::move(previous_query);
+  }
 }
 
 bool url::set_pathname(const std::string_view input) {
   if (has_opaque_path) {
     return false;
   }
+  auto previous_path = std::move(path);
   path.clear();
   parse_path(input);
+  if (get_href_size() > ada::get_max_input_length()) {
+    path = std::move(previous_path);
+    return false;
+  }
   return true;
 }
 
@@ -922,8 +960,14 @@ bool url::set_protocol(const std::string_view input) {
       std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
-    return parse_scheme<true>(
+    url saved_url(*this);
+    bool result = parse_scheme<true>(
         std::string_view(view.data(), pointer - view.begin()));
+    if (result && get_href_size() > ada::get_max_input_length()) {
+      *this = std::move(saved_url);
+      return false;
+    }
+    return result;
   }
   return false;
 }
@@ -932,6 +976,11 @@ bool url::set_href(const std::string_view input) {
   ada::result<ada::url> out = ada::parse<ada::url>(input);
 
   if (out) {
+    // The parser enforces get_max_input_length() on the input.
+    // Check the resulting URL size as well.
+    if (out->get_href_size() > ada::get_max_input_length()) {
+      return false;
+    }
     *this = *out;
   }
 

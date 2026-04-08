@@ -163,6 +163,12 @@ struct url : url_base {
   [[nodiscard]] ada_really_inline std::string get_href() const;
 
   /**
+   * Returns the byte length of the serialized URL without allocating a string.
+   * @return Size of the href in bytes.
+   */
+  [[nodiscard]] size_t get_href_size() const noexcept;
+
+  /**
    * Returns the URL's origin as a string (scheme + host + port for special
    * URLs).
    * @return A newly allocated string containing the serialized origin.

@@ -1,5 +1,7 @@
 #include "ada/implementation-inl.h"
 
+#include <atomic>
+#include <limits>
 #include <optional>
 #include <string_view>
 
@@ -13,6 +15,17 @@
 #include "ada/url_aggregator.h"
 
 namespace ada {
+
+static std::atomic<uint32_t> max_input_length_{
+    std::numeric_limits<uint32_t>::max()};
+
+void set_max_input_length(uint32_t length) {
+  max_input_length_.store(length, std::memory_order_relaxed);
+}
+
+uint32_t get_max_input_length() {
+  return max_input_length_.load(std::memory_order_relaxed);
+}
 
 namespace {
 
