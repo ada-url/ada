@@ -333,8 +333,8 @@ TEST(wpt_urlpattern_tests, parser_tokenize_malformed_utf8_progress) {
 }
 
 TEST(wpt_urlpattern_tests, tokenizer_advances_after_invalid_utf8_byte) {
-  using ada::url_pattern_helpers::Tokenizer;
   using ada::url_pattern_helpers::token_policy;
+  using ada::url_pattern_helpers::Tokenizer;
 
   // First byte is an invalid leading UTF-8 byte. The second byte is ASCII '*'.
   // On the old implementation, the decoder could keep re-reading byte 0.
