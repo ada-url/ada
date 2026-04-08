@@ -36,10 +36,12 @@ result_type parse_url_impl(std::string_view user_input,
   state state = state::SCHEME_START;
   result_type url{};
 
+  const uint32_t max_input_length = ada::get_max_input_length();
+
   // We refuse to parse URL strings that exceed the maximum input length.
   // By default, this is 4GB but can be configured via
   // ada::set_max_input_length().
-  if (user_input.size() > ada::get_max_input_length()) [[unlikely]] {
+  if (user_input.size() > max_input_length) [[unlikely]] {
     url.is_valid = false;
   }
   // Going forward, user_input.size() is in [0,
@@ -961,11 +963,11 @@ result_type parse_url_impl(std::string_view user_input,
   if constexpr (store_values) {
     if (url.is_valid) {
       if constexpr (result_type_is_ada_url_aggregator) {
-        if (url.buffer.size() > ada::get_max_input_length()) {
+        if (url.buffer.size() > max_input_length) {
           url.is_valid = false;
         }
       } else {
-        if (url.get_href_size() > ada::get_max_input_length()) {
+        if (url.get_href_size() > max_input_length) {
           url.is_valid = false;
         }
       }
