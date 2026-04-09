@@ -593,6 +593,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
       if (!succeeded) {
         update_base_hostname(previous_host);
         update_base_port(previous_port);
+        is_valid = true;
         return false;
       }
 
@@ -637,6 +638,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
       if (!succeeded) {
         update_base_hostname(previous_host);
         update_base_port(previous_port);
+        is_valid = true;
         return false;
       } else if (has_dash_dot()) {
         // Should remove dash_dot from pathname
@@ -659,6 +661,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     if (!parse_host(new_host)) {
       update_base_hostname(previous_host);
       update_base_port(previous_port);
+      is_valid = true;
       return false;
     }
 

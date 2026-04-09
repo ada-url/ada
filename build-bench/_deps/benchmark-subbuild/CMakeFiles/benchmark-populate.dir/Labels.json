@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/CMakeFiles/benchmark-populate"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/CMakeFiles/benchmark-populate.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/CMakeFiles/benchmark-populate-complete.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-build.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-configure.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-download.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-install.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-patch.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-test.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/benchmark-subbuild/benchmark-populate-prefix/src/benchmark-populate-stamp/benchmark-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"benchmark-populate"
+		],
+		"name" : "benchmark-populate"
+	}
+}

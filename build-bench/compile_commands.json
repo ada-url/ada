@@ -1,0 +1,278 @@
+[
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_INCLUDE_URL_PATTERN=1 -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -I/home/runner/work/ada/ada/src -I/home/runner/work/ada/ada/include -O3 -DNDEBUG -std=c++20 -fPIC -Wall -Wextra -Weffc++ -Wsuggest-override -Wfatal-errors -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self -Wconversion -Wno-sign-conversion -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store -o src/CMakeFiles/ada.dir/ada.cpp.o -c /home/runner/work/ada/ada/src/ada.cpp",
+  "file": "/home/runner/work/ada/ada/src/ada.cpp",
+  "output": "src/CMakeFiles/ada.dir/ada.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/cc -DADA_INCLUDE_URL_PATTERN=1 -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -I/home/runner/work/ada/ada/src -I/home/runner/work/ada/ada/include -O3 -DNDEBUG -fPIC -Wall -Wextra -Weffc++ -Wsuggest-override -Wfatal-errors -Wsign-compare -Wshadow -Wwrite-strings -Wpointer-arith -Winit-self -Wconversion -Wno-sign-conversion -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store -o src/CMakeFiles/ada.dir/ada_c.c.o -c /home/runner/work/ada/ada/src/ada_c.c",
+  "file": "/home/runner/work/ada/ada/src/ada_c.c",
+  "output": "src/CMakeFiles/ada.dir/ada_c.c.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DSIMDJSON_AVX512_ALLOWED=1 -DSIMDJSON_THREADS_ENABLED=1 -DSIMDJSON_UTF8VALIDATION=1 -I/home/runner/work/ada/ada/build-bench/_deps/simdjson-src/include -I/home/runner/work/ada/ada/build-bench/_deps/simdjson-src/src -O3 -DNDEBUG -std=c++17 -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store -o _deps/simdjson-build/CMakeFiles/simdjson.dir/src/simdjson.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/simdjson-src/src/simdjson.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/simdjson-src/src/simdjson.cpp",
+  "output": "_deps/simdjson-build/CMakeFiles/simdjson.dir/src/simdjson.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -DBENCHMARK_VERSION=\\\"v1.9.0\\\" -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_api_internal.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_api_internal.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_api_internal.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_api_internal.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_name.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_name.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_name.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_name.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_register.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_register.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_register.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_register.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_runner.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_runner.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_runner.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_runner.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/check.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/check.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/check.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/check.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/colorprint.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/colorprint.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/colorprint.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/colorprint.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/commandlineflags.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/commandlineflags.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/commandlineflags.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/commandlineflags.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/complexity.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/complexity.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/complexity.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/complexity.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/console_reporter.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/console_reporter.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/console_reporter.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/console_reporter.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/counter.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/counter.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/counter.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/counter.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/csv_reporter.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/csv_reporter.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/csv_reporter.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/csv_reporter.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/json_reporter.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/json_reporter.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/json_reporter.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/json_reporter.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/perf_counters.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/perf_counters.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/perf_counters.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/perf_counters.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/reporter.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/reporter.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/reporter.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/reporter.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/statistics.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/statistics.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/statistics.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/statistics.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/string_util.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/string_util.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/string_util.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/string_util.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/sysinfo.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/sysinfo.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/sysinfo.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/sysinfo.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_HAS_PTHREAD_AFFINITY -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark.dir/timers.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/timers.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/timers.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark.dir/timers.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DBENCHMARK_STATIC_DEFINE -DHAVE_POSIX_REGEX -DHAVE_PTHREAD_AFFINITY -DHAVE_STD_REGEX -DHAVE_STEADY_CLOCK -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wstrict-aliasing -O3 -DNDEBUG -std=c++14 -fvisibility=hidden -fvisibility-inlines-hidden -o _deps/benchmark-build/src/CMakeFiles/benchmark_main.dir/benchmark_main.cc.o -c /home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_main.cc",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/src/benchmark_main.cc",
+  "output": "_deps/benchmark-build/src/CMakeFiles/benchmark_main.dir/benchmark_main.cc.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/bench_protocol.dir/bench_protocol.cpp.o -c /home/runner/work/ada/ada/benchmarks/bench_protocol.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/bench_protocol.cpp",
+  "output": "benchmarks/CMakeFiles/bench_protocol.dir/bench_protocol.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DBENCHMARK_STATIC_DEFINE -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/bench_search_params.dir/bench_search_params.cpp.o -c /home/runner/work/ada/ada/benchmarks/bench_search_params.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/bench_search_params.cpp",
+  "output": "benchmarks/CMakeFiles/bench_search_params.dir/bench_search_params.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DBENCHMARK_STATIC_DEFINE -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/benchmarks -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/urlpattern.dir/urlpattern.cpp.o -c /home/runner/work/ada/ada/benchmarks/urlpattern.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/urlpattern.cpp",
+  "output": "benchmarks/CMakeFiles/urlpattern.dir/urlpattern.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DADA_url_whatwg_ENABLED=1 -DBENCHMARK_STATIC_DEFINE -DSIMDJSON_THREADS_ENABLED=1 -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/benchmarks -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -isystem /home/runner/work/ada/ada/build-bench/_deps/simdjson-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/wpt_bench.dir/wpt_bench.cpp.o -c /home/runner/work/ada/ada/benchmarks/wpt_bench.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/wpt_bench.cpp",
+  "output": "benchmarks/CMakeFiles/wpt_bench.dir/wpt_bench.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DADA_url_whatwg_ENABLED=1 -DBENCHMARK_STATIC_DEFINE -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/benchmarks -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/bench.dir/bench.cpp.o -c /home/runner/work/ada/ada/benchmarks/bench.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/bench.cpp",
+  "output": "benchmarks/CMakeFiles/bench.dir/bench.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_URL_FILE=\\\"/home/runner/work/ada/ada/build-bench/_deps/url-dataset-src/out.txt\\\" -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DADA_url_whatwg_ENABLED=1 -DBENCHMARK_PREFIX=BenchData_ -DBENCHMARK_PREFIX_STR=\\\"BenchData_\\\" -DBENCHMARK_STATIC_DEFINE -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/benchmarks -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/benchdata.dir/bench.cpp.o -c /home/runner/work/ada/ada/benchmarks/bench.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/bench.cpp",
+  "output": "benchmarks/CMakeFiles/benchdata.dir/bench.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DADA_url_whatwg_ENABLED=1 -DBENCHMARK_STATIC_DEFINE -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/benchmarks -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/bbc_bench.dir/bbc_bench.cpp.o -c /home/runner/work/ada/ada/benchmarks/bbc_bench.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/bbc_bench.cpp",
+  "output": "benchmarks/CMakeFiles/bbc_bench.dir/bbc_bench.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_URL_FILE=\\\"/home/runner/work/ada/ada/build-bench/_deps/url-dataset-src/out.txt\\\" -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DBENCHMARK_STATIC_DEFINE -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/benchmarks -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/bench_ipv4.dir/bench_ipv4.cpp.o -c /home/runner/work/ada/ada/benchmarks/bench_ipv4.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/bench_ipv4.cpp",
+  "output": "benchmarks/CMakeFiles/bench_ipv4.dir/bench_ipv4.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DBENCHMARK_STATIC_DEFINE -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/benchmarks -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/percent_encode.dir/percent_encode.cpp.o -c /home/runner/work/ada/ada/benchmarks/percent_encode.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/percent_encode.cpp",
+  "output": "benchmarks/CMakeFiles/percent_encode.dir/percent_encode.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_URL_FILE=\\\"/home/runner/work/ada/ada/build-bench/_deps/url-dataset-src/out.txt\\\" -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/model_bench.dir/model_bench.cpp.o -c /home/runner/work/ada/ada/benchmarks/model_bench.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/model_bench.cpp",
+  "output": "benchmarks/CMakeFiles/model_bench.dir/model_bench.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DBENCHMARK_STATIC_DEFINE -I/home/runner/work/ada/ada/include -I/home/runner/work/ada/ada/benchmarks -I/home/runner/work/ada/ada/build-bench/_deps/counters-src/include -I/home/runner/work/ada/ada/build-bench/_deps/benchmark-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/bench_c_api.dir/bench_c_api.cpp.o -c /home/runner/work/ada/ada/benchmarks/bench_c_api.cpp",
+  "file": "/home/runner/work/ada/ada/benchmarks/bench_c_api.cpp",
+  "output": "benchmarks/CMakeFiles/bench_c_api.dir/bench_c_api.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url.cpp",
+  "output": "benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_idna.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_idna.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_idna.cpp",
+  "output": "benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_idna.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_ip.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_ip.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_ip.cpp",
+  "output": "benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_ip.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_percent_encode.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_percent_encode.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_percent_encode.cpp",
+  "output": "benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_percent_encode.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_search_params.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_search_params.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_search_params.cpp",
+  "output": "benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_search_params.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_utf.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_utf.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_utf.cpp",
+  "output": "benchmarks/CMakeFiles/url_whatwg_lib.dir/__/_deps/url_whatwg-src/src/url_utf.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/deps -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o _deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url.cpp",
+  "output": "_deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/deps -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o _deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_idna.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_idna.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_idna.cpp",
+  "output": "_deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_idna.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/deps -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o _deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_ip.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_ip.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_ip.cpp",
+  "output": "_deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_ip.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/deps -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o _deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_percent_encode.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_percent_encode.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_percent_encode.cpp",
+  "output": "_deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_percent_encode.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/deps -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o _deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_search_params.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_search_params.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_search_params.cpp",
+  "output": "_deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_search_params.cpp.o"
+},
+{
+  "directory": "/home/runner/work/ada/ada/build-bench",
+  "command": "/usr/bin/c++ -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/deps -I/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/include -O3 -DNDEBUG -std=c++20 -o _deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_utf.cpp.o -c /home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_utf.cpp",
+  "file": "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-src/src/url_utf.cpp",
+  "output": "_deps/url_whatwg-build/CMakeFiles/upa_url.dir/src/url_utf.cpp.o"
+}
+]

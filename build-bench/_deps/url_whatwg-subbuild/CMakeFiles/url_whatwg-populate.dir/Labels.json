@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/CMakeFiles/url_whatwg-populate"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/CMakeFiles/url_whatwg-populate.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/CMakeFiles/url_whatwg-populate-complete.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/url_whatwg-populate-prefix/src/url_whatwg-populate-stamp/url_whatwg-populate-build.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/url_whatwg-populate-prefix/src/url_whatwg-populate-stamp/url_whatwg-populate-configure.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/url_whatwg-populate-prefix/src/url_whatwg-populate-stamp/url_whatwg-populate-download.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/url_whatwg-populate-prefix/src/url_whatwg-populate-stamp/url_whatwg-populate-install.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/url_whatwg-populate-prefix/src/url_whatwg-populate-stamp/url_whatwg-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/url_whatwg-populate-prefix/src/url_whatwg-populate-stamp/url_whatwg-populate-patch.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/url_whatwg-populate-prefix/src/url_whatwg-populate-stamp/url_whatwg-populate-test.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/url_whatwg-subbuild/url_whatwg-populate-prefix/src/url_whatwg-populate-stamp/url_whatwg-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"url_whatwg-populate"
+		],
+		"name" : "url_whatwg-populate"
+	}
+}

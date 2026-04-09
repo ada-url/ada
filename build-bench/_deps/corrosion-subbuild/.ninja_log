@@ -1,0 +1,21 @@
+# ninja log v7
+0	4	1774203684547449402	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-mkdir	a8a2ddbb92512933
+0	4	1774203684547449402	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-mkdir	a8a2ddbb92512933
+4	516	1774203685058450532	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-download	c9a8a4da91a38cd
+4	516	1774203685058450532	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-download	c9a8a4da91a38cd
+516	525	1774203685059450535	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-update	a3e1a62b67c726d6
+516	525	1774203685059450535	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-update	a3e1a62b67c726d6
+525	529	1774203685071450561	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-patch	8e267a09c58e256d
+525	529	1774203685071450561	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-patch	8e267a09c58e256d
+529	533	1774203685075450570	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-configure	a3cd9176d63e704e
+529	533	1774203685075450570	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-configure	a3cd9176d63e704e
+533	537	1774203685079450579	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-build	6826183a73554ea8
+533	537	1774203685079450579	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-build	6826183a73554ea8
+537	540	1774203685083450588	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-install	229aa25a97cdd762
+537	540	1774203685083450588	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-install	229aa25a97cdd762
+540	544	1774203685087450597	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-test	8fafa2e1402c6439
+540	544	1774203685087450597	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-test	8fafa2e1402c6439
+544	549	1774203685092450608	CMakeFiles/corrosion-populate-complete	c26f327fa84964cf
+544	549	1774203685092450608	corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-done	c26f327fa84964cf
+544	549	1774203685092450608	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/CMakeFiles/corrosion-populate-complete	c26f327fa84964cf
+544	549	1774203685092450608	/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-done	c26f327fa84964cf

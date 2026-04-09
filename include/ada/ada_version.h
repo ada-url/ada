@@ -7,6 +7,12 @@
 
 #define ADA_VERSION "3.4.4"
 
+/* C-compatible numeric macros (usable without C++ namespace). */
+#define ADA_VERSION_MAJOR_NUM 3
+#define ADA_VERSION_MINOR_NUM 4
+#define ADA_VERSION_REVISION_NUM 3
+
+#ifdef __cplusplus
 namespace ada {
 
 enum {
@@ -16,5 +22,6 @@ enum {
 };
 
 }  // namespace ada
+#endif /* __cplusplus */
 
 #endif  // ADA_ADA_VERSION_H

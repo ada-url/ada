@@ -1,0 +1,26 @@
+# ninja log v7
+3	299	1774203692853432050	src/CMakeFiles/ada.dir/ada_c.c.o	943b68b87b1f00b6
+4	866	1774203692856134185	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_name.cc.o	e30ac80f90a2d8db
+4	1221	1774203692855836690	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_api_internal.cc.o	b33b6117f4d4c50c
+866	1594	1774203693716430682	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/check.cc.o	bfeb4bf53f9ba432
+1222	2047	1774203694075430113	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/colorprint.cc.o	45efbcbf381cb95f
+1594	3483	1774203694444429527	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/commandlineflags.cc.o	d2a85aefdd1e7ef7
+299	4470	1774203693150976932	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_runner.cc.o	db0c4521638a9566
+2047	4908	1774203694897428809	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/complexity.cc.o	4613d4d039cad6b5
+3483	4928	1774203696333426532	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/console_reporter.cc.o	9367a9acaeea2e40
+4471	5494	1774203697321423564	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/counter.cc.o	d59e2953811e72a8
+4908	6414	1774203697758422016	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/csv_reporter.cc.o	47c92da66d50d48f
+5494	6723	1774203698344421482	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/perf_counters.cc.o	f8af7dcd6504dab5
+4928	6871	1774203697778421945	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/json_reporter.cc.o	b751540fb0ac5816
+3	7348	1774203692854918577	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark.cc.o	8fdce170a7600e0c
+6414	7768	1774203699264426035	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/reporter.cc.o	44d534cc4aad872d
+6871	8403	1774203699721428297	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/string_util.cc.o	59af8cef8ac6d84
+7768	8765	1774203700618429484	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/timers.cc.o	37dcf29f8a41f39e
+5	9371	1774203692857000712	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/benchmark_register.cc.o	d26b38f7da928436
+6723	9385	1774203699573427564	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/statistics.cc.o	341f7d96df5fd4c1
+7348	9731	1774203700198430579	_deps/benchmark-build/src/CMakeFiles/benchmark.dir/sysinfo.cc.o	41b0f5f881aacf79
+9731	9881	1774203702581424368	_deps/benchmark-build/src/libbenchmark.a	3fdc2257b483b8ac
+8403	11064	1774203701253427829	benchmarks/CMakeFiles/bench_c_api.dir/bench_c_api.cpp.o	d54a6b3e08338b69
+2	19311	1774203692852432051	src/CMakeFiles/ada.dir/ada.cpp.o	a4649f2495a4841a
+19311	19403	1774203712161400110	src/libada.a	66ff9323f3f44e61
+19403	19469	1774203712253399881	benchmarks/bench_c_api	af5dbeb8d50c9239

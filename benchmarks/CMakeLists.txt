@@ -72,6 +72,12 @@ add_executable(model_bench model_bench.cpp)
 target_link_libraries(model_bench PRIVATE ada counters::counters)
 target_compile_definitions(model_bench PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
 
+# C API benchmark
+add_executable(bench_c_api bench_c_api.cpp)
+target_link_libraries(bench_c_api PRIVATE ada counters::counters)
+target_include_directories(bench_c_api PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(bench_c_api PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
+
 target_link_libraries(wpt_bench PRIVATE benchmark::benchmark)
 target_link_libraries(bench PRIVATE benchmark::benchmark)
 target_link_libraries(benchdata PRIVATE benchmark::benchmark)
@@ -80,8 +86,9 @@ target_link_libraries(bench_ipv4 PRIVATE benchmark::benchmark)
 target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
 target_link_libraries(bench_search_params PRIVATE benchmark::benchmark)
 target_link_libraries(urlpattern PRIVATE benchmark::benchmark)
+target_link_libraries(bench_c_api PRIVATE benchmark::benchmark)
 
-set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_ipv4 percent_encode bench_search_params urlpattern)
+set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_ipv4 percent_encode bench_search_params urlpattern bench_c_api)
 
 add_custom_target(run_all_benchmarks
         COMMAND ${CMAKE_COMMAND} -E echo "Running all benchmarks..."

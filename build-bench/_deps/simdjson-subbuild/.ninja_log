@@ -1,0 +1,21 @@
+# ninja log v7
+0	4	1774203670441489199	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-mkdir	a5e6f7038b65eeec
+0	4	1774203670441489199	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-mkdir	a5e6f7038b65eeec
+5	7479	1774203677915460327	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-download	ebecdc4194ba2caa
+5	7479	1774203677915460327	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-download	ebecdc4194ba2caa
+7479	7488	1774203677916460323	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-update	4e10feb0495f8065
+7479	7488	1774203677916460323	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-update	4e10feb0495f8065
+7488	7491	1774203677928460277	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-patch	5cff03aed54cb733
+7488	7491	1774203677928460277	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-patch	5cff03aed54cb733
+7491	7495	1774203677932460262	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-configure	8c772920ed25390
+7491	7495	1774203677932460262	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-configure	8c772920ed25390
+7495	7499	1774203677935460250	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-build	9055d56700c01a4f
+7495	7499	1774203677935460250	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-build	9055d56700c01a4f
+7499	7503	1774203677939460235	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-install	7320203f1960a215
+7499	7503	1774203677939460235	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-install	7320203f1960a215
+7503	7507	1774203677943460219	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-test	4329b63cacda4e99
+7503	7507	1774203677943460219	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-test	4329b63cacda4e99
+7507	7512	1774203677949460196	CMakeFiles/simdjson-populate-complete	734a3a8f64397607
+7507	7512	1774203677949460196	simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-done	734a3a8f64397607
+7507	7512	1774203677949460196	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/CMakeFiles/simdjson-populate-complete	734a3a8f64397607
+7507	7512	1774203677949460196	/home/runner/work/ada/ada/build-bench/_deps/simdjson-subbuild/simdjson-populate-prefix/src/simdjson-populate-stamp/simdjson-populate-done	734a3a8f64397607

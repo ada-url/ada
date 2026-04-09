@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/CMakeFiles/corrosion-populate"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/CMakeFiles/corrosion-populate.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/CMakeFiles/corrosion-populate-complete.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-build.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-configure.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-download.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-install.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-patch.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-test.rule"
+		},
+		{
+			"file" : "/home/runner/work/ada/ada/build-bench/_deps/corrosion-subbuild/corrosion-populate-prefix/src/corrosion-populate-stamp/corrosion-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"corrosion-populate"
+		],
+		"name" : "corrosion-populate"
+	}
+}

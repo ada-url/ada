@@ -1,0 +1,11 @@
+prefix=/usr/local
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: ada
+Description: Fast spec-compliant URL parser
+URL: 
+Version: 3.4.3
+Cflags: -I${includedir} 
+Libs: -L${libdir} -lada
+
