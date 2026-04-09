@@ -109,11 +109,10 @@ extern template ada::result<url_aggregator> parse<url_aggregator>(
  * object. Use this when you only need to validate URLs without needing
  * their parsed components.
  *
- * Inputs whose size exceeds `get_max_input_length()` are rejected. However,
- * because `can_parse` does not perform full normalization (percent-encoding,
- * IDNA, etc.), it cannot detect cases where a short input would normalize
- * into a URL that exceeds the limit. In such edge cases `can_parse` may
- * return `true` while `parse` returns an error.
+ * When `get_max_input_length()` is set to a value smaller than the default,
+ * `can_parse` may still return `true` for overlength inputs that are
+ * structurally valid, because the fast path skips the length check for
+ * performance. Use `parse()` when strict length enforcement is required.
  *
  * @param input The URL string to validate. Must be valid ASCII or UTF-8.
  * @param base_input Optional pointer to a base URL string for resolving
