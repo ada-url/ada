@@ -23,8 +23,7 @@ namespace ada {
   return port.has_value();
 }
 [[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
-  return !host.has_value() || host.value().empty() ||
-         type == ada::scheme::type::FILE;
+  return !host.has_value() || host->empty() || type == ada::scheme::type::FILE;
 }
 [[nodiscard]] inline bool url::has_empty_hostname() const noexcept {
   if (!host.has_value()) {
@@ -227,6 +226,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
     size += non_special_scheme.size() + 1;
   }
   if (host.has_value()) {
+    size += host->size();
     size += 2;  // "//"
     if (has_credentials()) {
       size += username.size();
@@ -235,7 +235,6 @@ constexpr void url::copy_scheme(const ada::url& u) {
       }
       size += 1;  // "@"
     }
-    size += host.value().size();
     if (port.has_value()) {
       size += 1;  // ":"
       // Count digits of port value without calling std::to_string.
@@ -251,10 +250,10 @@ constexpr void url::copy_scheme(const ada::url& u) {
   }
   size += path.size();
   if (query.has_value()) {
-    size += 1 + query.value().size();  // "?" + query
+    size += 1 + query->size();  // "?" + query
   }
   if (hash.has_value()) {
-    size += 1 + hash.value().size();  // "#" + hash
+    size += 1 + hash->size();  // "#" + hash
   }
   return size;
 }

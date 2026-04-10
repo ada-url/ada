@@ -139,7 +139,7 @@ void run_benchmark(benchmark::State& state,
     for (size_t i = 0; i < count; ++i) {
       auto result = ada::parse<ResultType>(urls[order[pos]]);
       if (result) {
-        success++;
+        success = success + 1;
       }
       benchmark::DoNotOptimize(result);
 
@@ -161,7 +161,7 @@ void run_benchmark(benchmark::State& state,
       for (size_t j = 0; j < count; ++j) {
         auto result = ada::parse<ResultType>(urls[order[pos]]);
         if (result) {
-          success++;
+          success = success + 1;
         }
         benchmark::DoNotOptimize(result);
         pos += stride;

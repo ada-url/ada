@@ -356,7 +356,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
       // If url's scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE && host.has_value() &&
-          host.value().empty()) {
+          host->empty()) {
         return false;
       }
     }
@@ -400,7 +400,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
       // If url's scheme is "file" and its host is an empty host, then return.
       // An empty host is the empty string.
       if (type == ada::scheme::type::FILE && host.has_value() &&
-          host.value().empty()) {
+          host->empty()) {
         return true;
       }
     }
@@ -662,8 +662,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
 [[nodiscard]] std::string url::get_search() const {
   // If this's URL's query is either null or the empty string, then return the
   // empty string. Return U+003F (?), followed by this's URL's query.
-  return (!query.has_value() || (query.value().empty())) ? ""
-                                                         : "?" + query.value();
+  return (!query.has_value() || (query->empty())) ? "" : "?" + query.value();
 }
 
 [[nodiscard]] const std::string& url::get_username() const noexcept {
@@ -681,8 +680,7 @@ ada_really_inline void url::parse_path(std::string_view input) {
 [[nodiscard]] std::string url::get_hash() const {
   // If this's URL's fragment is either null or the empty string, then return
   // the empty string. Return U+0023 (#), followed by this's URL's fragment.
-  return (!hash.has_value() || (hash.value().empty())) ? ""
-                                                       : "#" + hash.value();
+  return (!hash.has_value() || (hash->empty())) ? "" : "#" + hash.value();
 }
 
 template <bool override_hostname>
