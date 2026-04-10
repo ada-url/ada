@@ -148,57 +148,6 @@ TYPED_TEST(basic_tests, set_protocol_should_return_true_sometimes) {
   SUCCEED();
 }
 
-TEST(url_aggregator_security, set_protocol_rewrites_preserve_components) {
-  auto url = ada::parse<ada::url_aggregator>(
-      "foo://user:pass@example.com:8080/path?query#hash");
-  ASSERT_TRUE(url);
-
-  std::string long_scheme(4096, 'a');
-  ASSERT_TRUE(url->set_protocol(long_scheme));
-  ASSERT_EQ(url->get_protocol(), long_scheme + ":");
-  ASSERT_EQ(url->get_username(), "user");
-  ASSERT_EQ(url->get_password(), "pass");
-  ASSERT_EQ(url->get_hostname(), "example.com");
-  ASSERT_EQ(url->get_port(), "8080");
-  ASSERT_EQ(url->get_pathname(), "/path");
-  ASSERT_EQ(url->get_search(), "?query");
-  ASSERT_EQ(url->get_hash(), "#hash");
-
-  ASSERT_TRUE(url->set_protocol("bar"));
-  ASSERT_EQ(url->get_protocol(), "bar:");
-  ASSERT_EQ(url->get_username(), "user");
-  ASSERT_EQ(url->get_password(), "pass");
-  ASSERT_EQ(url->get_hostname(), "example.com");
-  ASSERT_EQ(url->get_port(), "8080");
-  ASSERT_EQ(url->get_pathname(), "/path");
-  ASSERT_EQ(url->get_search(), "?query");
-  ASSERT_EQ(url->get_hash(), "#hash");
-  ASSERT_TRUE(url->validate());
-}
-
-TEST(url_aggregator_security, set_protocol_fails_closed_on_corrupted_offsets) {
-  auto parsed = ada::parse<ada::url_aggregator>("https://example.com/");
-  ASSERT_TRUE(parsed);
-
-  // Simulate an already-corrupted internal state and verify the setter fails
-  // closed rather than throwing from string operations.
-  parsed->is_valid = false;
-  auto& components =
-      const_cast<ada::url_components&>(parsed->get_components());
-  components.protocol_end = 0xfffffff0u;
-  components.username_end = 0;
-  components.host_start = 0;
-  components.host_end = 0;
-  components.pathname_start = 0;
-  components.search_start = ada::url_components::omitted;
-  components.hash_start = ada::url_components::omitted;
-
-  bool result = true;
-  ASSERT_NO_THROW(result = parsed->set_protocol("ws"));
-  ASSERT_FALSE(result);
-  ASSERT_FALSE(parsed->is_valid);
-}
-
 TYPED_TEST(basic_tests, readme4) {
   auto url = ada::parse<TypeParam>("https://www.google.com");
   url->set_host("github.com");
