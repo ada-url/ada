@@ -13,6 +13,24 @@
 #include <string>
 #include <string_view>
 
+namespace {
+
+ada_really_inline void apply_shifted_non_scheme_offsets(
+    ada::url_components& components, uint32_t new_difference) {
+  components.username_end += new_difference;
+  components.host_start += new_difference;
+  components.host_end += new_difference;
+  components.pathname_start += new_difference;
+  if (components.search_start != ada::url_components::omitted) {
+    components.search_start += new_difference;
+  }
+  if (components.hash_start != ada::url_components::omitted) {
+    components.hash_start += new_difference;
+  }
+}
+
+}  // namespace
+
 namespace ada {
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(
@@ -117,6 +135,7 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) {
   // next line could overflow but unsigned arithmetic has well-defined
   // overflows.
   uint32_t new_difference = u.components.protocol_end - components.protocol_end;
+
   type = u.type;
   buffer.erase(0, components.protocol_end);
   buffer.insert(0, u.get_protocol());
@@ -127,17 +146,7 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) {
     return;
   }
 
-  // Update the rest of the components.
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += new_difference;
-  }
+  apply_shifted_non_scheme_offsets(components, new_difference);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -161,17 +170,7 @@ inline void url_aggregator::set_scheme_from_view_with_colon(
   }
   components.protocol_end += new_difference;
 
-  // Update the rest of the components.
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += new_difference;
-  }
+  apply_shifted_non_scheme_offsets(components, new_difference);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -193,17 +192,7 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) {
   }
   components.protocol_end = uint32_t(new_scheme.size() + 1);
 
-  // Update the rest of the components.
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += new_difference;
-  }
+  apply_shifted_non_scheme_offsets(components, new_difference);
   ADA_ASSERT_TRUE(validate());
 }
 
