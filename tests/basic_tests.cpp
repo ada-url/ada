@@ -951,3 +951,126 @@ TYPED_TEST(basic_tests, set_host_fast_path_restores_is_valid) {
   ASSERT_EQ(url->get_hostname(), "rf");
   ASSERT_EQ(url->get_port(), "1");
 }
+
+TYPED_TEST(basic_tests, get_href_size_matches_get_href) {
+  // Verify that get_href_size() returns the same value as get_href().size()
+  // across a variety of URLs.
+  const std::string_view urls[] = {
+      "https://www.google.com/",
+      "https://user:pass@example.com:8080/path?query=1#hash",
+      "http://localhost/",
+      "http://localhost:3000/",
+      "ftp://ftp.example.com/pub/file.txt",
+      "ws://echo.websocket.org/",
+      "wss://secure.example.com:8443/chat",
+      "file:///tmp/test.txt",
+      "data:text/html,<h1>Hello</h1>",
+      "mailto:user@example.com",
+      "http://[::1]:8080/path",
+      "http://example.com/?q=hello%20world#section",
+      "https://example.com/path/to/resource",
+  };
+  for (const auto& input : urls) {
+    auto url = ada::parse<TypeParam>(input);
+    ASSERT_TRUE(url) << "Failed to parse: " << input;
+    ASSERT_EQ(url->get_href_size(), url->get_href().size())
+        << "Mismatch for: " << input;
+  }
+}
+
+TYPED_TEST(basic_tests, get_href_size_after_setters) {
+  auto url =
+      ada::parse<TypeParam>("https://user:pass@example.com:8080/path?q=1#frag");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_username("newuser");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_password("newpass");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_pathname("/new/path");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_search("?new=search");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_hash("#newhash");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_port("9090");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_hostname("other.com");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_protocol("http");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+}
+
+TYPED_TEST(basic_tests, get_href_size_no_port) {
+  auto url = ada::parse<TypeParam>("https://example.com/");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+}
+
+TYPED_TEST(basic_tests, get_href_size_no_credentials) {
+  auto url = ada::parse<TypeParam>("https://example.com:443/path?q=1#h");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+}
+
+TYPED_TEST(basic_tests, get_href_size_empty_components) {
+  auto url = ada::parse<TypeParam>("http://x");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_search("");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  url->set_hash("");
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+}
+
+TYPED_TEST(basic_tests, get_href_size_non_special_scheme) {
+  auto url = ada::parse<TypeParam>("foo://bar/baz?q#f");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+}
+
+TYPED_TEST(basic_tests, get_href_size_all_port_lengths) {
+  // Test ports with 1 through 5 digits to exercise the digit-counting logic.
+  const std::string_view ports[] = {"1", "80", "443", "8080", "65535"};
+  for (const auto& port : ports) {
+    auto url = ada::parse<TypeParam>("http://example.com/");
+    ASSERT_TRUE(url);
+    url->set_port(port);
+    ASSERT_EQ(url->get_href_size(), url->get_href().size())
+        << "Mismatch for port: " << port;
+  }
+}
+
+TYPED_TEST(basic_tests, get_href_size_percent_encoded) {
+  auto url = ada::parse<TypeParam>("http://example.com/hello%20world?q=%23#f");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+}
+
+TYPED_TEST(basic_tests, get_href_size_opaque_path) {
+  auto url = ada::parse<TypeParam>("data:text/html,content");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+}
+
+TYPED_TEST(basic_tests, get_href_size_password_no_password) {
+  // URL with username but no password.
+  auto url = ada::parse<TypeParam>("http://user@example.com/");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href_size(), url->get_href().size());
+
+  // URL with username and password.
+  auto url2 = ada::parse<TypeParam>("http://user:pass@example.com/");
+  ASSERT_TRUE(url2);
+  ASSERT_EQ(url2->get_href_size(), url2->get_href().size());
+}

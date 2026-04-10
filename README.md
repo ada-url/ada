@@ -179,6 +179,47 @@ url->set_hash("is-this-the-real-life"); // Update hash/fragment
 // url->get_hash() will return "#is-this-the-real-life"
 ```
 
+### URL Size Limit
+
+By default, ada allows URLs up to about 4 GB. You can set a lower limit to
+reject any URL whose serialized form (the href) would exceed a given number
+of bytes. The limit is enforced during parsing and across all setters.
+Setters that return `bool` return `false` when the limit would be exceeded;
+`void` setters (`set_search`, `set_hash`) silently leave the URL unchanged.
+In all cases the URL is never modified when a limit violation is detected.
+Percent-encoding expansion is accounted for: a short input that encodes into
+a long result is still rejected.
+
+```cpp
+// Set a 2 KB limit (any uint32_t value works).
+ada::set_max_input_length(2048);
+
+// Parsing a URL whose normalized form exceeds 2 KB fails.
+auto url = ada::parse("http://example.com/" + std::string(2048, 'a'));
+assert(!url);  // too long
+
+// Setters that would push the URL over the limit are rejected.
+auto u = ada::parse<ada::url_aggregator>("http://example.com/");
+assert(u);
+bool ok = u->set_pathname(std::string(2048, 'x'));
+assert(!ok);  // pathname too long; URL unchanged
+
+// Read the current limit.
+uint32_t limit = ada::get_max_input_length();
+
+// Reset to the default (no practical limit).
+ada::set_max_input_length(UINT32_MAX);
+```
+
+You can query the byte length of a URL without allocating a string via `get_href_size()`:
+
+```c++
+auto url = ada::parse<ada::url_aggregator>("https://example.com/path");
+assert(url);
+size_t len = url->get_href_size();  // no allocation
+assert(len == url->get_href().size());
+```
+
 ### URL Search Params
 
 ```cpp

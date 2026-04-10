@@ -23,8 +23,7 @@ namespace ada {
   return port.has_value();
 }
 [[nodiscard]] inline bool url::cannot_have_credentials_or_port() const {
-  return !host.has_value() || host.value().empty() ||
-         type == ada::scheme::type::FILE;
+  return !host.has_value() || host->empty() || type == ada::scheme::type::FILE;
 }
 [[nodiscard]] inline bool url::has_empty_hostname() const noexcept {
   if (!host.has_value()) {
@@ -215,6 +214,48 @@ constexpr void url::copy_scheme(const ada::url& u) {
     output += "#" + hash.value();
   }
   return output;
+}
+
+[[nodiscard]] inline size_t url::get_href_size() const noexcept {
+  // Mirrors the logic of get_href() but only computes the total size.
+  size_t size = 0;
+  // Protocol: scheme + ":"
+  if (is_special()) {
+    size += ada::scheme::details::is_special_list[type].size() + 1;
+  } else {
+    size += non_special_scheme.size() + 1;
+  }
+  if (host.has_value()) {
+    size += host->size();
+    size += 2;  // "//"
+    if (has_credentials()) {
+      size += username.size();
+      if (!password.empty()) {
+        size += 1 + password.size();  // ":" + password
+      }
+      size += 1;  // "@"
+    }
+    if (port.has_value()) {
+      size += 1;  // ":"
+      // Count digits of port value without calling std::to_string.
+      uint16_t p = port.value();
+      size += (p >= 10000)  ? 5
+              : (p >= 1000) ? 4
+              : (p >= 100)  ? 3
+              : (p >= 10)   ? 2
+                            : 1;
+    }
+  } else if (!has_opaque_path && path.starts_with("//")) {
+    size += 2;  // "/."
+  }
+  size += path.size();
+  if (query.has_value()) {
+    size += 1 + query->size();  // "?" + query
+  }
+  if (hash.has_value()) {
+    size += 1 + hash->size();  // "#" + hash
+  }
+  return size;
 }
 
 ada_really_inline size_t url::parse_port(std::string_view view,

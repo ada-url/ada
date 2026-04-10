@@ -590,3 +590,41 @@ TEST(ada_c, setters_tests_encoding) {
   }
   SUCCEED();
 }
+
+TEST(ada_c, max_input_length) {
+  // Save default and set a small limit.
+  uint32_t original = ada_get_max_input_length();
+  ada_set_max_input_length(512);
+  ASSERT_EQ(ada_get_max_input_length(), 512u);
+
+  // Parse a URL that exceeds the limit.
+  std::string long_url = "https://example.com/" + std::string(512, 'a');
+  ada_url result = ada_parse(long_url.c_str(), long_url.size());
+  ASSERT_FALSE(ada_is_valid(result));
+  ada_free(result);
+
+  // Parse a URL that fits within the limit.
+  const char* short_url = "https://example.com/ok";
+  result = ada_parse(short_url, strlen(short_url));
+  ASSERT_TRUE(ada_is_valid(result));
+
+  // Setter that would exceed the limit should fail.
+  std::string long_path(512, 'x');
+  ASSERT_FALSE(ada_set_pathname(result, long_path.c_str(), long_path.size()));
+
+  // URL should be unchanged after failed setter.
+  ada_string href = ada_get_href(result);
+  ASSERT_EQ(std::string_view(href.data, href.length), "https://example.com/ok");
+
+  ada_free(result);
+
+  // can_parse may return true for overlength inputs that are structurally
+  // valid, because the fast path does not check the length limit (by design,
+  // for performance). The full parse (ada_parse) does enforce the limit. We
+  // just verify it doesn't crash.
+  (void)ada_can_parse(long_url.c_str(), long_url.size());
+
+  // Restore default.
+  ada_set_max_input_length(original);
+  ASSERT_EQ(ada_get_max_input_length(), original);
+}

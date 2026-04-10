@@ -184,6 +184,10 @@ ada_string_pair ada_search_params_entries_iter_next(
 bool ada_search_params_entries_iter_has_next(
     ada_url_search_params_entries_iter result);
 
+// max URL length configuration
+void ada_set_max_input_length(uint32_t length);
+uint32_t ada_get_max_input_length(void);
+
 // Definitions for Ada's version number.
 typedef struct {
   int major;

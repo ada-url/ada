@@ -1,5 +1,7 @@
 #include "ada/implementation-inl.h"
 
+#include <atomic>
+#include <limits>
 #include <optional>
 #include <string_view>
 
@@ -13,6 +15,17 @@
 #include "ada/url_aggregator.h"
 
 namespace ada {
+
+static std::atomic<uint32_t> max_input_length_{
+    std::numeric_limits<uint32_t>::max()};
+
+void set_max_input_length(uint32_t length) {
+  max_input_length_.store(length, std::memory_order_relaxed);
+}
+
+uint32_t get_max_input_length() {
+  return max_input_length_.load(std::memory_order_relaxed);
+}
 
 namespace {
 
@@ -305,6 +318,20 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
     if (const auto r = try_can_parse_absolute_fast(input)) {
       return *r;
     }
+  }
+
+  // Reject inputs that exceed the configurable maximum length.
+  // This check is placed after the fast path so the common case (default 4 GB
+  // limit, absolute URLs) pays no overhead.
+  // Note: can_parse() does not perform normalization (percent-encoding, IDNA),
+  // so it cannot detect cases where a short input normalizes into a long URL.
+  // In such edge cases can_parse() may return true while parse() fails.
+  const uint32_t max_length = ada::get_max_input_length();
+  if (input.size() > max_length) {
+    return false;
+  }
+  if (base_input != nullptr && base_input->size() > max_length) {
+    return false;
   }
 
   // Fallback: run the parser in validation-only mode (store_values=false),

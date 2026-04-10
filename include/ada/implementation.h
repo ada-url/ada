@@ -65,6 +65,11 @@ using result = tl::expected<result_type, ada::errors>;
  *
  * @note The parser is fully compliant with the WHATWG URL Standard.
  *
+ * Parsing fails if the input or the resulting normalized URL exceeds
+ * `get_max_input_length()` bytes (default ~4 GB, configurable via
+ * `set_max_input_length()`). This accounts for percent-encoding expansion:
+ * a short input that normalizes into a long URL is still rejected.
+ *
  * @example
  * ```cpp
  * // Parse an absolute URL
@@ -103,6 +108,11 @@ extern template ada::result<url_aggregator> parse<url_aggregator>(
  * according to the WHATWG URL Standard without fully constructing a URL
  * object. Use this when you only need to validate URLs without needing
  * their parsed components.
+ *
+ * When `get_max_input_length()` is set to a value smaller than the default,
+ * `can_parse` may still return `true` for overlength inputs that are
+ * structurally valid, because the fast path skips the length check for
+ * performance. Use `parse()` when strict length enforcement is required.
  *
  * @param input The URL string to validate. Must be valid ASCII or UTF-8.
  * @param base_input Optional pointer to a base URL string for resolving
@@ -166,6 +176,26 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init>&& input,
  * @return A file:// URL string representing the given path.
  */
 std::string href_from_file(std::string_view path);
+
+/**
+ * Sets the maximum allowed length for URLs.
+ *
+ * Both the raw input and the resulting normalized URL (the href) are checked
+ * against this limit. Parsing or setter calls that would produce a URL
+ * exceeding this length are rejected. The value must fit in a uint32_t.
+ * The default is std::numeric_limits<uint32_t>::max() (approximately 4 GB).
+ *
+ * @param length The new maximum URL length in bytes.
+ */
+void set_max_input_length(uint32_t length);
+
+/**
+ * Returns the current maximum allowed length for URLs.
+ *
+ * @return The current maximum URL length in bytes.
+ */
+uint32_t get_max_input_length();
+
 }  // namespace ada
 
 #endif  // ADA_IMPLEMENTATION_H

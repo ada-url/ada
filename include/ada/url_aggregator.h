@@ -105,6 +105,12 @@ struct url_aggregator : url_base {
       ada_lifetime_bound;
 
   /**
+   * Returns the byte length of the serialized URL without allocating a string.
+   * @return Size of the href in bytes.
+   */
+  [[nodiscard]] constexpr size_t get_href_size() const noexcept;
+
+  /**
    * Returns the URL's username component.
    * Does not allocate memory. The returned view becomes invalid if this
    * url_aggregator is modified or destroyed.

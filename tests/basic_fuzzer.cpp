@@ -1,5 +1,6 @@
 #include "ada.h"
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <bit>
 
@@ -118,6 +119,94 @@ size_t roller_fuzz(size_t N) {
   return valid;
 }
 
+// Fuzz with a tight URL size limit (512 bytes). Parses each example URL,
+// then applies a sequence of pseudo-random setter calls with mutated values.
+// After every operation the href must not exceed the limit.
+template <class result>
+size_t length_fuzz(size_t N, size_t seed = 0) {
+  static constexpr uint32_t kMaxLength = 512;
+  ada::set_max_input_length(kMaxLength);
+
+  size_t counter = seed;
+  size_t checked = 0;
+
+  auto check = [&](const result& url, const char* context) {
+    if (url.get_href_size() > kMaxLength) {
+      std::cerr << "length_fuzz FAIL [" << context
+                << "]: href_size=" << url.get_href_size() << " exceeds limit "
+                << kMaxLength << "\n";
+      std::abort();
+    }
+    checked++;
+  };
+
+  for (size_t trial = 0; trial < N; trial++) {
+    std::string base_str = url_examples[(seed + trial) % (sizeof(url_examples) /
+                                                          sizeof(std::string))];
+
+    // Parse must respect the limit.
+    auto url = ada::parse<result>(base_str);
+    if (url) {
+      check(*url, "parse");
+    }
+
+    // Start from a short URL and apply mutated setters.
+    auto target = ada::parse<result>("http://x/");
+    if (!target) continue;
+
+    for (int step = 0; step < 20; step++) {
+      // Build a pseudo-random value: take a slice of a URL example, possibly
+      // containing characters that trigger percent-encoding expansion.
+      std::string val = url_examples[(counter++) % (sizeof(url_examples) /
+                                                    sizeof(std::string))];
+      // Mutate: insert characters that expand under percent-encoding.
+      size_t insert_pos = (counter * 7) % (val.size() + 1);
+      size_t insert_len = (counter * 13) % 256;
+      char insert_char = char((counter * 31) & 0xFF);
+      val.insert(insert_pos, insert_len, insert_char);
+      counter++;
+
+      int which = (counter++) % 10;
+      switch (which) {
+        case 0:
+          target->set_protocol(val);
+          break;
+        case 1:
+          target->set_username(val);
+          break;
+        case 2:
+          target->set_password(val);
+          break;
+        case 3:
+          target->set_hostname(val);
+          break;
+        case 4:
+          target->set_host(val);
+          break;
+        case 5:
+          target->set_pathname(val);
+          break;
+        case 6:
+          target->set_search(val);
+          break;
+        case 7:
+          target->set_hash(val);
+          break;
+        case 8:
+          target->set_port(val);
+          break;
+        case 9:
+          target->set_href(val);
+          break;
+      }
+      check(*target, "setter");
+    }
+  }
+
+  ada::set_max_input_length(std::numeric_limits<uint32_t>::max());
+  return checked;
+}
+
 int main() {
   if (std::endian::native == std::endian::big) {
     std::cout << "You have big-endian system." << std::endl;
@@ -137,5 +226,9 @@ int main() {
             << " mutations.\n";
   std::cout << "[roller] Executed " << roller_fuzz<ada::url_aggregator>(40000)
             << " correct cases.\n";
+  std::cout << "[length] Checked " << length_fuzz<ada::url>(10000)
+            << " length invariants.\n";
+  std::cout << "[length] Checked " << length_fuzz<ada::url_aggregator>(10000)
+            << " length invariants.\n";
   return EXIT_SUCCESS;
 }
