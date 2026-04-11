@@ -596,6 +596,16 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
     // index.
     tokenizer.seek_and_get_next_code_point(tokenizer.index);
 
+    // Malformed UTF-8 must not stall tokenization: report an invalid-char
+    // token (lenient) or fail fast (strict), while always making progress.
+    if (tokenizer.had_invalid_code_point()) {
+      if (auto error = tokenizer.process_tokenizing_error(tokenizer.next_index,
+                                                          tokenizer.index)) {
+        return tl::unexpected(*error);
+      }
+      continue;
+    }
+
     // If tokenizer's code point is U+002A (*):
     if (tokenizer.code_point == '*') {
       // Run add a token with default position and length given tokenizer and

@@ -9,6 +9,7 @@
 
 #include "ada.h"
 #include "ada/url_pattern.h"
+#include "ada/url_pattern_helpers.h"
 #include "ada/parser.h"
 
 using namespace simdjson;
@@ -308,6 +309,64 @@ TEST(wpt_urlpattern_tests, parser_tokenize_basic_tests) {
   auto tokenize_result =
       tokenize("*", ada::url_pattern_helpers::token_policy::strict);
   ASSERT_TRUE(tokenize_result);
+}
+
+TEST(wpt_urlpattern_tests, parser_tokenize_malformed_utf8_progress) {
+  std::string malformed("\x80*", 2);
+
+  auto strict_result = ada::url_pattern_helpers::tokenize(
+      malformed, ada::url_pattern_helpers::token_policy::strict);
+  ASSERT_FALSE(strict_result);
+  ASSERT_EQ(strict_result.error(), ada::errors::type_error);
+
+  auto lenient_result = ada::url_pattern_helpers::tokenize(
+      malformed, ada::url_pattern_helpers::token_policy::lenient);
+  ASSERT_TRUE(lenient_result);
+  ASSERT_GE(lenient_result->size(), 3u);
+  EXPECT_EQ((*lenient_result)[0].type,
+            ada::url_pattern_helpers::token_type::INVALID_CHAR);
+  EXPECT_EQ((*lenient_result)[0].value.size(), 1u);
+  EXPECT_EQ((*lenient_result)[1].type,
+            ada::url_pattern_helpers::token_type::ASTERISK);
+  EXPECT_EQ(lenient_result->back().type,
+            ada::url_pattern_helpers::token_type::END);
+}
+
+TEST(wpt_urlpattern_tests, tokenizer_advances_after_invalid_utf8_byte) {
+  using ada::url_pattern_helpers::token_policy;
+  using ada::url_pattern_helpers::Tokenizer;
+
+  // First byte is an invalid leading UTF-8 byte. The second byte is ASCII '*'.
+  // On the old implementation, the decoder could keep re-reading byte 0.
+  std::string malformed("\x80*", 2);
+  Tokenizer tokenizer(malformed, token_policy::lenient);
+
+  tokenizer.seek_and_get_next_code_point(0);
+  ASSERT_TRUE(tokenizer.had_invalid_code_point());
+
+  // This second decode only succeeds if the first call made forward progress.
+  tokenizer.get_next_code_point();
+  ASSERT_FALSE(tokenizer.had_invalid_code_point());
+}
+
+TEST(wpt_urlpattern_tests, malformed_utf8_large_payload_no_nonprogress) {
+  using ada::url_pattern_helpers::token_type;
+
+  // Attacker-controlled malformed bytes: each byte must consume one step.
+  constexpr size_t payload_size = 100000;
+  std::string payload(payload_size, '\x80');
+
+  auto result = ada::url_pattern_helpers::tokenize(
+      payload, ada::url_pattern_helpers::token_policy::lenient);
+  ASSERT_TRUE(result);
+
+  // One INVALID_CHAR token per byte, plus one END token.
+  ASSERT_EQ(result->size(), payload_size + 1);
+  EXPECT_EQ((*result)[0].type, token_type::INVALID_CHAR);
+  EXPECT_EQ((*result)[payload_size - 1].type, token_type::INVALID_CHAR);
+  EXPECT_EQ((*result)[payload_size - 1].index, payload_size - 1);
+  EXPECT_EQ((*result)[payload_size - 1].value.size(), 1u);
+  EXPECT_EQ(result->back().type, token_type::END);
 }
 
 TEST(wpt_urlpattern_tests, parse_pattern_string_basic_tests) {

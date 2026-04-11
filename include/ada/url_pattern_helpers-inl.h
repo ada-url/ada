@@ -350,8 +350,10 @@ constexpr void Tokenizer::get_next_code_point() {
   ada_log("Tokenizer::get_next_code_point called with index=", next_index);
   ADA_ASSERT_TRUE(next_index < input.size());
   // this assumes that we have a valid, non-truncated UTF-8 stream.
+  invalid_code_point = false;
   code_point = 0;
   size_t number_bytes = 0;
+  const size_t initial_index = next_index;
   unsigned char first_byte = input[next_index];
 
   if ((first_byte & 0x80) == 0) {
@@ -379,10 +381,31 @@ constexpr void Tokenizer::get_next_code_point() {
     number_bytes = 4;
     ada_log("Tokenizer::get_next_code_point four bytes");
   }
-  ADA_ASSERT_TRUE(number_bytes + next_index <= input.size());
+
+  // Invalid leading byte (e.g., continuation byte outside a sequence).
+  if (number_bytes == 0) {
+    invalid_code_point = true;
+    code_point = first_byte;
+    next_index = initial_index + 1;
+    return;
+  }
+
+  // Truncated UTF-8 sequence.
+  if (number_bytes + next_index > input.size()) {
+    invalid_code_point = true;
+    code_point = first_byte;
+    next_index = initial_index + 1;
+    return;
+  }
 
   for (size_t i = 1 + next_index; i < number_bytes + next_index; ++i) {
     unsigned char byte = input[i];
+    if ((byte & 0xC0) != 0x80) {
+      invalid_code_point = true;
+      code_point = first_byte;
+      next_index = initial_index + 1;
+      return;
+    }
     ada_log("Tokenizer::get_next_code_point read byte=", uint32_t(byte));
     code_point = (code_point << 6) | (byte & 0x3F);
   }
