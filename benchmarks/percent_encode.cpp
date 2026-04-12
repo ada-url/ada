@@ -13,6 +13,26 @@ std::string examples[] = {"\xE1|", "other:9818274x1!!",
                           "ref=web-twc-ao-gbl-adsinfo&utm_source=twc&utm_",
                           "connect_timeout=10&application_name=myapp"};
 
+std::string long_examples[] = {
+    "connect timeout=10 application name=myapp server=db host internal "
+    "database=production analytics read preference=secondary preferred "
+    "ssl=true retry writes=true w=majority max pool size=50",
+    "ref=web twc ao gbl adsinfo utm source=twc utm medium=cpc "
+    "utm campaign=brand awareness q4 2024 utm content=banner 300x250 "
+    "utm term=weather forecast today gclid=Cj0KCQiA3Y ABhCnARIsAK",
+};
+
+std::string decode_examples[] = {
+    "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C%20%21%22%23%24%25%26%27",
+    "connect_timeout%3D10%26application_name%3Dmyapp%26server%3Ddb.host",
+    "%68%65%6C%6C%6F%20%77%6F%72%6C%64%20%74%68%69%73%20%69%73%20"
+    "%61%20%70%65%72%63%65%6E%74%20%68%65%61%76%79%20%73%74%72%69"
+    "%6E%67",
+    "%2Fapi%2Fv1%2Fusers%2F12345%2Fposts%3Fpage%3D1%26limit%3D50%26"
+    "sort%3Dcreated%26order%3Ddesc%26fields%3Did%2Ctitle%2Cbody%26"
+    "filter%3Dstatus%253Dpublished",
+};
+
 void init_data() {}
 
 double examples_bytes = []() -> double {
@@ -115,7 +135,7 @@ static void SpecialQuery(benchmark::State& state) {
   for (auto _ : state) {
     for (std::string& url_string : examples) {
       benchmark::DoNotOptimize(ada::unicode::percent_encode(
-          url_string, ada::character_sets::FRAGMENT_PERCENT_ENCODE));
+          url_string, ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE));
     }
   }
   if (collector.has_events()) {
@@ -242,6 +262,76 @@ static void C0Control(benchmark::State& state) {
                          benchmark::Counter::kIsIterationInvariantRate);
 }
 BENCHMARK(C0Control);
+
+double long_examples_bytes = []() -> double {
+  size_t bytes{0};
+  for (std::string& s : long_examples) {
+    bytes += s.size();
+  }
+  return double(bytes);
+}();
+
+static void LongFragment(benchmark::State& state) {
+  for (auto _ : state) {
+    for (std::string& s : long_examples) {
+      benchmark::DoNotOptimize(ada::unicode::percent_encode(
+          s, ada::character_sets::FRAGMENT_PERCENT_ENCODE));
+    }
+  }
+  state.counters["speed"] = benchmark::Counter(
+      long_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(LongFragment);
+
+static void LongQuery(benchmark::State& state) {
+  for (auto _ : state) {
+    for (std::string& s : long_examples) {
+      benchmark::DoNotOptimize(ada::unicode::percent_encode(
+          s, ada::character_sets::QUERY_PERCENT_ENCODE));
+    }
+  }
+  state.counters["speed"] = benchmark::Counter(
+      long_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(LongQuery);
+
+double decode_examples_bytes = []() -> double {
+  size_t bytes{0};
+  for (std::string& s : decode_examples) {
+    bytes += s.size();
+  }
+  return double(bytes);
+}();
+
+const size_t decode_first_pct[] = {
+    decode_examples[0].find('%'),
+    decode_examples[1].find('%'),
+    decode_examples[2].find('%'),
+    decode_examples[3].find('%'),
+};
+
+static void Decode(benchmark::State& state) {
+  for (auto _ : state) {
+    for (size_t i = 0; i < std::size(decode_examples); i++) {
+      benchmark::DoNotOptimize(ada::unicode::percent_decode(
+          decode_examples[i], decode_first_pct[i]));
+    }
+  }
+  state.counters["speed"] = benchmark::Counter(
+      decode_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(Decode);
+
+static void DecodeClean(benchmark::State& state) {
+  std::string clean(200, 'a');
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(
+        ada::unicode::percent_decode(clean, std::string_view::npos));
+  }
+  state.counters["speed"] =
+      benchmark::Counter(200.0, benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(DecodeClean);
 
 int main(int argc, char** argv) {
 #if defined(ADA_RUST_VERSION)

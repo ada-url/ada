@@ -228,8 +228,8 @@ bool percent_encode(std::string_view input, const uint8_t character_set[],
  * Returns the index at which percent encoding should start, or (equivalently),
  * the length of the prefix that does not require percent encoding.
  */
-ada_really_inline size_t percent_encode_index(std::string_view input,
-                                              const uint8_t character_set[]);
+size_t percent_encode_index(std::string_view input,
+                            const uint8_t character_set[]);
 /**
  * @private
  * Lowers the string in-place, assuming that the content is ASCII.
