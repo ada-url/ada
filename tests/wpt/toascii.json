@@ -107,6 +107,36 @@
     "output": null
   },
   {
+    "comment": "CheckBidi: LTR label ending with RTL code point",
+    "input": "a\u05D0",
+    "output": null
+  },
+  {
+    "comment": "CheckBidi: LTR label ending with AL code point",
+    "input": "a\u0627",
+    "output": null
+  },
+  {
+    "comment": "CheckBidi: LTR label ending with AN code point",
+    "input": "a\u0661",
+    "output": null
+  },
+  {
+    "comment": "CheckBidi: LTR label with multiple trailing RTL code points",
+    "input": "a\u05D0\u05D1",
+    "output": null
+  },
+  {
+    "comment": "CheckBidi: NSM before trailing RTL code point",
+    "input": "a\u0301\u05D0",
+    "output": null
+  },
+  {
+    "comment": "CheckBidi: trailing NSM after RTL code point",
+    "input": "a\u05D0\u0301",
+    "output": null
+  },
+  {
     "input": "xn--a-yoc",
     "output": null
   },

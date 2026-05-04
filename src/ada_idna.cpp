@@ -9407,18 +9407,19 @@ bool is_label_valid(const std::u32string_view label) {
 
       // In an LTR label, only characters with the Bidi properties L, EN,
       // ES, CS, ET, ON, BN, or NSM are allowed.
-      for (size_t i = 0; i < last_non_nsm_char; i++) {
+      for (size_t i = 0; i <= last_non_nsm_char; i++) {
         const direction d = find_direction(label[i]);
         if (!(d == direction::L || d == direction::EN || d == direction::ES ||
               d == direction::CS || d == direction::ET || d == direction::ON ||
               d == direction::BN || d == direction::NSM)) {
           return false;
         }
+      }
 
-        if ((i == last_non_nsm_char) &&
-            !(d == direction::L || d == direction::EN)) {
-          return false;
-        }
+      // The last non-NSM code point in an LTR label must be L or EN.
+      const direction last_non_nsm = find_direction(label[last_non_nsm_char]);
+      if (!(last_non_nsm == direction::L || last_non_nsm == direction::EN)) {
+        return false;
       }
 
       return true;
