@@ -140,6 +140,36 @@ TYPED_TEST(basic_tests, set_protocol_should_return_false_sometimes) {
   SUCCEED();
 }
 
+// Companion to set_protocol_should_return_false_sometimes: the same
+// WHATWG state-override validation errors apply when the target scheme
+// is non-special. parse_scheme's fast path (special target) and slow
+// path (non-special target) must agree.
+TYPED_TEST(basic_tests, set_protocol_non_special_target_returns_false) {
+  // file: with empty host -> cannot change scheme (validation error #4).
+  {
+    auto url = ada::parse<TypeParam>("file:");
+    ASSERT_EQ(url->set_protocol("foo"), false);
+    ASSERT_EQ(url->get_protocol(), "file:");
+  }
+
+  // Special -> non-special is also a validation error (#1, mirror of the
+  // existing readme3 test which goes special -> special and succeeds).
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_EQ(url->set_protocol("foo"), false);
+    ASSERT_EQ(url->get_protocol(), "https:");
+    ASSERT_EQ(url->get_href(), "https://example.com/");
+  }
+
+  // Non-special -> non-special must still succeed.
+  {
+    auto url = ada::parse<TypeParam>("git://example.com/");
+    ASSERT_EQ(url->set_protocol("svn"), true);
+    ASSERT_EQ(url->get_protocol(), "svn:");
+  }
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_protocol_should_return_true_sometimes) {
   auto url = ada::parse<TypeParam>("file:");
   ASSERT_EQ(url->set_host("google.com"), true);
