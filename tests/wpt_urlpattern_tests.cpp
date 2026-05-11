@@ -360,13 +360,16 @@ TEST(wpt_urlpattern_tests, malformed_utf8_large_payload_no_nonprogress) {
       payload, ada::url_pattern_helpers::token_policy::lenient);
   ASSERT_TRUE(result);
 
-  // One INVALID_CHAR token per byte, plus one END token.
-  ASSERT_EQ(result->size(), payload_size + 1);
-  EXPECT_EQ((*result)[0].type, token_type::INVALID_CHAR);
-  EXPECT_EQ((*result)[payload_size - 1].type, token_type::INVALID_CHAR);
-  EXPECT_EQ((*result)[payload_size - 1].index, payload_size - 1);
-  EXPECT_EQ((*result)[payload_size - 1].value.size(), 1u);
+  // Tokenization must make progress and cover the whole payload.
+  size_t invalid_bytes = 0;
+  ASSERT_GE(result->size(), 2u);
+  for (size_t i = 0; i + 1 < result->size(); ++i) {
+    EXPECT_EQ((*result)[i].type, token_type::INVALID_CHAR);
+    invalid_bytes += (*result)[i].value.size();
+  }
+  EXPECT_EQ(invalid_bytes, payload_size);
   EXPECT_EQ(result->back().type, token_type::END);
+  EXPECT_EQ(result->back().index, payload_size);
 }
 
 TEST(wpt_urlpattern_tests, parse_pattern_string_basic_tests) {

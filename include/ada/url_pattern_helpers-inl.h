@@ -349,7 +349,9 @@ constexpr bool constructor_string_parser<regex_provider>::is_port_prefix()
 constexpr void Tokenizer::get_next_code_point() {
   ada_log("Tokenizer::get_next_code_point called with index=", next_index);
   ADA_ASSERT_TRUE(next_index < input.size());
-  // this assumes that we have a valid, non-truncated UTF-8 stream.
+  // Decode the next UTF-8 code point. If malformed or truncated, mark it as
+  // invalid, return the offending byte as the code point, and advance by one
+  // to guarantee forward progress.
   invalid_code_point = false;
   code_point = 0;
   size_t number_bytes = 0;
@@ -380,6 +382,15 @@ constexpr void Tokenizer::get_next_code_point() {
     code_point = first_byte & 0x07;
     number_bytes = 4;
     ada_log("Tokenizer::get_next_code_point four bytes");
+  }
+
+  // Invalid leading bytes that still match a multi-byte prefix.
+  if ((number_bytes == 2 && first_byte < 0xC2) ||
+      (number_bytes == 4 && first_byte > 0xF4)) {
+    invalid_code_point = true;
+    code_point = first_byte;
+    next_index = initial_index + 1;
+    return;
   }
 
   // Invalid leading byte (e.g., continuation byte outside a sequence).

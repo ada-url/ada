@@ -644,6 +644,13 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
       auto escaped_index = tokenizer.next_index;
       // Run get the next code point given tokenizer.
       tokenizer.get_next_code_point();
+      if (tokenizer.had_invalid_code_point()) {
+        if (auto error = tokenizer.process_tokenizing_error(tokenizer.next_index,
+                                                            escaped_index)) {
+          return tl::unexpected(*error);
+        }
+        continue;
+      }
       // Run add a token with default length given tokenizer, "escaped-char",
       // tokenizer's next index, and escaped index.
       tokenizer.add_token_with_default_length(
@@ -678,11 +685,20 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
       auto name_position = tokenizer.next_index;
       // Let name start be name position.
       auto name_start = name_position;
+      bool invalid_name = false;
       // While name position is less than tokenizer's input's code point length:
       while (name_position < tokenizer.input.size()) {
         // Run seek and get the next code point given tokenizer and name
         // position.
         tokenizer.seek_and_get_next_code_point(name_position);
+        if (tokenizer.had_invalid_code_point()) {
+          if (auto error = tokenizer.process_tokenizing_error(
+                  tokenizer.next_index, name_position)) {
+            return tl::unexpected(*error);
+          }
+          invalid_name = true;
+          break;
+        }
         // Let first code point be true if name position equals name start and
         // false otherwise.
         bool first_code_point = name_position == name_start;
@@ -697,6 +713,10 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
         if (!valid_code_point) break;
         // Set name position to tokenizer's next index.
         name_position = tokenizer.next_index;
+      }
+
+      if (invalid_name) {
+        continue;
       }
 
       // If name position is less than or equal to name start:
@@ -736,6 +756,14 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
         // Run seek and get the next code point given tokenizer and regexp
         // position.
         tokenizer.seek_and_get_next_code_point(regexp_position);
+        if (tokenizer.had_invalid_code_point()) {
+          if (auto process_error = tokenizer.process_tokenizing_error(
+                  tokenizer.next_index, regexp_position)) {
+            return tl::unexpected(*process_error);
+          }
+          error = true;
+          break;
+        }
 
         // TODO: Optimization opportunity: The next 2 if statements can be
         // merged. If the result of running is ASCII given tokenizer's code
@@ -781,7 +809,16 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
             break;
           }
           // Run get the next code point given tokenizer.
+          auto escaped_index = tokenizer.next_index;
           tokenizer.get_next_code_point();
+          if (tokenizer.had_invalid_code_point()) {
+            if (auto process_error = tokenizer.process_tokenizing_error(
+                    tokenizer.next_index, escaped_index)) {
+              return tl::unexpected(*process_error);
+            }
+            error = true;
+            break;
+          }
           // If the result of running is ASCII given tokenizer's code point is
           // false:
           if (!unicode::is_ascii(tokenizer.code_point)) {
@@ -833,6 +870,14 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
           auto temporary_position = tokenizer.next_index;
           // Run get the next code point given tokenizer.
           tokenizer.get_next_code_point();
+          if (tokenizer.had_invalid_code_point()) {
+            if (auto process_error = tokenizer.process_tokenizing_error(
+                    tokenizer.next_index, temporary_position)) {
+              return tl::unexpected(*process_error);
+            }
+            error = true;
+            break;
+          }
           // If tokenizer's code point is not U+003F (?):
           if (tokenizer.code_point != '?') {
             // Run process a tokenizing error given tokenizer, regexp start, and
