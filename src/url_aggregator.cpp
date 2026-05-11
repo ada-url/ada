@@ -94,15 +94,23 @@ template <bool has_state_override>
       // parser) leave the URL unchanged. The setter contract is
       // "true on success, false if the scheme is invalid" -- the fast path
       // above already returns false here, so the slow path must agree.
+
+      // If url's scheme is a special scheme and buffer is not a special scheme,
+      // then return. If url's scheme is not a special scheme and buffer is a
+      // special scheme, then return.
       if (is_special() != ada::scheme::is_special(_buffer)) {
         return false;
       }
 
+      // If url includes credentials or has a non-null port, and buffer is
+      // "file", then return.
       if ((has_credentials() || components.port != url_components::omitted) &&
           _buffer == "file") {
         return false;
       }
 
+      // If url's scheme is "file" and its host is an empty host, then return.
+      // An empty host is the empty string.
       if (type == ada::scheme::type::FILE &&
           components.host_start == components.host_end) {
         return false;
