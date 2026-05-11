@@ -186,8 +186,16 @@ TEST(ada_c, ada_idna) {
       ada_idna_to_unicode(unicode_input.data(), unicode_input.length());
   ASSERT_EQ(std::string_view(unicode.data, unicode.length), ascii_input);
 
+  // Labels that decode to pure ASCII should stay in punycode form.
+  std::string_view ascii_punycode = "xn--abc-";
+  ada_owned_string unicode_ascii = ada_idna_to_unicode(
+      ascii_punycode.data(), ascii_punycode.length());
+  ASSERT_EQ(std::string_view(unicode_ascii.data, unicode_ascii.length),
+            ascii_punycode);
+
   ada_free_owned_string(ascii);
   ada_free_owned_string(unicode);
+  ada_free_owned_string(unicode_ascii);
   SUCCEED();
 }
 

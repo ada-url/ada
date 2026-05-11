@@ -9727,6 +9727,7 @@ std::string to_unicode(std::string_view input) {
 
   size_t label_start = 0;
   std::u32string tmp_buffer;
+  std::u32string post_map;
   while (label_start < input.size()) {
     size_t loc_dot = input.find('.', label_start);
     bool is_last_label = (loc_dot == std::string_view::npos);
@@ -9738,21 +9739,45 @@ std::string to_unicode(std::string_view input) {
       label_view.remove_prefix(4);
       tmp_buffer.clear();
       if (ada::idna::punycode_to_utf32(label_view, tmp_buffer)) {
+        bool accept_decoded = true;
+        if (ada::idna::is_ascii(tmp_buffer)) {
+          accept_decoded = false;
+        } else {
+          post_map.clear();
+          if (!ada::idna::map(tmp_buffer, post_map) || post_map != tmp_buffer) {
+            accept_decoded = false;
+          }
+          if (accept_decoded) {
+            normalize(post_map);
+            if (post_map != tmp_buffer || post_map.empty() ||
+                !is_label_valid(post_map)) {
+              accept_decoded = false;
+            }
+          }
+        }
+
+        if (accept_decoded) {
 #ifdef ADA_USE_SIMDUTF
-        auto utf8_size = simdutf::utf8_length_from_utf32(tmp_buffer.data(),
-                                                         tmp_buffer.size());
-        size_t old_size = output.size();
-        output.resize(old_size + utf8_size);
-        simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
-                                       output.data() + old_size);
-#else
-        auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
+          auto utf8_size = simdutf::utf8_length_from_utf32(tmp_buffer.data(),
                                                            tmp_buffer.size());
-        size_t old_size = output.size();
-        output.resize(old_size + utf8_size);
-        ada::idna::utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
-                                 output.data() + old_size);
+          size_t old_size = output.size();
+          output.resize(old_size + utf8_size);
+          simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
+                                         output.data() + old_size);
+#else
+          auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
+                                                             tmp_buffer.size());
+          size_t old_size = output.size();
+          output.resize(old_size + utf8_size);
+          ada::idna::utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
+                                   output.data() + old_size);
 #endif
+        } else {
+          // ToUnicode never fails. If any step fails, return the original
+          // input sequence for the label.
+          output.append(
+              std::string_view(input.data() + label_start, label_size));
+        }
       } else {
         // ToUnicode never fails.  If any step fails, then the original input
         // sequence is returned immediately in that step.
