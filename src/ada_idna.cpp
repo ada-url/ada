@@ -1,4 +1,4 @@
-/* auto-generated on 2026-03-29 12:09:27 -0400. Do not edit! */
+/* auto-generated on 2026-05-11 12:05:16 -0400. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 
@@ -232,8 +232,8 @@ constexpr uint32_t IDNA_HIGH_IGNORED_START = 0x000E0100;
 constexpr uint32_t IDNA_HIGH_IGNORED_END   = 0x000E01F0;  // exclusive
 
 // idna_stage1[cp >> 6]: one entry per 64-code-point block.
-// Bit 15 set  -> lower 15 bits = index into idna_bool_blocks[].
-// Bit 15 clear -> value = base offset into idna_stage2[] for this block.
+// Bit 15 set  → lower 15 bits = index into idna_bool_blocks[].
+// Bit 15 clear → value = base offset into idna_stage2[] for this block.
 const uint16_t idna_stage1[3282] = {
 	0x8000, 0x0000, 0x0040, 0x0080, 0x00C0, 0x0100, 0x0140, 0x0180, 0x01C0, 0x0200, 0x0240, 0x0280,
 	0x8000, 0x02C0, 0x0300, 0x0340, 0x0380, 0x03C0, 0x0400, 0x0440, 0x0480, 0x04C0, 0x0500, 0x8001,
@@ -1472,7 +1472,7 @@ const uint16_t idna_stage2[11456] = {
 };
 
 // idna_bool_blocks[]: one uint64_t per boolean block.
-// Bit k (0 = LSB) = 1 -> (block_start + k) is VALID; 0 -> DISALLOWED.
+// Bit k (0 = LSB) = 1 → (block_start + k) is VALID; 0 → DISALLOWED.
 const uint64_t idna_bool_blocks[225] = {
 	0xFFFFFFFFFFFFFFFFULL, 0x001F87FFFFFF00FFULL, 0xFFFFFFFFEFFFFFC0ULL, 0xFFFFFFFFDFFFFFFFULL,
 	0xFFFFFFFFFFFF3FFFULL, 0xFFFFFFFFFFFFE7FFULL, 0x0003FFFFFFFFFFFFULL, 0xE7FFFFFFFFFFFFFFULL,
@@ -2631,20 +2631,20 @@ const uint8_t idna_utf8_mappings[17383] = {
 
 namespace ada::idna {
 
-// --- O(1) two-level table lookup ---------------------------------------------
+// ─── O(1) two-level table lookup ─────────────────────────────────────────────
 //
 // Returns one of:
-//   IDNA_VALID      - keep code point in output unchanged
-//   IDNA_DISALLOWED - code point is not allowed (map() returns error)
-//   IDNA_IGNORED    - code point is ignored (index 0 = empty UTF-8 entry)
-//   other           - byte offset into idna_utf8_mappings[] (null-terminated)
+//   IDNA_VALID      – keep code point in output unchanged
+//   IDNA_DISALLOWED – code point is not allowed (map() returns error)
+//   IDNA_IGNORED    – code point is ignored (index 0 = empty UTF-8 entry)
+//   other           – byte offset into idna_utf8_mappings[] (null-terminated)
 //
 // The two-level table covers [0, IDNA_LOW_RANGE_END).  All constants
 // (LOW_RANGE_END, HIGH_IGNORED_*) are generated from the IDNA table itself;
 // no Unicode version-specific values are hardcoded here.
 //
 static uint16_t idna_lookup(uint32_t cp) noexcept {
-  // -- Two-level table covers the full active code-point range ---------------
+  // ── Two-level table covers the full active code-point range ───────────────
   if (cp < IDNA_LOW_RANGE_END) {
     uint16_t ref = idna_stage1[cp >> IDNA_BLOCK_BITS];
     if (ref & IDNA_BOOL_FLAG) {
@@ -2658,7 +2658,7 @@ static uint16_t idna_lookup(uint32_t cp) noexcept {
     return idna_stage2[ref + (cp & IDNA_BLOCK_MASK)];
   }
 
-  // -- Variation selectors supplement (U+E0100-U+E01EF): all ignored ---------
+  // ── Variation selectors supplement (U+E0100–U+E01EF): all ignored ─────────
   // Everything else above IDNA_LOW_RANGE_END is disallowed.
   if (cp >= IDNA_HIGH_IGNORED_START && cp < IDNA_HIGH_IGNORED_END) {
     return IDNA_IGNORED;
@@ -2667,7 +2667,7 @@ static uint16_t idna_lookup(uint32_t cp) noexcept {
   return IDNA_DISALLOWED;
 }
 
-// --- Decode one UTF-8 code point ---------------------------------------------
+// ─── Decode one UTF-8 code point ─────────────────────────────────────────────
 // Advances *ptr past the bytes consumed.  The mapping table is trusted to be
 // well-formed UTF-8, so no validity checking is performed.
 static char32_t utf8_next(const uint8_t*& ptr) noexcept {
@@ -2692,8 +2692,8 @@ static char32_t utf8_next(const uint8_t*& ptr) noexcept {
   return static_cast<char32_t>(cp);
 }
 
-// --- ASCII fast path
-// ----------------------------------------------------------
+// ─── ASCII fast path
+// ──────────────────────────────────────────────────────────
 void ascii_map(char* input, size_t length) {
   auto broadcast = [](uint8_t v) -> uint64_t {
     return 0x101010101010101ull * v;
@@ -2719,8 +2719,8 @@ void ascii_map(char* input, size_t length) {
   }
 }
 
-// --- IDNA map
-// ----------------------------------------------------------------- Maps each
+// ─── IDNA map
+// ───────────────────────────────────────────────────────────────── Maps each
 // code point according to IDNA processing. Returns an empty string on error
 // (disallowed code point encountered).
 bool map(std::u32string_view input, std::u32string& out) {
@@ -9416,9 +9416,8 @@ bool is_label_valid(const std::u32string_view label) {
         }
       }
 
-      // The last non-NSM code point in an LTR label must be L or EN.
-      const direction last_non_nsm = find_direction(label[last_non_nsm_char]);
-      if (!(last_non_nsm == direction::L || last_non_nsm == direction::EN)) {
+      const direction last_dir = find_direction(label[last_non_nsm_char]);
+      if (!(last_dir == direction::L || last_dir == direction::EN)) {
         return false;
       }
 
@@ -9434,13 +9433,9 @@ bool is_label_valid(const std::u32string_view label) {
 
         // In an RTL label, if an EN is present, no AN may be present, and vice
         // versa.
-        if (d == direction::EN) {
-          has_en = true;
-          if (has_an) { return false; }
-        }
-        if (d == direction::AN) {
-          has_an = true;
-          if (has_en) { return false; }
+        if ((d == direction::EN && ((has_en = true) && has_an)) ||
+            (d == direction::AN && ((has_an = true) && has_en))) {
+          return false;
         }
 
         if (!(d == direction::R || d == direction::AL || d == direction::AN ||
@@ -9727,6 +9722,7 @@ std::string to_unicode(std::string_view input) {
 
   size_t label_start = 0;
   std::u32string tmp_buffer;
+  std::u32string post_map;
   while (label_start < input.size()) {
     size_t loc_dot = input.find('.', label_start);
     bool is_last_label = (loc_dot == std::string_view::npos);
@@ -9738,21 +9734,47 @@ std::string to_unicode(std::string_view input) {
       label_view.remove_prefix(4);
       tmp_buffer.clear();
       if (ada::idna::punycode_to_utf32(label_view, tmp_buffer)) {
+        // Per UTS #46, the decoded label must be re-validated. Reject decodings
+        // that are pure ASCII (xn-- encoding of an ASCII-only label), or whose
+        // mapping/normalization is not stable, or that fail label validity.
+        bool accept_decoded = true;
+        if (ada::idna::is_ascii(tmp_buffer)) {
+          accept_decoded = false;
+        } else {
+          post_map.clear();
+          if (!ada::idna::map(tmp_buffer, post_map) || post_map != tmp_buffer) {
+            accept_decoded = false;
+          } else {
+            ada::idna::normalize(post_map);
+            if (post_map != tmp_buffer || post_map.empty() ||
+                !ada::idna::is_label_valid(post_map)) {
+              accept_decoded = false;
+            }
+          }
+        }
+
+        if (accept_decoded) {
 #ifdef ADA_USE_SIMDUTF
-        auto utf8_size = simdutf::utf8_length_from_utf32(tmp_buffer.data(),
-                                                         tmp_buffer.size());
-        size_t old_size = output.size();
-        output.resize(old_size + utf8_size);
-        simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
-                                       output.data() + old_size);
-#else
-        auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
+          auto utf8_size = simdutf::utf8_length_from_utf32(tmp_buffer.data(),
                                                            tmp_buffer.size());
-        size_t old_size = output.size();
-        output.resize(old_size + utf8_size);
-        ada::idna::utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
-                                 output.data() + old_size);
+          size_t old_size = output.size();
+          output.resize(old_size + utf8_size);
+          simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
+                                         output.data() + old_size);
+#else
+          auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
+                                                             tmp_buffer.size());
+          size_t old_size = output.size();
+          output.resize(old_size + utf8_size);
+          ada::idna::utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
+                                   output.data() + old_size);
 #endif
+        } else {
+          // ToUnicode never fails. If any step fails, return the original
+          // input sequence for the label.
+          output.append(
+              std::string_view(input.data() + label_start, label_size));
+        }
       } else {
         // ToUnicode never fails.  If any step fails, then the original input
         // sequence is returned immediately in that step.
