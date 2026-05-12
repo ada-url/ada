@@ -238,7 +238,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
     if (port.has_value()) {
       size += 1;  // ":"
       // Count digits of port value without calling std::to_string.
-      uint16_t p = port.value();
+      uint16_t p = *port;
       size += (p >= 10000)  ? 5
               : (p >= 1000) ? 4
               : (p >= 100)  ? 3
