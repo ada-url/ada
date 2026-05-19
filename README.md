@@ -346,7 +346,7 @@ Contributors are encouraged to read our [AI Tool Policy](AI_USAGE_POLICY.md).
 
 ### Building
 
-Ada uses cmake as a build system, but also supports Bazel. It's recommended you to run the following 
+Ada uses cmake as a build system. It's recommended you to run the following 
 commands to build it locally.
 
 Without tests:
