@@ -379,6 +379,17 @@ constexpr void Tokenizer::get_next_code_point() {
     number_bytes = 4;
     ada_log("Tokenizer::get_next_code_point four bytes");
   }
+  // The ADA_ASSERT_TRUE below is compiled out in release builds, so without
+  // an explicit runtime check an invalid leading byte (no branch matched, so
+  // number_bytes is still 0) or a truncated multi-byte sequence at the end
+  // of input would read past the end of the std::string_view in the loop
+  // below. Treat such bytes as a single raw byte to guarantee forward
+  // progress and stay within bounds.
+  if (number_bytes == 0 || number_bytes > input.size() - next_index) {
+    code_point = first_byte;
+    next_index++;
+    return;
+  }
   ADA_ASSERT_TRUE(number_bytes + next_index <= input.size());
 
   for (size_t i = 1 + next_index; i < number_bytes + next_index; ++i) {
