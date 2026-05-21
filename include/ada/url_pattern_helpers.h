@@ -112,6 +112,9 @@ class Tokenizer {
   // @see https://urlpattern.spec.whatwg.org/#get-the-next-code-point
   constexpr void get_next_code_point();
 
+  // True when the most recent decoded unit was malformed UTF-8.
+  bool had_invalid_code_point() const { return invalid_code_point; }
+
   // @see https://urlpattern.spec.whatwg.org/#seek-and-get-the-next-code-point
   constexpr void seek_and_get_next_code_point(size_t index);
 
@@ -148,6 +151,8 @@ class Tokenizer {
   size_t next_index = 0;
   // has an associated code point, a Unicode code point, initially null.
   char32_t code_point{};
+  // Tracks whether the last decoded code point was malformed UTF-8.
+  bool invalid_code_point = false;
 };
 
 // @see https://urlpattern.spec.whatwg.org/#constructor-string-parser
