@@ -13,7 +13,12 @@
 // It represents "uint32_t(-1)"
 #define ada_url_omitted 0xffffffff
 
-// string that is owned by the ada_url instance
+// string that points to data stored in the ada_url instance
+//
+// Lifetime rules:
+// - This pointer remains valid only while the underlying ada_url is unchanged.
+// - Any mutation (e.g., ada_set_* and ada_clear_*) may invalidate previously
+//   returned ada_string pointers.
 typedef struct {
   const char* data;
   size_t length;
@@ -57,6 +62,9 @@ bool ada_is_valid(ada_url result);
 
 // url_aggregator getters
 // if ada_is_valid(result)) is false, an empty string is returned
+//
+// Important: this invalidation rule applies only to getters that return
+// ada_string. The ada_get_origin getter returns ada_owned_string.
 ada_owned_string ada_get_origin(ada_url result);
 ada_string ada_get_href(ada_url result);
 ada_string ada_get_username(ada_url result);
