@@ -147,6 +147,29 @@ TEST(wpt_urlpattern_tests, multiple_capture_groups_correct_mapping) {
   SUCCEED();
 }
 
+// An optional capture group that does not participate in the match is
+// undefined, not absent. The reported groups must stay aligned by position
+// with the group name list, so a later group is not attributed to the
+// skipped group's name.
+TEST(wpt_urlpattern_tests, unmatched_optional_group_keeps_alignment) {
+  auto init = ada::url_pattern_init{};
+  init.pathname = "(a)?(b)";
+  auto pattern = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(pattern) << "Pattern should parse successfully";
+
+  auto input = ada::url_pattern_init{};
+  input.pathname = "b";
+  auto result = pattern->exec(input, nullptr);
+  ASSERT_TRUE(result) << "exec should succeed";
+  ASSERT_TRUE(result->has_value()) << "should have a match";
+
+  auto& pathname_groups = result->value().pathname.groups;
+  ASSERT_EQ(pathname_groups.size(), 2u);
+  EXPECT_FALSE(pathname_groups.at("0").has_value())
+      << "skipped optional group must be undefined";
+  EXPECT_EQ(pathname_groups.at("1").value_or(""), "b");
+}
+
 // Verify that patterns with parentheses in regex values don't parse
 // (URLPattern spec doesn't allow unescaped parentheses in custom regex).
 // This documents the expected behavior and ensures we don't crash.

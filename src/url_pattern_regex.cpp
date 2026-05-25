@@ -46,6 +46,12 @@ std_regex_provider::regex_search(std::string_view input,
   for (size_t i = 1; i < match_result.size(); ++i) {
     if (auto entry = match_result[i]; entry.matched) {
       matches.emplace_back(entry.str());
+    } else {
+      // A capture group that did not participate in the match is undefined,
+      // not absent. Emitting nullopt keeps the result aligned by position with
+      // the component's group name list; dropping it shifts every later group
+      // onto the wrong name.
+      matches.emplace_back(std::nullopt);
     }
   }
   return matches;
