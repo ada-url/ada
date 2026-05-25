@@ -137,6 +137,21 @@
     "output": null
   },
   {
+    "comment": "CheckBidi: Bidi label starting with EN code point",
+    "input": "1\u0627",
+    "output": null
+  },
+  {
+    "comment": "CheckBidi: Bidi label starting with AN code point",
+    "input": "\u0660",
+    "output": null
+  },
+  {
+    "comment": "CheckBidi: Bidi label starting with AN followed by AL",
+    "input": "\u0660\u0627",
+    "output": null
+  },
+  {
     "input": "xn--a-yoc",
     "output": null
   },
