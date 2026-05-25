@@ -9426,6 +9426,13 @@ bool is_label_valid(const std::u32string_view label) {
     } else {
       // Eval as RTL
 
+      // The first character must be R or AL; a leading AN (or any other
+      // direction) does not start a valid RTL label.
+      const direction first_dir = find_direction(label[0]);
+      if (first_dir != direction::R && first_dir != direction::AL) {
+        return false;
+      }
+
       bool has_an = false;
       bool has_en = false;
       for (size_t i = 0; i <= last_non_nsm_char; i++) {
