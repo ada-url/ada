@@ -1,4 +1,4 @@
-/* auto-generated on 2026-05-12 17:47:14 -0400. Do not edit! */
+/* auto-generated on 2026-05-25 13:46:39 -0400. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 
@@ -9766,8 +9766,19 @@ std::string to_unicode(std::string_view input) {
                                                            tmp_buffer.size());
           size_t old_size = output.size();
           output.resize(old_size + utf8_size);
-          simdutf::convert_utf32_to_utf8(tmp_buffer.data(), tmp_buffer.size(),
-                                         output.data() + old_size);
+          size_t written = simdutf::convert_utf32_to_utf8(
+              tmp_buffer.data(), tmp_buffer.size(), output.data() + old_size);
+          if (written != utf8_size) {
+            // This cannot happen because punycode_to_utf32 only produces valid
+            // Unicode code points, but if it does (it would indicate a bug in
+            // punycode_to_utf32 or simdutf), we can fall back to the original
+            // input. This is pendantic. We have no report of such an issue and
+            // no reason to expect it, but we want to be robust against any such
+            // bug.
+            output.resize(old_size);
+            output.append(
+                std::string_view(input.data() + label_start, label_size));
+          }
 #else
           auto utf8_size = ada::idna::utf8_length_from_utf32(tmp_buffer.data(),
                                                              tmp_buffer.size());
