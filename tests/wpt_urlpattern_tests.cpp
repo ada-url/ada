@@ -372,6 +372,22 @@ TEST(wpt_urlpattern_tests, malformed_utf8_large_payload_no_nonprogress) {
   EXPECT_EQ(result->back().index, payload_size);
 }
 
+TEST(wpt_urlpattern_tests, name_code_point_above_id_continue_in_bounds) {
+  // A code point greater than the last id_continue range (> U+E01EF) must be
+  // rejected as a non-first name code point without reading past the table.
+  EXPECT_FALSE(ada::idna::valid_name_code_point(char32_t(0x10FFFF), false));
+  EXPECT_FALSE(ada::idna::valid_name_code_point(char32_t(0xE01F0), false));
+  // A real ID_Continue code point still validates.
+  EXPECT_TRUE(ada::idna::valid_name_code_point(U'a', false));
+
+  // End-to-end: a ":name" whose second code point is U+10FFFF (F4 8F BF BF)
+  // tokenizes without an out-of-bounds read.
+  std::string pattern(":a\xF4\x8F\xBF\xBF", 6);
+  auto tokens = ada::url_pattern_helpers::tokenize(
+      pattern, ada::url_pattern_helpers::token_policy::lenient);
+  ASSERT_TRUE(tokens);
+}
+
 TEST(wpt_urlpattern_tests, parse_pattern_string_basic_tests) {
   auto part_list = ada::url_pattern_helpers::parse_pattern_string(
       "*", ada::url_pattern_compile_component_options::DEFAULT,

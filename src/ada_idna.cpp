@@ -10413,7 +10413,7 @@ bool valid_name_code_point(char32_t code_point, bool first) {
     auto iter = std::lower_bound(
         std::begin(id_continue), std::end(id_continue), code_point,
         [](const uint32_t* range, uint32_t cp) { return range[1] < cp; });
-    return iter != std::end(id_start) && code_point >= (*iter)[0];
+    return iter != std::end(id_continue) && code_point >= (*iter)[0];
   }
 }
 }  // namespace ada::idna
