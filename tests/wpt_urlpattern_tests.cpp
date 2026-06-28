@@ -60,6 +60,15 @@ bool uses_unsupported_regex_syntax(std::string_view pattern) {
         return true;
       }
     }
+    // Check for named capture groups (?<name>...), which std::regex does not
+    // support. Lookbehind assertions (?<= and (?<!) are excluded since they
+    // are a different (also unsupported) construct handled elsewhere.
+    if (bracket_depth == 0 && c == '(' && i + 2 < pattern.size() &&
+        pattern[i + 1] == '?' && pattern[i + 2] == '<' &&
+        i + 3 < pattern.size() && pattern[i + 3] != '=' &&
+        pattern[i + 3] != '!') {
+      return true;
+    }
     // Check for invalid escape sequences
     if (c == '\\' && i + 1 < pattern.size()) {
       if (!valid_regexp_escape[static_cast<uint8_t>(pattern[i + 1])]) {

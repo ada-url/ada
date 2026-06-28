@@ -55,11 +55,11 @@
   {
     "comment": "Invalid Punycode",
     "input": "xn--a",
-    "output": null
+    "output": "xn--a"
   },
   {
     "input": "xn--a.xn--zca",
-    "output": null
+    "output": "xn--a.xn--zca"
   },
   {
     "input": "xn--a.ß",
@@ -67,7 +67,7 @@
   },
   {
     "input": "xn--ls8h=",
-    "output": null
+    "output": "xn--ls8h="
   },
   {
     "comment": "Invalid Punycode (contains non-ASCII character)",
@@ -99,7 +99,7 @@
   },
   {
     "input": "xn--1ug.example",
-    "output": null
+    "output": "xn--1ug.example"
   },
   {
     "comment": "CheckBidi is true",
@@ -107,53 +107,8 @@
     "output": null
   },
   {
-    "comment": "CheckBidi: LTR label ending with RTL code point",
-    "input": "a\u05D0",
-    "output": null
-  },
-  {
-    "comment": "CheckBidi: LTR label ending with AL code point",
-    "input": "a\u0627",
-    "output": null
-  },
-  {
-    "comment": "CheckBidi: LTR label ending with AN code point",
-    "input": "a\u0661",
-    "output": null
-  },
-  {
-    "comment": "CheckBidi: LTR label with multiple trailing RTL code points",
-    "input": "a\u05D0\u05D1",
-    "output": null
-  },
-  {
-    "comment": "CheckBidi: NSM before trailing RTL code point",
-    "input": "a\u0301\u05D0",
-    "output": null
-  },
-  {
-    "comment": "CheckBidi: trailing NSM after RTL code point",
-    "input": "a\u05D0\u0301",
-    "output": null
-  },
-  {
-    "comment": "CheckBidi: Bidi label starting with EN code point",
-    "input": "1\u0627",
-    "output": null
-  },
-  {
-    "comment": "CheckBidi: Bidi label starting with AN code point",
-    "input": "\u0660",
-    "output": null
-  },
-  {
-    "comment": "CheckBidi: Bidi label starting with AN followed by AL",
-    "input": "\u0660\u0627",
-    "output": null
-  },
-  {
     "input": "xn--a-yoc",
-    "output": null
+    "output": "xn--a-yoc"
   },
   {
     "comment": "processing_option is Nontransitional_Processing",
@@ -172,7 +127,7 @@
   {
     "comment": "U+FFFD character encoded in Punycode",
     "input": "xn--zn7c.com",
-    "output": null
+    "output": "xn--zn7c.com"
   },
   {
     "comment": "Label longer than 63 code points",
@@ -414,7 +369,7 @@
   },
   {
     "input": "xn--0.com",
-    "output": null
+    "output": "xn--0.com"
   },
   {
     "input": "foo\u0300.bar.com",

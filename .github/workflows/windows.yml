@@ -33,7 +33,10 @@ jobs:
     name: msvc (${{ matrix.build_type }}, shared=${{ matrix.shared }})
     uses: ./.github/workflows/_build.yaml
     with:
-      runner: windows-2025
+      # windows-2022 ships Visual Studio 2022 (v17), matching the generator
+      # below. The windows-2025 image no longer provides a VS 17 instance, so
+      # the 'Visual Studio 17 2022' generator fails to configure there.
+      runner: windows-2022
       generator: 'Visual Studio 17 2022'
       arch: ${{ matrix.arch }}
       shared: ${{ matrix.shared }}
