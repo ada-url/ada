@@ -13,5 +13,8 @@ Checks: >
 WarningsAsErrors: '*'
 # Check first-party (non-system, non-vendored) headers.
 HeaderFilterRegex: '.*'
-ExcludeHeaderFilterRegex: '(build[^/]*/_deps/|\.cpm-cache/|/expected\.h$)'
+# ada_idna.cpp is auto-generated third-party code (synced from ada-url/idna,
+# #included via unicode.cpp) and is intentionally out of clang-tidy scope; see
+# tools/run-clangcldocker.sh.
+ExcludeHeaderFilterRegex: '(build[^/]*/_deps/|\.cpm-cache/|/expected\.h$|/ada_idna\.cpp$)'
 SystemHeaders: false
