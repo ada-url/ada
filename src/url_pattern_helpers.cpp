@@ -645,8 +645,8 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
       // Run get the next code point given tokenizer.
       tokenizer.get_next_code_point();
       if (tokenizer.had_invalid_code_point()) {
-        if (auto error = tokenizer.process_tokenizing_error(
-                tokenizer.next_index, escaped_index)) {
+        if (auto error = tokenizer.process_tokenizing_error(tokenizer.next_index,
+                                                            escaped_index)) {
           return tl::unexpected(*error);
         }
         continue;

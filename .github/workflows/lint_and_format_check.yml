@@ -44,14 +44,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang-tidy-22 libc++-22-dev libc++abi-22-dev
 
-      # Run clang-tidy only on src/ada.cpp, the single translation unit that
-      # #includes every first-party .cpp. This keeps tests, benchmarks, the
-      # generated singleheader amalgamation, and vendored deps out of scope,
-      # matching tools/run-clangcldocker.sh. Setting CMAKE_CXX_CLANG_TIDY
-      # instead would lint those generated/third-party units too.
       - name: Run clang-tidy
         run: >
-          cmake -B build -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" &&
-          clang-tidy-22 -p build src/ada.cpp
+          cmake -B build -DADA_TESTING=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_CXX_CLANG_TIDY=clang-tidy-22 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" &&
+          cmake --build build -j=4
         env:
           CXX: clang++-22
