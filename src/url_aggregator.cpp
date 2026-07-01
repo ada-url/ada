@@ -673,6 +673,10 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
         } else if (has_dash_dot()) {
           add_authority_slashes_if_needed();
           delete_dash_dot();
+        } else {
+          // The url has no authority yet (e.g. "foo:/bar"); setting an empty
+          // host must still give it an (empty) authority, matching ada::url.
+          add_authority_slashes_if_needed();
         }
         return check_url_size();
       }
