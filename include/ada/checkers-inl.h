@@ -47,7 +47,7 @@ constexpr bool is_windows_drive_letter(std::string_view input) noexcept {
 
 constexpr bool is_normalized_windows_drive_letter(
     std::string_view input) noexcept {
-  return input.size() >= 2 && (is_alpha(input[0]) && (input[1] == ':'));
+  return input.size() == 2 && (is_alpha(input[0]) && (input[1] == ':'));
 }
 
 ada_really_inline constexpr uint64_t try_parse_ipv4_fast(
