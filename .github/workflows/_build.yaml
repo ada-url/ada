@@ -129,8 +129,8 @@ jobs:
         if: ${{ !inputs.use_run_on_arch }}
         uses: ./.github/actions/setup-runner
 
-      # Some generators (e.g. 'Visual Studio 18 2026') need a newer CMake than
-      # the runner ships. When cmake_version is set, install that exact version.
+      # Some generators (e.g. 'Visual Studio 18 2026') require CMake >= 4.2.
+      # When cmake_version is set, install that exact version for determinism.
       - name: Setup CMake
         if: ${{ !inputs.use_run_on_arch && inputs.cmake_version != '' }}
         uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # v4.3.3
