@@ -33,11 +33,14 @@ jobs:
     name: msvc (${{ matrix.build_type }}, shared=${{ matrix.shared }})
     uses: ./.github/workflows/_build.yaml
     with:
-      # windows-2022 ships Visual Studio 2022 (v17), matching the generator
-      # below. The windows-2025 image no longer provides a VS 17 instance, so
-      # the 'Visual Studio 17 2022' generator fails to configure there.
-      runner: windows-2022
-      generator: 'Visual Studio 17 2022'
+      # windows-2025 now ships Visual Studio 2026 (v18); the windows-2022 label
+      # has been retired and redirects to the VS 2026 image, so the old
+      # 'Visual Studio 17 2022' generator can no longer find a VS instance.
+      # The 'Visual Studio 18 2026' generator requires CMake >= 4.2, so we pin
+      # CMake to a matching version via cmake_version below.
+      runner: windows-2025
+      generator: 'Visual Studio 18 2026'
+      cmake_version: '4.2.6'
       arch: ${{ matrix.arch }}
       shared: ${{ matrix.shared }}
       build_type: ${{ matrix.build_type }}

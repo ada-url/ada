@@ -57,6 +57,10 @@ on:
         type: string
         required: false
         default: ''
+      cmake_version:
+        type: string
+        required: false
+        default: ''
 
       # Post-build actions
       run_tests:
@@ -124,6 +128,14 @@ jobs:
       - name: Setup Runner
         if: ${{ !inputs.use_run_on_arch }}
         uses: ./.github/actions/setup-runner
+
+      # Some generators (e.g. 'Visual Studio 18 2026') need a newer CMake than
+      # the runner ships. When cmake_version is set, install that exact version.
+      - name: Setup CMake
+        if: ${{ !inputs.use_run_on_arch && inputs.cmake_version != '' }}
+        uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # v4.3.3
+        with:
+          cmakeVersion: ${{ inputs.cmake_version }}
 
       - name: Setup environment
         if: ${{ !inputs.use_run_on_arch && inputs.setup_script != '' }}
