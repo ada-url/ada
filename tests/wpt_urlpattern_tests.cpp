@@ -429,6 +429,48 @@ TEST(wpt_urlpattern_tests, basic_tests) {
   SUCCEED();
 }
 
+// A plain hostname must be canonicalized the same way regardless of whether it
+// hits the fast path in canonicalize_hostname. IPv4-shaped hosts are
+// reserialized and "xn--" labels are IDNA-validated, so the fast path must not
+// return them verbatim.
+TEST(wpt_urlpattern_tests, hostname_ipv4_and_idna_canonicalization) {
+  {
+    auto init = ada::url_pattern_init{};
+    init.hostname = "0";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_hostname(), "0.0.0.0");
+    // The compiled pattern must match the canonical form of the same host.
+    auto input = ada::url_pattern_init{};
+    input.hostname = "0.0.0.0";
+    auto matched = url->test(input, nullptr);
+    ASSERT_TRUE(matched);
+    EXPECT_TRUE(*matched);
+  }
+  {
+    auto init = ada::url_pattern_init{};
+    init.hostname = "0x7f.1";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_hostname(), "127.0.0.1");
+  }
+  {
+    // Invalid ACE label: the slow path rejects it, the fast path must too.
+    auto init = ada::url_pattern_init{};
+    init.hostname = "xn--a";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_FALSE(url);
+  }
+  {
+    // A normal domain still takes the fast path unchanged.
+    auto init = ada::url_pattern_init{};
+    init.hostname = "example.com";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_hostname(), "example.com");
+  }
+}
+
 // Tests are taken from WPT
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {

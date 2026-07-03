@@ -9,6 +9,7 @@
 #include <string>
 
 #include "ada/character_sets.h"
+#include "ada/checkers.h"
 #include "ada/helpers.h"
 #include "ada/scheme.h"
 #include "ada/unicode.h"
@@ -314,13 +315,19 @@ tl::expected<std::string, errors> canonicalize_hostname(
     return "";
   }
 
-  // Fast path: simple hostnames (lowercase ASCII, digits, -, .) need no IDNA
+  // Fast path: simple hostnames (lowercase ASCII, digits, -, .) need no IDNA.
+  // The simple character set also covers IPv4-shaped hosts and "xn--" labels,
+  // which the slow path rewrites: it reserializes the address ("0" ->
+  // "0.0.0.0", "0x7f.1" -> "127.0.0.1") and runs IDNA/punycode validation
+  // (rejecting an invalid ACE label such as "xn--a"). Exclude those so the fast
+  // path can't return a non-canonical or wrongly-accepted hostname.
   bool needs_processing = false;
   for (char c : input) {
     needs_processing |=
         !(char_class_table[static_cast<uint8_t>(c)] & CHAR_SIMPLE_HOSTNAME);
   }
-  if (!needs_processing) {
+  if (!needs_processing && !checkers::is_ipv4(input) &&
+      input.find("xn--") == std::string_view::npos) {
     return std::string(input);
   }
 
