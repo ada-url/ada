@@ -178,6 +178,17 @@ TYPED_TEST(basic_tests, set_protocol_should_return_true_sometimes) {
   SUCCEED();
 }
 
+// Changing to a non-special scheme (default port 0) must not drop an explicit
+// port of 0. The port is only cleared when it equals the target scheme's
+// default port, and a non-special scheme has none.
+TYPED_TEST(basic_tests, set_protocol_keeps_zero_port_non_special_target) {
+  auto url = ada::parse<TypeParam>("a://h:0");
+  ASSERT_EQ(url->set_protocol("b"), true);
+  ASSERT_EQ(url->get_port(), "0");
+  ASSERT_EQ(url->get_href(), "b://h:0");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, readme4) {
   auto url = ada::parse<TypeParam>("https://www.google.com");
   url->set_host("github.com");
