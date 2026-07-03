@@ -76,10 +76,12 @@ template <bool has_state_override>
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
-      // If url's port is url's scheme's default port, then set url's port to
-      // null.
-      if (components.port == urls_scheme_port) {
-        clear_port();
+      if (urls_scheme_port) {
+        // If url's port is url's scheme's default port, then set url's port to
+        // null.
+        if (components.port == urls_scheme_port) {
+          clear_port();
+        }
       }
     }
   } else {  // slow path
@@ -123,10 +125,12 @@ template <bool has_state_override>
       // This is uncommon.
       uint16_t urls_scheme_port = get_special_port();
 
-      // If url's port is url's scheme's default port, then set url's port to
-      // null.
-      if (components.port == urls_scheme_port) {
-        clear_port();
+      if (urls_scheme_port) {
+        // If url's port is url's scheme's default port, then set url's port to
+        // null.
+        if (components.port == urls_scheme_port) {
+          clear_port();
+        }
       }
     }
   }
