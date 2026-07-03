@@ -120,6 +120,20 @@ TYPED_TEST(basic_tests, file_shorten_path_normalized_drive_letter_only) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, set_empty_host_on_non_special_without_authority) {
+  // A non-special URL with a non-opaque path but no authority (e.g. "foo:/bar")
+  // must gain an empty authority when its host is set to the empty string. The
+  // WHATWG host setter only returns early for an opaque path, and ada::url
+  // already behaves this way; url_aggregator must match.
+  auto a = ada::parse<TypeParam>("non-special:/x");
+  ASSERT_TRUE(a->set_host(""));
+  ASSERT_EQ(a->get_href(), "non-special:///x");
+  auto b = ada::parse<TypeParam>("sc:/x");
+  ASSERT_TRUE(b->set_hostname(""));
+  ASSERT_EQ(b->get_href(), "sc:///x");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, readme2free) {
   auto url = ada::parse("https://www.google.com");
   url->set_username("username");
