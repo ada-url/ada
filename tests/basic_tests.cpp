@@ -108,6 +108,18 @@ TYPED_TEST(basic_tests, readme2) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, file_shorten_path_normalized_drive_letter_only) {
+  // https://url.spec.whatwg.org/#shorten-a-urls-path : a file path's first
+  // segment is protected from ".." only when it is a *normalized Windows drive
+  // letter*, which is exactly two code points (an ASCII alpha followed by ":").
+  // Longer segments that merely start with "<alpha>:" must be popped.
+  ASSERT_EQ(ada::parse<TypeParam>("file:c:x/..")->get_href(), "file:///");
+  ASSERT_EQ(ada::parse<TypeParam>("file:u:p@h/..")->get_href(), "file:///");
+  // A real drive letter is still preserved.
+  ASSERT_EQ(ada::parse<TypeParam>("file:c:/..")->get_href(), "file:///c:/");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, readme2free) {
   auto url = ada::parse("https://www.google.com");
   url->set_username("username");
