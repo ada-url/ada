@@ -391,8 +391,18 @@ tl::expected<std::string, errors> canonicalize_port(
   std::string_view digits_to_parse =
       std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
 
-  // Here we have that a range of ASCII digit characters identified
-  // by digits_to_parse. It is none empty.
+  // Here we have a range of ASCII digit characters identified by
+  // digits_to_parse. It is non-empty. The port state of the URL parser reads
+  // it as an integer, so leading zeros are part of the number: "0080" is 80
+  // and "065535" is 65535, not a six-digit overflow. Only the significant
+  // digits count toward the 5-digit maximum, matching the fast path in
+  // implementation.cpp.
+  size_t first_significant = digits_to_parse.find_first_not_of('0');
+  if (first_significant == std::string_view::npos) {
+    // The value is all zeros, i.e. port 0.
+    return "0";
+  }
+  digits_to_parse.remove_prefix(first_significant);
   // We want to determine whether it is a valid port number (0-65535).
   // Clearly, if the length is greater than 5, it is invalid.
   // If the length is 5, we need to compare lexicographically to "65535".
@@ -402,10 +412,6 @@ tl::expected<std::string, errors> canonicalize_port(
       return tl::unexpected(errors::type_error);
     }
   } else if (digits_to_parse.size() > 5) {
-    return tl::unexpected(errors::type_error);
-  }
-  if (digits_to_parse[0] == '0' && digits_to_parse.size() > 1) {
-    // Leading zeros are not allowed for multi-digit ports
     return tl::unexpected(errors::type_error);
   }
   // It is valid! Most times, we do not need to parse it into an integer.
