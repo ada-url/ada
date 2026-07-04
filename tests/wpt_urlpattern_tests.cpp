@@ -471,6 +471,33 @@ TEST(wpt_urlpattern_tests, hostname_ipv4_and_idna_canonicalization) {
   }
 }
 
+TEST(wpt_urlpattern_tests, port_leading_zeros_canonicalization) {
+  // The URL port state reads the port as an integer, so leading zeros are
+  // part of the value: "0080" is 80 and "065535" is 65535, both valid.
+  for (const auto& [input, expected] :
+       std::vector<std::pair<std::string, std::string>>{
+           {"80", "80"},
+           {"0080", "80"},
+           {"065535", "65535"},
+           {"0000001", "1"},
+           {"0000000000000", "0"},
+           {"0", "0"},
+       }) {
+    auto init = ada::url_pattern_init{};
+    init.port = input;
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url) << "port \"" << input << "\" should be accepted";
+    EXPECT_EQ(url->get_port(), expected) << "port \"" << input << "\"";
+  }
+  {
+    // Still out of range after stripping leading zeros.
+    auto init = ada::url_pattern_init{};
+    init.port = "065536";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_FALSE(url);
+  }
+}
+
 // Tests are taken from WPT
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {
