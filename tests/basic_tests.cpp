@@ -76,6 +76,19 @@ TYPED_TEST(basic_tests, set_host_should_return_true_sometimes) {
   SUCCEED();
 }
 
+// A failed set_host on a non-special URL that has no authority must leave the
+// URL untouched. url_aggregator used to roll back through update_base_hostname,
+// which re-added the "//" authority ("non-spec:/x" -> "non-spec:///x").
+TYPED_TEST(basic_tests, failed_set_host_keeps_authority_less_url) {
+  auto r = ada::parse<TypeParam>("non-spec:/x");
+  ASSERT_TRUE(r);
+  ASSERT_FALSE(r->set_host("@\b["));
+  ASSERT_EQ(r->get_href(), "non-spec:/x");
+  ASSERT_FALSE(r->set_hostname("@\b["));
+  ASSERT_EQ(r->get_href(), "non-spec:/x");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_hostname_should_return_false_sometimes) {
   auto r = ada::parse<TypeParam>("mailto:a@b.com");
   ASSERT_FALSE(r->set_hostname("something"));
