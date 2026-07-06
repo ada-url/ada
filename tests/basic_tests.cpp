@@ -1032,6 +1032,21 @@ TYPED_TEST(basic_tests, set_host_fast_path_restores_is_valid) {
   ASSERT_EQ(url->get_port(), "1");
 }
 
+TYPED_TEST(basic_tests, failed_set_host_does_not_poison_set_port) {
+  auto url = ada::parse<TypeParam>(
+      "https://user:pass@example.com:8080/path?query=1#hash");
+  ASSERT_TRUE(url);
+
+  // A rejected set_host must leave the URL fully usable. Rolling back through
+  // update_base_port left is_valid=false, which made the following set_port
+  // fail (port stuck at 8080) instead of updating it.
+  ASSERT_FALSE(url->set_host("7\x03"));
+  ASSERT_TRUE(url->set_port("1"));
+  ASSERT_EQ(url->get_port(), "1");
+  ASSERT_EQ(url->get_href(),
+            "https://user:pass@example.com:1/path?query=1#hash");
+}
+
 TYPED_TEST(basic_tests, get_href_size_matches_get_href) {
   // Verify that get_href_size() returns the same value as get_href().size()
   // across a variety of URLs.
