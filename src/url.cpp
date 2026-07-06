@@ -696,9 +696,6 @@ bool url::set_host_or_hostname(const std::string_view input) {
 
   url saved_url(*this);
 
-  std::optional<std::string> previous_host = host;
-  std::optional<uint16_t> previous_port = port;
-
   size_t host_end_pos = input.find('#');
   std::string _host(input.data(), host_end_pos != std::string_view::npos
                                       ? host_end_pos
@@ -741,8 +738,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
       // Let host be the result of host parsing buffer with url is not special.
       bool succeeded = parse_host(buffer);
       if (!succeeded) {
-        host = std::move(previous_host);
-        update_base_port(previous_port);
+        *this = std::move(saved_url);
         return false;
       }
 
@@ -780,8 +776,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
 
       bool succeeded = parse_host(host_view);
       if (!succeeded) {
-        host = std::move(previous_host);
-        update_base_port(previous_port);
+        *this = std::move(saved_url);
         return false;
       }
       return check_url_size();
@@ -799,8 +794,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
   } else {
     // Let host be the result of host parsing buffer with url is not special.
     if (!parse_host(new_host)) {
-      host = std::move(previous_host);
-      update_base_port(previous_port);
+      *this = std::move(saved_url);
       return false;
     }
 

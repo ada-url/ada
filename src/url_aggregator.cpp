@@ -594,9 +594,6 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
   url_aggregator saved_url(*this);
 
-  std::string previous_host(get_hostname());
-  uint32_t previous_port = components.port;
-
   size_t host_end_pos = input.find('#');
   std::string _host(input.data(), host_end_pos != std::string_view::npos
                                       ? host_end_pos
@@ -639,8 +636,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
       // Let host be the result of host parsing buffer with url is not special.
       bool succeeded = parse_host(host_buffer);
       if (!succeeded) {
-        update_base_hostname(previous_host);
-        update_base_port(previous_port);
+        *this = std::move(saved_url);
         return false;
       }
 
@@ -687,8 +683,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
       bool succeeded = parse_host(host_view);
       if (!succeeded) {
-        update_base_hostname(previous_host);
-        update_base_port(previous_port);
+        *this = std::move(saved_url);
         return false;
       } else if (has_dash_dot()) {
         // Should remove dash_dot from pathname
@@ -709,8 +704,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   } else {
     // Let host be the result of host parsing buffer with url is not special.
     if (!parse_host(new_host)) {
-      update_base_hostname(previous_host);
-      update_base_port(previous_port);
+      *this = std::move(saved_url);
       return false;
     }
 

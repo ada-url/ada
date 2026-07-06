@@ -76,6 +76,19 @@ TYPED_TEST(basic_tests, set_host_should_return_true_sometimes) {
   SUCCEED();
 }
 
+// A failed set_host on a non-special URL that has no authority must leave the
+// URL untouched. url_aggregator used to roll back through update_base_hostname,
+// which re-added the "//" authority ("non-spec:/x" -> "non-spec:///x").
+TYPED_TEST(basic_tests, failed_set_host_keeps_authority_less_url) {
+  auto r = ada::parse<TypeParam>("non-spec:/x");
+  ASSERT_TRUE(r);
+  ASSERT_FALSE(r->set_host("@\b["));
+  ASSERT_EQ(r->get_href(), "non-spec:/x");
+  ASSERT_FALSE(r->set_hostname("@\b["));
+  ASSERT_EQ(r->get_href(), "non-spec:/x");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, set_hostname_should_return_false_sometimes) {
   auto r = ada::parse<TypeParam>("mailto:a@b.com");
   ASSERT_FALSE(r->set_hostname("something"));
@@ -1017,6 +1030,21 @@ TYPED_TEST(basic_tests, set_host_fast_path_restores_is_valid) {
   ASSERT_TRUE(url->is_valid);
   ASSERT_EQ(url->get_hostname(), "rf");
   ASSERT_EQ(url->get_port(), "1");
+}
+
+TYPED_TEST(basic_tests, failed_set_host_does_not_poison_set_port) {
+  auto url = ada::parse<TypeParam>(
+      "https://user:pass@example.com:8080/path?query=1#hash");
+  ASSERT_TRUE(url);
+
+  // A rejected set_host must leave the URL fully usable. Rolling back through
+  // update_base_port left is_valid=false, which made the following set_port
+  // fail (port stuck at 8080) instead of updating it.
+  ASSERT_FALSE(url->set_host("7\x03"));
+  ASSERT_TRUE(url->set_port("1"));
+  ASSERT_EQ(url->get_port(), "1");
+  ASSERT_EQ(url->get_href(),
+            "https://user:pass@example.com:1/path?query=1#hash");
 }
 
 TYPED_TEST(basic_tests, get_href_size_matches_get_href) {
