@@ -409,6 +409,20 @@ constexpr void Tokenizer::get_next_code_point() {
     return;
   }
 
+  // Constrain the first continuation byte per RFC 3629 so overlong encodings,
+  // UTF-16 surrogates, and code points above U+10FFFF are rejected rather than
+  // decoded into a spurious code point (e.g. E0 80 A8 becoming U+0028 '(').
+  const unsigned char second_byte = input[next_index + 1];
+  if ((first_byte == 0xE0 && second_byte < 0xA0) ||
+      (first_byte == 0xED && second_byte > 0x9F) ||
+      (first_byte == 0xF0 && second_byte < 0x90) ||
+      (first_byte == 0xF4 && second_byte > 0x8F)) {
+    invalid_code_point = true;
+    code_point = first_byte;
+    next_index = initial_index + 1;
+    return;
+  }
+
   for (size_t i = 1 + next_index; i < number_bytes + next_index; ++i) {
     unsigned char byte = input[i];
     if ((byte & 0xC0) != 0x80) {

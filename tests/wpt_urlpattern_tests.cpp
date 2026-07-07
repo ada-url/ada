@@ -404,6 +404,59 @@ TEST(wpt_urlpattern_tests, malformed_utf8_large_payload_no_nonprogress) {
   EXPECT_EQ(result->back().index, payload_size);
 }
 
+TEST(wpt_urlpattern_tests, tokenizer_rejects_overlong_and_surrogate_utf8) {
+  using ada::url_pattern_helpers::token_policy;
+  using ada::url_pattern_helpers::Tokenizer;
+
+  // Ill-formed UTF-8 must be flagged, not decoded into a code point. An
+  // overlong "(" (E0 80 A8) would otherwise become U+0028 and open a group.
+  const std::string malformed[] = {
+      std::string("\xE0\x80\xA8", 3),      // overlong '('
+      std::string("\xE0\x80\xBA", 3),      // overlong ':'
+      std::string("\xED\xA0\x80", 3),      // U+D800 surrogate
+      std::string("\xF0\x80\x80\xA8", 4),  // overlong four-byte '('
+      std::string("\xF4\x90\x80\x80", 4),  // above U+10FFFF
+  };
+  for (const auto& seq : malformed) {
+    Tokenizer tokenizer(seq, token_policy::lenient);
+    tokenizer.seek_and_get_next_code_point(0);
+    EXPECT_TRUE(tokenizer.had_invalid_code_point());
+  }
+
+  // Well-formed boundary sequences must still decode.
+  const std::string valid[] = {
+      std::string("\xE0\xA0\x80", 3),      // U+0800, shortest three-byte
+      std::string("\xED\x9F\xBF", 3),      // U+D7FF, just below surrogates
+      std::string("\xF0\x9F\x98\x80", 4),  // U+1F600 emoji
+      std::string("\xF4\x8F\xBF\xBF", 4),  // U+10FFFF
+  };
+  for (const auto& seq : valid) {
+    Tokenizer tokenizer(seq, token_policy::lenient);
+    tokenizer.seek_and_get_next_code_point(0);
+    EXPECT_FALSE(tokenizer.had_invalid_code_point());
+  }
+}
+
+TEST(wpt_urlpattern_tests, tokenizer_overlong_open_paren_not_a_group) {
+  using ada::url_pattern_helpers::token_type;
+
+  // "(x)" with the "(" smuggled as an overlong encoding: E0 80 A8 'x' ')'. The
+  // overlong bytes must not be read as U+0028, so no group token is produced.
+  std::string smuggled("\xE0\x80\xA8x)", 5);
+  auto lenient = ada::url_pattern_helpers::tokenize(
+      smuggled, ada::url_pattern_helpers::token_policy::lenient);
+  ASSERT_TRUE(lenient);
+  for (const auto& token : *lenient) {
+    EXPECT_NE(token.type, token_type::OPEN);
+    EXPECT_NE(token.type, token_type::REGEXP);
+  }
+
+  // Strict mode rejects the ill-formed input outright.
+  auto strict = ada::url_pattern_helpers::tokenize(
+      smuggled, ada::url_pattern_helpers::token_policy::strict);
+  EXPECT_FALSE(strict);
+}
+
 TEST(wpt_urlpattern_tests, parse_pattern_string_basic_tests) {
   auto part_list = ada::url_pattern_helpers::parse_pattern_string(
       "*", ada::url_pattern_compile_component_options::DEFAULT,
