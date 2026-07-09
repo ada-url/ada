@@ -498,6 +498,50 @@ TEST(wpt_urlpattern_tests, port_leading_zeros_canonicalization) {
   }
 }
 
+TEST(wpt_urlpattern_tests, search_and_hash_keep_leading_delimiter) {
+  // "canonicalize a search" runs the URL parser in query state, and
+  // "canonicalize a hash" in fragment state. Neither strips a leading
+  // delimiter: '?' is a valid query code point and '#' a valid fragment code
+  // point. The single delimiter is removed earlier, by process a search/hash.
+  {
+    auto search = ada::url_pattern_helpers::canonicalize_search("?x");
+    ASSERT_TRUE(search);
+    EXPECT_EQ(*search, "?x");
+    auto hash = ada::url_pattern_helpers::canonicalize_hash("#h");
+    ASSERT_TRUE(hash);
+    EXPECT_EQ(*hash, "#h");
+  }
+  {
+    // An escaped delimiter in a component pattern is a literal that must be
+    // kept, so the pattern matches the delimiter and nothing else.
+    auto init = ada::url_pattern_init{};
+    init.search = "\\?x";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    // A concrete URL whose query is exactly "?x".
+    auto ok = url->test(std::string_view("https://example.com/??x"), nullptr);
+    ASSERT_TRUE(ok);
+    EXPECT_TRUE(*ok);
+    auto dropped =
+        url->test(std::string_view("https://example.com/?x"), nullptr);
+    ASSERT_TRUE(dropped);
+    EXPECT_FALSE(*dropped);
+  }
+  {
+    auto init = ada::url_pattern_init{};
+    init.hash = "\\#h";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    auto ok = url->test(std::string_view("https://example.com/##h"), nullptr);
+    ASSERT_TRUE(ok);
+    EXPECT_TRUE(*ok);
+    auto dropped =
+        url->test(std::string_view("https://example.com/#h"), nullptr);
+    ASSERT_TRUE(dropped);
+    EXPECT_FALSE(*dropped);
+  }
+}
+
 // Tests are taken from WPT
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {
