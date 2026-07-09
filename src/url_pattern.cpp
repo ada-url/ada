@@ -118,22 +118,28 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
     // "search", then:
     if (!init.protocol && !init.hostname && !init.port && !init.pathname &&
         !init.search) {
-      // Let baseQuery be baseURL's query.
+      // Let baseQuery be baseURL's query. get_search() carries the leading "?"
+      // delimiter, but the spec inherits the query itself, so drop it.
+      std::string_view base_query = base_url->get_search();
+      if (base_query.starts_with("?")) base_query.remove_prefix(1);
       // Set result["search"] to the result of processing a base URL string
       // given baseQuery and type.
-      result.search = url_pattern_helpers::process_base_url_string(
-          base_url->get_search(), type);
+      result.search =
+          url_pattern_helpers::process_base_url_string(base_query, type);
     }
 
     // If init contains none of "protocol", "hostname", "port", "pathname",
     // "search", and "hash", then:
     if (!init.protocol && !init.hostname && !init.port && !init.pathname &&
         !init.search && !init.hash) {
-      // Let baseFragment be baseURL's fragment.
+      // Let baseFragment be baseURL's fragment. get_hash() carries the leading
+      // "#" delimiter, but the spec inherits the fragment itself, so drop it.
+      std::string_view base_fragment = base_url->get_hash();
+      if (base_fragment.starts_with("#")) base_fragment.remove_prefix(1);
       // Set result["hash"] to the result of processing a base URL string given
       // baseFragment and type.
-      result.hash = url_pattern_helpers::process_base_url_string(
-          base_url->get_hash(), type);
+      result.hash =
+          url_pattern_helpers::process_base_url_string(base_fragment, type);
     }
   }
 

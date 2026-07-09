@@ -545,9 +545,10 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   if (input.empty()) [[unlikely]] {
     return "";
   }
-  // Remove leading '?' if present
-  std::string new_value;
-  new_value = input[0] == '?' ? input.substr(1) : input;
+  // A leading '?' is a valid query code point here: it is the caller (process a
+  // search) that removes a single delimiter, not this step, which mirrors the
+  // basic URL parser's query state.
+  std::string new_value(input);
   // Remove ASCII tab or newline characters
   helpers::remove_ascii_tab_or_newline(new_value);
 
@@ -574,9 +575,10 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   if (input.empty()) [[unlikely]] {
     return "";
   }
-  // Remove leading '#' if present
-  std::string new_value;
-  new_value = input[0] == '#' ? input.substr(1) : input;
+  // A leading '#' is a valid fragment code point here: it is the caller
+  // (process a hash) that removes a single delimiter, not this step, which
+  // mirrors the basic URL parser's fragment state.
+  std::string new_value(input);
   // Remove ASCII tab or newline characters
   helpers::remove_ascii_tab_or_newline(new_value);
 
