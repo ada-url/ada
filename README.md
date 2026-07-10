@@ -390,7 +390,3 @@ Our tests include third-party code and data. The benchmarking code includes thir
 
 * Yagiz Nizipli, Daniel Lemire, [Parsing Millions of URLs per Second](https://doi.org/10.1002/spe.3296), Software: Practice and Experience 54(5) May 2024.
 
-## Stars
-
-
-[![Star History Chart](https://api.star-history.com/svg?repos=ada-url/ada&type=Date)](https://www.star-history.com/#ada-url/ada&Date)
