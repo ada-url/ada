@@ -32,6 +32,11 @@ ada_really_inline void apply_shifted_non_scheme_offsets(
 }  // namespace
 
 namespace ada {
+
+size_t url_aggregator::estimated_memory_usage() const noexcept {
+  return buffer.capacity();
+}
+
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(
     const std::string_view input_with_colon) {

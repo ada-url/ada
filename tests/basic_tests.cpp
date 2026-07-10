@@ -1073,6 +1073,19 @@ TYPED_TEST(basic_tests, get_href_size_matches_get_href) {
   }
 }
 
+TEST(url_aggregator, estimated_memory_usage_tracks_retained_capacity) {
+  auto url = ada::parse<ada::url_aggregator>("https://example.com/");
+  ASSERT_TRUE(url);
+
+  const size_t initial_estimate = url->estimated_memory_usage();
+  ASSERT_GE(initial_estimate, url->get_href_size());
+
+  const std::string large_url = "https://example.com/" + std::string(8192, 'a');
+  ASSERT_TRUE(url->set_href(large_url));
+  ASSERT_GE(url->estimated_memory_usage(), url->get_href_size());
+  ASSERT_GT(url->estimated_memory_usage(), initial_estimate);
+}
+
 TYPED_TEST(basic_tests, get_href_size_after_setters) {
   auto url =
       ada::parse<TypeParam>("https://user:pass@example.com:8080/path?q=1#frag");
