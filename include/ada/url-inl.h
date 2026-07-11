@@ -209,17 +209,21 @@ constexpr void url::copy_scheme(const ada::url& u) {
     p[1] = '/';
     p[2] = '/';
     p += 3;
+    // Sized copy into a pre-sized std::string; not a C string.
+    // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
     std::memcpy(p, host->data(), host_size);
     p += host_size;
     std::memcpy(p, path.data(), path_size);
     p += path_size;
     if (query.has_value()) {
       *p++ = '?';
+      // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
       std::memcpy(p, query->data(), query_size);
       p += query_size;
     }
     if (hash.has_value()) {
       *p++ = '#';
+      // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
       std::memcpy(p, hash->data(), hash_size);
     }
     return output;

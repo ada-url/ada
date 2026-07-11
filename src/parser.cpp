@@ -288,6 +288,8 @@ after_rest:
     if (!need_slash) {
       // Direct resize + memcpy is slightly faster than assign on libc++.
       out.buffer.resize(len);
+      // Sized binary copy; length is `len`, not a C-string API.
+      // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
       std::memcpy(out.buffer.data(), input.data(), len);
       if (has_upper) {
         unicode::to_lower_ascii(out.buffer.data() + host_start,
@@ -307,6 +309,7 @@ after_rest:
                                       : url_components::omitted;
     } else {
       out.buffer.resize(len + 1);
+      // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
       std::memcpy(out.buffer.data(), input.data(), host_end);
       out.buffer[host_end] = '/';
       if (host_end < len) {
