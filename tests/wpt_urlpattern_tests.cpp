@@ -455,11 +455,24 @@ TEST(wpt_urlpattern_tests, hostname_ipv4_and_idna_canonicalization) {
     EXPECT_EQ(url->get_hostname(), "127.0.0.1");
   }
   {
-    // Invalid ACE label: the slow path rejects it, the fast path must too.
+    // Invalid ACE label: WHATWG domain-to-ASCII (beStrict=false) accepts
+    // pure-ASCII domains as lowercased input regardless of Unicode ToASCII
+    // validity (web-compat carve-out). URLPattern hostname canonicalization
+    // follows the same path via set_hostname, so "xn--a" is accepted as-is.
+    // See tests/wpt/toascii.json ("Invalid Punycode" -> output "xn--a"),
+    // ada-url/idna to_ascii_tests.ascii_xn_carveout, and
+    // https://url.spec.whatwg.org/#concept-domain-to-ascii
     auto init = ada::url_pattern_init{};
     init.hostname = "xn--a";
     auto url = ada::parse_url_pattern<regex_provider>(init);
-    EXPECT_FALSE(url);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_hostname(), "xn--a");
+
+    // Uppercase ACE must be lowercased (slow path: not CHAR_SIMPLE_HOSTNAME).
+    init.hostname = "XN--A";
+    url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_hostname(), "xn--a");
   }
   {
     // A normal domain still takes the fast path unchanged.

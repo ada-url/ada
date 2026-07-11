@@ -316,18 +316,20 @@ tl::expected<std::string, errors> canonicalize_hostname(
   }
 
   // Fast path: simple hostnames (lowercase ASCII, digits, -, .) need no IDNA.
-  // The simple character set also covers IPv4-shaped hosts and "xn--" labels,
-  // which the slow path rewrites: it reserializes the address ("0" ->
-  // "0.0.0.0", "0x7f.1" -> "127.0.0.1") and runs IDNA/punycode validation
-  // (rejecting an invalid ACE label such as "xn--a"). Exclude those so the fast
-  // path can't return a non-canonical or wrongly-accepted hostname.
+  // The simple character set also covers IPv4-shaped hosts, which the slow
+  // path rewrites ("0" -> "0.0.0.0", "0x7f.1" -> "127.0.0.1"). Exclude those
+  // so the fast path can't return a non-canonical hostname.
+  //
+  // Pure-ASCII "xn--" labels are intentionally left on the fast path: with
+  // beStrict=false, domain-to-ASCII returns the lowercased ASCII input even
+  // when Unicode ToASCII would fail (e.g. invalid ACE "xn--a"). See
+  // https://url.spec.whatwg.org/#concept-domain-to-ascii
   bool needs_processing = false;
   for (char c : input) {
     needs_processing |=
         !(char_class_table[static_cast<uint8_t>(c)] & CHAR_SIMPLE_HOSTNAME);
   }
-  if (!needs_processing && !checkers::is_ipv4(input) &&
-      input.find("xn--") == std::string_view::npos) {
+  if (!needs_processing && !checkers::is_ipv4(input)) {
     return std::string(input);
   }
 
