@@ -1,4 +1,4 @@
-/* auto-generated on 2026-05-25 17:39:11 -0400. Do not edit! */
+/* auto-generated on 2026-07-10 19:40:16 -0400. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 
@@ -9517,70 +9517,26 @@ bool contains_forbidden_domain_code_point(std::string_view view) {
   return std::ranges::any_of(view, is_forbidden_domain_code_point);
 }
 
-// We return "" on error.
+// Per the WHATWG URL "domain to ASCII" algorithm, when beStrict is false and
+// the input domain is an ASCII string, the result is the input lowercased,
+// regardless of the outcome of Unicode ToASCII. This is a deliberate
+// web-compatibility carve-out: a label may decode from its ACE ("xn--") form
+// yet still fail IDNA validity criteria (ContextJ/Bidi rules, code points with
+// "mapped" status, empty labels, ...) and must nevertheless be accepted as-is.
+//
+// See https://url.spec.whatwg.org/#concept-domain-to-ascii:
+//   "When beStrict is false and domain is an ASCII string, the algorithm
+//    returns domain lowercased regardless of Unicode ToASCII's outcome, due to
+//    web compatibility. [...] Punycode can decode successfully yet still fail
+//    validity criteria. E.g., xn--8i7caa decodes to fullwidth 'www'
+//    (U+FF57 x3), whose code points have status 'mapped'."
+//
+// The forbidden-domain-code-point and empty-host checks are the caller's
+// responsibility (the URL host parser performs them on the result), so they
+// are intentionally not duplicated here.
 static std::string from_ascii_to_ascii(std::string_view ut8_string) {
-  static const std::string error = "";
-  std::string out;
-  out.reserve(ut8_string.size());
-  std::u32string tmp_buffer;
-  std::u32string post_map;
-  size_t label_start = 0;
-
-  while (label_start != ut8_string.size()) {
-    size_t loc_dot = ut8_string.find('.', label_start);
-    bool is_last_label = (loc_dot == std::string_view::npos);
-    size_t label_size =
-        is_last_label ? ut8_string.size() - label_start : loc_dot - label_start;
-    size_t label_size_with_dot = is_last_label ? label_size : label_size + 1;
-    std::string_view label_view(ut8_string.data() + label_start, label_size);
-    label_start += label_size_with_dot;
-    if (label_size == 0) {
-      // empty label? Nothing to do.
-    } else {
-      // Append the label to out and lowercase it in-place, avoiding a separate
-      // copy of the entire input string.
-      size_t label_out_start = out.size();
-      out.append(label_view);
-      ascii_map(out.data() + label_out_start, label_size);
-      std::string_view mapped_label(out.data() + label_out_start, label_size);
-      if (mapped_label.starts_with("xn--")) {
-        // The xn-- part is the expensive game.
-        std::string_view puny_segment_ascii(out.data() + label_out_start + 4,
-                                            label_size - 4);
-        tmp_buffer.clear();
-        bool is_ok =
-            ada::idna::punycode_to_utf32(puny_segment_ascii, tmp_buffer);
-        if (!is_ok) {
-          return error;
-        }
-        // If the input is just ASCII, it should not have been encoded
-        // as punycode.
-        // https://github.com/whatwg/url/issues/760
-        if (is_ascii(tmp_buffer)) {
-          return error;
-        }
-        if (!ada::idna::map(tmp_buffer, post_map)) {
-          return error;
-        }
-        if (tmp_buffer != post_map) {
-          return error;
-        }
-        normalize(post_map);
-        if (post_map != tmp_buffer) {
-          return error;
-        }
-        if (post_map.empty()) {
-          return error;
-        }
-        if (!is_label_valid(post_map)) {
-          return error;
-        }
-      }
-    }
-    if (!is_last_label) {
-      out.push_back('.');
-    }
-  }
+  std::string out(ut8_string);
+  ascii_map(out.data(), out.size());
   return out;
 }
 
