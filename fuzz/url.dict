@@ -28,6 +28,31 @@
 "file:///C:/path/to/file"
 "ftp://ftp.example.com/resource"
 
+# Simple-absolute fast path (clean http(s), no auth/port/IPv4/IDNA)
+"https://example.com"
+"https://example.com/"
+"https://example.com?q=1"
+"https://example.com#frag"
+"https://example.com/?q=1#frag"
+"http://www.example.com/path/file.js"
+"https://www.google.com/imghp?hl=en&tab=wi"
+"http://WWW.Example.COM/file.js"
+"https://example.com/path?continue=https%3A%2F%2Fexample.com%2F"
+
+# Simple-absolute intentional fall-throughs
+"http://192.168.0.1/x"
+"http://0x7f.1/"
+"http://127.1/"
+"https://user@example.com/"
+"https://user:pass@example.com/x"
+"https://example.com:8080/x"
+"https://example.com/a/./b/../c"
+"https://example.com/foo/%2e"
+"https://example.com/foo/%2e%2e"
+"https://xn--nxasmq6b.com/"
+"https://xn--a/"
+"http://example.com\\path"
+
 # Encoded characters
 "%2f"
 "%40"

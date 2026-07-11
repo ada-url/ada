@@ -150,6 +150,89 @@ static void exercise_aggregator_predicates(const ada::url_aggregator& u) {
   (void)u.to_diagram();
 }
 
+// Build absolute http(s) candidates that exercise try_parse_simple_absolute
+// and its fall-through gates (digit-led host, dots, credentials, port, xn--).
+static std::string make_simple_absolute_candidate(FuzzedDataProvider& fdp) {
+  static constexpr const char* kSchemes[] = {"http://",  "https://", "HTTP://",
+                                             "Https://", "http:",    "https:"};
+  static constexpr const char* kHosts[] = {
+      "example.com",
+      "www.example.com",
+      "WWW.Example.COM",
+      "a",
+      "a.b.c",
+      "192.168.0.1",  // digit-led: IPv4 gate
+      "0x7f.1",
+      "127.1",
+      "xn--nxasmq6b.com",
+      "xn--a",
+      "user@example.com",
+      "user:pass@example.com",
+      "example.com:8080",
+      "example.com:0",
+      "",
+  };
+  static constexpr const char* kPaths[] = {
+      "",
+      "/",
+      "/path",
+      "/path/file.js",
+      "/a/./b/../c",
+      "/foo/%2e",
+      "/foo/%2e%2e",
+      "/path with space",
+      "/path\twith\ttab",
+      "\\path",
+      "/continue=https%3A%2F%2Fexample.com%2F",
+  };
+  static constexpr const char* kQueries[] = {
+      "",
+      "?",
+      "?q=1",
+      "?hl=en&tab=wi",
+      "?continue=https%3A%2F%2Fexample.com%2F",
+  };
+  static constexpr const char* kFrags[] = {"", "#", "#frag", "#x%20y"};
+
+  std::string out;
+  out += kSchemes[fdp.ConsumeIntegralInRange<size_t>(
+      0, sizeof(kSchemes) / sizeof(kSchemes[0]) - 1)];
+  out += kHosts[fdp.ConsumeIntegralInRange<size_t>(
+      0, sizeof(kHosts) / sizeof(kHosts[0]) - 1)];
+  out += kPaths[fdp.ConsumeIntegralInRange<size_t>(
+      0, sizeof(kPaths) / sizeof(kPaths[0]) - 1)];
+  out += kQueries[fdp.ConsumeIntegralInRange<size_t>(
+      0, sizeof(kQueries) / sizeof(kQueries[0]) - 1)];
+  out += kFrags[fdp.ConsumeIntegralInRange<size_t>(
+      0, sizeof(kFrags) / sizeof(kFrags[0]) - 1)];
+
+  // Optional: splice a short fuzzed fragment into the middle to widen coverage.
+  if (fdp.ConsumeBool() && !out.empty()) {
+    std::string mid = fdp.ConsumeRandomLengthString(16);
+    size_t pos = fdp.ConsumeIntegralInRange<size_t>(0, out.size());
+    out.insert(pos, mid);
+  }
+  return out;
+}
+
+static void check_href_size_invariant(const ada::url& u) {
+  if (u.get_href_size() != u.get_href().size()) {
+    printf("get_href_size mismatch (url): size=%zu href.size=%zu href=%s\n",
+           u.get_href_size(), u.get_href().size(), u.get_href().c_str());
+    abort();
+  }
+}
+
+static void check_href_size_invariant(const ada::url_aggregator& u) {
+  if (u.get_href_size() != u.get_href().size()) {
+    printf(
+        "get_href_size mismatch (aggregator): size=%zu href.size=%zu href=%s\n",
+        u.get_href_size(), u.get_href().size(),
+        std::string(u.get_href()).c_str());
+    abort();
+  }
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   FuzzedDataProvider fdp(data, size);
   std::string source = fdp.ConsumeRandomLengthString(256);
@@ -158,6 +241,29 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   // volatile forces the compiler to store the results without undue
   // optimizations
   volatile size_t length = 0;
+
+  // Also parse a structured simple-absolute candidate so the fast path is
+  // reached even when pure random bytes rarely look like http(s) URLs.
+  std::string simple_abs = make_simple_absolute_candidate(fdp);
+  {
+    auto su = ada::parse<ada::url>(simple_abs);
+    auto sa = ada::parse<ada::url_aggregator>(simple_abs);
+    if (su.has_value() ^ sa.has_value()) {
+      printf("simple_abs parse agreement fail: %s\n", simple_abs.c_str());
+      abort();
+    }
+    if (su) {
+      if (su->get_href() != std::string(sa->get_href())) {
+        printf("simple_abs href mismatch:\n  in=%s\n  url=%s\n  agg=%s\n",
+               simple_abs.c_str(), su->get_href().c_str(),
+               std::string(sa->get_href()).c_str());
+        abort();
+      }
+      check_href_size_invariant(*su);
+      check_href_size_invariant(*sa);
+      length += su->get_href().size();
+    }
+  }
 
   auto parse_url = ada::parse<ada::url>(source);
   auto parse_url_aggregator = ada::parse<ada::url_aggregator>(source);
@@ -172,11 +278,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   if (parse_url) {
     length += parse_url->get_href().size();
     length += parse_url->get_origin().size();
+    check_href_size_invariant(*parse_url);
   }
 
   if (parse_url_aggregator) {
     length += parse_url_aggregator->get_href().size();
     length += parse_url_aggregator->get_origin().size();
+    check_href_size_invariant(*parse_url_aggregator);
 
     volatile bool is_parse_url_aggregator_output_valid = false;
     is_parse_url_aggregator_output_valid = parse_url_aggregator->validate();

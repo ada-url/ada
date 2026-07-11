@@ -40,7 +40,26 @@ std::string url_examples[] = {
     "old-ie.min.css",
     "https://gn-web-assets.api.bbc.com/wwhp/"
     "20220908-1153-091014d07889c842a7bdc06e00fa711c9e04f049/modules/vendor/"
-    "bower/modernizr/modernizr.js"};
+    "bower/modernizr/modernizr.js",
+    // Simple-absolute fast-path seeds (clean http(s), no auth/port/IPv4/IDNA).
+    "https://example.com",
+    "https://example.com/",
+    "https://example.com?q=1",
+    "https://example.com#frag",
+    "https://example.com/?q=1#frag",
+    "http://www.example.com/path/file.js",
+    "https://www.google.com/imghp?hl=en&tab=wi",
+    "https://maps.google.com/maps?hl=en&tab=wl",
+    "http://WWW.Example.COM/file.js",
+    // Fall-through seeds for the simple-absolute gate.
+    "http://192.168.0.1/x",            // digit-led host (IPv4)
+    "http://0x7f.1/",                  // non-decimal IPv4
+    "https://user@example.com/",       // credentials
+    "https://example.com:8080/x",      // port
+    "https://example.com/a/./b/../c",  // dot segments
+    "https://example.com/foo/%2e%2e",  // percent-encoded dots
+    "https://xn--nxasmq6b.com/",       // punycode
+};
 
 // This function copies your input onto a memory buffer that
 // has just the necessary size. This will entice tools to detect
@@ -207,6 +226,193 @@ size_t length_fuzz(size_t N, size_t seed = 0) {
   return checked;
 }
 
+// Seeds shaped like absolute http(s) URLs so mutations hit
+// try_parse_simple_absolute (and its fall-through gates: digit hosts, dots,
+// credentials, ports, xn--).
+static const char* kSimpleAbsoluteSeeds[] = {
+    "https://example.com",
+    "https://example.com/",
+    "https://example.com/path",
+    "https://example.com/path?q=1",
+    "https://example.com/path#frag",
+    "https://example.com/?q=1#frag",
+    "http://www.example.com/file.js",
+    "https://www.google.com/imghp?hl=en&tab=wi",
+    "http://WWW.Example.COM/file.js",
+    "https://example.com/continue=https%3A%2F%2Fexample.com%2F",
+    "http://192.168.0.1/x",
+    "http://0x7f.0.0.1/",
+    "https://user:pass@example.com/x",
+    "https://example.com:8080/x",
+    "https://example.com/a/./b/../c",
+    "https://example.com/foo/%2e",
+    "https://example.com/foo/%2e%2e",
+    "https://xn--nxasmq6b.com/",
+    "https://example.com/path with space",
+    "https://example.com/path\twith\ttab",
+    "http://example.com\\path",
+    "https://example.com?",
+    "https://example.com#",
+    "https://",
+    "http://",
+    "https://a",
+    "http://a.b.c.d.e.f.g/",
+};
+
+// Abort if url and url_aggregator disagree, or if get_href_size drifts from
+// get_href().size() (covers the memcpy-based get_href hot path).
+template <class R>
+static void check_simple_absolute_invariants(const R& parsed,
+                                             std::string_view input) {
+  const std::string href = std::string(parsed.get_href());
+  if (parsed.get_href_size() != href.size()) {
+    std::cerr << "simple_absolute_fuzz FAIL get_href_size mismatch\n"
+              << "  input: " << input << "\n"
+              << "  href:  " << href << "\n"
+              << "  size:  " << parsed.get_href_size()
+              << " vs href.size()=" << href.size() << "\n";
+    std::abort();
+  }
+  auto reparsed = ada::parse<R>(href);
+  if (!reparsed) {
+    std::cerr << "simple_absolute_fuzz FAIL re-parse of href\n"
+              << "  input: " << input << "\n"
+              << "  href:  " << href << "\n";
+    std::abort();
+  }
+  if (std::string(reparsed->get_href()) != href) {
+    std::cerr << "simple_absolute_fuzz FAIL href not idempotent\n"
+              << "  input: " << input << "\n"
+              << "  href1: " << href << "\n"
+              << "  href2: " << reparsed->get_href() << "\n";
+    std::abort();
+  }
+}
+
+// Mutate absolute http(s)-shaped inputs and assert cross-type agreement plus
+// href size/idempotency invariants. Targets the simple-absolute fast path and
+// every intentional fall-through (IPv4 digit gate, dots, auth, port, IDNA).
+size_t simple_absolute_fuzz(size_t N, size_t seed = 0) {
+  size_t counter = seed;
+  size_t checked = 0;
+  constexpr size_t nseeds =
+      sizeof(kSimpleAbsoluteSeeds) / sizeof(kSimpleAbsoluteSeeds[0]);
+
+  for (size_t trial = 0; trial < N; trial++) {
+    std::string copy = kSimpleAbsoluteSeeds[(seed + trial) % nseeds];
+
+    // Byte-level mutations that flip scheme, host, path, query, fragment.
+    int muts = 1 + int((counter * 17) % 6);
+    for (int m = 0; m < muts && !copy.empty(); m++) {
+      int kind = int((counter * 31 + m) % 5);
+      switch (kind) {
+        case 0:  // flip one byte
+          copy[(counter * 13) % copy.size()] =
+              char((counter * 71117 + m) & 0xFF);
+          break;
+        case 1:  // erase one byte
+          if (copy.size() > 1) {
+            copy.erase((counter * 11) % copy.size(), 1);
+          }
+          break;
+        case 2:  // insert a special character that may force fall-through
+        {
+          static const char specials[] = {':', '@', '/',  '\\', '?',  '#',
+                                          '.', '%', '0',  'x',  'A',  '[',
+                                          ']', ' ', '\t', '\n', '\r', 0};
+          char c = specials[(counter * 7 + m) % (sizeof(specials) - 1)];
+          copy.insert(copy.begin() + ((counter * 3) % (copy.size() + 1)), c);
+          break;
+        }
+        case 3:  // append a common tail
+        {
+          static const char* tails[] = {"/",    "?q=1", "#f", "/./x", "/../y",
+                                        "/%2e", ":80",  "@u", "0",    "xn--a"};
+          copy += tails[(counter + m) % 10];
+          break;
+        }
+        case 4:  // prepend alternate scheme
+        {
+          static const char* prefixes[] = {"http://",  "https://", "HTTP://",
+                                           "Https://", "http:",    "https:"};
+          // Drop an existing scheme if present so we do not double-prefix
+          // forever.
+          if (copy.rfind("http", 0) == 0) {
+            auto pos = copy.find("://");
+            if (pos != std::string::npos) {
+              copy = copy.substr(pos + 3);
+            }
+          }
+          copy = std::string(prefixes[(counter + m) % 6]) + copy;
+          break;
+        }
+        default:
+          break;
+      }
+      counter++;
+    }
+
+    auto u = ada_parse<ada::url>(copy);
+    auto a = ada_parse<ada::url_aggregator>(copy);
+    if (u.has_value() != a.has_value()) {
+      std::cerr << "simple_absolute_fuzz FAIL parse agreement\n"
+                << "  input: " << copy << "\n"
+                << "  url: " << u.has_value()
+                << " aggregator: " << a.has_value() << "\n";
+      std::abort();
+    }
+    if (u) {
+      if (u->get_href() != std::string(a->get_href())) {
+        std::cerr << "simple_absolute_fuzz FAIL href mismatch\n"
+                  << "  input: " << copy << "\n"
+                  << "  url:  " << u->get_href() << "\n"
+                  << "  agg:  " << a->get_href() << "\n";
+        std::abort();
+      }
+      check_simple_absolute_invariants(*u, copy);
+      check_simple_absolute_invariants(*a, copy);
+      checked++;
+    }
+  }
+  return checked;
+}
+
+// Roll every byte of each simple-absolute seed through 0..254, asserting
+// agreement between url and url_aggregator on every candidate.
+size_t simple_absolute_roller_fuzz() {
+  size_t valid = 0;
+  constexpr size_t nseeds =
+      sizeof(kSimpleAbsoluteSeeds) / sizeof(kSimpleAbsoluteSeeds[0]);
+  for (size_t s = 0; s < nseeds; s++) {
+    std::string copy = kSimpleAbsoluteSeeds[s];
+    for (size_t index = 0; index < copy.size(); index++) {
+      char orig = copy[index];
+      for (unsigned int value = 0; value < 255; value++) {
+        copy[index] = char(value);
+        auto u = ada_parse<ada::url>(copy);
+        auto a = ada_parse<ada::url_aggregator>(copy);
+        if (u.has_value() != a.has_value()) {
+          std::cerr << "simple_absolute_roller FAIL parse agreement\n"
+                    << "  input: " << copy << "\n";
+          std::abort();
+        }
+        if (u) {
+          if (u->get_href() != std::string(a->get_href())) {
+            std::cerr << "simple_absolute_roller FAIL href mismatch\n"
+                      << "  input: " << copy << "\n"
+                      << "  url:  " << u->get_href() << "\n"
+                      << "  agg:  " << a->get_href() << "\n";
+            std::abort();
+          }
+          valid++;
+        }
+      }
+      copy[index] = orig;
+    }
+  }
+  return valid;
+}
+
 int main() {
   if (std::endian::native == std::endian::big) {
     std::cout << "You have big-endian system." << std::endl;
@@ -230,5 +436,9 @@ int main() {
             << " length invariants.\n";
   std::cout << "[length] Checked " << length_fuzz<ada::url_aggregator>(10000)
             << " length invariants.\n";
+  std::cout << "[simple_abs] Checked " << simple_absolute_fuzz(80000)
+            << " successful parses.\n";
+  std::cout << "[simple_abs_roller] Valid " << simple_absolute_roller_fuzz()
+            << " cases.\n";
   return EXIT_SUCCESS;
 }
