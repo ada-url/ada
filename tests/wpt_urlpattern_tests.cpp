@@ -555,6 +555,42 @@ TEST(wpt_urlpattern_tests, search_and_hash_keep_leading_delimiter) {
   }
 }
 
+TEST(wpt_urlpattern_tests, pathname_encodes_query_and_fragment_delimiters) {
+  // "canonicalize a pathname" runs the URL parser in path state override, where
+  // '?' and '#' are ordinary path code points (percent-encoded) rather than
+  // query/fragment delimiters. A literal '?' or '#' in a pathname component
+  // must survive as %3F/%23; dropping everything from it onward would widen the
+  // pattern.
+  for (const auto& [input, expected] :
+       std::vector<std::pair<std::string, std::string>>{
+           {"/a?b", "/a%3Fb"},
+           {"/a#b", "/a%23b"},
+           {"/foo?", "/foo%3F"},
+           {"foo?bar", "foo%3Fbar"},
+           {"/a/../b", "/b"},
+       }) {
+    auto pathname = ada::url_pattern_helpers::canonicalize_pathname(input);
+    ASSERT_TRUE(pathname) << "pathname \"" << input << "\"";
+    EXPECT_EQ(*pathname, expected) << "pathname \"" << input << "\"";
+  }
+  {
+    // An escaped '?' in a pathname pattern is a literal, so the pattern matches
+    // the encoded delimiter and nothing shorter.
+    auto init = ada::url_pattern_init{};
+    init.pathname = "/a\\?b";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_pathname(), "/a%3Fb");
+    auto ok = url->test(std::string_view("https://example.com/a%3Fb"), nullptr);
+    ASSERT_TRUE(ok);
+    EXPECT_TRUE(*ok);
+    auto truncated =
+        url->test(std::string_view("https://example.com/a"), nullptr);
+    ASSERT_TRUE(truncated);
+    EXPECT_FALSE(*truncated);
+  }
+}
+
 // Tests are taken from WPT
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {

@@ -502,25 +502,33 @@ tl::expected<std::string, errors> canonicalize_pathname(
   const bool leading_slash = input.starts_with("/");
   // Let modified value be "/-" if leading slash is false and otherwise the
   // empty string.
-  const auto modified_value = leading_slash ? "" : "/-";
-  const auto full_url =
-      std::string("fake://fake-url") + modified_value + std::string(input);
-  if (auto url = ada::parse<url_aggregator>(full_url, nullptr)) {
-    const auto pathname = url->get_pathname();
-    // If leading slash is false, then set result to the code point substring
-    // from 2 to the end of the string within result.
-    if (!leading_slash) {
-      // pathname should start with "/-" but path traversal (e.g. "../../")
-      // can reduce it to just "/" which is shorter than 2 characters.
-      if (pathname.size() < 2) {
-        return tl::unexpected(errors::type_error);
-      }
-      return std::string(pathname.substr(2));
-    }
-    return std::string(pathname);
+  const auto modified_value =
+      (leading_slash ? std::string() : std::string("/-")) + std::string(input);
+  // The spec runs the basic URL parser with the path in state override, where
+  // '?' and '#' are ordinary path code points (percent-encoded) and leading or
+  // trailing C0 control or space is kept. Building a full URL string and
+  // parsing it (no state override) instead let '?' and '#' start the
+  // query/fragment, so the pathname was silently truncated at the first literal
+  // '?' or '#'. set_pathname runs the parser in path state override, matching
+  // how canonicalize_hostname uses set_hostname.
+  auto url = ada::parse<url_aggregator>("fake://fake-url", nullptr);
+  ADA_ASSERT_TRUE(url);
+  if (!url->set_pathname(modified_value)) {
+    // If parseResult is failure, then throw a TypeError.
+    return tl::unexpected(errors::type_error);
   }
-  // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(errors::type_error);
+  const auto pathname = url->get_pathname();
+  // If leading slash is false, then set result to the code point substring
+  // from 2 to the end of the string within result.
+  if (!leading_slash) {
+    // pathname should start with "/-" but path traversal (e.g. "../../")
+    // can reduce it to just "/" which is shorter than 2 characters.
+    if (pathname.size() < 2) {
+      return tl::unexpected(errors::type_error);
+    }
+    return std::string(pathname.substr(2));
+  }
+  return std::string(pathname);
 }
 
 tl::expected<std::string, errors> canonicalize_opaque_pathname(
