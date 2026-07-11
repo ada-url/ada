@@ -618,7 +618,6 @@ TEST(ada_c, max_input_length) {
 
   ada_free(result);
 
-  // can_parse must agree with ada_parse on overlength inputs.
   ASSERT_FALSE(ada_can_parse(long_url.c_str(), long_url.size()));
 
   // Restore default.

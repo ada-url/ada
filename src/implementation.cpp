@@ -311,10 +311,7 @@ std::string href_from_file(std::string_view input) {
 }
 
 bool can_parse(std::string_view input, const std::string_view* base_input) {
-  // can_parse must agree with parse().has_value() for every input. That
-  // includes ada::set_max_input_length limits applied to the *normalized*
-  // href (percent-encoding, IDNA, ...), not only the raw input size.
-
+  // Must match parse().has_value(), including post-normalization max length.
   const uint32_t max_length = ada::get_max_input_length();
   if (input.size() > max_length) {
     return false;
@@ -323,14 +320,8 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
     return false;
   }
 
-  // Fast path: absolute special (non-file) ASCII URLs with no credentials /
-  // IDNA / IPv6. Only used when we can prove the result matches parse():
-  //   - false  -> definitely invalid (same as parse)
-  //   - true   -> valid only if the normalized href cannot exceed max_length.
-  //               Percent-encoding expands each byte by at most 3x, so when
-  //               input.size() <= max_length/3 the expansion cannot breach
-  //               the limit. Near the limit we fall through to full parse.
-  //   - nullopt -> edge case; full parse decides.
+  // Fast path: false is definitive; true is only safe when percent-encoding
+  // cannot expand past max_length (at most 3x per byte).
   if (base_input == nullptr) {
     if (const auto r = try_can_parse_absolute_fast(input)) {
       if (!*r) {
@@ -339,18 +330,12 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
       if (input.size() <= static_cast<size_t>(max_length) / 3) {
         return true;
       }
-      // Structurally valid but near the size limit: confirm with full parse
-      // so post-normalization length is enforced exactly as in parse().
       return ada::parser::parse_url_impl<ada::url_aggregator, true>(input,
                                                                     nullptr)
           .is_valid;
     }
   }
 
-  // Full parse with store_values=true so the post-normalization length check
-  // in parse_url_impl matches parse(). Validation-only mode (store_values=
-  // false) skips that check and historically allowed can_parse/parse to
-  // disagree when a short input expanded past max_input_length.
   if (base_input == nullptr) {
     return ada::parser::parse_url_impl<ada::url_aggregator, true>(input,
                                                                   nullptr)

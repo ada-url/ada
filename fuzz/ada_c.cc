@@ -1,10 +1,5 @@
-// C API fuzzer. Built as C++ amalgamating ada.cpp so OSS-Fuzz coverage
-// instrumentation sees both the harness and the library (the previous
-// separate-object C link left ada_c at ~0% coverage once hard aborts on
-// can_parse/parse mismatches stopped corpus progress).
-//
-// Types/functions from ada_c.cpp are already in this TU via the amalgamation;
-// do not also include ada_c.h (redefinition errors).
+// C API fuzzer (C++ amalgamation; do not include ada_c.h — types come from
+// ada_c.cpp in the amalgamation).
 
 #include <fuzzer/FuzzedDataProvider.h>
 
@@ -103,7 +98,6 @@ static void exercise_valid_url(ada_url out, const char* input, size_t input_len,
   ada_has_search(out);
 
   const ada_url_components* comps = ada_get_components(out);
-  // ada_url_omitted is 0xffffffff (see ada_c.h / url_components::omitted).
   constexpr uint32_t kOmitted = 0xffffffffu;
   auto check_off = [&](uint32_t off, const char* name) {
     if (off != kOmitted && off > href.length) {
@@ -130,7 +124,6 @@ static void exercise_valid_url(ada_url out, const char* input, size_t input_len,
   }
   ada_free(out_copy);
 
-  // Re-parse idempotency after setters/clears.
   ada_string final_href = ada_get_href(out);
   ada_url reparsed = ada_parse(final_href.data, final_href.length);
   if (!ada_is_valid(reparsed)) {
@@ -163,7 +156,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   const char* base = secondary.data();
   size_t base_len = secondary.size();
 
-  // can_parse must agree with parse (is_valid).
   ada_url out = ada_parse(input, input_len);
   bool is_valid = ada_is_valid(out);
   bool can_parse_result = ada_can_parse(input, input_len);
@@ -220,7 +212,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     (void)ada_get_version_components().major;
   }
 
-  // Search params
   {
     ada_url_search_params sp = ada_parse_search_params(input, input_len);
     (void)ada_search_params_size(sp);
@@ -265,7 +256,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     ada_free_search_params(sp);
   }
 
-  // Anchors keep coverage alive with thin corpora.
   static constexpr const char* kAnchors[] = {
       "https://example.com/",
       "http://127.0.0.1/x",

@@ -194,9 +194,7 @@ TYPED_TEST(max_input_length_tests, parse_normalized_exceeds_limit) {
   std::string input = "http://x/" + std::string(339, ' ') + "y";
   ASSERT_LE(input.size(), small_limit);
   auto result = ada::parse<TypeParam>(input);
-  // The normalized URL should be 10 + 339*3 = 1027 bytes, exceeding the limit.
   ASSERT_FALSE(result);
-  // can_parse must agree with parse (including post-normalization length).
   ASSERT_FALSE(ada::can_parse(input));
 }
 

@@ -56,9 +56,6 @@ $CXX -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=1 \
      url_pattern.o \
      -o $OUT/url_pattern
 
-# C API harness is C++ and amalgamates ada.cpp in-process (same pattern as
-# parse/url_pattern). Linking a separate un-instrumented or multi-object
-# ada.o previously caused OSS-Fuzz coverage for ada_c to collapse to ~0%.
 $CXX $CFLAGS $CXXFLAGS \
      -std=c++20 \
      -I build/singleheader \

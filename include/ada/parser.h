@@ -72,11 +72,7 @@ extern template url_aggregator parse_url_impl<url_aggregator, false>(
 extern template url parse_url_impl<url, true>(std::string_view user_input,
                                               const url* base_url);
 
-/**
- * @private
- * Fast path for simple absolute http(s) URLs. Fills `out` and returns true on
- * success; returns false to fall through to the full parser.
- */
+/** @private */
 template <class result_type>
 bool try_parse_simple_absolute(std::string_view input, result_type& out);
 

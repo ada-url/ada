@@ -19,41 +19,28 @@
 
 namespace ada::parser {
 
-// Fast path for absolute http(s) URLs that are already fully normalized:
-// lowercase scheme/host, no credentials/port/IPv4/IPv6/IDNA, no percent-
-// encoding, and no "." / ".." path segments. One table-driven scan, then a
-// single buffer assign (aggregator) or a few component copies (url).
-//
-// Returns true and fills `out` on success. Returns false with no writes.
-// Friend of url / url_aggregator for private buffer access.
+// 0 = host byte, 1 = host delimiter (/ ? #), 2 = reject
 namespace {
 
-// 0 = ok in host, 1 = host delimiter (/ ? #), 2 = reject (full parser)
-// Mirrors the WHATWG forbidden-domain-code-point set: anything else is ok.
 constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
   std::array<uint8_t, 256> t{};
-  // Default: accept printable ASCII that is not a forbidden domain code point.
   for (size_t i = 0; i < 256; ++i) {
     t[i] = 2;
   }
   for (size_t i = 0x21; i <= 0x7E; ++i) {
     t[i] = 0;
   }
-  // Forbidden domain code points that fall in 0x21-0x7E.
   for (uint8_t c :
        {'#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
     t[c] = 2;
   }
-  // Delimiters that end the host (also forbidden as host bytes).
   t[static_cast<uint8_t>('/')] = 1;
   t[static_cast<uint8_t>('?')] = 1;
   t[static_cast<uint8_t>('#')] = 1;
   return t;
 }();
 
-// Bytes in path/query/fragment: 0 = ok, 1 = ? or # delimiter, 2 = reject.
-// Conservative union of path + special-query + fragment percent-encode sets
-// so one scan decides whether a pure copy is safe.
+// 0 = ok, 1 = ?/#, 2 = reject. Path rejects '%' so "%2e" falls through.
 constexpr std::array<uint8_t, 256> k_rest = []() consteval {
   std::array<uint8_t, 256> t{};
   for (size_t i = 0; i < 256; ++i) {
@@ -62,9 +49,6 @@ constexpr std::array<uint8_t, 256> k_rest = []() consteval {
   for (uint8_t c = 0x21; c <= 0x7E; ++c) {
     t[c] = 0;
   }
-  // Encode-set / special rejects. '%' is NOT allowed in the path table:
-  // "%2e" / "%2e%2e" are single/double-dot segments and need the full parser.
-  // Query/fragment scans allow '%' explicitly (already-encoded stays as-is).
   for (uint8_t c : {static_cast<uint8_t>('"'), static_cast<uint8_t>('<'),
                     static_cast<uint8_t>('>'), static_cast<uint8_t>('`'),
                     static_cast<uint8_t>('{'), static_cast<uint8_t>('}'),
@@ -79,10 +63,9 @@ constexpr std::array<uint8_t, 256> k_rest = []() consteval {
 
 }  // namespace
 
+// Fast path for already-normalized absolute http(s) URLs. noinline keeps
+// the fallthrough path small (IPv4 microbenches).
 template <class result_type>
-// noinline: inlining this into parse_url_impl bloated the fallthrough path
-// enough to regress IPv4 microbenchmarks via I-cache pressure, even when the
-// digit-host gate below skips the call entirely.
 ada_never_inline bool try_parse_simple_absolute(std::string_view input,
                                                 result_type& out) {
   constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
@@ -99,7 +82,6 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
   size_t pos;
   ada::scheme::type scheme_type;
   uint32_t protocol_end;
-  // Lowercase http:// or https:// only.
   if (b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
     if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
       pos = 7;
@@ -120,16 +102,11 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     return false;
   }
 
-  // IPv4 (decimal/hex/octal) and numeric hosts use the dedicated host parser.
-  // Bail before table-driven scanning so those workloads do not pay for a
-  // failed fast-path attempt. Domain names almost never start with a digit.
-  // No [[unlikely]]: IPv4 microbenchmarks hit this on every input; a
-  // mispredicted "unlikely" was a measurable regression there.
+  // Digit-led hosts are IPv4/numeric; skip before scanning.
   if (pos < len && b[pos] >= '0' && b[pos] <= '9') {
     return false;
   }
 
-  // --- Host ---
   const size_t host_start = pos;
   bool has_upper = false;
   size_t i = pos;
@@ -137,7 +114,7 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     const uint8_t c = b[i];
     const uint8_t cls = k_host_class[c];
     if (cls == 1) {
-      break;  // / ? #
+      break;
     }
     if (cls == 2) [[unlikely]] {
       return false;
@@ -151,9 +128,6 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     return false;
   }
   const size_t host_len = host_end - host_start;
-  // IPv4 (decimal/hex/octal) needs the dedicated parser. checkers::is_ipv4
-  // expects lowercase - only copy+lower when the host has uppercase.
-  // DNS max label total is 253; oversized hosts fall through.
   if (host_len > 253) [[unlikely]] {
     return false;
   }
@@ -168,16 +142,12 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     if (checkers::is_ipv4(hv)) [[unlikely]] {
       return false;
     }
-    // Punycode prefix requires IDNA (hv is lowercased when needed).
     static constexpr std::string_view xn{"xn-", 3};
     if (hv.find(xn) != std::string_view::npos) [[unlikely]] {
       return false;
     }
   }
 
-  // --- Path / query / fragment ---
-  // Path loop is deliberately minimal: table lookup + delimiter only.
-  // Dot-segment checks run once after the path is bounded (rare '.').
   size_t path_start = host_end;
   size_t path_end = host_end;
   size_t query_start = std::string_view::npos;
@@ -207,7 +177,7 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
         ++i;
         goto scan_hash;
       }
-      return false;  // cls == 2
+      return false;
     }
     path_end = i;
   } else if (i < len && b[i] == '?') {
@@ -222,8 +192,6 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
   goto after_rest;
 
 scan_query:
-  // Special-query percent-encode set does not include '%', so encoded
-  // sequences copy through. Allow '%' here (unlike the path table).
   for (; i < len; ++i) {
     const uint8_t c = b[i];
     if (c == '#') {
@@ -241,7 +209,6 @@ scan_query:
   goto after_rest;
 
 scan_hash:
-  // Fragment percent-encode set does not include '%'.
   for (; i < len; ++i) {
     const uint8_t c = b[i];
     if (c == '?' || c == '#' || c == '%') {
@@ -253,11 +220,9 @@ scan_hash:
   }
 
 after_rest:
-  // Reject "." / ".." path segments (only when path contains a '.').
   if (path_has_dot) [[unlikely]] {
     const std::string_view path_body(input.data() + path_start,
                                      path_end - path_start);
-    // path_body starts with '/'
     if (path_body.size() >= 2 && path_body[1] == '.') {
       if (path_body.size() == 2 || path_body[2] == '/' ||
           (path_body.size() >= 3 && path_body[2] == '.' &&
@@ -286,9 +251,7 @@ after_rest:
 
   if constexpr (is_aggregator) {
     if (!need_slash) {
-      // Direct resize + memcpy is slightly faster than assign on libc++.
       out.buffer.resize(len);
-      // Sized binary copy; length is `len`, not a C-string API.
       // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
       std::memcpy(out.buffer.data(), input.data(), len);
       if (has_upper) {
@@ -397,30 +360,17 @@ result_type parse_url_impl(std::string_view user_input,
     return url;
   }
 
-  // Fast path FIRST on the raw input: absolute special http(s) URLs with a
-  // clean ASCII host and no transforms. Running before has_tabs_or_newline
-  // avoids a full-string SIMD scan on the common case. Tabs/newlines/C0 in
-  // the input cause the fast path to reject and fall through.
-  // can_parse (store_values=false) has its own fast path in implementation.cpp.
-  //
-  // Digit-led hosts (IPv4 / pure-numeric) skip the call entirely so those
-  // microbenchmarks only pay a cheap scheme+host peek, not a failed attempt.
-  // No [[likely]] on success: mixed workloads and IPv4 benches mispredict it.
+  // Simple absolute http(s) fast path (before tabs/newline scan).
+  // Skip digit-led hosts (IPv4) with a cheap peek.
   if constexpr (store_values) {
     if (base_url == nullptr) {
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
-      // Cheap digit-host skip without re-matching the full scheme name:
-      // 4-letter scheme://D (http://1...) or 5-letter (https://1...).
-      // Safe: any digit-led host falls through to the dedicated IPv4 path.
-      // try_parse_simple_absolute still validates scheme/host fully.
       const bool digit_led_host = (n >= 8 && p[4] == ':' && p[5] == '/' &&
                                    p[6] == '/' && p[7] >= '0' && p[7] <= '9') ||
                                   (n >= 9 && p[5] == ':' && p[6] == '/' &&
                                    p[7] == '/' && p[8] >= '0' && p[8] <= '9');
       if (!digit_led_host && try_parse_simple_absolute(user_input, url)) {
-        // Match the post-normalization length gate used at the end of the
-        // full parser so can_parse/parse agree under set_max_input_length.
         if constexpr (result_type_is_ada_url_aggregator) {
           if (url.buffer.size() > max_input_length) [[unlikely]] {
             url.is_valid = false;

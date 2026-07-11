@@ -150,8 +150,6 @@ static void exercise_aggregator_predicates(const ada::url_aggregator& u) {
   (void)u.to_diagram();
 }
 
-// Build absolute http(s) candidates that exercise try_parse_simple_absolute
-// and its fall-through gates (digit-led host, dots, credentials, port, xn--).
 static std::string make_simple_absolute_candidate(FuzzedDataProvider& fdp) {
   static constexpr const char* kSchemes[] = {"http://",  "https://", "HTTP://",
                                              "Https://", "http:",    "https:"};
@@ -161,7 +159,7 @@ static std::string make_simple_absolute_candidate(FuzzedDataProvider& fdp) {
       "WWW.Example.COM",
       "a",
       "a.b.c",
-      "192.168.0.1",  // digit-led: IPv4 gate
+      "192.168.0.1",
       "0x7f.1",
       "127.1",
       "xn--nxasmq6b.com",
@@ -206,7 +204,6 @@ static std::string make_simple_absolute_candidate(FuzzedDataProvider& fdp) {
   out += kFrags[fdp.ConsumeIntegralInRange<size_t>(
       0, sizeof(kFrags) / sizeof(kFrags[0]) - 1)];
 
-  // Optional: splice a short fuzzed fragment into the middle to widen coverage.
   if (fdp.ConsumeBool() && !out.empty()) {
     std::string mid = fdp.ConsumeRandomLengthString(16);
     size_t pos = fdp.ConsumeIntegralInRange<size_t>(0, out.size());
@@ -242,8 +239,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   // optimizations
   volatile size_t length = 0;
 
-  // Also parse a structured simple-absolute candidate so the fast path is
-  // reached even when pure random bytes rarely look like http(s) URLs.
   std::string simple_abs = make_simple_absolute_candidate(fdp);
   {
     auto su = ada::parse<ada::url>(simple_abs);

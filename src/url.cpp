@@ -481,7 +481,6 @@ ada_really_inline bool url::parse_host(std::string_view input) {
   unicode::to_lower_ascii(buffer.data(), buffer.size());
   bool is_forbidden = unicode::contains_forbidden_domain_code_point(
       buffer.data(), buffer.size());
-  // Use a sized needle so find does not call strlen on the C string.
   static constexpr std::string_view xn_dash{"xn-", 3};
   if (is_forbidden == 0 && buffer.find(xn_dash) == std::string_view::npos) {
     // fast path

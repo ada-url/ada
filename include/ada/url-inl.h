@@ -186,9 +186,6 @@ constexpr void url::copy_scheme(const ada::url& u) {
 }
 
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
-  // Hot path: special scheme, host present, no credentials/port.
-  // Write directly into a pre-sized buffer with memcpy (no intermediate
-  // temporaries like "?" + query, no get_href_size pre-walk).
   if (is_special() && host.has_value() && username.empty() &&
       password.empty() && !port.has_value()) [[likely]] {
     const std::string_view scheme = ada::scheme::details::is_special_list[type];
@@ -196,8 +193,6 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const size_t path_size = path.size();
     const size_t query_size = query.has_value() ? query->size() : 0;
     const size_t hash_size = hash.has_value() ? hash->size() : 0;
-    // scheme + "://" + host + path + optional ("?" + query) + optional ("#" +
-    // hash)
     const size_t total = scheme.size() + 3 + host_size + path_size +
                          (query.has_value() ? query_size + 1 : 0) +
                          (hash.has_value() ? hash_size + 1 : 0);
@@ -209,7 +204,6 @@ constexpr void url::copy_scheme(const ada::url& u) {
     p[1] = '/';
     p[2] = '/';
     p += 3;
-    // Sized copy into a pre-sized std::string; not a C string.
     // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
     std::memcpy(p, host->data(), host_size);
     p += host_size;
@@ -229,7 +223,6 @@ constexpr void url::copy_scheme(const ada::url& u) {
     return output;
   }
 
-  // General path: pre-size and append pieces to avoid temporary concatenations.
   std::string output;
   output.reserve(get_href_size());
 
@@ -280,9 +273,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
 }
 
 [[nodiscard]] inline size_t url::get_href_size() const noexcept {
-  // Mirrors the logic of get_href() but only computes the total size.
   size_t size = 0;
-  // Protocol: scheme + ":"
   if (is_special()) {
     size += ada::scheme::details::is_special_list[type].size() + 1;
   } else {
@@ -290,17 +281,16 @@ constexpr void url::copy_scheme(const ada::url& u) {
   }
   if (host.has_value()) {
     size += host->size();
-    size += 2;  // "//"
+    size += 2;
     if (has_credentials()) {
       size += username.size();
       if (!password.empty()) {
-        size += 1 + password.size();  // ":" + password
+        size += 1 + password.size();
       }
-      size += 1;  // "@"
+      size += 1;
     }
     if (port.has_value()) {
-      size += 1;  // ":"
-      // Count digits of port value without calling std::to_string.
+      size += 1;
       uint16_t p = *port;
       size += (p >= 10000)  ? 5
               : (p >= 1000) ? 4
@@ -309,14 +299,14 @@ constexpr void url::copy_scheme(const ada::url& u) {
                             : 1;
     }
   } else if (!has_opaque_path && path.starts_with("//")) {
-    size += 2;  // "/."
+    size += 2;
   }
   size += path.size();
   if (query.has_value()) {
-    size += 1 + query->size();  // "?" + query
+    size += 1 + query->size();
   }
   if (hash.has_value()) {
-    size += 1 + hash->size();  // "#" + hash
+    size += 1 + hash->size();
   }
   return size;
 }

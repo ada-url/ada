@@ -538,7 +538,6 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   // could also check whether x and n and - are present, and so we could skip
   // some of the checks below. However, the gains are likely to be small, and
   // the code would be more complex.
-  // Use a sized needle so find does not call strlen on the C string.
   static constexpr std::string_view xn_dash{"xn-", 3};
   if (is_forbidden_or_upper == 0 &&
       input.find(xn_dash) == std::string_view::npos) {

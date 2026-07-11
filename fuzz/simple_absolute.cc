@@ -7,13 +7,6 @@
 #include "ada.cpp"
 #include "ada.h"
 
-// ============================================================
-// Fuzzer for the simple-absolute http(s) parse fast path
-// (try_parse_simple_absolute) and its intentional fall-throughs:
-// digit-led hosts (IPv4), credentials, ports, xn--/IDNA, dot
-// segments, percent-encoded dots, and get_href hot-path size.
-// ============================================================
-
 static constexpr const char* kSchemes[] = {
     "http://", "https://", "HTTP://", "Https://",
     "http:",   "https:",   "htTP://", "HTTPS://"};
@@ -25,7 +18,7 @@ static constexpr const char* kHosts[] = {
     "a",
     "a.b.c",
     "maps.google.com",
-    "192.168.0.1",  // digit-led host -> IPv4 gate
+    "192.168.0.1",
     "0x7f.1",
     "127.1",
     "0",
@@ -86,19 +79,15 @@ static std::string make_candidate(FuzzedDataProvider& fdp) {
   out += pick(fdp, kQueries);
   out += pick(fdp, kFrags);
 
-  // Optional splice of raw fuzz bytes to widen coverage.
   if (fdp.ConsumeBool() && !out.empty()) {
     std::string mid = fdp.ConsumeRandomLengthString(24);
     size_t pos = fdp.ConsumeIntegralInRange<size_t>(0, out.size());
     out.insert(pos, mid);
   }
-
-  // Optional single-byte mutation.
   if (fdp.ConsumeBool() && !out.empty()) {
     size_t i = fdp.ConsumeIntegralInRange<size_t>(0, out.size() - 1);
     out[i] = static_cast<char>(fdp.ConsumeIntegral<uint8_t>());
   }
-
   return out;
 }
 
@@ -202,7 +191,6 @@ static void fuzz_one_input(std::string_view input) {
   check_reparse_idempotent(*url, input);
   check_reparse_idempotent(*agg, input);
 
-  // get_href hot path must stay consistent after set_href of the same href.
   const std::string href = url->get_href();
   url->set_href(href);
   agg->set_href(href);
@@ -223,17 +211,13 @@ static void fuzz_one_input(std::string_view input) {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   FuzzedDataProvider fdp(data, size);
 
-  // 1) Structured candidate aimed at the simple-absolute fast path / gates.
-  std::string structured = make_candidate(fdp);
-  fuzz_one_input(structured);
+  fuzz_one_input(make_candidate(fdp));
 
-  // 2) Raw fuzz bytes as a pure absolute-URL-shaped input (prefix http(s)).
   if (fdp.remaining_bytes() > 0) {
     std::string raw = fdp.ConsumeRemainingBytesAsString();
     if (raw.size() > 512) {
       raw.resize(512);
     }
-    // Occasionally force an http(s) prefix so the fast-path entry is reached.
     if (!raw.empty() && (static_cast<unsigned char>(raw[0]) & 1u)) {
       raw = std::string("https://") + raw;
     } else if (!raw.empty()) {
@@ -242,7 +226,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzz_one_input(raw);
   }
 
-  // 3) Fixed seeds that must always be safe (dictionary-like corpus anchors).
   static constexpr const char* kAnchors[] = {
       "https://example.com",
       "https://example.com/",

@@ -12,10 +12,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   std::string source = fdp.ConsumeRandomLengthString(256);
   std::string base_source = fdp.ConsumeRandomLengthString(256);
 
-  /**
-   * can_parse must agree with parse().has_value() for every input.
-   */
-
   bool can_parse_result = ada::can_parse(source);
   auto parsed_agg = ada::parse<ada::url_aggregator>(source);
   auto parsed_url = ada::parse<ada::url>(source);
@@ -70,16 +66,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
              source.c_str(), base_source.c_str());
       abort();
     }
-  } else {
-    // Invalid base: can_parse with base must be false.
-    if (can_parse_with_base) {
-      printf("can_parse_with_base true with invalid base=%s\n",
-             base_source.c_str());
-      abort();
-    }
+  } else if (can_parse_with_base) {
+    printf("can_parse_with_base true with invalid base=%s\n",
+           base_source.c_str());
+    abort();
   }
 
-  // Empty string
   {
     bool empty_cp = ada::can_parse("");
     auto empty_agg = ada::parse<ada::url_aggregator>("");
@@ -91,7 +83,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     }
   }
 
-  // href round-trip
   if (parsed_agg) {
     std::string href = std::string(parsed_agg->get_href());
     if (!ada::can_parse(href)) {

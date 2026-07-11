@@ -1170,11 +1170,7 @@ TYPED_TEST(basic_tests, get_href_size_password_no_password) {
   ASSERT_EQ(url2->get_href_size(), url2->get_href().size());
 }
 
-// Regression coverage for the simple absolute http(s) parse fast path.
-// These cases exercise pure-copy handling, empty-path slash insertion,
-// already-encoded query bytes, and fall-through to the full parser.
 TYPED_TEST(basic_tests, simple_absolute_fast_path) {
-  // Already-normalized https URL (pure buffer assign / component fill).
   {
     auto url =
         ada::parse<TypeParam>("https://www.google.com/imghp?hl=en&tab=wi");
@@ -1185,8 +1181,6 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_EQ(url->get_search(), "?hl=en&tab=wi");
     ASSERT_EQ(url->get_href(), "https://www.google.com/imghp?hl=en&tab=wi");
   }
-
-  // Empty path must serialize with a trailing '/'.
   {
     auto url = ada::parse<TypeParam>("https://example.com");
     ASSERT_TRUE(url);
@@ -1200,8 +1194,6 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_EQ(url->get_search(), "?q=1");
     ASSERT_EQ(url->get_href(), "https://example.com/?q=1");
   }
-
-  // Already percent-encoded query copies through unchanged.
   {
     auto url = ada::parse<TypeParam>(
         "https://example.com/path?continue=https%3A%2F%2Fexample.com%2F");
@@ -1209,8 +1201,6 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_EQ(url->get_href(),
               "https://example.com/path?continue=https%3A%2F%2Fexample.com%2F");
   }
-
-  // Host uppercasing is lowercased; path with a filename dot is fine.
   {
     auto url = ada::parse<TypeParam>("http://WWW.Example.COM/file.js");
     ASSERT_TRUE(url);
@@ -1218,16 +1208,12 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_EQ(url->get_pathname(), "/file.js");
     ASSERT_EQ(url->get_href(), "http://www.example.com/file.js");
   }
-
-  // Dot segments must still be resolved (full parser).
   {
     auto url = ada::parse<TypeParam>("https://example.com/a/./b/../c");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_pathname(), "/a/c");
     ASSERT_EQ(url->get_href(), "https://example.com/a/c");
   }
-
-  // Percent-encoded dot segments must also be resolved (not pure-copied).
   {
     auto url = ada::parse<TypeParam>("https://example.com/foo/%2e");
     ASSERT_TRUE(url);
@@ -1240,8 +1226,6 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_EQ(url->get_pathname(), "/");
     ASSERT_EQ(url->get_href(), "https://example.com/");
   }
-
-  // Credentials / port force the full parser; results stay correct.
   {
     auto url =
         ada::parse<TypeParam>("https://user:pass@example.com:8080/x?y=1#z");
@@ -1253,8 +1237,6 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_EQ(url->get_search(), "?y=1");
     ASSERT_EQ(url->get_hash(), "#z");
   }
-
-  // url and url_aggregator must agree on href for fast-path inputs.
   const char* samples[] = {
       "https://www.youtube.com/about/",
       "http://example.com/",
