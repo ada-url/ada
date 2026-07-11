@@ -191,8 +191,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
   // temporaries like "?" + query, no get_href_size pre-walk).
   if (is_special() && host.has_value() && username.empty() &&
       password.empty() && !port.has_value()) [[likely]] {
-    const std::string_view scheme =
-        ada::scheme::details::is_special_list[type];
+    const std::string_view scheme = ada::scheme::details::is_special_list[type];
     const size_t host_size = host->size();
     const size_t path_size = path.size();
     const size_t query_size = query.has_value() ? query->size() : 0;

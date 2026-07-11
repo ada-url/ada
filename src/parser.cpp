@@ -40,8 +40,8 @@ constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
     t[i] = 0;
   }
   // Forbidden domain code points that fall in 0x21-0x7E.
-  for (uint8_t c : {'#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^',
-                    '|', '%'}) {
+  for (uint8_t c :
+       {'#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
     t[c] = 2;
   }
   // Delimiters that end the host (also forbidden as host bytes).
@@ -140,7 +140,7 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
   }
   const size_t host_len = host_end - host_start;
   // IPv4 (decimal/hex/octal) needs the dedicated parser. checkers::is_ipv4
-  // expects lowercase — only copy+lower when the host has uppercase.
+  // expects lowercase - only copy+lower when the host has uppercase.
   // DNS max label total is 253; oversized hosts fall through.
   if (host_len > 253) [[unlikely]] {
     return false;
@@ -287,14 +287,12 @@ after_rest:
       out.components.host_end = static_cast<uint32_t>(host_end);
       out.components.port = url_components::omitted;
       out.components.pathname_start = static_cast<uint32_t>(path_start);
-      out.components.search_start =
-          (query_start != std::string_view::npos)
-              ? static_cast<uint32_t>(query_start)
-              : url_components::omitted;
-      out.components.hash_start =
-          (hash_start != std::string_view::npos)
-              ? static_cast<uint32_t>(hash_start)
-              : url_components::omitted;
+      out.components.search_start = (query_start != std::string_view::npos)
+                                        ? static_cast<uint32_t>(query_start)
+                                        : url_components::omitted;
+      out.components.hash_start = (hash_start != std::string_view::npos)
+                                      ? static_cast<uint32_t>(hash_start)
+                                      : url_components::omitted;
     } else {
       out.buffer.resize(len + 1);
       std::memcpy(out.buffer.data(), input.data(), host_end);
@@ -313,14 +311,12 @@ after_rest:
       out.components.host_end = static_cast<uint32_t>(host_end);
       out.components.port = url_components::omitted;
       out.components.pathname_start = static_cast<uint32_t>(host_end);
-      out.components.search_start =
-          (query_start != std::string_view::npos)
-              ? static_cast<uint32_t>(query_start + 1)
-              : url_components::omitted;
-      out.components.hash_start =
-          (hash_start != std::string_view::npos)
-              ? static_cast<uint32_t>(hash_start + 1)
-              : url_components::omitted;
+      out.components.search_start = (query_start != std::string_view::npos)
+                                        ? static_cast<uint32_t>(query_start + 1)
+                                        : url_components::omitted;
+      out.components.hash_start = (hash_start != std::string_view::npos)
+                                      ? static_cast<uint32_t>(hash_start + 1)
+                                      : url_components::omitted;
     }
   } else {
     std::string host_str(input.substr(host_start, host_end - host_start));

@@ -1176,15 +1176,14 @@ TYPED_TEST(basic_tests, get_href_size_password_no_password) {
 TYPED_TEST(basic_tests, simple_absolute_fast_path) {
   // Already-normalized https URL (pure buffer assign / component fill).
   {
-    auto url = ada::parse<TypeParam>(
-        "https://www.google.com/imghp?hl=en&tab=wi");
+    auto url =
+        ada::parse<TypeParam>("https://www.google.com/imghp?hl=en&tab=wi");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_protocol(), "https:");
     ASSERT_EQ(url->get_hostname(), "www.google.com");
     ASSERT_EQ(url->get_pathname(), "/imghp");
     ASSERT_EQ(url->get_search(), "?hl=en&tab=wi");
-    ASSERT_EQ(url->get_href(),
-              "https://www.google.com/imghp?hl=en&tab=wi");
+    ASSERT_EQ(url->get_href(), "https://www.google.com/imghp?hl=en&tab=wi");
   }
 
   // Empty path must serialize with a trailing '/'.
