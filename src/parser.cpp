@@ -80,8 +80,11 @@ constexpr std::array<uint8_t, 256> k_rest = []() consteval {
 }  // namespace
 
 template <class result_type>
-ada_really_inline bool try_parse_simple_absolute(std::string_view input,
-                                                 result_type& out) {
+// noinline: inlining this into parse_url_impl bloated the fallthrough path
+// enough to regress IPv4 microbenchmarks via I-cache pressure, even when the
+// digit-host gate below skips the call entirely.
+ada_never_inline bool try_parse_simple_absolute(std::string_view input,
+                                                result_type& out) {
   constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
   constexpr bool is_aggregator =
       std::is_same_v<result_type, ada::url_aggregator>;
@@ -114,6 +117,15 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
     return false;
   }
   if (pos < len && (b[pos] == '/' || b[pos] == '\\')) [[unlikely]] {
+    return false;
+  }
+
+  // IPv4 (decimal/hex/octal) and numeric hosts use the dedicated host parser.
+  // Bail before table-driven scanning so those workloads do not pay for a
+  // failed fast-path attempt. Domain names almost never start with a digit.
+  // No [[unlikely]]: IPv4 microbenchmarks hit this on every input; a
+  // mispredicted "unlikely" was a measurable regression there.
+  if (pos < len && b[pos] >= '0' && b[pos] <= '9') {
     return false;
   }
 
@@ -387,9 +399,23 @@ result_type parse_url_impl(std::string_view user_input,
   // avoids a full-string SIMD scan on the common case. Tabs/newlines/C0 in
   // the input cause the fast path to reject and fall through.
   // can_parse (store_values=false) has its own fast path in implementation.cpp.
+  //
+  // Digit-led hosts (IPv4 / pure-numeric) skip the call entirely so those
+  // microbenchmarks only pay a cheap scheme+host peek, not a failed attempt.
+  // No [[likely]] on success: mixed workloads and IPv4 benches mispredict it.
   if constexpr (store_values) {
-    if (base_url == nullptr) [[likely]] {
-      if (try_parse_simple_absolute(user_input, url)) [[likely]] {
+    if (base_url == nullptr) {
+      const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
+      const size_t n = user_input.size();
+      // Cheap digit-host skip without re-matching the full scheme name:
+      // 4-letter scheme://D (http://1...) or 5-letter (https://1...).
+      // Safe: any digit-led host falls through to the dedicated IPv4 path.
+      // try_parse_simple_absolute still validates scheme/host fully.
+      const bool digit_led_host = (n >= 8 && p[4] == ':' && p[5] == '/' &&
+                                   p[6] == '/' && p[7] >= '0' && p[7] <= '9') ||
+                                  (n >= 9 && p[5] == ':' && p[6] == '/' &&
+                                   p[7] == '/' && p[8] >= '0' && p[8] <= '9');
+      if (!digit_led_host && try_parse_simple_absolute(user_input, url)) {
         return url;
       }
     }
