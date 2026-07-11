@@ -419,6 +419,17 @@ result_type parse_url_impl(std::string_view user_input,
                                   (n >= 9 && p[5] == ':' && p[6] == '/' &&
                                    p[7] == '/' && p[8] >= '0' && p[8] <= '9');
       if (!digit_led_host && try_parse_simple_absolute(user_input, url)) {
+        // Match the post-normalization length gate used at the end of the
+        // full parser so can_parse/parse agree under set_max_input_length.
+        if constexpr (result_type_is_ada_url_aggregator) {
+          if (url.buffer.size() > max_input_length) [[unlikely]] {
+            url.is_valid = false;
+          }
+        } else {
+          if (url.get_href_size() > max_input_length) [[unlikely]] {
+            url.is_valid = false;
+          }
+        }
         return url;
       }
     }

@@ -1,5 +1,10 @@
-// C API fuzzer. Amalgamates ada.cpp (same pattern as parse.cc).
-// Do not include ada_c.h — types are defined in the amalgamation.
+// C API fuzzer. Built as C++ amalgamating ada.cpp so OSS-Fuzz coverage
+// instrumentation sees both the harness and the library (the previous
+// separate-object C link left ada_c at ~0% coverage once hard aborts on
+// can_parse/parse mismatches stopped corpus progress).
+//
+// Types/functions from ada_c.cpp are already in this TU via the amalgamation;
+// do not also include ada_c.h (redefinition errors).
 
 #include <fuzzer/FuzzedDataProvider.h>
 
@@ -98,6 +103,7 @@ static void exercise_valid_url(ada_url out, const char* input, size_t input_len,
   ada_has_search(out);
 
   const ada_url_components* comps = ada_get_components(out);
+  // ada_url_omitted is 0xffffffff (see ada_c.h / url_components::omitted).
   constexpr uint32_t kOmitted = 0xffffffffu;
   auto check_off = [&](uint32_t off, const char* name) {
     if (off != kOmitted && off > href.length) {
@@ -124,6 +130,7 @@ static void exercise_valid_url(ada_url out, const char* input, size_t input_len,
   }
   ada_free(out_copy);
 
+  // Re-parse idempotency after setters/clears.
   ada_string final_href = ada_get_href(out);
   ada_url reparsed = ada_parse(final_href.data, final_href.length);
   if (!ada_is_valid(reparsed)) {
@@ -156,13 +163,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   const char* base = secondary.data();
   size_t base_len = secondary.size();
 
+  // can_parse must agree with parse (is_valid).
   ada_url out = ada_parse(input, input_len);
   bool is_valid = ada_is_valid(out);
   bool can_parse_result = ada_can_parse(input, input_len);
-  // Keep soft: can_parse/parse may still diverge under max_input_length on
-  // main until that is fixed. Still exercise both APIs for coverage.
-  (void)can_parse_result;
-  (void)is_valid;
+  if (can_parse_result != is_valid) {
+    printf("ada_can_parse vs ada_parse disagreement\n");
+    ada_free(out);
+    abort();
+  }
   exercise_valid_url(out, input, input_len, base, base_len);
   ada_free(out);
 
@@ -170,8 +179,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   bool with_base_valid = ada_is_valid(out_with_base);
   bool can_parse_with_base =
       ada_can_parse_with_base(input, input_len, base, base_len);
-  (void)can_parse_with_base;
-  (void)with_base_valid;
+  if (can_parse_with_base != with_base_valid) {
+    printf("ada_can_parse_with_base vs ada_parse_with_base disagreement\n");
+    ada_free(out_with_base);
+    abort();
+  }
   if (with_base_valid) {
     ada_get_href(out_with_base);
     ada_owned_string origin = ada_get_origin(out_with_base);
@@ -208,6 +220,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     (void)ada_get_version_components().major;
   }
 
+  // Search params
   {
     ada_url_search_params sp = ada_parse_search_params(input, input_len);
     (void)ada_search_params_size(sp);
@@ -252,6 +265,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     ada_free_search_params(sp);
   }
 
+  // Anchors keep coverage alive with thin corpora.
   static constexpr const char* kAnchors[] = {
       "https://example.com/",
       "http://127.0.0.1/x",
@@ -261,7 +275,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   for (const char* a : kAnchors) {
     size_t n = strlen(a);
     ada_url u = ada_parse(a, n);
-    (void)ada_can_parse(a, n);
+    if (ada_is_valid(u) != ada_can_parse(a, n)) {
+      ada_free(u);
+      abort();
+    }
     exercise_valid_url(u, a, n, "x", 1);
     ada_free(u);
   }
