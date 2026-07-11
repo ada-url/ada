@@ -9,6 +9,7 @@
 #include "ada/url_components.h"
 
 #include <charconv>
+#include <cstring>
 #include <optional>
 #include <string>
 #if ADA_REGULAR_VISUAL_STUDIO
@@ -185,33 +186,92 @@ constexpr void url::copy_scheme(const ada::url& u) {
 }
 
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
-  std::string output = get_protocol();
+  // Hot path: special scheme, host present, no credentials/port.
+  // Write directly into a pre-sized buffer with memcpy (no intermediate
+  // temporaries like "?" + query, no get_href_size pre-walk).
+  if (is_special() && host.has_value() && username.empty() &&
+      password.empty() && !port.has_value()) [[likely]] {
+    const std::string_view scheme =
+        ada::scheme::details::is_special_list[type];
+    const size_t host_size = host->size();
+    const size_t path_size = path.size();
+    const size_t query_size = query.has_value() ? query->size() : 0;
+    const size_t hash_size = hash.has_value() ? hash->size() : 0;
+    // scheme + "://" + host + path + optional ("?" + query) + optional ("#" +
+    // hash)
+    const size_t total = scheme.size() + 3 + host_size + path_size +
+                         (query.has_value() ? query_size + 1 : 0) +
+                         (hash.has_value() ? hash_size + 1 : 0);
+    std::string output(total, '\0');
+    char* p = output.data();
+    std::memcpy(p, scheme.data(), scheme.size());
+    p += scheme.size();
+    p[0] = ':';
+    p[1] = '/';
+    p[2] = '/';
+    p += 3;
+    std::memcpy(p, host->data(), host_size);
+    p += host_size;
+    std::memcpy(p, path.data(), path_size);
+    p += path_size;
+    if (query.has_value()) {
+      *p++ = '?';
+      std::memcpy(p, query->data(), query_size);
+      p += query_size;
+    }
+    if (hash.has_value()) {
+      *p++ = '#';
+      std::memcpy(p, hash->data(), hash_size);
+    }
+    return output;
+  }
+
+  // General path: pre-size and append pieces to avoid temporary concatenations.
+  std::string output;
+  output.reserve(get_href_size());
+
+  if (is_special()) {
+    output.append(ada::scheme::details::is_special_list[type]);
+    output += ':';
+  } else {
+    output.append(non_special_scheme);
+    output += ':';
+  }
 
   if (host.has_value()) {
-    output += "//";
+    output += '/';
+    output += '/';
     if (has_credentials()) {
-      output += username;
+      output.append(username);
       if (!password.empty()) {
-        output += ":" + get_password();
+        output += ':';
+        output.append(password);
       }
-      output += "@";
+      output += '@';
     }
-    output += host.value();
+    output.append(*host);
     if (port.has_value()) {
-      output += ":" + get_port();
+      output += ':';
+      char port_buf[5];
+      auto [ptr, ec] = std::to_chars(port_buf, port_buf + 5, *port);
+      (void)ec;
+      output.append(port_buf, static_cast<size_t>(ptr - port_buf));
     }
   } else if (!has_opaque_path && path.starts_with("//")) {
     // If url's host is null, url does not have an opaque path, url's path's
     // size is greater than 1, and url's path[0] is the empty string, then
     // append U+002F (/) followed by U+002E (.) to output.
-    output += "/.";
+    output += '/';
+    output += '.';
   }
-  output += path;
+  output.append(path);
   if (query.has_value()) {
-    output += "?" + query.value();
+    output += '?';
+    output.append(*query);
   }
   if (hash.has_value()) {
-    output += "#" + hash.value();
+    output += '#';
+    output.append(*hash);
   }
   return output;
 }

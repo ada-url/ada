@@ -1,18 +1,350 @@
 #include "ada/parser-inl.h"
 
+#include <array>
+#include <cstring>
 #include <limits>
 #include <ranges>
 
 #include "ada/character_sets-inl.h"
+#include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
 #include "ada/implementation.h"
 #include "ada/log.h"
+#include "ada/scheme-inl.h"
+#include "ada/unicode-inl.h"
 #include "ada/unicode.h"
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
 
 namespace ada::parser {
+
+// Fast path for absolute http(s) URLs that are already fully normalized:
+// lowercase scheme/host, no credentials/port/IPv4/IPv6/IDNA, no percent-
+// encoding, and no "." / ".." path segments. One table-driven scan, then a
+// single buffer assign (aggregator) or a few component copies (url).
+//
+// Returns true and fills `out` on success. Returns false with no writes.
+// Friend of url / url_aggregator for private buffer access.
+namespace {
+
+// 0 = ok in host, 1 = host delimiter (/ ? #), 2 = reject (full parser)
+// Mirrors the WHATWG forbidden-domain-code-point set: anything else is ok.
+constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
+  std::array<uint8_t, 256> t{};
+  // Default: accept printable ASCII that is not a forbidden domain code point.
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 2;
+  }
+  for (size_t i = 0x21; i <= 0x7E; ++i) {
+    t[i] = 0;
+  }
+  // Forbidden domain code points that fall in 0x21-0x7E.
+  for (uint8_t c : {'#', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^',
+                    '|', '%'}) {
+    t[c] = 2;
+  }
+  // Delimiters that end the host (also forbidden as host bytes).
+  t[static_cast<uint8_t>('/')] = 1;
+  t[static_cast<uint8_t>('?')] = 1;
+  t[static_cast<uint8_t>('#')] = 1;
+  return t;
+}();
+
+// Bytes in path/query/fragment: 0 = ok, 1 = ? or # delimiter, 2 = reject.
+// Conservative union of path + special-query + fragment percent-encode sets
+// so one scan decides whether a pure copy is safe.
+constexpr std::array<uint8_t, 256> k_rest = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 2;
+  }
+  for (uint8_t c = 0x21; c <= 0x7E; ++c) {
+    t[c] = 0;
+  }
+  // Encode-set / special rejects. '%' is NOT allowed in the path table:
+  // "%2e" / "%2e%2e" are single/double-dot segments and need the full parser.
+  // Query/fragment scans allow '%' explicitly (already-encoded stays as-is).
+  for (uint8_t c : {static_cast<uint8_t>('"'), static_cast<uint8_t>('<'),
+                    static_cast<uint8_t>('>'), static_cast<uint8_t>('`'),
+                    static_cast<uint8_t>('{'), static_cast<uint8_t>('}'),
+                    static_cast<uint8_t>('^'), static_cast<uint8_t>('\\'),
+                    static_cast<uint8_t>('%'), static_cast<uint8_t>('\'')}) {
+    t[c] = 2;
+  }
+  t[static_cast<uint8_t>('?')] = 1;
+  t[static_cast<uint8_t>('#')] = 1;
+  return t;
+}();
+
+}  // namespace
+
+template <class result_type>
+ada_really_inline bool try_parse_simple_absolute(std::string_view input,
+                                                 result_type& out) {
+  constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
+  constexpr bool is_aggregator =
+      std::is_same_v<result_type, ada::url_aggregator>;
+  static_assert(is_ada_url || is_aggregator);
+
+  const size_t len = input.size();
+  if (len < 8) [[unlikely]] {
+    return false;
+  }
+  const auto* b = reinterpret_cast<const uint8_t*>(input.data());
+
+  size_t pos;
+  ada::scheme::type scheme_type;
+  uint32_t protocol_end;
+  // Lowercase http:// or https:// only.
+  if (b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
+    if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
+      pos = 7;
+      scheme_type = ada::scheme::type::HTTP;
+      protocol_end = 5;
+    } else if (len >= 8 && b[4] == 's' && b[5] == ':' && b[6] == '/' &&
+               b[7] == '/') {
+      pos = 8;
+      scheme_type = ada::scheme::type::HTTPS;
+      protocol_end = 6;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+  if (pos < len && (b[pos] == '/' || b[pos] == '\\')) [[unlikely]] {
+    return false;
+  }
+
+  // --- Host ---
+  const size_t host_start = pos;
+  bool has_upper = false;
+  size_t i = pos;
+  for (; i < len; ++i) {
+    const uint8_t c = b[i];
+    const uint8_t cls = k_host_class[c];
+    if (cls == 1) {
+      break;  // / ? #
+    }
+    if (cls == 2) [[unlikely]] {
+      return false;
+    }
+    if (c >= 'A' && c <= 'Z') {
+      has_upper = true;
+    }
+  }
+  const size_t host_end = i;
+  if (host_start == host_end) [[unlikely]] {
+    return false;
+  }
+  const size_t host_len = host_end - host_start;
+  // IPv4 (decimal/hex/octal) needs the dedicated parser. checkers::is_ipv4
+  // expects lowercase — only copy+lower when the host has uppercase.
+  // DNS max label total is 253; oversized hosts fall through.
+  if (host_len > 253) [[unlikely]] {
+    return false;
+  }
+  {
+    std::string_view hv(input.data() + host_start, host_len);
+    char host_buf[256];
+    if (has_upper) [[unlikely]] {
+      std::memcpy(host_buf, input.data() + host_start, host_len);
+      unicode::to_lower_ascii(host_buf, host_len);
+      hv = std::string_view(host_buf, host_len);
+    }
+    if (checkers::is_ipv4(hv)) [[unlikely]] {
+      return false;
+    }
+    // Punycode prefix requires IDNA (hv is lowercased when needed).
+    static constexpr std::string_view xn{"xn-", 3};
+    if (hv.find(xn) != std::string_view::npos) [[unlikely]] {
+      return false;
+    }
+  }
+
+  // --- Path / query / fragment ---
+  // Path loop is deliberately minimal: table lookup + delimiter only.
+  // Dot-segment checks run once after the path is bounded (rare '.').
+  size_t path_start = host_end;
+  size_t path_end = host_end;
+  size_t query_start = std::string_view::npos;
+  size_t hash_start = std::string_view::npos;
+  bool has_path = false;
+  bool path_has_dot = false;
+
+  if (i < len && b[i] == '/') {
+    has_path = true;
+    path_start = i;
+    ++i;
+    for (; i < len; ++i) {
+      const uint8_t c = b[i];
+      const uint8_t cls = k_rest[c];
+      if (cls == 0) {
+        path_has_dot |= (c == '.');
+        continue;
+      }
+      if (cls == 1) {
+        path_end = i;
+        if (c == '?') {
+          query_start = i;
+          ++i;
+          goto scan_query;
+        }
+        hash_start = i;
+        ++i;
+        goto scan_hash;
+      }
+      return false;  // cls == 2
+    }
+    path_end = i;
+  } else if (i < len && b[i] == '?') {
+    query_start = i;
+    ++i;
+    goto scan_query;
+  } else if (i < len && b[i] == '#') {
+    hash_start = i;
+    ++i;
+    goto scan_hash;
+  }
+  goto after_rest;
+
+scan_query:
+  // Special-query percent-encode set does not include '%', so encoded
+  // sequences copy through. Allow '%' here (unlike the path table).
+  for (; i < len; ++i) {
+    const uint8_t c = b[i];
+    if (c == '#') {
+      hash_start = i;
+      ++i;
+      goto scan_hash;
+    }
+    if (c == '?' || c == '%') {
+      continue;
+    }
+    if (k_rest[c] == 2) [[unlikely]] {
+      return false;
+    }
+  }
+  goto after_rest;
+
+scan_hash:
+  // Fragment percent-encode set does not include '%'.
+  for (; i < len; ++i) {
+    const uint8_t c = b[i];
+    if (c == '?' || c == '#' || c == '%') {
+      continue;
+    }
+    if (k_rest[c] == 2) [[unlikely]] {
+      return false;
+    }
+  }
+
+after_rest:
+  // Reject "." / ".." path segments (only when path contains a '.').
+  if (path_has_dot) [[unlikely]] {
+    const std::string_view path_body(input.data() + path_start,
+                                     path_end - path_start);
+    // path_body starts with '/'
+    if (path_body.size() >= 2 && path_body[1] == '.') {
+      if (path_body.size() == 2 || path_body[2] == '/' ||
+          (path_body.size() >= 3 && path_body[2] == '.' &&
+           (path_body.size() == 3 || path_body[3] == '/'))) {
+        return false;
+      }
+    }
+    static constexpr std::string_view slash_dot{"/.", 2};
+    size_t p = 1;
+    while ((p = path_body.find(slash_dot, p)) != std::string_view::npos) {
+      const size_t after = p + 2;
+      if (after == path_body.size() || path_body[after] == '/' ||
+          (after + 1 <= path_body.size() && path_body[after] == '.' &&
+           (after + 1 == path_body.size() || path_body[after + 1] == '/'))) {
+        return false;
+      }
+      p = after;
+    }
+  }
+
+  const bool need_slash = !has_path;
+  out.type = scheme_type;
+  out.is_valid = true;
+  out.has_opaque_path = false;
+  out.host_type = DEFAULT;
+
+  if constexpr (is_aggregator) {
+    if (!need_slash) {
+      // Direct resize + memcpy is slightly faster than assign on libc++.
+      out.buffer.resize(len);
+      std::memcpy(out.buffer.data(), input.data(), len);
+      if (has_upper) {
+        unicode::to_lower_ascii(out.buffer.data() + host_start,
+                                host_end - host_start);
+      }
+      out.components.protocol_end = protocol_end;
+      out.components.username_end = protocol_end + 2;
+      out.components.host_start = protocol_end + 2;
+      out.components.host_end = static_cast<uint32_t>(host_end);
+      out.components.port = url_components::omitted;
+      out.components.pathname_start = static_cast<uint32_t>(path_start);
+      out.components.search_start =
+          (query_start != std::string_view::npos)
+              ? static_cast<uint32_t>(query_start)
+              : url_components::omitted;
+      out.components.hash_start =
+          (hash_start != std::string_view::npos)
+              ? static_cast<uint32_t>(hash_start)
+              : url_components::omitted;
+    } else {
+      out.buffer.resize(len + 1);
+      std::memcpy(out.buffer.data(), input.data(), host_end);
+      out.buffer[host_end] = '/';
+      if (host_end < len) {
+        std::memcpy(out.buffer.data() + host_end + 1, input.data() + host_end,
+                    len - host_end);
+      }
+      if (has_upper) {
+        unicode::to_lower_ascii(out.buffer.data() + host_start,
+                                host_end - host_start);
+      }
+      out.components.protocol_end = protocol_end;
+      out.components.username_end = protocol_end + 2;
+      out.components.host_start = protocol_end + 2;
+      out.components.host_end = static_cast<uint32_t>(host_end);
+      out.components.port = url_components::omitted;
+      out.components.pathname_start = static_cast<uint32_t>(host_end);
+      out.components.search_start =
+          (query_start != std::string_view::npos)
+              ? static_cast<uint32_t>(query_start + 1)
+              : url_components::omitted;
+      out.components.hash_start =
+          (hash_start != std::string_view::npos)
+              ? static_cast<uint32_t>(hash_start + 1)
+              : url_components::omitted;
+    }
+  } else {
+    std::string host_str(input.substr(host_start, host_end - host_start));
+    if (has_upper) {
+      unicode::to_lower_ascii(host_str.data(), host_str.size());
+    }
+    out.host = std::move(host_str);
+    if (need_slash) {
+      out.path = "/";
+    } else {
+      out.path.assign(input.data() + path_start, path_end - path_start);
+    }
+    if (query_start != std::string_view::npos) {
+      const size_t q_end =
+          (hash_start != std::string_view::npos) ? hash_start : len;
+      out.query.emplace(input.data() + query_start + 1,
+                        q_end - query_start - 1);
+    }
+    if (hash_start != std::string_view::npos) {
+      out.hash.emplace(input.data() + hash_start + 1, len - hash_start - 1);
+    }
+  }
+  return true;
+}
 
 template <class result_type, bool store_values>
 result_type parse_url_impl(std::string_view user_input,
@@ -53,6 +385,36 @@ result_type parse_url_impl(std::string_view user_input,
   if (!url.is_valid) {
     return url;
   }
+
+  // Fast path FIRST on the raw input: absolute special http(s) URLs with a
+  // clean ASCII host and no transforms. Running before has_tabs_or_newline
+  // avoids a full-string SIMD scan on the common case. Tabs/newlines/C0 in
+  // the input cause the fast path to reject and fall through.
+  // can_parse (store_values=false) has its own fast path in implementation.cpp.
+  if constexpr (store_values) {
+    if (base_url == nullptr) [[likely]] {
+      if (try_parse_simple_absolute(user_input, url)) [[likely]] {
+        return url;
+      }
+    }
+  }
+
+  std::string tmp_buffer;
+  std::string_view url_data;
+  if (unicode::has_tabs_or_newline(user_input)) [[unlikely]] {
+    tmp_buffer = user_input;
+    // Optimization opportunity: Instead of copying and then pruning, we could
+    // just directly build the string from user_input.
+    helpers::remove_ascii_tab_or_newline(tmp_buffer);
+    url_data = tmp_buffer;
+  } else [[likely]] {
+    url_data = user_input;
+  }
+
+  // Leading and trailing control characters are uncommon and easy to deal with
+  // (no performance concern).
+  helpers::trim_c0_whitespace(url_data);
+
   if constexpr (result_type_is_ada_url_aggregator && store_values) {
     // Most of the time, we just need user_input.size().
     // In some instances, we may need a bit more.
@@ -71,21 +433,6 @@ result_type parse_url_impl(std::string_view user_input,
         1;
     url.reserve(reserve_capacity);
   }
-  std::string tmp_buffer;
-  std::string_view url_data;
-  if (unicode::has_tabs_or_newline(user_input)) [[unlikely]] {
-    tmp_buffer = user_input;
-    // Optimization opportunity: Instead of copying and then pruning, we could
-    // just directly build the string from user_input.
-    helpers::remove_ascii_tab_or_newline(tmp_buffer);
-    url_data = tmp_buffer;
-  } else [[likely]] {
-    url_data = user_input;
-  }
-
-  // Leading and trailing control characters are uncommon and easy to deal with
-  // (no performance concern).
-  helpers::trim_c0_whitespace(url_data);
 
   // Optimization opportunity. Most websites do not have fragment.
   std::optional<std::string_view> fragment = helpers::prune_hash(url_data);
