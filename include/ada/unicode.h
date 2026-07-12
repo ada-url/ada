@@ -198,9 +198,11 @@ ada_really_inline unsigned constexpr convert_hex_to_binary(char c) noexcept;
 std::string percent_decode(std::string_view input, size_t first_percent);
 
 /**
- * @private
  * Decode an application/x-www-form-urlencoded component: map '+' to space,
  * then percent-decode. Single allocation; no intermediate string.
+ *
+ * Prefer the public `ada::form_urlencoded_decode` entry point.
+ *
  * @see https://url.spec.whatwg.org/#concept-urlencoded-parser
  */
 std::string form_urlencoded_decode(std::string_view input);

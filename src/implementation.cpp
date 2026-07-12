@@ -310,6 +310,10 @@ std::string href_from_file(std::string_view input) {
   return "file://" + path;
 }
 
+std::string form_urlencoded_decode(std::string_view input) {
+  return unicode::form_urlencoded_decode(input);
+}
+
 bool can_parse(std::string_view input, const std::string_view* base_input) {
   // Fast path: handles the overwhelming majority of inputs -- absolute special
   // URLs with an ASCII domain, no credentials, and no base -- with a single
