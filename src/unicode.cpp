@@ -483,37 +483,38 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
 }
 
 std::string form_urlencoded_decode(const std::string_view input) {
-  const char* const begin = input.data();
-  const char* const end = begin + input.size();
-  const char* p = begin;
-  while (p < end && *p != '+' && *p != '%') {
-    ++p;
+  const size_t len = input.size();
+  size_t i = 0;
+  while (i < len && input[i] != '+' && input[i] != '%') {
+    ++i;
   }
-  if (p == end) {
+  if (i == len) {
     return std::string(input);
   }
 
   std::string out;
-  out.reserve(input.size());
-  out.append(begin, p);
-  while (p < end) {
-    if (*p == '+') {
+  out.reserve(len);
+  out.append(input, 0, i);
+  while (i < len) {
+    const char c = input[i];
+    if (c == '+') {
       out.push_back(' ');
-      ++p;
-    } else if (*p == '%' && p + 2 < end && is_ascii_hex_digit(p[1]) &&
-               is_ascii_hex_digit(p[2])) {
-      out.push_back(static_cast<char>(convert_hex_to_binary(p[1]) * 16 +
-                                      convert_hex_to_binary(p[2])));
-      p += 3;
+      ++i;
+    } else if (c == '%' && i + 2 < len && is_ascii_hex_digit(input[i + 1]) &&
+               is_ascii_hex_digit(input[i + 2])) {
+      out.push_back(static_cast<char>(convert_hex_to_binary(input[i + 1]) * 16 +
+                                      convert_hex_to_binary(input[i + 2])));
+      i += 3;
     } else {
-      const char* start = p;
-      ++p;
-      while (p < end && *p != '+' &&
-             !(*p == '%' && p + 2 < end && is_ascii_hex_digit(p[1]) &&
-               is_ascii_hex_digit(p[2]))) {
-        ++p;
+      const size_t start = i;
+      ++i;
+      while (i < len && input[i] != '+' &&
+             !(input[i] == '%' && i + 2 < len &&
+               is_ascii_hex_digit(input[i + 1]) &&
+               is_ascii_hex_digit(input[i + 2]))) {
+        ++i;
       }
-      out.append(start, p);
+      out.append(input, start, i - start);
     }
   }
   return out;
