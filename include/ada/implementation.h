@@ -178,22 +178,6 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init>&& input,
 std::string href_from_file(std::string_view path);
 
 /**
- * Decodes an application/x-www-form-urlencoded component.
- *
- * Maps `'+'` to space and percent-decodes `%XX` sequences, matching the
- * WHATWG URL Standard urlencoded-byte-byte-sequence decoder used for
- * URLSearchParams keys and values.
- *
- * @param input A form-urlencoded component (key or value). Must be valid
- *        UTF-8 after decoding; invalid percent-escapes are left as-is.
- * @return The decoded string. Allocation is performed at most once.
- *
- * @see https://url.spec.whatwg.org/#concept-urlencoded-parser
- * @see https://url.spec.whatwg.org/#string-percent-decode
- */
-std::string form_urlencoded_decode(std::string_view input);
-
-/**
  * Sets the maximum allowed length for URLs.
  *
  * Both the raw input and the resulting normalized URL (the href) are checked

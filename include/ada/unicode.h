@@ -201,8 +201,8 @@ std::string percent_decode(std::string_view input, size_t first_percent);
  * Decode an application/x-www-form-urlencoded component: map '+' to space,
  * then percent-decode. Single allocation; no intermediate string.
  *
- * Prefer the public `ada::form_urlencoded_decode` entry point.
- *
+ * @param input A form-urlencoded component (key or value).
+ * @return The decoded string.
  * @see https://url.spec.whatwg.org/#concept-urlencoded-parser
  */
 std::string form_urlencoded_decode(std::string_view input);
