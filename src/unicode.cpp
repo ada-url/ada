@@ -484,10 +484,8 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   return dest;
 }
 
-namespace {
-
 // 0..15 for hex digits, 0xFF otherwise — validate and decode with two loads.
-constexpr std::array<uint8_t, 256> make_unhex_table() {
+constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
   std::array<uint8_t, 256> t{};
   for (size_t i = 0; i < 256; ++i) {
     t[i] = 0xFF;
@@ -500,11 +498,7 @@ constexpr std::array<uint8_t, 256> make_unhex_table() {
     t[static_cast<size_t>('a') + i] = static_cast<uint8_t>(10 + i);
   }
   return t;
-}
-
-constexpr auto unhex_table = make_unhex_table();
-
-}  // namespace
+}();
 
 std::string form_urlencoded_decode(const std::string_view input) {
   const size_t len = input.size();
