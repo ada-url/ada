@@ -484,7 +484,7 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   return dest;
 }
 
-// 0..15 for hex digits, 0xFF otherwise — validate and decode with two loads.
+// 0..15 for hex digits, 0xFF otherwise - validate and decode with two loads.
 constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
   std::array<uint8_t, 256> t{};
   for (size_t i = 0; i < 256; ++i) {
