@@ -457,31 +457,66 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   }
   std::string dest;
   dest.reserve(input.length());
-  dest.append(input.data(), first_percent);
+  dest.append(input.substr(0, first_percent));
   const char* pointer = input.data() + first_percent;
   const char* end = input.data() + input.size();
+  // Optimization opportunity: if the following code gets
+  // called often, it can be optimized quite a bit.
   while (pointer < end) {
-    if (pointer[0] == '%' && (end - pointer) > 2 &&
-        is_ascii_hex_digit(pointer[1]) && is_ascii_hex_digit(pointer[2])) {
-      const unsigned a = convert_hex_to_binary(pointer[1]);
-      const unsigned b = convert_hex_to_binary(pointer[2]);
-      dest.push_back(static_cast<char>(a * 16 + b));
-      pointer += 3;
+    const char ch = pointer[0];
+    size_t remaining = end - pointer - 1;
+    if (ch != '%' || remaining < 2 ||
+        (  // ch == '%' && // It is unnecessary to check that ch == '%'.
+            (!is_ascii_hex_digit(pointer[1]) ||
+             !is_ascii_hex_digit(pointer[2])))) {
+      dest += ch;
+      pointer++;
     } else {
-      // Append a run of bytes that are not a valid percent-escape.
-      const char* start = pointer;
-      ++pointer;
-      while (pointer < end) {
-        if (pointer[0] == '%' && (end - pointer) > 2 &&
-            is_ascii_hex_digit(pointer[1]) && is_ascii_hex_digit(pointer[2])) {
-          break;
-        }
-        ++pointer;
-      }
-      dest.append(start, static_cast<size_t>(pointer - start));
+      unsigned a = convert_hex_to_binary(pointer[1]);
+      unsigned b = convert_hex_to_binary(pointer[2]);
+      char c = static_cast<char>(a * 16 + b);
+      dest += c;
+      pointer += 3;
     }
   }
   return dest;
+}
+
+std::string form_urlencoded_decode(const std::string_view input) {
+  const char* const begin = input.data();
+  const char* const end = begin + input.size();
+  const char* p = begin;
+  while (p < end && *p != '+' && *p != '%') {
+    ++p;
+  }
+  if (p == end) {
+    return std::string(input);
+  }
+
+  std::string out;
+  out.reserve(input.size());
+  out.append(begin, p);
+  while (p < end) {
+    if (*p == '+') {
+      out.push_back(' ');
+      ++p;
+    } else if (*p == '%' && p + 2 < end && is_ascii_hex_digit(p[1]) &&
+               is_ascii_hex_digit(p[2])) {
+      out.push_back(static_cast<char>(convert_hex_to_binary(p[1]) * 16 +
+                                      convert_hex_to_binary(p[2])));
+      p += 3;
+    } else {
+      const char* start = p;
+      ++p;
+      while (p < end && *p != '+' &&
+             !(*p == '%' && p + 2 < end && is_ascii_hex_digit(p[1]) &&
+               is_ascii_hex_digit(p[2]))) {
+        ++p;
+      }
+      out.append(start, p);
+    }
+  }
+  return out;
 }
 
 std::string percent_encode(const std::string_view input,
