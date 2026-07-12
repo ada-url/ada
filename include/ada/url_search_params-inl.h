@@ -31,28 +31,83 @@ inline void url_search_params::initialize(std::string_view input) {
   if (!input.empty() && input.front() == '?') {
     input.remove_prefix(1);
   }
+  if (input.empty()) {
+    return;
+  }
+
+  // Reserve roughly one slot per '&' so large query strings avoid reallocs.
+  size_t ampersands = 0;
+  for (const char c : input) {
+    ampersands += static_cast<size_t>(c == '&');
+  }
+  params.reserve(ampersands + 1);
+
+  // application/x-www-form-urlencoded: '+' -> ' ', then percent-decode.
+  // Single allocation and a single pass (no intermediate string + replace).
+  // Hex helpers are local: unicode::is_ascii_hex_digit is not header-inline.
+  auto form_decode = [](std::string_view sv) -> std::string {
+    const auto is_hex = [](const char c) noexcept {
+      return (c >= '0' && c <= '9') || ((c | 0x20) >= 'a' && (c | 0x20) <= 'f');
+    };
+    const auto hex_val = [](const char c) noexcept -> unsigned {
+      return (c >= '0' && c <= '9') ? unsigned(c - '0')
+                                    : unsigned((c | 0x20) - 'a' + 10);
+    };
+
+    const char* const begin = sv.data();
+    const char* const end = begin + sv.size();
+    const char* p = begin;
+
+    while (p < end && *p != '+' && *p != '%') {
+      ++p;
+    }
+    if (p == end) {
+      return std::string(sv);
+    }
+
+    std::string out;
+    out.reserve(static_cast<size_t>(end - begin));
+    out.append(begin, p);
+
+    while (p < end) {
+      const char ch = *p;
+      if (ch == '+') {
+        out.push_back(' ');
+        ++p;
+      } else if (ch == '%' && p + 2 < end && is_hex(p[1]) && is_hex(p[2])) {
+        out.push_back(static_cast<char>(hex_val(p[1]) * 16 + hex_val(p[2])));
+        p += 3;
+      } else {
+        // Append a run of plain bytes until the next '+' or valid '%XX'.
+        const char* start = p;
+        ++p;
+        while (p < end) {
+          if (*p == '+') {
+            break;
+          }
+          if (*p == '%' && p + 2 < end && is_hex(p[1]) && is_hex(p[2])) {
+            break;
+          }
+          ++p;
+        }
+        out.append(start, p);
+      }
+    }
+    return out;
+  };
 
   auto process_key_value = [&](const std::string_view current) {
-    auto equal = current.find('=');
-
+    const auto equal = current.find('=');
     if (equal == std::string_view::npos) {
-      std::string name(current);
-      std::ranges::replace(name, '+', ' ');
-      params.emplace_back(unicode::percent_decode(name, name.find('%')), "");
+      params.emplace_back(form_decode(current), "");
     } else {
-      std::string name(current.substr(0, equal));
-      std::string value(current.substr(equal + 1));
-
-      std::ranges::replace(name, '+', ' ');
-      std::ranges::replace(value, '+', ' ');
-
-      params.emplace_back(unicode::percent_decode(name, name.find('%')),
-                          unicode::percent_decode(value, value.find('%')));
+      params.emplace_back(form_decode(current.substr(0, equal)),
+                          form_decode(current.substr(equal + 1)));
     }
   };
 
   while (!input.empty()) {
-    auto ampersand_index = input.find('&');
+    const auto ampersand_index = input.find('&');
 
     if (ampersand_index == std::string_view::npos) {
       if (!input.empty()) {
