@@ -10,6 +10,8 @@ ADA_PUSH_DISABLE_ALL_WARNINGS
 ADA_POP_DISABLE_WARNINGS
 
 #include <algorithm>
+#include <array>
+#include <cstring>
 #if ADA_SSSE3
 #include <tmmintrin.h>
 #elif ADA_NEON
@@ -480,6 +482,88 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
     }
   }
   return dest;
+}
+
+// 0..15 for hex digits, 0xFF otherwise - validate and decode with two loads.
+constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 0xFF;
+  }
+  for (uint8_t i = 0; i < 10; ++i) {
+    t[static_cast<size_t>('0') + i] = i;
+  }
+  for (uint8_t i = 0; i < 6; ++i) {
+    t[static_cast<size_t>('A') + i] = static_cast<uint8_t>(10 + i);
+    t[static_cast<size_t>('a') + i] = static_cast<uint8_t>(10 + i);
+  }
+  return t;
+}();
+
+std::string form_urlencoded_decode(const std::string_view input) {
+  const size_t len = input.size();
+  if (len == 0) [[unlikely]] {
+    return {};
+  }
+
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+  const char* const src = input.data();
+  const char* const end = src + len;
+  const char* p = src;
+
+  // Advance over the untransformed prefix.
+  while (p < end && *p != '+' && *p != '%') {
+    ++p;
+  }
+  if (p == end) {
+    return std::string(input);
+  }
+
+  // Output is always at most as long as the input: write into a single
+  // pre-sized buffer, then shrink to the final length.
+  std::string out(len, '\0');
+  char* d = out.data();
+  char* const d0 = d;
+
+  const size_t prefix = static_cast<size_t>(p - src);
+  std::memcpy(d, src, prefix);
+  d += prefix;
+
+  while (p < end) {
+    const char c = *p;
+    if (c == '+') {
+      *d++ = ' ';
+      ++p;
+    } else if (c == '%') {
+      // Decode runs of valid %XX tightly (common for nested URL query values).
+      while (p + 2 < end && *p == '%') {
+        const uint8_t hi = unhex_table[static_cast<uint8_t>(p[1])];
+        const uint8_t lo = unhex_table[static_cast<uint8_t>(p[2])];
+        if ((hi | lo) >= 16) {
+          break;
+        }
+        *d++ = static_cast<char>((hi << 4) | lo);
+        p += 3;
+      }
+      if (p < end && *p == '%') {
+        // Invalid escape: copy '%' literally and continue.
+        *d++ = *p++;
+      }
+    } else {
+      // Copy a plain run until the next '+' or '%'.
+      const char* start = p;
+      ++p;
+      while (p < end && *p != '+' && *p != '%') {
+        ++p;
+      }
+      const size_t n = static_cast<size_t>(p - start);
+      std::memcpy(d, start, n);
+      d += n;
+    }
+  }
+
+  out.resize(static_cast<size_t>(d - d0));
+  return out;
 }
 
 std::string percent_encode(const std::string_view input,

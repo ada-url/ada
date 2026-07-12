@@ -31,28 +31,25 @@ inline void url_search_params::initialize(std::string_view input) {
   if (!input.empty() && input.front() == '?') {
     input.remove_prefix(1);
   }
+  if (input.empty()) {
+    return;
+  }
+
+  params.reserve(size_t(std::count(input.begin(), input.end(), '&')) + 1);
 
   auto process_key_value = [&](const std::string_view current) {
-    auto equal = current.find('=');
-
+    const auto equal = current.find('=');
     if (equal == std::string_view::npos) {
-      std::string name(current);
-      std::ranges::replace(name, '+', ' ');
-      params.emplace_back(unicode::percent_decode(name, name.find('%')), "");
+      params.emplace_back(unicode::form_urlencoded_decode(current), "");
     } else {
-      std::string name(current.substr(0, equal));
-      std::string value(current.substr(equal + 1));
-
-      std::ranges::replace(name, '+', ' ');
-      std::ranges::replace(value, '+', ' ');
-
-      params.emplace_back(unicode::percent_decode(name, name.find('%')),
-                          unicode::percent_decode(value, value.find('%')));
+      params.emplace_back(
+          unicode::form_urlencoded_decode(current.substr(0, equal)),
+          unicode::form_urlencoded_decode(current.substr(equal + 1)));
     }
   };
 
   while (!input.empty()) {
-    auto ampersand_index = input.find('&');
+    const auto ampersand_index = input.find('&');
 
     if (ampersand_index == std::string_view::npos) {
       if (!input.empty()) {
