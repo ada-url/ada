@@ -1169,3 +1169,88 @@ TYPED_TEST(basic_tests, get_href_size_password_no_password) {
   ASSERT_TRUE(url2);
   ASSERT_EQ(url2->get_href_size(), url2->get_href().size());
 }
+
+TYPED_TEST(basic_tests, simple_absolute_fast_path) {
+  {
+    auto url =
+        ada::parse<TypeParam>("https://www.google.com/imghp?hl=en&tab=wi");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "https:");
+    ASSERT_EQ(url->get_hostname(), "www.google.com");
+    ASSERT_EQ(url->get_pathname(), "/imghp");
+    ASSERT_EQ(url->get_search(), "?hl=en&tab=wi");
+    ASSERT_EQ(url->get_href(), "https://www.google.com/imghp?hl=en&tab=wi");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_href(), "https://example.com/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com?q=1");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_search(), "?q=1");
+    ASSERT_EQ(url->get_href(), "https://example.com/?q=1");
+  }
+  {
+    auto url = ada::parse<TypeParam>(
+        "https://example.com/path?continue=https%3A%2F%2Fexample.com%2F");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_href(),
+              "https://example.com/path?continue=https%3A%2F%2Fexample.com%2F");
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://WWW.Example.COM/file.js");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "www.example.com");
+    ASSERT_EQ(url->get_pathname(), "/file.js");
+    ASSERT_EQ(url->get_href(), "http://www.example.com/file.js");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/a/./b/../c");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/a/c");
+    ASSERT_EQ(url->get_href(), "https://example.com/a/c");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo/%2e");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo/");
+    ASSERT_EQ(url->get_href(), "https://example.com/foo/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo/%2e%2e");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_href(), "https://example.com/");
+  }
+  {
+    auto url =
+        ada::parse<TypeParam>("https://user:pass@example.com:8080/x?y=1#z");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "user");
+    ASSERT_EQ(url->get_password(), "pass");
+    ASSERT_EQ(url->get_port(), "8080");
+    ASSERT_EQ(url->get_pathname(), "/x");
+    ASSERT_EQ(url->get_search(), "?y=1");
+    ASSERT_EQ(url->get_hash(), "#z");
+  }
+  const char* samples[] = {
+      "https://www.youtube.com/about/",
+      "http://example.com/",
+      "https://maps.google.com/maps?hl=en&tab=wl",
+      "https://example.com",
+      "https://example.com?q=1#frag",
+  };
+  for (const char* s : samples) {
+    auto u = ada::parse<ada::url>(s);
+    auto a = ada::parse<ada::url_aggregator>(s);
+    ASSERT_EQ(u.has_value(), a.has_value()) << s;
+    if (u) {
+      ASSERT_EQ(u->get_href(), std::string(a->get_href())) << s;
+    }
+  }
+  SUCCEED();
+}

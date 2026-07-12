@@ -1,5 +1,5 @@
-// C API fuzzer. Amalgamates ada.cpp (same pattern as parse.cc).
-// Do not include ada_c.h — types are defined in the amalgamation.
+// C API fuzzer (C++ amalgamation; do not include ada_c.h — types come from
+// ada_c.cpp in the amalgamation).
 
 #include <fuzzer/FuzzedDataProvider.h>
 
@@ -159,10 +159,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   ada_url out = ada_parse(input, input_len);
   bool is_valid = ada_is_valid(out);
   bool can_parse_result = ada_can_parse(input, input_len);
-  // Keep soft: can_parse/parse may still diverge under max_input_length on
-  // main until that is fixed. Still exercise both APIs for coverage.
-  (void)can_parse_result;
-  (void)is_valid;
+  if (can_parse_result != is_valid) {
+    printf("ada_can_parse vs ada_parse disagreement\n");
+    ada_free(out);
+    abort();
+  }
   exercise_valid_url(out, input, input_len, base, base_len);
   ada_free(out);
 
@@ -170,8 +171,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   bool with_base_valid = ada_is_valid(out_with_base);
   bool can_parse_with_base =
       ada_can_parse_with_base(input, input_len, base, base_len);
-  (void)can_parse_with_base;
-  (void)with_base_valid;
+  if (can_parse_with_base != with_base_valid) {
+    printf("ada_can_parse_with_base vs ada_parse_with_base disagreement\n");
+    ada_free(out_with_base);
+    abort();
+  }
   if (with_base_valid) {
     ada_get_href(out_with_base);
     ada_owned_string origin = ada_get_origin(out_with_base);
@@ -261,7 +265,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   for (const char* a : kAnchors) {
     size_t n = strlen(a);
     ada_url u = ada_parse(a, n);
-    (void)ada_can_parse(a, n);
+    if (ada_is_valid(u) != ada_can_parse(a, n)) {
+      ada_free(u);
+      abort();
+    }
     exercise_valid_url(u, a, n, "x", 1);
     ada_free(u);
   }

@@ -80,6 +80,14 @@ $CXX $CFLAGS $CXXFLAGS \
 $CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE unicode.o \
      -o $OUT/unicode
 
+$CXX $CFLAGS $CXXFLAGS \
+     -std=c++20 \
+     -I build/singleheader \
+     -c fuzz/simple_absolute.cc -o simple_absolute.o
+
+$CXX $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE simple_absolute.o \
+     -o $OUT/simple_absolute
+
 cp $SRC/ada-url/fuzz/*.dict $SRC/ada-url/fuzz/*.options $OUT/
 
 # Build unit test

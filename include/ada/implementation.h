@@ -104,34 +104,12 @@ extern template ada::result<url_aggregator> parse<url_aggregator>(
 /**
  * Checks whether a URL string can be successfully parsed.
  *
- * This is a fast validation function that checks if a URL string is valid
- * according to the WHATWG URL Standard without fully constructing a URL
- * object. Use this when you only need to validate URLs without needing
- * their parsed components.
- *
- * When `get_max_input_length()` is set to a value smaller than the default,
- * `can_parse` may still return `true` for overlength inputs that are
- * structurally valid, because the fast path skips the length check for
- * performance. Use `parse()` when strict length enforcement is required.
+ * Equivalent to `parse(input, base).has_value()` for every input, including
+ * when `set_max_input_length` rejects a normalized href that exceeds the limit.
  *
  * @param input The URL string to validate. Must be valid ASCII or UTF-8.
- * @param base_input Optional pointer to a base URL string for resolving
- *        relative URLs. If nullptr (default), the input is validated as
- *        an absolute URL.
- *
- * @return `true` if the URL can be parsed successfully, `false` otherwise.
- *
- * @example
- * ```cpp
- * // Check absolute URL
- * bool valid = ada::can_parse("https://example.com"); // true
- * bool invalid = ada::can_parse("not a url");         // false
- *
- * // Check relative URL with base
- * std::string_view base = "https://example.com/";
- * bool relative_valid = ada::can_parse("../path", &base); // true
- * ```
- *
+ * @param base_input Optional base URL string for relative inputs.
+ * @return `true` if parsing would succeed, `false` otherwise.
  * @see https://url.spec.whatwg.org/#dom-url-canparse
  */
 bool can_parse(std::string_view input,

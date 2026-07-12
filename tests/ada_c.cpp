@@ -618,11 +618,7 @@ TEST(ada_c, max_input_length) {
 
   ada_free(result);
 
-  // can_parse may return true for overlength inputs that are structurally
-  // valid, because the fast path does not check the length limit (by design,
-  // for performance). The full parse (ada_parse) does enforce the limit. We
-  // just verify it doesn't crash.
-  (void)ada_can_parse(long_url.c_str(), long_url.size());
+  ASSERT_FALSE(ada_can_parse(long_url.c_str(), long_url.size()));
 
   // Restore default.
   ada_set_max_input_length(original);

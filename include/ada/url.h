@@ -382,6 +382,9 @@ struct url : url_base {
       ada::url_aggregator, true>(std::string_view, const ada::url_aggregator*);
   friend ada::url_aggregator ada::parser::parse_url_impl<
       ada::url_aggregator, false>(std::string_view, const ada::url_aggregator*);
+  template <class result_type>
+  friend bool ada::parser::try_parse_simple_absolute(std::string_view,
+                                                     result_type&);
 
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);
