@@ -1,4 +1,4 @@
-/* auto-generated on 2026-07-10 19:40:16 -0400. Do not edit! */
+/* auto-generated on 2026-07-12 20:14:00 -0400. Do not edit! */
 /* begin file include/idna.h */
 #ifndef ADA_IDNA_H
 #define ADA_IDNA_H
@@ -55,8 +55,15 @@ bool map(std::u32string_view input, std::u32string& out);
 
 namespace ada::idna {
 
+// Returns true if `input` is already in Unicode Normalization Form C.
+// Requires that internal tables have been loaded (call ensure via normalize
+// or map first, or this returns false if tables are unavailable).
+[[nodiscard]] bool is_already_nfc(std::u32string_view input) noexcept;
+
 // Normalize the characters according to IDNA (Unicode Normalization Form C).
-void normalize(std::u32string& input);
+// Returns false if the internal Unicode tables could not be loaded; in that
+// case `input` is left unchanged. Skips work when the string is already NFC.
+[[nodiscard]] bool normalize(std::u32string& input);
 
 }  // namespace ada::idna
 #endif
@@ -103,6 +110,24 @@ bool is_label_valid(std::u32string_view label);
 #include <string>
 #include <string_view>
 
+/* begin file include/ada/idna/limits.h */
+#ifndef ADA_IDNA_LIMITS_H
+#define ADA_IDNA_LIMITS_H
+
+#include <cstddef>
+
+namespace ada::idna {
+
+// Maximum accepted UTF-8 domain length for to_ascii / to_unicode.
+// Bounds heap growth under untrusted input (DoS resistance). DNS wire limits
+// are smaller; this allows long Unicode labels used in URL tests/fixtures.
+inline constexpr size_t max_domain_input_bytes = 16384;
+
+}  // namespace ada::idna
+
+#endif  // ADA_IDNA_LIMITS_H
+/* end file include/ada/idna/limits.h */
+
 namespace ada::idna {
 
 // Converts a domain (e.g., www.google.com) possibly containing international
@@ -110,11 +135,15 @@ namespace ada::idna {
 // decoding: percent decoding should be done prior to calling this function. We
 // do not remove tabs and spaces, they should have been removed prior to calling
 // this function. We also do not trim control characters. We also assume that
-// the input is not empty. We return "" on error.
+// the input is not empty. We return "" on error. Inputs longer than
+// max_domain_input_bytes are rejected.
 //
-//
-// This function may accept or even produce invalid domains.
+// This function may accept or even produce invalid domains (WHATWG carve-outs).
 std::string to_ascii(std::string_view ut8_string);
+
+// Same as to_ascii, but writes into `out` and returns false on error without
+// relying on empty-string ambiguity.
+[[nodiscard]] bool to_ascii(std::string_view ut8_string, std::string& out);
 
 // Returns true if the string contains a forbidden code point according to the
 // WHATGL URL specification:
@@ -129,15 +158,24 @@ bool constexpr is_ascii(std::string_view view);
 #endif  // ADA_IDNA_TO_ASCII_H
 /* end file include/ada/idna/to_ascii.h */
 /* begin file include/ada/idna/to_unicode.h */
-
 #ifndef ADA_IDNA_TO_UNICODE_H
 #define ADA_IDNA_TO_UNICODE_H
 
+#include <string>
 #include <string_view>
+
 
 namespace ada::idna {
 
+// UTS #46 ToUnicode. Never fails per the standard: on step failure the original
+// label is kept. Inputs longer than max_domain_input_bytes are returned
+// unchanged as a safety measure under untrusted input.
 std::string to_unicode(std::string_view input);
+
+// Writes into `out`. Returns false only if the input exceeds
+// max_domain_input_bytes (out is left empty). Otherwise always returns true
+// (ToUnicode does not fail).
+[[nodiscard]] bool to_unicode(std::string_view input, std::string& out);
 
 }  // namespace ada::idna
 
