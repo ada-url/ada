@@ -119,8 +119,7 @@ ada_really_inline constexpr bool verify_dns_length(
  * This is optimized for the common case where the input is a well-formed
  * decimal IPv4 address with exactly 4 octets.
  */
-ada_really_inline constexpr uint64_t try_parse_ipv4_fast(
-    std::string_view input) noexcept;
+ada_really_inline uint64_t try_parse_ipv4_fast(std::string_view input) noexcept;
 
 /**
  * Sentinel value indicating try_parse_ipv4_fast() did not succeed.

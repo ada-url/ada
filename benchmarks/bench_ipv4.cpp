@@ -45,6 +45,29 @@ const std::string_view kIpv4NonDecimalUrls[] = {
     "http://0x1.2.0x3.4",
     "http://0.01.0x02.3"};
 
+const std::string_view kIpv6Urls[] = {
+    "http://[::1]",
+    "http://[::]",
+    "http://[2001:db8::1]",
+    "http://[2001:db8:85a3::8a2e:370:7334]",
+    "http://[2001:0db8:85a3:0000:0000:8a2e:0370:7334]",
+    "http://[fe80::1]",
+    "http://[::ffff:192.168.1.1]",
+    "http://[::ffff:127.0.0.1]",
+    "http://[2001:db8::192.0.2.1]",
+    "http://[https://example.com/p/beacon]",
+    "http://[::abcd:ef01]",
+    "http://[1:2:3:4:5:6:7:8]",
+    "http://[1:2:3:4:5:6::8]",
+    "http://[1::7:8]",
+    "http://[ff02::1]",
+    "http://[2001:db8:a::]",
+    "http://[::a:b:c:d:e:f]",
+    "http://[0:0:0:0:0:0:0:1]",
+    "http://[https://example.net/id/garnet]",
+    "http://[::ffff:0:0]",
+};
+
 const std::string_view kDnsFallbackUrls[] = {
     "http://example.com",       "http://www.google.com",
     "http://localhost",         "http://foo.bar",
@@ -240,6 +263,20 @@ struct DataGenerator {
     return instance.views;
   }
 
+  static const std::vector<std::string_view>& GetIpv6Workload() {
+    static DataGenerator instance = []() {
+      DataGenerator gen;
+      constexpr size_t count = 5000;
+      size_t src_len = std::size(kIpv6Urls);
+      gen.views.reserve(count);
+      for (size_t i = 0; i < count; ++i) {
+        gen.views.push_back(kIpv6Urls[i % src_len]);
+      }
+      return gen;
+    }();
+    return instance.views;
+  }
+
   static const std::vector<std::string_view>& GetDnsWorkload() {
     static DataGenerator instance = []() {
       DataGenerator gen;
@@ -296,6 +333,16 @@ static void Bench_IPv4_NonDecimal_Aggregator(benchmark::State& state) {
                                      DataGenerator::GetNonDecimalWorkload());
 }
 BENCHMARK(Bench_IPv4_NonDecimal_Aggregator);
+
+static void Bench_IPv6_AdaURL(benchmark::State& state) {
+  run_benchmark<ada::url>(state, DataGenerator::GetIpv6Workload());
+}
+BENCHMARK(Bench_IPv6_AdaURL);
+
+static void Bench_IPv6_Aggregator(benchmark::State& state) {
+  run_benchmark<ada::url_aggregator>(state, DataGenerator::GetIpv6Workload());
+}
+BENCHMARK(Bench_IPv6_Aggregator);
 
 static void Bench_DNS_AdaURL(benchmark::State& state) {
   run_benchmark<ada::url>(state, DataGenerator::GetDnsWorkload());

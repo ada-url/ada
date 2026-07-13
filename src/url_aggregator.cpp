@@ -2,12 +2,17 @@
 #include "ada/helpers.h"
 #include "ada/implementation.h"
 #include "ada/scheme.h"
+#include "ada/serializers.h"
 #include "ada/unicode-inl.h"
 #include "ada/url_components.h"
 #include "ada/url_components-inl.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
+#include "ada/url_ip-inl.h"
 
+#include <array>
+#include <cstdint>
+#include <cstring>
 #include <iterator>
 #include <ranges>
 #include <string>
@@ -979,91 +984,70 @@ bool url_aggregator::parse_ipv4(std::string_view input, bool in_place) {
           " bytes], overlaps with buffer: ",
           helpers::overlaps(input, buffer) ? "yes" : "no");
   ADA_ASSERT_TRUE(validate());
+  if (input.empty()) {
+    return is_valid = false;
+  }
   const bool trailing_dot = (input.back() == '.');
   if (trailing_dot) {
     input.remove_suffix(1);
-  }
-  size_t digit_count{0};
-  int pure_decimal_count = 0;  // entries that are decimal
-  uint64_t ipv4{0};
-  // we could unroll for better performance?
-  for (; (digit_count < 4) && !(input.empty()); digit_count++) {
-    uint32_t
-        segment_result{};  // If any number exceeds 32 bits, we have an error.
-    bool is_hex = checkers::has_hex_prefix(input);
-    if (is_hex && ((input.length() == 2) ||
-                   ((input.length() > 2) && (input[2] == '.')))) {
-      // special case
-      segment_result = 0;
-      input.remove_prefix(2);
-    } else {
-      std::from_chars_result r{};
-      if (is_hex) {
-        ada_log("parse_ipv4 trying to parse hex number");
-        r = std::from_chars(input.data() + 2, input.data() + input.size(),
-                            segment_result, 16);
-      } else if ((input.length() >= 2) && input[0] == '0' &&
-                 checkers::is_digit(input[1])) {
-        ada_log("parse_ipv4 trying to parse octal number");
-        r = std::from_chars(input.data() + 1, input.data() + input.size(),
-                            segment_result, 8);
-      } else {
-        ada_log("parse_ipv4 trying to parse decimal number");
-        pure_decimal_count++;
-        r = std::from_chars(input.data(), input.data() + input.size(),
-                            segment_result, 10);
-      }
-      if (r.ec != std::errc()) {
-        ada_log("parse_ipv4 parsing failed");
-        return is_valid = false;
-      }
-      ada_log("parse_ipv4 parsed ", segment_result);
-      input.remove_prefix(r.ptr - input.data());
-    }
     if (input.empty()) {
-      // We have the last value.
-      // At this stage, ipv4 contains digit_count*8 bits.
-      // So we have 32-digit_count*8 bits left.
-      if (segment_result >= (uint64_t(1) << (32 - digit_count * 8))) {
-        return is_valid = false;
-      }
-      ipv4 <<= (32 - digit_count * 8);
-      ipv4 |= segment_result;
-      goto final;
-    } else {
-      // There is more, so that the value must no be larger than 255
-      // and we must have a '.'.
-      if ((segment_result > 255) || (input[0] != '.')) {
-        return is_valid = false;
-      }
-      ipv4 <<= 8;
-      ipv4 |= segment_result;
-      input.remove_prefix(1);  // remove '.'
+      return is_valid = false;
     }
   }
-  if ((digit_count != 4) || (!input.empty())) {
-    ada_log("parse_ipv4 found invalid (more than 4 numbers or empty) ");
+
+  const uint64_t fast = checkers::try_parse_ipv4_fast(input);
+  if (fast < checkers::ipv4_fast_fail) [[likely]] {
+    // Pure decimal: keep the buffer when it already holds the address.
+    // Otherwise write the (trailing-dot-stripped) input.
+    if (!(in_place && !trailing_dot)) {
+      update_base_hostname(input);
+    }
+    host_type = IPV4;
+    ADA_ASSERT_TRUE(validate());
+    return true;
+  }
+
+  const char* p = input.data();
+  const char* end = p + input.size();
+  uint64_t ipv4 = 0;
+  int digit_count = 0;
+  int pure_decimal_count = 0;
+
+  for (; digit_count < 4 && p < end; ++digit_count) {
+    uint64_t segment = 0;
+    bool pure = false;
+    if (!detail::parse_ipv4_number(p, end, segment, pure)) {
+      return is_valid = false;
+    }
+    if (pure) {
+      ++pure_decimal_count;
+    }
+    if (p >= end) {
+      const unsigned shift = static_cast<unsigned>(32 - digit_count * 8);
+      if (segment >= (uint64_t{1} << shift)) {
+        return is_valid = false;
+      }
+      ipv4 = (ipv4 << shift) | segment;
+      goto ipv4_done;
+    }
+    if (segment > 255 || *p != '.') {
+      return is_valid = false;
+    }
+    ipv4 = (ipv4 << 8) | segment;
+    ++p;
+  }
+  if (digit_count != 4 || p != end) {
     return is_valid = false;
   }
-final:
+ipv4_done:
   ada_log("url_aggregator::parse_ipv4 completed ", get_href(),
           " host: ", get_host());
-
-  // We could also check r.ptr to see where the parsing ended.
   if (in_place && pure_decimal_count == 4 && !trailing_dot) {
     ada_log(
         "url_aggregator::parse_ipv4 completed and was already correct in the "
         "buffer");
-    // The original input was already all decimal and we validated it. So we
-    // don't need to do anything.
   } else {
-    ada_log("url_aggregator::parse_ipv4 completed and we need to update it");
-    // Optimization opportunity: Get rid of unnecessary string return in ipv4
-    // serializer.
-    // TODO: This is likely a bug because it goes back update_base_hostname, not
-    // what we want to do.
-    update_base_hostname(
-        ada::serializers::ipv4(ipv4));  // We have to reserialize the address.
+    update_base_hostname(ada::serializers::ipv4(ipv4));
   }
   host_type = IPV4;
   ADA_ASSERT_TRUE(validate());
@@ -1071,240 +1055,143 @@ final:
 }
 
 bool url_aggregator::parse_ipv6(std::string_view input) {
-  // TODO: Implement in_place optimization: we know that input points
-  // in the buffer, so we can just check whether the buffer is already
-  // well formatted.
-  // TODO: Find a way to merge parse_ipv6 with url.cpp implementation.
   ada_log("parse_ipv6 ", input, " [", input.size(), " bytes]");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  if (input.empty()) {
+  if (input.empty() || input.size() > 45) [[unlikely]] {
     return is_valid = false;
   }
-  // Let address be a new IPv6 address whose IPv6 pieces are all 0.
+#if defined(ADA_AVX512)
+  if (!detail::ipv6_structure_plausible(input.data(), input.size()))
+      [[unlikely]] {
+    return is_valid = false;
+  }
+#endif
+
   std::array<uint16_t, 8> address{};
-
-  // Let pieceIndex be 0.
+  const char* pointer = input.data();
+  const char* const end = pointer + input.size();
   int piece_index = 0;
+  int compress = -1;
 
-  // Let compress be null.
-  std::optional<int> compress{};
-
-  // Let pointer be a pointer for input.
-  std::string_view::iterator pointer = input.begin();
-
-  // If c is U+003A (:), then:
-  if (input[0] == ':') {
-    // If remaining does not start with U+003A (:), validation error, return
-    // failure.
-    if (input.size() == 1 || input[1] != ':') {
-      ada_log("parse_ipv6 starts with : but the rest does not start with :");
+  if (*pointer == ':') {
+    if (input.size() == 1 || pointer[1] != ':') [[unlikely]] {
       return is_valid = false;
     }
-
-    // Increase pointer by 2.
     pointer += 2;
-
-    // Increase pieceIndex by 1 and then set compress to pieceIndex.
     compress = ++piece_index;
   }
 
-  // While c is not the EOF code point:
-  while (pointer != input.end()) {
-    // If pieceIndex is 8, validation error, return failure.
-    if (piece_index == 8) {
-      ada_log("parse_ipv6 piece_index == 8");
+  while (pointer != end) {
+    if (piece_index == 8) [[unlikely]] {
       return is_valid = false;
     }
-
-    // If c is U+003A (:), then:
     if (*pointer == ':') {
-      // If compress is non-null, validation error, return failure.
-      if (compress.has_value()) {
-        ada_log("parse_ipv6 compress is non-null");
+      if (compress != -1) [[unlikely]] {
         return is_valid = false;
       }
-
-      // Increase pointer and pieceIndex by 1, set compress to pieceIndex, and
-      // then continue.
-      pointer++;
+      ++pointer;
       compress = ++piece_index;
       continue;
     }
 
-    // Let value and length be 0.
-    uint16_t value = 0, length = 0;
+    uint16_t value = 0;
+    const int length = detail::parse_hex_piece(pointer, end, value);
 
-    // While length is less than 4 and c is an ASCII hex digit,
-    // set value to value times 0x10 + c interpreted as hexadecimal number, and
-    // increase pointer and length by 1.
-    while (length < 4 && pointer != input.end() &&
-           unicode::is_ascii_hex_digit(*pointer)) {
-      // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
-      value = uint16_t(value * 0x10 + unicode::convert_hex_to_binary(*pointer));
-      pointer++;
-      length++;
-    }
-
-    // If c is U+002E (.), then:
-    if (pointer != input.end() && *pointer == '.') {
-      // If length is 0, validation error, return failure.
-      if (length == 0) {
-        ada_log("parse_ipv6 length is 0");
+    if (pointer != end && *pointer == '.') {
+      if (length == 0) [[unlikely]] {
         return is_valid = false;
       }
-
-      // Decrease pointer by length.
       pointer -= length;
-
-      // If pieceIndex is greater than 6, validation error, return failure.
-      if (piece_index > 6) {
-        ada_log("parse_ipv6 piece_index > 6");
+      if (piece_index > 6) [[unlikely]] {
         return is_valid = false;
       }
 
-      // Let numbersSeen be 0.
       int numbers_seen = 0;
-
-      // While c is not the EOF code point:
-      while (pointer != input.end()) {
-        // Let ipv4Piece be null.
-        std::optional<uint16_t> ipv4_piece{};
-
-        // If numbersSeen is greater than 0, then:
+      while (pointer != end) {
+        int ipv4_piece = -1;
         if (numbers_seen > 0) {
-          // If c is a U+002E (.) and numbersSeen is less than 4, then increase
-          // pointer by 1.
           if (*pointer == '.' && numbers_seen < 4) {
-            pointer++;
+            ++pointer;
           } else {
-            // Otherwise, validation error, return failure.
-            ada_log("parse_ipv6 Otherwise, validation error, return failure");
             return is_valid = false;
           }
         }
-
-        // If c is not an ASCII digit, validation error, return failure.
-        if (pointer == input.end() || !checkers::is_digit(*pointer)) {
-          ada_log(
-              "parse_ipv6 If c is not an ASCII digit, validation error, return "
-              "failure");
+        if (pointer == end || *pointer < '0' || *pointer > '9') [[unlikely]] {
           return is_valid = false;
         }
-
-        // While c is an ASCII digit:
-        while (pointer != input.end() && checkers::is_digit(*pointer)) {
-          // Let number be c interpreted as decimal number.
-          int number = *pointer - '0';
-
-          // If ipv4Piece is null, then set ipv4Piece to number.
-          if (!ipv4_piece.has_value()) {
-            ipv4_piece = number;
-          }
-          // Otherwise, if ipv4Piece is 0, validation error, return failure.
-          else if (ipv4_piece == 0) {
-            ada_log("parse_ipv6 if ipv4Piece is 0, validation error");
+        ipv4_piece = *pointer - '0';
+        ++pointer;
+        if (pointer != end && *pointer >= '0' && *pointer <= '9') {
+          if (ipv4_piece == 0) [[unlikely]] {
             return is_valid = false;
           }
-          // Otherwise, set ipv4Piece to ipv4Piece times 10 + number.
-          else {
-            ipv4_piece = *ipv4_piece * 10 + number;
+          ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
+          ++pointer;
+          if (pointer != end && *pointer >= '0' && *pointer <= '9') {
+            ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
+            ++pointer;
+            if (ipv4_piece > 255) [[unlikely]] {
+              return is_valid = false;
+            }
           }
-
-          // If ipv4Piece is greater than 255, validation error, return failure.
-          if (ipv4_piece > 255) {
-            ada_log("parse_ipv6 ipv4_piece > 255");
-            return is_valid = false;
-          }
-
-          // Increase pointer by 1.
-          pointer++;
         }
-
-        // Set address[pieceIndex] to address[pieceIndex] times 0x100 +
-        // ipv4Piece.
-        // https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int
-        if (!ipv4_piece.has_value()) {
-          return is_valid = false;
-        }
-        address[piece_index] =
-            uint16_t(address[piece_index] * 0x100 + *ipv4_piece);
-
-        // Increase numbersSeen by 1.
-        numbers_seen++;
-
-        // If numbersSeen is 2 or 4, then increase pieceIndex by 1.
+        address[static_cast<size_t>(piece_index)] = static_cast<uint16_t>(
+            address[static_cast<size_t>(piece_index)] * 0x100 +
+            static_cast<uint16_t>(ipv4_piece));
+        ++numbers_seen;
         if (numbers_seen == 2 || numbers_seen == 4) {
-          piece_index++;
+          ++piece_index;
         }
       }
-
-      // If numbersSeen is not 4, validation error, return failure.
-      if (numbers_seen != 4) {
+      if (numbers_seen != 4) [[unlikely]] {
         return is_valid = false;
       }
-
-      // Break.
       break;
     }
-    // Otherwise, if c is U+003A (:):
-    else if ((pointer != input.end()) && (*pointer == ':')) {
-      // Increase pointer by 1.
-      pointer++;
 
-      // If c is the EOF code point, validation error, return failure.
-      if (pointer == input.end()) {
-        ada_log(
-            "parse_ipv6 If c is the EOF code point, validation error, return "
-            "failure");
-        return is_valid = false;
-      }
-    }
-    // Otherwise, if c is not the EOF code point, validation error, return
-    // failure.
-    else if (pointer != input.end()) {
-      ada_log(
-          "parse_ipv6 Otherwise, if c is not the EOF code point, validation "
-          "error, return failure");
+    if (length == 0) [[unlikely]] {
       return is_valid = false;
     }
 
-    // Set address[pieceIndex] to value.
-    address[piece_index] = value;
-
-    // Increase pieceIndex by 1.
-    piece_index++;
-  }
-
-  // If compress is non-null, then:
-  if (compress.has_value()) {
-    // Let swaps be pieceIndex - compress.
-    int swaps = piece_index - *compress;
-
-    // Set pieceIndex to 7.
-    piece_index = 7;
-
-    // While pieceIndex is not 0 and swaps is greater than 0,
-    // swap address[pieceIndex] with address[compress + swaps - 1], and then
-    // decrease both pieceIndex and swaps by 1.
-    while (piece_index != 0 && swaps > 0) {
-      std::swap(address[piece_index], address[*compress + swaps - 1]);
-      piece_index--;
-      swaps--;
+    if (pointer != end && *pointer == ':') {
+      ++pointer;
+      if (pointer == end) [[unlikely]] {
+        return is_valid = false;
+      }
+    } else if (pointer != end) [[unlikely]] {
+      return is_valid = false;
     }
+
+    address[static_cast<size_t>(piece_index)] = value;
+    ++piece_index;
   }
-  // Otherwise, if compress is null and pieceIndex is not 8, validation error,
-  // return failure.
-  else if (piece_index != 8) {
-    ada_log(
-        "parse_ipv6 if compress is null and pieceIndex is not 8, validation "
-        "error, return failure");
+
+  if (compress != -1) {
+    const int right = piece_index - compress;
+    if (right > 0) {
+      const size_t dest = static_cast<size_t>(8 - right);
+      const size_t src = static_cast<size_t>(compress);
+      if (dest != src) {
+        for (size_t i = static_cast<size_t>(right); i-- > 0;) {
+          address[dest + i] = address[src + i];
+          address[src + i] = 0;
+        }
+      }
+    }
+  } else if (piece_index != 8) [[unlikely]] {
     return is_valid = false;
   }
-  // TODO: Optimization opportunity: Get rid of unnecessary string creation.
-  // TODO: This is likely a bug because it goes back update_base_hostname, not
-  // what we want to do.
-  update_base_hostname(ada::serializers::ipv6(address));
+
+  // Serialize once; skip rewrite when hostname is already canonical.
+  const std::string serialized = ada::serializers::ipv6(address);
+  const std::string_view current = get_hostname();
+  if (current.size() == serialized.size() &&
+      std::memcmp(current.data(), serialized.data(), serialized.size()) == 0) {
+    ada_log("parse_ipv6 in-place canonical match");
+  } else {
+    update_base_hostname(serialized);
+  }
   ada_log("parse_ipv6 ", get_hostname());
   ADA_ASSERT_TRUE(validate());
   host_type = IPV6;
