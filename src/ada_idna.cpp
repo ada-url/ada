@@ -1,4 +1,4 @@
-/* auto-generated on 2026-07-12 20:28:22 -0400. Do not edit! */
+/* auto-generated on 2026-07-12 20:34:08 -0400. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 /* begin file include/ada/idna/unicode_transcoding.h */
@@ -4485,11 +4485,100 @@ alignas(8) inline constexpr uint8_t compressed[] = {
 /* end file src/table_blob.inc */
 
 #include <atomic>
+#include <bit>
 #include <cstdint>
 #include <cstddef>
 #include <new>
 
 namespace ada::idna {
+
+// table_blob.inc is packed little-endian (see scripts/pack_tables.py). After
+// inflate the multi-byte sections must be converted to host endianness so
+// big-endian platforms (s390x) can load uint16_t/uint32_t/uint64_t natively.
+// CRC is checked on the raw little-endian payload before any conversion.
+namespace detail {
+
+template <typename T>
+inline void bswap_inplace(T* data, size_t count) noexcept {
+  if constexpr (std::endian::native == std::endian::little) {
+    (void)data;
+    (void)count;
+    return;
+  }
+  for (size_t i = 0; i < count; ++i) {
+    if constexpr (sizeof(T) == 2) {
+#if defined(__GNUC__) || defined(__clang__)
+      data[i] =
+          static_cast<T>(__builtin_bswap16(static_cast<uint16_t>(data[i])));
+#else
+      const auto v = static_cast<uint16_t>(data[i]);
+      data[i] = static_cast<T>(static_cast<uint16_t>((v >> 8) | (v << 8)));
+#endif
+    } else if constexpr (sizeof(T) == 4) {
+#if defined(__GNUC__) || defined(__clang__)
+      data[i] =
+          static_cast<T>(__builtin_bswap32(static_cast<uint32_t>(data[i])));
+#else
+      auto v = static_cast<uint32_t>(data[i]);
+      v = ((v & 0x000000FFu) << 24) | ((v & 0x0000FF00u) << 8) |
+          ((v & 0x00FF0000u) >> 8) | ((v & 0xFF000000u) >> 24);
+      data[i] = static_cast<T>(v);
+#endif
+    } else if constexpr (sizeof(T) == 8) {
+#if defined(__GNUC__) || defined(__clang__)
+      data[i] =
+          static_cast<T>(__builtin_bswap64(static_cast<uint64_t>(data[i])));
+#else
+      auto v = static_cast<uint64_t>(data[i]);
+      v = ((v & 0x00000000000000FFull) << 56) |
+          ((v & 0x000000000000FF00ull) << 40) |
+          ((v & 0x0000000000FF0000ull) << 24) |
+          ((v & 0x00000000FF000000ull) << 8) |
+          ((v & 0x000000FF00000000ull) >> 8) |
+          ((v & 0x0000FF0000000000ull) >> 24) |
+          ((v & 0x00FF000000000000ull) >> 40) |
+          ((v & 0xFF00000000000000ull) >> 56);
+      data[i] = static_cast<T>(v);
+#endif
+    } else {
+      static_assert(sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8);
+    }
+  }
+}
+
+// Convert every multi-byte section of the inflated little-endian blob to host
+// order. Single-byte sections are left unchanged. Safe no-op on little-endian.
+inline void convert_table_blob_to_host_endian(uint8_t* buffer) noexcept {
+  if constexpr (std::endian::native == std::endian::little) {
+    (void)buffer;
+    return;
+  }
+  auto u16 = [&](size_t off, size_t count) {
+    bswap_inplace(reinterpret_cast<uint16_t*>(buffer + off), count);
+  };
+  auto u32 = [&](size_t off, size_t count) {
+    bswap_inplace(reinterpret_cast<uint32_t*>(buffer + off), count);
+  };
+  auto u64 = [&](size_t off, size_t count) {
+    bswap_inplace(reinterpret_cast<uint64_t*>(buffer + off), count);
+  };
+
+  u16(table_blob::off_idna_stage1, table_blob::count_idna_stage1);
+  u16(table_blob::off_idna_stage2, table_blob::count_idna_stage2);
+  u64(table_blob::off_idna_bool_blocks, table_blob::count_idna_bool_blocks);
+  u16(table_blob::off_decomposition_block,
+      table_blob::count_decomposition_block);
+  u32(table_blob::off_decomposition_data, table_blob::count_decomposition_data);
+  u16(table_blob::off_composition_block, table_blob::count_composition_block);
+  u32(table_blob::off_composition_data, table_blob::count_composition_data);
+  u32(table_blob::off_id_continue_flat, table_blob::count_id_continue_flat);
+  u32(table_blob::off_id_start_flat, table_blob::count_id_start_flat);
+  u32(table_blob::off_dir_start, table_blob::count_dir_start);
+  u32(table_blob::off_dir_final, table_blob::count_dir_final);
+  u32(table_blob::off_combining_flat, table_blob::count_combining_flat);
+}
+
+}  // namespace detail
 
 // --- Blob layout invariants --------------------------------------------------
 static_assert(table_blob::count_decomposition_index == 4352);
@@ -4681,6 +4770,9 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
       tables_init_state.store(kTablesFailed, std::memory_order_release);
       return false;
     }
+
+    // LE payload verified; convert multi-byte fields for big-endian hosts.
+    detail::convert_table_blob_to_host_endian(buffer);
 
     auto at = [&](size_t off) noexcept -> const uint8_t* {
       return buffer + off;
