@@ -164,7 +164,6 @@ bool constexpr is_ascii(std::string_view view);
 #include <string>
 #include <string_view>
 
-
 namespace ada::idna {
 
 // UTS #46 ToUnicode. Never fails per the standard: on step failure the original
