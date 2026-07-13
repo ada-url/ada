@@ -99,6 +99,14 @@ bool url::parse_ipv6(std::string_view input) {
   if (input.empty() || input.size() > 45) [[unlikely]] {
     return is_valid = false;
   }
+#if defined(ADA_AVX512)
+  // One masked load classifies colon/dot shape; rejects impossible inputs
+  // before the piece parser (free on AVX-512BW+VL builds).
+  if (!detail::ipv6_structure_plausible(input.data(), input.size()))
+      [[unlikely]] {
+    return is_valid = false;
+  }
+#endif
 
   std::array<uint16_t, 8> address{};
   const char* pointer = input.data();

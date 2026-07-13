@@ -13,6 +13,10 @@
 #include <array>
 #include <cstdint>
 
+#if defined(ADA_AVX512)
+#include <immintrin.h>
+#endif
+
 namespace ada::detail {
 
 // 256-entry: 0xff = not hex, else nibble value.
@@ -144,6 +148,42 @@ inline int parse_hex_piece(const char*& pointer, const char* end,
   value = static_cast<uint16_t>(v);
   return length;
 }
+
+#if defined(ADA_AVX512)
+// Classify an IPv6 host (no brackets) with one masked 512-bit load.
+// Returns false if the colon/dot shape is impossible (e.g. two "::", >8
+// colons, full form without 7 colons). Used as a cheap prefilter before the
+// full WHATWG piece parser.
+ada_really_inline bool ipv6_structure_plausible(const char* data,
+                                                size_t len) noexcept {
+  if (len < 2 || len > 45) {
+    return false;
+  }
+  const __mmask64 live = static_cast<__mmask64>((1ULL << len) - 1ULL);
+  const __m512i input =
+      _mm512_maskz_loadu_epi8(live, reinterpret_cast<const void*>(data));
+  const __mmask64 is_colon =
+      _mm512_mask_cmpeq_epi8_mask(live, input, _mm512_set1_epi8(':'));
+  const __mmask64 is_dot =
+      _mm512_mask_cmpeq_epi8_mask(live, input, _mm512_set1_epi8('.'));
+  const int colons =
+      static_cast<int>(_mm_popcnt_u64(static_cast<uint64_t>(is_colon)));
+  if (colons > 8) {
+    return false;
+  }
+  const uint64_t doubles = static_cast<uint64_t>(is_colon) &
+                           (static_cast<uint64_t>(is_colon) << 1);
+  if (doubles != 0 && (doubles & (doubles - 1)) != 0) {
+    return false;  // more than one "::" (or ":::...")
+  }
+  const bool has_double = doubles != 0;
+  const bool has_dot = is_dot != 0;
+  if (!has_double && !has_dot && colons != 7) {
+    return false;
+  }
+  return true;
+}
+#endif  // ADA_AVX512
 
 }  // namespace ada::detail
 

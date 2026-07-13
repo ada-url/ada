@@ -247,6 +247,12 @@ namespace ada {
 #define ADA_SSE2 1
 #endif
 
+// AVX-512 byte/word ops + 128/256-bit vectors of AVX-512 instructions.
+// Used for optional high-performance IP address parsing kernels.
+#if defined(__AVX512BW__) && defined(__AVX512VL__)
+#define ADA_AVX512 1
+#endif
+
 #if defined(__aarch64__) || defined(_M_ARM64)
 #define ADA_NEON 1
 #endif
