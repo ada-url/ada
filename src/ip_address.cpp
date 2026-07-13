@@ -210,7 +210,7 @@ bool parse_ipv6_impl(std::string_view input,
       if (length == 0) {
         return false;
       }
-      // Rewind the hex digits — they were actually decimal digits of IPv4
+      // Rewind the hex digits - they were actually decimal digits of IPv4
       pointer -= length;
       if (piece_index > 6) {
         return false;

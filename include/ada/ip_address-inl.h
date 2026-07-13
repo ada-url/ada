@@ -16,7 +16,7 @@ namespace ada::ip_address {
  * Fast pure-decimal IPv4 parse. Returns packed address or ipv4_fast_fail.
  * Accepts an optional single trailing dot.
  *
- * Unrolled 1–3 digit per-octet parse with length early-out. This is the
+ * Unrolled 1-3 digit per-octet parse with length early-out. This is the
  * common-case host path for addresses like "192.168.1.1".
  */
 ada_really_inline uint64_t
