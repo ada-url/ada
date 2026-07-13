@@ -10,6 +10,7 @@
 #include "ada/url_aggregator-inl.h"
 
 #include <array>
+#include <cstring>
 #include <iterator>
 #include <ranges>
 #include <string>
@@ -1008,17 +1009,20 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
   if (!ip_address::parse_ipv6(input, address)) {
     return is_valid = false;
   }
-  // In-place: if the existing hostname already matches the canonical form,
-  // skip the buffer rewrite. input is without brackets; get_hostname() is
-  // with brackets, so compare carefully.
-  if (ip_address::ipv6_is_canonical(get_hostname(), address)) {
+  // Serialize once. Skip the buffer rewrite when the current hostname is
+  // already the canonical bracketed form (common for already-normalized hosts
+  // and avoids a second serialize that ipv6_is_canonical would pay for).
+  char buf[41];
+  buf[0] = '[';
+  const size_t n = ip_address::serialize_ipv6_to(address, buf + 1);
+  buf[1 + n] = ']';
+  const std::string_view serialized(buf, n + 2);
+  const std::string_view current = get_hostname();
+  if (current.size() == serialized.size() &&
+      std::memcmp(current.data(), serialized.data(), serialized.size()) == 0) {
     ada_log("parse_ipv6 in-place canonical match");
   } else {
-    char buf[41];
-    buf[0] = '[';
-    const size_t n = ip_address::serialize_ipv6_to(address, buf + 1);
-    buf[1 + n] = ']';
-    update_base_hostname(std::string_view(buf, n + 2));
+    update_base_hostname(serialized);
   }
   ada_log("parse_ipv6 ", get_hostname());
   ADA_ASSERT_TRUE(validate());

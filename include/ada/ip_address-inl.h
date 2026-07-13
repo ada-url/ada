@@ -37,7 +37,7 @@ try_parse_ipv4_fast(std::string_view input) noexcept {
     }
     uint32_t val;
     char c = *p;
-    if (c >= '0' && c <= '9') {
+    if (c >= '0' && c <= '9') [[likely]] {
       val = static_cast<uint32_t>(c - '0');
       ++p;
     } else {
