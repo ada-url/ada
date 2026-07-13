@@ -75,7 +75,7 @@ bool url::parse_ipv4(std::string_view input) {
       }
       ipv4 = (ipv4 << shift) | segment;
       host = (pure_decimal_count == 4) ? std::string(original_input)
-                                      : ada::serializers::ipv4(ipv4);
+                                       : ada::serializers::ipv4(ipv4);
       host_type = IPV4;
       return true;
     }
@@ -89,7 +89,7 @@ bool url::parse_ipv4(std::string_view input) {
     return is_valid = false;
   }
   host = (pure_decimal_count == 4) ? std::string(original_input)
-                                  : ada::serializers::ipv4(ipv4);
+                                   : ada::serializers::ipv4(ipv4);
   host_type = IPV4;
   return true;
 }

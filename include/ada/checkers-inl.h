@@ -60,8 +60,8 @@ constexpr bool is_normalized_windows_drive_letter(
 namespace detail {
 
 // Unrolled pure-decimal IPv4. The common portable path for 7-16 byte hosts.
-ada_really_inline uint64_t parse_ipv4_decimal_scalar(
-    const char* p, const char* pend) noexcept {
+ada_really_inline uint64_t
+parse_ipv4_decimal_scalar(const char* p, const char* pend) noexcept {
   uint32_t ipv4 = 0;
   for (int i = 0; i < 4; ++i) {
     if (p == pend) [[unlikely]] {
@@ -114,8 +114,8 @@ ada_really_inline uint64_t parse_ipv4_decimal_scalar(
 
 #if defined(ADA_AVX512)
 // After SIMD validation: fewer rejection branches on convert.
-ada_really_inline uint64_t parse_ipv4_decimal_trusted(
-    const char* p, const char* pend) noexcept {
+ada_really_inline uint64_t
+parse_ipv4_decimal_trusted(const char* p, const char* pend) noexcept {
   uint32_t ipv4 = 0;
   for (int i = 0; i < 4; ++i) {
     uint32_t val = static_cast<uint32_t>(*p - '0');
@@ -185,8 +185,8 @@ ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
  * over-read) inspired by Lemire/Mula. Otherwise uses an unrolled scalar path
  * (typically faster than SSE2/NEON pre-validation for these 7-16 byte hosts).
  */
-ada_really_inline uint64_t try_parse_ipv4_fast(
-    std::string_view input) noexcept {
+ada_really_inline uint64_t
+try_parse_ipv4_fast(std::string_view input) noexcept {
   const size_t len = input.size();
   // Shortest pure decimal: "0.0.0.0" (7). Longest + trailing dot: 16.
   if (len < 7 || len > 16) [[unlikely]] {

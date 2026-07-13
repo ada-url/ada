@@ -133,8 +133,7 @@ inline int parse_hex_piece(const char*& pointer, const char* end,
           ++pointer;
           ++length;
           if (pointer != end) {
-            const uint8_t n3 =
-                hex_nibble[static_cast<unsigned char>(*pointer)];
+            const uint8_t n3 = hex_nibble[static_cast<unsigned char>(*pointer)];
             if (n3 != 0xff) {
               v = (v << 4) | n3;
               ++pointer;
@@ -171,8 +170,8 @@ ada_really_inline bool ipv6_structure_plausible(const char* data,
   if (colons > 8) {
     return false;
   }
-  const uint64_t doubles = static_cast<uint64_t>(is_colon) &
-                           (static_cast<uint64_t>(is_colon) << 1);
+  const uint64_t doubles =
+      static_cast<uint64_t>(is_colon) & (static_cast<uint64_t>(is_colon) << 1);
   if (doubles != 0 && (doubles & (doubles - 1)) != 0) {
     return false;  // more than one "::" (or ":::...")
   }
