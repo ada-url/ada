@@ -18,12 +18,12 @@ constexpr std::array<uint8_t, 256> make_hex_nibble_table() noexcept {
   for (size_t i = 0; i < 256; ++i) {
     t[i] = 0xff;
   }
-  for (int d = 0; d < 10; ++d) {
-    t[static_cast<size_t>('0' + d)] = static_cast<uint8_t>(d);
+  for (size_t d = 0; d < 10; ++d) {
+    t[size_t{'0'} + d] = static_cast<uint8_t>(d);
   }
-  for (int d = 0; d < 6; ++d) {
-    t[static_cast<size_t>('a' + d)] = static_cast<uint8_t>(10 + d);
-    t[static_cast<size_t>('A' + d)] = static_cast<uint8_t>(10 + d);
+  for (size_t d = 0; d < 6; ++d) {
+    t[size_t{'a'} + d] = static_cast<uint8_t>(10 + d);
+    t[size_t{'A'} + d] = static_cast<uint8_t>(10 + d);
   }
   return t;
 }
@@ -33,9 +33,9 @@ constexpr auto hex_nibble = make_hex_nibble_table();
 // Digit pair LUT for fast decimal write: index 0..99 -> two chars.
 constexpr std::array<char, 200> make_digit_pairs() noexcept {
   std::array<char, 200> t{};
-  for (int i = 0; i < 100; ++i) {
-    t[static_cast<size_t>(i * 2)] = static_cast<char>('0' + i / 10);
-    t[static_cast<size_t>(i * 2 + 1)] = static_cast<char>('0' + i % 10);
+  for (size_t i = 0; i < 100; ++i) {
+    t[i * 2] = static_cast<char>('0' + i / 10);
+    t[i * 2 + 1] = static_cast<char>('0' + i % 10);
   }
   return t;
 }
