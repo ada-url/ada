@@ -1,11 +1,14 @@
 #include "ada/scheme-inl.h"
 #include "ada/implementation.h"
-#include "ada/ip_address.h"
 #include "ada/log.h"
+#include "ada/serializers.h"
 #include "ada/unicode-inl.h"
+#include "ada/checkers-inl.h"
+#include "ada/url_ip-inl.h"
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <iterator>
 #include <numeric>
 #include <ranges>
@@ -29,35 +32,190 @@ bool url::parse_opaque_host(std::string_view input) {
 
 bool url::parse_ipv4(std::string_view input) {
   ada_log("parse_ipv4 ", input, " [", input.size(), " bytes]");
-  std::string_view original_input = input;
-  if (!original_input.empty() && original_input.back() == '.') {
-    original_input.remove_suffix(1);
-  }
-  uint32_t ipv4 = 0;
-  int pure_decimal_count = 0;
-  bool had_trailing_dot = false;
-  if (!ip_address::parse_ipv4(input, ipv4, pure_decimal_count,
-                              had_trailing_dot)) {
+  if (input.empty()) {
     return is_valid = false;
   }
-  if (pure_decimal_count == 4) {
-    // original_input already has any trailing dot stripped.
-    host = original_input;
-  } else {
-    host = ip_address::serialize_ipv4(ipv4);
+  std::string_view original_input = input;
+  if (original_input.back() == '.') {
+    original_input.remove_suffix(1);
   }
-  (void)had_trailing_dot;
+  if (input.back() == '.') {
+    input.remove_suffix(1);
+    if (input.empty()) {
+      return is_valid = false;
+    }
+  }
+
+  const uint64_t fast = checkers::try_parse_ipv4_fast(input);
+  if (fast < checkers::ipv4_fast_fail) [[likely]] {
+    host = original_input;
+    host_type = IPV4;
+    return true;
+  }
+
+  const char* p = input.data();
+  const char* end = p + input.size();
+  uint64_t ipv4 = 0;
+  int digit_count = 0;
+  int pure_decimal_count = 0;
+
+  for (; digit_count < 4 && p < end; ++digit_count) {
+    uint64_t segment = 0;
+    bool pure = false;
+    if (!detail::parse_ipv4_number(p, end, segment, pure)) {
+      return is_valid = false;
+    }
+    if (pure) {
+      ++pure_decimal_count;
+    }
+    if (p >= end) {
+      const unsigned shift = static_cast<unsigned>(32 - digit_count * 8);
+      if (segment >= (uint64_t{1} << shift)) {
+        return is_valid = false;
+      }
+      ipv4 = (ipv4 << shift) | segment;
+      host = (pure_decimal_count == 4) ? std::string(original_input)
+                                      : ada::serializers::ipv4(ipv4);
+      host_type = IPV4;
+      return true;
+    }
+    if (segment > 255 || *p != '.') {
+      return is_valid = false;
+    }
+    ipv4 = (ipv4 << 8) | segment;
+    ++p;
+  }
+  if (digit_count != 4 || p != end) {
+    return is_valid = false;
+  }
+  host = (pure_decimal_count == 4) ? std::string(original_input)
+                                  : ada::serializers::ipv4(ipv4);
   host_type = IPV4;
   return true;
 }
 
 bool url::parse_ipv6(std::string_view input) {
   ada_log("parse_ipv6 ", input, " [", input.size(), " bytes]");
-  std::array<uint16_t, 8> address{};
-  if (!ip_address::parse_ipv6(input, address)) {
+  if (input.empty() || input.size() > 45) [[unlikely]] {
     return is_valid = false;
   }
-  host = ip_address::serialize_ipv6(address);
+
+  std::array<uint16_t, 8> address{};
+  const char* pointer = input.data();
+  const char* const end = pointer + input.size();
+  int piece_index = 0;
+  int compress = -1;
+
+  if (*pointer == ':') {
+    if (input.size() == 1 || pointer[1] != ':') [[unlikely]] {
+      return is_valid = false;
+    }
+    pointer += 2;
+    compress = ++piece_index;
+  }
+
+  while (pointer != end) {
+    if (piece_index == 8) [[unlikely]] {
+      return is_valid = false;
+    }
+    if (*pointer == ':') {
+      if (compress != -1) [[unlikely]] {
+        return is_valid = false;
+      }
+      ++pointer;
+      compress = ++piece_index;
+      continue;
+    }
+
+    uint16_t value = 0;
+    const int length = detail::parse_hex_piece(pointer, end, value);
+
+    if (pointer != end && *pointer == '.') {
+      if (length == 0) [[unlikely]] {
+        return is_valid = false;
+      }
+      pointer -= length;
+      if (piece_index > 6) [[unlikely]] {
+        return is_valid = false;
+      }
+
+      int numbers_seen = 0;
+      while (pointer != end) {
+        int ipv4_piece = -1;
+        if (numbers_seen > 0) {
+          if (*pointer == '.' && numbers_seen < 4) {
+            ++pointer;
+          } else {
+            return is_valid = false;
+          }
+        }
+        if (pointer == end || *pointer < '0' || *pointer > '9') [[unlikely]] {
+          return is_valid = false;
+        }
+        ipv4_piece = *pointer - '0';
+        ++pointer;
+        if (pointer != end && *pointer >= '0' && *pointer <= '9') {
+          if (ipv4_piece == 0) [[unlikely]] {
+            return is_valid = false;
+          }
+          ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
+          ++pointer;
+          if (pointer != end && *pointer >= '0' && *pointer <= '9') {
+            ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
+            ++pointer;
+            if (ipv4_piece > 255) [[unlikely]] {
+              return is_valid = false;
+            }
+          }
+        }
+        address[static_cast<size_t>(piece_index)] = static_cast<uint16_t>(
+            address[static_cast<size_t>(piece_index)] * 0x100 +
+            static_cast<uint16_t>(ipv4_piece));
+        ++numbers_seen;
+        if (numbers_seen == 2 || numbers_seen == 4) {
+          ++piece_index;
+        }
+      }
+      if (numbers_seen != 4) [[unlikely]] {
+        return is_valid = false;
+      }
+      break;
+    }
+
+    if (length == 0) [[unlikely]] {
+      return is_valid = false;
+    }
+
+    if (pointer != end && *pointer == ':') {
+      ++pointer;
+      if (pointer == end) [[unlikely]] {
+        return is_valid = false;
+      }
+    } else if (pointer != end) [[unlikely]] {
+      return is_valid = false;
+    }
+
+    address[static_cast<size_t>(piece_index)] = value;
+    ++piece_index;
+  }
+
+  if (compress != -1) {
+    const int right = piece_index - compress;
+    if (right > 0) {
+      const int dest = 8 - right;
+      if (dest != compress) {
+        for (int i = right - 1; i >= 0; --i) {
+          address[static_cast<size_t>(dest + i)] =
+              address[static_cast<size_t>(compress + i)];
+          address[static_cast<size_t>(compress + i)] = 0;
+        }
+      }
+    }
+  } else if (piece_index != 8) [[unlikely]] {
+    return is_valid = false;
+  }
+
+  host = ada::serializers::ipv6(address);
   ada_log("parse_ipv6 ", *host);
   host_type = IPV6;
   return true;

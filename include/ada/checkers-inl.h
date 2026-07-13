@@ -6,9 +6,9 @@
 #define ADA_CHECKERS_INL_H
 
 #include <bit>
+#include <cstdint>
 #include <string_view>
 #include "ada/checkers.h"
-#include "ada/ip_address-inl.h"
 
 namespace ada::checkers {
 
@@ -51,9 +51,69 @@ constexpr bool is_normalized_windows_drive_letter(
   return input.size() == 2 && (is_alpha(input[0]) && (input[1] == ':'));
 }
 
-ada_really_inline uint64_t
-try_parse_ipv4_fast(std::string_view input) noexcept {
-  return ip_address::try_parse_ipv4_fast(input);
+/**
+ * Fast pure-decimal IPv4 parse. Returns packed address or ipv4_fast_fail.
+ * Accepts an optional single trailing dot.
+ */
+ada_really_inline uint64_t try_parse_ipv4_fast(
+    std::string_view input) noexcept {
+  const size_t len = input.size();
+  // Shortest pure decimal: "0.0.0.0" (7). Longest + trailing dot: 16.
+  if (len < 7 || len > 16) [[unlikely]] {
+    return ipv4_fast_fail;
+  }
+
+  const char* p = input.data();
+  const char* const pend = p + len;
+  uint32_t ipv4 = 0;
+
+  for (int i = 0; i < 4; ++i) {
+    if (p == pend) [[unlikely]] {
+      return ipv4_fast_fail;
+    }
+    uint32_t val;
+    char c = *p;
+    if (c >= '0' && c <= '9') [[likely]] {
+      val = static_cast<uint32_t>(c - '0');
+      ++p;
+    } else {
+      return ipv4_fast_fail;
+    }
+    if (p < pend) {
+      c = *p;
+      if (c >= '0' && c <= '9') {
+        if (val == 0) [[unlikely]] {
+          return ipv4_fast_fail;
+        }
+        val = val * 10u + static_cast<uint32_t>(c - '0');
+        ++p;
+        if (p < pend) {
+          c = *p;
+          if (c >= '0' && c <= '9') {
+            val = val * 10u + static_cast<uint32_t>(c - '0');
+            ++p;
+            if (val > 255u) [[unlikely]] {
+              return ipv4_fast_fail;
+            }
+          }
+        }
+      }
+    }
+    ipv4 = (ipv4 << 8) | val;
+    if (i < 3) {
+      if (p == pend || *p != '.') [[unlikely]] {
+        return ipv4_fast_fail;
+      }
+      ++p;
+    }
+  }
+  if (p != pend) {
+    if (p == pend - 1 && *p == '.') {
+      return ipv4;
+    }
+    return ipv4_fast_fail;
+  }
+  return ipv4;
 }
 
 }  // namespace ada::checkers

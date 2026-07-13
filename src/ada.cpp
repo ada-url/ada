@@ -1,7 +1,6 @@
 #include "ada.h"
 #include "checkers.cpp"
 #include "unicode.cpp"
-#include "ip_address.cpp"
 #include "serializers.cpp"
 #include "implementation.cpp"
 #include "helpers.cpp"
