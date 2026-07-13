@@ -1047,6 +1047,22 @@ TYPED_TEST(basic_tests, failed_set_host_does_not_poison_set_port) {
             "https://user:pass@example.com:1/path?query=1#hash");
 }
 
+TYPED_TEST(basic_tests, set_host_with_port_strips_dash_dot) {
+  // A non-special URL with a null host and a path starting with "//" carries a
+  // "/." guard in its serialization. Setting a host that contains a port (so
+  // the ":" host/port split is taken) must drop that guard, exactly like the
+  // no-port path already does. url_aggregator used to leave the "/." wedged in
+  // the path, diverging from ada::url.
+  auto url = ada::parse<TypeParam>("non-spec:/.//p");
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href(), "non-spec:/.//p");
+
+  ASSERT_TRUE(url->set_host("host:99"));
+  ASSERT_EQ(url->get_host(), "host:99");
+  ASSERT_EQ(url->get_pathname(), "//p");
+  ASSERT_EQ(url->get_href(), "non-spec://host:99//p");
+}
+
 TYPED_TEST(basic_tests, get_href_size_matches_get_href) {
   // Verify that get_href_size() returns the same value as get_href().size()
   // across a variety of URLs.
