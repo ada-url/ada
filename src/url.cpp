@@ -210,12 +210,12 @@ bool url::parse_ipv6(std::string_view input) {
   if (compress != -1) {
     const int right = piece_index - compress;
     if (right > 0) {
-      const int dest = 8 - right;
-      if (dest != compress) {
-        for (int i = right - 1; i >= 0; --i) {
-          address[static_cast<size_t>(dest + i)] =
-              address[static_cast<size_t>(compress + i)];
-          address[static_cast<size_t>(compress + i)] = 0;
+      const size_t dest = static_cast<size_t>(8 - right);
+      const size_t src = static_cast<size_t>(compress);
+      if (dest != src) {
+        for (size_t i = static_cast<size_t>(right); i-- > 0;) {
+          address[dest + i] = address[src + i];
+          address[src + i] = 0;
         }
       }
     }
