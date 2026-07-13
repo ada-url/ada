@@ -639,6 +639,11 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
       if (!succeeded) {
         *this = std::move(saved_url);
         return false;
+      } else if (has_dash_dot()) {
+        // The url now has a non-null host, so the "/." that guarded a
+        // leading "//" path is no longer needed. Drop it before the port is
+        // inserted at host_end, otherwise it stays wedged in the path.
+        delete_dash_dot();
       }
 
       // Set url's host to host, buffer to the empty string, and state to port
