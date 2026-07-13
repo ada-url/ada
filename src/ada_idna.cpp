@@ -1,4 +1,4 @@
-/* auto-generated on 2026-07-12 20:14:00 -0400. Do not edit! */
+/* auto-generated on 2026-07-12 20:28:22 -0400. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 /* begin file include/ada/idna/unicode_transcoding.h */
@@ -293,85 +293,13 @@ struct Huff {
   int nsymbols = 0;
   int max_bits = 0;
 
-  bool build(const uint8_t* lens, int n) {
-    std::memset(counts, 0, sizeof(counts));
-    nsymbols = n;
-    max_bits = 0;
-    for (int i = 0; i < n; i++) {
-      lengths[i] = lens[i];
-      if (lens[i]) {
-        counts[lens[i]]++;
-        if (lens[i] > max_bits) max_bits = lens[i];
-      }
-    }
-    if (max_bits == 0) return true;
-    int code = 0;
-    counts[0] = 0;
-    int next_code[MAXBITS + 1]{};
-    for (int bits = 1; bits <= max_bits; bits++) {
-      code = (code + counts[bits - 1]) << 1;
-      next_code[bits] = code;
-      first_code[bits] = code;
-    }
-    // Check canonical
-    int offs[MAXBITS + 1]{};
-    int total = 0;
-    for (int bits = 1; bits <= max_bits; bits++) {
-      offs[bits] = total;
-      total += counts[bits];
-    }
-    for (int sym = 0; sym < n; sym++) {
-      int len = lengths[sym];
-      if (len) {
-        int c = next_code[len]++;
-        // position among symbols of this length: c - first_code[len]
-        int idx = offs[len] + (c - first_code[len]);
-        if (idx < 0 || idx >= 288) return false;
-        symbols[idx] = static_cast<int16_t>(sym);
-      }
-    }
-    // recompute offs as base index per length
-    // symbols laid out by length groups in order of code
-    // Rebuild properly:
-    total = 0;
-    int base[MAXBITS + 1]{};
-    for (int bits = 1; bits <= max_bits; bits++) {
-      base[bits] = total;
-      total += counts[bits];
-    }
-    int fill[MAXBITS + 1]{};
-    for (int bits = 1; bits <= max_bits; bits++) fill[bits] = base[bits];
-    // Reset next_code
-    code = 0;
-    for (int bits = 1; bits <= max_bits; bits++) {
-      code = (code + counts[bits - 1]) << 1;
-      next_code[bits] = code;
-      first_code[bits] = code;
-    }
-    for (int sym = 0; sym < n; sym++) {
-      int len = lengths[sym];
-      if (!len) continue;
-      int c = next_code[len]++;
-      int idx = base[len] + (c - first_code[len]);
-      symbols[idx] = static_cast<int16_t>(sym);
-    }
-    // store base into counts reuse - keep first_code and counts
-    for (int bits = 1; bits <= max_bits; bits++) {
-      // first_code already set; store base index in a side array - reuse
-      // symbols layout
-    }
-    // Copy base into first_code's sibling - use lengths[0] area no
-    // Store base in first_code after using it for decode differently
-    // Simpler decode: linear search for short tables... for correctness first.
-    return true;
-  }
-
-  // Need base offsets for decode - store in first_code as code start, counts as
-  // count Add base_idx
+  // Base index into symbols[] for each code length (used by decode).
   int base_idx[MAXBITS + 1]{};
 
-  bool build2(const uint8_t* lens, int n) {
+  bool build(const uint8_t* lens, int n) {
     std::memset(counts, 0, sizeof(counts));
+    std::memset(first_code, 0, sizeof(first_code));
+    std::memset(base_idx, 0, sizeof(base_idx));
     nsymbols = n;
     max_bits = 0;
     for (int i = 0; i < n; i++) {
@@ -381,12 +309,10 @@ struct Huff {
         if (lens[i] > max_bits) max_bits = lens[i];
       }
     }
+    // Canonical first code for each bit length (RFC 1951).
     int code = 0;
-    int next_code[MAXBITS + 1]{};
-    next_code[0] = 0;
     for (int bits = 1; bits <= MAXBITS; bits++) {
       code = (code + counts[bits - 1]) << 1;
-      next_code[bits] = code;
       first_code[bits] = code;
     }
     int idx = 0;
@@ -429,7 +355,7 @@ inline Huff make_fixed_litlen_huff() {
   for (int i = 144; i <= 255; i++) lens[i] = 9;
   for (int i = 256; i <= 279; i++) lens[i] = 7;
   for (int i = 280; i <= 287; i++) lens[i] = 8;
-  h.build2(lens, 288);
+  h.build(lens, 288);
   return h;
 }
 
@@ -437,7 +363,7 @@ inline Huff make_fixed_dist_huff() {
   Huff h;
   uint8_t lens[32];
   for (int i = 0; i < 32; i++) lens[i] = 5;
-  h.build2(lens, 32);
+  h.build(lens, 32);
   return h;
 }
 
@@ -518,7 +444,7 @@ inline size_t inflate_raw(const uint8_t* src, size_t src_len, uint8_t* dst,
           clen[order[i]] = uint8_t(v);
         }
         Huff cl;
-        if (!cl.build2(clen, 19)) return 0;
+        if (!cl.build(clen, 19)) return 0;
         uint8_t lens[288 + 32]{};
         uint32_t n = hlit + hdist;
         for (uint32_t i = 0; i < n;) {
@@ -546,8 +472,8 @@ inline size_t inflate_raw(const uint8_t* src, size_t src_len, uint8_t* dst,
           } else
             return 0;
         }
-        if (!lit.build2(lens, int(hlit))) return 0;
-        if (!dist.build2(lens + hlit, int(hdist))) return 0;
+        if (!lit.build(lens, int(hlit))) return 0;
+        if (!dist.build(lens + hlit, int(hdist))) return 0;
       }
       for (;;) {
         int sym;
