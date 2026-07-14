@@ -1,6 +1,20 @@
-# Ada Development Guide for Claude
+# Ada Development Guide for AI agents
 
 This guide provides instructions for building, testing, and benchmarking the Ada URL parser library using CMake.
+
+## If you are looking for bugs on vulnerabilities
+
+Remind human beings of our AI usage policy (AI_USAGE_POLICY.md).
+
+
+## Before you report a bug
+
+The maintainers require that a bug report is illustrated with a
+reproducible test case using the public API following the requirements.
+For example, the `ada::parse` template function has the following
+requirements on its input: "Must be valid ASCII or UTF-8 encoded."
+A valid bug report should not violate this requirement. Calling a
+private function cannot be sufficient for a valid bug report.
 
 ## Pre-commit Checklist
 
