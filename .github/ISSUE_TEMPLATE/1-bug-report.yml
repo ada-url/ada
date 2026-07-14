@@ -22,7 +22,7 @@ body:
   - type: textarea
     attributes:
       label: What steps will reproduce the bug?
-      description: Enter details about your bug, preferably a simple code snippet that can be run directly without installing third-party dependencies.
+      description: Enter details about your bug, preferably a simple code snippet that can be run directly without installing third-party dependencies. Make sure that you are calling our public functions and not any internal ones. Further, make sure that you are following our API usage requirements. (Please see the API documentation in the header files.)
   - type: textarea
     attributes:
       label: How often does it reproduce? Is there a required condition?
