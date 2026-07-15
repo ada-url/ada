@@ -699,6 +699,21 @@ TYPED_TEST(basic_tests, nodejs_51619) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, ipv4_hex_leading_zeros) {
+  // Leading zeros are permitted in a hex IPv4 number, so digit runs longer
+  // than eight still map to a <= 32-bit value.
+  auto a = ada::parse<TypeParam>("http://0x0000000ff/");
+  ASSERT_TRUE(a);
+  ASSERT_EQ(a->get_hostname(), "0.0.0.255");
+  auto b = ada::parse<TypeParam>("http://0x00000000ff/");
+  ASSERT_TRUE(b);
+  ASSERT_EQ(b->get_hostname(), "0.0.0.255");
+  // A value that genuinely exceeds 32 bits is still rejected.
+  auto c = ada::parse<TypeParam>("http://0x100000000/");
+  ASSERT_FALSE(c);
+  SUCCEED();
+}
+
 // https://github.com/nodejs/undici/pull/2971
 TYPED_TEST(basic_tests, nodejs_undici_2971) {
   std::string_view base =

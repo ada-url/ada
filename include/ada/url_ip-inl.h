@@ -53,7 +53,10 @@ inline bool parse_ipv4_number(const char*& p, const char* end, uint64_t& value,
     int digits = 0;
     while (p < end && *p != '.') {
       const uint8_t nib = hex_nibble[static_cast<unsigned char>(*p)];
-      if (nib == 0xff || digits >= 8) [[unlikely]] {
+      if (nib == 0xff) [[unlikely]] {
+        return false;
+      }
+      if (v > (0xFFFFFFFFULL >> 4)) [[unlikely]] {
         return false;
       }
       v = (v << 4) | nib;
