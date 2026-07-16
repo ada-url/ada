@@ -452,11 +452,29 @@ TYPED_TEST(basic_tests, node_issue_47889) {
   ASSERT_TRUE(expected_url->has_opaque_path);
   ASSERT_EQ(expected_url->get_href(), "a:b#");
   ASSERT_EQ(expected_url->get_pathname(), "b");
-  auto url = ada::parse<TypeParam>("..#", &*urlbase);
+  // The base has an opaque path and the input does not begin with '#', so
+  // "no scheme state" returns failure. It must report that instead of
+  // crashing, which is what the node issue asked for.
+  ASSERT_FALSE(ada::parse<TypeParam>("..#", &*urlbase));
+  ASSERT_FALSE(ada::parse<TypeParam>("x#f", &*urlbase));
+  // A fragment-only input is the one relative form such a base accepts.
+  auto url = ada::parse<TypeParam>("#f", &*urlbase);
   ASSERT_TRUE(url);
   ASSERT_TRUE(url->has_opaque_path);
-  ASSERT_EQ(url->get_href(), "a:b/#");
-  ASSERT_EQ(url->get_pathname(), "b/");
+  ASSERT_EQ(url->get_href(), "a:b#f");
+  ASSERT_EQ(url->get_pathname(), "b");
+  SUCCEED();
+}
+
+// A '#' anywhere in the input must not turn an opaque-path base into a
+// hierarchical one: the authority here is never parsed.
+TYPED_TEST(basic_tests, opaque_base_relative_hash_no_authority) {
+  auto base = ada::parse<TypeParam>("about:blank");
+  ASSERT_TRUE(base);
+  ASSERT_TRUE(base->has_opaque_path);
+  ASSERT_FALSE(ada::parse<TypeParam>("//evil.com/p", &*base));
+  ASSERT_FALSE(ada::parse<TypeParam>("//evil.com/p#", &*base));
+  ASSERT_FALSE(ada::parse<TypeParam>("/etc/passwd#", &*base));
   SUCCEED();
 }
 
