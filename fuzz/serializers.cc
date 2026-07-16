@@ -184,20 +184,23 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     volatile bool has_tn = ada::unicode::has_tabs_or_newline(util_input);
     (void)has_tn;
 
-    // is_ipv4: must not crash on arbitrary input. Cross-check against URL
-    // parsing: if is_ipv4 reports true, embedding the string as a hostname
-    // in an http:// URL must succeed (it must be a parseable IPv4 address).
-    volatile bool is_v4 = ada::checkers::is_ipv4(util_input);
-    (void)is_v4;
-    if (is_v4) {
-      std::string ipv4_url = "http://" + util_input + "/";
-      auto parsed = ada::parse<ada::url_aggregator>(ipv4_url);
-      // is_ipv4 reports true only for strings that look like IPv4 addresses;
-      // the full parser may still reject them (e.g. out-of-range octets), but
-      // if it accepts them the host type must be IPv4.
-      if (parsed) {
-        volatile bool v = parsed->validate();
-        (void)v;
+    // is_ipv4 assumes a non-empty, lower-cased input, so honor that
+    // precondition here. Cross-check against URL parsing: if is_ipv4 reports
+    // true, embedding the string as a hostname in an http:// URL must succeed
+    // (it must be a parseable IPv4 address).
+    if (!util_input.empty()) {
+      volatile bool is_v4 = ada::checkers::is_ipv4(util_input);
+      (void)is_v4;
+      if (is_v4) {
+        std::string ipv4_url = "http://" + util_input + "/";
+        auto parsed = ada::parse<ada::url_aggregator>(ipv4_url);
+        // is_ipv4 reports true only for strings that look like IPv4 addresses;
+        // the full parser may still reject them (e.g. out-of-range octets), but
+        // if it accepts them the host type must be IPv4.
+        if (parsed) {
+          volatile bool v = parsed->validate();
+          (void)v;
+        }
       }
     }
 
