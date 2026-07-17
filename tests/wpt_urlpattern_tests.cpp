@@ -591,6 +591,30 @@ TEST(wpt_urlpattern_tests, pathname_encodes_query_and_fragment_delimiters) {
   }
 }
 
+// A constructor string ending with an unterminated "{" must be rejected. The
+// end token has to reach the state machine so the trailing component is
+// captured and compiled; if it is consumed as group content instead, the
+// component is never set and silently falls back to the "*" wildcard.
+TEST(wpt_urlpattern_tests, constructor_string_unterminated_group) {
+  for (const auto& input : std::vector<std::string>{
+           "https://example.com/a{",
+           "https://example.com/{",
+           "https://example.com{",
+           "https://example.com:80/a{",
+           "https://example.com/a?q{",
+           "https://example.com/a#f{",
+       }) {
+    auto url = ada::parse_url_pattern<regex_provider>(std::string_view(input));
+    EXPECT_FALSE(url) << "pattern \"" << input << "\" should be rejected";
+  }
+  // A balanced group is unaffected.
+  auto url = ada::parse_url_pattern<regex_provider>(
+      std::string_view("https://example.com/a{b}"));
+  ASSERT_TRUE(url);
+  EXPECT_EQ(url->get_hostname(), "example.com");
+  EXPECT_EQ(url->get_pathname(), "/ab");
+}
+
 // Tests are taken from WPT
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {
