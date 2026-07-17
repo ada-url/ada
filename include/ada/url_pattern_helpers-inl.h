@@ -954,6 +954,8 @@ constructor_string_parser<regex_provider>::parse(std::string_view input) {
       parser.group_depth += 1;
       // Increment parser's token index by parser's token increment.
       parser.token_index += parser.token_increment;
+      // Continue.
+      continue;
     }
 
     // If parser's group depth is greater than 0:
