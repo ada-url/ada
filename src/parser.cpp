@@ -541,7 +541,7 @@ result_type parse_url_impl(std::string_view user_input,
         // Otherwise, if base has an opaque path and c is U+0023 (#),
         // set url's scheme to base's scheme, url's path to base's path, url's
         // query to base's query, and set state to fragment state.
-        else if (base_url->has_opaque_path) {
+        else if (base_url->has_opaque_path && c_is_hash) {
           ada_log("NO_SCHEME opaque base with fragment");
           url.copy_scheme(*base_url);
           url.has_opaque_path = base_url->has_opaque_path;
