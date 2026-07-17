@@ -274,7 +274,22 @@
   {
     "input": "..#",
     "base": "a:b",
-    "href": "a:b/#",
+    "failure": true
+  },
+  {
+    "input": "//evil.com/p#",
+    "base": "about:blank",
+    "failure": true
+  },
+  {
+    "input": "x#f",
+    "base": "a:b",
+    "failure": true
+  },
+  {
+    "input": "#f",
+    "base": "a:b",
+    "href": "a:b#f",
     "origin": null,
     "protocol": "a:",
     "username": "",
@@ -282,8 +297,8 @@
     "host": "",
     "hostname": "",
     "port": "",
-    "pathname": "b/",
+    "pathname": "b",
     "search": "",
-    "hash": ""
+    "hash": "#f"
   }
 ]
