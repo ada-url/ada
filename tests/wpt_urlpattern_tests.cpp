@@ -179,6 +179,46 @@ TEST(wpt_urlpattern_tests, unmatched_optional_group_keeps_alignment) {
   EXPECT_EQ(pathname_groups.at("1").value_or(""), "b");
 }
 
+// A capture group in a non-wildcard component can match an empty input value:
+// "(x*)" captures the empty string and ":a?" leaves an optional group
+// undefined. These go through the compiled-regex path (not the FULL_WILDCARD
+// fast path), so the group values must still be reported for an empty input.
+TEST(wpt_urlpattern_tests, empty_input_capture_group_reported) {
+  {
+    auto init = ada::url_pattern_init{};
+    init.search = "(x*)";
+    auto pattern = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(pattern);
+
+    auto input = ada::url_pattern_init{};
+    input.search = "";
+    auto result = pattern->exec(input, nullptr);
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->has_value());
+
+    auto& groups = result->value().search.groups;
+    ASSERT_EQ(groups.size(), 1u);
+    EXPECT_EQ(groups.at("0").value_or("<undef>"), "");
+  }
+  {
+    auto init = ada::url_pattern_init{};
+    init.search = ":a?";
+    auto pattern = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(pattern);
+
+    auto input = ada::url_pattern_init{};
+    input.search = "";
+    auto result = pattern->exec(input, nullptr);
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->has_value());
+
+    auto& groups = result->value().search.groups;
+    ASSERT_EQ(groups.size(), 1u);
+    EXPECT_FALSE(groups.at("a").has_value())
+        << "unmatched optional group must be undefined, not absent";
+  }
+}
+
 // Verify that patterns with parentheses in regex values don't parse
 // (URLPattern spec doesn't allow unescaped parentheses in custom regex).
 // This documents the expected behavior and ensures we don't crash.
