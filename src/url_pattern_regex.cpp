@@ -38,8 +38,11 @@ std_regex_provider::regex_search(std::string_view input,
     return std::nullopt;
   }
   std::vector<std::optional<std::string>> matches;
-  // If input is empty, let's assume the result will be empty as well.
-  if (input.empty() || match_result.empty()) {
+  // An empty input can still match with capture groups (e.g. "(x*)" or an
+  // optional ":a?" against ""), so the group values must be extracted here
+  // just like for a non-empty input. A successful regex_search always leaves
+  // the full match at index 0, so match_result is never empty at this point.
+  if (match_result.empty()) {
     return matches;
   }
   matches.reserve(match_result.size());
