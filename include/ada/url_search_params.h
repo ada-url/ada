@@ -75,6 +75,16 @@ struct url_search_params {
   ~url_search_params() = default;
 
   /**
+   * Estimates the bytes retained by the parameter list and its strings.
+   *
+   * The estimate is allocator-independent and is the saturating sum of the
+   * parameter vector capacity times its element size and every live key and
+   * value string capacity. It excludes allocator bookkeeping overhead.
+   * @return The estimated retained payload capacity in bytes.
+   */
+  [[nodiscard]] size_t estimated_memory_usage() const noexcept;
+
+  /**
    * Returns the number of key-value pairs.
    * @return The total count of parameters.
    */

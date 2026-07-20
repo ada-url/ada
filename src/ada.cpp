@@ -8,6 +8,7 @@
 #include "parser.cpp"
 #include "url_components.cpp"
 #include "url_aggregator.cpp"
+#include "url_search_params.cpp"
 
 #if ADA_INCLUDE_URL_PATTERN
 #include "url_pattern.cpp"
