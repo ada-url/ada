@@ -312,9 +312,11 @@ std::string href_from_file(std::string_view input) {
 
 bool can_parse(std::string_view input, const std::string_view* base_input) {
   // Must match parse().has_value(), including post-normalization max length.
-  // Percent-encoding expands a byte by at most 3x. When the input (plus base,
-  // if any) fits in max_length/3, the normalized href cannot exceed
-  // max_length, so validation-only parsing (store_values=false) is safe.
+  // Percent-encoding expands a byte by at most 3x, but IDNA expands more: a
+  // 3-byte UTF-8 label such as U+337F becomes the 17-byte "xn--6oqv20b1zgzxr",
+  // so a dotted host sustains 4.5x. When the input (plus base, if any) fits in
+  // max_length/5, the normalized href cannot exceed max_length, so
+  // validation-only parsing (store_values=false) is safe.
 
   // Hot path first: absolute special URLs, no base. Avoid loading max_length
   // until we need it (common absolute-fast true/false cases).
@@ -323,10 +325,10 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
       if (!*r) {
         return false;
       }
-      // size <= max/3 => normalized href cannot exceed max (3x expansion).
+      // size <= max/5 => normalized href cannot exceed max (4.5x expansion).
       // Check this first: default max is ~4GB so almost all URLs return true.
       const uint32_t max_length = ada::get_max_input_length();
-      if (input.size() <= static_cast<size_t>(max_length) / 3) {
+      if (input.size() <= static_cast<size_t>(max_length) / 5) {
         return true;
       }
       if (input.size() > max_length) {
@@ -346,11 +348,11 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
     return false;
   }
 
-  // Relative resolution combines base + input; bound the sum so 3x expansion
+  // Relative resolution combines base + input; bound the sum so 4.5x expansion
   // of either side cannot push the final href past max_length.
   const size_t combined =
       input.size() + (base_input == nullptr ? 0 : base_input->size());
-  const bool size_safe = combined <= static_cast<size_t>(max_length) / 3;
+  const bool size_safe = combined <= static_cast<size_t>(max_length) / 5;
 
   if (size_safe) {
     // Validation-only: no buffer build, host still fully checked.

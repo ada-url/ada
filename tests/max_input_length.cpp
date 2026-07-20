@@ -208,6 +208,25 @@ TYPED_TEST(max_input_length_tests, parse_normalized_just_under_limit) {
   ASSERT_LE(result->get_href().size(), small_limit);
 }
 
+TYPED_TEST(max_input_length_tests, can_parse_matches_parse_for_idna_expansion) {
+  // IDNA expands a host by more than the 3x that percent-encoding produces:
+  // U+337F is 3 UTF-8 bytes and becomes the 17-byte "xn--6oqv20b1zgzxr", so a
+  // dotted host sustains 4.5x once the label separator is amortized.
+  //
+  // 60 labels: input = 5 + 60*3 + 59 + 1 = 245 bytes, well under the limit.
+  // Normalized = 5 + 60*17 + 59 + 1 = 1085 bytes > 1024.
+  std::string host;
+  for (int i = 0; i < 60; i++) {
+    if (i) host += ".";
+    host += "\xe3\x8d\xbf";
+  }
+  std::string input = "ws://" + host + "/";
+  ASSERT_LE(input.size(), small_limit);
+  auto result = ada::parse<TypeParam>(input);
+  ASSERT_FALSE(result);
+  ASSERT_FALSE(ada::can_parse(input));
+}
+
 TYPED_TEST(max_input_length_tests, parse_with_base_normalized_exceeds_limit) {
   // Relative URL resolution can also produce long normalized URLs.
   auto base = ada::parse<TypeParam>("http://x/");
