@@ -655,6 +655,29 @@ TEST(wpt_urlpattern_tests, constructor_string_unterminated_group) {
   EXPECT_EQ(url->get_pathname(), "/ab");
 }
 
+// "file" is one of the special schemes, so a protocol component that matches it
+// must compile the pathname with the pathname options (segment wildcards stop
+// at "/") and make an absent pathname default to "/".
+TEST(wpt_urlpattern_tests, file_protocol_matches_special_scheme) {
+  for (const auto& input : std::vector<std::string>{
+           "file://host/:x",
+           "{file}://host/:x",
+       }) {
+    auto url = ada::parse_url_pattern<regex_provider>(std::string_view(input));
+    ASSERT_TRUE(url) << "pattern \"" << input << "\"";
+    auto one_segment = url->test(std::string_view("file://host/a"), nullptr);
+    ASSERT_TRUE(one_segment) << "pattern \"" << input << "\"";
+    EXPECT_TRUE(*one_segment) << "pattern \"" << input << "\"";
+    auto two_segments = url->test(std::string_view("file://host/a/b"), nullptr);
+    ASSERT_TRUE(two_segments) << "pattern \"" << input << "\"";
+    EXPECT_FALSE(*two_segments) << "pattern \"" << input << "\"";
+  }
+  auto url =
+      ada::parse_url_pattern<regex_provider>(std::string_view("file://host?q"));
+  ASSERT_TRUE(url);
+  EXPECT_EQ(url->get_pathname(), "/");
+}
+
 // Tests are taken from WPT
 // https://github.com/web-platform-tests/wpt/blob/0c1d19546fd4873bb9f4147f0bbf868e7b4f91b7/urlpattern/resources/urlpattern-hasregexpgroups-tests.js
 TEST(wpt_urlpattern_tests, has_regexp_groups) {
