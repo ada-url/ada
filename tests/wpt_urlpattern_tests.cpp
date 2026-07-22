@@ -631,6 +631,52 @@ TEST(wpt_urlpattern_tests, pathname_encodes_query_and_fragment_delimiters) {
   }
 }
 
+TEST(wpt_urlpattern_tests, grouped_part_keeps_braces_without_prefix_option) {
+  // "generate a pattern string" needs grouping when a part's prefix is not the
+  // options's prefix code point. Only the pathname options carry a prefix
+  // ('/'), so a prefixed part in any other component always keeps its braces.
+  {
+    auto init = ada::url_pattern_init{};
+    init.hostname = "{-:e}?.example.com";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_hostname(), "{-:e}?.example.com");
+    // The optional modifier applies to the whole group, so a bare "-" label
+    // does not match while an absent label does.
+    auto with_dash =
+        url->test(std::string_view("https://-.example.com/"), nullptr);
+    ASSERT_TRUE(with_dash);
+    EXPECT_FALSE(*with_dash);
+    auto without =
+        url->test(std::string_view("https://.example.com/"), nullptr);
+    ASSERT_TRUE(without);
+    EXPECT_TRUE(*without);
+  }
+  {
+    // Recompiling a component from its own serialization has to give back the
+    // same component.
+    auto init = ada::url_pattern_init{};
+    init.search = "{a:x}?";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_search(), "{a:x}?");
+    auto round = ada::url_pattern_init{};
+    round.search = std::string(url->get_search());
+    auto again = ada::parse_url_pattern<regex_provider>(round);
+    ASSERT_TRUE(again);
+    EXPECT_EQ(again->get_search(), url->get_search());
+  }
+  {
+    // The pathname options do carry '/' as prefix code point, so a '/'-prefixed
+    // part stays ungrouped there.
+    auto init = ada::url_pattern_init{};
+    init.pathname = "/a{/:b}?";
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_pathname(), "/a/:b?");
+  }
+}
+
 // A constructor string ending with an unterminated "{" must be rejected. The
 // end token has to reach the state machine so the trailing component is
 // captured and compiled; if it is consumed as group content instead, the
