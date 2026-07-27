@@ -288,6 +288,14 @@ template ada::result<url_aggregator> parse<url_aggregator>(
     std::string_view input, const url_aggregator* base_url = nullptr);
 
 std::string href_from_file(std::string_view input) {
+  // Match ada::parse / setters: refuse inputs that already exceed the limit.
+  // Path percent-encoding can still expand the result, so we also check the
+  // final href below.
+  const uint32_t max_length = ada::get_max_input_length();
+  if (input.size() > max_length) {
+    return {};
+  }
+
   // This is going to be much faster than constructing a URL.
   std::string tmp_buffer;
   std::string_view internal_input;
@@ -307,7 +315,11 @@ std::string href_from_file(std::string_view input) {
   } else {
     helpers::parse_prepared_path(internal_input, ada::scheme::type::FILE, path);
   }
-  return "file://" + path;
+  std::string result = "file://" + path;
+  if (result.size() > max_length) {
+    return {};
+  }
+  return result;
 }
 
 bool can_parse(std::string_view input, const std::string_view* base_input) {

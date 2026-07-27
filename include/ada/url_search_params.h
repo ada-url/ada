@@ -55,6 +55,10 @@ using url_search_params_entries_iter =
  * All string inputs must be valid UTF-8. The caller is responsible for
  * ensuring UTF-8 validity.
  *
+ * Construction and `reset` refuse query strings longer than
+ * `get_max_input_length()` (the object is left empty). Individual `append` /
+ * `set` calls are not length-capped.
+ *
  * @see https://url.spec.whatwg.org/#interface-urlsearchparams
  */
 struct url_search_params {
@@ -63,6 +67,7 @@ struct url_search_params {
   /**
    * Constructs url_search_params by parsing a query string.
    * @param input A query string (with or without leading '?'). Must be UTF-8.
+   *        If longer than `get_max_input_length()`, the object stays empty.
    */
   explicit url_search_params(const std::string_view input) {
     initialize(input);
