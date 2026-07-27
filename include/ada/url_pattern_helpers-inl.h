@@ -846,7 +846,8 @@ bool protocol_component_matches_special_scheme(
              component.exact_match_value == "https" ||
              component.exact_match_value == "ws" ||
              component.exact_match_value == "wss" ||
-             component.exact_match_value == "ftp";
+             component.exact_match_value == "ftp" ||
+             component.exact_match_value == "file";
     case url_pattern_component_type::FULL_WILDCARD:
       // Full wildcard matches everything including special schemes
       return true;
@@ -857,7 +858,8 @@ bool protocol_component_matches_special_scheme(
              regex_provider::regex_match("https", regex) ||
              regex_provider::regex_match("ws", regex) ||
              regex_provider::regex_match("wss", regex) ||
-             regex_provider::regex_match("ftp", regex);
+             regex_provider::regex_match("ftp", regex) ||
+             regex_provider::regex_match("file", regex);
   }
   ada::unreachable();
 }
