@@ -10,6 +10,7 @@
 #include "ada/url_search_params.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <optional>
 #include <ranges>
 #include <string>
@@ -17,6 +18,10 @@
 #include <vector>
 
 namespace ada {
+
+// Declared in implementation.h; used here as a DoS bound on untrusted query
+// strings (ada.h includes both headers).
+uint32_t get_max_input_length();
 
 // A default, empty url_search_params for use with empty iterators.
 template <typename T, ada::url_search_params_iter_type Type>
@@ -32,6 +37,10 @@ inline void url_search_params::initialize(std::string_view input) {
     input.remove_prefix(1);
   }
   if (input.empty()) {
+    return;
+  }
+  // Refuse overlong query strings (same process-wide cap as URL parsing).
+  if (input.size() > get_max_input_length()) {
     return;
   }
 

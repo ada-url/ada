@@ -149,9 +149,13 @@ parse_url_pattern(std::variant<std::string_view, url_pattern_init>&& input,
  * Creates a properly formatted file URL from a local file system path.
  * Handles platform-specific path separators and percent-encoding.
  *
+ * Respects `get_max_input_length()`: if the input path or the resulting
+ * `file://` href would exceed the limit, returns an empty string.
+ *
  * @param path The file system path to convert. Must be valid ASCII or UTF-8.
  *
- * @return A file:// URL string representing the given path.
+ * @return A file:// URL string representing the given path, or empty on
+ *         length-limit rejection.
  */
 std::string href_from_file(std::string_view path);
 
@@ -160,7 +164,9 @@ std::string href_from_file(std::string_view path);
  *
  * Both the raw input and the resulting normalized URL (the href) are checked
  * against this limit. Parsing or setter calls that would produce a URL
- * exceeding this length are rejected. The value must fit in a uint32_t.
+ * exceeding this length are rejected. The same limit also applies to
+ * `href_from_file` and to query strings passed to `url_search_params`
+ * construction / `reset`. The value must fit in a uint32_t.
  * The default is std::numeric_limits<uint32_t>::max() (approximately 4 GB).
  *
  * @param length The new maximum URL length in bytes.
