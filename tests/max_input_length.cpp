@@ -253,10 +253,15 @@ TYPED_TEST(max_input_length_tests, set_protocol_url_unchanged_after_reject) {
 }
 
 TEST(max_input_length_helpers, href_from_file_rejects_overlength_input) {
+  const uint32_t previous_limit = ada::get_max_input_length();
+  struct restore_t {
+    uint32_t v;
+    ~restore_t() { ada::set_max_input_length(v); }
+  } restore{previous_limit};
+
   ada::set_max_input_length(small_limit);
   std::string long_path(small_limit + 1, 'a');
   ASSERT_TRUE(ada::href_from_file(long_path).empty());
-  ada::set_max_input_length(std::numeric_limits<uint32_t>::max());
 }
 
 TEST(max_input_length_helpers, href_from_file_rejects_expanded_result) {
