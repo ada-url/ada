@@ -180,6 +180,47 @@ ada_really_inline int trailing_zeroes(uint32_t input_num) noexcept {
 #endif  // ADA_REGULAR_VISUAL_STUDIO
 }
 
+#if ADA_NEON
+// computes the number of trailing zeroes of a 64-bit word
+// this is a private inline function only defined in this source file.
+ada_really_inline int trailing_zeroes64(uint64_t input_num) noexcept {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+  unsigned long ret;
+  _BitScanForward64(&ret, input_num);
+  return (int)ret;
+#else   // ADA_REGULAR_VISUAL_STUDIO
+  return __builtin_ctzll(input_num);
+#endif  // ADA_REGULAR_VISUAL_STUDIO
+}
+
+// Given a NEON register whose lanes are all either 0x00 or 0xFF (i.e., the
+// result of a comparison), produce a 64-bit value with four bits set per
+// matching input byte, and zero bits elsewhere. Narrowing by four bits per
+// 16-bit lane is cheaper than materializing a 16-bit bitmask, and it keeps
+// the value in a vector register so that the "any match?" test can be done
+// with a floating-point compare against zero, avoiding a transfer to a
+// general-purpose register on the common no-match path.
+//
+// The floating-point compare is only safe because the lanes are 0x00/0xFF:
+// each byte of the narrowed value is then one of 0x00, 0x0F, 0xF0 or 0xFF,
+// so the result can never be the negative-zero bit pattern (which would
+// compare equal to 0.0). Do not use this on arbitrary vectors.
+ada_really_inline uint8x8_t to_nibble_mask(uint8x16_t comparison) noexcept {
+  return vshrn_n_u16(vreinterpretq_u16_u8(comparison), 4);
+}
+
+ada_really_inline bool any_set(uint8x8_t nibble_mask) noexcept {
+  return vdupd_lane_f64(vreinterpret_f64_u8(nibble_mask), 0) != 0.0;
+}
+
+// index of the first matching byte; only meaningful when any_set is true.
+ada_really_inline size_t first_set(uint8x8_t nibble_mask) noexcept {
+  return size_t(trailing_zeroes64(
+             vget_lane_u64(vreinterpret_u64_u8(nibble_mask), 0))) >>
+         2;
+}
+#endif  // ADA_NEON
+
 // starting at index location, this finds the next location of a character
 // :, /, \\, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
@@ -266,17 +307,6 @@ ada_really_inline size_t find_next_host_delimiter_special(
     }
     return size_t(view.size());
   }
-  auto to_bitmask = [](uint8x16_t input) -> uint16_t {
-    uint8x16_t bit_mask =
-        ada_make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x01,
-                            0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
-    uint8x16_t minput = vandq_u8(input, bit_mask);
-    uint8x16_t tmp = vpaddq_u8(minput, minput);
-    tmp = vpaddq_u8(tmp, tmp);
-    tmp = vpaddq_u8(tmp, tmp);
-    return vgetq_lane_u16(vreinterpretq_u16_u8(tmp), 0);
-  };
-
   // fast path for long strings (expected to be common)
   size_t i = location;
   uint8x16_t low_mask =
@@ -286,16 +316,16 @@ ada_really_inline size_t find_next_host_delimiter_special(
       ada_make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   uint8x16_t fmask = vmovq_n_u8(0xf);
-  uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
     uint8x16_t word = vld1q_u8((const uint8_t*)view.data() + i);
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
-    uint8x16_t classify = vandq_u8(lowpart, highpart);
-    if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
-      uint8x16_t is_zero = vceqq_u8(classify, zero);
-      uint16_t is_non_zero = static_cast<uint16_t>(~to_bitmask(is_zero));
-      return i + trailing_zeroes(is_non_zero);
+    // vtstq_u8 gives us 0xFF where (lowpart & highpart) is non-zero and 0x00
+    // elsewhere: unlike the plain AND, that is a proper comparison mask, which
+    // is what to_nibble_mask requires.
+    uint8x8_t matches = to_nibble_mask(vtstq_u8(lowpart, highpart));
+    if (any_set(matches)) {
+      return i + first_set(matches);
     }
   }
 
@@ -304,11 +334,9 @@ ada_really_inline size_t find_next_host_delimiter_special(
         vld1q_u8((const uint8_t*)view.data() + view.length() - 16);
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
-    uint8x16_t classify = vandq_u8(lowpart, highpart);
-    if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
-      uint8x16_t is_zero = vceqq_u8(classify, zero);
-      uint16_t is_non_zero = static_cast<uint16_t>(~to_bitmask(is_zero));
-      return view.length() - 16 + trailing_zeroes(is_non_zero);
+    uint8x8_t matches = to_nibble_mask(vtstq_u8(lowpart, highpart));
+    if (any_set(matches)) {
+      return view.length() - 16 + first_set(matches);
     }
   }
   return size_t(view.size());
@@ -555,17 +583,6 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     }
     return size_t(view.size());
   }
-  auto to_bitmask = [](uint8x16_t input) -> uint16_t {
-    uint8x16_t bit_mask =
-        ada_make_uint8x16_t(0x01, 0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x01,
-                            0x02, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80);
-    uint8x16_t minput = vandq_u8(input, bit_mask);
-    uint8x16_t tmp = vpaddq_u8(minput, minput);
-    tmp = vpaddq_u8(tmp, tmp);
-    tmp = vpaddq_u8(tmp, tmp);
-    return vgetq_lane_u16(vreinterpretq_u16_u8(tmp), 0);
-  };
-
   // fast path for long strings (expected to be common)
   size_t i = location;
   uint8x16_t low_mask =
@@ -575,16 +592,16 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
       ada_make_uint8x16_t(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00,
                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   uint8x16_t fmask = vmovq_n_u8(0xf);
-  uint8x16_t zero{0};
   for (; i + 15 < view.size(); i += 16) {
     uint8x16_t word = vld1q_u8((const uint8_t*)view.data() + i);
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
-    uint8x16_t classify = vandq_u8(lowpart, highpart);
-    if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
-      uint8x16_t is_zero = vceqq_u8(classify, zero);
-      uint16_t is_non_zero = static_cast<uint16_t>(~to_bitmask(is_zero));
-      return i + trailing_zeroes(is_non_zero);
+    // vtstq_u8 gives us 0xFF where (lowpart & highpart) is non-zero and 0x00
+    // elsewhere: unlike the plain AND, that is a proper comparison mask, which
+    // is what to_nibble_mask requires.
+    uint8x8_t matches = to_nibble_mask(vtstq_u8(lowpart, highpart));
+    if (any_set(matches)) {
+      return i + first_set(matches);
     }
   }
 
@@ -593,11 +610,9 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
         vld1q_u8((const uint8_t*)view.data() + view.length() - 16);
     uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
     uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
-    uint8x16_t classify = vandq_u8(lowpart, highpart);
-    if (vmaxvq_u32(vreinterpretq_u32_u8(classify)) != 0) {
-      uint8x16_t is_zero = vceqq_u8(classify, zero);
-      uint16_t is_non_zero = static_cast<uint16_t>(~to_bitmask(is_zero));
-      return view.length() - 16 + trailing_zeroes(is_non_zero);
+    uint8x8_t matches = to_nibble_mask(vtstq_u8(lowpart, highpart));
+    if (any_set(matches)) {
+      return view.length() - 16 + first_set(matches);
     }
   }
   return size_t(view.size());

@@ -129,7 +129,11 @@ ada_really_inline bool has_tabs_or_newline(
         vld1q_u8((const uint8_t*)user_input.data() + user_input.length() - 16);
     running = vorrq_u8(running, vceqq_u8(vqtbl1q_u8(rnt, word), word));
   }
-  return vmaxvq_u32(vreinterpretq_u32_u8(running)) != 0;
+  // `running` accumulates comparison results, so every lane is 0x00 or 0xFF:
+  // narrowing to four bits per lane and comparing the result against zero as a
+  // double is a cheaper "is anything set?" test than a horizontal maximum.
+  uint8x8_t narrowed = vshrn_n_u16(vreinterpretq_u16_u8(running), 4);
+  return vdupd_lane_f64(vreinterpret_f64_u8(narrowed), 0) != 0.0;
 }
 #elif ADA_SSE2
 ada_really_inline bool has_tabs_or_newline(
