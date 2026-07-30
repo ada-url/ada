@@ -385,6 +385,18 @@ struct url : url_base {
   template <class result_type>
   friend bool ada::parser::try_parse_simple_absolute(std::string_view,
                                                      result_type&);
+  template <class result_type>
+  friend bool ada::parser::try_parse_clean_http(std::string_view, result_type&);
+  template <class result_type>
+  friend bool ada::parser::try_parse_special_absolute(std::string_view,
+                                                      result_type&);
+  template <class result_type>
+  friend void ada::parser::fill_absolute_result(result_type&, std::string_view,
+                                                ada::scheme::type, uint32_t,
+                                                size_t, size_t, size_t, size_t,
+                                                uint32_t, size_t, size_t,
+                                                size_t, size_t, bool, bool,
+                                                bool, size_t);
 
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);

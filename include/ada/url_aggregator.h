@@ -324,6 +324,17 @@ struct url_aggregator : url_base {
       std::string_view, const url_aggregator*);
   template <class result_type>
   friend bool parser::try_parse_simple_absolute(std::string_view, result_type&);
+  template <class result_type>
+  friend bool parser::try_parse_clean_http(std::string_view, result_type&);
+  template <class result_type>
+  friend bool parser::try_parse_special_absolute(std::string_view,
+                                                 result_type&);
+  template <class result_type>
+  friend void parser::fill_absolute_result(result_type&, std::string_view,
+                                           ada::scheme::type, uint32_t, size_t,
+                                           size_t, size_t, size_t, uint32_t,
+                                           size_t, size_t, size_t, size_t, bool,
+                                           bool, bool, size_t);
 
 #if ADA_INCLUDE_URL_PATTERN
   // url_pattern methods

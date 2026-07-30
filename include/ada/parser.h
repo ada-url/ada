@@ -15,6 +15,7 @@
 #include <variant>
 
 #include "ada/expected.h"
+#include "ada/scheme.h"
 
 #include "ada/url_pattern_regex.h"
 #include "ada/url_pattern_init.h"
@@ -75,6 +76,25 @@ extern template url parse_url_impl<url, true>(std::string_view user_input,
 /** @private */
 template <class result_type>
 bool try_parse_simple_absolute(std::string_view input, result_type& out);
+
+/** @private Clean lowercase http(s) hot path (BenchData). */
+template <class result_type>
+bool try_parse_clean_http(std::string_view input, result_type& out);
+
+/** @private Ports / userinfo / ftp / ws (cold relative to clean http). */
+template <class result_type>
+bool try_parse_special_absolute(std::string_view input, result_type& out);
+
+/** @private Shared buffer/component fill for absolute fast paths. */
+template <class result_type>
+void fill_absolute_result(result_type& out, std::string_view input,
+                          ada::scheme::type scheme_type, uint32_t protocol_end,
+                          size_t host_start_comp, size_t hostname_begin,
+                          size_t host_end, size_t username_end,
+                          uint32_t port_value, size_t path_start,
+                          size_t path_end, size_t query_start,
+                          size_t hash_start, bool has_path, bool has_upper,
+                          bool scheme_has_upper, size_t at_pos);
 
 #if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>
