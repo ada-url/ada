@@ -51,8 +51,7 @@ constexpr std::array<uint8_t, 256> k_auth_class = []() consteval {
   for (size_t i = 0x21; i <= 0x7E; ++i) {
     t[i] = 0;
   }
-  for (uint8_t c :
-       {'#', '/', '<', '>', '?', '[', '\\', ']', '^', '|', '%'}) {
+  for (uint8_t c : {'#', '/', '<', '>', '?', '[', '\\', ']', '^', '|', '%'}) {
     t[c] = 2;
   }
   t[static_cast<uint8_t>('/')] = 1;
@@ -87,8 +86,8 @@ constexpr std::array<uint8_t, 256> k_rest = []() consteval {
 
 // True if path contains a "." / ".." segment or "%2e" / "%2e%2e" form that the
 // state machine would normalize.
-ada_really_inline bool path_needs_dot_normalization(
-    const uint8_t* p, size_t path_len) noexcept {
+ada_really_inline bool path_needs_dot_normalization(const uint8_t* p,
+                                                    size_t path_len) noexcept {
   if (path_len < 2) {
     return false;
   }
@@ -116,14 +115,15 @@ ada_really_inline bool path_needs_dot_normalization(
   return false;
 }
 
-// Userinfo that is already percent-encoded (no spaces, no DELIM that need work).
+// Userinfo that is already percent-encoded (no spaces, no DELIM that need
+// work).
 constexpr std::array<uint8_t, 256> k_userinfo_ok = []() consteval {
   std::array<uint8_t, 256> t{};
   for (uint8_t c = 'A'; c <= 'Z'; ++c) t[c] = 1;
   for (uint8_t c = 'a'; c <= 'z'; ++c) t[c] = 1;
   for (uint8_t c = '0'; c <= '9'; ++c) t[c] = 1;
-  for (uint8_t c : {'-', '.', '_', '~', '!', '$', '&', '\'', '(', ')',
-                    '*', '+', ',', ';', '=', '%'}) {
+  for (uint8_t c : {'-', '.', '_', '~', '!', '$', '&', '\'', '(', ')', '*', '+',
+                    ',', ';', '=', '%'}) {
     t[c] = 1;
   }
   return t;
@@ -228,8 +228,7 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
     protocol_end = 4;
     scheme_type = ada::scheme::type::FTP;
     default_port = 21;
-    scheme_has_upper =
-        (b[0] != 'f') || (b[1] != 't') || (b[2] != 'p');
+    scheme_has_upper = (b[0] != 'f') || (b[1] != 't') || (b[2] != 'p');
   } else if (len >= 6 && (b[0] | 0x20) == 'w' && (b[1] | 0x20) == 's' &&
              (b[2] | 0x20) == 's' && b[3] == ':' && b[4] == '/' &&
              b[5] == '/') {
@@ -237,8 +236,7 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
     protocol_end = 4;
     scheme_type = ada::scheme::type::WSS;
     default_port = 443;
-    scheme_has_upper =
-        (b[0] != 'w') || (b[1] != 's') || (b[2] != 's');
+    scheme_has_upper = (b[0] != 'w') || (b[1] != 's') || (b[2] != 's');
   } else if (len >= 5 && (b[0] | 0x20) == 'w' && (b[1] | 0x20) == 's' &&
              b[2] == ':' && b[3] == '/' && b[4] == '/') {
     auth_start = 5;
@@ -607,10 +605,9 @@ after_rest:
               : url_components::omitted;
     } else {
       out.components.pathname_start = static_cast<uint32_t>(path_start);
-      out.components.search_start =
-          (query_start != std::string_view::npos)
-              ? static_cast<uint32_t>(query_start)
-              : url_components::omitted;
+      out.components.search_start = (query_start != std::string_view::npos)
+                                        ? static_cast<uint32_t>(query_start)
+                                        : url_components::omitted;
       out.components.hash_start = (hash_start != std::string_view::npos)
                                       ? static_cast<uint32_t>(hash_start)
                                       : url_components::omitted;
@@ -688,10 +685,11 @@ result_type parse_url_impl(std::string_view user_input,
     return url;
   }
 
-  // Special-absolute fast path (http/https/ftp/ws/wss) before tabs/newline work.
+  // Special-absolute fast path (http/https/ftp/ws/wss) before tabs/newline
+  // work.
   if constexpr (store_values) {
-    if (base_url == nullptr &&
-        try_parse_simple_absolute(user_input, url)) [[likely]] {
+    if (base_url == nullptr && try_parse_simple_absolute(user_input, url))
+        [[likely]] {
       if constexpr (result_type_is_ada_url_aggregator) {
         if (url.buffer.size() > max_input_length) [[unlikely]] {
           url.is_valid = false;
