@@ -19,7 +19,8 @@
 
 namespace ada::parser {
 
-// 0 = host byte, 1 = host delimiter (/ ? #), 2 = reject
+// Byte-class tables for the special-absolute fast path.
+// 0 = continue, 1 = delimiter (/ ? #), 2 = reject / fall through
 namespace {
 
 constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
@@ -37,6 +38,28 @@ constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
   t[static_cast<uint8_t>('/')] = 1;
   t[static_cast<uint8_t>('?')] = 1;
   t[static_cast<uint8_t>('#')] = 1;
+  return t;
+}();
+
+// Authority host bytes: like host, but ':' and '@' are soft stops (tier 2).
+// 0 = host continue, 1 = /?#, 2 = reject, 3 = ':', 4 = '@'
+constexpr std::array<uint8_t, 256> k_auth_class = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 2;
+  }
+  for (size_t i = 0x21; i <= 0x7E; ++i) {
+    t[i] = 0;
+  }
+  for (uint8_t c :
+       {'#', '/', '<', '>', '?', '[', '\\', ']', '^', '|', '%'}) {
+    t[c] = 2;
+  }
+  t[static_cast<uint8_t>('/')] = 1;
+  t[static_cast<uint8_t>('?')] = 1;
+  t[static_cast<uint8_t>('#')] = 1;
+  t[static_cast<uint8_t>(':')] = 3;
+  t[static_cast<uint8_t>('@')] = 4;
   return t;
 }();
 
@@ -61,95 +84,320 @@ constexpr std::array<uint8_t, 256> k_rest = []() consteval {
   return t;
 }();
 
+// Userinfo that is already percent-encoded (no spaces, no DELIM that need work).
+constexpr std::array<uint8_t, 256> k_userinfo_ok = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (uint8_t c = 'A'; c <= 'Z'; ++c) t[c] = 1;
+  for (uint8_t c = 'a'; c <= 'z'; ++c) t[c] = 1;
+  for (uint8_t c = '0'; c <= '9'; ++c) t[c] = 1;
+  for (uint8_t c : {'-', '.', '_', '~', '!', '$', '&', '\'', '(', ')',
+                    '*', '+', ',', ';', '=', '%'}) {
+    t[c] = 1;
+  }
+  return t;
+}();
+
+ada_really_inline bool four_bytes_host_ok(const uint8_t* p) noexcept {
+  return k_host_class[p[0]] == 0 && k_host_class[p[1]] == 0 &&
+         k_host_class[p[2]] == 0 && k_host_class[p[3]] == 0;
+}
+
+ada_really_inline bool four_bytes_rest_ok(const uint8_t* p) noexcept {
+  return k_rest[p[0]] == 0 && k_rest[p[1]] == 0 && k_rest[p[2]] == 0 &&
+         k_rest[p[3]] == 0;
+}
+
+ada_really_inline bool path_has_dot_segment(std::string_view path_body) noexcept {
+  if (path_body.size() >= 2 && path_body[1] == '.') {
+    if (path_body.size() == 2 || path_body[2] == '/' ||
+        (path_body.size() >= 3 && path_body[2] == '.' &&
+         (path_body.size() == 3 || path_body[3] == '/'))) {
+      return true;
+    }
+  }
+  static constexpr std::string_view slash_dot{"/.", 2};
+  size_t p = 1;
+  while ((p = path_body.find(slash_dot, p)) != std::string_view::npos) {
+    const size_t after = p + 2;
+    if (after == path_body.size() || path_body[after] == '/' ||
+        (after + 1 <= path_body.size() && path_body[after] == '.' &&
+         (after + 1 == path_body.size() || path_body[after + 1] == '/'))) {
+      return true;
+    }
+    p = after;
+  }
+  return false;
+}
+
+// Returns true if host is safe for the fast path (not IPv4-like, no xn--).
+ada_really_inline bool host_is_fast_domain(std::string_view hv) noexcept {
+  if (hv.empty() || hv.size() > 253) {
+    return false;
+  }
+  if (hv.back() == '.') {
+    return false;
+  }
+  if (checkers::is_ipv4(hv)) {
+    return false;
+  }
+  static constexpr std::string_view xn{"xn-", 3};
+  return hv.find(xn) == std::string_view::npos;
+}
+
 }  // namespace
 
-// Fast path for already-normalized absolute http(s) URLs. noinline keeps
-// the fallthrough path small (IPv4 microbenches).
+// Tiered special-absolute fast path (http/https/ftp/ws/wss):
+//  1. Clean lowercase http(s) without port/userinfo (hottest corpus case)
+//  2. Other special schemes, optional userinfo + non-default port
+// Fail-closed: any byte that may need encoding/IDNA/IPv6 falls through.
 template <class result_type>
-ada_never_inline bool try_parse_simple_absolute(std::string_view input,
-                                                result_type& out) {
+ada_really_inline bool try_parse_simple_absolute(std::string_view input,
+                                                 result_type& out) {
   constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
   constexpr bool is_aggregator =
       std::is_same_v<result_type, ada::url_aggregator>;
   static_assert(is_ada_url || is_aggregator);
 
   const size_t len = input.size();
-  if (len < 8) [[unlikely]] {
+  if (len < 5) [[unlikely]] {
     return false;
   }
   const auto* b = reinterpret_cast<const uint8_t*>(input.data());
 
-  size_t pos;
-  ada::scheme::type scheme_type;
-  uint32_t protocol_end;
-  if (b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
-    if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
-      pos = 7;
-      scheme_type = ada::scheme::type::HTTP;
-      protocol_end = 5;
-    } else if (len >= 8 && b[4] == 's' && b[5] == ':' && b[6] == '/' &&
-               b[7] == '/') {
-      pos = 8;
-      scheme_type = ada::scheme::type::HTTPS;
-      protocol_end = 6;
-    } else {
-      return false;
+  // ---- Scheme detection (case-insensitive letters, require "://") ----
+  size_t auth_start = 0;
+  uint32_t protocol_end = 0;
+  ada::scheme::type scheme_type = ada::scheme::type::NOT_SPECIAL;
+  uint16_t default_port = 0;
+  bool scheme_has_upper = false;
+
+  auto note_scheme_case = [&](size_t scheme_len) {
+    for (size_t i = 0; i < scheme_len; ++i) {
+      if (b[i] >= 'A' && b[i] <= 'Z') {
+        scheme_has_upper = true;
+        break;
+      }
     }
+  };
+
+  // https:// (most common) then http:// then ftp/ws/wss
+  if (len >= 8 && (b[0] | 0x20) == 'h' && (b[1] | 0x20) == 't' &&
+      (b[2] | 0x20) == 't' && (b[3] | 0x20) == 'p' && (b[4] | 0x20) == 's' &&
+      b[5] == ':' && b[6] == '/' && b[7] == '/') {
+    auth_start = 8;
+    protocol_end = 6;
+    scheme_type = ada::scheme::type::HTTPS;
+    default_port = 443;
+    note_scheme_case(5);
+  } else if (len >= 7 && (b[0] | 0x20) == 'h' && (b[1] | 0x20) == 't' &&
+             (b[2] | 0x20) == 't' && (b[3] | 0x20) == 'p' && b[4] == ':' &&
+             b[5] == '/' && b[6] == '/') {
+    auth_start = 7;
+    protocol_end = 5;
+    scheme_type = ada::scheme::type::HTTP;
+    default_port = 80;
+    note_scheme_case(4);
+  } else if (len >= 6 && (b[0] | 0x20) == 'f' && (b[1] | 0x20) == 't' &&
+             (b[2] | 0x20) == 'p' && b[3] == ':' && b[4] == '/' &&
+             b[5] == '/') {
+    auth_start = 6;
+    protocol_end = 4;
+    scheme_type = ada::scheme::type::FTP;
+    default_port = 21;
+    note_scheme_case(3);
+  } else if (len >= 6 && (b[0] | 0x20) == 'w' && (b[1] | 0x20) == 's' &&
+             (b[2] | 0x20) == 's' && b[3] == ':' && b[4] == '/' &&
+             b[5] == '/') {
+    auth_start = 6;
+    protocol_end = 4;
+    scheme_type = ada::scheme::type::WSS;
+    default_port = 443;
+    note_scheme_case(3);
+  } else if (len >= 5 && (b[0] | 0x20) == 'w' && (b[1] | 0x20) == 's' &&
+             b[2] == ':' && b[3] == '/' && b[4] == '/') {
+    auth_start = 5;
+    protocol_end = 3;
+    scheme_type = ada::scheme::type::WS;
+    default_port = 80;
+    note_scheme_case(2);
   } else {
     return false;
   }
-  if (pos < len && (b[pos] == '/' || b[pos] == '\\')) [[unlikely]] {
+
+  // Extra authority slashes or empty authority → SM.
+  if (auth_start >= len || b[auth_start] == '/' || b[auth_start] == '\\') {
+    return false;
+  }
+  // IPv6 literal → SM.
+  if (b[auth_start] == '[') {
     return false;
   }
 
-  // Digit-led hosts are IPv4/numeric; skip before scanning.
-  if (pos < len && b[pos] >= '0' && b[pos] <= '9') {
+  // ---- Authority scan: userinfo + host + optional port ----
+  size_t i = auth_start;
+  size_t at_pos = std::string_view::npos;  // position of '@' if any
+  size_t first_colon = std::string_view::npos;
+
+  // If credentials present, find the rightmost '@' before /?#.
+  // Soft-scan without rejecting ':' so ports/userinfo are visible.
+  {
+    size_t j = auth_start;
+    for (; j < len; ++j) {
+      const uint8_t c = b[j];
+      const uint8_t cls = k_auth_class[c];
+      if (cls == 1) {
+        break;
+      }
+      if (cls == 4) {
+        at_pos = j;
+      } else if (cls == 2) {
+        return false;
+      }
+    }
+  }
+
+  // host_start component points at '@' when credentials exist (see get_hostname).
+  // hostname_begin is the first hostname byte.
+  size_t host_start = auth_start;
+  size_t hostname_begin = auth_start;
+  size_t username_end = protocol_end + 2;  // default: no userinfo
+  if (at_pos != std::string_view::npos) {
+    // Empty userinfo ("https://@host") is stripped by the SM → fall through.
+    if (at_pos == auth_start) {
+      return false;
+    }
+    // Validate userinfo is already encoded; split username:password.
+    size_t colon_in_user = std::string_view::npos;
+    for (size_t j = auth_start; j < at_pos; ++j) {
+      const uint8_t c = b[j];
+      if (c == ':') {
+        if (colon_in_user == std::string_view::npos) {
+          colon_in_user = j;
+        }
+        continue;
+      }
+      if (!k_userinfo_ok[c]) {
+        return false;
+      }
+    }
+    // Empty username with password (":pass@") → SM.
+    if (colon_in_user == auth_start) {
+      return false;
+    }
+    // Empty password ("user:@host") is serialized without ':' → SM.
+    if (colon_in_user != std::string_view::npos && colon_in_user + 1 == at_pos) {
+      return false;
+    }
+    username_end = colon_in_user == std::string_view::npos ? at_pos : colon_in_user;
+    host_start = at_pos;          // points at '@'
+    hostname_begin = at_pos + 1;  // hostname starts after '@'
+    if (hostname_begin >= len || b[hostname_begin] == '/' ||
+        b[hostname_begin] == '?' || b[hostname_begin] == '#' ||
+        b[hostname_begin] == '@' || b[hostname_begin] == ':') {
+      return false;
+    }
+  }
+
+  // Digit-led host → possible IPv4 → SM.
+  if (b[hostname_begin] >= '0' && b[hostname_begin] <= '9') {
     return false;
   }
 
-  const size_t host_start = pos;
+  // Host scan (no ':' '@' allowed here).
   bool has_upper = false;
-  size_t i = pos;
+  i = hostname_begin;
+  while (i + 4 <= len && four_bytes_host_ok(b + i)) {
+    if ((b[i] >= 'A' && b[i] <= 'Z') || (b[i + 1] >= 'A' && b[i + 1] <= 'Z') ||
+        (b[i + 2] >= 'A' && b[i + 2] <= 'Z') ||
+        (b[i + 3] >= 'A' && b[i + 3] <= 'Z')) {
+      has_upper = true;
+    }
+    i += 4;
+  }
   for (; i < len; ++i) {
     const uint8_t c = b[i];
     const uint8_t cls = k_host_class[c];
     if (cls == 1) {
       break;
     }
-    if (cls == 2) [[unlikely]] {
+    if (cls == 2) {
+      // ':' starts a port.
+      if (c == ':') {
+        first_colon = i;
+        break;
+      }
       return false;
     }
     if (c >= 'A' && c <= 'Z') {
       has_upper = true;
     }
   }
-  const size_t host_end = i;
-  if (host_start == host_end) [[unlikely]] {
+  const size_t host_end =
+      (first_colon != std::string_view::npos) ? first_colon : i;
+  if (hostname_begin == host_end) {
     return false;
   }
-  const size_t host_len = host_end - host_start;
-  if (host_len > 253) [[unlikely]] {
-    return false;
-  }
-  {
-    std::string_view hv(input.data() + host_start, host_len);
-    char host_buf[256];
-    if (has_upper) [[unlikely]] {
-      std::memcpy(host_buf, input.data() + host_start, host_len);
-      unicode::to_lower_ascii(host_buf, host_len);
-      hv = std::string_view(host_buf, host_len);
-    }
-    if (checkers::is_ipv4(hv)) [[unlikely]] {
+
+  char host_buf[256];
+  std::string_view hv(input.data() + hostname_begin, host_end - hostname_begin);
+  if (has_upper) {
+    if (hv.size() > 255) {
       return false;
     }
-    static constexpr std::string_view xn{"xn-", 3};
-    if (hv.find(xn) != std::string_view::npos) [[unlikely]] {
+    std::memcpy(host_buf, hv.data(), hv.size());
+    unicode::to_lower_ascii(host_buf, hv.size());
+    hv = std::string_view(host_buf, hv.size());
+  }
+  if (!host_is_fast_domain(hv)) {
+    return false;
+  }
+
+  // Optional port.
+  uint32_t port_value = url_components::omitted;
+  size_t after_authority = host_end;
+  if (first_colon != std::string_view::npos) {
+    size_t p = first_colon + 1;
+    if (p < len && b[p] >= '0' && b[p] <= '9') {
+      uint32_t pv = 0;
+      const size_t port_start = p;
+      // Leading zeros are stripped in serialization ("0080" → "80") → SM.
+      if (b[p] == '0' && p + 1 < len && b[p + 1] >= '0' && b[p + 1] <= '9') {
+        return false;
+      }
+      while (p < len && b[p] >= '0' && b[p] <= '9') {
+        pv = pv * 10 + uint32_t(b[p] - '0');
+        if (pv > 65535) {
+          return false;  // invalid port
+        }
+        ++p;
+      }
+      // Non-digit after digits before /?# → invalid/fallthrough.
+      if (p < len && k_host_class[b[p]] != 1 && b[p] != '/' && b[p] != '?' &&
+          b[p] != '#') {
+        return false;
+      }
+      if (p == port_start) {
+        return false;
+      }
+      if (pv == default_port) {
+        // Normalized href drops default ports — rewrite needed → SM.
+        return false;
+      }
+      port_value = pv;
+      after_authority = p;
+      i = p;
+    } else if (p < len && (b[p] == '/' || b[p] == '?' || b[p] == '#')) {
+      return false;
+    } else if (p == len) {
+      return false;
+    } else {
       return false;
     }
   }
 
-  size_t path_start = host_end;
-  size_t path_end = host_end;
+  // ---- Path / query / fragment ----
+  size_t path_start = after_authority;
+  size_t path_end = after_authority;
   size_t query_start = std::string_view::npos;
   size_t hash_start = std::string_view::npos;
   bool has_path = false;
@@ -159,6 +407,14 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     has_path = true;
     path_start = i;
     ++i;
+    while (i + 4 <= len && four_bytes_rest_ok(b + i)) {
+      // four_bytes_rest_ok excludes '.'? No, '.' is ok (class 0). Track dots.
+      if (b[i] == '.' || b[i + 1] == '.' || b[i + 2] == '.' ||
+          b[i + 3] == '.') {
+        path_has_dot = true;
+      }
+      i += 4;
+    }
     for (; i < len; ++i) {
       const uint8_t c = b[i];
       const uint8_t cls = k_rest[c];
@@ -188,6 +444,8 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     hash_start = i;
     ++i;
     goto scan_hash;
+  } else if (i != len) {
+    return false;
   }
   goto after_rest;
 
@@ -221,87 +479,88 @@ scan_hash:
 
 after_rest:
   if (path_has_dot) [[unlikely]] {
-    const std::string_view path_body(input.data() + path_start,
-                                     path_end - path_start);
-    if (path_body.size() >= 2 && path_body[1] == '.') {
-      if (path_body.size() == 2 || path_body[2] == '/' ||
-          (path_body.size() >= 3 && path_body[2] == '.' &&
-           (path_body.size() == 3 || path_body[3] == '/'))) {
-        return false;
-      }
-    }
-    static constexpr std::string_view slash_dot{"/.", 2};
-    size_t p = 1;
-    while ((p = path_body.find(slash_dot, p)) != std::string_view::npos) {
-      const size_t after = p + 2;
-      if (after == path_body.size() || path_body[after] == '/' ||
-          (after + 1 <= path_body.size() && path_body[after] == '.' &&
-           (after + 1 == path_body.size() || path_body[after + 1] == '/'))) {
-        return false;
-      }
-      p = after;
+    if (path_has_dot_segment(std::string_view(input.data() + path_start,
+                                              path_end - path_start))) {
+      return false;
     }
   }
 
   const bool need_slash = !has_path;
+  const bool has_userinfo = at_pos != std::string_view::npos;
+  const bool has_port = port_value != url_components::omitted;
+  // Inserting '/' for missing path with userinfo/port shifts offsets; do it.
+  const size_t insert_at = after_authority;
+  const size_t final_len = need_slash ? len + 1 : len;
+
   out.type = scheme_type;
   out.is_valid = true;
   out.has_opaque_path = false;
   out.host_type = DEFAULT;
 
   if constexpr (is_aggregator) {
+    out.buffer.resize(final_len);
     if (!need_slash) {
-      out.buffer.resize(len);
       // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
       std::memcpy(out.buffer.data(), input.data(), len);
-      if (has_upper) {
-        unicode::to_lower_ascii(out.buffer.data() + host_start,
-                                host_end - host_start);
+    } else {
+      // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+      std::memcpy(out.buffer.data(), input.data(), insert_at);
+      out.buffer[insert_at] = '/';
+      if (insert_at < len) {
+        std::memcpy(out.buffer.data() + insert_at + 1, input.data() + insert_at,
+                    len - insert_at);
       }
-      out.components.protocol_end = protocol_end;
-      out.components.username_end = protocol_end + 2;
-      out.components.host_start = protocol_end + 2;
-      out.components.host_end = static_cast<uint32_t>(host_end);
-      out.components.port = url_components::omitted;
+    }
+    // Lowercase scheme and host in the buffer when needed.
+    if (scheme_has_upper) {
+      unicode::to_lower_ascii(out.buffer.data(), protocol_end - 1);
+    }
+    if (has_upper) {
+      unicode::to_lower_ascii(out.buffer.data() + hostname_begin,
+                              host_end - hostname_begin);
+    }
+
+    const uint32_t shift = need_slash ? 1 : 0;
+    out.components.protocol_end = protocol_end;
+    out.components.username_end = static_cast<uint32_t>(username_end);
+    out.components.host_start = static_cast<uint32_t>(host_start);
+    out.components.host_end = static_cast<uint32_t>(host_end);
+    out.components.port = port_value;
+    if (need_slash) {
+      out.components.pathname_start = static_cast<uint32_t>(insert_at);
+      out.components.search_start =
+          (query_start != std::string_view::npos)
+              ? static_cast<uint32_t>(query_start + shift)
+              : url_components::omitted;
+      out.components.hash_start =
+          (hash_start != std::string_view::npos)
+              ? static_cast<uint32_t>(hash_start + shift)
+              : url_components::omitted;
+    } else {
       out.components.pathname_start = static_cast<uint32_t>(path_start);
-      out.components.search_start = (query_start != std::string_view::npos)
-                                        ? static_cast<uint32_t>(query_start)
-                                        : url_components::omitted;
+      out.components.search_start =
+          (query_start != std::string_view::npos)
+              ? static_cast<uint32_t>(query_start)
+              : url_components::omitted;
       out.components.hash_start = (hash_start != std::string_view::npos)
                                       ? static_cast<uint32_t>(hash_start)
                                       : url_components::omitted;
-    } else {
-      out.buffer.resize(len + 1);
-      // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-      std::memcpy(out.buffer.data(), input.data(), host_end);
-      out.buffer[host_end] = '/';
-      if (host_end < len) {
-        std::memcpy(out.buffer.data() + host_end + 1, input.data() + host_end,
-                    len - host_end);
-      }
-      if (has_upper) {
-        unicode::to_lower_ascii(out.buffer.data() + host_start,
-                                host_end - host_start);
-      }
-      out.components.protocol_end = protocol_end;
-      out.components.username_end = protocol_end + 2;
-      out.components.host_start = protocol_end + 2;
-      out.components.host_end = static_cast<uint32_t>(host_end);
-      out.components.port = url_components::omitted;
-      out.components.pathname_start = static_cast<uint32_t>(host_end);
-      out.components.search_start = (query_start != std::string_view::npos)
-                                        ? static_cast<uint32_t>(query_start + 1)
-                                        : url_components::omitted;
-      out.components.hash_start = (hash_start != std::string_view::npos)
-                                      ? static_cast<uint32_t>(hash_start + 1)
-                                      : url_components::omitted;
     }
+    (void)has_userinfo;
+    (void)has_port;
   } else {
-    std::string host_str(input.substr(host_start, host_end - host_start));
-    if (has_upper) {
-      unicode::to_lower_ascii(host_str.data(), host_str.size());
+    // ada::url: separate component strings.
+    if (has_userinfo) {
+      out.username.assign(input.data() + auth_start, username_end - auth_start);
+      if (username_end < at_pos) {
+        out.password.assign(input.data() + username_end + 1,
+                            at_pos - username_end - 1);
+      }
     }
-    out.host = std::move(host_str);
+    out.host = std::string(hv);
+    if (has_port) {
+      out.port = static_cast<uint16_t>(port_value);
+    }
     if (need_slash) {
       out.path = "/";
     } else {
@@ -360,28 +619,20 @@ result_type parse_url_impl(std::string_view user_input,
     return url;
   }
 
-  // Simple absolute http(s) fast path (before tabs/newline scan).
-  // Skip digit-led hosts (IPv4) with a cheap peek.
+  // Special-absolute fast path (http/https/ftp/ws/wss) before tabs/newline work.
   if constexpr (store_values) {
-    if (base_url == nullptr) {
-      const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
-      const size_t n = user_input.size();
-      const bool digit_led_host = (n >= 8 && p[4] == ':' && p[5] == '/' &&
-                                   p[6] == '/' && p[7] >= '0' && p[7] <= '9') ||
-                                  (n >= 9 && p[5] == ':' && p[6] == '/' &&
-                                   p[7] == '/' && p[8] >= '0' && p[8] <= '9');
-      if (!digit_led_host && try_parse_simple_absolute(user_input, url)) {
-        if constexpr (result_type_is_ada_url_aggregator) {
-          if (url.buffer.size() > max_input_length) [[unlikely]] {
-            url.is_valid = false;
-          }
-        } else {
-          if (url.get_href_size() > max_input_length) [[unlikely]] {
-            url.is_valid = false;
-          }
+    if (base_url == nullptr &&
+        try_parse_simple_absolute(user_input, url)) [[likely]] {
+      if constexpr (result_type_is_ada_url_aggregator) {
+        if (url.buffer.size() > max_input_length) [[unlikely]] {
+          url.is_valid = false;
         }
-        return url;
+      } else {
+        if (url.get_href_size() > max_input_length) [[unlikely]] {
+          url.is_valid = false;
+        }
       }
+      return url;
     }
   }
 
