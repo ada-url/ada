@@ -63,7 +63,8 @@ constexpr std::array<uint8_t, 256> k_auth_class = []() consteval {
   return t;
 }();
 
-// 0 = ok, 1 = ?/#, 2 = reject. Path rejects '%' so "%2e" falls through.
+// 0 = ok, 1 = ?/#, 2 = reject. '%' is allowed (already-encoded paths); %2e
+// segments are rejected separately so they fall through for normalization.
 constexpr std::array<uint8_t, 256> k_rest = []() consteval {
   std::array<uint8_t, 256> t{};
   for (size_t i = 0; i < 256; ++i) {
@@ -76,13 +77,44 @@ constexpr std::array<uint8_t, 256> k_rest = []() consteval {
                     static_cast<uint8_t>('>'), static_cast<uint8_t>('`'),
                     static_cast<uint8_t>('{'), static_cast<uint8_t>('}'),
                     static_cast<uint8_t>('^'), static_cast<uint8_t>('\\'),
-                    static_cast<uint8_t>('%'), static_cast<uint8_t>('\'')}) {
+                    static_cast<uint8_t>('\'')}) {
     t[c] = 2;
   }
   t[static_cast<uint8_t>('?')] = 1;
   t[static_cast<uint8_t>('#')] = 1;
   return t;
 }();
+
+// True if path contains a "." / ".." segment or "%2e" / "%2e%2e" form that the
+// state machine would normalize.
+ada_really_inline bool path_needs_dot_normalization(
+    const uint8_t* p, size_t path_len) noexcept {
+  if (path_len < 2) {
+    return false;
+  }
+  // path always starts with '/' when non-empty on this path.
+  size_t i = 0;
+  while (i < path_len) {
+    // At segment start (index 0 is '/', or previous was '/').
+    if (i == 0 || p[i - 1] == '/') {
+      // "." or ".."
+      if (p[i] == '.') {
+        if (i + 1 == path_len || p[i + 1] == '/' ||
+            (i + 1 < path_len && p[i + 1] == '.' &&
+             (i + 2 == path_len || p[i + 2] == '/'))) {
+          return true;
+        }
+      }
+      // "%2e" or "%2E" (and "%2e%2e")
+      if (p[i] == '%' && i + 2 < path_len && p[i + 1] == '2' &&
+          (p[i + 2] | 0x20) == 'e') {
+        return true;
+      }
+    }
+    ++i;
+  }
+  return false;
+}
 
 // Userinfo that is already percent-encoded (no spaces, no DELIM that need work).
 constexpr std::array<uint8_t, 256> k_userinfo_ok = []() consteval {
@@ -105,28 +137,6 @@ ada_really_inline bool four_bytes_host_ok(const uint8_t* p) noexcept {
 ada_really_inline bool four_bytes_rest_ok(const uint8_t* p) noexcept {
   return k_rest[p[0]] == 0 && k_rest[p[1]] == 0 && k_rest[p[2]] == 0 &&
          k_rest[p[3]] == 0;
-}
-
-ada_really_inline bool path_has_dot_segment(std::string_view path_body) noexcept {
-  if (path_body.size() >= 2 && path_body[1] == '.') {
-    if (path_body.size() == 2 || path_body[2] == '/' ||
-        (path_body.size() >= 3 && path_body[2] == '.' &&
-         (path_body.size() == 3 || path_body[3] == '/'))) {
-      return true;
-    }
-  }
-  static constexpr std::string_view slash_dot{"/.", 2};
-  size_t p = 1;
-  while ((p = path_body.find(slash_dot, p)) != std::string_view::npos) {
-    const size_t after = p + 2;
-    if (after == path_body.size() || path_body[after] == '/' ||
-        (after + 1 <= path_body.size() && path_body[after] == '.' &&
-         (after + 1 == path_body.size() || path_body[after + 1] == '/'))) {
-      return true;
-    }
-    p = after;
-  }
-  return false;
 }
 
 // Lightweight host check used on the hot path (no full IPv4 parser).
@@ -245,8 +255,11 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
     return false;
   }
 
-  // ---- Single-pass authority: optional userinfo + host + optional port ----
-  // First try the common case: no '@' (skip a dedicated pre-scan).
+  // ---- Authority (single pass on the common no-userinfo path) ----
+  if (b[auth_start] >= '0' && b[auth_start] <= '9') {
+    return false;
+  }
+
   size_t i = auth_start;
   size_t at_pos = std::string_view::npos;
   size_t first_colon = std::string_view::npos;
@@ -256,84 +269,15 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
   bool has_upper = false;
   bool saw_xn = false;
 
-  // Peek for '@' only if we see one during the host walk; use soft class.
-  // Digit-led host → IPv4-ish → SM.
-  if (b[auth_start] >= '0' && b[auth_start] <= '9') {
-    return false;
-  }
-
-  // Scan with k_auth_class so ':' and '@' are visible without a second pass.
-  i = auth_start;
-  size_t last_at = std::string_view::npos;
-  size_t auth_scan_end = auth_start;
-  for (; i < len; ++i) {
-    const uint8_t c = b[i];
-    const uint8_t cls = k_auth_class[c];
-    if (cls == 1) {  // / ? #
-      break;
-    }
-    if (cls == 4) {  // @
-      last_at = i;
-      continue;
-    }
-    if (cls == 3) {  // :
-      // Could be userinfo colon or port colon; resolved after we know '@'.
-      continue;
-    }
-    if (cls == 2) {
-      return false;
-    }
-  }
-  auth_scan_end = i;
-
-  if (last_at != std::string_view::npos) {
-    at_pos = last_at;
-    if (at_pos == auth_start) {
-      return false;  // empty userinfo
-    }
-    size_t colon_in_user = std::string_view::npos;
-    for (size_t j = auth_start; j < at_pos; ++j) {
-      const uint8_t c = b[j];
-      if (c == ':') {
-        if (colon_in_user == std::string_view::npos) {
-          colon_in_user = j;
-        }
-        continue;
-      }
-      if (!k_userinfo_ok[c]) {
-        return false;
-      }
-    }
-    if (colon_in_user == auth_start) {
-      return false;
-    }
-    if (colon_in_user != std::string_view::npos && colon_in_user + 1 == at_pos) {
-      return false;  // empty password
-    }
-    username_end =
-        colon_in_user == std::string_view::npos ? at_pos : colon_in_user;
-    host_start = at_pos;
-    hostname_begin = at_pos + 1;
-    if (hostname_begin >= auth_scan_end || b[hostname_begin] == ':' ||
-        b[hostname_begin] == '@') {
-      return false;
-    }
-    if (b[hostname_begin] >= '0' && b[hostname_begin] <= '9') {
-      return false;
-    }
-  }
-
-  // Host bytes in [hostname_begin, host_end); port may follow.
-  i = hostname_begin;
-  while (i + 4 <= auth_scan_end && four_bytes_host_ok(b + i)) {
+  // Common case: host until / ? # : — if we see '@', handle userinfo below.
+  while (i + 4 <= len && four_bytes_host_ok(b + i)) {
     if ((b[i] >= 'A' && b[i] <= 'Z') || (b[i + 1] >= 'A' && b[i + 1] <= 'Z') ||
         (b[i + 2] >= 'A' && b[i + 2] <= 'Z') ||
         (b[i + 3] >= 'A' && b[i + 3] <= 'Z')) {
       has_upper = true;
     }
-    // xn-- detection across the 4-byte window
     for (size_t k = 0; k < 4; ++k) {
-      if ((b[i + k] | 0x20) == 'x' && i + k + 3 < auth_scan_end &&
+      if ((b[i + k] | 0x20) == 'x' && i + k + 3 < len &&
           (b[i + k + 1] | 0x20) == 'n' && b[i + k + 2] == '-' &&
           b[i + k + 3] == '-') {
         saw_xn = true;
@@ -341,64 +285,126 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
     }
     i += 4;
   }
-  for (; i < auth_scan_end; ++i) {
+  for (; i < len; ++i) {
     const uint8_t c = b[i];
     const uint8_t cls = k_host_class[c];
     if (cls == 1) {
+      break;  // / ? #
+    }
+    if (cls == 0) {
+      if (c >= 'A' && c <= 'Z') {
+        has_upper = true;
+      }
+      if ((c | 0x20) == 'x' && i + 3 < len && (b[i + 1] | 0x20) == 'n' &&
+          b[i + 2] == '-' && b[i + 3] == '-') {
+        saw_xn = true;
+      }
+      continue;
+    }
+    if (c == ':') {
+      first_colon = i;
       break;
     }
-    if (cls == 2) {
-      if (c == ':') {
-        first_colon = i;
-        break;
+    if (c == '@') {
+      // Rare: credentials. Find rightmost '@' before /?# then re-validate.
+      size_t j = auth_start;
+      size_t last_at = std::string_view::npos;
+      for (; j < len; ++j) {
+        const uint8_t ac = b[j];
+        const uint8_t acls = k_auth_class[ac];
+        if (acls == 1) {
+          break;
+        }
+        if (acls == 4) {
+          last_at = j;
+        } else if (acls == 2) {
+          return false;
+        }
       }
-      // '@' here would mean a second @ after hostname start → reject.
-      return false;
-    }
-    if (c >= 'A' && c <= 'Z') {
-      has_upper = true;
-    }
-    if ((c | 0x20) == 'x' && i + 3 < auth_scan_end &&
-        (b[i + 1] | 0x20) == 'n' && b[i + 2] == '-' && b[i + 3] == '-') {
-      saw_xn = true;
-    }
-  }
-  // If we used soft scan, colon for port is between hostname_begin and
-  // auth_scan_end.
-  if (first_colon == std::string_view::npos) {
-    // Port colon only if present after hostname and before auth_scan_end.
-    for (size_t j = hostname_begin; j < auth_scan_end; ++j) {
-      if (b[j] == ':') {
-        // Only the first colon after hostname_begin is the port separator
-        // when there is no userinfo colon in this range.
-        first_colon = j;
-        break;
+      if (last_at == std::string_view::npos || last_at == auth_start) {
+        return false;
       }
+      at_pos = last_at;
+      size_t colon_in_user = std::string_view::npos;
+      for (size_t u = auth_start; u < at_pos; ++u) {
+        const uint8_t uc = b[u];
+        if (uc == ':') {
+          if (colon_in_user == std::string_view::npos) {
+            colon_in_user = u;
+          }
+          continue;
+        }
+        if (!k_userinfo_ok[uc]) {
+          return false;
+        }
+      }
+      if (colon_in_user == auth_start ||
+          (colon_in_user != std::string_view::npos &&
+           colon_in_user + 1 == at_pos)) {
+        return false;
+      }
+      username_end =
+          colon_in_user == std::string_view::npos ? at_pos : colon_in_user;
+      host_start = at_pos;
+      hostname_begin = at_pos + 1;
+      if (hostname_begin >= j || b[hostname_begin] == ':' ||
+          b[hostname_begin] == '@' ||
+          (b[hostname_begin] >= '0' && b[hostname_begin] <= '9')) {
+        return false;
+      }
+      // Re-scan hostname after '@'.
+      has_upper = false;
+      saw_xn = false;
+      first_colon = std::string_view::npos;
+      i = hostname_begin;
+      while (i + 4 <= j && four_bytes_host_ok(b + i)) {
+        if ((b[i] >= 'A' && b[i] <= 'Z') ||
+            (b[i + 1] >= 'A' && b[i + 1] <= 'Z') ||
+            (b[i + 2] >= 'A' && b[i + 2] <= 'Z') ||
+            (b[i + 3] >= 'A' && b[i + 3] <= 'Z')) {
+          has_upper = true;
+        }
+        for (size_t k = 0; k < 4; ++k) {
+          if ((b[i + k] | 0x20) == 'x' && i + k + 3 < j &&
+              (b[i + k + 1] | 0x20) == 'n' && b[i + k + 2] == '-' &&
+              b[i + k + 3] == '-') {
+            saw_xn = true;
+          }
+        }
+        i += 4;
+      }
+      for (; i < j; ++i) {
+        const uint8_t hc = b[i];
+        const uint8_t hcls = k_host_class[hc];
+        if (hcls == 1) {
+          break;
+        }
+        if (hcls == 0) {
+          if (hc >= 'A' && hc <= 'Z') {
+            has_upper = true;
+          }
+          if ((hc | 0x20) == 'x' && i + 3 < j && (b[i + 1] | 0x20) == 'n' &&
+              b[i + 2] == '-' && b[i + 3] == '-') {
+            saw_xn = true;
+          }
+          continue;
+        }
+        if (hc == ':') {
+          first_colon = i;
+          break;
+        }
+        return false;
+      }
+      break;  // leave outer loop; i/first_colon set
     }
+    return false;
   }
+
   const size_t host_end =
-      (first_colon != std::string_view::npos) ? first_colon : auth_scan_end;
-  // If first_colon was found via host_class loop, host_end is correct; if
-  // found via soft-scan fallback, ensure colon is not inside hostname bytes
-  // that include userinfo (already handled).
+      (first_colon != std::string_view::npos) ? first_colon : i;
   if (hostname_begin >= host_end) {
     return false;
   }
-  // Reject ':' inside hostname when multiple colons before /?# without @.
-  if (at_pos == std::string_view::npos) {
-    for (size_t j = hostname_begin; j < host_end; ++j) {
-      if (b[j] == ':') {
-        return false;
-      }
-    }
-  } else {
-    for (size_t j = hostname_begin; j < host_end; ++j) {
-      if (b[j] == ':' || b[j] == '@') {
-        return false;
-      }
-    }
-  }
-
   if (!host_ok_after_scan(b + hostname_begin, host_end - hostname_begin,
                           saw_xn)) {
     return false;
@@ -415,8 +421,7 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
     hv = std::string_view(host_buf, hv.size());
   }
 
-  // Resume path scan at auth_scan_end (or after port).
-  i = auth_scan_end;
+  // i is at /?# or past port colon start; fix i after optional port parse.
 
   // Optional port.
   uint32_t port_value = url_components::omitted;
@@ -474,9 +479,9 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
     path_start = i;
     ++i;
     while (i + 4 <= len && four_bytes_rest_ok(b + i)) {
-      // four_bytes_rest_ok excludes '.'? No, '.' is ok (class 0). Track dots.
       if (b[i] == '.' || b[i + 1] == '.' || b[i + 2] == '.' ||
-          b[i + 3] == '.') {
+          b[i + 3] == '.' || b[i] == '%' || b[i + 1] == '%' ||
+          b[i + 2] == '%' || b[i + 3] == '%') {
         path_has_dot = true;
       }
       i += 4;
@@ -485,7 +490,7 @@ ada_really_inline bool try_parse_simple_absolute(std::string_view input,
       const uint8_t c = b[i];
       const uint8_t cls = k_rest[c];
       if (cls == 0) {
-        path_has_dot |= (c == '.');
+        path_has_dot |= (c == '.' || c == '%');
         continue;
       }
       if (cls == 1) {
@@ -545,8 +550,7 @@ scan_hash:
 
 after_rest:
   if (path_has_dot) [[unlikely]] {
-    if (path_has_dot_segment(std::string_view(input.data() + path_start,
-                                              path_end - path_start))) {
+    if (path_needs_dot_normalization(b + path_start, path_end - path_start)) {
       return false;
     }
   }
