@@ -68,6 +68,19 @@ if(MSVC AND BUILD_SHARED_LIBS)
         "$<TARGET_FILE_DIR:percent_encode>")                 # <--this is out-file path
 endif()
 
+# Percent Decode
+add_executable(percent_decode percent_decode.cpp)
+target_link_libraries(percent_decode PRIVATE ada counters::counters)
+target_include_directories(percent_decode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(percent_decode PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
+if(MSVC AND BUILD_SHARED_LIBS)
+  # Copy the ada dll into the directory
+  add_custom_command(TARGET percent_decode POST_BUILD        # Adds a post-build event
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake -E copy_if_different..."
+        "$<TARGET_FILE:ada>"      # <--this is in-file
+        "$<TARGET_FILE_DIR:percent_decode>")                 # <--this is out-file path
+endif()
+
 add_executable(model_bench model_bench.cpp)
 target_link_libraries(model_bench PRIVATE ada counters::counters)
 target_compile_definitions(model_bench PRIVATE ADA_URL_FILE="${url-dataset_SOURCE_DIR}/out.txt")
@@ -78,10 +91,11 @@ target_link_libraries(benchdata PRIVATE benchmark::benchmark)
 target_link_libraries(bbc_bench PRIVATE benchmark::benchmark)
 target_link_libraries(bench_ipv4 PRIVATE benchmark::benchmark)
 target_link_libraries(percent_encode PRIVATE benchmark::benchmark)
+target_link_libraries(percent_decode PRIVATE benchmark::benchmark)
 target_link_libraries(bench_search_params PRIVATE benchmark::benchmark)
 target_link_libraries(urlpattern PRIVATE benchmark::benchmark)
 
-set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_ipv4 percent_encode bench_search_params urlpattern)
+set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_ipv4 percent_encode percent_decode bench_search_params urlpattern)
 
 add_custom_target(run_all_benchmarks
         COMMAND ${CMAKE_COMMAND} -E echo "Running all benchmarks..."
