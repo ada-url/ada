@@ -65,7 +65,9 @@ struct url : url_base {
   url(url&& u) noexcept = default;
   url& operator=(url&& u) noexcept = default;
   url& operator=(const url& u) = default;
-  ~url() override = default;
+  // Inline (see url-inl.h): recycles path / href-cache capacity into a bounded
+  // thread-local freelist. Kept inline to match main's defaulted dtor ABI.
+  ~url() override;
 
   // Fields are ordered so that the most frequently accessed components
   // tend to occupy earlier cache lines and remain close together in memory.
@@ -122,6 +124,18 @@ struct url : url_base {
    * the empty string.
    */
   std::string password{};
+
+  /**
+   * @private
+   * True when non_special_scheme holds a simple-absolute href cache.
+   */
+  [[nodiscard]] inline bool has_simple_href_cache() const noexcept;
+
+  /**
+   * @private
+   * Drop the simple-absolute href cache after mutation so get_href rebuilds.
+   */
+  inline void clear_simple_href_cache() noexcept;
 
   /**
    * Checks if the URL has an empty hostname (host is set but empty string).

@@ -353,6 +353,9 @@ validate_port:
 template <class result_type>
 ada_warn_unused tl::expected<result_type, errors> parse(
     std::string_view input, const result_type* base_url) {
+  // Single try_parse lives inside parse_url_impl. Do not call try_parse here
+  // as well: IPv4/IPv6 (and other non-simple) inputs would pay the fast-path
+  // reject twice and show large CodSpeed regressions on those benches.
   result_type u = ada::parser::parse_url_impl<result_type>(input, base_url);
   if (!u.is_valid) {
     return tl::unexpected(errors::type_error);

@@ -594,6 +594,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
     return false;
   }
 
+  clear_simple_href_cache();
   url saved_url(*this);
 
   size_t host_end_pos = input.find('#');
@@ -718,6 +719,7 @@ bool url::set_username(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+  clear_simple_href_cache();
   auto previous_username = std::move(username);
   username = ada::unicode::percent_encode(
       input, character_sets::USERINFO_PERCENT_ENCODE);
@@ -732,6 +734,7 @@ bool url::set_password(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+  clear_simple_href_cache();
   auto previous_password = std::move(password);
   password = ada::unicode::percent_encode(
       input, character_sets::USERINFO_PERCENT_ENCODE);
@@ -746,6 +749,7 @@ bool url::set_port(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+  clear_simple_href_cache();
 
   if (input.empty()) {
     port = std::nullopt;
@@ -786,6 +790,7 @@ bool url::set_port(const std::string_view input) {
 }
 
 void url::set_hash(const std::string_view input) {
+  clear_simple_href_cache();
   if (input.empty()) {
     hash = std::nullopt;
     helpers::strip_trailing_spaces_from_opaque_path(*this);
@@ -804,6 +809,7 @@ void url::set_hash(const std::string_view input) {
 }
 
 void url::set_search(const std::string_view input) {
+  clear_simple_href_cache();
   if (input.empty()) {
     query = std::nullopt;
     helpers::strip_trailing_spaces_from_opaque_path(*this);
@@ -829,6 +835,7 @@ bool url::set_pathname(const std::string_view input) {
   if (has_opaque_path) {
     return false;
   }
+  clear_simple_href_cache();
   auto previous_path = std::move(path);
   path.clear();
   parse_path(input);
@@ -840,6 +847,7 @@ bool url::set_pathname(const std::string_view input) {
 }
 
 bool url::set_protocol(const std::string_view input) {
+  clear_simple_href_cache();
   std::string view(input);
   helpers::remove_ascii_tab_or_newline(view);
   if (view.empty()) {

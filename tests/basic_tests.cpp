@@ -572,6 +572,24 @@ TEST(basic_tests, can_parse_consistency_percent_encoded_host) {
   }
 }
 
+// Regression: try_can_parse_clean_http treated the first ':' as a port and
+// returned false on non-digit characters. Credentialed URLs use ':' in
+// userinfo (user:pass@host), so can_parse must fail closed (full parse) and
+// agree with parse() -- never hard-reject.
+TEST(basic_tests, can_parse_consistency_credentials) {
+  for (const auto& input : std::vector<std::string>{
+           "http://user:pass@host/",
+           "https://user:pass@example.com/path",
+           "http://user:@host/",
+           "https://a:80@b/",
+           "http://evil.com:@ok.com/",
+           "https://u:p@h:8080/x",
+           "http://user:pass@192.168.0.1/",
+       }) {
+    assert_can_parse_consistent(input);
+  }
+}
+
 // Regression: try_can_parse_absolute_fast returned true for a valid IPv4 host
 // without validating the port. For "wS://1.3.3.51.:+" the host "1.3.3.51."
 // passes the IPv4 fast path, but the port "+" is not a valid digit, so the
@@ -1294,6 +1312,39 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_pathname(), "/");
     ASSERT_EQ(url->get_href(), "https://example.com/");
+  }
+  // Already-encoded path bytes (not %2e) stay on the simple-absolute path.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/a%20b/c");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/a%20b/c");
+    ASSERT_EQ(url->get_href(), "https://example.com/a%20b/c");
+  }
+  // IPv4-like last labels (hex/0x) must fall through; agreement with SM.
+  {
+    auto url = ada::parse<TypeParam>("http://foo.0x");
+    // Invalid host (partial IPv4 hex form) - must not be accepted incorrectly.
+    ASSERT_FALSE(url);
+  }
+  // Domains ending in [a-f] (e.g. .de, .be) are not IPv4: stay valid and
+  // keep simple-absolute semantics (no credentials/port).
+  {
+    auto url = ada::parse<TypeParam>("https://example.de/path");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "example.de");
+    ASSERT_EQ(url->get_pathname(), "/path");
+    ASSERT_EQ(url->get_href(), "https://example.de/path");
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://www.example.be/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "www.example.be");
+    ASSERT_EQ(url->get_href(), "http://www.example.be/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://1.2.3.4");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "1.2.3.4");
   }
   {
     auto url =
