@@ -7,6 +7,7 @@
 
 #include "ada/character_sets-inl.h"
 #include "ada/helpers.h"
+#include "ada/string_pool.h"
 #include "ada/unicode-inl.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_components.h"
@@ -18,6 +19,12 @@
 #include <string_view>
 
 namespace ada {
+
+// Inline destructor: recycles freelist capacity without an out-of-line public
+// symbol flip (Agents.md ABI: no non-inline↔inline public method changes).
+inline url_aggregator::~url_aggregator() {
+  string_pool::recycle(buffer);
+}
 
 inline void url_aggregator::update_base_authority(
     std::string_view base_buffer, const ada::url_components& base) {

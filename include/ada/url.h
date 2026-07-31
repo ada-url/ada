@@ -65,7 +65,9 @@ struct url : url_base {
   url(url&& u) noexcept = default;
   url& operator=(url&& u) noexcept = default;
   url& operator=(const url& u) = default;
-  ~url() override = default;
+  // Inline (see url-inl.h): recycles path / href-cache capacity into a bounded
+  // thread-local freelist. Kept inline to match main's defaulted dtor ABI.
+  ~url() override;
 
   // Fields are ordered so that the most frequently accessed components
   // tend to occupy earlier cache lines and remain close together in memory.
@@ -122,6 +124,30 @@ struct url : url_base {
    * the empty string.
    */
   std::string password{};
+
+  /**
+   * @private
+   * True when non_special_scheme holds a simple-absolute href cache.
+   */
+  [[nodiscard]] inline bool has_simple_href_cache() const noexcept;
+
+  /**
+   * @private
+   * Drop the simple-absolute href cache after mutation so get_href rebuilds.
+   */
+  inline void clear_simple_href_cache() noexcept;
+
+  /**
+   * @private
+   * Expand path/query/hash from the href cache, then clear the cache.
+   */
+  inline void materialize_from_simple_href_cache();
+
+  /**
+   * @private
+   * Pathname slice of the simple-absolute href cache.
+   */
+  [[nodiscard]] inline std::string_view simple_href_path() const noexcept;
 
   /**
    * Checks if the URL has an empty hostname (host is set but empty string).
@@ -204,7 +230,7 @@ struct url : url_base {
    * @return A string_view pointing to the path.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  [[nodiscard]] constexpr std::string_view get_pathname() const noexcept;
+  [[nodiscard]] std::string_view get_pathname() const noexcept;
 
   /**
    * Returns the byte length of the pathname without creating a string.
@@ -360,13 +386,13 @@ struct url : url_base {
    * Checks if the URL has a fragment/hash component.
    * @return `true` if hash is present, `false` otherwise.
    */
-  [[nodiscard]] constexpr bool has_hash() const noexcept override;
+  [[nodiscard]] bool has_hash() const noexcept override;
 
   /**
    * Checks if the URL has a query/search component.
    * @return `true` if query is present, `false` otherwise.
    */
-  [[nodiscard]] constexpr bool has_search() const noexcept override;
+  [[nodiscard]] bool has_search() const noexcept override;
 
  private:
   friend ada::url ada::parser::parse_url<ada::url>(std::string_view,
