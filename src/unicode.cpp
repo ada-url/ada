@@ -455,22 +455,6 @@ unsigned constexpr convert_hex_to_binary(const char c) noexcept {
   return hex_to_binary_table[c - '0'];
 }
 
-// 0..15 for hex digits, 0xFF otherwise - validate and decode with two loads.
-constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
-  std::array<uint8_t, 256> t{};
-  for (size_t i = 0; i < 256; ++i) {
-    t[i] = 0xFF;
-  }
-  for (uint8_t i = 0; i < 10; ++i) {
-    t[static_cast<size_t>('0') + i] = i;
-  }
-  for (uint8_t i = 0; i < 6; ++i) {
-    t[static_cast<size_t>('A') + i] = static_cast<uint8_t>(10 + i);
-    t[static_cast<size_t>('a') + i] = static_cast<uint8_t>(10 + i);
-  }
-  return t;
-}();
-
 std::string percent_decode(const std::string_view input, size_t first_percent) {
   // next line is for safety only, we expect users to avoid calling
   // percent_decode when first_percent is outside the range.
@@ -497,12 +481,11 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
     if (*p == '%') {
       // Decode runs of valid %XX tightly (common for nested/encoded URLs).
       while (p + 2 < end && *p == '%') {
-        const uint8_t hi = unhex_table[static_cast<uint8_t>(p[1])];
-        const uint8_t lo = unhex_table[static_cast<uint8_t>(p[2])];
-        if ((hi | lo) >= 16) {
+        if (!is_ascii_hex_digit(p[1]) || !is_ascii_hex_digit(p[2])) {
           break;
         }
-        *d++ = static_cast<char>((hi << 4) | lo);
+        *d++ = static_cast<char>(convert_hex_to_binary(p[1]) * 16 +
+                                 convert_hex_to_binary(p[2]));
         p += 3;
       }
       if (p < end && *p == '%') {
@@ -524,6 +507,22 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   out.resize(static_cast<size_t>(d - d0));
   return out;
 }
+
+// 0..15 for hex digits, 0xFF otherwise - validate and decode with two loads.
+constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 0xFF;
+  }
+  for (uint8_t i = 0; i < 10; ++i) {
+    t[static_cast<size_t>('0') + i] = i;
+  }
+  for (uint8_t i = 0; i < 6; ++i) {
+    t[static_cast<size_t>('A') + i] = static_cast<uint8_t>(10 + i);
+    t[static_cast<size_t>('a') + i] = static_cast<uint8_t>(10 + i);
+  }
+  return t;
+}();
 
 std::string form_urlencoded_decode(const std::string_view input) {
   const size_t len = input.size();
