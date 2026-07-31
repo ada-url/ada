@@ -1326,6 +1326,21 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     // Invalid host (partial IPv4 hex form) - must not be accepted incorrectly.
     ASSERT_FALSE(url);
   }
+  // Domains ending in [a-f] (e.g. .de, .be) are not IPv4: stay valid and
+  // keep simple-absolute semantics (no credentials/port).
+  {
+    auto url = ada::parse<TypeParam>("https://example.de/path");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "example.de");
+    ASSERT_EQ(url->get_pathname(), "/path");
+    ASSERT_EQ(url->get_href(), "https://example.de/path");
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://www.example.be/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "www.example.be");
+    ASSERT_EQ(url->get_href(), "http://www.example.be/");
+  }
   {
     auto url = ada::parse<TypeParam>("http://1.2.3.4");
     ASSERT_TRUE(url);

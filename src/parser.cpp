@@ -86,34 +86,15 @@ constexpr std::array<uint8_t, 256> k_host_clean = []() consteval {
   return t;
 }();
 
-// Path bulk: printable ASCII except ? # " < > ` { } ^ \ ' . %
-// ('.' and '%' force scalar so path_needs_norm can run).
-// 1 = continue bulk, 0 = need scalar handling.
-constexpr std::array<uint8_t, 256> k_path_bulk = []() consteval {
-  std::array<uint8_t, 256> t{};
-  for (uint8_t c = 0x21; c <= 0x7E; ++c) {
-    t[c] = 1;
-  }
-  for (uint8_t c : {static_cast<uint8_t>('"'), static_cast<uint8_t>('<'),
-                    static_cast<uint8_t>('>'), static_cast<uint8_t>('`'),
-                    static_cast<uint8_t>('{'), static_cast<uint8_t>('}'),
-                    static_cast<uint8_t>('^'), static_cast<uint8_t>('\\'),
-                    static_cast<uint8_t>('\''), static_cast<uint8_t>('.'),
-                    static_cast<uint8_t>('%'), static_cast<uint8_t>('?'),
-                    static_cast<uint8_t>('#')}) {
-    t[c] = 0;
-  }
-  return t;
-}();
-
 // Grow string to n bytes without requiring value-init of new chars when the
 // platform provides that API. Not noexcept: allocation may throw bad_alloc.
+// Prefer the standard C++23 API; only then the Apple libc++ extension.
 ada_really_inline void string_resize_uninitialized(std::string& s, size_t n) {
 #if defined(__cpp_lib_string_resize_and_overwrite)
   s.resize_and_overwrite(
       n, [](char*, std::size_t count) noexcept { return count; });
 #elif defined(_LIBCPP_VERSION) && defined(__APPLE__)
-  // Apple libc++ public extension; not available on all libc++ / libstdc++.
+  // Apple libc++ extension; not available on all libc++ / libstdc++.
   s.__resize_default_init(n);
 #else
   s.resize(n);
@@ -126,19 +107,12 @@ ada_really_inline bool eight_host_clean(const uint8_t* p) noexcept {
          k_host_clean[p[6]] & k_host_clean[p[7]];
 }
 
-ada_really_inline bool eight_path_bulk(const uint8_t* p) noexcept {
-  return k_path_bulk[p[0]] & k_path_bulk[p[1]] & k_path_bulk[p[2]] &
-         k_path_bulk[p[3]] & k_path_bulk[p[4]] & k_path_bulk[p[5]] &
-         k_path_bulk[p[6]] & k_path_bulk[p[7]];
-}
-
 #if ADA_NEON
 // Advance over clean lowercase host bytes; returns first non-clean index.
 ada_really_inline size_t scan_host_clean_neon(const uint8_t* b, size_t start,
                                               size_t len) noexcept {
   size_t i = start;
   // Accept: a-z 0-9 - . _ ~
-  // Range checks via vector compares.
   for (; i + 16 <= len; i += 16) {
     const uint8x16_t w = vld1q_u8(b + i);
     const uint8x16_t ge_a = vcgeq_u8(w, vdupq_n_u8('a'));
@@ -156,9 +130,7 @@ ada_really_inline size_t scan_host_clean_neon(const uint8_t* b, size_t start,
     ok = vorrq_u8(ok, is_dot);
     ok = vorrq_u8(ok, is_us);
     ok = vorrq_u8(ok, is_tilde);
-    // ok lanes are 0xFF if good; find first non-0xFF
     const uint8x16_t bad = vmvnq_u8(ok);
-    // Narrow to nibble mask (0x00/0xFF lanes)
     const uint8x8_t nib = vshrn_n_u16(vreinterpretq_u16_u8(bad), 4);
     const uint64_t bits = vget_lane_u64(vreinterpret_u64_u8(nib), 0);
     if (bits != 0) {
@@ -170,63 +142,20 @@ ada_really_inline size_t scan_host_clean_neon(const uint8_t* b, size_t start,
   }
   return i;
 }
-
-// Advance over path bulk-ok bytes (no . % ? # or forbidden).
-ada_really_inline size_t scan_path_bulk_neon(const uint8_t* b, size_t start,
-                                             size_t len) noexcept {
-  size_t i = start;
-  for (; i + 16 <= len; i += 16) {
-    const uint8x16_t w = vld1q_u8(b + i);
-    // Reject control/space and non-ASCII: c < 0x21 || c > 0x7E
-    const uint8x16_t ge_21 = vcgeq_u8(w, vdupq_n_u8(0x21));
-    const uint8x16_t le_7e = vcleq_u8(w, vdupq_n_u8(0x7e));
-    uint8x16_t ok = vandq_u8(ge_21, le_7e);
-    // Reject " < > ` { } ^ \ ' . % ? #  ('.'/'%' exit bulk for norm check)
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('"')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('<')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('>')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('`')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('{')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('}')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('^')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('\\')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('\'')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('.')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('%')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('?')));
-    ok = vbicq_u8(ok, vceqq_u8(w, vdupq_n_u8('#')));
-    const uint8x16_t bad = vmvnq_u8(ok);
-    const uint8x8_t nib = vshrn_n_u16(vreinterpretq_u16_u8(bad), 4);
-    const uint64_t bits = vget_lane_u64(vreinterpret_u64_u8(nib), 0);
-    if (bits != 0) {
-      return i + (size_t(__builtin_ctzll(bits)) >> 2);
-    }
-  }
-  while (i < len && k_path_bulk[b[i]]) {
-    ++i;
-  }
-  return i;
-}
 #endif  // ADA_NEON
 
-// Reject IPv4-like / punycode hosts without a full is_ipv4 scan.
-// Fail-closed: mirrors checkers::is_ipv4's cheap last-char filter + xn--.
+// Host is acceptable for the simple-absolute fast path (not IPv4, not xn--).
+// Domains like "example.de" end in [a-f] but are not IPv4: only leave the
+// fast path when checkers::is_ipv4 is true (or punycode was seen).
 ada_really_inline bool host_fast_ok(const uint8_t* host, size_t n,
                                     bool saw_xn) noexcept {
   if (n == 0 || n > 253 || saw_xn) [[unlikely]] {
     return false;
   }
-  uint8_t last = host[n - 1];
-  // Trailing dot: look at previous char (is_ipv4 prunes one trailing dot).
-  if (last == '.') [[unlikely]] {
-    if (n == 1) {
-      return false;
-    }
-    last = host[n - 2];
-  }
-  // IPv4 candidates end in digit, a-f, or 'x' (hex/octal forms like "foo.0x").
-  if ((last >= '0' && last <= '9') || (last >= 'a' && last <= 'f') ||
-      last == 'x') [[unlikely]] {
+  const std::string_view hv(reinterpret_cast<const char*>(host), n);
+  // is_ipv4 already applies the last-char filter + trailing-dot prune; cheap
+  // reject for the common non-IPv4 case (including example.de / example.be).
+  if (checkers::is_ipv4(hv)) [[unlikely]] {
     return false;
   }
   return true;
