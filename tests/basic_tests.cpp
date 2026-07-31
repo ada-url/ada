@@ -572,6 +572,24 @@ TEST(basic_tests, can_parse_consistency_percent_encoded_host) {
   }
 }
 
+// Regression: try_can_parse_clean_http treated the first ':' as a port and
+// returned false on non-digit characters. Credentialed URLs use ':' in
+// userinfo (user:pass@host), so can_parse must fail closed (full parse) and
+// agree with parse() -- never hard-reject.
+TEST(basic_tests, can_parse_consistency_credentials) {
+  for (const auto& input : std::vector<std::string>{
+           "http://user:pass@host/",
+           "https://user:pass@example.com/path",
+           "http://user:@host/",
+           "https://a:80@b/",
+           "http://evil.com:@ok.com/",
+           "https://u:p@h:8080/x",
+           "http://user:pass@192.168.0.1/",
+       }) {
+    assert_can_parse_consistent(input);
+  }
+}
+
 // Regression: try_can_parse_absolute_fast returned true for a valid IPv4 host
 // without validating the port. For "wS://1.3.3.51.:+" the host "1.3.3.51."
 // passes the IPv4 fast path, but the port "+" is not a valid digit, so the
