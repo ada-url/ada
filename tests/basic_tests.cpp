@@ -1295,6 +1295,24 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_EQ(url->get_pathname(), "/");
     ASSERT_EQ(url->get_href(), "https://example.com/");
   }
+  // Already-encoded path bytes (not %2e) stay on the simple-absolute path.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/a%20b/c");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/a%20b/c");
+    ASSERT_EQ(url->get_href(), "https://example.com/a%20b/c");
+  }
+  // IPv4-like last labels (hex/0x) must fall through; agreement with SM.
+  {
+    auto url = ada::parse<TypeParam>("http://foo.0x");
+    // Invalid host (partial IPv4 hex form) — must not be accepted incorrectly.
+    ASSERT_FALSE(url);
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://1.2.3.4");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "1.2.3.4");
+  }
   {
     auto url =
         ada::parse<TypeParam>("https://user:pass@example.com:8080/x?y=1#z");

@@ -185,40 +185,73 @@ constexpr void url::copy_scheme(const ada::url& u) {
   type = u.type;
 }
 
+namespace detail {
+ada_really_inline void string_resize_uninitialized(std::string& s,
+                                                   size_t n) noexcept {
+#if defined(_LIBCPP_VERSION)
+  s.__resize_default_init(n);
+#elif defined(__cpp_lib_string_resize_and_overwrite)
+  s.resize_and_overwrite(
+      n, [](char*, std::size_t count) noexcept { return count; });
+#else
+  s.resize(n);
+#endif
+}
+}  // namespace detail
+
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
-  if (is_special() && host.has_value() && username.empty() &&
-      password.empty() && !port.has_value()) [[likely]] {
-    const std::string_view scheme = ada::scheme::details::is_special_list[type];
+  // Hot path: special URL, no credentials, no port (covers almost all
+  // benchdata / production absolute URLs).
+  if (host.has_value() && username.empty() && password.empty() &&
+      !port.has_value() && type != ada::scheme::type::NOT_SPECIAL) [[likely]] {
+    // Hardcode common schemes to avoid table load + size branch.
+    const char* scheme_ptr;
+    size_t scheme_len;
+    if (type == ada::scheme::type::HTTPS) [[likely]] {
+      scheme_ptr = "https";
+      scheme_len = 5;
+    } else if (type == ada::scheme::type::HTTP) {
+      scheme_ptr = "http";
+      scheme_len = 4;
+    } else {
+      const std::string_view scheme =
+          ada::scheme::details::is_special_list[type];
+      scheme_ptr = scheme.data();
+      scheme_len = scheme.size();
+    }
     const size_t host_size = host->size();
     const size_t path_size = path.size();
-    const size_t query_size = query.has_value() ? query->size() : 0;
-    const size_t hash_size = hash.has_value() ? hash->size() : 0;
-    const size_t total = scheme.size() + 3 + host_size + path_size +
-                         (query.has_value() ? query_size + 1 : 0) +
-                         (hash.has_value() ? hash_size + 1 : 0);
-    std::string output(total, '\0');
-    char* p = output.data();
-    std::memcpy(p, scheme.data(), scheme.size());
-    p += scheme.size();
-    p[0] = ':';
-    p[1] = '/';
-    p[2] = '/';
-    p += 3;
+    const bool has_q = query.has_value();
+    const bool has_h = hash.has_value();
+    const size_t query_size = has_q ? query->size() : 0;
+    const size_t hash_size = has_h ? hash->size() : 0;
+    const size_t total = scheme_len + 3 + host_size + path_size +
+                         (has_q ? query_size + 1 : 0) +
+                         (has_h ? hash_size + 1 : 0);
+    std::string output;
+    detail::string_resize_uninitialized(output, total);
+    char* d = output.data();
+    std::memcpy(d, scheme_ptr, scheme_len);
+    d += scheme_len;
+    d[0] = ':';
+    d[1] = '/';
+    d[2] = '/';
+    d += 3;
     // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-    std::memcpy(p, host->data(), host_size);
-    p += host_size;
-    std::memcpy(p, path.data(), path_size);
-    p += path_size;
-    if (query.has_value()) {
-      *p++ = '?';
+    std::memcpy(d, host->data(), host_size);
+    d += host_size;
+    std::memcpy(d, path.data(), path_size);
+    d += path_size;
+    if (has_q) {
+      *d++ = '?';
       // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-      std::memcpy(p, query->data(), query_size);
-      p += query_size;
+      std::memcpy(d, query->data(), query_size);
+      d += query_size;
     }
-    if (hash.has_value()) {
-      *p++ = '#';
+    if (has_h) {
+      *d++ = '#';
       // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-      std::memcpy(p, hash->data(), hash_size);
+      std::memcpy(d, hash->data(), hash_size);
     }
     return output;
   }

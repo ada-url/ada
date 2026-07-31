@@ -49,7 +49,9 @@ struct url_aggregator : url_base {
   url_aggregator(url_aggregator&& u) noexcept = default;
   url_aggregator& operator=(url_aggregator&& u) noexcept = default;
   url_aggregator& operator=(const url_aggregator& u) = default;
-  ~url_aggregator() override = default;
+  // Out-of-line: recycles buffer capacity into a thread-local freelist so the
+  // next parse on this thread can avoid a heap allocation.
+  ~url_aggregator() override;
 
   /**
    * The setter functions follow the steps defined in the URL Standard.
@@ -339,6 +341,11 @@ struct url_aggregator : url_base {
   // Note: exact cache-line placement is implementation- and platform-dependent.
   url_components components{};
   std::string buffer{};
+
+  // Thread-local spare for buffer capacity reuse across parse/destroy.
+  // Private implementation detail; not part of the public API.
+  static void adopt_pooled_buffer(std::string& dest, size_t min_capacity);
+  static void recycle_pooled_buffer(std::string& s) noexcept;
 
   /**
    * Returns true if neither the search, nor the hash nor the pathname
