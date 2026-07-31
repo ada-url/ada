@@ -514,6 +514,26 @@ static void assert_can_parse_consistent(const std::string& input) {
   }
 }
 
+TEST(basic_tests, can_parse_consistency_clean_http_frontend) {
+  for (const auto& input : std::vector<std::string>{
+           "https://example.com/",
+           "https://example.de/a/long/path?query=value#fragment",
+           "http://foo_bar.example/path with spaces",
+           "http://example.com",
+           "http://",
+           "http://?query",
+           "http:///path",
+           "http://Example.com/",
+           "http://example.com:65536/",
+           "http://1.2.3.999/",
+           "http://xn--/",
+           "http://example.com./",
+           "http://%65xample.com/",
+       }) {
+    assert_can_parse_consistent(input);
+  }
+}
+
 // Regression: extra slashes after "://" are consumed by
 // SPECIAL_AUTHORITY_IGNORE_SLASHES in the full parser, but
 // try_can_parse_absolute_fast stopped at the first extra '/' after "//",
