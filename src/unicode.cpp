@@ -461,31 +461,51 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   if (first_percent == std::string_view::npos) {
     return std::string(input);
   }
-  std::string dest;
-  dest.reserve(input.length());
-  dest.append(input.substr(0, first_percent));
-  const char* pointer = input.data() + first_percent;
-  const char* end = input.data() + input.size();
-  // Optimization opportunity: if the following code gets
-  // called often, it can be optimized quite a bit.
-  while (pointer < end) {
-    const char ch = pointer[0];
-    size_t remaining = end - pointer - 1;
-    if (ch != '%' || remaining < 2 ||
-        (  // ch == '%' && // It is unnecessary to check that ch == '%'.
-            (!is_ascii_hex_digit(pointer[1]) ||
-             !is_ascii_hex_digit(pointer[2])))) {
-      dest += ch;
-      pointer++;
+
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+  const char* const src = input.data();
+  const char* const end = src + input.size();
+
+  // Decoding never grows the string, so a single pre-sized buffer written via
+  // bulk memcpy of the plain runs (then shrunk to the final length) avoids the
+  // byte-at-a-time appends of the naive version.
+  std::string out(input.size(), '\0');
+  char* d = out.data();
+  char* const d0 = d;
+
+  std::memcpy(d, src, first_percent);
+  d += first_percent;
+
+  const char* p = src + first_percent;
+  while (p < end) {
+    if (*p == '%') {
+      // Decode runs of valid %XX tightly (common for nested/encoded URLs).
+      while (p + 2 < end && *p == '%') {
+        if (!is_ascii_hex_digit(p[1]) || !is_ascii_hex_digit(p[2])) {
+          break;
+        }
+        *d++ = static_cast<char>(convert_hex_to_binary(p[1]) * 16 +
+                                 convert_hex_to_binary(p[2]));
+        p += 3;
+      }
+      if (p < end && *p == '%') {
+        // Not a valid escape (too few chars left or bad hex): copy '%'
+        // literally and keep scanning after it.
+        *d++ = *p++;
+      }
     } else {
-      unsigned a = convert_hex_to_binary(pointer[1]);
-      unsigned b = convert_hex_to_binary(pointer[2]);
-      char c = static_cast<char>(a * 16 + b);
-      dest += c;
-      pointer += 3;
+      const char* q = static_cast<const char*>(
+          std::memchr(p, '%', static_cast<size_t>(end - p)));
+      const char* run_end = q ? q : end;
+      const size_t n = static_cast<size_t>(run_end - p);
+      std::memcpy(d, p, n);
+      d += n;
+      p = run_end;
     }
   }
-  return dest;
+
+  out.resize(static_cast<size_t>(d - d0));
+  return out;
 }
 
 // 0..15 for hex digits, 0xFF otherwise - validate and decode with two loads.
