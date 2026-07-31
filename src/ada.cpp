@@ -4,6 +4,7 @@
 #include "serializers.cpp"
 #include "implementation.cpp"
 #include "helpers.cpp"
+#include "string_pool.cpp"
 #include "url.cpp"
 #include "parser.cpp"
 #include "url_components.cpp"
