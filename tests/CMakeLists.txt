@@ -52,17 +52,18 @@ endif()
 macro(add_gtest_test exe cpp)
   add_executable(${exe} ${cpp})
   target_link_libraries(${exe} PRIVATE simdjson GTest::gtest_main)
-  # Use PRE_TEST discovery mode for cross-compilation where the test binary
-  # cannot be executed at build time (e.g., LoongArch via QEMU).
-  # Use POST_BUILD (default) for native builds to avoid DLL/PATH issues on Windows.
-  if(CMAKE_CROSSCOMPILING)
+  # PRE_TEST: required for cross-compilation (binary not runnable at build).
+  # Also use PRE_TEST on Windows: CMake 4.x POST_BUILD discovery on clang-cl
+  # Debug can get empty JSON from the test binary and fail the whole build
+  # (same flake seen on main). MSVC shared builds disable these tests.
+  if(CMAKE_CROSSCOMPILING OR WIN32)
     set(GTEST_DISCOVERY_MODE PRE_TEST)
   else()
     set(GTEST_DISCOVERY_MODE POST_BUILD)
   endif()
   gtest_discover_tests(${exe}
     DISCOVERY_MODE ${GTEST_DISCOVERY_MODE}
-    PROPERTIES TEST_DISCOVERY_TIMEOUT 600
+    DISCOVERY_TIMEOUT 120
   )
   set_source_files_properties(${cpp} PROPERTIES SKIP_LINTING ON)
 endmacro()
