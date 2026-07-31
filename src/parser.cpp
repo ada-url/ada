@@ -476,9 +476,8 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
   out.host_type = DEFAULT;
 
   if constexpr (is_aggregator) {
-    // Pull recycled capacity to avoid malloc on the hot path.
     const size_t need = need_slash ? len + 1 : len;
-    url_aggregator::adopt_pooled_buffer(out.buffer, need);
+    (void)need;
     if (!need_slash) [[likely]] {
       string_resize_uninitialized(out.buffer, len);
       std::memcpy(out.buffer.data(), p, len);
@@ -584,18 +583,17 @@ result_type parse_url_impl(std::string_view user_input,
   }
 
   // Simple absolute http(s) fast path (before tabs/newline scan).
-  // Skip digit-led hosts (typical IPv4) with a cheap peek so pure IPv4
-  // microbenches never enter try_parse (matches main; avoids CodSpeed
-  // regressions on Bench_IPv4_*).
+  // Skip digit-led hosts (IPv4) and '[' (IPv6) with a cheap peek so pure IP
+  // microbenches never enter try_parse (matches main + avoids IPv6 call cost).
   if constexpr (store_values) {
     if (base_url == nullptr) {
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
-      const bool digit_led_host = (n >= 8 && p[4] == ':' && p[5] == '/' &&
-                                   p[6] == '/' && p[7] >= '0' && p[7] <= '9') ||
-                                  (n >= 9 && p[5] == ':' && p[6] == '/' &&
-                                   p[7] == '/' && p[8] >= '0' && p[8] <= '9');
-      if (!digit_led_host && try_parse_simple_absolute(user_input, url))
+      // http://X... at [7] or https://X... at [8]
+      const uint8_t host0 =
+          (n >= 9 && p[4] == 's') ? p[8] : (n >= 8 ? p[7] : 0);
+      const bool skip_simple = (host0 >= '0' && host0 <= '9') || host0 == '[';
+      if (!skip_simple && try_parse_simple_absolute(user_input, url))
           [[likely]] {
         // need-slash may grow by 1; simple-absolute never expands further.
         if (user_input.size() + 1 > max_input_length) [[unlikely]] {

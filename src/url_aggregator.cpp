@@ -34,38 +34,9 @@ ada_really_inline void apply_shifted_non_scheme_offsets(
   }
 }
 
-// Single thread-local spare buffer. The parse hot path swaps it in (retaining
-// capacity) instead of calling the global allocator; the destructor swaps
-// capacity back for the next parse on this thread. One spare keeps overhead
-// minimal while eliminating malloc/free on the steady-state parse path.
-thread_local std::string t_buffer_spare;
-
 }  // namespace
 
 namespace ada {
-
-void url_aggregator::adopt_pooled_buffer(std::string& dest,
-                                         size_t min_capacity) {
-  // Prefer spare capacity when it is large enough; otherwise grow dest.
-  if (t_buffer_spare.capacity() >= min_capacity) {
-    dest.swap(t_buffer_spare);
-    dest.clear();
-    // t_buffer_spare now holds dest's old (usually empty) string.
-    t_buffer_spare.clear();
-  } else if (dest.capacity() < min_capacity) {
-    dest.reserve(min_capacity);
-  }
-}
-
-void url_aggregator::recycle_pooled_buffer(std::string& s) noexcept {
-  // Keep the larger capacity of the two.
-  if (s.capacity() > t_buffer_spare.capacity()) {
-    s.clear();
-    t_buffer_spare.swap(s);
-  }
-}
-
-url_aggregator::~url_aggregator() { recycle_pooled_buffer(buffer); }
 
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(
