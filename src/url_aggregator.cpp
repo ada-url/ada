@@ -210,6 +210,13 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) {
   ADA_ASSERT_TRUE(validate());
 }
 
+bool url_aggregator::needs_rollback_snapshot(size_t input_len) const noexcept {
+  // 3x should cover worst-case percent-encoding of every input byte; the
+  // constant covers the handful of delimiter bytes a setter may add ("/.", "?",
+  // "#" and so on)
+  return buffer.size() + input_len * 3 + 16 > ada::get_max_input_length();
+}
+
 bool url_aggregator::set_protocol(const std::string_view input) {
   ada_log("url_aggregator::set_protocol ", input);
   ADA_ASSERT_TRUE(validate());
@@ -231,11 +238,14 @@ bool url_aggregator::set_protocol(const std::string_view input) {
       std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
-    url_aggregator saved_url(*this);
+    std::optional<url_aggregator> saved_url;
+    if (needs_rollback_snapshot(view.size())) {
+      saved_url = *this;
+    }
     bool result = parse_scheme_with_colon<true>(
         view.substr(0, pointer - view.begin() + 1));
-    if (result && buffer.size() > ada::get_max_input_length()) {
-      *this = std::move(saved_url);
+    if (result && saved_url && buffer.size() > ada::get_max_input_length()) {
+      *this = std::move(*saved_url);
       return false;
     }
     return result;
@@ -250,7 +260,10 @@ bool url_aggregator::set_username(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  url_aggregator saved_url(*this);
+  std::optional<url_aggregator> saved_url;
+  if (needs_rollback_snapshot(input.size())) {
+    saved_url = *this;
+  }
   size_t idx = ada::unicode::percent_encode_index(
       input, character_sets::USERINFO_PERCENT_ENCODE);
   if (idx == input.size()) {
@@ -260,8 +273,8 @@ bool url_aggregator::set_username(const std::string_view input) {
     update_base_username(ada::unicode::percent_encode(
         input, character_sets::USERINFO_PERCENT_ENCODE, idx));
   }
-  if (buffer.size() > ada::get_max_input_length()) {
-    *this = std::move(saved_url);
+  if (saved_url && buffer.size() > ada::get_max_input_length()) {
+    *this = std::move(*saved_url);
     return false;
   }
   ADA_ASSERT_TRUE(validate());
@@ -275,7 +288,10 @@ bool url_aggregator::set_password(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  url_aggregator saved_url(*this);
+  std::optional<url_aggregator> saved_url;
+  if (needs_rollback_snapshot(input.size())) {
+    saved_url = *this;
+  }
   size_t idx = ada::unicode::percent_encode_index(
       input, character_sets::USERINFO_PERCENT_ENCODE);
   if (idx == input.size()) {
@@ -285,8 +301,8 @@ bool url_aggregator::set_password(const std::string_view input) {
     update_base_password(ada::unicode::percent_encode(
         input, character_sets::USERINFO_PERCENT_ENCODE, idx));
   }
-  if (buffer.size() > ada::get_max_input_length()) {
-    *this = std::move(saved_url);
+  if (saved_url && buffer.size() > ada::get_max_input_length()) {
+    *this = std::move(*saved_url);
     return false;
   }
   ADA_ASSERT_TRUE(validate());
@@ -347,7 +363,10 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   if (has_opaque_path) {
     return false;
   }
-  url_aggregator saved_url(*this);
+  std::optional<url_aggregator> saved_url;
+  if (needs_rollback_snapshot(input.size())) {
+    saved_url = *this;
+  }
   clear_pathname();
   parse_path(input);
   if (get_pathname().starts_with("//") && !has_authority() && !has_dash_dot()) {
@@ -360,8 +379,8 @@ bool url_aggregator::set_pathname(const std::string_view input) {
       components.hash_start += 2;
     }
   }
-  if (buffer.size() > ada::get_max_input_length()) {
-    *this = std::move(saved_url);
+  if (saved_url && buffer.size() > ada::get_max_input_length()) {
+    *this = std::move(*saved_url);
     return false;
   }
   ADA_ASSERT_TRUE(validate());
@@ -427,10 +446,13 @@ void url_aggregator::set_search(const std::string_view input) {
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
                    : ada::character_sets::QUERY_PERCENT_ENCODE;
 
-  url_aggregator saved_url(*this);
+  std::optional<url_aggregator> saved_url;
+  if (needs_rollback_snapshot(new_value.size())) {
+    saved_url = *this;
+  }
   update_base_search(new_value, query_percent_encode_set);
-  if (buffer.size() > ada::get_max_input_length()) {
-    *this = std::move(saved_url);
+  if (saved_url && buffer.size() > ada::get_max_input_length()) {
+    *this = std::move(*saved_url);
     return;
   }
   ADA_ASSERT_TRUE(validate());
@@ -452,10 +474,13 @@ void url_aggregator::set_hash(const std::string_view input) {
   std::string new_value;
   new_value = input[0] == '#' ? input.substr(1) : input;
   helpers::remove_ascii_tab_or_newline(new_value);
-  url_aggregator saved_url(*this);
+  std::optional<url_aggregator> saved_url;
+  if (needs_rollback_snapshot(new_value.size())) {
+    saved_url = *this;
+  }
   update_unencoded_base_hash(new_value);
-  if (buffer.size() > ada::get_max_input_length()) {
-    *this = std::move(saved_url);
+  if (saved_url && buffer.size() > ada::get_max_input_length()) {
+    *this = std::move(*saved_url);
     return;
   }
   ADA_ASSERT_TRUE(validate());
