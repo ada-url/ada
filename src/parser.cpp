@@ -106,23 +106,17 @@ constexpr std::array<uint8_t, 256> k_path_bulk = []() consteval {
   return t;
 }();
 
-ada_really_inline void string_resize_uninitialized(std::string& s,
-                                                   size_t n) noexcept {
-  // Prefer the standard C++23 API when available. Fall back to libc++'s
-  // extension only when the member is actually present (SFINAE), otherwise
-  // zero-fill resize. Avoid unconditional __resize_default_init which is not
-  // available on all libc++ builds (clang-tidy / some Linux libc++).
+// Grow string to n bytes without requiring value-init of new chars when the
+// platform provides that API. Not noexcept: allocation may throw bad_alloc.
+ada_really_inline void string_resize_uninitialized(std::string& s, size_t n) {
 #if defined(__cpp_lib_string_resize_and_overwrite)
   s.resize_and_overwrite(
       n, [](char*, std::size_t count) noexcept { return count; });
+#elif defined(_LIBCPP_VERSION) && defined(__APPLE__)
+  // Apple libc++ public extension; not available on all libc++ / libstdc++.
+  s.__resize_default_init(n);
 #else
-  if constexpr (requires(std::string& str, size_t m) {
-                  str.__resize_default_init(m);
-                }) {
-    s.__resize_default_init(n);
-  } else {
-    s.resize(n);
-  }
+  s.resize(n);
 #endif
 }
 
@@ -322,11 +316,11 @@ ada_really_inline bool rest_is_clean(const uint8_t* b, size_t start,
 }
 
 // Fast path for already-normalized absolute http(s) URLs.
-// Keep this non-inline (explicit instantiations in this TU) so the exported
-// symbol stays stable for ABI; IPv4/IPv6 paths fall through after a quick
-// reject and must not pay a second attempt from a dual call site.
+// ada_never_inline: keep a single out-of-line symbol (ABI) and keep the
+// fallthrough / IPv4 state-machine path small.
 template <class result_type>
-bool try_parse_simple_absolute(std::string_view input, result_type& out) {
+ada_never_inline bool try_parse_simple_absolute(std::string_view input,
+                                                result_type& out) {
   constexpr bool is_aggregator =
       std::is_same_v<result_type, ada::url_aggregator>;
   static_assert(is_aggregator || std::is_same_v<result_type, ada::url>);
@@ -590,20 +584,31 @@ result_type parse_url_impl(std::string_view user_input,
   }
 
   // Simple absolute http(s) fast path (before tabs/newline scan).
+  // Skip digit-led hosts (typical IPv4) with a cheap peek so pure IPv4
+  // microbenches never enter try_parse (matches main; avoids CodSpeed
+  // regressions on Bench_IPv4_*).
   if constexpr (store_values) {
-    if (base_url == nullptr && try_parse_simple_absolute(user_input, url))
-        [[likely]] {
-      // need-slash may grow by 1; simple-absolute never expands further.
-      if (user_input.size() + 1 > max_input_length) [[unlikely]] {
-        if constexpr (result_type_is_ada_url_aggregator) {
-          if (url.buffer.size() > max_input_length) {
+    if (base_url == nullptr) {
+      const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
+      const size_t n = user_input.size();
+      const bool digit_led_host = (n >= 8 && p[4] == ':' && p[5] == '/' &&
+                                   p[6] == '/' && p[7] >= '0' && p[7] <= '9') ||
+                                  (n >= 9 && p[5] == ':' && p[6] == '/' &&
+                                   p[7] == '/' && p[8] >= '0' && p[8] <= '9');
+      if (!digit_led_host && try_parse_simple_absolute(user_input, url))
+          [[likely]] {
+        // need-slash may grow by 1; simple-absolute never expands further.
+        if (user_input.size() + 1 > max_input_length) [[unlikely]] {
+          if constexpr (result_type_is_ada_url_aggregator) {
+            if (url.buffer.size() > max_input_length) {
+              url.is_valid = false;
+            }
+          } else if (url.get_href_size() > max_input_length) {
             url.is_valid = false;
           }
-        } else if (url.get_href_size() > max_input_length) {
-          url.is_valid = false;
         }
+        return url;
       }
-      return url;
     }
   }
 

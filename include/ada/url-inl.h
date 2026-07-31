@@ -186,20 +186,17 @@ constexpr void url::copy_scheme(const ada::url& u) {
 }
 
 namespace detail {
-ada_really_inline void string_resize_uninitialized(std::string& s,
-                                                   size_t n) noexcept {
-  // Prefer C++23 resize_and_overwrite; then libc++ extension when present.
+// Grow string to n bytes without requiring value-init of new chars when the
+// platform provides that API. Not noexcept: allocation may throw bad_alloc.
+ada_really_inline void string_resize_uninitialized(std::string& s, size_t n) {
 #if defined(__cpp_lib_string_resize_and_overwrite)
   s.resize_and_overwrite(
       n, [](char*, std::size_t count) noexcept { return count; });
+#elif defined(_LIBCPP_VERSION) && defined(__APPLE__)
+  // Apple libc++ public extension; not available on all libc++ / libstdc++.
+  s.__resize_default_init(n);
 #else
-  if constexpr (requires(std::string& str, size_t m) {
-                  str.__resize_default_init(m);
-                }) {
-    s.__resize_default_init(n);
-  } else {
-    s.resize(n);
-  }
+  s.resize(n);
 #endif
 }
 }  // namespace detail
