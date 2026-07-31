@@ -1305,7 +1305,7 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
   // IPv4-like last labels (hex/0x) must fall through; agreement with SM.
   {
     auto url = ada::parse<TypeParam>("http://foo.0x");
-    // Invalid host (partial IPv4 hex form) — must not be accepted incorrectly.
+    // Invalid host (partial IPv4 hex form) - must not be accepted incorrectly.
     ASSERT_FALSE(url);
   }
   {

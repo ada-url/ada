@@ -353,29 +353,9 @@ validate_port:
 template <class result_type>
 ada_warn_unused tl::expected<result_type, errors> parse(
     std::string_view input, const result_type* base_url) {
-  // Hot path: fill expected in-place; try_parse is really_inline so the
-  // simple-absolute body is specialized here for each result type.
-  if (base_url == nullptr) [[likely]] {
-    tl::expected<result_type, errors> result{tl::in_place};
-    if (ada::parser::try_parse_simple_absolute(input, *result)) [[likely]] {
-      const uint32_t max_len = ada::get_max_input_length();
-      // need-slash may grow by 1; simple-absolute never expands further.
-      if (input.size() + 1 > max_len) [[unlikely]] {
-        if (result->get_href_size() > max_len) {
-          return tl::unexpected(errors::type_error);
-        }
-      }
-      return result;
-    }
-    // Fall through to the state machine (try_parse already failed).
-    *result = result_type{};
-    *result = ada::parser::parse_url_impl<result_type, true>(input, nullptr);
-    if (!result->is_valid) {
-      return tl::unexpected(errors::type_error);
-    }
-    return result;
-  }
-
+  // Single try_parse lives inside parse_url_impl. Do not call try_parse here
+  // as well: IPv4/IPv6 (and other non-simple) inputs would pay the fast-path
+  // reject twice and show large CodSpeed regressions on those benches.
   result_type u = ada::parser::parse_url_impl<result_type>(input, base_url);
   if (!u.is_valid) {
     return tl::unexpected(errors::type_error);

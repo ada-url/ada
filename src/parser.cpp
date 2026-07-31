@@ -108,13 +108,21 @@ constexpr std::array<uint8_t, 256> k_path_bulk = []() consteval {
 
 ada_really_inline void string_resize_uninitialized(std::string& s,
                                                    size_t n) noexcept {
-#if defined(_LIBCPP_VERSION)
-  s.__resize_default_init(n);
-#elif defined(__cpp_lib_string_resize_and_overwrite)
+  // Prefer the standard C++23 API when available. Fall back to libc++'s
+  // extension only when the member is actually present (SFINAE), otherwise
+  // zero-fill resize. Avoid unconditional __resize_default_init which is not
+  // available on all libc++ builds (clang-tidy / some Linux libc++).
+#if defined(__cpp_lib_string_resize_and_overwrite)
   s.resize_and_overwrite(
       n, [](char*, std::size_t count) noexcept { return count; });
 #else
-  s.resize(n);
+  if constexpr (requires(std::string& str, size_t m) {
+                  str.__resize_default_init(m);
+                }) {
+    s.__resize_default_init(n);
+  } else {
+    s.resize(n);
+  }
 #endif
 }
 
@@ -313,11 +321,12 @@ ada_really_inline bool rest_is_clean(const uint8_t* b, size_t start,
   return true;
 }
 
-// Fast path for already-normalized absolute http(s) URLs. noinline keeps
-// the fallthrough path small (IPv4 microbenches).
+// Fast path for already-normalized absolute http(s) URLs.
+// Keep this non-inline (explicit instantiations in this TU) so the exported
+// symbol stays stable for ABI; IPv4/IPv6 paths fall through after a quick
+// reject and must not pay a second attempt from a dual call site.
 template <class result_type>
-ada_really_inline bool try_parse_simple_absolute(std::string_view input,
-                                                 result_type& out) {
+bool try_parse_simple_absolute(std::string_view input, result_type& out) {
   constexpr bool is_aggregator =
       std::is_same_v<result_type, ada::url_aggregator>;
   static_assert(is_aggregator || std::is_same_v<result_type, ada::url>);

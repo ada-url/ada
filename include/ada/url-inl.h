@@ -188,13 +188,18 @@ constexpr void url::copy_scheme(const ada::url& u) {
 namespace detail {
 ada_really_inline void string_resize_uninitialized(std::string& s,
                                                    size_t n) noexcept {
-#if defined(_LIBCPP_VERSION)
-  s.__resize_default_init(n);
-#elif defined(__cpp_lib_string_resize_and_overwrite)
+  // Prefer C++23 resize_and_overwrite; then libc++ extension when present.
+#if defined(__cpp_lib_string_resize_and_overwrite)
   s.resize_and_overwrite(
       n, [](char*, std::size_t count) noexcept { return count; });
 #else
-  s.resize(n);
+  if constexpr (requires(std::string& str, size_t m) {
+                  str.__resize_default_init(m);
+                }) {
+    s.__resize_default_init(n);
+  } else {
+    s.resize(n);
+  }
 #endif
 }
 }  // namespace detail
