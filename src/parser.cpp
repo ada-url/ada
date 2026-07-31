@@ -211,24 +211,6 @@ constexpr std::array<uint8_t, 256> k_rest_ok = []() consteval {
 
 // Single-pass: all of [start,end) allowed for copy-as-is (no encoding).
 // Path ./% for path_needs_norm is detected separately via memchr on the path.
-// Copy path and query from a base url, resolving a possible simple-absolute
-// href cache (path/query fields may be empty while getters still return data).
-ada_really_inline void copy_url_path_and_query_from_base(url& dest,
-                                                         const url& base) {
-  dest.path = std::string(base.get_pathname());
-  if (base.has_search()) {
-    const std::string s = base.get_search();
-    // get_search() returns "" for empty query ("?"), or "?value".
-    if (s.empty() || s == "?") {
-      dest.query = "";
-    } else {
-      dest.query = s.substr(1);
-    }
-  } else {
-    dest.query = std::nullopt;
-  }
-}
-
 ada_really_inline bool rest_is_clean(const uint8_t* b, size_t start,
                                      size_t end) noexcept {
   size_t i = start;
@@ -424,9 +406,8 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
   out.host_type = DEFAULT;
 
   if constexpr (is_aggregator) {
-    // Pull recycled capacity to avoid malloc on the hot path (see string_pool).
-    const size_t need = need_slash ? len + 1 : len;
-    string_pool::adopt(out.buffer, need);
+    // No freelist: recycling on every destroy regressed IPv4 aggregator
+    // CodSpeed (~3-5%). Buffer is short-lived and filled in one shot.
     if (!need_slash) [[likely]] {
       string_resize_uninitialized(out.buffer, len);
       std::memcpy(out.buffer.data(), p, len);
@@ -470,9 +451,8 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
                                       : url_components::omitted;
     }
   } else {
-    // Single heap string: full href in non_special_scheme + SSO host.
-    // path/query/hash stay empty; getters slice the cache. Setters call
-    // materialize_from_simple_href_cache() first (see url.cpp).
+    // Prebuild href for get_href(); also fill host/path/query/hash so getters
+    // and setters use normal fields. Setters clear the href cache.
     const size_t href_len = need_slash ? len + 1 : len;
     string_pool::adopt(out.non_special_scheme, href_len);
     if (!need_slash) [[likely]] {
@@ -495,7 +475,23 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
                                 host_len);
       }
     }
-    out.host.emplace(out.non_special_scheme.data() + host_start, host_len);
+    const char* href = out.non_special_scheme.data();
+    out.host.emplace(href + host_start, host_len);
+    if (need_slash) {
+      out.path = "/";
+    } else {
+      out.path.assign(href + path_start, path_end - path_start);
+    }
+    if (query_start != std::string_view::npos) {
+      const size_t q_end =
+          hash_start != std::string_view::npos ? hash_start : len;
+      const size_t q_off = need_slash ? query_start + 1 : query_start;
+      out.query.emplace(href + q_off + 1, q_end - query_start - 1);
+    }
+    if (hash_start != std::string_view::npos) {
+      const size_t h_off = need_slash ? hash_start + 1 : hash_start;
+      out.hash.emplace(href + h_off + 1, len - hash_start - 1);
+    }
   }
   return true;
 }
@@ -730,7 +726,8 @@ result_type parse_url_impl(std::string_view user_input,
           url.has_opaque_path = base_url->has_opaque_path;
 
           if constexpr (result_type_is_ada_url) {
-            copy_url_path_and_query_from_base(url, *base_url);
+            url.path = base_url->path;
+            url.query = base_url->query;
           } else {
             url.update_base_pathname(base_url->get_pathname());
             if (base_url->has_search()) {
@@ -954,7 +951,8 @@ result_type parse_url_impl(std::string_view user_input,
             url.port = base_url->port;
             // cloning the base path includes cloning the has_opaque_path flag
             url.has_opaque_path = base_url->has_opaque_path;
-            copy_url_path_and_query_from_base(url, *base_url);
+            url.path = base_url->path;
+            url.query = base_url->query;
           } else {
             url.update_base_authority(base_url->get_href(),
                                       base_url->get_components());
@@ -1407,7 +1405,8 @@ result_type parse_url_impl(std::string_view user_input,
           ada_log("FILE base non-null");
           if constexpr (result_type_is_ada_url) {
             url.host = base_url->host;
-            copy_url_path_and_query_from_base(url, *base_url);
+            url.path = base_url->path;
+            url.query = base_url->query;
           } else {
             url.update_host_to_base_host(base_url->get_hostname());
             url.update_base_pathname(base_url->get_pathname());

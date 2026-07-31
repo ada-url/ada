@@ -138,18 +138,6 @@ struct url : url_base {
   inline void clear_simple_href_cache() noexcept;
 
   /**
-   * @private
-   * Expand path/query/hash from the href cache, then clear the cache.
-   */
-  inline void materialize_from_simple_href_cache();
-
-  /**
-   * @private
-   * Pathname slice of the simple-absolute href cache.
-   */
-  [[nodiscard]] inline std::string_view simple_href_path() const noexcept;
-
-  /**
    * Checks if the URL has an empty hostname (host is set but empty string).
    * @return `true` if host exists but is empty, `false` otherwise.
    */
@@ -230,7 +218,7 @@ struct url : url_base {
    * @return A string_view pointing to the path.
    * @see https://url.spec.whatwg.org/#dom-url-pathname
    */
-  [[nodiscard]] std::string_view get_pathname() const noexcept;
+  [[nodiscard]] constexpr std::string_view get_pathname() const noexcept;
 
   /**
    * Returns the byte length of the pathname without creating a string.
@@ -386,13 +374,13 @@ struct url : url_base {
    * Checks if the URL has a fragment/hash component.
    * @return `true` if hash is present, `false` otherwise.
    */
-  [[nodiscard]] bool has_hash() const noexcept override;
+  [[nodiscard]] constexpr bool has_hash() const noexcept override;
 
   /**
    * Checks if the URL has a query/search component.
    * @return `true` if query is present, `false` otherwise.
    */
-  [[nodiscard]] bool has_search() const noexcept override;
+  [[nodiscard]] constexpr bool has_search() const noexcept override;
 
  private:
   friend ada::url ada::parser::parse_url<ada::url>(std::string_view,

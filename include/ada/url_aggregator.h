@@ -49,9 +49,7 @@ struct url_aggregator : url_base {
   url_aggregator(url_aggregator&& u) noexcept = default;
   url_aggregator& operator=(url_aggregator&& u) noexcept = default;
   url_aggregator& operator=(const url_aggregator& u) = default;
-  // Inline (see url_aggregator-inl.h): recycles buffer capacity into a bounded
-  // thread-local freelist. Kept inline to match main's defaulted dtor ABI.
-  ~url_aggregator() override;
+  ~url_aggregator() override = default;
 
   /**
    * The setter functions follow the steps defined in the URL Standard.

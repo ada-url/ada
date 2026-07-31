@@ -20,14 +20,8 @@
 
 namespace ada {
 
-// Inline destructor: recycles freelist capacity without an out-of-line public
-// symbol flip (Agents.md ABI: no non-inline↔inline public method changes).
-inline url::~url() {
-  // Host/query/hash are typically SSO-sized; path and the simple-absolute
-  // href cache (non_special_scheme) may hold heap capacity.
-  string_pool::recycle(path);
-  string_pool::recycle(non_special_scheme);
-}
+// Inline destructor: recycle href-cache capacity (see string_pool).
+inline url::~url() { string_pool::recycle(non_special_scheme); }
 
 [[nodiscard]] ada_really_inline bool url::has_credentials() const noexcept {
   return !username.empty() || !password.empty();
@@ -51,11 +45,10 @@ inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
   return out << u.to_string();
 }
 
-// True when non_special_scheme holds a simple-absolute href cache for a
-// special scheme (the field is otherwise empty for special URLs).
+// non_special_scheme holds a full href only on the simple-absolute path for
+// special schemes (otherwise empty or a non-special scheme name).
 [[nodiscard]] inline bool url::has_simple_href_cache() const noexcept {
-  return !non_special_scheme.empty() &&
-         type != ada::scheme::type::NOT_SPECIAL;
+  return !non_special_scheme.empty() && type != ada::scheme::type::NOT_SPECIAL;
 }
 
 inline void url::clear_simple_href_cache() noexcept {
@@ -64,102 +57,16 @@ inline void url::clear_simple_href_cache() noexcept {
   }
 }
 
-// Materialize path/query/hash from the href cache, then drop the cache.
-// Called by setters before mutating so components stay consistent.
-inline void url::materialize_from_simple_href_cache() {
-  if (!has_simple_href_cache()) {
-    return;
-  }
-  const std::string& href = non_special_scheme;
-  const size_t auth = (type == ada::scheme::type::HTTPS) ? 8 : 7;
-  const size_t host_len = host.has_value() ? host->size() : 0;
-  const size_t path_begin = auth + host_len;
-  size_t path_end = href.size();
-  size_t q_pos = std::string::npos;
-  size_t h_pos = std::string::npos;
-  if (path_begin < href.size()) {
-    q_pos = href.find('?', path_begin);
-    h_pos = href.find('#', path_begin);
-    path_end = href.size();
-    if (q_pos != std::string::npos) {
-      path_end = q_pos;
-    }
-    if (h_pos != std::string::npos && h_pos < path_end) {
-      path_end = h_pos;
-    }
-    path.assign(href.data() + path_begin, path_end - path_begin);
-  } else {
-    path = "/";
-  }
-  if (q_pos != std::string::npos) {
-    const size_t q_end =
-        (h_pos != std::string::npos && h_pos > q_pos) ? h_pos : href.size();
-    query.emplace(href.data() + q_pos + 1, q_end - q_pos - 1);
-  }
-  if (h_pos != std::string::npos) {
-    hash.emplace(href.data() + h_pos + 1, href.size() - h_pos - 1);
-  }
-  non_special_scheme.clear();
-}
-
-[[nodiscard]] inline std::string_view url::simple_href_path() const noexcept {
-  const size_t auth = (type == ada::scheme::type::HTTPS) ? 8 : 7;
-  const size_t host_len = host.has_value() ? host->size() : 0;
-  const size_t path_begin = auth + host_len;
-  if (path_begin >= non_special_scheme.size()) {
-    return "/";
-  }
-  const size_t path_end =
-      non_special_scheme.find_first_of("?#", path_begin);
-  if (path_end == std::string::npos) {
-    return std::string_view(non_special_scheme).substr(path_begin);
-  }
-  return std::string_view(non_special_scheme)
-      .substr(path_begin, path_end - path_begin);
-}
-
 [[nodiscard]] size_t url::get_pathname_length() const noexcept {
-  if (has_simple_href_cache() && path.empty()) {
-    return simple_href_path().size();
-  }
   return path.size();
 }
 
-[[nodiscard]] inline std::string_view url::get_pathname() const noexcept {
-  if (has_simple_href_cache() && path.empty()) {
-    return simple_href_path();
-  }
+[[nodiscard]] constexpr std::string_view url::get_pathname() const noexcept {
   return path;
 }
 
 [[nodiscard]] ada_really_inline ada::url_components url::get_components()
     const {
-  // Simple-absolute href cache: offsets match the prebuilt href layout.
-  if (has_simple_href_cache()) {
-    url_components out{};
-    const uint32_t protocol_end =
-        (type == ada::scheme::type::HTTPS) ? 6u : 5u;
-    out.protocol_end = protocol_end;
-    out.username_end = protocol_end + 2;
-    out.host_start = protocol_end + 2;
-    const uint32_t host_len =
-        host.has_value() ? uint32_t(host->size()) : 0u;
-    // Match the non-credentials branch below: host_end is last host index.
-    out.host_end = out.host_start + host_len - (host_len > 0 ? 1u : 0u);
-    out.port = url_components::omitted;
-    const size_t path_begin = size_t(protocol_end) + 2 + host_len;
-    out.pathname_start = uint32_t(path_begin);
-    const size_t q = non_special_scheme.find('?', path_begin);
-    const size_t h = non_special_scheme.find('#', path_begin);
-    if (q != std::string::npos && (h == std::string::npos || q < h)) {
-      out.search_start = uint32_t(q);
-    }
-    if (h != std::string::npos) {
-      out.hash_start = uint32_t(h);
-    }
-    return out;
-  }
-
   url_components out{};
 
   // protocol ends with ':'. for example: "https:"
@@ -268,24 +175,12 @@ constexpr void url::clear_pathname() { path.clear(); }
 
 constexpr void url::clear_search() { query = std::nullopt; }
 
-[[nodiscard]] inline bool url::has_hash() const noexcept {
-  if (hash.has_value()) {
-    return true;
-  }
-  if (has_simple_href_cache()) {
-    return non_special_scheme.find('#') != std::string::npos;
-  }
-  return false;
+[[nodiscard]] constexpr bool url::has_hash() const noexcept {
+  return hash.has_value();
 }
 
-[[nodiscard]] inline bool url::has_search() const noexcept {
-  if (query.has_value()) {
-    return true;
-  }
-  if (has_simple_href_cache()) {
-    return non_special_scheme.find('?') != std::string::npos;
-  }
-  return false;
+[[nodiscard]] constexpr bool url::has_search() const noexcept {
+  return query.has_value();
 }
 
 constexpr void url::set_protocol_as_file() { type = ada::scheme::type::FILE; }
@@ -301,7 +196,7 @@ inline void url::set_scheme(std::string&& new_scheme) noexcept {
 constexpr void url::copy_scheme(ada::url&& u) {
   type = u.type;
   // non_special_scheme holds the scheme name only for non-special URLs. For
-  // special URLs it may hold a simple-absolute href cache — never copy that.
+  // special URLs it may hold a simple-absolute href cache - never copy that.
   if (u.type == ada::scheme::type::NOT_SPECIAL) {
     non_special_scheme = std::move(u.non_special_scheme);
   } else {
@@ -335,8 +230,7 @@ ada_really_inline void string_resize_uninitialized(std::string& s, size_t n) {
 }  // namespace detail
 
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
-  // Simple-absolute cache: return a copy of the prebuilt href. (Stealing would
-  // break a second get_href / getters that slice the cache.)
+  // Simple-absolute path prebuilds the full href in non_special_scheme.
   if (has_simple_href_cache()) [[likely]] {
     return non_special_scheme;
   }

@@ -484,36 +484,21 @@ ada_really_inline void url::parse_path(std::string_view input) {
     answer.append("\",\n");
   }
   answer.append("\t\"path\":\"");
-  // Use getter so a simple-absolute href cache (path field empty) is visible.
-  helpers::encode_json(get_pathname(), back);
+  helpers::encode_json(path, back);
   answer.append("\",\n");
   answer.append("\t\"opaque path\":");
   answer.append((has_opaque_path ? "true" : "false"));
   if (has_search()) {
     answer.append(",\n");
     answer.append("\t\"query\":\"");
-    if (query.has_value()) {
-      helpers::encode_json(query.value(), back);
-    } else if (has_simple_href_cache()) {
-      // Empty or non-empty query only in the href cache.
-      const std::string s = get_search();
-      if (s.size() > 1) {
-        helpers::encode_json(s.substr(1), back);
-      }
-    }
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+    helpers::encode_json(query.value(), back);
     answer.append("\"");
   }
-  if (has_hash()) {
+  if (hash.has_value()) {
     answer.append(",\n");
     answer.append("\t\"hash\":\"");
-    if (hash.has_value()) {
-      helpers::encode_json(hash.value(), back);
-    } else if (has_simple_href_cache()) {
-      const std::string s = get_hash();
-      if (s.size() > 1) {
-        helpers::encode_json(s.substr(1), back);
-      }
-    }
+    helpers::encode_json(hash.value(), back);
     answer.append("\"");
   }
   answer.append("\n}");
@@ -580,21 +565,6 @@ ada_really_inline void url::parse_path(std::string_view input) {
 }
 
 [[nodiscard]] std::string url::get_search() const {
-  if (has_simple_href_cache() && !query.has_value()) {
-    const size_t q = non_special_scheme.find('?');
-    if (q == std::string::npos) {
-      return "";
-    }
-    const size_t h = non_special_scheme.find('#', q + 1);
-    // Empty query ("?") returns "" like the materialized path.
-    if (h == q + 1 || (h == std::string::npos && q + 1 == non_special_scheme.size())) {
-      return "";
-    }
-    if (h == std::string::npos) {
-      return non_special_scheme.substr(q);
-    }
-    return non_special_scheme.substr(q, h - q);
-  }
   // If this's URL's query is either null or the empty string, then return the
   // empty string. Return U+003F (?), followed by this's URL's query.
   return (!query.has_value() || (query->empty())) ? "" : "?" + query.value();
@@ -613,14 +583,6 @@ ada_really_inline void url::parse_path(std::string_view input) {
 }
 
 [[nodiscard]] std::string url::get_hash() const {
-  if (has_simple_href_cache() && !hash.has_value()) {
-    const size_t h = non_special_scheme.find('#');
-    // Match the materialized path: empty fragment returns "" not "#".
-    if (h == std::string::npos || h + 1 >= non_special_scheme.size()) {
-      return "";
-    }
-    return non_special_scheme.substr(h);
-  }
   // If this's URL's fragment is either null or the empty string, then return
   // the empty string. Return U+0023 (#), followed by this's URL's fragment.
   return (!hash.has_value() || (hash->empty())) ? "" : "#" + hash.value();
@@ -632,7 +594,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
     return false;
   }
 
-  materialize_from_simple_href_cache();
+  clear_simple_href_cache();
   url saved_url(*this);
 
   size_t host_end_pos = input.find('#');
@@ -757,7 +719,7 @@ bool url::set_username(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  materialize_from_simple_href_cache();
+  clear_simple_href_cache();
   auto previous_username = std::move(username);
   username = ada::unicode::percent_encode(
       input, character_sets::USERINFO_PERCENT_ENCODE);
@@ -772,7 +734,7 @@ bool url::set_password(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  materialize_from_simple_href_cache();
+  clear_simple_href_cache();
   auto previous_password = std::move(password);
   password = ada::unicode::percent_encode(
       input, character_sets::USERINFO_PERCENT_ENCODE);
@@ -787,7 +749,7 @@ bool url::set_port(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  materialize_from_simple_href_cache();
+  clear_simple_href_cache();
 
   if (input.empty()) {
     port = std::nullopt;
@@ -828,7 +790,7 @@ bool url::set_port(const std::string_view input) {
 }
 
 void url::set_hash(const std::string_view input) {
-  materialize_from_simple_href_cache();
+  clear_simple_href_cache();
   if (input.empty()) {
     hash = std::nullopt;
     helpers::strip_trailing_spaces_from_opaque_path(*this);
@@ -847,7 +809,7 @@ void url::set_hash(const std::string_view input) {
 }
 
 void url::set_search(const std::string_view input) {
-  materialize_from_simple_href_cache();
+  clear_simple_href_cache();
   if (input.empty()) {
     query = std::nullopt;
     helpers::strip_trailing_spaces_from_opaque_path(*this);
@@ -873,7 +835,7 @@ bool url::set_pathname(const std::string_view input) {
   if (has_opaque_path) {
     return false;
   }
-  materialize_from_simple_href_cache();
+  clear_simple_href_cache();
   auto previous_path = std::move(path);
   path.clear();
   parse_path(input);
@@ -885,7 +847,7 @@ bool url::set_pathname(const std::string_view input) {
 }
 
 bool url::set_protocol(const std::string_view input) {
-  materialize_from_simple_href_cache();
+  clear_simple_href_cache();
   std::string view(input);
   helpers::remove_ascii_tab_or_newline(view);
   if (view.empty()) {
