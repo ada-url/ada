@@ -572,6 +572,26 @@ TEST(basic_tests, can_parse_consistency_percent_encoded_host) {
   }
 }
 
+// ada::unicode::percent_decode
+TEST(basic_tests, percent_decode_direct) {
+  using ada::unicode::percent_decode;
+  constexpr auto npos = std::string_view::npos;
+  // No percent sign: first_percent == npos returns the input unchanged.
+  ASSERT_EQ(percent_decode("no percent here", npos), "no percent here");
+  ASSERT_EQ(percent_decode("", npos), "");
+  // Valid escapes are decoded.
+  ASSERT_EQ(percent_decode("a%2Eb", 1), "a.b");
+  ASSERT_EQ(percent_decode("%41%42%43", 0), "ABC");
+  ASSERT_EQ(percent_decode("caf%C3%A9", 3), std::string("caf\xc3\xa9"));
+  // A plain run followed by an escape exercises the memchr run-copy.
+  ASSERT_EQ(percent_decode("hello%20world", 5), "hello world");
+  // Invalid escapes are copied literally.
+  ASSERT_EQ(percent_decode("%zz", 0), "%zz");    // non-hex digits
+  ASSERT_EQ(percent_decode("x%2", 1), "x%2");    // truncated escape at end
+  ASSERT_EQ(percent_decode("100%", 3), "100%");  // trailing '%'
+  ASSERT_EQ(percent_decode("%%41", 0), "%A");    // '%' then a valid escape
+}
+
 // Regression: try_can_parse_absolute_fast returned true for a valid IPv4 host
 // without validating the port. For "wS://1.3.3.51.:+" the host "1.3.3.51."
 // passes the IPv4 fast path, but the port "+" is not a valid digit, so the
