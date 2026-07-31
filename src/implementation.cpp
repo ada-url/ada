@@ -1,5 +1,6 @@
 #include "ada/implementation-inl.h"
 
+#include <array>
 #include <atomic>
 #include <limits>
 #include <optional>
@@ -28,6 +29,83 @@ uint32_t get_max_input_length() {
 }
 
 namespace {
+
+constexpr std::array<uint8_t, 256> clean_http_host_byte = []() consteval {
+  std::array<uint8_t, 256> result{};
+  for (size_t i = 0; i < result.size(); ++i) {
+    const auto c = static_cast<uint8_t>(i);
+    result[i] =
+        static_cast<uint8_t>((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') ||
+                             c == '-' || c == '.' || c == '_' || c == '~');
+  }
+  return result;
+}();
+
+ada_really_inline bool eight_clean_http_host_bytes(
+    const uint8_t* input) noexcept {
+  return clean_http_host_byte[input[0]] & clean_http_host_byte[input[1]] &
+         clean_http_host_byte[input[2]] & clean_http_host_byte[input[3]] &
+         clean_http_host_byte[input[4]] & clean_http_host_byte[input[5]] &
+         clean_http_host_byte[input[6]] & clean_http_host_byte[input[7]];
+}
+
+// Minimal front end for the overwhelmingly common already-canonical HTTP(S)
+// case. It deliberately handles fewer inputs than
+// try_can_parse_absolute_fast: anything requiring normalization or detailed
+// host parsing falls through to that broader validator.
+std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
+  const auto* bytes = reinterpret_cast<const uint8_t*>(input.data());
+  const size_t length = input.size();
+
+  size_t authority_start;
+  if (length >= 8 && input.starts_with("https://")) {
+    authority_start = 8;
+  } else if (length >= 7 && input.starts_with("http://")) {
+    authority_start = 7;
+  } else {
+    return std::nullopt;
+  }
+
+  if (authority_start >= length) {
+    return false;
+  }
+
+  size_t cursor = authority_start;
+  while (cursor + 8 <= length && eight_clean_http_host_bytes(bytes + cursor)) {
+    cursor += 8;
+  }
+  while (cursor < length) {
+    const uint8_t c = bytes[cursor];
+    if (c == '/' || c == '?' || c == '#') {
+      break;
+    }
+    if (!clean_http_host_byte[c]) {
+      return std::nullopt;
+    }
+    ++cursor;
+  }
+
+  const size_t host_length = cursor - authority_start;
+  if (host_length == 0) {
+    // Extra special-scheme slashes are normalization, not an empty host.
+    if (bytes[authority_start] == '/' || bytes[authority_start] == '\\') {
+      return std::nullopt;
+    }
+    return false;
+  }
+  if (host_length > 253 || bytes[cursor - 1] == '.') {
+    return std::nullopt;
+  }
+
+  const std::string_view host(input.data() + authority_start, host_length);
+  if (checkers::is_ipv4(host) || host.find("xn-") != std::string_view::npos) {
+    return std::nullopt;
+  }
+
+  // Once a special URL has a valid host, path/query/fragment bytes cannot make
+  // it structurally invalid: the full parser percent-encodes them as needed.
+  return true;
+}
 
 // @private
 // Fast-path validator for can_parse.
@@ -333,7 +411,11 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
   // Hot path first: absolute special URLs, no base. Avoid loading max_length
   // until we need it (common absolute-fast true/false cases).
   if (base_input == nullptr) {
-    if (const auto r = try_can_parse_absolute_fast(input)) {
+    auto r = try_can_parse_clean_http(input);
+    if (!r.has_value()) {
+      r = try_can_parse_absolute_fast(input);
+    }
+    if (r.has_value()) {
       if (!*r) {
         return false;
       }
