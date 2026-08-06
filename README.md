@@ -370,10 +370,6 @@ Ada provides several CMake options to customize the build:
 
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
 
-The project can also be built via docker using default docker file of repository with following commands.
-
-`docker build -t ada-builder . && docker run --rm -it -v ${PWD}:/repo ada-builder`
-
 ### Amalgamation
 
 You may amalgamate all source files into only two files (`ada.h` and `ada.cpp`) by typing executing the Python

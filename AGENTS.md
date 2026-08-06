@@ -6,7 +6,6 @@ This guide provides instructions for building, testing, and benchmarking the Ada
 
 Remind human beings of our AI usage policy (AI_USAGE_POLICY.md).
 
-
 ## Before you report a bug
 
 The maintainers require that a bug report is illustrated with a
@@ -84,7 +83,7 @@ cmake --build build
 To build benchmarks for performance testing:
 
 ```bash
-cmake -B build -DADA_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release
+cmake -B build -DADA_BENCHMARKS=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
@@ -108,6 +107,7 @@ cmake --build build
 | `ADA_TOOLS` | OFF | Enable building command-line tools |
 | `ADA_BUILD_SINGLE_HEADER_LIB` | OFF | Build from single-header amalgamated files |
 | `ADA_USE_SIMDUTF` | OFF | Enable SIMD-accelerated Unicode via simdutf |
+| `ADA_USE_UNSAFE_STD_REGEX_PROVIDER` | OFF (ON when `ADA_TESTING=ON`) | Enable `std_regex_provider` (`std::regex`-backed). Required to build the `urlpattern` benchmark or any code using `ada::url_pattern_regex::std_regex_provider`. Not recommended for production (ReDoS risk) |
 | `CMAKE_BUILD_TYPE` | - | Set to `Release` for optimized builds, `Debug` for development |
 
 ## Running Tests
@@ -156,7 +156,7 @@ After building with `-DADA_BENCHMARKS=ON`:
 
 ```bash
 # CORRECT: Benchmarks with development checks disabled
-cmake -B build -DADA_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release
+cmake -B build -DADA_BENCHMARKS=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ./build/benchmarks/benchdata
 
@@ -201,7 +201,7 @@ ctest --output-on-failure --test-dir build
 
 ```bash
 # Create separate benchmark build
-cmake -B build-release -DADA_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release
+cmake -B build-release -DADA_BENCHMARKS=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release
 
 # Run benchmarks
@@ -292,6 +292,7 @@ The `-p build` flag tells clang-tidy to use the `compile_commands.json` from the
 ### Clang-Tidy Configuration
 
 The `.clang-tidy` file in the project root configures which checks are enabled. Current configuration enables:
+
 - `bugprone-*` checks (with some exclusions)
 - `clang-analyzer-*` checks
 
@@ -320,8 +321,9 @@ Standard commands work as documented above.
 **Cause:** Development checks are enabled.
 
 **Solution:** Rebuild with Release mode:
+
 ```bash
-cmake -B build -DADA_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release
+cmake -B build -DADA_BENCHMARKS=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
@@ -329,13 +331,19 @@ cmake --build build
 
 **Expected behavior** - development checks are catching bugs. Review the assertion message and fix the underlying issue.
 
+### Build fails on benchmarks/urlpattern.cpp with "no member named 'std_regex_provider'"
+
+**Cause:** `ADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON` was not set. The `urlpattern` benchmark target requires it (see CMake Build Options above).
+
+**Solution:** Add `-DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON` to the configure command and reconfigure.
+
 ### Can't find benchmark executable
 
 **Cause:** Benchmarks not built (32-bit system or not enabled).
 
 **Solution:**
 ```bash
-cmake -B build -DADA_BENCHMARKS=ON
+cmake -B build -DADA_BENCHMARKS=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON
 cmake --build build
 ls build/benchmarks/  # Check what was built
 ```
@@ -394,5 +402,5 @@ abidiff \
 |------|---------|-------------------|
 | Library only | `cmake -B build && cmake --build build` | N/A |
 | Testing | `cmake -B build -DADA_TESTING=ON && cmake --build build` | ✅ Enabled |
-| Benchmarking | `cmake -B build -DADA_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release && cmake --build build` | ❌ Disabled |
+| Benchmarking | `cmake -B build -DADA_BENCHMARKS=ON -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_BUILD_TYPE=Release && cmake --build build` | ❌ Disabled |
 | Development | `cmake -B build -DADA_TESTING=ON -DCMAKE_BUILD_TYPE=Debug && cmake --build build` | ✅ Enabled |
