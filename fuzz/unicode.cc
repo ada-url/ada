@@ -95,21 +95,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   volatile bool has_tn = ada::unicode::has_tabs_or_newline(sv);
   (void)has_tn;
 
-  // has_hex_prefix and has_hex_prefix_unsafe must agree when size >= 2.
-  {
-    bool safe = ada::checkers::has_hex_prefix(sv);
-    if (sv.size() >= 2) {
-      bool unsafe = ada::checkers::has_hex_prefix_unsafe(sv);
-      if (safe != unsafe) {
-        printf(
-            "has_hex_prefix vs has_hex_prefix_unsafe inconsistency for"
-            " input '%s'\n",
-            input.c_str());
-        abort();
-      }
-    }
-  }
-
   // is_double_dot and is_single_dot are mutually exclusive.
   {
     bool double_dot = ada::unicode::is_double_dot_path_segment(sv);

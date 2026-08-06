@@ -18,25 +18,6 @@
 
 namespace ada::checkers {
 
-constexpr bool has_hex_prefix_unsafe(std::string_view input) {
-  // This is actually efficient code, see has_hex_prefix for the assembly.
-  constexpr bool is_little_endian = std::endian::native == std::endian::little;
-  constexpr uint16_t word0x = 0x7830;
-  uint16_t two_first_bytes =
-      static_cast<uint16_t>(input[0]) |
-      static_cast<uint16_t>((static_cast<uint16_t>(input[1]) << 8));
-  if constexpr (is_little_endian) {
-    two_first_bytes |= 0x2000;
-  } else {
-    two_first_bytes |= 0x020;
-  }
-  return two_first_bytes == word0x;
-}
-
-constexpr bool has_hex_prefix(std::string_view input) {
-  return input.size() >= 2 && has_hex_prefix_unsafe(input);
-}
-
 constexpr bool is_digit(char x) noexcept { return (x >= '0') & (x <= '9'); }
 
 constexpr char to_lower(char x) noexcept { return (x | 0x20); }
