@@ -588,6 +588,10 @@ ada_really_inline void url::parse_path(std::string_view input) {
   return (!hash.has_value() || (hash->empty())) ? "" : "#" + hash.value();
 }
 
+bool url::needs_rollback_snapshot(size_t input_len) const noexcept {
+  return get_href_size() + input_len + 16 > ada::get_max_input_length();
+}
+
 template <bool override_hostname>
 bool url::set_host_or_hostname(const std::string_view input) {
   if (has_opaque_path) {
@@ -857,11 +861,14 @@ bool url::set_protocol(const std::string_view input) {
       std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
   if (pointer != view.end() && *pointer == ':') {
-    url saved_url(*this);
+    std::optional<url> saved_url;
+    if (needs_rollback_snapshot(view.size())) {
+      saved_url = *this;
+    }
     bool result = parse_scheme<true>(
         std::string_view(view.data(), pointer - view.begin()));
-    if (result && get_href_size() > ada::get_max_input_length()) {
-      *this = std::move(saved_url);
+    if (result && saved_url && get_href_size() > ada::get_max_input_length()) {
+      *this = std::move(*saved_url);
       return false;
     }
     return result;

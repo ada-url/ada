@@ -5,19 +5,6 @@ CPMAddPackage(
   GIT_TAG v3.0.0
 )
 
-# Optional gperftools heap profiler (brew install gperftools), enable with
-# -DADA_MEMORY_PROFILE=ON. Linking this in lets any benchmark be run under
-# `HEAPPROFILE=/tmp/some.heap ./bench_setters` to capture allocation profiles.
-option(ADA_MEMORY_PROFILE "Link the gperftools heap profiler into benchmarks" OFF)
-if(ADA_MEMORY_PROFILE)
-  find_library(TCMALLOC_PROFILER_LIB tcmalloc_and_profiler
-    PATHS /opt/homebrew/lib /usr/local/lib)
-  if(NOT TCMALLOC_PROFILER_LIB)
-    message(FATAL_ERROR "ADA_MEMORY_PROFILE=ON but libtcmalloc_and_profiler was not found (brew install gperftools)")
-  endif()
-  message(STATUS "Heap profiler enabled, linking ${TCMALLOC_PROFILER_LIB}")
-endif()
-
 # bench_protocol
 add_executable(bench_protocol bench_protocol.cpp)
 target_link_libraries(bench_protocol PRIVATE ada counters::counters)
@@ -123,12 +110,6 @@ target_link_libraries(bench_search_params PRIVATE benchmark::benchmark)
 target_link_libraries(urlpattern PRIVATE benchmark::benchmark)
 
 set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_ipv4 percent_encode percent_decode bench_setters bench_search_params urlpattern)
-
-if(ADA_MEMORY_PROFILE)
-  foreach(benchmark IN LISTS BENCHMARKS)
-    target_link_libraries(${benchmark} PRIVATE ${TCMALLOC_PROFILER_LIB})
-  endforeach()
-endif()
 
 add_custom_target(run_all_benchmarks
         COMMAND ${CMAKE_COMMAND} -E echo "Running all benchmarks..."
