@@ -101,7 +101,7 @@ cmake --build build
 ## CMake Build Options
 
 | Option | Default | Description |
-| ------ | ------- | ----------- |
+|--------|---------|-------------|
 | `ADA_TESTING` | OFF | Enable building tests |
 | `ADA_BENCHMARKS` | OFF | Enable building benchmarks (requires 64-bit) |
 | `ADA_TOOLS` | OFF | Enable building command-line tools |
