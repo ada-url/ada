@@ -38,20 +38,6 @@ constexpr bool is_alpha(char x) noexcept;
 
 /**
  * @private
- * Check whether a string starts with 0x or 0X. The function is only
- * safe if input.size() >=2.
- *
- * @see has_hex_prefix
- */
-constexpr bool has_hex_prefix_unsafe(std::string_view input);
-/**
- * @private
- * Check whether a string starts with 0x or 0X.
- */
-constexpr bool has_hex_prefix(std::string_view input);
-
-/**
- * @private
  * Check whether x is an ASCII digit. More likely to be inlined than
  * std::isdigit.
  */
