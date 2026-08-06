@@ -390,6 +390,17 @@ struct url_aggregator : url_base {
    */
   [[nodiscard]] constexpr bool cannot_have_credentials_or_port() const;
 
+  /**
+   * @private
+   * Several setters restore a saved copy of the URL when the mutation pushes
+   * the buffer past get_max_input_length(). A setter grows the buffer by at
+   * most input_len * 3 (worst-case percent-encoding) plus a small constant for
+   * delimiters, so this returns false when that upper bound stays within the
+   * limit. It does not account for parse-failure rollbacks, which are
+   * unrelated to the length limit.
+   */
+  [[nodiscard]] bool needs_rollback_snapshot(size_t input_len) const noexcept;
+
   template <bool override_hostname = false>
   bool set_host_or_hostname(std::string_view input);
 
