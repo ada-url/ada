@@ -397,6 +397,12 @@ struct url : url_base {
   inline void update_base_port(std::optional<uint16_t> input);
 
   /**
+   * Returns true if growing href by input_len (worst case) could exceed
+   * get_max_input_length(), meaning a rollback snapshot is actually needed.
+   */
+  [[nodiscard]] bool needs_rollback_snapshot(size_t input_len) const noexcept;
+
+  /**
    * Sets the host or hostname according to override condition.
    * Return true on success.
    * @see https://url.spec.whatwg.org/#hostname-state
