@@ -340,20 +340,24 @@ bool url_aggregator::set_port(const std::string_view input) {
   std::string_view digits_to_parse =
       std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
 
-  // Revert changes if parse_port fails.
-  url_aggregator saved_url(*this);
-  parse_port(digits_to_parse);
-  if (is_valid) {
-    if (buffer.size() > ada::get_max_input_length()) {
-      *this = std::move(saved_url);
-      return false;
-    }
-    return true;
+  // parse_port only touches the buffer once the digits are already known to
+  // be in range, so an invalid port never mutates anything and needs no
+  // rollback; a valid one can only grow the buffer by a few bytes.
+  std::optional<url_aggregator> saved_url;
+  if (needs_rollback_snapshot(digits_to_parse.size())) {
+    saved_url = *this;
   }
-  *this = std::move(saved_url);
-  is_valid = true;
-  ADA_ASSERT_TRUE(validate());
-  return false;
+  parse_port(digits_to_parse);
+  if (!is_valid) {
+    is_valid = true;
+    ADA_ASSERT_TRUE(validate());
+    return false;
+  }
+  if (saved_url && buffer.size() > ada::get_max_input_length()) {
+    *this = std::move(*saved_url);
+    return false;
+  }
+  return true;
 }
 
 bool url_aggregator::set_pathname(const std::string_view input) {
