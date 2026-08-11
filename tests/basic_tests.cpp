@@ -772,6 +772,24 @@ TYPED_TEST(basic_tests, ipv4_hex_leading_zeros) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, ipv4_fast_path_malformed_groups) {
+  // A pure-decimal IPv4 group must hold 1-3 digits and be non-empty. These
+  // hosts satisfy the "all digits/dots, three dots" shape the AVX-512 fast
+  // path pre-checks but violate the group structure, so they are not valid
+  // IPv4 addresses and must be rejected on every build.
+  // Group longer than three digits:
+  ASSERT_FALSE(ada::parse<TypeParam>("http://1234.5.6.7/"));
+  ASSERT_FALSE(ada::parse<TypeParam>("http://1.2345.6.7/"));
+  // Empty group / consecutive dots:
+  ASSERT_FALSE(ada::parse<TypeParam>("http://1..2.34/"));
+  ASSERT_FALSE(ada::parse<TypeParam>("http://12.3..4/"));
+  // A well-formed address with the same length still parses:
+  auto ok = ada::parse<TypeParam>("http://12.34.56.78/");
+  ASSERT_TRUE(ok);
+  ASSERT_EQ(ok->get_hostname(), "12.34.56.78");
+  SUCCEED();
+}
+
 // https://github.com/nodejs/undici/pull/2971
 TYPED_TEST(basic_tests, nodejs_undici_2971) {
   std::string_view base =
