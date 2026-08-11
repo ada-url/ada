@@ -94,35 +94,6 @@ parse_ipv4_decimal_scalar(const char* p, const char* pend) noexcept {
 }
 
 #if defined(ADA_AVX512)
-// After SIMD validation: fewer rejection branches on convert.
-ada_really_inline uint64_t
-parse_ipv4_decimal_trusted(const char* p, const char* pend) noexcept {
-  uint32_t ipv4 = 0;
-  for (int i = 0; i < 4; ++i) {
-    uint32_t val = static_cast<uint32_t>(*p - '0');
-    ++p;
-    if (p < pend && static_cast<unsigned char>(*p - '0') <= 9) {
-      if (val == 0) [[unlikely]] {
-        return ipv4_fast_fail;
-      }
-      val = val * 10u + static_cast<uint32_t>(*p - '0');
-      ++p;
-      if (p < pend && static_cast<unsigned char>(*p - '0') <= 9) {
-        val = val * 10u + static_cast<uint32_t>(*p - '0');
-        ++p;
-        if (val > 255u) [[unlikely]] {
-          return ipv4_fast_fail;
-        }
-      }
-    }
-    ipv4 = (ipv4 << 8) | val;
-    if (i < 3) {
-      ++p;  // trusted '.'
-    }
-  }
-  return ipv4;  // trailing-dot already accounted for by caller via pend
-}
-
 // AVX-512 pure-decimal IPv4 (Lemire/Mula-style masked load + parallel checks).
 // No over-read of the source string. Wins when the binary is built with
 // -mavx512bw -mavx512vl (or -march that enables them).
@@ -149,10 +120,14 @@ ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
   } else {
     return ipv4_fast_fail;
   }
-  // Convert from a tiny stack copy so trusted peeks stay in-bounds.
+  // Convert from a tiny stack copy so the scalar parser's peeks stay in-bounds.
+  // The SIMD stage only guarantees the byte set and dot count, not per-group
+  // digit count or non-emptiness, so the group structure must still be checked
+  // during the convert. Reuse the scalar parser rather than a "trusted" one so
+  // the AVX-512 path accepts exactly the same hosts as the portable path.
   alignas(16) char buf[16]{};
   std::memcpy(buf, data, effective_len);
-  return parse_ipv4_decimal_trusted(buf, buf + effective_len);
+  return parse_ipv4_decimal_scalar(buf, buf + effective_len);
 }
 #endif  // ADA_AVX512
 
