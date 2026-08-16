@@ -1496,3 +1496,215 @@ TEST(basic_tests, last_label_may_be_a_number_direct) {
   ASSERT_TRUE(last_label_may_be_a_number("0x7f.0.0.1"));
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
+  // Scheme forms the fast path rejects (falls through to the state machine).
+  {
+    auto url = ada::parse<TypeParam>("http:/example.com");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "http:");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+  }
+  {
+    auto url = ada::parse<TypeParam>("http:example.com");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "http:");
+  }
+  {
+    auto url = ada::parse<TypeParam>("wsx://example.com");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "wsx:");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+  }
+  {
+    auto url = ada::parse<TypeParam>("http:///");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "");
+  }
+
+  // IPv6 must not enter the host scanner.
+  {
+    auto url = ada::parse<TypeParam>("http://[::1]/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "[::1]");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://[2001:db8::1]/path");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "[2001:db8::1]");
+  }
+
+  // Last-label gate inside the fast path (non-digit-led hosts).
+  ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123"));
+  ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123."));
+  ASSERT_FALSE(ada::parse<TypeParam>("https://foo.0xFF"));
+  {
+    auto url = ada::parse<TypeParam>("ws://123");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "0.0.0.123");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://foo.x/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "foo.x");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com./path");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "example.com");
+  }
+
+  // Punycode and overlong hosts leave the fast path.
+  {
+    auto url = ada::parse<TypeParam>("http://xn--ls8h.com/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "xn--ls8h.com");
+  }
+  {
+    const std::string long_host(254, 'a');
+    auto url = ada::parse<TypeParam>("http://" + long_host + "/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), long_host);
+  }
+
+  // Uppercase host plus percent-encoding (handoff, both url types).
+  {
+    auto url = ada::parse<TypeParam>("https://WWW.EXAMPLE.COM/foo%20bar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "www.example.com");
+    ASSERT_EQ(url->get_pathname(), "/foo%20bar");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://WWW.EXAMPLE.COM?q='x'");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "www.example.com");
+    ASSERT_EQ(url->get_search(), "?q=%27x%27");
+    ASSERT_EQ(url->get_pathname(), "/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://WWW.EXAMPLE.COM#foo\"bar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hash(), "#foo%22bar");
+  }
+
+  // Dots that are not dot-segments stay on the copy path.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/file.txt");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/file.txt");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/.hidden");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/.hidden");
+  }
+
+  // Dot-segment handoff at the start and middle of the path.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/./a");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/a");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/../a");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/a");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo/./bar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo/bar");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo/../bar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/bar");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo/.");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo/..");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+  }
+
+  // Path encoding then query/hash; query encoding then hash.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo bar?q=1");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo%20bar");
+    ASSERT_EQ(url->get_search(), "?q=1");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo bar#h");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo%20bar");
+    ASSERT_EQ(url->get_hash(), "#h");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo?q='x'#h");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_search(), "?q=%27x%27");
+    ASSERT_EQ(url->get_hash(), "#h");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo{bar}");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo%7Bbar%7D");
+  }
+
+  // SIMD block + scalar remainder (host/path/query/hash > 16 bytes).
+  {
+    auto url = ada::parse<TypeParam>(
+        "https://abcdefghijklmnopxyz.example.com/"
+        "0123456789abcdefghi?q=0123456789abcdefghi#0123456789abcdefghi");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "abcdefghijklmnopxyz.example.com");
+    ASSERT_EQ(url->get_pathname(), "/0123456789abcdefghi");
+    ASSERT_EQ(url->get_search(), "?q=0123456789abcdefghi");
+    ASSERT_EQ(url->get_hash(), "#0123456789abcdefghi");
+  }
+  {
+    auto url = ada::parse<TypeParam>(
+        "https://ABCDEFGHIJKLMNOP.example.com/0123456789abcdef%20rest");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "abcdefghijklmnop.example.com");
+    ASSERT_EQ(url->get_pathname(), "/0123456789abcdef%20rest");
+  }
+  {
+    auto url = ada::parse<TypeParam>(
+        "https://example.com/0123456789abcdef?q=0123456789abcdef'x#h");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_search(), "?q=0123456789abcdef%27x");
+  }
+  {
+    auto url =
+        ada::parse<TypeParam>("https://example.com#0123456789abcdef\"rest");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hash(), "#0123456789abcdef%22rest");
+  }
+
+  // wss and no-path hash/query already-canonical copies.
+  {
+    auto url = ada::parse<TypeParam>("wss://example.com/chat");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "wss:");
+    ASSERT_EQ(url->get_href(), "wss://example.com/chat");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com#frag");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_hash(), "#frag");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com?q=1");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_search(), "?q=1");
+  }
+  SUCCEED();
+}

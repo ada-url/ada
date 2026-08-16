@@ -386,8 +386,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
     host = std::move(buffer);
 
     // Check for other IPv4 formats (hex, octal, etc.)
-    if (checkers::last_label_may_be_a_number(host.value()) &&
-        checkers::is_ipv4(host.value())) {
+    if (checkers::is_ipv4(host.value())) {
       ada_log("parse_host fast path ipv4");
       return parse_ipv4(host.value());
     }
@@ -412,7 +411,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
 
   // If asciiDomain ends in a number, then return the result of IPv4 parsing
   // asciiDomain.
-  if (checkers::last_label_may_be_a_number(*host) && checkers::is_ipv4(*host)) {
+  if (checkers::is_ipv4(*host)) {
     ada_log("parse_host got ipv4 ", *host);
     return parse_ipv4(*host);
   }

@@ -493,22 +493,26 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
       return false;
     }
   }
+#else
+  // Big-endian / uncommon arches: byte-wise http(s) match (compiled out on LE).
+  if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
+    matched_scheme = true;
+    if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
+      pos = 7;
+      scheme_type = ada::scheme::type::HTTP;
+      protocol_end = 5;
+    } else if (len >= 8 && b[4] == 's' && b[5] == ':' && b[6] == '/' &&
+               b[7] == '/') {
+      pos = 8;
+      scheme_type = ada::scheme::type::HTTPS;
+      protocol_end = 6;
+    } else {
+      return false;
+    }
+  }
 #endif
   if (!matched_scheme) {
-    if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
-      if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
-        pos = 7;
-        scheme_type = ada::scheme::type::HTTP;
-        protocol_end = 5;
-      } else if (len >= 8 && b[4] == 's' && b[5] == ':' && b[6] == '/' &&
-                 b[7] == '/') {
-        pos = 8;
-        scheme_type = ada::scheme::type::HTTPS;
-        protocol_end = 6;
-      } else {
-        return false;
-      }
-    } else if (b[0] == 'w' && b[1] == 's') {
+    if (b[0] == 'w' && b[1] == 's') {
       if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
         pos = 5;
         scheme_type = ada::scheme::type::WS;
@@ -534,8 +538,8 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     return false;
   }
 
-  // Digit-led hosts are IPv4/numeric; skip before scanning.
-  if (pos < len && b[pos] >= '0' && b[pos] <= '9') {
+  // Digit-led hosts are IPv4/numeric; '[' is IPv6. Skip before scanning.
+  if (pos < len && ((b[pos] >= '0' && b[pos] <= '9') || b[pos] == '[')) {
     return false;
   }
 
@@ -843,11 +847,14 @@ result_type parse_url_impl(std::string_view user_input,
     if (base_url == nullptr) {
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
-      const bool digit_led_host = (n >= 8 && p[4] == ':' && p[5] == '/' &&
-                                   p[6] == '/' && p[7] >= '0' && p[7] <= '9') ||
-                                  (n >= 9 && p[5] == ':' && p[6] == '/' &&
-                                   p[7] == '/' && p[8] >= '0' && p[8] <= '9');
-      if (!digit_led_host && try_parse_simple_absolute(user_input, url)) {
+      const uint8_t host0 =
+          (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/')   ? p[7]
+          : (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') ? p[8]
+                                                                  : 0;
+      // Skip IPv4 (digit-led) and IPv6 ('[') so the fast path stays off
+      // those microbenchmarks.
+      const bool skip_fast = (host0 >= '0' && host0 <= '9') || host0 == '[';
+      if (!skip_fast && try_parse_simple_absolute(user_input, url)) {
         if constexpr (result_type_is_ada_url_aggregator) {
           if (url.buffer.size() > max_input_length) [[unlikely]] {
             url.is_valid = false;
