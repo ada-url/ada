@@ -428,7 +428,8 @@ ada_really_inline void scan_hash_run(const uint8_t* b, size_t& i,
 
 // Conservative WHATWG ends-in-a-number gate. True only when the last label
 // is non-empty, starts with an ASCII digit, and is hex digits / x/X.
-bool last_label_may_be_a_number(std::string_view view) noexcept {
+ada_really_inline bool last_label_may_be_a_number(
+    std::string_view view) noexcept {
   if (view.empty()) {
     return false;
   }
@@ -866,9 +867,13 @@ result_type parse_url_impl(std::string_view user_input,
           (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/')   ? p[7]
           : (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') ? p[8]
                                                                   : 0;
-      // Skip IPv4 (digit-led) and IPv6 ('[') so the fast path stays off
-      // those microbenchmarks.
-      const bool skip_fast = (host0 >= '0' && host0 <= '9') || host0 == '[';
+      // Skip IPv4 (digit-led), IPv6 ('['), and userinfo ('@' near the
+      // front). SetHref uses userinfo; entering the SIMD scanner there
+      // is pure overhead.
+      const size_t at_window = n < 24 ? n : 24;
+      const bool skip_fast =
+          (host0 >= '0' && host0 <= '9') || host0 == '[' ||
+          (at_window != 0 && std::memchr(p, '@', at_window) != nullptr);
       if (!skip_fast && try_parse_simple_absolute(user_input, url)) {
         if constexpr (result_type_is_ada_url_aggregator) {
           if (url.buffer.size() > max_input_length) [[unlikely]] {
