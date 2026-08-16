@@ -133,31 +133,6 @@ ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
 
 }  // namespace detail
 
-ada_really_inline constexpr bool last_label_may_be_a_number(
-    std::string_view view) noexcept {
-  if (view.empty()) {
-    return false;
-  }
-  if (view.back() == '.') {
-    view.remove_suffix(1);
-    if (view.empty()) {
-      return false;
-    }
-  }
-  auto is_ipv4_number_char = [](char c) noexcept {
-    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
-           (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
-  };
-  size_t i = view.size();
-  while (i > 0 && is_ipv4_number_char(view[i - 1])) {
-    --i;
-  }
-  if (i > 0 && view[i - 1] != '.') {
-    return false;
-  }
-  return i != view.size() && (view[i] >= '0' && view[i] <= '9');
-}
-
 /**
  * Fast pure-decimal IPv4 parse. Returns packed address or ipv4_fast_fail.
  * Accepts an optional single trailing dot.

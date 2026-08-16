@@ -426,6 +426,32 @@ ada_really_inline void scan_hash_run(const uint8_t* b, size_t& i,
   }
 }
 
+// Conservative WHATWG ends-in-a-number gate. True only when the last label
+// is non-empty, starts with an ASCII digit, and is hex digits / x/X.
+bool last_label_may_be_a_number(std::string_view view) noexcept {
+  if (view.empty()) {
+    return false;
+  }
+  if (view.back() == '.') {
+    view.remove_suffix(1);
+    if (view.empty()) {
+      return false;
+    }
+  }
+  auto is_ipv4_number_char = [](char c) noexcept {
+    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
+           (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
+  };
+  size_t i = view.size();
+  while (i > 0 && is_ipv4_number_char(view[i - 1])) {
+    --i;
+  }
+  if (i > 0 && view[i - 1] != '.') {
+    return false;
+  }
+  return i != view.size() && (view[i] >= '0' && view[i] <= '9');
+}
+
 bool path_has_dot_segment(std::string_view path_body) noexcept {
   if (path_body.size() >= 2 && path_body[1] == '.') {
     if (path_body.size() == 2 || path_body[2] == '/' ||
@@ -564,7 +590,7 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
       unicode::to_lower_ascii(host_buf, host_len);
       hv = std::string_view(host_buf, host_len);
     }
-    if (checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
+    if (last_label_may_be_a_number(hv)) [[unlikely]] {
       return false;
     }
     static constexpr std::string_view xn{"xn-", 3};
@@ -676,6 +702,23 @@ after_rest:
   if (!rest_simple) {
     // Host is a plain domain. Finish path/query/hash with the regular helpers
     // so percent-encoding and dot segments do not re-parse the authority.
+    const std::string_view path_view =
+        has_path
+            ? std::string_view(input.data() + path_start, path_end - path_start)
+            : std::string_view{};
+    auto apply_query_and_hash = [&]() {
+      if (query_start != std::string_view::npos) {
+        const size_t q_end =
+            (hash_start != std::string_view::npos) ? hash_start : len;
+        out.update_base_search(std::string_view(input.data() + query_start + 1,
+                                                q_end - query_start - 1),
+                               character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
+      }
+      if (hash_start != std::string_view::npos) {
+        out.update_unencoded_base_hash(std::string_view(
+            input.data() + hash_start + 1, len - hash_start - 1));
+      }
+    };
     if constexpr (is_aggregator) {
       out.buffer.assign(input.substr(0, host_end));
       if (has_upper) {
@@ -689,44 +732,16 @@ after_rest:
       out.components.pathname_start = static_cast<uint32_t>(host_end);
       out.components.search_start = url_components::omitted;
       out.components.hash_start = url_components::omitted;
-      const std::string_view path_view =
-          has_path ? std::string_view(input.data() + path_start,
-                                      path_end - path_start)
-                   : std::string_view{};
       out.parse_path(path_view);
-      if (query_start != std::string_view::npos) {
-        const size_t q_end =
-            (hash_start != std::string_view::npos) ? hash_start : len;
-        out.update_base_search(std::string_view(input.data() + query_start + 1,
-                                                q_end - query_start - 1),
-                               character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
-      }
-      if (hash_start != std::string_view::npos) {
-        out.update_unencoded_base_hash(std::string_view(
-            input.data() + hash_start + 1, len - hash_start - 1));
-      }
+      apply_query_and_hash();
     } else {
       std::string host_str(input.substr(host_start, host_len));
       if (has_upper) {
         unicode::to_lower_ascii(host_str.data(), host_str.size());
       }
       out.host = std::move(host_str);
-      const std::string_view path_view =
-          has_path ? std::string_view(input.data() + path_start,
-                                      path_end - path_start)
-                   : std::string_view{};
       out.parse_path(path_view);
-      if (query_start != std::string_view::npos) {
-        const size_t q_end =
-            (hash_start != std::string_view::npos) ? hash_start : len;
-        out.update_base_search(std::string_view(input.data() + query_start + 1,
-                                                q_end - query_start - 1),
-                               character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
-      }
-      if (hash_start != std::string_view::npos) {
-        out.update_unencoded_base_hash(std::string_view(
-            input.data() + hash_start + 1, len - hash_start - 1));
-      }
+      apply_query_and_hash();
     }
     return true;
   }

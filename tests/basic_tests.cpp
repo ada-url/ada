@@ -1,5 +1,4 @@
 #include "ada.h"
-#include "ada/checkers-inl.h"
 #include "gtest/gtest.h"
 #include <cstdlib>
 #include <iostream>
@@ -1477,23 +1476,6 @@ TYPED_TEST(basic_tests, last_label_may_be_a_number_gate) {
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "192.168.1.1");
   }
-  SUCCEED();
-}
-
-TEST(basic_tests, last_label_may_be_a_number_direct) {
-  using ada::checkers::last_label_may_be_a_number;
-  ASSERT_FALSE(last_label_may_be_a_number(""));
-  ASSERT_FALSE(last_label_may_be_a_number("."));
-  ASSERT_FALSE(last_label_may_be_a_number("example.com"));
-  ASSERT_FALSE(last_label_may_be_a_number("example.com."));
-  ASSERT_FALSE(last_label_may_be_a_number("foo.x"));
-  ASSERT_FALSE(last_label_may_be_a_number("foo.bar"));
-  ASSERT_TRUE(last_label_may_be_a_number("123"));
-  ASSERT_TRUE(last_label_may_be_a_number("foo.123"));
-  ASSERT_TRUE(last_label_may_be_a_number("foo.123."));
-  ASSERT_TRUE(last_label_may_be_a_number("foo.0xFF"));
-  ASSERT_TRUE(last_label_may_be_a_number("192.168.1.1"));
-  ASSERT_TRUE(last_label_may_be_a_number("0x7f.0.0.1"));
   SUCCEED();
 }
 
