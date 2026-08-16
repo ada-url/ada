@@ -1516,11 +1516,7 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_protocol(), "wsx:");
     ASSERT_EQ(url->get_hostname(), "example.com");
   }
-  {
-    auto url = ada::parse<TypeParam>("http:///");
-    ASSERT_TRUE(url);
-    ASSERT_EQ(url->get_hostname(), "");
-  }
+  ASSERT_FALSE(ada::parse<TypeParam>("http:///"));
 
   // IPv6 must not enter the host scanner.
   {
@@ -1551,7 +1547,7 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
   {
     auto url = ada::parse<TypeParam>("https://example.com./path");
     ASSERT_TRUE(url);
-    ASSERT_EQ(url->get_hostname(), "example.com");
+    ASSERT_EQ(url->get_hostname(), "example.com.");
   }
 
   // Punycode and overlong hosts leave the fast path.
