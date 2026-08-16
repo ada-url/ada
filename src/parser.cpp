@@ -867,13 +867,26 @@ result_type parse_url_impl(std::string_view user_input,
           (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/')   ? p[7]
           : (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') ? p[8]
                                                                   : 0;
-      // Skip IPv4 (digit-led), IPv6 ('['), and userinfo ('@' near the
-      // front). SetHref uses userinfo; entering the SIMD scanner there
-      // is pure overhead.
-      const size_t at_window = n < 24 ? n : 24;
-      const bool skip_fast =
-          (host0 >= '0' && host0 <= '9') || host0 == '[' ||
-          (at_window != 0 && std::memchr(p, '@', at_window) != nullptr);
+      // Skip IPv4 (digit-led) and IPv6 ('['). Also skip userinfo/port when
+      // ':' or '@' appears in the first 16 authority bytes (before '/').
+      // Do not scan past the first slash: https://www.tiktok.com/@user
+      // has '@' in the path and must stay on the fast path.
+      bool skip_fast = (host0 >= '0' && host0 <= '9') || host0 == '[';
+      if (!skip_fast && host0 != 0) {
+        const size_t h =
+            (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') ? 7 : 8;
+        const size_t lim = (h + 16 < n) ? h + 16 : n;
+        for (size_t i = h; i < lim; ++i) {
+          const uint8_t c = p[i];
+          if (c == '/' || c == '?' || c == '#') {
+            break;
+          }
+          if (c == ':' || c == '@') {
+            skip_fast = true;
+            break;
+          }
+        }
+      }
       if (!skip_fast && try_parse_simple_absolute(user_input, url)) {
         if constexpr (result_type_is_ada_url_aggregator) {
           if (url.buffer.size() > max_input_length) [[unlikely]] {

@@ -1358,6 +1358,7 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
       "https://example.com/a/./b/../c",
       "https://example.com/path?q='x'#f",
       "https://WWW.Example.COM/Long/Path/Name/Without/Dot/Segments?x=1#y",
+      "https://www.tiktok.com/@aguyandagolden/video/7133277734310038830",
   };
   for (const char* s : samples) {
     auto u = ada::parse<ada::url>(s);
@@ -1683,6 +1684,24 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_pathname(), "/");
     ASSERT_EQ(url->get_search(), "?q=1");
+  }
+  // '@' in the path is not userinfo; the fast path must still accept it.
+  {
+    auto url = ada::parse<TypeParam>(
+        "https://www.tiktok.com/@aguyandagolden/video/7133277734310038830");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "www.tiktok.com");
+    ASSERT_EQ(url->get_pathname(),
+              "/@aguyandagolden/video/7133277734310038830");
+  }
+  {
+    auto url = ada::parse<TypeParam>(
+        "https://user:pass@www.example.com:8080/path/to/resource?foo=bar#s");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "user");
+    ASSERT_EQ(url->get_password(), "pass");
+    ASSERT_EQ(url->get_hostname(), "www.example.com");
+    ASSERT_EQ(url->get_port(), "8080");
   }
   SUCCEED();
 }
