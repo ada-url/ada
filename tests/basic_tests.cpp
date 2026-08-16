@@ -1,4 +1,5 @@
 #include "ada.h"
+#include "ada/checkers-inl.h"
 #include "gtest/gtest.h"
 #include <cstdlib>
 #include <iostream>
@@ -1393,6 +1394,59 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
     ASSERT_EQ(url->get_search(), "?q=%27x%27");
     ASSERT_EQ(url->get_href(), "https://example.com/?q=%27x%27");
   }
+  {
+    // Host, path, query, and fragment long enough to exercise the 16-byte
+    // scanners, including a stop character inside a SIMD block.
+    auto url = ada::parse<TypeParam>(
+        "https://this-is-a-long-hostname.example.com/"
+        "abcdefghijklmnopqrstuvwxyz?q=abcdefghijklmnopqrstuvwxyz#h");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "this-is-a-long-hostname.example.com");
+    ASSERT_EQ(url->get_pathname(), "/abcdefghijklmnopqrstuvwxyz");
+    ASSERT_EQ(url->get_search(), "?q=abcdefghijklmnopqrstuvwxyz");
+    ASSERT_EQ(url->get_hash(), "#h");
+  }
+  {
+    auto url = ada::parse<TypeParam>(
+        "https://THIS-IS-A-LONG-HOSTNAME.EXAMPLE.COM/abc.def.ghi.jkl.mno/foo");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "this-is-a-long-hostname.example.com");
+    ASSERT_EQ(url->get_pathname(), "/abc.def.ghi.jkl.mno/foo");
+  }
+  {
+    auto url =
+        ada::parse<TypeParam>("https://example.com/abcdefghijklmnop%20rest");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/abcdefghijklmnop%20rest");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo\\bar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo/bar");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com#foo\"bar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hash(), "#foo%22bar");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/path?q=1#f`x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_search(), "?q=1");
+    ASSERT_EQ(url->get_hash(), "#f%60x");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com:8080/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_port(), "8080");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+  }
+  {
+    auto url = ada::parse<TypeParam>("ftp://ftp.example.com/file");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "ftp:");
+    ASSERT_EQ(url->get_href(), "ftp://ftp.example.com/file");
+  }
   SUCCEED();
 }
 
@@ -1418,5 +1472,27 @@ TYPED_TEST(basic_tests, last_label_may_be_a_number_gate) {
   // Last label is a number but the host is not valid IPv4.
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123"));
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.0x"));
+  {
+    auto url = ada::parse<TypeParam>("http://192.168.1.1./");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+  }
+  SUCCEED();
+}
+
+TEST(basic_tests, last_label_may_be_a_number_direct) {
+  using ada::checkers::last_label_may_be_a_number;
+  ASSERT_FALSE(last_label_may_be_a_number(""));
+  ASSERT_FALSE(last_label_may_be_a_number("."));
+  ASSERT_FALSE(last_label_may_be_a_number("example.com"));
+  ASSERT_FALSE(last_label_may_be_a_number("example.com."));
+  ASSERT_FALSE(last_label_may_be_a_number("foo.x"));
+  ASSERT_FALSE(last_label_may_be_a_number("foo.bar"));
+  ASSERT_TRUE(last_label_may_be_a_number("123"));
+  ASSERT_TRUE(last_label_may_be_a_number("foo.123"));
+  ASSERT_TRUE(last_label_may_be_a_number("foo.123."));
+  ASSERT_TRUE(last_label_may_be_a_number("foo.0xFF"));
+  ASSERT_TRUE(last_label_may_be_a_number("192.168.1.1"));
+  ASSERT_TRUE(last_label_may_be_a_number("0x7f.0.0.1"));
   SUCCEED();
 }

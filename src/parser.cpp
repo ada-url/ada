@@ -623,25 +623,6 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     hash_start = i;
     ++i;
     goto scan_hash;
-  } else if (i < len) {
-    rest_simple = false;
-    has_path = true;
-    path_start = i;
-    for (; i < len; ++i) {
-      if (b[i] == '?') {
-        path_end = i;
-        query_start = i;
-        ++i;
-        goto scan_query_boundary;
-      }
-      if (b[i] == '#') {
-        path_end = i;
-        hash_start = i;
-        ++i;
-        goto after_rest;
-      }
-    }
-    path_end = i;
   }
   goto after_rest;
 
@@ -692,7 +673,7 @@ after_rest:
     // Host is a plain domain. Finish path/query/hash with the regular helpers
     // so percent-encoding and dot segments do not re-parse the authority.
     if constexpr (is_aggregator) {
-      out.buffer.assign(input.data(), host_end);
+      out.buffer.assign(input.substr(0, host_end));
       if (has_upper) {
         unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
       }
