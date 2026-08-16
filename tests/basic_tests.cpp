@@ -1350,6 +1350,14 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
       "https://maps.google.com/maps?hl=en&tab=wl",
       "https://example.com",
       "https://example.com?q=1#frag",
+      "ws://example.com/chat",
+      "wss://example.com/chat",
+      "ftp://ftp.example.com/file",
+      "https://example.com/foo'bar",
+      "https://example.com/foo%20bar",
+      "https://example.com/a/./b/../c",
+      "https://example.com/path?q='x'#f",
+      "https://WWW.Example.COM/Long/Path/Name/Without/Dot/Segments?x=1#y",
   };
   for (const char* s : samples) {
     auto u = ada::parse<ada::url>(s);
@@ -1359,5 +1367,56 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
       ASSERT_EQ(u->get_href(), std::string(a->get_href())) << s;
     }
   }
+  {
+    auto url = ada::parse<TypeParam>("ws://example.com/chat");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "ws:");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+    ASSERT_EQ(url->get_pathname(), "/chat");
+    ASSERT_EQ(url->get_href(), "ws://example.com/chat");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo'bar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo'bar");
+    ASSERT_EQ(url->get_href(), "https://example.com/foo'bar");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo%20bar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo%20bar");
+    ASSERT_EQ(url->get_href(), "https://example.com/foo%20bar");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com?q='x'");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_search(), "?q=%27x%27");
+    ASSERT_EQ(url->get_href(), "https://example.com/?q=%27x%27");
+  }
+  SUCCEED();
+}
+
+TYPED_TEST(basic_tests, last_label_may_be_a_number_gate) {
+  // Ordinary .com hosts end with a hex letter; the last-label gate must
+  // still treat them as domains, not IPv4.
+  {
+    auto url = ada::parse<TypeParam>("https://www.google.com/search");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "www.google.com");
+    ASSERT_EQ(url->get_href(), "https://www.google.com/search");
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://192.168.1.1/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://0x7f.0.0.1/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "127.0.0.1");
+  }
+  // Last label is a number but the host is not valid IPv4.
+  ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123"));
+  ASSERT_FALSE(ada::parse<TypeParam>("https://foo.0x"));
   SUCCEED();
 }

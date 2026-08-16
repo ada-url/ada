@@ -75,6 +75,18 @@ ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept;
 
 /**
  * @private
+ * Conservative gate for the WHATWG ends-in-a-number checker and IPv4 parsing.
+ * True only when the last label is non-empty, starts with an ASCII digit, and
+ * consists solely of hex digits and x/X (optional trailing dot). Used to skip
+ * IPv4 work on ordinary domain names.
+ *
+ * @see https://url.spec.whatwg.org/#ends-in-a-number-checker
+ */
+ada_really_inline constexpr bool last_label_may_be_a_number(
+    std::string_view view) noexcept;
+
+/**
+ * @private
  * Returns a bitset. If the first bit is set, then at least one character needs
  * percent encoding. If the second bit is set, a \\ is found. If the third bit
  * is set then we have a dot. If the fourth bit is set, then we have a percent

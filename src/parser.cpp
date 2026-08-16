@@ -17,11 +17,25 @@
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
 
+#if ADA_NEON
+#include <arm_neon.h>
+#elif ADA_SSE2
+#include <emmintrin.h>
+#endif
+
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+#include <intrin.h>
+#endif
+
 namespace ada::parser {
 
-// 0 = host byte, 1 = host delimiter (/ ? #), 2 = reject
+// Classification tables and 16-byte run scanners for the absolute-URL fast
+// path. Inspired by oven-sh/WebKit#452: scan 16 bytes at a time, and when the
+// path/query/fragment is not already canonical, keep the parsed host and
+// finish with the existing path helpers instead of re-parsing from scratch.
 namespace {
 
+// 0 = host byte, 1 = host delimiter (/ ? #), 2 = reject
 constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
   std::array<uint8_t, 256> t{};
   for (size_t i = 0; i < 256; ++i) {
@@ -40,8 +54,8 @@ constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
   return t;
 }();
 
-// 0 = ok, 1 = ?/#, 2 = reject. Path rejects '%' so "%2e" falls through.
-constexpr std::array<uint8_t, 256> k_rest = []() consteval {
+// Path: 0 = copy, 1 = ?/#, 2 = needs work. Apostrophe is copyable in a path.
+constexpr std::array<uint8_t, 256> k_path = []() consteval {
   std::array<uint8_t, 256> t{};
   for (size_t i = 0; i < 256; ++i) {
     t[i] = 2;
@@ -53,7 +67,7 @@ constexpr std::array<uint8_t, 256> k_rest = []() consteval {
                     static_cast<uint8_t>('>'), static_cast<uint8_t>('`'),
                     static_cast<uint8_t>('{'), static_cast<uint8_t>('}'),
                     static_cast<uint8_t>('^'), static_cast<uint8_t>('\\'),
-                    static_cast<uint8_t>('%'), static_cast<uint8_t>('\'')}) {
+                    static_cast<uint8_t>('%')}) {
     t[c] = 2;
   }
   t[static_cast<uint8_t>('?')] = 1;
@@ -61,10 +75,386 @@ constexpr std::array<uint8_t, 256> k_rest = []() consteval {
   return t;
 }();
 
+// Special-query: 0 = copy, 1 = #, 2 = needs work. Apostrophe must be encoded.
+constexpr std::array<uint8_t, 256> k_query = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 2;
+  }
+  for (uint8_t c = 0x21; c <= 0x7E; ++c) {
+    t[c] = 0;
+  }
+  for (uint8_t c : {static_cast<uint8_t>('"'), static_cast<uint8_t>('<'),
+                    static_cast<uint8_t>('>'), static_cast<uint8_t>('\'')}) {
+    t[c] = 2;
+  }
+  t[static_cast<uint8_t>('#')] = 1;
+  return t;
+}();
+
+// Fragment: 0 = copy, 2 = needs work. '?' '#' '%' are copyable.
+constexpr std::array<uint8_t, 256> k_hash = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 2;
+  }
+  for (uint8_t c = 0x21; c <= 0x7E; ++c) {
+    t[c] = 0;
+  }
+  for (uint8_t c : {static_cast<uint8_t>('"'), static_cast<uint8_t>('<'),
+                    static_cast<uint8_t>('>'), static_cast<uint8_t>('`')}) {
+    t[c] = 2;
+  }
+  return t;
+}();
+
+ada_really_inline int trailing_zeroes32(uint32_t input_num) noexcept {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+  unsigned long ret;
+  _BitScanForward(&ret, input_num);
+  return static_cast<int>(ret);
+#else
+  return __builtin_ctz(input_num);
+#endif
+}
+
+ada_really_inline int trailing_zeroes64(uint64_t input_num) noexcept {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+  unsigned long ret;
+  _BitScanForward64(&ret, input_num);
+  return static_cast<int>(ret);
+#else
+  return __builtin_ctzll(input_num);
+#endif
+}
+
+#if ADA_SSE2
+// Signed < 0x21 matches 0x00-0x20 and 0x80-0xFF; 0x7F is checked separately.
+ada_really_inline __m128i sse2_ctrl_or_nonascii(__m128i w) noexcept {
+  return _mm_or_si128(_mm_cmplt_epi8(w, _mm_set1_epi8(0x21)),
+                      _mm_cmpeq_epi8(w, _mm_set1_epi8(0x7F)));
+}
+
+ada_really_inline int sse2_host_stop(__m128i w) noexcept {
+  const __m128i ctrl = sse2_ctrl_or_nonascii(w);
+  const __m128i is_upper = _mm_and_si128(
+      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('A' - 1))),
+      _mm_cmplt_epi8(w, _mm_set1_epi8(static_cast<char>('Z' + 1))));
+  const __m128i at = _mm_sub_epi8(w, _mm_set1_epi8('@'));
+  const __m128i at_through_caret =
+      _mm_cmpeq_epi8(_mm_min_epu8(at, _mm_set1_epi8('^' - '@')), at);
+  const __m128i at_not_upper = _mm_andnot_si128(is_upper, at_through_caret);
+  const __m128i spec = _mm_or_si128(
+      _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('#')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('%'))),
+                   _mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('/')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8(':')))),
+      _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('<')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('>'))),
+                   _mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('?')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('|')))));
+  return _mm_movemask_epi8(
+      _mm_or_si128(_mm_or_si128(ctrl, at_not_upper), spec));
+}
+
+ada_really_inline int sse2_uppercase(__m128i w) noexcept {
+  return _mm_movemask_epi8(_mm_and_si128(
+      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('A' - 1))),
+      _mm_cmplt_epi8(w, _mm_set1_epi8(static_cast<char>('Z' + 1)))));
+}
+
+ada_really_inline int sse2_path_stop(__m128i w) noexcept {
+  const __m128i ctrl = sse2_ctrl_or_nonascii(w);
+  const __m128i spec = _mm_or_si128(
+      _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('"')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('#'))),
+                   _mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('%')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('<')))),
+      _mm_or_si128(
+          _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('>')),
+                                    _mm_cmpeq_epi8(w, _mm_set1_epi8('?'))),
+                       _mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('\\')),
+                                    _mm_cmpeq_epi8(w, _mm_set1_epi8('^')))),
+          _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('`')),
+                                    _mm_cmpeq_epi8(w, _mm_set1_epi8('{'))),
+                       _mm_cmpeq_epi8(w, _mm_set1_epi8('}')))));
+  return _mm_movemask_epi8(_mm_or_si128(ctrl, spec));
+}
+
+ada_really_inline int sse2_query_stop(__m128i w) noexcept {
+  const __m128i ctrl = sse2_ctrl_or_nonascii(w);
+  const __m128i spec = _mm_or_si128(
+      _mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('"')),
+                   _mm_cmpeq_epi8(w, _mm_set1_epi8('#'))),
+      _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('<')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('>'))),
+                   _mm_cmpeq_epi8(w, _mm_set1_epi8('\''))));
+  return _mm_movemask_epi8(_mm_or_si128(ctrl, spec));
+}
+
+ada_really_inline int sse2_hash_stop(__m128i w) noexcept {
+  const __m128i ctrl = sse2_ctrl_or_nonascii(w);
+  const __m128i spec =
+      _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('"')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('<'))),
+                   _mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('>')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('`'))));
+  return _mm_movemask_epi8(_mm_or_si128(ctrl, spec));
+}
+#endif  // ADA_SSE2
+
+#if ADA_NEON
+ada_really_inline uint8x16_t neon_ctrl_or_nonascii(uint8x16_t w) noexcept {
+  return vorrq_u8(vcltq_u8(w, vdupq_n_u8(0x21)), vcgtq_u8(w, vdupq_n_u8(0x7E)));
+}
+
+ada_really_inline uint64_t neon_nibble_bits(uint8x16_t matches) noexcept {
+  const uint8x8_t nib = vshrn_n_u16(vreinterpretq_u16_u8(matches), 4);
+  return vget_lane_u64(vreinterpret_u64_u8(nib), 0);
+}
+
+ada_really_inline uint64_t neon_host_stop(uint8x16_t w) noexcept {
+  const uint8x16_t ctrl = neon_ctrl_or_nonascii(w);
+  const uint8x16_t is_upper =
+      vandq_u8(vcgeq_u8(w, vdupq_n_u8('A')), vcleq_u8(w, vdupq_n_u8('Z')));
+  const uint8x16_t at_through_caret =
+      vandq_u8(vcgeq_u8(w, vdupq_n_u8('@')), vcleq_u8(w, vdupq_n_u8('^')));
+  const uint8x16_t at_not_upper = vbicq_u8(at_through_caret, is_upper);
+  const uint8x16_t spec = vorrq_u8(
+      vorrq_u8(
+          vorrq_u8(vceqq_u8(w, vdupq_n_u8('#')), vceqq_u8(w, vdupq_n_u8('%'))),
+          vorrq_u8(vceqq_u8(w, vdupq_n_u8('/')), vceqq_u8(w, vdupq_n_u8(':')))),
+      vorrq_u8(
+          vorrq_u8(vceqq_u8(w, vdupq_n_u8('<')), vceqq_u8(w, vdupq_n_u8('>'))),
+          vorrq_u8(vceqq_u8(w, vdupq_n_u8('?')),
+                   vceqq_u8(w, vdupq_n_u8('|')))));
+  return neon_nibble_bits(vorrq_u8(vorrq_u8(ctrl, at_not_upper), spec));
+}
+
+ada_really_inline uint64_t neon_uppercase(uint8x16_t w) noexcept {
+  return neon_nibble_bits(
+      vandq_u8(vcgeq_u8(w, vdupq_n_u8('A')), vcleq_u8(w, vdupq_n_u8('Z'))));
+}
+
+ada_really_inline uint64_t neon_path_stop(uint8x16_t w) noexcept {
+  const uint8x16_t ctrl = neon_ctrl_or_nonascii(w);
+  const uint8x16_t spec = vorrq_u8(
+      vorrq_u8(
+          vorrq_u8(vceqq_u8(w, vdupq_n_u8('"')), vceqq_u8(w, vdupq_n_u8('#'))),
+          vorrq_u8(vceqq_u8(w, vdupq_n_u8('%')), vceqq_u8(w, vdupq_n_u8('<')))),
+      vorrq_u8(vorrq_u8(vorrq_u8(vceqq_u8(w, vdupq_n_u8('>')),
+                                 vceqq_u8(w, vdupq_n_u8('?'))),
+                        vorrq_u8(vceqq_u8(w, vdupq_n_u8('\\')),
+                                 vceqq_u8(w, vdupq_n_u8('^')))),
+               vorrq_u8(vorrq_u8(vceqq_u8(w, vdupq_n_u8('`')),
+                                 vceqq_u8(w, vdupq_n_u8('{'))),
+                        vceqq_u8(w, vdupq_n_u8('}')))));
+  return neon_nibble_bits(vorrq_u8(ctrl, spec));
+}
+
+ada_really_inline uint64_t neon_query_stop(uint8x16_t w) noexcept {
+  const uint8x16_t ctrl = neon_ctrl_or_nonascii(w);
+  const uint8x16_t spec = vorrq_u8(
+      vorrq_u8(vceqq_u8(w, vdupq_n_u8('"')), vceqq_u8(w, vdupq_n_u8('#'))),
+      vorrq_u8(
+          vorrq_u8(vceqq_u8(w, vdupq_n_u8('<')), vceqq_u8(w, vdupq_n_u8('>'))),
+          vceqq_u8(w, vdupq_n_u8('\''))));
+  return neon_nibble_bits(vorrq_u8(ctrl, spec));
+}
+
+ada_really_inline uint64_t neon_hash_stop(uint8x16_t w) noexcept {
+  const uint8x16_t ctrl = neon_ctrl_or_nonascii(w);
+  const uint8x16_t spec = vorrq_u8(
+      vorrq_u8(vceqq_u8(w, vdupq_n_u8('"')), vceqq_u8(w, vdupq_n_u8('<'))),
+      vorrq_u8(vceqq_u8(w, vdupq_n_u8('>')), vceqq_u8(w, vdupq_n_u8('`'))));
+  return neon_nibble_bits(vorrq_u8(ctrl, spec));
+}
+#endif  // ADA_NEON
+
+// Returns false if a forbidden host code point is found. On success, *end is
+// the first / ? # or len, and has_upper reports any ASCII uppercase.
+ada_really_inline bool scan_plain_host(const uint8_t* b, size_t start,
+                                       size_t len, size_t& end,
+                                       bool& has_upper) noexcept {
+  has_upper = false;
+  size_t i = start;
+#if ADA_SSE2
+  for (; i + 16 <= len; i += 16) {
+    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
+    if (sse2_uppercase(w) != 0) {
+      has_upper = true;
+    }
+    const int mask = sse2_host_stop(w);
+    if (mask != 0) {
+      end = i +
+            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      return k_host_class[b[end]] == 1;
+    }
+  }
+#elif ADA_NEON
+  for (; i + 16 <= len; i += 16) {
+    const uint8x16_t w = vld1q_u8(b + i);
+    if (neon_uppercase(w) != 0) {
+      has_upper = true;
+    }
+    const uint64_t bits = neon_host_stop(w);
+    if (bits != 0) {
+      end = i + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
+      return k_host_class[b[end]] == 1;
+    }
+  }
+#endif
+  for (; i < len; ++i) {
+    const uint8_t c = b[i];
+    const uint8_t cls = k_host_class[c];
+    if (cls == 1) {
+      end = i;
+      return true;
+    }
+    if (cls == 2) {
+      return false;
+    }
+    if (c >= 'A' && c <= 'Z') {
+      has_upper = true;
+    }
+  }
+  end = len;
+  return true;
+}
+
+// Advance i to the first path-class 1 or 2 character (or len). Sets
+// path_has_dot if a '.' is seen on the copyable run.
+ada_really_inline void scan_path_run(const uint8_t* b, size_t& i, size_t len,
+                                     bool& path_has_dot) noexcept {
+#if ADA_SSE2
+  for (; i + 16 <= len; i += 16) {
+    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
+    const int mask = sse2_path_stop(w);
+    if (mask != 0) {
+      const size_t hit =
+          i +
+          static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      for (size_t j = i; j < hit; ++j) {
+        path_has_dot |= (b[j] == '.');
+      }
+      i = hit;
+      return;
+    }
+    // No stop in this block; still need to notice dots.
+    const int dots = _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('.')));
+    path_has_dot |= (dots != 0);
+  }
+#elif ADA_NEON
+  for (; i + 16 <= len; i += 16) {
+    const uint8x16_t w = vld1q_u8(b + i);
+    const uint64_t bits = neon_path_stop(w);
+    if (bits != 0) {
+      const size_t hit =
+          i + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
+      for (size_t j = i; j < hit; ++j) {
+        path_has_dot |= (b[j] == '.');
+      }
+      i = hit;
+      return;
+    }
+    path_has_dot |= (neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('.'))) != 0);
+  }
+#endif
+  for (; i < len; ++i) {
+    const uint8_t c = b[i];
+    const uint8_t cls = k_path[c];
+    if (cls != 0) {
+      return;
+    }
+    path_has_dot |= (c == '.');
+  }
+}
+
+ada_really_inline void scan_query_run(const uint8_t* b, size_t& i,
+                                      size_t len) noexcept {
+#if ADA_SSE2
+  for (; i + 16 <= len; i += 16) {
+    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
+    const int mask = sse2_query_stop(w);
+    if (mask != 0) {
+      i += static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      return;
+    }
+  }
+#elif ADA_NEON
+  for (; i + 16 <= len; i += 16) {
+    const uint8x16_t w = vld1q_u8(b + i);
+    const uint64_t bits = neon_query_stop(w);
+    if (bits != 0) {
+      i += static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
+      return;
+    }
+  }
+#endif
+  for (; i < len; ++i) {
+    if (k_query[b[i]] != 0) {
+      return;
+    }
+  }
+}
+
+ada_really_inline void scan_hash_run(const uint8_t* b, size_t& i,
+                                     size_t len) noexcept {
+#if ADA_SSE2
+  for (; i + 16 <= len; i += 16) {
+    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
+    const int mask = sse2_hash_stop(w);
+    if (mask != 0) {
+      i += static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      return;
+    }
+  }
+#elif ADA_NEON
+  for (; i + 16 <= len; i += 16) {
+    const uint8x16_t w = vld1q_u8(b + i);
+    const uint64_t bits = neon_hash_stop(w);
+    if (bits != 0) {
+      i += static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
+      return;
+    }
+  }
+#endif
+  for (; i < len; ++i) {
+    if (k_hash[b[i]] != 0) {
+      return;
+    }
+  }
+}
+
+bool path_has_dot_segment(std::string_view path_body) noexcept {
+  if (path_body.size() >= 2 && path_body[1] == '.') {
+    if (path_body.size() == 2 || path_body[2] == '/' ||
+        (path_body.size() >= 3 && path_body[2] == '.' &&
+         (path_body.size() == 3 || path_body[3] == '/'))) {
+      return true;
+    }
+  }
+  static constexpr std::string_view slash_dot{"/.", 2};
+  size_t p = 1;
+  while ((p = path_body.find(slash_dot, p)) != std::string_view::npos) {
+    const size_t after = p + 2;
+    if (after == path_body.size() || path_body[after] == '/' ||
+        (after + 1 <= path_body.size() && path_body[after] == '.' &&
+         (after + 1 == path_body.size() || path_body[after + 1] == '/'))) {
+      return true;
+    }
+    p = after;
+  }
+  return false;
+}
+
 }  // namespace
 
-// Fast path for already-normalized absolute http(s) URLs. noinline keeps
-// the fallthrough path small (IPv4 microbenches).
+// Fast path for already-canonical special-scheme URLs of the shape
+// scheme://host[/path][?query][#fragment]. noinline keeps the fallthrough
+// path small (IPv4 microbenches). When the host is a plain domain but the
+// rest needs encoding or dot-segment normalization, the host is kept and
+// the existing path/query/hash helpers finish the URL (no second parse).
 template <class result_type>
 ada_never_inline bool try_parse_simple_absolute(std::string_view input,
                                                 result_type& out) {
@@ -74,16 +464,23 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
   static_assert(is_ada_url || is_aggregator);
 
   const size_t len = input.size();
-  if (len < 8) [[unlikely]] {
+  // Shortest accepted form is "ws://x" (6).
+  if (len < 6) [[unlikely]] {
     return false;
   }
   const auto* b = reinterpret_cast<const uint8_t*>(input.data());
 
-  size_t pos;
-  ada::scheme::type scheme_type;
-  uint32_t protocol_end;
-  if (b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
-    if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
+  size_t pos = 0;
+  ada::scheme::type scheme_type = ada::scheme::type::NOT_SPECIAL;
+  uint32_t protocol_end = 0;
+  bool matched_scheme = false;
+#if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
+    defined(_M_X64) || defined(_M_IX86) || defined(_M_AMD64)
+  uint32_t first4 = 0;
+  std::memcpy(&first4, b, 4);
+  if (first4 == 0x70747468u) {  // "http"
+    matched_scheme = true;
+    if (len >= 7 && b[4] == ':' && b[5] == '/' && b[6] == '/') {
       pos = 7;
       scheme_type = ada::scheme::type::HTTP;
       protocol_end = 5;
@@ -95,8 +492,43 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     } else {
       return false;
     }
-  } else {
-    return false;
+  }
+#endif
+  if (!matched_scheme) {
+    if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
+      if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
+        pos = 7;
+        scheme_type = ada::scheme::type::HTTP;
+        protocol_end = 5;
+      } else if (len >= 8 && b[4] == 's' && b[5] == ':' && b[6] == '/' &&
+                 b[7] == '/') {
+        pos = 8;
+        scheme_type = ada::scheme::type::HTTPS;
+        protocol_end = 6;
+      } else {
+        return false;
+      }
+    } else if (b[0] == 'w' && b[1] == 's') {
+      if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
+        pos = 5;
+        scheme_type = ada::scheme::type::WS;
+        protocol_end = 3;
+      } else if (len >= 6 && b[2] == 's' && b[3] == ':' && b[4] == '/' &&
+                 b[5] == '/') {
+        pos = 6;
+        scheme_type = ada::scheme::type::WSS;
+        protocol_end = 4;
+      } else {
+        return false;
+      }
+    } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
+               b[4] == '/' && b[5] == '/') {
+      pos = 6;
+      scheme_type = ada::scheme::type::FTP;
+      protocol_end = 4;
+    } else {
+      return false;
+    }
   }
   if (pos < len && (b[pos] == '/' || b[pos] == '\\')) [[unlikely]] {
     return false;
@@ -109,21 +541,10 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
 
   const size_t host_start = pos;
   bool has_upper = false;
-  size_t i = pos;
-  for (; i < len; ++i) {
-    const uint8_t c = b[i];
-    const uint8_t cls = k_host_class[c];
-    if (cls == 1) {
-      break;
-    }
-    if (cls == 2) [[unlikely]] {
-      return false;
-    }
-    if (c >= 'A' && c <= 'Z') {
-      has_upper = true;
-    }
+  size_t host_end = pos;
+  if (!scan_plain_host(b, pos, len, host_end, has_upper)) {
+    return false;
   }
-  const size_t host_end = i;
   if (host_start == host_end) [[unlikely]] {
     return false;
   }
@@ -139,7 +560,7 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
       unicode::to_lower_ascii(host_buf, host_len);
       hv = std::string_view(host_buf, host_len);
     }
-    if (checkers::is_ipv4(hv)) [[unlikely]] {
+    if (checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
       return false;
     }
     static constexpr std::string_view xn{"xn-", 3};
@@ -148,27 +569,25 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     }
   }
 
+  size_t i = host_end;
   size_t path_start = host_end;
   size_t path_end = host_end;
   size_t query_start = std::string_view::npos;
   size_t hash_start = std::string_view::npos;
   bool has_path = false;
   bool path_has_dot = false;
+  bool rest_simple = true;
 
   if (i < len && b[i] == '/') {
     has_path = true;
     path_start = i;
     ++i;
-    for (; i < len; ++i) {
-      const uint8_t c = b[i];
-      const uint8_t cls = k_rest[c];
-      if (cls == 0) {
-        path_has_dot |= (c == '.');
-        continue;
-      }
+    scan_path_run(b, i, len, path_has_dot);
+    if (i < len) {
+      const uint8_t cls = k_path[b[i]];
       if (cls == 1) {
         path_end = i;
-        if (c == '?') {
+        if (b[i] == '?') {
           query_start = i;
           ++i;
           goto scan_query;
@@ -177,7 +596,23 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
         ++i;
         goto scan_hash;
       }
-      return false;
+      rest_simple = false;
+      for (; i < len; ++i) {
+        if (b[i] == '?') {
+          path_end = i;
+          query_start = i;
+          ++i;
+          goto scan_query_boundary;
+        }
+        if (b[i] == '#') {
+          path_end = i;
+          hash_start = i;
+          ++i;
+          goto after_rest;
+        }
+      }
+      path_end = i;
+      goto after_rest;
     }
     path_end = i;
   } else if (i < len && b[i] == '?') {
@@ -188,75 +623,137 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     hash_start = i;
     ++i;
     goto scan_hash;
+  } else if (i < len) {
+    rest_simple = false;
+    has_path = true;
+    path_start = i;
+    for (; i < len; ++i) {
+      if (b[i] == '?') {
+        path_end = i;
+        query_start = i;
+        ++i;
+        goto scan_query_boundary;
+      }
+      if (b[i] == '#') {
+        path_end = i;
+        hash_start = i;
+        ++i;
+        goto after_rest;
+      }
+    }
+    path_end = i;
   }
   goto after_rest;
 
 scan_query:
-  for (; i < len; ++i) {
-    const uint8_t c = b[i];
-    if (c == '#') {
+  scan_query_run(b, i, len);
+  if (i < len) {
+    if (b[i] == '#') {
       hash_start = i;
       ++i;
       goto scan_hash;
     }
-    if (c == '?' || c == '%') {
-      continue;
-    }
-    if (k_rest[c] == 2) [[unlikely]] {
-      return false;
+    rest_simple = false;
+    goto scan_query_boundary;
+  }
+  goto after_rest;
+
+scan_query_boundary:
+  for (; i < len; ++i) {
+    if (b[i] == '#') {
+      hash_start = i;
+      ++i;
+      goto after_rest;
     }
   }
   goto after_rest;
 
 scan_hash:
-  for (; i < len; ++i) {
-    const uint8_t c = b[i];
-    if (c == '?' || c == '#' || c == '%') {
-      continue;
-    }
-    if (k_rest[c] == 2) [[unlikely]] {
-      return false;
-    }
+  scan_hash_run(b, i, len);
+  if (i < len) {
+    rest_simple = false;
   }
 
 after_rest:
-  if (path_has_dot) [[unlikely]] {
+  if (rest_simple && path_has_dot) {
     const std::string_view path_body(input.data() + path_start,
                                      path_end - path_start);
-    if (path_body.size() >= 2 && path_body[1] == '.') {
-      if (path_body.size() == 2 || path_body[2] == '/' ||
-          (path_body.size() >= 3 && path_body[2] == '.' &&
-           (path_body.size() == 3 || path_body[3] == '/'))) {
-        return false;
-      }
-    }
-    static constexpr std::string_view slash_dot{"/.", 2};
-    size_t p = 1;
-    while ((p = path_body.find(slash_dot, p)) != std::string_view::npos) {
-      const size_t after = p + 2;
-      if (after == path_body.size() || path_body[after] == '/' ||
-          (after + 1 <= path_body.size() && path_body[after] == '.' &&
-           (after + 1 == path_body.size() || path_body[after + 1] == '/'))) {
-        return false;
-      }
-      p = after;
+    if (path_has_dot_segment(path_body)) {
+      rest_simple = false;
     }
   }
 
-  const bool need_slash = !has_path;
   out.type = scheme_type;
   out.is_valid = true;
   out.has_opaque_path = false;
   out.host_type = DEFAULT;
 
+  if (!rest_simple) {
+    // Host is a plain domain. Finish path/query/hash with the regular helpers
+    // so percent-encoding and dot segments do not re-parse the authority.
+    if constexpr (is_aggregator) {
+      out.buffer.assign(input.data(), host_end);
+      if (has_upper) {
+        unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
+      }
+      out.components.protocol_end = protocol_end;
+      out.components.username_end = protocol_end + 2;
+      out.components.host_start = protocol_end + 2;
+      out.components.host_end = static_cast<uint32_t>(host_end);
+      out.components.port = url_components::omitted;
+      out.components.pathname_start = static_cast<uint32_t>(host_end);
+      out.components.search_start = url_components::omitted;
+      out.components.hash_start = url_components::omitted;
+      const std::string_view path_view =
+          has_path ? std::string_view(input.data() + path_start,
+                                      path_end - path_start)
+                   : std::string_view{};
+      out.parse_path(path_view);
+      if (query_start != std::string_view::npos) {
+        const size_t q_end =
+            (hash_start != std::string_view::npos) ? hash_start : len;
+        out.update_base_search(std::string_view(input.data() + query_start + 1,
+                                                q_end - query_start - 1),
+                               character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
+      }
+      if (hash_start != std::string_view::npos) {
+        out.update_unencoded_base_hash(std::string_view(
+            input.data() + hash_start + 1, len - hash_start - 1));
+      }
+    } else {
+      std::string host_str(input.substr(host_start, host_len));
+      if (has_upper) {
+        unicode::to_lower_ascii(host_str.data(), host_str.size());
+      }
+      out.host = std::move(host_str);
+      const std::string_view path_view =
+          has_path ? std::string_view(input.data() + path_start,
+                                      path_end - path_start)
+                   : std::string_view{};
+      out.parse_path(path_view);
+      if (query_start != std::string_view::npos) {
+        const size_t q_end =
+            (hash_start != std::string_view::npos) ? hash_start : len;
+        out.update_base_search(std::string_view(input.data() + query_start + 1,
+                                                q_end - query_start - 1),
+                               character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
+      }
+      if (hash_start != std::string_view::npos) {
+        out.update_unencoded_base_hash(std::string_view(
+            input.data() + hash_start + 1, len - hash_start - 1));
+      }
+    }
+    return true;
+  }
+
+  const bool need_slash = !has_path;
   if constexpr (is_aggregator) {
     if (!need_slash) {
       out.buffer.resize(len);
       // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
       std::memcpy(out.buffer.data(), input.data(), len);
       if (has_upper) {
-        unicode::to_lower_ascii(out.buffer.data() + host_start,
-                                host_end - host_start);
+        unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
       }
       out.components.protocol_end = protocol_end;
       out.components.username_end = protocol_end + 2;
@@ -280,8 +777,7 @@ after_rest:
                     len - host_end);
       }
       if (has_upper) {
-        unicode::to_lower_ascii(out.buffer.data() + host_start,
-                                host_end - host_start);
+        unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
       }
       out.components.protocol_end = protocol_end;
       out.components.username_end = protocol_end + 2;
@@ -297,7 +793,7 @@ after_rest:
                                       : url_components::omitted;
     }
   } else {
-    std::string host_str(input.substr(host_start, host_end - host_start));
+    std::string host_str(input.substr(host_start, host_len));
     if (has_upper) {
       unicode::to_lower_ascii(host_str.data(), host_str.size());
     }
