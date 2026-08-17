@@ -1759,6 +1759,40 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_hostname(), "www.example.com");
     ASSERT_EQ(url->get_port(), "8080");
   }
+  // 8-byte scheme match + 32-byte host window (BBC-style CDN hosts).
+  {
+    auto url = ada::parse<TypeParam>(
+        "https://abcdefghijklmnopqrstuvwxyz.com/0123456789abcdef0123456789");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "abcdefghijklmnopqrstuvwxyz.com");
+    ASSERT_EQ(url->get_pathname(), "/0123456789abcdef0123456789");
+  }
+  {
+    auto url = ada::parse<TypeParam>("ws://example.com/chat");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "ws:");
+  }
+  // 'x' in the path must not force an xn-- reject of a clean host.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/xn--path");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "example.com");
+    ASSERT_EQ(url->get_pathname(), "/xn--path");
+  }
+  // Uppercase in the path of a short host must not lowercase the path.
+  {
+    auto url = ada::parse<TypeParam>("https://ex.com/FooBar");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "ex.com");
+    ASSERT_EQ(url->get_pathname(), "/FooBar");
+    ASSERT_EQ(url->get_href(), "https://ex.com/FooBar");
+  }
+  {
+    ASSERT_TRUE(ada::can_parse("https://foo_bar.com/"));
+    ASSERT_TRUE(ada::can_parse("https://foo~bar.com/"));
+    ASSERT_TRUE(ada::can_parse("https://foo-bar.com/"));
+    ASSERT_TRUE(ada::can_parse("http://ab.cd.ef/"));
+  }
   {
     auto u = ada::parse<TypeParam>("https://example.com/a%20b/c%2Fd");
     ASSERT_TRUE(u);

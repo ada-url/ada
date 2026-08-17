@@ -341,29 +341,50 @@ ada_really_inline uint64_t neon_uppercase(uint8x16_t w) noexcept {
 #endif  // ADA_NEON
 
 // Returns false if a forbidden host code point is found. On success, *end is
-// the first / ? # or len, and has_upper reports any ASCII uppercase.
+// the first / ? # or len. has_upper / has_x only count host bytes, not the
+// path/query bytes that may sit in the same SIMD window after the delimiter.
 ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
-                                     size_t& end, bool& has_upper) noexcept {
+                                     size_t& end, bool& has_upper,
+                                     bool& has_x) noexcept {
   has_upper = false;
+  has_x = false;
   size_t i = start;
 #if ADA_PARSER_SSSE3
   if (len - start >= 16) {
     const __m128i lo_tbl = nibble_load(k_host_nibbles.low);
     const __m128i hi_tbl = nibble_load(k_host_nibbles.high);
+    const __m128i x_splat = _mm_set1_epi8('x');
     auto visit = [&](size_t at) noexcept -> bool {
       const __m128i w =
           _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
-      if (sse2_uppercase(w) != 0) {
-        has_upper = true;
-      }
+      const int up = sse2_uppercase(w);
+      const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat));
       const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
       if (mask == 0) {
+        if (up != 0) {
+          has_upper = true;
+        }
+        if (xs != 0) {
+          has_x = true;
+        }
         return false;
       }
-      end = at +
-            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      const int hit = trailing_zeroes32(static_cast<uint32_t>(mask));
+      const int valid = (1 << hit) - 1;
+      if ((up & valid) != 0) {
+        has_upper = true;
+      }
+      if ((xs & valid) != 0) {
+        has_x = true;
+      }
+      end = at + static_cast<size_t>(hit);
       return true;
     };
+    for (; i + 32 <= len; i += 32) {
+      if (visit(i) || visit(i + 16)) {
+        return k_host_class[b[end]] == 1;
+      }
+    }
     for (; i + 16 <= len; i += 16) {
       if (visit(i)) {
         return k_host_class[b[end]] == 1;
@@ -380,34 +401,93 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
   }
 #elif ADA_SSE2
+  const __m128i x_splat = _mm_set1_epi8('x');
+  for (; i + 32 <= len; i += 32) {
+    for (size_t off = 0; off < 32; off += 16) {
+      const __m128i w =
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i + off));
+      const int up = sse2_uppercase(w);
+      const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat));
+      const int mask = sse2_host_stop(w);
+      if (mask != 0) {
+        const int hit = trailing_zeroes32(static_cast<uint32_t>(mask));
+        const int valid = (1 << hit) - 1;
+        if ((up & valid) != 0) {
+          has_upper = true;
+        }
+        if ((xs & valid) != 0) {
+          has_x = true;
+        }
+        end = i + off + static_cast<size_t>(hit);
+        return k_host_class[b[end]] == 1;
+      }
+      if (up != 0) {
+        has_upper = true;
+      }
+      if (xs != 0) {
+        has_x = true;
+      }
+    }
+  }
   for (; i + 16 <= len; i += 16) {
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-    if (sse2_uppercase(w) != 0) {
-      has_upper = true;
-    }
+    const int up = sse2_uppercase(w);
+    const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat));
     const int mask = sse2_host_stop(w);
     if (mask != 0) {
-      end = i +
-            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      const int hit = trailing_zeroes32(static_cast<uint32_t>(mask));
+      const int valid = (1 << hit) - 1;
+      if ((up & valid) != 0) {
+        has_upper = true;
+      }
+      if ((xs & valid) != 0) {
+        has_x = true;
+      }
+      end = i + static_cast<size_t>(hit);
       return k_host_class[b[end]] == 1;
+    }
+    if (up != 0) {
+      has_upper = true;
+    }
+    if (xs != 0) {
+      has_x = true;
     }
   }
 #elif ADA_NEON
   if (len - start >= 16) {
     const uint8x16_t lo_tbl = vld1q_u8(k_host_nibbles.low);
     const uint8x16_t hi_tbl = vld1q_u8(k_host_nibbles.high);
+    const uint8x16_t x_splat = vdupq_n_u8('x');
     auto visit = [&](size_t at) noexcept -> bool {
       const uint8x16_t w = vld1q_u8(b + at);
-      if (neon_uppercase(w) != 0) {
-        has_upper = true;
-      }
+      const uint64_t up = neon_uppercase(w);
+      const uint64_t xs = neon_nibble_bits(vceqq_u8(w, x_splat));
       const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
       if (bits == 0) {
+        if (up != 0) {
+          has_upper = true;
+        }
+        if (xs != 0) {
+          has_x = true;
+        }
         return false;
       }
-      end = at + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
+      const size_t hit = static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
+      const uint64_t valid = (hit == 0) ? 0 : (uint64_t{1} << (hit * 4)) - 1;
+      if ((up & valid) != 0) {
+        has_upper = true;
+      }
+      if ((xs & valid) != 0) {
+        has_x = true;
+      }
+      end = at + hit;
       return true;
     };
+    for (; i + 32 <= len; i += 32) {
+      if (visit(i) || visit(i + 16)) {
+        return k_host_class[b[end]] == 1;
+      }
+    }
     for (; i + 16 <= len; i += 16) {
       if (visit(i)) {
         return k_host_class[b[end]] == 1;
@@ -434,6 +514,8 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
     if (c >= 'A' && c <= 'Z') {
       has_upper = true;
+    } else if (c == 'x') {
+      has_x = true;
     }
   }
   end = len;
@@ -468,6 +550,29 @@ ada_really_inline void note_dots_in_window(const uint8_t* b, size_t i,
       _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('/'))) & valid_mask;
   if (((dots & 1) != 0 && (i == run_start || b[i - 1] == '/')) ||
       (dots & (slashes << 1)) != 0) {
+    maybe_dot_segment = true;
+  }
+}
+#endif
+
+#if ADA_NEON
+// Each NEON match nibble occupies 4 bits, so a '.' immediately after '/' is
+// (slashes << 4) rather than (slashes << 1).
+ada_really_inline void note_dots_in_window_neon(
+    const uint8_t* b, size_t i, size_t run_start, uint8x16_t w,
+    uint64_t valid_bits, bool& maybe_dot_segment) noexcept {
+  if (maybe_dot_segment || valid_bits == 0) {
+    return;
+  }
+  const uint64_t dots =
+      neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('.'))) & valid_bits;
+  if (dots == 0) {
+    return;
+  }
+  const uint64_t slashes =
+      neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('/'))) & valid_bits;
+  if (((dots & 0xF) != 0 && (i == run_start || b[i - 1] == '/')) ||
+      (dots & (slashes << 4)) != 0) {
     maybe_dot_segment = true;
   }
 }
@@ -562,30 +667,49 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
   if (i + 16 <= len) {
     const uint8x16_t lo_tbl = vld1q_u8(k_path_nibbles.low);
     const uint8x16_t hi_tbl = vld1q_u8(k_path_nibbles.high);
+    for (; i + 32 <= len; i += 32) {
+      const uint8x16_t w0 = vld1q_u8(b + i);
+      const uint64_t bits0 = neon_table_stop(w0, lo_tbl, hi_tbl);
+      if (bits0 != 0) {
+        const size_t hit_off =
+            static_cast<size_t>(trailing_zeroes64(bits0)) >> 2;
+        const uint64_t valid =
+            (hit_off == 0) ? 0 : (uint64_t{1} << (hit_off * 4)) - 1;
+        note_dots_in_window_neon(b, i, run_start, w0, valid, maybe_dot_segment);
+        i += hit_off;
+        return;
+      }
+      note_dots_in_window_neon(b, i, run_start, w0, ~uint64_t{0},
+                               maybe_dot_segment);
+      const uint8x16_t w1 = vld1q_u8(b + i + 16);
+      const uint64_t bits1 = neon_table_stop(w1, lo_tbl, hi_tbl);
+      if (bits1 != 0) {
+        const size_t hit_off =
+            static_cast<size_t>(trailing_zeroes64(bits1)) >> 2;
+        const uint64_t valid =
+            (hit_off == 0) ? 0 : (uint64_t{1} << (hit_off * 4)) - 1;
+        note_dots_in_window_neon(b, i + 16, run_start, w1, valid,
+                                 maybe_dot_segment);
+        i += 16 + hit_off;
+        return;
+      }
+      note_dots_in_window_neon(b, i + 16, run_start, w1, ~uint64_t{0},
+                               maybe_dot_segment);
+    }
     for (; i + 16 <= len; i += 16) {
       const uint8x16_t w = vld1q_u8(b + i);
       const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
       if (bits != 0) {
-        const size_t hit =
-            i + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
-        for (size_t j = i; j < hit; ++j) {
-          if (b[j] == '.') {
-            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
-          }
-        }
-        i = hit;
+        const size_t hit_off =
+            static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
+        const uint64_t valid =
+            (hit_off == 0) ? 0 : (uint64_t{1} << (hit_off * 4)) - 1;
+        note_dots_in_window_neon(b, i, run_start, w, valid, maybe_dot_segment);
+        i += hit_off;
         return;
       }
-      if (neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('.'))) != 0) {
-        for (size_t j = i; j < i + 16; ++j) {
-          if (b[j] == '.') {
-            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
-            if (maybe_dot_segment) {
-              break;
-            }
-          }
-        }
-      }
+      note_dots_in_window_neon(b, i, run_start, w, ~uint64_t{0},
+                               maybe_dot_segment);
     }
     if (i > run_start && i < len) {
       const uint8x16_t w = vld1q_u8(b + len - 16);
@@ -776,31 +900,6 @@ ADA_PARSER_SIMD void scan_hash_run(const uint8_t* b, size_t& i,
 }
 
 #undef ADA_SCAN_STOP_RUN
-
-ada_really_inline bool last_label_may_be_a_number(
-    std::string_view view) noexcept {
-  if (view.empty()) {
-    return false;
-  }
-  if (view.back() == '.') {
-    view.remove_suffix(1);
-    if (view.empty()) {
-      return false;
-    }
-  }
-  auto is_ipv4_number_char = [](char c) noexcept {
-    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
-           (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
-  };
-  size_t i = view.size();
-  while (i > 0 && is_ipv4_number_char(view[i - 1])) {
-    --i;
-  }
-  if (i > 0 && view[i - 1] != '.') {
-    return false;
-  }
-  return i != view.size() && (view[i] >= '0' && view[i] <= '9');
-}
 
 bool path_has_dot_segment(std::string_view path) noexcept {
   if (path.empty()) {
@@ -1114,67 +1213,99 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
   size_t pos = 0;
   ada::scheme::type scheme_type = ada::scheme::type::NOT_SPECIAL;
   uint32_t protocol_end = 0;
-  bool matched_scheme = false;
 #if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
     defined(_M_X64) || defined(_M_IX86) || defined(_M_AMD64)
-  uint32_t first4 = 0;
-  std::memcpy(&first4, b, 4);
-  if (first4 == 0x70747468u) {  // "http"
-    matched_scheme = true;
-    if (len >= 7 && b[4] == ':' && b[5] == '/' && b[6] == '/') {
-      pos = 7;
-      scheme_type = ada::scheme::type::HTTP;
-      protocol_end = 5;
-    } else if (len >= 8 && b[4] == 's' && b[5] == ':' && b[6] == '/' &&
-               b[7] == '/') {
+  // One 8-byte load + integer compare is a single cmp/jcc on x86-64.
+  // Masked compares cover the shorter special schemes without extra loads.
+  if (len >= 8) {
+    uint64_t first8 = 0;
+    std::memcpy(&first8, b, 8);
+    if (first8 == 0x2f2f3a7370747468ull) {  // "https://"
       pos = 8;
       scheme_type = ada::scheme::type::HTTPS;
       protocol_end = 6;
-    } else {
-      return false;
-    }
-  }
-#else
-  // Big-endian / uncommon arches: byte-wise http(s) match (compiled out on LE).
-  if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
-    matched_scheme = true;
-    if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
+    } else if ((first8 & 0x00ffffffffffffffull) ==
+               0x002f2f3a70747468ull) {  // "http://"
       pos = 7;
       scheme_type = ada::scheme::type::HTTP;
       protocol_end = 5;
-    } else if (len >= 8 && b[4] == 's' && b[5] == ':' && b[6] == '/' &&
-               b[7] == '/') {
-      pos = 8;
-      scheme_type = ada::scheme::type::HTTPS;
-      protocol_end = 6;
-    } else {
-      return false;
-    }
-  }
-#endif
-  if (!matched_scheme) {
-    if (b[0] == 'w' && b[1] == 's') {
-      if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
-        pos = 5;
-        scheme_type = ada::scheme::type::WS;
-        protocol_end = 3;
-      } else if (len >= 6 && b[2] == 's' && b[3] == ':' && b[4] == '/' &&
-                 b[5] == '/') {
-        pos = 6;
-        scheme_type = ada::scheme::type::WSS;
-        protocol_end = 4;
-      } else {
-        return false;
-      }
-    } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
-               b[4] == '/' && b[5] == '/') {
+    } else if ((first8 & 0x0000ffffffffffffull) ==
+               0x00002f2f3a737377ull) {  // "wss://"
+      pos = 6;
+      scheme_type = ada::scheme::type::WSS;
+      protocol_end = 4;
+    } else if ((first8 & 0x0000ffffffffffffull) ==
+               0x00002f2f3a707466ull) {  // "ftp://"
       pos = 6;
       scheme_type = ada::scheme::type::FTP;
+      protocol_end = 4;
+    } else if ((first8 & 0x000000ffffffffffull) ==
+               0x0000002f2f3a7377ull) {  // "ws://"
+      pos = 5;
+      scheme_type = ada::scheme::type::WS;
+      protocol_end = 3;
+    } else {
+      return false;
+    }
+  } else if (b[0] == 'w' && b[1] == 's') {
+    if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
+      pos = 5;
+      scheme_type = ada::scheme::type::WS;
+      protocol_end = 3;
+    } else if (b[2] == 's' && b[3] == ':' && b[4] == '/' && b[5] == '/') {
+      pos = 6;
+      scheme_type = ada::scheme::type::WSS;
       protocol_end = 4;
     } else {
       return false;
     }
+  } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
+             b[4] == '/' && b[5] == '/') {
+    pos = 6;
+    scheme_type = ada::scheme::type::FTP;
+    protocol_end = 4;
+  } else if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' &&
+             b[3] == 'p' && b[4] == ':' && b[5] == '/' && b[6] == '/') {
+    pos = 7;
+    scheme_type = ada::scheme::type::HTTP;
+    protocol_end = 5;
+  } else {
+    return false;
   }
+#else
+  // Big-endian / uncommon arches: byte-wise special-scheme match.
+  if (len >= 8 && b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p' &&
+      b[4] == 's' && b[5] == ':' && b[6] == '/' && b[7] == '/') {
+    pos = 8;
+    scheme_type = ada::scheme::type::HTTPS;
+    protocol_end = 6;
+  } else if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' &&
+             b[3] == 'p' && b[4] == ':' && b[5] == '/' && b[6] == '/') {
+    pos = 7;
+    scheme_type = ada::scheme::type::HTTP;
+    protocol_end = 5;
+  } else if (b[0] == 'w' && b[1] == 's') {
+    if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
+      pos = 5;
+      scheme_type = ada::scheme::type::WS;
+      protocol_end = 3;
+    } else if (len >= 6 && b[2] == 's' && b[3] == ':' && b[4] == '/' &&
+               b[5] == '/') {
+      pos = 6;
+      scheme_type = ada::scheme::type::WSS;
+      protocol_end = 4;
+    } else {
+      return false;
+    }
+  } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
+             b[4] == '/' && b[5] == '/') {
+    pos = 6;
+    scheme_type = ada::scheme::type::FTP;
+    protocol_end = 4;
+  } else {
+    return false;
+  }
+#endif
   if (pos < len && (b[pos] == '/' || b[pos] == '\\')) [[unlikely]] {
     return false;
   }
@@ -1186,8 +1317,9 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
 
   const size_t host_start = pos;
   bool has_upper = false;
+  bool has_x = false;
   size_t host_end = pos;
-  if (!scan_plain_host(b, pos, len, host_end, has_upper)) {
+  if (!scan_plain_host(b, pos, len, host_end, has_upper, has_x)) {
     return false;
   }
   if (host_start == host_end) [[unlikely]] {
@@ -1205,13 +1337,14 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
       unicode::to_lower_ascii(host_buf, host_len);
       hv = std::string_view(host_buf, host_len);
     }
-    if (last_label_may_be_a_number(hv)) [[unlikely]] {
+    if (ada::checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
       return false;
     }
-    // Punycode is "xn--...". Skip the search when the host has no 'x'.
+    // Punycode is "xn--...". The host scan already notes a lowercase 'x';
+    // uppercase 'X' is covered by has_upper after the in-place lower.
     static constexpr std::string_view xn{"xn-", 3};
-    if (hv.find('x') != std::string_view::npos &&
-        hv.find(xn) != std::string_view::npos) [[unlikely]] {
+    if ((has_x || has_upper) && hv.find(xn) != std::string_view::npos)
+        [[unlikely]] {
       return false;
     }
   }
@@ -1378,18 +1511,20 @@ after_rest:
       if (has_upper) {
         unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
       }
-      out.components.protocol_end = protocol_end;
-      out.components.username_end = protocol_end + 2;
-      out.components.host_start = protocol_end + 2;
-      out.components.host_end = static_cast<uint32_t>(host_end);
-      out.components.port = url_components::omitted;
-      out.components.pathname_start = static_cast<uint32_t>(path_start);
-      out.components.search_start = (query_start != std::string_view::npos)
-                                        ? static_cast<uint32_t>(query_start)
-                                        : url_components::omitted;
-      out.components.hash_start = (hash_start != std::string_view::npos)
-                                      ? static_cast<uint32_t>(hash_start)
-                                      : url_components::omitted;
+      out.components = url_components{
+          protocol_end,
+          protocol_end + 2,
+          protocol_end + 2,
+          static_cast<uint32_t>(host_end),
+          url_components::omitted,
+          static_cast<uint32_t>(path_start),
+          (query_start != std::string_view::npos)
+              ? static_cast<uint32_t>(query_start)
+              : url_components::omitted,
+          (hash_start != std::string_view::npos)
+              ? static_cast<uint32_t>(hash_start)
+              : url_components::omitted,
+      };
     } else {
       out.buffer.clear();
       out.buffer.reserve(len + 1);
@@ -1671,11 +1806,25 @@ result_type parse_url_impl(std::string_view user_input,
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
       uint8_t host_first = 0;
+#if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
+    defined(_M_X64) || defined(_M_IX86) || defined(_M_AMD64)
+      if (n >= 8) {
+        uint64_t first8 = 0;
+        std::memcpy(&first8, p, 8);
+        if (first8 == 0x2f2f3a7370747468ull) {  // "https://"
+          host_first = (n > 8) ? p[8] : 0;
+        } else if ((first8 & 0x00ffffffffffffffull) ==
+                   0x002f2f3a70747468ull) {  // "http://"
+          host_first = p[7];
+        }
+      }
+#else
       if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
         host_first = p[7];
       } else if (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') {
         host_first = p[8];
       }
+#endif
       const bool skip_ip =
           host_first == '[' || (host_first >= '0' && host_first <= '9');
       hit_fast_path = !skip_ip && try_parse_simple_absolute(user_input, url);
