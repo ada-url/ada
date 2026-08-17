@@ -388,7 +388,7 @@ struct url : url_base {
   template <class result_type>
   friend bool ada::parser::finish_simple_absolute_with_port(
       std::string_view, result_type&, ada::scheme::type, uint32_t, size_t,
-      size_t, size_t, bool);
+      size_t, size_t, bool, bool);
   template <class result_type>
   friend bool ada::parser::try_parse_simple_relative(std::string_view,
                                                      const result_type&,

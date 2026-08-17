@@ -83,7 +83,7 @@ bool finish_simple_absolute_with_port(std::string_view input, result_type& out,
                                       ada::scheme::type scheme_type,
                                       uint32_t protocol_end, size_t host_start,
                                       size_t host_end, size_t host_len,
-                                      bool has_upper);
+                                      bool has_upper, bool is_ipv4);
 
 /** @private */
 template <class result_type>

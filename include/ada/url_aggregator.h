@@ -329,7 +329,7 @@ struct url_aggregator : url_base {
                                                        result_type&,
                                                        ada::scheme::type,
                                                        uint32_t, size_t, size_t,
-                                                       size_t, bool);
+                                                       size_t, bool, bool);
   template <class result_type>
   friend bool parser::try_parse_simple_relative(std::string_view,
                                                 const result_type&,

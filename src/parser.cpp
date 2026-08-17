@@ -504,6 +504,45 @@ ada_really_inline bool last_label_may_be_a_number(
   return i != view.size() && (view[i] >= '0' && view[i] <= '9');
 }
 
+// Already-canonical dotted-quad IPv4: 7-15 bytes, exactly 3 dots, digits
+// only, no leading zeros, no empty or trailing labels. Hex (`0x…`), octal
+// (`0177…`), short forms (`127.1`), and trailing dots fail in a few bytes
+// so digit-led hosts can leave the fast path as cheaply as main's skip.
+ada_really_inline bool host_is_canonical_ipv4_shape(
+    std::string_view host) noexcept {
+  const size_t n = host.size();
+  if (n < 7 || n > 15) {
+    return false;
+  }
+  const char* p = host.data();
+  const char* const end = p + n;
+  int dots = 0;
+  int digits = 0;
+  bool leading_zero = false;
+  for (; p < end; ++p) {
+    const char c = *p;
+    if (c == '.') {
+      if (digits == 0 || digits > 3) {
+        return false;
+      }
+      ++dots;
+      digits = 0;
+      leading_zero = false;
+      continue;
+    }
+    if (c < '0' || c > '9') {
+      return false;
+    }
+    if (digits == 0) {
+      leading_zero = c == '0';
+    } else if (leading_zero) {
+      return false;
+    }
+    ++digits;
+  }
+  return dots == 3 && digits >= 1 && digits <= 3;
+}
+
 bool path_has_dot_segment(std::string_view path) noexcept {
   if (path.empty()) {
     return false;
@@ -538,7 +577,7 @@ template <class result_type>
 ada_never_inline bool finish_simple_absolute_with_port(
     std::string_view input, result_type& out, ada::scheme::type scheme_type,
     uint32_t protocol_end, size_t host_start, size_t host_end, size_t host_len,
-    bool has_upper) {
+    bool has_upper, bool is_ipv4) {
   constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
   constexpr bool is_aggregator =
       std::is_same_v<result_type, ada::url_aggregator>;
@@ -662,10 +701,16 @@ after_rest:
     }
   }
 
+  // IPv4 plus a non-simple tail (embedded NUL, encoding) must use the
+  // general parser so ada::url and url_aggregator serialize the same href.
+  if (is_ipv4 && !rest_simple) {
+    return false;
+  }
+
   out.type = scheme_type;
   out.is_valid = true;
   out.has_opaque_path = false;
-  out.host_type = DEFAULT;
+  out.host_type = is_ipv4 ? IPV4 : DEFAULT;
 
   const uint32_t port_bytes = (parsed_port != url_components::omitted)
                                   ? (1 + port_decimal_digit_count(parsed_port))
@@ -881,13 +926,31 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     return false;
   }
 
-  // Digit-led hosts are IPv4/numeric; '[' is IPv6. Skip before scanning.
-  if (pos < len && ((b[pos] >= '0' && b[pos] <= '9') || b[pos] == '[')) {
+  // IPv6 never uses this path. Digit-led hosts are IPv4/numeric: ada::url
+  // keeps the cheap skip (its IPv4 finish is slower than the general
+  // parser). url_aggregator accepts already-canonical dotted quads only.
+  if (pos < len && b[pos] == '[') {
     return false;
+  }
+  if constexpr (is_ada_url) {
+    if (pos < len && b[pos] >= '0' && b[pos] <= '9') {
+      return false;
+    }
+  } else if (pos < len && b[pos] >= '0' && b[pos] <= '9') {
+    size_t h = pos;
+    while (h < len && b[h] != '/' && b[h] != '?' && b[h] != '#' &&
+           b[h] != ':') {
+      ++h;
+    }
+    if (!host_is_canonical_ipv4_shape(
+            std::string_view(input.data() + pos, h - pos))) {
+      return false;
+    }
   }
 
   const size_t host_start = pos;
   bool has_upper = false;
+  bool is_ipv4 = false;
   size_t host_end = pos;
   if (!scan_plain_host(b, pos, len, host_end, has_upper)) {
     return false;
@@ -908,7 +971,16 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
       hv = std::string_view(host_buf, host_len);
     }
     if (last_label_may_be_a_number(hv)) [[unlikely]] {
-      return false;
+      if constexpr (is_aggregator) {
+        if (host_is_canonical_ipv4_shape(hv) &&
+            checkers::try_parse_ipv4_fast(hv) < checkers::ipv4_fast_fail) {
+          is_ipv4 = true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
     }
     static constexpr std::string_view xn{"xn-", 3};
     if (hv.find(xn) != std::string_view::npos) [[unlikely]] {
@@ -919,7 +991,7 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
   if (host_end < len && b[host_end] == ':') [[unlikely]] {
     return finish_simple_absolute_with_port(input, out, scheme_type,
                                             protocol_end, host_start, host_end,
-                                            host_len, has_upper);
+                                            host_len, has_upper, is_ipv4);
   }
 
   size_t i = host_end;
@@ -1017,10 +1089,16 @@ after_rest:
     }
   }
 
+  // IPv4 plus a non-simple tail (embedded NUL, encoding) must use the
+  // general parser so ada::url and url_aggregator serialize the same href.
+  if (is_ipv4 && !rest_simple) {
+    return false;
+  }
+
   out.type = scheme_type;
   out.is_valid = true;
   out.has_opaque_path = false;
-  out.host_type = DEFAULT;
+  out.host_type = is_ipv4 ? IPV4 : DEFAULT;
 
   if (!rest_simple) {
     // Host is a plain domain. Finish path/query/hash with the regular helpers
@@ -1377,19 +1455,36 @@ result_type parse_url_impl(std::string_view user_input,
         host0 = 8;
       }
       const uint8_t host_first = host0 != 0 ? p[host0] : 0;
+      // Digit-led skip stays on ada::url (IPv4 finish is a regression there).
+      // url_aggregator only enters for already-canonical dotted quads.
       bool skip_absolute =
           host0 != 0 &&
-          (host_first == '[' || (host_first >= '0' && host_first <= '9'));
+          (host_first == '[' || (!result_type_is_ada_url_aggregator &&
+                                 host_first >= '0' && host_first <= '9'));
       if (!skip_absolute && host0 != 0) {
         const size_t lim = (host0 + 16 < n) ? host0 + 16 : n;
+        size_t host_end_guess = lim;
+        bool seen_host_end = false;
         for (size_t i = host0; i < lim; ++i) {
           const uint8_t c = p[i];
+          if (!seen_host_end &&
+              (c == '/' || c == '?' || c == '#' || c == ':')) {
+            host_end_guess = i;
+            seen_host_end = true;
+          }
           if (c == '/' || c == '?' || c == '#') {
             break;
           }
           if (c == '@') {
             skip_absolute = true;
             break;
+          }
+        }
+        if constexpr (result_type_is_ada_url_aggregator) {
+          if (!skip_absolute && host_first >= '0' && host_first <= '9' &&
+              !host_is_canonical_ipv4_shape(std::string_view(
+                  user_input.data() + host0, host_end_guess - host0))) {
+            skip_absolute = true;
           }
         }
       }
@@ -2345,10 +2440,10 @@ template bool try_parse_simple_absolute<url_aggregator>(std::string_view,
 template bool finish_simple_absolute_with_port<url>(std::string_view, url&,
                                                     ada::scheme::type, uint32_t,
                                                     size_t, size_t, size_t,
-                                                    bool);
+                                                    bool, bool);
 template bool finish_simple_absolute_with_port<url_aggregator>(
     std::string_view, url_aggregator&, ada::scheme::type, uint32_t, size_t,
-    size_t, size_t, bool);
+    size_t, size_t, bool, bool);
 template bool try_parse_simple_relative<url>(std::string_view, const url&,
                                              url&);
 template bool try_parse_simple_relative<url_aggregator>(std::string_view,

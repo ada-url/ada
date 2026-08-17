@@ -1853,6 +1853,92 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
   }
 }
 
+TEST(basic_tests, try_parse_simple_absolute_ipv4_aggregator_only) {
+  // ada::url keeps main's digit-led skip; only url_aggregator takes
+  // already-canonical dotted quads on the prefix path.
+  {
+    ada::url u;
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1/x"), u));
+  }
+  {
+    ada::url_aggregator u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1/x"), u));
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.get_pathname(), "/x");
+    ASSERT_EQ(u.get_href(), "http://192.168.1.1/x");
+    ASSERT_EQ(u.host_type, ada::url_host_type::IPV4);
+  }
+  {
+    ada::url_aggregator u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1"), u));
+    ASSERT_EQ(u.get_href(), "http://192.168.1.1/");
+    ASSERT_EQ(u.host_type, ada::url_host_type::IPV4);
+  }
+  {
+    ada::url_aggregator u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1:8080/x"), u));
+    ASSERT_EQ(u.get_port(), "8080");
+    ASSERT_EQ(u.get_href(), "http://192.168.1.1:8080/x");
+    ASSERT_EQ(u.host_type, ada::url_host_type::IPV4);
+  }
+  {
+    ada::url_aggregator u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1:80/x"), u));
+    ASSERT_EQ(u.get_port(), "");
+    ASSERT_EQ(u.get_href(), "http://192.168.1.1/x");
+  }
+  // Hex, octal, short form, trailing dot, and out-of-range stay off the
+  // prefix path for both types (cheap reject, then the general parser).
+  for (std::string_view input :
+       {"http://0x7f.0.0.1/", "http://0177.0.0.1/", "http://127.1/",
+        "http://192.168.1.1./", "http://256.1.1.1/", "http://192.168.01.1/"}) {
+    ada::url u;
+    ada::url_aggregator a;
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(input, u)) << input;
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(input, a)) << input;
+  }
+}
+
+TEST(basic_tests, ipv4_parse_href_matches_across_types) {
+  const std::string_view samples[] = {
+      "http://192.168.1.1/x",
+      "http://192.168.1.1",
+      "http://192.168.1.1:8080/x",
+      "http://192.168.1.1:80/x",
+      "http://0.0.0.0/",
+      "http://255.255.255.255/",
+      "http://0x7f.0.0.1/",
+      "http://192.168.1.1./",
+      "http://127.1/",
+      "http://192.168.1.1/foo bar",
+      "https://192.168.1.1/foo/../bar",
+  };
+  for (std::string_view input : samples) {
+    auto u = ada::parse<ada::url>(input);
+    auto a = ada::parse<ada::url_aggregator>(input);
+    ASSERT_EQ(u.has_value(), a.has_value()) << input;
+    if (u) {
+      ASSERT_EQ(u->get_href(), a->get_href()) << input;
+      ASSERT_EQ(u->host_type, a->host_type) << input;
+    }
+  }
+  std::string nul_after_quad("http://192.168.1.1/");
+  nul_after_quad.push_back('\0');
+  nul_after_quad += "x";
+  auto u = ada::parse<ada::url>(nul_after_quad);
+  auto a = ada::parse<ada::url_aggregator>(nul_after_quad);
+  ASSERT_EQ(u.has_value(), a.has_value());
+  if (u) {
+    ASSERT_EQ(u->get_href(), a->get_href());
+  }
+  SUCCEED();
+}
+
 TEST(basic_tests, ada_url_get_href_assembly) {
   {
     auto u = ada::parse<ada::url>("https://example.com/path?q=1#f");
