@@ -1,7 +1,12 @@
 #include "ada.h"
+#include "ada/character_sets-inl.h"
+#include "ada/unicode-inl.h"
 #include "gtest/gtest.h"
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
 template <class T>
@@ -1895,4 +1900,47 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_TRUE(last_label_may_be_a_number("19%2E68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("19.68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("0xffffffff."));
+}
+
+TEST(basic_tests, percent_encode_index_matches_scalar) {
+  const uint8_t* sets[] = {
+      ada::character_sets::C0_CONTROL_PERCENT_ENCODE,
+      ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE,
+      ada::character_sets::QUERY_PERCENT_ENCODE,
+      ada::character_sets::FRAGMENT_PERCENT_ENCODE,
+      ada::character_sets::USERINFO_PERCENT_ENCODE,
+      ada::character_sets::PATH_PERCENT_ENCODE,
+      ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE,
+  };
+  std::vector<std::string> samples = {
+      "",
+      "abc",
+      "hello world",
+      std::string(16, 'a'),
+      std::string(17, 'a') + " ",
+      std::string(31, 'x') + "#",
+      "ok#frag",
+      std::string(40, 'b'),
+      std::string("\x01") + std::string(20, 'a'),
+      std::string(15, 'a') + "?",
+      std::string(16, 'a') + "?",
+      std::string(64, 'z'),
+      "user:pass",
+      "path/to/file",
+  };
+  for (const uint8_t* set : sets) {
+    for (const std::string& s : samples) {
+      size_t expected = 0;
+      for (; expected < s.size(); ++expected) {
+        if (ada::character_sets::bit_at(set,
+                                        static_cast<uint8_t>(s[expected]))) {
+          break;
+        }
+      }
+      ASSERT_EQ(ada::unicode::percent_encode_index(s, set), expected) << s;
+      ASSERT_EQ(ada::unicode::percent_encode(s, set),
+                ada::unicode::percent_encode(s, set, expected))
+          << s;
+    }
+  }
 }

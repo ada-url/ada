@@ -240,6 +240,9 @@ bool percent_encode(std::string_view input, const uint8_t character_set[],
  */
 ada_really_inline size_t percent_encode_index(std::string_view input,
                                               const uint8_t character_set[]);
+/** @private SIMD/wide scan; percent_encode_index uses this for 16+ bytes. */
+size_t percent_encode_index_wide(std::string_view input,
+                                 const uint8_t character_set[]);
 /**
  * @private
  * Lowers the string in-place, assuming that the content is ASCII.

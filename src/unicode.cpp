@@ -9,13 +9,21 @@ ADA_PUSH_DISABLE_ALL_WARNINGS
 #include "ada_idna.cpp"
 ADA_POP_DISABLE_WARNINGS
 
+#include "ada/unicode-inl.h"
+
 #include <algorithm>
 #include <array>
 #include <cstring>
-#if ADA_SSSE3
-#include <tmmintrin.h>
-#elif ADA_NEON
+#if ADA_NEON
 #include <arm_neon.h>
+#elif defined(__SSSE3__)
+#include <tmmintrin.h>
+#define ADA_UNICODE_NIBBLE_SSSE3 1
+#elif (defined(__x86_64__) || defined(__amd64__)) && defined(__GNUC__) && \
+    !defined(_MSC_VER)
+#include <tmmintrin.h>
+#define ADA_UNICODE_NIBBLE_SSSE3 1
+#define ADA_UNICODE_NEED_SSSE3_TARGET 1
 #elif ADA_SSE2
 #include <emmintrin.h>
 #elif ADA_LSX
@@ -23,8 +31,181 @@ ADA_POP_DISABLE_WARNINGS
 #elif ADA_RVV
 #include <riscv_vector.h>
 #endif
+#ifndef ADA_UNICODE_NIBBLE_SSSE3
+#define ADA_UNICODE_NIBBLE_SSSE3 0
+#endif
+
+#ifdef ADA_UNICODE_NEED_SSSE3_TARGET
+#define ADA_UNICODE_NIBBLE_FN __attribute__((target("ssse3")))
+#else
+#define ADA_UNICODE_NIBBLE_FN ada_really_inline
+#endif
 
 #include <ranges>
+
+namespace {
+
+struct nibble_tables {
+  alignas(16) uint8_t low[16]{};
+  alignas(16) uint8_t high[16]{};
+  bool fits{true};
+};
+
+consteval nibble_tables make_stop_nibble_tables(
+    const std::array<uint8_t, 256>& cls) {
+  nibble_tables t{};
+  uint16_t patterns[16]{};
+  for (int hi = 0; hi < 16; ++hi) {
+    for (int lo = 0; lo < 16; ++lo) {
+      if (cls[static_cast<size_t>((hi << 4) | lo)] != 0) {
+        patterns[hi] = static_cast<uint16_t>(patterns[hi] | (1u << lo));
+      }
+    }
+  }
+  int bits_used = 0;
+  for (int hi = 0; hi < 16; ++hi) {
+    if (patterns[hi] == 0 || t.high[hi] != 0) {
+      continue;
+    }
+    if (bits_used == 8) {
+      t.fits = false;
+      return t;
+    }
+    const uint8_t bit = static_cast<uint8_t>(1u << bits_used++);
+    for (int other = hi; other < 16; ++other) {
+      if (patterns[other] == patterns[hi]) {
+        t.high[other] = static_cast<uint8_t>(t.high[other] | bit);
+      }
+    }
+    for (int lo = 0; lo < 16; ++lo) {
+      if ((patterns[hi] & (1u << lo)) != 0) {
+        t.low[lo] = static_cast<uint8_t>(t.low[lo] | bit);
+      }
+    }
+  }
+  return t;
+}
+
+consteval nibble_tables make_bitset_nibble_tables(const uint8_t (&bits)[32]) {
+  std::array<uint8_t, 256> cls{};
+  for (size_t i = 0; i < 256; ++i) {
+    if ((bits[i >> 3] & static_cast<uint8_t>(1u << (i & 7))) != 0) {
+      cls[i] = 1;
+    }
+  }
+  return make_stop_nibble_tables(cls);
+}
+
+constexpr nibble_tables k_c0_nibbles =
+    make_bitset_nibble_tables(ada::character_sets::C0_CONTROL_PERCENT_ENCODE);
+constexpr nibble_tables k_special_query_nibbles = make_bitset_nibble_tables(
+    ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
+constexpr nibble_tables k_query_nibbles =
+    make_bitset_nibble_tables(ada::character_sets::QUERY_PERCENT_ENCODE);
+constexpr nibble_tables k_fragment_nibbles =
+    make_bitset_nibble_tables(ada::character_sets::FRAGMENT_PERCENT_ENCODE);
+constexpr nibble_tables k_userinfo_nibbles =
+    make_bitset_nibble_tables(ada::character_sets::USERINFO_PERCENT_ENCODE);
+constexpr nibble_tables k_path_nibbles =
+    make_bitset_nibble_tables(ada::character_sets::PATH_PERCENT_ENCODE);
+constexpr nibble_tables k_www_form_nibbles = make_bitset_nibble_tables(
+    ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE);
+static_assert(k_c0_nibbles.fits);
+static_assert(k_special_query_nibbles.fits);
+static_assert(k_query_nibbles.fits);
+static_assert(k_fragment_nibbles.fits);
+static_assert(k_userinfo_nibbles.fits);
+static_assert(k_path_nibbles.fits);
+static_assert(k_www_form_nibbles.fits);
+
+const nibble_tables* nibble_tables_for(const uint8_t* set) noexcept {
+  auto is_set = [set](const uint8_t* known) noexcept {
+    return set == known || std::memcmp(set, known, 32) == 0;
+  };
+  if (is_set(ada::character_sets::FRAGMENT_PERCENT_ENCODE)) {
+    return &k_fragment_nibbles;
+  }
+  if (is_set(ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE)) {
+    return &k_special_query_nibbles;
+  }
+  if (is_set(ada::character_sets::QUERY_PERCENT_ENCODE)) {
+    return &k_query_nibbles;
+  }
+  if (is_set(ada::character_sets::USERINFO_PERCENT_ENCODE)) {
+    return &k_userinfo_nibbles;
+  }
+  if (is_set(ada::character_sets::PATH_PERCENT_ENCODE)) {
+    return &k_path_nibbles;
+  }
+  if (is_set(ada::character_sets::C0_CONTROL_PERCENT_ENCODE)) {
+    return &k_c0_nibbles;
+  }
+  if (is_set(ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE)) {
+    return &k_www_form_nibbles;
+  }
+  return nullptr;
+}
+
+#if ADA_UNICODE_NIBBLE_SSSE3
+ADA_UNICODE_NIBBLE_FN int ssse3_nibble_mask(__m128i w, __m128i lo_tbl,
+                                            __m128i hi_tbl) noexcept {
+  const __m128i nibble = _mm_set1_epi8(0x0F);
+  const __m128i lo = _mm_and_si128(w, nibble);
+  const __m128i hi = _mm_and_si128(_mm_srli_epi16(w, 4), nibble);
+  const __m128i hit =
+      _mm_and_si128(_mm_shuffle_epi8(lo_tbl, lo), _mm_shuffle_epi8(hi_tbl, hi));
+  return _mm_movemask_epi8(_mm_cmpeq_epi8(hit, _mm_setzero_si128())) ^ 0xFFFF;
+}
+
+ADA_UNICODE_NIBBLE_FN size_t scan_nibble_ssse3(
+    const uint8_t* data, size_t len, const nibble_tables& t) noexcept {
+  const __m128i lo_tbl =
+      _mm_load_si128(reinterpret_cast<const __m128i*>(t.low));
+  const __m128i hi_tbl =
+      _mm_load_si128(reinterpret_cast<const __m128i*>(t.high));
+  size_t i = 0;
+  for (; i + 16 <= len; i += 16) {
+    const __m128i w =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + i));
+    const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
+    if (mask != 0) {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+      unsigned long tz;
+      _BitScanForward(&tz, static_cast<uint32_t>(mask));
+      return i + static_cast<size_t>(tz);
+#else
+      return i +
+             static_cast<size_t>(__builtin_ctz(static_cast<uint32_t>(mask)));
+#endif
+    }
+  }
+  return i;
+}
+#endif
+
+#if ADA_NEON
+size_t scan_nibble_neon(const uint8_t* data, size_t len,
+                        const nibble_tables& t) noexcept {
+  const uint8x16_t lo_tbl = vld1q_u8(t.low);
+  const uint8x16_t hi_tbl = vld1q_u8(t.high);
+  size_t i = 0;
+  for (; i + 16 <= len; i += 16) {
+    const uint8x16_t w = vld1q_u8(data + i);
+    const uint8x16_t hit =
+        vandq_u8(vqtbl1q_u8(lo_tbl, vandq_u8(w, vdupq_n_u8(0x0F))),
+                 vqtbl1q_u8(hi_tbl, vshrq_n_u8(w, 4)));
+    const uint8x8_t nib =
+        vshrn_n_u16(vreinterpretq_u16_u8(vtstq_u8(hit, hit)), 4);
+    const uint64_t bits = vget_lane_u64(vreinterpret_u64_u8(nib), 0);
+    if (bits != 0) {
+      return i + (static_cast<size_t>(__builtin_ctzll(bits)) >> 2);
+    }
+  }
+  return i;
+}
+#endif
+
+}  // namespace
 
 namespace ada::unicode {
 
@@ -590,30 +771,34 @@ std::string form_urlencoded_decode(const std::string_view input) {
   return out;
 }
 
-std::string percent_encode(const std::string_view input,
-                           const uint8_t character_set[]) {
-  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
-    return character_sets::bit_at(character_set, c);
-  });
-  // Optimization: Don't iterate if percent encode is not required
-  if (pointer == input.end()) {
-    return std::string(input);
+size_t percent_encode_index_wide(const std::string_view input,
+                                 const uint8_t character_set[]) {
+  const auto* data = reinterpret_cast<const uint8_t*>(input.data());
+  const size_t size = input.size();
+  const nibble_tables* tables = nibble_tables_for(character_set);
+  size_t i = 0;
+  if (tables != nullptr) {
+#if ADA_UNICODE_NIBBLE_SSSE3
+    i = scan_nibble_ssse3(data, size, *tables);
+#elif ADA_NEON
+    i = scan_nibble_neon(data, size, *tables);
+#endif
   }
-
-  std::string result;
-  result.reserve(input.length());  // in the worst case, percent encoding might
-                                   // produce 3 characters.
-  result.append(input.substr(0, std::distance(input.begin(), pointer)));
-
-  for (; pointer != input.end(); pointer++) {
-    if (character_sets::bit_at(character_set, *pointer)) {
-      result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-    } else {
-      result += *pointer;
+  for (; i < size; ++i) {
+    if (character_sets::bit_at(character_set, data[i])) {
+      return i;
     }
   }
+  return size;
+}
 
-  return result;
+std::string percent_encode(const std::string_view input,
+                           const uint8_t character_set[]) {
+  const size_t idx = percent_encode_index(input, character_set);
+  if (idx == input.size()) {
+    return std::string(input);
+  }
+  return percent_encode(input, character_set, idx);
 }
 
 template <bool append>
@@ -621,26 +806,22 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
-  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
-    return character_sets::bit_at(character_set, c);
-  });
-  ada_log("percent_encode done checking, moved to ",
-          std::distance(input.begin(), pointer));
+  const size_t idx = percent_encode_index(input, character_set);
+  ada_log("percent_encode done checking, moved to ", idx);
 
   // Optimization: Don't iterate if percent encode is not required
-  if (pointer == input.end()) {
+  if (idx == input.size()) {
     ada_log("percent_encode encoding not needed.");
     return false;
   }
   if constexpr (!append) {
     out.clear();
   }
-  ada_log("percent_encode appending ", std::distance(input.begin(), pointer),
-          " bytes");
+  ada_log("percent_encode appending ", idx, " bytes");
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-  out.append(input.data(), std::distance(input.begin(), pointer));
-  ada_log("percent_encode processing ", std::distance(pointer, input.end()),
-          " bytes");
+  out.append(input.data(), idx);
+  ada_log("percent_encode processing ", input.size() - idx, " bytes");
+  auto pointer = input.begin() + static_cast<std::ptrdiff_t>(idx);
   for (; pointer != input.end(); pointer++) {
     if (character_sets::bit_at(character_set, *pointer)) {
       out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
