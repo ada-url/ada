@@ -1393,10 +1393,10 @@ after_rest:
     } else {
       out.buffer.clear();
       out.buffer.reserve(len + 1);
-      out.buffer.append(input.data(), host_end);
+      out.buffer.append(input.substr(0, host_end));
       out.buffer.push_back('/');
       if (host_end < len) {
-        out.buffer.append(input.data() + host_end, len - host_end);
+        out.buffer.append(input.substr(host_end));
       }
       if (has_upper) {
         unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
@@ -1666,10 +1666,24 @@ result_type parse_url_impl(std::string_view user_input,
   // The state machine lives in parse_url_state_machine so this function's
   // stack frame stays small on the common already-canonical path.
   if constexpr (store_values) {
-    const bool hit_fast_path =
-        (base_url == nullptr)
-            ? try_parse_simple_absolute(user_input, url)
-            : try_parse_simple_relative(user_input, *base_url, url);
+    bool hit_fast_path = false;
+    if (base_url == nullptr) {
+      // IPv4/IPv6 hosts start with a digit or '['. Skip the never_inline
+      // fast path so those URLs do not pay for a guaranteed miss.
+      const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
+      const size_t n = user_input.size();
+      uint8_t host_first = 0;
+      if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
+        host_first = p[7];
+      } else if (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') {
+        host_first = p[8];
+      }
+      const bool skip_ip =
+          host_first == '[' || (host_first >= '0' && host_first <= '9');
+      hit_fast_path = !skip_ip && try_parse_simple_absolute(user_input, url);
+    } else {
+      hit_fast_path = try_parse_simple_relative(user_input, *base_url, url);
+    }
     if (hit_fast_path) {
       if constexpr (result_type_is_ada_url_aggregator) {
         if (url.buffer.size() > max_input_length) [[unlikely]] {

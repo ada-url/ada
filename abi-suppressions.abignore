@@ -20,3 +20,13 @@
 # depending on TU size. Not part of the public URL API.
 [suppress_function]
   name = ada::idna::deflate::BitReader::get
+
+# Private inline url::set_scheme(std::string&&). The out-of-line copy is
+# emitted or omitted when the ada.cpp TU changes size. Not a public setter.
+[suppress_function]
+  name = ada::url::set_scheme
+
+# Private variadic concat helper. New instantiations show up as "changed"
+# parameter lists when call sites shift; the template itself is unchanged.
+[suppress_function]
+  name_regexp = ^ada::helpers::concat
