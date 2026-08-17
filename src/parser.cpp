@@ -33,15 +33,14 @@
 #endif
 
 // Parser nibble helpers use pshufb. When the TU is not compiled with
-// -mssse3, emit them (and the never-inline fast-path functions) with
-// target("ssse3") so helpers.cpp / unicode.cpp stay on the SSE2 paths.
+// -mssse3, emit them with target("ssse3") so helpers.cpp / unicode.cpp stay
+// on the SSE2 paths. Do not always_inline in that case: GCC will not inline
+// a target("ssse3") function into a caller compiled without SSSE3.
 #if ADA_PARSER_SSSE3 && defined(__GNUC__) && \
     !defined(ADA_REGULAR_VISUAL_STUDIO) && !defined(__SSSE3__)
-#define ADA_TARGET_SSSE3 __attribute__((target("ssse3")))
-#define ADA_SSSE3_INLINE
+#define ADA_PARSER_SIMD __attribute__((target("ssse3")))
 #else
-#define ADA_TARGET_SSSE3
-#define ADA_SSSE3_INLINE ada_really_inline
+#define ADA_PARSER_SIMD ada_really_inline
 #endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
@@ -226,15 +225,14 @@ ada_really_inline int trailing_zeroes64(uint64_t input_num) noexcept {
 }
 
 #if ADA_PARSER_SSSE3
-ADA_TARGET_SSSE3 ADA_SSSE3_INLINE __m128i
-nibble_load(const uint8_t* t) noexcept {
+ADA_PARSER_SIMD __m128i nibble_load(const uint8_t* t) noexcept {
   return _mm_load_si128(reinterpret_cast<const __m128i*>(t));
 }
 
 // Non-zero lanes are stops. Tables are passed in so the scan loops can hoist
 // the loads out of the 16-byte iteration.
-ADA_TARGET_SSSE3 ADA_SSSE3_INLINE int ssse3_nibble_mask(
-    __m128i w, __m128i lo_tbl, __m128i hi_tbl) noexcept {
+ADA_PARSER_SIMD int ssse3_nibble_mask(__m128i w, __m128i lo_tbl,
+                                      __m128i hi_tbl) noexcept {
   const __m128i nibble = _mm_set1_epi8(0x0F);
   const __m128i lo = _mm_and_si128(w, nibble);
   const __m128i hi = _mm_and_si128(_mm_srli_epi16(w, 4), nibble);
@@ -343,9 +341,8 @@ ada_really_inline uint64_t neon_uppercase(uint8x16_t w) noexcept {
 
 // Returns false if a forbidden host code point is found. On success, *end is
 // the first / ? # or len, and has_upper reports any ASCII uppercase.
-ADA_TARGET_SSSE3 ADA_SSSE3_INLINE bool scan_plain_host(
-    const uint8_t* b, size_t start, size_t len, size_t& end,
-    bool& has_upper) noexcept {
+ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
+                                     size_t& end, bool& has_upper) noexcept {
   has_upper = false;
   size_t i = start;
 #if ADA_PARSER_SSSE3
@@ -451,8 +448,8 @@ ada_really_inline void note_possible_dot_segment(
 }
 
 // Advance i to the first path-class 1 or 2 character (or len).
-ADA_TARGET_SSSE3 ADA_SSSE3_INLINE void scan_path_run(
-    const uint8_t* b, size_t& i, size_t len, bool& maybe_dot_segment) noexcept {
+ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
+                                   bool& maybe_dot_segment) noexcept {
   const size_t run_start = i;
 #if ADA_PARSER_SSSE3
   if (i + 16 <= len) {
@@ -608,167 +605,125 @@ ADA_TARGET_SSSE3 ADA_SSSE3_INLINE void scan_path_run(
   }
 }
 
-ADA_TARGET_SSSE3 ADA_SSSE3_INLINE void scan_query_run(const uint8_t* b,
-                                                      size_t& i,
-                                                      size_t len) noexcept {
-#if ADA_PARSER_SSSE3 || ADA_NEON
-  const size_t scan_start = i;
-#endif
+// Advance i to the first class-table stop (or len). Query and hash share
+// this loop; path keeps its own copy because it also tracks '.' segments.
 #if ADA_PARSER_SSSE3
-  if (i + 16 <= len) {
-    const __m128i lo_tbl = nibble_load(k_query_nibbles.low);
-    const __m128i hi_tbl = nibble_load(k_query_nibbles.high);
-    for (; i + 16 <= len; i += 16) {
-      const __m128i w =
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
-      if (mask != 0) {
-        i +=
-            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-        return;
-      }
-    }
-    if (i > scan_start && i < len) {
-      const __m128i w =
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + len - 16));
-      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
-      if (mask != 0) {
-        const size_t hit =
-            len - 16 +
-            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-        if (hit >= i) {
-          i = hit;
-          return;
-        }
-      }
-      i = len;
-      return;
-    }
-  }
-#elif ADA_SSE2
-  for (; i + 16 <= len; i += 16) {
-    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-    const int mask = sse2_query_stop(w);
-    if (mask != 0) {
-      i += static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-      return;
-    }
-  }
+#define ADA_SCAN_STOP_RUN(nibbles, cls, unused_sse2_stop)                    \
+  do {                                                                       \
+    const size_t scan_start = i;                                             \
+    if (i + 16 <= len) {                                                     \
+      const __m128i lo_tbl = nibble_load((nibbles).low);                     \
+      const __m128i hi_tbl = nibble_load((nibbles).high);                    \
+      for (; i + 16 <= len; i += 16) {                                       \
+        const __m128i w =                                                    \
+            _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));        \
+        const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);               \
+        if (mask != 0) {                                                     \
+          i += static_cast<size_t>(                                          \
+              trailing_zeroes32(static_cast<uint32_t>(mask)));               \
+          return;                                                            \
+        }                                                                    \
+      }                                                                      \
+      if (i > scan_start && i < len) {                                       \
+        const __m128i w =                                                    \
+            _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + len - 16)); \
+        const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);               \
+        if (mask != 0) {                                                     \
+          const size_t hit = len - 16 +                                      \
+                             static_cast<size_t>(trailing_zeroes32(          \
+                                 static_cast<uint32_t>(mask)));              \
+          if (hit >= i) {                                                    \
+            i = hit;                                                         \
+            return;                                                          \
+          }                                                                  \
+        }                                                                    \
+        i = len;                                                             \
+        return;                                                              \
+      }                                                                      \
+    }                                                                        \
+    for (; i < len; ++i) {                                                   \
+      if ((cls)[b[i]] != 0) {                                                \
+        return;                                                              \
+      }                                                                      \
+    }                                                                        \
+  } while (0)
 #elif ADA_NEON
-  if (i + 16 <= len) {
-    const uint8x16_t lo_tbl = vld1q_u8(k_query_nibbles.low);
-    const uint8x16_t hi_tbl = vld1q_u8(k_query_nibbles.high);
-    for (; i + 16 <= len; i += 16) {
-      const uint8x16_t w = vld1q_u8(b + i);
-      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
-      if (bits != 0) {
-        i += static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
-        return;
-      }
-    }
-    if (i > scan_start && i < len) {
-      const uint8x16_t w = vld1q_u8(b + len - 16);
-      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
-      if (bits != 0) {
-        const size_t hit =
-            len - 16 + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
-        if (hit >= i) {
-          i = hit;
-          return;
-        }
-      }
-      i = len;
-      return;
-    }
-  }
+#define ADA_SCAN_STOP_RUN(nibbles, cls, unused_sse2_stop)                     \
+  do {                                                                        \
+    const size_t scan_start = i;                                              \
+    if (i + 16 <= len) {                                                      \
+      const uint8x16_t lo_tbl = vld1q_u8((nibbles).low);                      \
+      const uint8x16_t hi_tbl = vld1q_u8((nibbles).high);                     \
+      for (; i + 16 <= len; i += 16) {                                        \
+        const uint8x16_t w = vld1q_u8(b + i);                                 \
+        const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);             \
+        if (bits != 0) {                                                      \
+          i += static_cast<size_t>(trailing_zeroes64(bits)) >> 2;             \
+          return;                                                             \
+        }                                                                     \
+      }                                                                       \
+      if (i > scan_start && i < len) {                                        \
+        const uint8x16_t w = vld1q_u8(b + len - 16);                          \
+        const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);             \
+        if (bits != 0) {                                                      \
+          const size_t hit =                                                  \
+              len - 16 + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2); \
+          if (hit >= i) {                                                     \
+            i = hit;                                                          \
+            return;                                                           \
+          }                                                                   \
+        }                                                                     \
+        i = len;                                                              \
+        return;                                                               \
+      }                                                                       \
+    }                                                                         \
+    for (; i < len; ++i) {                                                    \
+      if ((cls)[b[i]] != 0) {                                                 \
+        return;                                                               \
+      }                                                                       \
+    }                                                                         \
+  } while (0)
+#elif ADA_SSE2
+#define ADA_SCAN_STOP_RUN(nibbles, cls, sse2_stop)                  \
+  do {                                                              \
+    for (; i + 16 <= len; i += 16) {                                \
+      const __m128i w =                                             \
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i)); \
+      const int mask = sse2_stop(w);                                \
+      if (mask != 0) {                                              \
+        i += static_cast<size_t>(                                   \
+            trailing_zeroes32(static_cast<uint32_t>(mask)));        \
+        return;                                                     \
+      }                                                             \
+    }                                                               \
+    for (; i < len; ++i) {                                          \
+      if ((cls)[b[i]] != 0) {                                       \
+        return;                                                     \
+      }                                                             \
+    }                                                               \
+  } while (0)
+#else
+#define ADA_SCAN_STOP_RUN(nibbles, cls, unused_sse2_stop) \
+  do {                                                    \
+    for (; i < len; ++i) {                                \
+      if ((cls)[b[i]] != 0) {                             \
+        return;                                           \
+      }                                                   \
+    }                                                     \
+  } while (0)
 #endif
-  for (; i < len; ++i) {
-    if (k_query[b[i]] != 0) {
-      return;
-    }
-  }
+
+ADA_PARSER_SIMD void scan_query_run(const uint8_t* b, size_t& i,
+                                    size_t len) noexcept {
+  ADA_SCAN_STOP_RUN(k_query_nibbles, k_query, sse2_query_stop);
 }
 
-ADA_TARGET_SSSE3 ADA_SSSE3_INLINE void scan_hash_run(const uint8_t* b,
-                                                     size_t& i,
-                                                     size_t len) noexcept {
-#if ADA_PARSER_SSSE3 || ADA_NEON
-  const size_t scan_start = i;
-#endif
-#if ADA_PARSER_SSSE3
-  if (i + 16 <= len) {
-    const __m128i lo_tbl = nibble_load(k_hash_nibbles.low);
-    const __m128i hi_tbl = nibble_load(k_hash_nibbles.high);
-    for (; i + 16 <= len; i += 16) {
-      const __m128i w =
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
-      if (mask != 0) {
-        i +=
-            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-        return;
-      }
-    }
-    if (i > scan_start && i < len) {
-      const __m128i w =
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + len - 16));
-      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
-      if (mask != 0) {
-        const size_t hit =
-            len - 16 +
-            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-        if (hit >= i) {
-          i = hit;
-          return;
-        }
-      }
-      i = len;
-      return;
-    }
-  }
-#elif ADA_SSE2
-  for (; i + 16 <= len; i += 16) {
-    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-    const int mask = sse2_hash_stop(w);
-    if (mask != 0) {
-      i += static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-      return;
-    }
-  }
-#elif ADA_NEON
-  if (i + 16 <= len) {
-    const uint8x16_t lo_tbl = vld1q_u8(k_hash_nibbles.low);
-    const uint8x16_t hi_tbl = vld1q_u8(k_hash_nibbles.high);
-    for (; i + 16 <= len; i += 16) {
-      const uint8x16_t w = vld1q_u8(b + i);
-      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
-      if (bits != 0) {
-        i += static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
-        return;
-      }
-    }
-    if (i > scan_start && i < len) {
-      const uint8x16_t w = vld1q_u8(b + len - 16);
-      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
-      if (bits != 0) {
-        const size_t hit =
-            len - 16 + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
-        if (hit >= i) {
-          i = hit;
-          return;
-        }
-      }
-      i = len;
-      return;
-    }
-  }
-#endif
-  for (; i < len; ++i) {
-    if (k_hash[b[i]] != 0) {
-      return;
-    }
-  }
+ADA_PARSER_SIMD void scan_hash_run(const uint8_t* b, size_t& i,
+                                   size_t len) noexcept {
+  ADA_SCAN_STOP_RUN(k_hash_nibbles, k_hash, sse2_hash_stop);
 }
+
+#undef ADA_SCAN_STOP_RUN
 
 ada_really_inline bool last_label_may_be_a_number(
     std::string_view view) noexcept {
