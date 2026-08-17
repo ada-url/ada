@@ -15,6 +15,7 @@
 #include <variant>
 
 #include "ada/expected.h"
+#include "ada/scheme.h"
 
 #include "ada/url_pattern_regex.h"
 #include "ada/url_pattern_init.h"
@@ -75,6 +76,19 @@ extern template url parse_url_impl<url, true>(std::string_view user_input,
 /** @private */
 template <class result_type>
 bool try_parse_simple_absolute(std::string_view input, result_type& out);
+
+/** @private */
+template <class result_type>
+bool finish_simple_absolute_with_port(std::string_view input, result_type& out,
+                                      ada::scheme::type scheme_type,
+                                      uint32_t protocol_end, size_t host_start,
+                                      size_t host_end, size_t host_len,
+                                      bool has_upper);
+
+/** @private */
+template <class result_type>
+bool try_parse_simple_relative(std::string_view input, const result_type& base,
+                               result_type& out);
 
 #if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>

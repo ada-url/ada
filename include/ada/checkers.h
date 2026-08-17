@@ -75,6 +75,19 @@ ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept;
 
 /**
  * @private
+ * Cheap pre-check for the WHATWG "ends in a number" / IPv4-host cases.
+ * False means the host cannot be IPv4: the last label is empty, does not
+ * start with an ASCII digit, or contains a character other than a hex
+ * digit or x/X. True means the slower IPv4 parsers should run.
+ *
+ * Safe on mixed-case input (unlike is_ipv4, which expects a lowercased
+ * host).
+ */
+ada_really_inline constexpr bool last_label_may_be_a_number(
+    std::string_view view) noexcept;
+
+/**
+ * @private
  * Returns a bitset. If the first bit is set, then at least one character needs
  * percent encoding. If the second bit is set, a \\ is found. If the third bit
  * is set then we have a dot. If the fourth bit is set, then we have a percent

@@ -163,6 +163,7 @@ static void check_components_agree(const ada::url& u,
         "  agg href: %s\n",
         static_cast<int>(input.size()), input.data(), u.get_href().c_str(),
         std::string(a.get_href()).c_str());
+    fflush(stdout);
     abort();
   }
 }
@@ -243,6 +244,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       "https://example.com/foo/%2e%2e",
       "https://xn--nxasmq6b.com/",
       "https://xn--a/",
+      "http://foo.0xffffffff/",
+      "http://example.0x/",
+      "https://example.com:0080/x",
+      "http://@19%2E68.1.10.",
+      "http://19%2E68.1.10.",
+      "http://0xffffffff.",
   };
   for (const char* seed : kAnchors) {
     fuzz_one_input(seed);

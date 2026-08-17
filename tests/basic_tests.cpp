@@ -529,6 +529,12 @@ TEST(basic_tests, can_parse_consistency_clean_http_frontend) {
            "http://xn--/",
            "http://example.com./",
            "http://%65xample.com/",
+           "http://foo.0xffffffff/",
+           "http://foo.0xfffffffff/",
+           "http://0xfffffffff/",
+           "http://example.0x/",
+           "http://foo.0x1/",
+           "http://0xffffffff/",
        }) {
     assert_can_parse_consistent(input);
   }
@@ -567,8 +573,42 @@ TEST(basic_tests, can_parse_consistency_percent_encoded_host) {
            "ws://host%2Eexample/",   // percent-encoded dot in domain
            "ws://%00/",              // %00 -> forbidden after decode
            "ws://%2F/",              // %2F -> '/' -> forbidden after decode
+           "http://@19%2E68.1.10.",
+           "http://19%2E68.1.10.",
+           "http://@19%2E68.1.10.0.@'foo",
        }) {
     assert_can_parse_consistent(input);
+  }
+}
+
+// url and url_aggregator must agree after percent-decoding an IPv4 host.
+// Passing get_hostname() (a view into the aggregator buffer) into parse_ipv4
+// overlapped when the decoded host had a trailing dot.
+TEST(basic_tests, percent_encoded_ipv4_url_aggregator_agree) {
+  const char* inputs[] = {
+      "http://@19%2E68.1.10.",  "http://19%2E68.1.10.",
+      "http://19%2E68.1.10./x", "http://@19%2E68.1.10.0.@'foo",
+      "http://0xffffffff.",     "http://%31%2e%32%2e%33%2e%34/",
+      "http://19%2E68.1.10",
+  };
+  for (const char* input : inputs) {
+    auto url = ada::parse<ada::url>(input);
+    auto agg = ada::parse<ada::url_aggregator>(input);
+    ASSERT_EQ(url.has_value(), agg.has_value()) << input;
+    if (!url) {
+      continue;
+    }
+    ASSERT_EQ(url->get_href(), std::string(agg->get_href())) << input;
+    ASSERT_EQ(std::string(url->get_hostname()),
+              std::string(agg->get_hostname()))
+        << input;
+    ASSERT_EQ(std::string(url->get_host()), std::string(agg->get_host()))
+        << input;
+    ASSERT_EQ(url->get_username(), std::string(agg->get_username())) << input;
+    ASSERT_EQ(std::string(url->get_pathname()),
+              std::string(agg->get_pathname()))
+        << input;
+    ASSERT_TRUE(agg->validate()) << input;
   }
 }
 
@@ -1703,5 +1743,156 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_hostname(), "www.example.com");
     ASSERT_EQ(url->get_port(), "8080");
   }
+  {
+    auto u = ada::parse<TypeParam>("https://example.com/a%20b/c%2Fd");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_pathname(), "/a%20b/c%2Fd");
+    ASSERT_EQ(u->get_href(), "https://example.com/a%20b/c%2Fd");
+  }
+  {
+    auto u = ada::parse<TypeParam>("http://example.com:80/x");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_port(), "");
+    ASSERT_EQ(u->get_href(), "http://example.com/x");
+  }
+  {
+    auto u = ada::parse<TypeParam>("https://example.com:443");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_port(), "");
+    ASSERT_EQ(u->get_href(), "https://example.com/");
+  }
+  {
+    auto u = ada::parse<TypeParam>("http://example.com:8080/x?y#z");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_port(), "8080");
+    ASSERT_EQ(u->get_href(), "http://example.com:8080/x?y#z");
+  }
+  {
+    auto u = ada::parse<TypeParam>("https://example.com:0080/x");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_port(), "80");
+    ASSERT_EQ(u->get_href(), "https://example.com:80/x");
+  }
+  {
+    auto u = ada::parse<TypeParam>("http://example.com:0080/x");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_port(), "");
+    ASSERT_EQ(u->get_href(), "http://example.com/x");
+  }
+  {
+    auto base = ada::parse<TypeParam>("https://example.com/a/b?old#old");
+    ASSERT_TRUE(base);
+    auto path = ada::parse<TypeParam>("/c/d?q=1#f", &*base);
+    ASSERT_TRUE(path);
+    ASSERT_EQ(path->get_href(), "https://example.com/c/d?q=1#f");
+    auto query = ada::parse<TypeParam>("?new", &*base);
+    ASSERT_TRUE(query);
+    ASSERT_EQ(query->get_href(), "https://example.com/a/b?new");
+    auto qmark_query = ada::parse<TypeParam>("??a=b&c=d", &*base);
+    ASSERT_TRUE(qmark_query);
+    ASSERT_EQ(qmark_query->get_search(), "??a=b&c=d");
+    ASSERT_EQ(qmark_query->get_href(), "https://example.com/a/b??a=b&c=d");
+    auto hash = ada::parse<TypeParam>("#new", &*base);
+    ASSERT_TRUE(hash);
+    ASSERT_EQ(hash->get_href(), "https://example.com/a/b?old#new");
+    auto rel = ada::parse<TypeParam>("c/d?q", &*base);
+    ASSERT_TRUE(rel);
+    ASSERT_EQ(rel->get_href(), "https://example.com/a/c/d?q");
+  }
   SUCCEED();
+}
+
+TEST(basic_tests, try_parse_simple_absolute_ada_url) {
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/path?q=1#f"), u));
+    ASSERT_EQ(u.get_href(), "https://example.com/path?q=1#f");
+    ASSERT_EQ(u.get_hostname(), "example.com");
+    ASSERT_EQ(u.get_pathname(), "/path");
+    ASSERT_EQ(u.get_search(), "?q=1");
+    ASSERT_EQ(u.get_hash(), "#f");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://EXAMPLE.COM"), u));
+    ASSERT_EQ(u.get_hostname(), "example.com");
+    ASSERT_EQ(u.get_pathname(), "/");
+    ASSERT_EQ(u.get_href(), "http://example.com/");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://example.com:8080/x"), u));
+    ASSERT_EQ(u.get_port(), "8080");
+    ASSERT_EQ(u.get_href(), "http://example.com:8080/x");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://example.com:80/x"), u));
+    ASSERT_EQ(u.get_port(), "");
+    ASSERT_EQ(u.get_href(), "http://example.com/x");
+  }
+  {
+    ada::url u;
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1/x"), u));
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://user@example.com/x"), u));
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http:////example.com/x"), u));
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/foo/../bar"), u));
+    ASSERT_EQ(u.get_pathname(), "/bar");
+    ASSERT_EQ(u.get_href(), "https://example.com/bar");
+  }
+}
+
+TEST(basic_tests, ada_url_get_href_assembly) {
+  {
+    auto u = ada::parse<ada::url>("https://example.com/path?q=1#f");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_href(), "https://example.com/path?q=1#f");
+    ASSERT_EQ(u->get_href_size(), u->get_href().size());
+  }
+  {
+    auto u = ada::parse<ada::url>("https://example.com:8080/x");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_href(), "https://example.com:8080/x");
+    ASSERT_EQ(u->get_href_size(), u->get_href().size());
+  }
+  {
+    auto u = ada::parse<ada::url>("https://user:pass@example.com/x");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_href(), "https://user:pass@example.com/x");
+    ASSERT_EQ(u->get_href_size(), u->get_href().size());
+  }
+}
+
+TEST(basic_tests, last_label_may_be_a_number_cases) {
+  using ada::checkers::last_label_may_be_a_number;
+  ASSERT_FALSE(last_label_may_be_a_number(""));
+  ASSERT_FALSE(last_label_may_be_a_number("."));
+  ASSERT_FALSE(last_label_may_be_a_number("example.com"));
+  ASSERT_FALSE(last_label_may_be_a_number("example.com."));
+  ASSERT_FALSE(last_label_may_be_a_number("abc."));
+  ASSERT_TRUE(last_label_may_be_a_number("foo.123"));
+  ASSERT_TRUE(last_label_may_be_a_number("foo.123."));
+  ASSERT_TRUE(last_label_may_be_a_number("0x10"));
+  ASSERT_TRUE(last_label_may_be_a_number("0xffffffff"));
+  ASSERT_TRUE(last_label_may_be_a_number("foo.0xA"));
+  ASSERT_TRUE(last_label_may_be_a_number("192.168.1.1"));
+  ASSERT_TRUE(last_label_may_be_a_number("0x"));
+  ASSERT_FALSE(last_label_may_be_a_number("123abc.com"));
+  ASSERT_FALSE(last_label_may_be_a_number("abc"));
+  ASSERT_FALSE(last_label_may_be_a_number("foo.x10"));
+  ASSERT_FALSE(last_label_may_be_a_number("foo.bar.baz"));
+  ASSERT_TRUE(last_label_may_be_a_number("19%2E68.1.10."));
+  ASSERT_TRUE(last_label_may_be_a_number("19.68.1.10."));
+  ASSERT_TRUE(last_label_may_be_a_number("0xffffffff."));
 }

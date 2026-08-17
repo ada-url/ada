@@ -6,3 +6,17 @@
 
 [suppress_type]
   name_regexp = ^std::
+
+# Private helpers defined ada_really_inline in src/unicode.cpp. Taking their
+# address (ranges algorithms) emits an out-of-line copy whose DWARF "inline"
+# flag flips when the single ada.cpp TU grows. Signatures are unchanged.
+[suppress_function]
+  name = ada::unicode::is_forbidden_domain_code_point
+
+[suppress_function]
+  name = ada::unicode::is_lowercase_hex
+
+# Private IDNA deflate helper; in-class inline copy may be omitted or kept
+# depending on TU size. Not part of the public URL API.
+[suppress_function]
+  name = ada::idna::deflate::BitReader::get

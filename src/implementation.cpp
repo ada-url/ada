@@ -2,6 +2,7 @@
 
 #include <array>
 #include <atomic>
+#include <cstring>
 #include <limits>
 #include <optional>
 #include <string_view>
@@ -53,14 +54,33 @@ ada_really_inline bool eight_clean_http_host_bytes(
 // case. It deliberately handles fewer inputs than
 // try_can_parse_absolute_fast: anything requiring normalization or detailed
 // host parsing falls through to that broader validator.
+#if defined(_MSC_VER) || \
+    (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+constexpr bool k_can_parse_little_endian = true;
+#else
+constexpr bool k_can_parse_little_endian = false;
+#endif
+
 std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   const auto* bytes = reinterpret_cast<const uint8_t*>(input.data());
   const size_t length = input.size();
+  if (length < 7) {
+    return std::nullopt;
+  }
+
+  uint32_t first4{};
+  std::memcpy(&first4, bytes, 4);
+  const bool is_http =
+      first4 == (k_can_parse_little_endian ? 0x70747468u : 0x68747470u);
+  if (!is_http) {
+    return std::nullopt;
+  }
 
   size_t authority_start;
-  if (length >= 8 && input.starts_with("https://")) {
+  if (length >= 8 && bytes[4] == 's' && bytes[5] == ':' && bytes[6] == '/' &&
+      bytes[7] == '/') {
     authority_start = 8;
-  } else if (length >= 7 && input.starts_with("http://")) {
+  } else if (bytes[4] == ':' && bytes[5] == '/' && bytes[6] == '/') {
     authority_start = 7;
   } else {
     return std::nullopt;
@@ -98,7 +118,11 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   }
 
   const std::string_view host(input.data() + authority_start, host_length);
-  if (checkers::is_ipv4(host) || host.find("xn-") != std::string_view::npos) {
+  if (checkers::last_label_may_be_a_number(host)) {
+    return std::nullopt;
+  }
+  if (host.find('-') != std::string_view::npos &&
+      host.find("xn-") != std::string_view::npos) {
     return std::nullopt;
   }
 
@@ -228,7 +252,6 @@ skip_extra_slashes:
   size_t auth_end = pos;
   size_t port_colon = SIZE_MAX;
   bool all_dec_dots = true;
-  uint8_t last_non_dot = 0;
 
   for (; auth_end < len; ++auth_end) {
     const uint8_t c = b[auth_end];
@@ -273,9 +296,6 @@ skip_extra_slashes:
     // Track whether host is all decimal digits and dots (potential IPv4).
     if (c != '.' && (c < '0' || c > '9')) all_dec_dots = false;
 
-    // Track last non-dot character for the IPv4 hex/octal heuristic.
-    if (c != '.') last_non_dot = c;
-
     // Detect xn-- prefix inline (IDNA punycode -> needs full parser).
     // Checking at every position mirrors the original behavior: any
     // occurrence of "xn--" in the host (not just at label boundaries)
@@ -309,16 +329,8 @@ skip_extra_slashes:
     return std::nullopt;
   }
 
-  // Last-significant-character heuristic for non-decimal IPv4 (hex/octal):
-  // if the last non-dot char is a digit, 'a'-'f', or 'x' the host might be
-  // an IPv4 address that the fast path can't validate -- fall through.
-  // last_non_dot was tracked during the authority scan above.
-  {
-    const uint8_t lc = last_non_dot | 0x20;
-    if ((last_non_dot >= '0' && last_non_dot <= '9') ||
-        (lc >= 'a' && lc <= 'f') || lc == 'x') {
-      return std::nullopt;
-    }
+  if (checkers::last_label_may_be_a_number({host_ptr, host_len})) {
+    return std::nullopt;
   }
 
   // -- Port validation -------------------------------------------------------

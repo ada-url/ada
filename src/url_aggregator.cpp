@@ -548,10 +548,9 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   // case ASCII letter, then we can just copy it to the buffer. We want to
   // optimize for such a common case.
 
-  // Fast path: try to parse as pure decimal IPv4(a.b.c.d) first.
+  // Fast path: try to parse as pure decimal IPv4 first.
   const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
   if (fast_result < checkers::ipv4_fast_fail) {
-    // Fast path succeeded - input is pure decimal IPv4
     if (!input.empty() && input.back() == '.') {
       update_base_hostname(input.substr(0, input.size() - 1));
     } else {
@@ -566,26 +565,53 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   uint8_t is_forbidden_or_upper =
       unicode::contains_forbidden_domain_code_point_or_upper(input.data(),
                                                              input.size());
-  // Minor optimization opportunity:
-  // contains_forbidden_domain_code_point_or_upper could be extend to check for
-  // the presence of characters that cannot appear in the ipv4 address and we
-  // could also check whether x and n and - are present, and so we could skip
-  // some of the checks below. However, the gains are likely to be small, and
-  // the code would be more complex.
   static constexpr std::string_view xn_dash{"xn-", 3};
-  if (is_forbidden_or_upper == 0 &&
-      input.find(xn_dash) == std::string_view::npos) {
-    // fast path
-    update_base_hostname(input);
-
-    // Check for other IPv4 formats (hex, octal, etc.)
-    if (checkers::is_ipv4(get_hostname())) {
-      ada_log("parse_host fast path ipv4");
-      return parse_ipv4(get_hostname(), true);
+  if ((is_forbidden_or_upper & 1) == 0) {
+    if ((is_forbidden_or_upper & 2) != 0) {
+      std::string lowered(input);
+      unicode::to_lower_ascii(lowered.data(), lowered.size());
+      if (lowered.find('-') == std::string_view::npos ||
+          lowered.find(xn_dash) == std::string_view::npos) {
+        update_base_hostname(lowered);
+        if (checkers::is_ipv4(lowered)) {
+          ada_log("parse_host fast path ipv4");
+          return parse_ipv4(lowered, true);
+        }
+        ada_log("parse_host fast path ", get_hostname());
+        is_valid = true;
+        return true;
+      }
+    } else if (input.find('-') == std::string_view::npos ||
+               input.find(xn_dash) == std::string_view::npos) {
+      update_base_hostname(input);
+      if (checkers::is_ipv4(input)) {
+        ada_log("parse_host fast path ipv4");
+        return parse_ipv4(input, true);
+      }
+      ada_log("parse_host fast path ", get_hostname());
+      is_valid = true;
+      return true;
     }
-    ada_log("parse_host fast path ", get_hostname());
-    is_valid = true;
-    return true;
+  } else if (const size_t first_percent = input.find('%');
+             first_percent != std::string_view::npos) {
+    std::string decoded = unicode::percent_decode(input, first_percent);
+    const uint8_t decoded_flags =
+        unicode::contains_forbidden_domain_code_point_or_upper(decoded.data(),
+                                                               decoded.size());
+    if ((decoded_flags & 1) == 0) {
+      if ((decoded_flags & 2) != 0) {
+        unicode::to_lower_ascii(decoded.data(), decoded.size());
+      }
+      if (decoded.find('-') == std::string_view::npos ||
+          decoded.find(xn_dash) == std::string_view::npos) {
+        update_base_hostname(decoded);
+        if (checkers::is_ipv4(decoded)) {
+          return parse_ipv4(decoded, true);
+        }
+        is_valid = true;
+        return true;
+      }
+    }
   }
   // We have encountered at least one forbidden code point or the input contains
   // 'xn-' (case insensitive), so we need to call 'to_ascii' to perform the full
@@ -1029,7 +1055,11 @@ bool url_aggregator::parse_ipv4(std::string_view input, bool in_place) {
     // Pure decimal: keep the buffer when it already holds the address.
     // Otherwise write the (trailing-dot-stripped) input.
     if (!(in_place && !trailing_dot)) {
-      update_base_hostname(input);
+      if (helpers::overlaps(input, buffer)) {
+        update_base_hostname(std::string(input));
+      } else {
+        update_base_hostname(input);
+      }
     }
     host_type = IPV4;
     ADA_ASSERT_TRUE(validate());

@@ -385,6 +385,14 @@ struct url : url_base {
   template <class result_type>
   friend bool ada::parser::try_parse_simple_absolute(std::string_view,
                                                      result_type&);
+  template <class result_type>
+  friend bool ada::parser::finish_simple_absolute_with_port(
+      std::string_view, result_type&, ada::scheme::type, uint32_t, size_t,
+      size_t, size_t, bool);
+  template <class result_type>
+  friend bool ada::parser::try_parse_simple_relative(std::string_view,
+                                                     const result_type&,
+                                                     result_type&);
 
   inline void update_unencoded_base_hash(std::string_view input);
   inline void update_base_hostname(std::string_view input);

@@ -152,7 +152,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       size_t pct_pos = encoded.find('%');
       if (pct_pos != std::string::npos) {
         std::string decoded = ada::unicode::percent_decode(encoded, pct_pos);
-        if (decoded != source) {
+        // PATH percent-encode does not encode '%', so a source that already
+        // contains %HH is decoded and the round-trip is not an identity.
+        if (source.find('%') == std::string::npos && decoded != source) {
           printf(
               "percent_encode/decode round-trip failure!\n"
               "  source='%s'\n  encoded='%s'\n  decoded='%s'\n",

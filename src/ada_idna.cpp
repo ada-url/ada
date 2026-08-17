@@ -269,6 +269,11 @@ struct BitReader {
     }
     return true;
   }
+  // Keep this symbol in the shared library. A larger translation unit can
+  // otherwise inline it away and trip the ABI check (removed BitReader::get).
+#if defined(__GNUC__)
+  __attribute__((used))
+#endif
   uint32_t get(int n) {
     if (!ensure(n)) return UINT32_MAX;
     uint32_t v = acc & ((1u << n) - 1);
