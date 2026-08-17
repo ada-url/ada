@@ -505,8 +505,8 @@ ada_really_inline bool last_label_may_be_a_number(
 }
 
 // Already-canonical dotted-quad IPv4: 7-15 bytes, exactly 3 dots, digits
-// only, no leading zeros, no empty or trailing labels. Hex (`0x…`), octal
-// (`0177…`), short forms (`127.1`), and trailing dots fail in a few bytes
+// only, no leading zeros, no empty or trailing labels. Hex (`0x...`), octal
+// (`0177...`), short forms (`127.1`), and trailing dots fail in a few bytes
 // so digit-led hosts can leave the fast path as cheaply as main's skip.
 ada_really_inline bool host_is_canonical_ipv4_shape(
     std::string_view host) noexcept {
