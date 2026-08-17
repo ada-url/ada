@@ -777,31 +777,6 @@ ADA_PARSER_SIMD void scan_hash_run(const uint8_t* b, size_t& i,
 
 #undef ADA_SCAN_STOP_RUN
 
-ada_really_inline bool last_label_may_be_a_number(
-    std::string_view view) noexcept {
-  if (view.empty()) {
-    return false;
-  }
-  if (view.back() == '.') {
-    view.remove_suffix(1);
-    if (view.empty()) {
-      return false;
-    }
-  }
-  auto is_ipv4_number_char = [](char c) noexcept {
-    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
-           (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
-  };
-  size_t i = view.size();
-  while (i > 0 && is_ipv4_number_char(view[i - 1])) {
-    --i;
-  }
-  if (i > 0 && view[i - 1] != '.') {
-    return false;
-  }
-  return i != view.size() && (view[i] >= '0' && view[i] <= '9');
-}
-
 bool path_has_dot_segment(std::string_view path) noexcept {
   if (path.empty()) {
     return false;
@@ -1114,30 +1089,68 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
   size_t pos = 0;
   ada::scheme::type scheme_type = ada::scheme::type::NOT_SPECIAL;
   uint32_t protocol_end = 0;
-  bool matched_scheme = false;
 #if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
     defined(_M_X64) || defined(_M_IX86) || defined(_M_AMD64)
-  uint32_t first4 = 0;
-  std::memcpy(&first4, b, 4);
-  if (first4 == 0x70747468u) {  // "http"
-    matched_scheme = true;
-    if (len >= 7 && b[4] == ':' && b[5] == '/' && b[6] == '/') {
-      pos = 7;
-      scheme_type = ada::scheme::type::HTTP;
-      protocol_end = 5;
-    } else if (len >= 8 && b[4] == 's' && b[5] == ':' && b[6] == '/' &&
-               b[7] == '/') {
+  // One 8-byte load + integer compare is a single cmp/jcc on x86-64.
+  // Masked compares cover the shorter special schemes without extra loads.
+  if (len >= 8) {
+    uint64_t first8 = 0;
+    std::memcpy(&first8, b, 8);
+    if (first8 == 0x2f2f3a7370747468ull) {  // "https://"
       pos = 8;
       scheme_type = ada::scheme::type::HTTPS;
       protocol_end = 6;
+    } else if ((first8 & 0x00ffffffffffffffull) ==
+               0x002f2f3a70747468ull) {  // "http://"
+      pos = 7;
+      scheme_type = ada::scheme::type::HTTP;
+      protocol_end = 5;
+    } else if ((first8 & 0x0000ffffffffffffull) ==
+               0x00002f2f3a737377ull) {  // "wss://"
+      pos = 6;
+      scheme_type = ada::scheme::type::WSS;
+      protocol_end = 4;
+    } else if ((first8 & 0x0000ffffffffffffull) ==
+               0x00002f2f3a707466ull) {  // "ftp://"
+      pos = 6;
+      scheme_type = ada::scheme::type::FTP;
+      protocol_end = 4;
+    } else if ((first8 & 0x000000ffffffffffull) ==
+               0x0000002f2f3a7377ull) {  // "ws://"
+      pos = 5;
+      scheme_type = ada::scheme::type::WS;
+      protocol_end = 3;
     } else {
       return false;
     }
+  } else if (b[0] == 'w' && b[1] == 's') {
+    if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
+      pos = 5;
+      scheme_type = ada::scheme::type::WS;
+      protocol_end = 3;
+    } else if (b[2] == 's' && b[3] == ':' && b[4] == '/' && b[5] == '/') {
+      pos = 6;
+      scheme_type = ada::scheme::type::WSS;
+      protocol_end = 4;
+    } else {
+      return false;
+    }
+  } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
+             b[4] == '/' && b[5] == '/') {
+    pos = 6;
+    scheme_type = ada::scheme::type::FTP;
+    protocol_end = 4;
+  } else if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' &&
+             b[3] == 'p' && b[4] == ':' && b[5] == '/' && b[6] == '/') {
+    pos = 7;
+    scheme_type = ada::scheme::type::HTTP;
+    protocol_end = 5;
+  } else {
+    return false;
   }
 #else
-  // Big-endian / uncommon arches: byte-wise http(s) match (compiled out on LE).
+  // Big-endian / uncommon arches: byte-wise special-scheme match.
   if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p') {
-    matched_scheme = true;
     if (b[4] == ':' && b[5] == '/' && b[6] == '/') {
       pos = 7;
       scheme_type = ada::scheme::type::HTTP;
@@ -1150,31 +1163,28 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     } else {
       return false;
     }
-  }
-#endif
-  if (!matched_scheme) {
-    if (b[0] == 'w' && b[1] == 's') {
-      if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
-        pos = 5;
-        scheme_type = ada::scheme::type::WS;
-        protocol_end = 3;
-      } else if (len >= 6 && b[2] == 's' && b[3] == ':' && b[4] == '/' &&
-                 b[5] == '/') {
-        pos = 6;
-        scheme_type = ada::scheme::type::WSS;
-        protocol_end = 4;
-      } else {
-        return false;
-      }
-    } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
-               b[4] == '/' && b[5] == '/') {
+  } else if (b[0] == 'w' && b[1] == 's') {
+    if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
+      pos = 5;
+      scheme_type = ada::scheme::type::WS;
+      protocol_end = 3;
+    } else if (len >= 6 && b[2] == 's' && b[3] == ':' && b[4] == '/' &&
+               b[5] == '/') {
       pos = 6;
-      scheme_type = ada::scheme::type::FTP;
+      scheme_type = ada::scheme::type::WSS;
       protocol_end = 4;
     } else {
       return false;
     }
+  } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
+             b[4] == '/' && b[5] == '/') {
+    pos = 6;
+    scheme_type = ada::scheme::type::FTP;
+    protocol_end = 4;
+  } else {
+    return false;
   }
+#endif
   if (pos < len && (b[pos] == '/' || b[pos] == '\\')) [[unlikely]] {
     return false;
   }
@@ -1205,12 +1215,13 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
       unicode::to_lower_ascii(host_buf, host_len);
       hv = std::string_view(host_buf, host_len);
     }
-    if (last_label_may_be_a_number(hv)) [[unlikely]] {
+    if (checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
       return false;
     }
-    // Punycode is "xn--...". Skip the search when the host has no 'x'.
+    // Punycode is "xn--...". Skip the search when the host has no '-'.
+    // Hyphen is rarer in common hosts than 'x' (example.com, proxy, next).
     static constexpr std::string_view xn{"xn-", 3};
-    if (hv.find('x') != std::string_view::npos &&
+    if (hv.find('-') != std::string_view::npos &&
         hv.find(xn) != std::string_view::npos) [[unlikely]] {
       return false;
     }

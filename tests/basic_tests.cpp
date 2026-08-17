@@ -535,6 +535,12 @@ TEST(basic_tests, can_parse_consistency_clean_http_frontend) {
            "http://example.0x/",
            "http://foo.0x1/",
            "http://0xffffffff/",
+           "https://foo_bar.com/",
+           "https://foo~bar.com/",
+           "https://foo-bar.com/",
+           "http://ab.cd.ef/",
+           "xxxx://",
+           "http://",
        }) {
     assert_can_parse_consistent(input);
   }
@@ -1759,6 +1765,32 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_hostname(), "www.example.com");
     ASSERT_EQ(url->get_port(), "8080");
   }
+  // 8-byte integer scheme match for https/http/ws/ftp.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/path");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "https:");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+  }
+  {
+    auto url = ada::parse<TypeParam>("ws://example.com/chat");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "ws:");
+    ASSERT_EQ(url->get_href(), "ws://example.com/chat");
+  }
+  {
+    auto url = ada::parse<TypeParam>("ftp://ftp.example.com/file");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_protocol(), "ftp:");
+    ASSERT_EQ(url->get_hostname(), "ftp.example.com");
+  }
+  // Hyphen in the host is not punycode; 'x' in the path must not reject.
+  {
+    auto url = ada::parse<TypeParam>("https://foo-bar.com/xn--path");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "foo-bar.com");
+    ASSERT_EQ(url->get_pathname(), "/xn--path");
+  }
   {
     auto u = ada::parse<TypeParam>("https://example.com/a%20b/c%2Fd");
     ASSERT_TRUE(u);
@@ -1889,6 +1921,25 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
     ada::url u;
     ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
         std::string_view("https://xn--nxasmq6b.com/"), u));
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("ws://example.com/chat"), u));
+    ASSERT_EQ(u.get_protocol(), "ws:");
+    ASSERT_EQ(u.get_href(), "ws://example.com/chat");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("ftp://ftp.example.com/file"), u));
+    ASSERT_EQ(u.get_hostname(), "ftp.example.com");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://foo-bar.com/x"), u));
+    ASSERT_EQ(u.get_hostname(), "foo-bar.com");
   }
 }
 

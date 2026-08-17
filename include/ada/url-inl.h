@@ -196,29 +196,21 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const size_t total = scheme.size() + 3 + host_size + path_size +
                          (query.has_value() ? query_size + 1 : 0) +
                          (hash.has_value() ? hash_size + 1 : 0);
-    std::string output(total, '\0');
-    char* p = output.data();
-    std::memcpy(p, scheme.data(), scheme.size());
-    p += scheme.size();
-    p[0] = ':';
-    p[1] = '/';
-    p[2] = '/';
-    p += 3;
-    // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-    std::memcpy(p, host->data(), host_size);
-    p += host_size;
-    std::memcpy(p, path.data(), path_size);
-    p += path_size;
+    // reserve + append copies once. string(n, '\0') value-inits then
+    // overwrites, which is a wasted memset on this hot path.
+    std::string output;
+    output.reserve(total);
+    output.append(scheme);
+    output.append("://", 3);
+    output.append(*host);
+    output.append(path);
     if (query.has_value()) {
-      *p++ = '?';
-      // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-      std::memcpy(p, query->data(), query_size);
-      p += query_size;
+      output.push_back('?');
+      output.append(*query);
     }
     if (hash.has_value()) {
-      *p++ = '#';
-      // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-      std::memcpy(p, hash->data(), hash_size);
+      output.push_back('#');
+      output.append(*hash);
     }
     return output;
   }
