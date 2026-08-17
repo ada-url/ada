@@ -322,6 +322,10 @@ struct url_aggregator : url_base {
       std::string_view, const url_aggregator*);
   friend url_aggregator parser::parse_url_impl<url_aggregator, false>(
       std::string_view, const url_aggregator*);
+  friend url_aggregator parser::parse_url_state_machine<url_aggregator, true>(
+      std::string_view, const url_aggregator*, url_aggregator, uint32_t);
+  friend url_aggregator parser::parse_url_state_machine<url_aggregator, false>(
+      std::string_view, const url_aggregator*, url_aggregator, uint32_t);
   template <class result_type>
   friend bool parser::try_parse_simple_absolute(std::string_view, result_type&);
   template <class result_type>

@@ -1624,11 +1624,6 @@ ada_never_inline bool try_parse_simple_relative(std::string_view input,
 }
 
 template <class result_type, bool store_values>
-ada_never_inline result_type parse_url_state_machine(
-    std::string_view user_input, const result_type* base_url, result_type url,
-    uint32_t max_input_length);
-
-template <class result_type, bool store_values>
 result_type parse_url_impl(std::string_view user_input,
                            const result_type* base_url) {
   // We can specialize the implementation per type.
@@ -1697,9 +1692,9 @@ template <class result_type, bool store_values>
 ada_never_inline result_type parse_url_state_machine(
     std::string_view user_input, const result_type* base_url, result_type url,
     uint32_t max_input_length) {
-  constexpr bool result_type_is_ada_url = std::is_same_v<url, result_type>;
+  constexpr bool result_type_is_ada_url = std::is_same_v<ada::url, result_type>;
   constexpr bool result_type_is_ada_url_aggregator =
-      std::is_same_v<url_aggregator, result_type>;
+      std::is_same_v<ada::url_aggregator, result_type>;
 
   state state = state::SCHEME_START;
 

@@ -90,6 +90,12 @@ template <class result_type>
 bool try_parse_simple_relative(std::string_view input, const result_type& base,
                                result_type& out);
 
+/** @private */
+template <class result_type, bool store_values>
+result_type parse_url_state_machine(std::string_view user_input,
+                                    const result_type* base_url,
+                                    result_type url, uint32_t max_input_length);
+
 #if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>
 tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
