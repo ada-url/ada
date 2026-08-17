@@ -344,7 +344,6 @@ ada_really_inline bool scan_plain_host(const uint8_t* b, size_t start,
   return true;
 }
 
-// True when '.' is a possible '.' / '..' path segment (start or after '/').
 ada_really_inline void note_possible_dot_segment(
     const uint8_t* b, size_t pos, size_t run_start,
     bool& maybe_dot_segment) noexcept {
@@ -354,8 +353,6 @@ ada_really_inline void note_possible_dot_segment(
 }
 
 // Advance i to the first path-class 1 or 2 character (or len).
-// maybe_dot_segment is set only for '.' at the run start or after '/', so
-// filename dots (polyfills.js) do not trigger a second path walk.
 ada_really_inline void scan_path_run(const uint8_t* b, size_t& i, size_t len,
                                      bool& maybe_dot_segment) noexcept {
   const size_t run_start = i;
