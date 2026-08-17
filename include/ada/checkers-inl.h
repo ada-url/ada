@@ -20,6 +20,41 @@ namespace ada::checkers {
 
 constexpr bool is_digit(char x) noexcept { return (x >= '0') & (x <= '9'); }
 
+constexpr bool is_ipv4_number_char(char x) noexcept {
+  const unsigned char c = static_cast<unsigned char>(x);
+  return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
+         (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
+}
+
+// parseIPv4Host / ends-in-a-number can only succeed when the last label is
+// non-empty, starts with an ASCII digit, and is hex digits plus x/X.
+// Mirrors WebKit's lastLabelMayBeANumber (oven-sh/WebKit#452).
+constexpr bool last_label_may_be_a_number(std::string_view view) noexcept {
+  if (view.empty()) {
+    return false;
+  }
+  const char* start = view.data();
+  const char* end = start + view.size();
+  if (end[-1] == '.') {
+    --end;
+    if (end == start) {
+      return false;
+    }
+  }
+  // Cheap reject: a numeric last label can only end in a hex digit or x/X.
+  if (!is_ipv4_number_char(end[-1])) {
+    return false;
+  }
+  const char* label = end;
+  while (label != start && is_ipv4_number_char(label[-1])) {
+    --label;
+  }
+  if (label != start && label[-1] != '.') {
+    return false;
+  }
+  return label != end && is_digit(*label);
+}
+
 constexpr char to_lower(char x) noexcept { return (x | 0x20); }
 
 constexpr bool is_alpha(char x) noexcept {

@@ -324,6 +324,10 @@ struct url_aggregator : url_base {
       std::string_view, const url_aggregator*);
   template <class result_type>
   friend bool parser::try_parse_simple_absolute(std::string_view, result_type&);
+  template <class result_type>
+  friend bool parser::try_parse_simple_relative(std::string_view,
+                                                const result_type&,
+                                                result_type&);
 
 #if ADA_INCLUDE_URL_PATTERN
   // url_pattern methods

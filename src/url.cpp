@@ -354,45 +354,73 @@ ada_really_inline bool url::parse_host(std::string_view input) {
     return parse_opaque_host(input);
   }
 
-  // Fast path: try to parse as pure decimal IPv4(a.b.c.d) first.
-  const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
-  if (fast_result < checkers::ipv4_fast_fail) {
-    // Fast path succeeded - input is pure decimal IPv4
-    if (!input.empty() && input.back() == '.') {
-      host = input.substr(0, input.size() - 1);
-    } else {
-      host = input;
+  // IPv4 / ends-in-a-number is impossible unless the last label looks numeric.
+  // Digit-led hosts still go straight to the decimal fast parser (IPv4
+  // microbenches); ordinary DNS names skip it entirely.
+  if (checkers::is_digit(input[0]) ||
+      checkers::last_label_may_be_a_number(input)) {
+    const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
+    if (fast_result < checkers::ipv4_fast_fail) {
+      if (!input.empty() && input.back() == '.') {
+        host = input.substr(0, input.size() - 1);
+      } else {
+        host = input;
+      }
+      host_type = IPV4;
+      is_valid = true;
+      ada_log("parse_host fast path decimal ipv4");
+      return true;
     }
-    host_type = IPV4;
-    is_valid = true;
-    ada_log("parse_host fast path decimal ipv4");
-    return true;
   }
   // Let domain be the result of running UTF-8 decode without BOM on the
   // percent-decoding of input. Let asciiDomain be the result of running domain
   // to ASCII with domain and false. The most common case is an ASCII input, in
   // which case we do not need to call the expensive 'to_ascii' if a few
   // conditions are met: no '%' and no 'xn-' subsequence.
-  std::string buffer = std::string(input);
-  // This next function checks that the result is ascii, but we are going to
-  // to check anyhow with is_forbidden.
-  // bool is_ascii =
-  unicode::to_lower_ascii(buffer.data(), buffer.size());
-  bool is_forbidden = unicode::contains_forbidden_domain_code_point(
-      buffer.data(), buffer.size());
+  const uint8_t forbidden_or_upper =
+      unicode::contains_forbidden_domain_code_point_or_upper(input.data(),
+                                                             input.size());
   static constexpr std::string_view xn_dash{"xn-", 3};
-  if (is_forbidden == 0 && buffer.find(xn_dash) == std::string_view::npos) {
-    // fast path
-    host = std::move(buffer);
-
-    // Check for other IPv4 formats (hex, octal, etc.)
-    if (checkers::is_ipv4(host.value())) {
-      ada_log("parse_host fast path ipv4");
-      return parse_ipv4(host.value());
+  if ((forbidden_or_upper & 1) == 0) {
+    // No forbidden code point: copy once, lowercase only when needed.
+    host = std::string(input);
+    if ((forbidden_or_upper & 2) != 0) {
+      unicode::to_lower_ascii(host->data(), host->size());
     }
-    ada_log("parse_host fast path ", *host);
-    is_valid = true;
-    return true;
+    if (host->find('-') == std::string_view::npos ||
+        host->find(xn_dash) == std::string_view::npos) {
+      if (checkers::last_label_may_be_a_number(*host) &&
+          checkers::is_ipv4(*host)) {
+        ada_log("parse_host fast path ipv4");
+        return parse_ipv4(*host);
+      }
+      ada_log("parse_host fast path ", *host);
+      is_valid = true;
+      return true;
+    }
+  } else if (const size_t first_percent = input.find('%');
+             first_percent != std::string_view::npos) {
+    // Percent-encoded ASCII host: decode + lowercase without an IDNA round
+    // trip.
+    std::string decoded = unicode::percent_decode(input, first_percent);
+    const uint8_t decoded_flags =
+        unicode::contains_forbidden_domain_code_point_or_upper(decoded.data(),
+                                                               decoded.size());
+    if ((decoded_flags & 1) == 0) {
+      if ((decoded_flags & 2) != 0) {
+        unicode::to_lower_ascii(decoded.data(), decoded.size());
+      }
+      if (decoded.find('-') == std::string_view::npos ||
+          decoded.find(xn_dash) == std::string_view::npos) {
+        host = std::move(decoded);
+        if (checkers::last_label_may_be_a_number(*host) &&
+            checkers::is_ipv4(*host)) {
+          return parse_ipv4(*host);
+        }
+        is_valid = true;
+        return true;
+      }
+    }
   }
   ada_log("parse_host calling to_ascii");
   is_valid = ada::unicode::to_ascii(host, input, input.find('%'));

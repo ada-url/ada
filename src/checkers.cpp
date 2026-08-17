@@ -11,24 +11,15 @@ namespace ada::checkers {
 
 ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept {
   // The string is not empty and does not contain upper case ASCII characters.
-  //
-  // Optimization. To be considered as a possible ipv4, the string must end
-  // with 'x' or a lowercase hex character.
-  // Most of the time, this will be false so this simple check will save a lot
-  // of effort.
+  // last_label_may_be_a_number is a conservative pre-check: IPv4 / ends-in-a-
+  // number is impossible unless the last label starts with a digit and is
+  // hex digits plus x/X.
+  if (!last_label_may_be_a_number(view)) {
+    return false;
+  }
   // If the address ends with a dot, we need to prune it (special case).
   if (view.ends_with('.')) {
     view.remove_suffix(1);
-    if (view.empty()) {
-      return false;
-    }
-  }
-  char last_char = view.back();
-  bool possible_ipv4 = (last_char >= '0' && last_char <= '9') ||
-                       (last_char >= 'a' && last_char <= 'f') ||
-                       last_char == 'x';
-  if (!possible_ipv4) {
-    return false;
   }
   // From the last character, find the last dot.
   size_t last_dot = view.rfind('.');
