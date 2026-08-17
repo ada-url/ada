@@ -1867,6 +1867,29 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
     ASSERT_EQ(u.get_pathname(), "/bar");
     ASSERT_EQ(u.get_href(), "https://example.com/bar");
   }
+  {
+    // Host contains 'x' but is not punycode; long query exercises the
+    // 32-byte scan unroll; .css is not a dot-segment.
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view(
+            "https://example.com/style.css?q=abcdefghijklmnopqrstuvwxyz012345"),
+        u));
+    ASSERT_EQ(u.get_pathname(), "/style.css");
+    ASSERT_EQ(u.get_search(), "?q=abcdefghijklmnopqrstuvwxyz012345");
+  }
+  {
+    // "/." after a 16-byte path prefix so the SIMD window and tail agree.
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/0123456789abcdef/./x"), u));
+    ASSERT_EQ(u.get_pathname(), "/0123456789abcdef/x");
+  }
+  {
+    ada::url u;
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://xn--nxasmq6b.com/"), u));
+  }
 }
 
 TEST(basic_tests, ada_url_get_href_assembly) {
