@@ -1792,6 +1792,15 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_TRUE(ada::can_parse("https://foo~bar.com/"));
     ASSERT_TRUE(ada::can_parse("https://foo-bar.com/"));
     ASSERT_TRUE(ada::can_parse("http://ab.cd.ef/"));
+    // SWAR must not treat "./" or "_^" as eight clean host bytes.
+    ASSERT_FALSE(ada::can_parse("https://foo_^bar.com/"));
+    ASSERT_FALSE(ada::parse<TypeParam>("https://foo_^bar.com/"));
+    assert_can_parse_consistent("https://foo_^bar.com/");
+    assert_can_parse_consistent("https://x./xxxxx");
+    assert_can_parse_consistent("file://");
+    assert_can_parse_consistent("file://p");
+    assert_can_parse_consistent("abcd://");
+    assert_can_parse_consistent("xxxx://");
   }
   {
     auto u = ada::parse<TypeParam>("https://example.com/a%20b/c%2Fd");

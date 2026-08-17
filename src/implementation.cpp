@@ -45,13 +45,10 @@ constexpr std::array<uint8_t, 256> clean_http_host_byte = []() consteval {
 // SWAR: eight ASCII host bytes in [a-z0-9-._~] without 8 table lookups.
 // High bits must be clear first so the range subtracts cannot borrow
 // across bytes.
-ada_really_inline uint64_t swar_byte_eq(uint64_t w, uint8_t c) noexcept {
-  constexpr uint64_t k_ones = 0x0101010101010101ull;
-  constexpr uint64_t k_high = 0x8080808080808080ull;
-  const uint64_t x = w ^ (k_ones * c);
-  return (x - k_ones) & ~x & k_high;
-}
-
+// High-bit-cleared ASCII only. Subtracts cannot borrow across bytes because
+// each (hi|0x80) byte is >= 0x80 and each data byte is <= 0x7F. Do not use
+// has-zero (x-ones)&~x: a match followed by match^1 (e.g. "./" or "_^")
+// produces a false positive via borrow.
 ada_really_inline uint64_t swar_in_range(uint64_t w, uint8_t lo,
                                          uint8_t hi) noexcept {
   constexpr uint64_t k_ones = 0x0101010101010101ull;
@@ -70,8 +67,8 @@ ada_really_inline bool eight_clean_http_host_bytes(
     return false;
   }
   const uint64_t ok = swar_in_range(w, 'a', 'z') | swar_in_range(w, '0', '9') |
-                      swar_byte_eq(w, '-') | swar_byte_eq(w, '.') |
-                      swar_byte_eq(w, '_') | swar_byte_eq(w, '~');
+                      swar_in_range(w, '-', '-') | swar_in_range(w, '.', '.') |
+                      swar_in_range(w, '_', '_') | swar_in_range(w, '~', '~');
   return ok == k_high;
 }
 
@@ -106,7 +103,9 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
       } else {
         return std::nullopt;
       }
-    } else if (bytes[4] == ':' && bytes[5] == '/' && bytes[6] == '/') {
+    } else if (bytes[0] == 'h' && bytes[1] == 't' && bytes[2] == 't' &&
+               bytes[3] == 'p' && bytes[4] == ':' && bytes[5] == '/' &&
+               bytes[6] == '/') {
       authority_start = 7;
     } else {
       return std::nullopt;
