@@ -93,9 +93,12 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   // using ASCII digits then set processedInit["port"] to the empty string.
   // TODO: Optimization opportunity.
   if (scheme::is_special(*processed_init->protocol)) {
-    std::string_view port = processed_init->port.value();
-    if (std::to_string(scheme::get_special_port(*processed_init->protocol)) ==
-        port) {
+    // file is the only special scheme with no default port; get_special_port
+    // returns 0 as its sentinel, so a literal "0" port must not be mistaken for
+    // a default and dropped.
+    uint16_t default_port = scheme::get_special_port(*processed_init->protocol);
+    if (default_port != 0 &&
+        std::to_string(default_port) == processed_init->port.value()) {
       processed_init->port->clear();
     }
   }
