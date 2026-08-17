@@ -1890,9 +1890,10 @@ TEST(basic_tests, ada_url_get_href_assembly) {
   }
 }
 
-TYPED_TEST(basic_tests, simd_length_authority_path_query) {
-  // 16+ byte components exercise the SIMD authority/path/query scanners
-  // and their overlapping 16-byte tails (17-31 byte remnants).
+TYPED_TEST(basic_tests, long_authority_path_query) {
+  // Path '@', long userinfo, long query, and a 16+ byte host. These used
+  // to be the targets of extra SIMD; they stay as coverage for the
+  // existing scanners.
   {
     auto u = ada::parse<TypeParam>(
         "https://www.tiktok.com/@aguyandagolden/video/7133277734310038830");
