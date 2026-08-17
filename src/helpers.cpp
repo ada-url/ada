@@ -10,6 +10,14 @@
 
 #if ADA_SSSE3
 #include <tmmintrin.h>
+#elif ADA_NEON
+#include <arm_neon.h>
+#elif ADA_SSE2
+#include <emmintrin.h>
+#elif ADA_LSX
+#include <lsxintrin.h>
+#elif ADA_RVV
+#include <riscv_vector.h>
 #endif
 
 namespace ada::helpers {
@@ -1029,7 +1037,7 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) {
   url.update_base_pathname(path);
 }
 
-// @ / \\ ?
+// @ / \\ ?  (special)    @ / ?  (non-special)
 static constexpr std::array<uint8_t, 256> authority_delimiter_special =
     []() consteval {
       std::array<uint8_t, 256> result{};
@@ -1038,20 +1046,6 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special =
       }
       return result;
     }();
-// credit: @the-moisrex recommended a table-based approach
-ada_really_inline size_t
-find_authority_delimiter_special(std::string_view view) noexcept {
-  // performance note: we might be able to gain further performance
-  // with SIMD intrinsics.
-  for (auto pos = view.begin(); pos != view.end(); ++pos) {
-    if (authority_delimiter_special[(uint8_t)*pos]) {
-      return pos - view.begin();
-    }
-  }
-  return size_t(view.size());
-}
-
-// @ / ?
 static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   std::array<uint8_t, 256> result{};
   for (uint8_t i : {'@', '/', '?'}) {
@@ -1059,17 +1053,236 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   }
   return result;
 }();
-// credit: @the-moisrex recommended a table-based approach
+
+// Same 16-byte classify-and-mask approach as find_next_host_delimiter.
+// Special URLs also treat '\\' as a delimiter. Short inputs stay scalar.
+template <bool is_special>
 ada_really_inline size_t
-find_authority_delimiter(std::string_view view) noexcept {
-  // performance note: we might be able to gain further performance
-  // with SIMD instrinsics.
-  for (auto pos = view.begin(); pos != view.end(); ++pos) {
-    if (authority_delimiter[(uint8_t)*pos]) {
-      return pos - view.begin();
+find_authority_delimiter_impl(std::string_view view) noexcept {
+#if ADA_RVV
+  uint8_t* src = (uint8_t*)view.data();
+  size_t location = 0;
+  for (size_t vl, n = view.size(); n > 0; n -= vl, src += vl, location += vl) {
+    vl = __riscv_vsetvl_e8m1(n);
+    const vuint8m1_t v = __riscv_vle8_v_u8m1(src, vl);
+    const vbool8_t m1 = __riscv_vmseq(v, '@', vl);
+    const vbool8_t m2 = __riscv_vmseq(v, '/', vl);
+    const vbool8_t m3 = __riscv_vmseq(v, '?', vl);
+    vbool8_t m = __riscv_vmor(__riscv_vmor(m1, m2, vl), m3, vl);
+    if constexpr (is_special) {
+      m = __riscv_vmor(m, __riscv_vmseq(v, '\\', vl), vl);
+    }
+    const long idx = __riscv_vfirst(m, vl);
+    if (idx >= 0) {
+      return location + static_cast<size_t>(idx);
     }
   }
-  return size_t(view.size());
+  return view.size();
+#else
+  const auto& table =
+      is_special ? authority_delimiter_special : authority_delimiter;
+#if ADA_SSSE3
+  if (view.size() < 16) {
+    for (size_t i = 0; i < view.size(); i++) {
+      if (table[(uint8_t)view[i]]) {
+        return i;
+      }
+    }
+    return view.size();
+  }
+  // '@' 0x40: low[0x0]=0x01, high[0x4]=0x01
+  // '/' 0x2F: low[0xF]=0x02, high[0x2]=0x02
+  // '?' 0x3F: low[0xF]=0x02, high[0x3]=0x02
+  // '\\' 0x5C (special only): low[0xC]=0x04, high[0x5]=0x04
+  const __m128i low_mask =
+      is_special
+          ? _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x02)
+          : _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02);
+  const __m128i high_mask =
+      is_special
+          ? _mm_setr_epi8(0x00, 0x00, 0x02, 0x02, 0x01, 0x04, 0x00, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+          : _mm_setr_epi8(0x00, 0x00, 0x02, 0x02, 0x01, 0x00, 0x00, 0x00, 0x00,
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
+  size_t i = 0;
+  for (; i + 15 < view.size(); i += 16) {
+    const __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    const __m128i lowpart =
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    const __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    const __m128i classify = _mm_and_si128(lowpart, highpart);
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
+    if (mask != 0) {
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  if (i < view.size()) {
+    const __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    const __m128i lowpart =
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    const __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    const __m128i classify = _mm_and_si128(lowpart, highpart);
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  return view.size();
+#elif ADA_NEON
+  if (view.size() < 16) {
+    for (size_t i = 0; i < view.size(); i++) {
+      if (table[(uint8_t)view[i]]) {
+        return i;
+      }
+    }
+    return view.size();
+  }
+  const uint8x16_t low_mask =
+      is_special
+          ? ada_make_uint8x16_t(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x02)
+          : ada_make_uint8x16_t(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02);
+  const uint8x16_t high_mask =
+      is_special
+          ? ada_make_uint8x16_t(0x00, 0x00, 0x02, 0x02, 0x01, 0x04, 0x00, 0x00,
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+          : ada_make_uint8x16_t(0x00, 0x00, 0x02, 0x02, 0x01, 0x00, 0x00, 0x00,
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const uint8x16_t fmask = vmovq_n_u8(0xf);
+  size_t i = 0;
+  for (; i + 15 < view.size(); i += 16) {
+    const uint8x16_t word = vld1q_u8((const uint8_t*)view.data() + i);
+    const uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
+    const uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
+    const uint8x8_t matches = to_nibble_mask(vtstq_u8(lowpart, highpart));
+    if (any_set(matches)) {
+      return i + first_set(matches);
+    }
+  }
+  if (i < view.size()) {
+    const uint8x16_t word =
+        vld1q_u8((const uint8_t*)view.data() + view.length() - 16);
+    const uint8x16_t lowpart = vqtbl1q_u8(low_mask, vandq_u8(word, fmask));
+    const uint8x16_t highpart = vqtbl1q_u8(high_mask, vshrq_n_u8(word, 4));
+    const uint8x8_t matches = to_nibble_mask(vtstq_u8(lowpart, highpart));
+    if (any_set(matches)) {
+      return view.length() - 16 + first_set(matches);
+    }
+  }
+  return view.size();
+#elif ADA_SSE2
+  if (view.size() < 16) {
+    for (size_t i = 0; i < view.size(); i++) {
+      if (table[(uint8_t)view[i]]) {
+        return i;
+      }
+    }
+    return view.size();
+  }
+  const __m128i mask_at = _mm_set1_epi8('@');
+  const __m128i mask_slash = _mm_set1_epi8('/');
+  const __m128i mask_query = _mm_set1_epi8('?');
+  const __m128i mask_backslash = _mm_set1_epi8('\\');
+  size_t i = 0;
+  for (; i + 15 < view.size(); i += 16) {
+    const __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    __m128i m = _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(word, mask_at),
+                                          _mm_cmpeq_epi8(word, mask_slash)),
+                             _mm_cmpeq_epi8(word, mask_query));
+    if constexpr (is_special) {
+      m = _mm_or_si128(m, _mm_cmpeq_epi8(word, mask_backslash));
+    }
+    const int mask = _mm_movemask_epi8(m);
+    if (mask != 0) {
+      return i + trailing_zeroes(mask);
+    }
+  }
+  if (i < view.size()) {
+    const __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    __m128i m = _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(word, mask_at),
+                                          _mm_cmpeq_epi8(word, mask_slash)),
+                             _mm_cmpeq_epi8(word, mask_query));
+    if constexpr (is_special) {
+      m = _mm_or_si128(m, _mm_cmpeq_epi8(word, mask_backslash));
+    }
+    const int mask = _mm_movemask_epi8(m);
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(mask);
+    }
+  }
+  return view.size();
+#elif ADA_LSX
+  if (view.size() < 16) {
+    for (size_t i = 0; i < view.size(); i++) {
+      if (table[(uint8_t)view[i]]) {
+        return i;
+      }
+    }
+    return view.size();
+  }
+  const __m128i mask_at = __lsx_vrepli_b('@');
+  const __m128i mask_slash = __lsx_vrepli_b('/');
+  const __m128i mask_query = __lsx_vrepli_b('?');
+  const __m128i mask_backslash = __lsx_vrepli_b('\\');
+  size_t i = 0;
+  for (; i + 15 < view.size(); i += 16) {
+    const __m128i word = __lsx_vld((const __m128i*)(view.data() + i), 0);
+    __m128i m = __lsx_vor_v(__lsx_vor_v(__lsx_vseq_b(word, mask_at),
+                                        __lsx_vseq_b(word, mask_slash)),
+                            __lsx_vseq_b(word, mask_query));
+    if constexpr (is_special) {
+      m = __lsx_vor_v(m, __lsx_vseq_b(word, mask_backslash));
+    }
+    const int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
+    if (mask != 0) {
+      return i + trailing_zeroes(mask);
+    }
+  }
+  if (i < view.size()) {
+    const __m128i word =
+        __lsx_vld((const __m128i*)(view.data() + view.length() - 16), 0);
+    __m128i m = __lsx_vor_v(__lsx_vor_v(__lsx_vseq_b(word, mask_at),
+                                        __lsx_vseq_b(word, mask_slash)),
+                            __lsx_vseq_b(word, mask_query));
+    if constexpr (is_special) {
+      m = __lsx_vor_v(m, __lsx_vseq_b(word, mask_backslash));
+    }
+    const int mask = __lsx_vpickve2gr_hu(__lsx_vmsknz_b(m), 0);
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(mask);
+    }
+  }
+  return view.size();
+#else
+  for (auto pos = view.begin(); pos != view.end(); ++pos) {
+    if (table[(uint8_t)*pos]) {
+      return static_cast<size_t>(pos - view.begin());
+    }
+  }
+  return view.size();
+#endif
+#endif  // ADA_RVV
+}
+
+ada_really_inline size_t
+find_authority_delimiter_special(std::string_view view) noexcept {
+  return find_authority_delimiter_impl<true>(view);
+}
+
+ada_really_inline size_t
+find_authority_delimiter(std::string_view view) noexcept {
+  return find_authority_delimiter_impl<false>(view);
 }
 
 }  // namespace ada::helpers

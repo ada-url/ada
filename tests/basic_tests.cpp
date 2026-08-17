@@ -1890,6 +1890,46 @@ TEST(basic_tests, ada_url_get_href_assembly) {
   }
 }
 
+TYPED_TEST(basic_tests, simd_length_authority_path_query) {
+  // 16+ byte components exercise the SIMD authority/path/query scanners
+  // and their overlapping 16-byte tails (17-31 byte remnants).
+  {
+    auto u = ada::parse<TypeParam>(
+        "https://www.tiktok.com/@aguyandagolden/video/7133277734310038830");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_hostname(), "www.tiktok.com");
+    ASSERT_EQ(u->get_pathname(), "/@aguyandagolden/video/7133277734310038830");
+  }
+  {
+    auto u = ada::parse<TypeParam>(
+        "https://averylongusername:averylongpassword@example.com/path");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_username(), "averylongusername");
+    ASSERT_EQ(u->get_password(), "averylongpassword");
+    ASSERT_EQ(u->get_hostname(), "example.com");
+  }
+  {
+    const std::string query(40, 'a');
+    auto u = ada::parse<TypeParam>("https://example.com/search?" + query);
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_search(), "?" + query);
+  }
+  {
+    const std::string host = "cdn-edge-static-assets.example.com";
+    auto u = ada::parse<TypeParam>("https://" + host + "/x");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_hostname(), host);
+  }
+  {
+    auto u = ada::parse<TypeParam>(
+        "non-special://averylongusername@example.com/path");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_username(), "averylongusername");
+    ASSERT_EQ(u->get_hostname(), "example.com");
+  }
+  SUCCEED();
+}
+
 TEST(basic_tests, last_label_may_be_a_number_cases) {
   using ada::checkers::last_label_may_be_a_number;
   ASSERT_FALSE(last_label_may_be_a_number(""));
