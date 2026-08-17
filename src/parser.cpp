@@ -1804,25 +1804,11 @@ result_type parse_url_impl(std::string_view user_input,
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
       uint8_t host_first = 0;
-#if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
-    defined(_M_X64) || defined(_M_IX86) || defined(_M_AMD64)
-      if (n >= 8) {
-        uint64_t first8 = 0;
-        std::memcpy(&first8, p, 8);
-        if (first8 == 0x2f2f3a7370747468ull) {  // "https://"
-          host_first = (n > 8) ? p[8] : 0;
-        } else if ((first8 & 0x00ffffffffffffffull) ==
-                   0x002f2f3a70747468ull) {  // "http://"
-          host_first = p[7];
-        }
-      }
-#else
       if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
         host_first = p[7];
       } else if (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') {
         host_first = p[8];
       }
-#endif
       const bool skip_ip =
           host_first == '[' || (host_first >= '0' && host_first <= '9');
       hit_fast_path = !skip_ip && try_parse_simple_absolute(user_input, url);
