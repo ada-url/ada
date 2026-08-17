@@ -354,23 +354,19 @@ ada_really_inline bool url::parse_host(std::string_view input) {
     return parse_opaque_host(input);
   }
 
-  // IPv4 / ends-in-a-number is impossible unless the last label looks numeric.
-  // Digit-led hosts still go straight to the decimal fast parser (IPv4
-  // microbenches); ordinary DNS names skip it entirely.
-  if (checkers::is_digit(input[0]) ||
-      checkers::last_label_may_be_a_number(input)) {
-    const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
-    if (fast_result < checkers::ipv4_fast_fail) {
-      if (!input.empty() && input.back() == '.') {
-        host = input.substr(0, input.size() - 1);
-      } else {
-        host = input;
-      }
-      host_type = IPV4;
-      is_valid = true;
-      ada_log("parse_host fast path decimal ipv4");
-      return true;
+  // Fast path: try to parse as pure decimal IPv4 first. Do not wrap this
+  // in last_label_may_be_a_number: that extra walk regresses IPv4 and DNS.
+  const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
+  if (fast_result < checkers::ipv4_fast_fail) {
+    if (!input.empty() && input.back() == '.') {
+      host = input.substr(0, input.size() - 1);
+    } else {
+      host = input;
     }
+    host_type = IPV4;
+    is_valid = true;
+    ada_log("parse_host fast path decimal ipv4");
+    return true;
   }
   // Let domain be the result of running UTF-8 decode without BOM on the
   // percent-decoding of input. Let asciiDomain be the result of running domain
@@ -389,8 +385,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
     }
     if (host->find('-') == std::string_view::npos ||
         host->find(xn_dash) == std::string_view::npos) {
-      if (checkers::last_label_may_be_a_number(*host) &&
-          checkers::is_ipv4(*host)) {
+      if (checkers::is_ipv4(*host)) {
         ada_log("parse_host fast path ipv4");
         return parse_ipv4(*host);
       }
@@ -413,8 +408,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
       if (decoded.find('-') == std::string_view::npos ||
           decoded.find(xn_dash) == std::string_view::npos) {
         host = std::move(decoded);
-        if (checkers::last_label_may_be_a_number(*host) &&
-            checkers::is_ipv4(*host)) {
+        if (checkers::is_ipv4(*host)) {
           return parse_ipv4(*host);
         }
         is_valid = true;
