@@ -1037,7 +1037,7 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) {
   url.update_base_pathname(path);
 }
 
-// @ / \\ ?  (special)    @ / ?  (non-special)
+// @ / \\ ?  (special)
 static constexpr std::array<uint8_t, 256> authority_delimiter_special =
     []() consteval {
       std::array<uint8_t, 256> result{};
@@ -1046,6 +1046,8 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special =
       }
       return result;
     }();
+
+// @ / ?
 static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   std::array<uint8_t, 256> result{};
   for (uint8_t i : {'@', '/', '?'}) {
@@ -1054,11 +1056,13 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   return result;
 }();
 
-// Same 16-byte classify-and-mask approach as find_next_host_delimiter.
-// Special URLs also treat '\\' as a delimiter. Short inputs stay scalar.
+// 16-byte classify-and-mask, same approach as find_next_host_delimiter.
+// Kept out of line so the common <16-byte authority path stays a tight
+// table walk and does not bloat the inlined parser (CodSpeed / I-cache).
+#if ADA_RVV || ADA_SSSE3 || ADA_NEON || ADA_SSE2 || ADA_LSX
 template <bool is_special>
-ada_really_inline size_t
-find_authority_delimiter_impl(std::string_view view) noexcept {
+ada_never_inline size_t
+find_authority_delimiter_simd(std::string_view view) noexcept {
 #if ADA_RVV
   uint8_t* src = (uint8_t*)view.data();
   size_t location = 0;
@@ -1078,18 +1082,7 @@ find_authority_delimiter_impl(std::string_view view) noexcept {
     }
   }
   return view.size();
-#else
-  const auto& table =
-      is_special ? authority_delimiter_special : authority_delimiter;
-#if ADA_SSSE3
-  if (view.size() < 16) {
-    for (size_t i = 0; i < view.size(); i++) {
-      if (table[(uint8_t)view[i]]) {
-        return i;
-      }
-    }
-    return view.size();
-  }
+#elif ADA_SSSE3
   // '@' 0x40: low[0x0]=0x01, high[0x4]=0x01
   // '/' 0x2F: low[0xF]=0x02, high[0x2]=0x02
   // '?' 0x3F: low[0xF]=0x02, high[0x3]=0x02
@@ -1103,9 +1096,9 @@ find_authority_delimiter_impl(std::string_view view) noexcept {
   const __m128i high_mask =
       is_special
           ? _mm_setr_epi8(0x00, 0x00, 0x02, 0x02, 0x01, 0x04, 0x00, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
           : _mm_setr_epi8(0x00, 0x00, 0x02, 0x02, 0x01, 0x00, 0x00, 0x00, 0x00,
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   const __m128i fmask = _mm_set1_epi8(0xf);
   const __m128i zero = _mm_setzero_si128();
   size_t i = 0;
@@ -1138,14 +1131,6 @@ find_authority_delimiter_impl(std::string_view view) noexcept {
   }
   return view.size();
 #elif ADA_NEON
-  if (view.size() < 16) {
-    for (size_t i = 0; i < view.size(); i++) {
-      if (table[(uint8_t)view[i]]) {
-        return i;
-      }
-    }
-    return view.size();
-  }
   const uint8x16_t low_mask =
       is_special
           ? ada_make_uint8x16_t(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1181,14 +1166,6 @@ find_authority_delimiter_impl(std::string_view view) noexcept {
   }
   return view.size();
 #elif ADA_SSE2
-  if (view.size() < 16) {
-    for (size_t i = 0; i < view.size(); i++) {
-      if (table[(uint8_t)view[i]]) {
-        return i;
-      }
-    }
-    return view.size();
-  }
   const __m128i mask_at = _mm_set1_epi8('@');
   const __m128i mask_slash = _mm_set1_epi8('/');
   const __m128i mask_query = _mm_set1_epi8('?');
@@ -1223,14 +1200,6 @@ find_authority_delimiter_impl(std::string_view view) noexcept {
   }
   return view.size();
 #elif ADA_LSX
-  if (view.size() < 16) {
-    for (size_t i = 0; i < view.size(); i++) {
-      if (table[(uint8_t)view[i]]) {
-        return i;
-      }
-    }
-    return view.size();
-  }
   const __m128i mask_at = __lsx_vrepli_b('@');
   const __m128i mask_slash = __lsx_vrepli_b('/');
   const __m128i mask_query = __lsx_vrepli_b('?');
@@ -1264,25 +1233,44 @@ find_authority_delimiter_impl(std::string_view view) noexcept {
     }
   }
   return view.size();
-#else
-  for (auto pos = view.begin(); pos != view.end(); ++pos) {
-    if (table[(uint8_t)*pos]) {
-      return static_cast<size_t>(pos - view.begin());
-    }
-  }
-  return view.size();
 #endif
-#endif  // ADA_RVV
 }
+#endif  // ADA_RVV || ADA_SSSE3 || ADA_NEON || ADA_SSE2 || ADA_LSX
 
+// credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
-  return find_authority_delimiter_impl<true>(view);
+#if ADA_RVV
+  return find_authority_delimiter_simd<true>(view);
+#elif ADA_SSSE3 || ADA_NEON || ADA_SSE2 || ADA_LSX
+  if (view.size() >= 16) {
+    return find_authority_delimiter_simd<true>(view);
+  }
+#endif
+  for (auto pos = view.begin(); pos != view.end(); ++pos) {
+    if (authority_delimiter_special[(uint8_t)*pos]) {
+      return pos - view.begin();
+    }
+  }
+  return size_t(view.size());
 }
 
+// credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
-  return find_authority_delimiter_impl<false>(view);
+#if ADA_RVV
+  return find_authority_delimiter_simd<false>(view);
+#elif ADA_SSSE3 || ADA_NEON || ADA_SSE2 || ADA_LSX
+  if (view.size() >= 16) {
+    return find_authority_delimiter_simd<false>(view);
+  }
+#endif
+  for (auto pos = view.begin(); pos != view.end(); ++pos) {
+    if (authority_delimiter[(uint8_t)*pos]) {
+      return pos - view.begin();
+    }
+  }
+  return size_t(view.size());
 }
 
 }  // namespace ada::helpers

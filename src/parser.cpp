@@ -364,11 +364,6 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
             static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
       return true;
     };
-    for (; i + 32 <= len; i += 32) {
-      if (visit(i) || visit(i + 16)) {
-        return k_host_class[b[end]] == 1;
-      }
-    }
     for (; i + 16 <= len; i += 16) {
       if (visit(i)) {
         return k_host_class[b[end]] == 1;
@@ -385,29 +380,6 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
   }
 #elif ADA_SSE2
-  for (; i + 32 <= len; i += 32) {
-    const __m128i w0 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-    if (sse2_uppercase(w0) != 0) {
-      has_upper = true;
-    }
-    const int m0 = sse2_host_stop(w0);
-    if (m0 != 0) {
-      end = i +
-            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(m0)));
-      return k_host_class[b[end]] == 1;
-    }
-    const __m128i w1 =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i + 16));
-    if (sse2_uppercase(w1) != 0) {
-      has_upper = true;
-    }
-    const int m1 = sse2_host_stop(w1);
-    if (m1 != 0) {
-      end = i + 16 +
-            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(m1)));
-      return k_host_class[b[end]] == 1;
-    }
-  }
   for (; i + 16 <= len; i += 16) {
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
     if (sse2_uppercase(w) != 0) {
@@ -436,11 +408,6 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       end = at + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
       return true;
     };
-    for (; i + 32 <= len; i += 32) {
-      if (visit(i) || visit(i + 16)) {
-        return k_host_class[b[end]] == 1;
-      }
-    }
     for (; i + 16 <= len; i += 16) {
       if (visit(i)) {
         return k_host_class[b[end]] == 1;
@@ -485,45 +452,36 @@ ada_really_inline void note_possible_dot_segment(
 ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
                                    bool& maybe_dot_segment) noexcept {
   const size_t run_start = i;
-  auto note_dots = [&](size_t from, size_t to) {
-    for (size_t j = from; j < to; ++j) {
-      if (b[j] == '.') {
-        note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
-        if (maybe_dot_segment) {
-          return;
-        }
-      }
-    }
-  };
 #if ADA_PARSER_SSSE3
   if (i + 16 <= len) {
     const __m128i lo_tbl = nibble_load(k_path_nibbles.low);
     const __m128i hi_tbl = nibble_load(k_path_nibbles.high);
-    auto path_chunk = [&](size_t at) -> bool {
+    for (; i + 16 <= len; i += 16) {
       const __m128i w =
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
       const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
       if (mask != 0) {
         const size_t hit =
-            at +
+            i +
             static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-        note_dots(at, hit);
+        for (size_t j = i; j < hit; ++j) {
+          if (b[j] == '.') {
+            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+          }
+        }
         i = hit;
-        return true;
-      }
-      if (_mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('.'))) != 0) {
-        note_dots(at, at + 16);
-      }
-      return false;
-    };
-    for (; i + 32 <= len; i += 32) {
-      if (path_chunk(i) || path_chunk(i + 16)) {
         return;
       }
-    }
-    for (; i + 16 <= len; i += 16) {
-      if (path_chunk(i)) {
-        return;
+      const int dots = _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('.')));
+      if (dots != 0) {
+        for (size_t j = i; j < i + 16; ++j) {
+          if (b[j] == '.') {
+            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+            if (maybe_dot_segment) {
+              break;
+            }
+          }
+        }
       }
     }
     if (i > run_start && i < len) {
@@ -535,74 +493,79 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
             len - 16 +
             static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
         if (hit >= i) {
-          note_dots(i, hit);
+          for (size_t j = i; j < hit; ++j) {
+            if (b[j] == '.') {
+              note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+            }
+          }
           i = hit;
           return;
         }
       }
-      note_dots(i, len);
+      for (size_t j = i; j < len; ++j) {
+        if (b[j] == '.') {
+          note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+        }
+      }
       i = len;
       return;
     }
   }
 #elif ADA_SSE2
-  auto path_chunk = [&](const __m128i w, size_t at) -> bool {
+  for (; i + 16 <= len; i += 16) {
+    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
     const int mask = sse2_path_stop(w);
     if (mask != 0) {
       const size_t hit =
-          at +
+          i +
           static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-      note_dots(at, hit);
+      for (size_t j = i; j < hit; ++j) {
+        if (b[j] == '.') {
+          note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+        }
+      }
       i = hit;
-      return true;
-    }
-    if (_mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('.'))) != 0) {
-      note_dots(at, at + 16);
-    }
-    return false;
-  };
-  for (; i + 32 <= len; i += 32) {
-    if (path_chunk(_mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i)),
-                   i) ||
-        path_chunk(
-            _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i + 16)),
-            i + 16)) {
       return;
     }
-  }
-  for (; i + 16 <= len; i += 16) {
-    if (path_chunk(_mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i)),
-                   i)) {
-      return;
+    const int dots = _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('.')));
+    if (dots != 0) {
+      for (size_t j = i; j < i + 16; ++j) {
+        if (b[j] == '.') {
+          note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+          if (maybe_dot_segment) {
+            break;
+          }
+        }
+      }
     }
   }
 #elif ADA_NEON
   if (i + 16 <= len) {
     const uint8x16_t lo_tbl = vld1q_u8(k_path_nibbles.low);
     const uint8x16_t hi_tbl = vld1q_u8(k_path_nibbles.high);
-    auto path_chunk = [&](size_t at) -> bool {
-      const uint8x16_t w = vld1q_u8(b + at);
+    for (; i + 16 <= len; i += 16) {
+      const uint8x16_t w = vld1q_u8(b + i);
       const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
       if (bits != 0) {
         const size_t hit =
-            at + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
-        note_dots(at, hit);
+            i + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
+        for (size_t j = i; j < hit; ++j) {
+          if (b[j] == '.') {
+            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+          }
+        }
         i = hit;
-        return true;
+        return;
       }
       if (neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('.'))) != 0) {
-        note_dots(at, at + 16);
-      }
-      return false;
-    };
-    for (; i + 32 <= len; i += 32) {
-      if (path_chunk(i) || path_chunk(i + 16)) {
-        return;
-      }
-    }
-    for (; i + 16 <= len; i += 16) {
-      if (path_chunk(i)) {
-        return;
+        for (size_t j = i; j < i + 16; ++j) {
+          if (b[j] == '.') {
+            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+            if (maybe_dot_segment) {
+              break;
+            }
+          }
+        }
       }
     }
     if (i > run_start && i < len) {
@@ -612,12 +575,20 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
         const size_t hit =
             len - 16 + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
         if (hit >= i) {
-          note_dots(i, hit);
+          for (size_t j = i; j < hit; ++j) {
+            if (b[j] == '.') {
+              note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+            }
+          }
           i = hit;
           return;
         }
       }
-      note_dots(i, len);
+      for (size_t j = i; j < len; ++j) {
+        if (b[j] == '.') {
+          note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+        }
+      }
       i = len;
       return;
     }
@@ -644,24 +615,6 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     if (i + 16 <= len) {                                                     \
       const __m128i lo_tbl = nibble_load((nibbles).low);                     \
       const __m128i hi_tbl = nibble_load((nibbles).high);                    \
-      for (; i + 32 <= len; i += 32) {                                       \
-        const __m128i w0 =                                                   \
-            _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));        \
-        const int m0 = ssse3_nibble_mask(w0, lo_tbl, hi_tbl);                \
-        if (m0 != 0) {                                                       \
-          i += static_cast<size_t>(                                          \
-              trailing_zeroes32(static_cast<uint32_t>(m0)));                 \
-          return;                                                            \
-        }                                                                    \
-        const __m128i w1 =                                                   \
-            _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i + 16));   \
-        const int m1 = ssse3_nibble_mask(w1, lo_tbl, hi_tbl);                \
-        if (m1 != 0) {                                                       \
-          i += 16 + static_cast<size_t>(                                     \
-                        trailing_zeroes32(static_cast<uint32_t>(m1)));       \
-          return;                                                            \
-        }                                                                    \
-      }                                                                      \
       for (; i + 16 <= len; i += 16) {                                       \
         const __m128i w =                                                    \
             _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));        \
@@ -702,19 +655,6 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     if (i + 16 <= len) {                                                      \
       const uint8x16_t lo_tbl = vld1q_u8((nibbles).low);                      \
       const uint8x16_t hi_tbl = vld1q_u8((nibbles).high);                     \
-      for (; i + 32 <= len; i += 32) {                                        \
-        const uint64_t b0 = neon_table_stop(vld1q_u8(b + i), lo_tbl, hi_tbl); \
-        if (b0 != 0) {                                                        \
-          i += static_cast<size_t>(trailing_zeroes64(b0)) >> 2;               \
-          return;                                                             \
-        }                                                                     \
-        const uint64_t b1 =                                                   \
-            neon_table_stop(vld1q_u8(b + i + 16), lo_tbl, hi_tbl);            \
-        if (b1 != 0) {                                                        \
-          i += 16 + (static_cast<size_t>(trailing_zeroes64(b1)) >> 2);        \
-          return;                                                             \
-        }                                                                     \
-      }                                                                       \
       for (; i + 16 <= len; i += 16) {                                        \
         const uint8x16_t w = vld1q_u8(b + i);                                 \
         const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);             \
@@ -745,41 +685,23 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     }                                                                         \
   } while (0)
 #elif ADA_SSE2
-#define ADA_SCAN_STOP_RUN(nibbles, cls, sse2_stop)                           \
-  do {                                                                       \
-    for (; i + 32 <= len; i += 32) {                                         \
-      const __m128i w0 =                                                     \
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));          \
-      const int m0 = sse2_stop(w0);                                          \
-      if (m0 != 0) {                                                         \
-        i += static_cast<size_t>(                                            \
-            trailing_zeroes32(static_cast<uint32_t>(m0)));                   \
-        return;                                                              \
-      }                                                                      \
-      const __m128i w1 =                                                     \
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i + 16));     \
-      const int m1 = sse2_stop(w1);                                          \
-      if (m1 != 0) {                                                         \
-        i += 16 + static_cast<size_t>(                                       \
-                      trailing_zeroes32(static_cast<uint32_t>(m1)));         \
-        return;                                                              \
-      }                                                                      \
-    }                                                                        \
-    for (; i + 16 <= len; i += 16) {                                         \
-      const __m128i w =                                                      \
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));          \
-      const int mask = sse2_stop(w);                                         \
-      if (mask != 0) {                                                       \
-        i += static_cast<size_t>(                                            \
-            trailing_zeroes32(static_cast<uint32_t>(mask)));                 \
-        return;                                                              \
-      }                                                                      \
-    }                                                                        \
-    for (; i < len; ++i) {                                                   \
-      if ((cls)[b[i]] != 0) {                                                \
-        return;                                                              \
-      }                                                                      \
-    }                                                                        \
+#define ADA_SCAN_STOP_RUN(nibbles, cls, sse2_stop)                  \
+  do {                                                              \
+    for (; i + 16 <= len; i += 16) {                                \
+      const __m128i w =                                             \
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i)); \
+      const int mask = sse2_stop(w);                                \
+      if (mask != 0) {                                              \
+        i += static_cast<size_t>(                                   \
+            trailing_zeroes32(static_cast<uint32_t>(mask)));        \
+        return;                                                     \
+      }                                                             \
+    }                                                               \
+    for (; i < len; ++i) {                                          \
+      if ((cls)[b[i]] != 0) {                                       \
+        return;                                                     \
+      }                                                             \
+    }                                                               \
   } while (0)
 #else
 #define ADA_SCAN_STOP_RUN(nibbles, cls, unused_sse2_stop) \
