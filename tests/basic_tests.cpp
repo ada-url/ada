@@ -1399,6 +1399,12 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
       "https://example.com/path?q='x'#f",
       "https://WWW.Example.COM/Long/Path/Name/Without/Dot/Segments?x=1#y",
       "https://www.tiktok.com/@aguyandagolden/video/7133277734310038830",
+      "http://localhost:3000/",
+      "http://127.0.0.1:8080/",
+      "http://10.0.0.5:8080/foo",
+      "http://127.0.0.1/",
+      "http://localhost:3000/foo%20bar",
+      "http://127.0.0.1:8080/a/./b/../c",
   };
   for (const char* s : samples) {
     auto u = ada::parse<ada::url>(s);
@@ -1503,11 +1509,21 @@ TYPED_TEST(basic_tests, last_label_may_be_a_number_gate) {
     auto url = ada::parse<TypeParam>("http://192.168.1.1/");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+    ASSERT_EQ(url->host_type, ada::url_host_type::IPV4);
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://127.0.0.1:8080/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "127.0.0.1");
+    ASSERT_EQ(url->get_port(), "8080");
+    ASSERT_EQ(url->get_href(), "http://127.0.0.1:8080/");
+    ASSERT_EQ(url->host_type, ada::url_host_type::IPV4);
   }
   {
     auto url = ada::parse<TypeParam>("http://0x7f.0.0.1/");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "127.0.0.1");
+    ASSERT_EQ(url->host_type, ada::url_host_type::IPV4);
   }
   // Last label is a number but the host is not valid IPv4.
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123"));

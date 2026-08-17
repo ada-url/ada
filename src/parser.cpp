@@ -21,8 +21,27 @@
 
 #if ADA_NEON
 #include <arm_neon.h>
+#elif defined(__SSSE3__)
+#include <tmmintrin.h>
+#define ADA_PARSER_SSSE3 1
+#elif (defined(__x86_64__) || defined(__amd64__)) && defined(__GNUC__) && \
+    !defined(_MSC_VER)
+// gcc/clang honor target("ssse3"). clang-cl and MSVC do not: they still
+// compile the function as SSE2, then reject always_inline _mm_shuffle_epi8.
+#include <tmmintrin.h>
+#define ADA_PARSER_SSSE3 1
+#define ADA_PARSER_NEED_SSSE3_TARGET 1
 #elif ADA_SSE2
 #include <emmintrin.h>
+#endif
+#ifndef ADA_PARSER_SSSE3
+#define ADA_PARSER_SSSE3 0
+#endif
+
+#ifdef ADA_PARSER_NEED_SSSE3_TARGET
+#define ADA_PARSER_SIMD __attribute__((target("ssse3")))
+#else
+#define ADA_PARSER_SIMD ada_really_inline
 #endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
@@ -32,7 +51,8 @@
 namespace ada::parser {
 
 // Classification tables and 16-byte run scanners for the absolute-URL fast
-// path. Inspired by oven-sh/WebKit#452: scan 16 bytes at a time, and when the
+// path. Inspired by oven-sh/WebKit#452 and #454: scan 16 bytes at a time
+// (nibble-table pshufb/tbl when SSSE3 or NEON is available), and when the
 // path/query/fragment is not already canonical, keep the parsed host and
 // finish with the existing path helpers instead of re-parsing from scratch.
 namespace {
@@ -111,6 +131,61 @@ constexpr std::array<uint8_t, 256> k_hash = []() consteval {
   return t;
 }();
 
+// Nibble tables for pshufb / tbl classification (oven-sh/WebKit#454).
+// A byte is a stop when low[b & 0xF] & high[b >> 4] != 0. High nibbles whose
+// sixteen bytes share a stop pattern share a bit, so any set with at most
+// eight distinct patterns fits. Tables are built from the scalar class
+// arrays, so the vector and scalar paths cannot disagree.
+struct nibble_tables {
+  alignas(16) uint8_t low[16]{};
+  alignas(16) uint8_t high[16]{};
+  bool fits{true};
+};
+
+consteval nibble_tables make_stop_nibble_tables(
+    const std::array<uint8_t, 256>& cls) {
+  nibble_tables t{};
+  uint16_t patterns[16]{};
+  for (int hi = 0; hi < 16; ++hi) {
+    for (int lo = 0; lo < 16; ++lo) {
+      if (cls[static_cast<size_t>((hi << 4) | lo)] != 0) {
+        patterns[hi] = static_cast<uint16_t>(patterns[hi] | (1u << lo));
+      }
+    }
+  }
+  int bits_used = 0;
+  for (int hi = 0; hi < 16; ++hi) {
+    if (patterns[hi] == 0 || t.high[hi] != 0) {
+      continue;
+    }
+    if (bits_used == 8) {
+      t.fits = false;
+      return t;
+    }
+    const uint8_t bit = static_cast<uint8_t>(1u << bits_used++);
+    for (int other = hi; other < 16; ++other) {
+      if (patterns[other] == patterns[hi]) {
+        t.high[other] = static_cast<uint8_t>(t.high[other] | bit);
+      }
+    }
+    for (int lo = 0; lo < 16; ++lo) {
+      if ((patterns[hi] & (1u << lo)) != 0) {
+        t.low[lo] = static_cast<uint8_t>(t.low[lo] | bit);
+      }
+    }
+  }
+  return t;
+}
+
+constexpr nibble_tables k_host_nibbles = make_stop_nibble_tables(k_host_class);
+constexpr nibble_tables k_path_nibbles = make_stop_nibble_tables(k_path);
+constexpr nibble_tables k_query_nibbles = make_stop_nibble_tables(k_query);
+constexpr nibble_tables k_hash_nibbles = make_stop_nibble_tables(k_hash);
+static_assert(k_host_nibbles.fits);
+static_assert(k_path_nibbles.fits);
+static_assert(k_query_nibbles.fits);
+static_assert(k_hash_nibbles.fits);
+
 // WHATWG serializes a port as its decimal value with no leading zeros.
 ada_really_inline uint32_t port_decimal_digit_count(uint32_t port) noexcept {
   uint32_t digits = 1;
@@ -150,7 +225,26 @@ ada_really_inline int trailing_zeroes64(uint64_t input_num) noexcept {
 #endif
 }
 
+#if ADA_PARSER_SSSE3
+ADA_PARSER_SIMD __m128i nibble_load(const uint8_t* t) noexcept {
+  return _mm_load_si128(reinterpret_cast<const __m128i*>(t));
+}
+
+// Non-zero lanes are stops. Tables are passed in so the scan loops can hoist
+// the loads out of the 16-byte iteration.
+ADA_PARSER_SIMD int ssse3_nibble_mask(__m128i w, __m128i lo_tbl,
+                                      __m128i hi_tbl) noexcept {
+  const __m128i nibble = _mm_set1_epi8(0x0F);
+  const __m128i lo = _mm_and_si128(w, nibble);
+  const __m128i hi = _mm_and_si128(_mm_srli_epi16(w, 4), nibble);
+  const __m128i hit =
+      _mm_and_si128(_mm_shuffle_epi8(lo_tbl, lo), _mm_shuffle_epi8(hi_tbl, hi));
+  return _mm_movemask_epi8(_mm_cmpeq_epi8(hit, _mm_setzero_si128())) ^ 0xFFFF;
+}
+#endif  // ADA_PARSER_SSSE3
+
 #if ADA_SSE2
+#if !ADA_PARSER_SSSE3
 // Signed < 0x21 matches 0x00-0x20 and 0x80-0xFF; 0x7F is checked separately.
 ada_really_inline __m128i sse2_ctrl_or_nonascii(__m128i w) noexcept {
   return _mm_or_si128(_mm_cmplt_epi8(w, _mm_set1_epi8(0x21)),
@@ -177,12 +271,6 @@ ada_really_inline int sse2_host_stop(__m128i w) noexcept {
                                 _mm_cmpeq_epi8(w, _mm_set1_epi8('|')))));
   return _mm_movemask_epi8(
       _mm_or_si128(_mm_or_si128(ctrl, at_not_upper), spec));
-}
-
-ada_really_inline int sse2_uppercase(__m128i w) noexcept {
-  return _mm_movemask_epi8(_mm_and_si128(
-      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('A' - 1))),
-      _mm_cmplt_epi8(w, _mm_set1_epi8(static_cast<char>('Z' + 1)))));
 }
 
 ada_really_inline int sse2_path_stop(__m128i w) noexcept {
@@ -223,84 +311,75 @@ ada_really_inline int sse2_hash_stop(__m128i w) noexcept {
                                 _mm_cmpeq_epi8(w, _mm_set1_epi8('`'))));
   return _mm_movemask_epi8(_mm_or_si128(ctrl, spec));
 }
+#endif  // !ADA_PARSER_SSSE3
+
+ada_really_inline int sse2_uppercase(__m128i w) noexcept {
+  return _mm_movemask_epi8(_mm_and_si128(
+      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('A' - 1))),
+      _mm_cmplt_epi8(w, _mm_set1_epi8(static_cast<char>('Z' + 1)))));
+}
 #endif  // ADA_SSE2
 
 #if ADA_NEON
-ada_really_inline uint8x16_t neon_ctrl_or_nonascii(uint8x16_t w) noexcept {
-  return vorrq_u8(vcltq_u8(w, vdupq_n_u8(0x21)), vcgtq_u8(w, vdupq_n_u8(0x7E)));
-}
-
 ada_really_inline uint64_t neon_nibble_bits(uint8x16_t matches) noexcept {
   const uint8x8_t nib = vshrn_n_u16(vreinterpretq_u16_u8(matches), 4);
   return vget_lane_u64(vreinterpret_u64_u8(nib), 0);
 }
 
-ada_really_inline uint64_t neon_host_stop(uint8x16_t w) noexcept {
-  const uint8x16_t ctrl = neon_ctrl_or_nonascii(w);
-  const uint8x16_t is_upper =
-      vandq_u8(vcgeq_u8(w, vdupq_n_u8('A')), vcleq_u8(w, vdupq_n_u8('Z')));
-  const uint8x16_t at_through_caret =
-      vandq_u8(vcgeq_u8(w, vdupq_n_u8('@')), vcleq_u8(w, vdupq_n_u8('^')));
-  const uint8x16_t at_not_upper = vbicq_u8(at_through_caret, is_upper);
-  const uint8x16_t spec = vorrq_u8(
-      vorrq_u8(
-          vorrq_u8(vceqq_u8(w, vdupq_n_u8('#')), vceqq_u8(w, vdupq_n_u8('%'))),
-          vorrq_u8(vceqq_u8(w, vdupq_n_u8('/')), vceqq_u8(w, vdupq_n_u8(':')))),
-      vorrq_u8(
-          vorrq_u8(vceqq_u8(w, vdupq_n_u8('<')), vceqq_u8(w, vdupq_n_u8('>'))),
-          vorrq_u8(vceqq_u8(w, vdupq_n_u8('?')),
-                   vceqq_u8(w, vdupq_n_u8('|')))));
-  return neon_nibble_bits(vorrq_u8(vorrq_u8(ctrl, at_not_upper), spec));
+ada_really_inline uint64_t neon_table_stop(uint8x16_t w, uint8x16_t lo_tbl,
+                                           uint8x16_t hi_tbl) noexcept {
+  const uint8x16_t hit =
+      vandq_u8(vqtbl1q_u8(lo_tbl, vandq_u8(w, vdupq_n_u8(0x0F))),
+               vqtbl1q_u8(hi_tbl, vshrq_n_u8(w, 4)));
+  return neon_nibble_bits(vtstq_u8(hit, hit));
 }
 
 ada_really_inline uint64_t neon_uppercase(uint8x16_t w) noexcept {
   return neon_nibble_bits(
       vandq_u8(vcgeq_u8(w, vdupq_n_u8('A')), vcleq_u8(w, vdupq_n_u8('Z'))));
 }
-
-ada_really_inline uint64_t neon_path_stop(uint8x16_t w) noexcept {
-  const uint8x16_t ctrl = neon_ctrl_or_nonascii(w);
-  const uint8x16_t spec = vorrq_u8(
-      vorrq_u8(
-          vorrq_u8(vceqq_u8(w, vdupq_n_u8('"')), vceqq_u8(w, vdupq_n_u8('#'))),
-          vorrq_u8(vceqq_u8(w, vdupq_n_u8('%')), vceqq_u8(w, vdupq_n_u8('<')))),
-      vorrq_u8(vorrq_u8(vorrq_u8(vceqq_u8(w, vdupq_n_u8('>')),
-                                 vceqq_u8(w, vdupq_n_u8('?'))),
-                        vorrq_u8(vceqq_u8(w, vdupq_n_u8('\\')),
-                                 vceqq_u8(w, vdupq_n_u8('^')))),
-               vorrq_u8(vorrq_u8(vceqq_u8(w, vdupq_n_u8('`')),
-                                 vceqq_u8(w, vdupq_n_u8('{'))),
-                        vceqq_u8(w, vdupq_n_u8('}')))));
-  return neon_nibble_bits(vorrq_u8(ctrl, spec));
-}
-
-ada_really_inline uint64_t neon_query_stop(uint8x16_t w) noexcept {
-  const uint8x16_t ctrl = neon_ctrl_or_nonascii(w);
-  const uint8x16_t spec = vorrq_u8(
-      vorrq_u8(vceqq_u8(w, vdupq_n_u8('"')), vceqq_u8(w, vdupq_n_u8('#'))),
-      vorrq_u8(
-          vorrq_u8(vceqq_u8(w, vdupq_n_u8('<')), vceqq_u8(w, vdupq_n_u8('>'))),
-          vceqq_u8(w, vdupq_n_u8('\''))));
-  return neon_nibble_bits(vorrq_u8(ctrl, spec));
-}
-
-ada_really_inline uint64_t neon_hash_stop(uint8x16_t w) noexcept {
-  const uint8x16_t ctrl = neon_ctrl_or_nonascii(w);
-  const uint8x16_t spec = vorrq_u8(
-      vorrq_u8(vceqq_u8(w, vdupq_n_u8('"')), vceqq_u8(w, vdupq_n_u8('<'))),
-      vorrq_u8(vceqq_u8(w, vdupq_n_u8('>')), vceqq_u8(w, vdupq_n_u8('`'))));
-  return neon_nibble_bits(vorrq_u8(ctrl, spec));
-}
 #endif  // ADA_NEON
 
 // Returns false if a forbidden host code point is found. On success, *end is
 // the first / ? # or len, and has_upper reports any ASCII uppercase.
-ada_really_inline bool scan_plain_host(const uint8_t* b, size_t start,
-                                       size_t len, size_t& end,
-                                       bool& has_upper) noexcept {
+ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
+                                     size_t& end, bool& has_upper) noexcept {
   has_upper = false;
   size_t i = start;
-#if ADA_SSE2
+#if ADA_PARSER_SSSE3
+  if (len - start >= 16) {
+    const __m128i lo_tbl = nibble_load(k_host_nibbles.low);
+    const __m128i hi_tbl = nibble_load(k_host_nibbles.high);
+    auto visit = [&](size_t at) noexcept -> bool {
+      const __m128i w =
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
+      if (sse2_uppercase(w) != 0) {
+        has_upper = true;
+      }
+      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
+      if (mask == 0) {
+        return false;
+      }
+      end = at +
+            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      return true;
+    };
+    for (; i + 16 <= len; i += 16) {
+      if (visit(i)) {
+        return k_host_class[b[end]] == 1;
+      }
+    }
+    // Overlapping tail only after a full 16-byte step so the window cannot
+    // start before `start` (a prior '/' would otherwise look like a host stop).
+    if (i > start && i < len) {
+      if (visit(len - 16) && end >= i) {
+        return k_host_class[b[end]] == 1;
+      }
+      end = len;
+      return true;
+    }
+  }
+#elif ADA_SSE2
   for (; i + 16 <= len; i += 16) {
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
     if (sse2_uppercase(w) != 0) {
@@ -314,15 +393,32 @@ ada_really_inline bool scan_plain_host(const uint8_t* b, size_t start,
     }
   }
 #elif ADA_NEON
-  for (; i + 16 <= len; i += 16) {
-    const uint8x16_t w = vld1q_u8(b + i);
-    if (neon_uppercase(w) != 0) {
-      has_upper = true;
+  if (len - start >= 16) {
+    const uint8x16_t lo_tbl = vld1q_u8(k_host_nibbles.low);
+    const uint8x16_t hi_tbl = vld1q_u8(k_host_nibbles.high);
+    auto visit = [&](size_t at) noexcept -> bool {
+      const uint8x16_t w = vld1q_u8(b + at);
+      if (neon_uppercase(w) != 0) {
+        has_upper = true;
+      }
+      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
+      if (bits == 0) {
+        return false;
+      }
+      end = at + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
+      return true;
+    };
+    for (; i + 16 <= len; i += 16) {
+      if (visit(i)) {
+        return k_host_class[b[end]] == 1;
+      }
     }
-    const uint64_t bits = neon_host_stop(w);
-    if (bits != 0) {
-      end = i + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
-      return k_host_class[b[end]] == 1;
+    if (i > start && i < len) {
+      if (visit(len - 16) && end >= i) {
+        return k_host_class[b[end]] == 1;
+      }
+      end = len;
+      return true;
     }
   }
 #endif
@@ -353,10 +449,69 @@ ada_really_inline void note_possible_dot_segment(
 }
 
 // Advance i to the first path-class 1 or 2 character (or len).
-ada_really_inline void scan_path_run(const uint8_t* b, size_t& i, size_t len,
-                                     bool& maybe_dot_segment) noexcept {
+ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
+                                   bool& maybe_dot_segment) noexcept {
   const size_t run_start = i;
-#if ADA_SSE2
+#if ADA_PARSER_SSSE3
+  if (i + 16 <= len) {
+    const __m128i lo_tbl = nibble_load(k_path_nibbles.low);
+    const __m128i hi_tbl = nibble_load(k_path_nibbles.high);
+    for (; i + 16 <= len; i += 16) {
+      const __m128i w =
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
+      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
+      if (mask != 0) {
+        const size_t hit =
+            i +
+            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+        for (size_t j = i; j < hit; ++j) {
+          if (b[j] == '.') {
+            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+          }
+        }
+        i = hit;
+        return;
+      }
+      const int dots = _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('.')));
+      if (dots != 0) {
+        for (size_t j = i; j < i + 16; ++j) {
+          if (b[j] == '.') {
+            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+            if (maybe_dot_segment) {
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (i > run_start && i < len) {
+      const __m128i w =
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + len - 16));
+      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
+      if (mask != 0) {
+        const size_t hit =
+            len - 16 +
+            static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+        if (hit >= i) {
+          for (size_t j = i; j < hit; ++j) {
+            if (b[j] == '.') {
+              note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+            }
+          }
+          i = hit;
+          return;
+        }
+      }
+      for (size_t j = i; j < len; ++j) {
+        if (b[j] == '.') {
+          note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+        }
+      }
+      i = len;
+      return;
+    }
+  }
+#elif ADA_SSE2
   for (; i + 16 <= len; i += 16) {
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
     const int mask = sse2_path_stop(w);
@@ -385,29 +540,57 @@ ada_really_inline void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     }
   }
 #elif ADA_NEON
-  for (; i + 16 <= len; i += 16) {
-    const uint8x16_t w = vld1q_u8(b + i);
-    const uint64_t bits = neon_path_stop(w);
-    if (bits != 0) {
-      const size_t hit =
-          i + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
-      for (size_t j = i; j < hit; ++j) {
-        if (b[j] == '.') {
-          note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+  if (i + 16 <= len) {
+    const uint8x16_t lo_tbl = vld1q_u8(k_path_nibbles.low);
+    const uint8x16_t hi_tbl = vld1q_u8(k_path_nibbles.high);
+    for (; i + 16 <= len; i += 16) {
+      const uint8x16_t w = vld1q_u8(b + i);
+      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
+      if (bits != 0) {
+        const size_t hit =
+            i + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
+        for (size_t j = i; j < hit; ++j) {
+          if (b[j] == '.') {
+            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+          }
         }
+        i = hit;
+        return;
       }
-      i = hit;
-      return;
-    }
-    if (neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('.'))) != 0) {
-      for (size_t j = i; j < i + 16; ++j) {
-        if (b[j] == '.') {
-          note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
-          if (maybe_dot_segment) {
-            break;
+      if (neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('.'))) != 0) {
+        for (size_t j = i; j < i + 16; ++j) {
+          if (b[j] == '.') {
+            note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+            if (maybe_dot_segment) {
+              break;
+            }
           }
         }
       }
+    }
+    if (i > run_start && i < len) {
+      const uint8x16_t w = vld1q_u8(b + len - 16);
+      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
+      if (bits != 0) {
+        const size_t hit =
+            len - 16 + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2);
+        if (hit >= i) {
+          for (size_t j = i; j < hit; ++j) {
+            if (b[j] == '.') {
+              note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+            }
+          }
+          i = hit;
+          return;
+        }
+      }
+      for (size_t j = i; j < len; ++j) {
+        if (b[j] == '.') {
+          note_possible_dot_segment(b, j, run_start, maybe_dot_segment);
+        }
+      }
+      i = len;
+      return;
     }
   }
 #endif
@@ -423,61 +606,125 @@ ada_really_inline void scan_path_run(const uint8_t* b, size_t& i, size_t len,
   }
 }
 
-ada_really_inline void scan_query_run(const uint8_t* b, size_t& i,
-                                      size_t len) noexcept {
-#if ADA_SSE2
-  for (; i + 16 <= len; i += 16) {
-    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-    const int mask = sse2_query_stop(w);
-    if (mask != 0) {
-      i += static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-      return;
-    }
-  }
+// Advance i to the first class-table stop (or len). Query and hash share
+// this loop; path keeps its own copy because it also tracks '.' segments.
+#if ADA_PARSER_SSSE3
+#define ADA_SCAN_STOP_RUN(nibbles, cls, unused_sse2_stop)                    \
+  do {                                                                       \
+    const size_t scan_start = i;                                             \
+    if (i + 16 <= len) {                                                     \
+      const __m128i lo_tbl = nibble_load((nibbles).low);                     \
+      const __m128i hi_tbl = nibble_load((nibbles).high);                    \
+      for (; i + 16 <= len; i += 16) {                                       \
+        const __m128i w =                                                    \
+            _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));        \
+        const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);               \
+        if (mask != 0) {                                                     \
+          i += static_cast<size_t>(                                          \
+              trailing_zeroes32(static_cast<uint32_t>(mask)));               \
+          return;                                                            \
+        }                                                                    \
+      }                                                                      \
+      if (i > scan_start && i < len) {                                       \
+        const __m128i w =                                                    \
+            _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + len - 16)); \
+        const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);               \
+        if (mask != 0) {                                                     \
+          const size_t hit = len - 16 +                                      \
+                             static_cast<size_t>(trailing_zeroes32(          \
+                                 static_cast<uint32_t>(mask)));              \
+          if (hit >= i) {                                                    \
+            i = hit;                                                         \
+            return;                                                          \
+          }                                                                  \
+        }                                                                    \
+        i = len;                                                             \
+        return;                                                              \
+      }                                                                      \
+    }                                                                        \
+    for (; i < len; ++i) {                                                   \
+      if ((cls)[b[i]] != 0) {                                                \
+        return;                                                              \
+      }                                                                      \
+    }                                                                        \
+  } while (0)
 #elif ADA_NEON
-  for (; i + 16 <= len; i += 16) {
-    const uint8x16_t w = vld1q_u8(b + i);
-    const uint64_t bits = neon_query_stop(w);
-    if (bits != 0) {
-      i += static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
-      return;
-    }
-  }
+#define ADA_SCAN_STOP_RUN(nibbles, cls, unused_sse2_stop)                     \
+  do {                                                                        \
+    const size_t scan_start = i;                                              \
+    if (i + 16 <= len) {                                                      \
+      const uint8x16_t lo_tbl = vld1q_u8((nibbles).low);                      \
+      const uint8x16_t hi_tbl = vld1q_u8((nibbles).high);                     \
+      for (; i + 16 <= len; i += 16) {                                        \
+        const uint8x16_t w = vld1q_u8(b + i);                                 \
+        const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);             \
+        if (bits != 0) {                                                      \
+          i += static_cast<size_t>(trailing_zeroes64(bits)) >> 2;             \
+          return;                                                             \
+        }                                                                     \
+      }                                                                       \
+      if (i > scan_start && i < len) {                                        \
+        const uint8x16_t w = vld1q_u8(b + len - 16);                          \
+        const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);             \
+        if (bits != 0) {                                                      \
+          const size_t hit =                                                  \
+              len - 16 + (static_cast<size_t>(trailing_zeroes64(bits)) >> 2); \
+          if (hit >= i) {                                                     \
+            i = hit;                                                          \
+            return;                                                           \
+          }                                                                   \
+        }                                                                     \
+        i = len;                                                              \
+        return;                                                               \
+      }                                                                       \
+    }                                                                         \
+    for (; i < len; ++i) {                                                    \
+      if ((cls)[b[i]] != 0) {                                                 \
+        return;                                                               \
+      }                                                                       \
+    }                                                                         \
+  } while (0)
+#elif ADA_SSE2
+#define ADA_SCAN_STOP_RUN(nibbles, cls, sse2_stop)                  \
+  do {                                                              \
+    for (; i + 16 <= len; i += 16) {                                \
+      const __m128i w =                                             \
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i)); \
+      const int mask = sse2_stop(w);                                \
+      if (mask != 0) {                                              \
+        i += static_cast<size_t>(                                   \
+            trailing_zeroes32(static_cast<uint32_t>(mask)));        \
+        return;                                                     \
+      }                                                             \
+    }                                                               \
+    for (; i < len; ++i) {                                          \
+      if ((cls)[b[i]] != 0) {                                       \
+        return;                                                     \
+      }                                                             \
+    }                                                               \
+  } while (0)
+#else
+#define ADA_SCAN_STOP_RUN(nibbles, cls, unused_sse2_stop) \
+  do {                                                    \
+    for (; i < len; ++i) {                                \
+      if ((cls)[b[i]] != 0) {                             \
+        return;                                           \
+      }                                                   \
+    }                                                     \
+  } while (0)
 #endif
-  for (; i < len; ++i) {
-    if (k_query[b[i]] != 0) {
-      return;
-    }
-  }
+
+ADA_PARSER_SIMD void scan_query_run(const uint8_t* b, size_t& i,
+                                    size_t len) noexcept {
+  ADA_SCAN_STOP_RUN(k_query_nibbles, k_query, sse2_query_stop);
 }
 
-ada_really_inline void scan_hash_run(const uint8_t* b, size_t& i,
-                                     size_t len) noexcept {
-#if ADA_SSE2
-  for (; i + 16 <= len; i += 16) {
-    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-    const int mask = sse2_hash_stop(w);
-    if (mask != 0) {
-      i += static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
-      return;
-    }
-  }
-#elif ADA_NEON
-  for (; i + 16 <= len; i += 16) {
-    const uint8x16_t w = vld1q_u8(b + i);
-    const uint64_t bits = neon_hash_stop(w);
-    if (bits != 0) {
-      i += static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
-      return;
-    }
-  }
-#endif
-  for (; i < len; ++i) {
-    if (k_hash[b[i]] != 0) {
-      return;
-    }
-  }
+ADA_PARSER_SIMD void scan_hash_run(const uint8_t* b, size_t& i,
+                                   size_t len) noexcept {
+  ADA_SCAN_STOP_RUN(k_hash_nibbles, k_hash, sse2_hash_stop);
 }
+
+#undef ADA_SCAN_STOP_RUN
 
 ada_really_inline bool last_label_may_be_a_number(
     std::string_view view) noexcept {
@@ -1023,7 +1270,8 @@ after_rest:
   out.host_type = DEFAULT;
 
   if (!rest_simple) {
-    // Host is a plain domain. Finish path/query/hash with the regular helpers
+    // Host is a plain domain. Finish path/query/hash with
+    // the regular helpers
     // so percent-encoding and dot segments do not re-parse the authority.
     const std::string_view path_view =
         has_path
