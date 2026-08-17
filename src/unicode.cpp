@@ -12,10 +12,16 @@ ADA_POP_DISABLE_WARNINGS
 #include <algorithm>
 #include <array>
 #include <cstring>
-#if ADA_SSSE3
-#include <tmmintrin.h>
-#elif ADA_NEON
+#if ADA_NEON
 #include <arm_neon.h>
+#elif defined(__SSSE3__)
+#include <tmmintrin.h>
+#define ADA_UNICODE_NIBBLE_SSSE3 1
+#elif (defined(__x86_64__) || defined(__amd64__)) && defined(__GNUC__) && \
+    !defined(_MSC_VER)
+#include <tmmintrin.h>
+#define ADA_UNICODE_NIBBLE_SSSE3 1
+#define ADA_UNICODE_NEED_SSSE3_TARGET 1
 #elif ADA_SSE2
 #include <emmintrin.h>
 #elif ADA_LSX
@@ -23,8 +29,99 @@ ADA_POP_DISABLE_WARNINGS
 #elif ADA_RVV
 #include <riscv_vector.h>
 #endif
+#ifndef ADA_UNICODE_NIBBLE_SSSE3
+#define ADA_UNICODE_NIBBLE_SSSE3 0
+#endif
+
+#ifdef ADA_UNICODE_NEED_SSSE3_TARGET
+#define ADA_UNICODE_NIBBLE_FN __attribute__((target("ssse3")))
+#else
+#define ADA_UNICODE_NIBBLE_FN ada_really_inline
+#endif
 
 #include <ranges>
+
+namespace {
+
+struct nibble_tables {
+  alignas(16) uint8_t low[16]{};
+  alignas(16) uint8_t high[16]{};
+  bool fits{true};
+};
+
+consteval nibble_tables make_stop_nibble_tables(
+    const std::array<uint8_t, 256>& cls) {
+  nibble_tables t{};
+  uint16_t patterns[16]{};
+  for (int hi = 0; hi < 16; ++hi) {
+    for (int lo = 0; lo < 16; ++lo) {
+      if (cls[static_cast<size_t>((hi << 4) | lo)] != 0) {
+        patterns[hi] = static_cast<uint16_t>(patterns[hi] | (1u << lo));
+      }
+    }
+  }
+  int bits_used = 0;
+  for (int hi = 0; hi < 16; ++hi) {
+    if (patterns[hi] == 0 || t.high[hi] != 0) {
+      continue;
+    }
+    if (bits_used == 8) {
+      t.fits = false;
+      return t;
+    }
+    const uint8_t bit = static_cast<uint8_t>(1u << bits_used++);
+    for (int other = hi; other < 16; ++other) {
+      if (patterns[other] == patterns[hi]) {
+        t.high[other] = static_cast<uint8_t>(t.high[other] | bit);
+      }
+    }
+    for (int lo = 0; lo < 16; ++lo) {
+      if ((patterns[hi] & (1u << lo)) != 0) {
+        t.low[lo] = static_cast<uint8_t>(t.low[lo] | bit);
+      }
+    }
+  }
+  return t;
+}
+
+#if ADA_UNICODE_NIBBLE_SSSE3
+ADA_UNICODE_NIBBLE_FN int ssse3_nibble_mask(__m128i w, __m128i lo_tbl,
+                                            __m128i hi_tbl) noexcept {
+  const __m128i nibble = _mm_set1_epi8(0x0F);
+  const __m128i lo = _mm_and_si128(w, nibble);
+  const __m128i hi = _mm_and_si128(_mm_srli_epi16(w, 4), nibble);
+  const __m128i hit =
+      _mm_and_si128(_mm_shuffle_epi8(lo_tbl, lo), _mm_shuffle_epi8(hi_tbl, hi));
+  return _mm_movemask_epi8(_mm_cmpeq_epi8(hit, _mm_setzero_si128())) ^ 0xFFFF;
+}
+
+ADA_UNICODE_NIBBLE_FN bool ssse3_has_upper(__m128i w) noexcept {
+  // Signed compares: A-Z are 0x41..0x5A, so they stay non-negative.
+  const __m128i upper = _mm_and_si128(
+      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('A' - 1))),
+      _mm_cmpgt_epi8(_mm_set1_epi8(static_cast<char>('Z' + 1)), w));
+  return _mm_movemask_epi8(upper) != 0;
+}
+#endif
+
+#if ADA_NEON
+bool neon_nibble_hit(uint8x16_t w, uint8x16_t lo_tbl,
+                     uint8x16_t hi_tbl) noexcept {
+  const uint8x16_t hit =
+      vandq_u8(vqtbl1q_u8(lo_tbl, vandq_u8(w, vdupq_n_u8(0x0F))),
+               vqtbl1q_u8(hi_tbl, vshrq_n_u8(w, 4)));
+  const uint8x8_t nib =
+      vshrn_n_u16(vreinterpretq_u16_u8(vtstq_u8(hit, hit)), 4);
+  return vget_lane_u64(vreinterpret_u64_u8(nib), 0) != 0;
+}
+
+bool neon_has_upper(uint8x16_t w) noexcept {
+  return vmaxvq_u8(vandq_u8(vcgeq_u8(w, vdupq_n_u8('A')),
+                            vcleq_u8(w, vdupq_n_u8('Z')))) != 0;
+}
+#endif
+
+}  // namespace
 
 namespace ada::unicode {
 
@@ -287,8 +384,134 @@ ada_really_inline constexpr bool is_forbidden_domain_code_point(
   return is_forbidden_domain_code_point_table[uint8_t(c)];
 }
 
-ada_really_inline constexpr bool contains_forbidden_domain_code_point(
+constexpr nibble_tables k_forbidden_domain_nibbles =
+    make_stop_nibble_tables(is_forbidden_domain_code_point_table);
+static_assert(k_forbidden_domain_nibbles.fits);
+
+#if ADA_UNICODE_NIBBLE_SSSE3
+ADA_UNICODE_NIBBLE_FN bool contains_forbidden_wide_ssse3(
     const char* input, size_t length) noexcept {
+  const auto* data = reinterpret_cast<const uint8_t*>(input);
+  const __m128i lo_tbl = _mm_load_si128(
+      reinterpret_cast<const __m128i*>(k_forbidden_domain_nibbles.low));
+  const __m128i hi_tbl = _mm_load_si128(
+      reinterpret_cast<const __m128i*>(k_forbidden_domain_nibbles.high));
+  size_t i = 0;
+  for (; i + 16 <= length; i += 16) {
+    const __m128i w =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + i));
+    if (ssse3_nibble_mask(w, lo_tbl, hi_tbl) != 0) {
+      return true;
+    }
+  }
+  if (i < length) {
+    const __m128i w =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + length - 16));
+    if (ssse3_nibble_mask(w, lo_tbl, hi_tbl) != 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+ADA_UNICODE_NIBBLE_FN uint8_t contains_forbidden_or_upper_wide_ssse3(
+    const char* input, size_t length) noexcept {
+  const auto* data = reinterpret_cast<const uint8_t*>(input);
+  const __m128i lo_tbl = _mm_load_si128(
+      reinterpret_cast<const __m128i*>(k_forbidden_domain_nibbles.low));
+  const __m128i hi_tbl = _mm_load_si128(
+      reinterpret_cast<const __m128i*>(k_forbidden_domain_nibbles.high));
+  uint8_t accumulator = 0;
+  size_t i = 0;
+  for (; i + 16 <= length; i += 16) {
+    const __m128i w =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + i));
+    if (ssse3_nibble_mask(w, lo_tbl, hi_tbl) != 0) {
+      accumulator = static_cast<uint8_t>(accumulator | 1);
+    }
+    if (ssse3_has_upper(w)) {
+      accumulator = static_cast<uint8_t>(accumulator | 2);
+    }
+    if (accumulator == 3) {
+      return accumulator;
+    }
+  }
+  if (i < length) {
+    const __m128i w =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + length - 16));
+    if (ssse3_nibble_mask(w, lo_tbl, hi_tbl) != 0) {
+      accumulator = static_cast<uint8_t>(accumulator | 1);
+    }
+    if (ssse3_has_upper(w)) {
+      accumulator = static_cast<uint8_t>(accumulator | 2);
+    }
+  }
+  return accumulator;
+}
+#endif
+
+#if ADA_NEON
+bool contains_forbidden_wide_neon(const char* input, size_t length) noexcept {
+  const auto* data = reinterpret_cast<const uint8_t*>(input);
+  const uint8x16_t lo_tbl = vld1q_u8(k_forbidden_domain_nibbles.low);
+  const uint8x16_t hi_tbl = vld1q_u8(k_forbidden_domain_nibbles.high);
+  size_t i = 0;
+  for (; i + 16 <= length; i += 16) {
+    if (neon_nibble_hit(vld1q_u8(data + i), lo_tbl, hi_tbl)) {
+      return true;
+    }
+  }
+  if (i < length) {
+    if (neon_nibble_hit(vld1q_u8(data + length - 16), lo_tbl, hi_tbl)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+uint8_t contains_forbidden_or_upper_wide_neon(const char* input,
+                                              size_t length) noexcept {
+  const auto* data = reinterpret_cast<const uint8_t*>(input);
+  const uint8x16_t lo_tbl = vld1q_u8(k_forbidden_domain_nibbles.low);
+  const uint8x16_t hi_tbl = vld1q_u8(k_forbidden_domain_nibbles.high);
+  uint8_t accumulator = 0;
+  size_t i = 0;
+  for (; i + 16 <= length; i += 16) {
+    const uint8x16_t w = vld1q_u8(data + i);
+    if (neon_nibble_hit(w, lo_tbl, hi_tbl)) {
+      accumulator = static_cast<uint8_t>(accumulator | 1);
+    }
+    if (neon_has_upper(w)) {
+      accumulator = static_cast<uint8_t>(accumulator | 2);
+    }
+    if (accumulator == 3) {
+      return accumulator;
+    }
+  }
+  if (i < length) {
+    const uint8x16_t w = vld1q_u8(data + length - 16);
+    if (neon_nibble_hit(w, lo_tbl, hi_tbl)) {
+      accumulator = static_cast<uint8_t>(accumulator | 1);
+    }
+    if (neon_has_upper(w)) {
+      accumulator = static_cast<uint8_t>(accumulator | 2);
+    }
+  }
+  return accumulator;
+}
+#endif
+
+bool contains_forbidden_domain_code_point(
+    const char* input, size_t length) noexcept {
+#if ADA_UNICODE_NIBBLE_SSSE3 || ADA_NEON
+  if (length >= 16) {
+#if ADA_UNICODE_NIBBLE_SSSE3
+    return contains_forbidden_wide_ssse3(input, length);
+#elif ADA_NEON
+    return contains_forbidden_wide_neon(input, length);
+#endif
+  }
+#endif
   size_t i = 0;
   uint8_t accumulator{};
   for (; i + 4 <= length; i += 4) {
@@ -322,9 +545,17 @@ constexpr static std::array<uint8_t, 256>
       return result;
     }();
 
-ada_really_inline constexpr uint8_t
-contains_forbidden_domain_code_point_or_upper(const char* input,
-                                              size_t length) noexcept {
+uint8_t contains_forbidden_domain_code_point_or_upper(
+    const char* input, size_t length) noexcept {
+#if ADA_UNICODE_NIBBLE_SSSE3 || ADA_NEON
+  if (length >= 16) {
+#if ADA_UNICODE_NIBBLE_SSSE3
+    return contains_forbidden_or_upper_wide_ssse3(input, length);
+#elif ADA_NEON
+    return contains_forbidden_or_upper_wide_neon(input, length);
+#endif
+  }
+#endif
   size_t i = 0;
   uint8_t accumulator{};
   for (; i + 4 <= length; i += 4) {

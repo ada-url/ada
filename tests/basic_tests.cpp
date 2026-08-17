@@ -1896,3 +1896,58 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_TRUE(last_label_may_be_a_number("19.68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("0xffffffff."));
 }
+
+TEST(basic_tests, forbidden_domain_matches_scalar) {
+  auto expected_or_upper = [](std::string_view s) -> uint8_t {
+    uint8_t acc = 0;
+    for (unsigned char c : s) {
+      if (c <= 32 || c >= 127 || c == '#' || c == '/' || c == ':' || c == '<' ||
+          c == '>' || c == '?' || c == '@' || c == '[' || c == '\\' ||
+          c == ']' || c == '^' || c == '|' || c == '%') {
+        acc |= 1;
+      } else if (c >= 'A' && c <= 'Z') {
+        acc |= 2;
+      }
+    }
+    return acc;
+  };
+  const std::vector<std::string> samples = {
+      "",
+      "a",
+      "example.com",
+      "EXAMPLE.COM",
+      "Example.Com",
+      std::string(16, 'a'),
+      std::string(16, 'A'),
+      std::string(15, 'a') + "B",
+      std::string(17, 'a') + " ",
+      std::string(31, 'x') + "#",
+      std::string(40, 'b'),
+      std::string(16, 'z') + "%",
+      std::string("\x01") + std::string(20, 'a'),
+      std::string(20, 'a') + "\x7f",
+      std::string(20, 'a') + "\xff",
+      "subdomain.example.com",
+      "VERY-LONG-HOST.EXAMPLE.COM",
+      std::string(64, 'z'),
+      std::string(16, 'a') + ":",
+      std::string(16, 'a') + "@",
+      std::string(10, 'A') + std::string(10, 'a') + "#",
+      std::string(20, 'A') + " ",
+  };
+  for (const std::string& s : samples) {
+    const uint8_t expected = expected_or_upper(s);
+    ASSERT_EQ(
+        ada::unicode::contains_forbidden_domain_code_point(s.data(), s.size()),
+        (expected & 1) != 0)
+        << s;
+    ASSERT_EQ(ada::unicode::contains_forbidden_domain_code_point_or_upper(
+                  s.data(), s.size()),
+              expected)
+        << s;
+  }
+  auto r = ada::parse<ada::url_aggregator>(
+      "https://VERY-LONG-HOST.EXAMPLE.COM/path");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_hostname(), "very-long-host.example.com");
+}

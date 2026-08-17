@@ -88,8 +88,8 @@ ada_really_inline constexpr bool is_forbidden_host_code_point(char c) noexcept;
  * Checks if the input contains a forbidden domain code point.
  * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
  */
-ada_really_inline constexpr bool contains_forbidden_domain_code_point(
-    const char* input, size_t length) noexcept;
+bool contains_forbidden_domain_code_point(const char* input,
+                                          size_t length) noexcept;
 
 /**
  * @private
@@ -98,9 +98,8 @@ ada_really_inline constexpr bool contains_forbidden_domain_code_point(
  * then the second bit is set to 1.
  * @see https://url.spec.whatwg.org/#forbidden-domain-code-point
  */
-ada_really_inline constexpr uint8_t
-contains_forbidden_domain_code_point_or_upper(const char* input,
-                                              size_t length) noexcept;
+uint8_t contains_forbidden_domain_code_point_or_upper(const char* input,
+                                                      size_t length) noexcept;
 
 /**
  * @private
