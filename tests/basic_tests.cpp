@@ -1629,6 +1629,13 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_pathname(), "/file.txt");
   }
   {
+    auto url = ada::parse<TypeParam>(
+        "https://static.files.bbci.co.uk/orbit/737a4ee2/js/polyfills.js");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "static.files.bbci.co.uk");
+    ASSERT_EQ(url->get_pathname(), "/orbit/737a4ee2/js/polyfills.js");
+  }
+  {
     auto url = ada::parse<TypeParam>("https://example.com/.hidden");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_pathname(), "/.hidden");
