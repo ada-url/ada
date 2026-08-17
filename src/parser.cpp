@@ -479,8 +479,6 @@ ada_really_inline void scan_hash_run(const uint8_t* b, size_t& i,
   }
 }
 
-// Conservative WHATWG ends-in-a-number gate. True only when the last label
-// is non-empty, starts with an ASCII digit, and is hex digits / x/X.
 ada_really_inline bool last_label_may_be_a_number(
     std::string_view view) noexcept {
   if (view.empty()) {
@@ -797,10 +795,9 @@ after_rest:
 }
 
 // Fast path for already-canonical special-scheme URLs of the shape
-// scheme://host[/path][?query][#fragment]. noinline keeps the fallthrough
-// path small (IPv4 microbenches). When the host is a plain domain but the
-// rest needs encoding or dot-segment normalization, the host is kept and
-// the existing path/query/hash helpers finish the URL (no second parse).
+// scheme://host[/path][?query][#fragment]. When the host is a plain domain
+// but the rest needs encoding or dot-segment normalization, the host is
+// kept and the path/query/hash helpers finish the URL.
 template <class result_type>
 ada_never_inline bool try_parse_simple_absolute(std::string_view input,
                                                 result_type& out) {
