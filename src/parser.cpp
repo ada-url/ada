@@ -766,10 +766,9 @@ after_rest:
   out.has_opaque_path = false;
   out.host_type = DEFAULT;
 
-  const uint32_t port_bytes =
-      (parsed_port != url_components::omitted)
-          ? (1 + port_decimal_digit_count(parsed_port))
-          : 0;
+  const uint32_t port_bytes = (parsed_port != url_components::omitted)
+                                  ? (1 + port_decimal_digit_count(parsed_port))
+                                  : 0;
 
   if (!rest_simple) {
     // Host is a plain domain. Finish path/query/hash with the regular helpers
@@ -1036,8 +1035,7 @@ ada_never_inline bool try_parse_simple_relative(std::string_view input,
       out.clear_search();
     }
     if (first == '/') {
-      out.update_base_pathname(
-          input.substr(path_start, path_end - path_start));
+      out.update_base_pathname(input.substr(path_start, path_end - path_start));
     } else if (path_relative) {
       const std::string_view base_path = out.get_pathname();
       const size_t slash = base_path.rfind('/');
@@ -2114,8 +2112,9 @@ template bool try_parse_simple_absolute<url_aggregator>(std::string_view,
                                                         url_aggregator&);
 template bool try_parse_simple_relative<url>(std::string_view, const url&,
                                              url&);
-template bool try_parse_simple_relative<url_aggregator>(
-    std::string_view, const url_aggregator&, url_aggregator&);
+template bool try_parse_simple_relative<url_aggregator>(std::string_view,
+                                                        const url_aggregator&,
+                                                        url_aggregator&);
 
 template url parse_url_impl<url, true>(std::string_view user_input,
                                        const url* base_url = nullptr);
