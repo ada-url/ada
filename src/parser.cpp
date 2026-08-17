@@ -2323,6 +2323,13 @@ result_type parse_url_impl(std::string_view user_input,
 template bool try_parse_simple_absolute<url>(std::string_view, url&);
 template bool try_parse_simple_absolute<url_aggregator>(std::string_view,
                                                         url_aggregator&);
+template bool finish_simple_absolute_with_port<url>(std::string_view, url&,
+                                                    ada::scheme::type, uint32_t,
+                                                    size_t, size_t, size_t,
+                                                    bool);
+template bool finish_simple_absolute_with_port<url_aggregator>(
+    std::string_view, url_aggregator&, ada::scheme::type, uint32_t, size_t,
+    size_t, size_t, bool);
 template bool try_parse_simple_relative<url>(std::string_view, const url&,
                                              url&);
 template bool try_parse_simple_relative<url_aggregator>(std::string_view,
