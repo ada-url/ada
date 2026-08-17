@@ -1511,20 +1511,18 @@ after_rest:
       if (has_upper) {
         unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
       }
-      out.components = url_components{
-          protocol_end,
-          protocol_end + 2,
-          protocol_end + 2,
-          static_cast<uint32_t>(host_end),
-          url_components::omitted,
-          static_cast<uint32_t>(path_start),
-          (query_start != std::string_view::npos)
-              ? static_cast<uint32_t>(query_start)
-              : url_components::omitted,
-          (hash_start != std::string_view::npos)
-              ? static_cast<uint32_t>(hash_start)
-              : url_components::omitted,
-      };
+      out.components.protocol_end = protocol_end;
+      out.components.username_end = protocol_end + 2;
+      out.components.host_start = protocol_end + 2;
+      out.components.host_end = static_cast<uint32_t>(host_end);
+      out.components.port = url_components::omitted;
+      out.components.pathname_start = static_cast<uint32_t>(path_start);
+      out.components.search_start = (query_start != std::string_view::npos)
+                                        ? static_cast<uint32_t>(query_start)
+                                        : url_components::omitted;
+      out.components.hash_start = (hash_start != std::string_view::npos)
+                                      ? static_cast<uint32_t>(hash_start)
+                                      : url_components::omitted;
     } else {
       out.buffer.clear();
       out.buffer.reserve(len + 1);
