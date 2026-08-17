@@ -382,14 +382,6 @@ struct url : url_base {
       ada::url_aggregator, true>(std::string_view, const ada::url_aggregator*);
   friend ada::url_aggregator ada::parser::parse_url_impl<
       ada::url_aggregator, false>(std::string_view, const ada::url_aggregator*);
-  friend ada::url ada::parser::parse_url_state_machine<ada::url, true>(
-      std::string_view, const ada::url*, ada::url, uint32_t);
-  friend ada::url_aggregator ada::parser::parse_url_state_machine<
-      ada::url_aggregator, true>(std::string_view, const ada::url_aggregator*,
-                                 ada::url_aggregator, uint32_t);
-  friend ada::url_aggregator ada::parser::parse_url_state_machine<
-      ada::url_aggregator, false>(std::string_view, const ada::url_aggregator*,
-                                  ada::url_aggregator, uint32_t);
   template <class result_type>
   friend bool ada::parser::try_parse_simple_absolute(std::string_view,
                                                      result_type&);

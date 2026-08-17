@@ -1663,8 +1663,6 @@ result_type parse_url_impl(std::string_view user_input,
   }
 
   // Simple absolute / relative fast paths (before tabs/newline scan).
-  // The state machine lives in parse_url_state_machine so this function's
-  // stack frame stays small on the common already-canonical path.
   if constexpr (store_values) {
     bool hit_fast_path = false;
     if (base_url == nullptr) {
@@ -1697,18 +1695,6 @@ result_type parse_url_impl(std::string_view user_input,
       return url;
     }
   }
-
-  return parse_url_state_machine<result_type, store_values>(
-      user_input, base_url, std::move(url), max_input_length);
-}
-
-template <class result_type, bool store_values>
-ada_never_inline result_type parse_url_state_machine(
-    std::string_view user_input, const result_type* base_url, result_type url,
-    uint32_t max_input_length) {
-  constexpr bool result_type_is_ada_url = std::is_same_v<ada::url, result_type>;
-  constexpr bool result_type_is_ada_url_aggregator =
-      std::is_same_v<ada::url_aggregator, result_type>;
 
   state state = state::SCHEME_START;
 
