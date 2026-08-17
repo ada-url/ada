@@ -354,8 +354,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
     return parse_opaque_host(input);
   }
 
-  // Fast path: try to parse as pure decimal IPv4 first. Do not wrap this
-  // in last_label_may_be_a_number: that extra walk regresses IPv4 and DNS.
+  // Fast path: try to parse as pure decimal IPv4 first.
   const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
   if (fast_result < checkers::ipv4_fast_fail) {
     if (!input.empty() && input.back() == '.') {
@@ -378,7 +377,6 @@ ada_really_inline bool url::parse_host(std::string_view input) {
                                                              input.size());
   static constexpr std::string_view xn_dash{"xn-", 3};
   if ((forbidden_or_upper & 1) == 0) {
-    // No forbidden code point: copy once, lowercase only when needed.
     host = std::string(input);
     if ((forbidden_or_upper & 2) != 0) {
       unicode::to_lower_ascii(host->data(), host->size());
@@ -395,8 +393,6 @@ ada_really_inline bool url::parse_host(std::string_view input) {
     }
   } else if (const size_t first_percent = input.find('%');
              first_percent != std::string_view::npos) {
-    // Percent-encoded ASCII host: decode + lowercase without an IDNA round
-    // trip.
     std::string decoded = unicode::percent_decode(input, first_percent);
     const uint8_t decoded_flags =
         unicode::contains_forbidden_domain_code_point_or_upper(decoded.data(),

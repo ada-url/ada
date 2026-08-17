@@ -26,9 +26,6 @@ constexpr bool is_ipv4_number_char(char x) noexcept {
          (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
 }
 
-// parseIPv4Host / ends-in-a-number can only succeed when the last label is
-// non-empty, starts with an ASCII digit, and is hex digits plus x/X.
-// Mirrors WebKit's lastLabelMayBeANumber (oven-sh/WebKit#452).
 constexpr bool last_label_may_be_a_number(std::string_view view) noexcept {
   if (view.empty()) {
     return false;
@@ -41,7 +38,6 @@ constexpr bool last_label_may_be_a_number(std::string_view view) noexcept {
       return false;
     }
   }
-  // Cheap reject: a numeric last label can only end in a hex digit or x/X.
   if (!is_ipv4_number_char(end[-1])) {
     return false;
   }

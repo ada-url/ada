@@ -529,8 +529,6 @@ TEST(basic_tests, can_parse_consistency_clean_http_frontend) {
            "http://xn--/",
            "http://example.com./",
            "http://%65xample.com/",
-           // Hex / 0x last labels: clean_http must not treat these as
-           // ordinary DNS names (parse() sends them to the IPv4 path).
            "http://foo.0xffffffff/",
            "http://foo.0xfffffffff/",
            "http://0xfffffffff/",
@@ -575,7 +573,6 @@ TEST(basic_tests, can_parse_consistency_percent_encoded_host) {
            "ws://host%2Eexample/",   // percent-encoded dot in domain
            "ws://%00/",              // %00 -> forbidden after decode
            "ws://%2F/",              // %2F -> '/' -> forbidden after decode
-           // with a trailing dot must agree across url / aggregator.
            "http://@19%2E68.1.10.",
            "http://19%2E68.1.10.",
            "http://@19%2E68.1.10.0.@'foo",
@@ -1806,7 +1803,6 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
 }
 
 TEST(basic_tests, try_parse_simple_absolute_ada_url) {
-  // Direct coverage of the ada::url specialization (also used by parse).
   {
     ada::url u;
     ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
@@ -1849,7 +1845,6 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
         std::string_view("http:////example.com/x"), u));
   }
   {
-    // Dot segments stay on the host-preserving handoff (not a miss).
     ada::url u;
     ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
         std::string_view("https://example.com/foo/../bar"), u));

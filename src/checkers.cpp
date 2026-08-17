@@ -11,9 +11,6 @@ namespace ada::checkers {
 
 ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept {
   // The string is not empty and does not contain upper case ASCII characters.
-  // last_label_may_be_a_number is a conservative pre-check: IPv4 / ends-in-a-
-  // number is impossible unless the last label starts with a digit and is
-  // hex digits plus x/X.
   if (!last_label_may_be_a_number(view)) {
     return false;
   }

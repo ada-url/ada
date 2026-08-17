@@ -548,8 +548,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   // case ASCII letter, then we can just copy it to the buffer. We want to
   // optimize for such a common case.
 
-  // Fast path: try to parse as pure decimal IPv4 first. Do not wrap this
-  // in last_label_may_be_a_number: that extra walk regresses IPv4 and DNS.
+  // Fast path: try to parse as pure decimal IPv4 first.
   const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
   if (fast_result < checkers::ipv4_fast_fail) {
     if (!input.empty() && input.back() == '.') {
@@ -569,8 +568,6 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   static constexpr std::string_view xn_dash{"xn-", 3};
   if ((is_forbidden_or_upper & 1) == 0) {
     if ((is_forbidden_or_upper & 2) != 0) {
-      // Upper case only: lowercase into the buffer, then reuse the no-upper
-      // path.
       std::string lowered(input);
       unicode::to_lower_ascii(lowered.data(), lowered.size());
       if (lowered.find('-') == std::string_view::npos ||
@@ -578,8 +575,6 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
         update_base_hostname(lowered);
         if (checkers::is_ipv4(lowered)) {
           ada_log("parse_host fast path ipv4");
-          // Pass the owned string, not get_hostname(): that view aliases
-          // buffer, and parse_ipv4 may rewrite a trailing-dot IPv4 in place.
           return parse_ipv4(lowered, true);
         }
         ada_log("parse_host fast path ", get_hostname());
@@ -611,9 +606,6 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
           decoded.find(xn_dash) == std::string_view::npos) {
         update_base_hostname(decoded);
         if (checkers::is_ipv4(decoded)) {
-          // decoded is owned; get_hostname() aliases buffer and would
-          // overlap when parse_ipv4 strips a trailing dot (OSS-Fuzz:
-          // http://@19%2E68.1.10.).
           return parse_ipv4(decoded, true);
         }
         is_valid = true;

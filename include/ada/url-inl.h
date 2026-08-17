@@ -196,8 +196,6 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const size_t total = scheme.size() + 3 + host_size + path_size +
                          (query.has_value() ? query_size + 1 : 0) +
                          (hash.has_value() ? hash_size + 1 : 0);
-    // One allocation + memcpy. reserve+append was slower on BBC href
-    // (many long https URLs with no userinfo/port).
     std::string output(total, '\0');
     char* p = output.data();
     std::memcpy(p, scheme.data(), scheme.size());

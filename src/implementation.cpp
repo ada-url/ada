@@ -118,8 +118,6 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   }
 
   const std::string_view host(input.data() + authority_start, host_length);
-  // Hex / 0x last labels (e.g. 0xffffffff) must use the IPv4 parser. A
-  // digit-only last-character check misses those and disagrees with parse().
   if (checkers::last_label_may_be_a_number(host)) {
     return std::nullopt;
   }
@@ -331,7 +329,6 @@ skip_extra_slashes:
     return std::nullopt;
   }
 
-  // Ends-in-a-number / hex-octal IPv4: only the last label matters.
   if (checkers::last_label_may_be_a_number({host_ptr, host_len})) {
     return std::nullopt;
   }

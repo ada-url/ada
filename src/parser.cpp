@@ -53,7 +53,6 @@ constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
   t[static_cast<uint8_t>('/')] = 1;
   t[static_cast<uint8_t>('?')] = 1;
   t[static_cast<uint8_t>('#')] = 1;
-  // Port separator: stop the host scan so the fast path can parse the port.
   t[static_cast<uint8_t>(':')] = 1;
   return t;
 }();
@@ -540,8 +539,6 @@ bool path_has_dot_segment(std::string_view path) noexcept {
 
 }  // namespace
 
-// Port-bearing continuation. Kept out of try_parse_simple_absolute so the
-// no-port BBC/DNS memcpy path stays as small as #1214.
 template <class result_type>
 ada_never_inline bool finish_simple_absolute_with_port(
     std::string_view input, result_type& out, ada::scheme::type scheme_type,
@@ -925,7 +922,6 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     }
   }
 
-  // Ports are uncommon on BBC/DNS; keep that work out of this function.
   if (host_end < len && b[host_end] == ':') [[unlikely]] {
     return finish_simple_absolute_with_port(input, out, scheme_type,
                                             protocol_end, host_start, host_end,
@@ -1375,8 +1371,6 @@ result_type parse_url_impl(std::string_view user_input,
   }
 
   // Simple absolute / relative fast paths (before tabs/newline scan).
-  // Skip IPv4 (digit-led) and IPv6 ('[') so those benches do not pay the
-  // noinline miss. Ports stay on the fast path; only userinfo skips it.
   if constexpr (store_values) {
     bool hit_fast_path = false;
     if (base_url == nullptr) {
@@ -1392,9 +1386,6 @@ result_type parse_url_impl(std::string_view user_input,
       bool skip_absolute =
           host0 != 0 &&
           (host_first == '[' || (host_first >= '0' && host_first <= '9'));
-      // Userinfo never hits the simple host scanner; skip the noinline miss.
-      // Scan only the first 16 authority bytes and stop at '/' '?' '#'.
-      // Do not treat ':' as a skip (ports stay on the fast path).
       if (!skip_absolute && host0 != 0) {
         const size_t lim = (host0 + 16 < n) ? host0 + 16 : n;
         for (size_t i = host0; i < lim; ++i) {
