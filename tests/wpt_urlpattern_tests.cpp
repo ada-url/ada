@@ -551,6 +551,33 @@ TEST(wpt_urlpattern_tests, port_leading_zeros_canonicalization) {
   }
 }
 
+TEST(wpt_urlpattern_tests, file_zero_port_not_dropped_as_default) {
+  // Only file among the special schemes has no default port; the "default
+  // port" step must not treat a literal "0" as file's default and drop it.
+  // Other special schemes still drop their real default port.
+  for (const auto& [protocol, port, expected] :
+       std::vector<std::tuple<std::string, std::string, std::string>>{
+           {"file", "0", "0"},
+           {"file", "80", "80"},
+           {"http", "0", "0"},
+           {"http", "80", ""},
+           {"https", "443", ""},
+           {"ftp", "21", ""},
+       }) {
+    auto init = ada::url_pattern_init{};
+    init.protocol = protocol;
+    init.port = port;
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url) << protocol << ":" << port;
+    EXPECT_EQ(url->get_port(), expected) << protocol << ":" << port;
+  }
+  // Same through the constructor string form.
+  auto url = ada::parse_url_pattern<regex_provider>(
+      std::string_view("file://example.com:0/"));
+  ASSERT_TRUE(url);
+  EXPECT_EQ(url->get_port(), "0");
+}
+
 TEST(wpt_urlpattern_tests, search_and_hash_keep_leading_delimiter) {
   // "canonicalize a search" runs the URL parser in query state, and
   // "canonicalize a hash" in fragment state. Neither strips a leading
