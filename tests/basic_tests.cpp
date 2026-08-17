@@ -1847,8 +1847,14 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
         std::string_view("http://user@example.com/x"), u));
     ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
         std::string_view("http:////example.com/x"), u));
-    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+  }
+  {
+    // Dot segments stay on the host-preserving handoff (not a miss).
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
         std::string_view("https://example.com/foo/../bar"), u));
+    ASSERT_EQ(u.get_pathname(), "/bar");
+    ASSERT_EQ(u.get_href(), "https://example.com/bar");
   }
 }
 
