@@ -1758,6 +1758,14 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_password(), "pass");
     ASSERT_EQ(url->get_hostname(), "www.example.com");
     ASSERT_EQ(url->get_port(), "8080");
+    // set_href re-parses a credential URL; the '@' skip must not reject it.
+    ASSERT_TRUE(
+        url->set_href("https://user:pass@www.example.com:8080/path/to/"
+                      "resource?foo=bar&baz=qux#section"));
+    ASSERT_EQ(url->get_username(), "user");
+    ASSERT_EQ(url->get_href(),
+              "https://user:pass@www.example.com:8080/path/to/"
+              "resource?foo=bar&baz=qux#section");
   }
   // 8-byte scheme match + 32-byte host window (BBC-style CDN hosts).
   {

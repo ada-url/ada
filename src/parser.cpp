@@ -1,6 +1,7 @@
 #include "ada/parser-inl.h"
 
 #include <array>
+#include <bit>
 #include <charconv>
 #include <cstdint>
 #include <cstring>
@@ -339,6 +340,57 @@ ada_really_inline uint64_t neon_uppercase(uint8x16_t w) noexcept {
       vandq_u8(vcgeq_u8(w, vdupq_n_u8('A')), vcleq_u8(w, vdupq_n_u8('Z'))));
 }
 #endif  // ADA_NEON
+
+// True when '@' appears in the authority before '/', '?', or '#'.
+// One 16-byte window covers typical userinfo (SetHref's "user:pass@").
+// Longer userinfo still misses inside the never_inline fast path. No
+// '@' is a single load + compare so the parse hot path stays cheap.
+ada_really_inline bool authority_has_at(const uint8_t* p, size_t host_start,
+                                        size_t n) noexcept {
+  const size_t rem = n - host_start;
+  if (rem == 0) {
+    return false;
+  }
+#if ADA_NEON
+  if (rem >= 16) {
+    const uint8x16_t w = vld1q_u8(p + host_start);
+    const uint64_t at = neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('@')));
+    if (at == 0) {
+      return false;
+    }
+    const uint64_t delim = neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('/'))) |
+                           neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('?'))) |
+                           neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('#')));
+    return delim == 0 || std::countr_zero(at) < std::countr_zero(delim);
+  }
+#elif ADA_SSE2
+  if (rem >= 16) {
+    const __m128i w =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(p + host_start));
+    const uint16_t at = static_cast<uint16_t>(
+        _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('@'))));
+    if (at == 0) {
+      return false;
+    }
+    const uint16_t delim = static_cast<uint16_t>(
+        _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('/'))) |
+        _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('?'))) |
+        _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('#'))));
+    return delim == 0 || std::countr_zero(at) < std::countr_zero(delim);
+  }
+#endif
+  const size_t lim = host_start + rem;
+  for (size_t i = host_start; i < lim; ++i) {
+    const uint8_t c = p[i];
+    if (c == '@') {
+      return true;
+    }
+    if (c == '/' || c == '?' || c == '#') {
+      return false;
+    }
+  }
+  return false;
+}
 
 // Returns false if a forbidden host code point is found. On success, *end is
 // the first / ? # or len. has_upper / has_x only count host bytes, not the
@@ -1799,19 +1851,23 @@ result_type parse_url_impl(std::string_view user_input,
   if constexpr (store_values) {
     bool hit_fast_path = false;
     if (base_url == nullptr) {
-      // IPv4/IPv6 hosts start with a digit or '['. Skip the never_inline
-      // fast path so those URLs do not pay for a guaranteed miss.
+      // IPv4/IPv6 and userinfo miss the fast path. Skip the never_inline
+      // call so those URLs (including SetHref) do not pay for a miss.
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
-      uint8_t host_first = 0;
+      size_t host_start = 0;
       if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
-        host_first = p[7];
+        host_start = 7;
       } else if (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') {
-        host_first = p[8];
+        host_start = 8;
       }
+      const uint8_t host_first = host_start != 0 ? p[host_start] : 0;
       const bool skip_ip =
           host_first == '[' || (host_first >= '0' && host_first <= '9');
-      hit_fast_path = !skip_ip && try_parse_simple_absolute(user_input, url);
+      const bool skip_userinfo =
+          host_start != 0 && authority_has_at(p, host_start, n);
+      hit_fast_path = !skip_ip && !skip_userinfo &&
+                      try_parse_simple_absolute(user_input, url);
     } else {
       hit_fast_path = try_parse_simple_relative(user_input, *base_url, url);
     }
