@@ -42,12 +42,34 @@ constexpr std::array<uint8_t, 256> clean_http_host_byte = []() consteval {
   return result;
 }();
 
+// SWAR: eight ASCII host bytes in [a-z0-9-._~] without 8 table lookups.
+// High bits must be clear first so the range subtracts cannot borrow
+// across bytes.
+// High-bit-cleared ASCII only. Subtracts cannot borrow across bytes because
+// each (hi|0x80) byte is >= 0x80 and each data byte is <= 0x7F. Do not use
+// has-zero (x-ones)&~x: a match followed by match^1 (e.g. "./" or "_^")
+// produces a false positive via borrow.
+ada_really_inline uint64_t swar_in_range(uint64_t w, uint8_t lo,
+                                         uint8_t hi) noexcept {
+  constexpr uint64_t k_ones = 0x0101010101010101ull;
+  constexpr uint64_t k_high = 0x8080808080808080ull;
+  const uint64_t ge_lo = (w | k_high) - (k_ones * lo);
+  const uint64_t le_hi = ((k_ones * hi) | k_high) - w;
+  return ge_lo & le_hi & k_high;
+}
+
 ada_really_inline bool eight_clean_http_host_bytes(
     const uint8_t* input) noexcept {
-  return clean_http_host_byte[input[0]] & clean_http_host_byte[input[1]] &
-         clean_http_host_byte[input[2]] & clean_http_host_byte[input[3]] &
-         clean_http_host_byte[input[4]] & clean_http_host_byte[input[5]] &
-         clean_http_host_byte[input[6]] & clean_http_host_byte[input[7]];
+  uint64_t w = 0;
+  std::memcpy(&w, input, 8);
+  constexpr uint64_t k_high = 0x8080808080808080ull;
+  if ((w & k_high) != 0) {
+    return false;
+  }
+  const uint64_t ok = swar_in_range(w, 'a', 'z') | swar_in_range(w, '0', '9') |
+                      swar_in_range(w, '-', '-') | swar_in_range(w, '.', '.') |
+                      swar_in_range(w, '_', '_') | swar_in_range(w, '~', '~');
+  return ok == k_high;
 }
 
 // Minimal front end for the overwhelmingly common already-canonical HTTP(S)
@@ -68,22 +90,40 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
     return std::nullopt;
   }
 
-  uint32_t first4{};
-  std::memcpy(&first4, bytes, 4);
-  const bool is_http =
-      first4 == (k_can_parse_little_endian ? 0x70747468u : 0x68747470u);
-  if (!is_http) {
-    return std::nullopt;
-  }
-
   size_t authority_start;
-  if (length >= 8 && bytes[4] == 's' && bytes[5] == ':' && bytes[6] == '/' &&
-      bytes[7] == '/') {
-    authority_start = 8;
-  } else if (bytes[4] == ':' && bytes[5] == '/' && bytes[6] == '/') {
-    authority_start = 7;
+  if constexpr (k_can_parse_little_endian) {
+    if (length >= 8) {
+      uint64_t first8 = 0;
+      std::memcpy(&first8, bytes, 8);
+      if (first8 == 0x2f2f3a7370747468ull) {  // "https://"
+        authority_start = 8;
+      } else if ((first8 & 0x00ffffffffffffffull) ==
+                 0x002f2f3a70747468ull) {  // "http://"
+        authority_start = 7;
+      } else {
+        return std::nullopt;
+      }
+    } else if (bytes[0] == 'h' && bytes[1] == 't' && bytes[2] == 't' &&
+               bytes[3] == 'p' && bytes[4] == ':' && bytes[5] == '/' &&
+               bytes[6] == '/') {
+      authority_start = 7;
+    } else {
+      return std::nullopt;
+    }
   } else {
-    return std::nullopt;
+    uint32_t first4{};
+    std::memcpy(&first4, bytes, 4);
+    if (first4 != 0x68747470u) {  // "http"
+      return std::nullopt;
+    }
+    if (length >= 8 && bytes[4] == 's' && bytes[5] == ':' && bytes[6] == '/' &&
+        bytes[7] == '/') {
+      authority_start = 8;
+    } else if (bytes[4] == ':' && bytes[5] == '/' && bytes[6] == '/') {
+      authority_start = 7;
+    } else {
+      return std::nullopt;
+    }
   }
 
   if (authority_start >= length) {
@@ -121,7 +161,7 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   if (checkers::last_label_may_be_a_number(host)) {
     return std::nullopt;
   }
-  if (host.find('-') != std::string_view::npos &&
+  if (host.find('x') != std::string_view::npos &&
       host.find("xn-") != std::string_view::npos) {
     return std::nullopt;
   }
