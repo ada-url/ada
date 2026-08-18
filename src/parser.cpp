@@ -1853,21 +1853,27 @@ result_type parse_url_impl(std::string_view user_input,
     if (base_url == nullptr) {
       // IPv4/IPv6 and userinfo miss the fast path. Skip the never_inline
       // call so those URLs (including SetHref) do not pay for a miss.
+      // The '@' scan must stay behind the IP peek: decimal IPv4 hosts are
+      // short and would otherwise walk the whole authority on every parse.
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
+      uint8_t host_first = 0;
       size_t host_start = 0;
       if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
         host_start = 7;
+        host_first = p[7];
       } else if (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') {
         host_start = 8;
+        host_first = p[8];
       }
-      const uint8_t host_first = host_start != 0 ? p[host_start] : 0;
       const bool skip_ip =
           host_first == '[' || (host_first >= '0' && host_first <= '9');
-      const bool skip_userinfo =
-          host_start != 0 && authority_has_at(p, host_start, n);
-      hit_fast_path = !skip_ip && !skip_userinfo &&
-                      try_parse_simple_absolute(user_input, url);
+      if (!skip_ip) {
+        const bool skip_userinfo =
+            host_start != 0 && authority_has_at(p, host_start, n);
+        hit_fast_path =
+            !skip_userinfo && try_parse_simple_absolute(user_input, url);
+      }
     } else {
       hit_fast_path = try_parse_simple_relative(user_input, *base_url, url);
     }
