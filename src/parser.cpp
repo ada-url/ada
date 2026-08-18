@@ -1111,6 +1111,16 @@ after_rest:
     }
   }
 
+  // The slow path removes ASCII tab/newline anywhere in the input and trims a
+  // trailing C0 control or space; this fast path does neither. A query or
+  // fragment reaching the helpers below would keep those bytes percent-encoded
+  // ("?a\nb" -> "?a%0Ab", "#f " -> "#f%20") instead of stripped, so hand such
+  // inputs back to the slow path.
+  if (!rest_simple && (unicode::is_c0_control_or_space(input.back()) ||
+                       unicode::has_tabs_or_newline(input))) {
+    return false;
+  }
+
   out.type = scheme_type;
   out.is_valid = true;
   out.has_opaque_path = false;
@@ -1500,6 +1510,16 @@ after_rest:
     if (path_has_dot_segment(path_body)) {
       rest_simple = false;
     }
+  }
+
+  // The slow path removes ASCII tab/newline anywhere in the input and trims a
+  // trailing C0 control or space; this fast path does neither. A query or
+  // fragment reaching the helpers below would keep those bytes percent-encoded
+  // ("?a\nb" -> "?a%0Ab", "#f " -> "#f%20") instead of stripped, so hand such
+  // inputs back to the slow path.
+  if (!rest_simple && (unicode::is_c0_control_or_space(input.back()) ||
+                       unicode::has_tabs_or_newline(input))) {
+    return false;
   }
 
   out.type = scheme_type;
