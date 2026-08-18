@@ -1935,3 +1935,28 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_TRUE(last_label_may_be_a_number("19.68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("0xffffffff."));
 }
+
+TYPED_TEST(basic_tests,
+           absolute_fast_path_strips_tab_newline_and_trailing_space) {
+  // The absolute fast path must remove ASCII tab/newline and trim a trailing
+  // C0 control or space just like the general parser; a query or fragment that
+  // reaches the fast path's percent-encoding helpers must not keep those bytes
+  // as %09/%0A/%20.
+  auto check = [](std::string_view input, std::string_view expected) {
+    auto r = ada::parse<TypeParam>(input);
+    ASSERT_TRUE(r);
+    ASSERT_EQ(r->get_href(), expected);
+  };
+  check("wss://ab?x\n9", "wss://ab/?x9");
+  check("http://ab?a\tb", "http://ab/?ab");
+  check("wss://ab?x9 ", "wss://ab/?x9");
+  check("http://ab#f\ng", "http://ab/#fg");
+  check("http://ab#f ", "http://ab/#f");
+  check("http://ab/p ", "http://ab/p");
+  // with an explicit port (finish_simple_absolute_with_port)
+  check("http://ab:81?x\n9", "http://ab:81/?x9");
+  check("http://ab:81/p?x\ty#h", "http://ab:81/p?xy#h");
+  check("http://ab:81#f ", "http://ab:81/#f");
+  // a byte that legitimately needs encoding is still encoded
+  check("http://ab?x y", "http://ab/?x%20y");
+}
