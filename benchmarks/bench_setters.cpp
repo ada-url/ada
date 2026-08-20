@@ -119,6 +119,36 @@ static void SetSearch(benchmark::State& state) {
 }
 BENCHMARK(SetSearch);
 
+static void SetSearchAlternatingLength(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool use_long_value = false;
+  run_setter(state, [&] {
+    use_long_value = !use_long_value;
+    url.set_search(use_long_value ? "?a=much-longer-query-value" : "?x=1");
+  });
+}
+BENCHMARK(SetSearchAlternatingLength);
+
+static void SetSearchEncodedAlternatingLength(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool use_long_value = false;
+  run_setter(state, [&] {
+    use_long_value = !use_long_value;
+    url.set_search(use_long_value ? "?a=much longer query value" : "?x= ");
+  });
+}
+BENCHMARK(SetSearchEncodedAlternatingLength);
+
+static void SetSearchInsertAndClear(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool insert_search = false;
+  run_setter(state, [&] {
+    insert_search = !insert_search;
+    url.set_search(insert_search ? "?a=1&b=2" : "");
+  });
+}
+BENCHMARK(SetSearchInsertAndClear);
+
 static void SetHash(benchmark::State& state) {
   auto url = ada::parse<ada::url_aggregator>(base_url).value();
   run_setter(state, [&] { url.set_hash("#newfragment"); });

@@ -490,6 +490,36 @@ TYPED_TEST(basic_tests, credential_insertion_and_encoding_preserve_url_tail) {
   ASSERT_EQ(url->get_href(), "https://example.com/path?q=1#fragment");
 }
 
+TYPED_TEST(basic_tests, query_replacement_preserves_url_tail) {
+  auto url = ada::parse<TypeParam>(
+      "https://user:pass@example.com/path?before=yes#fragment");
+  ASSERT_TRUE(url);
+
+  url->set_search("?same=value");
+  ASSERT_EQ(url->get_href(),
+            "https://user:pass@example.com/path?same=value#fragment");
+
+  url->set_search("?a=1");
+  ASSERT_EQ(url->get_href(), "https://user:pass@example.com/path?a=1#fragment");
+
+  url->set_search("?longer query=value");
+  ASSERT_EQ(url->get_href(),
+            "https://user:pass@example.com/path?"
+            "longer%20query=value#fragment");
+}
+
+TYPED_TEST(basic_tests, query_insertion_and_encoding_preserve_url_tail) {
+  auto url = ada::parse<TypeParam>("https://example.com/path#fragment");
+  ASSERT_TRUE(url);
+
+  url->set_search("?value='x y'");
+  ASSERT_EQ(url->get_href(),
+            "https://example.com/path?value=%27x%20y%27#fragment");
+
+  url->set_search("");
+  ASSERT_EQ(url->get_href(), "https://example.com/path#fragment");
+}
+
 // https://github.com/nodejs/node/issues/47889
 TYPED_TEST(basic_tests, node_issue_47889) {
   auto urlbase = ada::parse<TypeParam>("a:b");

@@ -192,17 +192,17 @@ inline void url_aggregator::update_base_search(std::string_view input) {
     }
 
     buffer.append(input);
+  } else if (components.search_start != url_components::omitted) {
+    const uint32_t difference = replace_and_resize(
+        components.search_start + 1, components.hash_start, input);
+    components.hash_start += difference;
   } else {
-    if (components.search_start == url_components::omitted) {
-      components.search_start = components.hash_start;
-    } else {
-      buffer.erase(components.search_start,
-                   components.hash_start - components.search_start);
-      components.hash_start = components.search_start;
+    components.search_start = components.hash_start;
+    buffer.insert(components.search_start, input.size() + 1, '?');
+    if (!input.empty()) {
+      std::memmove(buffer.data() + components.search_start + 1, input.data(),
+                   input.size());
     }
-
-    buffer.insert(components.search_start, "?");
-    buffer.insert(components.search_start + 1, input);
     components.hash_start += uint32_t(input.size() + 1);  // Do not forget `?`
   }
 
@@ -232,30 +232,29 @@ inline void url_aggregator::update_base_search(
       buffer.append(input);
     }
   } else {
-    if (components.search_start == url_components::omitted) {
-      components.search_start = components.hash_start;
-    } else {
-      buffer.erase(components.search_start,
-                   components.hash_start - components.search_start);
-      components.hash_start = components.search_start;
+    const size_t idx =
+        ada::unicode::percent_encode_index(input, query_percent_encode_set);
+    std::string encoded;
+    std::string_view replacement = input;
+    if (idx != input.size()) {
+      encoded =
+          ada::unicode::percent_encode(input, query_percent_encode_set, idx);
+      replacement = encoded;
     }
 
-    buffer.insert(components.search_start, "?");
-    size_t idx =
-        ada::unicode::percent_encode_index(input, query_percent_encode_set);
-    if (idx == input.size()) {
-      buffer.insert(components.search_start + 1, input);
-      components.hash_start += uint32_t(input.size() + 1);  // Do not forget `?`
+    if (components.search_start != url_components::omitted) {
+      const uint32_t difference = replace_and_resize(
+          components.search_start + 1, components.hash_start, replacement);
+      components.hash_start += difference;
     } else {
-      buffer.insert(components.search_start + 1, input, 0, idx);
-      input.remove_prefix(idx);
-      // We only create a temporary string if we need percent encoding and
-      // we attempt to create as small a temporary string as we can.
-      std::string encoded =
-          ada::unicode::percent_encode(input, query_percent_encode_set);
-      buffer.insert(components.search_start + idx + 1, encoded);
+      components.search_start = components.hash_start;
+      buffer.insert(components.search_start, replacement.size() + 1, '?');
+      if (!replacement.empty()) {
+        std::memmove(buffer.data() + components.search_start + 1,
+                     replacement.data(), replacement.size());
+      }
       components.hash_start +=
-          uint32_t(encoded.size() + idx + 1);  // Do not forget `?`
+          uint32_t(replacement.size() + 1);  // Do not forget `?`
     }
   }
 
