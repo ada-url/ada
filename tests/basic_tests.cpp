@@ -263,6 +263,21 @@ TYPED_TEST(basic_tests, readme8) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, host_nfc_reorders_precomposed_starter) {
+  // A precomposed starter followed by a combining mark of lower combining class
+  // is not in NFC: normalization decomposes the starter and reorders the marks.
+  // %C3%A1%CC%A3 is U+00E1 (a + acute, class 230) then U+0323 (dot below, class
+  // 220); NFC is U+1EA1 (a + dot below) with the acute floating -> xn--lsa752l.
+  auto url = ada::parse<TypeParam>("http://%C3%A1%CC%A3/");
+  ASSERT_TRUE(url.has_value());
+  ASSERT_EQ(url->get_hostname(), "xn--lsa752l");
+
+  auto url2 = ada::parse<TypeParam>("https://%C5%9A%CC%A7.example/");
+  ASSERT_TRUE(url2.has_value());
+  ASSERT_EQ(url2->get_hostname(), "xn--nga05f.example");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, nodejs1) {
   auto base = ada::parse<TypeParam>("http://other.com/");
   ASSERT_TRUE(base.has_value());

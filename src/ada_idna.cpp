@@ -5330,6 +5330,22 @@ static bool would_compose(std::u32string_view input) noexcept {
   return false;
 }
 
+// Trailing canonical combining class of a character: the combining class of the
+// last code point of its canonical decomposition, or the character's own class
+// when it has none. A precomposed starter such as U+00E1 (a + U+0301, class
+// 230) has class 0 but a nonzero trailing class, so a following mark of lower
+// class reorders past the hidden mark during normalization.
+static uint8_t trailing_ccc(char32_t c) noexcept {
+  const size_t length = canonical_decomp_length(c);
+  if (length == 0) {
+    return get_ccc(c);
+  }
+  const uint16_t* const decomposition =
+      decomposition_block_row(decomposition_index[c >> 8]) + (c % 256);
+  const size_t base = decomposition[0] >> 2;
+  return get_ccc(decomposition_data[base + length - 1]);
+}
+
 bool is_already_nfc(std::u32string_view input) noexcept {
   if (input.empty()) {
     return true;
@@ -5344,14 +5360,16 @@ bool is_already_nfc(std::u32string_view input) noexcept {
       return false;
     }
   }
-  // 2) Combining marks already in canonical order.
+  // 2) Combining marks already in canonical order. prev_ccc carries the
+  //    trailing class of the previous character's canonical decomposition so a
+  //    composite starter followed by a lower-class mark is caught.
   uint8_t prev_ccc = 0;
   for (char32_t c : input) {
     uint8_t ccc = get_ccc(c);
     if (ccc != 0 && prev_ccc > ccc) {
       return false;
     }
-    prev_ccc = ccc;
+    prev_ccc = trailing_ccc(c);
   }
   // 3) No pairwise composition would apply (including Hangul L+V / LV+T).
   return !would_compose(input);
