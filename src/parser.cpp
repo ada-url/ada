@@ -1897,7 +1897,13 @@ result_type parse_url_impl(std::string_view user_input,
           url.is_valid = false;
         }
       } else {
-        if (url.get_href_size() > max_input_length) [[unlikely]] {
+        // For a small absolute input, even worst-case normalization cannot
+        // exceed the limit: percent encoding expands at most 3x and IDNA at
+        // most 4.5x. Avoid traversing every stored component on the common
+        // default-limit path.
+        if ((base_url != nullptr ||
+             user_input.size() > static_cast<size_t>(max_input_length) / 5) &&
+            url.get_href_size() > max_input_length) [[unlikely]] {
           url.is_valid = false;
         }
       }
