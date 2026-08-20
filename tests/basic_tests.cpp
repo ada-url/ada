@@ -454,6 +454,42 @@ TYPED_TEST(basic_tests, should_update_password_correctly) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, credential_replacement_preserves_url_tail) {
+  auto url = ada::parse<TypeParam>(
+      "https://initial:secret@example.com/path?before=yes#fragment");
+  ASSERT_TRUE(url);
+
+  ASSERT_TRUE(url->set_username("changed"));
+  ASSERT_TRUE(url->set_password("planet"));
+  ASSERT_EQ(url->get_href(),
+            "https://changed:planet@example.com/path?before=yes#fragment");
+
+  ASSERT_TRUE(url->set_username("x"));
+  ASSERT_TRUE(url->set_password("y"));
+  ASSERT_EQ(url->get_href(),
+            "https://x:y@example.com/path?before=yes#fragment");
+
+  ASSERT_TRUE(url->set_username("a-much-longer-username"));
+  ASSERT_TRUE(url->set_password("a-much-longer-password"));
+  ASSERT_EQ(url->get_href(),
+            "https://a-much-longer-username:a-much-longer-password@"
+            "example.com/path?before=yes#fragment");
+}
+
+TYPED_TEST(basic_tests, credential_insertion_and_encoding_preserve_url_tail) {
+  auto url = ada::parse<TypeParam>("https://example.com/path?q=1#fragment");
+  ASSERT_TRUE(url);
+
+  ASSERT_TRUE(url->set_username("a b"));
+  ASSERT_TRUE(url->set_password("p@ss"));
+  ASSERT_EQ(url->get_href(),
+            "https://a%20b:p%40ss@example.com/path?q=1#fragment");
+
+  ASSERT_TRUE(url->set_username(""));
+  ASSERT_TRUE(url->set_password(""));
+  ASSERT_EQ(url->get_href(), "https://example.com/path?q=1#fragment");
+}
+
 // https://github.com/nodejs/node/issues/47889
 TYPED_TEST(basic_tests, node_issue_47889) {
   auto urlbase = ada::parse<TypeParam>("a:b");

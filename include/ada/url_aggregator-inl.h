@@ -14,6 +14,7 @@
 #include "ada/log.h"
 
 #include <charconv>
+#include <cstring>
 #include <ostream>
 #include <string_view>
 
@@ -110,7 +111,9 @@ ada_really_inline uint32_t url_aggregator::replace_and_resize(
   if (current_length == 0) {
     buffer.insert(start, input);
   } else if (input_size == current_length) {
-    buffer.replace(start, input_size, input);
+    if (input_size != 0) {
+      std::memmove(buffer.data() + start, input.data(), input_size);
+    }
   } else if (input_size < current_length) {
     buffer.erase(start, current_length - input_size);
     buffer.replace(start, input_size, input);
@@ -456,16 +459,14 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
   uint32_t difference = uint32_t(input.size());
 
   if (password_exists) {
-    uint32_t current_length =
-        components.host_start - components.username_end - 1;
-    buffer.erase(components.username_end + 1, current_length);
-    difference -= current_length;
+    difference = replace_and_resize(components.username_end + 1,
+                                    components.host_start, input);
   } else {
-    buffer.insert(components.username_end, ":");
+    buffer.insert(components.username_end, input.size() + 1, ':');
+    std::memmove(buffer.data() + components.username_end + 1, input.data(),
+                 input.size());
     difference++;
   }
-
-  buffer.insert(components.username_end + 1, input);
   components.host_start += difference;
 
   // The following line is required to add "@" to hostname. When updating
