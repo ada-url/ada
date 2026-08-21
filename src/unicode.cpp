@@ -590,6 +590,9 @@ std::string form_urlencoded_decode(const std::string_view input) {
   return out;
 }
 
+void percent_encode_suffix(const char* p, const char* end,
+                           const uint8_t character_set[], std::string& out);
+
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
   auto pointer = std::ranges::find_if(input, [character_set](const char c) {
@@ -604,15 +607,18 @@ std::string percent_encode(const std::string_view input,
   result.reserve(input.length());  // in the worst case, percent encoding might
                                    // produce 3 characters.
   result.append(input.substr(0, std::distance(input.begin(), pointer)));
-
-  for (; pointer != input.end(); pointer++) {
-    if (character_sets::bit_at(character_set, *pointer)) {
-      result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-    } else {
-      result += *pointer;
+  if (static_cast<size_t>(input.end() - pointer) >= 48) {
+    percent_encode_suffix(&*pointer, input.data() + input.size(), character_set,
+                          result);
+  } else {
+    for (; pointer != input.end(); pointer++) {
+      if (character_sets::bit_at(character_set, *pointer)) {
+        result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
+      } else {
+        result += *pointer;
+      }
     }
   }
-
   return result;
 }
 
@@ -651,6 +657,13 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
   return true;
 }
 
+template bool percent_encode<true>(std::string_view input,
+                                   const uint8_t character_set[],
+                                   std::string& out);
+template bool percent_encode<false>(std::string_view input,
+                                    const uint8_t character_set[],
+                                    std::string& out);
+
 bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
               size_t first_percent) {
   std::string percent_decoded_buffer;
@@ -675,11 +688,16 @@ std::string percent_encode(const std::string_view input,
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   out.append(input.data(), index);
   auto pointer = input.begin() + index;
-  for (; pointer != input.end(); pointer++) {
-    if (character_sets::bit_at(character_set, *pointer)) {
-      out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-    } else {
-      out += *pointer;
+  if (static_cast<size_t>(input.end() - pointer) >= 48) {
+    percent_encode_suffix(&*pointer, input.data() + input.size(), character_set,
+                          out);
+  } else {
+    for (; pointer != input.end(); pointer++) {
+      if (character_sets::bit_at(character_set, *pointer)) {
+        out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
+      } else {
+        out += *pointer;
+      }
     }
   }
   return out;
