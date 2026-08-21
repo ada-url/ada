@@ -791,7 +791,7 @@ ada_really_inline void percent_encode_to_rvv(const char* p, const char* end,
 }
 #endif  // ADA_RVV
 
-// Setter and existing percent_encode benches are 2–44 bytes. Table setup
+// Setter and existing percent_encode benches are 2-44 bytes. Table setup
 // plus mask walking costs more instructions than bit_at on those inputs
 // (especially dense USERINFO). SIMD pays off on the remaining suffix.
 static constexpr size_t kPercentEncodeSimdMin = 48;
