@@ -689,15 +689,15 @@ struct ssse3_percent_tables {
   __m128i zero;
 };
 
-ADA_UNICODE_SIMD ssse3_percent_tables load_ssse3_percent_tables(
-    const uint8_t character_set[]) noexcept {
+ADA_UNICODE_SIMD ssse3_percent_tables
+load_ssse3_percent_tables(const uint8_t character_set[]) noexcept {
   ssse3_percent_tables t{};
   t.cs_lo = _mm_loadu_si128(reinterpret_cast<const __m128i*>(character_set));
   t.cs_hi =
       _mm_loadu_si128(reinterpret_cast<const __m128i*>(character_set + 16));
   // 1 << (0..7), duplicated so pshufb(index & 7) works for every lane.
-  t.pow2 = _mm_setr_epi8(1, 2, 4, 8, 16, 32, 64, -128, 1, 2, 4, 8, 16, 32, 64,
-                         -128);
+  t.pow2 =
+      _mm_setr_epi8(1, 2, 4, 8, 16, 32, 64, -128, 1, 2, 4, 8, 16, 32, 64, -128);
   t.mask_0f = _mm_set1_epi8(0x0F);
   t.mask_07 = _mm_set1_epi8(0x07);
   t.zero = _mm_setzero_si128();
@@ -706,12 +706,11 @@ ADA_UNICODE_SIMD ssse3_percent_tables load_ssse3_percent_tables(
 
 ADA_UNICODE_SIMD int ssse3_percent_mask(
     __m128i word, const ssse3_percent_tables& tables) noexcept {
-  const __m128i idx =
-      _mm_and_si128(_mm_srli_epi16(word, 3), tables.mask_0f);
+  const __m128i idx = _mm_and_si128(_mm_srli_epi16(word, 3), tables.mask_0f);
   const __m128i lo = _mm_shuffle_epi8(tables.cs_lo, idx);
   const __m128i hi = _mm_shuffle_epi8(tables.cs_hi, idx);
   // Bytes 0x80-0xFF are signed-negative; select the high half of the bitmap.
-  const __m128i high_byte = _mm_cmplt_epi8(word, tables.zero);
+  const __m128i high_byte = _mm_cmpgt_epi8(tables.zero, word);
   const __m128i cs_byte = _mm_or_si128(_mm_and_si128(hi, high_byte),
                                        _mm_andnot_si128(high_byte, lo));
   const __m128i bits =
@@ -720,16 +719,17 @@ ADA_UNICODE_SIMD int ssse3_percent_mask(
   return _mm_movemask_epi8(_mm_cmpeq_epi8(hits, tables.zero)) ^ 0xFFFF;
 }
 
-ADA_UNICODE_SIMD size_t percent_encode_index_ssse3(
-    const char* data, size_t size,
-    const ssse3_percent_tables& tables) noexcept {
+ADA_UNICODE_SIMD size_t
+percent_encode_index_ssse3(const char* data, size_t size,
+                           const ssse3_percent_tables& tables) noexcept {
   size_t i = 0;
   for (; i + 16 <= size; i += 16) {
     const __m128i word =
         _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + i));
     const int mask = ssse3_percent_mask(word, tables);
     if (mask != 0) {
-      return i + static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      return i + static_cast<size_t>(
+                     trailing_zeroes32(static_cast<uint32_t>(mask)));
     }
   }
   if (i < size) {
@@ -739,16 +739,16 @@ ADA_UNICODE_SIMD size_t percent_encode_index_ssse3(
     const unsigned skip = static_cast<unsigned>(i - (size - 16));
     mask >>= skip;
     if (mask != 0) {
-      return i + static_cast<size_t>(trailing_zeroes32(static_cast<uint32_t>(mask)));
+      return i + static_cast<size_t>(
+                     trailing_zeroes32(static_cast<uint32_t>(mask)));
     }
   }
   return size;
 }
 
-ADA_UNICODE_SIMD void percent_encode_to_ssse3(const char* p, const char* end,
-                                              const uint8_t character_set[],
-                                              const ssse3_percent_tables& tables,
-                                              std::string& out) {
+ADA_UNICODE_SIMD void percent_encode_to_ssse3(
+    const char* p, const char* end, const uint8_t character_set[],
+    const ssse3_percent_tables& tables, std::string& out) {
   while (p + 16 <= end) {
     const __m128i word = _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
     const int mask = ssse3_percent_mask(word, tables);
@@ -764,8 +764,8 @@ ADA_UNICODE_SIMD void percent_encode_to_ssse3(const char* p, const char* end,
 #endif  // ADA_UNICODE_SSSE3
 
 #if ADA_NEON
-ada_really_inline uint8x16x2_t load_neon_percent_table(
-    const uint8_t character_set[]) noexcept {
+ada_really_inline uint8x16x2_t
+load_neon_percent_table(const uint8_t character_set[]) noexcept {
   uint8x16x2_t table{};
   table.val[0] = vld1q_u8(character_set);
   table.val[1] = vld1q_u8(character_set + 16);
@@ -775,8 +775,8 @@ ada_really_inline uint8x16x2_t load_neon_percent_table(
 ada_really_inline uint8x16_t neon_percent_hits(uint8x16_t word,
                                                uint8x16x2_t table) noexcept {
   const uint8x16_t cs_bytes = vqtbl2q_u8(table, vshrq_n_u8(word, 3));
-  const uint8x16_t bit_mask =
-      vshlq_u8(vdupq_n_u8(1), vreinterpretq_s8_u8(vandq_u8(word, vdupq_n_u8(7))));
+  const uint8x16_t bit_mask = vshlq_u8(
+      vdupq_n_u8(1), vreinterpretq_s8_u8(vandq_u8(word, vdupq_n_u8(7))));
   return vandq_u8(cs_bytes, bit_mask);
 }
 
@@ -793,12 +793,11 @@ ada_really_inline size_t percent_encode_index_neon(
     const char* data, size_t size, uint8x16x2_t table) noexcept {
   size_t i = 0;
   for (; i + 16 <= size; i += 16) {
-    const uint8x16_t hits =
-        neon_percent_hits(vld1q_u8(reinterpret_cast<const uint8_t*>(data + i)),
-                          table);
+    const uint8x16_t hits = neon_percent_hits(
+        vld1q_u8(reinterpret_cast<const uint8_t*>(data + i)), table);
     if (vmaxvq_u32(vreinterpretq_u32_u8(hits)) != 0) {
-      return i + static_cast<size_t>(
-                     trailing_zeroes32(neon_percent_mask(hits)));
+      return i +
+             static_cast<size_t>(trailing_zeroes32(neon_percent_mask(hits)));
     }
   }
   if (i < size) {
@@ -842,12 +841,10 @@ ada_really_inline size_t percent_encode_index_rvv(
         __riscv_vle8_v_u8m1(reinterpret_cast<const uint8_t*>(data + i), vl);
     const vuint8m1_t cs_bytes =
         __riscv_vluxei8(character_set, __riscv_vsrl(word, 3, vl), vl);
-    const vuint8m1_t bit_mask =
-        __riscv_vsll(__riscv_vmv_v_x_u8m1(1, vl),
-                     __riscv_vand(word, 7, vl), vl);
-    const long idx =
-        __riscv_vfirst(__riscv_vmsne(__riscv_vand(cs_bytes, bit_mask, vl), 0, vl),
-                       vl);
+    const vuint8m1_t bit_mask = __riscv_vsll(__riscv_vmv_v_x_u8m1(1, vl),
+                                             __riscv_vand(word, 7, vl), vl);
+    const long idx = __riscv_vfirst(
+        __riscv_vmsne(__riscv_vand(cs_bytes, bit_mask, vl), 0, vl), vl);
     if (idx >= 0) {
       return i + static_cast<size_t>(idx);
     }
@@ -866,12 +863,10 @@ ada_really_inline void percent_encode_to_rvv(const char* p, const char* end,
         __riscv_vle8_v_u8m1(reinterpret_cast<const uint8_t*>(p), vl);
     const vuint8m1_t cs_bytes =
         __riscv_vluxei8(character_set, __riscv_vsrl(word, 3, vl), vl);
-    const vuint8m1_t bit_mask =
-        __riscv_vsll(__riscv_vmv_v_x_u8m1(1, vl),
-                     __riscv_vand(word, 7, vl), vl);
-    const long idx =
-        __riscv_vfirst(__riscv_vmsne(__riscv_vand(cs_bytes, bit_mask, vl), 0, vl),
-                       vl);
+    const vuint8m1_t bit_mask = __riscv_vsll(__riscv_vmv_v_x_u8m1(1, vl),
+                                             __riscv_vand(word, 7, vl), vl);
+    const long idx = __riscv_vfirst(
+        __riscv_vmsne(__riscv_vand(cs_bytes, bit_mask, vl), 0, vl), vl);
     if (idx < 0) {
       out.append(p, vl);
       p += vl;
@@ -892,7 +887,8 @@ ada_really_inline void percent_encode_to(const char* p, const char* end,
                                          std::string& out) {
 #if ADA_UNICODE_SSSE3
   if (end - p >= 16) {
-    const ssse3_percent_tables tables = load_ssse3_percent_tables(character_set);
+    const ssse3_percent_tables tables =
+        load_ssse3_percent_tables(character_set);
     percent_encode_to_ssse3(p, end, character_set, tables, out);
     return;
   }

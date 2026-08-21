@@ -791,8 +791,7 @@ TEST(basic_tests, percent_encode_index_and_encode_match_scalar) {
               scalar_percent_encode_index(mixed, character_set));
     ASSERT_EQ(ada::unicode::percent_encode(mixed, character_set),
               scalar_percent_encode(mixed, character_set));
-    const size_t idx =
-        ada::unicode::percent_encode_index(mixed, character_set);
+    const size_t idx = ada::unicode::percent_encode_index(mixed, character_set);
     ASSERT_EQ(ada::unicode::percent_encode(mixed, character_set, idx),
               ada::unicode::percent_encode(mixed, character_set));
   }
@@ -804,7 +803,8 @@ TEST(basic_tests, percent_encode_template_append_and_replace) {
   const std::string dirty = std::string(16, 'n') + " " + std::string(16, 'n');
 
   std::string replace_clean;
-  ASSERT_FALSE(ada::unicode::percent_encode<false>(clean, query, replace_clean));
+  ASSERT_FALSE(
+      ada::unicode::percent_encode<false>(clean, query, replace_clean));
   ASSERT_TRUE(replace_clean.empty());
 
   std::string replace_dirty;
