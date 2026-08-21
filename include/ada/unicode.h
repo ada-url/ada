@@ -237,19 +237,9 @@ bool percent_encode(std::string_view input, const uint8_t character_set[],
  * @private
  * Returns the index at which percent encoding should start, or (equivalently),
  * the length of the prefix that does not require percent encoding.
- *
- * Inputs shorter than 16 bytes stay on an inline 8-byte scalar scan. Longer
- * inputs use percent_encode_index_wide (16-byte SIMD when available).
  */
 ada_really_inline size_t percent_encode_index(std::string_view input,
                                               const uint8_t character_set[]);
-/**
- * @private
- * 16-byte SIMD (or unrolled scalar) scan used by percent_encode_index when
- * input.size() >= 16. Also used by the percent_encode implementations.
- */
-size_t percent_encode_index_wide(std::string_view input,
-                                 const uint8_t character_set[]) noexcept;
 /**
  * @private
  * Lowers the string in-place, assuming that the content is ASCII.

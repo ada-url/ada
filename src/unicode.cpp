@@ -1,4 +1,5 @@
 #include "ada/unicode.h"
+#include "ada/unicode-inl.h"
 
 #include "ada/character_sets-inl.h"
 #include "ada/character_sets.h"
@@ -656,26 +657,6 @@ ada_really_inline void percent_encode_to_scalar(const char* p, const char* end,
   }
 }
 
-ada_really_inline size_t percent_encode_index_scalar(
-    const char* data, size_t size, const uint8_t character_set[]) noexcept {
-  size_t i = 0;
-  for (; i + 8 <= size; i += 8) {
-    unsigned char chunk[8];
-    std::memcpy(&chunk, data + i, 8);
-    for (size_t j = 0; j < 8; j++) {
-      if (character_sets::bit_at(character_set, chunk[j])) {
-        return i + j;
-      }
-    }
-  }
-  for (; i < size; i++) {
-    if (character_sets::bit_at(character_set, data[i])) {
-      return i;
-    }
-  }
-  return size;
-}
-
 #if ADA_UNICODE_SSSE3
 // Classify 16 input bytes against the 32-byte character_set bitmap:
 // bit_at(cs, b) == cs[b >> 3] & (1 << (b & 7)). pshufb looks up the two
@@ -717,33 +698,6 @@ ADA_UNICODE_SIMD int ssse3_percent_mask(
       _mm_shuffle_epi8(tables.pow2, _mm_and_si128(word, tables.mask_07));
   const __m128i hits = _mm_and_si128(cs_byte, bits);
   return _mm_movemask_epi8(_mm_cmpeq_epi8(hits, tables.zero)) ^ 0xFFFF;
-}
-
-ADA_UNICODE_SIMD size_t
-percent_encode_index_ssse3(const char* data, size_t size,
-                           const ssse3_percent_tables& tables) noexcept {
-  size_t i = 0;
-  for (; i + 16 <= size; i += 16) {
-    const __m128i word =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + i));
-    const int mask = ssse3_percent_mask(word, tables);
-    if (mask != 0) {
-      return i + static_cast<size_t>(
-                     trailing_zeroes32(static_cast<uint32_t>(mask)));
-    }
-  }
-  if (i < size) {
-    const __m128i word =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(data + size - 16));
-    int mask = ssse3_percent_mask(word, tables);
-    const unsigned skip = static_cast<unsigned>(i - (size - 16));
-    mask >>= skip;
-    if (mask != 0) {
-      return i + static_cast<size_t>(
-                     trailing_zeroes32(static_cast<uint32_t>(mask)));
-    }
-  }
-  return size;
 }
 
 ADA_UNICODE_SIMD void percent_encode_to_ssse3(
@@ -789,30 +743,6 @@ ada_really_inline uint32_t neon_percent_mask(uint8x16_t hits) noexcept {
          (static_cast<uint32_t>(vaddv_u8(vget_high_u8(masked))) << 8);
 }
 
-ada_really_inline size_t percent_encode_index_neon(
-    const char* data, size_t size, uint8x16x2_t table) noexcept {
-  size_t i = 0;
-  for (; i + 16 <= size; i += 16) {
-    const uint8x16_t hits = neon_percent_hits(
-        vld1q_u8(reinterpret_cast<const uint8_t*>(data + i)), table);
-    if (vmaxvq_u32(vreinterpretq_u32_u8(hits)) != 0) {
-      return i +
-             static_cast<size_t>(trailing_zeroes32(neon_percent_mask(hits)));
-    }
-  }
-  if (i < size) {
-    const uint8x16_t hits = neon_percent_hits(
-        vld1q_u8(reinterpret_cast<const uint8_t*>(data + size - 16)), table);
-    uint32_t mask = neon_percent_mask(hits);
-    const unsigned skip = static_cast<unsigned>(i - (size - 16));
-    mask >>= skip;
-    if (mask != 0) {
-      return i + static_cast<size_t>(trailing_zeroes32(mask));
-    }
-  }
-  return size;
-}
-
 ada_really_inline void percent_encode_to_neon(const char* p, const char* end,
                                               const uint8_t character_set[],
                                               uint8x16x2_t table,
@@ -832,27 +762,6 @@ ada_really_inline void percent_encode_to_neon(const char* p, const char* end,
 #endif  // ADA_NEON
 
 #if ADA_RVV
-ada_really_inline size_t percent_encode_index_rvv(
-    const char* data, size_t size, const uint8_t character_set[]) noexcept {
-  size_t i = 0;
-  while (i < size) {
-    const size_t vl = __riscv_vsetvl_e8m1(size - i);
-    const vuint8m1_t word =
-        __riscv_vle8_v_u8m1(reinterpret_cast<const uint8_t*>(data + i), vl);
-    const vuint8m1_t cs_bytes =
-        __riscv_vluxei8(character_set, __riscv_vsrl(word, 3, vl), vl);
-    const vuint8m1_t bit_mask = __riscv_vsll(__riscv_vmv_v_x_u8m1(1, vl),
-                                             __riscv_vand(word, 7, vl), vl);
-    const long idx = __riscv_vfirst(
-        __riscv_vmsne(__riscv_vand(cs_bytes, bit_mask, vl), 0, vl), vl);
-    if (idx >= 0) {
-      return i + static_cast<size_t>(idx);
-    }
-    i += vl;
-  }
-  return size;
-}
-
 ada_really_inline void percent_encode_to_rvv(const char* p, const char* end,
                                              const uint8_t character_set[],
                                              std::string& out) {
@@ -882,58 +791,47 @@ ada_really_inline void percent_encode_to_rvv(const char* p, const char* end,
 }
 #endif  // ADA_RVV
 
+// Setter and existing percent_encode benches are 2–44 bytes. Table setup
+// plus mask walking costs more instructions than bit_at on those inputs
+// (especially dense USERINFO). SIMD pays off on the remaining suffix.
+static constexpr size_t kPercentEncodeSimdMin = 48;
+
+#if ADA_UNICODE_SSSE3 || ADA_NEON || ADA_RVV
+#if ADA_UNICODE_SSSE3
+ADA_UNICODE_SIMD
+#endif
+ada_never_inline void percent_encode_to_wide(const char* p, const char* end,
+                                             const uint8_t character_set[],
+                                             std::string& out) {
+#if ADA_UNICODE_SSSE3
+  const ssse3_percent_tables tables = load_ssse3_percent_tables(character_set);
+  percent_encode_to_ssse3(p, end, character_set, tables, out);
+#elif ADA_NEON
+  percent_encode_to_neon(p, end, character_set,
+                         load_neon_percent_table(character_set), out);
+#else
+  percent_encode_to_rvv(p, end, character_set, out);
+#endif
+}
+#endif
+
 ada_really_inline void percent_encode_to(const char* p, const char* end,
                                          const uint8_t character_set[],
                                          std::string& out) {
-#if ADA_UNICODE_SSSE3
-  if (end - p >= 16) {
-    const ssse3_percent_tables tables =
-        load_ssse3_percent_tables(character_set);
-    percent_encode_to_ssse3(p, end, character_set, tables, out);
+#if ADA_UNICODE_SSSE3 || ADA_NEON || ADA_RVV
+  if (static_cast<size_t>(end - p) >= kPercentEncodeSimdMin) {
+    percent_encode_to_wide(p, end, character_set, out);
     return;
   }
-#elif ADA_NEON
-  if (end - p >= 16) {
-    percent_encode_to_neon(p, end, character_set,
-                           load_neon_percent_table(character_set), out);
-    return;
-  }
-#elif ADA_RVV
-  percent_encode_to_rvv(p, end, character_set, out);
-  return;
 #endif
   percent_encode_to_scalar(p, end, character_set, out);
 }
 
-ada_really_inline size_t first_percent_encode_index(
-    const std::string_view input, const uint8_t character_set[]) noexcept {
-  if (input.size() < 16) {
-    return percent_encode_index_scalar(input.data(), input.size(),
-                                       character_set);
-  }
-#if ADA_UNICODE_SSSE3
-  return percent_encode_index_ssse3(input.data(), input.size(),
-                                    load_ssse3_percent_tables(character_set));
-#elif ADA_NEON
-  return percent_encode_index_neon(input.data(), input.size(),
-                                   load_neon_percent_table(character_set));
-#elif ADA_RVV
-  return percent_encode_index_rvv(input.data(), input.size(), character_set);
-#else
-  return percent_encode_index_scalar(input.data(), input.size(), character_set);
-#endif
-}
-
 }  // namespace
-
-size_t percent_encode_index_wide(const std::string_view input,
-                                 const uint8_t character_set[]) noexcept {
-  return first_percent_encode_index(input, character_set);
-}
 
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
-  const size_t first_idx = first_percent_encode_index(input, character_set);
+  const size_t first_idx = percent_encode_index(input, character_set);
   if (first_idx == input.size()) {
     return std::string(input);
   }
@@ -952,7 +850,7 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
-  const size_t first_idx = first_percent_encode_index(input, character_set);
+  const size_t first_idx = percent_encode_index(input, character_set);
   ada_log("percent_encode done checking, moved to ", first_idx);
 
   if (first_idx == input.size()) {

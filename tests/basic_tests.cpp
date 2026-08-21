@@ -750,7 +750,7 @@ const uint8_t* percent_encode_sets[] = {
 
 TEST(basic_tests, percent_encode_index_and_encode_match_scalar) {
   for (const uint8_t* character_set : percent_encode_sets) {
-    for (size_t len = 0; len <= 40; len++) {
+    for (size_t len = 0; len <= 80; len++) {
       std::string clean(len, 'a');
       ASSERT_EQ(ada::unicode::percent_encode_index(clean, character_set),
                 clean.size())
@@ -785,6 +785,10 @@ TEST(basic_tests, percent_encode_index_and_encode_match_scalar) {
     ASSERT_EQ(ada::unicode::percent_encode(dense, character_set),
               scalar_percent_encode(dense, character_set));
 
+    std::string long_dense(64, '"');
+    ASSERT_EQ(ada::unicode::percent_encode(long_dense, character_set),
+              scalar_percent_encode(long_dense, character_set));
+
     std::string mixed = std::string(15, 'a') + "|" + std::string(16, 'b') +
                         std::string(1, char(0x7F)) + std::string(17, 'c');
     ASSERT_EQ(ada::unicode::percent_encode_index(mixed, character_set),
@@ -801,6 +805,8 @@ TEST(basic_tests, percent_encode_template_append_and_replace) {
   const uint8_t* query = ada::character_sets::QUERY_PERCENT_ENCODE;
   const std::string clean(24, 'n');
   const std::string dirty = std::string(16, 'n') + " " + std::string(16, 'n');
+  const std::string long_dirty =
+      std::string(16, 'n') + " " + std::string(48, 'n');
 
   std::string replace_clean;
   ASSERT_FALSE(
@@ -811,12 +817,22 @@ TEST(basic_tests, percent_encode_template_append_and_replace) {
   ASSERT_TRUE(ada::unicode::percent_encode<false>(dirty, query, replace_dirty));
   ASSERT_EQ(replace_dirty, scalar_percent_encode(dirty, query));
 
+  std::string replace_long;
+  ASSERT_TRUE(
+      ada::unicode::percent_encode<false>(long_dirty, query, replace_long));
+  ASSERT_EQ(replace_long, scalar_percent_encode(long_dirty, query));
+
   std::string append_out = "pre:";
   ASSERT_FALSE(ada::unicode::percent_encode<true>(clean, query, append_out));
   ASSERT_EQ(append_out, "pre:");
 
   ASSERT_TRUE(ada::unicode::percent_encode<true>(dirty, query, append_out));
   ASSERT_EQ(append_out, "pre:" + scalar_percent_encode(dirty, query));
+
+  ASSERT_TRUE(
+      ada::unicode::percent_encode<true>(long_dirty, query, append_out));
+  ASSERT_EQ(append_out, "pre:" + scalar_percent_encode(dirty, query) +
+                            scalar_percent_encode(long_dirty, query));
 }
 
 // Regression: try_can_parse_absolute_fast returned true for a valid IPv4 host
