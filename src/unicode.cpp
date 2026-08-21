@@ -657,6 +657,13 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
   return true;
 }
 
+template bool percent_encode<true>(std::string_view input,
+                                   const uint8_t character_set[],
+                                   std::string& out);
+template bool percent_encode<false>(std::string_view input,
+                                    const uint8_t character_set[],
+                                    std::string& out);
+
 bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
               size_t first_percent) {
   std::string percent_decoded_buffer;
