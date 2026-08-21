@@ -789,6 +789,17 @@ TEST(basic_tests, percent_encode_index_and_encode_match_scalar) {
     ASSERT_EQ(ada::unicode::percent_encode(long_dense, character_set),
               scalar_percent_encode(long_dense, character_set));
 
+    for (size_t len : {96u, 128u, 256u}) {
+      std::string clean(len, 'a');
+      ASSERT_EQ(ada::unicode::percent_encode(clean, character_set), clean)
+          << "clean len=" << len;
+      clean[len / 2] = ' ';
+      clean[len - 1] = static_cast<char>(0x7F);
+      ASSERT_EQ(ada::unicode::percent_encode(clean, character_set),
+                scalar_percent_encode(clean, character_set))
+          << "wide len=" << len;
+    }
+
     std::string mixed = std::string(15, 'a') + "|" + std::string(16, 'b') +
                         std::string(1, char(0x7F)) + std::string(17, 'c');
     ASSERT_EQ(ada::unicode::percent_encode_index(mixed, character_set),
