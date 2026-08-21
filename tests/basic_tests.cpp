@@ -713,6 +713,112 @@ TEST(basic_tests, percent_decode_direct) {
   ASSERT_EQ(percent_decode("%%41", 0), "%A");    // '%' then a valid escape
 }
 
+namespace {
+size_t scalar_percent_encode_index(std::string_view input,
+                                   const uint8_t character_set[]) {
+  for (size_t i = 0; i < input.size(); i++) {
+    if (ada::character_sets::bit_at(character_set, input[i])) {
+      return i;
+    }
+  }
+  return input.size();
+}
+
+std::string scalar_percent_encode(std::string_view input,
+                                  const uint8_t character_set[]) {
+  std::string out;
+  for (unsigned char c : input) {
+    if (ada::character_sets::bit_at(character_set, c)) {
+      out.append(ada::character_sets::hex + static_cast<size_t>(c) * 4, 3);
+    } else {
+      out.push_back(static_cast<char>(c));
+    }
+  }
+  return out;
+}
+
+const uint8_t* percent_encode_sets[] = {
+    ada::character_sets::C0_CONTROL_PERCENT_ENCODE,
+    ada::character_sets::FRAGMENT_PERCENT_ENCODE,
+    ada::character_sets::QUERY_PERCENT_ENCODE,
+    ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE,
+    ada::character_sets::USERINFO_PERCENT_ENCODE,
+    ada::character_sets::PATH_PERCENT_ENCODE,
+    ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE,
+};
+}  // namespace
+
+TEST(basic_tests, percent_encode_index_and_encode_match_scalar) {
+  for (const uint8_t* character_set : percent_encode_sets) {
+    for (size_t len = 0; len <= 40; len++) {
+      std::string clean(len, 'a');
+      ASSERT_EQ(ada::unicode::percent_encode_index(clean, character_set),
+                clean.size())
+          << "clean len=" << len;
+      ASSERT_EQ(ada::unicode::percent_encode(clean, character_set), clean)
+          << "clean len=" << len;
+
+      for (size_t pos = 0; pos < len; pos++) {
+        std::string one_space = clean;
+        one_space[pos] = ' ';
+        ASSERT_EQ(ada::unicode::percent_encode_index(one_space, character_set),
+                  scalar_percent_encode_index(one_space, character_set))
+            << "space at " << pos << " len=" << len;
+        ASSERT_EQ(ada::unicode::percent_encode(one_space, character_set),
+                  scalar_percent_encode(one_space, character_set))
+            << "space at " << pos << " len=" << len;
+
+        std::string one_high = clean;
+        one_high[pos] = static_cast<char>(0xE1);
+        ASSERT_EQ(ada::unicode::percent_encode_index(one_high, character_set),
+                  pos)
+            << "high at " << pos << " len=" << len;
+        ASSERT_EQ(ada::unicode::percent_encode(one_high, character_set),
+                  scalar_percent_encode(one_high, character_set))
+            << "high at " << pos << " len=" << len;
+      }
+    }
+
+    std::string dense(32, '"');
+    ASSERT_EQ(ada::unicode::percent_encode_index(dense, character_set),
+              scalar_percent_encode_index(dense, character_set));
+    ASSERT_EQ(ada::unicode::percent_encode(dense, character_set),
+              scalar_percent_encode(dense, character_set));
+
+    std::string mixed = std::string(15, 'a') + "|" + std::string(16, 'b') +
+                        std::string(1, char(0x7F)) + std::string(17, 'c');
+    ASSERT_EQ(ada::unicode::percent_encode_index(mixed, character_set),
+              scalar_percent_encode_index(mixed, character_set));
+    ASSERT_EQ(ada::unicode::percent_encode(mixed, character_set),
+              scalar_percent_encode(mixed, character_set));
+    const size_t idx =
+        ada::unicode::percent_encode_index(mixed, character_set);
+    ASSERT_EQ(ada::unicode::percent_encode(mixed, character_set, idx),
+              ada::unicode::percent_encode(mixed, character_set));
+  }
+}
+
+TEST(basic_tests, percent_encode_template_append_and_replace) {
+  const uint8_t* query = ada::character_sets::QUERY_PERCENT_ENCODE;
+  const std::string clean(24, 'n');
+  const std::string dirty = std::string(16, 'n') + " " + std::string(16, 'n');
+
+  std::string replace_clean;
+  ASSERT_FALSE(ada::unicode::percent_encode<false>(clean, query, replace_clean));
+  ASSERT_TRUE(replace_clean.empty());
+
+  std::string replace_dirty;
+  ASSERT_TRUE(ada::unicode::percent_encode<false>(dirty, query, replace_dirty));
+  ASSERT_EQ(replace_dirty, scalar_percent_encode(dirty, query));
+
+  std::string append_out = "pre:";
+  ASSERT_FALSE(ada::unicode::percent_encode<true>(clean, query, append_out));
+  ASSERT_EQ(append_out, "pre:");
+
+  ASSERT_TRUE(ada::unicode::percent_encode<true>(dirty, query, append_out));
+  ASSERT_EQ(append_out, "pre:" + scalar_percent_encode(dirty, query));
+}
+
 // Regression: try_can_parse_absolute_fast returned true for a valid IPv4 host
 // without validating the port. For "wS://1.3.3.51.:+" the host "1.3.3.51."
 // passes the IPv4 fast path, but the port "+" is not a valid digit, so the

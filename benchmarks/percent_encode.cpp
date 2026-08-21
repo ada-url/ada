@@ -243,6 +243,47 @@ static void C0Control(benchmark::State& state) {
 }
 BENCHMARK(C0Control);
 
+std::string long_examples[] = {
+    "connect timeout=10 application name=myapp server=db host internal "
+    "database=production analytics read preference=secondary preferred "
+    "ssl=true retry writes=true w=majority max pool size=50",
+    "ref=web twc ao gbl adsinfo utm source=twc utm medium=cpc "
+    "utm campaign=brand awareness q4 2024 utm content=banner 300x250 "
+    "utm term=weather forecast today gclid=Cj0KCQiA3Y ABhCnARIsAK",
+};
+
+double long_examples_bytes = []() -> double {
+  size_t bytes{0};
+  for (std::string& url_string : long_examples) {
+    bytes += url_string.size();
+  }
+  return double(bytes);
+}();
+
+static void LongFragment(benchmark::State& state) {
+  for (auto _ : state) {
+    for (std::string& url_string : long_examples) {
+      benchmark::DoNotOptimize(ada::unicode::percent_encode(
+          url_string, ada::character_sets::FRAGMENT_PERCENT_ENCODE));
+    }
+  }
+  state.counters["speed"] = benchmark::Counter(
+      long_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(LongFragment);
+
+static void LongQuery(benchmark::State& state) {
+  for (auto _ : state) {
+    for (std::string& url_string : long_examples) {
+      benchmark::DoNotOptimize(ada::unicode::percent_encode(
+          url_string, ada::character_sets::QUERY_PERCENT_ENCODE));
+    }
+  }
+  state.counters["speed"] = benchmark::Counter(
+      long_examples_bytes, benchmark::Counter::kIsIterationInvariantRate);
+}
+BENCHMARK(LongQuery);
+
 int main(int argc, char** argv) {
 #if defined(ADA_RUST_VERSION)
   benchmark::AddCustomContext("rust version ", ADA_RUST_VERSION);
