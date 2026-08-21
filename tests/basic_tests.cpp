@@ -1,7 +1,12 @@
 #include "ada.h"
+#include "ada/character_sets-inl.h"
+#include "ada/unicode-inl.h"
 #include "gtest/gtest.h"
 #include <cstdlib>
 #include <iostream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
 template <class T>
@@ -2091,4 +2096,211 @@ TYPED_TEST(basic_tests,
   check("http://ab:81#f ", "http://ab:81/#f");
   // a byte that legitimately needs encoding is still encoded
   check("http://ab?x y", "http://ab/?x%20y");
+}
+
+namespace {
+std::string scalar_percent_encode(std::string_view input, const uint8_t* set) {
+  std::string out;
+  for (unsigned char c : input) {
+    if (ada::character_sets::bit_at(set, c)) {
+      out.append(ada::character_sets::hex + static_cast<size_t>(c) * 4, 3);
+    } else {
+      out.push_back(static_cast<char>(c));
+    }
+  }
+  return out;
+}
+
+size_t scalar_percent_encode_index(std::string_view input, const uint8_t* set) {
+  for (size_t i = 0; i < input.size(); ++i) {
+    if (ada::character_sets::bit_at(set, static_cast<uint8_t>(input[i]))) {
+      return i;
+    }
+  }
+  return input.size();
+}
+
+std::string percent_escape(unsigned char c, bool lowercase) {
+  constexpr char kUpper[] = "0123456789ABCDEF";
+  constexpr char kLower[] = "0123456789abcdef";
+  const char* hex = lowercase ? kLower : kUpper;
+  std::string out = "%";
+  out.push_back(hex[c >> 4]);
+  out.push_back(hex[c & 0xF]);
+  return out;
+}
+
+std::string scalar_form_urlencoded_encode(std::string_view input) {
+  const uint8_t* set = ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE;
+  std::string out;
+  for (unsigned char c : input) {
+    if (c == ' ') {
+      out.push_back('+');
+    } else if (ada::character_sets::bit_at(set, c)) {
+      out.append(ada::character_sets::hex + static_cast<size_t>(c) * 4, 3);
+    } else {
+      out.push_back(static_cast<char>(c));
+    }
+  }
+  return out;
+}
+}  // namespace
+
+TEST(basic_tests, percent_encode_matches_scalar) {
+  const uint8_t* sets[] = {
+      ada::character_sets::C0_CONTROL_PERCENT_ENCODE,
+      ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE,
+      ada::character_sets::QUERY_PERCENT_ENCODE,
+      ada::character_sets::FRAGMENT_PERCENT_ENCODE,
+      ada::character_sets::USERINFO_PERCENT_ENCODE,
+      ada::character_sets::PATH_PERCENT_ENCODE,
+      ada::character_sets::WWW_FORM_URLENCODED_PERCENT_ENCODE,
+  };
+  std::vector<std::string> samples = {
+      "",
+      "abc",
+      "hello world",
+      std::string(15, 'a') + " ",
+      std::string(16, 'a'),
+      std::string(16, 'a') + " ",
+      std::string(17, 'a') + "#",
+      std::string(31, 'x') + "?",
+      std::string(32, 'z'),
+      std::string(40, 'b') + "|" + std::string(20, 'c'),
+      std::string("\x01") + std::string(20, 'a'),
+      std::string(16, 'a') + std::string(1, static_cast<char>(0xE1)),
+      "user:pass",
+      "path/to/file",
+      "%3A%2F%2Falready",
+  };
+  for (int i = 0; i < 256; ++i) {
+    samples.emplace_back(1, static_cast<char>(i));
+  }
+  // Dirty byte in every 16-byte lane, plus a long mixed tail.
+  std::string every_lane(64, 'a');
+  for (size_t i = 0; i < every_lane.size(); i += 16) {
+    every_lane[i + 15] = ' ';
+  }
+  samples.push_back(every_lane);
+
+  for (const uint8_t* set : sets) {
+    for (const std::string& s : samples) {
+      const std::string expected = scalar_percent_encode(s, set);
+      ASSERT_EQ(ada::unicode::percent_encode_index(s, set),
+                scalar_percent_encode_index(s, set));
+      ASSERT_EQ(ada::unicode::percent_encode(s, set), expected);
+      const size_t idx = ada::unicode::percent_encode_index(s, set);
+      ASSERT_EQ(ada::unicode::percent_encode(s, set, idx), expected);
+      std::string appended = "pre";
+      const bool needed = ada::unicode::percent_encode<true>(s, set, appended);
+      if (idx == s.size()) {
+        ASSERT_FALSE(needed);
+        ASSERT_EQ(appended, "pre");
+      } else {
+        ASSERT_TRUE(needed);
+        ASSERT_EQ(appended, "pre" + expected);
+      }
+    }
+  }
+}
+
+TEST(basic_tests, percent_decode_dense_and_malformed) {
+  const std::string dense = "%3A%2F%2Fexample.com%2Fpath%3Fa%3D1%26b%3D2";
+  ASSERT_EQ(ada::unicode::percent_decode(dense, 0),
+            "://example.com/path?a=1&b=2");
+
+  const std::string at_15 = std::string(15, 'a') + "%41" + std::string(16, 'b');
+  ASSERT_EQ(ada::unicode::percent_decode(at_15, at_15.find('%')),
+            std::string(15, 'a') + "A" + std::string(16, 'b'));
+
+  const std::string at_16 = std::string(16, 'a') + "%20" + std::string(15, 'b');
+  ASSERT_EQ(ada::unicode::percent_decode(at_16, at_16.find('%')),
+            std::string(16, 'a') + " " + std::string(15, 'b'));
+
+  const std::string invalid =
+      std::string(15, 'a') + "%G1" + std::string(16, 'b') + "%";
+  ASSERT_EQ(ada::unicode::percent_decode(invalid, invalid.find('%')), invalid);
+
+  const std::string truncated = std::string(16, 'a') + "%4";
+  ASSERT_EQ(ada::unicode::percent_decode(truncated, truncated.find('%')),
+            truncated);
+
+  const std::string mixed = "%3Ahello%2F%ZZ%41";
+  ASSERT_EQ(ada::unicode::percent_decode(mixed, 0), ":hello/%ZZA");
+
+  ASSERT_EQ(ada::unicode::percent_decode("plain-text", std::string_view::npos),
+            "plain-text");
+
+  std::string eighty_in;
+  std::string eighty_out;
+  for (int i = 0; i < 80; ++i) {
+    eighty_in +=
+        percent_escape(static_cast<unsigned char>('A' + (i % 26)), i & 1);
+    eighty_out.push_back(static_cast<char>('A' + (i % 26)));
+  }
+  ASSERT_EQ(ada::unicode::percent_decode(eighty_in, 0), eighty_out);
+
+  for (int i = 0; i < 256; ++i) {
+    const auto c = static_cast<unsigned char>(i);
+    ASSERT_EQ(ada::unicode::percent_decode(percent_escape(c, false), 0),
+              std::string(1, static_cast<char>(c)));
+    ASSERT_EQ(ada::unicode::percent_decode(percent_escape(c, true), 0),
+              std::string(1, static_cast<char>(c)));
+  }
+}
+
+TEST(basic_tests, form_urlencoded_round_trip_spaces_and_dense) {
+  ASSERT_EQ(ada::unicode::form_urlencoded_encode("a b+c"), "a+b%2Bc");
+  ASSERT_EQ(ada::unicode::form_urlencoded_decode("a+b%2Bc"), "a b+c");
+
+  const std::string long_spaces = std::string(20, 'a') + " " +
+                                  std::string(20, 'b') + "  " +
+                                  std::string(20, 'c');
+  const std::string encoded = ada::unicode::form_urlencoded_encode(long_spaces);
+  ASSERT_EQ(encoded.find(' '), std::string::npos);
+  ASSERT_EQ(encoded, scalar_form_urlencoded_encode(long_spaces));
+  ASSERT_EQ(ada::unicode::form_urlencoded_decode(encoded), long_spaces);
+
+  const std::string dense =
+      "https%3A%2F%2Fexample.com%2Fpath%3Fa%3D1%26b%3D2%26c%3D3";
+  ASSERT_EQ(ada::unicode::form_urlencoded_decode(dense),
+            "https://example.com/path?a=1&b=2&c=3");
+
+  std::string appended;
+  ada::unicode::form_urlencoded_encode_append("x y", appended);
+  ada::unicode::form_urlencoded_encode_append("z", appended);
+  ASSERT_EQ(appended, "x+yz");
+
+  for (int i = 0; i < 256; ++i) {
+    const std::string in(1, static_cast<char>(i));
+    const std::string got = ada::unicode::form_urlencoded_encode(in);
+    ASSERT_EQ(got, scalar_form_urlencoded_encode(in));
+    if (i != '+') {
+      ASSERT_EQ(ada::unicode::form_urlencoded_decode(got), in);
+    }
+  }
+
+  ada::url_search_params params;
+  const std::string key = std::string(24, 'k') + " " + std::string(24, 'y');
+  const std::string value =
+      "https://example.com/path?a=1&b=2 " + std::string(32, 'z');
+  params.append(key, value);
+  ASSERT_EQ(params.to_string(),
+            ada::unicode::form_urlencoded_encode(key) + "=" +
+                ada::unicode::form_urlencoded_encode(value));
+
+  std::string query;
+  for (int i = 0; i < 20; ++i) {
+    if (i != 0) {
+      query += '&';
+    }
+    query += "k";
+    query += static_cast<char>('0' + (i % 10));
+    query += "=https%3A%2F%2Fexample.com%2F";
+    query += static_cast<char>('0' + (i % 10));
+  }
+  ada::url_search_params parsed(query);
+  ASSERT_EQ(parsed.size(), 20U);
+  ASSERT_EQ(parsed.get("k0").value_or(""), "https://example.com/0");
+  ASSERT_EQ(parsed.get("k9").value_or(""), "https://example.com/9");
 }

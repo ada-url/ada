@@ -198,6 +198,7 @@ ada_really_inline unsigned constexpr convert_hex_to_binary(char c) noexcept;
 std::string percent_decode(std::string_view input, size_t first_percent);
 
 /**
+ * @private
  * Decode an application/x-www-form-urlencoded component: map '+' to space,
  * then percent-decode. Single allocation; no intermediate string.
  *
@@ -206,6 +207,20 @@ std::string percent_decode(std::string_view input, size_t first_percent);
  * @see https://url.spec.whatwg.org/#concept-urlencoded-parser
  */
 std::string form_urlencoded_decode(std::string_view input);
+
+/**
+ * @private
+ * application/x-www-form-urlencoded byte serializer: percent-encode with the
+ * form set, mapping 0x20 SPACE to '+' instead of '%20'.
+ * @see https://url.spec.whatwg.org/#concept-urlencoded-byte-serializer
+ */
+std::string form_urlencoded_encode(std::string_view input);
+
+/**
+ * @private
+ * Append a form-urlencoded component to `out` (no intermediate string).
+ */
+void form_urlencoded_encode_append(std::string_view input, std::string& out);
 
 /**
  * @private
