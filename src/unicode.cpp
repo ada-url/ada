@@ -814,9 +814,8 @@ ada_never_inline void percent_encode_to_wide(const char* p, const char* end,
 }
 #endif
 
-ada_really_inline void percent_encode_to(const char* p, const char* end,
-                                         const uint8_t character_set[],
-                                         std::string& out) {
+void percent_encode_to(const char* p, const char* end,
+                       const uint8_t character_set[], std::string& out) {
 #if ADA_UNICODE_SSSE3 || ADA_NEON || ADA_RVV
   if (static_cast<size_t>(end - p) >= kPercentEncodeSimdMin) {
     percent_encode_to_wide(p, end, character_set, out);
@@ -872,7 +871,15 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
   out.append(input.data(), std::distance(input.begin(), pointer));
   ada_log("percent_encode processing ", std::distance(pointer, input.end()),
           " bytes");
-  percent_encode_to(&*pointer, input.data() + input.size(), character_set, out);
+  // Keep this loop in the template so set_hash/set_search inlining matches
+  // main. SIMD is only used by the allocating percent_encode overloads.
+  for (; pointer != input.end(); pointer++) {
+    if (character_sets::bit_at(character_set, *pointer)) {
+      out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
+    } else {
+      out += *pointer;
+    }
+  }
   return true;
 }
 
