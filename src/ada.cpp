@@ -1,6 +1,9 @@
 #include "ada.h"
 #include "checkers.cpp"
 #include "unicode.cpp"
+#if !defined(ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU)
+#include "unicode_percent_encode.cpp"
+#endif
 #include "serializers.cpp"
 #include "implementation.cpp"
 #include "helpers.cpp"
