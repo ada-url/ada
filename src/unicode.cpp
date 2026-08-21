@@ -40,8 +40,14 @@ ADA_POP_DISABLE_WARNINGS
 
 #ifdef ADA_UNICODE_NEED_SSSE3_TARGET
 #define ADA_UNICODE_SIMD __attribute__((target("ssse3")))
+#define ADA_UNICODE_SIMD_NOINLINE __attribute__((target("ssse3"), noinline))
 #else
 #define ADA_UNICODE_SIMD ada_really_inline
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+#define ADA_UNICODE_SIMD_NOINLINE __declspec(noinline)
+#else
+#define ADA_UNICODE_SIMD_NOINLINE __attribute__((noinline))
+#endif
 #endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
@@ -420,8 +426,8 @@ ada_really_inline unsigned decode_pct_groups(const uint8_t* p,
 }
 
 template <bool space_as_plus>
-void append_encoded_byte(unsigned char c, const uint8_t* set,
-                         std::string& out) {
+ada_really_inline void append_encoded_byte(unsigned char c, const uint8_t* set,
+                                           std::string& out) {
   if (space_as_plus && c == ' ') {
     out.push_back('+');
   } else if (ada::character_sets::bit_at(set, c)) {
@@ -471,55 +477,76 @@ void flush_encode_bits_neon(const char* p, uint64_t bits, const uint8_t* set,
 }
 #endif
 
-template <bool space_as_plus>
-void encode_tail(const char* p, const char* end, const uint8_t* set,
-                 std::string& out) {
 #if ADA_UNICODE_SSSE3_ENCODE || ADA_NEON
-  if (const nibble_tables* tables = nibble_tables_for(set);
-      tables != nullptr && end - p >= 16) {
+// Out of line so short percent_encode (setters, CodSpeed examples) does not
+// grow by the 16-byte classify loop. 48-byte floor: below that, scalar
+// bit_at wins on instruction count (#1218 / #1230).
+template <bool space_as_plus>
+ADA_UNICODE_SIMD_NOINLINE void simd_encode_windows(const char* p,
+                                                   const char* end,
+                                                   const uint8_t* set,
+                                                   const nibble_tables* tables,
+                                                   std::string& out) {
 #if ADA_UNICODE_SSSE3_ENCODE
-    const __m128i lo_tbl =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(tables->low));
-    const __m128i hi_tbl =
-        _mm_loadu_si128(reinterpret_cast<const __m128i*>(tables->high));
-    const __m128i space = _mm_set1_epi8(' ');
-    while (p + 16 <= end) {
-      const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
-      int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
-      if constexpr (space_as_plus) {
-        mask |= _mm_movemask_epi8(_mm_cmpeq_epi8(w, space));
-      }
-      if (mask == 0) {
-        out.append(p, 16);
-        p += 16;
-        continue;
-      }
-      flush_encode_mask<space_as_plus>(p, static_cast<uint32_t>(mask), set,
-                                       out);
-      p += 16;
+  const __m128i lo_tbl =
+      _mm_loadu_si128(reinterpret_cast<const __m128i*>(tables->low));
+  const __m128i hi_tbl =
+      _mm_loadu_si128(reinterpret_cast<const __m128i*>(tables->high));
+  const __m128i space = _mm_set1_epi8(' ');
+  while (p + 16 <= end) {
+    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
+    int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
+    if constexpr (space_as_plus) {
+      mask |= _mm_movemask_epi8(_mm_cmpeq_epi8(w, space));
     }
+    if (mask == 0) {
+      out.append(p, 16);
+      p += 16;
+      continue;
+    }
+    flush_encode_mask<space_as_plus>(p, static_cast<uint32_t>(mask), set, out);
+    p += 16;
+  }
 #elif ADA_NEON
-    const uint8x16_t lo_tbl = vld1q_u8(tables->low);
-    const uint8x16_t hi_tbl = vld1q_u8(tables->high);
-    const uint8x16_t space = vdupq_n_u8(' ');
-    while (p + 16 <= end) {
-      const uint8x16_t w = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
-      const uint8x16_t hit =
-          vandq_u8(vqtbl1q_u8(lo_tbl, vandq_u8(w, vdupq_n_u8(0x0F))),
-                   vqtbl1q_u8(hi_tbl, vshrq_n_u8(w, 4)));
-      uint64_t bits = neon_nibble_bits(vtstq_u8(hit, hit));
-      if constexpr (space_as_plus) {
-        bits |= neon_nibble_bits(vceqq_u8(w, space));
-      }
-      if (bits == 0) {
-        out.append(p, 16);
-        p += 16;
-        continue;
-      }
-      flush_encode_bits_neon<space_as_plus>(p, bits, set, out);
-      p += 16;
+  const uint8x16_t lo_tbl = vld1q_u8(tables->low);
+  const uint8x16_t hi_tbl = vld1q_u8(tables->high);
+  const uint8x16_t space = vdupq_n_u8(' ');
+  while (p + 16 <= end) {
+    const uint8x16_t w = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+    const uint8x16_t hit =
+        vandq_u8(vqtbl1q_u8(lo_tbl, vandq_u8(w, vdupq_n_u8(0x0F))),
+                 vqtbl1q_u8(hi_tbl, vshrq_n_u8(w, 4)));
+    uint64_t bits = neon_nibble_bits(vtstq_u8(hit, hit));
+    if constexpr (space_as_plus) {
+      bits |= neon_nibble_bits(vceqq_u8(w, space));
     }
+    if (bits == 0) {
+      out.append(p, 16);
+      p += 16;
+      continue;
+    }
+    flush_encode_bits_neon<space_as_plus>(p, bits, set, out);
+    p += 16;
+  }
 #endif
+  while (p < end) {
+    append_encoded_byte<space_as_plus>(static_cast<unsigned char>(*p), set,
+                                       out);
+    ++p;
+  }
+}
+#endif  // ADA_UNICODE_SSSE3_ENCODE || ADA_NEON
+
+template <bool space_as_plus>
+ada_really_inline void encode_tail(const char* p, const char* end,
+                                   const uint8_t* set, std::string& out) {
+#if ADA_UNICODE_SSSE3_ENCODE || ADA_NEON
+  if (end - p >= 48) {
+    if (const nibble_tables* tables = nibble_tables_for(set);
+        tables != nullptr) {
+      simd_encode_windows<space_as_plus>(p, end, set, tables, out);
+      return;
+    }
   }
 #endif
   while (p < end) {
