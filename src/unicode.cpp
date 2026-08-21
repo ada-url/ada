@@ -1,5 +1,4 @@
 #include "ada/unicode.h"
-#include "ada/unicode-inl.h"
 
 #include "ada/character_sets-inl.h"
 #include "ada/character_sets.h"
@@ -831,17 +830,20 @@ ada_really_inline void percent_encode_to(const char* p, const char* end,
 
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
-  const size_t first_idx = percent_encode_index(input, character_set);
-  if (first_idx == input.size()) {
+  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
+    return character_sets::bit_at(character_set, c);
+  });
+  // Optimization: Don't iterate if percent encode is not required
+  if (pointer == input.end()) {
     return std::string(input);
   }
 
   std::string result;
-  result.reserve(input.length());
-  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-  result.append(input.data(), first_idx);
-  percent_encode_to(input.data() + first_idx, input.data() + input.size(),
-                    character_set, result);
+  result.reserve(input.length());  // in the worst case, percent encoding might
+                                   // produce 3 characters.
+  result.append(input.substr(0, std::distance(input.begin(), pointer)));
+  percent_encode_to(&*pointer, input.data() + input.size(), character_set,
+                    result);
   return result;
 }
 
@@ -850,22 +852,27 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
-  const size_t first_idx = percent_encode_index(input, character_set);
-  ada_log("percent_encode done checking, moved to ", first_idx);
+  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
+    return character_sets::bit_at(character_set, c);
+  });
+  ada_log("percent_encode done checking, moved to ",
+          std::distance(input.begin(), pointer));
 
-  if (first_idx == input.size()) {
+  // Optimization: Don't iterate if percent encode is not required
+  if (pointer == input.end()) {
     ada_log("percent_encode encoding not needed.");
     return false;
   }
   if constexpr (!append) {
     out.clear();
   }
-  ada_log("percent_encode appending ", first_idx, " bytes");
+  ada_log("percent_encode appending ", std::distance(input.begin(), pointer),
+          " bytes");
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-  out.append(input.data(), first_idx);
-  ada_log("percent_encode processing ", input.size() - first_idx, " bytes");
-  percent_encode_to(input.data() + first_idx, input.data() + input.size(),
-                    character_set, out);
+  out.append(input.data(), std::distance(input.begin(), pointer));
+  ada_log("percent_encode processing ", std::distance(pointer, input.end()),
+          " bytes");
+  percent_encode_to(&*pointer, input.data() + input.size(), character_set, out);
   return true;
 }
 
