@@ -59,12 +59,45 @@ static void SetUsername(benchmark::State& state) {
 }
 BENCHMARK(SetUsername);
 
+static void SetUsernameAlternatingLength(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool use_long_value = false;
+  run_setter(state, [&] {
+    use_long_value = !use_long_value;
+    benchmark::DoNotOptimize(
+        url.set_username(use_long_value ? "a-much-longer-username" : "x"));
+  });
+}
+BENCHMARK(SetUsernameAlternatingLength);
+
 static void SetPassword(benchmark::State& state) {
   auto url = ada::parse<ada::url_aggregator>(base_url).value();
   run_setter(state,
              [&] { benchmark::DoNotOptimize(url.set_password("newpass")); });
 }
 BENCHMARK(SetPassword);
+
+static void SetPasswordAlternatingLength(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool use_long_value = false;
+  run_setter(state, [&] {
+    use_long_value = !use_long_value;
+    benchmark::DoNotOptimize(
+        url.set_password(use_long_value ? "a-much-longer-password" : "y"));
+  });
+}
+BENCHMARK(SetPasswordAlternatingLength);
+
+static void SetPasswordInsertAndClear(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool insert_password = false;
+  run_setter(state, [&] {
+    insert_password = !insert_password;
+    benchmark::DoNotOptimize(
+        url.set_password(insert_password ? "newpass" : ""));
+  });
+}
+BENCHMARK(SetPasswordInsertAndClear);
 
 static void SetPort(benchmark::State& state) {
   auto url = ada::parse<ada::url_aggregator>(base_url).value();
@@ -85,6 +118,36 @@ static void SetSearch(benchmark::State& state) {
   run_setter(state, [&] { url.set_search("?a=1&b=2&c=3&d=4"); });
 }
 BENCHMARK(SetSearch);
+
+static void SetSearchAlternatingLength(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool use_long_value = false;
+  run_setter(state, [&] {
+    use_long_value = !use_long_value;
+    url.set_search(use_long_value ? "?a=much-longer-query-value" : "?x=1");
+  });
+}
+BENCHMARK(SetSearchAlternatingLength);
+
+static void SetSearchEncodedAlternatingLength(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool use_long_value = false;
+  run_setter(state, [&] {
+    use_long_value = !use_long_value;
+    url.set_search(use_long_value ? "?a=much longer query value" : "?x= ");
+  });
+}
+BENCHMARK(SetSearchEncodedAlternatingLength);
+
+static void SetSearchInsertAndClear(benchmark::State& state) {
+  auto url = ada::parse<ada::url_aggregator>(base_url).value();
+  bool insert_search = false;
+  run_setter(state, [&] {
+    insert_search = !insert_search;
+    url.set_search(insert_search ? "?a=1&b=2" : "");
+  });
+}
+BENCHMARK(SetSearchInsertAndClear);
 
 static void SetHash(benchmark::State& state) {
   auto url = ada::parse<ada::url_aggregator>(base_url).value();

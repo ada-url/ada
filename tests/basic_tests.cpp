@@ -263,6 +263,21 @@ TYPED_TEST(basic_tests, readme8) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, host_nfc_reorders_precomposed_starter) {
+  // A precomposed starter followed by a combining mark of lower combining class
+  // is not in NFC: normalization decomposes the starter and reorders the marks.
+  // %C3%A1%CC%A3 is U+00E1 (a + acute, class 230) then U+0323 (dot below, class
+  // 220); NFC is U+1EA1 (a + dot below) with the acute floating -> xn--lsa752l.
+  auto url = ada::parse<TypeParam>("http://%C3%A1%CC%A3/");
+  ASSERT_TRUE(url.has_value());
+  ASSERT_EQ(url->get_hostname(), "xn--lsa752l");
+
+  auto url2 = ada::parse<TypeParam>("https://%C5%9A%CC%A7.example/");
+  ASSERT_TRUE(url2.has_value());
+  ASSERT_EQ(url2->get_hostname(), "xn--nga05f.example");
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, nodejs1) {
   auto base = ada::parse<TypeParam>("http://other.com/");
   ASSERT_TRUE(base.has_value());
@@ -437,6 +452,72 @@ TYPED_TEST(basic_tests, should_update_password_correctly) {
   ASSERT_EQ(url->get_href(),
             "https://username:test@host:8000/path?query#fragment");
   SUCCEED();
+}
+
+TYPED_TEST(basic_tests, credential_replacement_preserves_url_tail) {
+  auto url = ada::parse<TypeParam>(
+      "https://initial:secret@example.com/path?before=yes#fragment");
+  ASSERT_TRUE(url);
+
+  ASSERT_TRUE(url->set_username("changed"));
+  ASSERT_TRUE(url->set_password("planet"));
+  ASSERT_EQ(url->get_href(),
+            "https://changed:planet@example.com/path?before=yes#fragment");
+
+  ASSERT_TRUE(url->set_username("x"));
+  ASSERT_TRUE(url->set_password("y"));
+  ASSERT_EQ(url->get_href(),
+            "https://x:y@example.com/path?before=yes#fragment");
+
+  ASSERT_TRUE(url->set_username("a-much-longer-username"));
+  ASSERT_TRUE(url->set_password("a-much-longer-password"));
+  ASSERT_EQ(url->get_href(),
+            "https://a-much-longer-username:a-much-longer-password@"
+            "example.com/path?before=yes#fragment");
+}
+
+TYPED_TEST(basic_tests, credential_insertion_and_encoding_preserve_url_tail) {
+  auto url = ada::parse<TypeParam>("https://example.com/path?q=1#fragment");
+  ASSERT_TRUE(url);
+
+  ASSERT_TRUE(url->set_username("a b"));
+  ASSERT_TRUE(url->set_password("p@ss"));
+  ASSERT_EQ(url->get_href(),
+            "https://a%20b:p%40ss@example.com/path?q=1#fragment");
+
+  ASSERT_TRUE(url->set_username(""));
+  ASSERT_TRUE(url->set_password(""));
+  ASSERT_EQ(url->get_href(), "https://example.com/path?q=1#fragment");
+}
+
+TYPED_TEST(basic_tests, query_replacement_preserves_url_tail) {
+  auto url = ada::parse<TypeParam>(
+      "https://user:pass@example.com/path?before=yes#fragment");
+  ASSERT_TRUE(url);
+
+  url->set_search("?same=value");
+  ASSERT_EQ(url->get_href(),
+            "https://user:pass@example.com/path?same=value#fragment");
+
+  url->set_search("?a=1");
+  ASSERT_EQ(url->get_href(), "https://user:pass@example.com/path?a=1#fragment");
+
+  url->set_search("?longer query=value");
+  ASSERT_EQ(url->get_href(),
+            "https://user:pass@example.com/path?"
+            "longer%20query=value#fragment");
+}
+
+TYPED_TEST(basic_tests, query_insertion_and_encoding_preserve_url_tail) {
+  auto url = ada::parse<TypeParam>("https://example.com/path#fragment");
+  ASSERT_TRUE(url);
+
+  url->set_search("?value='x y'");
+  ASSERT_EQ(url->get_href(),
+            "https://example.com/path?value=%27x%20y%27#fragment");
+
+  url->set_search("");
+  ASSERT_EQ(url->get_href(), "https://example.com/path#fragment");
 }
 
 // https://github.com/nodejs/node/issues/47889
@@ -1985,4 +2066,29 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_TRUE(last_label_may_be_a_number("19%2E68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("19.68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("0xffffffff."));
+}
+
+TYPED_TEST(basic_tests,
+           absolute_fast_path_strips_tab_newline_and_trailing_space) {
+  // The absolute fast path must remove ASCII tab/newline and trim a trailing
+  // C0 control or space just like the general parser; a query or fragment that
+  // reaches the fast path's percent-encoding helpers must not keep those bytes
+  // as %09/%0A/%20.
+  auto check = [](std::string_view input, std::string_view expected) {
+    auto r = ada::parse<TypeParam>(input);
+    ASSERT_TRUE(r);
+    ASSERT_EQ(r->get_href(), expected);
+  };
+  check("wss://ab?x\n9", "wss://ab/?x9");
+  check("http://ab?a\tb", "http://ab/?ab");
+  check("wss://ab?x9 ", "wss://ab/?x9");
+  check("http://ab#f\ng", "http://ab/#fg");
+  check("http://ab#f ", "http://ab/#f");
+  check("http://ab/p ", "http://ab/p");
+  // with an explicit port (finish_simple_absolute_with_port)
+  check("http://ab:81?x\n9", "http://ab:81/?x9");
+  check("http://ab:81/p?x\ty#h", "http://ab:81/p?xy#h");
+  check("http://ab:81#f ", "http://ab:81/#f");
+  // a byte that legitimately needs encoding is still encoded
+  check("http://ab?x y", "http://ab/?x%20y");
 }

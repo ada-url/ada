@@ -343,19 +343,10 @@ ada_really_inline uint64_t neon_uppercase(uint8x16_t w) noexcept {
 
 // True when '@' appears in the authority before '/', '?', or '#'.
 // One 16-byte window covers typical userinfo (SetHref's "user:pass@").
-// Longer userinfo still misses inside the never_inline fast path.
-// never_inline so the IPv4/IPv6 skip stays a cheap host-byte peek.
-ada_never_inline bool authority_has_userinfo(const uint8_t* p,
-                                             size_t n) noexcept {
-  size_t host_start = 0;
-  if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
-    host_start = 7;
-  } else if (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') {
-    host_start = 8;
-  }
-  if (host_start == 0) {
-    return false;
-  }
+// Longer userinfo still misses inside the never_inline fast path. No
+// '@' is a single load + compare so the parse hot path stays cheap.
+ada_really_inline bool authority_has_at(const uint8_t* p, size_t host_start,
+                                        size_t n) noexcept {
   const size_t rem = n - host_start;
   if (rem == 0) {
     return false;
@@ -1120,6 +1111,16 @@ after_rest:
     }
   }
 
+  // The slow path removes ASCII tab/newline anywhere in the input and trims a
+  // trailing C0 control or space; this fast path does neither. A query or
+  // fragment reaching the helpers below would keep those bytes percent-encoded
+  // ("?a\nb" -> "?a%0Ab", "#f " -> "#f%20") instead of stripped, so hand such
+  // inputs back to the slow path.
+  if (!rest_simple && (unicode::is_c0_control_or_space(input.back()) ||
+                       unicode::has_tabs_or_newline(input))) {
+    return false;
+  }
+
   out.type = scheme_type;
   out.is_valid = true;
   out.has_opaque_path = false;
@@ -1511,6 +1512,16 @@ after_rest:
     }
   }
 
+  // The slow path removes ASCII tab/newline anywhere in the input and trims a
+  // trailing C0 control or space; this fast path does neither. A query or
+  // fragment reaching the helpers below would keep those bytes percent-encoded
+  // ("?a\nb" -> "?a%0Ab", "#f " -> "#f%20") instead of stripped, so hand such
+  // inputs back to the slow path.
+  if (!rest_simple && (unicode::is_c0_control_or_space(input.back()) ||
+                       unicode::has_tabs_or_newline(input))) {
+    return false;
+  }
+
   out.type = scheme_type;
   out.is_valid = true;
   out.has_opaque_path = false;
@@ -1862,19 +1873,20 @@ result_type parse_url_impl(std::string_view user_input,
     if (base_url == nullptr) {
       // IPv4/IPv6 and userinfo miss the fast path. Skip the never_inline
       // call so those URLs (including SetHref) do not pay for a miss.
-      // The '@' helper is never_inline and short-circuited after the IP
-      // peek so decimal IPv4 hosts match main's host-byte check.
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
-      uint8_t host_first = 0;
+      size_t host_start = 0;
       if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
-        host_first = p[7];
+        host_start = 7;
       } else if (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') {
-        host_first = p[8];
+        host_start = 8;
       }
+      const uint8_t host_first = host_start != 0 ? p[host_start] : 0;
       const bool skip_ip =
           host_first == '[' || (host_first >= '0' && host_first <= '9');
-      hit_fast_path = !skip_ip && !authority_has_userinfo(p, n) &&
+      const bool skip_userinfo =
+          host_start != 0 && authority_has_at(p, host_start, n);
+      hit_fast_path = !skip_ip && !skip_userinfo &&
                       try_parse_simple_absolute(user_input, url);
     } else {
       hit_fast_path = try_parse_simple_relative(user_input, *base_url, url);
@@ -1885,7 +1897,13 @@ result_type parse_url_impl(std::string_view user_input,
           url.is_valid = false;
         }
       } else {
-        if (url.get_href_size() > max_input_length) [[unlikely]] {
+        // For a small absolute input, even worst-case normalization cannot
+        // exceed the limit: percent encoding expands at most 3x and IDNA at
+        // most 4.5x. Avoid traversing every stored component on the common
+        // default-limit path.
+        if ((base_url != nullptr ||
+             user_input.size() > static_cast<size_t>(max_input_length) / 5) &&
+            url.get_href_size() > max_input_length) [[unlikely]] {
           url.is_valid = false;
         }
       }
