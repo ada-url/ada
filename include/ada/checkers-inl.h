@@ -7,7 +7,6 @@
 
 #include <bit>
 #include <cstdint>
-#include <cstring>
 #include <string_view>
 #include "ada/checkers.h"
 #include "ada/common_defs.h"
@@ -125,40 +124,95 @@ parse_ipv4_decimal_scalar(const char* p, const char* pend) noexcept {
 }
 
 #if defined(ADA_AVX512)
-// AVX-512 pure-decimal IPv4 (Lemire/Mula-style masked load + parallel checks).
-// No over-read of the source string. Wins when the binary is built with
-// -mavx512bw -mavx512vl (or -march that enables them).
+// Table-free AVX-512VL IPv4 parse (simdip parse_ipv4_avx512vl_notab5).
+// Masked load of exactly `len` bytes (no over-read). Digit placement is
+// computed from compressed delimiter positions; octet > 255 is a dword
+// compare on the zero-padded reversed digit group, in parallel with the
+// convert. Unusual-but-valid forms (octal, hex, leading zeros, fewer than
+// four parts) return ipv4_fast_fail so the general parser runs.
 ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
                                                  size_t len) noexcept {
-  const __mmask16 live = static_cast<__mmask16>((1u << len) - 1u);
-  const __m128i input =
-      _mm_maskz_loadu_epi8(live, reinterpret_cast<const void*>(data));
-  const __mmask16 is_dot =
-      _mm_mask_cmpeq_epi8_mask(live, input, _mm_set1_epi8('.'));
-  const __m128i shifted = _mm_sub_epi8(input, _mm_set1_epi8('0'));
-  const __mmask16 is_digit =
-      _mm_mask_cmplt_epu8_mask(live, shifted, _mm_set1_epi8(10));
-  if ((is_digit | is_dot) != live) {
+  // One trailing dot is WHATWG-legal ("1.2.3.4."); the SIMD kernel is
+  // strict four-group dotted-decimal.
+  if (data[len - 1] == '.') {
+    --len;
+  }
+  if (len > 15) [[unlikely]] {
     return ipv4_fast_fail;
   }
-  const unsigned dot_count =
-      static_cast<unsigned>(_mm_popcnt_u32(static_cast<unsigned>(is_dot)));
-  size_t effective_len = len;
-  if (dot_count == 3) {
-    // ok
-  } else if (dot_count == 4 && data[len - 1] == '.') {
-    effective_len = len - 1;  // strip trailing dot for convert
-  } else {
-    return ipv4_fast_fail;
+
+#if defined(__BMI2__)
+  const uint32_t len_mask = _bzhi_u32(0xFFFFFFFFu, static_cast<unsigned>(len));
+#else
+  const uint32_t len_mask = (1u << static_cast<unsigned>(len)) - 1u;
+#endif
+  const __mmask16 len_k = static_cast<__mmask16>(len_mask);
+  const __m128i dot = _mm_set1_epi8('.');
+  const __m128i v =
+      _mm_mask_loadu_epi8(dot, len_k, reinterpret_cast<const void*>(data));
+
+  const __mmask16 delim = _mm_cmpeq_epi8_mask(v, dot);
+  const uint32_t dots = static_cast<uint32_t>(delim) & len_mask;
+  const uint32_t keep = len_mask & ~dots;
+
+  const __m128i zero = _mm_set1_epi8('0');
+  const __m128i digits = _mm_sub_epi8(v, zero);
+  const __mmask16 is_digit = _mm_cmple_epu8_mask(digits, _mm_set1_epi8(9));
+  // Junk in a digit slot: inside [0, len) yet neither a digit nor a dot.
+  const __mmask16 hole = _kandn_mask16(_kor_mask16(delim, is_digit), len_k);
+  const __m128i v0 = _mm_maskz_mov_epi8(is_digit, digits);
+
+  const __m128i iota =
+      _mm_setr_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+  const __m128i c = _mm_maskz_compress_epi8(delim, iota);
+  const __m128i k_rep =
+      _mm_setr_epi8(0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3);
+  const __m128i qi = _mm_shuffle_epi8(c, k_rep);
+  const __m128i prev =
+      _mm_shuffle_epi8(_mm_alignr_epi8(c, _mm_set1_epi8(-1), 15), k_rep);
+  // Reversed group order: lane 4i+j fetches q_i-(j+1), so the dword is
+  // ones | tens<<8 | hundreds<<16, monotone in the decimal value.
+  const __m128i offr = _mm_setr_epi8(-1, -2, -3, -4, -1, -2, -3, -4, -1, -2, -3,
+                                     -4, -1, -2, -3, -4);
+  const __m128i idx = _mm_max_epi8(_mm_add_epi8(qi, offr), prev);
+  const __m128i padded = _mm_shuffle_epi8(v0, idx);
+
+  const __m128i lim =
+      _mm_setr_epi8(5, 5, 2, 0, 5, 5, 2, 0, 5, 5, 2, 0, 5, 5, 2, 0);
+  const __mmask8 over = _mm_cmpgt_epu32_mask(padded, lim);
+  const __m128i wtsr =
+      _mm_setr_epi8(1, 10, 100, 0, 1, 10, 100, 0, 1, 10, 100, 0, 1, 10, 100, 0);
+#if defined(__AVX512VNNI__)
+  const __m128i res = _mm_dpbusd_epi32(_mm_setzero_si128(), padded, wtsr);
+#else
+  const __m128i res =
+      _mm_madd_epi16(_mm_maddubs_epi16(padded, wtsr), _mm_set1_epi16(1));
+#endif
+
+  const __m128i gmin =
+      _mm_setr_epi8(1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  const __m128i gmax =
+      _mm_setr_epi8(2, 2, 2, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+  const __m128i gap = _mm_sub_epi8(c, _mm_slli_si128(c, 1));
+  const __mmask16 bad_gap = _mm_cmpgt_epu8_mask(_mm_sub_epi8(gap, gmin), gmax);
+
+  const uint32_t zero_bits =
+      static_cast<uint32_t>(_mm_cmpeq_epi8_mask(v, zero));
+  const uint32_t start_bits = (dots << 1) | 1u;
+
+  const __mmask16 kerr =
+      _kor_mask16(_kor_mask16(hole, static_cast<__mmask16>(over)), bad_gap);
+  const uint32_t gerr = static_cast<uint32_t>(_mm_popcnt_u32(dots) ^ 3u) |
+                        (zero_bits & start_bits & (keep >> 1));
+
+  if ((gerr | static_cast<uint32_t>(kerr)) == 0) [[likely]] {
+    uint8_t oct[4]{};
+    _mm_mask_cvtepi32_storeu_epi8(oct, 0x0F, res);
+    return (static_cast<uint64_t>(oct[0]) << 24) |
+           (static_cast<uint64_t>(oct[1]) << 16) |
+           (static_cast<uint64_t>(oct[2]) << 8) | oct[3];
   }
-  // Convert from a tiny stack copy so the scalar parser's peeks stay in-bounds.
-  // The SIMD stage only guarantees the byte set and dot count, not per-group
-  // digit count or non-emptiness, so the group structure must still be checked
-  // during the convert. Reuse the scalar parser rather than a "trusted" one so
-  // the AVX-512 path accepts exactly the same hosts as the portable path.
-  alignas(16) char buf[16]{};
-  std::memcpy(buf, data, effective_len);
-  return parse_ipv4_decimal_scalar(buf, buf + effective_len);
+  return ipv4_fast_fail;
 }
 #endif  // ADA_AVX512
 
@@ -168,9 +222,10 @@ ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
  * Fast pure-decimal IPv4 parse. Returns packed address or ipv4_fast_fail.
  * Accepts an optional single trailing dot.
  *
- * On AVX-512BW+VL targets, uses a masked-load SIMD kernel (no source
- * over-read) inspired by Lemire/Mula. Otherwise uses an unrolled scalar path
- * (typically faster than SSE2/NEON pre-validation for these 7-16 byte hosts).
+ * On AVX-512BW+VL targets, uses a table-free SIMD parse (masked load, no
+ * source over-read) based on parse_ipv4_avx512vl_notab5. Otherwise uses an
+ * unrolled scalar path (typically faster than SSE2/NEON pre-validation for
+ * these 7-16 byte hosts).
  */
 ada_really_inline uint64_t
 try_parse_ipv4_fast(std::string_view input) noexcept {

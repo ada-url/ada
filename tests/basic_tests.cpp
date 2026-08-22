@@ -1028,9 +1028,8 @@ TYPED_TEST(basic_tests, ipv4_hex_leading_zeros) {
 
 TYPED_TEST(basic_tests, ipv4_fast_path_malformed_groups) {
   // A pure-decimal IPv4 group must hold 1-3 digits and be non-empty. These
-  // hosts satisfy the "all digits/dots, three dots" shape the AVX-512 fast
-  // path pre-checks but violate the group structure, so they are not valid
-  // IPv4 addresses and must be rejected on every build.
+  // hosts look digit/dot-shaped but violate group structure, so they are
+  // not valid IPv4 addresses and must be rejected on every build.
   // Group longer than three digits:
   ASSERT_FALSE(ada::parse<TypeParam>("http://1234.5.6.7/"));
   ASSERT_FALSE(ada::parse<TypeParam>("http://1.2345.6.7/"));
@@ -1042,6 +1041,22 @@ TYPED_TEST(basic_tests, ipv4_fast_path_malformed_groups) {
   ASSERT_TRUE(ok);
   ASSERT_EQ(ok->get_hostname(), "12.34.56.78");
   SUCCEED();
+}
+
+TEST(ipv4_fast_path, packed_decimal_and_rejects) {
+  using ada::checkers::ipv4_fast_fail;
+  using ada::checkers::try_parse_ipv4_fast;
+  ASSERT_EQ(try_parse_ipv4_fast("192.168.1.1"), 0xC0A80101ull);
+  ASSERT_EQ(try_parse_ipv4_fast("0.0.0.0"), 0ull);
+  ASSERT_EQ(try_parse_ipv4_fast("255.255.255.255"), 0xFFFFFFFFull);
+  ASSERT_EQ(try_parse_ipv4_fast("1.2.3.4."), 0x01020304ull);
+  ASSERT_EQ(try_parse_ipv4_fast("255.255.255.255."), 0xFFFFFFFFull);
+  // Double trailing dot, overflow, leading zeros, short form: not this path.
+  ASSERT_EQ(try_parse_ipv4_fast("1.2.3.4.."), ipv4_fast_fail);
+  ASSERT_EQ(try_parse_ipv4_fast("256.0.0.1"), ipv4_fast_fail);
+  ASSERT_EQ(try_parse_ipv4_fast("01.2.3.4"), ipv4_fast_fail);
+  ASSERT_EQ(try_parse_ipv4_fast("127.1"), ipv4_fast_fail);
+  ASSERT_EQ(try_parse_ipv4_fast("1.2.3.4.5"), ipv4_fast_fail);
 }
 
 // https://github.com/nodejs/undici/pull/2971
