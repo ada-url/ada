@@ -11,7 +11,7 @@
 #include "ada/checkers.h"
 #include "ada/common_defs.h"
 
-#if defined(ADA_AVX512)
+#if defined(ADA_AVX512) && defined(__AVX512VBMI2__)
 #include <immintrin.h>
 #endif
 
@@ -123,13 +123,14 @@ parse_ipv4_decimal_scalar(const char* p, const char* pend) noexcept {
   return ipv4;
 }
 
-#if defined(ADA_AVX512)
+#if defined(ADA_AVX512) && defined(__AVX512VBMI2__)
 // Table-free AVX-512VL IPv4 parse (simdip parse_ipv4_avx512vl_notab5).
-// Masked load of exactly `len` bytes (no over-read). Digit placement is
-// computed from compressed delimiter positions; octet > 255 is a dword
-// compare on the zero-padded reversed digit group, in parallel with the
-// convert. Unusual-but-valid forms (octal, hex, leading zeros, fewer than
-// four parts) return ipv4_fast_fail so the general parser runs.
+// Needs VBMI2 for vpcompressb; ADA_AVX512 stays BW+VL (IPv6 does not use
+// VBMI2). Masked load of exactly `len` bytes (no over-read). Digit
+// placement is computed from compressed delimiter positions; octet > 255
+// is a dword compare on the zero-padded reversed digit group, in parallel
+// with the convert. Unusual-but-valid forms (octal, hex, leading zeros,
+// fewer than four parts) return ipv4_fast_fail so the general parser runs.
 ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
                                                  size_t len) noexcept {
   // One trailing dot is WHATWG-legal ("1.2.3.4."); the SIMD kernel is
@@ -206,15 +207,17 @@ ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
                         (zero_bits & start_bits & (keep >> 1));
 
   if ((gerr | static_cast<uint32_t>(kerr)) == 0) [[likely]] {
-    uint8_t oct[4]{};
-    _mm_mask_cvtepi32_storeu_epi8(oct, 0x0F, res);
-    return (static_cast<uint64_t>(oct[0]) << 24) |
-           (static_cast<uint64_t>(oct[1]) << 16) |
-           (static_cast<uint64_t>(oct[2]) << 8) | oct[3];
+    const uint32_t packed =
+        static_cast<uint32_t>(_mm_cvtsi128_si32(_mm_cvtepi32_epi8(res)));
+#if defined(__GNUC__) || defined(__clang__)
+    return static_cast<uint64_t>(__builtin_bswap32(packed));
+#else
+    return static_cast<uint64_t>(_byteswap_ulong(packed));
+#endif
   }
   return ipv4_fast_fail;
 }
-#endif  // ADA_AVX512
+#endif  // ADA_AVX512 && __AVX512VBMI2__
 
 }  // namespace detail
 
@@ -222,10 +225,10 @@ ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
  * Fast pure-decimal IPv4 parse. Returns packed address or ipv4_fast_fail.
  * Accepts an optional single trailing dot.
  *
- * On AVX-512BW+VL targets, uses a table-free SIMD parse (masked load, no
- * source over-read) based on parse_ipv4_avx512vl_notab5. Otherwise uses an
- * unrolled scalar path (typically faster than SSE2/NEON pre-validation for
- * these 7-16 byte hosts).
+ * On AVX-512BW+VL+VBMI2 targets, uses a table-free SIMD parse (masked
+ * load, no source over-read) based on parse_ipv4_avx512vl_notab5.
+ * Otherwise uses an unrolled scalar path (typically faster than SSE2/NEON
+ * pre-validation for these 7-16 byte hosts).
  */
 ada_really_inline uint64_t
 try_parse_ipv4_fast(std::string_view input) noexcept {
@@ -236,7 +239,7 @@ try_parse_ipv4_fast(std::string_view input) noexcept {
   }
   const char* data = input.data();
 
-#if defined(ADA_AVX512)
+#if defined(ADA_AVX512) && defined(__AVX512VBMI2__)
   return detail::try_parse_ipv4_avx512(data, len);
 #else
   return detail::parse_ipv4_decimal_scalar(data, data + len);
