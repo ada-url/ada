@@ -13,6 +13,12 @@
 #include <array>
 #include <cstdint>
 
+// The IPv6 kernel needs vpermi2b/vpermb (VBMI) and vpcompressb/vpexpandb
+// (VBMI2) on top of ADA_AVX512's BW+VL.
+#if defined(ADA_AVX512) && defined(__AVX512VBMI__) && defined(__AVX512VBMI2__)
+#define ADA_AVX512_IPV6 1
+#endif
+
 #if defined(ADA_AVX512)
 #include <immintrin.h>
 #endif
@@ -151,41 +157,136 @@ inline int parse_hex_piece(const char*& pointer, const char* end,
   return length;
 }
 
-#if defined(ADA_AVX512)
-// Classify an IPv6 host (no brackets) with one masked 512-bit load.
-// Returns false if the colon/dot shape is impossible (e.g. two "::", >8
-// colons, full form without 7 colons). Used as a cheap prefilter before the
-// full WHATWG piece parser.
-ada_really_inline bool ipv6_structure_plausible(const char* data,
-                                                size_t len) noexcept {
-  if (len < 2 || len > 45) {
+#if defined(ADA_AVX512_IPV6)
+// Gather each group's up-to-four nibbles and fold them into eight hextets.
+// `prev` is the byte before each group, so an index that runs off the front of
+// a short group clamps onto a colon, which translates to zero: no write mask.
+ada_really_inline void ipv6_gather(__m128i ends, __m128i prev, __m512i nib,
+                                   std::array<uint16_t, 8>& address) noexcept {
+  const __m256i grp =
+      _mm256_setr_epi8(0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,
+                       4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7);
+  const __m256i off = _mm256_setr_epi8(
+      -4, -3, -2, -1, -4, -3, -2, -1, -4, -3, -2, -1, -4, -3, -2, -1, -4, -3,
+      -2, -1, -4, -3, -2, -1, -4, -3, -2, -1, -4, -3, -2, -1);
+  const __m256i idx = _mm256_max_epi8(
+      _mm256_add_epi8(
+          _mm256_permutexvar_epi8(grp, _mm256_castsi128_si256(ends)), off),
+      _mm256_permutexvar_epi8(grp, _mm256_castsi128_si256(prev)));
+  const __m256i gathered = _mm512_castsi512_si256(
+      _mm512_permutexvar_epi8(_mm512_castsi256_si512(idx), nib));
+  // (a,b) -> 16a+b are the sixteen address bytes; 256*hi+lo pairs them.
+  const __m256i hextets = _mm256_madd_epi16(
+      _mm256_maddubs_epi16(gathered, _mm256_set1_epi16(0x0110)),
+      _mm256_set1_epi32(0x00010100));
+  _mm_storeu_si128(reinterpret_cast<__m128i*>(address.data()),
+                   _mm256_cvtepi32_epi16(hextets));
+}
+
+// Parse an IPv6 host with one masked 512-bit load. Derived from
+// vtlmks/ipv6-avx512 (Peter Fors, MIT).
+//
+// Returns false when the input is outside this kernel's grammar and the caller
+// must run the scalar parser. Otherwise `valid` receives the verdict, and
+// `address` the eight hextets when valid.
+ada_really_inline bool try_parse_ipv6_avx512(const char* data, size_t len,
+                                             std::array<uint16_t, 8>& address,
+                                             bool& valid) noexcept {
+  if (len < 2 || len > 45) [[unlikely]] {
     return false;
   }
-  const __mmask64 live = static_cast<__mmask64>((1ULL << len) - 1ULL);
-  const __m512i input =
-      _mm512_maskz_loadu_epi8(live, reinterpret_cast<const void*>(data));
-  const __mmask64 is_colon =
-      _mm512_mask_cmpeq_epi8_mask(live, input, _mm512_set1_epi8(':'));
-  const __mmask64 is_dot =
-      _mm512_mask_cmpeq_epi8_mask(live, input, _mm512_set1_epi8('.'));
-  const int colons =
-      static_cast<int>(_mm_popcnt_u64(static_cast<uint64_t>(is_colon)));
-  if (colons > 8) {
+  // ':' rather than 0x80 for the colon, so a clamped index reads a zero nibble.
+  alignas(64) static constexpr uint8_t hex_lo[64] = {
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+      0x07, 0x08, 0x09, 0x00, 0x80, 0x80, 0x80, 0x80, 0x80};
+  alignas(64) static constexpr uint8_t hex_hi[64] = {
+      0x80, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x80, 0x80, 0x80, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+  alignas(64) static constexpr uint8_t iota[64] = {
+      0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
+      16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+      32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+      48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
+
+  const __mmask64 active =
+      static_cast<__mmask64>(_bzhi_u64(~0ULL, static_cast<uint32_t>(len)));
+  const __m512i colon = _mm512_set1_epi8(':');
+  // Merging ':' into the tail makes the terminator at `len` a real colon, so
+  // the compress mask below never has to be rebuilt in a general register.
+  const __m512i v = _mm512_mask_loadu_epi8(colon, active, data);
+  const __mmask64 mcolon = _mm512_cmpeq_epi8_mask(v, colon);
+
+  // An embedded dotted quad is the one valid form this kernel does not cover.
+  // Because that is the only gap, every other input it does not accept is
+  // invalid, which is what makes `valid = false` below safe.
+  if (_mm512_cmpeq_epi8_mask(v, _mm512_set1_epi8('.'))) [[unlikely]] {
     return false;
   }
-  const uint64_t doubles =
-      static_cast<uint64_t>(is_colon) & (static_cast<uint64_t>(is_colon) << 1);
-  if (doubles != 0 && (doubles & (doubles - 1)) != 0) {
-    return false;  // more than one "::" (or ":::...")
+
+  const __m512i nib = _mm512_permutex2var_epi8(_mm512_load_si512(hex_lo), v,
+                                               _mm512_load_si512(hex_hi));
+  const __m128i comp = _mm512_castsi512_si128(
+      _mm512_maskz_compress_epi8(mcolon, _mm512_load_si512(iota)));
+  const __m128i lane0 =
+      _mm_setr_epi8(-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  const __m128i prev = _mm_or_si128(_mm_bslli_si128(comp, 1), lane0);
+  const __m128i width = _mm_sub_epi8(comp, prev);  // one too large
+
+  const uint64_t mc = static_cast<uint64_t>(mcolon);
+  const uint64_t act = static_cast<uint64_t>(active);
+  const uint64_t dc = mc & (mc >> 1) & (act >> 1);  // a "::" inside [0, len)
+
+  if (!dc) {
+    ipv6_gather(comp, prev, nib, address);
+    // nib | (v & 0x80): one scan for non-hex bytes and for bytes whose high
+    // bit made vpermi2b alias a legal one.
+    const __m512i fused = _mm512_ternarylogic_epi32(
+        nib, v, _mm512_set1_epi8(static_cast<char>(0x80)), 0xf8);
+    // Lanes 8..15 bound against 255, which an unsigned byte cannot exceed.
+    const __m128i wmax =
+        _mm_setr_epi8(3, 3, 3, 3, 3, 3, 3, 3, -1, -1, -1, -1, -1, -1, -1, -1);
+    __mmask64 err = _kandn_mask64(mcolon, _mm512_movepi8_mask(fused));
+    err = _kor_mask64(
+        err, static_cast<__mmask64>(static_cast<uint16_t>(_mm_cmpgt_epu8_mask(
+                 _mm_sub_epi8(width, _mm_set1_epi8(2)), wmax))));
+    valid = (_mm_popcnt_u64(mc & act) == 7) && !err;
+    return true;
   }
-  const bool has_double = doubles != 0;
-  const bool has_dot = is_dot != 0;
-  if (!has_double && !has_dot && colons != 7) {
-    return false;
-  }
+
+  // Drop the zero-width gap field(s), then expand the surviving head and tail
+  // fields into eight slots with all-zero groups inserted at the gap.
+  const uint32_t head = static_cast<uint32_t>(_mm_popcnt_u64(mc & (dc - 1))) +
+                        static_cast<uint32_t>(dc > 1);
+  const __mmask16 keep = _mm_cmpgt_epi8_mask(width, _mm_set1_epi8(1));
+  const uint32_t kept = static_cast<uint32_t>(_mm_popcnt_u32(keep));
+  const __mmask16 slots = static_cast<__mmask16>(
+      ~(_bzhi_u32(0xFFFFFFFFu, 8 - kept) << head) & 0xFFu);
+  // Inserted groups take prev = -1, so their indices clamp to byte 63, a tail
+  // colon, and read zero.
+  ipv6_gather(_mm_maskz_expand_epi8(slots, _mm_maskz_compress_epi8(keep, comp)),
+              _mm_mask_expand_epi8(_mm_set1_epi8(-1), slots,
+                                   _mm_maskz_compress_epi8(keep, prev)),
+              nib, address);
+
+  uint64_t err = _mm512_movepi8_mask(v);    // high-bit bytes
+  err |= _mm512_movepi8_mask(nib) & ~mc;    // non-hex
+  err |= _blsr_u64(dc);                     // a second "::"
+  err |= static_cast<uint64_t>(kept >= 8);  // "::" elides nothing
+  err |= _mm_cmpgt_epu8_mask(width, _mm_set1_epi8(5)) & keep;  // group > 4
+  err |= (mc & 1ULL) & ~dc;                                // leading lone ':'
+  err |= ((mc >> (len - 1)) & 1ULL) & ~(dc >> (len - 2));  // trailing lone ':'
+  valid = !err;
   return true;
 }
-#endif  // ADA_AVX512
+#endif  // ADA_AVX512_IPV6
 
 }  // namespace ada::detail
 

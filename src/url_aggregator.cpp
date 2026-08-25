@@ -1120,14 +1120,22 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
   if (input.empty() || input.size() > 45) [[unlikely]] {
     return is_valid = false;
   }
-#if defined(ADA_AVX512)
-  if (!detail::ipv6_structure_plausible(input.data(), input.size()))
-      [[unlikely]] {
-    return is_valid = false;
-  }
-#endif
-
   std::array<uint16_t, 8> address{};
+#if defined(ADA_AVX512_IPV6)
+  if (bool simd_valid; detail::try_parse_ipv6_avx512(input.data(), input.size(),
+                                                     address, simd_valid)) {
+    if (!simd_valid) [[unlikely]] {
+      return is_valid = false;
+    }
+    const std::string serialized = ada::serializers::ipv6(address);
+    if (get_hostname() != serialized) {
+      update_base_hostname(serialized);
+    }
+    host_type = IPV6;
+    return true;
+  }
+  address = {};
+#endif
   const char* pointer = input.data();
   const char* const end = pointer + input.size();
   int piece_index = 0;

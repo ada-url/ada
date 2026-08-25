@@ -99,16 +99,19 @@ bool url::parse_ipv6(std::string_view input) {
   if (input.empty() || input.size() > 45) [[unlikely]] {
     return is_valid = false;
   }
-#if defined(ADA_AVX512)
-  // One masked load classifies colon/dot shape; rejects impossible inputs
-  // before the piece parser (free on AVX-512BW+VL builds).
-  if (!detail::ipv6_structure_plausible(input.data(), input.size()))
-      [[unlikely]] {
-    return is_valid = false;
-  }
-#endif
-
   std::array<uint16_t, 8> address{};
+#if defined(ADA_AVX512_IPV6)
+  if (bool simd_valid; detail::try_parse_ipv6_avx512(input.data(), input.size(),
+                                                     address, simd_valid)) {
+    if (!simd_valid) [[unlikely]] {
+      return is_valid = false;
+    }
+    host = ada::serializers::ipv6(address);
+    host_type = IPV6;
+    return true;
+  }
+  address = {};
+#endif
   const char* pointer = input.data();
   const char* const end = pointer + input.size();
   int piece_index = 0;
