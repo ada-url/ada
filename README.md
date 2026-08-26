@@ -267,6 +267,44 @@ auto match = pattern->match("https://example.com/books/123");
 auto matched = pattern->test("https://example.com/books/123");
 ```
 
+### URLPattern List (experimental)
+
+`ada::url_pattern_list` compiles a whole set of URLPattern pathname patterns
+into one dispatch structure, answering "which route matches this pathname, and
+what are the parameter values?" without looping over the patterns and without
+executing regular expressions for routes in the common static / `:param` / `*`
+subset. Construction canonicalizes the patterns through the URLPattern pattern
+parser; matching is allocation-free on the fast path.
+
+```cpp
+using provider = ada::url_pattern_regex::std_regex_provider;
+std::vector<std::string_view> routes = {"/", "/users/:id", "/users/me",
+                                        "/static/:file"};
+auto list = ada::url_pattern_list<provider>::create(routes);
+if (!list) { return EXIT_FAILURE; }
+
+auto m = list->match("/users/42");
+// m.route_index == 1; the ":id" capture is a slice of the input:
+// m.captures[0] -> "42", named list->group_names(1)[0] == "id"
+```
+
+Match priority is specificity order (literal beats `:param` beats `*`,
+compared per segment from the left), with insertion order breaking ties --
+the priority scheme of find-my-way/Express-style routers. Routes that need
+URLPattern regexp semantics (custom `(...)` groups, `?`/`+`/`*` modifiers)
+are matched through the regex provider and participate in the same priority
+order. Fast-path limits (input length 4096, 24 input segments, 16 pattern
+segments, 8 captures per route) are performance gates only: inputs and
+routes beyond them are matched by a sequential fallback with identical
+semantics. Only the pathname component is considered (other components are
+treated as wildcards); inputs are expected in canonical percent-encoded
+form, as produced by `ada::url_aggregator::get_pathname()`.
+
+This API is experimental and its shape is under discussion: whether a
+standardized `URLPatternList` should use specificity order or pure
+insertion order, and how regexp-route group values should be surfaced, are
+open questions.
+
 ### C wrapper
 
 See the file `include/ada_c.h` for our C interface. We expect ASCII or UTF-8 strings.

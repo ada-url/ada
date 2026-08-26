@@ -18,6 +18,11 @@ target_link_libraries(urlpattern PRIVATE ada counters::counters)
 target_include_directories(urlpattern PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(urlpattern PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
 
+add_executable(urlpattern_list urlpattern_list.cpp)
+target_link_libraries(urlpattern_list PRIVATE ada counters::counters)
+target_include_directories(urlpattern_list PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(urlpattern_list PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks>")
+
 # Bench
 add_executable(wpt_bench wpt_bench.cpp)
 target_link_libraries(wpt_bench PRIVATE ada counters::counters)
@@ -108,8 +113,9 @@ target_link_libraries(percent_decode PRIVATE benchmark::benchmark)
 target_link_libraries(bench_setters PRIVATE benchmark::benchmark)
 target_link_libraries(bench_search_params PRIVATE benchmark::benchmark)
 target_link_libraries(urlpattern PRIVATE benchmark::benchmark)
+target_link_libraries(urlpattern_list PRIVATE benchmark::benchmark)
 
-set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_ipv4 percent_encode percent_decode bench_setters bench_search_params urlpattern)
+set(BENCHMARKS wpt_bench bench benchdata bbc_bench bench_ipv4 percent_encode percent_decode bench_setters bench_search_params urlpattern urlpattern_list)
 
 add_custom_target(run_all_benchmarks
         COMMAND ${CMAKE_COMMAND} -E echo "Running all benchmarks..."
