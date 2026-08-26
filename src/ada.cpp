@@ -16,7 +16,9 @@
 #include "url_pattern.cpp"
 #include "url_pattern_helpers.cpp"
 #include "url_pattern_regex.cpp"
+#if !defined(ADA_URL_PATTERN_LIST_SEPARATE_TU)
 #include "url_pattern_list.cpp"
+#endif
 #endif  // ADA_INCLUDE_URL_PATTERN
 
 #include "ada_c.cpp"

@@ -15,7 +15,7 @@
  * that fail demote the affected table to a linear scan: slower, never
  * incorrect.
  */
-#include "ada/url_pattern_list.h"
+#include "ada.h"
 
 #include <algorithm>
 #include <bit>
@@ -38,7 +38,6 @@ namespace {
 
 // Depth cap of the shape machinery == the trie pattern depth cap.
 constexpr uint32_t max_shape_statics = max_trie_pattern_segments - 1;
-constexpr uint32_t max_shape_runs = max_captures_per_route + 1;
 
 // ---- shared witness machinery ---------------------------------------------
 // One witness alphabet and one projection packing serve the per-node

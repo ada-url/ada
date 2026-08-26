@@ -7,7 +7,7 @@ target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAK
 add_library(ada-source INTERFACE)
 target_sources(ada-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/ada.cpp)
 target_link_libraries(ada-source INTERFACE ada-include-source)
-add_library(ada ada.cpp unicode_percent_encode.cpp)
+add_library(ada ada.cpp unicode_percent_encode.cpp url_pattern_list.cpp)
 target_compile_features(ada PUBLIC cxx_std_20)
 target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
 target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -63,6 +63,12 @@ endif()
 # Keep the SIMD percent-encode kernel in its own TU so the unity ada.cpp
 # inlining budget for setters matches main.
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
+
+# Keep the URLPattern route-set compiler in its own TU for the same reason:
+# ~1800 extra lines in the unity TU reshuffle GCC's unit-wide inlining budget
+# and de-inline url_aggregator setter hot paths (CodSpeed: SetHash -12%).
+# The amalgamated single-file build still includes it inline.
+target_compile_definitions(ada PRIVATE ADA_URL_PATTERN_LIST_SEPARATE_TU=1)
 
 if(ADA_INCLUDE_URL_PATTERN)
   target_compile_definitions(ada PRIVATE ADA_INCLUDE_URL_PATTERN=1)
