@@ -79,6 +79,10 @@ static const std::vector<std::string>& route_table() {
 // A deterministic stream of request pathnames: instantiated hits over the
 // route table plus a share of misses (the final "/*" catches them; a match
 // is still found, exercising the worst backtracking path of both sides).
+// Both benchmarks iterate this same stream, so the comparison stays honest.
+// The stream is kept short (32 URLs) so one iteration of the sequential
+// url_pattern::exec loop stays well under CodSpeed's per-iteration budget;
+// the ns/url counters normalize the stream length away.
 static const std::vector<std::string>& url_stream() {
   static const std::vector<std::string> urls = [] {
     std::vector<std::string> u;
@@ -99,7 +103,7 @@ static const std::vector<std::string>& url_stream() {
       return t;
     };
     const auto& routes = route_table();
-    for (size_t i = 0; i < 512; i++) {
+    for (size_t i = 0; i < 32; i++) {
       const std::string& pattern = routes[next() % routes.size()];
       std::string url;
       size_t pos = 0;

@@ -42,8 +42,12 @@ namespace ada {
 /**
  * Internal machinery for ada::url_pattern_list: the provider-independent
  * route-set compiler and matcher. Nothing in this namespace is part of the
- * supported public API except the limit constants, which are documented
- * because they delimit the fast path.
+ * supported public API except the limit constants and the `capture` struct
+ * (re-exported by url_pattern_list_match_result), which are documented
+ * because they delimit the fast path and the result contract. Everything
+ * else lives here only because the url_pattern_list class template needs it
+ * and is marked @private; it may change at any time.
+ * @namespace ada::url_pattern_list_helpers
  */
 namespace url_pattern_list_helpers {
 
@@ -86,6 +90,7 @@ inline constexpr uint32_t max_trie_pattern_segments = 16;
 inline constexpr uint32_t max_dispatch_table_entries = 254;
 
 /**
+ * @private
  * The kind of one compiled pattern segment. The numeric values define match
  * priority: at the first differing segment, a literal beats a ":param" and a
  * ":param" beats a "*" (find-my-way / Express-compatible specificity order).
@@ -97,6 +102,7 @@ enum class segment_kind : uint8_t {
 };
 
 /**
+ * @private
  * One '/'-separated segment of a compiled pattern: a literal text (already
  * canonicalized by the URLPattern pattern parser), a ":param" (text = group
  * name), or a trailing "*" wildcard.
@@ -106,7 +112,7 @@ struct route_segment {
   std::string text{};
 };
 
-/** How one route of the set is matched. */
+/** @private How one route of the set is matched. */
 enum class route_mode : uint8_t {
   // Compiled into the trie / exact-table / shape-table fast path.
   trie,
@@ -121,6 +127,7 @@ enum class route_mode : uint8_t {
 };
 
 /**
+ * @private
  * Everything the matcher knows about one route. `kind_sequence` packs the
  * per-segment kinds two bits per segment, most significant first, so that
  * comparing (kind_sequence, kind_length, route index) as a tuple is exactly
@@ -155,7 +162,8 @@ struct capture {
 // perfect multipliers, probe orders) are made at build time by
 // compile_route_set; the matcher only follows them.
 
-/** One trie node; static children occupy a contiguous block of edges. */
+/** @private One trie node; static children occupy a contiguous block of
+ * edges. */
 struct trie_node {
   // Perfect multiplier for projection dispatch (dispatch == 2).
   uint64_t multiplier = 0;
@@ -178,7 +186,8 @@ struct trie_node {
   uint8_t has_alternative = 0;
 };
 
-/** One static edge; keys <= 16 bytes verify from the packed windows alone. */
+/** @private One static edge; keys <= 16 bytes verify from the packed
+ * windows alone. */
 struct trie_edge {
   // Key bytes [0, min(8, len)), little-endian, zero-padded.
   uint64_t prefix = 0;
@@ -191,7 +200,8 @@ struct trie_edge {
   uint16_t key_length = 0;
 };
 
-/** Per-route capture positions, precomputed for trie-mode routes. */
+/** @private Per-route capture positions, precomputed for trie-mode
+ * routes. */
 struct route_meta {
   uint8_t n_segments = 0;
   uint8_t n_params = 0;
@@ -200,7 +210,8 @@ struct route_meta {
   std::array<uint8_t, max_captures_per_route> param_positions{};
 };
 
-/** One entry of the whole-pathname exact table or of a shape group. */
+/** @private One entry of the whole-pathname exact table or of a shape
+ * group. */
 struct static_entry {
   // Key text in the blob.
   uint32_t offset = 0;
@@ -209,6 +220,7 @@ struct static_entry {
 };
 
 /**
+ * @private
  * One (segment count, param-position mask) group of parameterized routes.
  * The probe gathers four witness bytes at precomputed segment positions,
  * multiplies, loads one slot, and verifies the static runs of the entry.
@@ -240,13 +252,15 @@ struct shape_group {
   std::array<uint8_t, max_captures_per_route> param_positions{};
 };
 
-/** Per input segment count: the shape groups probed, in certified order. */
+/** @private Per input segment count: the shape groups probed, in
+ * certified order. */
 struct shape_directory_entry {
   uint32_t first = 0;
   uint32_t count = 0;
 };
 
-/** The compiled route set: every table the fast-path matcher reads. */
+/** @private The compiled route set: every table the fast-path matcher
+ * reads. */
 struct compiled_routes {
   std::vector<trie_node> nodes{};
   std::vector<trie_edge> edges{};
@@ -270,7 +284,8 @@ struct compiled_routes {
   uint8_t has_shape_tables = 0;
 };
 
-/** Result of the fast-path engine or of the sequential route matcher. */
+/** @private Result of the fast-path engine or of the sequential route
+ * matcher. */
 struct engine_result {
   int32_t route = -1;
   uint32_t capture_count = 0;
@@ -282,6 +297,7 @@ struct engine_result {
 };
 
 /**
+ * @private
  * Classifies a URLPattern part list into '/'-separated pattern segments.
  * Returns true when the pattern is expressible in the static/":param"/"*"
  * subset (every segment wholly a literal, a param, or a final wildcard);
@@ -291,10 +307,8 @@ bool classify_parts(const std::vector<url_pattern_part>& parts,
                     std::vector<route_segment>& segments,
                     std::vector<std::string>& group_names);
 
-/** Fills route.kind_sequence / kind_length from route.segments. */
-void compute_kind_sequence(route_info& route) noexcept;
-
 /**
+ * @private
  * Computes kind sequence and flags from route.segments and decides the
  * route's mode: trie when every fast-path build limit is met, sequential
  * otherwise (empty literal segment, more than max_trie_pattern_segments
@@ -303,6 +317,7 @@ void compute_kind_sequence(route_info& route) noexcept;
 void finalize_route(route_info& route) noexcept;
 
 /**
+ * @private
  * Best-effort kind sequence for a route that needs regexp matching, so it can
  * participate in the specificity order: custom "(...)" groups count as params,
  * full wildcards and modified ("?", "+", "*") groups terminate the sequence as
@@ -313,6 +328,7 @@ void approximate_kind_sequence(const std::vector<url_pattern_part>& parts,
                                route_info& route);
 
 /**
+ * @private
  * Compiles the route set: builds the trie, the dispatch plans, the
  * whole-pathname exact table and the shape tables over the trie-mode routes,
  * and sets covered_by_static_table on the routes the exact table answers for.
@@ -322,6 +338,7 @@ void approximate_kind_sequence(const std::vector<url_pattern_part>& parts,
 compiled_routes compile_route_set(std::vector<route_info>& routes);
 
 /**
+ * @private
  * Matches `pathname` against the compiled tables. When the input is out of
  * the fast-path contract, returns with within_fast_path == false and no
  * answer; the caller falls back to the sequential matcher.
@@ -330,6 +347,7 @@ engine_result match_compiled(const compiled_routes& tables,
                              std::string_view pathname) noexcept;
 
 /**
+ * @private
  * Sequential reference matcher for one non-regexp route; matches any input
  * (no fast-path limits) with the same semantics as the compiled engine.
  * On a match, fills `result` (route index is NOT set) and returns true.
@@ -338,6 +356,7 @@ bool match_route_sequential(const route_info& route, std::string_view pathname,
                             engine_result& result) noexcept;
 
 /**
+ * @private
  * True when route `a` (at insertion index `a_index`) outranks route `b` (at
  * `b_index`): lexicographically smaller kind sequence, insertion order as the
  * tiebreak.
@@ -457,23 +476,27 @@ class url_pattern_list {
   }
 
  private:
-  // Sequential fallback over every route; used when the input exceeds the
-  // fast-path limits.
+  /** @private Sequential fallback over every route; used when the input
+   * exceeds the fast-path limits. */
   [[nodiscard]] url_pattern_list_match_result match_sequential(
       std::string_view pathname) const;
 
-  // Tests one route (sequential or regexp mode) and, when it matches and
-  // outranks `best`, replaces `best` with it.
+  /** @private Tests one route (sequential or regexp mode) and, when it
+   * matches and outranks `best`, replaces `best` with it. */
   void consider_route(uint32_t route_index, std::string_view pathname,
                       url_pattern_list_helpers::engine_result& best) const;
 
+  /** @private The pattern strings, by route index. */
   std::vector<std::string> patterns_{};
+  /** @private Per-route classification and priority data. */
   std::vector<url_pattern_list_helpers::route_info> routes_{};
+  /** @private The compiled fast-path tables. */
   url_pattern_list_helpers::compiled_routes compiled_{};
-  // Routes the fast path cannot answer from the compiled tables (sequential
-  // mode routes not covered by the exact table, and regexp mode routes), in
-  // insertion order.
+  /** @private Routes the fast path cannot answer from the compiled tables
+   * (sequential mode routes not covered by the exact table, and regexp mode
+   * routes), in insertion order. */
   std::vector<uint32_t> auxiliary_routes_{};
+  /** @private Compiled pathname components of the regexp-mode routes. */
   std::vector<url_pattern_component<regex_provider>> regexp_components_{};
 };
 

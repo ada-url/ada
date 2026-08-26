@@ -1332,9 +1332,20 @@ void encode_leaf_shortcuts(compiled_routes& r) {
   }
 }
 
+// Fills route.kind_sequence / kind_length from route.segments.
+void compute_kind_sequence(route_info& route) noexcept {
+  uint64_t seq = 0;
+  const size_t n = route.segments.size();
+  for (size_t j = 0; j < n && j < 32; j++) {
+    seq |= static_cast<uint64_t>(route.segments[j].kind) << (62 - 2 * j);
+  }
+  route.kind_sequence = seq;
+  route.kind_length = static_cast<uint8_t>(n < 255 ? n : 255);
+}
+
 }  // namespace
 
-// ---- public engine entry points --------------------------------------------
+// ---- helper entry points declared in the header ----------------------------
 
 bool classify_parts(const std::vector<url_pattern_part>& parts,
                     std::vector<route_segment>& segments,
@@ -1419,16 +1430,6 @@ bool classify_parts(const std::vector<url_pattern_part>& parts,
   }
   close_segment();
   return true;
-}
-
-void compute_kind_sequence(route_info& route) noexcept {
-  uint64_t seq = 0;
-  const size_t n = route.segments.size();
-  for (size_t j = 0; j < n && j < 32; j++) {
-    seq |= static_cast<uint64_t>(route.segments[j].kind) << (62 - 2 * j);
-  }
-  route.kind_sequence = seq;
-  route.kind_length = static_cast<uint8_t>(n < 255 ? n : 255);
 }
 
 void finalize_route(route_info& route) noexcept {
