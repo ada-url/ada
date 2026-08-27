@@ -1851,6 +1851,29 @@ result_type parse_url_impl(std::string_view user_input,
 
   const uint32_t max_input_length = ada::get_max_input_length();
 
+  // Normalization (percent-encoding, IDNA) can push the serialized URL past
+  // max_input_length even when the input fit under it. The check at the end of
+  // the state machine covers URLs that run to completion, but several states
+  // return early after appending a query or fragment, so run the same check on
+  // those exits too. Without this, a query- or fragment-terminated URL such as
+  // file://x/?<...> or https://user@x/?<...> is accepted while the equivalent
+  // https://x/?<...> that takes the absolute fast path is rejected.
+  const auto enforce_max_input_length = [&]() {
+    if constexpr (store_values) {
+      if (url.is_valid) {
+        if constexpr (result_type_is_ada_url_aggregator) {
+          if (url.buffer.size() > max_input_length) [[unlikely]] {
+            url.is_valid = false;
+          }
+        } else {
+          if (url.get_href_size() > max_input_length) [[unlikely]] {
+            url.is_valid = false;
+          }
+        }
+      }
+    }
+  };
+
   // We refuse to parse URL strings that exceed the maximum input length.
   // By default, this is 4GB but can be configured via
   // ada::set_max_input_length().
@@ -2088,6 +2111,7 @@ result_type parse_url_impl(std::string_view user_input,
             }
           }
           url.update_unencoded_base_hash(*fragment);
+          enforce_max_input_length();
           return url;
         }
         // Otherwise, if base's scheme is not "file", set state to relative
@@ -2223,6 +2247,7 @@ result_type parse_url_impl(std::string_view user_input,
                 url.update_unencoded_base_hash(*fragment);
               }
             }
+            enforce_max_input_length();
             return url;
           }
           input_position = end_of_authority + 1;
@@ -2436,6 +2461,7 @@ result_type parse_url_impl(std::string_view user_input,
             url.update_unencoded_base_hash(*fragment);
           }
         }
+        enforce_max_input_length();
         return url;
       }
       case state::HOST: {
@@ -2566,6 +2592,7 @@ result_type parse_url_impl(std::string_view user_input,
                 url.update_unencoded_base_hash(*fragment);
               }
             }
+            enforce_max_input_length();
             return url;
           }
           // If c is neither U+002F (/) nor U+005C (\), then decrease pointer
@@ -2821,22 +2848,7 @@ result_type parse_url_impl(std::string_view user_input,
       url.update_unencoded_base_hash(*fragment);
     }
   }
-  // Check the resulting (normalized) URL size against the maximum input length.
-  // Normalization (percent-encoding, IDNA, etc.) can expand the URL beyond the
-  // original input size.
-  if constexpr (store_values) {
-    if (url.is_valid) {
-      if constexpr (result_type_is_ada_url_aggregator) {
-        if (url.buffer.size() > max_input_length) {
-          url.is_valid = false;
-        }
-      } else {
-        if (url.get_href_size() > max_input_length) {
-          url.is_valid = false;
-        }
-      }
-    }
-  }
+  enforce_max_input_length();
   return url;
 }
 
