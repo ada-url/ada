@@ -1889,6 +1889,42 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
         std::string_view("http://[0:0:0:0:0:0:0:1]"), u));
     ASSERT_EQ(u.get_hostname(), "[::1]");
     ASSERT_EQ(u.get_href(), "http://[::1]/");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]?q=1"), u));
+    ASSERT_EQ(u.get_search(), "?q=1");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]#f"), u));
+    ASSERT_EQ(u.get_hash(), "#f");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]:8080/"), u));
+    ASSERT_EQ(u.get_port(), "8080");
+    // Junk after ']' is not a hash. The state machine rejects it.
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]foo"), u));
+    ASSERT_FALSE(ada::parse<TypeParam>("http://[::1]foo"));
+    ASSERT_EQ(ada::can_parse("http://[::1]foo"), false);
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]bar/"), u));
+    ASSERT_FALSE(ada::parse<TypeParam>("http://[::1]bar/"));
+  }
+  {
+    // ada_c fuzzer aborts when can_parse and parse disagree.
+    static constexpr const char* kSchemes[] = {
+        "http://", "https://", "ws://", "wss://", "ftp://", "file://"};
+    static constexpr const char* kHosts[] = {
+        "example.com", "0x7f.1", "[::1]", "127.1", "3232235777", "a"};
+    static constexpr const char* kRest[] = {"",   "/",   "/path", "?q=1",
+                                            "#f", "foo", "bar/"};
+    for (const char* scheme : kSchemes) {
+      for (const char* host : kHosts) {
+        for (const char* rest : kRest) {
+          const std::string input = std::string(scheme) + host + rest;
+          ASSERT_EQ(ada::can_parse(input),
+                    ada::parse<TypeParam>(input).has_value())
+              << input;
+        }
+      }
+    }
   }
   {
     ada::url u;

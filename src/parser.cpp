@@ -1970,6 +1970,43 @@ after_rest:
   return true;
 }
 
+// After the host scanner misses on '[', finish a bracket IPv6 host. The
+// character after ']' must be a real authority/path delimiter; otherwise
+// the state machine rejects (e.g. http://[::1]foo).
+template <class result_type>
+ada_never_inline bool try_finish_simple_ipv6(std::string_view input,
+                                             result_type& out,
+                                             ada::scheme::type scheme_type,
+                                             uint32_t protocol_end,
+                                             size_t host_start) {
+  const auto* b = reinterpret_cast<const uint8_t*>(input.data());
+  const size_t len = input.size();
+  size_t close = host_start + 1;
+  while (close < len && b[close] != ']') {
+    ++close;
+  }
+  if (close >= len) {
+    return false;
+  }
+  const size_t after = close + 1;
+  if (after < len) {
+    const uint8_t c = b[after];
+    if (c != ':' && c != '/' && c != '?' && c != '#') {
+      return false;
+    }
+  }
+  std::array<uint16_t, 8> addr{};
+  if (!detail::parse_ipv6_address(
+          std::string_view(input.data() + host_start + 1,
+                           close - host_start - 1),
+          addr)) {
+    return false;
+  }
+  const std::string canon = ada::serializers::ipv6(addr);
+  return finish_simple_absolute_literal_host(
+      input, out, scheme_type, protocol_end, host_start, after, canon, IPV6);
+}
+
 // Fast path for already-canonical special-scheme URLs of the shape
 // scheme://host[/path][?query][#fragment]. When the host is a plain domain
 // but the rest needs encoding or dot-segment normalization, the host is
@@ -2028,22 +2065,7 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
     // '[' is a host-class reject. Only inspect it after the scanner misses
     // so the 99% domain path never pays for an IPv6 check.
     if (pos < len && b[pos] == '[') {
-      size_t close = pos + 1;
-      while (close < len && b[close] != ']') {
-        ++close;
-      }
-      if (close >= len) {
-        return false;
-      }
-      std::array<uint16_t, 8> addr{};
-      if (!detail::parse_ipv6_address(
-              std::string_view(input.data() + pos + 1, close - pos - 1),
-              addr)) {
-        return false;
-      }
-      const std::string canon = ada::serializers::ipv6(addr);
-      return finish_simple_absolute_literal_host(
-          input, out, scheme_type, protocol_end, pos, close + 1, canon, IPV6);
+      return try_finish_simple_ipv6(input, out, scheme_type, protocol_end, pos);
     }
     return false;
   }
