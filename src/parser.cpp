@@ -54,6 +54,10 @@
 #include <intrin.h>
 #endif
 
+namespace ada {
+extern bool max_input_length_customized;
+}
+
 namespace ada::parser {
 
 // Classification tables and 16-byte run scanners for the absolute-URL fast
@@ -400,6 +404,10 @@ ada_really_inline void note_xn_neon(const uint8_t* b, size_t at, uint64_t xs,
 }
 #endif
 
+ada_really_inline bool is_host_delimiter(uint8_t c) noexcept {
+  return c == '/' || c == '?' || c == '#' || c == ':';
+}
+
 // Returns false if a forbidden host code point is found. On success, *end is
 // the first / ? # or len. has_upper / has_xn only count host bytes, not the
 // path/query bytes that may sit in the same SIMD window after the delimiter.
@@ -438,19 +446,19 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     };
     for (; i + 32 <= len; i += 32) {
       if (visit(i) || visit(i + 16)) {
-        return k_host_class[b[end]] == 1;
+        return is_host_delimiter(b[end]);
       }
     }
     for (; i + 16 <= len; i += 16) {
       if (visit(i)) {
-        return k_host_class[b[end]] == 1;
+        return is_host_delimiter(b[end]);
       }
     }
     // Overlapping tail only after a full 16-byte step so the window cannot
     // start before `start` (a prior '/' would otherwise look like a host stop).
     if (i > start && i < len) {
       if (visit(len - 16) && end >= i) {
-        return k_host_class[b[end]] == 1;
+        return is_host_delimiter(b[end]);
       }
       end = len;
       return true;
@@ -483,7 +491,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
     note_xn_mask(b, at, xs & valid, len, has_xn);
     end = at + static_cast<size_t>(hit);
-    return k_host_class[b[end]] == 1;
+    return is_host_delimiter(b[end]);
   }
 #elif ADA_SSE2
   const __m128i x_splat = _mm_set1_epi8('x');
@@ -502,7 +510,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
         }
         note_xn_mask(b, i + off, xs & valid, len, has_xn);
         end = i + off + static_cast<size_t>(hit);
-        return k_host_class[b[end]] == 1;
+        return is_host_delimiter(b[end]);
       }
       if (up != 0) {
         has_upper = true;
@@ -523,7 +531,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       }
       note_xn_mask(b, i, xs & valid, len, has_xn);
       end = i + static_cast<size_t>(hit);
-      return k_host_class[b[end]] == 1;
+      return is_host_delimiter(b[end]);
     }
     if (up != 0) {
       has_upper = true;
@@ -553,7 +561,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
     note_xn_mask(b, at, xs & valid, len, has_xn);
     end = at + static_cast<size_t>(hit);
-    return k_host_class[b[end]] == 1;
+    return is_host_delimiter(b[end]);
   }
 #elif ADA_NEON
   if (len - start >= 16) {
@@ -583,17 +591,17 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     };
     for (; i + 32 <= len; i += 32) {
       if (visit(i) || visit(i + 16)) {
-        return k_host_class[b[end]] == 1;
+        return is_host_delimiter(b[end]);
       }
     }
     for (; i + 16 <= len; i += 16) {
       if (visit(i)) {
-        return k_host_class[b[end]] == 1;
+        return is_host_delimiter(b[end]);
       }
     }
     if (i > start && i < len) {
       if (visit(len - 16) && end >= i) {
-        return k_host_class[b[end]] == 1;
+        return is_host_delimiter(b[end]);
       }
       end = len;
       return true;
@@ -623,7 +631,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
     note_xn_neon(b, at, xs & valid, len, has_xn);
     end = at + hit;
-    return k_host_class[b[end]] == 1;
+    return is_host_delimiter(b[end]);
   }
 #endif
   for (; i < len; ++i) {
@@ -1221,6 +1229,35 @@ ada_really_inline bool simple_path_is_canonical(std::string_view path_body,
                                         saw_percent);
 }
 
+// Uppercase hosts and numeric last labels are rare on the dataset. Keep
+// their buffers and IPv4 parser out of the hot I-cache.
+ada_never_inline bool reject_uppercase_plain_host(const char* host,
+                                                  size_t host_len) noexcept {
+  char host_buf[256];
+  std::memcpy(host_buf, host, host_len);
+  unicode::to_lower_ascii(host_buf, host_len);
+  const std::string_view hv(host_buf, host_len);
+  if (ada::checkers::last_label_may_be_a_number(hv)) {
+    return true;
+  }
+  static constexpr std::string_view xn{"xn-", 3};
+  return hv.find(xn) != std::string_view::npos;
+}
+
+// true => leave the simple-absolute path. false => stay; may set is_ipv4.
+ada_never_inline bool reject_or_classify_numeric_last_label(
+    std::string_view hv, bool& is_ipv4) noexcept {
+  if (!ada::checkers::last_label_may_be_a_number(hv)) {
+    return false;
+  }
+  if (hv.back() == '.' ||
+      checkers::try_parse_ipv4_fast(hv) >= checkers::ipv4_fast_fail) {
+    return true;
+  }
+  is_ipv4 = true;
+  return false;
+}
+
 }  // namespace
 
 // Percent-encoding / dot-segment handoff. Kept out of the already-canonical
@@ -1321,14 +1358,14 @@ ADA_PARSER_FASTPATH bool finish_simple_absolute_with_port(
     ++i;
     scan_path_run(b, i, len, maybe_dot_segment, saw_percent);
     if (i < len) {
-      const uint8_t cls = k_path[b[i]];
-      if (cls == 1) {
+      if (b[i] == '?') {
         path_end = i;
-        if (b[i] == '?') {
-          query_start = i;
-          ++i;
-          goto scan_query;
-        }
+        query_start = i;
+        ++i;
+        goto scan_query;
+      }
+      if (b[i] == '#') {
+        path_end = i;
         hash_start = i;
         ++i;
         goto scan_hash;
@@ -1670,34 +1707,16 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
       lastc = b[host_end - 2];
     }
     if (has_upper) [[unlikely]] {
-      // Rare: keep the 256-byte lower buffer off the common-path frame.
-      char host_buf[256];
-      std::memcpy(host_buf, input.data() + host_start, host_len);
-      unicode::to_lower_ascii(host_buf, host_len);
-      const std::string_view hv(host_buf, host_len);
-      if (ada::checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
+      if (reject_uppercase_plain_host(input.data() + host_start, host_len)) {
         return false;
       }
-      static constexpr std::string_view xn{"xn-", 3};
-      if (hv.find(xn) != std::string_view::npos) [[unlikely]] {
+    } else if (ada::checkers::is_ipv4_number_char(static_cast<char>(lastc)))
+        [[unlikely]] {
+      // .com/.org/.net never enter: last letter is not an IPv4 number char
+      // ('m' and 'g' are outside 0-9a-fxX).
+      const std::string_view hv(input.data() + host_start, host_len);
+      if (reject_or_classify_numeric_last_label(hv, is_ipv4)) {
         return false;
-      }
-    } else if (ada::checkers::is_ipv4_number_char(static_cast<char>(lastc))) {
-      // .org/.net/... never enter: last letter is not an IPv4 number char.
-      // .com does (m is hex) but ends_with_dot_com skips the label walk.
-      if (!ada::checkers::ends_with_dot_com(input.data() + host_start,
-                                            host_len)) {
-        const std::string_view hv(input.data() + host_start, host_len);
-        if (ada::checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
-          // Canonical dotted-decimal IPv4 stays here, including a non-default
-          // port. Trailing dots, hex/octal, and short forms (ws://123) go to
-          // the state machine. '[' is already a host-class reject.
-          if (hv.back() == '.' ||
-              checkers::try_parse_ipv4_fast(hv) >= checkers::ipv4_fast_fail) {
-            return false;
-          }
-          is_ipv4 = true;
-        }
       }
     }
     if (has_xn) [[unlikely]] {
@@ -1733,14 +1752,14 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
     ++i;
     scan_path_run(b, i, len, maybe_dot_segment, saw_percent);
     if (i < len) {
-      const uint8_t cls = k_path[b[i]];
-      if (cls == 1) {
+      if (b[i] == '?') {
         path_end = i;
-        if (b[i] == '?') {
-          query_start = i;
-          ++i;
-          goto scan_query;
-        }
+        query_start = i;
+        ++i;
+        goto scan_query;
+      }
+      if (b[i] == '#') {
+        path_end = i;
         hash_start = i;
         ++i;
         goto scan_hash;
@@ -1837,7 +1856,7 @@ after_rest:
 
   const bool need_slash = !has_path;
   if constexpr (is_aggregator) {
-    if (!need_slash) {
+    if (!need_slash) [[likely]] {
       // assign copies once. resize()+memcpy would value-init then overwrite.
       out.buffer.assign(input.data(), input.size());
       if (has_upper) {
@@ -2100,12 +2119,11 @@ result_type parse_url_impl(std::string_view user_input,
 
   result_type url{};
 
-  const uint32_t max_input_length = ada::get_max_input_length();
-
-  // We refuse to parse URL strings that exceed the maximum input length.
-  // By default, this is 4GB but can be configured via
-  // ada::set_max_input_length().
-  if (user_input.size() > max_input_length) [[unlikely]] {
+  // Default max is ~4 GB. Skip the atomic unless set_max_input_length ran.
+  if (user_input.size() > std::numeric_limits<uint32_t>::max()) [[unlikely]] {
+    url.is_valid = false;
+  } else if (ada::max_input_length_customized &&
+             user_input.size() > ada::get_max_input_length()) [[unlikely]] {
     url.is_valid = false;
   }
   // Going forward, user_input.size() is in [0,
@@ -2131,9 +2149,13 @@ result_type parse_url_impl(std::string_view user_input,
       // the post-parse length walk when the input (absolute) cannot grow
       // past the limit. Relative resolution can grow to base+input, so
       // always recheck that path.
-      if (base_url != nullptr ||
-          user_input.size() > static_cast<size_t>(max_input_length) / 5)
-          [[unlikely]] {
+      const bool may_expand_past_max =
+          ada::max_input_length_customized
+              ? user_input.size() >
+                    static_cast<size_t>(ada::get_max_input_length()) / 5
+              : user_input.size() > std::numeric_limits<uint32_t>::max() / 5;
+      if (base_url != nullptr || may_expand_past_max) [[unlikely]] {
+        const uint32_t max_input_length = ada::get_max_input_length();
         if constexpr (result_type_is_ada_url_aggregator) {
           if (url.buffer.size() > max_input_length) {
             url.is_valid = false;
@@ -3061,6 +3083,7 @@ result_type parse_url_impl(std::string_view user_input,
   // original input size.
   if constexpr (store_values) {
     if (url.is_valid) {
+      const uint32_t max_input_length = ada::get_max_input_length();
       if constexpr (result_type_is_ada_url_aggregator) {
         if (url.buffer.size() > max_input_length) {
           url.is_valid = false;

@@ -1729,8 +1729,8 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
 }
 
 TYPED_TEST(basic_tests, last_label_may_be_a_number_gate) {
-  // Ordinary .com hosts end with a hex letter; the last-label gate must
-  // still treat them as domains, not IPv4.
+  // Ordinary .com/.org hosts end with a letter outside 0-9a-fxX, so the
+  // last-label gate rejects IPv4 without walking the label.
   {
     auto url = ada::parse<TypeParam>("https://www.google.com/search");
     ASSERT_TRUE(url);
@@ -2314,7 +2314,18 @@ TEST(basic_tests, ada_url_get_href_assembly) {
 }
 
 TEST(basic_tests, last_label_may_be_a_number_cases) {
+  using ada::checkers::is_ipv4_number_char;
   using ada::checkers::last_label_may_be_a_number;
+  ASSERT_FALSE(is_ipv4_number_char('m'));
+  ASSERT_FALSE(is_ipv4_number_char('g'));
+  ASSERT_FALSE(is_ipv4_number_char('t'));
+  ASSERT_TRUE(is_ipv4_number_char('e'));
+  ASSERT_TRUE(is_ipv4_number_char('c'));
+  ASSERT_TRUE(is_ipv4_number_char('x'));
+  ASSERT_TRUE(is_ipv4_number_char('0'));
+  ASSERT_TRUE(ada::checkers::ends_with_dot_com("example.com", 11));
+  ASSERT_TRUE(ada::checkers::ends_with_dot_com("example.COM.", 12));
+  ASSERT_FALSE(ada::checkers::ends_with_dot_com("example.org", 11));
   ASSERT_FALSE(last_label_may_be_a_number(""));
   ASSERT_FALSE(last_label_may_be_a_number("."));
   ASSERT_FALSE(last_label_may_be_a_number("example.com"));

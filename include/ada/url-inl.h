@@ -196,36 +196,53 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const bool has_q = query.has_value();
     const bool has_h = hash.has_value();
     const bool has_p = port.has_value();
-    auto finish = [](size_t total, auto&& write) -> std::string {
+#if !defined(__cpp_lib_string_resize_and_overwrite)
+    auto append_prefix = [&](std::string& output) {
+      if (type == ada::scheme::type::HTTPS) [[likely]] {
+        output.append("https://", 8);
+      } else {
+        output.append(prefix);
+      }
+    };
+#endif
 #if defined(__cpp_lib_string_resize_and_overwrite)
+    auto write_prefix = [&](char* p) -> char* {
+      if (type == ada::scheme::type::HTTPS) [[likely]] {
+        std::memcpy(p, "https://", 8);
+        return p + 8;
+      }
+      std::memcpy(p, prefix.data(), prefix.size());
+      return p + prefix.size();
+    };
+    auto finish = [&](size_t total, auto&& write) -> std::string {
       std::string output;
       output.resize_and_overwrite(total, [&](char* p, size_t) {
         write(p);
         return total;
       });
       return output;
-#else
-      // Avoid string(total, '\0') zero-fill on typical hrefs (dataset p90~155).
-      if (total <= 256) {
-        char buf[256];
-        write(buf);
-        return std::string(buf, total);
-      }
-      std::string output(total, '\0');
-      write(output.data());
-      return output;
-#endif
     };
+#endif
     if (!has_q && !has_h && !has_p) [[likely]] {
       const size_t total = prefix.size() + host_size + path_size;
+#if defined(__cpp_lib_string_resize_and_overwrite)
       return finish(total, [&](char* p) {
-        std::memcpy(p, prefix.data(), prefix.size());
-        p += prefix.size();
+        p = write_prefix(p);
         // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
         std::memcpy(p, host->data(), host_size);
         p += host_size;
         std::memcpy(p, path.data(), path_size);
       });
+#else
+      // reserve+append writes straight into the string. A stack buffer
+      // plus string(buf, n) copies the href twice.
+      std::string output;
+      output.reserve(total);
+      append_prefix(output);
+      output.append(*host);
+      output.append(path);
+      return output;
+#endif
     }
     const size_t query_size = has_q ? query->size() : 0;
     const size_t hash_size = has_h ? hash->size() : 0;
@@ -238,9 +255,9 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const size_t total =
         prefix.size() + host_size + (has_p ? size_t(1 + port_digits) : 0) +
         path_size + (has_q ? query_size + 1 : 0) + (has_h ? hash_size + 1 : 0);
+#if defined(__cpp_lib_string_resize_and_overwrite)
     return finish(total, [&](char* p) {
-      std::memcpy(p, prefix.data(), prefix.size());
-      p += prefix.size();
+      p = write_prefix(p);
       // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
       std::memcpy(p, host->data(), host_size);
       p += host_size;
@@ -264,6 +281,29 @@ constexpr void url::copy_scheme(const ada::url& u) {
         std::memcpy(p, hash->data(), hash_size);
       }
     });
+#else
+    std::string output;
+    output.reserve(total);
+    append_prefix(output);
+    output.append(*host);
+    if (has_p) {
+      output += ':';
+      char port_buf[5];
+      auto [ptr, ec] = std::to_chars(port_buf, port_buf + 5, port_val);
+      (void)ec;
+      output.append(port_buf, static_cast<size_t>(ptr - port_buf));
+    }
+    output.append(path);
+    if (has_q) {
+      output += '?';
+      output.append(*query);
+    }
+    if (has_h) {
+      output += '#';
+      output.append(*hash);
+    }
+    return output;
+#endif
   }
 
   std::string output;

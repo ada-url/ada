@@ -25,8 +25,7 @@ constexpr bool is_ipv4_number_char(char x) noexcept {
          (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
 }
 
-// ".com" / ".COM" after an optional trailing dot. 'm' is an IPv4 number
-// char, so last_label_may_be_a_number would otherwise walk the label.
+// ".com" / ".COM" after an optional trailing dot.
 constexpr bool ends_with_dot_com(const char* start, size_t n) noexcept {
   if (n > 0 && start[n - 1] == '.') {
     --n;
@@ -53,13 +52,8 @@ constexpr bool last_label_may_be_a_number(std::string_view view) noexcept {
       return false;
     }
   }
-  // .org / .net / .gov / ... end with a non-hex letter: one compare.
+  // .com / .org / .net / .gov / ... end with a letter outside 0-9a-fxX.
   if (!is_ipv4_number_char(end[-1])) {
-    return false;
-  }
-  // .com ends with hex 'm'. Reject it before walking the label.
-  if (end - start >= 4 &&
-      ends_with_dot_com(start, static_cast<size_t>(end - start))) {
     return false;
   }
   const char* label = end;

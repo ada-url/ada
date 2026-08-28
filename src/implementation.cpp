@@ -28,8 +28,13 @@ namespace ada {
 static std::atomic<uint32_t> max_input_length_{
     std::numeric_limits<uint32_t>::max()};
 
+// parse() / parse_url_impl read this instead of always hitting the atomic.
+// Restored to false when the limit is set back to the ~4 GB default.
+bool max_input_length_customized = false;
+
 void set_max_input_length(uint32_t length) {
   max_input_length_.store(length, std::memory_order_relaxed);
+  max_input_length_customized = length != std::numeric_limits<uint32_t>::max();
 }
 
 uint32_t get_max_input_length() {
@@ -287,9 +292,8 @@ host_done:
   }
 
   const char lastc = static_cast<char>(bytes[cursor - 1]);
+  // 'm'/'g'/... are not IPv4 number chars, so .com/.org never walk.
   if (checkers::is_ipv4_number_char(lastc) &&
-      !checkers::ends_with_dot_com(input.data() + authority_start,
-                                   host_length) &&
       checkers::last_label_may_be_a_number(
           std::string_view(input.data() + authority_start, host_length))) {
     return std::nullopt;
@@ -534,6 +538,33 @@ validate_port:
 template <class result_type>
 ada_warn_unused tl::expected<result_type, errors> parse(
     std::string_view input, const result_type* base_url) {
+  if (base_url == nullptr) [[likely]] {
+    if (input.size() > std::numeric_limits<uint32_t>::max()) [[unlikely]] {
+      return tl::unexpected(errors::type_error);
+    }
+    if (max_input_length_customized && input.size() > get_max_input_length())
+        [[unlikely]] {
+      return tl::unexpected(errors::type_error);
+    }
+    result_type u{};
+    if (ada::parser::try_parse_simple_absolute(input, u)) [[likely]] {
+      // Default max is ~4 GB; only re-check expansion when the input
+      // could grow past that (or past a customized limit).
+      if (max_input_length_customized) [[unlikely]] {
+        const uint32_t max_length = get_max_input_length();
+        if (input.size() > static_cast<size_t>(max_length) / 5 &&
+            u.get_href_size() > max_length) {
+          return tl::unexpected(errors::type_error);
+        }
+      } else if (input.size() > std::numeric_limits<uint32_t>::max() / 5)
+          [[unlikely]] {
+        if (u.get_href_size() > std::numeric_limits<uint32_t>::max()) {
+          return tl::unexpected(errors::type_error);
+        }
+      }
+      return u;
+    }
+  }
   result_type u = ada::parser::parse_url_impl<result_type>(input, base_url);
   if (!u.is_valid) {
     return tl::unexpected(errors::type_error);
@@ -601,7 +632,16 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
         return false;
       }
       // size <= max/5 => normalized href cannot exceed max (4.5x expansion).
-      // Check this first: default max is ~4GB so almost all URLs return true.
+      // Default max is ~4 GB: skip the atomic on typical inputs.
+      if (!max_input_length_customized) [[likely]] {
+        if (input.size() > std::numeric_limits<uint32_t>::max() / 5)
+            [[unlikely]] {
+          return ada::parser::parse_url_impl<ada::url_aggregator, true>(input,
+                                                                        nullptr)
+              .is_valid;
+        }
+        return true;
+      }
       const uint32_t max_length = ada::get_max_input_length();
       if (input.size() <= static_cast<size_t>(max_length) / 5) {
         return true;
