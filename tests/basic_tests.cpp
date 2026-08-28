@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
 template <class T>
@@ -2239,4 +2240,55 @@ TYPED_TEST(basic_tests,
   check("http://ab:81#f ", "http://ab:81/#f");
   // a byte that legitimately needs encoding is still encoded
   check("http://ab?x y", "http://ab/?x%20y");
+}
+
+TYPED_TEST(basic_tests, short_host_qword_scan) {
+  // Authorities of 8-15 bytes after "://" take the 8-byte host kernel
+  // (x86-64 SSSE3 assembly, SSSE3/SSE2/NEON intrinsics, or the table tail).
+  struct Case {
+    const char* in;
+    const char* host;
+    const char* href;
+  };
+  const Case ok[] = {
+      {"https://abcdefgh", "abcdefgh", "https://abcdefgh/"},
+      {"https://abcdefghi", "abcdefghi", "https://abcdefghi/"},
+      {"https://github.com", "github.com", "https://github.com/"},
+      {"https://example.com", "example.com", "https://example.com/"},
+      {"https://example.com/", "example.com", "https://example.com/"},
+      {"https://www.google.com", "www.google.com", "https://www.google.com/"},
+      {"https://www.youtube.com", "www.youtube.com",
+       "https://www.youtube.com/"},
+      {"https://EXAMPLE.com/x", "example.com", "https://example.com/x"},
+      {"https://abcdefgh.COM", "abcdefgh.com", "https://abcdefgh.com/"},
+      {"https://xample.com/", "xample.com", "https://xample.com/"},
+      {"https://abc.com/xy", "abc.com", "https://abc.com/xy"},
+      {"http://abc.com/", "abc.com", "http://abc.com/"},
+      {"https://example.com:8080/x", "example.com",
+       "https://example.com:8080/x"},
+      {"https://www.google.com/search", "www.google.com",
+       "https://www.google.com/search"},
+  };
+  for (const auto& c : ok) {
+    auto url = ada::parse<TypeParam>(c.in);
+    ASSERT_TRUE(url) << c.in;
+    ASSERT_EQ(url->get_hostname(), c.host) << c.in;
+    ASSERT_EQ(url->get_href(), c.href) << c.in;
+  }
+  for (size_t n = 8; n <= 15; ++n) {
+    std::string host(n, 'a');
+    host[n - 4] = '.';
+    host[n - 3] = 'c';
+    host[n - 2] = 'o';
+    host[n - 1] = 'm';
+    const std::string in = "https://" + host + "/p";
+    auto url = ada::parse<TypeParam>(in);
+    ASSERT_TRUE(url) << in;
+    ASSERT_EQ(url->get_hostname(), host) << in;
+    ASSERT_EQ(url->get_pathname(), "/p") << in;
+  }
+  ASSERT_FALSE(ada::parse<TypeParam>("https://exampl%.com"));
+  ASSERT_FALSE(ada::parse<TypeParam>("https://abcdefgh%.com"));
+  ASSERT_FALSE(ada::parse<TypeParam>("https://exam ple.com"));
+  SUCCEED();
 }
