@@ -1,7 +1,5 @@
 #include "ada/parser-inl.h"
 
-#include "parser_host_scan.h"
-
 #include <array>
 #include <bit>
 #include <charconv>
@@ -556,12 +554,6 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
   }
 #endif
-  // 8+ bytes after the SIMD windows (github.com, www.google.com): one
-  // movq/ldr and a table classify in parser_host_scan.cpp. The <8 scalar
-  // loop stays here so ada.cpp layout matches main (CodSpeed setters).
-  if (len - i >= 8) {
-    return scan_plain_host_tail(b, i, len, end, has_upper, has_x);
-  }
   for (; i < len; ++i) {
     const uint8_t c = b[i];
     const uint8_t cls = k_host_class[c];
