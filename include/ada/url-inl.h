@@ -195,7 +195,27 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const bool has_h = hash.has_value();
     const bool has_p = port.has_value();
     const bool is_https = type == ada::scheme::type::HTTPS;
-    // HTTPS is ~96% of special URLs. Size is 8; skip the prefix table.
+    if (is_https && !has_q && !has_h && !has_p) [[likely]] {
+      const size_t total = size_t{8} + host_size + path_size;
+#if defined(__cpp_lib_string_resize_and_overwrite)
+      std::string output;
+      output.resize_and_overwrite(total, [&](char* p, size_t) {
+        std::memcpy(p, "https://", 8);
+        // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+        std::memcpy(p + 8, host->data(), host_size);
+        std::memcpy(p + 8 + host_size, path.data(), path_size);
+        return total;
+      });
+      return output;
+#else
+      std::string output;
+      output.reserve(total);
+      output.append("https://", 8);
+      output.append(*host);
+      output.append(path);
+      return output;
+#endif
+    }
     const std::string_view prefix =
         is_https ? std::string_view{"https://", 8}
                  : ada::scheme::details::special_href_prefix[type];

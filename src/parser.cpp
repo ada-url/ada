@@ -56,7 +56,8 @@
 
 namespace ada {
 extern bool max_input_length_customized;
-}
+extern thread_local bool skip_simple_absolute_once;
+}  // namespace ada
 
 namespace ada::parser {
 
@@ -2144,9 +2145,12 @@ result_type parse_url_impl(std::string_view user_input,
   // IPv6 ('[') is a host-class reject; dotted-decimal IPv4 is finished
   // inside try_parse_simple_absolute. No extra preamble on the 99% path.
   if constexpr (store_values) {
+    const bool already_tried_absolute = ada::skip_simple_absolute_once;
+    ada::skip_simple_absolute_once = false;
     const bool hit_fast_path =
         (base_url == nullptr)
-            ? try_parse_simple_absolute(user_input, url)
+            ? (!already_tried_absolute &&
+               try_parse_simple_absolute(user_input, url))
             : try_parse_simple_relative(user_input, *base_url, url);
     if (hit_fast_path) {
       // Percent-encoding expands at most 3x and IDNA at most 4.5x. Skip
