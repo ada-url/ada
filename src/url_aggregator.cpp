@@ -278,6 +278,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   return result;
 }
 
+#ifndef ADA_URL_SETTERS_SEPARATE_TU
 bool url_aggregator::set_username(const std::string_view input) {
   ada_log("url_aggregator::set_username '", input, "' ");
   ADA_ASSERT_TRUE(validate());
@@ -333,6 +334,7 @@ bool url_aggregator::set_password(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
   return true;
 }
+#endif  // ADA_URL_SETTERS_SEPARATE_TU
 
 bool url_aggregator::set_port(const std::string_view input) {
   ada_log("url_aggregator::set_port ", input);
@@ -390,6 +392,7 @@ bool url_aggregator::set_port(const std::string_view input) {
   return true;
 }
 
+#ifndef ADA_URL_SETTERS_SEPARATE_TU
 bool url_aggregator::set_pathname(const std::string_view input) {
   ada_log("url_aggregator::set_pathname ", input);
   ADA_ASSERT_TRUE(validate());
@@ -420,6 +423,7 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
   return true;
 }
+#endif  // ADA_URL_SETTERS_SEPARATE_TU
 
 void url_aggregator::parse_path_outlined(std::string_view input) {
   parse_path(input);
@@ -500,6 +504,7 @@ void url_aggregator::set_search(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
 }
 
+#ifndef ADA_URL_SETTERS_SEPARATE_TU
 void url_aggregator::set_hash(const std::string_view input) {
   ada_log("url_aggregator::set_hash ", input);
   ADA_ASSERT_TRUE(validate());
@@ -531,6 +536,7 @@ void url_aggregator::set_hash(const std::string_view input) {
   }
   ADA_ASSERT_TRUE(validate());
 }
+#endif  // ADA_URL_SETTERS_SEPARATE_TU
 
 bool url_aggregator::set_href(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
