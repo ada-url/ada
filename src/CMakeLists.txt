@@ -7,7 +7,7 @@ target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAK
 add_library(ada-source INTERFACE)
 target_sources(ada-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/ada.cpp)
 target_link_libraries(ada-source INTERFACE ada-include-source)
-add_library(ada ada.cpp unicode_percent_encode.cpp parser_hot.cpp parser_finish.cpp can_parse.cpp url_setters.cpp)
+add_library(ada ada.cpp unicode_percent_encode.cpp parser_hot.cpp parser_finish.cpp can_parse.cpp)
 target_compile_features(ada PUBLIC cxx_std_20)
 target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
 target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -61,13 +61,11 @@ if(ADA_TESTING)
 endif()
 
 # Keep the SIMD percent-encode kernel, the simple-absolute fast path,
-# the cold finish helpers (including relative resolution), can_parse,
-# and the credential/hash/pathname setters in their own TUs so the
-# unity ada.cpp inlining budget does not displace setter I-cache.
+# the cold finish helpers (including relative resolution), and can_parse
+# in their own TUs so the unity ada.cpp inlining budget stays on setters.
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
 target_compile_definitions(ada PRIVATE ADA_PARSER_FINISH_SEPARATE_TU=1)
 target_compile_definitions(ada PRIVATE ADA_CAN_PARSE_SEPARATE_TU=1)
-target_compile_definitions(ada PRIVATE ADA_URL_SETTERS_SEPARATE_TU=1)
 
 if(ADA_INCLUDE_URL_PATTERN)
   target_compile_definitions(ada PRIVATE ADA_INCLUDE_URL_PATTERN=1)
