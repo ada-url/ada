@@ -18,6 +18,8 @@
 #include "ada/unicode.h"
 #include "ada/serializers.h"
 #include "ada/url.h"
+#include "ada/url-inl.h"
+#include "ada/url_base-inl.h"
 #include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
 #include "ada/url_ip-inl.h"
@@ -2332,6 +2334,7 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
             input, out, scheme_type, protocol_end, host_start, host_end,
             std::string_view(dotted, n), IPV4);
       }
+      out.host_type = IPV4;
     }
     if (has_xn) [[unlikely]] {
       return false;
@@ -2461,9 +2464,6 @@ after_rest:
   }
 
   out.type = scheme_type;
-  if (is_ipv4) {
-    out.host_type = IPV4;
-  }
 
   if (!rest_simple) {
     finish_simple_absolute_handoff<result_type>(
@@ -2476,7 +2476,7 @@ after_rest:
   if constexpr (is_aggregator) {
     if (!need_slash) [[likely]] {
       // assign copies once. resize()+memcpy would value-init then overwrite.
-      out.buffer.assign(input.data(), input.size());
+      out.buffer.assign(input);
       if (has_upper) {
         unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
       }
@@ -3795,3 +3795,55 @@ template url parse_url<url>(std::string_view user_input,
 template url_aggregator parse_url<url_aggregator>(
     std::string_view user_input, const url_aggregator* base_url = nullptr);
 }  // namespace ada::parser
+
+namespace ada {
+
+template <class result_type>
+ada_warn_unused tl::expected<result_type, errors> parse(
+    std::string_view input, const result_type* base_url) {
+  if (base_url == nullptr) [[likely]] {
+    if (input.size() > std::numeric_limits<uint32_t>::max()) [[unlikely]] {
+      return tl::unexpected(errors::type_error);
+    }
+    if (max_input_length_customized && input.size() > get_max_input_length())
+        [[unlikely]] {
+      return tl::unexpected(errors::type_error);
+    }
+    result_type u{};
+    if (ada::parser::try_parse_simple_absolute(input, u)) [[likely]] {
+      // Default max is ~4 GB; only re-check expansion when the input
+      // could grow past that (or past a customized limit).
+      if (max_input_length_customized) [[unlikely]] {
+        const uint32_t max_length = get_max_input_length();
+        if (input.size() > static_cast<size_t>(max_length) / 5 &&
+            u.get_href_size() > max_length) {
+          return tl::unexpected(errors::type_error);
+        }
+      } else if (input.size() > std::numeric_limits<uint32_t>::max() / 5)
+          [[unlikely]] {
+        if (u.get_href_size() > std::numeric_limits<uint32_t>::max()) {
+          return tl::unexpected(errors::type_error);
+        }
+      }
+      return u;
+    }
+    ada::parser::parse_url_impl_into<result_type, true>(u, input, nullptr,
+                                                        false);
+    if (!u.is_valid) {
+      return tl::unexpected(errors::type_error);
+    }
+    return u;
+  }
+  result_type u = ada::parser::parse_url_impl<result_type>(input, base_url);
+  if (!u.is_valid) {
+    return tl::unexpected(errors::type_error);
+  }
+  return u;
+}
+
+template ada::result<url> parse<url>(std::string_view input,
+                                     const url* base_url);
+template ada::result<url_aggregator> parse<url_aggregator>(
+    std::string_view input, const url_aggregator* base_url);
+
+}  // namespace ada

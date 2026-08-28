@@ -11,6 +11,7 @@
 
 // https://en.cppreference.com/w/cpp/feature_test#Library_features
 // detect C++20 features
+#include <cstdint>
 #include <version>
 
 #ifdef _MSC_VER

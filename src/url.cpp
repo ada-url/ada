@@ -682,8 +682,8 @@ bool url::set_port(const std::string_view input) {
   // Find the first non-digit character to determine the length of digits
   auto first_non_digit =
       std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
-  std::string_view digits_to_parse = std::string_view(
-      trimmed.data(), static_cast<size_t>(first_non_digit - trimmed.begin()));
+  const std::string_view digits_to_parse =
+      trimmed.substr(0, static_cast<size_t>(first_non_digit - trimmed.begin()));
 
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;

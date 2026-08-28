@@ -187,6 +187,69 @@ constexpr void url::copy_scheme(const ada::url& u) {
 }
 
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
+  // ~96% of the dataset is http(s) without userinfo or a port. Include
+  // query/hash here so the 23% with `?` do not fall into the general
+  // prefix-table / port path.
+  if (host.has_value() && username.empty() && password.empty() &&
+      !port.has_value() &&
+      (type == ada::scheme::type::HTTPS || type == ada::scheme::type::HTTP))
+      [[likely]] {
+    const bool is_https = type == ada::scheme::type::HTTPS;
+    const size_t prefix_n = is_https ? size_t{8} : size_t{7};
+    const size_t host_size = host->size();
+    const size_t path_size = path.size();
+    const size_t q_n = query ? query->size() + 1 : 0;
+    const size_t h_n = hash ? hash->size() + 1 : 0;
+    const size_t total = prefix_n + host_size + path_size + q_n + h_n;
+#if defined(__cpp_lib_string_resize_and_overwrite)
+    std::string output;
+    output.resize_and_overwrite(total, [&](char* p, size_t) {
+      if (is_https) {
+        std::memcpy(p, "https://", 8);
+      } else {
+        std::memcpy(p, "http://", 7);
+      }
+      char* w = p + prefix_n;
+      // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+      std::memcpy(w, host->data(), host_size);
+      w += host_size;
+      std::memcpy(w, path.data(), path_size);
+      w += path_size;
+      if (q_n != 0) {
+        *w++ = '?';
+        // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+        std::memcpy(w, query->data(), q_n - 1);
+        w += q_n - 1;
+      }
+      if (h_n != 0) {
+        *w++ = '#';
+        // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+        std::memcpy(w, hash->data(), h_n - 1);
+      }
+      return total;
+    });
+    return output;
+#else
+    std::string output;
+    output.reserve(total);
+    if (is_https) {
+      output.append("https://", 8);
+    } else {
+      output.append("http://", 7);
+    }
+    output.append(*host);
+    output.append(path);
+    if (q_n != 0) {
+      output += '?';
+      output.append(*query);
+    }
+    if (h_n != 0) {
+      output += '#';
+      output.append(*hash);
+    }
+    return output;
+#endif
+  }
   if (is_special() && host.has_value() && username.empty() && password.empty())
       [[likely]] {
     const size_t host_size = host->size();
@@ -195,37 +258,6 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const bool has_h = hash.has_value();
     const bool has_p = port.has_value();
     const bool is_https = type == ada::scheme::type::HTTPS;
-    const bool is_http = type == ada::scheme::type::HTTP;
-    if (!has_q && !has_h && !has_p && (is_https || is_http)) [[likely]] {
-      const size_t prefix_n = is_https ? size_t{8} : size_t{7};
-      const size_t total = prefix_n + host_size + path_size;
-#if defined(__cpp_lib_string_resize_and_overwrite)
-      std::string output;
-      output.resize_and_overwrite(total, [&](char* p, size_t) {
-        if (is_https) {
-          std::memcpy(p, "https://", 8);
-        } else {
-          std::memcpy(p, "http://", 7);
-        }
-        // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-        std::memcpy(p + prefix_n, host->data(), host_size);
-        std::memcpy(p + prefix_n + host_size, path.data(), path_size);
-        return total;
-      });
-      return output;
-#else
-      std::string output;
-      output.reserve(total);
-      if (is_https) {
-        output.append("https://", 8);
-      } else {
-        output.append("http://", 7);
-      }
-      output.append(*host);
-      output.append(path);
-      return output;
-#endif
-    }
     const std::string_view prefix =
         is_https ? std::string_view{"https://", 8}
                  : ada::scheme::details::special_href_prefix[type];

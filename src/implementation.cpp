@@ -535,54 +535,6 @@ validate_port:
 
 }  // namespace
 
-template <class result_type>
-ada_warn_unused tl::expected<result_type, errors> parse(
-    std::string_view input, const result_type* base_url) {
-  if (base_url == nullptr) [[likely]] {
-    if (input.size() > std::numeric_limits<uint32_t>::max()) [[unlikely]] {
-      return tl::unexpected(errors::type_error);
-    }
-    if (max_input_length_customized && input.size() > get_max_input_length())
-        [[unlikely]] {
-      return tl::unexpected(errors::type_error);
-    }
-    result_type u{};
-    if (ada::parser::try_parse_simple_absolute(input, u)) [[likely]] {
-      // Default max is ~4 GB; only re-check expansion when the input
-      // could grow past that (or past a customized limit).
-      if (max_input_length_customized) [[unlikely]] {
-        const uint32_t max_length = get_max_input_length();
-        if (input.size() > static_cast<size_t>(max_length) / 5 &&
-            u.get_href_size() > max_length) {
-          return tl::unexpected(errors::type_error);
-        }
-      } else if (input.size() > std::numeric_limits<uint32_t>::max() / 5)
-          [[unlikely]] {
-        if (u.get_href_size() > std::numeric_limits<uint32_t>::max()) {
-          return tl::unexpected(errors::type_error);
-        }
-      }
-      return u;
-    }
-    ada::parser::parse_url_impl_into<result_type, true>(u, input, nullptr,
-                                                        false);
-    if (!u.is_valid) {
-      return tl::unexpected(errors::type_error);
-    }
-    return u;
-  }
-  result_type u = ada::parser::parse_url_impl<result_type>(input, base_url);
-  if (!u.is_valid) {
-    return tl::unexpected(errors::type_error);
-  }
-  return u;
-}
-
-template ada::result<url> parse<url>(std::string_view input,
-                                     const url* base_url = nullptr);
-template ada::result<url_aggregator> parse<url_aggregator>(
-    std::string_view input, const url_aggregator* base_url = nullptr);
-
 std::string href_from_file(std::string_view input) {
   // Match ada::parse / setters: refuse inputs that already exceed the limit.
   // Path percent-encoding can still expand the result, so we also check the
