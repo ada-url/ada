@@ -2110,13 +2110,17 @@ ADA_PARSER_COLD bool try_finish_simple_userinfo(std::string_view input,
       return false;
     }
     const uint16_t default_port = ada::scheme::get_special_port(scheme_type);
-    if (any_digit && port_value == default_port) {
-      // Href omits the default port; the input is not already canonical.
+    if (!any_digit || port_value == default_port) {
+      // Empty or default port: href drops the colon. `https://u@h://x`
+      // must not keep the extra ':' in the aggregator buffer.
       return false;
     }
-    if (any_digit) {
-      parsed_port = port_value;
+    // `:0080` parses as 80 but href writes `:80`. Only finish when the
+    // digits are already the canonical decimal form.
+    if (p - (host_end + 1) != port_decimal_digit_count(port_value)) {
+      return false;
     }
+    parsed_port = port_value;
   }
   const size_t authority_end = p;
 
@@ -2164,6 +2168,7 @@ ADA_PARSER_COLD bool try_finish_simple_userinfo(std::string_view input,
   }
 
   out.type = scheme_type;
+  out.host_type = DEFAULT;
   const bool insert_slash = !has_path;
   const uint32_t username_end =
       protocol_end + 2 + static_cast<uint32_t>(username.size());

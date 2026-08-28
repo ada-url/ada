@@ -2251,6 +2251,24 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
   assert_can_parse_consistent("https://user@example.com/x");
   assert_can_parse_consistent("https://@example.com/");
   assert_can_parse_consistent("https://user:pass@example.com");
+  // Empty port after userinfo (`host://`) must not keep the colon.
+  assert_can_parse_consistent("https://htt@ps://example.com/ath?q=1/.?x/./x");
+  assert_can_parse_consistent("https://e@ample.com:0080/x");
+  {
+    auto url = ada::parse<TypeParam>("https://e@ample.com:0080/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_port(), "80");
+    ASSERT_EQ(std::string(url->get_href()), "https://e@ample.com:80/x");
+  }
+  {
+    auto url =
+        ada::parse<TypeParam>("https://htt@ps://example.com/ath?q=1/.?x/./x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(std::string(url->get_href()),
+              std::string(ada::parse<ada::url_aggregator>(
+                              "https://htt@ps://example.com/ath?q=1/.?x/./x")
+                              ->get_href()));
+  }
   // 8-byte scheme match + 32-byte host window (BBC-style CDN hosts).
   {
     auto url = ada::parse<TypeParam>(
@@ -2392,8 +2410,10 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
         std::string_view("http://192.168.1.1/x"), u));
     ASSERT_EQ(u.get_hostname(), "192.168.1.1");
     ASSERT_EQ(u.host_type, ada::IPV4);
-    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
         std::string_view("http://user@example.com/x"), u));
+    ASSERT_EQ(u.get_username(), "user");
+    ASSERT_EQ(u.get_href(), "http://user@example.com/x");
     ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
         std::string_view("http:////example.com/x"), u));
   }
