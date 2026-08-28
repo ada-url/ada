@@ -2,7 +2,7 @@
 // SetUsername / SetPassword / SetHash is not charged against the 700 KB
 // unity parse object. Rollback is decided with a local helper: calling
 // needs_rollback_snapshot() would jump back into ada.cpp.o at ~0x5500
-// (that is why the previous isolation recovered only ~0.2 µs).
+// (that is why the previous isolation recovered only ~0.2 us).
 // Amalgamation leaves ADA_URL_SETTERS_SEPARATE_TU unset and compiles
 // these methods once via url_aggregator.cpp.
 //
