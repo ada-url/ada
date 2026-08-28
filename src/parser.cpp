@@ -704,7 +704,14 @@ ada_really_inline void note_dots_in_window(const uint8_t* b, size_t i,
   const int slashes =
       _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('/'))) & valid_mask;
   const bool leading_prefix = (i == run_start || b[i - 1] == '/');
-  if (((dots & 1) != 0 && leading_prefix) || (dots & (slashes << 1)) != 0) {
+  // The '/' before run_start is often outside valid_mask (it is the path
+  // delimiter already consumed). Treat the first path byte as a segment
+  // start so "/./a" in an overlapping last-16 window is not missed.
+  int after_slash = slashes << 1;
+  if (run_start > i && run_start < i + 16) {
+    after_slash |= 1 << static_cast<int>(run_start - i);
+  }
+  if (((dots & 1) != 0 && leading_prefix) || (dots & after_slash) != 0) {
     maybe_dot_segment = true;
   }
 }
@@ -736,7 +743,11 @@ ada_really_inline void note_dots_in_window_neon(const uint8_t* b, size_t i,
   const uint64_t slashes =
       neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('/'))) & valid_bits;
   const bool leading_prefix = (i == run_start || b[i - 1] == '/');
-  if (((dots & 0xF) != 0 && leading_prefix) || (dots & (slashes << 4)) != 0) {
+  uint64_t after_slash = slashes << 4;
+  if (run_start > i && run_start < i + 16) {
+    after_slash |= uint64_t{0xF} << ((run_start - i) * 4);
+  }
+  if (((dots & 0xF) != 0 && leading_prefix) || (dots & after_slash) != 0) {
     maybe_dot_segment = true;
   }
 }
