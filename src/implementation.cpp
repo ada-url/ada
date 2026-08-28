@@ -109,6 +109,22 @@ ada_really_inline int sse2_unclean_http_host(__m128i w) noexcept {
 ada_really_inline bool sse2_http_host_delim(uint8_t c) noexcept {
   return c == '/' || c == '?' || c == '#';
 }
+
+ada_really_inline bool mask_has_xn(const uint8_t* bytes, size_t at, int x_mask,
+                                   size_t length) noexcept {
+  if (x_mask == 0) {
+    return false;
+  }
+  unsigned bits = static_cast<unsigned>(x_mask);
+  do {
+    const size_t pos = at + static_cast<size_t>(ctz32(bits));
+    if (pos + 2 < length && bytes[pos + 1] == 'n' && bytes[pos + 2] == '-') {
+      return true;
+    }
+    bits &= bits - 1;
+  } while (bits != 0);
+  return false;
+}
 #endif
 
 // Minimal front end for the overwhelmingly common already-canonical HTTP(S)
@@ -170,7 +186,6 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   }
 
   size_t cursor = authority_start;
-  bool has_x = false;
 #if ADA_SSE2
   const __m128i x_splat = _mm_set1_epi8('x');
   // 0 = window was clean (keep scanning), 1 = host delimiter, -1 = fall through
@@ -180,15 +195,12 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
     const int unclean = sse2_unclean_http_host(w) & keep;
     const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat)) & keep;
     if (unclean == 0) {
-      if (xs != 0) {
-        has_x = true;
-      }
-      return 0;
+      return mask_has_xn(bytes, at, xs, length) ? -1 : 0;
     }
     const int hit = ctz32(static_cast<unsigned>(unclean));
     const int valid = (1 << hit) - 1;
-    if ((xs & valid) != 0) {
-      has_x = true;
+    if (mask_has_xn(bytes, at, xs & valid, length)) {
+      return -1;
     }
     cursor = at + static_cast<size_t>(hit);
     return sse2_http_host_delim(bytes[cursor]) ? 1 : -1;
@@ -234,8 +246,14 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   {
     while (cursor + 8 <= length &&
            eight_clean_http_host_bytes(bytes + cursor)) {
-      if (!has_x && std::memchr(bytes + cursor, 'x', 8) != nullptr) {
-        has_x = true;
+      if (std::memchr(bytes + cursor, 'x', 8) != nullptr) {
+        for (size_t k = 0; k < 8; ++k) {
+          const size_t pos = cursor + k;
+          if (bytes[pos] == 'x' && pos + 2 < length && bytes[pos + 1] == 'n' &&
+              bytes[pos + 2] == '-') {
+            return std::nullopt;
+          }
+        }
       }
       cursor += 8;
     }
@@ -247,8 +265,9 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
       if (!clean_http_host_byte[c]) {
         return std::nullopt;
       }
-      if (c == 'x') {
-        has_x = true;
+      if (c == 'x' && cursor + 2 < length && bytes[cursor + 1] == 'n' &&
+          bytes[cursor + 2] == '-') {
+        return std::nullopt;
       }
       ++cursor;
     }
@@ -267,11 +286,8 @@ host_done:
     return std::nullopt;
   }
 
-  const std::string_view host(input.data() + authority_start, host_length);
-  if (checkers::last_label_may_be_a_number(host)) {
-    return std::nullopt;
-  }
-  if (has_x && host.find("xn-") != std::string_view::npos) {
+  if (checkers::last_label_may_be_a_number(
+          std::string_view(input.data() + authority_start, host_length))) {
     return std::nullopt;
   }
 

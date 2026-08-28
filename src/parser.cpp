@@ -364,14 +364,50 @@ ada_really_inline uint64_t neon_uppercase(uint8x16_t w) noexcept {
 }
 #endif  // ADA_NEON
 
+// Punycode "xn-" at pos. Path bytes after a host delimiter are never "n-",
+// so a host-final 'x' cannot false-positive.
+ada_really_inline void note_xn_prefix(const uint8_t* b, size_t pos, size_t len,
+                                      bool& has_xn) noexcept {
+  if (!has_xn && pos + 2 < len && b[pos + 1] == 'n' && b[pos + 2] == '-') {
+    has_xn = true;
+  }
+}
+
+ada_really_inline void note_xn_mask(const uint8_t* b, size_t at, int x_mask,
+                                    size_t len, bool& has_xn) noexcept {
+  if (has_xn || x_mask == 0) {
+    return;
+  }
+  unsigned bits = static_cast<unsigned>(x_mask);
+  do {
+    note_xn_prefix(b, at + static_cast<size_t>(trailing_zeroes32(bits)), len,
+                   has_xn);
+    bits &= bits - 1;
+  } while (bits != 0 && !has_xn);
+}
+
+#if ADA_NEON
+ada_really_inline void note_xn_neon(const uint8_t* b, size_t at, uint64_t xs,
+                                    size_t len, bool& has_xn) noexcept {
+  if (has_xn || xs == 0) {
+    return;
+  }
+  do {
+    const int tz = trailing_zeroes64(xs);
+    note_xn_prefix(b, at + (static_cast<size_t>(tz) >> 2), len, has_xn);
+    xs &= ~(uint64_t{0xF} << (static_cast<unsigned>(tz) & ~3u));
+  } while (xs != 0 && !has_xn);
+}
+#endif
+
 // Returns false if a forbidden host code point is found. On success, *end is
-// the first / ? # or len. has_upper / has_x only count host bytes, not the
+// the first / ? # or len. has_upper / has_xn only count host bytes, not the
 // path/query bytes that may sit in the same SIMD window after the delimiter.
 ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
                                      size_t& end, bool& has_upper,
-                                     bool& has_x) noexcept {
+                                     bool& has_xn) noexcept {
   has_upper = false;
-  has_x = false;
+  has_xn = false;
   size_t i = start;
 #if ADA_PARSER_SSSE3
   if (len - start >= 16) {
@@ -388,9 +424,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
         if (up != 0) {
           has_upper = true;
         }
-        if (xs != 0) {
-          has_x = true;
-        }
+        note_xn_mask(b, at, xs, len, has_xn);
         return false;
       }
       const int hit = trailing_zeroes32(static_cast<uint32_t>(mask));
@@ -398,9 +432,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       if ((up & valid) != 0) {
         has_upper = true;
       }
-      if ((xs & valid) != 0) {
-        has_x = true;
-      }
+      note_xn_mask(b, at, xs & valid, len, has_xn);
       end = at + static_cast<size_t>(hit);
       return true;
     };
@@ -440,9 +472,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       if (up != 0) {
         has_upper = true;
       }
-      if (xs != 0) {
-        has_x = true;
-      }
+      note_xn_mask(b, at, xs, len, has_xn);
       end = len;
       return true;
     }
@@ -451,9 +481,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     if ((up & valid) != 0) {
       has_upper = true;
     }
-    if ((xs & valid) != 0) {
-      has_x = true;
-    }
+    note_xn_mask(b, at, xs & valid, len, has_xn);
     end = at + static_cast<size_t>(hit);
     return k_host_class[b[end]] == 1;
   }
@@ -472,18 +500,14 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
         if ((up & valid) != 0) {
           has_upper = true;
         }
-        if ((xs & valid) != 0) {
-          has_x = true;
-        }
+        note_xn_mask(b, i + off, xs & valid, len, has_xn);
         end = i + off + static_cast<size_t>(hit);
         return k_host_class[b[end]] == 1;
       }
       if (up != 0) {
         has_upper = true;
       }
-      if (xs != 0) {
-        has_x = true;
-      }
+      note_xn_mask(b, i + off, xs, len, has_xn);
     }
   }
   for (; i + 16 <= len; i += 16) {
@@ -497,18 +521,14 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       if ((up & valid) != 0) {
         has_upper = true;
       }
-      if ((xs & valid) != 0) {
-        has_x = true;
-      }
+      note_xn_mask(b, i, xs & valid, len, has_xn);
       end = i + static_cast<size_t>(hit);
       return k_host_class[b[end]] == 1;
     }
     if (up != 0) {
       has_upper = true;
     }
-    if (xs != 0) {
-      has_x = true;
-    }
+    note_xn_mask(b, i, xs, len, has_xn);
   }
   if (len >= 16 && i < len) {
     const size_t at = len - 16;
@@ -522,9 +542,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       if (up != 0) {
         has_upper = true;
       }
-      if (xs != 0) {
-        has_x = true;
-      }
+      note_xn_mask(b, at, xs, len, has_xn);
       end = len;
       return true;
     }
@@ -533,9 +551,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     if ((up & valid) != 0) {
       has_upper = true;
     }
-    if ((xs & valid) != 0) {
-      has_x = true;
-    }
+    note_xn_mask(b, at, xs & valid, len, has_xn);
     end = at + static_cast<size_t>(hit);
     return k_host_class[b[end]] == 1;
   }
@@ -553,9 +569,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
         if (up != 0) {
           has_upper = true;
         }
-        if (xs != 0) {
-          has_x = true;
-        }
+        note_xn_neon(b, at, xs, len, has_xn);
         return false;
       }
       const size_t hit = static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
@@ -563,9 +577,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       if ((up & valid) != 0) {
         has_upper = true;
       }
-      if ((xs & valid) != 0) {
-        has_x = true;
-      }
+      note_xn_neon(b, at, xs & valid, len, has_xn);
       end = at + hit;
       return true;
     };
@@ -600,9 +612,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       if (up != 0) {
         has_upper = true;
       }
-      if (xs != 0) {
-        has_x = true;
-      }
+      note_xn_neon(b, at, xs, len, has_xn);
       end = len;
       return true;
     }
@@ -611,9 +621,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     if ((up & valid) != 0) {
       has_upper = true;
     }
-    if ((xs & valid) != 0) {
-      has_x = true;
-    }
+    note_xn_neon(b, at, xs & valid, len, has_xn);
     end = at + hit;
     return k_host_class[b[end]] == 1;
   }
@@ -631,7 +639,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     if (c >= 'A' && c <= 'Z') {
       has_upper = true;
     } else if (c == 'x') {
-      has_x = true;
+      note_xn_prefix(b, i, len, has_xn);
     }
   }
   end = len;
@@ -1643,9 +1651,9 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
 
   const size_t host_start = pos;
   bool has_upper = false;
-  bool has_x = false;
+  bool has_xn = false;
   size_t host_end = pos;
-  if (!scan_plain_host(b, pos, len, host_end, has_upper, has_x)) {
+  if (!scan_plain_host(b, pos, len, host_end, has_upper, has_xn)) {
     return false;
   }
   if (host_start == host_end) [[unlikely]] {
@@ -1680,11 +1688,8 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
         return false;
       }
       is_ipv4 = true;
-    } else if (has_x) [[unlikely]] {
-      static constexpr std::string_view xn{"xn-", 3};
-      if (hv.find(xn) != std::string_view::npos) [[unlikely]] {
-        return false;
-      }
+    } else if (has_xn) [[unlikely]] {
+      return false;
     }
   }
 

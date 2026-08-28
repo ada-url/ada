@@ -1876,6 +1876,14 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     auto url = ada::parse<TypeParam>("http://xn--ls8h.com/");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "xn--ls8h.com");
+    ada::url u;
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://xn--ls8h.com/"), u));
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://foo.xn--bar.com/"), u));
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/"), u));
+    ASSERT_EQ(u.get_hostname(), "example.com");
   }
   {
     const std::string long_host(254, 'a');
