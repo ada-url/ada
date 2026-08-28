@@ -1359,7 +1359,7 @@ ada_never_inline void finish_simple_absolute_handoff(
     }
   };
   if constexpr (is_aggregator) {
-    out.buffer.assign(input.data(), host_end);
+    out.buffer.assign(input.substr(0, host_end));
     if (has_upper) {
       unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
     }
@@ -1545,7 +1545,7 @@ after_rest:
       }
     };
     if constexpr (is_aggregator) {
-      out.buffer.assign(input.data(), host_end);
+      out.buffer.assign(input.substr(0, host_end));
       if (parsed_port != url_components::omitted) {
         append_canonical_port(out.buffer, parsed_port);
       }
@@ -2125,10 +2125,9 @@ result_type parse_url_impl(std::string_view user_input,
   result_type url{};
 
   // Default max is ~4 GB. Skip the atomic unless set_max_input_length ran.
-  if (user_input.size() > std::numeric_limits<uint32_t>::max()) [[unlikely]] {
-    url.is_valid = false;
-  } else if (ada::max_input_length_customized &&
-             user_input.size() > ada::get_max_input_length()) [[unlikely]] {
+  if (user_input.size() > std::numeric_limits<uint32_t>::max() ||
+      (ada::max_input_length_customized &&
+       user_input.size() > ada::get_max_input_length())) [[unlikely]] {
     url.is_valid = false;
   }
   // Going forward, user_input.size() is in [0,
