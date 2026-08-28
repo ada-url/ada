@@ -123,7 +123,8 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   clear_pathname();
   parse_path_outlined(input);
   if (get_pathname().starts_with("//") && !has_authority() && !has_dash_dot()) {
-    buffer.insert(components.pathname_start, "/.");
+    buffer.insert(components.pathname_start, 1, '/');
+    buffer.insert(components.pathname_start + 1, 1, '.');
     components.pathname_start += 2;
     if (components.search_start != url_components::omitted) {
       components.search_start += 2;
