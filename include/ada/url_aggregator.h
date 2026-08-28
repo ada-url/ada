@@ -411,6 +411,9 @@ struct url_aggregator : url_base {
   [[nodiscard]] bool parse_opaque_host(std::string_view input);
 
   ada_really_inline void parse_path(std::string_view input);
+  // Out-of-line thunk so finish helpers in parser_finish.cpp can call
+  // parse_path (always_inline body lives only in the unity TU).
+  void parse_path_outlined(std::string_view input);
 
   /**
    * A URL cannot have a username/password/port if its host is null or the empty

@@ -421,6 +421,10 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   return true;
 }
 
+void url_aggregator::parse_path_outlined(std::string_view input) {
+  parse_path(input);
+}
+
 ada_really_inline void url_aggregator::parse_path(std::string_view input) {
   ada_log("url_aggregator::parse_path ", input);
   ADA_ASSERT_TRUE(validate());

@@ -2209,6 +2209,32 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
               "https://user:pass@www.example.com:8080/path/to/"
               "resource?foo=bar&baz=qux#section");
   }
+  // 16-byte inputs use an overlapping last-16 path window that starts at
+  // byte 0. A leading '.' in that window must not read b[-1].
+  {
+    constexpr std::string_view k16 = "https://u@x/c.de";
+    ASSERT_EQ(k16.size(), 16u);
+    auto url = ada::parse<TypeParam>(k16);
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "u");
+    ASSERT_EQ(url->get_hostname(), "x");
+    ASSERT_EQ(url->get_pathname(), "/c.de");
+    ASSERT_EQ(url->get_href(), "https://u@x/c.de");
+    ada::url fast;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(k16, fast));
+    ASSERT_EQ(fast.get_href(), "https://u@x/c.de");
+  }
+  {
+    constexpr std::string_view k16 = "https://a.com/.x";
+    ASSERT_EQ(k16.size(), 16u);
+    auto url = ada::parse<TypeParam>(k16);
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "a.com");
+    ASSERT_EQ(url->get_pathname(), "/.x");
+    ada::url fast;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(k16, fast));
+    ASSERT_EQ(fast.get_pathname(), "/.x");
+  }
   // Userinfo without a password, empty userinfo, and a missing path.
   {
     auto url = ada::parse<TypeParam>("https://user@example.com/x");

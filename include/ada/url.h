@@ -509,6 +509,9 @@ struct url : url_base {
    * @see https://url.spec.whatwg.org/
    */
   ada_really_inline void parse_path(std::string_view input);
+  // Out-of-line thunk so finish helpers in parser_finish.cpp can call
+  // parse_path (always_inline body lives only in the unity TU).
+  void parse_path_outlined(std::string_view input);
 
   /**
    * Set the scheme for this URL. The provided scheme should be a valid

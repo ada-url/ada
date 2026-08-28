@@ -215,16 +215,16 @@ constexpr void url::copy_scheme(const ada::url& u) {
       w += host_size;
       std::memcpy(w, path.data(), path_size);
       w += path_size;
-      if (q_n != 0) {
+      if (query) {
         *w++ = '?';
         // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-        std::memcpy(w, query->data(), q_n - 1);
-        w += q_n - 1;
+        std::memcpy(w, query->data(), query->size());
+        w += query->size();
       }
-      if (h_n != 0) {
+      if (hash) {
         *w++ = '#';
         // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-        std::memcpy(w, hash->data(), h_n - 1);
+        std::memcpy(w, hash->data(), hash->size());
       }
       return total;
     });
@@ -239,11 +239,11 @@ constexpr void url::copy_scheme(const ada::url& u) {
     }
     output.append(*host);
     output.append(path);
-    if (q_n != 0) {
+    if (query) {
       output += '?';
       output.append(*query);
     }
-    if (h_n != 0) {
+    if (hash) {
       output += '#';
       output.append(*hash);
     }

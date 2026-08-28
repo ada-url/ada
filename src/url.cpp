@@ -316,6 +316,8 @@ ada_really_inline bool url::parse_host(std::string_view input) {
   return true;
 }
 
+void url::parse_path_outlined(std::string_view input) { parse_path(input); }
+
 ada_really_inline void url::parse_path(std::string_view input) {
   ada_log("parse_path ", input);
   std::string tmp_buffer;

@@ -18,10 +18,11 @@ DOCKER_IMAGE=xianpengshen/clang-tools:22
 ALL_ADA_FILES=$(cd "$MAINSOURCE" && \
   git ls-tree --full-tree --name-only -r HEAD | grep -E '.*\.(c|h|cc|cpp|hh)$')
 
-# ada.cpp is the single translation unit that #includes every other .cpp file.
-# Running clang-tidy on it covers all first-party code; HeaderFilterRegex in
-# .clang-tidy controls which included files generate diagnostics.
-TIDY_SRC=src/ada.cpp
+# ada.cpp is the unity translation unit. parser_finish.cpp is a separate
+# TU that #includes parser.cpp with ADA_SKIP_PARSER_HOT, so tidy must
+# cover both. HeaderFilterRegex in .clang-tidy controls which included
+# files generate diagnostics.
+TIDY_SRCS=(src/ada.cpp src/parser_finish.cpp)
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -85,7 +86,7 @@ run_tidy() {
     -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_CXX_FLAGS="-stdlib=libc++"
-  "$tidy" -p build-clang-tidy "$TIDY_SRC"
+  "$tidy" -p build-clang-tidy "${TIDY_SRCS[@]}"
 }
 
 if have_tool_version clang-tidy-22 && command -v clang++-22 >/dev/null 2>&1; then
@@ -111,6 +112,6 @@ else
         -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
         -DCMAKE_CXX_FLAGS='-stdlib=libc++'
-      clang-tidy-22 -p build-clang-tidy "$TIDY_SRC"
+      clang-tidy-22 -p build-clang-tidy src/ada.cpp src/parser_finish.cpp
     "
 fi

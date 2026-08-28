@@ -8,6 +8,9 @@
 #include "implementation.cpp"
 #include "helpers.cpp"
 #include "url.cpp"
+#if defined(ADA_PARSER_FINISH_SEPARATE_TU)
+#define ADA_SKIP_PARSER_FINISH
+#endif
 #include "parser.cpp"
 #include "url_components.cpp"
 #include "url_aggregator.cpp"
