@@ -2236,8 +2236,10 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
   }
   {
     ada::url u;
-    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
         std::string_view("http://192.168.1.1/x"), u));
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.host_type, ada::IPV4);
     ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
         std::string_view("http://user@example.com/x"), u));
     ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
