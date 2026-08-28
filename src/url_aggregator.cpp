@@ -278,6 +278,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   return parse_scheme_with_colon<true>(with_colon);
 }
 
+#if !defined(ADA_URL_SETTERS_SEPARATE_TU)
 bool url_aggregator::set_username(const std::string_view input) {
   ada_log("url_aggregator::set_username '", input, "' ");
   ADA_ASSERT_TRUE(validate());
@@ -347,6 +348,7 @@ bool url_aggregator::set_password(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
   return true;
 }
+#endif  // !ADA_URL_SETTERS_SEPARATE_TU
 
 bool url_aggregator::set_port(const std::string_view input) {
   ada_log("url_aggregator::set_port ", input);
@@ -536,6 +538,7 @@ void url_aggregator::set_search(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
 }
 
+#if !defined(ADA_URL_SETTERS_SEPARATE_TU)
 void url_aggregator::set_hash(const std::string_view input) {
   ada_log("url_aggregator::set_hash ", input);
   ADA_ASSERT_TRUE(validate());
@@ -569,6 +572,7 @@ void url_aggregator::set_hash(const std::string_view input) {
   update_unencoded_base_hash(new_value);
   ADA_ASSERT_TRUE(validate());
 }
+#endif  // !ADA_URL_SETTERS_SEPARATE_TU
 
 bool url_aggregator::set_href(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));

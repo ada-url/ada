@@ -20,9 +20,9 @@ ALL_ADA_FILES=$(cd "$MAINSOURCE" && \
 
 # ada.cpp is the unity translation unit. parser_hot.cpp and
 # parser_finish.cpp #include parser.cpp with complementary skip macros,
-# and can_parse.cpp is a separate TU. HeaderFilterRegex in .clang-tidy
-# controls which included files generate diagnostics.
-TIDY_SRCS=(src/ada.cpp src/parser_hot.cpp src/parser_finish.cpp src/can_parse.cpp)
+# and can_parse.cpp / url_setters.cpp are separate TUs. HeaderFilterRegex
+# in .clang-tidy controls which included files generate diagnostics.
+TIDY_SRCS=(src/ada.cpp src/parser_hot.cpp src/parser_finish.cpp src/can_parse.cpp src/url_setters.cpp)
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -112,6 +112,6 @@ else
         -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
         -DCMAKE_CXX_FLAGS='-stdlib=libc++'
-      clang-tidy-22 -p build-clang-tidy src/ada.cpp src/parser_hot.cpp src/parser_finish.cpp src/can_parse.cpp
+      clang-tidy-22 -p build-clang-tidy src/ada.cpp src/parser_hot.cpp src/parser_finish.cpp src/can_parse.cpp src/url_setters.cpp
     "
 fi
