@@ -112,6 +112,12 @@ bool finish_simple_absolute_literal_host(
     uint32_t protocol_end, size_t host_start, size_t host_end,
     std::string_view host, url_host_type parsed_host_type);
 
+/** @private Cold already-canonical userinfo finish (`user[:pass]@host`). */
+template <class result_type>
+bool try_finish_simple_userinfo(std::string_view input, result_type& out,
+                                ada::scheme::type scheme_type,
+                                uint32_t protocol_end, size_t auth_start);
+
 /** @private Cold rest_simple=false tail; kept out of the hot I-cache. */
 template <class result_type>
 void finish_simple_absolute_handoff(std::string_view input, result_type& out,

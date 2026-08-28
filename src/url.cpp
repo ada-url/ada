@@ -10,6 +10,7 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <numeric>
 #include <ranges>
 #include <string>
@@ -485,6 +486,10 @@ ada_really_inline void url::parse_path(std::string_view input) {
 }
 
 bool url::needs_rollback_snapshot(size_t input_len) const noexcept {
+  if (!ada::max_input_length_customized) [[likely]] {
+    return get_href_size() + input_len + 16 >
+           std::numeric_limits<uint32_t>::max();
+  }
   return get_href_size() + input_len + 16 > ada::get_max_input_length();
 }
 
@@ -496,12 +501,17 @@ bool url::set_host_or_hostname(const std::string_view input) {
 
   url saved_url(*this);
 
-  size_t host_end_pos = input.find('#');
-  std::string _host(input.data(), host_end_pos != std::string_view::npos
-                                      ? host_end_pos
-                                      : input.size());
-  helpers::remove_ascii_tab_or_newline(_host);
-  std::string_view new_host(_host);
+  std::string cleaned;
+  std::string_view new_host = input;
+  if (const size_t host_end_pos = input.find('#');
+      host_end_pos != std::string_view::npos) {
+    new_host = input.substr(0, host_end_pos);
+  }
+  if (unicode::has_tabs_or_newline(new_host)) {
+    cleaned.assign(new_host);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    new_host = cleaned;
+  }
 
   auto check_url_size = [&]() -> bool {
     if (get_href_size() > ada::get_max_input_length()) {
@@ -514,7 +524,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
   // If url's scheme is "file", then set state to file host state, instead of
   // host state.
   if (type != ada::scheme::type::FILE) {
-    std::string_view host_view(_host.data(), _host.length());
+    std::string_view host_view = new_host;
     auto [location, found_colon] =
         helpers::get_host_delimiter_location(is_special(), host_view);
 
@@ -652,8 +662,13 @@ bool url::set_port(const std::string_view input) {
     return true;
   }
 
-  std::string trimmed(input);
-  helpers::remove_ascii_tab_or_newline(trimmed);
+  std::string cleaned;
+  std::string_view trimmed = input;
+  if (unicode::has_tabs_or_newline(input)) {
+    cleaned.assign(input);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    trimmed = cleaned;
+  }
 
   if (trimmed.empty()) {
     return true;
@@ -667,8 +682,8 @@ bool url::set_port(const std::string_view input) {
   // Find the first non-digit character to determine the length of digits
   auto first_non_digit =
       std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
-  std::string_view digits_to_parse =
-      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
+  std::string_view digits_to_parse = std::string_view(
+      trimmed.data(), static_cast<size_t>(first_non_digit - trimmed.begin()));
 
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;
@@ -692,9 +707,13 @@ void url::set_hash(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '#' ? input.substr(1) : input;
-  helpers::remove_ascii_tab_or_newline(new_value);
+  std::string cleaned;
+  std::string_view new_value = input[0] == '#' ? input.substr(1) : input;
+  if (unicode::has_tabs_or_newline(new_value)) {
+    cleaned.assign(new_value);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    new_value = cleaned;
+  }
   auto previous_hash = std::move(hash);
   hash = unicode::percent_encode(new_value,
                                  ada::character_sets::FRAGMENT_PERCENT_ENCODE);
@@ -710,9 +729,13 @@ void url::set_search(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '?' ? input.substr(1) : input;
-  helpers::remove_ascii_tab_or_newline(new_value);
+  std::string cleaned;
+  std::string_view new_value = input[0] == '?' ? input.substr(1) : input;
+  if (unicode::has_tabs_or_newline(new_value)) {
+    cleaned.assign(new_value);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    new_value = cleaned;
+  }
 
   auto query_percent_encode_set =
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
@@ -740,8 +763,13 @@ bool url::set_pathname(const std::string_view input) {
 }
 
 bool url::set_protocol(const std::string_view input) {
-  std::string view(input);
-  helpers::remove_ascii_tab_or_newline(view);
+  std::string cleaned;
+  std::string_view view = input;
+  if (unicode::has_tabs_or_newline(input)) {
+    cleaned.assign(input);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    view = cleaned;
+  }
   if (view.empty()) {
     return true;
   }
@@ -751,25 +779,24 @@ bool url::set_protocol(const std::string_view input) {
     return false;
   }
 
-  view.append(":");
-
-  std::string::iterator pointer =
-      std::ranges::find_if_not(view, unicode::is_alnum_plus);
-
-  if (pointer != view.end() && *pointer == ':') {
-    std::optional<url> saved_url;
-    if (needs_rollback_snapshot(view.size())) {
-      saved_url = *this;
-    }
-    bool result = parse_scheme<true>(
-        std::string_view(view.data(), pointer - view.begin()));
-    if (result && saved_url && get_href_size() > ada::get_max_input_length()) {
-      *this = std::move(*saved_url);
-      return false;
-    }
-    return result;
+  size_t n = 0;
+  while (n < view.size() && unicode::is_alnum_plus(view[n])) {
+    ++n;
   }
-  return false;
+  if (n < view.size() && view[n] != ':') {
+    return false;
+  }
+
+  std::optional<url> saved_url;
+  if (needs_rollback_snapshot(n + 1)) {
+    saved_url = *this;
+  }
+  const bool result = parse_scheme<true>(view.substr(0, n));
+  if (result && saved_url && get_href_size() > ada::get_max_input_length()) {
+    *this = std::move(*saved_url);
+    return false;
+  }
+  return result;
 }
 
 bool url::set_href(const std::string_view input) {

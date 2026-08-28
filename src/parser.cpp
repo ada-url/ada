@@ -44,12 +44,16 @@
 #ifdef ADA_PARSER_NEED_SSSE3_TARGET
 // Scanners and the never_inline fast-path entry points share target("ssse3")
 // so the compiler can inline pshufb loops into try_parse_*. parse_url_impl
-// stays baseline and only calls the noinline entries.
+// stays baseline and only calls the noinline entries. COLD helpers also
+// need the target so they can call the pshufb scanners, but they live in
+// .text.unlikely so they do not displace setter I-cache.
 #define ADA_PARSER_SIMD __attribute__((target("ssse3")))
 #define ADA_PARSER_FASTPATH __attribute__((target("ssse3"), noinline))
+#define ADA_PARSER_COLD __attribute__((target("ssse3"), noinline, cold))
 #else
 #define ADA_PARSER_SIMD ada_really_inline
 #define ADA_PARSER_FASTPATH ada_never_inline
+#define ADA_PARSER_COLD ada_never_inline ada_cold
 #endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
@@ -644,6 +648,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       return true;
     }
     if (cls == 2) {
+      end = i;
       return false;
     }
     if (c >= 'A' && c <= 'Z') {
@@ -1318,7 +1323,7 @@ ada_never_inline bool reject_uppercase_plain_host(const char* host,
 
 // Hex/octal/compressed IPv4. Decimal-with-trailing-dot is handled by
 // try_parse_ipv4_fast; this runs only after that miss.
-uint64_t try_parse_ipv4_any(std::string_view input) noexcept {
+ada_cold uint64_t try_parse_ipv4_any(std::string_view input) noexcept {
   if (input.empty()) {
     return checkers::ipv4_fast_fail;
   }
@@ -1372,7 +1377,7 @@ ada_really_inline char* write_u8_dec(char* p, uint8_t v) noexcept {
   return p;
 }
 
-size_t write_ipv4_dotted(char* buf, uint32_t addr) noexcept {
+ada_cold size_t write_ipv4_dotted(char* buf, uint32_t addr) noexcept {
   char* p = buf;
   p = write_u8_dec(p, static_cast<uint8_t>(addr >> 24));
   *p++ = '.';
@@ -1386,7 +1391,7 @@ size_t write_ipv4_dotted(char* buf, uint32_t addr) noexcept {
 
 // true => leave the simple-absolute path. false => stay; may set is_ipv4
 // and ask the caller to rewrite the host to dotted-decimal.
-ada_never_inline bool reject_or_classify_numeric_last_label(
+ada_never_inline ada_cold bool reject_or_classify_numeric_last_label(
     std::string_view hv, bool& is_ipv4, uint64_t& ipv4_addr,
     bool& rewrite_host) noexcept {
   if (!ada::checkers::last_label_may_be_a_number(hv)) {
@@ -1414,7 +1419,7 @@ ada_never_inline bool reject_or_classify_numeric_last_label(
 // Percent-encoding / dot-segment handoff. Kept out of the already-canonical
 // fast-path I-cache: this is the uncommon rest_simple=false tail.
 template <class result_type>
-ada_never_inline void finish_simple_absolute_handoff(
+ada_never_inline ada_cold void finish_simple_absolute_handoff(
     std::string_view input, result_type& out, size_t host_start,
     size_t host_end, size_t host_len, uint32_t protocol_end, bool has_upper,
     bool has_path, size_t path_start, size_t path_end, size_t query_start,
@@ -1461,7 +1466,7 @@ ada_never_inline void finish_simple_absolute_handoff(
 }
 
 template <class result_type>
-ADA_PARSER_FASTPATH bool finish_simple_absolute_with_port(
+ADA_PARSER_COLD bool finish_simple_absolute_with_port(
     std::string_view input, result_type& out, ada::scheme::type scheme_type,
     uint32_t protocol_end, size_t host_start, size_t host_end, size_t host_len,
     bool has_upper) {
@@ -1724,7 +1729,7 @@ after_rest:
 // is not a slice of `input`. Port / path / query / hash still come from input
 // after `host_end`.
 template <class result_type>
-ada_never_inline bool finish_simple_absolute_literal_host(
+ADA_PARSER_COLD bool finish_simple_absolute_literal_host(
     std::string_view input, result_type& out, ada::scheme::type scheme_type,
     uint32_t protocol_end, size_t host_start, size_t host_end,
     std::string_view host, url_host_type parsed_host_type) {
@@ -1974,11 +1979,11 @@ after_rest:
 // character after ']' must be a real authority/path delimiter; otherwise
 // the state machine rejects (e.g. http://[::1]foo).
 template <class result_type>
-ada_never_inline bool try_finish_simple_ipv6(std::string_view input,
-                                             result_type& out,
-                                             ada::scheme::type scheme_type,
-                                             uint32_t protocol_end,
-                                             size_t host_start) {
+ADA_PARSER_COLD bool try_finish_simple_ipv6(std::string_view input,
+                                            result_type& out,
+                                            ada::scheme::type scheme_type,
+                                            uint32_t protocol_end,
+                                            size_t host_start) {
   const auto* b = reinterpret_cast<const uint8_t*>(input.data());
   const size_t len = input.size();
   size_t close = host_start + 1;
@@ -2005,6 +2010,222 @@ ada_never_inline bool try_finish_simple_ipv6(std::string_view input,
   const std::string canon = ada::serializers::ipv6(addr);
   return finish_simple_absolute_literal_host(
       input, out, scheme_type, protocol_end, host_start, after, canon, IPV6);
+}
+
+// Already-canonical `user[:password]@host[:port][/path][?query][#hash]`.
+// Invoked only after the host scanner misses or a port parse fails, so the
+// 99% no-credential path never pays for an '@' check.
+template <class result_type>
+ADA_PARSER_COLD bool try_finish_simple_userinfo(std::string_view input,
+                                                result_type& out,
+                                                ada::scheme::type scheme_type,
+                                                uint32_t protocol_end,
+                                                size_t auth_start) {
+  constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
+  constexpr bool is_aggregator =
+      std::is_same_v<result_type, ada::url_aggregator>;
+  static_assert(is_ada_url || is_aggregator);
+
+  const auto* b = reinterpret_cast<const uint8_t*>(input.data());
+  const size_t len = input.size();
+  size_t at = auth_start;
+  for (; at < len; ++at) {
+    const uint8_t c = b[at];
+    if (c == '@') {
+      break;
+    }
+    if (c == '/' || c == '?' || c == '#') {
+      return false;
+    }
+  }
+  if (at >= len || b[at] != '@') {
+    return false;
+  }
+
+  const std::string_view userinfo(input.data() + auth_start, at - auth_start);
+  const size_t colon = userinfo.find(':');
+  const std::string_view username =
+      colon == std::string_view::npos ? userinfo : userinfo.substr(0, colon);
+  const std::string_view password = colon == std::string_view::npos
+                                        ? std::string_view{}
+                                        : userinfo.substr(colon + 1);
+  // Empty credentials serialize without '@'. An empty password after ':'
+  // drops the colon (`user:@host` -> `user@host`). Leave those to the
+  // state machine so href stays canonical.
+  if ((username.empty() && password.empty()) ||
+      (password.empty() && colon != std::string_view::npos)) {
+    return false;
+  }
+  if (unicode::percent_encode_index(username,
+                                    character_sets::USERINFO_PERCENT_ENCODE) !=
+          username.size() ||
+      unicode::percent_encode_index(password,
+                                    character_sets::USERINFO_PERCENT_ENCODE) !=
+          password.size()) {
+    return false;
+  }
+
+  const size_t host_begin = at + 1;
+  bool has_upper = false;
+  bool has_xn = false;
+  size_t host_end = host_begin;
+  if (!scan_plain_host(b, host_begin, len, host_end, has_upper, has_xn)) {
+    return false;
+  }
+  const size_t host_len = host_end - host_begin;
+  if (host_len - 1 >= 253 || has_xn) {
+    return false;
+  }
+  {
+    uint8_t lastc = b[host_end - 1];
+    if (lastc == '.' && host_len > 1) {
+      lastc = b[host_end - 2];
+    }
+    if (has_upper) {
+      if (reject_uppercase_plain_host(input.data() + host_begin, host_len)) {
+        return false;
+      }
+    } else if (ada::checkers::is_ipv4_number_char(static_cast<char>(lastc)) &&
+               ada::checkers::last_label_may_be_a_number(
+                   std::string_view(input.data() + host_begin, host_len))) {
+      return false;
+    }
+  }
+
+  size_t p = host_end;
+  uint32_t parsed_port = url_components::omitted;
+  if (p < len && b[p] == ':') {
+    ++p;
+    uint32_t port_value = 0;
+    bool any_digit = false;
+    while (p < len && b[p] >= '0' && b[p] <= '9') {
+      any_digit = true;
+      port_value = port_value * 10 + static_cast<uint32_t>(b[p] - '0');
+      if (port_value > 65535) {
+        return false;
+      }
+      ++p;
+    }
+    if (p < len && b[p] != '/' && b[p] != '?' && b[p] != '#') {
+      return false;
+    }
+    const uint16_t default_port = ada::scheme::get_special_port(scheme_type);
+    if (any_digit && port_value == default_port) {
+      // Href omits the default port; the input is not already canonical.
+      return false;
+    }
+    if (any_digit) {
+      parsed_port = port_value;
+    }
+  }
+  const size_t authority_end = p;
+
+  size_t i = authority_end;
+  size_t path_start = authority_end;
+  size_t path_end = authority_end;
+  size_t query_start = std::string_view::npos;
+  size_t hash_start = std::string_view::npos;
+  bool has_path = false;
+  bool maybe_dot_segment = false;
+  bool saw_percent = false;
+  if (i < len && b[i] == '/') {
+    has_path = true;
+    path_start = i;
+    ++i;
+    scan_path_run(b, i, len, maybe_dot_segment, saw_percent);
+    if (i < len && k_path[b[i]] == 2) {
+      return false;
+    }
+    path_end = i;
+  }
+  if (i < len && b[i] == '?') {
+    query_start = i;
+    ++i;
+    scan_query_run(b, i, len);
+    if (i < len && b[i] != '#') {
+      return false;
+    }
+  }
+  if (i < len && b[i] == '#') {
+    hash_start = i;
+    ++i;
+    scan_hash_run(b, i, len);
+    if (i < len) {
+      return false;
+    }
+  } else if (i < len) {
+    return false;
+  }
+  if (has_path && (maybe_dot_segment || saw_percent) &&
+      !simple_path_is_canonical(
+          std::string_view(input.data() + path_start, path_end - path_start),
+          maybe_dot_segment, saw_percent)) {
+    return false;
+  }
+
+  out.type = scheme_type;
+  const bool insert_slash = !has_path;
+  const uint32_t username_end =
+      protocol_end + 2 + static_cast<uint32_t>(username.size());
+  const uint32_t at_host_start = static_cast<uint32_t>(at);
+  const uint32_t pathname_start =
+      static_cast<uint32_t>(insert_slash ? authority_end : path_start);
+  const uint32_t tail_delta = insert_slash ? 1 : 0;
+
+  if constexpr (is_aggregator) {
+    if (!insert_slash) {
+      out.buffer.assign(input);
+    } else {
+      out.buffer.clear();
+      out.buffer.reserve(len + 1);
+      out.buffer.append(input.substr(0, authority_end));
+      out.buffer.push_back('/');
+      if (authority_end < len) {
+        out.buffer.append(input.substr(authority_end));
+      }
+    }
+    if (has_upper) {
+      unicode::to_lower_ascii(out.buffer.data() + host_begin, host_len);
+    }
+    out.components.protocol_end = protocol_end;
+    out.components.username_end = username_end;
+    out.components.host_start = at_host_start;
+    out.components.host_end = static_cast<uint32_t>(host_end);
+    out.components.port = parsed_port;
+    out.components.pathname_start = pathname_start;
+    out.components.search_start =
+        (query_start != std::string_view::npos)
+            ? static_cast<uint32_t>(query_start + tail_delta)
+            : url_components::omitted;
+    out.components.hash_start =
+        (hash_start != std::string_view::npos)
+            ? static_cast<uint32_t>(hash_start + tail_delta)
+            : url_components::omitted;
+  } else {
+    out.username.assign(username);
+    out.password.assign(password);
+    out.host.emplace(input.substr(host_begin, host_len));
+    if (has_upper) {
+      unicode::to_lower_ascii(out.host->data(), host_len);
+    }
+    if (parsed_port != url_components::omitted) {
+      out.port = static_cast<uint16_t>(parsed_port);
+    }
+    if (insert_slash) {
+      out.path = "/";
+    } else {
+      out.path.assign(input.substr(path_start, path_end - path_start));
+    }
+    if (query_start != std::string_view::npos) {
+      const size_t q_end =
+          (hash_start != std::string_view::npos) ? hash_start : len;
+      out.query.emplace(input.substr(query_start + 1, q_end - query_start - 1));
+    }
+    if (hash_start != std::string_view::npos) {
+      out.hash.emplace(input.substr(hash_start + 1, len - hash_start - 1));
+    }
+  }
+  return true;
 }
 
 // Fast path for already-canonical special-scheme URLs of the shape
@@ -2067,7 +2288,8 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
     if (pos < len && b[pos] == '[') {
       return try_finish_simple_ipv6(input, out, scheme_type, protocol_end, pos);
     }
-    return false;
+    return try_finish_simple_userinfo(input, out, scheme_type, protocol_end,
+                                      pos);
   }
   const size_t host_len = host_end - host_start;
   // Empty (0) or too long (>253): (0-1) wraps to SIZE_MAX.
@@ -2112,15 +2334,17 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
   }
 
   if (host_end < len && b[host_end] == ':') [[unlikely]] {
-    if (!finish_simple_absolute_with_port(input, out, scheme_type, protocol_end,
-                                          host_start, host_end, host_len,
-                                          has_upper)) {
-      return false;
+    if (finish_simple_absolute_with_port(input, out, scheme_type, protocol_end,
+                                         host_start, host_end, host_len,
+                                         has_upper)) {
+      if (is_ipv4) {
+        out.host_type = IPV4;
+      }
+      return true;
     }
-    if (is_ipv4) {
-      out.host_type = IPV4;
-    }
-    return true;
+    // `user:pass@host` looks like a port until the '@'.
+    return try_finish_simple_userinfo(input, out, scheme_type, protocol_end,
+                                      host_start);
   }
 
   size_t i = host_end;
@@ -3473,13 +3697,19 @@ result_type& parse_url_impl_into(result_type& url, std::string_view user_input,
   // original input size.
   if constexpr (store_values) {
     if (url.is_valid) {
-      const uint32_t max_input_length = ada::get_max_input_length();
-      if constexpr (result_type_is_ada_url_aggregator) {
-        if (url.buffer.size() > max_input_length) {
-          url.is_valid = false;
-        }
-      } else {
-        if (url.get_href_size() > max_input_length) {
+      const bool may_exceed =
+          ada::max_input_length_customized ||
+          user_input.size() > std::numeric_limits<uint32_t>::max() / 5;
+      if (may_exceed) [[unlikely]] {
+        const uint32_t max_input_length =
+            ada::max_input_length_customized
+                ? ada::get_max_input_length()
+                : std::numeric_limits<uint32_t>::max();
+        if constexpr (result_type_is_ada_url_aggregator) {
+          if (url.buffer.size() > max_input_length) {
+            url.is_valid = false;
+          }
+        } else if (url.get_href_size() > max_input_length) {
           url.is_valid = false;
         }
       }
@@ -3506,6 +3736,13 @@ template bool finish_simple_absolute_literal_host<url>(std::string_view, url&,
 template bool finish_simple_absolute_literal_host<url_aggregator>(
     std::string_view, url_aggregator&, ada::scheme::type, uint32_t, size_t,
     size_t, std::string_view, url_host_type);
+template bool try_finish_simple_userinfo<url>(std::string_view, url&,
+                                              ada::scheme::type, uint32_t,
+                                              size_t);
+template bool try_finish_simple_userinfo<url_aggregator>(std::string_view,
+                                                         url_aggregator&,
+                                                         ada::scheme::type,
+                                                         uint32_t, size_t);
 template void finish_simple_absolute_handoff<url>(std::string_view, url&,
                                                   size_t, size_t, size_t,
                                                   uint32_t, bool, bool, size_t,

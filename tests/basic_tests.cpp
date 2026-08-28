@@ -263,6 +263,22 @@ TYPED_TEST(basic_tests, readme8) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, setters_strip_ascii_tab_or_newline) {
+  auto url = ada::parse<TypeParam>(
+      "https://user:pass@www.example.com:8080/path?q=1#h");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->set_protocol("w\tss"));
+  ASSERT_EQ(url->get_protocol(), "wss:");
+  ASSERT_TRUE(url->set_port("90\t90"));
+  ASSERT_EQ(url->get_port(), "9090");
+  url->set_search("?a=\t1");
+  ASSERT_EQ(url->get_search(), "?a=1");
+  url->set_hash("#new\tfrag");
+  ASSERT_EQ(url->get_hash(), "#newfrag");
+  ASSERT_TRUE(url->set_hostname("www.newhost.exam\tple.org"));
+  ASSERT_EQ(url->get_hostname(), "www.newhost.example.org");
+}
+
 TYPED_TEST(basic_tests, host_nfc_reorders_precomposed_starter) {
   // A precomposed starter followed by a combining mark of lower combining class
   // is not in NFC: normalization decomposes the starter and reorders the marks.
@@ -2193,6 +2209,48 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
               "https://user:pass@www.example.com:8080/path/to/"
               "resource?foo=bar&baz=qux#section");
   }
+  // Userinfo without a password, empty userinfo, and a missing path.
+  {
+    auto url = ada::parse<TypeParam>("https://user@example.com/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "user");
+    ASSERT_EQ(url->get_password(), "");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+    ASSERT_EQ(url->get_href(), "https://user@example.com/x");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://@example.com/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+    ASSERT_EQ(url->get_href(), "https://example.com/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://user:pass@example.com");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_href(), "https://user:pass@example.com/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://user:pass@example.com?q=1#f");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_search(), "?q=1");
+    ASSERT_EQ(url->get_hash(), "#f");
+    ASSERT_EQ(url->get_href(), "https://user:pass@example.com/?q=1#f");
+  }
+  // Encoding-needed userinfo must fall through (space is not copyable).
+  {
+    auto url = ada::parse<TypeParam>("https://user name@example.com/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "user%20name");
+  }
+  assert_can_parse_consistent(
+      "https://user:pass@www.example.com:8080/path/to/"
+      "resource?foo=bar&baz=qux#section");
+  assert_can_parse_consistent("https://user@example.com/x");
+  assert_can_parse_consistent("https://@example.com/");
+  assert_can_parse_consistent("https://user:pass@example.com");
   // 8-byte scheme match + 32-byte host window (BBC-style CDN hosts).
   {
     auto url = ada::parse<TypeParam>(

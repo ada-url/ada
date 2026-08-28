@@ -339,6 +339,10 @@ struct url_aggregator : url_base {
       std::string_view, result_type&, ada::scheme::type, uint32_t, size_t,
       size_t, std::string_view, url_host_type);
   template <class result_type>
+  friend bool parser::try_finish_simple_userinfo(std::string_view, result_type&,
+                                                 ada::scheme::type, uint32_t,
+                                                 size_t);
+  template <class result_type>
   friend void parser::finish_simple_absolute_handoff(std::string_view,
                                                      result_type&, size_t,
                                                      size_t, size_t, uint32_t,
