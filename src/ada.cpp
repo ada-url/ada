@@ -8,9 +8,7 @@
 #include "implementation.cpp"
 #include "helpers.cpp"
 #include "url.cpp"
-#if !defined(ADA_PARSER_SEPARATE_TU)
 #include "parser.cpp"
-#endif
 #include "url_components.cpp"
 #include "url_aggregator.cpp"
 

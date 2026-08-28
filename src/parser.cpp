@@ -1,3 +1,5 @@
+#include "ada.h"
+#include "ada/parser.h"
 #include "ada/parser-inl.h"
 
 #include <array>
@@ -236,6 +238,19 @@ ada_really_inline void set_plain_host_components(
   c.host_start = host_off;
   c.host_end = host_end;
   c.port = port;
+  c.pathname_start = pathname_start;
+  c.search_start = search_start;
+  c.hash_start = hash_start;
+}
+
+// https:// is ~96% of the dataset: protocol_end=6, host at 8, port omitted.
+ada_really_inline void set_https_plain_host_components(
+    url_components& c, uint32_t host_end, uint32_t pathname_start,
+    uint32_t search_start, uint32_t hash_start) noexcept {
+  c.protocol_end = 6;
+  c.username_end = 8;
+  c.host_start = 8;
+  c.host_end = host_end;
   c.pathname_start = pathname_start;
   c.search_start = search_start;
   c.hash_start = hash_start;
@@ -2480,15 +2495,21 @@ after_rest:
       if (has_upper) {
         unicode::to_lower_ascii(out.buffer.data() + host_start, host_len);
       }
-      set_plain_host_components(out.components, protocol_end,
-                                static_cast<uint32_t>(host_end),
-                                static_cast<uint32_t>(path_start),
-                                (query_start != std::string_view::npos)
-                                    ? static_cast<uint32_t>(query_start)
-                                    : url_components::omitted,
-                                (hash_start != std::string_view::npos)
-                                    ? static_cast<uint32_t>(hash_start)
-                                    : url_components::omitted);
+      const uint32_t search = (query_start != std::string_view::npos)
+                                  ? static_cast<uint32_t>(query_start)
+                                  : url_components::omitted;
+      const uint32_t hash = (hash_start != std::string_view::npos)
+                                ? static_cast<uint32_t>(hash_start)
+                                : url_components::omitted;
+      if (scheme_type == ada::scheme::type::HTTPS) {
+        set_https_plain_host_components(
+            out.components, static_cast<uint32_t>(host_end),
+            static_cast<uint32_t>(path_start), search, hash);
+      } else {
+        set_plain_host_components(
+            out.components, protocol_end, static_cast<uint32_t>(host_end),
+            static_cast<uint32_t>(path_start), search, hash);
+      }
     } else {
       out.buffer.clear();
       out.buffer.reserve(len + 1);
