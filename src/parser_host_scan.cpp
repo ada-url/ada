@@ -8,7 +8,9 @@
 #include "ada/common_defs.h"
 
 namespace ada::parser {
-namespace {
+// Named (not anonymous) so amalgamation with parser.cpp cannot collide
+// on k_host_class in ada::parser::{anonymous}.
+namespace short_host {
 
 // Same classes as parser.cpp k_host_class: 0 = host, 1 = / ? # :, 2 = reject.
 constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
@@ -84,7 +86,7 @@ ada_really_inline void note_flags(uint64_t prefix, bool& has_upper,
   }
 }
 
-}  // namespace
+}  // namespace short_host
 
 // noinline: keep this out of ada.cpp even under LTO. Inlining it into
 // scan_plain_host grew the setter/parse unity TU and lost CodSpeed.
@@ -98,38 +100,40 @@ ADA_HOST_SCAN_OUTLINE bool scan_plain_host_short(const uint8_t* b, size_t start,
                                                  size_t len, size_t& end,
                                                  bool& has_upper,
                                                  bool& has_x) noexcept {
-  const uint64_t word = load_qword(b + start);
-  const uint64_t delim = eq_high(word, static_cast<uint8_t>('/')) |
-                         eq_high(word, static_cast<uint8_t>('?')) |
-                         eq_high(word, static_cast<uint8_t>('#')) |
-                         eq_high(word, static_cast<uint8_t>(':'));
-  const uint64_t reject = lt_high(word, 0x21) | (word & k_high) |
-                          eq_high(word, 0x7F) |
-                          eq_high(word, static_cast<uint8_t>('<')) |
-                          eq_high(word, static_cast<uint8_t>('>')) |
-                          eq_high(word, static_cast<uint8_t>('@')) |
-                          eq_high(word, static_cast<uint8_t>('[')) |
-                          eq_high(word, static_cast<uint8_t>('\\')) |
-                          eq_high(word, static_cast<uint8_t>(']')) |
-                          eq_high(word, static_cast<uint8_t>('^')) |
-                          eq_high(word, static_cast<uint8_t>('|')) |
-                          eq_high(word, static_cast<uint8_t>('%'));
-  const size_t rpos = first_lane(reject);
-  const size_t dpos = first_lane(delim);
+  const uint64_t word = short_host::load_qword(b + start);
+  const uint64_t delim = short_host::eq_high(word, static_cast<uint8_t>('/')) |
+                         short_host::eq_high(word, static_cast<uint8_t>('?')) |
+                         short_host::eq_high(word, static_cast<uint8_t>('#')) |
+                         short_host::eq_high(word, static_cast<uint8_t>(':'));
+  const uint64_t reject =
+      short_host::lt_high(word, 0x21) | (word & short_host::k_high) |
+      short_host::eq_high(word, 0x7F) |
+      short_host::eq_high(word, static_cast<uint8_t>('<')) |
+      short_host::eq_high(word, static_cast<uint8_t>('>')) |
+      short_host::eq_high(word, static_cast<uint8_t>('@')) |
+      short_host::eq_high(word, static_cast<uint8_t>('[')) |
+      short_host::eq_high(word, static_cast<uint8_t>('\\')) |
+      short_host::eq_high(word, static_cast<uint8_t>(']')) |
+      short_host::eq_high(word, static_cast<uint8_t>('^')) |
+      short_host::eq_high(word, static_cast<uint8_t>('|')) |
+      short_host::eq_high(word, static_cast<uint8_t>('%'));
+  const size_t rpos = short_host::first_lane(reject);
+  const size_t dpos = short_host::first_lane(delim);
   if (rpos < dpos) {
     return false;
   }
   if (dpos < 8) {
     if (dpos != 0) {
-      note_flags(((uint64_t{1} << (dpos * 8)) - 1) & word, has_upper, has_x);
+      short_host::note_flags(((uint64_t{1} << (dpos * 8)) - 1) & word,
+                             has_upper, has_x);
     }
     end = start + dpos;
     return true;
   }
-  note_flags(word, has_upper, has_x);
+  short_host::note_flags(word, has_upper, has_x);
   for (size_t i = start + 8; i < len; ++i) {
     const uint8_t c = b[i];
-    const uint8_t cls = k_host_class[c];
+    const uint8_t cls = short_host::k_host_class[c];
     if (cls == 1) {
       end = i;
       return true;
