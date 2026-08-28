@@ -1,17 +1,15 @@
-#include "ada/implementation-inl.h"
-
 #include <array>
 #include <cstring>
 #include <limits>
 #include <optional>
 #include <string_view>
 
-#include "ada/checkers-inl.h"
-#include "ada/checkers.h"
 #include "ada/common_defs.h"
 #include "ada/parser.h"
-#include "ada/scheme.h"
-#include "ada/unicode-inl.h"
+#include "ada/implementation-inl.h"
+#include "ada/checkers-inl.h"
+#include "ada/checkers.h"
+#include "ada/scheme-inl.h"
 #include "ada/url.h"
 #include "ada/url_aggregator.h"
 
@@ -33,9 +31,11 @@
 #endif
 
 #ifdef ADA_CAN_PARSE_NEED_SSSE3_TARGET
-#define ADA_CAN_PARSE_SIMD \
-  inline __attribute__((always_inline, target("ssse3")))
-#define ADA_CAN_PARSE_FASTPATH __attribute__((target("ssse3"), noinline))
+// File-scope pragma so the visit16 lambda inherits SSSE3 and can
+// always_inline the pshufb helper. Per-function target() cannot.
+#define ADA_CAN_PARSE_SIMD ada_really_inline
+#define ADA_CAN_PARSE_FASTPATH ada_never_inline
+#define ADA_CAN_PARSE_ENABLE_SSSE3_PRAGMA 1
 #else
 #define ADA_CAN_PARSE_SIMD ada_really_inline
 #define ADA_CAN_PARSE_FASTPATH
@@ -45,10 +45,22 @@
 #include <intrin.h>
 #endif
 
+#ifdef ADA_CAN_PARSE_ENABLE_SSSE3_PRAGMA
+#pragma GCC push_options
+#pragma GCC target("ssse3")
+#endif
+
 namespace ada {
 extern bool max_input_length_customized;
 
 namespace {
+
+// Local copy: unicode::is_alnum_plus is always_inline in unicode.cpp
+// and has no standalone symbol for this TU.
+ada_really_inline constexpr bool is_alnum_plus(char c) noexcept {
+  return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') ||
+         (c >= 'A' && c <= 'Z') || c == '+' || c == '-' || c == '.';
+}
 
 constexpr std::array<uint8_t, 256> clean_http_host_byte = []() consteval {
   std::array<uint8_t, 256> result{};
@@ -458,7 +470,7 @@ std::optional<bool> try_can_parse_absolute_fast(
       }
       // Tabs/newlines in the scheme require the full parser to strip them.
       if (c == '\t' || c == '\n' || c == '\r') return std::nullopt;
-      if (!unicode::is_alnum_plus(c)) return false;
+      if (!is_alnum_plus(c)) return false;
     }
 
     // Lowercase scheme bytes inline and classify via the existing perfect
@@ -713,3 +725,7 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
 }
 
 }  // namespace ada
+
+#ifdef ADA_CAN_PARSE_ENABLE_SSSE3_PRAGMA
+#pragma GCC pop_options
+#endif

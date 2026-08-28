@@ -46,17 +46,14 @@
 #endif
 
 #ifdef ADA_PARSER_NEED_SSSE3_TARGET
-// Scanners and the never_inline fast-path entry points share target("ssse3")
-// so the compiler can inline pshufb loops into try_parse_*. parse_url_impl
-// stays baseline and only calls the noinline entries. COLD helpers also
-// need the target so they can call the pshufb scanners, but they live in
-// .text.unlikely so they do not displace setter I-cache.
-// always_inline is required: without it gcc leaves nibble_load /
-// ssse3_nibble_mask / scan_* as out-of-line calls (a call/ret per
-// 16-byte window on the CodSpeed g++-12 path).
-#define ADA_PARSER_SIMD inline __attribute__((always_inline, target("ssse3")))
-#define ADA_PARSER_FASTPATH __attribute__((target("ssse3"), noinline))
-#define ADA_PARSER_COLD __attribute__((target("ssse3"), noinline, cold))
+// File-scope #pragma GCC target("ssse3") (not per-function target()) so
+// lambdas inside the scanners inherit SSSE3 and always_inline pshufb
+// helpers can actually inline. parse_url_impl stays outside the pragma
+// and remains baseline. COLD helpers live in .text.unlikely.
+#define ADA_PARSER_SIMD ada_really_inline
+#define ADA_PARSER_FASTPATH ada_never_inline
+#define ADA_PARSER_COLD ada_never_inline ada_cold
+#define ADA_PARSER_ENABLE_SSSE3_PRAGMA 1
 #else
 #define ADA_PARSER_SIMD ada_really_inline
 #define ADA_PARSER_FASTPATH ada_never_inline
@@ -72,6 +69,11 @@ extern bool max_input_length_customized;
 }  // namespace ada
 
 namespace ada::parser {
+
+#ifdef ADA_PARSER_ENABLE_SSSE3_PRAGMA
+#pragma GCC push_options
+#pragma GCC target("ssse3")
+#endif
 
 #if !defined(ADA_SKIP_PARSER_FASTPATH) || !defined(ADA_SKIP_PARSER_FINISH)
 // Classification tables and 16-byte run scanners for the absolute-URL fast
@@ -2868,6 +2870,10 @@ template bool try_parse_simple_relative<url_aggregator>(std::string_view,
                                                         url_aggregator&);
 #endif  // ADA_SKIP_PARSER_FASTPATH
 
+#ifdef ADA_PARSER_ENABLE_SSSE3_PRAGMA
+#pragma GCC pop_options
+#endif
+
 #ifndef ADA_SKIP_PARSER_IMPL
 template <class result_type, bool store_values>
 result_type& parse_url_impl_into(result_type& url, std::string_view user_input,
@@ -3912,6 +3918,11 @@ template url_aggregator parse_url<url_aggregator>(
 #endif  // ADA_SKIP_PARSER_IMPL
 }  // namespace ada::parser
 
+#ifdef ADA_PARSER_ENABLE_SSSE3_PRAGMA
+#pragma GCC push_options
+#pragma GCC target("ssse3")
+#endif
+
 #ifndef ADA_SKIP_PARSER_FASTPATH
 namespace ada {
 
@@ -3966,3 +3977,7 @@ template ada::result<url_aggregator> parse<url_aggregator>(
 }  // namespace ada
 
 #endif  // ADA_SKIP_PARSER_FASTPATH
+
+#ifdef ADA_PARSER_ENABLE_SSSE3_PRAGMA
+#pragma GCC pop_options
+#endif
