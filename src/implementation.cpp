@@ -286,7 +286,11 @@ host_done:
     return std::nullopt;
   }
 
-  if (checkers::last_label_may_be_a_number(
+  const char lastc = static_cast<char>(bytes[cursor - 1]);
+  if (checkers::is_ipv4_number_char(lastc) &&
+      !checkers::ends_with_dot_com(input.data() + authority_start,
+                                   host_length) &&
+      checkers::last_label_may_be_a_number(
           std::string_view(input.data() + authority_start, host_length))) {
     return std::nullopt;
   }

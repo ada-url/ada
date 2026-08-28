@@ -2321,6 +2321,9 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_FALSE(last_label_may_be_a_number("example.com."));
   ASSERT_FALSE(last_label_may_be_a_number("example.COM"));
   ASSERT_FALSE(last_label_may_be_a_number("www.google.com"));
+  ASSERT_FALSE(last_label_may_be_a_number("wikipedia.org"));
+  ASSERT_FALSE(last_label_may_be_a_number("foo.gov"));
+  ASSERT_FALSE(last_label_may_be_a_number("foo.edu"));
   ASSERT_FALSE(last_label_may_be_a_number("abc."));
   ASSERT_TRUE(last_label_may_be_a_number("foo.123"));
   ASSERT_TRUE(last_label_may_be_a_number("foo.123."));

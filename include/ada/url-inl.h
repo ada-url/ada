@@ -196,6 +196,37 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const bool has_q = query.has_value();
     const bool has_h = hash.has_value();
     const bool has_p = port.has_value();
+    auto finish = [](size_t total, auto&& write) -> std::string {
+#if defined(__cpp_lib_string_resize_and_overwrite)
+      std::string output;
+      output.resize_and_overwrite(total, [&](char* p, size_t) {
+        write(p);
+        return total;
+      });
+      return output;
+#else
+      // Avoid string(total, '\0') zero-fill on typical hrefs (dataset p90~155).
+      if (total <= 256) {
+        char buf[256];
+        write(buf);
+        return std::string(buf, total);
+      }
+      std::string output(total, '\0');
+      write(output.data());
+      return output;
+#endif
+    };
+    if (!has_q && !has_h && !has_p) [[likely]] {
+      const size_t total = prefix.size() + host_size + path_size;
+      return finish(total, [&](char* p) {
+        std::memcpy(p, prefix.data(), prefix.size());
+        p += prefix.size();
+        // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+        std::memcpy(p, host->data(), host_size);
+        p += host_size;
+        std::memcpy(p, path.data(), path_size);
+      });
+    }
     const size_t query_size = has_q ? query->size() : 0;
     const size_t hash_size = has_h ? hash->size() : 0;
     uint16_t port_val = 0;
@@ -207,7 +238,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const size_t total =
         prefix.size() + host_size + (has_p ? size_t(1 + port_digits) : 0) +
         path_size + (has_q ? query_size + 1 : 0) + (has_h ? hash_size + 1 : 0);
-    auto write_href = [&](char* p) {
+    return finish(total, [&](char* p) {
       std::memcpy(p, prefix.data(), prefix.size());
       p += prefix.size();
       // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
@@ -232,19 +263,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
         // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
         std::memcpy(p, hash->data(), hash_size);
       }
-    };
-#if defined(__cpp_lib_string_resize_and_overwrite)
-    std::string output;
-    output.resize_and_overwrite(total, [&](char* p, size_t) {
-      write_href(p);
-      return total;
     });
-    return output;
-#else
-    std::string output(total, '\0');
-    write_href(output.data());
-    return output;
-#endif
   }
 
   std::string output;

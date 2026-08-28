@@ -1665,13 +1665,16 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
   }
   bool is_ipv4 = false;
   {
-    std::string_view hv(input.data() + host_start, host_len);
+    uint8_t lastc = b[host_end - 1];
+    if (lastc == '.' && host_len > 1) {
+      lastc = b[host_end - 2];
+    }
     if (has_upper) [[unlikely]] {
       // Rare: keep the 256-byte lower buffer off the common-path frame.
       char host_buf[256];
       std::memcpy(host_buf, input.data() + host_start, host_len);
       unicode::to_lower_ascii(host_buf, host_len);
-      hv = std::string_view(host_buf, host_len);
+      const std::string_view hv(host_buf, host_len);
       if (ada::checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
         return false;
       }
@@ -1679,16 +1682,25 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
       if (hv.find(xn) != std::string_view::npos) [[unlikely]] {
         return false;
       }
-    } else if (ada::checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
-      // Canonical dotted-decimal IPv4 stays here, including a non-default
-      // port. Trailing dots, hex/octal, and short forms (ws://123) go to
-      // the state machine. '[' is already a host-class reject.
-      if (hv.back() == '.' ||
-          checkers::try_parse_ipv4_fast(hv) >= checkers::ipv4_fast_fail) {
-        return false;
+    } else if (ada::checkers::is_ipv4_number_char(static_cast<char>(lastc))) {
+      // .org/.net/... never enter: last letter is not an IPv4 number char.
+      // .com does (m is hex) but ends_with_dot_com skips the label walk.
+      if (!ada::checkers::ends_with_dot_com(input.data() + host_start,
+                                            host_len)) {
+        const std::string_view hv(input.data() + host_start, host_len);
+        if (ada::checkers::last_label_may_be_a_number(hv)) [[unlikely]] {
+          // Canonical dotted-decimal IPv4 stays here, including a non-default
+          // port. Trailing dots, hex/octal, and short forms (ws://123) go to
+          // the state machine. '[' is already a host-class reject.
+          if (hv.back() == '.' ||
+              checkers::try_parse_ipv4_fast(hv) >= checkers::ipv4_fast_fail) {
+            return false;
+          }
+          is_ipv4 = true;
+        }
       }
-      is_ipv4 = true;
-    } else if (has_xn) [[unlikely]] {
+    }
+    if (has_xn) [[unlikely]] {
       return false;
     }
   }
