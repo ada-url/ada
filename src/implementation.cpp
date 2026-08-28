@@ -7,8 +7,10 @@
 
 #include "ada/common_defs.h"
 #include "ada/helpers.h"
+#include "ada/parser.h"
 #include "ada/scheme.h"
 #include "ada/unicode.h"
+#include "ada/url_aggregator.h"
 
 namespace ada {
 
@@ -26,6 +28,48 @@ void set_max_input_length(uint32_t length) {
 
 uint32_t get_max_input_length() {
   return max_input_length_.load(std::memory_order_relaxed);
+}
+
+bool can_parse_fallback(std::string_view input,
+                        const std::string_view* base_input) {
+  const uint32_t max_length = get_max_input_length();
+  if (input.size() > max_length) {
+    return false;
+  }
+  if (base_input != nullptr && base_input->size() > max_length) {
+    return false;
+  }
+
+  const size_t combined =
+      input.size() + (base_input == nullptr ? 0 : base_input->size());
+  const bool size_safe = combined <= static_cast<size_t>(max_length) / 5;
+
+  if (size_safe) {
+    url_aggregator base_agg;
+    url_aggregator* base_ptr = nullptr;
+    if (base_input != nullptr) {
+      base_agg =
+          parser::parse_url_impl<url_aggregator, false>(*base_input, nullptr);
+      if (!base_agg.is_valid) {
+        return false;
+      }
+      base_ptr = &base_agg;
+    }
+    return parser::parse_url_impl<url_aggregator, false>(input, base_ptr)
+        .is_valid;
+  }
+
+  if (base_input == nullptr) {
+    return parser::parse_url_impl<url_aggregator, true>(input, nullptr)
+        .is_valid;
+  }
+  url_aggregator base_agg =
+      parser::parse_url_impl<url_aggregator, true>(*base_input, nullptr);
+  if (!base_agg.is_valid) {
+    return false;
+  }
+  return parser::parse_url_impl<url_aggregator, true>(input, &base_agg)
+      .is_valid;
 }
 
 std::string href_from_file(std::string_view input) {

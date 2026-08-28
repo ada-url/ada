@@ -46,14 +46,21 @@
 #endif
 
 #ifdef ADA_PARSER_NEED_SSSE3_TARGET
-// File-scope #pragma GCC target("ssse3") (not per-function target()) so
-// lambdas inside the scanners inherit SSSE3 and always_inline pshufb
-// helpers can actually inline. parse_url_impl stays outside the pragma
-// and remains baseline. COLD helpers live in .text.unlikely.
+#if defined(__clang__)
+// clang ignores #pragma GCC target and treats unknown pragmas as
+// errors under -Werror. Per-function target() works; do not
+// always_inline the pshufb helpers (lambdas do not inherit target).
+#define ADA_PARSER_SIMD inline __attribute__((target("ssse3")))
+#define ADA_PARSER_FASTPATH __attribute__((target("ssse3"), noinline))
+#define ADA_PARSER_COLD __attribute__((target("ssse3"), noinline, cold))
+#else
+// gcc: file-scope pragma so lambdas inherit SSSE3 and always_inline
+// pshufb helpers can inline. parse_url_impl stays outside the pragma.
 #define ADA_PARSER_SIMD ada_really_inline
 #define ADA_PARSER_FASTPATH ada_never_inline
 #define ADA_PARSER_COLD ada_never_inline ada_cold
 #define ADA_PARSER_ENABLE_SSSE3_PRAGMA 1
+#endif
 #else
 #define ADA_PARSER_SIMD ada_really_inline
 #define ADA_PARSER_FASTPATH ada_never_inline

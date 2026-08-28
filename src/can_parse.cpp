@@ -5,13 +5,9 @@
 #include <string_view>
 
 #include "ada/common_defs.h"
-#include "ada/parser.h"
-#include "ada/implementation-inl.h"
 #include "ada/checkers-inl.h"
 #include "ada/checkers.h"
 #include "ada/scheme-inl.h"
-#include "ada/url.h"
-#include "ada/url_aggregator.h"
 
 #if ADA_NEON
 #include <arm_neon.h>
@@ -31,11 +27,14 @@
 #endif
 
 #ifdef ADA_CAN_PARSE_NEED_SSSE3_TARGET
-// File-scope pragma so the visit16 lambda inherits SSSE3 and can
-// always_inline the pshufb helper. Per-function target() cannot.
+#if defined(__clang__)
+#define ADA_CAN_PARSE_SIMD inline __attribute__((target("ssse3")))
+#define ADA_CAN_PARSE_FASTPATH __attribute__((target("ssse3"), noinline))
+#else
 #define ADA_CAN_PARSE_SIMD ada_really_inline
 #define ADA_CAN_PARSE_FASTPATH ada_never_inline
 #define ADA_CAN_PARSE_ENABLE_SSSE3_PRAGMA 1
+#endif
 #else
 #define ADA_CAN_PARSE_SIMD ada_really_inline
 #define ADA_CAN_PARSE_FASTPATH
@@ -52,6 +51,12 @@
 
 namespace ada {
 extern bool max_input_length_customized;
+uint32_t get_max_input_length();
+// Full parser fallback; lives in the unity TU so always_inline helpers
+// (parse_port, pathname, ...) are visible. This file must not include
+// url.h or clang-cl / clang-tidy report undefined-inline.
+bool can_parse_fallback(std::string_view input,
+                        const std::string_view* base_input);
 
 namespace {
 
@@ -657,71 +662,22 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
       if (!max_input_length_customized) [[likely]] {
         if (input.size() > std::numeric_limits<uint32_t>::max() / 5)
             [[unlikely]] {
-          return ada::parser::parse_url_impl<ada::url_aggregator, true>(input,
-                                                                        nullptr)
-              .is_valid;
+          return can_parse_fallback(input, nullptr);
         }
         return true;
       }
-      const uint32_t max_length = ada::get_max_input_length();
+      const uint32_t max_length = get_max_input_length();
       if (input.size() <= static_cast<size_t>(max_length) / 5) {
         return true;
       }
       if (input.size() > max_length) {
         return false;
       }
-      return ada::parser::parse_url_impl<ada::url_aggregator, true>(input,
-                                                                    nullptr)
-          .is_valid;
+      return can_parse_fallback(input, nullptr);
     }
   }
 
-  const uint32_t max_length = ada::get_max_input_length();
-  if (input.size() > max_length) {
-    return false;
-  }
-  if (base_input != nullptr && base_input->size() > max_length) {
-    return false;
-  }
-
-  // Relative resolution combines base + input; bound the sum so 4.5x expansion
-  // of either side cannot push the final href past max_length.
-  const size_t combined =
-      input.size() + (base_input == nullptr ? 0 : base_input->size());
-  const bool size_safe = combined <= static_cast<size_t>(max_length) / 5;
-
-  if (size_safe) {
-    // Validation-only: no buffer build, host still fully checked.
-    ada::url_aggregator base_agg;
-    ada::url_aggregator* base_ptr = nullptr;
-    if (base_input != nullptr) {
-      base_agg = ada::parser::parse_url_impl<ada::url_aggregator, false>(
-          *base_input, nullptr);
-      if (!base_agg.is_valid) {
-        return false;
-      }
-      base_ptr = &base_agg;
-    }
-    return ada::parser::parse_url_impl<ada::url_aggregator, false>(input,
-                                                                   base_ptr)
-        .is_valid;
-  }
-
-  // Near the limit: full parse so post-normalization length matches parse().
-  if (base_input == nullptr) {
-    return ada::parser::parse_url_impl<ada::url_aggregator, true>(input,
-                                                                  nullptr)
-        .is_valid;
-  }
-  ada::url_aggregator base_agg =
-      ada::parser::parse_url_impl<ada::url_aggregator, true>(*base_input,
-                                                             nullptr);
-  if (!base_agg.is_valid) {
-    return false;
-  }
-  return ada::parser::parse_url_impl<ada::url_aggregator, true>(input,
-                                                                &base_agg)
-      .is_valid;
+  return can_parse_fallback(input, base_input);
 }
 
 }  // namespace ada
