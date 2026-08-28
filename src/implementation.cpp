@@ -7,6 +7,13 @@
 #include <optional>
 #include <string_view>
 
+#if ADA_SSE2
+#include <emmintrin.h>
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+#include <intrin.h>
+#endif
+#endif
+
 #include "ada/checkers-inl.h"
 #include "ada/checkers.h"
 #include "ada/common_defs.h"
@@ -72,6 +79,38 @@ ada_really_inline bool eight_clean_http_host_bytes(
   return ok == k_high;
 }
 
+#if ADA_SSE2
+ada_really_inline int ctz32(unsigned bits) noexcept {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+  unsigned long ret;
+  _BitScanForward(&ret, bits);
+  return static_cast<int>(ret);
+#else
+  return __builtin_ctz(bits);
+#endif
+}
+
+// Bits set where the byte is not in [a-z0-9-._~]. That includes / ? #.
+ada_really_inline int sse2_unclean_http_host(__m128i w) noexcept {
+  const __m128i az = _mm_and_si128(
+      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('a' - 1))),
+      _mm_cmplt_epi8(w, _mm_set1_epi8(static_cast<char>('z' + 1))));
+  const __m128i d09 = _mm_and_si128(
+      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('0' - 1))),
+      _mm_cmplt_epi8(w, _mm_set1_epi8(static_cast<char>('9' + 1))));
+  const __m128i spec =
+      _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('-')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('.'))),
+                   _mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('_')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('~'))));
+  return _mm_movemask_epi8(_mm_or_si128(_mm_or_si128(az, d09), spec)) ^ 0xFFFF;
+}
+
+ada_really_inline bool sse2_http_host_delim(uint8_t c) noexcept {
+  return c == '/' || c == '?' || c == '#';
+}
+#endif
+
 // Minimal front end for the overwhelmingly common already-canonical HTTP(S)
 // case. It deliberately handles fewer inputs than
 // try_can_parse_absolute_fast: anything requiring normalization or detailed
@@ -131,20 +170,91 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   }
 
   size_t cursor = authority_start;
-  while (cursor + 8 <= length && eight_clean_http_host_bytes(bytes + cursor)) {
-    cursor += 8;
-  }
-  while (cursor < length) {
-    const uint8_t c = bytes[cursor];
-    if (c == '/' || c == '?' || c == '#') {
-      break;
+  bool has_x = false;
+#if ADA_SSE2
+  const __m128i x_splat = _mm_set1_epi8('x');
+  // 0 = window was clean (keep scanning), 1 = host delimiter, -1 = fall through
+  auto visit16 = [&](size_t at, int keep) -> int {
+    const __m128i w =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(bytes + at));
+    const int unclean = sse2_unclean_http_host(w) & keep;
+    const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat)) & keep;
+    if (unclean == 0) {
+      if (xs != 0) {
+        has_x = true;
+      }
+      return 0;
     }
-    if (!clean_http_host_byte[c]) {
+    const int hit = ctz32(static_cast<unsigned>(unclean));
+    const int valid = (1 << hit) - 1;
+    if ((xs & valid) != 0) {
+      has_x = true;
+    }
+    cursor = at + static_cast<size_t>(hit);
+    return sse2_http_host_delim(bytes[cursor]) ? 1 : -1;
+  };
+
+  if (length - authority_start >= 16) {
+    for (; cursor + 16 <= length; cursor += 16) {
+      const int r = visit16(cursor, 0xFFFF);
+      if (r < 0) {
+        return std::nullopt;
+      }
+      if (r > 0) {
+        goto host_done;
+      }
+    }
+    if (cursor < length) {
+      const size_t at = length - 16;
+      const int skip = static_cast<int>(cursor - at);
+      const int keep = static_cast<int>(~((1u << skip) - 1u));
+      const int r = visit16(at, keep);
+      if (r < 0) {
+        return std::nullopt;
+      }
+      if (r > 0) {
+        goto host_done;
+      }
+      cursor = length;
+    }
+  } else if (length >= 16) {
+    const size_t at = length - 16;
+    const int skip = static_cast<int>(authority_start - at);
+    const int keep = static_cast<int>(~((1u << skip) - 1u));
+    const int r = visit16(at, keep);
+    if (r < 0) {
       return std::nullopt;
     }
-    ++cursor;
+    if (r > 0) {
+      goto host_done;
+    }
+    cursor = length;
+  } else
+#endif
+  {
+    while (cursor + 8 <= length &&
+           eight_clean_http_host_bytes(bytes + cursor)) {
+      if (!has_x && std::memchr(bytes + cursor, 'x', 8) != nullptr) {
+        has_x = true;
+      }
+      cursor += 8;
+    }
+    while (cursor < length) {
+      const uint8_t c = bytes[cursor];
+      if (c == '/' || c == '?' || c == '#') {
+        break;
+      }
+      if (!clean_http_host_byte[c]) {
+        return std::nullopt;
+      }
+      if (c == 'x') {
+        has_x = true;
+      }
+      ++cursor;
+    }
   }
 
+host_done:
   const size_t host_length = cursor - authority_start;
   if (host_length == 0) {
     // Extra special-scheme slashes are normalization, not an empty host.
@@ -161,8 +271,7 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   if (checkers::last_label_may_be_a_number(host)) {
     return std::nullopt;
   }
-  if (host.find('x') != std::string_view::npos &&
-      host.find("xn-") != std::string_view::npos) {
+  if (has_x && host.find("xn-") != std::string_view::npos) {
     return std::nullopt;
   }
 

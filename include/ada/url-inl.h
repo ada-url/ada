@@ -7,6 +7,7 @@
 
 #include "ada/url.h"
 #include "ada/url_components.h"
+#include "ada/scheme-inl.h"
 
 #include <charconv>
 #include <cstring>
@@ -186,41 +187,64 @@ constexpr void url::copy_scheme(const ada::url& u) {
 }
 
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
-  if (is_special() && host.has_value() && username.empty() &&
-      password.empty() && !port.has_value()) [[likely]] {
-    const std::string_view scheme = ada::scheme::details::is_special_list[type];
+  if (is_special() && host.has_value() && username.empty() && password.empty())
+      [[likely]] {
+    const std::string_view prefix =
+        ada::scheme::details::special_href_prefix[type];
     const size_t host_size = host->size();
     const size_t path_size = path.size();
-    const size_t query_size = query.has_value() ? query->size() : 0;
-    const size_t hash_size = hash.has_value() ? hash->size() : 0;
-    const size_t total = scheme.size() + 3 + host_size + path_size +
-                         (query.has_value() ? query_size + 1 : 0) +
-                         (hash.has_value() ? hash_size + 1 : 0);
-    std::string output(total, '\0');
-    char* p = output.data();
-    std::memcpy(p, scheme.data(), scheme.size());
-    p += scheme.size();
-    p[0] = ':';
-    p[1] = '/';
-    p[2] = '/';
-    p += 3;
-    // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-    std::memcpy(p, host->data(), host_size);
-    p += host_size;
-    std::memcpy(p, path.data(), path_size);
-    p += path_size;
-    if (query.has_value()) {
-      *p++ = '?';
-      // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-      std::memcpy(p, query->data(), query_size);
-      p += query_size;
+    const bool has_q = query.has_value();
+    const bool has_h = hash.has_value();
+    const bool has_p = port.has_value();
+    const size_t query_size = has_q ? query->size() : 0;
+    const size_t hash_size = has_h ? hash->size() : 0;
+    uint16_t port_val = 0;
+    int port_digits = 0;
+    if (has_p) {
+      port_val = *port;
+      port_digits = helpers::fast_digit_count(port_val);
     }
-    if (hash.has_value()) {
-      *p++ = '#';
+    const size_t total =
+        prefix.size() + host_size + (has_p ? size_t(1 + port_digits) : 0) +
+        path_size + (has_q ? query_size + 1 : 0) + (has_h ? hash_size + 1 : 0);
+    auto write_href = [&](char* p) {
+      std::memcpy(p, prefix.data(), prefix.size());
+      p += prefix.size();
       // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-      std::memcpy(p, hash->data(), hash_size);
-    }
+      std::memcpy(p, host->data(), host_size);
+      p += host_size;
+      if (has_p) {
+        *p++ = ':';
+        auto [ptr, ec] = std::to_chars(p, p + 5, port_val);
+        (void)ec;
+        p = ptr;
+      }
+      std::memcpy(p, path.data(), path_size);
+      p += path_size;
+      if (has_q) {
+        *p++ = '?';
+        // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+        std::memcpy(p, query->data(), query_size);
+        p += query_size;
+      }
+      if (has_h) {
+        *p++ = '#';
+        // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+        std::memcpy(p, hash->data(), hash_size);
+      }
+    };
+#if defined(__cpp_lib_string_resize_and_overwrite)
+    std::string output;
+    output.resize_and_overwrite(total, [&](char* p, size_t) {
+      write_href(p);
+      return total;
+    });
     return output;
+#else
+    std::string output(total, '\0');
+    write_href(output.data());
+    return output;
+#endif
   }
 
   std::string output;

@@ -37,6 +37,16 @@ constexpr bool last_label_may_be_a_number(std::string_view view) noexcept {
       return false;
     }
   }
+  // Most dataset hosts end in ".com". That last label cannot start with a
+  // digit, but 'm' is an IPv4 number char so the walk below would still run.
+  if (end - start >= 4) {
+    const uint32_t last4 =
+        uint32_t(uint8_t(end[-4])) | (uint32_t(uint8_t(end[-3])) << 8) |
+        (uint32_t(uint8_t(end[-2])) << 16) | (uint32_t(uint8_t(end[-1])) << 24);
+    if ((last4 | 0x20202020u) == 0x6d6f632eu) {
+      return false;
+    }
+  }
   if (!is_ipv4_number_char(end[-1])) {
     return false;
   }

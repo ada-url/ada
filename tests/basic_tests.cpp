@@ -606,6 +606,9 @@ TEST(basic_tests, can_parse_consistency_clean_http_frontend) {
            "http:///path",
            "http://Example.com/",
            "http://example.com:65536/",
+           "https://www.google.com/webhp?hl=en",
+           "https://images-na.ssl-images-amazon.com/images/I/x.css",
+           "http://abcdefghijklmnopqrstuvwxyz0123456789-._~example.com/path",
            "http://1.2.3.999/",
            "http://xn--/",
            "http://example.com./",
@@ -1846,12 +1849,16 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
   }
   {
     ada::url u;
-    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
         std::string_view("http://192.168.1.1:8080/"), u));
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.get_port(), "8080");
+    ASSERT_EQ(u.host_type, ada::IPV4);
     auto url = ada::parse<TypeParam>("http://192.168.1.1:8080/");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "192.168.1.1");
     ASSERT_EQ(url->get_port(), "8080");
+    ASSERT_EQ(url->host_type, ada::IPV4);
   }
   {
     auto url = ada::parse<TypeParam>("https://foo.x/");
@@ -2304,6 +2311,8 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_FALSE(last_label_may_be_a_number("."));
   ASSERT_FALSE(last_label_may_be_a_number("example.com"));
   ASSERT_FALSE(last_label_may_be_a_number("example.com."));
+  ASSERT_FALSE(last_label_may_be_a_number("example.COM"));
+  ASSERT_FALSE(last_label_may_be_a_number("www.google.com"));
   ASSERT_FALSE(last_label_may_be_a_number("abc."));
   ASSERT_TRUE(last_label_may_be_a_number("foo.123"));
   ASSERT_TRUE(last_label_may_be_a_number("foo.123."));

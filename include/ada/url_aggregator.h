@@ -331,6 +331,12 @@ struct url_aggregator : url_base {
                                                        uint32_t, size_t, size_t,
                                                        size_t, bool);
   template <class result_type>
+  friend void parser::finish_simple_absolute_handoff(std::string_view,
+                                                     result_type&, size_t,
+                                                     size_t, size_t, uint32_t,
+                                                     bool, bool, size_t, size_t,
+                                                     size_t, size_t);
+  template <class result_type>
   friend bool parser::try_parse_simple_relative(std::string_view,
                                                 const result_type&,
                                                 result_type&);

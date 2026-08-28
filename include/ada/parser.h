@@ -85,6 +85,15 @@ bool finish_simple_absolute_with_port(std::string_view input, result_type& out,
                                       size_t host_end, size_t host_len,
                                       bool has_upper);
 
+/** @private Cold rest_simple=false tail; kept out of the hot I-cache. */
+template <class result_type>
+void finish_simple_absolute_handoff(std::string_view input, result_type& out,
+                                    size_t host_start, size_t host_end,
+                                    size_t host_len, uint32_t protocol_end,
+                                    bool has_upper, bool has_path,
+                                    size_t path_start, size_t path_end,
+                                    size_t query_start, size_t hash_start);
+
 /** @private */
 template <class result_type>
 bool try_parse_simple_relative(std::string_view input, const result_type& base,
