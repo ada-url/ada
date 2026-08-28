@@ -2030,7 +2030,7 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_TRUE(ada::can_parse("https://foo~bar.com/"));
     ASSERT_TRUE(ada::can_parse("https://foo-bar.com/"));
     ASSERT_TRUE(ada::can_parse("http://ab.cd.ef/"));
-    // SWAR must not treat "./" or "_^" as eight clean host bytes.
+    // Table classify must not treat "./" or "_^" as eight clean host bytes.
     ASSERT_FALSE(ada::can_parse("https://foo_^bar.com/"));
     ASSERT_FALSE(ada::parse<TypeParam>("https://foo_^bar.com/"));
     assert_can_parse_consistent("https://foo_^bar.com/");
@@ -2244,7 +2244,7 @@ TYPED_TEST(basic_tests,
 
 TYPED_TEST(basic_tests, short_host_qword_scan) {
   // Authorities of 8-15 bytes after "://" take the 8-byte host load
-  // (x86-64 movq / AArch64 ldr, then SWAR classify).
+  // (x86-64 movq / AArch64 ldr, then a memory-order table classify).
   struct Case {
     const char* in;
     const char* host;
@@ -2261,6 +2261,11 @@ TYPED_TEST(basic_tests, short_host_qword_scan) {
        "https://www.youtube.com/"},
       {"https://EXAMPLE.com/x", "example.com", "https://example.com/x"},
       {"https://abcdefgh.COM", "abcdefgh.com", "https://abcdefgh.com/"},
+      // Uppercase after '.' in the first 8 bytes (SWAR upper_high missed
+      // this: borrow from '.' cleared the 'E' lane).
+      {"https://x.Example/p", "x.example", "https://x.example/p"},
+      {"https://a.Bcdefgh", "a.bcdefgh", "https://a.bcdefgh/"},
+      {"https://ex.com/FooBar", "ex.com", "https://ex.com/FooBar"},
       {"https://xample.com/", "xample.com", "https://xample.com/"},
       {"https://abc.com/xy", "abc.com", "https://abc.com/xy"},
       {"http://abc.com/", "abc.com", "http://abc.com/"},

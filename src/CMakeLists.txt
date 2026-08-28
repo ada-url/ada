@@ -60,9 +60,8 @@ if(ADA_TESTING)
   target_compile_definitions(ada PRIVATE ADA_TESTING=1)
 endif()
 
-# Keep the SIMD percent-encode kernel and the short-host qword scan in
-# their own TUs so the unity ada.cpp inlining budget for setters matches
-# main.
+# Keep the SIMD percent-encode kernel and the host-scan tail in their own
+# TUs so the unity ada.cpp inlining budget for setters matches main.
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
 target_compile_definitions(ada PRIVATE ADA_PARSER_HOST_SCAN_SEPARATE_TU=1)
 

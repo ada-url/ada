@@ -32,32 +32,6 @@ constexpr std::array<uint8_t, 256> k_host_class = []() consteval {
   return t;
 }();
 
-constexpr uint64_t k_ones = 0x0101010101010101ULL;
-constexpr uint64_t k_high = 0x8080808080808080ULL;
-
-ada_really_inline uint64_t splat(uint8_t c) noexcept { return k_ones * c; }
-
-// High bit set in each lane whose byte equals c.
-ada_really_inline uint64_t eq_high(uint64_t w, uint8_t c) noexcept {
-  const uint64_t x = w ^ splat(c);
-  return (x - k_ones) & ~x & k_high;
-}
-
-// High bit set in each lane whose byte is < n (n in 1..128).
-ada_really_inline uint64_t lt_high(uint64_t w, uint8_t n) noexcept {
-  return (w - splat(n)) & ~w & k_high;
-}
-
-ada_really_inline size_t first_lane(uint64_t high_mask) noexcept {
-  return static_cast<size_t>(std::countr_zero(high_mask)) >> 3;
-}
-
-// Printable-ASCII lanes in ['A','Z']. Call only on a prefix that already
-// passed the host-class check (no high-bit bytes).
-ada_really_inline uint64_t upper_high(uint64_t w) noexcept {
-  return lt_high(w - splat(static_cast<uint8_t>('A')), 26);
-}
-
 // One 8-byte load. A 16-byte SIMD load would over-read short hosts.
 // Numbered GCC operands only: movq on x86-64, ldr on AArch64.
 ada_really_inline uint64_t load_qword(const uint8_t* p) noexcept {
@@ -76,14 +50,32 @@ ada_really_inline uint64_t load_qword(const uint8_t* p) noexcept {
   return word;
 }
 
-ada_really_inline void note_flags(uint64_t prefix, bool& has_upper,
-                                  bool& has_x) noexcept {
-  if (upper_high(prefix) != 0) {
-    has_upper = true;
+// Memory-order byte. SWAR countr_zero lanes are little-endian-only and
+// the haszero borrow also mis-detects uppercase after '.', which broke
+// s390x and made some hrefs non-idempotent on little-endian.
+ada_really_inline uint8_t byte_at(uint64_t word, size_t k) noexcept {
+  const size_t shift =
+      (std::endian::native == std::endian::little ? k : 7 - k) * 8;
+  return static_cast<uint8_t>(word >> shift);
+}
+
+// 1 = /?#:, -1 = reject, 0 = keep. Flags only for kept host bytes.
+ada_really_inline int take_byte(uint8_t c, size_t at, size_t& end,
+                                bool& has_upper, bool& has_x) noexcept {
+  const uint8_t cls = k_host_class[c];
+  if (cls == 1) {
+    end = at;
+    return 1;
   }
-  if (eq_high(prefix, static_cast<uint8_t>('x')) != 0) {
+  if (cls == 2) {
+    return -1;
+  }
+  if (c >= 'A' && c <= 'Z') {
+    has_upper = true;
+  } else if (c == 'x') {
     has_x = true;
   }
+  return 0;
 }
 
 }  // namespace short_host
@@ -96,55 +88,26 @@ ada_really_inline void note_flags(uint64_t prefix, bool& has_upper,
 #define ADA_HOST_SCAN_OUTLINE __attribute__((noinline))
 #endif
 
-ADA_HOST_SCAN_OUTLINE bool scan_plain_host_short(const uint8_t* b, size_t start,
-                                                 size_t len, size_t& end,
-                                                 bool& has_upper,
-                                                 bool& has_x) noexcept {
-  const uint64_t word = short_host::load_qword(b + start);
-  const uint64_t delim = short_host::eq_high(word, static_cast<uint8_t>('/')) |
-                         short_host::eq_high(word, static_cast<uint8_t>('?')) |
-                         short_host::eq_high(word, static_cast<uint8_t>('#')) |
-                         short_host::eq_high(word, static_cast<uint8_t>(':'));
-  const uint64_t reject =
-      short_host::lt_high(word, 0x21) | (word & short_host::k_high) |
-      short_host::eq_high(word, 0x7F) |
-      short_host::eq_high(word, static_cast<uint8_t>('<')) |
-      short_host::eq_high(word, static_cast<uint8_t>('>')) |
-      short_host::eq_high(word, static_cast<uint8_t>('@')) |
-      short_host::eq_high(word, static_cast<uint8_t>('[')) |
-      short_host::eq_high(word, static_cast<uint8_t>('\\')) |
-      short_host::eq_high(word, static_cast<uint8_t>(']')) |
-      short_host::eq_high(word, static_cast<uint8_t>('^')) |
-      short_host::eq_high(word, static_cast<uint8_t>('|')) |
-      short_host::eq_high(word, static_cast<uint8_t>('%'));
-  const size_t rpos = short_host::first_lane(reject);
-  const size_t dpos = short_host::first_lane(delim);
-  if (rpos < dpos) {
-    return false;
+ADA_HOST_SCAN_OUTLINE bool scan_plain_host_tail(const uint8_t* b, size_t start,
+                                                size_t len, size_t& end,
+                                                bool& has_upper,
+                                                bool& has_x) noexcept {
+  size_t i = start;
+  while (len - i >= 8) {
+    const uint64_t word = short_host::load_qword(b + i);
+    for (size_t k = 0; k < 8; ++k) {
+      const int r = short_host::take_byte(short_host::byte_at(word, k), i + k,
+                                          end, has_upper, has_x);
+      if (r != 0) {
+        return r > 0;
+      }
+    }
+    i += 8;
   }
-  if (dpos < 8) {
-    if (dpos != 0) {
-      short_host::note_flags(((uint64_t{1} << (dpos * 8)) - 1) & word,
-                             has_upper, has_x);
-    }
-    end = start + dpos;
-    return true;
-  }
-  short_host::note_flags(word, has_upper, has_x);
-  for (size_t i = start + 8; i < len; ++i) {
-    const uint8_t c = b[i];
-    const uint8_t cls = short_host::k_host_class[c];
-    if (cls == 1) {
-      end = i;
-      return true;
-    }
-    if (cls == 2) {
-      return false;
-    }
-    if (c >= 'A' && c <= 'Z') {
-      has_upper = true;
-    } else if (c == 'x') {
-      has_x = true;
+  for (; i < len; ++i) {
+    const int r = short_host::take_byte(b[i], i, end, has_upper, has_x);
+    if (r != 0) {
+      return r > 0;
     }
   }
   end = len;

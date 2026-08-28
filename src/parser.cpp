@@ -556,30 +556,9 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
   }
 #endif
-  // 8-15 bytes after :// (github.com, www.google.com): one movq/ldr, not
-  // a 16-byte SIMD load. Lives in parser_host_scan.cpp so ada.cpp stays
-  // the same size for setters.
-  if (len - i >= 8) {
-    return scan_plain_host_short(b, i, len, end, has_upper, has_x);
-  }
-  for (; i < len; ++i) {
-    const uint8_t c = b[i];
-    const uint8_t cls = k_host_class[c];
-    if (cls == 1) {
-      end = i;
-      return true;
-    }
-    if (cls == 2) {
-      return false;
-    }
-    if (c >= 'A' && c <= 'Z') {
-      has_upper = true;
-    } else if (c == 'x') {
-      has_x = true;
-    }
-  }
-  end = len;
-  return true;
+  // movq/ldr + table classify, and the <8 remainder. Out of line so this
+  // unity TU is smaller than main's inlined scalar loop (CodSpeed setters).
+  return scan_plain_host_tail(b, i, len, end, has_upper, has_x);
 }
 
 ada_really_inline void note_possible_dot_segment(
