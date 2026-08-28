@@ -704,14 +704,10 @@ ada_really_inline void note_dots_in_window(const uint8_t* b, size_t i,
   const int slashes =
       _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('/'))) & valid_mask;
   const bool leading_prefix = (i == run_start || b[i - 1] == '/');
-  // The '/' before run_start is often outside valid_mask (it is the path
-  // delimiter already consumed). Treat the first path byte as a segment
-  // start so "/./a" in an overlapping last-16 window is not missed.
-  int after_slash = slashes << 1;
-  if (run_start > i && run_start < i + 16) {
-    after_slash |= 1 << static_cast<int>(run_start - i);
-  }
-  if (((dots & 1) != 0 && leading_prefix) || (dots & after_slash) != 0) {
+  // Overlapping last-16 windows that start before the path must mark the
+  // first path byte as a segment start separately (see scan_path_run).
+  // Doing that here taxes every dotted aligned window.
+  if (((dots & 1) != 0 && leading_prefix) || (dots & (slashes << 1)) != 0) {
     maybe_dot_segment = true;
   }
 }
@@ -743,11 +739,7 @@ ada_really_inline void note_dots_in_window_neon(const uint8_t* b, size_t i,
   const uint64_t slashes =
       neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('/'))) & valid_bits;
   const bool leading_prefix = (i == run_start || b[i - 1] == '/');
-  uint64_t after_slash = slashes << 4;
-  if (run_start > i && run_start < i + 16) {
-    after_slash |= uint64_t{0xF} << ((run_start - i) * 4);
-  }
-  if (((dots & 0xF) != 0 && leading_prefix) || (dots & after_slash) != 0) {
+  if (((dots & 0xF) != 0 && leading_prefix) || (dots & (slashes << 4)) != 0) {
     maybe_dot_segment = true;
   }
 }
@@ -826,6 +818,9 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
       return;
     }
   } else if (len >= 16 && i < len) {
+    // The path delimiter sits before run_start, so it is outside valid_mask.
+    // Note the first path byte as a segment start (https://host/./a).
+    note_scalar_path_byte(b, i, run_start, maybe_dot_segment, saw_percent);
     const size_t at = len - 16;
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
     const int skip = static_cast<int>(i - at);
@@ -856,6 +851,7 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
                         saw_percent);
   }
   if (len >= 16 && i < len) {
+    note_scalar_path_byte(b, i, run_start, maybe_dot_segment, saw_percent);
     const size_t at = len - 16;
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
     const int skip = static_cast<int>(i - at);
@@ -941,6 +937,7 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
       return;
     }
   } else if (len >= 16 && i < len) {
+    note_scalar_path_byte(b, i, run_start, maybe_dot_segment, saw_percent);
     const size_t at = len - 16;
     const uint8x16_t w = vld1q_u8(b + at);
     const size_t skip = i - at;
@@ -1234,6 +1231,74 @@ ada_really_inline bool simple_path_is_canonical(std::string_view path_body,
                                         saw_percent);
 }
 
+// http/ws/wss/ftp and URLs shorter than 8 bytes are ~4% of the dataset.
+// Keep those compares out of the https:// I-cache.
+ada_never_inline bool match_non_https_special_scheme(
+    uint64_t first8, size_t len, const uint8_t* b, size_t& pos,
+    ada::scheme::type& scheme_type, uint32_t& protocol_end) noexcept {
+  // first8 == 0 means the caller did not load one (short URL or big-endian).
+  if (len >= 8 && first8 != 0) {
+    if ((first8 & 0x00ffffffffffffffull) == 0x002f2f3a70747468ull) {
+      pos = 7;
+      scheme_type = ada::scheme::type::HTTP;
+      protocol_end = 5;
+      return true;
+    }
+    if ((first8 & 0x0000ffffffffffffull) == 0x00002f2f3a737377ull) {
+      pos = 6;
+      scheme_type = ada::scheme::type::WSS;
+      protocol_end = 4;
+      return true;
+    }
+    if ((first8 & 0x0000ffffffffffffull) == 0x00002f2f3a707466ull) {
+      pos = 6;
+      scheme_type = ada::scheme::type::FTP;
+      protocol_end = 4;
+      return true;
+    }
+    if ((first8 & 0x000000ffffffffffull) == 0x0000002f2f3a7377ull) {
+      pos = 5;
+      scheme_type = ada::scheme::type::WS;
+      protocol_end = 3;
+      return true;
+    }
+    return false;
+  }
+  if (len < 6) {
+    return false;
+  }
+  if (b[0] == 'w' && b[1] == 's') {
+    if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
+      pos = 5;
+      scheme_type = ada::scheme::type::WS;
+      protocol_end = 3;
+      return true;
+    }
+    if (b[2] == 's' && b[3] == ':' && b[4] == '/' && b[5] == '/') {
+      pos = 6;
+      scheme_type = ada::scheme::type::WSS;
+      protocol_end = 4;
+      return true;
+    }
+    return false;
+  }
+  if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' && b[4] == '/' &&
+      b[5] == '/') {
+    pos = 6;
+    scheme_type = ada::scheme::type::FTP;
+    protocol_end = 4;
+    return true;
+  }
+  if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' && b[3] == 'p' &&
+      b[4] == ':' && b[5] == '/' && b[6] == '/') {
+    pos = 7;
+    scheme_type = ada::scheme::type::HTTP;
+    protocol_end = 5;
+    return true;
+  }
+  return false;
+}
+
 // Uppercase hosts and numeric last labels are rare on the dataset. Keep
 // their buffers and IPv4 parser out of the hot I-cache.
 ada_never_inline bool reject_uppercase_plain_host(const char* host,
@@ -1357,51 +1422,53 @@ ADA_PARSER_FASTPATH bool finish_simple_absolute_with_port(
   bool saw_percent = false;
   bool rest_simple = true;
 
-  if (i < len && b[i] == '/') {
-    has_path = true;
-    path_start = i;
-    ++i;
-    scan_path_run(b, i, len, maybe_dot_segment, saw_percent);
-    if (i < len) {
-      if (b[i] == '?') {
-        path_end = i;
-        query_start = i;
-        ++i;
-        goto scan_query;
-      }
-      if (b[i] == '#') {
-        path_end = i;
-        hash_start = i;
-        ++i;
-        goto scan_hash;
-      }
-      rest_simple = false;
-      for (; i < len; ++i) {
+  if (i < len) {
+    if (b[i] == '/') {
+      has_path = true;
+      path_start = i;
+      ++i;
+      scan_path_run(b, i, len, maybe_dot_segment, saw_percent);
+      if (i < len) {
         if (b[i] == '?') {
           path_end = i;
           query_start = i;
           ++i;
-          goto scan_query_boundary;
+          goto scan_query;
         }
         if (b[i] == '#') {
           path_end = i;
           hash_start = i;
           ++i;
-          goto after_rest;
+          goto scan_hash;
         }
+        rest_simple = false;
+        for (; i < len; ++i) {
+          if (b[i] == '?') {
+            path_end = i;
+            query_start = i;
+            ++i;
+            goto scan_query_boundary;
+          }
+          if (b[i] == '#') {
+            path_end = i;
+            hash_start = i;
+            ++i;
+            goto after_rest;
+          }
+        }
+        path_end = i;
+        goto after_rest;
       }
       path_end = i;
-      goto after_rest;
+    } else if (b[i] == '?') {
+      query_start = i;
+      ++i;
+      goto scan_query;
+    } else {
+      hash_start = i;
+      ++i;
+      goto scan_hash;
     }
-    path_end = i;
-  } else if (i < len && b[i] == '?') {
-    query_start = i;
-    ++i;
-    goto scan_query;
-  } else if (i < len && b[i] == '#') {
-    hash_start = i;
-    ++i;
-    goto scan_hash;
   }
   goto after_rest;
 
@@ -1585,10 +1652,6 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
   static_assert(is_ada_url || is_aggregator);
 
   const size_t len = input.size();
-  // Shortest accepted form is "ws://x" (6).
-  if (len < 6) [[unlikely]] {
-    return false;
-  }
   const auto* b = reinterpret_cast<const uint8_t*>(input.data());
 
   size_t pos = 0;
@@ -1597,60 +1660,20 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
 #if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
     defined(_M_X64) || defined(_M_IX86) || defined(_M_AMD64)
   // One 8-byte load + integer compare is a single cmp/jcc on x86-64.
-  // Masked compares cover the shorter special schemes without extra loads.
-  if (len >= 8) {
+  // Non-https schemes stay in a never_inline helper (~4% of URLs).
+  if (len >= 8) [[likely]] {
     uint64_t first8 = 0;
     std::memcpy(&first8, b, 8);
     if (first8 == 0x2f2f3a7370747468ull) {  // "https://"
       pos = 8;
       scheme_type = ada::scheme::type::HTTPS;
       protocol_end = 6;
-    } else if ((first8 & 0x00ffffffffffffffull) ==
-               0x002f2f3a70747468ull) {  // "http://"
-      pos = 7;
-      scheme_type = ada::scheme::type::HTTP;
-      protocol_end = 5;
-    } else if ((first8 & 0x0000ffffffffffffull) ==
-               0x00002f2f3a737377ull) {  // "wss://"
-      pos = 6;
-      scheme_type = ada::scheme::type::WSS;
-      protocol_end = 4;
-    } else if ((first8 & 0x0000ffffffffffffull) ==
-               0x00002f2f3a707466ull) {  // "ftp://"
-      pos = 6;
-      scheme_type = ada::scheme::type::FTP;
-      protocol_end = 4;
-    } else if ((first8 & 0x000000ffffffffffull) ==
-               0x0000002f2f3a7377ull) {  // "ws://"
-      pos = 5;
-      scheme_type = ada::scheme::type::WS;
-      protocol_end = 3;
-    } else {
+    } else if (!match_non_https_special_scheme(first8, len, b, pos, scheme_type,
+                                               protocol_end)) {
       return false;
     }
-  } else if (b[0] == 'w' && b[1] == 's') {
-    if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
-      pos = 5;
-      scheme_type = ada::scheme::type::WS;
-      protocol_end = 3;
-    } else if (b[2] == 's' && b[3] == ':' && b[4] == '/' && b[5] == '/') {
-      pos = 6;
-      scheme_type = ada::scheme::type::WSS;
-      protocol_end = 4;
-    } else {
-      return false;
-    }
-  } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
-             b[4] == '/' && b[5] == '/') {
-    pos = 6;
-    scheme_type = ada::scheme::type::FTP;
-    protocol_end = 4;
-  } else if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' &&
-             b[3] == 'p' && b[4] == ':' && b[5] == '/' && b[6] == '/') {
-    pos = 7;
-    scheme_type = ada::scheme::type::HTTP;
-    protocol_end = 5;
-  } else {
+  } else if (!match_non_https_special_scheme(0, len, b, pos, scheme_type,
+                                             protocol_end)) {
     return false;
   }
 #else
@@ -1660,36 +1683,11 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
     pos = 8;
     scheme_type = ada::scheme::type::HTTPS;
     protocol_end = 6;
-  } else if (len >= 7 && b[0] == 'h' && b[1] == 't' && b[2] == 't' &&
-             b[3] == 'p' && b[4] == ':' && b[5] == '/' && b[6] == '/') {
-    pos = 7;
-    scheme_type = ada::scheme::type::HTTP;
-    protocol_end = 5;
-  } else if (b[0] == 'w' && b[1] == 's') {
-    if (b[2] == ':' && b[3] == '/' && b[4] == '/') {
-      pos = 5;
-      scheme_type = ada::scheme::type::WS;
-      protocol_end = 3;
-    } else if (len >= 6 && b[2] == 's' && b[3] == ':' && b[4] == '/' &&
-               b[5] == '/') {
-      pos = 6;
-      scheme_type = ada::scheme::type::WSS;
-      protocol_end = 4;
-    } else {
-      return false;
-    }
-  } else if (b[0] == 'f' && b[1] == 't' && b[2] == 'p' && b[3] == ':' &&
-             b[4] == '/' && b[5] == '/') {
-    pos = 6;
-    scheme_type = ada::scheme::type::FTP;
-    protocol_end = 4;
-  } else {
+  } else if (!match_non_https_special_scheme(0, len, b, pos, scheme_type,
+                                             protocol_end)) {
     return false;
   }
 #endif
-  if (pos < len && (b[pos] == '/' || b[pos] == '\\')) [[unlikely]] {
-    return false;
-  }
 
   const size_t host_start = pos;
   bool has_upper = false;
@@ -1698,11 +1696,11 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
   if (!scan_plain_host(b, pos, len, host_end, has_upper, has_xn)) {
     return false;
   }
-  if (host_start == host_end) [[unlikely]] {
-    return false;
-  }
   const size_t host_len = host_end - host_start;
-  if (host_len > 253) [[unlikely]] {
+  // Empty (0) or too long (>253): (0-1) wraps to SIZE_MAX.
+  // Extra slashes after "://" are an empty host here; the state machine
+  // consumes them, so this correctly misses the fast path.
+  if (host_len - 1 >= 253) [[unlikely]] {
     return false;
   }
   bool is_ipv4 = false;
@@ -1751,51 +1749,53 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
   bool saw_percent = false;
   bool rest_simple = true;
 
-  if (i < len && b[i] == '/') {
-    has_path = true;
-    path_start = i;
-    ++i;
-    scan_path_run(b, i, len, maybe_dot_segment, saw_percent);
-    if (i < len) {
-      if (b[i] == '?') {
-        path_end = i;
-        query_start = i;
-        ++i;
-        goto scan_query;
-      }
-      if (b[i] == '#') {
-        path_end = i;
-        hash_start = i;
-        ++i;
-        goto scan_hash;
-      }
-      rest_simple = false;
-      for (; i < len; ++i) {
+  if (i < len) {
+    if (b[i] == '/') {
+      has_path = true;
+      path_start = i;
+      ++i;
+      scan_path_run(b, i, len, maybe_dot_segment, saw_percent);
+      if (i < len) {
         if (b[i] == '?') {
           path_end = i;
           query_start = i;
           ++i;
-          goto scan_query_boundary;
+          goto scan_query;
         }
         if (b[i] == '#') {
           path_end = i;
           hash_start = i;
           ++i;
-          goto after_rest;
+          goto scan_hash;
         }
+        rest_simple = false;
+        for (; i < len; ++i) {
+          if (b[i] == '?') {
+            path_end = i;
+            query_start = i;
+            ++i;
+            goto scan_query_boundary;
+          }
+          if (b[i] == '#') {
+            path_end = i;
+            hash_start = i;
+            ++i;
+            goto after_rest;
+          }
+        }
+        path_end = i;
+        goto after_rest;
       }
       path_end = i;
-      goto after_rest;
+    } else if (b[i] == '?') {
+      query_start = i;
+      ++i;
+      goto scan_query;
+    } else {
+      hash_start = i;
+      ++i;
+      goto scan_hash;
     }
-    path_end = i;
-  } else if (i < len && b[i] == '?') {
-    query_start = i;
-    ++i;
-    goto scan_query;
-  } else if (i < len && b[i] == '#') {
-    hash_start = i;
-    ++i;
-    goto scan_hash;
   }
   goto after_rest;
 

@@ -21,8 +21,13 @@ constexpr bool is_digit(char x) noexcept { return (x >= '0') & (x <= '9'); }
 
 constexpr bool is_ipv4_number_char(char x) noexcept {
   const unsigned char c = static_cast<unsigned char>(x);
+  // .com/.org/.net end with 'm'/'g'/'t', all > 'f'. Two compares reject them
+  // without walking the 0-9 / a-f / A-F ranges. 'X' is 0x58 and is not > 'f'.
+  if (c > 'f') {
+    return c == 'x';
+  }
   return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
-         (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
+         (c >= 'A' && c <= 'F') || c == 'X';
 }
 
 // ".com" / ".COM" after an optional trailing dot.

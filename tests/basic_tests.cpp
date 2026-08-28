@@ -2290,6 +2290,31 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
     ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
         std::string_view("https://xn--nxasmq6b.com/"), u));
   }
+  {
+    // Overlapping last-16 path: first path byte is '.' and the '/' before
+    // it is outside the SIMD valid mask.
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/./a"), u));
+    ASSERT_EQ(u.get_pathname(), "/a");
+    ASSERT_EQ(u.get_href(), "https://example.com/a");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(
+        ada::parser::try_parse_simple_absolute(std::string_view("ws://x"), u));
+    ASSERT_EQ(u.get_href(), "ws://x/");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("ftp://example.com/f"), u));
+    ASSERT_EQ(u.get_href(), "ftp://example.com/f");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("wss://example.com/c"), u));
+    ASSERT_EQ(u.get_href(), "wss://example.com/c");
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https:///extra"), u));
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://"), u));
+  }
 }
 
 TEST(basic_tests, ada_url_get_href_assembly) {
@@ -2322,7 +2347,13 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_TRUE(is_ipv4_number_char('e'));
   ASSERT_TRUE(is_ipv4_number_char('c'));
   ASSERT_TRUE(is_ipv4_number_char('x'));
+  ASSERT_TRUE(is_ipv4_number_char('X'));
+  ASSERT_TRUE(is_ipv4_number_char('A'));
+  ASSERT_TRUE(is_ipv4_number_char('F'));
+  ASSERT_TRUE(is_ipv4_number_char('9'));
   ASSERT_TRUE(is_ipv4_number_char('0'));
+  ASSERT_FALSE(is_ipv4_number_char('.'));
+  ASSERT_FALSE(is_ipv4_number_char('z'));
   ASSERT_TRUE(ada::checkers::ends_with_dot_com("example.com", 11));
   ASSERT_TRUE(ada::checkers::ends_with_dot_com("example.COM.", 12));
   ASSERT_FALSE(ada::checkers::ends_with_dot_com("example.org", 11));

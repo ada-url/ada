@@ -189,16 +189,20 @@ constexpr void url::copy_scheme(const ada::url& u) {
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
   if (is_special() && host.has_value() && username.empty() && password.empty())
       [[likely]] {
-    const std::string_view prefix =
-        ada::scheme::details::special_href_prefix[type];
     const size_t host_size = host->size();
     const size_t path_size = path.size();
     const bool has_q = query.has_value();
     const bool has_h = hash.has_value();
     const bool has_p = port.has_value();
+    const bool is_https = type == ada::scheme::type::HTTPS;
+    // HTTPS is ~96% of special URLs. Size is 8; skip the prefix table.
+    const std::string_view prefix =
+        is_https ? std::string_view{"https://", 8}
+                 : ada::scheme::details::special_href_prefix[type];
+    const size_t prefix_size = is_https ? size_t{8} : prefix.size();
 #if !defined(__cpp_lib_string_resize_and_overwrite)
     auto append_prefix = [&](std::string& output) {
-      if (type == ada::scheme::type::HTTPS) [[likely]] {
+      if (is_https) [[likely]] {
         output.append("https://", 8);
       } else {
         output.append(prefix);
@@ -207,7 +211,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
 #endif
 #if defined(__cpp_lib_string_resize_and_overwrite)
     auto write_prefix = [&](char* p) -> char* {
-      if (type == ada::scheme::type::HTTPS) [[likely]] {
+      if (is_https) [[likely]] {
         std::memcpy(p, "https://", 8);
         return p + 8;
       }
@@ -224,7 +228,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
     };
 #endif
     if (!has_q && !has_h && !has_p) [[likely]] {
-      const size_t total = prefix.size() + host_size + path_size;
+      const size_t total = prefix_size + host_size + path_size;
 #if defined(__cpp_lib_string_resize_and_overwrite)
       return finish(total, [&](char* p) {
         p = write_prefix(p);
@@ -253,7 +257,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
       port_digits = helpers::fast_digit_count(port_val);
     }
     const size_t total =
-        prefix.size() + host_size + (has_p ? size_t(1 + port_digits) : 0) +
+        prefix_size + host_size + (has_p ? size_t(1 + port_digits) : 0) +
         path_size + (has_q ? query_size + 1 : 0) + (has_h ? hash_size + 1 : 0);
 #if defined(__cpp_lib_string_resize_and_overwrite)
     return finish(total, [&](char* p) {
