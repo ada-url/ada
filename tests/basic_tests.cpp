@@ -1798,7 +1798,8 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_hostname(), "[2001:db8::1]");
   }
 
-  // Last-label gate inside the fast path (non-digit-led hosts).
+  // Last-label gate inside the fast path. Digit-led domains are accepted;
+  // a numeric last label that is not dotted-decimal IPv4 is rejected.
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123"));
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123."));
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.0xFF"));
@@ -1806,6 +1807,51 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     auto url = ada::parse<TypeParam>("ws://123");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "0.0.0.123");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://1and1.com/x"), u));
+    ASSERT_EQ(u.get_hostname(), "1and1.com");
+    ASSERT_EQ(u.get_pathname(), "/x");
+    ASSERT_EQ(u.host_type, ada::DEFAULT);
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://123.com/"), u));
+    ASSERT_EQ(u.get_hostname(), "123.com");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1"), u));
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.get_pathname(), "/");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://192.168.1.1/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+    ASSERT_EQ(url->get_pathname(), "/x");
+    ASSERT_EQ(url->host_type, ada::IPV4);
+  }
+  {
+    // Trailing-dot IPv4 still works via the state machine.
+    auto url = ada::parse<TypeParam>("http://192.168.1.1./");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+    ASSERT_EQ(url->host_type, ada::IPV4);
+  }
+  {
+    ada::url u;
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1:8080/"), u));
+    auto url = ada::parse<TypeParam>("http://192.168.1.1:8080/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+    ASSERT_EQ(url->get_port(), "8080");
   }
   {
     auto url = ada::parse<TypeParam>("https://foo.x/");
