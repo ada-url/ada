@@ -57,8 +57,7 @@ ada_really_inline bool setter_needs_rollback(size_t buffer_size,
 
 namespace ada {
 
-ada_setter_section bool url_aggregator::set_username(
-    const std::string_view input) {
+bool url_aggregator::set_username(const std::string_view input) {
   ada_log("url_aggregator::set_username '", input, "' ");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -92,8 +91,7 @@ ada_setter_section bool url_aggregator::set_username(
   return true;
 }
 
-ada_setter_section bool url_aggregator::set_password(
-    const std::string_view input) {
+bool url_aggregator::set_password(const std::string_view input) {
   ada_log("url_aggregator::set_password '", input, "'");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -127,7 +125,7 @@ ada_setter_section bool url_aggregator::set_password(
   return true;
 }
 
-ada_setter_section void url_aggregator::set_hash(const std::string_view input) {
+void url_aggregator::set_hash(const std::string_view input) {
   ada_log("url_aggregator::set_hash ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
