@@ -2243,8 +2243,8 @@ TYPED_TEST(basic_tests,
 }
 
 TYPED_TEST(basic_tests, short_host_qword_scan) {
-  // Authorities of 8-15 bytes after "://" take the 8-byte host kernel
-  // (x86-64 SSSE3 assembly, SSSE3/SSE2/NEON intrinsics, or the table tail).
+  // Authorities of 8-15 bytes after "://" take the 8-byte host load
+  // (x86-64 movq, SSSE3/SSE2/NEON classify, or the table tail).
   struct Case {
     const char* in;
     const char* host;

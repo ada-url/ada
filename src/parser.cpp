@@ -45,15 +45,13 @@
 #define ADA_PARSER_SIMD ada_really_inline
 #endif
 
-// Hand-written SSSE3 for the common 8-15 byte authority. A 16-byte load
-// would over-read; gcc/clang x86-64 inline asm keeps the kernel in four
-// XMM temps. MSVC, clang-cl, and the analyzer use the intrinsic form.
-#if ADA_PARSER_SSSE3 && defined(__GNUC__) && !defined(__INTEL_COMPILER) && \
-    (defined(__x86_64__) || defined(__amd64__)) && !defined(_MSC_VER) &&   \
-    !defined(__clang_analyzer__)
-#define ADA_PARSER_HOST_QWORD_ASM 1
+// gcc/clang x86-64: pin an 8-byte load so the short-host path cannot
+// over-read. Other compilers use _mm_loadl_epi64.
+#if defined(__GNUC__) && (defined(__x86_64__) || defined(__amd64__)) && \
+    !defined(_MSC_VER) && !defined(__clang_analyzer__)
+#define ADA_PARSER_QWORD_LOAD_ASM 1
 #else
-#define ADA_PARSER_HOST_QWORD_ASM 0
+#define ADA_PARSER_QWORD_LOAD_ASM 0
 #endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
@@ -362,68 +360,32 @@ ada_really_inline bool apply_host_hits(host_qword_hits h, size_t at,
   end = at + static_cast<size_t>(hit);
   return true;
 }
+
+// Eight bytes only: a 16-byte load would over-read short authorities.
+ada_really_inline __m128i load_host_qword(const uint8_t* p) noexcept {
+#if ADA_PARSER_QWORD_LOAD_ASM
+  __m128i word;
+  // movq (%1), %0 : 8-byte load into an XMM, high 8 lanes stay zero.
+  __asm__("movq (%1), %0" : "=x"(word) : "r"(p) : "memory");
+  return word;
+#else
+  return _mm_loadl_epi64(reinterpret_cast<const __m128i*>(p));
+#endif
+}
 #endif  // ADA_PARSER_SSSE3 || ADA_SSE2
 
 #if ADA_PARSER_SSSE3
-// Eight-byte host classifier. movq leaves the high 8 lanes zero; those
-// bytes are class 2 (NUL), so every mask is kept to 0xFF.
 ADA_PARSER_SIMD host_qword_hits classify_host_qword(const uint8_t* p,
                                                     __m128i lo_tbl,
                                                     __m128i hi_tbl) noexcept {
-#if ADA_PARSER_HOST_QWORD_ASM
-  const __m128i nibble = _mm_set1_epi8(0x0F);
-  const __m128i A_m1 = _mm_set1_epi8(static_cast<char>('A' - 1));
-  const __m128i Z_p1 = _mm_set1_epi8(static_cast<char>('Z' + 1));
-  const __m128i x_splat = _mm_set1_epi8('x');
-  __m128i w;
-  __m128i lo;
-  __m128i hi;
-  __m128i t0;
-  __m128i t1;
+  const __m128i w = load_host_qword(p);
   host_qword_hits h{};
-  __asm__ __volatile__(
-      "movq %[mem], %[w]\n\t"
-      "movdqa %[w], %[t0]\n\t"
-      "pand %[nib], %[t0]\n\t"
-      "movdqa %[w], %[t1]\n\t"
-      "psrlw $4, %[t1]\n\t"
-      "pand %[nib], %[t1]\n\t"
-      "movdqa %[lo_tbl], %[lo]\n\t"
-      "pshufb %[t0], %[lo]\n\t"
-      "movdqa %[hi_tbl], %[hi]\n\t"
-      "pshufb %[t1], %[hi]\n\t"
-      "pand %[hi], %[lo]\n\t"
-      "pxor %[t0], %[t0]\n\t"
-      "pcmpeqb %[t0], %[lo]\n\t"
-      "pmovmskb %[lo], %[stop]\n\t"
-      "xorl $0xFFFF, %[stop]\n\t"
-      "andl $0xFF, %[stop]\n\t"
-      "movdqa %[w], %[t0]\n\t"
-      "pcmpgtb %[Am1], %[t0]\n\t"
-      "movdqa %[Zp1], %[t1]\n\t"
-      "pcmpgtb %[w], %[t1]\n\t"
-      "pand %[t1], %[t0]\n\t"
-      "pmovmskb %[t0], %[up]\n\t"
-      "andl $0xFF, %[up]\n\t"
-      "pcmpeqb %[xsplat], %[w]\n\t"
-      "pmovmskb %[w], %[xs]\n\t"
-      "andl $0xFF, %[xs]"
-      : [w] "=&x"(w), [lo] "=&x"(lo), [hi] "=&x"(hi), [t0] "=&x"(t0),
-        [t1] "=&x"(t1), [stop] "=&r"(h.stop), [up] "=&r"(h.up), [xs] "=&r"(h.xs)
-      : [mem] "m"(*reinterpret_cast<const uint8_t(*)[8]>(p)),
-        [lo_tbl] "x"(lo_tbl), [hi_tbl] "x"(hi_tbl), [nib] "x"(nibble),
-        [Am1] "x"(A_m1), [Zp1] "x"(Z_p1), [xsplat] "x"(x_splat)
-      : "cc");
-  return h;
-#else
-  const __m128i w = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(p));
-  host_qword_hits h{};
+  // Zero-padded high lanes are class 2 (NUL); keep the first 8 bits.
   h.stop = static_cast<uint32_t>(ssse3_nibble_mask(w, lo_tbl, hi_tbl) & 0xFF);
   h.up = static_cast<uint32_t>(sse2_uppercase(w) & 0xFF);
   h.xs = static_cast<uint32_t>(
       _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('x'))) & 0xFF);
   return h;
-#endif
 }
 #endif  // ADA_PARSER_SSSE3
 
@@ -559,7 +521,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
   } else if (len - start >= 8) {
     // Typical hosts (github.com, www.google.com) are 8-15 bytes and used
-    // to take the scalar loop. One 8-byte kernel, then the table tail.
+    // to take the scalar loop. One 8-byte load, then the table tail.
     const __m128i lo_tbl = nibble_load(k_host_nibbles.low);
     const __m128i hi_tbl = nibble_load(k_host_nibbles.high);
     if (apply_host_hits(classify_host_qword(b + start, lo_tbl, hi_tbl), start,
@@ -622,7 +584,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     }
   }
   if (len - i >= 8) {
-    const __m128i w = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(b + i));
+    const __m128i w = load_host_qword(b + i);
     host_qword_hits h{};
     h.stop = static_cast<uint32_t>(sse2_host_stop(w) & 0xFF);
     h.up = static_cast<uint32_t>(sse2_uppercase(w) & 0xFF);
