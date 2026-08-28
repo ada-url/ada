@@ -32,10 +32,6 @@ static std::atomic<uint32_t> max_input_length_{
 // Restored to false when the limit is set back to the ~4 GB default.
 bool max_input_length_customized = false;
 
-// parse() already tried try_parse_simple_absolute on the no-base path.
-// parse_url_impl must not run it again (IPv6 / non-decimal IPv4 miss).
-thread_local bool skip_simple_absolute_once = false;
-
 void set_max_input_length(uint32_t length) {
   max_input_length_.store(length, std::memory_order_relaxed);
   max_input_length_customized = length != std::numeric_limits<uint32_t>::max();
@@ -568,11 +564,13 @@ ada_warn_unused tl::expected<result_type, errors> parse(
       }
       return u;
     }
-    skip_simple_absolute_once = true;
+    ada::parser::parse_url_impl_into<result_type, true>(u, input, nullptr,
+                                                        false);
+    if (!u.is_valid) {
+      return tl::unexpected(errors::type_error);
+    }
+    return u;
   }
-  struct clear_skip_simple_absolute {
-    ~clear_skip_simple_absolute() { skip_simple_absolute_once = false; }
-  } clear_skip;
   result_type u = ada::parser::parse_url_impl<result_type>(input, base_url);
   if (!u.is_valid) {
     return tl::unexpected(errors::type_error);

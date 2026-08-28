@@ -195,22 +195,32 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const bool has_h = hash.has_value();
     const bool has_p = port.has_value();
     const bool is_https = type == ada::scheme::type::HTTPS;
-    if (is_https && !has_q && !has_h && !has_p) [[likely]] {
-      const size_t total = size_t{8} + host_size + path_size;
+    const bool is_http = type == ada::scheme::type::HTTP;
+    if (!has_q && !has_h && !has_p && (is_https || is_http)) [[likely]] {
+      const size_t prefix_n = is_https ? size_t{8} : size_t{7};
+      const size_t total = prefix_n + host_size + path_size;
 #if defined(__cpp_lib_string_resize_and_overwrite)
       std::string output;
       output.resize_and_overwrite(total, [&](char* p, size_t) {
-        std::memcpy(p, "https://", 8);
+        if (is_https) {
+          std::memcpy(p, "https://", 8);
+        } else {
+          std::memcpy(p, "http://", 7);
+        }
         // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-        std::memcpy(p + 8, host->data(), host_size);
-        std::memcpy(p + 8 + host_size, path.data(), path_size);
+        std::memcpy(p + prefix_n, host->data(), host_size);
+        std::memcpy(p + prefix_n + host_size, path.data(), path_size);
         return total;
       });
       return output;
 #else
       std::string output;
       output.reserve(total);
-      output.append("https://", 8);
+      if (is_https) {
+        output.append("https://", 8);
+      } else {
+        output.append("http://", 7);
+      }
       output.append(*host);
       output.append(path);
       return output;

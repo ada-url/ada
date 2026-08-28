@@ -1841,11 +1841,54 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->host_type, ada::IPV4);
   }
   {
-    // Trailing-dot IPv4 still works via the state machine.
+    // Trailing-dot IPv4 is rewritten to dotted-decimal on the fast path.
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1./"), u));
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.host_type, ada::IPV4);
     auto url = ada::parse<TypeParam>("http://192.168.1.1./");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "192.168.1.1");
     ASSERT_EQ(url->host_type, ada::IPV4);
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://0x7f.0x0.0x0.0x1"), u));
+    ASSERT_EQ(u.get_hostname(), "127.0.0.1");
+    ASSERT_EQ(u.get_pathname(), "/");
+    ASSERT_EQ(u.get_href(), "http://127.0.0.1/");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+    auto url = ada::parse<TypeParam>("http://0x7f.0x0.0x0.0x1");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "127.0.0.1");
+    ASSERT_EQ(url->get_href(), "http://127.0.0.1/");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://127.1"), u));
+    ASSERT_EQ(u.get_hostname(), "127.0.0.1");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]/"), u));
+    ASSERT_EQ(u.get_hostname(), "[::1]");
+    ASSERT_EQ(u.get_pathname(), "/");
+    ASSERT_EQ(u.get_href(), "http://[::1]/");
+    ASSERT_EQ(u.host_type, ada::IPV6);
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://[2001:db8::1]/path"), u));
+    ASSERT_EQ(u.get_hostname(), "[2001:db8::1]");
+    ASSERT_EQ(u.get_pathname(), "/path");
+    ASSERT_EQ(u.host_type, ada::IPV6);
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[0:0:0:0:0:0:0:1]"), u));
+    ASSERT_EQ(u.get_hostname(), "[::1]");
+    ASSERT_EQ(u.get_href(), "http://[::1]/");
   }
   {
     ada::url u;
@@ -2334,6 +2377,12 @@ TEST(basic_tests, ada_url_get_href_assembly) {
     auto u = ada::parse<ada::url>("https://user:pass@example.com/x");
     ASSERT_TRUE(u);
     ASSERT_EQ(u->get_href(), "https://user:pass@example.com/x");
+    ASSERT_EQ(u->get_href_size(), u->get_href().size());
+  }
+  {
+    auto u = ada::parse<ada::url>("http://example.com/path");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_href(), "http://example.com/path");
     ASSERT_EQ(u->get_href_size(), u->get_href().size());
   }
 }
