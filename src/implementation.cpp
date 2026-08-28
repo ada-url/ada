@@ -200,7 +200,7 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
     const int unclean = sse2_unclean_http_host(w) & keep;
     const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat)) & keep;
     if (unclean == 0) {
-      return mask_has_xn(bytes, at, xs, length) ? -1 : 0;
+      return (xs != 0 && mask_has_xn(bytes, at, xs, length)) ? -1 : 0;
     }
     const int hit = ctz32(static_cast<unsigned>(unclean));
     const int valid = (1 << hit) - 1;

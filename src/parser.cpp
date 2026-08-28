@@ -816,7 +816,6 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     }
   } else if (len >= 16 && i < len) {
     const size_t at = len - 16;
-    const size_t path_i = i;
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
     const int skip = static_cast<int>(i - at);
     const int keep = static_cast<int>(~((1u << skip) - 1u));
@@ -828,7 +827,6 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     const int valid = (hit == 16) ? keep : (((1 << hit) - 1) & keep);
     note_dots_in_window(b, at, run_start, w, valid, maybe_dot_segment,
                         saw_percent);
-    note_scalar_path_byte(b, path_i, run_start, maybe_dot_segment, saw_percent);
     i = (hit == 16) ? len : at + static_cast<size_t>(hit);
     return;
   }
@@ -848,7 +846,6 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
   }
   if (len >= 16 && i < len) {
     const size_t at = len - 16;
-    const size_t path_i = i;
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
     const int skip = static_cast<int>(i - at);
     const int keep = static_cast<int>(~((1u << skip) - 1u));
@@ -858,7 +855,6 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     const int valid = (hit == 16) ? keep : (((1 << hit) - 1) & keep);
     note_dots_in_window(b, at, run_start, w, valid, maybe_dot_segment,
                         saw_percent);
-    note_scalar_path_byte(b, path_i, run_start, maybe_dot_segment, saw_percent);
     i = (hit == 16) ? len : at + static_cast<size_t>(hit);
     return;
   }
@@ -935,7 +931,6 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     }
   } else if (len >= 16 && i < len) {
     const size_t at = len - 16;
-    const size_t path_i = i;
     const uint8x16_t w = vld1q_u8(b + at);
     const size_t skip = i - at;
     const uint64_t keep = (skip >= 16) ? 0 : ~((uint64_t{1} << (skip * 4)) - 1);
@@ -952,7 +947,6 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
     }
     note_dots_in_window_neon(b, at, run_start, w, valid, maybe_dot_segment,
                              saw_percent);
-    note_scalar_path_byte(b, path_i, run_start, maybe_dot_segment, saw_percent);
     return;
   }
 #endif
