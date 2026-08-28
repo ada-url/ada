@@ -1,5 +1,7 @@
 #include "ada/parser-inl.h"
 
+#include "parser_host_scan.h"
+
 #include <array>
 #include <bit>
 #include <charconv>
@@ -43,15 +45,6 @@
 #define ADA_PARSER_SIMD __attribute__((target("ssse3")))
 #else
 #define ADA_PARSER_SIMD ada_really_inline
-#endif
-
-// gcc/clang x86-64: pin an 8-byte load so the short-host path cannot
-// over-read. Other compilers use _mm_loadl_epi64.
-#if defined(__GNUC__) && (defined(__x86_64__) || defined(__amd64__)) && \
-    !defined(_MSC_VER) && !defined(__clang_analyzer__)
-#define ADA_PARSER_QWORD_LOAD_ASM 1
-#else
-#define ADA_PARSER_QWORD_LOAD_ASM 0
 #endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
@@ -330,65 +323,6 @@ ada_really_inline int sse2_uppercase(__m128i w) noexcept {
 }
 #endif  // ADA_SSE2
 
-#if ADA_PARSER_SSSE3 || ADA_SSE2
-struct host_qword_hits {
-  uint32_t stop;
-  uint32_t up;
-  uint32_t xs;
-};
-
-ada_really_inline bool apply_host_hits(host_qword_hits h, size_t at,
-                                       size_t& end, bool& has_upper,
-                                       bool& has_x) noexcept {
-  if (h.stop == 0) {
-    if (h.up != 0) {
-      has_upper = true;
-    }
-    if (h.xs != 0) {
-      has_x = true;
-    }
-    return false;
-  }
-  const int hit = trailing_zeroes32(h.stop);
-  const uint32_t valid = (1u << hit) - 1u;
-  if ((h.up & valid) != 0) {
-    has_upper = true;
-  }
-  if ((h.xs & valid) != 0) {
-    has_x = true;
-  }
-  end = at + static_cast<size_t>(hit);
-  return true;
-}
-
-// Eight bytes only: a 16-byte load would over-read short authorities.
-ada_really_inline __m128i load_host_qword(const uint8_t* p) noexcept {
-#if ADA_PARSER_QWORD_LOAD_ASM
-  __m128i word;
-  // movq (%1), %0 : 8-byte load into an XMM, high 8 lanes stay zero.
-  __asm__("movq (%1), %0" : "=x"(word) : "r"(p) : "memory");
-  return word;
-#else
-  return _mm_loadl_epi64(reinterpret_cast<const __m128i*>(p));
-#endif
-}
-#endif  // ADA_PARSER_SSSE3 || ADA_SSE2
-
-#if ADA_PARSER_SSSE3
-ADA_PARSER_SIMD host_qword_hits classify_host_qword(const uint8_t* p,
-                                                    __m128i lo_tbl,
-                                                    __m128i hi_tbl) noexcept {
-  const __m128i w = load_host_qword(p);
-  host_qword_hits h{};
-  // Zero-padded high lanes are class 2 (NUL); keep the first 8 bits.
-  h.stop = static_cast<uint32_t>(ssse3_nibble_mask(w, lo_tbl, hi_tbl) & 0xFF);
-  h.up = static_cast<uint32_t>(sse2_uppercase(w) & 0xFF);
-  h.xs = static_cast<uint32_t>(
-      _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('x'))) & 0xFF);
-  return h;
-}
-#endif  // ADA_PARSER_SSSE3
-
 #if ADA_NEON
 ada_really_inline uint64_t neon_nibble_bits(uint8x16_t matches) noexcept {
   const uint8x8_t nib = vshrn_n_u16(vreinterpretq_u16_u8(matches), 4);
@@ -519,16 +453,6 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       end = len;
       return true;
     }
-  } else if (len - start >= 8) {
-    // Typical hosts (github.com, www.google.com) are 8-15 bytes and used
-    // to take the scalar loop. One 8-byte load, then the table tail.
-    const __m128i lo_tbl = nibble_load(k_host_nibbles.low);
-    const __m128i hi_tbl = nibble_load(k_host_nibbles.high);
-    if (apply_host_hits(classify_host_qword(b + start, lo_tbl, hi_tbl), start,
-                        end, has_upper, has_x)) {
-      return k_host_class[b[end]] == 1;
-    }
-    i = start + 8;
   }
 #elif ADA_SSE2
   const __m128i x_splat = _mm_set1_epi8('x');
@@ -583,18 +507,6 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       has_x = true;
     }
   }
-  if (len - i >= 8) {
-    const __m128i w = load_host_qword(b + i);
-    host_qword_hits h{};
-    h.stop = static_cast<uint32_t>(sse2_host_stop(w) & 0xFF);
-    h.up = static_cast<uint32_t>(sse2_uppercase(w) & 0xFF);
-    h.xs = static_cast<uint32_t>(_mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat)) &
-                                 0xFF);
-    if (apply_host_hits(h, i, end, has_upper, has_x)) {
-      return k_host_class[b[end]] == 1;
-    }
-    i += 8;
-  }
 #elif ADA_NEON
   if (len - start >= 16) {
     const uint8x16_t lo_tbl = vld1q_u8(k_host_nibbles.low);
@@ -642,37 +554,14 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
       end = len;
       return true;
     }
-  } else if (len - start >= 8) {
-    const uint8x16_t lo_tbl = vld1q_u8(k_host_nibbles.low);
-    const uint8x16_t hi_tbl = vld1q_u8(k_host_nibbles.high);
-    const uint8x16_t w = vcombine_u8(vld1_u8(b + start), vdup_n_u8(0));
-    // Zero-padded high 8 lanes are class 2; keep the first 8 bytes (32 bits).
-    constexpr uint64_t lane8 = 0xFFFFFFFFull;
-    const uint64_t up = neon_uppercase(w) & lane8;
-    const uint64_t xs = neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('x'))) & lane8;
-    const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl) & lane8;
-    if (bits == 0) {
-      if (up != 0) {
-        has_upper = true;
-      }
-      if (xs != 0) {
-        has_x = true;
-      }
-      i = start + 8;
-    } else {
-      const size_t hit = static_cast<size_t>(trailing_zeroes64(bits)) >> 2;
-      const uint64_t valid = (hit == 0) ? 0 : (uint64_t{1} << (hit * 4)) - 1;
-      if ((up & valid) != 0) {
-        has_upper = true;
-      }
-      if ((xs & valid) != 0) {
-        has_x = true;
-      }
-      end = start + hit;
-      return k_host_class[b[end]] == 1;
-    }
   }
 #endif
+  // 8-15 bytes after :// (github.com, www.google.com): one movq/ldr, not
+  // a 16-byte SIMD load. Lives in parser_host_scan.cpp so ada.cpp stays
+  // the same size for setters.
+  if (len - i >= 8) {
+    return scan_plain_host_short(b, i, len, end, has_upper, has_x);
+  }
   for (; i < len; ++i) {
     const uint8_t c = b[i];
     const uint8_t cls = k_host_class[c];

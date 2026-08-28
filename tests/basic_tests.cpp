@@ -2244,7 +2244,7 @@ TYPED_TEST(basic_tests,
 
 TYPED_TEST(basic_tests, short_host_qword_scan) {
   // Authorities of 8-15 bytes after "://" take the 8-byte host load
-  // (x86-64 movq, SSSE3/SSE2/NEON classify, or the table tail).
+  // (x86-64 movq / AArch64 ldr, then SWAR classify).
   struct Case {
     const char* in;
     const char* host;
@@ -2290,5 +2290,30 @@ TYPED_TEST(basic_tests, short_host_qword_scan) {
   ASSERT_FALSE(ada::parse<TypeParam>("https://exampl%.com"));
   ASSERT_FALSE(ada::parse<TypeParam>("https://abcdefgh%.com"));
   ASSERT_FALSE(ada::parse<TypeParam>("https://exam ple.com"));
+  // Reject / delimiter in each lane of the 8-byte window.
+  for (size_t k = 0; k < 8; ++k) {
+    std::string bad(8, 'a');
+    bad[k] = '%';
+    ASSERT_FALSE(ada::parse<TypeParam>("https://" + bad)) << k;
+  }
+  for (size_t k = 1; k < 8; ++k) {
+    std::string rest(8, 'b');
+    rest[k] = '/';
+    const std::string in = "https://" + rest + "z";
+    auto url = ada::parse<TypeParam>(in);
+    ASSERT_TRUE(url) << in;
+    ASSERT_EQ(url->get_hostname(), std::string(k, 'b')) << in;
+    ASSERT_EQ(url->get_pathname(), "/" + std::string(7 - k, 'b') + "z") << in;
+  }
+  {
+    auto q = ada::parse<TypeParam>("https://abcd1234?x=1");
+    ASSERT_TRUE(q);
+    ASSERT_EQ(q->get_hostname(), "abcd1234");
+    ASSERT_EQ(q->get_search(), "?x=1");
+    auto h = ada::parse<TypeParam>("https://abcd1234#f");
+    ASSERT_TRUE(h);
+    ASSERT_EQ(h->get_hostname(), "abcd1234");
+    ASSERT_EQ(h->get_hash(), "#f");
+  }
   SUCCEED();
 }

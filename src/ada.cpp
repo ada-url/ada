@@ -4,6 +4,9 @@
 #if !defined(ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU)
 #include "unicode_percent_encode.cpp"
 #endif
+#if !defined(ADA_PARSER_HOST_SCAN_SEPARATE_TU)
+#include "parser_host_scan.cpp"
+#endif
 #include "serializers.cpp"
 #include "implementation.cpp"
 #include "helpers.cpp"
