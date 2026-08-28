@@ -1895,6 +1895,63 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_pathname(), "/");
   }
 
+  // Overlapping 16-byte host window: remaining host region is < 16.
+  {
+    auto url = ada::parse<TypeParam>("https://ab.com/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "ab.com");
+    ASSERT_EQ(url->get_pathname(), "/x");
+    ASSERT_EQ(url->get_href(), "https://ab.com/x");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://a.co");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "a.co");
+    ASSERT_EQ(url->get_href(), "https://a.co/");
+  }
+
+  // '%' in a path is copyable unless the segment is %2e / %2e%2e.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/a%2fb%20c");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/a%2fb%20c");
+    ASSERT_EQ(url->get_href(), "https://example.com/a%2fb%20c");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/a%2fb"), u));
+    ASSERT_EQ(u.get_pathname(), "/a%2fb");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/foo/%2e"), u));
+    ASSERT_EQ(u.get_pathname(), "/foo/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo/%2E");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/%2e%2e/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/x");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/.%2e");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+  }
+  {
+    // Mid-segment %2e is not a dot-segment.
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/foo%2ebar"), u));
+    ASSERT_EQ(u.get_pathname(), "/foo%2ebar");
+  }
+
   // Path encoding then query/hash; query encoding then hash.
   {
     auto url = ada::parse<TypeParam>("https://example.com/foo bar?q=1");
@@ -2214,6 +2271,22 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_TRUE(last_label_may_be_a_number("19%2E68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("19.68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("0xffffffff."));
+}
+
+TYPED_TEST(basic_tests, aggregator_href_buffer_reuse) {
+  // Successive parses must not leak a previous href into a later URL.
+  const char* long_url =
+      "https://this-is-a-long-hostname.example.com/"
+      "abcdefghijklmnopqrstuvwxyz0123456789/path?q=1#frag";
+  for (int i = 0; i < 8; ++i) {
+    auto url = ada::parse<TypeParam>(long_url);
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_href(), long_url);
+  }
+  auto short_url = ada::parse<TypeParam>("https://example.com/x");
+  ASSERT_TRUE(short_url);
+  ASSERT_EQ(short_url->get_href(), "https://example.com/x");
+  ASSERT_EQ(short_url->get_hostname(), "example.com");
 }
 
 TYPED_TEST(basic_tests,
