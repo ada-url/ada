@@ -108,18 +108,14 @@ ada_really_inline uint32_t url_aggregator::replace_and_resize(
   uint32_t input_size = uint32_t(input.size());
   uint32_t new_difference = input_size - current_length;
 
-  if (current_length == 0) {
-    buffer.insert(start, input);
-  } else if (input_size == current_length) {
+  // Equal length: copy in place. Any other delta is one replace
+  // (insert, erase+copy, or grow) instead of erase+replace / replace+insert.
+  if (input_size == current_length) {
     if (input_size != 0) {
       std::memmove(buffer.data() + start, input.data(), input_size);
     }
-  } else if (input_size < current_length) {
-    buffer.erase(start, current_length - input_size);
-    buffer.replace(start, input_size, input);
   } else {
-    buffer.replace(start, current_length, input.substr(0, current_length));
-    buffer.insert(start + current_length, input.substr(current_length));
+    buffer.replace(start, current_length, input);
   }
 
   return new_difference;

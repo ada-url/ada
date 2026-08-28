@@ -3,19 +3,24 @@
 // benches (SetUsername / SetPassword / SetHash). Amalgamation leaves
 // ADA_URL_SETTERS_SEPARATE_TU unset and compiles these methods once
 // via url_aggregator.cpp.
-
-#include "ada/character_sets.h"
-#include "ada/common_defs.h"
-#include "ada/implementation.h"
-#include "ada/log.h"
-#include "ada/unicode-inl.h"
-#include "ada/url_aggregator.h"
-#include "ada/url_aggregator-inl.h"
-
+//
 #include <algorithm>
+#include <cstring>
+#include <limits>
 #include <optional>
 #include <string>
 #include <string_view>
+
+// ada.h pulls parser.h before url.h so ada::parser friends resolve, and
+// the *-inl.h bodies that parse_port / is_special need. This TU is not
+// part of the amalgamate include tree (ada.cpp never #includes it).
+#include "ada.h"
+#include "ada/log.h"
+#include "ada/unicode-inl.h"
+
+namespace ada {
+extern bool max_input_length_customized;
+}  // namespace ada
 
 namespace {
 
@@ -38,15 +43,15 @@ void strip_ascii_tab_or_newline(std::string& input) {
               input.end());
 }
 
-void strip_opaque_trailing_spaces(ada::url_aggregator& url) {
-  if (!url.has_opaque_path || url.has_hash() || url.has_search()) {
-    return;
+// Same bound as url_aggregator::needs_rollback_snapshot, but without
+// jumping into the unity TU (Valgrind I-cache) on every setter call.
+ada_really_inline bool setter_needs_rollback(size_t buffer_size,
+                                             size_t input_len) noexcept {
+  const size_t upper = buffer_size + input_len * 3 + 16;
+  if (!ada::max_input_length_customized) [[likely]] {
+    return upper > std::numeric_limits<uint32_t>::max();
   }
-  std::string path(url.get_pathname());
-  while (!path.empty() && path.back() == ' ') {
-    path.resize(path.size() - 1);
-  }
-  url.update_base_pathname(path);
+  return upper > ada::get_max_input_length();
 }
 
 }  // namespace
@@ -60,7 +65,7 @@ bool url_aggregator::set_username(const std::string_view input) {
     return false;
   }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(input.size())) {
+  if (setter_needs_rollback(buffer.size(), input.size())) {
     saved_url = *this;
   }
   size_t idx = ada::unicode::percent_encode_index(
@@ -86,7 +91,7 @@ bool url_aggregator::set_password(const std::string_view input) {
     return false;
   }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(input.size())) {
+  if (setter_needs_rollback(buffer.size(), input.size())) {
     saved_url = *this;
   }
   size_t idx = ada::unicode::percent_encode_index(
@@ -112,7 +117,7 @@ bool url_aggregator::set_pathname(const std::string_view input) {
     return false;
   }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(input.size())) {
+  if (setter_needs_rollback(buffer.size(), input.size())) {
     saved_url = *this;
   }
   clear_pathname();
@@ -143,7 +148,13 @@ void url_aggregator::set_hash(const std::string_view input) {
       buffer.resize(components.hash_start);
       components.hash_start = url_components::omitted;
     }
-    strip_opaque_trailing_spaces(*this);
+    if (has_opaque_path && !has_search()) {
+      std::string path(get_pathname());
+      while (!path.empty() && path.back() == ' ') {
+        path.resize(path.size() - 1);
+      }
+      update_base_pathname(path);
+    }
     return;
   }
 
@@ -155,7 +166,7 @@ void url_aggregator::set_hash(const std::string_view input) {
     new_value = cleaned;
   }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(new_value.size())) {
+  if (setter_needs_rollback(buffer.size(), new_value.size())) {
     saved_url = *this;
   }
   if (components.hash_start != url_components::omitted) {
