@@ -70,6 +70,7 @@ extern bool max_input_length_customized;
 
 namespace ada::parser {
 
+#if !defined(ADA_SKIP_PARSER_FASTPATH) || !defined(ADA_SKIP_PARSER_FINISH)
 // Classification tables and 16-byte run scanners for the absolute-URL fast
 // path. Inspired by oven-sh/WebKit#452 and #454: scan 16 bytes at a time
 // (nibble-table pshufb/tbl when SSSE3 or NEON is available), and when the
@@ -1225,12 +1226,8 @@ ada_really_inline bool is_double_dot_seg(std::string_view input) noexcept {
          input == "%2E%2E" || input == "%2E%2e" || input == "%2e%2E";
 }
 
-#if !defined(ADA_SKIP_PARSER_HOT)
-ada_really_inline bool ascii_to_lower(char* input, size_t length) noexcept {
-  return unicode::to_lower_ascii(input, length);
-}
-#else
-// The always_inline unicode.cpp body is not visible in this TU.
+// Local copy so the fast-path TU does not depend on always_inline
+// unicode.cpp (no standalone symbol).
 ada_really_inline bool ascii_to_lower(char* input, size_t length) noexcept {
   constexpr uint64_t broadcast_80 = 0x8080808080808080ull;
   constexpr uint64_t broadcast_Ap = 0x101010101010101ull * (128 - 'A');
@@ -1255,7 +1252,6 @@ ada_really_inline bool ascii_to_lower(char* input, size_t length) noexcept {
   }
   return non_ascii == 0;
 }
-#endif
 
 // True when a path segment is "." / ".." or a percent-encoded form
 // ("%2e", "%2e%2e", ".%2e", "%2e.") that the path helpers would collapse.
@@ -1425,7 +1421,7 @@ ada_cold uint64_t try_parse_ipv4_any(std::string_view input) noexcept {
   return ipv4;
 }
 
-#if !defined(ADA_SKIP_PARSER_HOT)
+#if !defined(ADA_SKIP_PARSER_FASTPATH)
 ada_really_inline char* write_u8_dec(char* p, uint8_t v) noexcept {
   if (v < 10) {
     *p++ = static_cast<char>('0' + v);
@@ -1452,7 +1448,7 @@ ada_cold size_t write_ipv4_dotted(char* buf, uint32_t addr) noexcept {
   p = write_u8_dec(p, static_cast<uint8_t>(addr));
   return static_cast<size_t>(p - buf);
 }
-#endif  // ADA_SKIP_PARSER_HOT
+#endif  // ADA_SKIP_PARSER_FASTPATH
 
 // true => leave the simple-absolute path. false => stay; may set is_ipv4
 // and ask the caller to rewrite the host to dotted-decimal.
@@ -1499,6 +1495,7 @@ ada_really_inline bool trailing_c0_or_tab_newline(
 }
 
 }  // namespace
+#endif  // scanners (fast path or finish)
 
 #ifndef ADA_SKIP_PARSER_FINISH
 // Percent-encoding / dot-segment handoff. Kept out of the already-canonical
@@ -2354,7 +2351,7 @@ template void finish_simple_absolute_handoff<url_aggregator>(
 
 #endif  // ADA_SKIP_PARSER_FINISH
 
-#ifndef ADA_SKIP_PARSER_HOT
+#ifndef ADA_SKIP_PARSER_FASTPATH
 // Fast path for already-canonical special-scheme URLs of the shape
 // scheme://host[/path][?query][#fragment]. When the host is a plain domain
 // but the rest needs encoding or dot-segment normalization, the host is
@@ -2578,8 +2575,7 @@ after_rest:
   // fragment reaching the helpers below would keep those bytes percent-encoded
   // ("?a\nb" -> "?a%0Ab", "#f " -> "#f%20") instead of stripped, so hand such
   // inputs back to the slow path.
-  if (!rest_simple && (unicode::is_c0_control_or_space(input.back()) ||
-                       unicode::has_tabs_or_newline(input))) {
+  if (!rest_simple && trailing_c0_or_tab_newline(input)) {
     return false;
   }
 
@@ -2854,6 +2850,17 @@ ADA_PARSER_FASTPATH bool try_parse_simple_relative(std::string_view input,
   return true;
 }
 
+template bool try_parse_simple_absolute<url>(std::string_view, url&);
+template bool try_parse_simple_absolute<url_aggregator>(std::string_view,
+                                                        url_aggregator&);
+template bool try_parse_simple_relative<url>(std::string_view, const url&,
+                                             url&);
+template bool try_parse_simple_relative<url_aggregator>(std::string_view,
+                                                        const url_aggregator&,
+                                                        url_aggregator&);
+#endif  // ADA_SKIP_PARSER_FASTPATH
+
+#ifndef ADA_SKIP_PARSER_IMPL
 template <class result_type, bool store_values>
 result_type& parse_url_impl_into(result_type& url, std::string_view user_input,
                                  const result_type* base_url,
@@ -3861,15 +3868,6 @@ result_type& parse_url_impl_into(result_type& url, std::string_view user_input,
   return url;
 }
 
-template bool try_parse_simple_absolute<url>(std::string_view, url&);
-template bool try_parse_simple_absolute<url_aggregator>(std::string_view,
-                                                        url_aggregator&);
-template bool try_parse_simple_relative<url>(std::string_view, const url&,
-                                             url&);
-template bool try_parse_simple_relative<url_aggregator>(std::string_view,
-                                                        const url_aggregator&,
-                                                        url_aggregator&);
-
 template url& parse_url_impl_into<url, true>(url&, std::string_view, const url*,
                                              bool);
 template url_aggregator& parse_url_impl_into<url_aggregator, true>(
@@ -3903,10 +3901,10 @@ template url parse_url<url>(std::string_view user_input,
                             const url* base_url = nullptr);
 template url_aggregator parse_url<url_aggregator>(
     std::string_view user_input, const url_aggregator* base_url = nullptr);
-#endif  // ADA_SKIP_PARSER_HOT
+#endif  // ADA_SKIP_PARSER_IMPL
 }  // namespace ada::parser
 
-#ifndef ADA_SKIP_PARSER_HOT
+#ifndef ADA_SKIP_PARSER_FASTPATH
 namespace ada {
 
 template <class result_type>
@@ -3959,4 +3957,4 @@ template ada::result<url_aggregator> parse<url_aggregator>(
 
 }  // namespace ada
 
-#endif  // ADA_SKIP_PARSER_HOT
+#endif  // ADA_SKIP_PARSER_FASTPATH

@@ -7,7 +7,7 @@ target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAK
 add_library(ada-source INTERFACE)
 target_sources(ada-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/ada.cpp)
 target_link_libraries(ada-source INTERFACE ada-include-source)
-add_library(ada ada.cpp unicode_percent_encode.cpp parser_finish.cpp)
+add_library(ada ada.cpp unicode_percent_encode.cpp parser_hot.cpp parser_finish.cpp)
 target_compile_features(ada PUBLIC cxx_std_20)
 target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
 target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -60,9 +60,9 @@ if(ADA_TESTING)
   target_compile_definitions(ada PRIVATE ADA_TESTING=1)
 endif()
 
-# Keep the SIMD percent-encode kernel and the cold simple-absolute finish
-# helpers in their own TUs so the unity ada.cpp inlining budget for
-# setters matches main.
+# Keep the SIMD percent-encode kernel, the simple-absolute fast path, and
+# the cold finish helpers in their own TUs so the unity ada.cpp inlining
+# budget for setters matches main.
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
 target_compile_definitions(ada PRIVATE ADA_PARSER_FINISH_SEPARATE_TU=1)
 

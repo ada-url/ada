@@ -18,11 +18,11 @@ DOCKER_IMAGE=xianpengshen/clang-tools:22
 ALL_ADA_FILES=$(cd "$MAINSOURCE" && \
   git ls-tree --full-tree --name-only -r HEAD | grep -E '.*\.(c|h|cc|cpp|hh)$')
 
-# ada.cpp is the unity translation unit. parser_finish.cpp is a separate
-# TU that #includes parser.cpp with ADA_SKIP_PARSER_HOT, so tidy must
-# cover both. HeaderFilterRegex in .clang-tidy controls which included
-# files generate diagnostics.
-TIDY_SRCS=(src/ada.cpp src/parser_finish.cpp)
+# ada.cpp is the unity translation unit. parser_hot.cpp and
+# parser_finish.cpp #include parser.cpp with complementary skip macros,
+# so tidy must cover all three. HeaderFilterRegex in .clang-tidy
+# controls which included files generate diagnostics.
+TIDY_SRCS=(src/ada.cpp src/parser_hot.cpp src/parser_finish.cpp)
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -112,6 +112,6 @@ else
         -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
         -DCMAKE_CXX_FLAGS='-stdlib=libc++'
-      clang-tidy-22 -p build-clang-tidy src/ada.cpp src/parser_finish.cpp
+      clang-tidy-22 -p build-clang-tidy src/ada.cpp src/parser_hot.cpp src/parser_finish.cpp
     "
 fi
