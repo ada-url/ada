@@ -256,6 +256,11 @@ ada_really_inline void set_plain_host_components(
   c.hash_start = hash_start;
 }
 
+// npos truncated to uint32_t is omitted, so the 99% has-path finish
+// can store query/hash starts without a cmov against string_view::npos.
+static_assert(static_cast<uint32_t>(std::string_view::npos) ==
+              url_components::omitted);
+
 // https:// is ~96% of the dataset: protocol_end=6, host at 8, port omitted.
 ada_really_inline void set_https_plain_host_components(
     url_components& c, uint32_t host_end, uint32_t pathname_start,
@@ -1801,7 +1806,7 @@ after_rest:
       out.port = static_cast<uint16_t>(parsed_port);
     }
     if (insert_slash) {
-      out.path = "/";
+      out.path.assign(1, '/');
     } else {
       out.path.assign(input.data() + path_start, path_end - path_start);
     }
@@ -2050,7 +2055,7 @@ after_rest:
       out.port = static_cast<uint16_t>(parsed_port);
     }
     if (insert_slash) {
-      out.path = "/";
+      out.path.assign(1, '/');
     } else {
       out.path.assign(input.data() + path_start, path_end - path_start);
     }
@@ -2309,7 +2314,7 @@ ADA_PARSER_COLD bool try_finish_simple_userinfo(std::string_view input,
       out.port = static_cast<uint16_t>(parsed_port);
     }
     if (insert_slash) {
-      out.path = "/";
+      out.path.assign(1, '/');
     } else {
       out.path.assign(input.substr(path_start, path_end - path_start));
     }
@@ -2475,20 +2480,6 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
     }
   }
 
-  if (host_end < len && b[host_end] == ':') [[unlikely]] {
-    if (finish_simple_absolute_with_port(input, out, scheme_type, protocol_end,
-                                         host_start, host_end, host_len,
-                                         has_upper)) {
-      if (is_ipv4) {
-        out.host_type = IPV4;
-      }
-      return true;
-    }
-    // `user:pass@host` looks like a port until the '@'.
-    return try_finish_simple_userinfo(input, out, scheme_type, protocol_end,
-                                      host_start);
-  }
-
   size_t i = host_end;
   size_t path_start = host_end;
   size_t path_end = host_end;
@@ -2499,8 +2490,23 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
   bool saw_percent = false;
   bool rest_simple = true;
 
-  if (i < len) {
-    if (b[i] == '/') {
+  if (host_end < len) {
+    const uint8_t delim = b[host_end];
+    if (delim == ':') [[unlikely]] {
+      if (finish_simple_absolute_with_port(input, out, scheme_type,
+                                           protocol_end, host_start, host_end,
+                                           host_len, has_upper)) {
+        if (is_ipv4) {
+          out.host_type = IPV4;
+        }
+        return true;
+      }
+      // `user:pass@host` looks like a port until the '@'.
+      return try_finish_simple_userinfo(input, out, scheme_type, protocol_end,
+                                        host_start);
+    }
+    // scan_plain_host succeeded, so delim is / ? # (or we returned above).
+    if (delim == '/') {
       has_path = true;
       path_start = i;
       ++i;
@@ -2537,7 +2543,7 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
         goto after_rest;
       }
       path_end = i;
-    } else if (b[i] == '?') {
+    } else if (delim == '?') {
       query_start = i;
       ++i;
       goto scan_query;
@@ -2610,23 +2616,23 @@ after_rest:
     if (!need_slash) [[likely]] {
       // assign copies once. resize()+memcpy would value-init then overwrite.
       out.buffer.assign(input);
-      if (has_upper) {
+      if (has_upper) [[unlikely]] {
         ascii_to_lower(out.buffer.data() + host_start, host_len);
       }
-      const uint32_t search = (query_start != std::string_view::npos)
-                                  ? static_cast<uint32_t>(query_start)
-                                  : url_components::omitted;
-      const uint32_t hash = (hash_start != std::string_view::npos)
-                                ? static_cast<uint32_t>(hash_start)
-                                : url_components::omitted;
-      if (scheme_type == ada::scheme::type::HTTPS) {
-        set_https_plain_host_components(
-            out.components, static_cast<uint32_t>(host_end),
-            static_cast<uint32_t>(path_start), search, hash);
+      // query_start / hash_start are npos when absent; the uint32_t
+      // truncation is omitted (see static_assert above).
+      if (scheme_type == ada::scheme::type::HTTPS) [[likely]] {
+        set_https_plain_host_components(out.components,
+                                        static_cast<uint32_t>(host_end),
+                                        static_cast<uint32_t>(path_start),
+                                        static_cast<uint32_t>(query_start),
+                                        static_cast<uint32_t>(hash_start));
       } else {
-        set_plain_host_components(
-            out.components, protocol_end, static_cast<uint32_t>(host_end),
-            static_cast<uint32_t>(path_start), search, hash);
+        set_plain_host_components(out.components, protocol_end,
+                                  static_cast<uint32_t>(host_end),
+                                  static_cast<uint32_t>(path_start),
+                                  static_cast<uint32_t>(query_start),
+                                  static_cast<uint32_t>(hash_start));
       }
     } else {
       out.buffer.clear();
@@ -2663,11 +2669,11 @@ after_rest:
     }
   } else {
     out.host.emplace(input.data() + host_start, host_len);
-    if (has_upper) {
+    if (has_upper) [[unlikely]] {
       ascii_to_lower(out.host->data(), host_len);
     }
     if (need_slash) {
-      out.path = "/";
+      out.path.assign(1, '/');
     } else {
       out.path.assign(input.data() + path_start, path_end - path_start);
     }
@@ -2684,9 +2690,17 @@ after_rest:
   return true;
 }
 
+template bool try_parse_simple_absolute<url>(std::string_view, url&);
+template bool try_parse_simple_absolute<url_aggregator>(std::string_view,
+                                                        url_aggregator&);
+#endif  // ADA_SKIP_PARSER_FASTPATH
+
+#ifndef ADA_SKIP_PARSER_RELATIVE
 // Fast path for `/path`, path-relative (`foo`, `c/d?q`), `?query`, and
 // `#fragment` against a special-scheme base. Scheme-relative (`//`) and
 // scheme-like first segments (`foo:bar`) stay on the state machine.
+// Compiled in the finish TU so the absolute/https I-cache is not
+// displaced by relative resolution.
 template <class result_type>
 ADA_PARSER_FASTPATH bool try_parse_simple_relative(std::string_view input,
                                                    const result_type& base,
@@ -2867,15 +2881,12 @@ ADA_PARSER_FASTPATH bool try_parse_simple_relative(std::string_view input,
   return true;
 }
 
-template bool try_parse_simple_absolute<url>(std::string_view, url&);
-template bool try_parse_simple_absolute<url_aggregator>(std::string_view,
-                                                        url_aggregator&);
 template bool try_parse_simple_relative<url>(std::string_view, const url&,
                                              url&);
 template bool try_parse_simple_relative<url_aggregator>(std::string_view,
                                                         const url_aggregator&,
                                                         url_aggregator&);
-#endif  // ADA_SKIP_PARSER_FASTPATH
+#endif  // ADA_SKIP_PARSER_RELATIVE
 
 #ifdef ADA_PARSER_ENABLE_SSSE3_PRAGMA
 #pragma GCC pop_options

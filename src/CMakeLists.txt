@@ -61,8 +61,9 @@ if(ADA_TESTING)
 endif()
 
 # Keep the SIMD percent-encode kernel, the simple-absolute fast path,
-# the cold finish helpers, and can_parse in their own TUs so the unity
-# ada.cpp inlining budget for setters matches main.
+# the cold finish helpers (including relative resolution), and can_parse
+# in their own TUs so the unity ada.cpp inlining budget for setters
+# matches main.
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
 target_compile_definitions(ada PRIVATE ADA_PARSER_FINISH_SEPARATE_TU=1)
 target_compile_definitions(ada PRIVATE ADA_CAN_PARSE_SEPARATE_TU=1)

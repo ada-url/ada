@@ -14,6 +14,7 @@
 #if defined(ADA_PARSER_FINISH_SEPARATE_TU)
 #define ADA_SKIP_PARSER_FINISH
 #define ADA_SKIP_PARSER_FASTPATH
+#define ADA_SKIP_PARSER_RELATIVE
 #endif
 #include "parser.cpp"
 #include "url_components.cpp"
