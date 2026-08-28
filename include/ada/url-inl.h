@@ -187,29 +187,22 @@ constexpr void url::copy_scheme(const ada::url& u) {
 }
 
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
-  // ~96% of the dataset is http(s) without userinfo or a port. Include
-  // query/hash here so the 23% with `?` do not fall into the general
-  // prefix-table / port path.
-  if (host.has_value() && username.empty() && password.empty() &&
-      !port.has_value() &&
-      (type == ada::scheme::type::HTTPS || type == ada::scheme::type::HTTP))
-      [[likely]] {
-    const bool is_https = type == ada::scheme::type::HTTPS;
-    const size_t prefix_n = is_https ? size_t{8} : size_t{7};
+  // ~96% of the dataset is https without userinfo or a port. Keep this
+  // branch HTTPS-only so the common path does not cmov the prefix length
+  // or choose between "https://" and "http://". HTTP falls through to
+  // the special-scheme prefix table below.
+  if (type == ada::scheme::type::HTTPS && host.has_value() &&
+      username.empty() && password.empty() && !port.has_value()) [[likely]] {
     const size_t host_size = host->size();
     const size_t path_size = path.size();
     const size_t q_n = query ? query->size() + 1 : 0;
     const size_t h_n = hash ? hash->size() + 1 : 0;
-    const size_t total = prefix_n + host_size + path_size + q_n + h_n;
+    const size_t total = size_t{8} + host_size + path_size + q_n + h_n;
 #if defined(__cpp_lib_string_resize_and_overwrite)
     std::string output;
     output.resize_and_overwrite(total, [&](char* p, size_t) {
-      if (is_https) {
-        std::memcpy(p, "https://", 8);
-      } else {
-        std::memcpy(p, "http://", 7);
-      }
-      char* w = p + prefix_n;
+      std::memcpy(p, "https://", 8);
+      char* w = p + 8;
       // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
       std::memcpy(w, host->data(), host_size);
       w += host_size;
@@ -232,11 +225,7 @@ constexpr void url::copy_scheme(const ada::url& u) {
 #else
     std::string output;
     output.reserve(total);
-    if (is_https) {
-      output.append("https://", 8);
-    } else {
-      output.append("http://", 7);
-    }
+    output.append("https://", 8);
     output.append(*host);
     output.append(path);
     if (query) {

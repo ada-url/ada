@@ -738,9 +738,14 @@ url_aggregator::get_components() const noexcept {
   ada_log("url_aggregator::has_authority");
   // Performance: instead of doing this potentially expensive check, we could
   // have a boolean in the struct.
-  return components.protocol_end + 2 <= components.host_start &&
-         buffer[components.protocol_end] == '/' &&
-         buffer[components.protocol_end + 1] == '/';
+  if (components.protocol_end + 2 > components.host_start) {
+    return false;
+  }
+  // "//" as a 16-bit load. Little-endian stores 0x2f2f; big-endian is
+  // the same because both bytes are identical.
+  uint16_t slashes = 0;
+  std::memcpy(&slashes, buffer.data() + components.protocol_end, 2);
+  return slashes == 0x2f2f;
 }
 
 inline void ada::url_aggregator::add_authority_slashes_if_needed() {

@@ -51,7 +51,10 @@
 // stays baseline and only calls the noinline entries. COLD helpers also
 // need the target so they can call the pshufb scanners, but they live in
 // .text.unlikely so they do not displace setter I-cache.
-#define ADA_PARSER_SIMD __attribute__((target("ssse3")))
+// always_inline is required: without it gcc leaves nibble_load /
+// ssse3_nibble_mask / scan_* as out-of-line calls (a call/ret per
+// 16-byte window on the CodSpeed g++-12 path).
+#define ADA_PARSER_SIMD inline __attribute__((always_inline, target("ssse3")))
 #define ADA_PARSER_FASTPATH __attribute__((target("ssse3"), noinline))
 #define ADA_PARSER_COLD __attribute__((target("ssse3"), noinline, cold))
 #else
@@ -2428,33 +2431,38 @@ ADA_PARSER_FASTPATH bool try_parse_simple_absolute(std::string_view input,
     if (lastc == '.' && host_len > 1) {
       lastc = b[host_end - 2];
     }
-    if (has_upper) [[unlikely]] {
-      if (reject_uppercase_plain_host(input.data() + host_start, host_len)) {
+    // .com/.org last letters are outside 0-9a-fxX, so this is one
+    // not-taken branch on the common path instead of has_upper /
+    // ipv4-char / has_xn as three separate checks.
+    const bool rare_host =
+        has_xn || has_upper ||
+        ada::checkers::is_ipv4_number_char(static_cast<char>(lastc));
+    if (rare_host) [[unlikely]] {
+      if (has_xn) {
         return false;
       }
-    } else if (ada::checkers::is_ipv4_number_char(static_cast<char>(lastc)))
-        [[unlikely]] {
-      // .com/.org/.net never enter: last letter is not an IPv4 number char
-      // ('m' and 'g' are outside 0-9a-fxX).
-      const std::string_view hv(input.data() + host_start, host_len);
-      uint64_t ipv4_addr = 0;
-      bool rewrite_host = false;
-      if (reject_or_classify_numeric_last_label(hv, is_ipv4, ipv4_addr,
-                                                rewrite_host)) {
-        return false;
+      if (has_upper) {
+        if (reject_uppercase_plain_host(input.data() + host_start, host_len)) {
+          return false;
+        }
+      } else {
+        const std::string_view hv(input.data() + host_start, host_len);
+        uint64_t ipv4_addr = 0;
+        bool rewrite_host = false;
+        if (reject_or_classify_numeric_last_label(hv, is_ipv4, ipv4_addr,
+                                                  rewrite_host)) {
+          return false;
+        }
+        if (rewrite_host) {
+          char dotted[16];
+          const size_t n =
+              write_ipv4_dotted(dotted, static_cast<uint32_t>(ipv4_addr));
+          return finish_simple_absolute_literal_host(
+              input, out, scheme_type, protocol_end, host_start, host_end,
+              std::string_view(dotted, n), IPV4);
+        }
+        out.host_type = IPV4;
       }
-      if (rewrite_host) {
-        char dotted[16];
-        const size_t n =
-            write_ipv4_dotted(dotted, static_cast<uint32_t>(ipv4_addr));
-        return finish_simple_absolute_literal_host(
-            input, out, scheme_type, protocol_end, host_start, host_end,
-            std::string_view(dotted, n), IPV4);
-      }
-      out.host_type = IPV4;
-    }
-    if (has_xn) [[unlikely]] {
-      return false;
     }
   }
 

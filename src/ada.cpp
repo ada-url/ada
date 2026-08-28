@@ -6,6 +6,9 @@
 #endif
 #include "serializers.cpp"
 #include "implementation.cpp"
+#if !defined(ADA_CAN_PARSE_SEPARATE_TU)
+#include "can_parse.cpp"
+#endif
 #include "helpers.cpp"
 #include "url.cpp"
 #if defined(ADA_PARSER_FINISH_SEPARATE_TU)
