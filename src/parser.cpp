@@ -1336,7 +1336,7 @@ scan_hash:
   }
 
 after_rest:
-  if (rest_simple && has_path) {
+  if (rest_simple && has_path && (maybe_dot_segment || saw_percent)) {
     const std::string_view path_body(input.data() + path_start,
                                      path_end - path_start);
     if (!simple_path_is_canonical(path_body, maybe_dot_segment, saw_percent)) {
@@ -1735,7 +1735,7 @@ scan_hash:
   }
 
 after_rest:
-  if (rest_simple && has_path) {
+  if (rest_simple && has_path && (maybe_dot_segment || saw_percent)) {
     const std::string_view path_body(input.data() + path_start,
                                      path_end - path_start);
     if (!simple_path_is_canonical(path_body, maybe_dot_segment, saw_percent)) {
@@ -1967,12 +1967,11 @@ ADA_PARSER_FASTPATH bool try_parse_simple_relative(std::string_view input,
     }
   }
 
-  if (has_path) {
-    const std::string_view path_body(input.data() + path_start,
-                                     path_end - path_start);
-    if (!simple_path_is_canonical(path_body, maybe_dot_segment, saw_percent)) {
-      return false;
-    }
+  if (has_path && (maybe_dot_segment || saw_percent) &&
+      !simple_path_is_canonical(
+          std::string_view(input.data() + path_start, path_end - path_start),
+          maybe_dot_segment, saw_percent)) {
+    return false;
   }
 
   out = base;
