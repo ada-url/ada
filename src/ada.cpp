@@ -6,8 +6,16 @@
 #endif
 #include "serializers.cpp"
 #include "implementation.cpp"
+#if !defined(ADA_CAN_PARSE_SEPARATE_TU)
+#include "can_parse.cpp"
+#endif
 #include "helpers.cpp"
 #include "url.cpp"
+#if defined(ADA_PARSER_FINISH_SEPARATE_TU)
+#define ADA_SKIP_PARSER_FINISH
+#define ADA_SKIP_PARSER_FASTPATH
+#define ADA_SKIP_PARSER_RELATIVE
+#endif
 #include "parser.cpp"
 #include "url_components.cpp"
 #include "url_aggregator.cpp"

@@ -186,7 +186,76 @@ constexpr void url::copy_scheme(const ada::url& u) {
   type = u.type;
 }
 
+namespace href_detail {
+// Constant prefix length so https:// and http:// do not cmov the size.
+// query/hash use `if (opt)` so clang-tidy sees the optional is engaged.
+template <size_t PrefixSize>
+[[nodiscard]] ada_really_inline std::string write_plain_special_href(
+    const char* prefix, const std::string& hostname,
+    const std::string& pathname, const std::optional<std::string>& query,
+    const std::optional<std::string>& hash) {
+  const size_t host_size = hostname.size();
+  const size_t path_size = pathname.size();
+  const size_t q_n = query ? query->size() + 1 : 0;
+  const size_t h_n = hash ? hash->size() + 1 : 0;
+  const size_t total = PrefixSize + host_size + path_size + q_n + h_n;
+#if defined(__cpp_lib_string_resize_and_overwrite)
+  std::string output;
+  output.resize_and_overwrite(total, [&](char* p, size_t) {
+    std::memcpy(p, prefix, PrefixSize);
+    char* w = p + PrefixSize;
+    // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+    std::memcpy(w, hostname.data(), host_size);
+    w += host_size;
+    std::memcpy(w, pathname.data(), path_size);
+    w += path_size;
+    if (query) {
+      *w++ = '?';
+      // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+      std::memcpy(w, query->data(), query->size());
+      w += query->size();
+    }
+    if (hash) {
+      *w++ = '#';
+      // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
+      std::memcpy(w, hash->data(), hash->size());
+    }
+    return total;
+  });
+  return output;
+#else
+  std::string output;
+  output.reserve(total);
+  output.append(prefix, PrefixSize);
+  output.append(hostname);
+  output.append(pathname);
+  if (query) {
+    output += '?';
+    output.append(*query);
+  }
+  if (hash) {
+    output += '#';
+    output.append(*hash);
+  }
+  return output;
+#endif
+}
+}  // namespace href_detail
+
 [[nodiscard]] ada_really_inline std::string url::get_href() const {
+  // ~96% of the dataset is https without userinfo or a port. Keep this
+  // branch HTTPS-only so the common path does not cmov the prefix length
+  // or choose between "https://" and "http://". HTTP is the next ~4%.
+  if (type == ada::scheme::type::HTTPS && host.has_value() &&
+      username.empty() && password.empty() && !port.has_value()) [[likely]] {
+    return href_detail::write_plain_special_href<8>("https://", *host, path,
+                                                    query, hash);
+  }
+  if (type == ada::scheme::type::HTTP && host.has_value() && username.empty() &&
+      password.empty() && !port.has_value()) {
+    return href_detail::write_plain_special_href<7>("http://", *host, path,
+                                                    query, hash);
+  }
   if (is_special() && host.has_value() && username.empty() && password.empty())
       [[likely]] {
     const size_t host_size = host->size();
@@ -195,37 +264,6 @@ constexpr void url::copy_scheme(const ada::url& u) {
     const bool has_h = hash.has_value();
     const bool has_p = port.has_value();
     const bool is_https = type == ada::scheme::type::HTTPS;
-    const bool is_http = type == ada::scheme::type::HTTP;
-    if (!has_q && !has_h && !has_p && (is_https || is_http)) [[likely]] {
-      const size_t prefix_n = is_https ? size_t{8} : size_t{7};
-      const size_t total = prefix_n + host_size + path_size;
-#if defined(__cpp_lib_string_resize_and_overwrite)
-      std::string output;
-      output.resize_and_overwrite(total, [&](char* p, size_t) {
-        if (is_https) {
-          std::memcpy(p, "https://", 8);
-        } else {
-          std::memcpy(p, "http://", 7);
-        }
-        // NOLINTNEXTLINE(bugprone-not-null-terminated-result)
-        std::memcpy(p + prefix_n, host->data(), host_size);
-        std::memcpy(p + prefix_n + host_size, path.data(), path_size);
-        return total;
-      });
-      return output;
-#else
-      std::string output;
-      output.reserve(total);
-      if (is_https) {
-        output.append("https://", 8);
-      } else {
-        output.append("http://", 7);
-      }
-      output.append(*host);
-      output.append(path);
-      return output;
-#endif
-    }
     const std::string_view prefix =
         is_https ? std::string_view{"https://", 8}
                  : ada::scheme::details::special_href_prefix[type];

@@ -118,6 +118,12 @@ bool try_finish_simple_userinfo(std::string_view input, result_type& out,
                                 ada::scheme::type scheme_type,
                                 uint32_t protocol_end, size_t auth_start);
 
+/** @private Cold bracket-IPv6 finish after the host scanner misses on '['. */
+template <class result_type>
+bool try_finish_simple_ipv6(std::string_view input, result_type& out,
+                            ada::scheme::type scheme_type,
+                            uint32_t protocol_end, size_t host_start);
+
 /** @private Cold rest_simple=false tail; kept out of the hot I-cache. */
 template <class result_type>
 void finish_simple_absolute_handoff(std::string_view input, result_type& out,
