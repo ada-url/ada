@@ -263,6 +263,22 @@ TYPED_TEST(basic_tests, readme8) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, setters_strip_ascii_tab_or_newline) {
+  auto url = ada::parse<TypeParam>(
+      "https://user:pass@www.example.com:8080/path?q=1#h");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->set_protocol("w\tss"));
+  ASSERT_EQ(url->get_protocol(), "wss:");
+  ASSERT_TRUE(url->set_port("90\t90"));
+  ASSERT_EQ(url->get_port(), "9090");
+  url->set_search("?a=\t1");
+  ASSERT_EQ(url->get_search(), "?a=1");
+  url->set_hash("#new\tfrag");
+  ASSERT_EQ(url->get_hash(), "#newfrag");
+  ASSERT_TRUE(url->set_hostname("www.newhost.exam\tple.org"));
+  ASSERT_EQ(url->get_hostname(), "www.newhost.example.org");
+}
+
 TYPED_TEST(basic_tests, host_nfc_reorders_precomposed_starter) {
   // A precomposed starter followed by a combining mark of lower combining class
   // is not in NFC: normalization decomposes the starter and reorders the marks.
@@ -606,6 +622,9 @@ TEST(basic_tests, can_parse_consistency_clean_http_frontend) {
            "http:///path",
            "http://Example.com/",
            "http://example.com:65536/",
+           "https://www.google.com/webhp?hl=en",
+           "https://images-na.ssl-images-amazon.com/images/I/x.css",
+           "http://abcdefghijklmnopqrstuvwxyz0123456789-._~example.com/path",
            "http://1.2.3.999/",
            "http://xn--/",
            "http://example.com./",
@@ -1726,8 +1745,8 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
 }
 
 TYPED_TEST(basic_tests, last_label_may_be_a_number_gate) {
-  // Ordinary .com hosts end with a hex letter; the last-label gate must
-  // still treat them as domains, not IPv4.
+  // Ordinary .com/.org hosts end with a letter outside 0-9a-fxX, so the
+  // last-label gate rejects IPv4 without walking the label.
   {
     auto url = ada::parse<TypeParam>("https://www.google.com/search");
     ASSERT_TRUE(url);
@@ -1798,7 +1817,8 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_hostname(), "[2001:db8::1]");
   }
 
-  // Last-label gate inside the fast path (non-digit-led hosts).
+  // Last-label gate inside the fast path. Digit-led domains are accepted;
+  // a numeric last label that is not dotted-decimal IPv4 is rejected.
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123"));
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.123."));
   ASSERT_FALSE(ada::parse<TypeParam>("https://foo.0xFF"));
@@ -1806,6 +1826,134 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     auto url = ada::parse<TypeParam>("ws://123");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "0.0.0.123");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://1and1.com/x"), u));
+    ASSERT_EQ(u.get_hostname(), "1and1.com");
+    ASSERT_EQ(u.get_pathname(), "/x");
+    ASSERT_EQ(u.host_type, ada::DEFAULT);
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://123.com/"), u));
+    ASSERT_EQ(u.get_hostname(), "123.com");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1"), u));
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.get_pathname(), "/");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+  }
+  {
+    auto url = ada::parse<TypeParam>("http://192.168.1.1/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+    ASSERT_EQ(url->get_pathname(), "/x");
+    ASSERT_EQ(url->host_type, ada::IPV4);
+  }
+  {
+    // Trailing-dot IPv4 is rewritten to dotted-decimal on the fast path.
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1./"), u));
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+    auto url = ada::parse<TypeParam>("http://192.168.1.1./");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+    ASSERT_EQ(url->host_type, ada::IPV4);
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://0x7f.0x0.0x0.0x1"), u));
+    ASSERT_EQ(u.get_hostname(), "127.0.0.1");
+    ASSERT_EQ(u.get_pathname(), "/");
+    ASSERT_EQ(u.get_href(), "http://127.0.0.1/");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+    auto url = ada::parse<TypeParam>("http://0x7f.0x0.0x0.0x1");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "127.0.0.1");
+    ASSERT_EQ(url->get_href(), "http://127.0.0.1/");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://127.1"), u));
+    ASSERT_EQ(u.get_hostname(), "127.0.0.1");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]/"), u));
+    ASSERT_EQ(u.get_hostname(), "[::1]");
+    ASSERT_EQ(u.get_pathname(), "/");
+    ASSERT_EQ(u.get_href(), "http://[::1]/");
+    ASSERT_EQ(u.host_type, ada::IPV6);
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://[2001:db8::1]/path"), u));
+    ASSERT_EQ(u.get_hostname(), "[2001:db8::1]");
+    ASSERT_EQ(u.get_pathname(), "/path");
+    ASSERT_EQ(u.host_type, ada::IPV6);
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[0:0:0:0:0:0:0:1]"), u));
+    ASSERT_EQ(u.get_hostname(), "[::1]");
+    ASSERT_EQ(u.get_href(), "http://[::1]/");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]?q=1"), u));
+    ASSERT_EQ(u.get_search(), "?q=1");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]#f"), u));
+    ASSERT_EQ(u.get_hash(), "#f");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]:8080/"), u));
+    ASSERT_EQ(u.get_port(), "8080");
+    // Junk after ']' is not a hash. The state machine rejects it.
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]foo"), u));
+    ASSERT_FALSE(ada::parse<TypeParam>("http://[::1]foo"));
+    ASSERT_EQ(ada::can_parse("http://[::1]foo"), false);
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://[::1]bar/"), u));
+    ASSERT_FALSE(ada::parse<TypeParam>("http://[::1]bar/"));
+  }
+  {
+    // ada_c fuzzer aborts when can_parse and parse disagree.
+    static constexpr const char* kSchemes[] = {
+        "http://", "https://", "ws://", "wss://", "ftp://", "file://"};
+    static constexpr const char* kHosts[] = {
+        "example.com", "0x7f.1", "[::1]", "127.1", "3232235777", "a"};
+    static constexpr const char* kRest[] = {"",   "/",   "/path", "?q=1",
+                                            "#f", "foo", "bar/"};
+    for (const char* scheme : kSchemes) {
+      for (const char* host : kHosts) {
+        for (const char* rest : kRest) {
+          const std::string input = std::string(scheme) + host + rest;
+          ASSERT_EQ(ada::can_parse(input),
+                    ada::parse<TypeParam>(input).has_value())
+              << input;
+        }
+      }
+    }
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://192.168.1.1:8080/"), u));
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.get_port(), "8080");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+    auto url = ada::parse<TypeParam>("http://192.168.1.1:8080/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "192.168.1.1");
+    ASSERT_EQ(url->get_port(), "8080");
+    ASSERT_EQ(url->host_type, ada::IPV4);
   }
   {
     auto url = ada::parse<TypeParam>("https://foo.x/");
@@ -1823,6 +1971,14 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     auto url = ada::parse<TypeParam>("http://xn--ls8h.com/");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_hostname(), "xn--ls8h.com");
+    ada::url u;
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("http://xn--ls8h.com/"), u));
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://foo.xn--bar.com/"), u));
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/"), u));
+    ASSERT_EQ(u.get_hostname(), "example.com");
   }
   {
     const std::string long_host(254, 'a');
@@ -1893,6 +2049,63 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     auto url = ada::parse<TypeParam>("https://example.com/foo/..");
     ASSERT_TRUE(url);
     ASSERT_EQ(url->get_pathname(), "/");
+  }
+
+  // Overlapping 16-byte host window: remaining host region is < 16.
+  {
+    auto url = ada::parse<TypeParam>("https://ab.com/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "ab.com");
+    ASSERT_EQ(url->get_pathname(), "/x");
+    ASSERT_EQ(url->get_href(), "https://ab.com/x");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://a.co");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_hostname(), "a.co");
+    ASSERT_EQ(url->get_href(), "https://a.co/");
+  }
+
+  // '%' in a path is copyable unless the segment is %2e / %2e%2e.
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/a%2fb%20c");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/a%2fb%20c");
+    ASSERT_EQ(url->get_href(), "https://example.com/a%2fb%20c");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/a%2fb"), u));
+    ASSERT_EQ(u.get_pathname(), "/a%2fb");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/foo/%2e"), u));
+    ASSERT_EQ(u.get_pathname(), "/foo/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/foo/%2E");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/foo/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/%2e%2e/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/x");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/.%2e");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+  }
+  {
+    // Mid-segment %2e is not a dot-segment.
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/foo%2ebar"), u));
+    ASSERT_EQ(u.get_pathname(), "/foo%2ebar");
   }
 
   // Path encoding then query/hash; query encoding then hash.
@@ -1995,6 +2208,66 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path_edges) {
     ASSERT_EQ(url->get_href(),
               "https://user:pass@www.example.com:8080/path/to/"
               "resource?foo=bar&baz=qux#section");
+  }
+  // Userinfo without a password, empty userinfo, and a missing path.
+  {
+    auto url = ada::parse<TypeParam>("https://user@example.com/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "user");
+    ASSERT_EQ(url->get_password(), "");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+    ASSERT_EQ(url->get_href(), "https://user@example.com/x");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://@example.com/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "");
+    ASSERT_EQ(url->get_hostname(), "example.com");
+    ASSERT_EQ(url->get_href(), "https://example.com/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://user:pass@example.com");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_href(), "https://user:pass@example.com/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://user:pass@example.com?q=1#f");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_pathname(), "/");
+    ASSERT_EQ(url->get_search(), "?q=1");
+    ASSERT_EQ(url->get_hash(), "#f");
+    ASSERT_EQ(url->get_href(), "https://user:pass@example.com/?q=1#f");
+  }
+  // Encoding-needed userinfo must fall through (space is not copyable).
+  {
+    auto url = ada::parse<TypeParam>("https://user name@example.com/");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_username(), "user%20name");
+  }
+  assert_can_parse_consistent(
+      "https://user:pass@www.example.com:8080/path/to/"
+      "resource?foo=bar&baz=qux#section");
+  assert_can_parse_consistent("https://user@example.com/x");
+  assert_can_parse_consistent("https://@example.com/");
+  assert_can_parse_consistent("https://user:pass@example.com");
+  // Empty port after userinfo (`host://`) must not keep the colon.
+  assert_can_parse_consistent("https://htt@ps://example.com/ath?q=1/.?x/./x");
+  assert_can_parse_consistent("https://e@ample.com:0080/x");
+  {
+    auto url = ada::parse<TypeParam>("https://e@ample.com:0080/x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_port(), "80");
+    ASSERT_EQ(std::string(url->get_href()), "https://e@ample.com:80/x");
+  }
+  {
+    auto url =
+        ada::parse<TypeParam>("https://htt@ps://example.com/ath?q=1/.?x/./x");
+    ASSERT_TRUE(url);
+    ASSERT_EQ(std::string(url->get_href()),
+              std::string(ada::parse<ada::url_aggregator>(
+                              "https://htt@ps://example.com/ath?q=1/.?x/./x")
+                              ->get_href()));
   }
   // 8-byte scheme match + 32-byte host window (BBC-style CDN hosts).
   {
@@ -2133,10 +2406,14 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
   }
   {
     ada::url u;
-    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
         std::string_view("http://192.168.1.1/x"), u));
-    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+    ASSERT_EQ(u.get_hostname(), "192.168.1.1");
+    ASSERT_EQ(u.host_type, ada::IPV4);
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
         std::string_view("http://user@example.com/x"), u));
+    ASSERT_EQ(u.get_username(), "user");
+    ASSERT_EQ(u.get_href(), "http://user@example.com/x");
     ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
         std::string_view("http:////example.com/x"), u));
   }
@@ -2170,6 +2447,31 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
     ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
         std::string_view("https://xn--nxasmq6b.com/"), u));
   }
+  {
+    // Overlapping last-16 path: first path byte is '.' and the '/' before
+    // it is outside the SIMD valid mask.
+    ada::url u;
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://example.com/./a"), u));
+    ASSERT_EQ(u.get_pathname(), "/a");
+    ASSERT_EQ(u.get_href(), "https://example.com/a");
+  }
+  {
+    ada::url u;
+    ASSERT_TRUE(
+        ada::parser::try_parse_simple_absolute(std::string_view("ws://x"), u));
+    ASSERT_EQ(u.get_href(), "ws://x/");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("ftp://example.com/f"), u));
+    ASSERT_EQ(u.get_href(), "ftp://example.com/f");
+    ASSERT_TRUE(ada::parser::try_parse_simple_absolute(
+        std::string_view("wss://example.com/c"), u));
+    ASSERT_EQ(u.get_href(), "wss://example.com/c");
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https:///extra"), u));
+    ASSERT_FALSE(ada::parser::try_parse_simple_absolute(
+        std::string_view("https://"), u));
+  }
 }
 
 TEST(basic_tests, ada_url_get_href_assembly) {
@@ -2191,14 +2493,42 @@ TEST(basic_tests, ada_url_get_href_assembly) {
     ASSERT_EQ(u->get_href(), "https://user:pass@example.com/x");
     ASSERT_EQ(u->get_href_size(), u->get_href().size());
   }
+  {
+    auto u = ada::parse<ada::url>("http://example.com/path");
+    ASSERT_TRUE(u);
+    ASSERT_EQ(u->get_href(), "http://example.com/path");
+    ASSERT_EQ(u->get_href_size(), u->get_href().size());
+  }
 }
 
 TEST(basic_tests, last_label_may_be_a_number_cases) {
+  using ada::checkers::is_ipv4_number_char;
   using ada::checkers::last_label_may_be_a_number;
+  ASSERT_FALSE(is_ipv4_number_char('m'));
+  ASSERT_FALSE(is_ipv4_number_char('g'));
+  ASSERT_FALSE(is_ipv4_number_char('t'));
+  ASSERT_TRUE(is_ipv4_number_char('e'));
+  ASSERT_TRUE(is_ipv4_number_char('c'));
+  ASSERT_TRUE(is_ipv4_number_char('x'));
+  ASSERT_TRUE(is_ipv4_number_char('X'));
+  ASSERT_TRUE(is_ipv4_number_char('A'));
+  ASSERT_TRUE(is_ipv4_number_char('F'));
+  ASSERT_TRUE(is_ipv4_number_char('9'));
+  ASSERT_TRUE(is_ipv4_number_char('0'));
+  ASSERT_FALSE(is_ipv4_number_char('.'));
+  ASSERT_FALSE(is_ipv4_number_char('z'));
+  ASSERT_TRUE(ada::checkers::ends_with_dot_com("example.com", 11));
+  ASSERT_TRUE(ada::checkers::ends_with_dot_com("example.COM.", 12));
+  ASSERT_FALSE(ada::checkers::ends_with_dot_com("example.org", 11));
   ASSERT_FALSE(last_label_may_be_a_number(""));
   ASSERT_FALSE(last_label_may_be_a_number("."));
   ASSERT_FALSE(last_label_may_be_a_number("example.com"));
   ASSERT_FALSE(last_label_may_be_a_number("example.com."));
+  ASSERT_FALSE(last_label_may_be_a_number("example.COM"));
+  ASSERT_FALSE(last_label_may_be_a_number("www.google.com"));
+  ASSERT_FALSE(last_label_may_be_a_number("wikipedia.org"));
+  ASSERT_FALSE(last_label_may_be_a_number("foo.gov"));
+  ASSERT_FALSE(last_label_may_be_a_number("foo.edu"));
   ASSERT_FALSE(last_label_may_be_a_number("abc."));
   ASSERT_TRUE(last_label_may_be_a_number("foo.123"));
   ASSERT_TRUE(last_label_may_be_a_number("foo.123."));
@@ -2214,6 +2544,22 @@ TEST(basic_tests, last_label_may_be_a_number_cases) {
   ASSERT_TRUE(last_label_may_be_a_number("19%2E68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("19.68.1.10."));
   ASSERT_TRUE(last_label_may_be_a_number("0xffffffff."));
+}
+
+TYPED_TEST(basic_tests, aggregator_href_buffer_reuse) {
+  // Successive parses must not leak a previous href into a later URL.
+  const char* long_url =
+      "https://this-is-a-long-hostname.example.com/"
+      "abcdefghijklmnopqrstuvwxyz0123456789/path?q=1#frag";
+  for (int i = 0; i < 8; ++i) {
+    auto url = ada::parse<TypeParam>(long_url);
+    ASSERT_TRUE(url);
+    ASSERT_EQ(url->get_href(), long_url);
+  }
+  auto short_url = ada::parse<TypeParam>("https://example.com/x");
+  ASSERT_TRUE(short_url);
+  ASSERT_EQ(short_url->get_href(), "https://example.com/x");
+  ASSERT_EQ(short_url->get_hostname(), "example.com");
 }
 
 TYPED_TEST(basic_tests,

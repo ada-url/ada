@@ -10,12 +10,14 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <numeric>
 #include <ranges>
 #include <string>
 #include <string_view>
 
 namespace ada {
+extern bool max_input_length_customized;
 
 bool url::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
@@ -96,136 +98,10 @@ bool url::parse_ipv4(std::string_view input) {
 
 bool url::parse_ipv6(std::string_view input) {
   ada_log("parse_ipv6 ", input, " [", input.size(), " bytes]");
-  if (input.empty() || input.size() > 45) [[unlikely]] {
-    return is_valid = false;
-  }
   std::array<uint16_t, 8> address{};
-#if defined(ADA_AVX512_IPV6)
-  if (bool simd_valid; detail::try_parse_ipv6_avx512(input.data(), input.size(),
-                                                     address, simd_valid)) {
-    if (!simd_valid) [[unlikely]] {
-      return is_valid = false;
-    }
-    host = ada::serializers::ipv6(address);
-    host_type = IPV6;
-    return true;
-  }
-  address = {};
-#endif
-  const char* pointer = input.data();
-  const char* const end = pointer + input.size();
-  int piece_index = 0;
-  int compress = -1;
-
-  if (*pointer == ':') {
-    if (input.size() == 1 || pointer[1] != ':') [[unlikely]] {
-      return is_valid = false;
-    }
-    pointer += 2;
-    compress = ++piece_index;
-  }
-
-  while (pointer != end) {
-    if (piece_index == 8) [[unlikely]] {
-      return is_valid = false;
-    }
-    if (*pointer == ':') {
-      if (compress != -1) [[unlikely]] {
-        return is_valid = false;
-      }
-      ++pointer;
-      compress = ++piece_index;
-      continue;
-    }
-
-    uint16_t value = 0;
-    const int length = detail::parse_hex_piece(pointer, end, value);
-
-    if (pointer != end && *pointer == '.') {
-      if (length == 0) [[unlikely]] {
-        return is_valid = false;
-      }
-      pointer -= length;
-      if (piece_index > 6) [[unlikely]] {
-        return is_valid = false;
-      }
-
-      int numbers_seen = 0;
-      while (pointer != end) {
-        int ipv4_piece = -1;
-        if (numbers_seen > 0) {
-          if (*pointer == '.' && numbers_seen < 4) {
-            ++pointer;
-          } else {
-            return is_valid = false;
-          }
-        }
-        if (pointer == end || *pointer < '0' || *pointer > '9') [[unlikely]] {
-          return is_valid = false;
-        }
-        ipv4_piece = *pointer - '0';
-        ++pointer;
-        if (pointer != end && *pointer >= '0' && *pointer <= '9') {
-          if (ipv4_piece == 0) [[unlikely]] {
-            return is_valid = false;
-          }
-          ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
-          ++pointer;
-          if (pointer != end && *pointer >= '0' && *pointer <= '9') {
-            ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
-            ++pointer;
-            if (ipv4_piece > 255) [[unlikely]] {
-              return is_valid = false;
-            }
-          }
-        }
-        address[static_cast<size_t>(piece_index)] = static_cast<uint16_t>(
-            address[static_cast<size_t>(piece_index)] * 0x100 +
-            static_cast<uint16_t>(ipv4_piece));
-        ++numbers_seen;
-        if (numbers_seen == 2 || numbers_seen == 4) {
-          ++piece_index;
-        }
-      }
-      if (numbers_seen != 4) [[unlikely]] {
-        return is_valid = false;
-      }
-      break;
-    }
-
-    if (length == 0) [[unlikely]] {
-      return is_valid = false;
-    }
-
-    if (pointer != end && *pointer == ':') {
-      ++pointer;
-      if (pointer == end) [[unlikely]] {
-        return is_valid = false;
-      }
-    } else if (pointer != end) [[unlikely]] {
-      return is_valid = false;
-    }
-
-    address[static_cast<size_t>(piece_index)] = value;
-    ++piece_index;
-  }
-
-  if (compress != -1) {
-    const int right = piece_index - compress;
-    if (right > 0) {
-      const size_t dest = static_cast<size_t>(8 - right);
-      const size_t src = static_cast<size_t>(compress);
-      if (dest != src) {
-        for (size_t i = static_cast<size_t>(right); i-- > 0;) {
-          address[dest + i] = address[src + i];
-          address[src + i] = 0;
-        }
-      }
-    }
-  } else if (piece_index != 8) [[unlikely]] {
+  if (!detail::parse_ipv6_address(input, address)) [[unlikely]] {
     return is_valid = false;
   }
-
   host = ada::serializers::ipv6(address);
   ada_log("parse_ipv6 ", *host);
   host_type = IPV6;
@@ -610,6 +486,10 @@ ada_really_inline void url::parse_path(std::string_view input) {
 }
 
 bool url::needs_rollback_snapshot(size_t input_len) const noexcept {
+  if (!ada::max_input_length_customized) [[likely]] {
+    return get_href_size() + input_len + 16 >
+           std::numeric_limits<uint32_t>::max();
+  }
   return get_href_size() + input_len + 16 > ada::get_max_input_length();
 }
 
@@ -621,12 +501,17 @@ bool url::set_host_or_hostname(const std::string_view input) {
 
   url saved_url(*this);
 
-  size_t host_end_pos = input.find('#');
-  std::string _host(input.data(), host_end_pos != std::string_view::npos
-                                      ? host_end_pos
-                                      : input.size());
-  helpers::remove_ascii_tab_or_newline(_host);
-  std::string_view new_host(_host);
+  std::string cleaned;
+  std::string_view new_host = input;
+  if (const size_t host_end_pos = input.find('#');
+      host_end_pos != std::string_view::npos) {
+    new_host = input.substr(0, host_end_pos);
+  }
+  if (unicode::has_tabs_or_newline(new_host)) {
+    cleaned.assign(new_host);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    new_host = cleaned;
+  }
 
   auto check_url_size = [&]() -> bool {
     if (get_href_size() > ada::get_max_input_length()) {
@@ -639,7 +524,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
   // If url's scheme is "file", then set state to file host state, instead of
   // host state.
   if (type != ada::scheme::type::FILE) {
-    std::string_view host_view(_host.data(), _host.length());
+    std::string_view host_view = new_host;
     auto [location, found_colon] =
         helpers::get_host_delimiter_location(is_special(), host_view);
 
@@ -777,8 +662,13 @@ bool url::set_port(const std::string_view input) {
     return true;
   }
 
-  std::string trimmed(input);
-  helpers::remove_ascii_tab_or_newline(trimmed);
+  std::string cleaned;
+  std::string_view trimmed = input;
+  if (unicode::has_tabs_or_newline(input)) {
+    cleaned.assign(input);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    trimmed = cleaned;
+  }
 
   if (trimmed.empty()) {
     return true;
@@ -792,8 +682,8 @@ bool url::set_port(const std::string_view input) {
   // Find the first non-digit character to determine the length of digits
   auto first_non_digit =
       std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
-  std::string_view digits_to_parse =
-      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
+  std::string_view digits_to_parse = std::string_view(
+      trimmed.data(), static_cast<size_t>(first_non_digit - trimmed.begin()));
 
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;
@@ -817,9 +707,13 @@ void url::set_hash(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '#' ? input.substr(1) : input;
-  helpers::remove_ascii_tab_or_newline(new_value);
+  std::string cleaned;
+  std::string_view new_value = input[0] == '#' ? input.substr(1) : input;
+  if (unicode::has_tabs_or_newline(new_value)) {
+    cleaned.assign(new_value);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    new_value = cleaned;
+  }
   auto previous_hash = std::move(hash);
   hash = unicode::percent_encode(new_value,
                                  ada::character_sets::FRAGMENT_PERCENT_ENCODE);
@@ -835,9 +729,13 @@ void url::set_search(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '?' ? input.substr(1) : input;
-  helpers::remove_ascii_tab_or_newline(new_value);
+  std::string cleaned;
+  std::string_view new_value = input[0] == '?' ? input.substr(1) : input;
+  if (unicode::has_tabs_or_newline(new_value)) {
+    cleaned.assign(new_value);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    new_value = cleaned;
+  }
 
   auto query_percent_encode_set =
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
@@ -865,8 +763,13 @@ bool url::set_pathname(const std::string_view input) {
 }
 
 bool url::set_protocol(const std::string_view input) {
-  std::string view(input);
-  helpers::remove_ascii_tab_or_newline(view);
+  std::string cleaned;
+  std::string_view view = input;
+  if (unicode::has_tabs_or_newline(input)) {
+    cleaned.assign(input);
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    view = cleaned;
+  }
   if (view.empty()) {
     return true;
   }
@@ -876,34 +779,34 @@ bool url::set_protocol(const std::string_view input) {
     return false;
   }
 
-  view.append(":");
-
-  std::string::iterator pointer =
-      std::ranges::find_if_not(view, unicode::is_alnum_plus);
-
-  if (pointer != view.end() && *pointer == ':') {
-    std::optional<url> saved_url;
-    if (needs_rollback_snapshot(view.size())) {
-      saved_url = *this;
-    }
-    bool result = parse_scheme<true>(
-        std::string_view(view.data(), pointer - view.begin()));
-    if (result && saved_url && get_href_size() > ada::get_max_input_length()) {
-      *this = std::move(*saved_url);
-      return false;
-    }
-    return result;
+  size_t n = 0;
+  while (n < view.size() && unicode::is_alnum_plus(view[n])) {
+    ++n;
   }
-  return false;
+  if (n < view.size() && view[n] != ':') {
+    return false;
+  }
+
+  std::optional<url> saved_url;
+  if (needs_rollback_snapshot(n + 1)) {
+    saved_url = *this;
+  }
+  const bool result = parse_scheme<true>(view.substr(0, n));
+  if (result && saved_url && get_href_size() > ada::get_max_input_length()) {
+    *this = std::move(*saved_url);
+    return false;
+  }
+  return result;
 }
 
 bool url::set_href(const std::string_view input) {
   ada::result<ada::url> out = ada::parse<ada::url>(input);
 
   if (out) {
-    // The parser enforces get_max_input_length() on both the input and the
-    // normalized result. This is a defense-in-depth check.
-    if (out->get_href_size() > ada::get_max_input_length()) {
+    // parse() already enforces the default ~4 GB cap. Only reload the
+    // atomic when set_max_input_length installed a tighter limit.
+    if (ada::max_input_length_customized &&
+        out->get_href_size() > ada::get_max_input_length()) {
       return false;
     }
     *this = *out;

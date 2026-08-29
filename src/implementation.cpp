@@ -7,6 +7,13 @@
 #include <optional>
 #include <string_view>
 
+#if ADA_SSE2
+#include <emmintrin.h>
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+#include <intrin.h>
+#endif
+#endif
+
 #include "ada/checkers-inl.h"
 #include "ada/checkers.h"
 #include "ada/common_defs.h"
@@ -21,8 +28,13 @@ namespace ada {
 static std::atomic<uint32_t> max_input_length_{
     std::numeric_limits<uint32_t>::max()};
 
+// parse() / parse_url_impl read this instead of always hitting the atomic.
+// Restored to false when the limit is set back to the ~4 GB default.
+bool max_input_length_customized = false;
+
 void set_max_input_length(uint32_t length) {
   max_input_length_.store(length, std::memory_order_relaxed);
+  max_input_length_customized = length != std::numeric_limits<uint32_t>::max();
 }
 
 uint32_t get_max_input_length() {
@@ -71,6 +83,54 @@ ada_really_inline bool eight_clean_http_host_bytes(
                       swar_in_range(w, '_', '_') | swar_in_range(w, '~', '~');
   return ok == k_high;
 }
+
+#if ADA_SSE2
+ada_really_inline int ctz32(unsigned bits) noexcept {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+  unsigned long ret;
+  _BitScanForward(&ret, bits);
+  return static_cast<int>(ret);
+#else
+  return __builtin_ctz(bits);
+#endif
+}
+
+// Bits set where the byte is not in [a-z0-9-._~]. That includes / ? #.
+ada_really_inline int sse2_unclean_http_host(__m128i w) noexcept {
+  const __m128i az = _mm_and_si128(
+      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('a' - 1))),
+      _mm_cmplt_epi8(w, _mm_set1_epi8(static_cast<char>('z' + 1))));
+  const __m128i d09 = _mm_and_si128(
+      _mm_cmpgt_epi8(w, _mm_set1_epi8(static_cast<char>('0' - 1))),
+      _mm_cmplt_epi8(w, _mm_set1_epi8(static_cast<char>('9' + 1))));
+  const __m128i spec =
+      _mm_or_si128(_mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('-')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('.'))),
+                   _mm_or_si128(_mm_cmpeq_epi8(w, _mm_set1_epi8('_')),
+                                _mm_cmpeq_epi8(w, _mm_set1_epi8('~'))));
+  return _mm_movemask_epi8(_mm_or_si128(_mm_or_si128(az, d09), spec)) ^ 0xFFFF;
+}
+
+ada_really_inline bool sse2_http_host_delim(uint8_t c) noexcept {
+  return c == '/' || c == '?' || c == '#';
+}
+
+ada_really_inline bool mask_has_xn(const uint8_t* bytes, size_t at, int x_mask,
+                                   size_t length) noexcept {
+  if (x_mask == 0) {
+    return false;
+  }
+  unsigned bits = static_cast<unsigned>(x_mask);
+  do {
+    const size_t pos = at + static_cast<size_t>(ctz32(bits));
+    if (pos + 2 < length && bytes[pos + 1] == 'n' && bytes[pos + 2] == '-') {
+      return true;
+    }
+    bits &= bits - 1;
+  } while (bits != 0);
+  return false;
+}
+#endif
 
 // Minimal front end for the overwhelmingly common already-canonical HTTP(S)
 // case. It deliberately handles fewer inputs than
@@ -131,20 +191,94 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
   }
 
   size_t cursor = authority_start;
-  while (cursor + 8 <= length && eight_clean_http_host_bytes(bytes + cursor)) {
-    cursor += 8;
-  }
-  while (cursor < length) {
-    const uint8_t c = bytes[cursor];
-    if (c == '/' || c == '?' || c == '#') {
-      break;
+#if ADA_SSE2
+  const __m128i x_splat = _mm_set1_epi8('x');
+  // 0 = window was clean (keep scanning), 1 = host delimiter, -1 = fall through
+  auto visit16 = [&](size_t at, int keep) -> int {
+    const __m128i w =
+        _mm_loadu_si128(reinterpret_cast<const __m128i*>(bytes + at));
+    const int unclean = sse2_unclean_http_host(w) & keep;
+    const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat)) & keep;
+    if (unclean == 0) {
+      return (xs != 0 && mask_has_xn(bytes, at, xs, length)) ? -1 : 0;
     }
-    if (!clean_http_host_byte[c]) {
+    const int hit = ctz32(static_cast<unsigned>(unclean));
+    const int valid = (1 << hit) - 1;
+    if (mask_has_xn(bytes, at, xs & valid, length)) {
+      return -1;
+    }
+    cursor = at + static_cast<size_t>(hit);
+    return sse2_http_host_delim(bytes[cursor]) ? 1 : -1;
+  };
+
+  if (length - authority_start >= 16) {
+    for (; cursor + 16 <= length; cursor += 16) {
+      const int r = visit16(cursor, 0xFFFF);
+      if (r < 0) {
+        return std::nullopt;
+      }
+      if (r > 0) {
+        goto host_done;
+      }
+    }
+    if (cursor < length) {
+      const size_t at = length - 16;
+      const int skip = static_cast<int>(cursor - at);
+      const int keep = static_cast<int>(~((1u << skip) - 1u));
+      const int r = visit16(at, keep);
+      if (r < 0) {
+        return std::nullopt;
+      }
+      if (r > 0) {
+        goto host_done;
+      }
+      cursor = length;
+    }
+  } else if (length >= 16) {
+    const size_t at = length - 16;
+    const int skip = static_cast<int>(authority_start - at);
+    const int keep = static_cast<int>(~((1u << skip) - 1u));
+    const int r = visit16(at, keep);
+    if (r < 0) {
       return std::nullopt;
     }
-    ++cursor;
+    if (r > 0) {
+      goto host_done;
+    }
+    cursor = length;
+  } else
+#endif
+  {
+    while (cursor + 8 <= length &&
+           eight_clean_http_host_bytes(bytes + cursor)) {
+      if (std::memchr(bytes + cursor, 'x', 8) != nullptr) {
+        for (size_t k = 0; k < 8; ++k) {
+          const size_t pos = cursor + k;
+          if (bytes[pos] == 'x' && pos + 2 < length && bytes[pos + 1] == 'n' &&
+              bytes[pos + 2] == '-') {
+            return std::nullopt;
+          }
+        }
+      }
+      cursor += 8;
+    }
+    while (cursor < length) {
+      const uint8_t c = bytes[cursor];
+      if (c == '/' || c == '?' || c == '#') {
+        break;
+      }
+      if (!clean_http_host_byte[c]) {
+        return std::nullopt;
+      }
+      if (c == 'x' && cursor + 2 < length && bytes[cursor + 1] == 'n' &&
+          bytes[cursor + 2] == '-') {
+        return std::nullopt;
+      }
+      ++cursor;
+    }
   }
 
+host_done:
   const size_t host_length = cursor - authority_start;
   if (host_length == 0) {
     // Extra special-scheme slashes are normalization, not an empty host.
@@ -157,12 +291,11 @@ std::optional<bool> try_can_parse_clean_http(std::string_view input) noexcept {
     return std::nullopt;
   }
 
-  const std::string_view host(input.data() + authority_start, host_length);
-  if (checkers::last_label_may_be_a_number(host)) {
-    return std::nullopt;
-  }
-  if (host.find('x') != std::string_view::npos &&
-      host.find("xn-") != std::string_view::npos) {
+  const char lastc = static_cast<char>(bytes[cursor - 1]);
+  // 'm'/'g'/... are not IPv4 number chars, so .com/.org never walk.
+  if (checkers::is_ipv4_number_char(lastc) &&
+      checkers::last_label_may_be_a_number(
+          std::string_view(input.data() + authority_start, host_length))) {
     return std::nullopt;
   }
 
@@ -405,6 +538,39 @@ validate_port:
 template <class result_type>
 ada_warn_unused tl::expected<result_type, errors> parse(
     std::string_view input, const result_type* base_url) {
+  if (base_url == nullptr) [[likely]] {
+    if (input.size() > std::numeric_limits<uint32_t>::max()) [[unlikely]] {
+      return tl::unexpected(errors::type_error);
+    }
+    if (max_input_length_customized && input.size() > get_max_input_length())
+        [[unlikely]] {
+      return tl::unexpected(errors::type_error);
+    }
+    result_type u{};
+    if (ada::parser::try_parse_simple_absolute(input, u)) [[likely]] {
+      // Default max is ~4 GB; only re-check expansion when the input
+      // could grow past that (or past a customized limit).
+      if (max_input_length_customized) [[unlikely]] {
+        const uint32_t max_length = get_max_input_length();
+        if (input.size() > static_cast<size_t>(max_length) / 5 &&
+            u.get_href_size() > max_length) {
+          return tl::unexpected(errors::type_error);
+        }
+      } else if (input.size() > std::numeric_limits<uint32_t>::max() / 5)
+          [[unlikely]] {
+        if (u.get_href_size() > std::numeric_limits<uint32_t>::max()) {
+          return tl::unexpected(errors::type_error);
+        }
+      }
+      return u;
+    }
+    ada::parser::parse_url_impl_into<result_type, true>(u, input, nullptr,
+                                                        false);
+    if (!u.is_valid) {
+      return tl::unexpected(errors::type_error);
+    }
+    return u;
+  }
   result_type u = ada::parser::parse_url_impl<result_type>(input, base_url);
   if (!u.is_valid) {
     return tl::unexpected(errors::type_error);
@@ -472,7 +638,16 @@ bool can_parse(std::string_view input, const std::string_view* base_input) {
         return false;
       }
       // size <= max/5 => normalized href cannot exceed max (4.5x expansion).
-      // Check this first: default max is ~4GB so almost all URLs return true.
+      // Default max is ~4 GB: skip the atomic on typical inputs.
+      if (!max_input_length_customized) [[likely]] {
+        if (input.size() > std::numeric_limits<uint32_t>::max() / 5)
+            [[unlikely]] {
+          return ada::parser::parse_url_impl<ada::url_aggregator, true>(input,
+                                                                        nullptr)
+              .is_valid;
+        }
+        return true;
+      }
       const uint32_t max_length = ada::get_max_input_length();
       if (input.size() <= static_cast<size_t>(max_length) / 5) {
         return true;
