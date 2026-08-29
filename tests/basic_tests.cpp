@@ -277,6 +277,19 @@ TYPED_TEST(basic_tests, setters_strip_ascii_tab_or_newline) {
   ASSERT_EQ(url->get_hash(), "#newfrag");
   ASSERT_TRUE(url->set_hostname("www.newhost.exam\tple.org"));
   ASSERT_EQ(url->get_hostname(), "www.newhost.example.org");
+
+  // The isolated hash setter uses its own tab/newline helper. Cover each
+  // ASCII whitespace that helper treats as removable.
+  url->set_hash("lf\nfrag");
+  ASSERT_EQ(url->get_hash(), "#lffrag");
+  url->set_hash("cr\rfrag");
+  ASSERT_EQ(url->get_hash(), "#crfrag");
+  url->set_hash("mix\t\n\rfrag");
+  ASSERT_EQ(url->get_hash(), "#mixfrag");
+  url->set_search("?a=\n1");
+  ASSERT_EQ(url->get_search(), "?a=1");
+  url->set_search("?a=\r1");
+  ASSERT_EQ(url->get_search(), "?a=1");
 }
 
 TYPED_TEST(basic_tests, host_nfc_reorders_precomposed_starter) {
@@ -1567,6 +1580,58 @@ TYPED_TEST(basic_tests, mailto_rejects_credentials) {
   ASSERT_TRUE(url);
   ASSERT_FALSE(url->set_username("user"));
   ASSERT_FALSE(url->set_password("pass"));
+}
+
+TYPED_TEST(basic_tests, setter_empty_and_opaque_hash_paths) {
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(url);
+    url->set_hash("");
+    ASSERT_EQ(url->get_hash(), "");
+    ASSERT_EQ(url->get_href(), "https://example.com/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/#frag");
+    ASSERT_TRUE(url);
+    url->set_hash("");
+    ASSERT_EQ(url->get_hash(), "");
+    ASSERT_EQ(url->get_href(), "https://example.com/");
+  }
+  {
+    auto url = ada::parse<TypeParam>("data:hello?q#frag");
+    ASSERT_TRUE(url);
+    ASSERT_TRUE(url->has_opaque_path);
+    url->set_hash("");
+    ASSERT_EQ(url->get_hash(), "");
+    ASSERT_EQ(url->get_search(), "?q");
+    ASSERT_EQ(url->get_pathname(), "hello");
+  }
+  {
+    auto url = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(url);
+    url->set_hash("#withhash");
+    ASSERT_EQ(url->get_hash(), "#withhash");
+    url->set_hash("nohash");
+    ASSERT_EQ(url->get_hash(), "#nohash");
+  }
+  {
+    auto url = ada::parse<TypeParam>("data:hello");
+    ASSERT_TRUE(url);
+    ASSERT_FALSE(url->set_pathname("/nope"));
+    ASSERT_EQ(url->get_pathname(), "hello");
+  }
+}
+
+TYPED_TEST(basic_tests, setter_empty_protocol_and_port) {
+  auto url = ada::parse<TypeParam>("https://example.com:8080/");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->set_protocol(""));
+  ASSERT_EQ(url->get_protocol(), "https:");
+  ASSERT_TRUE(url->set_port(""));
+  ASSERT_EQ(url->get_port(), "");
+  ASSERT_EQ(url->get_href(), "https://example.com/");
+  ASSERT_TRUE(url->set_port("\t"));
+  ASSERT_EQ(url->get_port(), "");
 }
 
 TYPED_TEST(basic_tests, get_href_size_password_no_password) {

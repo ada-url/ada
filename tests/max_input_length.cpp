@@ -152,6 +152,83 @@ TYPED_TEST(max_input_length_tests, setters_snapshot_then_accept) {
     result->set_hash(payload);
     ASSERT_EQ(result->get_hash(), "#" + payload);
   }
+  {
+    auto result = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->set_pathname("/" + payload));
+    ASSERT_EQ(result->get_pathname(), "/" + payload);
+  }
+  {
+    auto result = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(result);
+    result->set_search(payload);
+    ASSERT_EQ(result->get_search(), "?" + payload);
+  }
+  {
+    auto result = ada::parse<TypeParam>("foo://example.com/");
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->set_protocol(payload));
+    ASSERT_EQ(result->get_protocol(), payload + ":");
+  }
+}
+
+// Percent-encoding takes the idx != size arm inside the snapshot path.
+TYPED_TEST(max_input_length_tests, setters_snapshot_then_accept_encoded) {
+  std::string payload(399, 'a');
+  payload.push_back(' ');
+  {
+    auto result = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->set_username(payload));
+    ASSERT_EQ(result->get_username(), std::string(399, 'a') + "%20");
+  }
+  {
+    auto result = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->set_password(payload));
+    ASSERT_EQ(result->get_password(), std::string(399, 'a') + "%20");
+  }
+}
+
+// A long all-alpha scheme on a special URL is rejected after the snapshot
+// is taken (special -> non-special is a no-op).
+TYPED_TEST(max_input_length_tests, set_protocol_snapshot_then_reject) {
+  auto result = ada::parse<TypeParam>("https://example.com/");
+  ASSERT_TRUE(result);
+  std::string original_href(result->get_href());
+  ASSERT_FALSE(result->set_protocol(std::string(400, 'x')));
+  ASSERT_EQ(result->get_href(), original_href);
+}
+
+// Port digits are short, so use a tighter cap to enter the snapshot arm.
+TYPED_TEST(max_input_length_tests, set_port_snapshot_then_accept_and_reject) {
+  ada::set_max_input_length(40);
+  {
+    auto result = ada::parse<TypeParam>("https://ex.com/");
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->set_port("8080"));
+    ASSERT_EQ(result->get_port(), "8080");
+  }
+  {
+    auto result = ada::parse<TypeParam>("https://ex.com/");
+    ASSERT_TRUE(result);
+    std::string original_href(result->get_href());
+    ASSERT_FALSE(result->set_port("99999"));
+    ASSERT_EQ(result->get_href(), original_href);
+  }
+}
+
+// Non-special URL without authority: the snapshot arm must insert "/."
+// and shift an existing query and hash.
+TYPED_TEST(max_input_length_tests, set_pathname_snapshot_dash_dot) {
+  ada::set_max_input_length(40);
+  auto result = ada::parse<TypeParam>("foo:/?q#h");
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result->set_pathname("//bar"));
+  ASSERT_EQ(result->get_pathname(), "//bar");
+  ASSERT_EQ(result->get_search(), "?q");
+  ASSERT_EQ(result->get_hash(), "#h");
+  ASSERT_EQ(result->get_href(), "foo:/.//bar?q#h");
 }
 
 TYPED_TEST(max_input_length_tests, percent_encoding_expansion_blocked) {
