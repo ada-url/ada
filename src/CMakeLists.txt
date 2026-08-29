@@ -64,10 +64,12 @@ endif()
 # inlining budget for setters matches main.
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
 
-# Keep the URLPattern route-set compiler in its own TU for the same reason:
-# ~1800 extra lines in the unity TU reshuffle GCC's unit-wide inlining budget
-# and de-inline url_aggregator setter hot paths (CodSpeed: SetHash -12%).
-# The amalgamated single-file build still includes it inline.
+# Keep the URLPattern route-set compiler (the builder, src/url_pattern_list.cpp)
+# in its own TU for the same reason: the extra code in the unity TU reshuffles
+# GCC's unit-wide inlining budget and de-inlines url_aggregator setter hot
+# paths (CodSpeed: SetHash -12%). The matcher itself is inline in the public
+# header so it inlines into url_pattern_list::match. The amalgamated
+# single-file build still includes the builder inline.
 target_compile_definitions(ada PRIVATE ADA_URL_PATTERN_LIST_SEPARATE_TU=1)
 
 if(ADA_INCLUDE_URL_PATTERN)

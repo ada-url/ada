@@ -269,36 +269,48 @@ auto matched = pattern->test("https://example.com/books/123");
 
 ### URLPattern List (experimental)
 
-`ada::url_pattern_list` compiles a whole set of URLPattern pathname patterns
-into one dispatch structure, answering "which route matches this pathname, and
-what are the parameter values?" without looping over the patterns and without
-executing regular expressions for routes in the common static / `:param` / `*`
-subset. Construction canonicalizes the patterns through the URLPattern pattern
-parser; matching is allocation-free on the fast path.
+`ada::parse_url_pattern_list` compiles a whole set of URLPattern pathname
+patterns into one dispatch structure, `ada::url_pattern_list`, answering
+"which route matches this pathname, and what are the group values?" without
+looping over the patterns and without executing regular expressions for
+routes in the common static / `:param` / `*` subset. It takes the regex
+provider and the options exactly as `ada::parse_url_pattern` does;
+construction canonicalizes the patterns through the URLPattern pattern
+parser, and matching is allocation-free on the fast path.
 
 ```cpp
 using provider = ada::url_pattern_regex::std_regex_provider;
 std::vector<std::string_view> routes = {"/", "/users/:id", "/users/me",
-                                        "/static/:file"};
-auto list = ada::url_pattern_list<provider>::create(routes);
+                                        "/static/:file", "/posts/(\\d+)"};
+auto list = ada::parse_url_pattern_list<provider>(routes);
 if (!list) { return EXIT_FAILURE; }
 
 auto m = list->match("/users/42");
 // m.route_index == 1; the ":id" capture is a slice of the input:
 // m.captures[0] -> "42", named list->group_names(1)[0] == "id"
+
+auto r = list->match("/posts/7");
+// r.route_index == 4, r.regexp_route == true: the route was matched through
+// the provider, and r.regexp_groups[0] == "7" is what regex_search returned.
 ```
 
-Match priority is specificity order (literal beats `:param` beats `*`,
-compared per segment from the left), with insertion order breaking ties --
-the priority scheme of find-my-way/Express-style routers. Routes that need
-URLPattern regexp semantics (custom `(...)` groups, `?`/`+`/`*` modifiers)
-are matched through the regex provider and participate in the same priority
-order. Fast-path limits (input length 4096, 24 input segments, 16 pattern
-segments, 8 captures per route) are performance gates only: inputs and
-routes beyond them are matched by a sequential fallback with identical
-semantics. Only the pathname component is considered (other components are
-treated as wildcards); inputs are expected in canonical percent-encoded
-form, as produced by `ada::url_aggregator::get_pathname()`.
+`parse_url_pattern_list` also accepts a base URL and `url_pattern_options`
+(`ignore_case`), and an overload takes existing `ada::url_pattern` objects,
+reusing their compiled pathname components. Match priority is specificity
+order (literal beats `:param` beats `*`, compared per segment from the
+left), with insertion order breaking ties -- the priority scheme of
+find-my-way/Express-style routers. Routes that need URLPattern regexp
+semantics (custom `(...)` groups, `?`/`+`/`*` modifiers) are matched through
+the regex provider with the same `regex_search` call `url_pattern::exec`
+makes, and participate in the same priority order; the list records at
+creation which of them can outrank each compiled route, so a regexp route in
+the table costs nothing on requests it cannot win. Fast-path limits (input
+length 4096, 24 input segments, 16 pattern segments, 8 captures per route)
+are performance gates only: inputs and routes beyond them are matched by a
+sequential fallback with identical semantics. Only the pathname component is
+considered (other components are treated as wildcards); inputs are expected
+in canonical percent-encoded form, as produced by
+`ada::url_aggregator::get_pathname()`.
 
 This API is experimental and its shape is under discussion: whether a
 standardized `URLPatternList` should use specificity order or pure

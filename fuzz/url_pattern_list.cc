@@ -6,79 +6,78 @@
 #include <string>
 #include <vector>
 
+// The amalgamated ada.cpp carries the route-set compiler
+// (src/url_pattern_list_compiler.h), which is not part of the public
+// headers; the reference below uses its classification to rank routes.
 #include "ada.cpp"
 #include "ada.h"
 
 using regex_provider = ada::url_pattern_regex::std_regex_provider;
 using list_type = ada::url_pattern_list<regex_provider>;
-namespace helpers = ada::url_pattern_list_helpers;
+namespace compiler = ada::url_pattern_list_compiler;
+using groups_type = std::vector<std::optional<std::string>>;
 
-// One route of the independent reference: either the sequential segment
-// matcher's route_info (built through the same public helper entry points
-// url_pattern_list::create uses) or, for patterns outside the safe subset,
-// the compiled URLPattern pathname component.
+// One route of the independent reference: the compiler's classification
+// (for the priority order only) and the URLPattern object itself, whose
+// pathname component -- ada's own engine, regex_search included -- decides
+// whether the route matches and what its group values are.
 struct reference_route {
-  helpers::route_info info{};
-  std::optional<ada::url_pattern_component<regex_provider>> component{};
+  compiler::route_info info{};
+  ada::url_pattern<regex_provider> pattern{};
 };
 
-// Mirrors the classification url_pattern_list::create performs. Returns
-// false when a pattern is rejected, in which case create must fail too.
+// Mirrors the classification url_pattern_list performs and builds the
+// url_pattern oracle. Returns false when a pattern is rejected, in which
+// case parse_url_pattern_list must fail too.
 static bool build_reference(const std::vector<std::string>& patterns,
+                            const ada::url_pattern_options& options,
                             std::vector<reference_route>& out) {
   for (const std::string& pattern : patterns) {
-    auto options = ada::url_pattern_compile_component_options::PATHNAME;
+    auto compile_options = ada::url_pattern_compile_component_options::PATHNAME;
     auto part_list = ada::url_pattern_helpers::parse_pattern_string(
-        pattern, options, ada::url_pattern_helpers::canonicalize_pathname);
+        pattern, compile_options,
+        ada::url_pattern_helpers::canonicalize_pathname);
     if (!part_list) {
       return false;
     }
     reference_route route{};
-    if (helpers::classify_parts(*part_list, route.info.segments,
-                                route.info.group_names)) {
-      helpers::finalize_route(route.info);
+    if (compiler::classify_parts(*part_list, route.info.segments,
+                                 route.info.group_names)) {
+      compiler::finalize_route(route.info);
     } else {
-      auto component = ada::url_pattern_component<regex_provider>::compile(
-          pattern, ada::url_pattern_helpers::canonicalize_pathname, options);
-      if (!component) {
-        return false;
-      }
-      helpers::approximate_kind_sequence(*part_list, route.info);
-      route.component = std::move(*component);
+      compiler::approximate_kind_sequence(*part_list, route.info);
     }
+    auto parsed = ada::parse_url_pattern<regex_provider>(
+        ada::url_pattern_init{.pathname = pattern}, nullptr, &options);
+    if (!parsed) {
+      return false;
+    }
+    route.pattern = std::move(*parsed);
     out.push_back(std::move(route));
   }
   return true;
 }
 
-// The sequential reference oracle: every route is tested with the
-// no-fast-path matcher (or the regex provider) and ranked with the same
-// priority rule the compiled engine implements. Any disagreement with
-// url_pattern_list::match is a bug in the compiled tables.
+// The reference oracle: every route's URLPattern pathname component is
+// executed on the raw input (fast_match is exactly what url_pattern::exec
+// runs per component: regex_search for regexp components), and the winner
+// is the best match under the documented priority rule. Any disagreement
+// with url_pattern_list::match is a bug in the compiled tables.
 static int32_t reference_match(const std::vector<reference_route>& routes,
-                               std::string_view pathname,
-                               helpers::engine_result& best) {
-  best = helpers::engine_result{};
+                               std::string_view pathname, groups_type& groups) {
   int32_t best_route = -1;
   for (size_t i = 0; i < routes.size(); i++) {
     const reference_route& route = routes[i];
     if (best_route >= 0 &&
-        !helpers::route_outranks(route.info, i,
-                                 routes[static_cast<size_t>(best_route)].info,
-                                 static_cast<size_t>(best_route))) {
+        !compiler::route_outranks(route.info, i,
+                                  routes[static_cast<size_t>(best_route)].info,
+                                  static_cast<size_t>(best_route))) {
       continue;
     }
-    if (route.component.has_value()) {
-      if (route.component->fast_test(pathname)) {
-        best = helpers::engine_result{};
-        best_route = static_cast<int32_t>(i);
-      }
-    } else {
-      helpers::engine_result scratch{};
-      if (helpers::match_route_sequential(route.info, pathname, scratch)) {
-        best = scratch;
-        best_route = static_cast<int32_t>(i);
-      }
+    auto result = route.pattern.pathname_component.fast_match(pathname);
+    if (result) {
+      groups = std::move(*result);
+      best_route = static_cast<int32_t>(i);
     }
   }
   return best_route;
@@ -92,47 +91,80 @@ static void exercise_match_result(
   sink += static_cast<uint64_t>(result.route_index);
   sink += result.capture_count;
   sink += result.captures_truncated ? 1 : 0;
+  sink += result.regexp_route ? 1 : 0;
   sink += result.has_match() ? 1 : 0;
   for (const auto& capture : result.captures) {
     sink += capture.offset;
     sink += capture.length;
   }
+  for (const auto& group : result.regexp_groups) {
+    sink += group.has_value() ? group->size() : 0;
+  }
   (void)sink;
+}
+
+static void fail(const char* what, const std::string& input,
+                 const std::vector<std::string>& patterns) {
+  printf("url_pattern_list %s on input '%s'\n", what, input.c_str());
+  for (const std::string& pattern : patterns) {
+    printf("  pattern: '%s'\n", pattern.c_str());
+  }
+  abort();
 }
 
 static void check_agreement(const list_type& list,
                             const std::vector<reference_route>& reference,
                             const std::vector<std::string>& patterns,
                             const std::string& input) {
-  const auto matched = list.match(input);
+  // The pathname is handed over as a view of an exactly sized heap buffer
+  // (not a null-terminated std::string), so that a read past its end is a
+  // heap-buffer-overflow under ASan rather than a silent read of the
+  // terminator.
+  const std::vector<char> exact(input.begin(), input.end());
+  const auto matched = list.match(std::string_view(exact.data(), exact.size()));
   exercise_match_result(matched);
-  helpers::engine_result expected{};
-  const int32_t expected_route = reference_match(reference, input, expected);
+  groups_type expected_groups;
+  const int32_t expected_route =
+      reference_match(reference, input, expected_groups);
   if (matched.route_index != expected_route) {
-    printf("url_pattern_list winner mismatch on input '%s': list=%d ref=%d\n",
-           input.c_str(), matched.route_index, expected_route);
-    for (const std::string& pattern : patterns) {
-      printf("  pattern: '%s'\n", pattern.c_str());
-    }
-    abort();
+    printf("list=%d ref=%d\n", matched.route_index, expected_route);
+    fail("winner mismatch", input, patterns);
   }
-  if (expected_route < 0 ||
-      reference[static_cast<size_t>(expected_route)].component.has_value()) {
-    // Regexp-mode winners report no capture slices; nothing more to compare.
+  if (expected_route < 0) {
     return;
   }
-  const bool captures_agree =
-      matched.capture_count == expected.capture_count &&
-      matched.captures_truncated == expected.captures_truncated;
-  bool slices_agree = captures_agree;
-  for (uint32_t k = 0; slices_agree && k < matched.capture_count; k++) {
-    slices_agree = matched.captures[k].offset == expected.captures[k].offset &&
-                   matched.captures[k].length == expected.captures[k].length;
+  const reference_route& winner =
+      reference[static_cast<size_t>(expected_route)];
+  const bool is_regexp =
+      winner.info.mode == ada::url_pattern_list_detail::route_mode::regexp;
+  if (matched.regexp_route != is_regexp) {
+    fail("capture form mismatch", input, patterns);
   }
-  if (!slices_agree) {
-    printf("url_pattern_list capture mismatch on input '%s' (route %d)\n",
-           input.c_str(), expected_route);
-    abort();
+  if (is_regexp) {
+    // Regexp winners: the provider's groups, verbatim.
+    if (matched.regexp_groups != expected_groups) {
+      fail("regexp group mismatch", input, patterns);
+    }
+    return;
+  }
+  // Subset winners: slices of the input equal to the oracle's group values,
+  // truncated at max_captures_per_route.
+  const size_t n_reported =
+      std::min<size_t>(expected_groups.size(),
+                       ada::url_pattern_list_limits::max_captures_per_route);
+  if (matched.capture_count != n_reported ||
+      matched.captures_truncated != (expected_groups.size() > n_reported) ||
+      !matched.regexp_groups.empty()) {
+    fail("capture count mismatch", input, patterns);
+  }
+  for (size_t k = 0; k < n_reported; k++) {
+    const auto& capture = matched.captures[k];
+    if (capture.offset + capture.length > input.size() ||
+        !expected_groups[k].has_value() ||
+        input.compare(capture.offset, capture.length, *expected_groups[k]) !=
+            0) {
+      fail("capture slice mismatch", input, patterns);
+    }
   }
 }
 
@@ -147,10 +179,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return result;
   };
   // Tokens from a canonical-safe alphabet, so structured patterns compile
-  // often and derived inputs need no canonicalization.
+  // often and derived inputs need no canonicalization. Upper-case letters
+  // exercise the ignore_case folding paths.
   auto token = [&fdp]() -> std::string {
     static constexpr char alphabet[] =
-        "abcdefghijklmnopqrstuvwxyz0123456789-_.~";
+        "abcdefghijklmnopqrstuvwxyzABCDEF0123456789-_.~";
     const size_t length = fdp.ConsumeIntegralInRange<size_t>(1, 12);
     std::string result;
     result.reserve(length);
@@ -166,10 +199,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   std::vector<std::string> patterns;
   patterns.reserve(n_patterns);
   for (size_t i = 0; i < n_patterns; i++) {
-    const int mode = fdp.ConsumeIntegralInRange<int>(0, 5);
+    const int mode = fdp.ConsumeIntegralInRange<int>(0, 6);
     if (mode == 0) {
       // Raw pattern bytes: URLPattern syntax errors are expected and must
-      // surface as a clean create() error, never as a crash.
+      // surface as a clean parse error, never as a crash.
       patterns.push_back("/" + to_ascii(fdp.ConsumeRandomLengthString(40)));
     } else if (mode == 1 && !patterns.empty()) {
       // Duplicate an earlier pattern: the smaller index must win.
@@ -181,7 +214,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       const size_t depth = fdp.ConsumeIntegralInRange<size_t>(1, 20);
       int params = 0;
       for (size_t d = 0; d < depth; d++) {
-        const int kind = fdp.ConsumeIntegralInRange<int>(0, 9);
+        const int kind = fdp.ConsumeIntegralInRange<int>(0, 11);
         if (kind == 0 && d + 1 == depth) {
           pattern += "/*";
         } else if (kind <= 3) {
@@ -192,6 +225,22 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
           pattern +=
               static_cast<char>('A' + fdp.ConsumeIntegralInRange<int>(0, 25));
           pattern += "aaaaaaaa";
+        } else if (kind == 5 && mode == 6) {
+          // Regexp-mode routes: custom groups, optional and mixed segments.
+          switch (fdp.ConsumeIntegralInRange<int>(0, 3)) {
+            case 0:
+              pattern += "/(\\d+)";
+              break;
+            case 1:
+              pattern += "/:q" + std::to_string(params++) + "?";
+              break;
+            case 2:
+              pattern += "/x-(\\w+)";
+              break;
+            default:
+              pattern += "/pre-:m" + std::to_string(params++);
+              break;
+          }
         } else {
           pattern += "/" + token();
         }
@@ -199,15 +248,17 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       patterns.push_back(std::move(pattern));
     }
   }
+  const ada::url_pattern_options options{.ignore_case = fdp.ConsumeBool()};
   std::vector<std::string_view> views(patterns.begin(), patterns.end());
-  auto list_result = list_type::create(views);
+  auto list_result =
+      ada::parse_url_pattern_list<regex_provider>(views, nullptr, &options);
 
   // --- strategy (ii): the independent reference must agree on
-  // constructibility, on every winner, and on every capture slice ----------
+  // constructibility, on every winner, and on every capture ---------------
   std::vector<reference_route> reference;
-  const bool reference_ok = build_reference(patterns, reference);
+  const bool reference_ok = build_reference(patterns, options, reference);
   if (list_result.has_value() != reference_ok) {
-    printf("create()/reference disagreement: create=%d reference=%d\n",
+    printf("parse/reference disagreement: parse=%d reference=%d\n",
            list_result.has_value() ? 1 : 0, reference_ok ? 1 : 0);
     abort();
   }
@@ -218,13 +269,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   // Exercise the full public surface.
   volatile uint64_t sink = list.size();
+  sink += list.ignore_case() ? 1 : 0;
   bool has_regexp_route = false;
   for (size_t i = 0; i < list.size(); i++) {
     sink += list.pattern(i).size();
     for (const std::string& name : list.group_names(i)) {
       sink += name.size();
     }
-    has_regexp_route |= reference[i].component.has_value();
+    has_regexp_route |= reference[i].info.mode ==
+                        ada::url_pattern_list_detail::route_mode::regexp;
   }
   (void)sink;
 
@@ -259,17 +312,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       // Raw input bytes (match() accepts arbitrary bytes).
       input = fdp.ConsumeRandomLengthString(64);
     } else {
-      // Instantiate a derived route, then mutate.
+      // Instantiate a derived route (regexp routes: their literal prefix),
+      // then mutate.
       const reference_route& base =
           reference[fdp.ConsumeIntegralInRange<size_t>(0,
                                                        reference.size() - 1)];
       if (base.info.segments.empty()) {
         input = "/" + to_ascii(fdp.ConsumeRandomLengthString(40));
       } else {
-        for (const helpers::route_segment& segment : base.info.segments) {
-          if (segment.kind == helpers::segment_kind::literal) {
+        for (const compiler::route_segment& segment : base.info.segments) {
+          if (segment.kind == compiler::segment_kind::literal) {
             input += "/" + segment.text;
-          } else if (segment.kind == helpers::segment_kind::param) {
+          } else if (segment.kind == compiler::segment_kind::param) {
             input += "/" + token();
           } else {
             const size_t tail = fdp.ConsumeIntegralInRange<size_t>(0, 3);
@@ -282,7 +336,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
           }
         }
       }
-      switch (fdp.ConsumeIntegralInRange<int>(0, 5)) {
+      switch (fdp.ConsumeIntegralInRange<int>(0, 6)) {
         case 0:
           if (!input.empty()) {
             input[fdp.ConsumeIntegralInRange<size_t>(0, input.size() - 1)] =
@@ -303,6 +357,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
           if (const size_t slash = input.find_last_of('/');
               slash != std::string::npos && slash > 0) {
             input.resize(slash);
+          }
+          break;
+        case 5:
+          // Flip the case of one byte (matters under ignore_case).
+          if (!input.empty()) {
+            char& c =
+                input[fdp.ConsumeIntegralInRange<size_t>(0, input.size() - 1)];
+            c = static_cast<char>(static_cast<unsigned char>(c) ^ 0x20);
           }
           break;
         default:

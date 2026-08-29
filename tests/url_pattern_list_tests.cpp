@@ -22,8 +22,16 @@ std::string capture_text(std::string_view path,
       path.substr(m.captures[index].offset, m.captures[index].length));
 }
 
-list_type make_list(const std::vector<std::string_view>& patterns) {
-  auto result = list_type::create(patterns);
+tl::expected<list_type, ada::errors> parse_list(
+    const std::vector<std::string_view>& patterns,
+    const ada::url_pattern_options* options = nullptr) {
+  return ada::parse_url_pattern_list<regex_provider>(patterns, nullptr,
+                                                     options);
+}
+
+list_type make_list(const std::vector<std::string_view>& patterns,
+                    const ada::url_pattern_options* options = nullptr) {
+  auto result = parse_list(patterns, options);
   EXPECT_TRUE(result.has_value());
   if (!result.has_value()) {
     return list_type{};
@@ -183,7 +191,7 @@ TEST(url_pattern_list, agrees_with_url_pattern_on_boundary_cases) {
 }
 
 TEST(url_pattern_list, invalid_pattern_is_type_error) {
-  auto result = list_type::create({"/users/(unclosed"});
+  auto result = parse_list({"/users/(unclosed"});
   ASSERT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), ada::errors::type_error);
 }
@@ -301,11 +309,20 @@ TEST(url_pattern_list, regexp_routes_compose_with_priority) {
   EXPECT_EQ(list.match("/users/bob").route_index, 1);
   EXPECT_EQ(list.match("/users/admin").route_index, 2);
   EXPECT_EQ(list.match("/other").route_index, 3);
-  // Group values for regexp routes are not surfaced as slices; the route
-  // can be re-executed as a url_pattern for its groups.
+  // Group values for regexp routes come back from the provider's
+  // regex_search, aligned with group_names.
   auto m = list.match("/users/123");
+  EXPECT_TRUE(m.regexp_route);
   EXPECT_EQ(m.capture_count, 0u);
   ASSERT_EQ(list.group_names(0).size(), 1u);
+  ASSERT_EQ(m.regexp_groups.size(), 1u);
+  EXPECT_EQ(m.regexp_groups[0], std::optional<std::string>("123"));
+  // Subset routes report slices and no regexp groups.
+  auto n = list.match("/users/bob");
+  EXPECT_FALSE(n.regexp_route);
+  EXPECT_TRUE(n.regexp_groups.empty());
+  ASSERT_EQ(n.capture_count, 1u);
+  EXPECT_EQ(capture_text("/users/bob", n, 0), "bob");
 }
 
 TEST(url_pattern_list, regexp_routes_compose_in_both_directions) {
@@ -469,7 +486,7 @@ void run_differential(uint64_t seed) {
   constexpr size_t vocabulary_size = sizeof(vocabulary) / sizeof(vocabulary[0]);
 
   // ~200 generated routes over a small vocabulary, so prefixes collide and
-  // the trie, exact-table and shape-table paths all populate.
+  // every dispatch rung of the trie populates.
   std::vector<std::string> storage;
   std::vector<reference_route> reference_routes;
   const size_t n_routes = 200;
@@ -493,7 +510,7 @@ void run_differential(uint64_t seed) {
     reference_routes.push_back(reference_parse(storage.back()));
   }
   std::vector<std::string_view> patterns(storage.begin(), storage.end());
-  auto result = list_type::create(patterns);
+  auto result = parse_list(patterns);
   ASSERT_TRUE(result.has_value());
   const auto& list = *result;
 
@@ -607,7 +624,7 @@ void run_differential(uint64_t seed) {
     if (expected >= 0) {
       const size_t n_reported = std::min<size_t>(
           reference_captures.size(),
-          ada::url_pattern_list_helpers::max_captures_per_route);
+          ada::url_pattern_list_limits::max_captures_per_route);
       ASSERT_EQ(matched.capture_count, n_reported)
           << "seed=" << seed << " path=" << path;
       for (size_t c = 0; c < n_reported; c++) {
@@ -652,8 +669,8 @@ struct semantics_case {
   const char* pattern;
   const char* input;
   bool matches;
-  // Expected capture count, or -1 to skip capture checks (regexp-mode routes
-  // report no capture slices).
+  // Expected capture count, or -1 for regexp-mode routes (whose group values
+  // come back as regexp_groups rather than slices).
   int capture_count;
   // The expected capture values, joined with '|' (exactly capture_count
   // entries; empty entries denote empty captures).
@@ -809,13 +826,19 @@ TEST(url_pattern_list, data_driven_semantics_table) {
     const std::string pattern(c.pattern);
     auto it = lists.find(pattern);
     if (it == lists.end()) {
-      auto created = list_type::create({c.pattern});
+      auto created = parse_list({c.pattern});
       ASSERT_TRUE(created.has_value()) << "pattern=" << c.pattern;
       it = lists.emplace(pattern, std::move(*created)).first;
     }
     const auto m = it->second.match(c.input);
     EXPECT_EQ(m.has_match(), c.matches)
         << "pattern=" << c.pattern << " input=" << c.input;
+    if (c.matches) {
+      // Rows without slice expectations are the regexp-mode routes: they
+      // report the provider's groups, subset rows report slices.
+      EXPECT_EQ(m.regexp_route, c.capture_count < 0)
+          << "pattern=" << c.pattern << " input=" << c.input;
+    }
     if (c.matches && c.capture_count >= 0) {
       ASSERT_EQ(m.capture_count, static_cast<uint32_t>(c.capture_count))
           << "pattern=" << c.pattern << " input=" << c.input;
@@ -854,16 +877,26 @@ TEST(url_pattern_list, data_driven_semantics_table) {
 // rung (dispatch ladders, offline-search failures, demotions, gates) that the
 // happy path never reaches.
 
-TEST(url_pattern_list, witness_exhaustion_demotes_node_and_static_table) {
-  // 17-byte segments that differ only at byte 8: no witness plan over the
-  // first/last 8 bytes plus the length can tell them apart, so the offline
-  // searches fail and both the node dispatch and the whole-pathname exact
-  // table demote (the table is simply not built). Matching must not care.
+TEST(url_pattern_list, witness_exhaustion_demotes_node) {
+  // Nine 17-byte segments that differ only at byte 8: no witness plan over
+  // the first/last 8 bytes plus the length can tell them apart, so the
+  // offline search fails and the node dispatch demotes to a linear scan
+  // (they also share a first byte, so the root index is not used). Matching
+  // must not care.
   auto list = make_list({
       "/aaaaaaaaBaaaaaaaa",  // 0
       "/aaaaaaaaCaaaaaaaa",  // 1
       "/aaaaaaaaDaaaaaaaa",  // 2
+      "/aaaaaaaaEaaaaaaab",  // 3
+      "/aaaaaaaaFaaaaaaab",  // 4
+      "/aaaaaaaaGaaaaaaab",  // 5
+      "/aaaaaaaaHaaaaaaac",  // 6
+      "/aaaaaaaaIaaaaaaac",  // 7
+      "/aaaaaaaaJaaaaaaac",  // 8
   });
+  EXPECT_EQ(list.match("/aaaaaaaaHaaaaaaac").route_index, 6);
+  EXPECT_EQ(list.match("/aaaaaaaaJaaaaaaac").route_index, 8);
+  EXPECT_EQ(list.match("/aaaaaaaaJaaaaaaab").route_index, -1);
   EXPECT_EQ(list.match("/aaaaaaaaBaaaaaaaa").route_index, 0);
   EXPECT_EQ(list.match("/aaaaaaaaCaaaaaaaa").route_index, 1);
   EXPECT_EQ(list.match("/aaaaaaaaDaaaaaaaa").route_index, 2);
@@ -872,10 +905,9 @@ TEST(url_pattern_list, witness_exhaustion_demotes_node_and_static_table) {
   EXPECT_EQ(list.match("/aaaaaaaaBaaaaaaa").route_index, -1);
 }
 
-TEST(url_pattern_list, witness_exhaustion_demotes_shape_group) {
-  // The same 17-byte statics as leading segments of ":param" routes: the
-  // shape group has no usable witness column at all (k == 0) and demotes to
-  // a linear scan; captures and misses stay exact.
+TEST(url_pattern_list, witness_hostile_statics_before_params) {
+  // The same 17-byte statics as leading segments of ":param" routes:
+  // captures and misses stay exact through the direct-compare node.
   auto list = make_list({
       "/aaaaaaaaBaaaaaaaa/:id",  // 0
       "/aaaaaaaaCaaaaaaaa/:id",  // 1
@@ -890,12 +922,10 @@ TEST(url_pattern_list, witness_exhaustion_demotes_shape_group) {
   EXPECT_EQ(list.match("/aaaaaaaaCaaaaaaaa").route_index, -1);
 }
 
-TEST(url_pattern_list, shape_witness_columns_exist_but_never_separate) {
-  // Routes 0 and 1 collide in every addressable byte while routes 2-6 keep
-  // five distinct witness columns alive: the four-witness subset search runs
-  // through every combination (rotating its combination cursor past the last
-  // position) and exhausts without an injective plan, so the group demotes
-  // to a linear scan.
+TEST(url_pattern_list, witness_hostile_statics_share_a_first_byte) {
+  // Routes 0 and 1 collide in every addressable byte while routes 2-6 differ
+  // in one interior byte each; all seven share the first byte 'a' or 'b', so
+  // the root index maps a run of children to direct compares.
   auto list = make_list({
       "/aaaaaaaaBaaaaaaaa/:id",  // 0
       "/aaaaaaaaCaaaaaaaa/:id",  // 1 (indistinguishable from 0 by witnesses)
@@ -913,10 +943,9 @@ TEST(url_pattern_list, shape_witness_columns_exist_but_never_separate) {
   EXPECT_EQ(list.match("/aaaaaaaaBaaaaaaaa").route_index, -1);
 }
 
-TEST(url_pattern_list, shape_single_column_plan) {
-  // Single-character statics: the first-byte column alone is injective (and
-  // the last-byte column is pruned as its duplicate), so the group compiles
-  // with a one-witness plan.
+TEST(url_pattern_list, single_character_statics_before_params) {
+  // Single-character statics under the root index, each followed by a
+  // param.
   auto list = make_list({
       "/a/:id",  // 0
       "/b/:id",  // 1
@@ -930,11 +959,9 @@ TEST(url_pattern_list, shape_single_column_plan) {
   EXPECT_EQ(list.match("/b/").route_index, -1);
 }
 
-TEST(url_pattern_list, shape_with_many_static_segments) {
-  // Nine static segments and a trailing param: the witness alphabet only
-  // addresses the first eight statics, and four witnesses cannot cover all
-  // of them, so the coverage-preferring search runs its want-descending
-  // loop. Three same-shape routes force a projection table.
+TEST(url_pattern_list, many_static_segments_before_a_param) {
+  // Nine static segments and a trailing param: a deep chain of one-child
+  // nodes ending in a pure-leaf param shortcut.
   auto list = make_list({
       "/a1/a2/a3/a4/a5/a6/a7/a8/a9/:id",  // 0
       "/b1/b2/b3/b4/b5/b6/b7/b8/b9/:id",  // 1
@@ -948,9 +975,10 @@ TEST(url_pattern_list, shape_with_many_static_segments) {
   EXPECT_EQ(list.match("/b1/b2/b3/b4/b5/b6/b7/b8/b9").route_index, -1);
 }
 
-TEST(url_pattern_list, shape_group_beyond_dispatch_table_capacity) {
-  // 260 routes of one shape: more entries than 8-bit slot ordinals can
-  // index, so the group skips the witness search entirely and runs linear.
+TEST(url_pattern_list, root_fanout_beyond_dispatch_table_capacity) {
+  // 260 param routes under distinct first segments: more root children than
+  // 8-bit slot ordinals can index (and more than max_direct_children per
+  // first byte), so the root runs a linear scan.
   std::vector<std::string> storage;
   storage.reserve(260);
   for (int i = 0; i < 260; i++) {
@@ -968,9 +996,9 @@ TEST(url_pattern_list, shape_group_beyond_dispatch_table_capacity) {
 }
 
 TEST(url_pattern_list, slot_tables_beyond_64_keys) {
-  // More than 64 keys in one dispatch table (both the root node's fanout and
-  // the whole-pathname exact table): the multiplier search starts with the
-  // loosened load factor.
+  // More than 64 keys in one dispatch table (80 root children sharing the
+  // first byte 'k', so the root index is not used): the multiplier search
+  // starts with the loosened load factor.
   std::vector<std::string> storage;
   storage.reserve(80);
   for (int i = 0; i < 80; i++) {
@@ -985,11 +1013,10 @@ TEST(url_pattern_list, slot_tables_beyond_64_keys) {
   EXPECT_EQ(list.match("/k7").route_index, -1);
 }
 
-TEST(url_pattern_list, huge_static_key_disables_exact_table) {
-  // A static route whose whole-pathname key exceeds the 16-bit entry length:
-  // the exact table is not built at all and every route answers through the
-  // trie or the sequential fallback (the 70001-byte input is beyond the
-  // fast-path length limit).
+TEST(url_pattern_list, huge_static_key) {
+  // A 70000-byte static segment: the key lives in the blob (memcmp path)
+  // and the 70001-byte input is beyond the fast-path length limit, so the
+  // route answers through the sequential fallback.
   const std::string huge = "/" + std::string(70000, 'a');
   auto list = make_list({huge, "/ok"});
   EXPECT_EQ(list.match(huge).route_index, 0);
@@ -1001,7 +1028,7 @@ TEST(url_pattern_list, huge_static_key_disables_exact_table) {
 TEST(url_pattern_list, segment_count_gate_boundaries) {
   auto list = make_list({
       "/w/*",   // 0
-      "/x/:y",  // 1 (so shape tables exist)
+      "/x/:y",  // 1
   });
   const auto with_segments = [](int n) {
     std::string path = "/w";
@@ -1020,8 +1047,7 @@ TEST(url_pattern_list, segment_count_gate_boundaries) {
     EXPECT_EQ(capture_text(with_segments(n), m, 0), with_segments(n).substr(3))
         << n;
   }
-  // 17 to 24 segments are within the fast path but beyond the deepest
-  // possible shape group; the shape directory must pass without probing.
+  // 17 to 24 segments are within the fast path but deeper than any pattern.
   std::string deep17 = "/x";
   for (int i = 1; i < 17; i++) {
     deep17 += "/s";
@@ -1030,12 +1056,11 @@ TEST(url_pattern_list, segment_count_gate_boundaries) {
   EXPECT_EQ(list.match("/x/hit").route_index, 1);
 }
 
-TEST(url_pattern_list, probe_order_promotion_with_shared_static_position) {
-  // Two shape groups of the three-segment class share static position 1 and
-  // conflict there in every entry pair ("mm" vs "qq"): the larger group is
-  // provably order-independent from the smaller lexicographically-earlier
-  // one and is promoted ahead of it in probe order. Winners must be exactly
-  // the specificity-order winners regardless.
+TEST(url_pattern_list, param_then_static_routes_against_static_then_param) {
+  // Routes with a leading param and routes with a leading static that
+  // conflict at position 1 ("mm" vs "qq"): winners must be exactly the
+  // specificity-order winners, with backtracking from the static child to
+  // the param child.
   auto list = make_list({
       "/:x/mm/a1",  // 0
       "/:x/mm/a2",  // 1
@@ -1050,12 +1075,10 @@ TEST(url_pattern_list, probe_order_promotion_with_shared_static_position) {
   EXPECT_EQ(list.match("/pp/rr/a1").route_index, -1);
 }
 
-TEST(url_pattern_list, dependent_shape_groups_keep_lexicographic_order) {
-  // Three shape groups in the three-segment class. The last (and largest)
-  // group shares static position 1 with the first, with the SAME text "q":
-  // a pathname can match entries of both, so the pair is not
-  // order-independent and the large group must not be promoted past it
-  // (the middle group makes the promotion scan re-test its head loop).
+TEST(url_pattern_list, overlapping_param_routes_keep_specificity_order) {
+  // Three route shapes of three segments that can all match one pathname
+  // ("q" at position 1 is shared): the specificity order must decide, with
+  // the walk backtracking through every alternative.
   auto list = make_list({
       "/p/q/:z",   // 0 (kinds [0,0,1])
       "/p/:y/r",   // 1 (kinds [0,1,0])
@@ -1116,21 +1139,20 @@ TEST(url_pattern_list, sequential_wildcard_still_needs_its_segment) {
 
 TEST(url_pattern_list, create_errors) {
   // Not a valid URLPattern pathname pattern at all.
-  EXPECT_FALSE(list_type::create({"/users/(unclosed"}).has_value());
+  EXPECT_FALSE(parse_list({"/users/(unclosed"}).has_value());
   // A '?' modifier cannot follow plain text.
-  EXPECT_FALSE(list_type::create({"/a?b"}).has_value());
+  EXPECT_FALSE(parse_list({"/a?b"}).has_value());
   // Duplicate group name within one pattern is a URLPattern type error.
-  auto dup = list_type::create({"/:id/:id"});
+  auto dup = parse_list({"/:id/:id"});
   ASSERT_FALSE(dup.has_value());
   EXPECT_EQ(dup.error(), ada::errors::type_error);
   // Tokenizes fine but the generated regex is rejected by the provider
   // (invalid interval), which create must surface as the same error.
-  auto bad_regex = list_type::create({"/(a{2,1})"});
+  auto bad_regex = parse_list({"/(a{2,1})"});
   ASSERT_FALSE(bad_regex.has_value());
   EXPECT_EQ(bad_regex.error(), ada::errors::type_error);
   // One bad pattern anywhere fails the whole list.
-  EXPECT_FALSE(
-      list_type::create({"/fine", "/also/:ok", "/(a{2,1})"}).has_value());
+  EXPECT_FALSE(parse_list({"/fine", "/also/:ok", "/(a{2,1})"}).has_value());
 }
 
 TEST(url_pattern_list, group_names_and_capture_alignment) {
@@ -1160,9 +1182,629 @@ TEST(url_pattern_list, group_names_and_capture_alignment) {
   EXPECT_EQ(capture_text(path, m, 1), "right");
   EXPECT_EQ(capture_text(path, m, 2), "t1/t2");
 
-  // Regexp routes surface their names but no capture slices; the same
-  // pattern as a url_pattern yields the group values.
+  // Regexp routes surface their names and the provider's group values, in
+  // the same order.
   auto r = list.match("/users/123");
   EXPECT_EQ(r.route_index, 5);
   EXPECT_EQ(r.capture_count, 0u);
+  EXPECT_TRUE(r.regexp_route);
+  ASSERT_EQ(r.regexp_groups.size(), 1u);
+  EXPECT_EQ(r.regexp_groups[0], std::optional<std::string>("123"));
+  auto h = list.match("/@bob/x-hello");
+  EXPECT_EQ(h.route_index, 6);
+  ASSERT_EQ(h.regexp_groups.size(), 2u);
+  EXPECT_EQ(h.regexp_groups[0], std::optional<std::string>("bob"));
+  EXPECT_EQ(h.regexp_groups[1], std::optional<std::string>("hello"));
+}
+
+// ---------------------------------------------------------------------------
+// Provider, options and input-shape tests: the list must use the regex
+// provider exactly as url_pattern does (create_instance with ignore_case,
+// regex_search for group values), accept url_pattern_options and
+// url_pattern objects, and prune the auxiliary routes it does not need.
+
+namespace {
+
+// A provider wrapper that counts its calls and records the ignore_case flag
+// it was given, delegating to std_regex_provider.
+struct counting_provider {
+  using regex_type = regex_provider::regex_type;
+  static inline size_t create_instance_calls = 0;
+  static inline size_t regex_search_calls = 0;
+  static inline size_t regex_match_calls = 0;
+  static inline bool last_ignore_case = false;
+  static void reset() {
+    create_instance_calls = 0;
+    regex_search_calls = 0;
+    regex_match_calls = 0;
+    last_ignore_case = false;
+  }
+  static std::optional<regex_type> create_instance(std::string_view pattern,
+                                                   bool ignore_case) {
+    create_instance_calls++;
+    last_ignore_case = ignore_case;
+    return regex_provider::create_instance(pattern, ignore_case);
+  }
+  static std::optional<std::vector<std::optional<std::string>>> regex_search(
+      std::string_view input, const regex_type& pattern) {
+    regex_search_calls++;
+    return regex_provider::regex_search(input, pattern);
+  }
+  static bool regex_match(std::string_view input, const regex_type& pattern) {
+    regex_match_calls++;
+    return regex_provider::regex_match(input, pattern);
+  }
+};
+static_assert(ada::url_pattern_regex::regex_concept<counting_provider>);
+
+using counting_list = ada::url_pattern_list<counting_provider>;
+
+tl::expected<counting_list, ada::errors> parse_counting(
+    const std::vector<std::string_view>& patterns,
+    const ada::url_pattern_options* options = nullptr) {
+  return ada::parse_url_pattern_list<counting_provider>(patterns, nullptr,
+                                                        options);
+}
+
+std::optional<std::string> group(const char* s) { return std::string(s); }
+
+}  // namespace
+
+TEST(url_pattern_list, custom_provider_is_used_for_regexp_routes) {
+  counting_provider::reset();
+  auto list = parse_counting({
+      "/users/(\\d+)",    // 0: regexp, compiled through the provider
+      "/users/:id",       // 1: subset, no provider involvement
+      "/files/*",         // 2: subset
+      "/@:handle/(\\w+)"  // 3: regexp
+  });
+  ASSERT_TRUE(list.has_value());
+  // One create_instance per regexp route; subset routes never touch the
+  // provider.
+  EXPECT_EQ(counting_provider::create_instance_calls, 2u);
+  EXPECT_FALSE(counting_provider::last_ignore_case);
+
+  // A regexp winner is tested with regex_match and its groups then come
+  // from regex_search (as url_pattern::exec obtains them).
+  counting_provider::reset();
+  auto m = list->match("/users/123");
+  EXPECT_EQ(m.route_index, 0);  // outranks "/users/:id" on insertion order
+  EXPECT_TRUE(m.regexp_route);
+  ASSERT_EQ(m.regexp_groups.size(), 1u);
+  EXPECT_EQ(m.regexp_groups[0], group("123"));
+  EXPECT_EQ(counting_provider::regex_search_calls, 1u);
+  EXPECT_EQ(counting_provider::regex_match_calls, 1u);
+
+  // A fast-path miss scans the auxiliary routes, but a route whose literal
+  // prefix ("users") cannot fit the input is skipped before the provider.
+  counting_provider::reset();
+  auto h = list->match("/@bob/hello");
+  EXPECT_EQ(h.route_index, 3);
+  ASSERT_EQ(h.regexp_groups.size(), 2u);
+  EXPECT_EQ(h.regexp_groups[0], group("bob"));
+  EXPECT_EQ(h.regexp_groups[1], group("hello"));
+  EXPECT_EQ(counting_provider::regex_match_calls, 1u);
+  EXPECT_EQ(counting_provider::regex_search_calls, 1u);
+
+  // A subset winner that nothing outranks never runs the provider.
+  counting_provider::reset();
+  auto f = list->match("/files/a/b");
+  EXPECT_EQ(f.route_index, 2);
+  EXPECT_FALSE(f.regexp_route);
+  EXPECT_EQ(counting_provider::regex_search_calls, 0u);
+  EXPECT_EQ(counting_provider::regex_match_calls, 0u);
+}
+
+TEST(url_pattern_list, regexp_groups_report_unmatched_optional_groups) {
+  auto list = make_list({"/users/:id?"});
+  auto with = list.match("/users/7");
+  EXPECT_EQ(with.route_index, 0);
+  EXPECT_TRUE(with.regexp_route);
+  ASSERT_EQ(with.regexp_groups.size(), 1u);
+  EXPECT_EQ(with.regexp_groups[0], group("7"));
+  auto without = list.match("/users");
+  EXPECT_EQ(without.route_index, 0);
+  ASSERT_EQ(without.regexp_groups.size(), 1u);
+  EXPECT_EQ(without.regexp_groups[0], std::nullopt);
+  EXPECT_EQ(list.group_names(0), std::vector<std::string>{"id"});
+}
+
+TEST(url_pattern_list, auxiliary_routes_are_pruned_after_a_fast_path_hit) {
+  // A regexp route that outranks a compiled winner (same kind sequence,
+  // earlier insertion, compatible literal prefix) must still be tested; one
+  // that cannot outrank the winner, or cannot match the same input, must
+  // not cost a regex execution.
+  {
+    counting_provider::reset();
+    auto list = parse_counting({
+        "/users/(\\d+)",  // 0: outranks route 1 on insertion order
+        "/users/:id",     // 1
+        "/posts/(\\d+)",  // 2: literal "posts" can never match "/users/..."
+    });
+    ASSERT_TRUE(list.has_value());
+    counting_provider::reset();
+    auto digits = list->match("/users/123");
+    EXPECT_EQ(digits.route_index, 0);
+    EXPECT_EQ(counting_provider::regex_match_calls, 1u);  // route 0 only
+    EXPECT_EQ(counting_provider::regex_search_calls, 1u);
+    counting_provider::reset();
+    auto name = list->match("/users/bob");
+    EXPECT_EQ(name.route_index, 1);
+    ASSERT_EQ(name.capture_count, 1u);
+    EXPECT_EQ(capture_text("/users/bob", name, 0), "bob");
+    EXPECT_EQ(counting_provider::regex_match_calls, 1u);  // route 0 only
+    EXPECT_EQ(counting_provider::regex_search_calls, 0u);
+    counting_provider::reset();
+    auto post = list->match("/posts/9");
+    EXPECT_EQ(post.route_index, 2);  // fast-path miss: aux routes scanned
+    EXPECT_EQ(counting_provider::regex_match_calls, 1u);  // route 2 only
+    EXPECT_EQ(counting_provider::regex_search_calls, 1u);
+  }
+  {
+    counting_provider::reset();
+    auto list = parse_counting({
+        "/users/:id",     // 0
+        "/users/(\\d+)",  // 1: same kind sequence, later: never outranks 0
+        "/(\\d+)/edit",   // 2: kinds [param, literal]: outranked by 0
+    });
+    ASSERT_TRUE(list.has_value());
+    counting_provider::reset();
+    auto m = list->match("/users/123");
+    EXPECT_EQ(m.route_index, 0);
+    EXPECT_FALSE(m.regexp_route);
+    EXPECT_EQ(counting_provider::regex_search_calls, 0u);
+    EXPECT_EQ(counting_provider::regex_match_calls, 0u);
+    EXPECT_EQ(list->match("/7/edit").route_index, 2);
+  }
+  {
+    // A static winner is outranked by nothing: no regex ever runs after a
+    // static hit, whatever the regexp routes look like.
+    counting_provider::reset();
+    auto list = parse_counting({"/(.*)", "/health", "/users/(\\d+)"});
+    ASSERT_TRUE(list.has_value());
+    counting_provider::reset();
+    EXPECT_EQ(list->match("/health").route_index, 1);
+    EXPECT_EQ(counting_provider::regex_search_calls, 0u);
+    EXPECT_EQ(list->match("/other").route_index, 0);
+  }
+}
+
+TEST(url_pattern_list, ignore_case_option_subset_routes) {
+  const ada::url_pattern_options options{.ignore_case = true};
+  auto list = make_list(
+      {
+          "/Users/:id",     // 0
+          "/About",         // 1
+          "/Files/*",       // 2
+          "/API/v1/:a/:b",  // 3
+      },
+      &options);
+  EXPECT_TRUE(list.ignore_case());
+  for (const char* input : {"/users/42", "/USERS/42", "/Users/42"}) {
+    auto m = list.match(input);
+    EXPECT_EQ(m.route_index, 0) << input;
+    ASSERT_EQ(m.capture_count, 1u) << input;
+    // Captures slice the original input, not a folded copy.
+    EXPECT_EQ(capture_text(input, m, 0), "42") << input;
+  }
+  EXPECT_EQ(list.match("/about").route_index, 1);
+  EXPECT_EQ(list.match("/ABOUT").route_index, 1);
+  EXPECT_EQ(list.match("/abut").route_index, -1);
+  auto w = list.match("/FILES/A/B");
+  EXPECT_EQ(w.route_index, 2);
+  ASSERT_EQ(w.capture_count, 1u);
+  EXPECT_EQ(capture_text("/FILES/A/B", w, 0), "A/B");
+  auto d = list.match("/api/V1/X/y");
+  EXPECT_EQ(d.route_index, 3);
+  ASSERT_EQ(d.capture_count, 2u);
+  EXPECT_EQ(capture_text("/api/V1/X/y", d, 0), "X");
+  EXPECT_EQ(capture_text("/api/V1/X/y", d, 1), "y");
+  // Case-sensitive by default.
+  auto strict = make_list({"/Users/:id"});
+  EXPECT_FALSE(strict.ignore_case());
+  EXPECT_EQ(strict.match("/users/42").route_index, -1);
+  EXPECT_EQ(strict.match("/Users/42").route_index, 0);
+  // Beyond the fast-path length the sequential fallback folds on the fly.
+  std::string longu = "/FILES/" + std::string(5000, 'X');
+  auto l = list.match(longu);
+  EXPECT_EQ(l.route_index, 2);
+  ASSERT_EQ(l.capture_count, 1u);
+  EXPECT_EQ(l.captures[0].length, 5000u);
+}
+
+TEST(url_pattern_list, ignore_case_agrees_with_url_pattern) {
+  const ada::url_pattern_options options{.ignore_case = true};
+  const std::vector<std::string_view> patterns = {
+      "/Users/:id", "/About", "/Files/*", "/a/B/c", "/x-(\\d+)/Y", "/Q/:p?"};
+  const std::vector<std::string_view> inputs = {
+      "/users/1", "/USERS/1", "/about", "/ABOUT/", "/files/X", "/A/b/C",
+      "/a/b/c/",  "/x-7/y",   "/X-7/Y", "/x-a/y",  "/q",       "/Q/z"};
+  for (const std::string_view pattern : patterns) {
+    auto list = make_list({pattern}, &options);
+    auto url_pattern = ada::parse_url_pattern<regex_provider>(
+        ada::url_pattern_init{.pathname = std::string(pattern)}, nullptr,
+        &options);
+    ASSERT_TRUE(url_pattern.has_value()) << pattern;
+    for (const std::string_view input : inputs) {
+      auto expected = url_pattern->test(
+          ada::url_pattern_init{.pathname = std::string(input)});
+      ASSERT_TRUE(expected.has_value()) << pattern << " " << input;
+      EXPECT_EQ(list.match(input).has_match(), *expected)
+          << "pattern=" << pattern << " input=" << input;
+    }
+  }
+}
+
+TEST(url_pattern_list, ignore_case_reaches_the_provider) {
+  const ada::url_pattern_options options{.ignore_case = true};
+  counting_provider::reset();
+  auto list = parse_counting({"/Docs/(\\d+)", "/users/:id"}, &options);
+  ASSERT_TRUE(list.has_value());
+  EXPECT_EQ(counting_provider::create_instance_calls, 1u);
+  EXPECT_TRUE(counting_provider::last_ignore_case);
+  auto m = list->match("/DOCS/12");
+  EXPECT_EQ(m.route_index, 0);
+  ASSERT_EQ(m.regexp_groups.size(), 1u);
+  EXPECT_EQ(m.regexp_groups[0], group("12"));
+  // Duplicate patterns under folding collapse onto the smaller index.
+  auto dup = make_list({"/Users/:id", "/users/:id"}, &options);
+  EXPECT_EQ(dup.match("/USERS/1").route_index, 0);
+}
+
+TEST(url_pattern_list, parse_url_pattern_list_free_function) {
+  const std::vector<std::string_view> patterns = {"/", "/users/:id",
+                                                  "/files/*"};
+  auto list = ada::parse_url_pattern_list<regex_provider>(patterns);
+  ASSERT_TRUE(list.has_value());
+  EXPECT_EQ(list->size(), 3u);
+  EXPECT_EQ(list->match("/users/1").route_index, 1);
+  EXPECT_EQ(list->pattern(1), "/users/:id");
+  // Errors surface exactly as from the URLPattern constructor.
+  auto bad = ada::parse_url_pattern_list<regex_provider>(
+      std::vector<std::string_view>{"/fine", "/(a{2,1})"});
+  ASSERT_FALSE(bad.has_value());
+  EXPECT_EQ(bad.error(), ada::errors::type_error);
+  // An empty span is an empty list.
+  auto empty = ada::parse_url_pattern_list<regex_provider>(
+      std::span<const std::string_view>{});
+  ASSERT_TRUE(empty.has_value());
+  EXPECT_EQ(empty->size(), 0u);
+}
+
+TEST(url_pattern_list, parse_url_pattern_list_with_base_url) {
+  // With a base URL, each pattern is processed as the pathname of a
+  // URLPatternInit: relative patterns resolve against the base's path.
+  const std::string_view base = "https://example.com/app/index.html";
+  const std::vector<std::string_view> patterns = {"users/:id", "/abs",
+                                                  "./rel/*"};
+  auto list = ada::parse_url_pattern_list<regex_provider>(patterns, &base);
+  ASSERT_TRUE(list.has_value());
+  EXPECT_EQ(list->pattern(0), "/app/users/:id");
+  EXPECT_EQ(list->pattern(1), "/abs");
+  EXPECT_EQ(list->pattern(2), "/app/./rel/*");
+  auto m = list->match("/app/users/7");
+  EXPECT_EQ(m.route_index, 0);
+  ASSERT_EQ(m.capture_count, 1u);
+  EXPECT_EQ(capture_text("/app/users/7", m, 0), "7");
+  EXPECT_EQ(list->match("/abs").route_index, 1);
+  EXPECT_EQ(list->match("/users/7").route_index, -1);
+  // The same processing url_pattern applies to a relative pattern string.
+  auto up = ada::parse_url_pattern<regex_provider>("users/:id", &base);
+  ASSERT_TRUE(up.has_value());
+  EXPECT_EQ(up->get_pathname(), list->pattern(0));
+  // An unparsable base URL is a type error, as for parse_url_pattern.
+  const std::string_view bad_base = "not a url";
+  auto bad = ada::parse_url_pattern_list<regex_provider>(patterns, &bad_base);
+  ASSERT_FALSE(bad.has_value());
+  EXPECT_EQ(bad.error(), ada::errors::type_error);
+}
+
+TEST(url_pattern_list, url_pattern_objects_as_input) {
+  std::vector<ada::url_pattern<regex_provider>> patterns;
+  for (const char* pathname :
+       {"/", "/users/:id", "/users/(\\d+)", "/files/*", "/:a/x-(\\w+)"}) {
+    auto parsed = ada::parse_url_pattern<regex_provider>(
+        ada::url_pattern_init{.pathname = pathname});
+    ASSERT_TRUE(parsed.has_value()) << pathname;
+    patterns.push_back(std::move(*parsed));
+  }
+  auto list = ada::parse_url_pattern_list<regex_provider>(
+      std::span<const ada::url_pattern<regex_provider>>(patterns));
+  ASSERT_TRUE(list.has_value());
+  ASSERT_EQ(list->size(), 5u);
+  for (size_t i = 0; i < patterns.size(); i++) {
+    EXPECT_EQ(list->pattern(i), patterns[i].get_pathname());
+  }
+  EXPECT_EQ(list->match("/").route_index, 0);
+  auto m = list->match("/users/bob");
+  EXPECT_EQ(m.route_index, 1);
+  ASSERT_EQ(m.capture_count, 1u);
+  EXPECT_EQ(capture_text("/users/bob", m, 0), "bob");
+  // Regexp routes reuse the pattern's compiled pathname component and
+  // report its groups.
+  auto d = list->match("/users/42");
+  EXPECT_EQ(d.route_index, 1);  // "/users/:id" wins the tie on insertion
+  auto w = list->match("/left/x-right");
+  EXPECT_EQ(w.route_index, 4);
+  EXPECT_TRUE(w.regexp_route);
+  EXPECT_EQ(list->group_names(4), (std::vector<std::string>{"a", "0"}));
+  ASSERT_EQ(w.regexp_groups.size(), 2u);
+  EXPECT_EQ(w.regexp_groups[0], group("left"));
+  EXPECT_EQ(w.regexp_groups[1], group("right"));
+  // The url_pattern's own exec agrees on the groups.
+  auto exec =
+      patterns[4].exec(ada::url_pattern_init{.pathname = "/left/x-right"});
+  ASSERT_TRUE(exec.has_value() && exec->has_value());
+  EXPECT_EQ((*exec)->pathname.groups.at("a"), group("left"));
+  EXPECT_EQ((*exec)->pathname.groups.at("0"), group("right"));
+}
+
+TEST(url_pattern_list, url_pattern_objects_carry_ignore_case) {
+  const ada::url_pattern_options options{.ignore_case = true};
+  std::vector<ada::url_pattern<regex_provider>> patterns;
+  for (const char* pathname : {"/Users/:id", "/Docs/(\\d+)"}) {
+    auto parsed = ada::parse_url_pattern<regex_provider>(
+        ada::url_pattern_init{.pathname = pathname}, nullptr, &options);
+    ASSERT_TRUE(parsed.has_value()) << pathname;
+    patterns.push_back(std::move(*parsed));
+  }
+  auto list = ada::parse_url_pattern_list<regex_provider>(
+      std::span<const ada::url_pattern<regex_provider>>(patterns));
+  ASSERT_TRUE(list.has_value());
+  EXPECT_TRUE(list->ignore_case());
+  EXPECT_EQ(list->match("/users/1").route_index, 0);
+  auto d = list->match("/docs/9");
+  EXPECT_EQ(d.route_index, 1);
+  ASSERT_EQ(d.regexp_groups.size(), 1u);
+  EXPECT_EQ(d.regexp_groups[0], group("9"));
+  // Mixed flags cannot share one list.
+  auto strict = ada::parse_url_pattern<regex_provider>(
+      ada::url_pattern_init{.pathname = "/x"});
+  ASSERT_TRUE(strict.has_value());
+  patterns.push_back(std::move(*strict));
+  auto mixed = ada::parse_url_pattern_list<regex_provider>(
+      std::span<const ada::url_pattern<regex_provider>>(patterns));
+  ASSERT_FALSE(mixed.has_value());
+  EXPECT_EQ(mixed.error(), ada::errors::type_error);
+}
+
+// ---------------------------------------------------------------------------
+// Matcher-internal sweeps: the SWAR segment scan, short-tail compares and
+// the root first-byte index.
+
+namespace {
+
+std::vector<uint16_t> naive_segment_starts(std::string_view url) {
+  std::vector<uint16_t> starts{1};
+  for (size_t i = 1; i < url.size(); i++) {
+    if (url[i] == '/') {
+      starts.push_back(static_cast<uint16_t>(i + 1));
+    }
+  }
+  return starts;
+}
+
+}  // namespace
+
+TEST(url_pattern_list, swar_segment_scan_sweep) {
+  namespace detail = ada::url_pattern_list_detail;
+  using ada::url_pattern_list_limits::max_fast_path_segments;
+  std::mt19937_64 rng(0x5CA7ull);
+  // Filler bytes include values >= 0x80 and the byte that differs from '/'
+  // only in the high bit, which must never read as a separator.
+  const unsigned char fillers[] = {'a', 'z', '0', 0x80, 0xAF, 0xFF, 0x2E, 0x30};
+  for (uint32_t len = 1; len <= 70; len++) {
+    for (int variant = 0; variant < 12; variant++) {
+      std::string url(len, 'a');
+      url[0] = '/';
+      for (uint32_t i = 1; i < len; i++) {
+        url[i] = static_cast<char>(fillers[rng() % 8]);
+      }
+      // Slash placements: none, every position, first/last, random.
+      if (variant == 1) {
+        for (uint32_t i = 1; i < len; i++) {
+          url[i] = '/';
+        }
+      } else if (variant == 2 && len > 1) {
+        url[1] = '/';
+      } else if (variant == 3 && len > 1) {
+        url[len - 1] = '/';
+      } else if (variant >= 4) {
+        const uint32_t n_slashes = static_cast<uint32_t>(rng() % 6);
+        for (uint32_t k = 0; k < n_slashes && len > 1; k++) {
+          url[1 + rng() % (len - 1)] = '/';
+        }
+      }
+      const std::vector<uint16_t> expected = naive_segment_starts(url);
+      uint16_t soff[max_fast_path_segments + 1];
+      const uint32_t nseg = detail::scan_segments(
+          url.data(), static_cast<uint32_t>(url.size()), soff);
+      if (expected.size() > max_fast_path_segments) {
+        EXPECT_EQ(nseg, 0u) << "len=" << len << " variant=" << variant;
+        continue;
+      }
+      ASSERT_EQ(nseg, expected.size())
+          << "len=" << len << " variant=" << variant;
+      for (uint32_t i = 0; i < nseg; i++) {
+        EXPECT_EQ(soff[i], expected[i])
+            << "len=" << len << " variant=" << variant << " i=" << i;
+      }
+      EXPECT_EQ(soff[nseg], len + 1);
+    }
+  }
+}
+
+TEST(url_pattern_list, short_tail_segments_compare_exactly) {
+  // Final segments of 1..7 bytes are compared without loading past the end
+  // of the input; a mismatch in the last byte, an extra byte, or a missing
+  // byte must all be rejected.
+  std::vector<std::string> storage;
+  for (uint32_t len = 1; len <= 7; len++) {
+    storage.push_back("/t/" + std::string(len, 'x'));      // 0,2,...: static
+    storage.push_back("/p/:id/" + std::string(len, 'y'));  // after a param
+  }
+  std::vector<std::string_view> patterns(storage.begin(), storage.end());
+  auto list = make_list(patterns);
+  for (uint32_t len = 1; len <= 7; len++) {
+    const int32_t route = static_cast<int32_t>((len - 1) * 2);
+    const std::string hit = "/t/" + std::string(len, 'x');
+    EXPECT_EQ(list.match(hit).route_index, route) << len;
+    std::string last_differs = hit;
+    last_differs.back() = 'X';
+    EXPECT_EQ(list.match(last_differs).route_index, -1) << len;
+    EXPECT_EQ(list.match(hit + "x").route_index, len < 7 ? route + 2 : -1)
+        << len;
+    EXPECT_EQ(list.match(hit + "/").route_index, -1) << len;
+    const std::string after_param = "/p/42/" + std::string(len, 'y');
+    auto m = list.match(after_param);
+    EXPECT_EQ(m.route_index, route + 1) << len;
+    ASSERT_EQ(m.capture_count, 1u) << len;
+    EXPECT_EQ(capture_text(after_param, m, 0), "42") << len;
+    std::string wrong = after_param;
+    wrong.back() = 'Y';
+    EXPECT_EQ(list.match(wrong).route_index, -1) << len;
+  }
+  // Short non-final segments (8 readable bytes available) take the masked
+  // whole-word compare; they must reject on every byte too.
+  auto mid = make_list({"/ab/cd/efgh/i", "/ab/cX/efgh/i"});
+  EXPECT_EQ(mid.match("/ab/cd/efgh/i").route_index, 0);
+  EXPECT_EQ(mid.match("/ab/cX/efgh/i").route_index, 1);
+  EXPECT_EQ(mid.match("/ab/cdd/efgh/i").route_index, -1);
+  EXPECT_EQ(mid.match("/aX/cd/efgh/i").route_index, -1);
+}
+
+TEST(url_pattern_list, root_first_byte_index) {
+  // Routes differing only after byte 0, several sharing a first byte, and
+  // first bytes with no route at all.
+  auto list = make_list({
+      "/users",      // 0
+      "/uploads",    // 1
+      "/u",          // 2
+      "/user",       // 3
+      "/posts",      // 4
+      "/p",          // 5
+      "/health",     // 6
+      "/users/:id",  // 7
+      "/x/*",        // 8
+  });
+  EXPECT_EQ(list.match("/users").route_index, 0);
+  EXPECT_EQ(list.match("/uploads").route_index, 1);
+  EXPECT_EQ(list.match("/u").route_index, 2);
+  EXPECT_EQ(list.match("/user").route_index, 3);
+  EXPECT_EQ(list.match("/posts").route_index, 4);
+  EXPECT_EQ(list.match("/p").route_index, 5);
+  EXPECT_EQ(list.match("/health").route_index, 6);
+  EXPECT_EQ(list.match("/users/9").route_index, 7);
+  EXPECT_EQ(list.match("/x/a/b").route_index, 8);
+  EXPECT_EQ(list.match("/uu").route_index, -1);
+  EXPECT_EQ(list.match("/zzz").route_index, -1);
+  EXPECT_EQ(list.match("/").route_index, -1);
+  EXPECT_EQ(list.match("/upload").route_index, -1);
+  EXPECT_EQ(list.match("/User").route_index, -1);
+  // More than max_direct_children (16) children sharing one first byte: the
+  // index is not used and the root falls back to the projection ladder.
+  std::vector<std::string> storage;
+  for (int i = 0; i < 20; i++) {
+    storage.push_back("/same" + std::to_string(i));
+  }
+  storage.push_back("/other");
+  std::vector<std::string_view> patterns(storage.begin(), storage.end());
+  auto wide = make_list(patterns);
+  EXPECT_EQ(wide.match("/same7").route_index, 7);
+  EXPECT_EQ(wide.match("/same19").route_index, 19);
+  EXPECT_EQ(wide.match("/other").route_index, 20);
+  EXPECT_EQ(wide.match("/same20").route_index, -1);
+}
+
+TEST(url_pattern_list, direct_compare_fanout_up_to_sixteen) {
+  // A non-root node with up to 16 static children compares them directly;
+  // 17 children switch to projection. Both must answer identically.
+  for (int fanout : {3, 8, 16, 17}) {
+    std::vector<std::string> storage;
+    for (int i = 0; i < fanout; i++) {
+      storage.push_back("/api/child" + std::to_string(i));
+    }
+    storage.push_back("/api/:rest");
+    std::vector<std::string_view> patterns(storage.begin(), storage.end());
+    auto list = make_list(patterns);
+    for (int i = 0; i < fanout; i++) {
+      EXPECT_EQ(list.match("/api/child" + std::to_string(i)).route_index, i)
+          << fanout;
+    }
+    EXPECT_EQ(list.match("/api/child" + std::to_string(fanout)).route_index,
+              fanout)
+        << fanout;  // the param route
+    EXPECT_EQ(list.match("/api/child0/x").route_index, -1) << fanout;
+  }
+}
+
+TEST(url_pattern_list, regexp_route_shape_check_precedes_the_provider) {
+  // A regexp route made only of fixed text and ":name" groups has an exact
+  // segment count and exact literal positions: inputs that cannot fit it
+  // are rejected before any provider call, even on the "/*" hits that it
+  // outranks.
+  counting_provider::reset();
+  auto list = parse_counting({"/@:handle/status/:sid", "/*"});
+  ASSERT_TRUE(list.has_value());
+  counting_provider::reset();
+  EXPECT_EQ(list->match("/a/b").route_index, 1);  // 2 segments: never
+  EXPECT_EQ(list->match("/a/b/c/d").route_index, 1);
+  EXPECT_EQ(list->match("/a/nope/c").route_index, 1);   // literal mismatch
+  EXPECT_EQ(list->match("/a/status/").route_index, 1);  // empty ":sid"
+  EXPECT_EQ(counting_provider::regex_match_calls, 0u);
+  EXPECT_EQ(counting_provider::regex_search_calls, 0u);
+  // The shape fits but the regex does not: one regex_match, no search.
+  counting_provider::reset();
+  EXPECT_EQ(list->match("/x/status/y").route_index, 1);
+  EXPECT_EQ(counting_provider::regex_match_calls, 1u);
+  EXPECT_EQ(counting_provider::regex_search_calls, 0u);
+  // A hit: regex_match then regex_search for the groups.
+  counting_provider::reset();
+  auto m = list->match("/@bob/status/77");
+  EXPECT_EQ(m.route_index, 0);
+  ASSERT_EQ(m.regexp_groups.size(), 2u);
+  EXPECT_EQ(m.regexp_groups[0], group("bob"));
+  EXPECT_EQ(m.regexp_groups[1], group("77"));
+  EXPECT_EQ(counting_provider::regex_match_calls, 1u);
+  EXPECT_EQ(counting_provider::regex_search_calls, 1u);
+  // A custom group may span segments, so only the literal prefix before it
+  // is trusted: "/a/x/y/edit" must still reach the provider.
+  auto custom = make_list({"/a/(.*)/edit", "/*"});
+  EXPECT_EQ(custom.match("/a/x/y/edit").route_index, 0);
+  EXPECT_EQ(custom.match("/b/x/edit").route_index, 1);
+  // Not anchored at '/': nothing is assumed about the shape.
+  auto loose = make_list({"(.*)", "/*"});
+  EXPECT_EQ(loose.match("/anything/at/all").route_index, 0);
+}
+
+TEST(url_pattern_list, inputs_need_no_terminator) {
+  // match() reads exactly the bytes of the view it is given: a pathname in an
+  // exactly sized heap buffer, with no terminator after it, is matched like
+  // any other (a read past its end is a heap-buffer-overflow under ASan).
+  const auto exact = [](const list_type& list, std::string_view input) {
+    const std::vector<char> buffer(input.begin(), input.end());
+    return list.match(std::string_view(buffer.data(), buffer.size()))
+        .route_index;
+  };
+  auto list = make_list(
+      {"/", "/users/:id", "/users/me", "/posts", "/about/*", "/a/b/c/d/e/f/g"});
+  EXPECT_EQ(exact(list, "/"), 0);
+  EXPECT_EQ(exact(list, "/users/42"), 1);
+  EXPECT_EQ(exact(list, "/users/me"), 2);
+  EXPECT_EQ(exact(list, "/posts"), 3);
+  EXPECT_EQ(exact(list, "/about/x/y"), 4);
+  EXPECT_EQ(exact(list, "/a/b/c/d/e/f/g"), 5);
+  EXPECT_EQ(exact(list, "/a/b/c/d/e/f/gh"), -1);
+  EXPECT_EQ(exact(list, "/users/"), -1);
+  EXPECT_EQ(exact(list, "//"), -1);
+  EXPECT_EQ(exact(list, ""), -1);
+  // A root with the first-byte index (three or more children, none with an
+  // empty key) probed with empty segments: "/" has no first byte to index.
+  auto indexed = make_list({"/users/:id", "/users/me", "/posts", "/about/*"});
+  EXPECT_EQ(exact(indexed, "/"), -1);
+  EXPECT_EQ(exact(indexed, "//"), -1);
+  EXPECT_EQ(exact(indexed, "/users/"), -1);
+  EXPECT_EQ(exact(indexed, "/posts/"), -1);
+  EXPECT_EQ(exact(indexed, "/p"), -1);
+  EXPECT_EQ(exact(indexed, "/posts"), 2);
 }
