@@ -261,7 +261,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
     stack[n] = ':';
     with_colon = std::string_view(stack, n + 1);
   } else {
-    heap.assign(view.data(), n);
+    heap.assign(view.substr(0, n));
     heap.push_back(':');
     with_colon = heap;
   }
@@ -367,8 +367,8 @@ bool url_aggregator::set_port(const std::string_view input) {
   // Find the first non-digit character to determine the length of digits
   auto first_non_digit =
       std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
-  std::string_view digits_to_parse = std::string_view(
-      trimmed.data(), static_cast<size_t>(first_non_digit - trimmed.begin()));
+  const std::string_view digits_to_parse =
+      trimmed.substr(0, static_cast<size_t>(first_non_digit - trimmed.begin()));
 
   // parse_port only touches the buffer once the digits are already known to
   // be in range, so an invalid port never mutates anything and needs no

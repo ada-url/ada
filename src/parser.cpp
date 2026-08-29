@@ -665,7 +665,9 @@ ada_really_inline void note_possible_segment_prefix(const uint8_t* b,
                                                     size_t pos,
                                                     size_t run_start,
                                                     bool& flag) noexcept {
-  if (pos == run_start || b[pos - 1] == '/') {
+  // pos==0 and pos!=run_start is an overlapping window that starts at the
+  // first input byte; do not read b[-1].
+  if (pos == run_start || (pos != 0 && b[pos - 1] == '/')) {
     flag = true;
   }
 }
@@ -710,7 +712,7 @@ ada_really_inline void note_dots_in_window(const uint8_t* b, size_t i,
   }
   const int slashes =
       _mm_movemask_epi8(_mm_cmpeq_epi8(w, _mm_set1_epi8('/'))) & valid_mask;
-  const bool leading_prefix = (i == run_start || b[i - 1] == '/');
+  const bool leading_prefix = i == run_start || (i != 0 && b[i - 1] == '/');
   // Overlapping last-16 windows that start before the path must mark the
   // first path byte as a segment start separately (see scan_path_run).
   // Doing that here taxes every dotted aligned window.
@@ -745,7 +747,7 @@ ada_really_inline void note_dots_in_window_neon(const uint8_t* b, size_t i,
   }
   const uint64_t slashes =
       neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('/'))) & valid_bits;
-  const bool leading_prefix = (i == run_start || b[i - 1] == '/');
+  const bool leading_prefix = i == run_start || (i != 0 && b[i - 1] == '/');
   if (((dots & 0xF) != 0 && leading_prefix) || (dots & (slashes << 4)) != 0) {
     maybe_dot_segment = true;
   }
