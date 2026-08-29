@@ -36,7 +36,7 @@ inline void url_aggregator::update_base_authority(
   if (input_starts_with_dash) {
     input.remove_prefix(2);
     diff += 2;  // add "//"
-    buffer.insert(components.protocol_end, "//");
+    buffer.insert(components.protocol_end, 2, '/');
     components.username_end += 2;
   }
 
@@ -51,7 +51,7 @@ inline void url_aggregator::update_base_authority(
 
     buffer.insert(components.protocol_end + diff, username);
     diff += uint32_t(username.size());
-    buffer.insert(components.protocol_end + diff, ":");
+    buffer.insert(components.protocol_end + diff, 1, ':');
     components.username_end = components.protocol_end + diff;
     buffer.insert(components.protocol_end + diff + 1, password);
     diff += uint32_t(password.size()) + 1;
@@ -66,7 +66,7 @@ inline void url_aggregator::update_base_authority(
   components.host_start += diff;
 
   if (buffer.size() > base.host_start && buffer[base.host_start] != '@') {
-    buffer.insert(components.host_start, "@");
+    buffer.insert(components.host_start, 1, '@');
     diff++;
   }
   components.host_end += diff;
@@ -139,7 +139,7 @@ inline void url_aggregator::update_base_hostname(const std::string_view input) {
       replace_and_resize(components.host_start, components.host_end, input);
 
   if (has_credentials) {
-    buffer.insert(components.host_start, "@");
+    buffer.insert(components.host_start, 1, '@');
     new_difference++;
   }
   components.host_end += new_difference;
@@ -278,7 +278,8 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
     // If url's host is null, url does not have an opaque path, url's path's
     // size is greater than 1, then append U+002F (/) followed by U+002E (.) to
     // output.
-    buffer.insert(components.pathname_start, "/.");
+    buffer.insert(components.pathname_start, 1, '/');
+    buffer.insert(components.pathname_start + 1, 1, '.');
     components.pathname_start += 2;
     if (components.search_start != url_components::omitted) {
       components.search_start += 2;
@@ -351,7 +352,7 @@ inline void url_aggregator::update_base_username(const std::string_view input) {
   components.host_start += diff;
 
   if (!input.empty() && !host_starts_with_at) {
-    buffer.insert(components.host_start, "@");
+    buffer.insert(components.host_start, 1, '@');
     diff++;
   } else if (input.empty() && host_starts_with_at && !has_password) {
     // Input is empty, there is no password, and we need to remove "@" from
@@ -394,7 +395,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
 
   if (buffer[components.host_start] != '@' &&
       components.host_start != components.host_end) {
-    buffer.insert(components.host_start, "@");
+    buffer.insert(components.host_start, 1, '@');
     difference++;
   }
 
@@ -472,7 +473,7 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
   // password if hostname does not start with "@", it is "update_base_password"s
   // responsibility to set it.
   if (buffer[components.host_start] != '@') {
-    buffer.insert(components.host_start, "@");
+    buffer.insert(components.host_start, 1, '@');
     difference++;
   }
 
@@ -509,7 +510,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
     buffer.insert(components.host_start, input);
   } else {
     difference++;  // Increment for ":"
-    buffer.insert(components.username_end, ":");
+    buffer.insert(components.username_end, 1, ':');
     buffer.insert(components.username_end + 1, input);
   }
   components.host_start += difference;
@@ -518,7 +519,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
   // password if hostname does not start with "@", it is "append_base_password"s
   // responsibility to set it.
   if (buffer[components.host_start] != '@') {
-    buffer.insert(components.host_start, "@");
+    buffer.insert(components.host_start, 1, '@');
     difference++;
   }
 
@@ -755,7 +756,7 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() {
   // Performance: the common case is components.protocol_end == buffer.size()
   // Optimization opportunity: in many cases, the "//" is part of the input and
   // the insert could be fused with another insert.
-  buffer.insert(components.protocol_end, "//");
+  buffer.insert(components.protocol_end, 2, '/');
   components.username_end += 2;
   components.host_start += 2;
   components.host_end += 2;

@@ -52,6 +52,6 @@ jobs:
       - name: Run clang-tidy
         run: >
           cmake -B build -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-stdlib=libc++" &&
-          clang-tidy-22 -p build src/ada.cpp src/parser_hot.cpp src/parser_finish.cpp src/can_parse.cpp
+          clang-tidy-22 -p build src/ada.cpp src/parser_hot.cpp src/parser_finish.cpp src/can_parse.cpp src/url_setters.cpp
         env:
           CXX: clang++-22
