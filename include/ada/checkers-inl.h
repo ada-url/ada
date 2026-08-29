@@ -21,28 +21,8 @@ constexpr bool is_digit(char x) noexcept { return (x >= '0') & (x <= '9'); }
 
 constexpr bool is_ipv4_number_char(char x) noexcept {
   const unsigned char c = static_cast<unsigned char>(x);
-  // .com/.org/.net end with 'm'/'g'/'t', all > 'f'. Two compares reject them
-  // without walking the 0-9 / a-f / A-F ranges. 'X' is 0x58 and is not > 'f'.
-  if (c > 'f') {
-    return c == 'x';
-  }
   return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
-         (c >= 'A' && c <= 'F') || c == 'X';
-}
-
-// ".com" / ".COM" after an optional trailing dot.
-constexpr bool ends_with_dot_com(const char* start, size_t n) noexcept {
-  if (n > 0 && start[n - 1] == '.') {
-    --n;
-  }
-  if (n < 4) {
-    return false;
-  }
-  const uint32_t last4 = uint32_t(uint8_t(start[n - 4])) |
-                         (uint32_t(uint8_t(start[n - 3])) << 8) |
-                         (uint32_t(uint8_t(start[n - 2])) << 16) |
-                         (uint32_t(uint8_t(start[n - 1])) << 24);
-  return (last4 | 0x20202020u) == 0x6d6f632eu;
+         (c >= 'A' && c <= 'F') || c == 'x' || c == 'X';
 }
 
 constexpr bool last_label_may_be_a_number(std::string_view view) noexcept {
@@ -57,7 +37,6 @@ constexpr bool last_label_may_be_a_number(std::string_view view) noexcept {
       return false;
     }
   }
-  // .com / .org / .net / .gov / ... end with a letter outside 0-9a-fxX.
   if (!is_ipv4_number_char(end[-1])) {
     return false;
   }

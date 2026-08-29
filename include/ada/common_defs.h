@@ -53,7 +53,6 @@
 
 #define ada_really_inline __forceinline
 #define ada_never_inline __declspec(noinline)
-#define ada_cold
 
 #define ada_unused
 #define ada_warn_unused
@@ -85,7 +84,6 @@
 
 #define ada_really_inline inline __attribute__((always_inline))
 #define ada_never_inline inline __attribute__((noinline))
-#define ada_cold __attribute__((cold))
 
 #define ada_unused __attribute__((unused))
 #define ada_warn_unused __attribute__((warn_unused_result))

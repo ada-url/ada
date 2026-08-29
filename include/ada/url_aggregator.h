@@ -322,10 +322,6 @@ struct url_aggregator : url_base {
       std::string_view, const url_aggregator*);
   friend url_aggregator parser::parse_url_impl<url_aggregator, false>(
       std::string_view, const url_aggregator*);
-  friend url_aggregator& parser::parse_url_impl_into<url_aggregator, true>(
-      url_aggregator&, std::string_view, const url_aggregator*, bool);
-  friend url_aggregator& parser::parse_url_impl_into<url_aggregator, false>(
-      url_aggregator&, std::string_view, const url_aggregator*, bool);
   template <class result_type>
   friend bool parser::try_parse_simple_absolute(std::string_view, result_type&);
   template <class result_type>
@@ -334,20 +330,6 @@ struct url_aggregator : url_base {
                                                        ada::scheme::type,
                                                        uint32_t, size_t, size_t,
                                                        size_t, bool);
-  template <class result_type>
-  friend bool parser::finish_simple_absolute_literal_host(
-      std::string_view, result_type&, ada::scheme::type, uint32_t, size_t,
-      size_t, std::string_view, url_host_type);
-  template <class result_type>
-  friend bool parser::try_finish_simple_userinfo(std::string_view, result_type&,
-                                                 ada::scheme::type, uint32_t,
-                                                 size_t);
-  template <class result_type>
-  friend void parser::finish_simple_absolute_handoff(std::string_view,
-                                                     result_type&, size_t,
-                                                     size_t, size_t, uint32_t,
-                                                     bool, bool, size_t, size_t,
-                                                     size_t, size_t);
   template <class result_type>
   friend bool parser::try_parse_simple_relative(std::string_view,
                                                 const result_type&,

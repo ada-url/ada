@@ -16,7 +16,6 @@
 
 #include "ada/expected.h"
 #include "ada/scheme.h"
-#include "ada/url_base.h"
 
 #include "ada/url_pattern_regex.h"
 #include "ada/url_pattern_init.h"
@@ -74,24 +73,6 @@ extern template url_aggregator parse_url_impl<url_aggregator, false>(
 extern template url parse_url_impl<url, true>(std::string_view user_input,
                                               const url* base_url);
 
-/** @private Fill `url` in place. `try_fast_path` is false when parse()
- *  already ran try_parse_simple_absolute. */
-template <typename result_type, bool store_values = true>
-result_type& parse_url_impl_into(result_type& url, std::string_view user_input,
-                                 const result_type* base_url,
-                                 bool try_fast_path);
-
-extern template url_aggregator& parse_url_impl_into<url_aggregator, true>(
-    url_aggregator& out, std::string_view user_input,
-    const url_aggregator* base_url, bool try_fast_path);
-extern template url_aggregator& parse_url_impl_into<url_aggregator, false>(
-    url_aggregator& out, std::string_view user_input,
-    const url_aggregator* base_url, bool try_fast_path);
-extern template url& parse_url_impl_into<url, true>(url& out,
-                                                    std::string_view user_input,
-                                                    const url* base_url,
-                                                    bool try_fast_path);
-
 /** @private */
 template <class result_type>
 bool try_parse_simple_absolute(std::string_view input, result_type& out);
@@ -103,29 +84,6 @@ bool finish_simple_absolute_with_port(std::string_view input, result_type& out,
                                       uint32_t protocol_end, size_t host_start,
                                       size_t host_end, size_t host_len,
                                       bool has_upper);
-
-/** @private Write a host that is not a slice of `input` (canonical IPv4/IPv6).
- */
-template <class result_type>
-bool finish_simple_absolute_literal_host(
-    std::string_view input, result_type& out, ada::scheme::type scheme_type,
-    uint32_t protocol_end, size_t host_start, size_t host_end,
-    std::string_view host, url_host_type parsed_host_type);
-
-/** @private Cold already-canonical userinfo finish (`user[:pass]@host`). */
-template <class result_type>
-bool try_finish_simple_userinfo(std::string_view input, result_type& out,
-                                ada::scheme::type scheme_type,
-                                uint32_t protocol_end, size_t auth_start);
-
-/** @private Cold rest_simple=false tail; kept out of the hot I-cache. */
-template <class result_type>
-void finish_simple_absolute_handoff(std::string_view input, result_type& out,
-                                    size_t host_start, size_t host_end,
-                                    size_t host_len, uint32_t protocol_end,
-                                    bool has_upper, bool has_path,
-                                    size_t path_start, size_t path_end,
-                                    size_t query_start, size_t hash_start);
 
 /** @private */
 template <class result_type>

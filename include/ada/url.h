@@ -382,14 +382,6 @@ struct url : url_base {
       ada::url_aggregator, true>(std::string_view, const ada::url_aggregator*);
   friend ada::url_aggregator ada::parser::parse_url_impl<
       ada::url_aggregator, false>(std::string_view, const ada::url_aggregator*);
-  friend ada::url& ada::parser::parse_url_impl_into<ada::url, true>(
-      ada::url&, std::string_view, const ada::url*, bool);
-  friend ada::url_aggregator&
-  ada::parser::parse_url_impl_into<ada::url_aggregator, true>(
-      ada::url_aggregator&, std::string_view, const ada::url_aggregator*, bool);
-  friend ada::url_aggregator&
-  ada::parser::parse_url_impl_into<ada::url_aggregator, false>(
-      ada::url_aggregator&, std::string_view, const ada::url_aggregator*, bool);
   template <class result_type>
   friend bool ada::parser::try_parse_simple_absolute(std::string_view,
                                                      result_type&);
@@ -397,19 +389,6 @@ struct url : url_base {
   friend bool ada::parser::finish_simple_absolute_with_port(
       std::string_view, result_type&, ada::scheme::type, uint32_t, size_t,
       size_t, size_t, bool);
-  template <class result_type>
-  friend bool ada::parser::finish_simple_absolute_literal_host(
-      std::string_view, result_type&, ada::scheme::type, uint32_t, size_t,
-      size_t, std::string_view, url_host_type);
-  template <class result_type>
-  friend bool ada::parser::try_finish_simple_userinfo(std::string_view,
-                                                      result_type&,
-                                                      ada::scheme::type,
-                                                      uint32_t, size_t);
-  template <class result_type>
-  friend void ada::parser::finish_simple_absolute_handoff(
-      std::string_view, result_type&, size_t, size_t, size_t, uint32_t, bool,
-      bool, size_t, size_t, size_t, size_t);
   template <class result_type>
   friend bool ada::parser::try_parse_simple_relative(std::string_view,
                                                      const result_type&,
