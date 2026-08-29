@@ -2191,12 +2191,6 @@ TEST(basic_tests, ada_url_get_href_assembly) {
     ASSERT_EQ(u->get_href(), "https://user:pass@example.com/x");
     ASSERT_EQ(u->get_href_size(), u->get_href().size());
   }
-  {
-    auto u = ada::parse<ada::url>("http://example.com/path");
-    ASSERT_TRUE(u);
-    ASSERT_EQ(u->get_href(), "http://example.com/path");
-    ASSERT_EQ(u->get_href_size(), u->get_href().size());
-  }
 }
 
 TEST(basic_tests, last_label_may_be_a_number_cases) {

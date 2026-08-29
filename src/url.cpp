@@ -666,8 +666,8 @@ bool url::set_port(const std::string_view input) {
   // Find the first non-digit character to determine the length of digits
   auto first_non_digit =
       std::ranges::find_if_not(trimmed, ada::unicode::is_ascii_digit);
-  const std::string_view digits_to_parse = std::string_view{trimmed}.substr(
-      0, static_cast<size_t>(first_non_digit - trimmed.begin()));
+  std::string_view digits_to_parse =
+      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
 
   // Revert changes if parse_port fails.
   std::optional<uint16_t> previous_port = port;
@@ -760,8 +760,8 @@ bool url::set_protocol(const std::string_view input) {
     if (needs_rollback_snapshot(view.size())) {
       saved_url = *this;
     }
-    const bool result = parse_scheme<true>(std::string_view{view}.substr(
-        0, static_cast<size_t>(pointer - view.begin())));
+    bool result = parse_scheme<true>(
+        std::string_view(view.data(), pointer - view.begin()));
     if (result && saved_url && get_href_size() > ada::get_max_input_length()) {
       *this = std::move(*saved_url);
       return false;

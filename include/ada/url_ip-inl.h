@@ -289,8 +289,8 @@ ada_really_inline bool try_parse_ipv6_avx512(const char* data, size_t len,
 }
 #endif  // ADA_AVX512_IPV6
 
-// Parse an IPv6 host (no surrounding brackets). Shared by url, url_aggregator,
-// and the simple-absolute fast path.
+// Parse an IPv6 host (no surrounding brackets). Shared by url and
+// url_aggregator so the unity TU (ada.cpp) keeps one copy.
 inline bool parse_ipv6_address(std::string_view input,
                                std::array<uint16_t, 8>& address) noexcept {
   if (input.empty() || input.size() > 45) [[unlikely]] {
