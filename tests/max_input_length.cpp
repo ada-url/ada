@@ -130,6 +130,30 @@ TYPED_TEST(max_input_length_tests, setters_accept_under_limit) {
   ASSERT_EQ(result->get_hash(), "#frag");
 }
 
+// The rollback helper uses buffer + 3*input + 16. A 400-byte username
+// trips that bound against a 1 KB cap, but the stored result still fits.
+TYPED_TEST(max_input_length_tests, setters_snapshot_then_accept) {
+  const std::string payload(400, 'a');
+  {
+    auto result = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->set_username(payload));
+    ASSERT_EQ(result->get_username(), payload);
+  }
+  {
+    auto result = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->set_password(payload));
+    ASSERT_EQ(result->get_password(), payload);
+  }
+  {
+    auto result = ada::parse<TypeParam>("https://example.com/");
+    ASSERT_TRUE(result);
+    result->set_hash(payload);
+    ASSERT_EQ(result->get_hash(), "#" + payload);
+  }
+}
+
 TYPED_TEST(max_input_length_tests, percent_encoding_expansion_blocked) {
   // Percent encoding triples the size of each non-ASCII byte (%XX).
   // Use a limit that the base URL fits within, but the encoded result exceeds.

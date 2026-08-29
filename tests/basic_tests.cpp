@@ -1553,6 +1553,22 @@ TYPED_TEST(basic_tests, get_href_size_opaque_path) {
   ASSERT_EQ(url->get_href_size(), url->get_href().size());
 }
 
+TYPED_TEST(basic_tests, clear_hash_on_opaque_path) {
+  auto url = ada::parse<TypeParam>("data:hello#frag");
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->has_opaque_path);
+  url->set_hash("");
+  ASSERT_EQ(url->get_hash(), "");
+  ASSERT_EQ(url->get_pathname(), "hello");
+}
+
+TYPED_TEST(basic_tests, mailto_rejects_credentials) {
+  auto url = ada::parse<TypeParam>("mailto:a@b.com");
+  ASSERT_TRUE(url);
+  ASSERT_FALSE(url->set_username("user"));
+  ASSERT_FALSE(url->set_password("pass"));
+}
+
 TYPED_TEST(basic_tests, get_href_size_password_no_password) {
   // URL with username but no password.
   auto url = ada::parse<TypeParam>("http://user@example.com/");

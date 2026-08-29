@@ -37,6 +37,10 @@ ada_really_inline void apply_shifted_non_scheme_offsets(
 
 }  // namespace
 
+#if !defined(ADA_URL_SETTERS_SEPARATE_TU)
+#include "url_setters-inl.h"
+#endif
+
 namespace ada {
 extern bool max_input_length_customized;
 
@@ -278,78 +282,6 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   return parse_scheme_with_colon<true>(with_colon);
 }
 
-#if !defined(ADA_URL_SETTERS_SEPARATE_TU)
-bool url_aggregator::set_username(const std::string_view input) {
-  ada_log("url_aggregator::set_username '", input, "' ");
-  ADA_ASSERT_TRUE(validate());
-  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  if (cannot_have_credentials_or_port()) {
-    return false;
-  }
-  const size_t idx = ada::unicode::percent_encode_index(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
-  // Do not default-construct optional<url_aggregator>: gcc zero-fills ~90
-  // bytes of stack on every call when the cap flag is an extern.
-  if (needs_rollback_snapshot(input.size())) [[unlikely]] {
-    url_aggregator saved = *this;
-    if (idx == input.size()) {
-      update_base_username(input);
-    } else {
-      update_base_username(ada::unicode::percent_encode(
-          input, character_sets::USERINFO_PERCENT_ENCODE, idx));
-    }
-    if (buffer.size() > ada::get_max_input_length()) {
-      *this = std::move(saved);
-      return false;
-    }
-    ADA_ASSERT_TRUE(validate());
-    return true;
-  }
-  if (idx == input.size()) {
-    update_base_username(input);
-  } else {
-    update_base_username(ada::unicode::percent_encode(
-        input, character_sets::USERINFO_PERCENT_ENCODE, idx));
-  }
-  ADA_ASSERT_TRUE(validate());
-  return true;
-}
-
-bool url_aggregator::set_password(const std::string_view input) {
-  ada_log("url_aggregator::set_password '", input, "'");
-  ADA_ASSERT_TRUE(validate());
-  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  if (cannot_have_credentials_or_port()) {
-    return false;
-  }
-  const size_t idx = ada::unicode::percent_encode_index(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
-  if (needs_rollback_snapshot(input.size())) [[unlikely]] {
-    url_aggregator saved = *this;
-    if (idx == input.size()) {
-      update_base_password(input);
-    } else {
-      update_base_password(ada::unicode::percent_encode(
-          input, character_sets::USERINFO_PERCENT_ENCODE, idx));
-    }
-    if (buffer.size() > ada::get_max_input_length()) {
-      *this = std::move(saved);
-      return false;
-    }
-    ADA_ASSERT_TRUE(validate());
-    return true;
-  }
-  if (idx == input.size()) {
-    update_base_password(input);
-  } else {
-    update_base_password(ada::unicode::percent_encode(
-        input, character_sets::USERINFO_PERCENT_ENCODE, idx));
-  }
-  ADA_ASSERT_TRUE(validate());
-  return true;
-}
-#endif  // !ADA_URL_SETTERS_SEPARATE_TU
-
 bool url_aggregator::set_port(const std::string_view input) {
   ada_log("url_aggregator::set_port ", input);
   ADA_ASSERT_TRUE(validate());
@@ -537,42 +469,6 @@ void url_aggregator::set_search(const std::string_view input) {
   update_base_search(new_value, query_percent_encode_set);
   ADA_ASSERT_TRUE(validate());
 }
-
-#if !defined(ADA_URL_SETTERS_SEPARATE_TU)
-void url_aggregator::set_hash(const std::string_view input) {
-  ada_log("url_aggregator::set_hash ", input);
-  ADA_ASSERT_TRUE(validate());
-  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  if (input.empty()) {
-    if (components.hash_start != url_components::omitted) {
-      buffer.resize(components.hash_start);
-      components.hash_start = url_components::omitted;
-    }
-    helpers::strip_trailing_spaces_from_opaque_path(*this);
-    return;
-  }
-
-  std::string cleaned;
-  std::string_view new_value = input[0] == '#' ? input.substr(1) : input;
-  if (unicode::has_tabs_or_newline(new_value)) {
-    cleaned.assign(new_value);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    new_value = cleaned;
-  }
-  if (needs_rollback_snapshot(new_value.size())) [[unlikely]] {
-    url_aggregator saved = *this;
-    update_unencoded_base_hash(new_value);
-    if (buffer.size() > ada::get_max_input_length()) {
-      *this = std::move(saved);
-      return;
-    }
-    ADA_ASSERT_TRUE(validate());
-    return;
-  }
-  update_unencoded_base_hash(new_value);
-  ADA_ASSERT_TRUE(validate());
-}
-#endif  // !ADA_URL_SETTERS_SEPARATE_TU
 
 bool url_aggregator::set_href(const std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
