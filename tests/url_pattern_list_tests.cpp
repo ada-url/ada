@@ -1777,6 +1777,54 @@ TEST(url_pattern_list, regexp_route_shape_check_precedes_the_provider) {
   EXPECT_EQ(loose.match("/anything/at/all").route_index, 0);
 }
 
+TEST(url_pattern_list, wildcard_does_not_match_line_terminators) {
+  // "*" stands for "(.*)" in the URLPattern regexp, and "." does not match
+  // a line terminator, while ":param" ("[^/]+?") does. Canonical pathnames
+  // contain neither LF nor CR; this pins the rule for raw inputs.
+  const std::vector<std::string_view> patterns = {"/files/*", "/:name", "/*"};
+  auto list = make_list(patterns);
+  std::vector<ada::url_pattern<regex_provider>> objects;
+  for (std::string_view pattern : patterns) {
+    auto parsed = ada::parse_url_pattern<regex_provider>(
+        ada::url_pattern_init{.pathname = std::string(pattern)});
+    ASSERT_TRUE(parsed.has_value());
+    objects.push_back(std::move(*parsed));
+  }
+  const auto any_url_pattern_matches = [&](std::string_view input) {
+    for (const auto& object : objects) {
+      if (object.pathname_component.fast_match(input)) {
+        return true;
+      }
+    }
+    return false;
+  };
+  EXPECT_EQ(list.match("/files/a/b").route_index, 0);
+  EXPECT_EQ(list.match("/files/").route_index, 0);
+  EXPECT_EQ(list.match("/files/a\nb").route_index, -1);
+  EXPECT_EQ(list.match("/files/\r").route_index, -1);
+  EXPECT_EQ(list.match("/a\r/b").route_index, -1);
+  EXPECT_EQ(list.match("/x\ny").route_index, 1);  // "[^/]+?" matches LF
+  EXPECT_EQ(list.match("/%0A").route_index, 1);   // the canonical form
+  for (std::string_view input :
+       {"/files/a/b", "/files/", "/files/a\nb", "/files/\r", "/a\r/b", "/x\ny",
+        "/\n", "/%0A", "/files/a%0Ab"}) {
+    EXPECT_EQ(list.match(input).has_match(), any_url_pattern_matches(input))
+        << input;
+  }
+  // The same rule in the sequential matcher (a 17-segment route is beyond
+  // the trie limit).
+  std::string deep;
+  for (int i = 0; i < 16; i++) {
+    deep += "/s" + std::to_string(i);
+  }
+  const std::string deep_wildcard = deep + "/*";
+  auto sequential = make_list({deep_wildcard});
+  EXPECT_EQ(sequential.match(deep + "/x/y").route_index, 0);
+  EXPECT_EQ(sequential.match(deep + "/").route_index, 0);
+  EXPECT_EQ(sequential.match(deep + "/x\ny").route_index, -1);
+  EXPECT_EQ(sequential.match(deep + "/\r").route_index, -1);
+}
+
 TEST(url_pattern_list, inputs_need_no_terminator) {
   // match() reads exactly the bytes of the view it is given: a pathname in an
   // exactly sized heap buffer, with no terminator after it, is matched like

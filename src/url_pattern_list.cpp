@@ -1041,6 +1041,10 @@ bool match_route_sequential(const compiled_routes& r, uint32_t route,
     if (seg_start > pathname.size()) {
       return false;  // the wildcard still needs its (possibly empty) segment
     }
+    // "(.*)" does not match a line terminator (see wildcard_tail_ok).
+    if (pathname.find_first_of("\n\r", seg_start) != std::string_view::npos) {
+      return false;
+    }
     add_capture(seg_start, pathname.size() - seg_start);
   } else if (seg_start != pathname.size() + 1) {
     return false;  // the input has more segments than the pattern

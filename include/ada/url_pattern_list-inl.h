@@ -177,6 +177,19 @@ ada_really_inline uint32_t scan_segments(const char* url, uint32_t ulen,
   return nseg;
 }
 
+// A "*" segment compiles to "(.*)" in the URLPattern regexp, and "." in an
+// ECMAScript regular expression does not match a line terminator: the tail
+// a wildcard captures must not contain LF or CR. Canonical pathnames never
+// do (both are percent-encoded), so this only decides raw inputs.
+ada_really_inline bool wildcard_tail_ok(const char* p, uint32_t n) noexcept {
+  for (uint32_t j = 0; j < n; j++) {
+    if (p[j] == '\n' || p[j] == '\r') {
+      return false;
+    }
+  }
+  return true;
+}
+
 // ---- verify / dispatch -----------------------------------------------------
 
 // One input segment prepared for dispatch: its bytes, its length, and how
@@ -405,7 +418,8 @@ ada_really_inline void match_compiled(const compiled_routes& r, const char* url,
       }
     }
     if (alt == alt_wild) {
-      if (nd.wild_route >= 0) {
+      if (nd.wild_route >= 0 &&
+          wildcard_tail_ok(url + soff[i], ulen - soff[i])) {
         route = nd.wild_route;
         wild_from = i;
         wild = true;

@@ -345,7 +345,10 @@ constexpr bool outranks(uint64_t a_sequence, uint32_t a_length, size_t a_index,
  * as fully wildcarded; match() takes an already-extracted pathname (for
  * example ada::url_aggregator::get_pathname()). Inputs are matched as given
  * and are expected to be in canonical (percent-encoded) form; the pattern
- * side is canonicalized by the URLPattern pattern parser at creation.
+ * side is canonicalized by the URLPattern pattern parser at creation. The
+ * subset follows the URLPattern regexp it stands for: a ":param" segment
+ * ("[^/]+?") is one non-empty segment, and a "*" tail ("(.*)") matches any
+ * bytes except the line terminators LF and CR, which "." never matches.
  *
  * With url_pattern_options::ignore_case, regexp routes are compiled through
  * the provider with the flag set (as url_pattern does), and the static /
