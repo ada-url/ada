@@ -10,14 +10,12 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
-#include <limits>
 #include <numeric>
 #include <ranges>
 #include <string>
 #include <string_view>
 
 namespace ada {
-extern bool max_input_length_customized;
 
 bool url::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
@@ -486,10 +484,6 @@ ada_really_inline void url::parse_path(std::string_view input) {
 }
 
 bool url::needs_rollback_snapshot(size_t input_len) const noexcept {
-  if (!ada::max_input_length_customized) [[likely]] {
-    return get_href_size() + input_len + 16 >
-           std::numeric_limits<uint32_t>::max();
-  }
   return get_href_size() + input_len + 16 > ada::get_max_input_length();
 }
 
@@ -501,17 +495,12 @@ bool url::set_host_or_hostname(const std::string_view input) {
 
   url saved_url(*this);
 
-  std::string cleaned;
-  std::string_view new_host = input;
-  if (const size_t host_end_pos = input.find('#');
-      host_end_pos != std::string_view::npos) {
-    new_host = input.substr(0, host_end_pos);
-  }
-  if (unicode::has_tabs_or_newline(new_host)) {
-    cleaned.assign(new_host);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    new_host = cleaned;
-  }
+  size_t host_end_pos = input.find('#');
+  std::string _host(input.data(), host_end_pos != std::string_view::npos
+                                      ? host_end_pos
+                                      : input.size());
+  helpers::remove_ascii_tab_or_newline(_host);
+  std::string_view new_host(_host);
 
   auto check_url_size = [&]() -> bool {
     if (get_href_size() > ada::get_max_input_length()) {
@@ -524,7 +513,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
   // If url's scheme is "file", then set state to file host state, instead of
   // host state.
   if (type != ada::scheme::type::FILE) {
-    std::string_view host_view = new_host;
+    std::string_view host_view(_host.data(), _host.length());
     auto [location, found_colon] =
         helpers::get_host_delimiter_location(is_special(), host_view);
 
@@ -662,13 +651,8 @@ bool url::set_port(const std::string_view input) {
     return true;
   }
 
-  std::string cleaned;
-  std::string_view trimmed = input;
-  if (unicode::has_tabs_or_newline(input)) {
-    cleaned.assign(input);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    trimmed = cleaned;
-  }
+  std::string trimmed(input);
+  helpers::remove_ascii_tab_or_newline(trimmed);
 
   if (trimmed.empty()) {
     return true;
@@ -707,13 +691,9 @@ void url::set_hash(const std::string_view input) {
     return;
   }
 
-  std::string cleaned;
-  std::string_view new_value = input[0] == '#' ? input.substr(1) : input;
-  if (unicode::has_tabs_or_newline(new_value)) {
-    cleaned.assign(new_value);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    new_value = cleaned;
-  }
+  std::string new_value;
+  new_value = input[0] == '#' ? input.substr(1) : input;
+  helpers::remove_ascii_tab_or_newline(new_value);
   auto previous_hash = std::move(hash);
   hash = unicode::percent_encode(new_value,
                                  ada::character_sets::FRAGMENT_PERCENT_ENCODE);
@@ -729,13 +709,9 @@ void url::set_search(const std::string_view input) {
     return;
   }
 
-  std::string cleaned;
-  std::string_view new_value = input[0] == '?' ? input.substr(1) : input;
-  if (unicode::has_tabs_or_newline(new_value)) {
-    cleaned.assign(new_value);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    new_value = cleaned;
-  }
+  std::string new_value;
+  new_value = input[0] == '?' ? input.substr(1) : input;
+  helpers::remove_ascii_tab_or_newline(new_value);
 
   auto query_percent_encode_set =
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
@@ -763,13 +739,8 @@ bool url::set_pathname(const std::string_view input) {
 }
 
 bool url::set_protocol(const std::string_view input) {
-  std::string cleaned;
-  std::string_view view = input;
-  if (unicode::has_tabs_or_newline(input)) {
-    cleaned.assign(input);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    view = cleaned;
-  }
+  std::string view(input);
+  helpers::remove_ascii_tab_or_newline(view);
   if (view.empty()) {
     return true;
   }
@@ -779,34 +750,34 @@ bool url::set_protocol(const std::string_view input) {
     return false;
   }
 
-  size_t n = 0;
-  while (n < view.size() && unicode::is_alnum_plus(view[n])) {
-    ++n;
-  }
-  if (n < view.size() && view[n] != ':') {
-    return false;
-  }
+  view.append(":");
 
-  std::optional<url> saved_url;
-  if (needs_rollback_snapshot(n + 1)) {
-    saved_url = *this;
+  std::string::iterator pointer =
+      std::ranges::find_if_not(view, unicode::is_alnum_plus);
+
+  if (pointer != view.end() && *pointer == ':') {
+    std::optional<url> saved_url;
+    if (needs_rollback_snapshot(view.size())) {
+      saved_url = *this;
+    }
+    const bool result = parse_scheme<true>(
+        view.substr(0, static_cast<size_t>(pointer - view.begin())));
+    if (result && saved_url && get_href_size() > ada::get_max_input_length()) {
+      *this = std::move(*saved_url);
+      return false;
+    }
+    return result;
   }
-  const bool result = parse_scheme<true>(view.substr(0, n));
-  if (result && saved_url && get_href_size() > ada::get_max_input_length()) {
-    *this = std::move(*saved_url);
-    return false;
-  }
-  return result;
+  return false;
 }
 
 bool url::set_href(const std::string_view input) {
   ada::result<ada::url> out = ada::parse<ada::url>(input);
 
   if (out) {
-    // parse() already enforces the default ~4 GB cap. Only reload the
-    // atomic when set_max_input_length installed a tighter limit.
-    if (ada::max_input_length_customized &&
-        out->get_href_size() > ada::get_max_input_length()) {
+    // The parser enforces get_max_input_length() on both the input and the
+    // normalized result. This is a defense-in-depth check.
+    if (out->get_href_size() > ada::get_max_input_length()) {
       return false;
     }
     *this = *out;

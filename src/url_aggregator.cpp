@@ -14,7 +14,6 @@
 #include <cstdint>
 #include <cstring>
 #include <iterator>
-#include <limits>
 #include <ranges>
 #include <string>
 #include <string_view>
@@ -38,8 +37,6 @@ ada_really_inline void apply_shifted_non_scheme_offsets(
 }  // namespace
 
 namespace ada {
-extern bool max_input_length_customized;
-
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(
     const std::string_view input_with_colon) {
@@ -216,12 +213,7 @@ inline void url_aggregator::set_scheme(std::string_view new_scheme) {
 bool url_aggregator::needs_rollback_snapshot(size_t input_len) const noexcept {
   // 3x should cover worst-case percent-encoding of every input byte; the
   // constant covers the handful of delimiter bytes a setter may add ("/.", "?",
-  // "#" and so on). The default max is ~4 GB: skip the atomic unless a
-  // tighter limit was installed.
-  if (!ada::max_input_length_customized) [[likely]] {
-    return buffer.size() + input_len * 3 + 16 >
-           std::numeric_limits<uint32_t>::max();
-  }
+  // "#" and so on)
   return buffer.size() + input_len * 3 + 16 > ada::get_max_input_length();
 }
 
@@ -229,13 +221,8 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   ada_log("url_aggregator::set_protocol ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  std::string cleaned;
-  std::string_view view = input;
-  if (unicode::has_tabs_or_newline(input)) {
-    cleaned.assign(input);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    view = cleaned;
-  }
+  std::string view(input);
+  helpers::remove_ascii_tab_or_newline(view);
   if (view.empty()) {
     return true;
   }
@@ -245,37 +232,25 @@ bool url_aggregator::set_protocol(const std::string_view input) {
     return false;
   }
 
-  size_t n = 0;
-  while (n < view.size() && unicode::is_alnum_plus(view[n])) {
-    ++n;
-  }
-  if (n < view.size() && view[n] != ':') {
-    return false;
-  }
+  view.append(":");
 
-  char stack[64];
-  std::string heap;
-  std::string_view with_colon;
-  if (n + 1 <= sizeof(stack)) {
-    std::memcpy(stack, view.data(), n);
-    stack[n] = ':';
-    with_colon = std::string_view(stack, n + 1);
-  } else {
-    heap.assign(view.substr(0, n));
-    heap.push_back(':');
-    with_colon = heap;
-  }
+  std::string::iterator pointer =
+      std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
-  std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(n + 1)) {
-    saved_url = *this;
+  if (pointer != view.end() && *pointer == ':') {
+    std::optional<url_aggregator> saved_url;
+    if (needs_rollback_snapshot(view.size())) {
+      saved_url = *this;
+    }
+    bool result = parse_scheme_with_colon<true>(
+        view.substr(0, pointer - view.begin() + 1));
+    if (result && saved_url && buffer.size() > ada::get_max_input_length()) {
+      *this = std::move(*saved_url);
+      return false;
+    }
+    return result;
   }
-  const bool result = parse_scheme_with_colon<true>(with_colon);
-  if (result && saved_url && buffer.size() > ada::get_max_input_length()) {
-    *this = std::move(*saved_url);
-    return false;
-  }
-  return result;
+  return false;
 }
 
 bool url_aggregator::set_username(const std::string_view input) {
@@ -347,13 +322,8 @@ bool url_aggregator::set_port(const std::string_view input) {
     return true;
   }
 
-  std::string cleaned;
-  std::string_view trimmed = input;
-  if (unicode::has_tabs_or_newline(input)) {
-    cleaned.assign(input);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    trimmed = cleaned;
-  }
+  std::string trimmed(input);
+  helpers::remove_ascii_tab_or_newline(trimmed);
 
   if (trimmed.empty()) {
     return true;
@@ -472,13 +442,9 @@ void url_aggregator::set_search(const std::string_view input) {
     return;
   }
 
-  std::string cleaned;
-  std::string_view new_value = input[0] == '?' ? input.substr(1) : input;
-  if (unicode::has_tabs_or_newline(new_value)) {
-    cleaned.assign(new_value);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    new_value = cleaned;
-  }
+  std::string new_value;
+  new_value = input[0] == '?' ? input.substr(1) : input;
+  helpers::remove_ascii_tab_or_newline(new_value);
 
   auto query_percent_encode_set =
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
@@ -509,13 +475,9 @@ void url_aggregator::set_hash(const std::string_view input) {
     return;
   }
 
-  std::string cleaned;
-  std::string_view new_value = input[0] == '#' ? input.substr(1) : input;
-  if (unicode::has_tabs_or_newline(new_value)) {
-    cleaned.assign(new_value);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    new_value = cleaned;
-  }
+  std::string new_value;
+  new_value = input[0] == '#' ? input.substr(1) : input;
+  helpers::remove_ascii_tab_or_newline(new_value);
   std::optional<url_aggregator> saved_url;
   if (needs_rollback_snapshot(new_value.size())) {
     saved_url = *this;
@@ -535,10 +497,9 @@ bool url_aggregator::set_href(const std::string_view input) {
   ada_log("url_aggregator::set_href, success :", out.has_value());
 
   if (out) {
-    // parse() already enforces the default ~4 GB cap. Only reload the
-    // atomic when set_max_input_length installed a tighter limit.
-    if (ada::max_input_length_customized &&
-        out->buffer.size() > ada::get_max_input_length()) {
+    // The parser enforces get_max_input_length() on both the input and the
+    // normalized result. This is a defense-in-depth check.
+    if (out->buffer.size() > ada::get_max_input_length()) {
       return false;
     }
     ada_log("url_aggregator::set_href, parsed ", out->to_string());
@@ -694,17 +655,12 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
   url_aggregator saved_url(*this);
 
-  std::string cleaned;
-  std::string_view new_host = input;
-  if (const size_t host_end_pos = input.find('#');
-      host_end_pos != std::string_view::npos) {
-    new_host = input.substr(0, host_end_pos);
-  }
-  if (unicode::has_tabs_or_newline(new_host)) {
-    cleaned.assign(new_host);
-    helpers::remove_ascii_tab_or_newline(cleaned);
-    new_host = cleaned;
-  }
+  size_t host_end_pos = input.find('#');
+  std::string _host(input.data(), host_end_pos != std::string_view::npos
+                                      ? host_end_pos
+                                      : input.size());
+  helpers::remove_ascii_tab_or_newline(_host);
+  std::string_view new_host(_host);
 
   auto check_url_size = [&]() -> bool {
     if (buffer.size() > ada::get_max_input_length()) {
@@ -717,7 +673,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   // If url's scheme is "file", then set state to file host state, instead of
   // host state.
   if (type != ada::scheme::type::FILE) {
-    std::string_view host_view = new_host;
+    std::string_view host_view(_host.data(), _host.length());
     auto [location, found_colon] =
         helpers::get_host_delimiter_location(is_special(), host_view);
 
