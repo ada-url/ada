@@ -4,6 +4,9 @@
 #if !defined(ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU)
 #include "unicode_percent_encode.cpp"
 #endif
+#if !defined(ADA_X86_64_V2_SIMD_SEPARATE_TU)
+#include "simd_x86_64_v2.cpp"
+#endif
 #include "serializers.cpp"
 #include "implementation.cpp"
 #include "helpers.cpp"

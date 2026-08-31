@@ -7,7 +7,7 @@ target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAK
 add_library(ada-source INTERFACE)
 target_sources(ada-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/ada.cpp)
 target_link_libraries(ada-source INTERFACE ada-include-source)
-add_library(ada ada.cpp unicode_percent_encode.cpp)
+add_library(ada ada.cpp unicode_percent_encode.cpp simd_x86_64_v2.cpp)
 target_compile_features(ada PUBLIC cxx_std_20)
 target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
 target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -72,9 +72,10 @@ if(ADA_TESTING)
   target_compile_definitions(ada PRIVATE ADA_TESTING=1)
 endif()
 
-# Keep the SIMD percent-encode kernel in its own TU so the unity ada.cpp
-# inlining budget for setters matches main.
+# Keep SIMD kernels that use target() out of the unity ada.cpp TU so the
+# setter inlining budget matches main (see percent_encode and x86-64-v2).
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
+target_compile_definitions(ada PRIVATE ADA_X86_64_V2_SIMD_SEPARATE_TU=1)
 
 if(ADA_INCLUDE_URL_PATTERN)
   target_compile_definitions(ada PRIVATE ADA_INCLUDE_URL_PATTERN=1)

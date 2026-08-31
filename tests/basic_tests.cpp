@@ -2334,8 +2334,9 @@ TYPED_TEST(basic_tests, x86_64_v2_long_url_parse) {
   ASSERT_EQ(r->get_pathname(), "/foo");
 
   const std::string long_host = "abcdefghijklmnopqrstuvwxyz.example.com";
+  const size_t tab_positions[] = {0, 8, 16, long_host.size() - 1};
   for (char ws : {'\t', '\n', '\r'}) {
-    for (size_t pos : {size_t{0}, size_t{8}, size_t{16}, long_host.size() - 1}) {
+    for (size_t pos : tab_positions) {
       std::string host = long_host;
       host.insert(pos, 1, ws);
       r = ada::parse<TypeParam>("https://" + host + "/");

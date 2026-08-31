@@ -4,6 +4,7 @@
 #include "ada/character_sets.h"
 #include "ada/common_defs.h"
 #include "ada/log.h"
+#include "simd_x86_64_v2.h"
 
 ADA_PUSH_DISABLE_ALL_WARNINGS
 #include "ada_idna.cpp"
@@ -12,12 +13,7 @@ ADA_POP_DISABLE_WARNINGS
 #include <algorithm>
 #include <array>
 #include <cstring>
-#if ADA_SSSE3
-#include <tmmintrin.h>
-#if ADA_SSE41
-#include <smmintrin.h>
-#endif
-#elif ADA_NEON
+#if ADA_NEON
 #include <arm_neon.h>
 #elif ADA_SSE2
 #include <emmintrin.h>
@@ -64,42 +60,6 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   }
   return non_ascii == 0;
 }
-#if ADA_SSSE3
-namespace {
-// Precondition: user_input.size() >= 16.
-ADA_X86_64_V2_SIMD bool has_tabs_or_newline_wide(
-    std::string_view user_input) noexcept {
-  // Using SSSE3's _mm_shuffle_epi8 for table lookup (same approach as NEON)
-  size_t i = 0;
-  // Lookup table where positions 9, 10, 13 contain their own values
-  // Everything else is set to 1 so it won't match
-  const __m128i rnt =
-      _mm_setr_epi8(1, 0, 0, 0, 0, 0, 0, 0, 0, 9, 10, 0, 0, 13, 0, 0);
-  __m128i running = _mm_setzero_si128();
-  for (; i + 15 < user_input.size(); i += 16) {
-    __m128i word = _mm_loadu_si128((const __m128i*)(user_input.data() + i));
-    // Shuffle the lookup table using input bytes as indices
-    __m128i shuffled = _mm_shuffle_epi8(rnt, word);
-    // Compare: if shuffled value matches input, we found \t, \n, or \r
-    __m128i matches = _mm_cmpeq_epi8(shuffled, word);
-    running = _mm_or_si128(running, matches);
-  }
-  if (i < user_input.size()) {
-    __m128i word = _mm_loadu_si128(
-        (const __m128i*)(user_input.data() + user_input.length() - 16));
-    __m128i shuffled = _mm_shuffle_epi8(rnt, word);
-    __m128i matches = _mm_cmpeq_epi8(shuffled, word);
-    running = _mm_or_si128(running, matches);
-  }
-#if ADA_SSE41
-  // SSE4.1 ptest avoids a movemask + GPR transfer on the common miss path.
-  return _mm_testz_si128(running, running) == 0;
-#else
-  return _mm_movemask_epi8(running) != 0;
-#endif
-}
-}  // namespace
-#endif
 
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
@@ -108,7 +68,7 @@ ada_really_inline bool has_tabs_or_newline(
     return std::ranges::any_of(user_input, is_tabs_or_newline);
   }
 #if ADA_SSSE3
-  return has_tabs_or_newline_wide(user_input);
+  return ada::simd::has_tabs_or_newline_wide(user_input);
 #elif ADA_NEON
   // fast path for long strings (expected to be common)
   size_t i = 0;
