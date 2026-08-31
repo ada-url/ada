@@ -231,10 +231,11 @@ ada_really_inline size_t first_set(uint8x8_t nibble_mask) noexcept {
 #endif  // ADA_NEON
 
 #if ADA_SSSE3
+namespace {
 // Classify 16 bytes with a pair of nibble tables (same scheme as NEON vqtbl).
 // Returns a 16-bit mask of matching lanes.
-ADA_X86_64_V2_SIMD int ssse3_nibble_match_mask(__m128i word, __m128i low_mask,
-                                               __m128i high_mask) noexcept {
+ada_really_inline ADA_X86_64_V2_SIMD int ssse3_nibble_match_mask(
+    __m128i word, __m128i low_mask, __m128i high_mask) noexcept {
   const __m128i fmask = _mm_set1_epi8(0x0f);
   const __m128i lowpart =
       _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
@@ -249,7 +250,7 @@ ADA_X86_64_V2_SIMD int ssse3_nibble_match_mask(__m128i word, __m128i low_mask,
 
 // Precondition: view.size() - location >= 16, so an overlapping tail load
 // of the last 16 bytes cannot match a byte before location.
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline ADA_X86_64_V2_SIMD size_t
 find_next_ssse3_nibble_match(std::string_view view, size_t location,
                              __m128i low_mask, __m128i high_mask) noexcept {
   size_t i = location;
@@ -270,13 +271,69 @@ find_next_ssse3_nibble_match(std::string_view view, size_t location,
   }
   return view.size();
 }
+
+// Precondition: view.size() - location >= 16.
+ADA_X86_64_V2_SIMD size_t find_next_host_delimiter_special_wide(
+    std::string_view view, size_t location) noexcept {
+  // ':' 0x3A, '/' 0x2F, '\\' 0x5C, '?' 0x3F, '[' 0x5B
+  const __m128i low_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x01, 0x04, 0x04, 0x00, 0x00, 0x03);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  return find_next_ssse3_nibble_match(view, location, low_mask, high_mask);
+}
+
+// Precondition: view.size() - location >= 16.
+ADA_X86_64_V2_SIMD size_t
+find_next_host_delimiter_wide(std::string_view view, size_t location) noexcept {
+  // ':' (0x3A): low[0xA]=0x01, high[0x3]=0x01
+  // '/' (0x2F): low[0xF]=0x02, high[0x2]=0x02
+  // '?' (0x3F): low[0xF]=0x01, high[0x3]=0x01
+  // '[' (0x5B): low[0xB]=0x04, high[0x5]=0x04
+  const __m128i low_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x01, 0x04, 0x00, 0x00, 0x00, 0x03);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  return find_next_ssse3_nibble_match(view, location, low_mask, high_mask);
+}
+
+// Precondition: view.size() >= 16.
+ADA_X86_64_V2_SIMD size_t
+find_authority_delimiter_special_wide(std::string_view view) noexcept {
+  // '@' 0x40, '/' 0x2F, '\\' 0x5C, '?' 0x3F
+  const __m128i low_mask =
+      _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x08, 0x00, 0x00, 0x06);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x04, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  return find_next_ssse3_nibble_match(view, 0, low_mask, high_mask);
+}
+
+// Precondition: view.size() >= 16.
+ADA_X86_64_V2_SIMD size_t
+find_authority_delimiter_wide(std::string_view view) noexcept {
+  // '@' 0x40, '/' 0x2F, '?' 0x3F
+  const __m128i low_mask =
+      _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x06);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  return find_next_ssse3_nibble_match(view, 0, low_mask, high_mask);
+}
+}  // namespace
 #endif  // ADA_SSSE3
 
 // starting at index location, this finds the next location of a character
 // :, /, \\, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
 #if ADA_SSSE3
-ADA_X86_64_V2_SIMD size_t find_next_host_delimiter_special(
+ada_really_inline size_t find_next_host_delimiter_special(
     std::string_view view, size_t location) noexcept {
   // first check for short strings in which case we do it naively.
   if (view.size() - location < 16) {  // slow path
@@ -288,14 +345,7 @@ ADA_X86_64_V2_SIMD size_t find_next_host_delimiter_special(
     }
     return size_t(view.size());
   }
-  // ':' 0x3A, '/' 0x2F, '\\' 0x5C, '?' 0x3F, '[' 0x5B
-  const __m128i low_mask =
-      _mm_setr_epi8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x01, 0x04, 0x04, 0x00, 0x00, 0x03);
-  const __m128i high_mask =
-      _mm_setr_epi8(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-  return find_next_ssse3_nibble_match(view, location, low_mask, high_mask);
+  return find_next_host_delimiter_special_wide(view, location);
 }
 #elif ADA_NEON
 // The ada_make_uint8x16_t macro is necessary because Visual Studio does not
@@ -524,8 +574,8 @@ ada_really_inline size_t find_next_host_delimiter_special(
 // :, /, ? or [. If none is found, view.size() is returned.
 // For use within get_host_delimiter_location.
 #if ADA_SSSE3
-ADA_X86_64_V2_SIMD size_t find_next_host_delimiter(std::string_view view,
-                                                   size_t location) noexcept {
+ada_really_inline size_t find_next_host_delimiter(std::string_view view,
+                                                  size_t location) noexcept {
   // first check for short strings in which case we do it naively.
   if (view.size() - location < 16) {  // slow path
     for (size_t i = location; i < view.size(); i++) {
@@ -536,17 +586,7 @@ ADA_X86_64_V2_SIMD size_t find_next_host_delimiter(std::string_view view,
     }
     return size_t(view.size());
   }
-  // ':' (0x3A): low[0xA]=0x01, high[0x3]=0x01
-  // '/' (0x2F): low[0xF]=0x02, high[0x2]=0x02
-  // '?' (0x3F): low[0xF]=0x01, high[0x3]=0x01
-  // '[' (0x5B): low[0xB]=0x04, high[0x5]=0x04
-  const __m128i low_mask =
-      _mm_setr_epi8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x01, 0x04, 0x00, 0x00, 0x00, 0x03);
-  const __m128i high_mask =
-      _mm_setr_epi8(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-  return find_next_ssse3_nibble_match(view, location, low_mask, high_mask);
+  return find_next_host_delimiter_wide(view, location);
 }
 #elif ADA_NEON
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
@@ -730,7 +770,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 }
 #endif
 
-ADA_X86_64_V2_SIMD std::pair<size_t, bool> get_host_delimiter_location(
+ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
     const bool is_special, std::string_view& view) noexcept {
   /**
    * The spec at https://url.spec.whatwg.org/#hostname-state expects us to
@@ -1008,7 +1048,7 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) {
 }
 
 #if ADA_SSSE3
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
   if (view.size() < 16) {
     for (size_t i = 0; i < view.size(); i++) {
@@ -1019,17 +1059,10 @@ find_authority_delimiter_special(std::string_view view) noexcept {
     }
     return view.size();
   }
-  // '@' 0x40, '/' 0x2F, '\\' 0x5C, '?' 0x3F
-  const __m128i low_mask =
-      _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x08, 0x00, 0x00, 0x06);
-  const __m128i high_mask =
-      _mm_setr_epi8(0x00, 0x00, 0x02, 0x04, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-  return find_next_ssse3_nibble_match(view, 0, low_mask, high_mask);
+  return find_authority_delimiter_special_wide(view);
 }
 
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
   if (view.size() < 16) {
     for (size_t i = 0; i < view.size(); i++) {
@@ -1039,17 +1072,10 @@ find_authority_delimiter(std::string_view view) noexcept {
     }
     return view.size();
   }
-  // '@' 0x40, '/' 0x2F, '?' 0x3F
-  const __m128i low_mask =
-      _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x06);
-  const __m128i high_mask =
-      _mm_setr_epi8(0x00, 0x00, 0x02, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-  return find_next_ssse3_nibble_match(view, 0, low_mask, high_mask);
+  return find_authority_delimiter_wide(view);
 }
 #elif ADA_SSE2
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
   if (view.size() < 16) {
     for (size_t i = 0; i < view.size(); i++) {
@@ -1089,7 +1115,7 @@ find_authority_delimiter_special(std::string_view view) noexcept {
   return view.size();
 }
 
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
   if (view.size() < 16) {
     for (size_t i = 0; i < view.size(); i++) {
@@ -1137,7 +1163,7 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special =
       return result;
     }();
 // credit: @the-moisrex recommended a table-based approach
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
   for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (authority_delimiter_special[(uint8_t)*pos]) {
@@ -1156,7 +1182,7 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   return result;
 }();
 // credit: @the-moisrex recommended a table-based approach
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
   for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (authority_delimiter[(uint8_t)*pos]) {

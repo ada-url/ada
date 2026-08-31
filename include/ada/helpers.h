@@ -129,7 +129,7 @@ ada_really_inline void resize(std::string_view& input, size_t pos) noexcept;
  * Returns a host's delimiter location depending on the state of the instance,
  * and whether a colon was found outside brackets. Used by the host parser.
  */
-ADA_X86_64_V2_SIMD std::pair<size_t, bool> get_host_delimiter_location(
+ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
     bool is_special, std::string_view& view) noexcept;
 
 /**
@@ -151,14 +151,14 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url);
  * @private
  * Finds the delimiter of a view in authority state.
  */
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept;
 
 /**
  * @private
  * Finds the delimiter of a view in authority state.
  */
-ADA_X86_64_V2_SIMD size_t
+ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept;
 
 /**

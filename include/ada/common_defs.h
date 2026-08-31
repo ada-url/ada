@@ -285,12 +285,14 @@ namespace ada {
 #endif
 
 #ifdef ADA_NEED_X86_64_V2_TARGET
+// Wide kernels only. gcc refuses to always_inline a targeted SSSE3
+// function into an SSE2 caller, so short-path wrappers stay
+// ada_really_inline with no target attribute.
 #define ADA_X86_64_V2_SIMD __attribute__((target("ssse3,sse4.1,sse4.2,popcnt")))
+#define ADA_SSSE3_TARGET __attribute__((target("ssse3")))
 #else
-// Empty on purpose (not always_inline). Tests call these helpers from
-// another TU; an always_inline definition would omit the symbol on
-// ARM/macOS/clang-cl and fail the link.
 #define ADA_X86_64_V2_SIMD
+#define ADA_SSSE3_TARGET
 #endif
 
 // AVX-512 byte/word ops + 128/256-bit vectors of AVX-512 instructions.

@@ -33,7 +33,7 @@
 #endif
 
 #ifdef ADA_NEED_X86_64_V2_TARGET
-#define ADA_PARSER_SIMD ADA_X86_64_V2_SIMD
+#define ADA_PARSER_SIMD ADA_SSSE3_TARGET
 #else
 #define ADA_PARSER_SIMD ada_really_inline
 #endif

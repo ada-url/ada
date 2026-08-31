@@ -65,13 +65,10 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   return non_ascii == 0;
 }
 #if ADA_SSSE3
-ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
+namespace {
+// Precondition: user_input.size() >= 16.
+ADA_X86_64_V2_SIMD bool has_tabs_or_newline_wide(
     std::string_view user_input) noexcept {
-  // first check for short strings in which case we do it naively.
-  if (user_input.size() < 16) {  // slow path
-    return std::ranges::any_of(user_input, is_tabs_or_newline);
-  }
-  // fast path for long strings (expected to be common)
   // Using SSSE3's _mm_shuffle_epi8 for table lookup (same approach as NEON)
   size_t i = 0;
   // Lookup table where positions 9, 10, 13 contain their own values
@@ -101,13 +98,18 @@ ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
   return _mm_movemask_epi8(running) != 0;
 #endif
 }
-#elif ADA_NEON
-ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
+}  // namespace
+#endif
+
+ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
     return std::ranges::any_of(user_input, is_tabs_or_newline);
   }
+#if ADA_SSSE3
+  return has_tabs_or_newline_wide(user_input);
+#elif ADA_NEON
   // fast path for long strings (expected to be common)
   size_t i = 0;
   /**
@@ -142,14 +144,7 @@ ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
   // double is a cheaper "is anything set?" test than a horizontal maximum.
   uint8x8_t narrowed = vshrn_n_u16(vreinterpretq_u16_u8(running), 4);
   return vdupd_lane_f64(vreinterpret_f64_u8(narrowed), 0) != 0.0;
-}
 #elif ADA_SSE2
-ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
-    std::string_view user_input) noexcept {
-  // first check for short strings in which case we do it naively.
-  if (user_input.size() < 16) {  // slow path
-    return std::ranges::any_of(user_input, is_tabs_or_newline);
-  }
   // fast path for long strings (expected to be common)
   size_t i = 0;
   const __m128i mask1 = _mm_set1_epi8('\r');
@@ -173,14 +168,7 @@ ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
         _mm_cmpeq_epi8(word, mask3));
   }
   return _mm_movemask_epi8(running) != 0;
-}
 #elif ADA_LSX
-ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
-    std::string_view user_input) noexcept {
-  // first check for short strings in which case we do it naively.
-  if (user_input.size() < 16) {  // slow path
-    return std::ranges::any_of(user_input, is_tabs_or_newline);
-  }
   // fast path for long strings (expected to be common)
   size_t i = 0;
   const __m128i mask1 = __lsx_vrepli_b('\r');
@@ -205,10 +193,7 @@ ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
   }
   if (__lsx_bz_v(running)) return false;
   return true;
-}
 #elif ADA_RVV
-ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
-    std::string_view user_input) noexcept {
   uint8_t* src = (uint8_t*)user_input.data();
   for (size_t vl, n = user_input.size(); n > 0; n -= vl, src += vl) {
     vl = __riscv_vsetvl_e8m1(n);
@@ -221,10 +206,7 @@ ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     if (idx >= 0) return true;
   }
   return false;
-}
 #else
-ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
-    std::string_view user_input) noexcept {
   auto has_zero_byte = [](uint64_t v) {
     return ((v - 0x0101010101010101) & ~(v) & 0x8080808080808080);
   };
@@ -250,8 +232,8 @@ ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     running |= has_zero_byte(xor1) | has_zero_byte(xor2) | has_zero_byte(xor3);
   }
   return running;
-}
 #endif
+}
 
 // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR,
 // U+0020 SPACE, U+0023 (#), U+002F (/), U+003A (:), U+003C (<), U+003E (>),

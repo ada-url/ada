@@ -2298,109 +2298,6 @@ TYPED_TEST(basic_tests,
   check("http://ab?x y", "http://ab/?x%20y");
 }
 
-static size_t first_of_or_size(std::string_view s, std::string_view needles) {
-  const auto pos = s.find_first_of(needles);
-  return pos == std::string_view::npos ? s.size() : pos;
-}
-
-TEST(x86_64_v2, has_tabs_or_newline_windows) {
-  using ada::unicode::has_tabs_or_newline;
-  ASSERT_FALSE(has_tabs_or_newline(""));
-  ASSERT_FALSE(has_tabs_or_newline("hello"));
-  ASSERT_TRUE(has_tabs_or_newline("hello\t"));
-  ASSERT_TRUE(has_tabs_or_newline("\nhello"));
-  ASSERT_TRUE(has_tabs_or_newline("hel\rlo"));
-
-  const std::string sixteen_ok(16, 'a');
-  ASSERT_FALSE(has_tabs_or_newline(sixteen_ok));
-  for (char ws : {'\t', '\n', '\r'}) {
-    for (size_t pos = 0; pos < 16; ++pos) {
-      std::string s = sixteen_ok;
-      s[pos] = ws;
-      ASSERT_TRUE(has_tabs_or_newline(s)) << "pos=" << pos;
-    }
-  }
-
-  std::string tail(20, 'b');
-  ASSERT_FALSE(has_tabs_or_newline(tail));
-  tail[18] = '\t';
-  ASSERT_TRUE(has_tabs_or_newline(tail));
-
-  std::string long_ok(64, 'c');
-  ASSERT_FALSE(has_tabs_or_newline(long_ok));
-  long_ok[63] = '\n';
-  ASSERT_TRUE(has_tabs_or_newline(long_ok));
-}
-
-TEST(x86_64_v2, delimiter_matches_scalar) {
-  constexpr std::string_view needles_host_special = ":/\\?[";
-  constexpr std::string_view needles_host = ":/?[";
-  constexpr std::string_view needles_auth_special = "@/\\?";
-  constexpr std::string_view needles_auth = "@/?";
-
-  std::vector<std::string> samples;
-  samples.emplace_back("");
-  samples.emplace_back("abc");
-  for (size_t len : {15u, 16u, 17u, 20u, 31u, 32u, 33u, 40u, 64u}) {
-    samples.emplace_back(len, 'a');
-    for (char d : {':', '/', '\\', '?', '[', '@'}) {
-      for (size_t pos = 0; pos < len; ++pos) {
-        std::string s(len, 'x');
-        s[pos] = d;
-        samples.push_back(std::move(s));
-      }
-    }
-  }
-
-  for (const auto& s : samples) {
-    const std::string_view v = s;
-    ASSERT_EQ(ada::helpers::find_authority_delimiter_special(v),
-              first_of_or_size(v, needles_auth_special))
-        << s;
-    ASSERT_EQ(ada::helpers::find_authority_delimiter(v),
-              first_of_or_size(v, needles_auth))
-        << s;
-    if (s.find('[') != std::string::npos) {
-      continue;
-    }
-    {
-      std::string copy = s;
-      std::string_view hv = copy;
-      const auto [loc, colon] =
-          ada::helpers::get_host_delimiter_location(true, hv);
-      ASSERT_EQ(loc, first_of_or_size(s, needles_host_special)) << s;
-      if (loc < s.size()) {
-        ASSERT_EQ(colon, s[loc] == ':');
-      }
-    }
-    {
-      std::string copy = s;
-      std::string_view hv = copy;
-      const auto [loc, colon] =
-          ada::helpers::get_host_delimiter_location(false, hv);
-      ASSERT_EQ(loc, first_of_or_size(s, needles_host)) << s;
-      if (loc < s.size()) {
-        ASSERT_EQ(colon, s[loc] == ':');
-      }
-    }
-  }
-}
-
-TEST(x86_64_v2, ipv6_brackets_and_long_userinfo) {
-  {
-    std::string input = "[::1]:8080";
-    std::string_view view = input;
-    const auto [loc, colon] =
-        ada::helpers::get_host_delimiter_location(true, view);
-    ASSERT_EQ(loc, 5u);
-    ASSERT_TRUE(colon);
-  }
-  std::string long_user(40, 'u');
-  long_user += "@example.com/foo";
-  ASSERT_EQ(ada::helpers::find_authority_delimiter_special(long_user), 40u);
-  ASSERT_EQ(ada::helpers::find_authority_delimiter(long_user), 40u);
-}
-
 TYPED_TEST(basic_tests, x86_64_v2_long_url_parse) {
   auto r = ada::parse<TypeParam>(
       "https://abcdefghijklmnopqrstuvwxyz012345.example.com/path");
@@ -2414,6 +2311,20 @@ TYPED_TEST(basic_tests, x86_64_v2_long_url_parse) {
   ASSERT_EQ(r->get_password(), "password");
   ASSERT_EQ(r->get_hostname(), "abcdefghijklmnopqrstuvwxyz.example.com");
 
+  // Long userinfo so the authority delimiter sits past a 16-byte window.
+  const std::string long_user(40, 'u');
+  r = ada::parse<TypeParam>("https://" + long_user + "@example.com/foo");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_username(), long_user);
+  ASSERT_EQ(r->get_hostname(), "example.com");
+  ASSERT_EQ(r->get_pathname(), "/foo");
+
+  r = ada::parse<TypeParam>("https://[::1]:8080/path");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_hostname(), "[::1]");
+  ASSERT_EQ(r->get_port(), "8080");
+  ASSERT_EQ(r->get_pathname(), "/path");
+
   // Tabs/newlines must be stripped on a string long enough for the SSSE3
   // window, including a match that sits only in the overlapping tail.
   std::string with_tab = "https://abcdefghijklmnopqrstuvwxyz.example.com/foo";
@@ -2421,4 +2332,20 @@ TYPED_TEST(basic_tests, x86_64_v2_long_url_parse) {
   r = ada::parse<TypeParam>(with_tab);
   ASSERT_TRUE(r);
   ASSERT_EQ(r->get_pathname(), "/foo");
+
+  const std::string long_host = "abcdefghijklmnopqrstuvwxyz.example.com";
+  for (char ws : {'\t', '\n', '\r'}) {
+    for (size_t pos : {size_t{0}, size_t{8}, size_t{16}, long_host.size() - 1}) {
+      std::string host = long_host;
+      host.insert(pos, 1, ws);
+      r = ada::parse<TypeParam>("https://" + host + "/");
+      ASSERT_TRUE(r) << "ws=" << int(ws) << " pos=" << pos;
+      ASSERT_EQ(r->get_hostname(), long_host);
+    }
+  }
+
+  r = ada::parse<TypeParam>("https://example.com/#newfragment");
+  ASSERT_TRUE(r);
+  r->set_hash("#otherfragment");
+  ASSERT_EQ(r->get_hash(), "#otherfragment");
 }

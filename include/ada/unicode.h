@@ -70,11 +70,11 @@ bool to_ascii(std::optional<std::string>& out, std::string_view plain,
  * @private
  * Checks if the input has tab or newline characters.
  *
- * @attention Bottleneck. x86-64 uses an SSSE3 pshufb table (NEON tbl on
- * ARM); gcc/clang compile that kernel at x86-64-v2 even when the
- * translation unit is the SSE2 baseline.
+ * @attention Bottleneck. Short inputs stay on an always_inline scalar
+ * path. x86-64 strings of 16+ bytes use an SSSE3 pshufb table compiled
+ * at x86-64-v2 even when the translation unit is the SSE2 baseline.
  */
-ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
+ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept;
 
 /**
