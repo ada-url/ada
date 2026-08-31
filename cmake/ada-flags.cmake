@@ -21,7 +21,7 @@ option(ADA_TESTING "Build tests" OFF)
 option(ADA_USE_UNSAFE_STD_REGEX_PROVIDER "Enable unsafe regex provider that uses std::regex" OFF)
 option(ADA_INCLUDE_URL_PATTERN "Include URL pattern implementation" ON)
 option(ADA_X86_64_V2
-  "Target x86-64-v2 (SSSE3, SSE4.1, SSE4.2, POPCNT). Default gcc/clang x86-64 builds already compile those kernels with per-function target attributes; this option applies -march=x86-64-v2 (or MSVC /arch:SSE4.2) to the whole library."
+  "Target x86-64-v2 (SSSE3, SSE4.1, SSE4.2, POPCNT) for the whole library via -march=x86-64-v2 (MSVC /arch:SSE4.2). Platforms that already default to that baseline (Rocky/RHEL 9) enable the kernels without this option."
   OFF)
 
 if (ADA_COVERAGE)

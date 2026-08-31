@@ -1,4 +1,3 @@
-#include <array>
 #include <cstdint>
 #include <cstring>
 #include <sstream>
@@ -8,16 +7,9 @@
 #include "ada/helpers.h"
 #include "ada/scheme.h"
 #include "ada/state.h"
-#include "simd_x86_64_v2.h"
 
-#if ADA_NEON
-#include <arm_neon.h>
-#elif ADA_SSE2
-#include <emmintrin.h>
-#elif ADA_LSX
-#include <lsxintrin.h>
-#elif ADA_RVV
-#include <riscv_vector.h>
+#if ADA_SSSE3
+#include <tmmintrin.h>
 #endif
 
 namespace ada::helpers {
@@ -245,7 +237,49 @@ ada_really_inline size_t find_next_host_delimiter_special(
     }
     return size_t(view.size());
   }
-  return ada::simd::find_next_host_delimiter_special_wide(view, location);
+  // fast path for long strings (expected to be common)
+  // Using SSSE3's _mm_shuffle_epi8 for table lookup (same approach as NEON)
+  size_t i = location;
+  const __m128i low_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x01, 0x04, 0x04, 0x00, 0x00, 0x03);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
+  for (; i + 15 < view.size(); i += 16) {
+    __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    __m128i lowpart = _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    __m128i classify = _mm_and_si128(lowpart, highpart);
+    __m128i is_zero = _mm_cmpeq_epi8(classify, zero);
+    // _mm_movemask_epi8 returns a 16-bit mask in bits 0-15, with bits 16-31
+    // zero. After NOT (~), bits 16-31 become 1. We must mask to 16 bits to
+    // avoid false positives.
+    int mask = ~_mm_movemask_epi8(is_zero) & 0xFFFF;
+    if (mask != 0) {
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  if (i < view.size()) {
+    __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    __m128i lowpart = _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    __m128i classify = _mm_and_si128(lowpart, highpart);
+    __m128i is_zero = _mm_cmpeq_epi8(classify, zero);
+    // _mm_movemask_epi8 returns a 16-bit mask in bits 0-15, with bits 16-31
+    // zero. After NOT (~), bits 16-31 become 1. We must mask to 16 bits to
+    // avoid false positives.
+    int mask = ~_mm_movemask_epi8(is_zero) & 0xFFFF;
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  return size_t(view.size());
 }
 #elif ADA_NEON
 // The ada_make_uint8x16_t macro is necessary because Visual Studio does not
@@ -486,7 +520,55 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
     }
     return size_t(view.size());
   }
-  return ada::simd::find_next_host_delimiter_wide(view, location);
+  // fast path for long strings (expected to be common)
+  size_t i = location;
+  // Lookup tables for bit classification:
+  // ':' (0x3A): low[0xA]=0x01, high[0x3]=0x01 -> match
+  // '/' (0x2F): low[0xF]=0x02, high[0x2]=0x02 -> match
+  // '?' (0x3F): low[0xF]=0x01, high[0x3]=0x01 -> match
+  // '[' (0x5B): low[0xB]=0x04, high[0x5]=0x04 -> match
+  const __m128i low_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x01, 0x04, 0x00, 0x00, 0x00, 0x03);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
+
+  for (; i + 15 < view.size(); i += 16) {
+    __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    __m128i lowpart = _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    __m128i classify = _mm_and_si128(lowpart, highpart);
+    __m128i is_zero = _mm_cmpeq_epi8(classify, zero);
+    // _mm_movemask_epi8 returns a 16-bit mask in bits 0-15, with bits 16-31
+    // zero. After NOT (~), bits 16-31 become 1. We must mask to 16 bits to
+    // avoid false positives.
+    int mask = ~_mm_movemask_epi8(is_zero) & 0xFFFF;
+    if (mask != 0) {
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+
+  if (i < view.size()) {
+    __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    __m128i lowpart = _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask));
+    __m128i highpart = _mm_shuffle_epi8(
+        high_mask, _mm_and_si128(_mm_srli_epi16(word, 4), fmask));
+    __m128i classify = _mm_and_si128(lowpart, highpart);
+    __m128i is_zero = _mm_cmpeq_epi8(classify, zero);
+    // _mm_movemask_epi8 returns a 16-bit mask in bits 0-15, with bits 16-31
+    // zero. After NOT (~), bits 16-31 become 1. We must mask to 16 bits to
+    // avoid false positives.
+    int mask = ~_mm_movemask_epi8(is_zero) & 0xFFFF;
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  return size_t(view.size());
 }
 #elif ADA_NEON
 ada_really_inline size_t find_next_host_delimiter(std::string_view view,
@@ -959,57 +1041,38 @@ find_authority_delimiter_special(std::string_view view) noexcept {
     }
     return view.size();
   }
-  return ada::simd::find_authority_delimiter_special_wide(view);
-}
-
-ada_really_inline size_t
-find_authority_delimiter(std::string_view view) noexcept {
-  if (view.size() < 16) {
-    for (size_t i = 0; i < view.size(); i++) {
-      if (view[i] == '@' || view[i] == '/' || view[i] == '?') {
-        return i;
-      }
-    }
-    return view.size();
-  }
-  return ada::simd::find_authority_delimiter_wide(view);
-}
-#elif ADA_SSE2
-ada_really_inline size_t
-find_authority_delimiter_special(std::string_view view) noexcept {
-  if (view.size() < 16) {
-    for (size_t i = 0; i < view.size(); i++) {
-      if (view[i] == '@' || view[i] == '/' || view[i] == '\\' ||
-          view[i] == '?') {
-        return i;
-      }
-    }
-    return view.size();
-  }
-  const __m128i mask1 = _mm_set1_epi8('@');
-  const __m128i mask2 = _mm_set1_epi8('/');
-  const __m128i mask3 = _mm_set1_epi8('\\');
-  const __m128i mask4 = _mm_set1_epi8('?');
   size_t i = 0;
+  const __m128i low_mask =
+      _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x08, 0x00, 0x00, 0x06);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x04, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
   for (; i + 15 < view.size(); i += 16) {
     const __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
-    const __m128i m = _mm_or_si128(
-        _mm_or_si128(_mm_cmpeq_epi8(word, mask1), _mm_cmpeq_epi8(word, mask2)),
-        _mm_or_si128(_mm_cmpeq_epi8(word, mask3), _mm_cmpeq_epi8(word, mask4)));
-    const int mask = _mm_movemask_epi8(m);
+    const __m128i classify = _mm_and_si128(
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask)),
+        _mm_shuffle_epi8(high_mask,
+                         _mm_and_si128(_mm_srli_epi16(word, 4), fmask)));
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
     if (mask != 0) {
-      return i + trailing_zeroes(mask);
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   if (i < view.size()) {
     const __m128i word =
         _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
-    const __m128i m = _mm_or_si128(
-        _mm_or_si128(_mm_cmpeq_epi8(word, mask1), _mm_cmpeq_epi8(word, mask2)),
-        _mm_or_si128(_mm_cmpeq_epi8(word, mask3), _mm_cmpeq_epi8(word, mask4)));
-    const int mask = _mm_movemask_epi8(m);
+    const __m128i classify = _mm_and_si128(
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask)),
+        _mm_shuffle_epi8(high_mask,
+                         _mm_and_si128(_mm_srli_epi16(word, 4), fmask)));
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
     if (mask != 0) {
-      return view.length() - 16 + trailing_zeroes(mask);
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   return view.size();
@@ -1025,29 +1088,38 @@ find_authority_delimiter(std::string_view view) noexcept {
     }
     return view.size();
   }
-  const __m128i mask1 = _mm_set1_epi8('@');
-  const __m128i mask2 = _mm_set1_epi8('/');
-  const __m128i mask4 = _mm_set1_epi8('?');
   size_t i = 0;
+  const __m128i low_mask =
+      _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x06);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
   for (; i + 15 < view.size(); i += 16) {
     const __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
-    const __m128i m = _mm_or_si128(
-        _mm_or_si128(_mm_cmpeq_epi8(word, mask1), _mm_cmpeq_epi8(word, mask2)),
-        _mm_cmpeq_epi8(word, mask4));
-    const int mask = _mm_movemask_epi8(m);
+    const __m128i classify = _mm_and_si128(
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask)),
+        _mm_shuffle_epi8(high_mask,
+                         _mm_and_si128(_mm_srli_epi16(word, 4), fmask)));
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
     if (mask != 0) {
-      return i + trailing_zeroes(mask);
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   if (i < view.size()) {
     const __m128i word =
         _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
-    const __m128i m = _mm_or_si128(
-        _mm_or_si128(_mm_cmpeq_epi8(word, mask1), _mm_cmpeq_epi8(word, mask2)),
-        _mm_cmpeq_epi8(word, mask4));
-    const int mask = _mm_movemask_epi8(m);
+    const __m128i classify = _mm_and_si128(
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask)),
+        _mm_shuffle_epi8(high_mask,
+                         _mm_and_si128(_mm_srli_epi16(word, 4), fmask)));
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
     if (mask != 0) {
-      return view.length() - 16 + trailing_zeroes(mask);
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
     }
   }
   return view.size();
@@ -1065,6 +1137,8 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special =
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
+  // performance note: we might be able to gain further performance
+  // with SIMD intrinsics.
   for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (authority_delimiter_special[(uint8_t)*pos]) {
       return pos - view.begin();
@@ -1084,6 +1158,8 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
 // credit: @the-moisrex recommended a table-based approach
 ada_really_inline size_t
 find_authority_delimiter(std::string_view view) noexcept {
+  // performance note: we might be able to gain further performance
+  // with SIMD instrinsics.
   for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (authority_delimiter[(uint8_t)*pos]) {
       return pos - view.begin();

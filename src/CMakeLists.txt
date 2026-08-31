@@ -7,7 +7,7 @@ target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAK
 add_library(ada-source INTERFACE)
 target_sources(ada-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/ada.cpp)
 target_link_libraries(ada-source INTERFACE ada-include-source)
-add_library(ada ada.cpp unicode_percent_encode.cpp simd_x86_64_v2.cpp)
+add_library(ada ada.cpp unicode_percent_encode.cpp)
 target_compile_features(ada PUBLIC cxx_std_20)
 target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
 target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -39,9 +39,9 @@ if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_SYSTEM_PROCESSOR MATCHES "
   target_compile_options(ada PRIVATE -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store)
 endif()
 
-# Optional whole-library x86-64-v2 target. gcc/clang x86-64 builds already
-# emit SSSE3/SSE4.1/SSE4.2/POPCNT in selected kernels via target attributes
-# even without this option (see ADA_X86_64_V2_SIMD in common_defs.h).
+# Optional whole-library x86-64-v2 target. When the compiler already
+# defines __SSSE3__ (Rocky/RHEL 9, -march=x86-64-v2), the SSSE3 kernels
+# in unicode.cpp/helpers.cpp compile without this option.
 if(ADA_X86_64_V2 AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
   if(MSVC)
     target_compile_options(ada PRIVATE /arch:SSE4.2)
@@ -72,10 +72,9 @@ if(ADA_TESTING)
   target_compile_definitions(ada PRIVATE ADA_TESTING=1)
 endif()
 
-# Keep SIMD kernels that use target() out of the unity ada.cpp TU so the
-# setter inlining budget matches main (see percent_encode and x86-64-v2).
+# Keep the SIMD percent-encode kernel in its own TU so the unity ada.cpp
+# inlining budget for setters matches main.
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
-target_compile_definitions(ada PRIVATE ADA_X86_64_V2_SIMD_SEPARATE_TU=1)
 
 if(ADA_INCLUDE_URL_PATTERN)
   target_compile_definitions(ada PRIVATE ADA_INCLUDE_URL_PATTERN=1)

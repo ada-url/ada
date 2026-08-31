@@ -272,29 +272,6 @@ namespace ada {
 #define ADA_POPCNT 1
 #endif
 
-// gcc/clang honor target() on an SSE2 translation unit. clang-cl and MSVC
-// do not: they still compile the function as SSE2, then reject SSSE3/SSE4
-// always_inline intrinsics such as _mm_shuffle_epi8.
-#if !defined(ADA_SSSE3) && (defined(__x86_64__) || defined(__amd64__)) && \
-    defined(__GNUC__) && !defined(_MSC_VER)
-#define ADA_NEED_X86_64_V2_TARGET 1
-#define ADA_SSSE3 1
-#define ADA_SSE41 1
-#define ADA_SSE42 1
-#define ADA_POPCNT 1
-#endif
-
-#ifdef ADA_NEED_X86_64_V2_TARGET
-// Wide kernels only. gcc refuses to always_inline a targeted SSSE3
-// function into an SSE2 caller, so short-path wrappers stay
-// ada_really_inline with no target attribute.
-#define ADA_X86_64_V2_SIMD __attribute__((target("ssse3,sse4.1,sse4.2,popcnt")))
-#define ADA_SSSE3_TARGET __attribute__((target("ssse3")))
-#else
-#define ADA_X86_64_V2_SIMD
-#define ADA_SSSE3_TARGET
-#endif
-
 // AVX-512 byte/word ops + 128/256-bit vectors of AVX-512 instructions.
 // Used for optional high-performance IP address parsing kernels.
 #if defined(__AVX512BW__) && defined(__AVX512VL__)

@@ -3,8 +3,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include <string_view>
-#include <vector>
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
 template <class T>

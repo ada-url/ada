@@ -22,9 +22,16 @@
 
 #if ADA_NEON
 #include <arm_neon.h>
-#elif ADA_SSSE3
+#elif defined(__SSSE3__)
 #include <tmmintrin.h>
 #define ADA_PARSER_SSSE3 1
+#elif (defined(__x86_64__) || defined(__amd64__)) && defined(__GNUC__) && \
+    !defined(_MSC_VER)
+// gcc/clang honor target("ssse3"). clang-cl and MSVC do not: they still
+// compile the function as SSE2, then reject always_inline _mm_shuffle_epi8.
+#include <tmmintrin.h>
+#define ADA_PARSER_SSSE3 1
+#define ADA_PARSER_NEED_SSSE3_TARGET 1
 #elif ADA_SSE2
 #include <emmintrin.h>
 #endif
@@ -32,8 +39,8 @@
 #define ADA_PARSER_SSSE3 0
 #endif
 
-#ifdef ADA_NEED_X86_64_V2_TARGET
-#define ADA_PARSER_SIMD ADA_SSSE3_TARGET
+#ifdef ADA_PARSER_NEED_SSSE3_TARGET
+#define ADA_PARSER_SIMD __attribute__((target("ssse3")))
 #else
 #define ADA_PARSER_SIMD ada_really_inline
 #endif

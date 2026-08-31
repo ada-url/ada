@@ -108,7 +108,7 @@ cmake --build build
 | `ADA_BUILD_SINGLE_HEADER_LIB` | OFF | Build from single-header amalgamated files |
 | `ADA_USE_SIMDUTF` | OFF | Enable SIMD-accelerated Unicode via simdutf |
 | `ADA_USE_UNSAFE_STD_REGEX_PROVIDER` | OFF (ON when `ADA_TESTING=ON`) | Enable `std_regex_provider` (`std::regex`-backed). Required to build the `urlpattern` benchmark or any code using `ada::url_pattern_regex::std_regex_provider`. Not recommended for production (ReDoS risk) |
-| `ADA_X86_64_V2` | OFF | Compile the library with `-march=x86-64-v2` (MSVC `/arch:SSE4.2`). Default gcc/clang x86-64 builds already emit SSSE3/SSE4.1/SSE4.2/POPCNT in selected kernels via per-function `target` attributes |
+| `ADA_X86_64_V2` | OFF | Compile the library with `-march=x86-64-v2` (MSVC `/arch:SSE4.2`). Platforms that already default to that baseline (Rocky/RHEL 9) and MSVC `/arch:SSE4.2` or AVX builds enable the SSSE3 kernels without this option |
 | `CMAKE_BUILD_TYPE` | - | Set to `Release` for optimized builds, `Debug` for development |
 
 ## Running Tests
