@@ -287,7 +287,9 @@ namespace ada {
 #ifdef ADA_NEED_X86_64_V2_TARGET
 #define ADA_X86_64_V2_SIMD __attribute__((target("ssse3,sse4.1,sse4.2,popcnt")))
 #else
-#define ADA_X86_64_V2_SIMD ada_really_inline
+// Not always_inline: tests and other TUs call these helpers and need a
+// standalone symbol when the translation unit is already x86-64-v2.
+#define ADA_X86_64_V2_SIMD
 #endif
 
 // AVX-512 byte/word ops + 128/256-bit vectors of AVX-512 instructions.

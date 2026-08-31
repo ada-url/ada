@@ -18,7 +18,11 @@
 #ifndef ADA_UNICODE_SSSE3
 #define ADA_UNICODE_SSSE3 0
 #endif
+#ifdef ADA_NEED_X86_64_V2_TARGET
 #define ADA_UNICODE_SIMD ADA_X86_64_V2_SIMD
+#else
+#define ADA_UNICODE_SIMD ada_really_inline
+#endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
 #include <intrin.h>

@@ -730,7 +730,7 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 }
 #endif
 
-ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
+ADA_X86_64_V2_SIMD std::pair<size_t, bool> get_host_delimiter_location(
     const bool is_special, std::string_view& view) noexcept {
   /**
    * The spec at https://url.spec.whatwg.org/#hostname-state expects us to

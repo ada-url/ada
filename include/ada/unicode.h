@@ -74,7 +74,7 @@ bool to_ascii(std::optional<std::string>& out, std::string_view plain,
  * ARM); gcc/clang compile that kernel at x86-64-v2 even when the
  * translation unit is the SSE2 baseline.
  */
-ada_really_inline bool has_tabs_or_newline(
+ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     std::string_view user_input) noexcept;
 
 /**
