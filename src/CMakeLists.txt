@@ -38,6 +38,18 @@ endif(MSVC)
 if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$"))
   target_compile_options(ada PRIVATE -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store)
 endif()
+
+# Optional whole-library x86-64-v2 target. gcc/clang x86-64 builds already
+# emit SSSE3/SSE4.1/SSE4.2/POPCNT in selected kernels via target attributes
+# even without this option (see ADA_X86_64_V2_SIMD in common_defs.h).
+if(ADA_X86_64_V2 AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+  if(MSVC)
+    target_compile_options(ada PRIVATE /arch:SSE4.2)
+  else()
+    target_compile_options(ada PRIVATE -march=x86-64-v2)
+  endif()
+  message(STATUS "Targeting x86-64-v2 (SSSE3, SSE4.1, SSE4.2, POPCNT)")
+endif()
 if(ADA_DEVELOPMENT_CHECKS)
   target_compile_definitions(ada PUBLIC ADA_DEVELOPMENT_CHECKS=1)
 endif()

@@ -14,6 +14,9 @@ ADA_POP_DISABLE_WARNINGS
 #include <cstring>
 #if ADA_SSSE3
 #include <tmmintrin.h>
+#if ADA_SSE41
+#include <smmintrin.h>
+#endif
 #elif ADA_NEON
 #include <arm_neon.h>
 #elif ADA_SSE2
@@ -62,7 +65,7 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   return non_ascii == 0;
 }
 #if ADA_SSSE3
-ada_really_inline bool has_tabs_or_newline(
+ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
@@ -91,7 +94,12 @@ ada_really_inline bool has_tabs_or_newline(
     __m128i matches = _mm_cmpeq_epi8(shuffled, word);
     running = _mm_or_si128(running, matches);
   }
+#if ADA_SSE41
+  // SSE4.1 ptest avoids a movemask + GPR transfer on the common miss path.
+  return _mm_testz_si128(running, running) == 0;
+#else
   return _mm_movemask_epi8(running) != 0;
+#endif
 }
 #elif ADA_NEON
 ada_really_inline bool has_tabs_or_newline(

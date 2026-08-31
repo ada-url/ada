@@ -15,24 +15,10 @@
 #elif ADA_RVV
 #include <riscv_vector.h>
 #endif
-
-// gcc/clang honor target("ssse3") on an SSE2 translation unit. clang-cl and
-// MSVC do not: they still compile the function as SSE2, then reject
-// always_inline _mm_shuffle_epi8. Same approach as parser.cpp.
-#if !ADA_UNICODE_SSSE3 && (defined(__x86_64__) || defined(__amd64__)) && \
-    defined(__GNUC__) && !defined(_MSC_VER)
-#include <tmmintrin.h>
-#define ADA_UNICODE_SSSE3 1
-#define ADA_UNICODE_NEED_SSSE3_TARGET 1
-#endif
 #ifndef ADA_UNICODE_SSSE3
 #define ADA_UNICODE_SSSE3 0
 #endif
-#ifdef ADA_UNICODE_NEED_SSSE3_TARGET
-#define ADA_UNICODE_SIMD __attribute__((target("ssse3")))
-#else
-#define ADA_UNICODE_SIMD ada_really_inline
-#endif
+#define ADA_UNICODE_SIMD ADA_X86_64_V2_SIMD
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
 #include <intrin.h>
