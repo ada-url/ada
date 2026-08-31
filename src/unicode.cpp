@@ -102,7 +102,7 @@ ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
 #endif
 }
 #elif ADA_NEON
-ada_really_inline bool has_tabs_or_newline(
+ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
@@ -144,7 +144,7 @@ ada_really_inline bool has_tabs_or_newline(
   return vdupd_lane_f64(vreinterpret_f64_u8(narrowed), 0) != 0.0;
 }
 #elif ADA_SSE2
-ada_really_inline bool has_tabs_or_newline(
+ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
@@ -175,7 +175,7 @@ ada_really_inline bool has_tabs_or_newline(
   return _mm_movemask_epi8(running) != 0;
 }
 #elif ADA_LSX
-ada_really_inline bool has_tabs_or_newline(
+ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
@@ -207,7 +207,7 @@ ada_really_inline bool has_tabs_or_newline(
   return true;
 }
 #elif ADA_RVV
-ada_really_inline bool has_tabs_or_newline(
+ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   uint8_t* src = (uint8_t*)user_input.data();
   for (size_t vl, n = user_input.size(); n > 0; n -= vl, src += vl) {
@@ -223,7 +223,7 @@ ada_really_inline bool has_tabs_or_newline(
   return false;
 }
 #else
-ada_really_inline bool has_tabs_or_newline(
+ADA_X86_64_V2_SIMD bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   auto has_zero_byte = [](uint64_t v) {
     return ((v - 0x0101010101010101) & ~(v) & 0x8080808080808080);

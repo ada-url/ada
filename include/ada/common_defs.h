@@ -287,8 +287,9 @@ namespace ada {
 #ifdef ADA_NEED_X86_64_V2_TARGET
 #define ADA_X86_64_V2_SIMD __attribute__((target("ssse3,sse4.1,sse4.2,popcnt")))
 #else
-// Not always_inline: tests and other TUs call these helpers and need a
-// standalone symbol when the translation unit is already x86-64-v2.
+// Empty on purpose (not always_inline). Tests call these helpers from
+// another TU; an always_inline definition would omit the symbol on
+// ARM/macOS/clang-cl and fail the link.
 #define ADA_X86_64_V2_SIMD
 #endif
 

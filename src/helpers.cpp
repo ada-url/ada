@@ -1049,7 +1049,7 @@ find_authority_delimiter(std::string_view view) noexcept {
   return find_next_ssse3_nibble_match(view, 0, low_mask, high_mask);
 }
 #elif ADA_SSE2
-ada_really_inline size_t
+ADA_X86_64_V2_SIMD size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
   if (view.size() < 16) {
     for (size_t i = 0; i < view.size(); i++) {
@@ -1089,7 +1089,7 @@ find_authority_delimiter_special(std::string_view view) noexcept {
   return view.size();
 }
 
-ada_really_inline size_t
+ADA_X86_64_V2_SIMD size_t
 find_authority_delimiter(std::string_view view) noexcept {
   if (view.size() < 16) {
     for (size_t i = 0; i < view.size(); i++) {
@@ -1137,7 +1137,7 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special =
       return result;
     }();
 // credit: @the-moisrex recommended a table-based approach
-ada_really_inline size_t
+ADA_X86_64_V2_SIMD size_t
 find_authority_delimiter_special(std::string_view view) noexcept {
   for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (authority_delimiter_special[(uint8_t)*pos]) {
@@ -1156,7 +1156,7 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   return result;
 }();
 // credit: @the-moisrex recommended a table-based approach
-ada_really_inline size_t
+ADA_X86_64_V2_SIMD size_t
 find_authority_delimiter(std::string_view view) noexcept {
   for (auto pos = view.begin(); pos != view.end(); ++pos) {
     if (authority_delimiter[(uint8_t)*pos]) {
