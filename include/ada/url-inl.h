@@ -71,15 +71,18 @@ inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
         out.host_start += uint32_t(password.size() + 1);
       }
 
-      out.host_end = uint32_t(out.host_start + host->size());
+      // host_start is the '@' when there are credentials, exactly as
+      // url_aggregator reports it, so the host itself begins one byte later.
+      out.host_end = uint32_t(out.host_start + 1 + host->size());
     } else {
       out.username_end = out.host_start;
 
       // Host does not start with "@" if it does not include credentials.
-      out.host_end = uint32_t(out.host_start + host->size()) - 1;
+      out.host_end = uint32_t(out.host_start + host->size());
     }
 
-    running_index = out.host_end + 1;
+    // host_end is one past the host, so it is already the next index.
+    running_index = out.host_end;
   } else {
     // Update host start and end date to the same index, since it does not
     // exist.
