@@ -31,12 +31,15 @@ inline constexpr uint32_t max_dispatch_table_entries = 254;
 
 /**
  * Static fanout up to which a node compares its children directly, in
- * turn; wider nodes dispatch through a projection table. Segment keys are
- * short and each compare is gated by the key length, so direct compares
- * measure faster than a projection up to 16 children (16 vs 8: static hits
- * 25.9 vs 28.0 ns/url, param hits 32.3 vs 35.5 on the PR benchmark).
+ * turn; wider nodes dispatch through a projection table. Measured on a
+ * synthetic node hit uniformly: direct compares beat the projection by
+ * about 1 ns for keys of varied length up to about 12 children, while for
+ * keys of one length (which the length gate cannot reject) the projection
+ * wins by 4-5 ns at every fanout and by more on misses, because the direct
+ * loop's exit is unpredictable. Eight keeps the first case and bounds the
+ * second.
  */
-inline constexpr uint32_t max_direct_children = 16;
+inline constexpr uint32_t max_direct_children = 8;
 
 /**
  * The kind of one compiled pattern segment. The numeric values define match

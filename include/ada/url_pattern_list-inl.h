@@ -256,7 +256,7 @@ ada_really_inline int32_t dispatch_static(const table_view& t,
   switch (nd.dispatch) {
     case 0:
       return -1;
-    case 1: {  // direct: up to 16 compares, each gated by the key length
+    case 1: {  // direct: up to 8 compares, each gated by the key length
       for (uint32_t j = 0; j < nd.n_static; j++) {
         if (verify_edge(e[j], s, t.blob)) {
           return static_cast<int32_t>(j);

@@ -1701,7 +1701,7 @@ TEST(url_pattern_list, root_first_byte_index) {
   EXPECT_EQ(list.match("/").route_index, -1);
   EXPECT_EQ(list.match("/upload").route_index, -1);
   EXPECT_EQ(list.match("/User").route_index, -1);
-  // More than max_direct_children (16) children sharing one first byte: the
+  // More than max_direct_children children sharing one first byte: the
   // index is not used and the root falls back to the projection ladder.
   std::vector<std::string> storage;
   for (int i = 0; i < 20; i++) {
@@ -1716,10 +1716,10 @@ TEST(url_pattern_list, root_first_byte_index) {
   EXPECT_EQ(wide.match("/same20").route_index, -1);
 }
 
-TEST(url_pattern_list, direct_compare_fanout_up_to_sixteen) {
-  // A non-root node with up to 16 static children compares them directly;
-  // 17 children switch to projection. Both must answer identically.
-  for (int fanout : {3, 8, 16, 17}) {
+TEST(url_pattern_list, direct_compare_fanout_up_to_eight) {
+  // A non-root node with up to 8 static children compares them directly;
+  // nine children switch to projection. Both must answer identically.
+  for (int fanout : {3, 8, 9, 16}) {
     std::vector<std::string> storage;
     for (int i = 0; i < fanout; i++) {
       storage.push_back("/api/child" + std::to_string(i));
