@@ -1590,15 +1590,17 @@ TEST(url_pattern_list, swar_segment_scan_sweep) {
   namespace detail = ada::url_pattern_list_detail;
   using ada::url_pattern_list_limits::max_fast_path_segments;
   std::mt19937_64 rng(0x5CA7ull);
-  // Filler bytes include values >= 0x80 and the byte that differs from '/'
-  // only in the high bit, which must never read as a separator.
-  const unsigned char fillers[] = {'a', 'z', '0', 0x80, 0xAF, 0xFF, 0x2E, 0x30};
+  // Filler bytes include values >= 0x80, the byte that differs from '/'
+  // only in the high bit (which must never read as a separator), and the
+  // two line terminators, which the scan treats as ordinary bytes.
+  const unsigned char fillers[] = {'a',  'z',  '0',  0x80, 0xAF,
+                                   0xFF, 0x2E, 0x30, '\n', '\r'};
   for (uint32_t len = 1; len <= 70; len++) {
     for (int variant = 0; variant < 12; variant++) {
       std::string url(len, 'a');
       url[0] = '/';
       for (uint32_t i = 1; i < len; i++) {
-        url[i] = static_cast<char>(fillers[rng() % 8]);
+        url[i] = static_cast<char>(fillers[rng() % 10]);
       }
       // Slash placements: none, every position, first/last, random.
       if (variant == 1) {
@@ -1823,6 +1825,26 @@ TEST(url_pattern_list, wildcard_does_not_match_line_terminators) {
   EXPECT_EQ(sequential.match(deep + "/").route_index, 0);
   EXPECT_EQ(sequential.match(deep + "/x\ny").route_index, -1);
   EXPECT_EQ(sequential.match(deep + "/\r").route_index, -1);
+}
+
+TEST(url_pattern_list, wildcard_tail_check_covers_every_length) {
+  // The wildcard tail check works 8 bytes at a time: a terminator at every
+  // position of tails from 1 to 40 bytes must be seen, and tails without
+  // one (including bytes >= 0x80 and other control bytes) must pass.
+  auto list = make_list({"/files/*"});
+  for (uint32_t n = 1; n <= 40; n++) {
+    std::string clean = "/files/" + std::string(n, 'x');
+    clean[7 + n / 2] = static_cast<char>(0xC3);  // a non-ASCII byte
+    if (n > 2) {
+      clean[8] = '\t';  // a control byte that is not a terminator
+    }
+    EXPECT_EQ(list.match(clean).route_index, 0) << n;
+    for (uint32_t at = 0; at < n; at++) {
+      std::string url = "/files/" + std::string(n, 'x');
+      url[7 + at] = (at % 2) ? '\n' : '\r';
+      EXPECT_EQ(list.match(url).route_index, -1) << n << " " << at;
+    }
+  }
 }
 
 TEST(url_pattern_list, inputs_need_no_terminator) {

@@ -180,8 +180,31 @@ ada_really_inline uint32_t scan_segments(const char* url, uint32_t ulen,
 // A "*" segment compiles to "(.*)" in the URLPattern regexp, and "." in an
 // ECMAScript regular expression does not match a line terminator: the tail
 // a wildcard captures must not contain LF or CR. Canonical pathnames never
-// do (both are percent-encoded), so this only decides raw inputs.
-ada_really_inline bool wildcard_tail_ok(const char* p, uint32_t n) noexcept {
+// do (both are percent-encoded), so this only decides raw inputs. SWAR, 8
+// bytes per step: "some byte is below 0x20" ("hasless" of Bit Twiddling
+// Hacks) is exact as a yes/no answer, because a borrow can only leave a lane
+// that itself qualifies; only a tail holding a control byte gets the exact
+// byte check. Kept out of line on purpose: inlined into the walk, this loop
+// costs the static and ":param" paths, which never run it, about 5 ns
+// through register allocation; as a call it costs only wildcard hits.
+ada_never_inline bool wildcard_tail_ok(const char* p, uint32_t n) noexcept {
+  constexpr uint64_t spaces = 0x2020202020202020ull;
+  constexpr uint64_t highs = 0x8080808080808080ull;
+  const auto below_space = [](uint64_t x) noexcept {
+    return (x - spaces) & ~x & highs;
+  };
+  uint64_t control = 0;
+  uint32_t i = 0;
+  for (; i + 8 <= n; i += 8) {
+    control |= below_space(load8_le(p + i));
+  }
+  if (i < n) {  // 1..7 bytes, padded with spaces
+    control |= below_space(gather_le(p + i, n - i) |
+                           (spaces & ~low_bytes_mask(n - i)));
+  }
+  if (control == 0) {
+    return true;
+  }
   for (uint32_t j = 0; j < n; j++) {
     if (p[j] == '\n' || p[j] == '\r') {
       return false;
