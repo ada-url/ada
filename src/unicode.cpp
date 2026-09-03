@@ -14,6 +14,9 @@ ADA_POP_DISABLE_WARNINGS
 #include <cstring>
 #if ADA_SSSE3
 #include <tmmintrin.h>
+#if ADA_SSE41
+#include <smmintrin.h>
+#endif
 #elif ADA_NEON
 #include <arm_neon.h>
 #elif ADA_SSE2
@@ -61,6 +64,7 @@ constexpr bool to_lower_ascii(char* input, size_t length) noexcept {
   }
   return non_ascii == 0;
 }
+
 #if ADA_SSSE3
 ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
@@ -91,7 +95,12 @@ ada_really_inline bool has_tabs_or_newline(
     __m128i matches = _mm_cmpeq_epi8(shuffled, word);
     running = _mm_or_si128(running, matches);
   }
+#if ADA_SSE41
+  // SSE4.1 ptest avoids a movemask + GPR transfer on the common miss path.
+  return _mm_testz_si128(running, running) == 0;
+#else
   return _mm_movemask_epi8(running) != 0;
+#endif
 }
 #elif ADA_NEON
 ada_really_inline bool has_tabs_or_newline(
@@ -244,7 +253,6 @@ ada_really_inline bool has_tabs_or_newline(
   return running;
 }
 #endif
-
 // A forbidden host code point is U+0000 NULL, U+0009 TAB, U+000A LF, U+000D CR,
 // U+0020 SPACE, U+0023 (#), U+002F (/), U+003A (:), U+003C (<), U+003E (>),
 // U+003F (?), U+0040 (@), U+005B ([), U+005C (\), U+005D (]), U+005E (^), or

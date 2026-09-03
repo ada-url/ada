@@ -1029,6 +1029,102 @@ ada_really_inline void strip_trailing_spaces_from_opaque_path(url_type& url) {
   url.update_base_pathname(path);
 }
 
+#if ADA_SSSE3
+ada_really_inline size_t
+find_authority_delimiter_special(std::string_view view) noexcept {
+  if (view.size() < 16) {
+    for (size_t i = 0; i < view.size(); i++) {
+      if (view[i] == '@' || view[i] == '/' || view[i] == '\\' ||
+          view[i] == '?') {
+        return i;
+      }
+    }
+    return view.size();
+  }
+  size_t i = 0;
+  const __m128i low_mask =
+      _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x08, 0x00, 0x00, 0x06);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x04, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
+  for (; i + 15 < view.size(); i += 16) {
+    const __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    const __m128i classify = _mm_and_si128(
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask)),
+        _mm_shuffle_epi8(high_mask,
+                         _mm_and_si128(_mm_srli_epi16(word, 4), fmask)));
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
+    if (mask != 0) {
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  if (i < view.size()) {
+    const __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    const __m128i classify = _mm_and_si128(
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask)),
+        _mm_shuffle_epi8(high_mask,
+                         _mm_and_si128(_mm_srli_epi16(word, 4), fmask)));
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  return view.size();
+}
+
+ada_really_inline size_t
+find_authority_delimiter(std::string_view view) noexcept {
+  if (view.size() < 16) {
+    for (size_t i = 0; i < view.size(); i++) {
+      if (view[i] == '@' || view[i] == '/' || view[i] == '?') {
+        return i;
+      }
+    }
+    return view.size();
+  }
+  size_t i = 0;
+  const __m128i low_mask =
+      _mm_setr_epi8(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x06);
+  const __m128i high_mask =
+      _mm_setr_epi8(0x00, 0x00, 0x02, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  const __m128i fmask = _mm_set1_epi8(0xf);
+  const __m128i zero = _mm_setzero_si128();
+  for (; i + 15 < view.size(); i += 16) {
+    const __m128i word = _mm_loadu_si128((const __m128i*)(view.data() + i));
+    const __m128i classify = _mm_and_si128(
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask)),
+        _mm_shuffle_epi8(high_mask,
+                         _mm_and_si128(_mm_srli_epi16(word, 4), fmask)));
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
+    if (mask != 0) {
+      return i + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  if (i < view.size()) {
+    const __m128i word =
+        _mm_loadu_si128((const __m128i*)(view.data() + view.length() - 16));
+    const __m128i classify = _mm_and_si128(
+        _mm_shuffle_epi8(low_mask, _mm_and_si128(word, fmask)),
+        _mm_shuffle_epi8(high_mask,
+                         _mm_and_si128(_mm_srli_epi16(word, 4), fmask)));
+    const int mask =
+        ~_mm_movemask_epi8(_mm_cmpeq_epi8(classify, zero)) & 0xFFFF;
+    if (mask != 0) {
+      return view.length() - 16 + trailing_zeroes(static_cast<uint32_t>(mask));
+    }
+  }
+  return view.size();
+}
+#else
 // @ / \\ ?
 static constexpr std::array<uint8_t, 256> authority_delimiter_special =
     []() consteval {
@@ -1071,6 +1167,7 @@ find_authority_delimiter(std::string_view view) noexcept {
   }
   return size_t(view.size());
 }
+#endif
 
 }  // namespace ada::helpers
 

@@ -367,6 +367,7 @@ With tests (requires available local packages):
 Ada provides several CMake options to customize the build:
 
 - `ADA_USE_SIMDUTF`: Enables SIMD-accelerated Unicode processing via simdutf (default: OFF)
+- `ADA_X86_64_V2`: Compile with `-march=x86-64-v2` (MSVC `/arch:SSE4.2`) for SSSE3, SSE4.1, SSE4.2, and POPCNT. Platforms that already default to that baseline (Rocky Linux 9, RHEL 9) enable those kernels without this option. MSVC builds that request AVX or `/arch:SSE4.2` also enable them.
 
 Windows users need additional flags to specify the build configuration, e.g. `--config Release`.
 

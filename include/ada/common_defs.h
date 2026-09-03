@@ -241,10 +241,35 @@ namespace ada {
 #define ADA_SSSE3 1
 #endif
 
+#if defined(__SSE4_1__)
+#define ADA_SSE41 1
+#endif
+
+#if defined(__SSE4_2__)
+#define ADA_SSE42 1
+#endif
+
+#if defined(__POPCNT__)
+#define ADA_POPCNT 1
+#endif
+
 #if defined(__SSE2__) || defined(__x86_64__) || defined(__x86_64) || \
     (defined(_M_AMD64) || defined(_M_X64) ||                         \
      (defined(_M_IX86_FP) && _M_IX86_FP == 2))
 #define ADA_SSE2 1
+#endif
+
+// x86-64-v2 = SSE2 + SSE3 + SSSE3 + SSE4.1 + SSE4.2 + POPCNT.
+// Windows 11 24H2, Rocky Linux 9, and RHEL 9 default to this baseline.
+// MSVC does not define the GNU __SSSE3__/__SSE4_*__ macros unless /arch
+// requests them; AVX (and the newer /arch:SSE4.2) imply the v2 ISA.
+#if !defined(ADA_SSSE3) && defined(ADA_SSE2) && defined(_MSC_VER) && \
+    !defined(__clang__) &&                                           \
+    (defined(__AVX__) || defined(__AVX2__) || defined(__SSE4_2__))
+#define ADA_SSSE3 1
+#define ADA_SSE41 1
+#define ADA_SSE42 1
+#define ADA_POPCNT 1
 #endif
 
 // AVX-512 byte/word ops + 128/256-bit vectors of AVX-512 instructions.
