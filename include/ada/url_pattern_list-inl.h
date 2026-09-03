@@ -25,6 +25,10 @@
 #include <utility>
 #include <vector>
 
+#if ADA_NEON
+#include <arm_neon.h>
+#endif
+
 #if ADA_INCLUDE_URL_PATTERN
 namespace ada::url_pattern_list_detail {
 
@@ -124,29 +128,32 @@ constexpr uint64_t project(const char* p, uint32_t len,
 
 // Splits the pathname into segments in one pass, in place: only segment
 // starts are recorded, with a sentinel soff[nseg] = ulen + 1 so that
-// seg_len(i) == soff[i + 1] - soff[i] - 1. Portable SWAR: 8 bytes per step,
-// an exact zero-byte test on x ^ '/'-fill (no false positives, bytes >= 0x80
-// included), and a byte-exact partial load for the tail, so the input is
-// never over-read. Returns the segment count, or 0 when the input has more
-// than max_fast_path_segments segments (the caller falls back to the
-// sequential matcher). Requires ulen >= 1 and url[0] == '/'.
-ada_really_inline uint32_t scan_segments(const char* url, uint32_t ulen,
-                                         uint16_t* soff) noexcept {
-  using url_pattern_list_limits::max_fast_path_segments;
-  constexpr uint64_t slashes = 0x2F2F2F2F2F2F2F2Full;
-  constexpr uint64_t low7 = 0x7F7F7F7F7F7F7F7Full;
+// seg_len(i) == soff[i + 1] - soff[i] - 1. Returns the segment count, or 0
+// when the input has more than max_fast_path_segments segments (the caller
+// falls back to the sequential matcher). Requires ulen >= 1 and
+// url[0] == '/'.
+//
+// Two implementations with the same contract: the portable SWAR scan (8
+// bytes per step, an exact zero-byte test on x ^ '/'-fill with no false
+// positives, bytes >= 0x80 included, and a byte-exact partial load for the
+// tail, so the input is never over-read), and on AArch64 a NEON scan for
+// inputs of 16 bytes or more (16 bytes per step, the '/' compare narrowed
+// to one nibble per byte, the last block overlapping the previous one so
+// the input is never over-read). The 1k+ pathname benchmark in the PR
+// discussion is what keeps the NEON scan: it is faster at every length and
+// 3-4x faster past 1 KB.
+struct segment_emitter {
+  uint16_t* soff;
   uint32_t nseg = 0;
   uint32_t start = 1;
-  // Bit 7 of every byte of x that is zero, exactly: (b & 0x7F) + 0x7F has
-  // bit 7 set iff the low bits are non-zero, b itself has it set iff b is
-  // >= 0x80, and no lane can carry into its neighbour.
-  const auto zero_lanes = [](uint64_t x) noexcept {
-    return ~(((x & low7) + low7) | x | low7);
-  };
-  const auto emit = [&](uint64_t lanes, uint32_t base) noexcept {
+  // One segment start per set bit of `lanes`; a lane is 1 << shift bits
+  // wide (8 for the SWAR masks, 4 for the NEON nibble masks).
+  ada_really_inline bool emit(uint64_t lanes, uint32_t base,
+                              unsigned shift) noexcept {
+    using url_pattern_list_limits::max_fast_path_segments;
     while (lanes) {
       const uint32_t pos =
-          base + (static_cast<uint32_t>(std::countr_zero(lanes)) >> 3);
+          base + (static_cast<uint32_t>(std::countr_zero(lanes)) >> shift);
       if (nseg >= max_fast_path_segments) {
         return false;
       }
@@ -155,38 +162,104 @@ ada_really_inline uint32_t scan_segments(const char* url, uint32_t ulen,
       lanes &= lanes - 1;
     }
     return true;
+  }
+  ada_really_inline uint32_t finish(uint32_t ulen) noexcept {
+    using url_pattern_list_limits::max_fast_path_segments;
+    if (nseg >= max_fast_path_segments) {
+      return 0;
+    }
+    soff[nseg++] = static_cast<uint16_t>(start);
+    soff[nseg] = static_cast<uint16_t>(ulen + 1);  // sentinel
+    return nseg;
+  }
+};
+
+ada_really_inline uint32_t scan_segments_swar(const char* url, uint32_t ulen,
+                                              uint16_t* soff) noexcept {
+  constexpr uint64_t slashes = 0x2F2F2F2F2F2F2F2Full;
+  constexpr uint64_t low7 = 0x7F7F7F7F7F7F7F7Full;
+  // Bit 7 of every byte of x that is zero, exactly: (b & 0x7F) + 0x7F has
+  // bit 7 set iff the low bits are non-zero, b itself has it set iff b is
+  // >= 0x80, and no lane can carry into its neighbour.
+  const auto zero_lanes = [](uint64_t x) noexcept {
+    return ~(((x & low7) + low7) | x | low7);
   };
+  segment_emitter out{soff};
   uint32_t i = 1;
   for (; i + 8 <= ulen; i += 8) {
     const uint64_t lanes = zero_lanes(load8_le(url + i) ^ slashes);
-    if (lanes != 0 && !emit(lanes, i)) {
+    if (lanes != 0 && !out.emit(lanes, i, 3)) {
       return 0;
     }
   }
   if (i < ulen) {  // tail of 1..7 bytes: zero padding is never a '/'
     const uint64_t lanes = zero_lanes(gather_le(url + i, ulen - i) ^ slashes);
-    if (lanes != 0 && !emit(lanes, i)) {
+    if (lanes != 0 && !out.emit(lanes, i, 3)) {
       return 0;
     }
   }
-  if (nseg >= max_fast_path_segments) {
-    return 0;
+  return out.finish(ulen);
+}
+
+#if ADA_NEON
+ada_really_inline uint32_t scan_segments_neon(const char* url, uint32_t ulen,
+                                              uint16_t* soff) noexcept {
+  // Requires ulen >= 16.
+  const uint8x16_t slash = vdupq_n_u8('/');
+  // One bit per byte lane that holds a '/': compare, narrow each 16-bit
+  // pair to its high nibble, keep bit 0 of every nibble.
+  const auto slash_lanes = [&](const char* p) noexcept {
+    const uint8x16_t v = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+    const uint64_t nibbles =
+        vget_lane_u64(vreinterpret_u64_u8(vshrn_n_u16(
+                          vreinterpretq_u16_u8(vceqq_u8(v, slash)), 4)),
+                      0);
+    return nibbles & 0x1111111111111111ull;
+  };
+  segment_emitter out{soff};
+  uint32_t i = 0;
+  for (; i + 16 <= ulen; i += 16) {
+    uint64_t lanes = slash_lanes(url + i);
+    if (i == 0) {
+      lanes &= ~0xFull;  // the leading '/' is not a separator
+    }
+    if (lanes != 0 && !out.emit(lanes, i, 2)) {
+      return 0;
+    }
   }
-  soff[nseg++] = static_cast<uint16_t>(start);
-  soff[nseg] = static_cast<uint16_t>(ulen + 1);  // sentinel
-  return nseg;
+  if (i < ulen) {  // overlapped last block: drop the lanes already scanned
+    const uint32_t off = ulen - 16;
+    const uint64_t lanes = slash_lanes(url + off) & (~0ull << ((i - off) * 4));
+    if (lanes != 0 && !out.emit(lanes, off, 2)) {
+      return 0;
+    }
+  }
+  return out.finish(ulen);
+}
+#endif  // ADA_NEON
+
+ada_really_inline uint32_t scan_segments(const char* url, uint32_t ulen,
+                                         uint16_t* soff) noexcept {
+#if ADA_NEON
+  if (ulen >= 16) {
+    return scan_segments_neon(url, ulen, soff);
+  }
+#endif
+  return scan_segments_swar(url, ulen, soff);
 }
 
 // A "*" segment compiles to "(.*)" in the URLPattern regexp, and "." in an
 // ECMAScript regular expression does not match a line terminator: the tail
 // a wildcard captures must not contain LF or CR. Canonical pathnames never
-// do (both are percent-encoded), so this only decides raw inputs. SWAR, 8
-// bytes per step: "some byte is below 0x20" ("hasless" of Bit Twiddling
-// Hacks) is exact as a yes/no answer, because a borrow can only leave a lane
-// that itself qualifies; only a tail holding a control byte gets the exact
-// byte check. Kept out of line on purpose: inlined into the walk, this loop
-// costs the static and ":param" paths, which never run it, about 5 ns
-// through register allocation; as a call it costs only wildcard hits.
+// do (both are percent-encoded), so this only decides raw inputs. On
+// AArch64 whole 16-byte blocks go through NEON (a running byte minimum);
+// the rest is SWAR, 8 bytes per step: "some byte is below 0x20" ("hasless"
+// of Bit Twiddling Hacks) is exact as a yes/no answer, because a borrow can
+// only leave a lane that itself qualifies. Only a tail holding a control
+// byte gets the exact byte check. Kept out of line on purpose: inlined into
+// the walk, this loop cost the static and ":param" paths, which never run
+// it, about 5 ns through register allocation; as a call it costs only
+// wildcard hits.
 ada_never_inline bool wildcard_tail_ok(const char* p, uint32_t n) noexcept {
   constexpr uint64_t spaces = 0x2020202020202020ull;
   constexpr uint64_t highs = 0x8080808080808080ull;
@@ -195,6 +268,16 @@ ada_never_inline bool wildcard_tail_ok(const char* p, uint32_t n) noexcept {
   };
   uint64_t control = 0;
   uint32_t i = 0;
+#if ADA_NEON
+  if (n >= 16) {
+    uint8x16_t lowest = vdupq_n_u8(0xFF);
+    for (; i + 16 <= n; i += 16) {
+      lowest =
+          vminq_u8(lowest, vld1q_u8(reinterpret_cast<const uint8_t*>(p + i)));
+    }
+    control = vminvq_u8(lowest) < 0x20 ? 1 : 0;
+  }
+#endif
   for (; i + 8 <= n; i += 8) {
     control |= below_space(load8_le(p + i));
   }

@@ -1586,7 +1586,9 @@ std::vector<uint16_t> naive_segment_starts(std::string_view url) {
 
 }  // namespace
 
-TEST(url_pattern_list, swar_segment_scan_sweep) {
+TEST(url_pattern_list, segment_scan_sweep) {
+  // Both scans (the portable SWAR one, and on AArch64 the NEON one that
+  // scan_segments selects from 16 bytes on) against a naive scanner.
   namespace detail = ada::url_pattern_list_detail;
   using ada::url_pattern_list_limits::max_fast_path_segments;
   std::mt19937_64 rng(0x5CA7ull);
@@ -1618,20 +1620,26 @@ TEST(url_pattern_list, swar_segment_scan_sweep) {
         }
       }
       const std::vector<uint16_t> expected = naive_segment_starts(url);
-      uint16_t soff[max_fast_path_segments + 1];
-      const uint32_t nseg = detail::scan_segments(
-          url.data(), static_cast<uint32_t>(url.size()), soff);
-      if (expected.size() > max_fast_path_segments) {
-        EXPECT_EQ(nseg, 0u) << "len=" << len << " variant=" << variant;
-        continue;
+      for (int which = 0; which < 2; which++) {
+        uint16_t soff[max_fast_path_segments + 1];
+        const uint32_t nseg =
+            which == 0
+                ? detail::scan_segments(url.data(),
+                                        static_cast<uint32_t>(url.size()), soff)
+                : detail::scan_segments_swar(
+                      url.data(), static_cast<uint32_t>(url.size()), soff);
+        if (expected.size() > max_fast_path_segments) {
+          EXPECT_EQ(nseg, 0u) << "len=" << len << " variant=" << variant;
+          continue;
+        }
+        ASSERT_EQ(nseg, expected.size())
+            << "len=" << len << " variant=" << variant << " which=" << which;
+        for (uint32_t i = 0; i < nseg; i++) {
+          EXPECT_EQ(soff[i], expected[i])
+              << "len=" << len << " variant=" << variant << " i=" << i;
+        }
+        EXPECT_EQ(soff[nseg], len + 1);
       }
-      ASSERT_EQ(nseg, expected.size())
-          << "len=" << len << " variant=" << variant;
-      for (uint32_t i = 0; i < nseg; i++) {
-        EXPECT_EQ(soff[i], expected[i])
-            << "len=" << len << " variant=" << variant << " i=" << i;
-      }
-      EXPECT_EQ(soff[nseg], len + 1);
     }
   }
 }
