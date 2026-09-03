@@ -133,7 +133,7 @@ jobs:
       # When cmake_version is set, install that exact version for determinism.
       - name: Setup CMake
         if: ${{ !inputs.use_run_on_arch && inputs.cmake_version != '' }}
-        uses: lukka/get-cmake@591817e96fcad43505fb4eae36172462abb3a42e # v4.3.3
+        uses: lukka/get-cmake@fffaaafeea488556c2c12dad60690008bc1caacb # v4.4.2
         with:
           cmakeVersion: ${{ inputs.cmake_version }}
 
@@ -221,7 +221,7 @@ jobs:
           ./build_install_test/main
 
       # run-on-arch path (for s390x and similar architectures)
-      - uses: uraimo/run-on-arch-action@f9b26e3a1a408d5fd530d20c17b9f3f4428ff8d9 # v3.1.0
+      - uses: uraimo/run-on-arch-action@460cb8e6d9f726a588fc9b5e681c8a6cab09ae41 # v3.2.0
         if: ${{ inputs.use_run_on_arch }}
         name: Build and Test
         with:

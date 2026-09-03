@@ -109,6 +109,10 @@ TEST(url_components, urltestdata_encoding) {
         }
         ASSERT_EQ(href.substr(host_start, url.get_hostname().size()),
                   url.get_hostname());
+        // host_end is one past the host, so slicing to it is the hostname.
+        // Nothing pinned this before, and it was one byte short.
+        ASSERT_EQ(href.substr(host_start, out.host_end - host_start),
+                  url.get_hostname());
 
         if (url.port.has_value()) {
           ASSERT_EQ(out.port, url.port.value());

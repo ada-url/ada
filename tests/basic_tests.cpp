@@ -1043,6 +1043,60 @@ TYPED_TEST(basic_tests, ipv4_fast_path_malformed_groups) {
   SUCCEED();
 }
 
+// Regression coverage for the "::"-bearing branch of the IPv6 host parser
+// (include/ada/url_ip-inl.h, try_parse_ipv6_avx512's `dc` branch on
+// AVX512VBMI2 builds; the scalar compress-shift loop in url.cpp otherwise).
+// These specifically target invariants enforced only by that branch's own
+// checks (kept-group count, per-group width, lone leading/trailing colon)
+// rather than by the outer piece-index bookkeeping, none of which are
+// exercised by the existing WPT urltestdata.json IPv6 cases.
+TYPED_TEST(basic_tests, ipv6_double_colon_boundary_checks) {
+  // "::" must elide at least one group: with all 8 groups already explicit,
+  // using "::" anywhere is invalid (kept == 8).
+  ASSERT_FALSE(ada::parse<TypeParam>("http://[1::2:3:4:5:6:7:8]/"));
+  // Eliding exactly one group is valid; a single elided zero-piece is NOT
+  // compressed back to "::" on serialization (only runs of >= 2 are).
+  {
+    auto ok = ada::parse<TypeParam>("http://[1::2:3:4:5:6:7]/");
+    ASSERT_TRUE(ok);
+    ASSERT_EQ(ok->get_hostname(), "[1:0:2:3:4:5:6:7]");
+  }
+  // A group may hold at most 4 hex digits.
+  ASSERT_FALSE(ada::parse<TypeParam>("http://[::abcde]/"));
+  {
+    auto ok = ada::parse<TypeParam>("http://[::abcd]/");
+    ASSERT_TRUE(ok);
+    ASSERT_EQ(ok->get_hostname(), "[::abcd]");
+  }
+  // Uppercase hex digits are accepted and normalized to lowercase.
+  {
+    auto ok = ada::parse<TypeParam>("http://[AB::CD]/");
+    ASSERT_TRUE(ok);
+    ASSERT_EQ(ok->get_hostname(), "[ab::cd]");
+  }
+  // A leading single colon not immediately followed by another colon is
+  // invalid, even when a genuine "::" appears later in the same host.
+  ASSERT_FALSE(ada::parse<TypeParam>("http://[:1::2]/"));
+  // Likewise for a single trailing colon, even with an earlier genuine "::".
+  ASSERT_FALSE(ada::parse<TypeParam>("http://[1::2:]/"));
+  // More than one "::" is invalid.
+  ASSERT_FALSE(ada::parse<TypeParam>("http://[1::2::3]/"));
+  SUCCEED();
+}
+
+// Boundary coverage for the no-"::" branch: exactly 8 groups, each at the
+// 4-hex-digit width limit (the widest valid non-compressed address).
+TYPED_TEST(basic_tests, ipv6_full_width_no_compression) {
+  auto ok = ada::parse<TypeParam>(
+      "http://[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]/");
+  ASSERT_TRUE(ok);
+  ASSERT_EQ(ok->get_hostname(), "[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]");
+  // One digit too many on any group is invalid.
+  ASSERT_FALSE(ada::parse<TypeParam>(
+      "http://[fffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]/"));
+  SUCCEED();
+}
+
 TEST(ipv4_fast_path, packed_decimal_and_rejects) {
   using ada::checkers::ipv4_fast_fail;
   using ada::checkers::try_parse_ipv4_fast;

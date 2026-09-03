@@ -208,6 +208,31 @@ TYPED_TEST(max_input_length_tests, parse_normalized_just_under_limit) {
   ASSERT_LE(result->get_href().size(), small_limit);
 }
 
+TYPED_TEST(max_input_length_tests, parse_query_normalized_exceeds_limit) {
+  // A URL that terminates in the query state returns before the end-of-parse
+  // length check. file:// takes that slow path (unlike http://x/? which hits
+  // the absolute fast path), so its expanded query must still be rejected.
+  // Normalized = 10 ("file://x/?") + 3*339 spaces + 1 ("y") = 1028 > 1024.
+  std::string input = "file://x/?" + std::string(339, ' ') + "y";
+  ASSERT_LE(input.size(), small_limit);
+  auto result = ada::parse<TypeParam>(input);
+  ASSERT_FALSE(result);
+  ASSERT_FALSE(ada::can_parse(input));
+}
+
+TYPED_TEST(max_input_length_tests, parse_fragment_normalized_exceeds_limit) {
+  // Userinfo forces the slow path, and an authority with no path terminated by
+  // a fragment returns from the authority state after appending the fragment,
+  // before the end-of-parse length check. The expanded fragment must still be
+  // rejected.
+  // Normalized = 11 ("http://u@x#") + 3*339 spaces + 1 ("y") = 1029 > 1024.
+  std::string input = "http://u@x#" + std::string(339, ' ') + "y";
+  ASSERT_LE(input.size(), small_limit);
+  auto result = ada::parse<TypeParam>(input);
+  ASSERT_FALSE(result);
+  ASSERT_FALSE(ada::can_parse(input));
+}
+
 TYPED_TEST(max_input_length_tests, can_parse_matches_parse_for_idna_expansion) {
   // IDNA expands a host by more than the 3x that percent-encoding produces:
   // U+337F is 3 UTF-8 bytes and becomes the 17-byte "xn--6oqv20b1zgzxr", so a
