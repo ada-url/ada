@@ -202,6 +202,9 @@ tl::expected<url_pattern<regex_provider>, errors> parse_url_pattern_impl(
   auto compile_options = url_pattern_compile_component_options::DEFAULT;
   if (options) {
     compile_options.ignore_case = options->ignore_case;
+    // Recorded on the pattern so that url_pattern::ignore_case() reports the
+    // option it was created with.
+    url_pattern_.ignore_case_ = options->ignore_case;
   }
 
   // TODO: Optimization opportunity: Simplify this if statement.

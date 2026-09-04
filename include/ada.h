@@ -58,6 +58,8 @@
 #include "ada/url_pattern_helpers.h"
 #include "ada/url_pattern_helpers-inl.h"
 #include "ada/url_pattern_regex.h"
+#include "ada/url_pattern_list.h"
+#include "ada/url_pattern_list-inl.h"
 
 // Public API
 #include "ada/ada_version.h"
