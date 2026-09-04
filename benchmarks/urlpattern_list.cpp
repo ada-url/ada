@@ -78,9 +78,11 @@ static const std::vector<std::string>& route_table() {
 
 // The same table with one regexp route added, the way a real table grows:
 // a "(\\d+)" route that the specificity order ranks alongside the ":id"
-// routes. Every hit on the compiled fast path must decide, at creation,
-// whether this route can outrank it; here it never can, so std::regex must
-// never run on this stream.
+// routes. Every hit on the compiled fast path decides, at creation, whether
+// this route can outrank it: no ":id" or static winner can be outranked by
+// it, and only a "/*" miss under "/api/v1/invoices/" is a legitimate
+// candidate, so std::regex runs for at most one URL of the stream instead
+// of every one.
 static const std::vector<std::string>& route_table_with_regexp() {
   static const std::vector<std::string> routes = [] {
     std::vector<std::string> r = route_table();
