@@ -269,53 +269,53 @@ auto matched = pattern->test("https://example.com/books/123");
 
 ### URLPattern List (experimental)
 
-`ada::parse_url_pattern_list` compiles a whole set of URLPattern pathname
-patterns into one dispatch structure, `ada::url_pattern_list`, answering
-"which route matches this pathname, and what are the group values?" without
-looping over the patterns and without executing regular expressions for
-routes in the common static / `:param` / `*` subset. It takes the regex
-provider and the options exactly as `ada::parse_url_pattern` does;
-construction canonicalizes the patterns through the URLPattern pattern
-parser, and matching is allocation-free on the fast path.
+A URLPattern list is a set of pathname patterns compiled together, so that
+finding the matching route is one lookup instead of a loop over
+`url_pattern::exec`. It takes the same regex provider as `parse_url_pattern`,
+and only routes that need regexp semantics (custom `(...)` groups, `?`, `+`
+or `*` modifiers) ever reach it. Static, `:param` and `*` routes are matched
+without a regex engine.
 
 ```cpp
-using provider = ada::url_pattern_regex::std_regex_provider;
+// Same provider as for parse_url_pattern; see the URLPattern section above.
 std::vector<std::string_view> routes = {"/", "/users/:id", "/users/me",
-                                        "/static/:file", "/posts/(\\d+)"};
-auto list = ada::parse_url_pattern_list<provider>(routes);
+                                        "/files/*", "/posts/(\\d+)"};
+auto list = ada::parse_url_pattern_list<v8_regex_provider>(routes);
 if (!list) { return EXIT_FAILURE; }
 
+// Match a pathname, for example url.get_pathname()
 auto m = list->match("/users/42");
-// m.route_index == 1; the ":id" capture is a slice of the input:
-// m.captures[0] -> "42", named list->group_names(1)[0] == "id"
+// m.route_index == 1
+// m.captures[0] is the ":id" value as a slice of the input: offset 7, length 2
+// list->group_names(1)[0] == "id"
 
 auto r = list->match("/posts/7");
-// r.route_index == 4, r.regexp_route == true: the route was matched through
-// the provider, and r.regexp_groups[0] == "7" is what regex_search returned.
+// r.route_index == 4 and r.regexp_route == true: matched through the provider
+// r.regexp_groups[0] == "7", as returned by regex_search
 ```
 
-`parse_url_pattern_list` also accepts a base URL and `url_pattern_options`
-(`ignore_case`), and an overload takes existing `ada::url_pattern` objects,
-reusing their compiled pathname components. Match priority is specificity
-order (literal beats `:param` beats `*`, compared per segment from the
-left), with insertion order breaking ties -- the priority scheme of
-find-my-way/Express-style routers. Routes that need URLPattern regexp
-semantics (custom `(...)` groups, `?`/`+`/`*` modifiers) are matched through
-the regex provider with the same `regex_search` call `url_pattern::exec`
-makes, and participate in the same priority order; the list records at
-creation which of them can outrank each compiled route, so a regexp route in
-the table costs nothing on requests it cannot win. Fast-path limits (input
-length 4096, 24 input segments, 16 pattern segments, 8 captures per route)
-are performance gates only: inputs and routes beyond them are matched by a
-sequential fallback with identical semantics. Only the pathname component is
-considered (other components are treated as wildcards); inputs are expected
-in canonical percent-encoded form, as produced by
-`ada::url_aggregator::get_pathname()`.
+Things to know:
 
-This API is experimental and its shape is under discussion: whether a
-standardized `URLPatternList` should use specificity order or pure
-insertion order, and how regexp-route group values should be surfaced, are
-open questions.
+- `match` takes a pathname, not a full URL. Only the pathname is matched;
+  the other components are treated as wildcards.
+- The most specific route wins: a literal segment beats `:param`, which beats
+  `*`, compared segment by segment from the left. Between equally specific
+  routes, the one added first wins. `/users/me` wins over `/users/:id` for
+  `/users/me` whatever the insertion order. This is the order used by routers
+  such as find-my-way and Express.
+- Regexp routes take part in the same order. A regexp route that cannot beat
+  the compiled winner is not executed at all.
+- `parse_url_pattern_list` also takes a base URL and `url_pattern_options`
+  (`ignore_case`), and an overload takes existing `ada::url_pattern` objects
+  and reuses their compiled pathname components.
+- Inputs over 4096 bytes or 24 segments, and routes with more than 16
+  segments, are handled by a slower path with the same result. A route may
+  declare up to 8 captures; beyond that only the first 8 are reported and
+  `captures_truncated` is set.
+
+The API is experimental. Whether a standard URLPatternList should use this
+order or plain insertion order is still being discussed in the WHATWG
+[urlpattern](https://github.com/whatwg/urlpattern/issues/166) repository.
 
 ### C wrapper
 
