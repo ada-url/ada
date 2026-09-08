@@ -949,6 +949,54 @@ bool literal_equals(std::string_view s, const char* text, uint32_t length,
 
 }  // namespace
 
+// Kept out of line on purpose: inlined into the walk, this loop cost the
+// static and ":param" paths, which never run it, about 5 ns through register
+// allocation; as a call it costs only wildcard hits. It lives in this
+// translation unit rather than the header because MSVC's ada_never_inline
+// expands to __declspec(noinline) with no inline linkage, so a definition in
+// the header is emitted in every translation unit and the link fails.
+//
+// On AArch64 whole 16-byte blocks go through NEON (a running byte minimum);
+// the rest is SWAR, 8 bytes per step: "some byte is below 0x20" ("hasless"
+// of Bit Twiddling Hacks) is exact as a yes/no answer, because a borrow can
+// only leave a lane that itself qualifies. Only a tail holding a control
+// byte gets the exact byte check.
+bool wildcard_tail_ok(const char* p, uint32_t n) noexcept {
+  constexpr uint64_t spaces = 0x2020202020202020ull;
+  constexpr uint64_t highs = 0x8080808080808080ull;
+  const auto below_space = [](uint64_t x) noexcept {
+    return (x - spaces) & ~x & highs;
+  };
+  uint64_t control = 0;
+  uint32_t i = 0;
+#if ADA_NEON
+  if (n >= 16) {
+    uint8x16_t lowest = vdupq_n_u8(0xFF);
+    for (; i + 16 <= n; i += 16) {
+      lowest =
+          vminq_u8(lowest, vld1q_u8(reinterpret_cast<const uint8_t*>(p + i)));
+    }
+    control = vminvq_u8(lowest) < 0x20 ? 1 : 0;
+  }
+#endif
+  for (; i + 8 <= n; i += 8) {
+    control |= below_space(load8_le(p + i));
+  }
+  if (i < n) {  // 1..7 bytes, padded with spaces
+    control |= below_space(gather_le(p + i, n - i) |
+                           (spaces & ~low_bytes_mask(n - i)));
+  }
+  if (control == 0) {
+    return true;
+  }
+  for (uint32_t j = 0; j < n; j++) {
+    if (p[j] == '\n' || p[j] == '\r') {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool match_regexp_shape(const compiled_routes& r, uint32_t route,
                         std::string_view pathname, bool fold_input) noexcept {
   const route_record& rt = r.section<route_record>(r.routes_offset)[route];

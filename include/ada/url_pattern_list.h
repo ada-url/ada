@@ -293,6 +293,19 @@ bool match_route_sequential(const compiled_routes& tables, uint32_t route,
 
 /**
  * @private
+ * True when the bytes [p, p + n) hold no line terminator. A "*" segment
+ * compiles to "(.*)" in the URLPattern regexp, and "." in an ECMAScript
+ * regular expression does not match LF or CR, so a wildcard may not capture
+ * past one. Deliberately not inlined into the walk (it costs the static and
+ * ":param" paths, which never run it), and deliberately defined in
+ * url_pattern_list.cpp rather than here: MSVC's ada_never_inline carries no
+ * inline linkage, so a definition in this header is emitted in every
+ * translation unit.
+ */
+bool wildcard_tail_ok(const char* p, uint32_t n) noexcept;
+
+/**
+ * @private
  * Cheap pre-check for a regexp-mode route before running the provider: the
  * part of the route's segment shape that is certain (see the compiler's
  * approximate_kind_sequence) must fit the pathname -- its anchored literal
@@ -321,6 +334,31 @@ constexpr bool outranks(uint64_t a_sequence, uint32_t a_length, size_t a_index,
 }
 
 }  // namespace url_pattern_list_detail
+
+template <url_pattern_regex::regex_concept regex_provider>
+class url_pattern_list;
+
+/**
+ * @private
+ * url_pattern_list befriends these two specializations, so they have to be
+ * declared before it: a friend declaration that redeclares the function
+ * template instead is not matched by every compiler we support (Apple clang
+ * 15 rejects the resulting member access). The documented declarations are
+ * in implementation.h, next to parse_url_pattern, and carry the default
+ * arguments: this header includes url_pattern.h, which includes
+ * implementation.h, so those declarations are always seen first, and a
+ * function template may not gain default arguments in a later declaration.
+ */
+template <url_pattern_regex::regex_concept regex_provider>
+ada_warn_unused tl::expected<url_pattern_list<regex_provider>, errors>
+parse_url_pattern_list(std::span<const std::string_view> pathname_patterns,
+                       const std::string_view* base_url,
+                       const url_pattern_options* options);
+
+/** @private See above. */
+template <url_pattern_regex::regex_concept regex_provider>
+ada_warn_unused tl::expected<url_pattern_list<regex_provider>, errors>
+parse_url_pattern_list(std::span<const url_pattern<regex_provider>> patterns);
 
 /**
  * @brief A compiled set of URLPattern pathname patterns with one-shot
@@ -399,14 +437,13 @@ class url_pattern_list {
     return compiled_.ignore_case != 0;
   }
 
-  template <url_pattern_regex::regex_concept P>
-  friend tl::expected<url_pattern_list<P>, errors> parse_url_pattern_list(
+  friend tl::expected<url_pattern_list, errors>
+  parse_url_pattern_list<regex_provider>(
       std::span<const std::string_view> pathname_patterns,
       const std::string_view* base_url, const url_pattern_options* options);
 
-  template <url_pattern_regex::regex_concept P>
-  friend tl::expected<url_pattern_list<P>, errors> parse_url_pattern_list(
-      std::span<const url_pattern<P>> patterns);
+  friend tl::expected<url_pattern_list, errors> parse_url_pattern_list<
+      regex_provider>(std::span<const url_pattern<regex_provider>> patterns);
 
  private:
   /** @private Compiles the (already processed) pattern strings; the regexp
