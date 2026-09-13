@@ -56,6 +56,18 @@ $CXX -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=1 \
      url_pattern.o \
      -o $OUT/url_pattern
 
+# url_pattern_list shares the std_regex_provider caveat above: testing only.
+$CXX -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=1 \
+     $CFLAGS $CXXFLAGS \
+     -std=c++20 \
+     -I build/singleheader \
+     -c fuzz/url_pattern_list.cc -o url_pattern_list.o
+
+$CXX -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=1 \
+     $CFLAGS $CXXFLAGS $LIB_FUZZING_ENGINE \
+     url_pattern_list.o \
+     -o $OUT/url_pattern_list
+
 $CXX $CFLAGS $CXXFLAGS \
      -std=c++20 \
      -I build/singleheader \

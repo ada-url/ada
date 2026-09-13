@@ -11,9 +11,10 @@
 #ifndef ADA_IMPLEMENTATION_H
 #define ADA_IMPLEMENTATION_H
 
+#include <optional>
+#include <span>
 #include <string>
 #include <string_view>
-#include <optional>
 
 #include "ada/url.h"
 #include "ada/common_defs.h"
@@ -141,6 +142,52 @@ ada_warn_unused tl::expected<url_pattern<regex_provider>, errors>
 parse_url_pattern(std::variant<std::string_view, url_pattern_init>&& input,
                   const std::string_view* base_url = nullptr,
                   const url_pattern_options* options = nullptr);
+
+template <url_pattern_regex::regex_concept regex_provider>
+class url_pattern_list;
+
+/**
+ * Compiles a set of URLPattern pathname patterns into an ada::url_pattern_list
+ * (experimental): one structure that answers "which route matches this
+ * pathname, and what are its group values?" without a loop over the
+ * patterns and without executing regular expressions for routes written in
+ * the static / ":param" / "*" subset.
+ *
+ * @tparam regex_provider The regex implementation, as for parse_url_pattern;
+ *         it is used only for routes that need URLPattern regexp semantics.
+ *
+ * @param pathname_patterns URLPattern pathname patterns (valid UTF-8), for
+ *        example "/users/:id". The index of a pattern is the route index
+ *        reported by url_pattern_list::match; duplicates are allowed.
+ * @param base_url Optional pointer to a base URL string (valid UTF-8): each
+ *        pattern is then processed as the pathname of a URLPatternInit with
+ *        that base URL (relative patterns resolve against its path).
+ * @param options Optional pointer to configuration options (ignore_case),
+ *        applied to every route as parse_url_pattern applies them.
+ *
+ * @return A `tl::expected` containing either the compiled list on success,
+ *         or an error code when a pattern is not a valid URLPattern pathname
+ *         pattern (errors::type_error, as the URLPattern constructor).
+ *
+ * @see https://github.com/whatwg/urlpattern/issues/166
+ */
+template <url_pattern_regex::regex_concept regex_provider>
+ada_warn_unused tl::expected<url_pattern_list<regex_provider>, errors>
+parse_url_pattern_list(std::span<const std::string_view> pathname_patterns,
+                       const std::string_view* base_url = nullptr,
+                       const url_pattern_options* options = nullptr);
+
+/**
+ * Compiles the pathname components of existing url_pattern objects into an
+ * ada::url_pattern_list (experimental). Only the pathname component of each
+ * pattern is used; routes that need the regex provider reuse the pattern's
+ * already compiled pathname component. All patterns must share the same
+ * ignore_case setting (errors::type_error otherwise); the pathname is
+ * compiled as for a special-scheme URL.
+ */
+template <url_pattern_regex::regex_concept regex_provider>
+ada_warn_unused tl::expected<url_pattern_list<regex_provider>, errors>
+parse_url_pattern_list(std::span<const url_pattern<regex_provider>> patterns);
 #endif  // ADA_INCLUDE_URL_PATTERN
 
 /**
