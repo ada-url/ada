@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
 template <class T>
@@ -2293,4 +2294,57 @@ TYPED_TEST(basic_tests,
   check("http://ab:81#f ", "http://ab:81/#f");
   // a byte that legitimately needs encoding is still encoded
   check("http://ab?x y", "http://ab/?x%20y");
+}
+
+TYPED_TEST(basic_tests, x86_64_v2_long_url_parse) {
+  auto r = ada::parse<TypeParam>(
+      "https://abcdefghijklmnopqrstuvwxyz012345.example.com/path");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_hostname(), "abcdefghijklmnopqrstuvwxyz012345.example.com");
+
+  r = ada::parse<TypeParam>(
+      "https://user:password@abcdefghijklmnopqrstuvwxyz.example.com/foo");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_username(), "user");
+  ASSERT_EQ(r->get_password(), "password");
+  ASSERT_EQ(r->get_hostname(), "abcdefghijklmnopqrstuvwxyz.example.com");
+
+  // Long userinfo so the authority delimiter sits past a 16-byte window.
+  const std::string long_user(40, 'u');
+  r = ada::parse<TypeParam>("https://" + long_user + "@example.com/foo");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_username(), long_user);
+  ASSERT_EQ(r->get_hostname(), "example.com");
+  ASSERT_EQ(r->get_pathname(), "/foo");
+
+  r = ada::parse<TypeParam>("https://[::1]:8080/path");
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_hostname(), "[::1]");
+  ASSERT_EQ(r->get_port(), "8080");
+  ASSERT_EQ(r->get_pathname(), "/path");
+
+  // Tabs/newlines must be stripped on a string long enough for the SSSE3
+  // window, including a match that sits only in the overlapping tail.
+  std::string with_tab = "https://abcdefghijklmnopqrstuvwxyz.example.com/foo";
+  with_tab.insert(with_tab.size() - 2, "\t");
+  r = ada::parse<TypeParam>(with_tab);
+  ASSERT_TRUE(r);
+  ASSERT_EQ(r->get_pathname(), "/foo");
+
+  const std::string long_host = "abcdefghijklmnopqrstuvwxyz.example.com";
+  const size_t tab_positions[] = {0, 8, 16, long_host.size() - 1};
+  for (char ws : {'\t', '\n', '\r'}) {
+    for (size_t pos : tab_positions) {
+      std::string host = long_host;
+      host.insert(pos, 1, ws);
+      r = ada::parse<TypeParam>("https://" + host + "/");
+      ASSERT_TRUE(r) << "ws=" << int(ws) << " pos=" << pos;
+      ASSERT_EQ(r->get_hostname(), long_host);
+    }
+  }
+
+  r = ada::parse<TypeParam>("https://example.com/#newfragment");
+  ASSERT_TRUE(r);
+  r->set_hash("#otherfragment");
+  ASSERT_EQ(r->get_hash(), "#otherfragment");
 }
