@@ -5824,7 +5824,24 @@ inline static bool is_rtl_label(const std::u32string_view label) noexcept {
   return (directions & mask) != 0;
 }
 
-bool is_label_valid(const std::u32string_view label) {
+bool is_bidi_domain(const std::u32string_view domain) {
+  if (!ensure_tables() || dir_start == nullptr || dir_final == nullptr ||
+      dir_value == nullptr) {
+    return false;
+  }
+  for (const char32_t c : domain) {
+    if (c < 0x80) {
+      continue;  // ASCII is never R, AL or AN
+    }
+    const direction d = find_direction(c);
+    if (d == direction::R || d == direction::AL || d == direction::AN) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool is_label_valid(const std::u32string_view label, const bool bidi_domain) {
   if (label.empty()) {
     return true;
   }
@@ -6004,7 +6021,7 @@ bool is_label_valid(const std::u32string_view label) {
   // A "Bidi domain name" is a domain name that contains at least one RTL label.
   // The following rule, consisting of six conditions, applies to labels in Bidi
   // domain names.
-  if (is_rtl_label(label)) {
+  if (bidi_domain || is_rtl_label(label)) {
     // The first character must be a character with Bidi property L, R,
     // or AL. If it has the R or AL property, it is an RTL label; if it
     // has the L property, it is an LTR label.
@@ -6071,6 +6088,10 @@ bool is_label_valid(const std::u32string_view label) {
   }
 
   return true;
+}
+
+bool is_label_valid(const std::u32string_view label) {
+  return is_label_valid(label, false);
 }
 
 }  // namespace ada::idna
@@ -6149,6 +6170,19 @@ namespace ada::idna {
  * @see https://www.unicode.org/reports/tr46/#Validity_Criteria
  */
 bool is_label_valid(std::u32string_view label);
+
+/**
+ * Same check for a label of a Bidi domain name: with bidi_domain set, the
+ * RFC 5893 conditions apply even when the label has no RTL code point.
+ */
+bool is_label_valid(std::u32string_view label, bool bidi_domain);
+
+/**
+ * True when the domain contains a code point of Bidi class R, AL or AN, which
+ * makes it a Bidi domain name.
+ * @see https://www.rfc-editor.org/rfc/rfc5893#section-2
+ */
+bool is_bidi_domain(std::u32string_view domain);
 
 }  // namespace ada::idna
 
@@ -6280,6 +6314,10 @@ static bool is_ace_prefix(std::u32string_view label) noexcept {
   // Estimate ASCII output size (punycode may expand non-ASCII labels).
   out.reserve(mapped.size() + 8);
 
+  // In a Bidi domain name every label, ASCII ones included, must satisfy the
+  // RFC 5893 conditions, so the domain is classified before its labels.
+  bool bidi_domain = is_bidi_domain(mapped);
+
   // Walk labels with a single pointer scan (no repeated string::find).
   const char32_t* p = mapped.data();
   const char32_t* const end = p + mapped.size();
@@ -6329,14 +6367,26 @@ static bool is_ace_prefix(std::u32string_view label) noexcept {
           return false;
         }
       }
-      if (post_map.empty() || !is_label_valid(post_map)) {
+      if (!bidi_domain && is_bidi_domain(post_map)) {
+        // The RTL code points are inside an ACE label, so the labels already
+        // converted were not held to the Bidi conditions: start over.
+        bidi_domain = true;
+        out.clear();
+        p = mapped.data();
+        continue;
+      }
+      if (post_map.empty() || !is_label_valid(post_map, bidi_domain)) {
         out.clear();
         return false;
       }
     } else if (is_ascii(label_view)) {
+      if (bidi_domain && !is_label_valid(label_view, true)) {
+        out.clear();
+        return false;
+      }
       append_ascii_label(out, label_view);
     } else {
-      if (!is_label_valid(label_view)) {
+      if (!is_label_valid(label_view, bidi_domain)) {
         out.clear();
         return false;
       }

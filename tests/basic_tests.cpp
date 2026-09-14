@@ -2294,3 +2294,30 @@ TYPED_TEST(basic_tests,
   // a byte that legitimately needs encoding is still encoded
   check("http://ab?x y", "http://ab/?x%20y");
 }
+
+TYPED_TEST(basic_tests, bidi_domain_rule_applies_to_every_label) {
+  // RFC 5893 constrains every label of a domain that has an RTL label, so a
+  // label with no RTL code point of its own can still be invalid there.
+  auto host_of = [](std::string_view input) -> std::string {
+    auto r = ada::parse<TypeParam>(input);
+    return r ? std::string(r->get_host()) : std::string();
+  };
+  // an LTR label starts with a letter and ends with a letter or digit
+  ASSERT_EQ(host_of("http://\xd8\xa7.x1/"), "xn--mgb.x1");
+  ASSERT_EQ(host_of("http://a1.\xd7\x90/"), "a1.xn--4db");
+  // it may not start with a digit, nor start or end with a hyphen
+  ASSERT_FALSE(ada::parse<TypeParam>("http://\xd8\xa7.1x/"));
+  ASSERT_FALSE(ada::parse<TypeParam>("http://x.1.\xd7\x90/"));
+  ASSERT_FALSE(ada::parse<TypeParam>("http://\xd8\xa7.-a/"));
+  ASSERT_FALSE(ada::parse<TypeParam>("http://\xd8\xa7.a-/"));
+  // the RTL label may be an ACE label of a non-ASCII domain
+  ASSERT_FALSE(ada::parse<TypeParam>("http://xn--mgb.1x.\xc3\xa9/"));
+  // an all-ASCII domain keeps the URL standard's ASCII carve-out
+  ASSERT_EQ(host_of("http://xn--mgb.1x/"), "xn--mgb.1x");
+  auto url = ada::parse<TypeParam>("http://x/");
+  ASSERT_TRUE(url);
+  ASSERT_FALSE(url->set_hostname("\xd8\xa7.1x"));
+  ASSERT_EQ(url->get_hostname(), "x");
+  ASSERT_TRUE(url->set_hostname("\xd8\xa7.x1"));
+  ASSERT_EQ(url->get_hostname(), "xn--mgb.x1");
+}
