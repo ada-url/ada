@@ -108,6 +108,7 @@ cmake --build build
 | `ADA_BUILD_SINGLE_HEADER_LIB` | OFF | Build from single-header amalgamated files |
 | `ADA_USE_SIMDUTF` | OFF | Enable SIMD-accelerated Unicode via simdutf |
 | `ADA_USE_UNSAFE_STD_REGEX_PROVIDER` | OFF (ON when `ADA_TESTING=ON`) | Enable `std_regex_provider` (`std::regex`-backed). Required to build the `urlpattern` benchmark or any code using `ada::url_pattern_regex::std_regex_provider`. Not recommended for production (ReDoS risk) |
+| `ADA_NEON_SAFE_ZERO_CHECK` | OFF | Test whether a NEON register is all zeros with an integer compare instead of a float compare against 0.0. The float path is faster but incorrect if flush-to-zero is enabled |
 | `CMAKE_BUILD_TYPE` | - | Set to `Release` for optimized builds, `Debug` for development |
 
 ## Running Tests

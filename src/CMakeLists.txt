@@ -56,6 +56,10 @@ if(ADA_LOGGING)
   target_compile_definitions(ada PRIVATE ADA_LOGGING=1)
 endif()
 
+if(ADA_NEON_SAFE_ZERO_CHECK)
+  target_compile_definitions(ada PRIVATE ADA_NEON_SAFE_ZERO_CHECK=1)
+endif()
+
 if(ADA_TESTING)
   target_compile_definitions(ada PRIVATE ADA_TESTING=1)
 endif()

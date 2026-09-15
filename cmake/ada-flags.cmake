@@ -20,6 +20,7 @@ option(ADA_BENCHMARKS "Build benchmarks" OFF)
 option(ADA_TESTING "Build tests" OFF)
 option(ADA_USE_UNSAFE_STD_REGEX_PROVIDER "Enable unsafe regex provider that uses std::regex" OFF)
 option(ADA_INCLUDE_URL_PATTERN "Include URL pattern implementation" ON)
+option(ADA_NEON_SAFE_ZERO_CHECK "Use an integer compare instead of a float compare when testing whether a NEON register is all zeros (safer if flush-to-zero is enabled)" OFF)
 
 if (ADA_COVERAGE)
     message(STATUS "You want to compute coverage. We assume that you have installed gcovr.")

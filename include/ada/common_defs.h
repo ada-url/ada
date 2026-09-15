@@ -289,4 +289,11 @@ namespace ada {
 #define ADA_INCLUDE_URL_PATTERN 1
 #endif  // ADA_INCLUDE_URL_PATTERN
 
+// When set, NEON all-zero tests use an integer compare instead of
+// reinterpreting the bits as a double. The double compare is faster (no
+// GPR transfer) but is incorrect if flush-to-zero is enabled.
+#ifndef ADA_NEON_SAFE_ZERO_CHECK
+#define ADA_NEON_SAFE_ZERO_CHECK 0
+#endif  // ADA_NEON_SAFE_ZERO_CHECK
+
 #endif  // ADA_COMMON_DEFS_H
