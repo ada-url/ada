@@ -2,9 +2,7 @@
 #include "gtest/gtest.h"
 #include "simdjson.h"
 #include <filesystem>
-extern "C" {
 #include "ada_c.h"
-}
 
 #ifndef WPT_DATA_DIR
 #define WPT_DATA_DIR "wpt/"

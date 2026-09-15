@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // This is a reference to ada::url_components::omitted
 // It represents "uint32_t(-1)"
 #define ada_url_omitted 0xffffffff
@@ -205,5 +209,9 @@ typedef struct {
 
 const char* ada_get_version();
 ada_version_components ada_get_version_components();
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
 
 #endif  // ADA_C_H
