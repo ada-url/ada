@@ -130,10 +130,16 @@ ada_really_inline bool has_tabs_or_newline(
     running = vorrq_u8(running, vceqq_u8(vqtbl1q_u8(rnt, word), word));
   }
   // `running` accumulates comparison results, so every lane is 0x00 or 0xFF:
-  // narrowing to four bits per lane and comparing the result against zero as a
-  // double is a cheaper "is anything set?" test than a horizontal maximum.
+  // narrowing to four bits per lane and testing against zero is cheaper than a
+  // horizontal maximum. The double compare is faster (no GPR transfer) but
+  // incorrect if flush-to-zero is enabled; ADA_NEON_SAFE_ZERO_CHECK uses an
+  // integer compare instead.
   uint8x8_t narrowed = vshrn_n_u16(vreinterpretq_u16_u8(running), 4);
+#if ADA_NEON_SAFE_ZERO_CHECK
+  return vget_lane_u64(vreinterpret_u64_u8(narrowed), 0) != 0;
+#else
   return vdupd_lane_f64(vreinterpret_f64_u8(narrowed), 0) != 0.0;
+#endif
 }
 #elif ADA_SSE2
 ada_really_inline bool has_tabs_or_newline(

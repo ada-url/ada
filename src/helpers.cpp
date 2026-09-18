@@ -201,16 +201,21 @@ ada_really_inline int trailing_zeroes64(uint64_t input_num) noexcept {
 // with a floating-point compare against zero, avoiding a transfer to a
 // general-purpose register on the common no-match path.
 //
-// The floating-point compare is only safe because the lanes are 0x00/0xFF:
-// each byte of the narrowed value is then one of 0x00, 0x0F, 0xF0 or 0xFF,
-// so the result can never be the negative-zero bit pattern (which would
-// compare equal to 0.0). Do not use this on arbitrary vectors.
+// The floating-point compare treats the nibble mask as an IEEE 754 double.
+// Negative zero cannot occur (each byte is 0x00, 0x0F, 0xF0 or 0xFF), but a
+// mask with only low bits set is a denormal: if flush-to-zero is enabled,
+// those compare equal to 0.0. Do not use this on arbitrary vectors.
+// Define ADA_NEON_SAFE_ZERO_CHECK to 1 to use an integer compare instead.
 ada_really_inline uint8x8_t to_nibble_mask(uint8x16_t comparison) noexcept {
   return vshrn_n_u16(vreinterpretq_u16_u8(comparison), 4);
 }
 
 ada_really_inline bool any_set(uint8x8_t nibble_mask) noexcept {
+#if ADA_NEON_SAFE_ZERO_CHECK
+  return vget_lane_u64(vreinterpret_u64_u8(nibble_mask), 0) != 0;
+#else
   return vdupd_lane_f64(vreinterpret_f64_u8(nibble_mask), 0) != 0.0;
+#endif
 }
 
 // index of the first matching byte; only meaningful when any_set is true.
