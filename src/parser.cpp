@@ -1721,51 +1721,6 @@ result_type parse_url_impl(std::string_view user_input,
     }
   };
 
-  // Sets url's path and query to base's. The aggregator's update_base_pathname
-  // reads has_opaque_path, so callers order that store around this call.
-  const auto copy_base_path_and_query = [&]() {
-    if constexpr (result_type_is_ada_url) {
-      url.path = base_url->path;
-      url.query = base_url->query;
-    } else {
-      url.update_base_pathname(base_url->get_pathname());
-      if (base_url->has_search()) {
-        // get_search() returns "" for an empty query string (URL ends
-        // with '?'). update_base_search("") would incorrectly clear the
-        // query, so pass "?" to preserve the empty query distinction.
-        auto s = base_url->get_search();
-        url.update_base_search(s.empty() ? std::string_view("?") : s);
-      }
-    }
-  };
-
-  // Sets url's username, password, host, and port to base's.
-  const auto copy_base_authority = [&]() {
-    if constexpr (result_type_is_ada_url) {
-      url.username = base_url->username;
-      url.password = base_url->password;
-      url.host = base_url->host;
-      url.port = base_url->port;
-    } else {
-      url.update_base_authority(base_url->get_href(),
-                                base_url->get_components());
-      url.update_host_to_base_host(base_url->get_hostname());
-      url.update_base_port(base_url->retrieve_base_port());
-    }
-  };
-
-  const auto shorten_url_path = [&]() {
-    if constexpr (result_type_is_ada_url) {
-      helpers::shorten_path(url.path, url.type);
-    } else {
-      std::string_view path = url.get_pathname();
-      if (helpers::shorten_path(path, url.type)) {
-        // path views url.buffer, so pass a copy.
-        url.update_base_pathname(std::string(path));
-      }
-    }
-  };
-
   // We refuse to parse URL strings that exceed the maximum input length.
   // By default, this is 4GB but can be configured via
   // ada::set_max_input_length().
@@ -1988,7 +1943,20 @@ result_type parse_url_impl(std::string_view user_input,
           ada_log("NO_SCHEME opaque base with fragment");
           url.copy_scheme(*base_url);
           url.has_opaque_path = base_url->has_opaque_path;
-          copy_base_path_and_query();
+
+          if constexpr (result_type_is_ada_url) {
+            url.path = base_url->path;
+            url.query = base_url->query;
+          } else {
+            url.update_base_pathname(base_url->get_pathname());
+            if (base_url->has_search()) {
+              // get_search() returns "" for an empty query string (URL ends
+              // with '?'). update_base_search("") would incorrectly clear the
+              // query, so pass "?" to preserve the empty query distinction.
+              auto s = base_url->get_search();
+              url.update_base_search(s.empty() ? std::string_view("?") : s);
+            }
+          }
           url.update_unencoded_base_hash(*fragment);
           enforce_max_input_length();
           return url;
@@ -2023,20 +1991,6 @@ result_type parse_url_impl(std::string_view user_input,
           state = state::HOST;
           break;
         }
-        const auto append_username = [&](std::string_view value) {
-          if constexpr (result_type_is_ada_url) {
-            url.username += value;
-          } else {
-            url.append_base_username(value);
-          }
-        };
-        const auto append_password = [&](std::string_view value) {
-          if constexpr (result_type_is_ada_url) {
-            url.password += value;
-          } else {
-            url.append_base_password(value);
-          }
-        };
         bool at_sign_seen{false};
         bool password_token_seen{false};
         /**
@@ -2058,9 +2012,17 @@ result_type parse_url_impl(std::string_view user_input,
             // If atSignSeen is true, then prepend "%40" to buffer.
             if (at_sign_seen) {
               if (password_token_seen) {
-                append_password("%40");
+                if constexpr (result_type_is_ada_url) {
+                  url.password += "%40";
+                } else {
+                  url.append_base_password("%40");
+                }
               } else {
-                append_username("%40");
+                if constexpr (result_type_is_ada_url) {
+                  url.username += "%40";
+                } else {
+                  url.append_base_username("%40");
+                }
               }
             }
 
@@ -2073,20 +2035,41 @@ result_type parse_url_impl(std::string_view user_input,
 
               if constexpr (store_values) {
                 if (!password_token_seen) {
-                  append_username(unicode::percent_encode(
-                      authority_view, character_sets::USERINFO_PERCENT_ENCODE));
+                  if constexpr (result_type_is_ada_url) {
+                    url.username += unicode::percent_encode(
+                        authority_view,
+                        character_sets::USERINFO_PERCENT_ENCODE);
+                  } else {
+                    url.append_base_username(unicode::percent_encode(
+                        authority_view,
+                        character_sets::USERINFO_PERCENT_ENCODE));
+                  }
                 } else {
-                  append_username(unicode::percent_encode(
-                      authority_view.substr(0, password_token_location),
-                      character_sets::USERINFO_PERCENT_ENCODE));
-                  append_password(unicode::percent_encode(
-                      authority_view.substr(password_token_location + 1),
-                      character_sets::USERINFO_PERCENT_ENCODE));
+                  if constexpr (result_type_is_ada_url) {
+                    url.username += unicode::percent_encode(
+                        authority_view.substr(0, password_token_location),
+                        character_sets::USERINFO_PERCENT_ENCODE);
+                    url.password += unicode::percent_encode(
+                        authority_view.substr(password_token_location + 1),
+                        character_sets::USERINFO_PERCENT_ENCODE);
+                  } else {
+                    url.append_base_username(unicode::percent_encode(
+                        authority_view.substr(0, password_token_location),
+                        character_sets::USERINFO_PERCENT_ENCODE));
+                    url.append_base_password(unicode::percent_encode(
+                        authority_view.substr(password_token_location + 1),
+                        character_sets::USERINFO_PERCENT_ENCODE));
+                  }
                 }
               }
             } else if constexpr (store_values) {
-              append_password(unicode::percent_encode(
-                  authority_view, character_sets::USERINFO_PERCENT_ENCODE));
+              if constexpr (result_type_is_ada_url) {
+                url.password += unicode::percent_encode(
+                    authority_view, character_sets::USERINFO_PERCENT_ENCODE);
+              } else {
+                url.append_base_password(unicode::percent_encode(
+                    authority_view, character_sets::USERINFO_PERCENT_ENCODE));
+              }
             }
           }
           // Otherwise, if one of the following is true:
@@ -2182,10 +2165,33 @@ result_type parse_url_impl(std::string_view user_input,
           // password, url's host to base's host, url's port to base's port,
           // url's path to a clone of base's path, and url's query to base's
           // query.
-          copy_base_authority();
-          // cloning the base path includes cloning the has_opaque_path flag
+          if constexpr (result_type_is_ada_url) {
+            url.username = base_url->username;
+            url.password = base_url->password;
+            url.host = base_url->host;
+            url.port = base_url->port;
+            // cloning the base path includes cloning the has_opaque_path flag
+            url.has_opaque_path = base_url->has_opaque_path;
+            url.path = base_url->path;
+            url.query = base_url->query;
+          } else {
+            url.update_base_authority(base_url->get_href(),
+                                      base_url->get_components());
+            url.update_host_to_base_host(base_url->get_hostname());
+            url.update_base_port(base_url->retrieve_base_port());
+            // cloning the base path includes cloning the has_opaque_path flag
+            url.has_opaque_path = base_url->has_opaque_path;
+            url.update_base_pathname(base_url->get_pathname());
+            if (base_url->has_search()) {
+              // get_search() returns "" for an empty query string (URL ends
+              // with '?'). update_base_search("") would incorrectly clear the
+              // query, so pass "?" to preserve the empty query distinction.
+              auto s = base_url->get_search();
+              url.update_base_search(s.empty() ? std::string_view("?") : s);
+            }
+          }
+
           url.has_opaque_path = base_url->has_opaque_path;
-          copy_base_path_and_query();
 
           // If c is U+003F (?), then set url's query to the empty string, and
           // state to query state.
@@ -2197,8 +2203,15 @@ result_type parse_url_impl(std::string_view user_input,
           else if (input_position != input_size) {
             // Set url's query to null.
             url.clear_search();
-            // Shorten url's path.
-            shorten_url_path();
+            if constexpr (result_type_is_ada_url) {
+              // Shorten url's path.
+              helpers::shorten_path(url.path, url.type);
+            } else {
+              std::string_view path = url.get_pathname();
+              if (helpers::shorten_path(path, url.type)) {
+                url.update_base_pathname(std::move(std::string(path)));
+              }
+            }
             // Set state to path state and decrease pointer by 1.
             state = state::PATH;
             break;
@@ -2231,7 +2244,17 @@ result_type parse_url_impl(std::string_view user_input,
         // - url's port to base's port,
         // - state to path state, and then, decrease pointer by 1.
         else {
-          copy_base_authority();
+          if constexpr (result_type_is_ada_url) {
+            url.username = base_url->username;
+            url.password = base_url->password;
+            url.host = base_url->host;
+            url.port = base_url->port;
+          } else {
+            url.update_base_authority(base_url->get_href(),
+                                      base_url->get_components());
+            url.update_host_to_base_host(base_url->get_hostname());
+            url.update_base_port(base_url->retrieve_base_port());
+          }
           state = state::PATH;
           break;
         }
@@ -2601,10 +2624,19 @@ result_type parse_url_impl(std::string_view user_input,
           ada_log("FILE base non-null");
           if constexpr (result_type_is_ada_url) {
             url.host = base_url->host;
+            url.path = base_url->path;
+            url.query = base_url->query;
           } else {
             url.update_host_to_base_host(base_url->get_hostname());
+            url.update_base_pathname(base_url->get_pathname());
+            if (base_url->has_search()) {
+              // get_search() returns "" for an empty query string (URL ends
+              // with '?'). update_base_search("") would incorrectly clear the
+              // query, so pass "?" to preserve the empty query distinction.
+              auto s = base_url->get_search();
+              url.update_base_search(s.empty() ? std::string_view("?") : s);
+            }
           }
-          copy_base_path_and_query();
           url.has_opaque_path = base_url->has_opaque_path;
 
           // If c is U+003F (?), then set url's query to the empty string and
@@ -2619,7 +2651,14 @@ result_type parse_url_impl(std::string_view user_input,
             // If the code point substring from pointer to the end of input does
             // not start with a Windows drive letter, then shorten url's path.
             if (!checkers::is_windows_drive_letter(file_view)) {
-              shorten_url_path();
+              if constexpr (result_type_is_ada_url) {
+                helpers::shorten_path(url.path, url.type);
+              } else {
+                std::string_view path = url.get_pathname();
+                if (helpers::shorten_path(path, url.type)) {
+                  url.update_base_pathname(std::move(std::string(path)));
+                }
+              }
             }
             // Otherwise:
             else {
