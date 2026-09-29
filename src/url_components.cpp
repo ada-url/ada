@@ -3,6 +3,8 @@
 
 #include <iterator>
 #include <string>
+#include <string_view>
+#include <utility>
 
 namespace ada {
 
@@ -11,37 +13,23 @@ namespace ada {
   auto back = std::back_insert_iterator(answer);
   answer.append("{\n");
 
-  answer.append("\t\"protocol_end\":\"");
-  helpers::encode_json(std::to_string(protocol_end), back);
-  answer.append("\",\n");
-
-  answer.append("\t\"username_end\":\"");
-  helpers::encode_json(std::to_string(username_end), back);
-  answer.append("\",\n");
-
-  answer.append("\t\"host_start\":\"");
-  helpers::encode_json(std::to_string(host_start), back);
-  answer.append("\",\n");
-
-  answer.append("\t\"host_end\":\"");
-  helpers::encode_json(std::to_string(host_end), back);
-  answer.append("\",\n");
-
-  answer.append("\t\"port\":\"");
-  helpers::encode_json(std::to_string(port), back);
-  answer.append("\",\n");
-
-  answer.append("\t\"pathname_start\":\"");
-  helpers::encode_json(std::to_string(pathname_start), back);
-  answer.append("\",\n");
-
-  answer.append("\t\"search_start\":\"");
-  helpers::encode_json(std::to_string(search_start), back);
-  answer.append("\",\n");
-
-  answer.append("\t\"hash_start\":\"");
-  helpers::encode_json(std::to_string(hash_start), back);
-  answer.append("\",\n");
+  const std::pair<std::string_view, uint32_t> fields[] = {
+      {"protocol_end", protocol_end},
+      {"username_end", username_end},
+      {"host_start", host_start},
+      {"host_end", host_end},
+      {"port", port},
+      {"pathname_start", pathname_start},
+      {"search_start", search_start},
+      {"hash_start", hash_start},
+  };
+  for (const auto& [name, value] : fields) {
+    answer.append("\t\"");
+    answer.append(name);
+    answer.append("\":\"");
+    helpers::encode_json(std::to_string(value), back);
+    answer.append("\",\n");
+  }
 
   answer.append("\n}");
   return answer;

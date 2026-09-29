@@ -22,8 +22,6 @@
 
 namespace ada {
 
-namespace parser {}
-
 /**
  * @brief Memory-efficient URL representation using a single buffer.
  *
@@ -457,7 +455,7 @@ struct url_aggregator : url_base {
 
 };  // url_aggregator
 
-inline std::ostream& operator<<(std::ostream& out, const url& u);
+inline std::ostream& operator<<(std::ostream& out, const url_aggregator& u);
 }  // namespace ada
 
 #endif
