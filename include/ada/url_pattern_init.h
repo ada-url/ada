@@ -13,10 +13,6 @@
 #include <optional>
 #include <iostream>
 
-#if ADA_TESTING
-#include <iostream>
-#endif  // ADA_TESTING
-
 #if ADA_INCLUDE_URL_PATTERN
 namespace ada {
 

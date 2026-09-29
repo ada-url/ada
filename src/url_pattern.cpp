@@ -2,7 +2,6 @@
 
 #include "ada/url_pattern-inl.h"
 
-#include <algorithm>
 #include <optional>
 #include <string>
 
@@ -75,17 +74,15 @@ tl::expected<url_pattern_init, errors> url_pattern_init::process(
         !init.port && !init.username) {
       result.username = url_pattern_helpers::process_base_url_string(
           base_url->get_username(), type);
-    }
 
-    // TODO: Optimization opportunity: Merge this with the previous check.
-    // If type is not "pattern" and init contains none of "protocol",
-    // "hostname", "port", "username" and "password", then set
-    // result["password"] to the result of processing a base URL string given
-    // baseURL's password and type.
-    if (type != process_type::pattern && !init.protocol && !init.hostname &&
-        !init.port && !init.username && !init.password) {
-      result.password = url_pattern_helpers::process_base_url_string(
-          base_url->get_password(), type);
+      // If type is not "pattern" and init contains none of "protocol",
+      // "hostname", "port", "username" and "password", then set
+      // result["password"] to the result of processing a base URL string given
+      // baseURL's password and type.
+      if (!init.password) {
+        result.password = url_pattern_helpers::process_base_url_string(
+            base_url->get_password(), type);
+      }
     }
 
     // If init contains neither "protocol" nor "hostname", then:

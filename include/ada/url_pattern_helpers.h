@@ -91,7 +91,7 @@ class url_pattern_parser {
   // @see https://urlpattern.spec.whatwg.org/#add-a-part
   std::optional<errors> add_part(std::string_view prefix, token* name_token,
                                  token* regexp_or_wildcard_token,
-                                 std::string_view suyffix,
+                                 std::string_view suffix,
                                  token* modifier_token) ada_warn_unused;
 
   std::vector<token> tokens{};
@@ -270,7 +270,7 @@ tl::expected<std::string, errors> canonicalize_username(std::string_view input);
 // @see https://wicg.github.io/urlpattern/#canonicalize-a-password
 tl::expected<std::string, errors> canonicalize_password(std::string_view input);
 
-// @see https://wicg.github.io/urlpattern/#canonicalize-a-password
+// @see https://wicg.github.io/urlpattern/#canonicalize-a-hostname
 tl::expected<std::string, errors> canonicalize_hostname(std::string_view input);
 
 // @see https://wicg.github.io/urlpattern/#canonicalize-an-ipv6-hostname
