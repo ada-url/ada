@@ -27,10 +27,7 @@ namespace ada {
   return !host.has_value() || host->empty() || type == ada::scheme::type::FILE;
 }
 [[nodiscard]] inline bool url::has_empty_hostname() const noexcept {
-  if (!host.has_value()) {
-    return false;
-  }
-  return host->empty();
+  return host.has_value() && host->empty();
 }
 [[nodiscard]] inline bool url::has_hostname() const noexcept {
   return host.has_value();
@@ -52,7 +49,10 @@ inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
   url_components out{};
 
   // protocol ends with ':'. for example: "https:"
-  out.protocol_end = uint32_t(get_protocol().size());
+  out.protocol_end = uint32_t(
+      (is_special() ? ada::scheme::details::is_special_list[type].size()
+                    : non_special_scheme.size()) +
+      1);
 
   // Trailing index is always the next character of the current one.
   // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
@@ -110,10 +110,7 @@ inline std::ostream& operator<<(std::ostream& out, const ada::url& u) {
 
   if (query.has_value()) {
     out.search_start = uint32_t(running_index);
-    running_index += get_search().size();
-    if (get_search().empty()) {
-      running_index++;
-    }
+    running_index += query->size() + 1;  // '?' followed by the query
   }
 
   if (hash.has_value()) {
@@ -318,7 +315,7 @@ ada_really_inline size_t url::parse_port(std::string_view view,
                                          bool check_trailing_content) noexcept {
   ada_log("parse_port('", view, "') ", view.size());
   if (!view.empty() && view[0] == '-') {
-    ada_log("parse_port: view[0] == '0' && view.size() > 1");
+    ada_log("parse_port: view[0] == '-'");
     is_valid = false;
     return 0;
   }

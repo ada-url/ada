@@ -27,15 +27,6 @@ namespace ada {
 
 struct url_aggregator;
 
-// namespace parser {
-// template <typename result_type>
-// result_type parse_url(std::string_view user_input,
-//                       const result_type* base_url = nullptr);
-// template <typename result_type, bool store_values>
-// result_type parse_url_impl(std::string_view user_input,
-//                            const result_type* base_url = nullptr);
-// }
-
 /**
  * @brief Represents a parsed URL with individual string components.
  *
