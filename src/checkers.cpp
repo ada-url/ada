@@ -30,11 +30,8 @@ ada_really_inline constexpr bool is_ipv4(std::string_view view) noexcept {
   if (std::ranges::all_of(view, ada::checkers::is_digit)) {
     return true;
   }
-  // It could be hex (0x), but not if there is a single character.
-  if (view.size() == 1) {
-    return false;
-  }
-  // It must start with 0x.
+  // last_label_may_be_a_number ensured the label starts with a digit, so a
+  // single-character label was accepted above. It must start with 0x.
   if (!view.starts_with("0x")) {
     return false;
   }
@@ -64,8 +61,6 @@ static constexpr std::array<uint8_t, 256> path_signature_table =
           result[i] = 4;
         } else if (i == 0x5c) {
           result[i] = 2;
-        } else {
-          result[i] = 0;
         }
       }
       return result;
