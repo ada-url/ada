@@ -73,32 +73,34 @@ namespace detail {
 // Unrolled pure-decimal IPv4. The common portable path for 7-16 byte hosts.
 ada_really_inline uint64_t
 parse_ipv4_decimal_scalar(std::string_view input) noexcept {
+  const char* p = input.data();
+  const char* const pend = p + input.size();
   uint32_t ipv4 = 0;
   for (int i = 0; i < 4; ++i) {
-    if (input.empty()) [[unlikely]] {
+    if (p == pend) [[unlikely]] {
       return ipv4_fast_fail;
     }
     uint32_t val;
-    char c = input.front();
+    char c = *p;
     if (c >= '0' && c <= '9') [[likely]] {
       val = static_cast<uint32_t>(c - '0');
-      input.remove_prefix(1);
+      ++p;
     } else {
       return ipv4_fast_fail;
     }
-    if (!input.empty()) {
-      c = input.front();
+    if (p < pend) {
+      c = *p;
       if (c >= '0' && c <= '9') {
         if (val == 0) [[unlikely]] {
           return ipv4_fast_fail;
         }
         val = val * 10u + static_cast<uint32_t>(c - '0');
-        input.remove_prefix(1);
-        if (!input.empty()) {
-          c = input.front();
+        ++p;
+        if (p < pend) {
+          c = *p;
           if (c >= '0' && c <= '9') {
             val = val * 10u + static_cast<uint32_t>(c - '0');
-            input.remove_prefix(1);
+            ++p;
             if (val > 255u) [[unlikely]] {
               return ipv4_fast_fail;
             }
@@ -108,14 +110,14 @@ parse_ipv4_decimal_scalar(std::string_view input) noexcept {
     }
     ipv4 = (ipv4 << 8) | val;
     if (i < 3) {
-      if (input.empty() || input.front() != '.') [[unlikely]] {
+      if (p == pend || *p != '.') [[unlikely]] {
         return ipv4_fast_fail;
       }
-      input.remove_prefix(1);
+      ++p;
     }
   }
-  if (!input.empty()) {
-    if (input.size() == 1 && input.front() == '.') {
+  if (p != pend) {
+    if (p == pend - 1 && *p == '.') {
       return ipv4;
     }
     return ipv4_fast_fail;
