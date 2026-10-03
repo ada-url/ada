@@ -442,19 +442,27 @@ void url_aggregator::set_search(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '?' ? input.substr(1) : input;
-  helpers::remove_ascii_tab_or_newline(new_value);
+  std::string_view stripped =
+      input[0] == '?' ? input.substr(1) : input;
+  // Fast path: no tabs/newlines (the common case) avoids the std::string
+  // allocation entirely by passing the view straight to update_base_search.
+  std::string cleaned;
+  std::string_view effective = stripped;
+  if (unicode::has_tabs_or_newline(stripped)) {
+    cleaned = stripped;
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    effective = cleaned;
+  }
 
   auto query_percent_encode_set =
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
                    : ada::character_sets::QUERY_PERCENT_ENCODE;
 
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(new_value.size())) {
+  if (needs_rollback_snapshot(effective.size())) {
     saved_url = *this;
   }
-  update_base_search(new_value, query_percent_encode_set);
+  update_base_search(effective, query_percent_encode_set);
   if (saved_url && buffer.size() > ada::get_max_input_length()) {
     *this = std::move(*saved_url);
     return;
@@ -475,14 +483,21 @@ void url_aggregator::set_hash(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '#' ? input.substr(1) : input;
-  helpers::remove_ascii_tab_or_newline(new_value);
+  std::string_view stripped = input[0] == '#' ? input.substr(1) : input;
+  // Fast path: no tabs/newlines (the common case) avoids the std::string
+  // allocation entirely by passing the view straight through.
+  std::string cleaned;
+  std::string_view effective = stripped;
+  if (unicode::has_tabs_or_newline(stripped)) {
+    cleaned = stripped;
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    effective = cleaned;
+  }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(new_value.size())) {
+  if (needs_rollback_snapshot(effective.size())) {
     saved_url = *this;
   }
-  update_unencoded_base_hash(new_value);
+  update_unencoded_base_hash(effective);
   if (saved_url && buffer.size() > ada::get_max_input_length()) {
     *this = std::move(*saved_url);
     return;
@@ -656,11 +671,20 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   url_aggregator saved_url(*this);
 
   size_t host_end_pos = input.find('#');
-  std::string _host(input.data(), host_end_pos != std::string_view::npos
-                                      ? host_end_pos
-                                      : input.size());
-  helpers::remove_ascii_tab_or_newline(_host);
-  std::string_view new_host(_host);
+  std::string_view host_input(input.data(), host_end_pos != std::string_view::npos
+                                                  ? host_end_pos
+                                                  : input.size());
+  // Fast path: no tabs/newlines (the common case) avoids the std::string
+  // allocation by viewing the input prefix directly.
+  std::string _host_buf;
+  std::string_view new_host;
+  if (unicode::has_tabs_or_newline(host_input)) {
+    _host_buf = host_input;
+    helpers::remove_ascii_tab_or_newline(_host_buf);
+    new_host = _host_buf;
+  } else {
+    new_host = host_input;
+  }
 
   auto check_url_size = [&]() -> bool {
     if (buffer.size() > ada::get_max_input_length()) {
@@ -673,7 +697,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   // If url's scheme is "file", then set state to file host state, instead of
   // host state.
   if (type != ada::scheme::type::FILE) {
-    std::string_view host_view(_host.data(), _host.length());
+    std::string_view host_view = new_host;
     auto [location, found_colon] =
         helpers::get_host_delimiter_location(is_special(), host_view);
 
