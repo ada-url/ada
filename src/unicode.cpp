@@ -561,8 +561,8 @@ static const char* find_first_plus_or_percent(const char* p,
     std::memcpy(&w, p, sizeof(w));
     const uint64_t xor1 = w ^ broadcast('+');
     const uint64_t xor2 = w ^ broadcast('%');
-    const uint64_t m = ((xor1 - ones) & ~xor1 & highs) |
-                       ((xor2 - ones) & ~xor2 & highs);
+    const uint64_t m =
+        ((xor1 - ones) & ~xor1 & highs) | ((xor2 - ones) & ~xor2 & highs);
     if (m != 0) {
       for (int i = 0; i < 8; i++) {
         if (p[i] == '+' || p[i] == '%') {
@@ -664,6 +664,42 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
+  // Short inputs use the scalar path, which also preserves the historical
+  // debug-info shape of these explicit instantiations (libabigail reports a
+  // phantom ABI change if the std::ranges::find_if below disappears, see
+  // abi-suppressions.abignore). The threshold matches percent_encode_index,
+  // whose SIMD kernel likewise engages at 16 bytes, so longer inputs get the
+  // SIMD scan and suffix kernel (see unicode_percent_encode.cpp).
+  if (input.size() < 16) {
+    auto pointer = std::ranges::find_if(input, [character_set](const char c) {
+      return character_sets::bit_at(character_set, c);
+    });
+    ada_log("percent_encode done checking, moved to ",
+            std::distance(input.begin(), pointer));
+
+    // Optimization: Don't iterate if percent encode is not required
+    if (pointer == input.end()) {
+      ada_log("percent_encode encoding not needed.");
+      return false;
+    }
+    if constexpr (!append) {
+      out.clear();
+    }
+    ada_log("percent_encode appending ", std::distance(input.begin(), pointer),
+            " bytes");
+    // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+    out.append(input.data(), std::distance(input.begin(), pointer));
+    ada_log("percent_encode processing ", std::distance(pointer, input.end()),
+            " bytes");
+    for (; pointer != input.end(); pointer++) {
+      if (character_sets::bit_at(character_set, *pointer)) {
+        out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
+      } else {
+        out += *pointer;
+      }
+    }
+    return true;
+  }
   const size_t idx = percent_encode_index(input, character_set);
   ada_log("percent_encode done checking, moved to ", idx);
 

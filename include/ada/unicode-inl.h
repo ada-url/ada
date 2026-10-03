@@ -26,8 +26,7 @@ ada_really_inline size_t percent_encode_index(const std::string_view input,
   // unaffected). Short inputs stay fully inline with no call overhead.
   if (input.size() >= 16) {
     // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-    return percent_encode_index_simd(input.data(), input.size(),
-                                     character_set);
+    return percent_encode_index_simd(input.data(), input.size(), character_set);
   }
   const char* data = input.data();
   const size_t size = input.size();

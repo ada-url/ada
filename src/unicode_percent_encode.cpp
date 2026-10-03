@@ -321,8 +321,7 @@ size_t percent_encode_index_simd(const char* data, size_t size,
       p += 32;
     }
     if (p + 16 <= end) {
-      const __m128i word =
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
+      const __m128i word = _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
       const int mask = ssse3_percent_mask(word, tables);
       if (mask != 0) {
         return static_cast<size_t>(p - data) +
