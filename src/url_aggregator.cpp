@@ -264,8 +264,8 @@ bool url_aggregator::set_username(const std::string_view input) {
   if (needs_rollback_snapshot(input.size())) {
     saved_url = *this;
   }
-  size_t idx = ada::unicode::percent_encode_index(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
+  size_t idx = ada::unicode::percent_encode_index_bytes(
+      input, character_sets::USERINFO_PERCENT_ENCODE_BYTES.data());
   if (idx == input.size()) {
     update_base_username(input);
   } else {
@@ -292,8 +292,8 @@ bool url_aggregator::set_password(const std::string_view input) {
   if (needs_rollback_snapshot(input.size())) {
     saved_url = *this;
   }
-  size_t idx = ada::unicode::percent_encode_index(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
+  size_t idx = ada::unicode::percent_encode_index_bytes(
+      input, character_sets::USERINFO_PERCENT_ENCODE_BYTES.data());
   if (idx == input.size()) {
     update_base_password(input);
   } else {
@@ -1275,8 +1275,8 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
 
   // Return the result of running UTF-8 percent-encode on input using the C0
   // control percent-encode set.
-  size_t idx = ada::unicode::percent_encode_index(
-      input, character_sets::C0_CONTROL_PERCENT_ENCODE);
+  size_t idx = ada::unicode::percent_encode_index_bytes(
+      input, character_sets::C0_CONTROL_PERCENT_ENCODE_BYTES.data());
   if (idx == input.size()) {
     update_base_hostname(input);
   } else {
