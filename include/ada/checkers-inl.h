@@ -72,33 +72,33 @@ namespace detail {
 
 // Unrolled pure-decimal IPv4. The common portable path for 7-16 byte hosts.
 ada_really_inline uint64_t
-parse_ipv4_decimal_scalar(const char* p, const char* pend) noexcept {
+parse_ipv4_decimal_scalar(std::string_view input) noexcept {
   uint32_t ipv4 = 0;
   for (int i = 0; i < 4; ++i) {
-    if (p == pend) [[unlikely]] {
+    if (input.empty()) [[unlikely]] {
       return ipv4_fast_fail;
     }
     uint32_t val;
-    char c = *p;
+    char c = input.front();
     if (c >= '0' && c <= '9') [[likely]] {
       val = static_cast<uint32_t>(c - '0');
-      ++p;
+      input.remove_prefix(1);
     } else {
       return ipv4_fast_fail;
     }
-    if (p < pend) {
-      c = *p;
+    if (!input.empty()) {
+      c = input.front();
       if (c >= '0' && c <= '9') {
         if (val == 0) [[unlikely]] {
           return ipv4_fast_fail;
         }
         val = val * 10u + static_cast<uint32_t>(c - '0');
-        ++p;
-        if (p < pend) {
-          c = *p;
+        input.remove_prefix(1);
+        if (!input.empty()) {
+          c = input.front();
           if (c >= '0' && c <= '9') {
             val = val * 10u + static_cast<uint32_t>(c - '0');
-            ++p;
+            input.remove_prefix(1);
             if (val > 255u) [[unlikely]] {
               return ipv4_fast_fail;
             }
@@ -108,14 +108,14 @@ parse_ipv4_decimal_scalar(const char* p, const char* pend) noexcept {
     }
     ipv4 = (ipv4 << 8) | val;
     if (i < 3) {
-      if (p == pend || *p != '.') [[unlikely]] {
+      if (input.empty() || input.front() != '.') [[unlikely]] {
         return ipv4_fast_fail;
       }
-      ++p;
+      input.remove_prefix(1);
     }
   }
-  if (p != pend) {
-    if (p == pend - 1 && *p == '.') {
+  if (!input.empty()) {
+    if (input.size() == 1 && input.front() == '.') {
       return ipv4;
     }
     return ipv4_fast_fail;
@@ -131,13 +131,14 @@ parse_ipv4_decimal_scalar(const char* p, const char* pend) noexcept {
 // is a dword compare on the zero-padded reversed digit group, in parallel
 // with the convert. Unusual-but-valid forms (octal, hex, leading zeros,
 // fewer than four parts) return ipv4_fast_fail so the general parser runs.
-ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
-                                                 size_t len) noexcept {
+ada_really_inline uint64_t
+try_parse_ipv4_avx512(std::string_view input) noexcept {
   // One trailing dot is WHATWG-legal ("1.2.3.4."); the SIMD kernel is
   // strict four-group dotted-decimal.
-  if (data[len - 1] == '.') {
-    --len;
+  if (input.back() == '.') {
+    input.remove_suffix(1);
   }
+  const size_t len = input.size();
   if (len > 15) [[unlikely]] {
     return ipv4_fast_fail;
   }
@@ -149,8 +150,7 @@ ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
 #endif
   const __mmask16 len_k = static_cast<__mmask16>(len_mask);
   const __m128i dot = _mm_set1_epi8('.');
-  const __m128i v =
-      _mm_mask_loadu_epi8(dot, len_k, reinterpret_cast<const void*>(data));
+  const __m128i v = _mm_mask_loadu_epi8(dot, len_k, input.data());
 
   const __mmask16 delim = _mm_cmpeq_epi8_mask(v, dot);
   const uint32_t dots = static_cast<uint32_t>(delim) & len_mask;
@@ -237,12 +237,11 @@ try_parse_ipv4_fast(std::string_view input) noexcept {
   if (len < 7 || len > 16) [[unlikely]] {
     return ipv4_fast_fail;
   }
-  const char* data = input.data();
 
 #if defined(ADA_AVX512) && defined(__AVX512VBMI2__)
-  return detail::try_parse_ipv4_avx512(data, len);
+  return detail::try_parse_ipv4_avx512(input);
 #else
-  return detail::parse_ipv4_decimal_scalar(data, data + len);
+  return detail::parse_ipv4_decimal_scalar(input);
 #endif
 }
 
