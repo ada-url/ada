@@ -1843,24 +1843,11 @@ result_type parse_url_impl(std::string_view user_input,
   if constexpr (store_values) {
     bool hit_fast_path = false;
     if (base_url == nullptr) {
-      // IPv4/IPv6 miss the fast path. Skip the never_inline call so those
-      // URLs (including SetHref) do not pay for a miss. Userinfo ('@') is
-      // intentionally not pre-scanned: it is rare (<1% of real URLs) and
-      // scan_plain_host rejects it cheaply, so the pre-scan's SIMD load
-      // would cost more on the common no-'@' path than it saves.
-      const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
-      const size_t n = user_input.size();
-      size_t host_start = 0;
-      if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
-        host_start = 7;
-      } else if (n >= 9 && p[5] == ':' && p[6] == '/' && p[7] == '/') {
-        host_start = 8;
-      }
-      const uint8_t host_first = host_start != 0 ? p[host_start] : 0;
-      const bool skip_ip =
-          host_first == '[' || (host_first >= '0' && host_first <= '9');
-      hit_fast_path =
-          !skip_ip && try_parse_simple_absolute(user_input, url);
+      // try_parse_simple_absolute rejects IPv4/IPv6/userinfo hosts itself
+      // (digit/'['-led hosts, '@' in scan_plain_host), so no pre-scan here:
+      // IP/userinfo inputs are rare (<0.1% of real URLs) and only pay for a
+      // cheap miss, while the pre-scan's scheme sniff would cost every URL.
+      hit_fast_path = try_parse_simple_absolute(user_input, url);
     } else {
       hit_fast_path = try_parse_simple_relative(user_input, *base_url, url);
     }
