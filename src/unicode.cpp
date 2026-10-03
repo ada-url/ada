@@ -4,6 +4,7 @@
 #include "ada/character_sets.h"
 #include "ada/common_defs.h"
 #include "ada/log.h"
+#include "ada/unicode-inl.h"
 
 ADA_PUSH_DISABLE_ALL_WARNINGS
 #include "ada_idna.cpp"
@@ -461,6 +462,22 @@ unsigned constexpr convert_hex_to_binary(const char c) noexcept {
   return hex_to_binary_table[c - '0'];
 }
 
+// 0..15 for hex digits, 0xFF otherwise - validate and decode with two loads.
+constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 0xFF;
+  }
+  for (uint8_t i = 0; i < 10; ++i) {
+    t[static_cast<size_t>('0') + i] = i;
+  }
+  for (uint8_t i = 0; i < 6; ++i) {
+    t[static_cast<size_t>('A') + i] = static_cast<uint8_t>(10 + i);
+    t[static_cast<size_t>('a') + i] = static_cast<uint8_t>(10 + i);
+  }
+  return t;
+}();
+
 std::string percent_decode(const std::string_view input, size_t first_percent) {
   // next line is for safety only, we expect users to avoid calling
   // percent_decode when first_percent is outside the range.
@@ -473,8 +490,8 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   const char* const end = src + input.size();
 
   // Decoding never grows the string, so a single pre-sized buffer written via
-  // bulk memcpy of the plain runs (then shrunk to the final length) avoids the
-  // byte-at-a-time appends of the naive version.
+  // bulk memcpy of the plain runs (then shrunk to the final length) avoids
+  // per-byte append overheads.
   std::string out(input.size(), '\0');
   char* d = out.data();
   char* const d0 = d;
@@ -486,12 +503,15 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   while (p < end) {
     if (*p == '%') {
       // Decode runs of valid %XX tightly (common for nested/encoded URLs).
+      // unhex_table validates and decodes with two loads and a single test,
+      // replacing two range checks plus a multiply-add per triplet.
       while (p + 2 < end && *p == '%') {
-        if (!is_ascii_hex_digit(p[1]) || !is_ascii_hex_digit(p[2])) {
+        const uint8_t hi = unhex_table[static_cast<uint8_t>(p[1])];
+        const uint8_t lo = unhex_table[static_cast<uint8_t>(p[2])];
+        if ((hi | lo) >= 16) {
           break;
         }
-        *d++ = static_cast<char>(convert_hex_to_binary(p[1]) * 16 +
-                                 convert_hex_to_binary(p[2]));
+        *d++ = static_cast<char>((hi << 4) | lo);
         p += 3;
       }
       if (p < end && *p == '%') {
@@ -514,21 +534,48 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
   return out;
 }
 
-// 0..15 for hex digits, 0xFF otherwise - validate and decode with two loads.
-constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
-  std::array<uint8_t, 256> t{};
-  for (size_t i = 0; i < 256; ++i) {
-    t[i] = 0xFF;
+// Finds the first '+' or '%' at or after p (before end). A short scalar
+// prologue resolves delimiters a few bytes away (the common case for
+// '+'-separated values) with zero setup overhead; longer runs use an inlined
+// SWAR scan (8 bytes per iteration, no function calls). A single pass keeps
+// delimiter-heavy inputs linear, whereas one memchr per delimiter per run
+// rescans the same bytes repeatedly.
+static const char* find_first_plus_or_percent(const char* p,
+                                              const char* end) noexcept {
+  const size_t n = static_cast<size_t>(end - p);
+  const size_t head = n < 8 ? n : 8;
+  for (size_t i = 0; i < head; i++) {
+    const char c = p[i];
+    if (c == '+' || c == '%') {
+      return p + i;
+    }
   }
-  for (uint8_t i = 0; i < 10; ++i) {
-    t[static_cast<size_t>('0') + i] = i;
+  if (n <= 8) {
+    return end;
   }
-  for (uint8_t i = 0; i < 6; ++i) {
-    t[static_cast<size_t>('A') + i] = static_cast<uint8_t>(10 + i);
-    t[static_cast<size_t>('a') + i] = static_cast<uint8_t>(10 + i);
+  p += 8;
+  constexpr uint64_t ones = 0x0101010101010101ull;
+  constexpr uint64_t highs = 0x8080808080808080ull;
+  for (; p + 8 <= end; p += 8) {
+    uint64_t w;
+    std::memcpy(&w, p, sizeof(w));
+    const uint64_t xor1 = w ^ broadcast('+');
+    const uint64_t xor2 = w ^ broadcast('%');
+    const uint64_t m = ((xor1 - ones) & ~xor1 & highs) |
+                       ((xor2 - ones) & ~xor2 & highs);
+    if (m != 0) {
+      for (int i = 0; i < 8; i++) {
+        if (p[i] == '+' || p[i] == '%') {
+          return p + i;
+        }
+      }
+    }
   }
-  return t;
-}();
+  while (p < end && *p != '+' && *p != '%') {
+    ++p;
+  }
+  return p;
+}
 
 std::string form_urlencoded_decode(const std::string_view input) {
   const size_t len = input.size();
@@ -539,18 +586,15 @@ std::string form_urlencoded_decode(const std::string_view input) {
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   const char* const src = input.data();
   const char* const end = src + len;
-  const char* p = src;
 
   // Advance over the untransformed prefix.
-  while (p < end && *p != '+' && *p != '%') {
-    ++p;
-  }
+  const char* p = find_first_plus_or_percent(src, end);
   if (p == end) {
     return std::string(input);
   }
 
-  // Output is always at most as long as the input: write into a single
-  // pre-sized buffer, then shrink to the final length.
+  // Output never exceeds the input length: write into a single pre-sized
+  // buffer, then shrink to the final length.
   std::string out(len, '\0');
   char* d = out.data();
   char* const d0 = d;
@@ -581,14 +625,11 @@ std::string form_urlencoded_decode(const std::string_view input) {
       }
     } else {
       // Copy a plain run until the next '+' or '%'.
-      const char* start = p;
-      ++p;
-      while (p < end && *p != '+' && *p != '%') {
-        ++p;
-      }
-      const size_t n = static_cast<size_t>(p - start);
-      std::memcpy(d, start, n);
+      const char* run_end = find_first_plus_or_percent(p, end);
+      const size_t n = static_cast<size_t>(run_end - p);
+      std::memcpy(d, p, n);
       d += n;
+      p = run_end;
     }
   }
 
@@ -601,30 +642,20 @@ void percent_encode_suffix(const char* p, const char* end,
 
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
-  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
-    return character_sets::bit_at(character_set, c);
-  });
-  // Optimization: Don't iterate if percent encode is not required
-  if (pointer == input.end()) {
+  const size_t idx = percent_encode_index(input, character_set);
+  // Optimization: Don't allocate if percent encode is not required
+  if (idx == input.size()) {
     return std::string(input);
   }
 
   std::string result;
-  result.reserve(input.length());  // in the worst case, percent encoding might
-                                   // produce 3 characters.
-  result.append(input.substr(0, std::distance(input.begin(), pointer)));
-  if (static_cast<size_t>(input.end() - pointer) >= 48) {
-    percent_encode_suffix(&*pointer, input.data() + input.size(), character_set,
-                          result);
-  } else {
-    for (; pointer != input.end(); pointer++) {
-      if (character_sets::bit_at(character_set, *pointer)) {
-        result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-      } else {
-        result += *pointer;
-      }
-    }
-  }
+  // In the worst case, every remaining byte becomes 3 characters. Reserving
+  // up front avoids any reallocation while encoding.
+  result.reserve(idx + (input.size() - idx) * 3);
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+  result.append(input.data(), idx);
+  percent_encode_suffix(input.data() + idx, input.data() + input.size(),
+                        character_set, result);
   return result;
 }
 
@@ -633,33 +664,28 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
-  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
-    return character_sets::bit_at(character_set, c);
-  });
-  ada_log("percent_encode done checking, moved to ",
-          std::distance(input.begin(), pointer));
+  const size_t idx = percent_encode_index(input, character_set);
+  ada_log("percent_encode done checking, moved to ", idx);
 
   // Optimization: Don't iterate if percent encode is not required
-  if (pointer == input.end()) {
+  if (idx == input.size()) {
     ada_log("percent_encode encoding not needed.");
     return false;
   }
   if constexpr (!append) {
     out.clear();
   }
-  ada_log("percent_encode appending ", std::distance(input.begin(), pointer),
-          " bytes");
+  ada_log("percent_encode appending ", idx, " bytes");
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-  out.append(input.data(), std::distance(input.begin(), pointer));
-  ada_log("percent_encode processing ", std::distance(pointer, input.end()),
-          " bytes");
-  for (; pointer != input.end(); pointer++) {
-    if (character_sets::bit_at(character_set, *pointer)) {
-      out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-    } else {
-      out += *pointer;
-    }
-  }
+  out.append(input.data(), idx);
+  ada_log("percent_encode processing ", input.size() - idx, " bytes");
+  // In the worst case, every remaining byte becomes 3 characters. Reserving
+  // up front avoids any reallocation, and the suffix kernel encodes with SIMD
+  // when it pays off.
+  out.reserve(out.size() + (input.size() - idx) * 3);
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+  percent_encode_suffix(input.data() + idx, input.data() + input.size(),
+                        character_set, out);
   return true;
 }
 
@@ -691,21 +717,14 @@ bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[], size_t index) {
   std::string out;
+  // In the worst case, every remaining byte becomes 3 characters. Reserving
+  // up front avoids any reallocation while encoding.
+  out.reserve(index + (input.size() - index) * 3);
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   out.append(input.data(), index);
-  auto pointer = input.begin() + index;
-  if (static_cast<size_t>(input.end() - pointer) >= 48) {
-    percent_encode_suffix(&*pointer, input.data() + input.size(), character_set,
-                          out);
-  } else {
-    for (; pointer != input.end(); pointer++) {
-      if (character_sets::bit_at(character_set, *pointer)) {
-        out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-      } else {
-        out += *pointer;
-      }
-    }
-  }
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+  percent_encode_suffix(input.data() + index, input.data() + input.size(),
+                        character_set, out);
   return out;
 }
 

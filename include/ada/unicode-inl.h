@@ -7,6 +7,9 @@
 #include "ada/unicode.h"
 #include "ada/character_sets.h"
 
+#include <cstddef>
+#include <cstring>
+
 /**
  * Unicode operations. These functions are not part of our public API and may
  * change at any time.
@@ -18,6 +21,14 @@
 namespace ada::unicode {
 ada_really_inline size_t percent_encode_index(const std::string_view input,
                                               const uint8_t character_set[]) {
+  // Longer inputs use the SIMD kernel in unicode_percent_encode.cpp (separate
+  // translation unit, so the unity-build inlining budget of the URL setters is
+  // unaffected). Short inputs stay fully inline with no call overhead.
+  if (input.size() >= 16) {
+    // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+    return percent_encode_index_simd(input.data(), input.size(),
+                                     character_set);
+  }
   const char* data = input.data();
   const size_t size = input.size();
 

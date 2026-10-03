@@ -289,6 +289,90 @@ void percent_encode_to_wide(const char* p, const char* end,
 
 }  // namespace
 
+// First-byte-needing-encoding scan. Unlike percent_encode_to_wide (which must
+// also emit output and only pays off for longer suffixes), a pure scan has no
+// per-hit append cost, so SIMD wins from a single 16-byte window onward.
+// percent_encode_index dispatches here for inputs of 16+ bytes.
+size_t percent_encode_index_simd(const char* data, size_t size,
+                                 const uint8_t character_set[]) noexcept {
+  const char* p = data;
+  const char* const end = data + size;
+#if ADA_UNICODE_SSSE3
+  {
+    const ssse3_percent_tables tables =
+        load_ssse3_percent_tables(character_set);
+    while (p + 32 <= end) {
+      const __m128i word0 =
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
+      const int mask0 = ssse3_percent_mask(word0, tables);
+      if (mask0 != 0) {
+        return static_cast<size_t>(p - data) +
+               static_cast<size_t>(
+                   trailing_zeroes32(static_cast<uint32_t>(mask0)));
+      }
+      const __m128i word1 =
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(p + 16));
+      const int mask1 = ssse3_percent_mask(word1, tables);
+      if (mask1 != 0) {
+        return static_cast<size_t>(p - data) + 16 +
+               static_cast<size_t>(
+                   trailing_zeroes32(static_cast<uint32_t>(mask1)));
+      }
+      p += 32;
+    }
+    if (p + 16 <= end) {
+      const __m128i word =
+          _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
+      const int mask = ssse3_percent_mask(word, tables);
+      if (mask != 0) {
+        return static_cast<size_t>(p - data) +
+               static_cast<size_t>(
+                   trailing_zeroes32(static_cast<uint32_t>(mask)));
+      }
+      p += 16;
+    }
+  }
+#elif ADA_NEON
+  {
+    const uint8x16x2_t table = load_neon_percent_table(character_set);
+    while (p + 16 <= end) {
+      const uint8x16_t hits = neon_percent_hits(
+          vld1q_u8(reinterpret_cast<const uint8_t*>(p)), table);
+      const uint32_t mask = neon_percent_mask(hits);
+      if (mask != 0) {
+        return static_cast<size_t>(p - data) +
+               static_cast<size_t>(trailing_zeroes32(mask));
+      }
+      p += 16;
+    }
+  }
+#elif ADA_RVV
+  while (p < end) {
+    const size_t remaining = static_cast<size_t>(end - p);
+    const size_t vl = __riscv_vsetvl_e8m1(remaining);
+    const vuint8m1_t word =
+        __riscv_vle8_v_u8m1(reinterpret_cast<const uint8_t*>(p), vl);
+    const vuint8m1_t cs_bytes =
+        __riscv_vluxei8(character_set, __riscv_vsrl(word, 3, vl), vl);
+    const vuint8m1_t bit_mask = __riscv_vsll(__riscv_vmv_v_x_u8m1(1, vl),
+                                             __riscv_vand(word, 7, vl), vl);
+    const long idx = __riscv_vfirst(
+        __riscv_vmsne(__riscv_vand(cs_bytes, bit_mask, vl), 0, vl), vl);
+    if (idx >= 0) {
+      return static_cast<size_t>(p - data) + static_cast<size_t>(idx);
+    }
+    p += vl;
+  }
+  return size;
+#endif
+  for (; p < end; ++p) {
+    if (character_sets::bit_at(character_set, *p)) {
+      return static_cast<size_t>(p - data);
+    }
+  }
+  return size;
+}
+
 void percent_encode_suffix(const char* p, const char* end,
                            const uint8_t character_set[], std::string& out) {
 #if ADA_UNICODE_SSSE3 || ADA_NEON || ADA_RVV

@@ -242,6 +242,16 @@ ada_really_inline size_t percent_encode_index(std::string_view input,
                                               const uint8_t character_set[]);
 /**
  * @private
+ * SIMD-accelerated scan for the first byte requiring percent encoding.
+ * Returns `size` when no byte requires encoding. Defined in
+ * `unicode_percent_encode.cpp`, which compiles as its own translation unit so
+ * that the SIMD kernel does not disturb the unity-build inlining budget of the
+ * URL setters. `percent_encode_index` dispatches here for longer inputs.
+ */
+size_t percent_encode_index_simd(const char* data, size_t size,
+                                 const uint8_t character_set[]) noexcept;
+/**
+ * @private
  * Lowers the string in-place, assuming that the content is ASCII.
  * Return true if the content was ASCII.
  */
