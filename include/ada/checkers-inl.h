@@ -72,9 +72,7 @@ namespace detail {
 
 // Unrolled pure-decimal IPv4. The common portable path for 7-16 byte hosts.
 ada_really_inline uint64_t
-parse_ipv4_decimal_scalar(std::string_view input) noexcept {
-  const char* p = input.data();
-  const char* const pend = p + input.size();
+parse_ipv4_decimal_scalar(const char* p, const char* pend) noexcept {
   uint32_t ipv4 = 0;
   for (int i = 0; i < 4; ++i) {
     if (p == pend) [[unlikely]] {
@@ -125,6 +123,13 @@ parse_ipv4_decimal_scalar(std::string_view input) noexcept {
   return ipv4;
 }
 
+// string_view entry point. The kernel stays pointer-based so the unity
+// TU inlining budget (CodSpeed setters) matches main.
+ada_really_inline uint64_t
+parse_ipv4_decimal_scalar(std::string_view input) noexcept {
+  return parse_ipv4_decimal_scalar(input.data(), input.data() + input.size());
+}
+
 #if defined(ADA_AVX512) && defined(__AVX512VBMI2__)
 // Table-free AVX-512VL IPv4 parse (simdip parse_ipv4_avx512vl_notab5).
 // Needs VBMI2 for vpcompressb; ADA_AVX512 stays BW+VL (IPv6 does not use
@@ -133,14 +138,13 @@ parse_ipv4_decimal_scalar(std::string_view input) noexcept {
 // is a dword compare on the zero-padded reversed digit group, in parallel
 // with the convert. Unusual-but-valid forms (octal, hex, leading zeros,
 // fewer than four parts) return ipv4_fast_fail so the general parser runs.
-ada_really_inline uint64_t
-try_parse_ipv4_avx512(std::string_view input) noexcept {
+ada_really_inline uint64_t try_parse_ipv4_avx512(const char* data,
+                                                 size_t len) noexcept {
   // One trailing dot is WHATWG-legal ("1.2.3.4."); the SIMD kernel is
   // strict four-group dotted-decimal.
-  if (input.back() == '.') {
-    input.remove_suffix(1);
+  if (data[len - 1] == '.') {
+    --len;
   }
-  const size_t len = input.size();
   if (len > 15) [[unlikely]] {
     return ipv4_fast_fail;
   }
@@ -152,7 +156,8 @@ try_parse_ipv4_avx512(std::string_view input) noexcept {
 #endif
   const __mmask16 len_k = static_cast<__mmask16>(len_mask);
   const __m128i dot = _mm_set1_epi8('.');
-  const __m128i v = _mm_mask_loadu_epi8(dot, len_k, input.data());
+  const __m128i v =
+      _mm_mask_loadu_epi8(dot, len_k, reinterpret_cast<const void*>(data));
 
   const __mmask16 delim = _mm_cmpeq_epi8_mask(v, dot);
   const uint32_t dots = static_cast<uint32_t>(delim) & len_mask;
@@ -218,6 +223,11 @@ try_parse_ipv4_avx512(std::string_view input) noexcept {
 #endif
   }
   return ipv4_fast_fail;
+}
+
+ada_really_inline uint64_t
+try_parse_ipv4_avx512(std::string_view input) noexcept {
+  return try_parse_ipv4_avx512(input.data(), input.size());
 }
 #endif  // ADA_AVX512 && __AVX512VBMI2__
 
