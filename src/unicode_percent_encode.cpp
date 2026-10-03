@@ -42,6 +42,12 @@ namespace ada::unicode {
 namespace {
 
 #if ADA_UNICODE_SSSE3 || ADA_NEON
+// Number of dirty bytes in a 16-byte window above which walking the mask
+// (ctz + a branch per hit) costs more than re-testing each byte with the
+// scalar loop. Fully dense windows are the worst case: classification is
+// pure overhead there.
+static constexpr int kPercentDenseWindowMax = 8;
+
 ada_really_inline int trailing_zeroes32(uint32_t input_num) noexcept {
 #ifdef ADA_REGULAR_VISUAL_STUDIO
   unsigned long ret;
@@ -52,35 +58,54 @@ ada_really_inline int trailing_zeroes32(uint32_t input_num) noexcept {
 #endif
 }
 
-// Append one window whose set bits mark bytes that need encoding.
+ada_really_inline int popcount32(uint32_t input_num) noexcept {
+#ifdef ADA_REGULAR_VISUAL_STUDIO
+  return static_cast<int>(__popcnt(input_num));
+#else
+  return __builtin_popcount(input_num);
+#endif
+}
+
+// Encode one window whose set bits mark bytes that need encoding. Runs of
+// clean bytes go out with a single memcpy; each hit expands to its %XX
+// triplet with a 3-byte memcpy. Writing through a raw pointer into the
+// pre-sized tail (see percent_encode_to_wide) avoids one std::string::append
+// call per piece, which dominates dense inputs.
 ada_really_inline void encode_mask_window(const char* p, uint32_t mask,
-                                          size_t width, std::string& out) {
+                                          size_t width, char*& d) {
   uint64_t bits = mask;
   size_t off = 0;
   while (bits != 0) {
     const int zero_run = trailing_zeroes32(static_cast<uint32_t>(bits));
     if (zero_run != 0) {
-      out.append(p + off, static_cast<size_t>(zero_run));
+      const size_t n = static_cast<size_t>(zero_run);
+      std::memcpy(d, p + off, n);
+      d += n;
     }
     off += static_cast<size_t>(zero_run);
-    out.append(character_sets::hex + uint8_t(p[off]) * 4, 3);
+    std::memcpy(d, character_sets::hex + uint8_t(p[off]) * 4, 3);
+    d += 3;
     ++off;
     bits >>= static_cast<unsigned>(zero_run + 1);
   }
   if (off < width) {
-    out.append(p + off, width - off);
+    const size_t n = width - off;
+    std::memcpy(d, p + off, n);
+    d += n;
   }
 }
 #endif  // ADA_UNICODE_SSSE3 || ADA_NEON
 
 ada_really_inline void percent_encode_to_scalar(const char* p, const char* end,
                                                 const uint8_t character_set[],
-                                                std::string& out) {
+                                                char*& d) {
   for (; p != end; ++p) {
-    if (character_sets::bit_at(character_set, *p)) {
-      out.append(character_sets::hex + uint8_t(*p) * 4, 3);
+    const uint8_t b = static_cast<uint8_t>(*p);
+    if (character_sets::bit_at(character_set, b)) {
+      std::memcpy(d, character_sets::hex + b * 4, 3);
+      d += 3;
     } else {
-      out += *p;
+      *d++ = *p;
     }
   }
 }
@@ -130,8 +155,8 @@ ADA_UNICODE_SIMD int ssse3_percent_mask(
 
 ADA_UNICODE_SIMD void percent_encode_to_ssse3(
     const char* p, const char* end, const uint8_t character_set[],
-    const ssse3_percent_tables& tables, std::string& out) {
-  // Pair 16-byte windows so a fully clean 32-byte run is one append.
+    const ssse3_percent_tables& tables, char*& d) {
+  // Pair 16-byte windows so a fully clean 32-byte run is one memcpy.
   while (p + 32 <= end) {
     const __m128i word0 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
     const __m128i word1 =
@@ -139,17 +164,26 @@ ADA_UNICODE_SIMD void percent_encode_to_ssse3(
     const int mask0 = ssse3_percent_mask(word0, tables);
     const int mask1 = ssse3_percent_mask(word1, tables);
     if ((mask0 | mask1) == 0) {
-      out.append(p, 32);
+      std::memcpy(d, p, 32);
+      d += 32;
     } else {
       if (mask0 == 0) {
-        out.append(p, 16);
+        std::memcpy(d, p, 16);
+        d += 16;
+      } else if (popcount32(static_cast<uint32_t>(mask0)) >
+                 kPercentDenseWindowMax) {
+        percent_encode_to_scalar(p, p + 16, character_set, d);
       } else {
-        encode_mask_window(p, static_cast<uint32_t>(mask0), 16, out);
+        encode_mask_window(p, static_cast<uint32_t>(mask0), 16, d);
       }
       if (mask1 == 0) {
-        out.append(p + 16, 16);
+        std::memcpy(d, p + 16, 16);
+        d += 16;
+      } else if (popcount32(static_cast<uint32_t>(mask1)) >
+                 kPercentDenseWindowMax) {
+        percent_encode_to_scalar(p + 16, p + 32, character_set, d);
       } else {
-        encode_mask_window(p + 16, static_cast<uint32_t>(mask1), 16, out);
+        encode_mask_window(p + 16, static_cast<uint32_t>(mask1), 16, d);
       }
     }
     p += 32;
@@ -158,13 +192,17 @@ ADA_UNICODE_SIMD void percent_encode_to_ssse3(
     const __m128i word = _mm_loadu_si128(reinterpret_cast<const __m128i*>(p));
     const int mask = ssse3_percent_mask(word, tables);
     if (mask == 0) {
-      out.append(p, 16);
+      std::memcpy(d, p, 16);
+      d += 16;
+    } else if (popcount32(static_cast<uint32_t>(mask)) >
+               kPercentDenseWindowMax) {
+      percent_encode_to_scalar(p, p + 16, character_set, d);
     } else {
-      encode_mask_window(p, static_cast<uint32_t>(mask), 16, out);
+      encode_mask_window(p, static_cast<uint32_t>(mask), 16, d);
     }
     p += 16;
   }
-  percent_encode_to_scalar(p, end, character_set, out);
+  percent_encode_to_scalar(p, end, character_set, d);
 }
 #endif  // ADA_UNICODE_SSSE3
 
@@ -196,8 +234,7 @@ ada_really_inline uint32_t neon_percent_mask(uint8x16_t hits) noexcept {
 
 ada_really_inline void percent_encode_to_neon(const char* p, const char* end,
                                               const uint8_t character_set[],
-                                              uint8x16x2_t table,
-                                              std::string& out) {
+                                              uint8x16x2_t table, char*& d) {
   while (p + 32 <= end) {
     const uint8x16_t hits0 =
         neon_percent_hits(vld1q_u8(reinterpret_cast<const uint8_t*>(p)), table);
@@ -206,17 +243,30 @@ ada_really_inline void percent_encode_to_neon(const char* p, const char* end,
     const bool clean0 = vmaxvq_u32(vreinterpretq_u32_u8(hits0)) == 0;
     const bool clean1 = vmaxvq_u32(vreinterpretq_u32_u8(hits1)) == 0;
     if (clean0 && clean1) {
-      out.append(p, 32);
+      std::memcpy(d, p, 32);
+      d += 32;
     } else {
       if (clean0) {
-        out.append(p, 16);
+        std::memcpy(d, p, 16);
+        d += 16;
       } else {
-        encode_mask_window(p, neon_percent_mask(hits0), 16, out);
+        const uint32_t mask0 = neon_percent_mask(hits0);
+        if (popcount32(mask0) > kPercentDenseWindowMax) {
+          percent_encode_to_scalar(p, p + 16, character_set, d);
+        } else {
+          encode_mask_window(p, mask0, 16, d);
+        }
       }
       if (clean1) {
-        out.append(p + 16, 16);
+        std::memcpy(d, p + 16, 16);
+        d += 16;
       } else {
-        encode_mask_window(p + 16, neon_percent_mask(hits1), 16, out);
+        const uint32_t mask1 = neon_percent_mask(hits1);
+        if (popcount32(mask1) > kPercentDenseWindowMax) {
+          percent_encode_to_scalar(p + 16, p + 32, character_set, d);
+        } else {
+          encode_mask_window(p + 16, mask1, 16, d);
+        }
       }
     }
     p += 32;
@@ -225,20 +275,26 @@ ada_really_inline void percent_encode_to_neon(const char* p, const char* end,
     const uint8x16_t hits =
         neon_percent_hits(vld1q_u8(reinterpret_cast<const uint8_t*>(p)), table);
     if (vmaxvq_u32(vreinterpretq_u32_u8(hits)) == 0) {
-      out.append(p, 16);
+      std::memcpy(d, p, 16);
+      d += 16;
     } else {
-      encode_mask_window(p, neon_percent_mask(hits), 16, out);
+      const uint32_t mask = neon_percent_mask(hits);
+      if (popcount32(mask) > kPercentDenseWindowMax) {
+        percent_encode_to_scalar(p, p + 16, character_set, d);
+      } else {
+        encode_mask_window(p, mask, 16, d);
+      }
     }
     p += 16;
   }
-  percent_encode_to_scalar(p, end, character_set, out);
+  percent_encode_to_scalar(p, end, character_set, d);
 }
 #endif  // ADA_NEON
 
 #if ADA_RVV
 ada_really_inline void percent_encode_to_rvv(const char* p, const char* end,
                                              const uint8_t character_set[],
-                                             std::string& out) {
+                                             char*& d) {
   while (p < end) {
     const size_t remaining = static_cast<size_t>(end - p);
     const size_t vl = __riscv_vsetvl_e8m1(remaining);
@@ -251,39 +307,51 @@ ada_really_inline void percent_encode_to_rvv(const char* p, const char* end,
     const long idx = __riscv_vfirst(
         __riscv_vmsne(__riscv_vand(cs_bytes, bit_mask, vl), 0, vl), vl);
     if (idx < 0) {
-      out.append(p, vl);
+      std::memcpy(d, p, vl);
+      d += vl;
       p += vl;
       continue;
     }
     if (idx > 0) {
-      out.append(p, static_cast<size_t>(idx));
+      std::memcpy(d, p, static_cast<size_t>(idx));
+      d += idx;
       p += idx;
     }
-    out.append(character_sets::hex + uint8_t(*p) * 4, 3);
+    std::memcpy(d, character_sets::hex + uint8_t(*p) * 4, 3);
+    d += 3;
     ++p;
   }
 }
 #endif  // ADA_RVV
 
 #if ADA_UNICODE_SSSE3 || ADA_NEON || ADA_RVV
-// Setter and existing percent_encode benches are 2-44 bytes. Table setup
-// plus mask walking costs more instructions than bit_at on those inputs
-// (especially dense USERINFO). SIMD pays off on the remaining suffix.
-static constexpr size_t kPercentEncodeSimdMin = 48;
+// Suffix length from which the SIMD classify + pointer-emit kernels pay off
+// over the scalar pointer loop. Emission no longer costs an append call per
+// piece in either path, so this only covers table setup plus mask walking;
+// 32 keeps short setter/bench inputs scalar while routing ~40-byte suffixes
+// with real dirt (e.g. USERINFO bench inputs) to SIMD.
+static constexpr size_t kPercentEncodeSimdMin = 32;
 
 void percent_encode_to_wide(const char* p, const char* end,
                             const uint8_t character_set[], std::string& out) {
-  // Worst case every byte becomes %XX. Avoids realloc while walking windows.
-  out.reserve(out.size() + static_cast<size_t>(end - p) * 3);
+  // Worst case every byte becomes %XX. Extend to the worst-case size up front
+  // (single allocation, if any) so the kernels below can emit through a raw
+  // pointer with memcpy/stores instead of one std::string::append call per
+  // piece, then shrink to the actual length. The fill is memset-fast and every
+  // byte of it is overwritten for dense inputs.
+  const size_t base = out.size();
+  out.resize(base + static_cast<size_t>(end - p) * 3);
+  char* d = out.data() + base;
 #if ADA_UNICODE_SSSE3
   const ssse3_percent_tables tables = load_ssse3_percent_tables(character_set);
-  percent_encode_to_ssse3(p, end, character_set, tables, out);
+  percent_encode_to_ssse3(p, end, character_set, tables, d);
 #elif ADA_NEON
   percent_encode_to_neon(p, end, character_set,
-                         load_neon_percent_table(character_set), out);
+                         load_neon_percent_table(character_set), d);
 #elif ADA_RVV
-  percent_encode_to_rvv(p, end, character_set, out);
+  percent_encode_to_rvv(p, end, character_set, d);
 #endif
+  out.resize(static_cast<size_t>(d - out.data()));
 }
 #endif
 
@@ -380,7 +448,13 @@ void percent_encode_suffix(const char* p, const char* end,
     return;
   }
 #endif
-  percent_encode_to_scalar(p, end, character_set, out);
+  // Short scalar tail: same resize-and-write-through-pointer scheme as the
+  // wide path, so even small suffixes avoid per-byte append calls.
+  const size_t base = out.size();
+  out.resize(base + static_cast<size_t>(end - p) * 3);
+  char* d = out.data() + base;
+  percent_encode_to_scalar(p, end, character_set, d);
+  out.resize(static_cast<size_t>(d - out.data()));
 }
 
 }  // namespace ada::unicode

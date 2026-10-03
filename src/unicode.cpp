@@ -520,13 +520,26 @@ std::string percent_decode(const std::string_view input, size_t first_percent) {
         *d++ = *p++;
       }
     } else {
-      const char* q = static_cast<const char*>(
-          std::memchr(p, '%', static_cast<size_t>(end - p)));
-      const char* run_end = q ? q : end;
-      const size_t n = static_cast<size_t>(run_end - p);
-      std::memcpy(d, p, n);
-      d += n;
-      p = run_end;
+      // Copy a plain run until the next '%'. Bytes a few positions away are
+      // copied inline with a single bounds check (no memchr/memcpy call
+      // overhead, which dominates runs of a handful of bytes); only the
+      // remainder of longer runs goes through memchr/memcpy.
+      const char* q = p;
+      const size_t remaining = static_cast<size_t>(end - q);
+      const char* const pro_end = remaining < 8 ? end : q + 8;
+      while (q < pro_end && *q != '%') {
+        *d++ = *q++;
+      }
+      p = q;
+      if (p < end && *p != '%') {
+        const char* r = static_cast<const char*>(
+            std::memchr(p, '%', static_cast<size_t>(end - p)));
+        const char* run_end = r ? r : end;
+        const size_t n = static_cast<size_t>(run_end - p);
+        std::memcpy(d, p, n);
+        d += n;
+        p = run_end;
+      }
     }
   }
 
@@ -604,11 +617,31 @@ std::string form_urlencoded_decode(const std::string_view input) {
   d += prefix;
 
   while (p < end) {
-    const char c = *p;
-    if (c == '+') {
-      *d++ = ' ';
-      ++p;
-    } else if (c == '%') {
+    // Consume delimiters and short plain runs inline: a bounded scalar pass
+    // with a single bounds check resolves '+' (emitted as space) and nearby
+    // bytes without a finder call per delimiter, which dominates
+    // '+'-separated values. Only longer plain runs and %XX triplets take the
+    // finder / unhex paths below.
+    const char* q = p;
+    const size_t remaining = static_cast<size_t>(end - q);
+    const char* const pro_end = remaining < 8 ? end : q + 8;
+    while (q < pro_end) {
+      const char c = *q;
+      if (c == '+') {
+        *d++ = ' ';
+        ++q;
+      } else if (c == '%') {
+        break;
+      } else {
+        *d++ = c;
+        ++q;
+      }
+    }
+    p = q;
+    if (p >= end) {
+      break;
+    }
+    if (*p == '%') {
       // Decode runs of valid %XX tightly (common for nested URL query values).
       while (p + 2 < end && *p == '%') {
         const uint8_t hi = unhex_table[static_cast<uint8_t>(p[1])];
@@ -667,9 +700,8 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
   // Short inputs use the scalar path, which also preserves the historical
   // debug-info shape of these explicit instantiations (libabigail reports a
   // phantom ABI change if the std::ranges::find_if below disappears, see
-  // abi-suppressions.abignore). The threshold matches percent_encode_index,
-  // whose SIMD kernel likewise engages at 16 bytes, so longer inputs get the
-  // SIMD scan and suffix kernel (see unicode_percent_encode.cpp).
+  // abi-suppressions.abignore). Longer inputs get the SIMD scan and suffix
+  // kernel (see unicode_percent_encode.cpp).
   if (input.size() < 16) {
     auto pointer = std::ranges::find_if(input, [character_set](const char c) {
       return character_sets::bit_at(character_set, c);
