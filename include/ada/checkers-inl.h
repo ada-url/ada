@@ -249,11 +249,12 @@ try_parse_ipv4_fast(std::string_view input) noexcept {
   if (len < 7 || len > 16) [[unlikely]] {
     return ipv4_fast_fail;
   }
+  const char* data = input.data();
 
 #if defined(ADA_AVX512) && defined(__AVX512VBMI2__)
-  return detail::try_parse_ipv4_avx512(input);
+  return detail::try_parse_ipv4_avx512(data, len);
 #else
-  return detail::parse_ipv4_decimal_scalar(input);
+  return detail::parse_ipv4_decimal_scalar(data, data + len);
 #endif
 }
 

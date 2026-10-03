@@ -1100,6 +1100,9 @@ TYPED_TEST(basic_tests, ipv6_full_width_no_compression) {
 TEST(ipv4_fast_path, packed_decimal_and_rejects) {
   using ada::checkers::ipv4_fast_fail;
   using ada::checkers::try_parse_ipv4_fast;
+  ASSERT_EQ(ada::checkers::detail::parse_ipv4_decimal_scalar(
+                std::string_view{"192.168.1.1"}),
+            0xC0A80101ull);
   ASSERT_EQ(try_parse_ipv4_fast("192.168.1.1"), 0xC0A80101ull);
   ASSERT_EQ(try_parse_ipv4_fast("0.0.0.0"), 0ull);
   ASSERT_EQ(try_parse_ipv4_fast("255.255.255.255"), 0xFFFFFFFFull);
