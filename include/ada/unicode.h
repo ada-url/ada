@@ -252,6 +252,20 @@ size_t percent_encode_index_simd(const char* data, size_t size,
                                  const uint8_t character_set[]) noexcept;
 /**
  * @private
+ *
+ * Mid-size scalar scan for the first byte requiring percent encoding. Returns
+ * `size` when no byte requires encoding. Defined in
+ * `unicode_percent_encode.cpp` (same separate translation unit as the SIMD
+ * scan and suffix kernels): the unrolled scalar loop stays out of the unity
+ * build so the out-of-line percent_encode overloads keep their historical
+ * code size and the URL setters stay in L1I, while mid-size scans still get
+ * the faster chunked loop through a single shared hot copy.
+ * `percent_encode_index` dispatches here for inputs of 16-31 bytes.
+ */
+size_t percent_encode_index_scalar(const char* data, size_t size,
+                                   const uint8_t character_set[]) noexcept;
+/**
+ * @private
  * Lowers the string in-place, assuming that the content is ASCII.
  * Return true if the content was ASCII.
  */

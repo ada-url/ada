@@ -617,31 +617,11 @@ std::string form_urlencoded_decode(const std::string_view input) {
   d += prefix;
 
   while (p < end) {
-    // Consume delimiters and short plain runs inline: a bounded scalar pass
-    // with a single bounds check resolves '+' (emitted as space) and nearby
-    // bytes without a finder call per delimiter, which dominates
-    // '+'-separated values. Only longer plain runs and %XX triplets take the
-    // finder / unhex paths below.
-    const char* q = p;
-    const size_t remaining = static_cast<size_t>(end - q);
-    const char* const pro_end = remaining < 8 ? end : q + 8;
-    while (q < pro_end) {
-      const char c = *q;
-      if (c == '+') {
-        *d++ = ' ';
-        ++q;
-      } else if (c == '%') {
-        break;
-      } else {
-        *d++ = c;
-        ++q;
-      }
-    }
-    p = q;
-    if (p >= end) {
-      break;
-    }
-    if (*p == '%') {
+    const char c = *p;
+    if (c == '+') {
+      *d++ = ' ';
+      ++p;
+    } else if (c == '%') {
       // Decode runs of valid %XX tightly (common for nested URL query values).
       while (p + 2 < end && *p == '%') {
         const uint8_t hi = unhex_table[static_cast<uint8_t>(p[1])];
@@ -682,9 +662,6 @@ std::string percent_encode(const std::string_view input,
   }
 
   std::string result;
-  // In the worst case, every remaining byte becomes 3 characters. Reserving
-  // up front avoids any reallocation while encoding.
-  result.reserve(idx + (input.size() - idx) * 3);
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   result.append(input.data(), idx);
   percent_encode_suffix(input.data() + idx, input.data() + input.size(),
@@ -700,9 +677,12 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
   // Short inputs use the scalar path, which also preserves the historical
   // debug-info shape of these explicit instantiations (libabigail reports a
   // phantom ABI change if the std::ranges::find_if below disappears, see
-  // abi-suppressions.abignore). Longer inputs get the SIMD scan and suffix
-  // kernel (see unicode_percent_encode.cpp).
-  if (input.size() < 16) {
+  // abi-suppressions.abignore). Inputs of 32+ bytes get the SIMD scan and
+  // suffix kernel (see unicode_percent_encode.cpp). The template never calls
+  // the inline percent_encode_index helper: its unrolled scalar loop would
+  // triple the size of these instantiations in the unity build and push the
+  // URL setters out of L1I.
+  if (input.size() < 32) {
     auto pointer = std::ranges::find_if(input, [character_set](const char c) {
       return character_sets::bit_at(character_set, c);
     });
@@ -732,7 +712,11 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
     }
     return true;
   }
-  const size_t idx = percent_encode_index(input, character_set);
+  // Inputs of 32+ bytes: SIMD scan (out of line, in the separate
+  // percent-encode translation unit).
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+  const size_t idx =
+      percent_encode_index_simd(input.data(), input.size(), character_set);
   ada_log("percent_encode done checking, moved to ", idx);
 
   // Optimization: Don't iterate if percent encode is not required
@@ -747,10 +731,6 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   out.append(input.data(), idx);
   ada_log("percent_encode processing ", input.size() - idx, " bytes");
-  // In the worst case, every remaining byte becomes 3 characters. Reserving
-  // up front avoids any reallocation, and the suffix kernel encodes with SIMD
-  // when it pays off.
-  out.reserve(out.size() + (input.size() - idx) * 3);
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   percent_encode_suffix(input.data() + idx, input.data() + input.size(),
                         character_set, out);
@@ -785,9 +765,6 @@ bool to_ascii(std::optional<std::string>& out, const std::string_view plain,
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[], size_t index) {
   std::string out;
-  // In the worst case, every remaining byte becomes 3 characters. Reserving
-  // up front avoids any reallocation while encoding.
-  out.reserve(index + (input.size() - index) * 3);
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   out.append(input.data(), index);
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)

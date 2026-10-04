@@ -357,10 +357,37 @@ void percent_encode_to_wide(const char* p, const char* end,
 
 }  // namespace
 
+// Mid-size scalar scan for the first byte needing encoding. Outlined here
+// (rather than inlined in unicode-inl.h) so the out-of-line percent_encode
+// overloads in the unity build keep their historical code size and the URL
+// setters stay in L1I; there is a single hot copy shared by all call sites.
+// The 8-byte chunk staging entices the compiler to process a full word per
+// iteration, which beats a plain byte loop once inputs reach this size.
+size_t percent_encode_index_scalar(const char* data, size_t size,
+                                   const uint8_t character_set[]) noexcept {
+  size_t i = 0;
+  for (; i + 8 <= size; i += 8) {
+    unsigned char chunk[8];
+    std::memcpy(&chunk, data + i,
+                8);  // entices compiler to unconditionally process 8 characters
+    for (size_t j = 0; j < 8; j++) {
+      if (character_sets::bit_at(character_set, chunk[j])) {
+        return i + j;
+      }
+    }
+  }
+  for (; i < size; i++) {
+    if (character_sets::bit_at(character_set, data[i])) {
+      return i;
+    }
+  }
+  return size;
+}
+
 // First-byte-needing-encoding scan. Unlike percent_encode_to_wide (which must
 // also emit output and only pays off for longer suffixes), a pure scan has no
-// per-hit append cost, so SIMD wins from a single 16-byte window onward.
-// percent_encode_index dispatches here for inputs of 16+ bytes.
+// per-hit cost, so SIMD wins from short inputs onward; percent_encode_index
+// dispatches here for inputs of 32+ bytes (shorter ones stay inline).
 size_t percent_encode_index_simd(const char* data, size_t size,
                                  const uint8_t character_set[]) noexcept {
   const char* p = data;
@@ -442,16 +469,17 @@ size_t percent_encode_index_simd(const char* data, size_t size,
 
 void percent_encode_suffix(const char* p, const char* end,
                            const uint8_t character_set[], std::string& out) {
+  const size_t tail = static_cast<size_t>(end - p);
 #if ADA_UNICODE_SSSE3 || ADA_NEON || ADA_RVV
-  if (static_cast<size_t>(end - p) >= kPercentEncodeSimdMin) {
+  if (tail >= kPercentEncodeSimdMin) {
     percent_encode_to_wide(p, end, character_set, out);
     return;
   }
 #endif
   // Short scalar tail: same resize-and-write-through-pointer scheme as the
-  // wide path, so even small suffixes avoid per-byte append calls.
+  // wide path, so even small suffixes avoid per-piece append calls.
   const size_t base = out.size();
-  out.resize(base + static_cast<size_t>(end - p) * 3);
+  out.resize(base + tail * 3);
   char* d = out.data() + base;
   percent_encode_to_scalar(p, end, character_set, d);
   out.resize(static_cast<size_t>(d - out.data()));
