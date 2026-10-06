@@ -40,9 +40,21 @@
 #endif
 
 #ifdef ADA_PARSER_NEED_SSSE3_TARGET
+// The scanners carry an explicit SSSE3 target so they compile without a
+// global -mssse3. A target mismatch would block inlining into the (baseline)
+// fast-path bodies, costing a call plus by-reference spills on every parse,
+// so the four scan_* functions below are always_inline and each fast-path
+// entry point carries the same target via ADA_PARSER_CONSUMER (see
+// ada/parser.h) to keep the inline legal. always_inline paired with target
+// trips -Wattributes even though every call site is a matching target, so
+// the definitions below sit under a scoped suppression. The tiny nibble
+// helpers stay target-only: they still inline heuristically.
+// (clang-cl and MSVC never take this branch.)
 #define ADA_PARSER_SIMD __attribute__((target("ssse3")))
+#define ADA_PARSER_SCAN __attribute__((target("ssse3"), always_inline))
 #else
 #define ADA_PARSER_SIMD ada_really_inline
+#define ADA_PARSER_SCAN ada_really_inline
 #endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
@@ -392,10 +404,50 @@ ada_really_inline bool authority_has_at(const uint8_t* p, size_t host_start,
   return false;
 }
 
+#if defined(__GNUC__) && !defined(_MSC_VER)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#endif
+#if ADA_PARSER_SSSE3
+// One 16-byte host window: notes uppercase/'x' bytes, reports the first
+// stop. A named function (rather than a lambda) so the SSSE3 target needed
+// for the always_inline below is spelled portably across GCC and Clang.
+ADA_PARSER_SCAN bool visit_host_window(const uint8_t* b, size_t at,
+                                       const __m128i lo_tbl,
+                                       const __m128i hi_tbl,
+                                       const __m128i x_splat, size_t& end,
+                                       bool& has_upper,
+                                       bool& has_x) noexcept {
+  const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
+  const int up = sse2_uppercase(w);
+  const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat));
+  const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
+  if (mask == 0) {
+    if (up != 0) {
+      has_upper = true;
+    }
+    if (xs != 0) {
+      has_x = true;
+    }
+    return false;
+  }
+  const int hit = trailing_zeroes32(static_cast<uint32_t>(mask));
+  const int valid = (1 << hit) - 1;
+  if ((up & valid) != 0) {
+    has_upper = true;
+  }
+  if ((xs & valid) != 0) {
+    has_x = true;
+  }
+  end = at + static_cast<size_t>(hit);
+  return true;
+}
+#endif
+
 // Returns false if a forbidden host code point is found. On success, *end is
 // the first / ? # or len. has_upper / has_x only count host bytes, not the
 // path/query bytes that may sit in the same SIMD window after the delimiter.
-ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
+ADA_PARSER_SCAN bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
                                      size_t& end, bool& has_upper,
                                      bool& has_x) noexcept {
   has_upper = false;
@@ -406,46 +458,26 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     const __m128i lo_tbl = nibble_load(k_host_nibbles.low);
     const __m128i hi_tbl = nibble_load(k_host_nibbles.high);
     const __m128i x_splat = _mm_set1_epi8('x');
-    auto visit = [&](size_t at) noexcept -> bool {
-      const __m128i w =
-          _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
-      const int up = sse2_uppercase(w);
-      const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat));
-      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
-      if (mask == 0) {
-        if (up != 0) {
-          has_upper = true;
-        }
-        if (xs != 0) {
-          has_x = true;
-        }
-        return false;
-      }
-      const int hit = trailing_zeroes32(static_cast<uint32_t>(mask));
-      const int valid = (1 << hit) - 1;
-      if ((up & valid) != 0) {
-        has_upper = true;
-      }
-      if ((xs & valid) != 0) {
-        has_x = true;
-      }
-      end = at + static_cast<size_t>(hit);
-      return true;
-    };
     for (; i + 32 <= len; i += 32) {
-      if (visit(i) || visit(i + 16)) {
+      if (visit_host_window(b, i, lo_tbl, hi_tbl, x_splat, end, has_upper,
+                            has_x) ||
+          visit_host_window(b, i + 16, lo_tbl, hi_tbl, x_splat, end, has_upper,
+                            has_x)) {
         return k_host_class[b[end]] == 1;
       }
     }
     for (; i + 16 <= len; i += 16) {
-      if (visit(i)) {
+      if (visit_host_window(b, i, lo_tbl, hi_tbl, x_splat, end, has_upper,
+                            has_x)) {
         return k_host_class[b[end]] == 1;
       }
     }
     // Overlapping tail only after a full 16-byte step so the window cannot
     // start before `start` (a prior '/' would otherwise look like a host stop).
     if (i > start && i < len) {
-      if (visit(len - 16) && end >= i) {
+      if (visit_host_window(b, len - 16, lo_tbl, hi_tbl, x_splat, end,
+                            has_upper, has_x) &&
+          end >= i) {
         return k_host_class[b[end]] == 1;
       }
       end = len;
@@ -631,7 +663,7 @@ ada_really_inline void note_dots_in_window_neon(
 #endif
 
 // Advance i to the first path-class 1 or 2 character (or len).
-ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
+ADA_PARSER_SCAN void scan_path_run(const uint8_t* b, size_t& i, size_t len,
                                    bool& maybe_dot_segment) noexcept {
   const size_t run_start = i;
 #if ADA_PARSER_SSSE3
@@ -941,17 +973,20 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
   } while (0)
 #endif
 
-ADA_PARSER_SIMD void scan_query_run(const uint8_t* b, size_t& i,
+ADA_PARSER_SCAN void scan_query_run(const uint8_t* b, size_t& i,
                                     size_t len) noexcept {
   ADA_SCAN_STOP_RUN(k_query_nibbles, k_query, sse2_query_stop);
 }
 
-ADA_PARSER_SIMD void scan_hash_run(const uint8_t* b, size_t& i,
+ADA_PARSER_SCAN void scan_hash_run(const uint8_t* b, size_t& i,
                                    size_t len) noexcept {
   ADA_SCAN_STOP_RUN(k_hash_nibbles, k_hash, sse2_hash_stop);
 }
 
 #undef ADA_SCAN_STOP_RUN
+#if defined(__GNUC__) && !defined(_MSC_VER)
+#pragma GCC diagnostic pop
+#endif
 
 bool path_has_dot_segment(std::string_view path) noexcept {
   if (path.empty()) {
@@ -984,7 +1019,7 @@ bool path_has_dot_segment(std::string_view path) noexcept {
 }  // namespace
 
 template <class result_type>
-ada_never_inline bool finish_simple_absolute_with_port(
+ADA_PARSER_CONSUMER ada_never_inline bool finish_simple_absolute_with_port(
     std::string_view input, result_type& out, ada::scheme::type scheme_type,
     uint32_t protocol_end, size_t host_start, size_t host_end, size_t host_len,
     bool has_upper) {
@@ -1258,8 +1293,8 @@ after_rest:
 // but the rest needs encoding or dot-segment normalization, the host is
 // kept and the path/query/hash helpers finish the URL.
 template <class result_type>
-ada_never_inline bool try_parse_simple_absolute(std::string_view input,
-                                                result_type& out) {
+ADA_PARSER_CONSUMER ada_never_inline bool try_parse_simple_absolute(
+    std::string_view input, result_type& out) {
   constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
   constexpr bool is_aggregator =
       std::is_same_v<result_type, ada::url_aggregator>;
@@ -1647,9 +1682,8 @@ after_rest:
 // `#fragment` against a special-scheme base. Scheme-relative (`//`) and
 // scheme-like first segments (`foo:bar`) stay on the state machine.
 template <class result_type>
-ada_never_inline bool try_parse_simple_relative(std::string_view input,
-                                                const result_type& base,
-                                                result_type& out) {
+ADA_PARSER_CONSUMER ada_never_inline bool try_parse_simple_relative(
+    std::string_view input, const result_type& base, result_type& out) {
   constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
   constexpr bool is_aggregator =
       std::is_same_v<result_type, ada::url_aggregator>;

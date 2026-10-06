@@ -20,6 +20,18 @@
 #include "ada/url_pattern_regex.h"
 #include "ada/url_pattern_init.h"
 
+// Matches the SSSE3 target used by the fast-path scanners in src/parser.cpp
+// (which carry an explicit target("ssse3") when the toolchain does not
+// enable SSSE3 globally). Carrying the same target on the declarations keeps
+// the scanners inlinable into the fast-path bodies. Has no effect on other
+// toolchains (MSVC, ARM, or builds with global SSSE3).
+#if defined(__GNUC__) && !defined(_MSC_VER) && \
+    (defined(__x86_64__) || defined(__amd64__)) && !defined(__SSSE3__)
+#define ADA_PARSER_CONSUMER __attribute__((target("ssse3")))
+#else
+#define ADA_PARSER_CONSUMER
+#endif
+
 /** @private Forward declarations */
 namespace ada {
 struct url_aggregator;
@@ -75,20 +87,21 @@ extern template url parse_url_impl<url, true>(std::string_view user_input,
 
 /** @private */
 template <class result_type>
-bool try_parse_simple_absolute(std::string_view input, result_type& out);
+ADA_PARSER_CONSUMER bool try_parse_simple_absolute(std::string_view input,
+                                                   result_type& out);
 
 /** @private */
 template <class result_type>
-bool finish_simple_absolute_with_port(std::string_view input, result_type& out,
-                                      ada::scheme::type scheme_type,
-                                      uint32_t protocol_end, size_t host_start,
-                                      size_t host_end, size_t host_len,
-                                      bool has_upper);
+ADA_PARSER_CONSUMER bool finish_simple_absolute_with_port(
+    std::string_view input, result_type& out, ada::scheme::type scheme_type,
+    uint32_t protocol_end, size_t host_start, size_t host_end, size_t host_len,
+    bool has_upper);
 
 /** @private */
 template <class result_type>
-bool try_parse_simple_relative(std::string_view input, const result_type& base,
-                               result_type& out);
+ADA_PARSER_CONSUMER bool try_parse_simple_relative(std::string_view input,
+                                                   const result_type& base,
+                                                   result_type& out);
 
 #if ADA_INCLUDE_URL_PATTERN
 template <url_pattern_regex::regex_concept regex_provider>
