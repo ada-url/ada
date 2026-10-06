@@ -361,7 +361,7 @@ ada_really_inline bool authority_has_at(const uint8_t* p, size_t host_start,
     const uint64_t delim = neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('/'))) |
                            neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('?'))) |
                            neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('#')));
-    return delim == 0 || std::countr_zero(at) < std::countr_zero(delim);
+    return delim == 0 || trailing_zeroes64(at) < trailing_zeroes64(delim);
   }
 #elif ADA_SSE2
   if (rem >= 16) {
@@ -409,9 +409,9 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     auto visit = [&](size_t at) noexcept -> bool {
       const __m128i w =
           _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + at));
-      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
       const int up = sse2_uppercase(w);
       const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat));
+      const int mask = ssse3_nibble_mask(w, lo_tbl, hi_tbl);
       if (mask == 0) {
         if (up != 0) {
           has_upper = true;
@@ -458,9 +458,9 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     for (size_t off = 0; off < 32; off += 16) {
       const __m128i w =
           _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i + off));
-      const int mask = sse2_host_stop(w);
       const int up = sse2_uppercase(w);
       const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat));
+      const int mask = sse2_host_stop(w);
       if (mask != 0) {
         const int hit = trailing_zeroes32(static_cast<uint32_t>(mask));
         const int valid = (1 << hit) - 1;
@@ -483,9 +483,9 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
   }
   for (; i + 16 <= len; i += 16) {
     const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i*>(b + i));
-    const int mask = sse2_host_stop(w);
     const int up = sse2_uppercase(w);
     const int xs = _mm_movemask_epi8(_mm_cmpeq_epi8(w, x_splat));
+    const int mask = sse2_host_stop(w);
     if (mask != 0) {
       const int hit = trailing_zeroes32(static_cast<uint32_t>(mask));
       const int valid = (1 << hit) - 1;
@@ -512,9 +512,9 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
     const uint8x16_t x_splat = vdupq_n_u8('x');
     auto visit = [&](size_t at) noexcept -> bool {
       const uint8x16_t w = vld1q_u8(b + at);
-      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
       const uint64_t up = neon_uppercase(w);
       const uint64_t xs = neon_nibble_bits(vceqq_u8(w, x_splat));
+      const uint64_t bits = neon_table_stop(w, lo_tbl, hi_tbl);
       if (bits == 0) {
         if (up != 0) {
           has_upper = true;
@@ -1881,9 +1881,7 @@ result_type parse_url_impl(std::string_view user_input,
             url.is_valid = false;
           }
         } else {
-          if ((base_url != nullptr ||
-               user_input.size() > static_cast<size_t>(max_input_length) / 5) &&
-              url.get_href_size() > max_input_length) [[unlikely]] {
+          if (url.get_href_size() > max_input_length) [[unlikely]] {
             url.is_valid = false;
           }
         }
@@ -1921,7 +1919,7 @@ result_type parse_url_impl(std::string_view user_input,
         uint64_t first8 = 0;
         std::memcpy(&first8, p, 8);
         if (first8 == 0x2f2f3a7370747468ull) {  // "https://"
-          const uint8_t host_first = p[8];
+          const uint8_t host_first = n > 8 ? p[8] : 0;
           const bool skip_ip =
               host_first == '[' || (host_first >= '0' && host_first <= '9');
           const bool skip_userinfo = authority_has_at(p, 8, n);
@@ -1930,7 +1928,7 @@ result_type parse_url_impl(std::string_view user_input,
                               user_input, url, ada::scheme::type::HTTPS, 6, 8);
         } else if ((first8 & 0x00ffffffffffffffull) ==
                    0x002f2f3a70747468ull) {  // "http://"
-          const uint8_t host_first = p[7];
+          const uint8_t host_first = n > 7 ? p[7] : 0;
           const bool skip_ip =
               host_first == '[' || (host_first >= '0' && host_first <= '9');
           const bool skip_userinfo = authority_has_at(p, 7, n);
@@ -1939,7 +1937,7 @@ result_type parse_url_impl(std::string_view user_input,
                               user_input, url, ada::scheme::type::HTTP, 5, 7);
         } else if ((first8 & 0x0000ffffffffffffull) ==
                    0x00002f2f3a737377ull) {  // "wss://"
-          const uint8_t host_first = p[6];
+          const uint8_t host_first = n > 6 ? p[6] : 0;
           const bool skip_ip =
               host_first == '[' || (host_first >= '0' && host_first <= '9');
           const bool skip_userinfo = authority_has_at(p, 6, n);
@@ -1948,7 +1946,7 @@ result_type parse_url_impl(std::string_view user_input,
                               user_input, url, ada::scheme::type::WSS, 4, 6);
         } else if ((first8 & 0x0000ffffffffffffull) ==
                    0x00002f2f3a707466ull) {  // "ftp://"
-          const uint8_t host_first = p[6];
+          const uint8_t host_first = n > 6 ? p[6] : 0;
           const bool skip_ip =
               host_first == '[' || (host_first >= '0' && host_first <= '9');
           const bool skip_userinfo = authority_has_at(p, 6, n);
@@ -1957,7 +1955,7 @@ result_type parse_url_impl(std::string_view user_input,
                               user_input, url, ada::scheme::type::FTP, 4, 6);
         } else if ((first8 & 0x000000ffffffffffull) ==
                    0x0000002f2f3a7377ull) {  // "ws://"
-          const uint8_t host_first = p[5];
+          const uint8_t host_first = n > 5 ? p[5] : 0;
           const bool skip_ip =
               host_first == '[' || (host_first >= '0' && host_first <= '9');
           const bool skip_userinfo = authority_has_at(p, 5, n);
@@ -1994,13 +1992,7 @@ result_type parse_url_impl(std::string_view user_input,
           url.is_valid = false;
         }
       } else {
-        // For a small absolute input, even worst-case normalization cannot
-        // exceed the limit: percent encoding expands at most 3x and IDNA at
-        // most 4.5x. Avoid traversing every stored component on the common
-        // default-limit path.
-        if ((base_url != nullptr ||
-             user_input.size() > static_cast<size_t>(max_input_length) / 5) &&
-            url.get_href_size() > max_input_length) [[unlikely]] {
+        if (url.get_href_size() > max_input_length) [[unlikely]] {
           url.is_valid = false;
         }
       }
