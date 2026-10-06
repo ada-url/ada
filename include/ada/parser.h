@@ -79,6 +79,13 @@ bool try_parse_simple_absolute(std::string_view input, result_type& out);
 
 /** @private */
 template <class result_type>
+bool try_parse_simple_absolute_with_scheme(std::string_view input,
+                                           result_type& out,
+                                           ada::scheme::type scheme_type,
+                                           uint32_t protocol_end, size_t pos);
+
+/** @private */
+template <class result_type>
 bool finish_simple_absolute_with_port(std::string_view input, result_type& out,
                                       ada::scheme::type scheme_type,
                                       uint32_t protocol_end, size_t host_start,
