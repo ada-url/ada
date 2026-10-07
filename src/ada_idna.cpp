@@ -5930,37 +5930,37 @@ bool is_label_valid(const std::u32string_view label) {
       0xa867, 0xa868, 0xa869, 0xa86a, 0xa86b, 0xa86c, 0xa86d, 0xa86e, 0xa86f,
       0xa870, 0xa871};
 
+  auto is_l_or_d = [](uint32_t code) {
+    return std::ranges::binary_search(L, code) ||
+           std::ranges::binary_search(D, code);
+  };
+  auto is_r_or_d = [](uint32_t code) {
+    return std::ranges::binary_search(R, code) ||
+           std::ranges::binary_search(D, code);
+  };
   for (size_t i = 0; i < label.size(); i++) {
     uint32_t c = label[i];
     if (c == 0x200c) {
-      if (i > 0) {
-        if (std::ranges::binary_search(virama, label[i - 1])) {
-          return true;
-        }
+      if (i > 0 &&
+          std::ranges::binary_search(virama, label[i - 1])) {
+        continue;
       }
       if ((i == 0) || (i + 1 >= label.size())) {
         return false;
       }
       // we go backward looking for L or D
-      auto is_l_or_d = [](uint32_t code) {
-        return std::ranges::binary_search(L, code) ||
-               std::ranges::binary_search(D, code);
-      };
-      auto is_r_or_d = [](uint32_t code) {
-        return std::ranges::binary_search(R, code) ||
-               std::ranges::binary_search(D, code);
-      };
       std::u32string_view before = label.substr(0, i);
       std::u32string_view after = label.substr(i + 1);
-      return (std::find_if(before.begin(), before.end(), is_l_or_d) !=
-              before.end()) &&
-             (std::find_if(after.begin(), after.end(), is_r_or_d) !=
-              after.end());
+      if (!((std::find_if(before.begin(), before.end(), is_l_or_d) !=
+             before.end()) &&
+            (std::find_if(after.begin(), after.end(), is_r_or_d) !=
+             after.end()))) {
+        return false;
+      }
     } else if (c == 0x200d) {
-      if (i > 0) {
-        if (std::ranges::binary_search(virama, label[i - 1])) {
-          return true;
-        }
+      if (i > 0 &&
+          std::ranges::binary_search(virama, label[i - 1])) {
+        continue;
       }
       return false;
     }

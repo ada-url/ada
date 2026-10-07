@@ -20,6 +20,33 @@ TYPED_TEST(basic_tests, insane_url) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, idna_joiners_and_bidi) {
+  // A label must check ALL joiners (RFC 5892 ContextJ) and then run the
+  // RFC 5893 Bidi rule. Regression test: a virama+ZWNJ match used to return
+  // early, skipping later joiners and the whole Bidi block.
+  // U+05D0 HEBREW ALEF (R), U+094D DEVANAGARI SIGN VIRAMA, U+200C ZWNJ,
+  // U+200D ZWJ.
+
+  // '1' (EN) + RTL char + virama + ZWNJ: joiner is valid, but Bidi rule 1
+  // requires the first char to be L, R or AL -> reject.
+  ASSERT_EQ(ada::idna::to_ascii("1\xD7\x90\xE0\xA5\x8D\xE2\x80\x8C.example"),
+            "");
+  ASSERT_FALSE(ada::parse<TypeParam>(
+      "http://1\xD7\x90\xE0\xA5\x8D\xE2\x80\x8C.example/"));
+
+  // 'a' (L) + virama + ZWNJ + ZWJ: the ZWJ has no virama before it -> reject.
+  ASSERT_EQ(
+      ada::idna::to_ascii("a\xE0\xA5\x8D\xE2\x80\x8C\xE2\x80\x8D.example"), "");
+
+  // A genuinely valid joiner label must still pass: virama + ZWNJ between
+  // Indic letters (Devanagari क + virama + ZWNJ + क).
+  std::string out;
+  ASSERT_TRUE(ada::idna::to_ascii(
+      "\xE0\xA4\x95\xE0\xA5\x8D\xE2\x80\x8C\xE0\xA4\x95.example", out));
+  ASSERT_FALSE(out.empty());
+  SUCCEED();
+}
+
 TYPED_TEST(basic_tests, bad_percent_encoding) {
   auto r = ada::parse<TypeParam>("http://www.google.com/%X%");
   ASSERT_TRUE(r);
