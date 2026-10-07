@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <array>
-#include <charconv>
 #include <optional>
 #include <ranges>
 #include <string>
@@ -292,20 +291,8 @@ tl::expected<std::string, errors> canonicalize_username(
 
 tl::expected<std::string, errors> canonicalize_password(
     std::string_view input) {
-  // If value is the empty string, return value.
-  if (input.empty()) [[unlikely]] {
-    return "";
-  }
-  // Percent-encode the input using the userinfo percent-encode set.
-  size_t idx = ada::unicode::percent_encode_index(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
-  if (idx == input.size()) {
-    // No encoding needed, return input as-is
-    return std::string(input);
-  }
-  // Percent-encode from the first character that needs encoding
-  return ada::unicode::percent_encode(
-      input, character_sets::USERINFO_PERCENT_ENCODE, idx);
+  // Passwords use the same userinfo percent-encode set as usernames.
+  return canonicalize_username(input);
 }
 
 tl::expected<std::string, errors> canonicalize_hostname(
@@ -422,62 +409,21 @@ tl::expected<std::string, errors> canonicalize_port(
 
 tl::expected<std::string, errors> canonicalize_port_with_protocol(
     std::string_view port_value, std::string_view protocol) {
-  // If portValue is the empty string, return portValue.
-  if (port_value.empty()) [[unlikely]] {
-    return "";
+  // canonicalize_port returns the port without leading zeros (or "0"), which
+  // is how std::to_string would serialize it.
+  auto port = canonicalize_port(port_value);
+  if (!port || port->empty()) {
+    return port;
   }
-
-  // Handle empty or trailing colon in protocol
-  if (protocol.empty()) {
-    protocol = "fake";
-  } else if (protocol.ends_with(":")) {
+  if (protocol.ends_with(":")) {
     protocol.remove_suffix(1);
   }
-
-  // Remove ASCII tab or newline characters
-  std::string trimmed(port_value);
-  helpers::remove_ascii_tab_or_newline(trimmed);
-
-  if (trimmed.empty()) {
+  // If it's the default port for a special scheme, return empty string
+  const uint16_t default_port = scheme::get_special_port(protocol);
+  if (default_port != 0 && *port == std::to_string(default_port)) {
     return "";
   }
-
-  // Input should start with a digit character
-  if (!unicode::is_ascii_digit(trimmed.front())) {
-    return tl::unexpected(errors::type_error);
-  }
-
-  // Find the first non-digit character
-  auto first_non_digit =
-      std::ranges::find_if_not(trimmed, unicode::is_ascii_digit);
-  std::string_view digits_to_parse =
-      std::string_view(trimmed.data(), first_non_digit - trimmed.begin());
-
-  // Parse the port number
-  uint16_t parsed_port{};
-  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-  auto result = std::from_chars(digits_to_parse.data(),
-                                digits_to_parse.data() + digits_to_parse.size(),
-                                parsed_port);
-
-  if (result.ec == std::errc::result_out_of_range) {
-    return tl::unexpected(errors::type_error);
-  }
-
-  if (result.ec == std::errc()) {
-    // Check if this is the default port for the scheme
-    uint16_t default_port = scheme::get_special_port(protocol);
-
-    // If it's the default port for a special scheme, return empty string
-    if (default_port != 0 && default_port == parsed_port) {
-      return "";
-    }
-
-    // Successfully parsed, return as string
-    return std::to_string(parsed_port);
-  }
-
-  return tl::unexpected(errors::type_error);
+  return port;
 }
 
 tl::expected<std::string, errors> canonicalize_pathname(
@@ -550,6 +496,22 @@ tl::expected<std::string, errors> canonicalize_opaque_pathname(
   return tl::unexpected(errors::type_error);
 }
 
+namespace {
+// Removes ASCII tab or newline characters, then percent-encodes the rest.
+std::string strip_and_percent_encode(std::string_view input,
+                                     const uint8_t character_set[]) {
+  std::string new_value(input);
+  helpers::remove_ascii_tab_or_newline(new_value);
+  size_t idx = ada::unicode::percent_encode_index(new_value, character_set);
+  if (idx == new_value.size()) {
+    // No encoding needed
+    return new_value;
+  }
+  // Percent-encode from the first character that needs encoding
+  return ada::unicode::percent_encode(new_value, character_set, idx);
+}
+}  // namespace
+
 tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   // If value is the empty string, return value.
   if (input.empty()) [[unlikely]] {
@@ -558,26 +520,8 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
   // A leading '?' is a valid query code point here: it is the caller (process a
   // search) that removes a single delimiter, not this step, which mirrors the
   // basic URL parser's query state.
-  std::string new_value(input);
-  // Remove ASCII tab or newline characters
-  helpers::remove_ascii_tab_or_newline(new_value);
-
-  if (new_value.empty()) {
-    return "";
-  }
-
-  // Percent-encode using QUERY_PERCENT_ENCODE (for non-special URLs)
-  // Note: "fake://dummy.test" is not a special URL, so we use
-  // QUERY_PERCENT_ENCODE
-  size_t idx = ada::unicode::percent_encode_index(
-      new_value, character_sets::QUERY_PERCENT_ENCODE);
-  if (idx == new_value.size()) {
-    // No encoding needed
-    return new_value;
-  }
-  // Percent-encode from the first character that needs encoding
-  return ada::unicode::percent_encode(
-      new_value, character_sets::QUERY_PERCENT_ENCODE, idx);
+  // "fake://dummy.test" is not a special URL, so we use QUERY_PERCENT_ENCODE.
+  return strip_and_percent_encode(input, character_sets::QUERY_PERCENT_ENCODE);
 }
 
 tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
@@ -588,24 +532,8 @@ tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {
   // A leading '#' is a valid fragment code point here: it is the caller
   // (process a hash) that removes a single delimiter, not this step, which
   // mirrors the basic URL parser's fragment state.
-  std::string new_value(input);
-  // Remove ASCII tab or newline characters
-  helpers::remove_ascii_tab_or_newline(new_value);
-
-  if (new_value.empty()) {
-    return "";
-  }
-
-  // Percent-encode using FRAGMENT_PERCENT_ENCODE
-  size_t idx = ada::unicode::percent_encode_index(
-      new_value, character_sets::FRAGMENT_PERCENT_ENCODE);
-  if (idx == new_value.size()) {
-    // No encoding needed
-    return new_value;
-  }
-  // Percent-encode from the first character that needs encoding
-  return ada::unicode::percent_encode(
-      new_value, character_sets::FRAGMENT_PERCENT_ENCODE, idx);
+  return strip_and_percent_encode(input,
+                                  character_sets::FRAGMENT_PERCENT_ENCODE);
 }
 
 tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
@@ -790,10 +718,11 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
           break;
         }
 
-        // TODO: Optimization opportunity: The next 2 if statements can be
-        // merged. If the result of running is ASCII given tokenizer's code
-        // point is false:
-        if (!unicode::is_ascii(tokenizer.code_point)) {
+        // If the result of running is ASCII given tokenizer's code point is
+        // false, or if regexp position equals regexp start and tokenizer's
+        // code point is U+003F (?):
+        if (!unicode::is_ascii(tokenizer.code_point) ||
+            (regexp_position == regexp_start && tokenizer.code_point == '?')) {
           // Run process a tokenizing error given tokenizer, regexp start, and
           // tokenizer's index.
           if (auto process_error = tokenizer.process_tokenizing_error(
@@ -801,20 +730,6 @@ tl::expected<std::vector<token>, errors> tokenize(std::string_view input,
             return tl::unexpected(*process_error);
           }
           // Set error to true.
-          error = true;
-          break;
-        }
-
-        // If regexp position equals regexp start and tokenizer's code point is
-        // U+003F (?):
-        if (regexp_position == regexp_start && tokenizer.code_point == '?') {
-          // Run process a tokenizing error given tokenizer, regexp start, and
-          // tokenizer's index.
-          if (auto process_error = tokenizer.process_tokenizing_error(
-                  regexp_start, tokenizer.index)) {
-            return tl::unexpected(*process_error);
-          }
-          // Set error to true;
           error = true;
           break;
         }
@@ -976,37 +891,6 @@ constexpr std::array<uint8_t, 256> escape_pattern_table = []() consteval {
   return out;
 }();
 
-constexpr bool should_escape_pattern_char(char c) {
-  return escape_pattern_table[static_cast<uint8_t>(c)];
-}
-}  // namespace
-
-std::string escape_pattern_string(std::string_view input) {
-  ada_log("escape_pattern_string called with input=", input);
-  if (input.empty()) [[unlikely]] {
-    return "";
-  }
-  // Assert: input is an ASCII string.
-  ADA_ASSERT_TRUE(ada::idna::is_ascii(input));
-  // Let result be the empty string.
-  std::string result{};
-  // Reserve extra space for potential escapes
-  result.reserve(input.size() * 2);
-
-  // While index is less than input's length:
-  for (const char c : input) {
-    if (should_escape_pattern_char(c)) {
-      // Append U+005C (\) to the end of result.
-      result.push_back('\\');
-    }
-    // Append c to the end of result.
-    result.push_back(c);
-  }
-  // Return result.
-  return result;
-}
-
-namespace {
 constexpr std::array<uint8_t, 256> escape_regexp_table = []() consteval {
   std::array<uint8_t, 256> out{};
   for (auto& c : {'.', '+', '*', '?', '^', '$', '{', '}', '(', ')', '[', ']',
@@ -1016,28 +900,32 @@ constexpr std::array<uint8_t, 256> escape_regexp_table = []() consteval {
   return out;
 }();
 
-constexpr bool should_escape_regexp_char(char c) {
-  return escape_regexp_table[(uint8_t)c];
-}
-}  // namespace
-
-std::string escape_regexp_string(std::string_view input) {
+// Prefixes every character flagged in table with U+005C (\).
+std::string escape_string(std::string_view input,
+                          const std::array<uint8_t, 256>& table) {
   // Assert: input is an ASCII string.
-  ADA_ASSERT_TRUE(idna::is_ascii(input));
+  ADA_ASSERT_TRUE(ada::idna::is_ascii(input));
   // Let result be the empty string.
   std::string result{};
   // Reserve extra space for potential escapes (worst case: all chars escaped)
   result.reserve(input.size() * 2);
   for (const char c : input) {
-    if (should_escape_regexp_char(c)) {
-      // Avoid temporary string allocation - directly append characters
+    if (table[static_cast<uint8_t>(c)]) {
       result.push_back('\\');
-      result.push_back(c);
-    } else {
-      result.push_back(c);
     }
+    result.push_back(c);
   }
   return result;
+}
+}  // namespace
+
+std::string escape_pattern_string(std::string_view input) {
+  ada_log("escape_pattern_string called with input=", input);
+  return escape_string(input, escape_pattern_table);
+}
+
+std::string escape_regexp_string(std::string_view input) {
+  return escape_string(input, escape_regexp_table);
 }
 
 std::string process_base_url_string(std::string_view input,

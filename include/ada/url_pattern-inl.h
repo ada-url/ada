@@ -178,15 +178,15 @@ url_pattern_component<regex_provider>::compile(
     }
   }
 
+  auto pattern_string =
+      url_pattern_helpers::generate_pattern_string(*part_list, options);
+
   // For simple patterns, skip regex generation and compilation entirely
   if (component_type != url_pattern_component_type::REGEXP) {
-    auto pattern_string =
-        url_pattern_helpers::generate_pattern_string(*part_list, options);
     // For FULL_WILDCARD, we need the group name from
     // generate_regular_expression
     std::vector<std::string> name_list;
-    if (component_type == url_pattern_component_type::FULL_WILDCARD &&
-        !part_list->empty()) {
+    if (component_type == url_pattern_component_type::FULL_WILDCARD) {
       name_list.push_back((*part_list)[0].name);
     }
     return url_pattern_component<regex_provider>(
@@ -199,8 +199,6 @@ url_pattern_component<regex_provider>::compile(
   auto [regular_expression_string, name_list] =
       url_pattern_helpers::generate_regular_expression_and_name_list(*part_list,
                                                                      options);
-  auto pattern_string =
-      url_pattern_helpers::generate_pattern_string(*part_list, options);
 
   std::optional<typename regex_provider::regex_type> regular_expression =
       regex_provider::create_instance(regular_expression_string,

@@ -1,6 +1,4 @@
 #include <cstdint>
-#include <cstring>
-#include <sstream>
 
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
@@ -39,7 +37,7 @@ void encode_json(std::string_view view, out_iter out) {
   }
 }
 
-ada_unused std::string get_state(ada::state s) {
+std::string get_state(ada::state s) {
   switch (s) {
     case ada::state::AUTHORITY:
       return "Authority";
@@ -100,16 +98,19 @@ ada_really_inline std::optional<std::string_view> prune_hash(
   return hash;
 }
 
+// If url's scheme is "file", path's size is 1, and path[0] is a normalized
+// Windows drive letter, then shorten_path must return without shortening.
+ada_really_inline bool is_file_drive_letter_path(std::string_view path,
+                                                 ada::scheme::type type) {
+  return type == ada::scheme::type::FILE && path.size() == 3 &&
+         checkers::is_normalized_windows_drive_letter(
+             helpers::substring(path, 1));
+}
+
 ada_really_inline bool shorten_path(std::string& path, ada::scheme::type type) {
   // Let path be url's path.
-  // If url's scheme is "file", path's size is 1, and path[0] is a normalized
-  // Windows drive letter, then return.
-  if (type == ada::scheme::type::FILE &&
-      path.find('/', 1) == std::string_view::npos && !path.empty()) {
-    if (checkers::is_normalized_windows_drive_letter(
-            helpers::substring(path, 1))) {
-      return false;
-    }
+  if (is_file_drive_letter_path(path, type)) {
+    return false;
   }
 
   // Remove path's last item, if any.
@@ -125,23 +126,15 @@ ada_really_inline bool shorten_path(std::string& path, ada::scheme::type type) {
 ada_really_inline bool shorten_path(std::string_view& path,
                                     ada::scheme::type type) {
   // Let path be url's path.
-  // If url's scheme is "file", path's size is 1, and path[0] is a normalized
-  // Windows drive letter, then return.
-  if (type == ada::scheme::type::FILE &&
-      path.find('/', 1) == std::string_view::npos && !path.empty()) {
-    if (checkers::is_normalized_windows_drive_letter(
-            helpers::substring(path, 1))) {
-      return false;
-    }
+  if (is_file_drive_letter_path(path, type)) {
+    return false;
   }
 
   // Remove path's last item, if any.
-  if (!path.empty()) {
-    size_t slash_loc = path.rfind('/');
-    if (slash_loc != std::string_view::npos) {
-      path.remove_suffix(path.size() - slash_loc);
-      return true;
-    }
+  size_t slash_loc = path.rfind('/');
+  if (slash_loc != std::string_view::npos) {
+    path.remove_suffix(path.size() - slash_loc);
+    return true;
   }
 
   return false;
@@ -156,8 +149,6 @@ ada_really_inline void remove_ascii_tab_or_newline(std::string& input) {
 ada_really_inline constexpr std::string_view substring(std::string_view input,
                                                        size_t pos) {
   ADA_ASSERT_TRUE(pos <= input.size());
-  // The following is safer but unneeded if we have the above line:
-  // return pos > input.size() ? std::string_view() : input.substr(pos);
   return input.substr(pos);
 }
 
@@ -757,6 +748,45 @@ ada_really_inline size_t find_next_host_delimiter(std::string_view view,
 }
 #endif
 
+template <bool is_special>
+ada_really_inline size_t
+find_next_host_delimiter_for(std::string_view view, size_t location) noexcept {
+  if constexpr (is_special) {
+    return find_next_host_delimiter_special(view, location);
+  } else {
+    return find_next_host_delimiter(view, location);
+  }
+}
+
+// Returns the end of the host and whether it is a ':' outside brackets.
+template <bool is_special>
+ada_really_inline std::pair<size_t, bool> find_host_end(
+    std::string_view view) noexcept {
+  const size_t view_size = view.size();
+  bool found_colon = false;
+  // We move to the next delimiter.
+  size_t location = find_next_host_delimiter_for<is_special>(view, 0);
+  // Unless we find '[' then we are only going to have to call
+  // find_next_host_delimiter_for once.
+  for (; location < view_size;
+       location = find_next_host_delimiter_for<is_special>(view, location)) {
+    if (view[location] == '[') {
+      location = view.find(']', location);
+      if (location == std::string_view::npos) {
+        // performance: view.find might get translated to a memchr, which
+        // has no notion of std::string_view::npos, so the code does not
+        // reflect the assembly.
+        location = view_size;
+        break;
+      }
+    } else {
+      found_colon = view[location] == ':';
+      break;
+    }
+  }
+  return {location, found_colon};
+}
+
 ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
     const bool is_special, std::string_view& view) noexcept {
   /**
@@ -767,9 +797,6 @@ ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
    * It is conceptually simpler and arguably more efficient to just return a
    * Boolean indicating whether ':' was found outside brackets.
    */
-  const size_t view_size = view.size();
-  size_t location = 0;
-  bool found_colon = false;
   /**
    * Performance analysis:
    *
@@ -786,55 +813,12 @@ ada_really_inline std::pair<size_t, bool> get_host_delimiter_location(
    * Unless we find '[', then it only needs to be called once! Ideally, such a
    * function would be provided by the C++ standard library, but it seems that
    * find_first_of is not very fast, so we are forced to roll our own.
-   *
-   * We do not break into two loops for speed, but for clarity.
    */
-  if (is_special) {
-    // We move to the next delimiter.
-    location = find_next_host_delimiter_special(view, location);
-    // Unless we find '[' then we are going only going to have to call
-    // find_next_host_delimiter_special once.
-    for (; location < view_size;
-         location = find_next_host_delimiter_special(view, location)) {
-      if (view[location] == '[') {
-        location = view.find(']', location);
-        if (location == std::string_view::npos) {
-          // performance: view.find might get translated to a memchr, which
-          // has no notion of std::string_view::npos, so the code does not
-          // reflect the assembly.
-          location = view_size;
-          break;
-        }
-      } else {
-        found_colon = view[location] == ':';
-        break;
-      }
-    }
-  } else {
-    // We move to the next delimiter.
-    location = find_next_host_delimiter(view, location);
-    // Unless we find '[' then we are going only going to have to call
-    // find_next_host_delimiter_special once.
-    for (; location < view_size;
-         location = find_next_host_delimiter(view, location)) {
-      if (view[location] == '[') {
-        location = view.find(']', location);
-        if (location == std::string_view::npos) {
-          // performance: view.find might get translated to a memchr, which
-          // has no notion of std::string_view::npos, so the code does not
-          // reflect the assembly.
-          location = view_size;
-          break;
-        }
-      } else {
-        found_colon = view[location] == ':';
-        break;
-      }
-    }
-  }
+  const std::pair<size_t, bool> result =
+      is_special ? find_host_end<true>(view) : find_host_end<false>(view);
   // performance: remove_suffix may translate into a single instruction.
-  view.remove_suffix(view_size - location);
-  return {location, found_colon};
+  view.remove_suffix(view.size() - result.first);
+  return result;
 }
 
 void trim_c0_whitespace(std::string_view& input) noexcept {
@@ -916,8 +900,7 @@ ada_really_inline void parse_prepared_path(std::string_view input,
     size_t previous_location = 0;  // We start at 0.
     do {
       size_t new_location = input.find('/', previous_location);
-      // std::string_view path_view = input;
-      //  We process the last segment separately:
+      // We process the last segment separately:
       if (new_location == std::string_view::npos) {
         std::string_view path_view = input.substr(previous_location);
         if (path_view == "..") {  // The path ends with ..
@@ -959,10 +942,10 @@ ada_really_inline void parse_prepared_path(std::string_view input,
   } else {
     ada_log("parse_path slow");
     // we have reached the general case
-    bool needs_percent_encoding = (accumulator & 1);
+    bool needs_percent_encoding = (accumulator & need_encoding);
     std::string path_buffer_tmp;
     do {
-      size_t location = (special && (accumulator & 2))
+      size_t location = (special && (accumulator & backslash_char))
                             ? input.find_first_of("/\\")
                             : input.find('/');
       std::string_view path_view = input;
@@ -983,12 +966,13 @@ ada_really_inline void parse_prepared_path(std::string_view input,
         if (location == std::string_view::npos) {
           path += '/';
         }
-      } else if (unicode::is_single_dot_path_segment(path_buffer) &&
-                 (location == std::string_view::npos)) {
-        path += '/';
+      } else if (unicode::is_single_dot_path_segment(path_buffer)) {
+        if (location == std::string_view::npos) {
+          path += '/';
+        }
       }
       // Otherwise, if path_buffer is not a single-dot path segment, then:
-      else if (!unicode::is_single_dot_path_segment(path_buffer)) {
+      else {
         // If url's scheme is "file", url's path is empty, and path_buffer is a
         // Windows drive letter, then replace the second code point in
         // path_buffer with U+003A (:).
@@ -1043,18 +1027,6 @@ static constexpr std::array<uint8_t, 256> authority_delimiter_special =
       }
       return result;
     }();
-// credit: @the-moisrex recommended a table-based approach
-ada_really_inline size_t
-find_authority_delimiter_special(std::string_view view) noexcept {
-  // performance note: we might be able to gain further performance
-  // with SIMD intrinsics.
-  for (auto pos = view.begin(); pos != view.end(); ++pos) {
-    if (authority_delimiter_special[(uint8_t)*pos]) {
-      return pos - view.begin();
-    }
-  }
-  return size_t(view.size());
-}
 
 // @ / ?
 static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
@@ -1064,17 +1036,29 @@ static constexpr std::array<uint8_t, 256> authority_delimiter = []() consteval {
   }
   return result;
 }();
+
+// Returns the index of the first byte of view flagged in table, or view.size().
 // credit: @the-moisrex recommended a table-based approach
-ada_really_inline size_t
-find_authority_delimiter(std::string_view view) noexcept {
-  // performance note: we might be able to gain further performance
-  // with SIMD instrinsics.
+// performance note: we might be able to gain further performance with SIMD
+// intrinsics.
+ada_really_inline size_t find_first_in_table(
+    std::string_view view, const std::array<uint8_t, 256>& table) noexcept {
   for (auto pos = view.begin(); pos != view.end(); ++pos) {
-    if (authority_delimiter[(uint8_t)*pos]) {
+    if (table[(uint8_t)*pos]) {
       return pos - view.begin();
     }
   }
   return size_t(view.size());
+}
+
+ada_really_inline size_t
+find_authority_delimiter_special(std::string_view view) noexcept {
+  return find_first_in_table(view, authority_delimiter_special);
+}
+
+ada_really_inline size_t
+find_authority_delimiter(std::string_view view) noexcept {
+  return find_first_in_table(view, authority_delimiter);
 }
 
 }  // namespace ada::helpers

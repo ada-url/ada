@@ -20,6 +20,56 @@
 
 namespace ada {
 
+namespace detail {
+// Each shift_from_* helper adds delta to the named offset and to every offset
+// after it. Offsets wrap modulo 2^32: pass uint32_t(0) - n to shift back by n.
+ada_really_inline constexpr void shift_search_and_hash(
+    url_components& c, uint32_t delta) noexcept {
+  if (c.search_start != url_components::omitted) {
+    c.search_start += delta;
+  }
+  if (c.hash_start != url_components::omitted) {
+    c.hash_start += delta;
+  }
+}
+
+ada_really_inline constexpr void shift_from_pathname(url_components& c,
+                                                     uint32_t delta) noexcept {
+  c.pathname_start += delta;
+  shift_search_and_hash(c, delta);
+}
+
+ada_really_inline constexpr void shift_from_host_end(url_components& c,
+                                                     uint32_t delta) noexcept {
+  c.host_end += delta;
+  shift_from_pathname(c, delta);
+}
+
+ada_really_inline constexpr void shift_from_host_start(
+    url_components& c, uint32_t delta) noexcept {
+  c.host_start += delta;
+  shift_from_host_end(c, delta);
+}
+
+ada_really_inline constexpr void shift_from_username_end(
+    url_components& c, uint32_t delta) noexcept {
+  c.username_end += delta;
+  shift_from_host_start(c, delta);
+}
+
+// Offset one past the pathname: search_start, else hash_start, else the end.
+ada_really_inline constexpr uint32_t pathname_end(const url_components& c,
+                                                  size_t buffer_size) noexcept {
+  if (c.search_start != url_components::omitted) {
+    return c.search_start;
+  }
+  if (c.hash_start != url_components::omitted) {
+    return c.hash_start;
+  }
+  return uint32_t(buffer_size);
+}
+}  // namespace detail
+
 inline void url_aggregator::update_base_authority(
     std::string_view base_buffer, const ada::url_components& base) {
   std::string_view input = base_buffer.substr(
@@ -69,14 +119,7 @@ inline void url_aggregator::update_base_authority(
     buffer.insert(components.host_start, "@");
     diff++;
   }
-  components.host_end += diff;
-  components.pathname_start += diff;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += diff;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += diff;
-  }
+  detail::shift_from_host_end(components, diff);
 }
 
 inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
@@ -142,27 +185,15 @@ inline void url_aggregator::update_base_hostname(const std::string_view input) {
     buffer.insert(components.host_start, "@");
     new_difference++;
   }
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += new_difference;
-  }
+  detail::shift_from_host_end(components, new_difference);
   ADA_ASSERT_TRUE(validate());
 }
 
 [[nodiscard]] ada_really_inline uint32_t
 url_aggregator::get_pathname_length() const noexcept {
   ada_log("url_aggregator::get_pathname_length");
-  uint32_t ending_index = uint32_t(buffer.size());
-  if (components.search_start != url_components::omitted) {
-    ending_index = components.search_start;
-  } else if (components.hash_start != url_components::omitted) {
-    ending_index = components.hash_start;
-  }
-  return ending_index - components.pathname_start;
+  return detail::pathname_end(components, buffer.size()) -
+         components.pathname_start;
 }
 
 [[nodiscard]] ada_really_inline bool url_aggregator::is_at_path()
@@ -279,24 +310,13 @@ inline void url_aggregator::update_base_pathname(const std::string_view input) {
     // size is greater than 1, then append U+002F (/) followed by U+002E (.) to
     // output.
     buffer.insert(components.pathname_start, "/.");
-    components.pathname_start += 2;
-    if (components.search_start != url_components::omitted) {
-      components.search_start += 2;
-    }
-    if (components.hash_start != url_components::omitted) {
-      components.hash_start += 2;
-    }
+    detail::shift_from_pathname(components, 2);
   }
 
   uint32_t difference = replace_and_resize(
       components.pathname_start,
       components.pathname_start + get_pathname_length(), input);
-  if (components.search_start != url_components::omitted) {
-    components.search_start += difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += difference;
-  }
+  detail::shift_search_and_hash(components, difference);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -310,20 +330,8 @@ inline void url_aggregator::append_base_pathname(const std::string_view input) {
   std::string path_expected(get_pathname());
   path_expected.append(input);
 #endif  // ADA_DEVELOPMENT_CHECKS
-  uint32_t ending_index = uint32_t(buffer.size());
-  if (components.search_start != url_components::omitted) {
-    ending_index = components.search_start;
-  } else if (components.hash_start != url_components::omitted) {
-    ending_index = components.hash_start;
-  }
-  buffer.insert(ending_index, input);
-
-  if (components.search_start != url_components::omitted) {
-    components.search_start += uint32_t(input.size());
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += uint32_t(input.size());
-  }
+  buffer.insert(detail::pathname_end(components, buffer.size()), input);
+  detail::shift_search_and_hash(components, uint32_t(input.size()));
 #if ADA_DEVELOPMENT_CHECKS
   std::string path_after = std::string(get_pathname());
   ADA_ASSERT_EQUAL(
@@ -360,14 +368,7 @@ inline void url_aggregator::update_base_username(const std::string_view input) {
     diff--;
   }
 
-  components.host_end += diff;
-  components.pathname_start += diff;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += diff;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += diff;
-  }
+  detail::shift_from_host_end(components, diff);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -398,14 +399,7 @@ inline void url_aggregator::append_base_username(const std::string_view input) {
     difference++;
   }
 
-  components.host_end += difference;
-  components.pathname_start += difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += difference;
-  }
+  detail::shift_from_host_end(components, difference);
 #if ADA_DEVELOPMENT_CHECKS
   std::string username_after(get_username());
   ADA_ASSERT_EQUAL(
@@ -424,15 +418,7 @@ constexpr void url_aggregator::clear_password() {
 
   uint32_t diff = components.host_start - components.username_end;
   buffer.erase(components.username_end, diff);
-  components.host_start -= diff;
-  components.host_end -= diff;
-  components.pathname_start -= diff;
-  if (components.search_start != url_components::omitted) {
-    components.search_start -= diff;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start -= diff;
-  }
+  detail::shift_from_host_start(components, uint32_t(0) - diff);
 }
 
 inline void url_aggregator::update_base_password(const std::string_view input) {
@@ -476,14 +462,7 @@ inline void url_aggregator::update_base_password(const std::string_view input) {
     difference++;
   }
 
-  components.host_end += difference;
-  components.pathname_start += difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += difference;
-  }
+  detail::shift_from_host_end(components, difference);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -522,14 +501,7 @@ inline void url_aggregator::append_base_password(const std::string_view input) {
     difference++;
   }
 
-  components.host_end += difference;
-  components.pathname_start += difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += difference;
-  }
+  detail::shift_from_host_end(components, difference);
 #if ADA_DEVELOPMENT_CHECKS
   std::string password_after(get_password());
   ADA_ASSERT_EQUAL(
@@ -558,13 +530,7 @@ inline void url_aggregator::update_base_port(uint32_t input) {
   }
 
   buffer.insert(components.host_end, value);
-  components.pathname_start += difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += difference;
-  }
+  detail::shift_from_pathname(components, difference);
   components.port = input;
   ADA_ASSERT_TRUE(validate());
 }
@@ -577,13 +543,7 @@ inline void url_aggregator::clear_port() {
   }
   uint32_t length = components.pathname_start - components.host_end;
   buffer.erase(components.host_end, length);
-  components.pathname_start -= length;
-  if (components.search_start != url_components::omitted) {
-    components.search_start -= length;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start -= length;
-  }
+  detail::shift_from_pathname(components, uint32_t(0) - length);
   components.port = url_components::omitted;
   ADA_ASSERT_TRUE(validate());
 }
@@ -638,13 +598,8 @@ inline void url_aggregator::clear_hash() {
 constexpr void url_aggregator::clear_pathname() {
   ada_log("url_aggregator::clear_pathname");
   ADA_ASSERT_TRUE(validate());
-  uint32_t ending_index = uint32_t(buffer.size());
-  if (components.search_start != url_components::omitted) {
-    ending_index = components.search_start;
-  } else if (components.hash_start != url_components::omitted) {
-    ending_index = components.hash_start;
-  }
-  uint32_t pathname_length = ending_index - components.pathname_start;
+  uint32_t pathname_length = detail::pathname_end(components, buffer.size()) -
+                             components.pathname_start;
   buffer.erase(components.pathname_start, pathname_length);
   uint32_t difference = pathname_length;
   if (components.pathname_start == components.host_end + 2 &&
@@ -654,12 +609,7 @@ constexpr void url_aggregator::clear_pathname() {
     buffer.erase(components.host_end, 2);
     difference += 2;
   }
-  if (components.search_start != url_components::omitted) {
-    components.search_start -= difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start -= difference;
-  }
+  detail::shift_search_and_hash(components, uint32_t(0) - difference);
   ada_log("url_aggregator::clear_pathname completed, running checks...");
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_pathname(), "",
@@ -676,7 +626,6 @@ constexpr void url_aggregator::clear_hostname() {
   if (!has_authority()) {
     return;
   }
-  ADA_ASSERT_TRUE(has_authority());
 
   uint32_t hostname_length = components.host_end - components.host_start;
   uint32_t start = components.host_start;
@@ -688,13 +637,7 @@ constexpr void url_aggregator::clear_hostname() {
   }
   buffer.erase(start, hostname_length);
   components.host_end = start;
-  components.pathname_start -= hostname_length;
-  if (components.search_start != url_components::omitted) {
-    components.search_start -= hostname_length;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start -= hostname_length;
-  }
+  detail::shift_from_pathname(components, uint32_t(0) - hostname_length);
 #if ADA_DEVELOPMENT_CHECKS
   ADA_ASSERT_EQUAL(get_hostname(), "",
                    "hostname should have been cleared on buffer=" + buffer +
@@ -756,16 +699,7 @@ inline void ada::url_aggregator::add_authority_slashes_if_needed() {
   // Optimization opportunity: in many cases, the "//" is part of the input and
   // the insert could be fused with another insert.
   buffer.insert(components.protocol_end, "//");
-  components.username_end += 2;
-  components.host_start += 2;
-  components.host_end += 2;
-  components.pathname_start += 2;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += 2;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += 2;
-  }
+  detail::shift_from_username_end(components, 2);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -860,7 +794,7 @@ ada_really_inline size_t
 url_aggregator::parse_port(std::string_view view, bool check_trailing_content) {
   ada_log("url_aggregator::parse_port('", view, "') ", view.size());
   if (!view.empty() && view[0] == '-') {
-    ada_log("parse_port: view[0] == '0' && view.size() > 1");
+    ada_log("parse_port: view[0] == '-'");
     is_valid = false;
     return 0;
   }
@@ -912,16 +846,7 @@ constexpr void url_aggregator::set_protocol_as_file() {
   components.protocol_end = 5;
 
   // Update the rest of the components.
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start += new_difference;
-  }
+  detail::shift_from_username_end(components, new_difference);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -948,24 +873,9 @@ constexpr void url_aggregator::set_protocol_as_file() {
    *       |     `--------------------------------------- username_end
    *       `--------------------------------------------- protocol_end
    */
-  if (components.protocol_end == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted protocol_end \n", to_diagram());
-    return false;
-  }
-  if (components.username_end == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted username_end \n", to_diagram());
-    return false;
-  }
-  if (components.host_start == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted host_start \n", to_diagram());
-    return false;
-  }
+  // check_offset_consistency() already rejects the other omitted offsets.
   if (components.host_end == url_components::omitted) {
     ada_log("url_aggregator::validate omitted host_end \n", to_diagram());
-    return false;
-  }
-  if (components.pathname_start == url_components::omitted) {
-    ada_log("url_aggregator::validate omitted pathname_start \n", to_diagram());
     return false;
   }
 
@@ -1101,13 +1011,8 @@ constexpr void url_aggregator::set_protocol_as_file() {
           components.pathname_start, " buffer.size() = ", buffer.size(),
           " components.search_start = ", components.search_start,
           " components.hash_start = ", components.hash_start);
-  auto ending_index = uint32_t(buffer.size());
-  if (components.search_start != url_components::omitted) {
-    ending_index = components.search_start;
-  } else if (components.hash_start != url_components::omitted) {
-    ending_index = components.hash_start;
-  }
-  return helpers::substring(buffer, components.pathname_start, ending_index);
+  return helpers::substring(buffer, components.pathname_start,
+                            detail::pathname_end(components, buffer.size()));
 }
 
 inline std::ostream& operator<<(std::ostream& out,
@@ -1119,17 +1024,15 @@ void url_aggregator::update_host_to_base_host(const std::string_view input) {
   ada_log("url_aggregator::update_host_to_base_host ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  if (type != ada::scheme::type::FILE) {
-    // Let host be the result of host parsing host_view with url is not special.
-    if (input.empty() && !is_special()) {
-      if (has_hostname()) {
-        clear_hostname();
-      } else if (has_dash_dot()) {
-        add_authority_slashes_if_needed();
-        delete_dash_dot();
-      }
-      return;
+  // Let host be the result of host parsing host_view with url is not special.
+  if (input.empty() && !is_special()) {
+    if (has_hostname()) {
+      clear_hostname();
+    } else if (has_dash_dot()) {
+      add_authority_slashes_if_needed();
+      delete_dash_dot();
     }
+    return;
   }
   update_base_hostname(input);
   ADA_ASSERT_TRUE(validate());

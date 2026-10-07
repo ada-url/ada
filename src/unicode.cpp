@@ -28,10 +28,6 @@ ADA_POP_DISABLE_WARNINGS
 
 namespace ada::unicode {
 
-constexpr bool is_tabs_or_newline(char c) noexcept {
-  return c == '\r' || c == '\n' || c == '\t';
-}
-
 constexpr uint64_t broadcast(uint8_t v) noexcept {
   return 0x101010101010101ull * v;
 }
@@ -66,7 +62,7 @@ ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
-    return std::ranges::any_of(user_input, is_tabs_or_newline);
+    return std::ranges::any_of(user_input, is_ascii_tab_or_newline);
   }
   // fast path for long strings (expected to be common)
   // Using SSSE3's _mm_shuffle_epi8 for table lookup (same approach as NEON)
@@ -98,7 +94,7 @@ ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
-    return std::ranges::any_of(user_input, is_tabs_or_newline);
+    return std::ranges::any_of(user_input, is_ascii_tab_or_newline);
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
@@ -146,7 +142,7 @@ ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
-    return std::ranges::any_of(user_input, is_tabs_or_newline);
+    return std::ranges::any_of(user_input, is_ascii_tab_or_newline);
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
@@ -177,7 +173,7 @@ ada_really_inline bool has_tabs_or_newline(
     std::string_view user_input) noexcept {
   // first check for short strings in which case we do it naively.
   if (user_input.size() < 16) {  // slow path
-    return std::ranges::any_of(user_input, is_tabs_or_newline);
+    return std::ranges::any_of(user_input, is_ascii_tab_or_newline);
   }
   // fast path for long strings (expected to be common)
   size_t i = 0;
@@ -201,8 +197,7 @@ ada_really_inline bool has_tabs_or_newline(
                                          __lsx_vseq_b(word, mask2))),
         __lsx_vseq_b(word, mask3));
   }
-  if (__lsx_bz_v(running)) return false;
-  return true;
+  return !__lsx_bz_v(running);
 }
 #elif ADA_RVV
 ada_really_inline bool has_tabs_or_newline(
@@ -293,37 +288,35 @@ ada_really_inline constexpr bool is_forbidden_domain_code_point(
   return is_forbidden_domain_code_point_table[uint8_t(c)];
 }
 
-ada_really_inline constexpr bool contains_forbidden_domain_code_point(
-    const char* input, size_t length) noexcept {
+// Returns the bitwise OR of table[c] over every byte c of input.
+ada_really_inline constexpr uint8_t or_table_values(
+    const std::array<uint8_t, 256>& table, const char* input,
+    size_t length) noexcept {
   size_t i = 0;
   uint8_t accumulator{};
   for (; i + 4 <= length; i += 4) {
-    accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i])];
-    accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i + 1])];
-    accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i + 2])];
-    accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i + 3])];
+    accumulator |= table[uint8_t(input[i])];
+    accumulator |= table[uint8_t(input[i + 1])];
+    accumulator |= table[uint8_t(input[i + 2])];
+    accumulator |= table[uint8_t(input[i + 3])];
   }
   for (; i < length; i++) {
-    accumulator |= is_forbidden_domain_code_point_table[uint8_t(input[i])];
+    accumulator |= table[uint8_t(input[i])];
   }
   return accumulator;
 }
 
+ada_really_inline constexpr bool contains_forbidden_domain_code_point(
+    const char* input, size_t length) noexcept {
+  return or_table_values(is_forbidden_domain_code_point_table, input, length);
+}
+
+// Forbidden domain code points map to 1 and ASCII upper case letters to 2.
 constexpr static std::array<uint8_t, 256>
     is_forbidden_domain_code_point_table_or_upper = []() consteval {
-      std::array<uint8_t, 256> result{};
-      for (uint8_t c : {'\0', '\x09', '\x0a', '\x0d', ' ', '#', '/', ':', '<',
-                        '>', '?', '@', '[', '\\', ']', '^', '|', '%'}) {
-        result[c] = 1;
-      }
+      std::array<uint8_t, 256> result = is_forbidden_domain_code_point_table;
       for (uint8_t c = 'A'; c <= 'Z'; c++) {
         result[c] = 2;
-      }
-      for (uint8_t c = 0; c <= 32; c++) {
-        result[c] = 1;
-      }
-      for (size_t c = 127; c < 256; c++) {
-        result[c] = 1;
       }
       return result;
     }();
@@ -331,23 +324,8 @@ constexpr static std::array<uint8_t, 256>
 ada_really_inline constexpr uint8_t
 contains_forbidden_domain_code_point_or_upper(const char* input,
                                               size_t length) noexcept {
-  size_t i = 0;
-  uint8_t accumulator{};
-  for (; i + 4 <= length; i += 4) {
-    accumulator |=
-        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i])];
-    accumulator |=
-        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 1])];
-    accumulator |=
-        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 2])];
-    accumulator |=
-        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i + 3])];
-  }
-  for (; i < length; i++) {
-    accumulator |=
-        is_forbidden_domain_code_point_table_or_upper[uint8_t(input[i])];
-  }
-  return accumulator;
+  return or_table_values(is_forbidden_domain_code_point_table_or_upper, input,
+                         length);
 }
 
 // std::isalnum(c) || c == '+' || c == '-' || c == '.') is true for
@@ -362,9 +340,6 @@ constexpr static std::array<bool, 256> is_alnum_plus_table = []() consteval {
 
 ada_really_inline constexpr bool is_alnum_plus(const char c) noexcept {
   return is_alnum_plus_table[uint8_t(c)];
-  // A table is almost surely much faster than the
-  // following under most compilers: return
-  // return (std::isalnum(c) || c == '+' || c == '-' || c == '.');
 }
 
 ada_really_inline constexpr bool is_ascii_hex_digit(const char c) noexcept {
@@ -434,14 +409,6 @@ ada_really_inline constexpr bool is_double_dot_path_segment(
     }
   }
   return true;
-  // The above code might be a bit better than the code below. Compilers
-  // are not stupid and may use the fact that these strings have length 2,4 and
-  // 6 and other tricks.
-  // return input == ".." ||
-  //  input == ".%2e" || input == ".%2E" ||
-  //  input == "%2e." || input == "%2E." ||
-  //  input == "%2e%2e" || input == "%2E%2E" || input == "%2E%2e" || input ==
-  //  "%2e%2E";
 }
 
 ada_really_inline constexpr bool is_single_dot_path_segment(
@@ -599,6 +566,23 @@ std::string form_urlencoded_decode(const std::string_view input) {
 void percent_encode_suffix(const char* p, const char* end,
                            const uint8_t character_set[], std::string& out);
 
+// Appends [p, end) to out, percent-encoding the bytes in character_set.
+ada_really_inline void percent_encode_tail(const char* p, const char* end,
+                                           const uint8_t character_set[],
+                                           std::string& out) {
+  if (static_cast<size_t>(end - p) >= 48) {
+    percent_encode_suffix(p, end, character_set, out);
+    return;
+  }
+  for (; p != end; p++) {
+    if (character_sets::bit_at(character_set, *p)) {
+      out.append(character_sets::hex + uint8_t(*p) * 4, 3);
+    } else {
+      out += *p;
+    }
+  }
+}
+
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
   auto pointer = std::ranges::find_if(input, [character_set](const char c) {
@@ -612,19 +596,10 @@ std::string percent_encode(const std::string_view input,
   std::string result;
   result.reserve(input.length());  // in the worst case, percent encoding might
                                    // produce 3 characters.
-  result.append(input.substr(0, std::distance(input.begin(), pointer)));
-  if (static_cast<size_t>(input.end() - pointer) >= 48) {
-    percent_encode_suffix(&*pointer, input.data() + input.size(), character_set,
-                          result);
-  } else {
-    for (; pointer != input.end(); pointer++) {
-      if (character_sets::bit_at(character_set, *pointer)) {
-        result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-      } else {
-        result += *pointer;
-      }
-    }
-  }
+  const size_t index = std::distance(input.begin(), pointer);
+  result.append(input.substr(0, index));
+  percent_encode_tail(input.data() + index, input.data() + input.size(),
+                      character_set, result);
   return result;
 }
 
@@ -693,19 +668,8 @@ std::string percent_encode(const std::string_view input,
   std::string out;
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   out.append(input.data(), index);
-  auto pointer = input.begin() + index;
-  if (static_cast<size_t>(input.end() - pointer) >= 48) {
-    percent_encode_suffix(&*pointer, input.data() + input.size(), character_set,
-                          out);
-  } else {
-    for (; pointer != input.end(); pointer++) {
-      if (character_sets::bit_at(character_set, *pointer)) {
-        out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
-      } else {
-        out += *pointer;
-      }
-    }
-  }
+  percent_encode_tail(input.data() + index, input.data() + input.size(),
+                      character_set, out);
   return out;
 }
 

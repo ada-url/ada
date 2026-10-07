@@ -12,6 +12,7 @@
 
 #include <array>
 #include <cstdint>
+#include <string_view>
 
 // The IPv6 kernel needs vpermi2b/vpermb (VBMI) and vpcompressb/vpexpandb
 // (VBMI2) on top of ADA_AVX512's BW+VL.
@@ -287,6 +288,172 @@ ada_really_inline bool try_parse_ipv6_avx512(const char* data, size_t len,
   return true;
 }
 #endif  // ADA_AVX512_IPV6
+
+// Parses an IPv4 address that the decimal fast path rejected (e.g. hex or
+// octal parts, fewer than four parts). Returns false on failure. Otherwise ipv4
+// holds the address and pure_decimal_count the number of plain decimal parts.
+inline bool parse_ipv4_address(std::string_view input, uint64_t& ipv4,
+                               int& pure_decimal_count) noexcept {
+  const char* p = input.data();
+  const char* const end = p + input.size();
+  ipv4 = 0;
+  pure_decimal_count = 0;
+  int digit_count = 0;
+  for (; digit_count < 4 && p < end; ++digit_count) {
+    uint64_t segment = 0;
+    bool pure = false;
+    if (!parse_ipv4_number(p, end, segment, pure)) {
+      return false;
+    }
+    if (pure) {
+      ++pure_decimal_count;
+    }
+    if (p >= end) {
+      const unsigned shift = static_cast<unsigned>(32 - digit_count * 8);
+      if (segment >= (uint64_t{1} << shift)) {
+        return false;
+      }
+      ipv4 = (ipv4 << shift) | segment;
+      return true;
+    }
+    if (segment > 255 || *p != '.') {
+      return false;
+    }
+    ipv4 = (ipv4 << 8) | segment;
+    ++p;
+  }
+  return digit_count == 4 && p == end;
+}
+
+// https://url.spec.whatwg.org/#concept-ipv6-parser
+// Returns false on failure. Otherwise address holds the eight pieces.
+inline bool parse_ipv6_address(std::string_view input,
+                               std::array<uint16_t, 8>& address) noexcept {
+  if (input.empty() || input.size() > 45) [[unlikely]] {
+    return false;
+  }
+#if defined(ADA_AVX512_IPV6)
+  if (bool simd_valid;
+      try_parse_ipv6_avx512(input.data(), input.size(), address, simd_valid)) {
+    return simd_valid;
+  }
+#endif
+  address = {};
+  const char* pointer = input.data();
+  const char* const end = pointer + input.size();
+  int piece_index = 0;
+  int compress = -1;
+
+  if (*pointer == ':') {
+    if (input.size() == 1 || pointer[1] != ':') [[unlikely]] {
+      return false;
+    }
+    pointer += 2;
+    compress = ++piece_index;
+  }
+
+  while (pointer != end) {
+    if (piece_index == 8) [[unlikely]] {
+      return false;
+    }
+    if (*pointer == ':') {
+      if (compress != -1) [[unlikely]] {
+        return false;
+      }
+      ++pointer;
+      compress = ++piece_index;
+      continue;
+    }
+
+    uint16_t value = 0;
+    const int length = parse_hex_piece(pointer, end, value);
+
+    if (pointer != end && *pointer == '.') {
+      if (length == 0) [[unlikely]] {
+        return false;
+      }
+      pointer -= length;
+      if (piece_index > 6) [[unlikely]] {
+        return false;
+      }
+
+      int numbers_seen = 0;
+      while (pointer != end) {
+        int ipv4_piece = -1;
+        if (numbers_seen > 0) {
+          if (*pointer == '.' && numbers_seen < 4) {
+            ++pointer;
+          } else {
+            return false;
+          }
+        }
+        if (pointer == end || *pointer < '0' || *pointer > '9') [[unlikely]] {
+          return false;
+        }
+        ipv4_piece = *pointer - '0';
+        ++pointer;
+        if (pointer != end && *pointer >= '0' && *pointer <= '9') {
+          if (ipv4_piece == 0) [[unlikely]] {
+            return false;
+          }
+          ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
+          ++pointer;
+          if (pointer != end && *pointer >= '0' && *pointer <= '9') {
+            ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
+            ++pointer;
+            if (ipv4_piece > 255) [[unlikely]] {
+              return false;
+            }
+          }
+        }
+        address[static_cast<size_t>(piece_index)] = static_cast<uint16_t>(
+            address[static_cast<size_t>(piece_index)] * 0x100 +
+            static_cast<uint16_t>(ipv4_piece));
+        ++numbers_seen;
+        if (numbers_seen == 2 || numbers_seen == 4) {
+          ++piece_index;
+        }
+      }
+      if (numbers_seen != 4) [[unlikely]] {
+        return false;
+      }
+      break;
+    }
+
+    if (length == 0) [[unlikely]] {
+      return false;
+    }
+
+    if (pointer != end && *pointer == ':') {
+      ++pointer;
+      if (pointer == end) [[unlikely]] {
+        return false;
+      }
+    } else if (pointer != end) [[unlikely]] {
+      return false;
+    }
+
+    address[static_cast<size_t>(piece_index)] = value;
+    ++piece_index;
+  }
+
+  if (compress != -1) {
+    const int right = piece_index - compress;
+    if (right > 0) {
+      const size_t dest = static_cast<size_t>(8 - right);
+      const size_t src = static_cast<size_t>(compress);
+      if (dest != src) {
+        for (size_t i = static_cast<size_t>(right); i-- > 0;) {
+          address[dest + i] = address[src + i];
+          address[src + i] = 0;
+        }
+      }
+    }
+  } else if (piece_index != 8) [[unlikely]] {
+    return false;
+  }
+  return true;
+}
 
 }  // namespace ada::detail
 

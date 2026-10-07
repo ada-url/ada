@@ -10,7 +10,6 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
-#include <numeric>
 #include <ranges>
 #include <string>
 #include <string_view>
@@ -35,10 +34,6 @@ bool url::parse_ipv4(std::string_view input) {
   if (input.empty()) {
     return is_valid = false;
   }
-  std::string_view original_input = input;
-  if (original_input.back() == '.') {
-    original_input.remove_suffix(1);
-  }
   if (input.back() == '.') {
     input.remove_suffix(1);
     if (input.empty()) {
@@ -48,47 +43,17 @@ bool url::parse_ipv4(std::string_view input) {
 
   const uint64_t fast = checkers::try_parse_ipv4_fast(input);
   if (fast < checkers::ipv4_fast_fail) [[likely]] {
-    host = original_input;
+    host = input;
     host_type = IPV4;
     return true;
   }
 
-  const char* p = input.data();
-  const char* end = p + input.size();
   uint64_t ipv4 = 0;
-  int digit_count = 0;
   int pure_decimal_count = 0;
-
-  for (; digit_count < 4 && p < end; ++digit_count) {
-    uint64_t segment = 0;
-    bool pure = false;
-    if (!detail::parse_ipv4_number(p, end, segment, pure)) {
-      return is_valid = false;
-    }
-    if (pure) {
-      ++pure_decimal_count;
-    }
-    if (p >= end) {
-      const unsigned shift = static_cast<unsigned>(32 - digit_count * 8);
-      if (segment >= (uint64_t{1} << shift)) {
-        return is_valid = false;
-      }
-      ipv4 = (ipv4 << shift) | segment;
-      host = (pure_decimal_count == 4) ? std::string(original_input)
-                                       : ada::serializers::ipv4(ipv4);
-      host_type = IPV4;
-      return true;
-    }
-    if (segment > 255 || *p != '.') {
-      return is_valid = false;
-    }
-    ipv4 = (ipv4 << 8) | segment;
-    ++p;
-  }
-  if (digit_count != 4 || p != end) {
+  if (!detail::parse_ipv4_address(input, ipv4, pure_decimal_count)) {
     return is_valid = false;
   }
-  host = (pure_decimal_count == 4) ? std::string(original_input)
+  host = (pure_decimal_count == 4) ? std::string(input)
                                    : ada::serializers::ipv4(ipv4);
   host_type = IPV4;
   return true;
@@ -96,136 +61,10 @@ bool url::parse_ipv4(std::string_view input) {
 
 bool url::parse_ipv6(std::string_view input) {
   ada_log("parse_ipv6 ", input, " [", input.size(), " bytes]");
-  if (input.empty() || input.size() > 45) [[unlikely]] {
+  std::array<uint16_t, 8> address;
+  if (!detail::parse_ipv6_address(input, address)) [[unlikely]] {
     return is_valid = false;
   }
-  std::array<uint16_t, 8> address{};
-#if defined(ADA_AVX512_IPV6)
-  if (bool simd_valid; detail::try_parse_ipv6_avx512(input.data(), input.size(),
-                                                     address, simd_valid)) {
-    if (!simd_valid) [[unlikely]] {
-      return is_valid = false;
-    }
-    host = ada::serializers::ipv6(address);
-    host_type = IPV6;
-    return true;
-  }
-  address = {};
-#endif
-  const char* pointer = input.data();
-  const char* const end = pointer + input.size();
-  int piece_index = 0;
-  int compress = -1;
-
-  if (*pointer == ':') {
-    if (input.size() == 1 || pointer[1] != ':') [[unlikely]] {
-      return is_valid = false;
-    }
-    pointer += 2;
-    compress = ++piece_index;
-  }
-
-  while (pointer != end) {
-    if (piece_index == 8) [[unlikely]] {
-      return is_valid = false;
-    }
-    if (*pointer == ':') {
-      if (compress != -1) [[unlikely]] {
-        return is_valid = false;
-      }
-      ++pointer;
-      compress = ++piece_index;
-      continue;
-    }
-
-    uint16_t value = 0;
-    const int length = detail::parse_hex_piece(pointer, end, value);
-
-    if (pointer != end && *pointer == '.') {
-      if (length == 0) [[unlikely]] {
-        return is_valid = false;
-      }
-      pointer -= length;
-      if (piece_index > 6) [[unlikely]] {
-        return is_valid = false;
-      }
-
-      int numbers_seen = 0;
-      while (pointer != end) {
-        int ipv4_piece = -1;
-        if (numbers_seen > 0) {
-          if (*pointer == '.' && numbers_seen < 4) {
-            ++pointer;
-          } else {
-            return is_valid = false;
-          }
-        }
-        if (pointer == end || *pointer < '0' || *pointer > '9') [[unlikely]] {
-          return is_valid = false;
-        }
-        ipv4_piece = *pointer - '0';
-        ++pointer;
-        if (pointer != end && *pointer >= '0' && *pointer <= '9') {
-          if (ipv4_piece == 0) [[unlikely]] {
-            return is_valid = false;
-          }
-          ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
-          ++pointer;
-          if (pointer != end && *pointer >= '0' && *pointer <= '9') {
-            ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
-            ++pointer;
-            if (ipv4_piece > 255) [[unlikely]] {
-              return is_valid = false;
-            }
-          }
-        }
-        address[static_cast<size_t>(piece_index)] = static_cast<uint16_t>(
-            address[static_cast<size_t>(piece_index)] * 0x100 +
-            static_cast<uint16_t>(ipv4_piece));
-        ++numbers_seen;
-        if (numbers_seen == 2 || numbers_seen == 4) {
-          ++piece_index;
-        }
-      }
-      if (numbers_seen != 4) [[unlikely]] {
-        return is_valid = false;
-      }
-      break;
-    }
-
-    if (length == 0) [[unlikely]] {
-      return is_valid = false;
-    }
-
-    if (pointer != end && *pointer == ':') {
-      ++pointer;
-      if (pointer == end) [[unlikely]] {
-        return is_valid = false;
-      }
-    } else if (pointer != end) [[unlikely]] {
-      return is_valid = false;
-    }
-
-    address[static_cast<size_t>(piece_index)] = value;
-    ++piece_index;
-  }
-
-  if (compress != -1) {
-    const int right = piece_index - compress;
-    if (right > 0) {
-      const size_t dest = static_cast<size_t>(8 - right);
-      const size_t src = static_cast<size_t>(compress);
-      if (dest != src) {
-        for (size_t i = static_cast<size_t>(right); i-- > 0;) {
-          address[dest + i] = address[src + i];
-          address[src + i] = 0;
-        }
-      }
-    }
-  } else if (piece_index != 8) [[unlikely]] {
-    return is_valid = false;
-  }
-
   host = ada::serializers::ipv6(address);
   ada_log("parse_ipv6 ", *host);
   host_type = IPV6;
@@ -244,7 +83,7 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
     if constexpr (has_state_override) {
       // If url's scheme is not a special scheme and buffer is a special scheme,
       // then return.
-      if (is_special() != is_input_special) {
+      if (!is_special()) {
         return false;
       }
 
@@ -264,19 +103,6 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
     }
 
     type = parsed_type;
-
-    if constexpr (has_state_override) {
-      // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
-
-      if (urls_scheme_port) {
-        // If url's port is url's scheme's default port, then set url's port to
-        // null.
-        if (port.has_value() && *port == urls_scheme_port) {
-          port = std::nullopt;
-        }
-      }
-    }
   } else {  // slow path
     std::string _buffer(input);
     // Next function is only valid if the input is ASCII and returns false
@@ -313,17 +139,17 @@ ada_really_inline bool url::parse_scheme(const std::string_view input) {
     }
 
     set_scheme(std::move(_buffer));
+  }
 
-    if constexpr (has_state_override) {
-      // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
+  if constexpr (has_state_override) {
+    // This is uncommon.
+    uint16_t urls_scheme_port = get_special_port();
 
-      if (urls_scheme_port) {
-        // If url's port is url's scheme's default port, then set url's port to
-        // null.
-        if (port.has_value() && *port == urls_scheme_port) {
-          port = std::nullopt;
-        }
+    if (urls_scheme_port) {
+      // If url's port is url's scheme's default port, then set url's port to
+      // null.
+      if (port.has_value() && *port == urls_scheme_port) {
+        port = std::nullopt;
       }
     }
   }
@@ -360,7 +186,7 @@ ada_really_inline bool url::parse_host(std::string_view input) {
   // Fast path: try to parse as pure decimal IPv4 first.
   const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
   if (fast_result < checkers::ipv4_fast_fail) {
-    if (!input.empty() && input.back() == '.') {
+    if (input.back() == '.') {
       host = input.substr(0, input.size() - 1);
     } else {
       host = input;
@@ -454,25 +280,15 @@ ada_really_inline void url::parse_path(std::string_view input) {
     internal_input = input;
   }
 
-  // If url is special, then:
-  if (is_special()) {
-    if (internal_input.empty()) {
+  if (internal_input.empty()) {
+    if (is_special() || !host.has_value()) {
       path = "/";
-    } else if ((internal_input[0] == '/') || (internal_input[0] == '\\')) {
-      helpers::parse_prepared_path(internal_input.substr(1), type, path);
-    } else {
-      helpers::parse_prepared_path(internal_input, type, path);
     }
-  } else if (!internal_input.empty()) {
-    if (internal_input[0] == '/') {
-      helpers::parse_prepared_path(internal_input.substr(1), type, path);
-    } else {
-      helpers::parse_prepared_path(internal_input, type, path);
-    }
+  } else if (internal_input[0] == '/' ||
+             (is_special() && internal_input[0] == '\\')) {
+    helpers::parse_prepared_path(internal_input.substr(1), type, path);
   } else {
-    if (!host.has_value()) {
-      path = "/";
-    }
+    helpers::parse_prepared_path(internal_input, type, path);
   }
 }
 
@@ -621,10 +437,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
 
   url saved_url(*this);
 
-  size_t host_end_pos = input.find('#');
-  std::string _host(input.data(), host_end_pos != std::string_view::npos
-                                      ? host_end_pos
-                                      : input.size());
+  std::string _host(input.substr(0, input.find('#')));
   helpers::remove_ascii_tab_or_newline(_host);
   std::string_view new_host(_host);
 
@@ -649,7 +462,7 @@ bool url::set_host_or_hostname(const std::string_view input) {
     if (found_colon) {
       // If buffer is the empty string, host-missing validation error, return
       // failure.
-      std::string_view buffer = host_view.substr(0, location);
+      std::string_view buffer = host_view;
       if (buffer.empty()) {
         return false;
       }
@@ -679,22 +492,17 @@ bool url::set_host_or_hostname(const std::string_view input) {
     // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
     // - url is special and c is U+005C (\)
     else {
-      // If url is special and host_view is the empty string, host-missing
-      // validation error, return failure.
-      if (host_view.empty() && is_special()) {
-        return false;
-      }
-
-      // Otherwise, if state override is given, host_view is the empty string,
-      // and either url includes credentials or url's port is non-null, then
-      // return failure.
-      if (host_view.empty() && (has_credentials() || port.has_value())) {
-        return false;
-      }
-
-      // Let host be the result of host parsing host_view with url is not
-      // special.
-      if (host_view.empty() && !is_special()) {
+      if (host_view.empty()) {
+        // If url is special and host_view is the empty string, host-missing
+        // validation error, return failure.
+        // Otherwise, if state override is given, host_view is the empty
+        // string, and either url includes credentials or url's port is
+        // non-null, then return failure.
+        if (is_special() || has_credentials() || port.has_value()) {
+          return false;
+        }
+        // Let host be the result of host parsing host_view with url is not
+        // special.
         host = "";
         return check_url_size();
       }
@@ -817,8 +625,7 @@ void url::set_hash(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '#' ? input.substr(1) : input;
+  std::string new_value(input[0] == '#' ? input.substr(1) : input);
   helpers::remove_ascii_tab_or_newline(new_value);
   auto previous_hash = std::move(hash);
   hash = unicode::percent_encode(new_value,
@@ -835,8 +642,7 @@ void url::set_search(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '?' ? input.substr(1) : input;
+  std::string new_value(input[0] == '?' ? input.substr(1) : input);
   helpers::remove_ascii_tab_or_newline(new_value);
 
   auto query_percent_encode_set =
@@ -881,7 +687,7 @@ bool url::set_protocol(const std::string_view input) {
   std::string::iterator pointer =
       std::ranges::find_if_not(view, unicode::is_alnum_plus);
 
-  if (pointer != view.end() && *pointer == ':') {
+  if (*pointer == ':') {
     std::optional<url> saved_url;
     if (needs_rollback_snapshot(view.size())) {
       saved_url = *this;

@@ -1,6 +1,6 @@
 /**
- * @file url_search_params.h
- * @brief Declaration for the URL Search Params
+ * @file url_pattern_regex.h
+ * @brief Declaration for the URLPattern regex providers
  */
 #ifndef ADA_URL_PATTERN_REGEX_H
 #define ADA_URL_PATTERN_REGEX_H

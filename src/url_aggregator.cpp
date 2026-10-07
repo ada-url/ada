@@ -12,29 +12,11 @@
 
 #include <array>
 #include <cstdint>
-#include <cstring>
 #include <iterator>
 #include <ranges>
 #include <string>
 #include <string_view>
-
-namespace {
-
-ada_really_inline void apply_shifted_non_scheme_offsets(
-    ada::url_components& components, uint32_t new_difference) {
-  components.username_end += new_difference;
-  components.host_start += new_difference;
-  components.host_end += new_difference;
-  components.pathname_start += new_difference;
-  if (components.search_start != ada::url_components::omitted) {
-    components.search_start += new_difference;
-  }
-  if (components.hash_start != ada::url_components::omitted) {
-    components.hash_start += new_difference;
-  }
-}
-
-}  // namespace
+#include <utility>
 
 namespace ada {
 template <bool has_state_override>
@@ -76,19 +58,6 @@ template <bool has_state_override>
 
     type = parsed_type;
     set_scheme_from_view_with_colon(input_with_colon);
-
-    if constexpr (has_state_override) {
-      // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
-
-      if (urls_scheme_port) {
-        // If url's port is url's scheme's default port, then set url's port to
-        // null.
-        if (components.port == urls_scheme_port) {
-          clear_port();
-        }
-      }
-    }
   } else {  // slow path
     std::string _buffer(input);
     // Next function is only valid if the input is ASCII and returns false
@@ -125,17 +94,17 @@ template <bool has_state_override>
     }
 
     set_scheme(_buffer);
+  }
 
-    if constexpr (has_state_override) {
-      // This is uncommon.
-      uint16_t urls_scheme_port = get_special_port();
+  if constexpr (has_state_override) {
+    // This is uncommon.
+    uint16_t urls_scheme_port = get_special_port();
 
-      if (urls_scheme_port) {
-        // If url's port is url's scheme's default port, then set url's port to
-        // null.
-        if (components.port == urls_scheme_port) {
-          clear_port();
-        }
+    if (urls_scheme_port) {
+      // If url's port is url's scheme's default port, then set url's port to
+      // null.
+      if (components.port == urls_scheme_port) {
+        clear_port();
       }
     }
   }
@@ -160,7 +129,7 @@ inline void url_aggregator::copy_scheme(const url_aggregator& u) {
     return;
   }
 
-  apply_shifted_non_scheme_offsets(components, new_difference);
+  detail::shift_from_username_end(components, new_difference);
   ADA_ASSERT_TRUE(validate());
 }
 
@@ -184,30 +153,15 @@ inline void url_aggregator::set_scheme_from_view_with_colon(
   }
   components.protocol_end += new_difference;
 
-  apply_shifted_non_scheme_offsets(components, new_difference);
+  detail::shift_from_username_end(components, new_difference);
   ADA_ASSERT_TRUE(validate());
 }
 
 inline void url_aggregator::set_scheme(std::string_view new_scheme) {
   ada_log("url_aggregator::set_scheme ", new_scheme);
-  ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(new_scheme.empty() || new_scheme.back() != ':');
-  // next line could overflow but unsigned arithmetic has well-defined
-  // overflows.
-  uint32_t new_difference =
-      uint32_t(new_scheme.size()) - components.protocol_end + 1;
-
   type = ada::scheme::get_scheme_type(new_scheme);
-  if (buffer.empty()) {
-    buffer.append(helpers::concat(new_scheme, ":"));
-  } else {
-    buffer.erase(0, components.protocol_end);
-    buffer.insert(0, helpers::concat(new_scheme, ":"));
-  }
-  components.protocol_end = uint32_t(new_scheme.size() + 1);
-
-  apply_shifted_non_scheme_offsets(components, new_difference);
-  ADA_ASSERT_TRUE(validate());
+  set_scheme_from_view_with_colon(helpers::concat(new_scheme, ":"));
 }
 
 bool url_aggregator::needs_rollback_snapshot(size_t input_len) const noexcept {
@@ -375,13 +329,7 @@ bool url_aggregator::set_pathname(const std::string_view input) {
   parse_path(input);
   if (get_pathname().starts_with("//") && !has_authority() && !has_dash_dot()) {
     buffer.insert(components.pathname_start, "/.");
-    components.pathname_start += 2;
-    if (components.search_start != url_components::omitted) {
-      components.search_start += 2;
-    }
-    if (components.hash_start != url_components::omitted) {
-      components.hash_start += 2;
-    }
+    detail::shift_from_pathname(components, 2);
   }
   if (saved_url && buffer.size() > ada::get_max_input_length()) {
     *this = std::move(*saved_url);
@@ -467,10 +415,7 @@ void url_aggregator::set_hash(const std::string_view input) {
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (input.empty()) {
-    if (components.hash_start != url_components::omitted) {
-      buffer.resize(components.hash_start);
-      components.hash_start = url_components::omitted;
-    }
+    clear_hash();
     helpers::strip_trailing_spaces_from_opaque_path(*this);
     return;
   }
@@ -517,7 +462,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (input.empty()) {
     return is_valid = false;
-  }  // technically unnecessary.
+  }
   // If input starts with U+005B ([), then:
   if (input[0] == '[') {
     // If input does not end with U+005D (]), validation error, return failure.
@@ -551,7 +496,7 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
   // Fast path: try to parse as pure decimal IPv4 first.
   const uint64_t fast_result = checkers::try_parse_ipv4_fast(input);
   if (fast_result < checkers::ipv4_fast_fail) {
-    if (!input.empty() && input.back() == '.') {
+    if (input.back() == '.') {
       update_base_hostname(input.substr(0, input.size() - 1));
     } else {
       update_base_hostname(input);
@@ -655,10 +600,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
   url_aggregator saved_url(*this);
 
-  size_t host_end_pos = input.find('#');
-  std::string _host(input.data(), host_end_pos != std::string_view::npos
-                                      ? host_end_pos
-                                      : input.size());
+  std::string _host(input.substr(0, input.find('#')));
   helpers::remove_ascii_tab_or_newline(_host);
   std::string_view new_host(_host);
 
@@ -718,22 +660,22 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     // - c is the EOF code point, U+002F (/), U+003F (?), or U+0023 (#)
     // - url is special and c is U+005C (\)
     else {
-      // If url is special and host_view is the empty string, host-missing
-      // validation error, return failure.
-      if (host_view.empty() && is_special()) {
-        return false;
-      }
+      if (host_view.empty()) {
+        // If url is special and host_view is the empty string, host-missing
+        // validation error, return failure.
+        if (is_special()) {
+          return false;
+        }
 
-      // Otherwise, if state override is given, host_view is the empty string,
-      // and either url includes credentials or url's port is non-null, then
-      // return failure.
-      if (host_view.empty() && (has_credentials() || has_port())) {
-        return false;
-      }
+        // Otherwise, if state override is given, host_view is the empty
+        // string, and either url includes credentials or url's port is
+        // non-null, then return failure.
+        if (has_credentials() || has_port()) {
+          return false;
+        }
 
-      // Let host be the result of host parsing host_view with url is not
-      // special.
-      if (host_view.empty() && !is_special()) {
+        // Let host be the result of host parsing host_view with url is not
+        // special.
         if (has_hostname()) {
           clear_hostname();  // easy!
         } else if (has_dash_dot()) {
@@ -860,10 +802,8 @@ bool url_aggregator::set_hostname(const std::string_view input) {
   ada_log("url_aggregator::get_hash");
   // If this's URL's fragment is either null or the empty string, then return
   // the empty string. Return U+0023 (#), followed by this's URL's fragment.
-  if (components.hash_start == url_components::omitted) {
-    return "";
-  }
-  if (buffer.size() - components.hash_start <= 1) {
+  if (components.hash_start == url_components::omitted ||
+      buffer.size() - components.hash_start <= 1) {
     return "";
   }
   return helpers::substring(buffer, components.hash_start);
@@ -936,87 +876,56 @@ bool url_aggregator::set_hostname(const std::string_view input) {
 
   std::string answer;
   auto back = std::back_insert_iterator(answer);
+  auto append_json_string = [&](std::string_view name, std::string_view value) {
+    answer.append("\t\"");
+    answer.append(name);
+    answer.append("\":\"");
+    helpers::encode_json(value, back);
+    answer.append("\",\n");
+  };
   answer.append("{\n");
-
-  answer.append("\t\"buffer\":\"");
-  helpers::encode_json(buffer, back);
-  answer.append("\",\n");
-
-  answer.append("\t\"protocol\":\"");
-  helpers::encode_json(get_protocol(), back);
-  answer.append("\",\n");
-
+  append_json_string("buffer", buffer);
+  append_json_string("protocol", get_protocol());
   if (has_credentials()) {
-    answer.append("\t\"username\":\"");
-    helpers::encode_json(get_username(), back);
-    answer.append("\",\n");
-    answer.append("\t\"password\":\"");
-    helpers::encode_json(get_password(), back);
-    answer.append("\",\n");
+    append_json_string("username", get_username());
+    append_json_string("password", get_password());
   }
-
-  answer.append("\t\"host\":\"");
-  helpers::encode_json(get_host(), back);
-  answer.append("\",\n");
-
-  answer.append("\t\"path\":\"");
-  helpers::encode_json(get_pathname(), back);
-  answer.append("\",\n");
+  append_json_string("host", get_host());
+  append_json_string("path", get_pathname());
   answer.append("\t\"opaque path\":");
   answer.append((has_opaque_path ? "true" : "false"));
   answer.append(",\n");
-
   if (components.search_start != url_components::omitted) {
-    answer.append("\t\"query\":\"");
-    helpers::encode_json(get_search(), back);
-    answer.append("\",\n");
+    append_json_string("query", get_search());
   }
   if (components.hash_start != url_components::omitted) {
-    answer.append("\t\"fragment\":\"");
-    helpers::encode_json(get_hash(), back);
-    answer.append("\",\n");
+    append_json_string("fragment", get_hash());
   }
 
-  auto convert_offset_to_string = [](uint32_t offset) -> std::string {
-    if (offset == url_components::omitted) {
-      return "null";
-    } else {
-      return std::to_string(offset);
-    }
+  const std::pair<std::string_view, uint32_t> offsets[] = {
+      {"protocol_end", components.protocol_end},
+      {"username_end", components.username_end},
+      {"host_start", components.host_start},
+      {"host_end", components.host_end},
+      {"port", components.port},
+      {"pathname_start", components.pathname_start},
+      {"search_start", components.search_start},
+      {"hash_start", components.hash_start},
   };
-
-  answer.append("\t\"protocol_end\":");
-  answer.append(convert_offset_to_string(components.protocol_end));
-  answer.append(",\n");
-
-  answer.append("\t\"username_end\":");
-  answer.append(convert_offset_to_string(components.username_end));
-  answer.append(",\n");
-
-  answer.append("\t\"host_start\":");
-  answer.append(convert_offset_to_string(components.host_start));
-  answer.append(",\n");
-
-  answer.append("\t\"host_end\":");
-  answer.append(convert_offset_to_string(components.host_end));
-  answer.append(",\n");
-
-  answer.append("\t\"port\":");
-  answer.append(convert_offset_to_string(components.port));
-  answer.append(",\n");
-
-  answer.append("\t\"pathname_start\":");
-  answer.append(convert_offset_to_string(components.pathname_start));
-  answer.append(",\n");
-
-  answer.append("\t\"search_start\":");
-  answer.append(convert_offset_to_string(components.search_start));
-  answer.append(",\n");
-
-  answer.append("\t\"hash_start\":");
-  answer.append(convert_offset_to_string(components.hash_start));
+  std::string_view separator;
+  for (const auto& [name, offset] : offsets) {
+    answer.append(separator);
+    answer.append("\t\"");
+    answer.append(name);
+    answer.append("\":");
+    if (offset == url_components::omitted) {
+      answer.append("null");
+    } else {
+      answer.append(std::to_string(offset));
+    }
+    separator = ",\n";
+  }
   answer.append("\n}");
-
   return answer;
 }
 
@@ -1066,39 +975,11 @@ bool url_aggregator::parse_ipv4(std::string_view input, bool in_place) {
     return true;
   }
 
-  const char* p = input.data();
-  const char* end = p + input.size();
   uint64_t ipv4 = 0;
-  int digit_count = 0;
   int pure_decimal_count = 0;
-
-  for (; digit_count < 4 && p < end; ++digit_count) {
-    uint64_t segment = 0;
-    bool pure = false;
-    if (!detail::parse_ipv4_number(p, end, segment, pure)) {
-      return is_valid = false;
-    }
-    if (pure) {
-      ++pure_decimal_count;
-    }
-    if (p >= end) {
-      const unsigned shift = static_cast<unsigned>(32 - digit_count * 8);
-      if (segment >= (uint64_t{1} << shift)) {
-        return is_valid = false;
-      }
-      ipv4 = (ipv4 << shift) | segment;
-      goto ipv4_done;
-    }
-    if (segment > 255 || *p != '.') {
-      return is_valid = false;
-    }
-    ipv4 = (ipv4 << 8) | segment;
-    ++p;
-  }
-  if (digit_count != 4 || p != end) {
+  if (!detail::parse_ipv4_address(input, ipv4, pure_decimal_count)) {
     return is_valid = false;
   }
-ipv4_done:
   ada_log("url_aggregator::parse_ipv4 completed ", get_href(),
           " host: ", get_host());
   if (in_place && pure_decimal_count == 4 && !trailing_dot) {
@@ -1117,146 +998,14 @@ bool url_aggregator::parse_ipv6(std::string_view input) {
   ada_log("parse_ipv6 ", input, " [", input.size(), " bytes]");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
-  if (input.empty() || input.size() > 45) [[unlikely]] {
-    return is_valid = false;
-  }
-  std::array<uint16_t, 8> address{};
-#if defined(ADA_AVX512_IPV6)
-  if (bool simd_valid; detail::try_parse_ipv6_avx512(input.data(), input.size(),
-                                                     address, simd_valid)) {
-    if (!simd_valid) [[unlikely]] {
-      return is_valid = false;
-    }
-    const std::string serialized = ada::serializers::ipv6(address);
-    if (get_hostname() != serialized) {
-      update_base_hostname(serialized);
-    }
-    host_type = IPV6;
-    return true;
-  }
-  address = {};
-#endif
-  const char* pointer = input.data();
-  const char* const end = pointer + input.size();
-  int piece_index = 0;
-  int compress = -1;
-
-  if (*pointer == ':') {
-    if (input.size() == 1 || pointer[1] != ':') [[unlikely]] {
-      return is_valid = false;
-    }
-    pointer += 2;
-    compress = ++piece_index;
-  }
-
-  while (pointer != end) {
-    if (piece_index == 8) [[unlikely]] {
-      return is_valid = false;
-    }
-    if (*pointer == ':') {
-      if (compress != -1) [[unlikely]] {
-        return is_valid = false;
-      }
-      ++pointer;
-      compress = ++piece_index;
-      continue;
-    }
-
-    uint16_t value = 0;
-    const int length = detail::parse_hex_piece(pointer, end, value);
-
-    if (pointer != end && *pointer == '.') {
-      if (length == 0) [[unlikely]] {
-        return is_valid = false;
-      }
-      pointer -= length;
-      if (piece_index > 6) [[unlikely]] {
-        return is_valid = false;
-      }
-
-      int numbers_seen = 0;
-      while (pointer != end) {
-        int ipv4_piece = -1;
-        if (numbers_seen > 0) {
-          if (*pointer == '.' && numbers_seen < 4) {
-            ++pointer;
-          } else {
-            return is_valid = false;
-          }
-        }
-        if (pointer == end || *pointer < '0' || *pointer > '9') [[unlikely]] {
-          return is_valid = false;
-        }
-        ipv4_piece = *pointer - '0';
-        ++pointer;
-        if (pointer != end && *pointer >= '0' && *pointer <= '9') {
-          if (ipv4_piece == 0) [[unlikely]] {
-            return is_valid = false;
-          }
-          ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
-          ++pointer;
-          if (pointer != end && *pointer >= '0' && *pointer <= '9') {
-            ipv4_piece = ipv4_piece * 10 + (*pointer - '0');
-            ++pointer;
-            if (ipv4_piece > 255) [[unlikely]] {
-              return is_valid = false;
-            }
-          }
-        }
-        address[static_cast<size_t>(piece_index)] = static_cast<uint16_t>(
-            address[static_cast<size_t>(piece_index)] * 0x100 +
-            static_cast<uint16_t>(ipv4_piece));
-        ++numbers_seen;
-        if (numbers_seen == 2 || numbers_seen == 4) {
-          ++piece_index;
-        }
-      }
-      if (numbers_seen != 4) [[unlikely]] {
-        return is_valid = false;
-      }
-      break;
-    }
-
-    if (length == 0) [[unlikely]] {
-      return is_valid = false;
-    }
-
-    if (pointer != end && *pointer == ':') {
-      ++pointer;
-      if (pointer == end) [[unlikely]] {
-        return is_valid = false;
-      }
-    } else if (pointer != end) [[unlikely]] {
-      return is_valid = false;
-    }
-
-    address[static_cast<size_t>(piece_index)] = value;
-    ++piece_index;
-  }
-
-  if (compress != -1) {
-    const int right = piece_index - compress;
-    if (right > 0) {
-      const size_t dest = static_cast<size_t>(8 - right);
-      const size_t src = static_cast<size_t>(compress);
-      if (dest != src) {
-        for (size_t i = static_cast<size_t>(right); i-- > 0;) {
-          address[dest + i] = address[src + i];
-          address[src + i] = 0;
-        }
-      }
-    }
-  } else if (piece_index != 8) [[unlikely]] {
+  std::array<uint16_t, 8> address;
+  if (!detail::parse_ipv6_address(input, address)) [[unlikely]] {
     return is_valid = false;
   }
 
   // Serialize once; skip rewrite when hostname is already canonical.
   const std::string serialized = ada::serializers::ipv6(address);
-  const std::string_view current = get_hostname();
-  if (current.size() == serialized.size() &&
-      std::memcmp(current.data(), serialized.data(), serialized.size()) == 0) {
-    ada_log("parse_ipv6 in-place canonical match");
-  } else {
+  if (get_hostname() != serialized) {
     update_base_hostname(serialized);
   }
   ada_log("parse_ipv6 ", get_hostname());
@@ -1292,132 +1041,61 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   if (!is_valid) {
     return "invalid";
   }
+  struct marker {
+    uint32_t offset;
+    bool present;
+    std::string_view name;
+    bool print_offset;
+  };
+  const std::array<marker, 7> markers{{
+      {components.hash_start, components.hash_start != url_components::omitted,
+       "hash_start", false},
+      {components.search_start,
+       components.search_start != url_components::omitted, "search_start",
+       true},
+      {components.pathname_start, components.pathname_start != buffer.size(),
+       "pathname_start", true},
+      {components.host_end, components.host_end != buffer.size(), "host_end",
+       true},
+      {components.host_start, components.host_start != buffer.size(),
+       "host_start", true},
+      {components.username_end, components.username_end != buffer.size(),
+       "username_end", true},
+      {components.protocol_end, components.protocol_end != buffer.size(),
+       "protocol_end", true},
+  }};
   std::string answer;
   answer.append(buffer);
   answer.append(" [");
   answer.append(std::to_string(buffer.size()));
-  answer.append(" bytes]");
-  answer.append("\n");
+  answer.append(" bytes]\n");
   // first line
-  std::string line1;
-  line1.resize(buffer.size(), ' ');
-  if (components.hash_start != url_components::omitted) {
-    line1[components.hash_start] = '|';
-  }
-  if (components.search_start != url_components::omitted) {
-    line1[components.search_start] = '|';
-  }
-  if (components.pathname_start != buffer.size()) {
-    line1[components.pathname_start] = '|';
-  }
-  if (components.host_end != buffer.size()) {
-    line1[components.host_end] = '|';
-  }
-  if (components.host_start != buffer.size()) {
-    line1[components.host_start] = '|';
-  }
-  if (components.username_end != buffer.size()) {
-    line1[components.username_end] = '|';
-  }
-  if (components.protocol_end != buffer.size()) {
-    line1[components.protocol_end] = '|';
+  std::string line1(buffer.size(), ' ');
+  for (const marker& m : markers) {
+    if (m.present) {
+      line1[m.offset] = '|';
+    }
   }
   answer.append(line1);
   answer.append("\n");
 
-  std::string line2 = line1;
-  if (components.hash_start != url_components::omitted) {
-    line2[components.hash_start] = '`';
-    line1[components.hash_start] = ' ';
-
-    for (size_t i = components.hash_start + 1; i < line2.size(); i++) {
-      line2[i] = '-';
+  for (const marker& m : markers) {
+    if (!m.present) {
+      continue;
     }
-    line2.append(" hash_start");
-    answer.append(line2);
-    answer.append("\n");
-  }
-
-  std::string line3 = line1;
-  if (components.search_start != url_components::omitted) {
-    line3[components.search_start] = '`';
-    line1[components.search_start] = ' ';
-
-    for (size_t i = components.search_start + 1; i < line3.size(); i++) {
-      line3[i] = '-';
+    std::string line = line1;
+    line[m.offset] = '`';
+    line1[m.offset] = ' ';
+    for (size_t i = m.offset + 1; i < line.size(); i++) {
+      line[i] = '-';
     }
-    line3.append(" search_start ");
-    line3.append(std::to_string(components.search_start));
-    answer.append(line3);
-    answer.append("\n");
-  }
-
-  std::string line4 = line1;
-  if (components.pathname_start != buffer.size()) {
-    line4[components.pathname_start] = '`';
-    line1[components.pathname_start] = ' ';
-    for (size_t i = components.pathname_start + 1; i < line4.size(); i++) {
-      line4[i] = '-';
+    line.append(" ");
+    line.append(m.name);
+    if (m.print_offset) {
+      line.append(" ");
+      line.append(std::to_string(m.offset));
     }
-    line4.append(" pathname_start ");
-    line4.append(std::to_string(components.pathname_start));
-    answer.append(line4);
-    answer.append("\n");
-  }
-
-  std::string line5 = line1;
-  if (components.host_end != buffer.size()) {
-    line5[components.host_end] = '`';
-    line1[components.host_end] = ' ';
-
-    for (size_t i = components.host_end + 1; i < line5.size(); i++) {
-      line5[i] = '-';
-    }
-    line5.append(" host_end ");
-    line5.append(std::to_string(components.host_end));
-    answer.append(line5);
-    answer.append("\n");
-  }
-
-  std::string line6 = line1;
-  if (components.host_start != buffer.size()) {
-    line6[components.host_start] = '`';
-    line1[components.host_start] = ' ';
-
-    for (size_t i = components.host_start + 1; i < line6.size(); i++) {
-      line6[i] = '-';
-    }
-    line6.append(" host_start ");
-    line6.append(std::to_string(components.host_start));
-    answer.append(line6);
-    answer.append("\n");
-  }
-
-  std::string line7 = line1;
-  if (components.username_end != buffer.size()) {
-    line7[components.username_end] = '`';
-    line1[components.username_end] = ' ';
-
-    for (size_t i = components.username_end + 1; i < line7.size(); i++) {
-      line7[i] = '-';
-    }
-    line7.append(" username_end ");
-    line7.append(std::to_string(components.username_end));
-    answer.append(line7);
-    answer.append("\n");
-  }
-
-  std::string line8 = line1;
-  if (components.protocol_end != buffer.size()) {
-    line8[components.protocol_end] = '`';
-    line1[components.protocol_end] = ' ';
-
-    for (size_t i = components.protocol_end + 1; i < line8.size(); i++) {
-      line8[i] = '-';
-    }
-    line8.append(" protocol_end ");
-    line8.append(std::to_string(components.protocol_end));
-    answer.append(line8);
+    answer.append(line);
     answer.append("\n");
   }
 
@@ -1427,20 +1105,13 @@ bool url_aggregator::parse_opaque_host(std::string_view input) {
   if (components.search_start == url_components::omitted) {
     answer.append("note: search omitted\n");
   }
-  if (components.protocol_end > buffer.size()) {
-    answer.append("warning: protocol_end overflows\n");
-  }
-  if (components.username_end > buffer.size()) {
-    answer.append("warning: username_end overflows\n");
-  }
-  if (components.host_start > buffer.size()) {
-    answer.append("warning: host_start overflows\n");
-  }
-  if (components.host_end > buffer.size()) {
-    answer.append("warning: host_end overflows\n");
-  }
-  if (components.pathname_start > buffer.size()) {
-    answer.append("warning: pathname_start overflows\n");
+  // Overflow warnings cover the non-optional offsets, protocol_end first.
+  for (size_t i = markers.size(); i-- > 2;) {
+    if (markers[i].offset > buffer.size()) {
+      answer.append("warning: ");
+      answer.append(markers[i].name);
+      answer.append(" overflows\n");
+    }
   }
   return answer;
 }
@@ -1450,13 +1121,7 @@ void url_aggregator::delete_dash_dot() {
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(has_dash_dot());
   buffer.erase(components.host_end, 2);
-  components.pathname_start -= 2;
-  if (components.search_start != url_components::omitted) {
-    components.search_start -= 2;
-  }
-  if (components.hash_start != url_components::omitted) {
-    components.hash_start -= 2;
-  }
+  detail::shift_from_pathname(components, uint32_t(0) - 2);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!has_dash_dot());
 }
@@ -1538,25 +1203,18 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
     size_t previous_location = 0;  // We start at 0.
     do {
       size_t new_location = input.find('/', previous_location);
-      // std::string_view path_view = input;
-      //  We process the last segment separately:
+      // We process the last segment separately:
       if (new_location == std::string_view::npos) {
         std::string_view path_view = input.substr(previous_location);
         if (path_view == "..") {  // The path ends with ..
           // e.g., if you receive ".." with an empty path, you go to "/".
           if (path.empty()) {
             path = '/';
-            update_base_pathname(path);
-            return;
+          } else if (path.back() != '/') {
+            // If you have the path "/joe/myfriend",
+            // then you delete 'myfriend'.
+            path.resize(path.rfind('/') + 1);
           }
-          // Fast case where we have nothing to do:
-          if (path.back() == '/') {
-            update_base_pathname(path);
-            return;
-          }
-          // If you have the path "/joe/myfriend",
-          // then you delete 'myfriend'.
-          path.resize(path.rfind('/') + 1);
           update_base_pathname(path);
           return;
         }
@@ -1585,10 +1243,10 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
   } else {
     ada_log("parse_path slow");
     // we have reached the general case
-    bool needs_percent_encoding = (accumulator & 1);
+    bool needs_percent_encoding = (accumulator & need_encoding);
     std::string path_buffer_tmp;
     do {
-      size_t location = (special && (accumulator & 2))
+      size_t location = (special && (accumulator & backslash_char))
                             ? input.find_first_of("/\\")
                             : input.find('/');
       std::string_view path_view = input;
@@ -1609,12 +1267,13 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
         if (location == std::string_view::npos) {
           path += '/';
         }
-      } else if (unicode::is_single_dot_path_segment(path_buffer) &&
-                 (location == std::string_view::npos)) {
-        path += '/';
+      } else if (unicode::is_single_dot_path_segment(path_buffer)) {
+        if (location == std::string_view::npos) {
+          path += '/';
+        }
       }
       // Otherwise, if path_buffer is not a single-dot path segment, then:
-      else if (!unicode::is_single_dot_path_segment(path_buffer)) {
+      else {
         // If url's scheme is "file", url's path is empty, and path_buffer is a
         // Windows drive letter, then replace the second code point in
         // path_buffer with U+003A (:).

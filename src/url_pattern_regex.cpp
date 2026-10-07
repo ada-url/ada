@@ -41,10 +41,7 @@ std_regex_provider::regex_search(std::string_view input,
   // An empty input can still match with capture groups (e.g. "(x*)" or an
   // optional ":a?" against ""), so the group values must be extracted here
   // just like for a non-empty input. A successful regex_search always leaves
-  // the full match at index 0, so match_result is never empty at this point.
-  if (match_result.empty()) {
-    return matches;
-  }
+  // the full match at index 0; group values start at index 1.
   matches.reserve(match_result.size());
   for (size_t i = 1; i < match_result.size(); ++i) {
     if (auto entry = match_result[i]; entry.matched) {

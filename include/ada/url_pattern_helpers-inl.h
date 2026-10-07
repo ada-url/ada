@@ -5,6 +5,7 @@
 #ifndef ADA_URL_PATTERN_HELPERS_INL_H
 #define ADA_URL_PATTERN_HELPERS_INL_H
 
+#include <algorithm>
 #include <optional>
 #include <string_view>
 
@@ -157,17 +158,10 @@ constexpr bool constructor_string_parser<regex_provider>::is_group_close()
 template <url_pattern_regex::regex_concept regex_provider>
 constexpr bool
 constructor_string_parser<regex_provider>::next_is_authority_slashes() const {
-  // If the result of running is a non-special pattern char given parser,
-  // parser's token index + 1, and "/" is false, then return false.
-  if (!is_non_special_pattern_char(token_index + 1, '/')) {
-    return false;
-  }
-  // If the result of running is a non-special pattern char given parser,
-  // parser's token index + 2, and "/" is false, then return false.
-  if (!is_non_special_pattern_char(token_index + 2, '/')) {
-    return false;
-  }
-  return true;
+  // Return false unless running is a non-special pattern char given parser,
+  // "/", and both parser's token index + 1 and parser's token index + 2.
+  return is_non_special_pattern_char(token_index + 1, '/') &&
+         is_non_special_pattern_char(token_index + 2, '/');
 }
 
 template <url_pattern_regex::regex_concept regex_provider>
@@ -184,60 +178,48 @@ void constructor_string_parser<regex_provider>::change_state(State new_state,
   // If parser's state is not "init", not "authority", and not "done", then set
   // parser's result[parser's state] to the result of running make a component
   // string given parser.
-  if (state != State::INIT && state != State::AUTHORITY &&
-      state != State::DONE) {
-    auto value = make_component_string();
-    // TODO: Simplify this.
-    switch (state) {
-      case State::PROTOCOL: {
-        result.protocol = value;
-        break;
-      }
-      case State::USERNAME: {
-        result.username = value;
-        break;
-      }
-      case State::PASSWORD: {
-        result.password = value;
-        break;
-      }
-      case State::HOSTNAME: {
-        result.hostname = value;
-        break;
-      }
-      case State::PORT: {
-        result.port = value;
-        break;
-      }
-      case State::PATHNAME: {
-        result.pathname = value;
-        break;
-      }
-      case State::SEARCH: {
-        result.search = value;
-        break;
-      }
-      case State::HASH: {
-        result.hash = value;
-        break;
-      }
-      default:
-        ada::unreachable();
-    }
+  switch (state) {
+    case State::PROTOCOL:
+      result.protocol = make_component_string();
+      break;
+    case State::USERNAME:
+      result.username = make_component_string();
+      break;
+    case State::PASSWORD:
+      result.password = make_component_string();
+      break;
+    case State::HOSTNAME:
+      result.hostname = make_component_string();
+      break;
+    case State::PORT:
+      result.port = make_component_string();
+      break;
+    case State::PATHNAME:
+      result.pathname = make_component_string();
+      break;
+    case State::SEARCH:
+      result.search = make_component_string();
+      break;
+    case State::HASH:
+      result.hash = make_component_string();
+      break;
+    case State::INIT:
+    case State::AUTHORITY:
+    case State::DONE:
+      break;
   }
 
-  // If parser's state is not "init" and new state is not "done", then:
-  if (state != State::INIT && new_state != State::DONE) {
-    // If parser's state is "protocol", "authority", "username", or "password";
-    // new state is "port", "pathname", "search", or "hash"; and parser's
-    // result["hostname"] does not exist, then set parser's result["hostname"]
-    // to the empty string.
-    if ((state == State::PROTOCOL || state == State::AUTHORITY ||
-         state == State::USERNAME || state == State::PASSWORD) &&
-        (new_state == State::PORT || new_state == State::PATHNAME ||
-         new_state == State::SEARCH || new_state == State::HASH) &&
-        !result.hostname)
-      result.hostname = "";
+  // If parser's state is "protocol", "authority", "username", or "password";
+  // new state is "port", "pathname", "search", or "hash"; and parser's
+  // result["hostname"] does not exist, then set parser's result["hostname"]
+  // to the empty string. (This implies that parser's state is not "init" and
+  // new state is not "done".)
+  if ((state == State::PROTOCOL || state == State::AUTHORITY ||
+       state == State::USERNAME || state == State::PASSWORD) &&
+      (new_state == State::PORT || new_state == State::PATHNAME ||
+       new_state == State::SEARCH || new_state == State::HASH) &&
+      !result.hostname) {
+    result.hostname = "";
   }
 
   // If parser's state is "protocol", "authority", "username", "password",
@@ -819,7 +801,7 @@ tl::expected<std::vector<url_pattern_part>, errors> parse_pattern_string(
     }
     // Run maybe add a part from the pending fixed value given parser.
     if (auto error = parser.maybe_add_part_from_the_pending_fixed_value()) {
-      ada_log("maybe_add_part_from_the_pending_fixed_value failed on line 992");
+      ada_log("maybe_add_part_from_the_pending_fixed_value failed");
       return tl::unexpected(*error);
     }
     // Run consume a required token given parser and "end".
@@ -835,31 +817,25 @@ tl::expected<std::vector<url_pattern_part>, errors> parse_pattern_string(
 template <url_pattern_regex::regex_concept regex_provider>
 bool protocol_component_matches_special_scheme(
     url_pattern_component<regex_provider>& component) {
-  // Optimization: Use fast_test for simple patterns to avoid regex overhead
+  // Optimization: avoid regex evaluation for simple patterns
   switch (component.type) {
     case url_pattern_component_type::EMPTY:
       // Empty pattern can't match any special scheme
       return false;
     case url_pattern_component_type::EXACT_MATCH:
       // Direct string comparison for exact match patterns
-      return component.exact_match_value == "http" ||
-             component.exact_match_value == "https" ||
-             component.exact_match_value == "ws" ||
-             component.exact_match_value == "wss" ||
-             component.exact_match_value == "ftp" ||
-             component.exact_match_value == "file";
+      return scheme::is_special(component.exact_match_value);
     case url_pattern_component_type::FULL_WILDCARD:
       // Full wildcard matches everything including special schemes
       return true;
-    case url_pattern_component_type::REGEXP:
+    case url_pattern_component_type::REGEXP: {
       // Fall back to regex matching for complex patterns
-      auto& regex = component.regexp;
-      return regex_provider::regex_match("http", regex) ||
-             regex_provider::regex_match("https", regex) ||
-             regex_provider::regex_match("ws", regex) ||
-             regex_provider::regex_match("wss", regex) ||
-             regex_provider::regex_match("ftp", regex) ||
-             regex_provider::regex_match("file", regex);
+      constexpr std::string_view special_schemes[] = {"http", "https", "ws",
+                                                      "wss",  "ftp",   "file"};
+      return std::ranges::any_of(special_schemes, [&](std::string_view s) {
+        return regex_provider::regex_match(s, component.regexp);
+      });
+    }
   }
   ada::unreachable();
 }
