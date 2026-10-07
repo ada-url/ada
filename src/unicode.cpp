@@ -4,6 +4,7 @@
 #include "ada/character_sets.h"
 #include "ada/common_defs.h"
 #include "ada/log.h"
+#include "ada/unicode-inl.h"
 
 ADA_PUSH_DISABLE_ALL_WARNINGS
 #include "ada_idna.cpp"
@@ -601,27 +602,25 @@ void percent_encode_suffix(const char* p, const char* end,
 
 std::string percent_encode(const std::string_view input,
                            const uint8_t character_set[]) {
-  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
-    return character_sets::bit_at(character_set, c);
-  });
+  const size_t first_to_encode = percent_encode_index(input, character_set);
   // Optimization: Don't iterate if percent encode is not required
-  if (pointer == input.end()) {
+  if (first_to_encode == input.size()) {
     return std::string(input);
   }
 
   std::string result;
   result.reserve(input.length());  // in the worst case, percent encoding might
                                    // produce 3 characters.
-  result.append(input.substr(0, std::distance(input.begin(), pointer)));
-  if (static_cast<size_t>(input.end() - pointer) >= 48) {
-    percent_encode_suffix(&*pointer, input.data() + input.size(), character_set,
-                          result);
+  result.append(input.substr(0, first_to_encode));
+  if (input.size() - first_to_encode >= 48) {
+    percent_encode_suffix(input.data() + first_to_encode,
+                          input.data() + input.size(), character_set, result);
   } else {
-    for (; pointer != input.end(); pointer++) {
-      if (character_sets::bit_at(character_set, *pointer)) {
-        result.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
+    for (size_t i = first_to_encode; i < input.size(); i++) {
+      if (character_sets::bit_at(character_set, input[i])) {
+        result.append(character_sets::hex + uint8_t(input[i]) * 4, 3);
       } else {
-        result += *pointer;
+        result += input[i];
       }
     }
   }
@@ -633,31 +632,27 @@ bool percent_encode(const std::string_view input, const uint8_t character_set[],
                     std::string& out) {
   ada_log("percent_encode ", input, " to output string while ",
           append ? "appending" : "overwriting");
-  auto pointer = std::ranges::find_if(input, [character_set](const char c) {
-    return character_sets::bit_at(character_set, c);
-  });
-  ada_log("percent_encode done checking, moved to ",
-          std::distance(input.begin(), pointer));
+  const size_t first_to_encode = percent_encode_index(input, character_set);
+  ada_log("percent_encode done checking, moved to ", first_to_encode);
 
   // Optimization: Don't iterate if percent encode is not required
-  if (pointer == input.end()) {
+  if (first_to_encode == input.size()) {
     ada_log("percent_encode encoding not needed.");
     return false;
   }
   if constexpr (!append) {
     out.clear();
   }
-  ada_log("percent_encode appending ", std::distance(input.begin(), pointer),
-          " bytes");
+  ada_log("percent_encode appending ", first_to_encode, " bytes");
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
-  out.append(input.data(), std::distance(input.begin(), pointer));
-  ada_log("percent_encode processing ", std::distance(pointer, input.end()),
+  out.append(input.data(), first_to_encode);
+  ada_log("percent_encode processing ", input.size() - first_to_encode,
           " bytes");
-  for (; pointer != input.end(); pointer++) {
-    if (character_sets::bit_at(character_set, *pointer)) {
-      out.append(character_sets::hex + uint8_t(*pointer) * 4, 3);
+  for (size_t i = first_to_encode; i < input.size(); i++) {
+    if (character_sets::bit_at(character_set, input[i])) {
+      out.append(character_sets::hex + uint8_t(input[i]) * 4, 3);
     } else {
-      out += *pointer;
+      out += input[i];
     }
   }
   return true;

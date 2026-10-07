@@ -90,12 +90,17 @@ inline void url_aggregator::update_unencoded_base_hash(std::string_view input) {
   }
   components.hash_start = uint32_t(buffer.size());
   buffer += "#";
-  bool encoding_required = unicode::percent_encode<true>(
-      input, ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
-  // When encoding_required is false, then buffer is left unchanged, and percent
-  // encoding was not deemed required.
-  if (!encoding_required) {
+  // Byte-indexed pre-scan: a single load + test per byte, roughly twice as
+  // fast as bit_at on the short inputs setters handle. percent_encode<true>
+  // re-scans on the rare path that actually needs encoding.
+  if (unicode::percent_encode_index_bytes(
+          input,
+          ada::character_sets::FRAGMENT_PERCENT_ENCODE_BYTES.data()) ==
+      input.size()) {
     buffer.append(input);
+  } else {
+    unicode::percent_encode<true>(
+        input, ada::character_sets::FRAGMENT_PERCENT_ENCODE, buffer);
   }
   ada_log("url_aggregator::update_unencoded_base_hash final buffer is '",
           buffer, "' [", buffer.size(), " bytes]");
@@ -216,6 +221,18 @@ inline void url_aggregator::update_base_search(
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
 
+  // Byte-indexed pre-scan table (see update_unencoded_base_hash). It follows
+  // is_special(), mirroring how callers select the bit set.
+  ADA_ASSERT_TRUE((is_special() && query_percent_encode_set ==
+                                        character_sets::
+                                            SPECIAL_QUERY_PERCENT_ENCODE) ||
+                  (!is_special() && query_percent_encode_set ==
+                                         character_sets::QUERY_PERCENT_ENCODE));
+  const uint8_t* encode_bytes =
+      is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE_BYTES
+                         .data()
+                   : ada::character_sets::QUERY_PERCENT_ENCODE_BYTES.data();
+
   if (components.hash_start == url_components::omitted) {
     if (components.search_start == url_components::omitted) {
       components.search_start = uint32_t(buffer.size());
@@ -224,16 +241,16 @@ inline void url_aggregator::update_base_search(
       buffer.resize(components.search_start + 1);
     }
 
-    bool encoding_required =
-        unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
-    // When encoding_required is false, then buffer is left unchanged, and
-    // percent encoding was not deemed required.
-    if (!encoding_required) {
+    if (unicode::percent_encode_index_bytes(input, encode_bytes) ==
+        input.size()) {
       buffer.append(input);
+    } else {
+      // Rare path that actually needs encoding; re-scans with the bit set.
+      unicode::percent_encode<true>(input, query_percent_encode_set, buffer);
     }
   } else {
     const size_t idx =
-        ada::unicode::percent_encode_index(input, query_percent_encode_set);
+        ada::unicode::percent_encode_index_bytes(input, encode_bytes);
     std::string encoded;
     std::string_view replacement = input;
     if (idx != input.size()) {

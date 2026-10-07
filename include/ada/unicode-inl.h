@@ -45,6 +45,22 @@ ada_really_inline size_t percent_encode_index(const std::string_view input,
 
   return size;
 }
+
+// Byte-indexed variant of percent_encode_index: each table entry is 0/1, so
+// the scan is a single load + test per byte instead of bit_at's shifts and
+// logic. Used on short setter/fast-path inputs where the SSSE3/NEON
+// percent_encode_to_* kernels (48+ bytes) do not pay off.
+ada_really_inline size_t percent_encode_index_bytes(
+    const std::string_view input, const uint8_t encode_bytes[256]) {
+  const char* data = input.data();
+  const size_t size = input.size();
+  for (size_t i = 0; i < size; i++) {
+    if (encode_bytes[static_cast<uint8_t>(data[i])] != 0) {
+      return i;
+    }
+  }
+  return size;
+}
 }  // namespace ada::unicode
 
 #endif  // ADA_UNICODE_INL_H

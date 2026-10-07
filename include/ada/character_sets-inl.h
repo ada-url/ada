@@ -9,6 +9,8 @@
 
 #include "ada/character_sets.h"
 
+#include <array>
+
 /**
  * These functions are not part of our public API and may
  * change at any time.
@@ -515,6 +517,31 @@ constexpr uint8_t WWW_FORM_URLENCODED_PERCENT_ENCODE[32] = {
 ada_really_inline constexpr bool bit_at(const uint8_t a[], const uint8_t i) {
   return !!(a[i >> 3] & (1 << (i & 7)));
 }
+
+// Byte-indexed companions of the bit-packed percent-encode sets above.
+// Pre-scanning with bit_at costs two shifts, two loads and several logic ops
+// per byte; a single byte load + test is roughly twice as fast, which matters
+// for the short inputs setters and the fast-path parser scan most often.
+// Generated from the bit-packed sets so the two cannot disagree.
+consteval std::array<uint8_t, 256> make_encode_bytes(
+    const uint8_t (&bits)[32]) noexcept {
+  std::array<uint8_t, 256> table{};
+  for (size_t i = 0; i < 256; i++) {
+    table[i] = static_cast<uint8_t>((bits[i >> 3] >> (i & 7)) & 1);
+  }
+  return table;
+}
+
+constexpr std::array<uint8_t, 256> C0_CONTROL_PERCENT_ENCODE_BYTES =
+    make_encode_bytes(C0_CONTROL_PERCENT_ENCODE);
+constexpr std::array<uint8_t, 256> SPECIAL_QUERY_PERCENT_ENCODE_BYTES =
+    make_encode_bytes(SPECIAL_QUERY_PERCENT_ENCODE);
+constexpr std::array<uint8_t, 256> QUERY_PERCENT_ENCODE_BYTES =
+    make_encode_bytes(QUERY_PERCENT_ENCODE);
+constexpr std::array<uint8_t, 256> FRAGMENT_PERCENT_ENCODE_BYTES =
+    make_encode_bytes(FRAGMENT_PERCENT_ENCODE);
+constexpr std::array<uint8_t, 256> USERINFO_PERCENT_ENCODE_BYTES =
+    make_encode_bytes(USERINFO_PERCENT_ENCODE);
 
 }  // namespace ada::character_sets
 
