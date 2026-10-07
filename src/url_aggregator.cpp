@@ -504,7 +504,7 @@ bool url_aggregator::set_href(const std::string_view input) {
     }
     ada_log("url_aggregator::set_href, parsed ", out->to_string());
     // TODO: Figure out why the following line puts test to never finish.
-    *this = *out;
+    *this = std::move(*out);
   }
 
   return out.has_value();
