@@ -3,9 +3,30 @@
 #include "ada/url_aggregator-inl.h"
 #include "ada/url_search_params-inl.h"
 
+#include <limits>
+
 ada::result<ada::url_aggregator>& get_instance(void* result) noexcept {
   return *(ada::result<ada::url_aggregator>*)result;
 }
+
+namespace {
+
+template <typename T>
+[[nodiscard]] size_t estimated_c_object_memory_usage(
+    const ada::result<T>& result) noexcept {
+  constexpr size_t owning_block_size = sizeof(ada::result<T>);
+  if (!result) {
+    return owning_block_size;
+  }
+
+  const size_t payload_size = result->estimated_memory_usage();
+  constexpr size_t max = std::numeric_limits<size_t>::max();
+  return payload_size > max - owning_block_size
+             ? max
+             : owning_block_size + payload_size;
+}
+
+}  // namespace
 
 extern "C" {
 typedef void* ada_url;
@@ -218,6 +239,11 @@ ada_string ada_get_protocol(ada_url result) noexcept {
   }
   std::string_view out = r->get_protocol();
   return ada_string_create(out.data(), out.length());
+}
+
+size_t ada_url_estimated_memory_usage(ada_url result) noexcept {
+  ada::result<ada::url_aggregator>& r = get_instance(result);
+  return estimated_c_object_memory_usage(r);
 }
 
 uint8_t ada_get_host_type(ada_url result) noexcept {
@@ -496,6 +522,12 @@ size_t ada_search_params_size(ada_url_search_params result) {
     return 0;
   }
   return r->size();
+}
+
+size_t ada_search_params_estimated_memory_usage(ada_url_search_params result) {
+  ada::result<ada::url_search_params>& r =
+      *(ada::result<ada::url_search_params>*)result;
+  return estimated_c_object_memory_usage(r);
 }
 
 void ada_search_params_sort(ada_url_search_params result) {

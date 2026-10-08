@@ -111,6 +111,17 @@ struct url_aggregator : url_base {
   [[nodiscard]] constexpr size_t get_href_size() const noexcept;
 
   /**
+   * Estimates the bytes retained by the serialized URL buffer.
+   *
+   * The estimate is allocator-independent and reports the buffer capacity,
+   * not the current serialized URL length or allocator bookkeeping overhead.
+   * It is suitable for embedders that need to account for retained payload
+   * storage.
+   * @return The retained buffer capacity in bytes.
+   */
+  [[nodiscard]] size_t estimated_memory_usage() const noexcept;
+
+  /**
    * Returns the URL's username component.
    * Does not allocate memory. The returned view becomes invalid if this
    * url_aggregator is modified or destroyed.
