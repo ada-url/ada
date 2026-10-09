@@ -1372,3 +1372,155 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
   }
   SUCCEED();
 }
+
+TEST(wpt_urlpattern_tests, string_input_without_base_must_parse_alone) {
+  // https://github.com/ada-url/ada/issues/1280
+  // A string input is parsed against the base URL string only when one is
+  // given. A relative string with no base is not a URL, so test() is false
+  // and exec() is null, whatever the pattern.
+  auto check = [](std::variant<std::string_view, ada::url_pattern_init> pattern,
+                  std::string_view input) {
+    auto p = ada::parse_url_pattern<regex_provider>(std::move(pattern));
+    ASSERT_TRUE(p);
+    auto t = p->test(input);
+    ASSERT_TRUE(t);
+    EXPECT_FALSE(*t) << input;
+    auto e = p->exec(input);
+    ASSERT_TRUE(e);
+    EXPECT_FALSE(e->has_value()) << input;
+  };
+  ada::url_pattern_init users{};
+  users.pathname = "/users/:id";
+  check(users, "/users/1");
+  ada::url_pattern_init admin{};
+  admin.pathname = "/admin/*";
+  check(admin, "/admin/x");
+  check(std::string_view("*://*"), "not a url");
+  // With a base, the same relative input matches.
+  auto p = ada::parse_url_pattern<regex_provider>(users);
+  ASSERT_TRUE(p);
+  std::string_view base = "https://example.com";
+  auto t = p->test("/users/1", &base);
+  ASSERT_TRUE(t);
+  EXPECT_TRUE(*t);
+  auto e = p->exec("/users/1", &base);
+  ASSERT_TRUE(e);
+  ASSERT_TRUE(e->has_value());
+  EXPECT_EQ((*e)->pathname.groups["id"], "1");
+}
+
+TEST(wpt_urlpattern_tests, special_scheme_pathname_converts_backslash) {
+  // https://github.com/ada-url/ada/issues/1281
+  // "canonicalize a pathname" parses the path on the spec's dummy URL,
+  // https://dummy.invalid/, which is special: a literal backslash becomes
+  // "/". In pattern syntax, the two characters "\\" are one literal backslash.
+  auto compile = [](std::string_view protocol, std::string_view pathname) {
+    ada::url_pattern_init init{};
+    init.protocol = protocol;
+    init.hostname = "h";
+    init.pathname = pathname;
+    auto p = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_TRUE(p) << pathname;
+    return p ? std::string(p->get_pathname()) : std::string("(error)");
+  };
+  EXPECT_EQ(compile("https", "/a\\\\b"), "/a/b");
+  EXPECT_EQ(compile("ftp", "/a\\\\b"), "/a/b");
+  EXPECT_EQ(compile("https", "/a/../b"), "/b");
+  auto canonical = ada::url_pattern_helpers::canonicalize_pathname("/a\\b");
+  ASSERT_TRUE(canonical);
+  EXPECT_EQ(*canonical, "/a/b");
+
+  ada::url_pattern_init init{};
+  init.protocol = "https";
+  init.hostname = "h";
+  init.pathname = "/a\\\\b";
+  auto p = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(p);
+  auto slash = p->test(std::string_view("https://h/a/b"));
+  ASSERT_TRUE(slash);
+  EXPECT_TRUE(*slash);
+  // The URL https://h/a\b has the path /a/b too.
+  auto backslash = p->test(std::string_view("https://h/a\\b"));
+  ASSERT_TRUE(backslash);
+  EXPECT_TRUE(*backslash);
+}
+
+TEST(wpt_urlpattern_tests, protocol_bare_colon_is_rejected) {
+  // https://github.com/ada-url/ada/issues/1283
+  // The encoding callback can pass canonicalize_protocol a bare ":" (from an
+  // escaped colon in a protocol pattern), which is empty once its trailing
+  // ":" is stripped and must not be indexed. The spec's "canonicalize a
+  // protocol" fails on ":" (":://dummy.invalid/" does not parse).
+  for (auto src : {"\\:", "\\:?", "\\:*", "\\:+"}) {
+    ada::url_pattern_init init{};
+    init.protocol = src;
+    EXPECT_FALSE(ada::parse_url_pattern<regex_provider>(init)) << src;
+  }
+  EXPECT_FALSE(
+      ada::parse_url_pattern<regex_provider>(std::string_view("{\\:}?://a")));
+  EXPECT_FALSE(ada::url_pattern_helpers::canonicalize_protocol(":"));
+  // An init protocol of ":" loses its trailing ":" in "process protocol for
+  // init" first, and canonicalizes to the empty protocol.
+  ada::url_pattern_init colon{};
+  colon.protocol = ":";
+  auto p = ada::parse_url_pattern<regex_provider>(colon);
+  ASSERT_TRUE(p);
+  EXPECT_EQ(p->get_protocol(), "");
+}
+
+TEST(wpt_urlpattern_tests, opaque_pathname_keeps_leading_slashes) {
+  // https://github.com/ada-url/ada/issues/1284
+  // "canonicalize an opaque pathname" runs the opaque path state, which
+  // appends a leading "//" like any other code points: it must not start an
+  // authority and drop what follows.
+  auto pathname = [](std::string_view value) {
+    ada::url_pattern_init init{};
+    init.protocol = "foo";
+    init.pathname = value;
+    auto p = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_TRUE(p) << value;
+    return p ? std::string(p->get_pathname()) : std::string("(error)");
+  };
+  EXPECT_EQ(pathname("//x/y"), "//x/y");
+  EXPECT_EQ(pathname("//x"), "//x");
+  EXPECT_EQ(pathname("//"), "//");
+  // The URL parser removes ASCII tab or newline before the opaque path state.
+  EXPECT_EQ(pathname("\t//x"), "//x");
+  EXPECT_EQ(pathname("/x/y"), "/x/y");
+  EXPECT_EQ(pathname("x/y"), "x/y");
+  // A pattern made from a non-special URL matches that URL, and only it.
+  auto p =
+      ada::parse_url_pattern<regex_provider>(std::string_view("foo://h//x/y"));
+  ASSERT_TRUE(p);
+  EXPECT_EQ(p->get_pathname(), "//x/y");
+  auto same = p->test(std::string_view("foo://h//x/y"));
+  ASSERT_TRUE(same);
+  EXPECT_TRUE(*same);
+  auto other = p->test(std::string_view("foo://h/y"));
+  ASSERT_TRUE(other);
+  EXPECT_FALSE(*other);
+}
+
+TEST(wpt_urlpattern_tests, search_uses_special_query_percent_encode_set) {
+  // https://github.com/ada-url/ada/issues/1285
+  // "canonicalize a search" runs the query state on the spec's dummy URL,
+  // https://dummy.invalid/, which is special: U+0027 (') is percent-encoded,
+  // as in the query of any special URL.
+  ada::url_pattern_init init{};
+  init.search = "q='x'";
+  auto p = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(p);
+  EXPECT_EQ(p->get_search(), "q=%27x%27");
+  auto t = p->test(std::string_view("https://h/?q='x'"));
+  ASSERT_TRUE(t);
+  EXPECT_TRUE(*t);
+  // Processing an init input canonicalizes its search the same way.
+  ada::url_pattern_init input{};
+  input.search = "?'";
+  auto all = ada::parse_url_pattern<regex_provider>(ada::url_pattern_init{});
+  ASSERT_TRUE(all);
+  auto m = all->exec(ada::url_pattern_input(input), nullptr);
+  ASSERT_TRUE(m);
+  ASSERT_TRUE(m->has_value());
+  EXPECT_EQ((**m).search.input, "%27");
+}

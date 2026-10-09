@@ -2821,7 +2821,6 @@ result_type parse_url_impl(std::string_view user_input,
             else {
               // Set url's path to an empty list.
               url.clear_pathname();
-              url.has_opaque_path = true;
             }
 
             // Set state to path state and decrease pointer by 1.

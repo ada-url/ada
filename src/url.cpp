@@ -671,7 +671,9 @@ bool url::set_host_or_hostname(const std::string_view input) {
       // state.
       std::string_view port_buffer = new_host.substr(location + 1);
       if (!port_buffer.empty()) {
-        set_port(port_buffer);
+        // check_url_size() checks the limit for the host and port together,
+        // so a port that does not fit rolls back the host too.
+        set_port_impl<false>(port_buffer);
       }
       return check_url_size();
     }
@@ -768,6 +770,11 @@ bool url::set_password(const std::string_view input) {
 }
 
 bool url::set_port(const std::string_view input) {
+  return set_port_impl<true>(input);
+}
+
+template <bool enforce_max_input_length>
+bool url::set_port_impl(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
@@ -799,9 +806,11 @@ bool url::set_port(const std::string_view input) {
   std::optional<uint16_t> previous_port = port;
   parse_port(digits_to_parse);
   if (is_valid) {
-    if (get_href_size() > ada::get_max_input_length()) {
-      port = std::move(previous_port);
-      return false;
+    if constexpr (enforce_max_input_length) {
+      if (get_href_size() > ada::get_max_input_length()) {
+        port = std::move(previous_port);
+        return false;
+      }
     }
     return true;
   }

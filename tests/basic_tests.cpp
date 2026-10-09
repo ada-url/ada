@@ -2294,3 +2294,34 @@ TYPED_TEST(basic_tests,
   // a byte that legitimately needs encoding is still encoded
   check("http://ab?x y", "http://ab/?x%20y");
 }
+
+TYPED_TEST(basic_tests, file_relative_windows_drive_letter_path_is_not_opaque) {
+  // https://github.com/ada-url/ada/issues/1278
+  // In the file state, a reference that starts with a Windows drive letter
+  // sets url's path to an empty list; the drive letter is then a path segment.
+  // The result must behave like the URL its href parses to.
+  auto file = ada::parse<TypeParam>("file:");
+  ASSERT_TRUE(file);
+  auto url = ada::parse<TypeParam>("C|", &*file);
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href(), "file:///C:");
+  ASSERT_FALSE(url->has_opaque_path);
+
+  auto relative = ada::parse<TypeParam>("x", &*url);
+  ASSERT_TRUE(relative);
+  ASSERT_EQ(relative->get_href(), "file:///C:/x");
+
+  auto host = *url;
+  ASSERT_TRUE(host.set_hostname("h"));
+  ASSERT_EQ(host.get_href(), "file://h/C:");
+  auto path = *url;
+  ASSERT_TRUE(path.set_pathname("/D:/y"));
+  ASSERT_EQ(path.get_href(), "file:///D:/y");
+
+  auto base = ada::parse<TypeParam>("file:///z");
+  ASSERT_TRUE(base);
+  auto backslash = ada::parse<TypeParam>("c|\\x", &*base);
+  ASSERT_TRUE(backslash);
+  ASSERT_EQ(backslash->get_href(), "file:///c:/x");
+  ASSERT_FALSE(backslash->has_opaque_path);
+}

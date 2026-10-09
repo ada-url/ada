@@ -239,6 +239,13 @@ tl::expected<std::string, errors> canonicalize_protocol(
 
   if (input.ends_with(":")) {
     input.remove_suffix(1);
+    // A bare ":" can only come from the encoding callback (an escaped colon
+    // in a protocol pattern): process_protocol strips the trailing ":" of an
+    // init value first. The spec fails on it (":://dummy.invalid/" does not
+    // parse), and input[0] below must not be read.
+    if (input.empty()) [[unlikely]] {
+      return tl::unexpected(errors::type_error);
+    }
   }
 
   // Fast path: special schemes are already canonical
@@ -511,7 +518,10 @@ tl::expected<std::string, errors> canonicalize_pathname(
   // query/fragment, so the pathname was silently truncated at the first literal
   // '?' or '#'. set_pathname runs the parser in path state override, matching
   // how canonicalize_hostname uses set_hostname.
-  auto url = ada::parse<url_aggregator>("fake://fake-url", nullptr);
+  // The dummy URL must be special, as the spec's "create a dummy URL"
+  // (https://dummy.invalid/) is: a special URL's path parser turns '\' into
+  // '/', and a non-special one keeps it.
+  auto url = ada::parse<url_aggregator>("https://dummy.invalid/", nullptr);
   ADA_ASSERT_TRUE(url);
   if (!url->set_pathname(modified_value)) {
     // If parseResult is failure, then throw a TypeError.
@@ -541,8 +551,17 @@ tl::expected<std::string, errors> canonicalize_opaque_pathname(
   // Set dummyURL's path to the empty string.
   // Let parseResult be the result of running URL parsing given value with
   // dummyURL as url and opaque path state as state override.
-  if (auto url =
-          ada::parse<url_aggregator>("fake:" + std::string(input), nullptr)) {
+  // The opaque path state appends a leading "//" like any other code points,
+  // but "fake://..." would start an authority and drop it ("//x/y" became
+  // "/y"). "/." before "//" keeps the parser in the path: it is how a path
+  // that starts with an empty segment is serialized, and the pathname getter
+  // leaves it out. The parser removes ASCII tab or newline first, so check
+  // for "//" after that.
+  std::string value(input);
+  helpers::remove_ascii_tab_or_newline(value);
+  std::string dummy_input(value.starts_with("//") ? "fake:/." : "fake:");
+  dummy_input.append(value);
+  if (auto url = ada::parse<url_aggregator>(dummy_input, nullptr)) {
     // Return the result of URL path serializing dummyURL.
     return std::string(url->get_pathname());
   }
@@ -566,18 +585,17 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
     return "";
   }
 
-  // Percent-encode using QUERY_PERCENT_ENCODE (for non-special URLs)
-  // Note: "fake://dummy.test" is not a special URL, so we use
-  // QUERY_PERCENT_ENCODE
+  // The spec's dummy URL (https://dummy.invalid/) is special, so its query
+  // state uses the special-query percent-encode set, which also encodes '\''.
   size_t idx = ada::unicode::percent_encode_index(
-      new_value, character_sets::QUERY_PERCENT_ENCODE);
+      new_value, character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
   if (idx == new_value.size()) {
     // No encoding needed
     return new_value;
   }
   // Percent-encode from the first character that needs encoding
   return ada::unicode::percent_encode(
-      new_value, character_sets::QUERY_PERCENT_ENCODE, idx);
+      new_value, character_sets::SPECIAL_QUERY_PERCENT_ENCODE, idx);
 }
 
 tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {

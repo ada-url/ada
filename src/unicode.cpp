@@ -530,6 +530,89 @@ constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
   return t;
 }();
 
+namespace {
+// Returns the length of the UTF-8 sequence that starts `input` (non-empty)
+// and sets `valid`. For an ill-formed sequence, the length is that of its
+// maximal subpart, which the Encoding Standard's UTF-8 decoder turns into a
+// single U+FFFD before it reads the next byte.
+// https://encoding.spec.whatwg.org/#utf-8-decoder
+size_t utf8_sequence_length(const std::string_view input, bool& valid) {
+  const auto lead = static_cast<uint8_t>(input[0]);
+  valid = true;
+  if (lead < 0x80) {
+    return 1;
+  }
+  size_t needed = 0;
+  uint8_t lower = 0x80;
+  uint8_t upper = 0xBF;
+  if (lead >= 0xC2 && lead <= 0xDF) {
+    needed = 1;
+  } else if (lead >= 0xE0 && lead <= 0xEF) {
+    needed = 2;
+    if (lead == 0xE0) {
+      lower = 0xA0;
+    } else if (lead == 0xED) {
+      upper = 0x9F;
+    }
+  } else if (lead >= 0xF0 && lead <= 0xF4) {
+    needed = 3;
+    if (lead == 0xF0) {
+      lower = 0x90;
+    } else if (lead == 0xF4) {
+      upper = 0x8F;
+    }
+  } else {
+    valid = false;
+    return 1;
+  }
+  size_t seen = 0;
+  while (seen < needed && seen + 1 < input.size()) {
+    const auto c = static_cast<uint8_t>(input[seen + 1]);
+    if (c < lower || c > upper) {
+      break;
+    }
+    lower = 0x80;
+    upper = 0xBF;
+    seen++;
+  }
+  valid = seen == needed;
+  return seen + 1;
+}
+
+// UTF-8 decode without BOM (error mode replacement), then UTF-8 encode:
+// replaces each maximal subpart of an ill-formed sequence with U+FFFD.
+// https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
+void replace_ill_formed_utf8(std::string& s) {
+  const std::string_view view(s);
+  size_t i = 0;
+  bool valid = true;
+  // Most decoded text is well-formed: only copy once an error is found.
+  while (i < view.size()) {
+    const size_t n = utf8_sequence_length(view.substr(i), valid);
+    if (!valid) {
+      break;
+    }
+    i += n;
+  }
+  if (i == view.size()) {
+    return;
+  }
+  std::string out;
+  out.reserve(view.size() + 2);
+  out.append(view.substr(0, i));
+  while (i < view.size()) {
+    const size_t n = utf8_sequence_length(view.substr(i), valid);
+    if (valid) {
+      out.append(view.substr(i, n));
+    } else {
+      out.append("\xEF\xBF\xBD");
+    }
+    i += n;
+  }
+  s = std::move(out);
+}
+}  // namespace
+
 std::string form_urlencoded_decode(const std::string_view input) {
   const size_t len = input.size();
   if (len == 0) [[unlikely]] {
@@ -554,6 +637,9 @@ std::string form_urlencoded_decode(const std::string_view input) {
   std::string out(len, '\0');
   char* d = out.data();
   char* const d0 = d;
+  // The input is valid UTF-8, so only a %XX escape of a non-ASCII byte can
+  // make the decoded bytes ill-formed.
+  bool decoded_non_ascii = false;
 
   const size_t prefix = static_cast<size_t>(p - src);
   std::memcpy(d, src, prefix);
@@ -573,6 +659,7 @@ std::string form_urlencoded_decode(const std::string_view input) {
           break;
         }
         *d++ = static_cast<char>((hi << 4) | lo);
+        decoded_non_ascii |= hi >= 8;
         p += 3;
       }
       if (p < end && *p == '%') {
@@ -593,6 +680,9 @@ std::string form_urlencoded_decode(const std::string_view input) {
   }
 
   out.resize(static_cast<size_t>(d - d0));
+  if (decoded_non_ascii) {
+    replace_ill_formed_utf8(out);
+  }
   return out;
 }
 

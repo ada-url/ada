@@ -414,6 +414,14 @@ struct url_aggregator : url_base {
   template <bool override_hostname = false>
   bool set_host_or_hostname(std::string_view input);
 
+  /**
+   * Implements set_port. When enforce_max_input_length is false, a valid port
+   * is kept even if the buffer then exceeds get_max_input_length(): the host
+   * setter checks the limit for the host and port together.
+   */
+  template <bool enforce_max_input_length>
+  bool set_port_impl(std::string_view input);
+
   ada_really_inline bool parse_host(std::string_view input);
 
   inline void update_base_authority(std::string_view base_buffer,

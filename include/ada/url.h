@@ -419,6 +419,14 @@ struct url : url_base {
   bool set_host_or_hostname(std::string_view input);
 
   /**
+   * Implements set_port. When enforce_max_input_length is false, a valid port
+   * is kept even if the href then exceeds get_max_input_length(): the host
+   * setter checks the limit for the host and port together.
+   */
+  template <bool enforce_max_input_length>
+  bool set_port_impl(std::string_view input);
+
+  /**
    * Return true on success.
    * @see https://url.spec.whatwg.org/#concept-ipv4-parser
    */
