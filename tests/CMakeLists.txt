@@ -31,6 +31,12 @@ else()
   add_compile_definitions(ADA_INCLUDE_URL_PATTERN=0)
 endif()
 
+if(ADA_NEON_SAFE_ZERO_CHECK)
+  add_compile_definitions(ADA_NEON_SAFE_ZERO_CHECK=1)
+else()
+  add_compile_definitions(ADA_NEON_SAFE_ZERO_CHECK=0)
+endif()
+
 if(ADA_TESTING)
   add_compile_definitions(ADA_TESTING=1)
 endif()

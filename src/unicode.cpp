@@ -131,9 +131,8 @@ ada_really_inline bool has_tabs_or_newline(
   }
   // `running` accumulates comparison results, so every lane is 0x00 or 0xFF:
   // narrowing to four bits per lane and testing against zero is cheaper than a
-  // horizontal maximum. The double compare is faster (no GPR transfer) but
-  // incorrect if flush-to-zero is enabled; ADA_NEON_SAFE_ZERO_CHECK uses an
-  // integer compare instead.
+  // horizontal maximum. The double compare (ADA_NEON_SAFE_ZERO_CHECK set to 0)
+  // avoids a GPR transfer but is incorrect if flush-to-zero is enabled.
   uint8x8_t narrowed = vshrn_n_u16(vreinterpretq_u16_u8(running), 4);
 #if ADA_NEON_SAFE_ZERO_CHECK
   return vget_lane_u64(vreinterpret_u64_u8(narrowed), 0) != 0;
