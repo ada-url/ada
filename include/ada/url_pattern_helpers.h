@@ -11,6 +11,7 @@
 
 #include <string>
 #include <tuple>
+#include <unordered_set>
 #include <vector>
 
 #if ADA_INCLUDE_URL_PATTERN
@@ -101,6 +102,10 @@ class url_pattern_parser {
   std::string pending_fixed_value{};
   size_t index = 0;
   size_t next_numeric_name = 0;
+  // Names already taken by a part, for the "is a duplicate name" check in
+  // add_part. A linear scan of the part list there is O(n^2) over a pattern
+  // with n named parts (e.g. "/*" repeated); this set keeps it amortized O(1).
+  std::unordered_set<std::string> seen_names{};
 };
 
 // @see https://urlpattern.spec.whatwg.org/#tokenizer
