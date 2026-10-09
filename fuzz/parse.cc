@@ -697,9 +697,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       std::string serialized = sp.to_string();
 
       // Idempotency: re-parsing the serialised form must yield the same string.
+      // append() stores its arguments as given, while parsing replaces
+      // ill-formed UTF-8 with U+FFFD, so this holds when the appended strings
+      // are valid UTF-8, as the API requires.
       ada::url_search_params sp2(serialized);
       std::string serialized2 = sp2.to_string();
-      if (serialized2 != serialized) {
+      if (is_valid_utf8_string(source.data(), source.length()) &&
+          is_valid_utf8_string(base.data(), base.length()) &&
+          serialized2 != serialized) {
         printf(
             "url_search_params serialisation not idempotent!\n"
             "  first:  %s\n  second: %s\n",

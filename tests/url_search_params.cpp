@@ -613,6 +613,8 @@ TEST(url_search_params, percent_decoded_ill_formed_utf8_becomes_replacement) {
     ASSERT_EQ(params.size(), 1);
     ASSERT_EQ(params.front().first, key);
     ASSERT_EQ(params.to_string(), serialized);
+    // Serializing is a fixed point once parsed.
+    ASSERT_EQ(ada::url_search_params(serialized).to_string(), serialized);
   };
   check("%aa", "\xEF\xBF\xBD", "%EF%BF%BD=");
   check("%C3", "\xEF\xBF\xBD", "%EF%BF%BD=");
@@ -625,6 +627,10 @@ TEST(url_search_params, percent_decoded_ill_formed_utf8_becomes_replacement) {
   // Octal escapes, since a hex escape would swallow the following "b" or "c".
   check("a%E2%82%ACb%FFc", "a\342\202\254b\357\277\275c",
         "a%E2%82%ACb%EF%BF%BDc=");
+  // The decoder runs on all the bytes, so raw ill-formed bytes (which the
+  // API does not accept as valid input) are replaced the same way.
+  check("\xAF", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("\\%\xAF", "\\%\xEF\xBF\xBD", "%5C%25%EF%BF%BD=");
   // Well-formed sequences, including a BOM, are kept.
   check("%C3%A9", "\xC3\xA9", "%C3%A9=");
   check("%EF%BB%BFx", "\xEF\xBB\xBFx", "%EF%BB%BFx=");

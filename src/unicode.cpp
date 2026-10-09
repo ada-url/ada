@@ -624,12 +624,22 @@ std::string form_urlencoded_decode(const std::string_view input) {
   const char* const end = src + len;
   const char* p = src;
 
+  // The UTF-8 decode step runs on all the bytes, copied or percent-decoded,
+  // and can only change a component that has a non-ASCII byte. OR every
+  // output byte into this: bit 7 is set if any of them is non-ASCII.
+  uint8_t output_bits = 0;
+
   // Advance over the untransformed prefix.
   while (p < end && *p != '+' && *p != '%') {
+    output_bits |= static_cast<uint8_t>(*p);
     ++p;
   }
   if (p == end) {
-    return std::string(input);
+    std::string out(input);
+    if (output_bits >= 0x80) {
+      replace_ill_formed_utf8(out);
+    }
+    return out;
   }
 
   // Output is always at most as long as the input: write into a single
@@ -637,9 +647,6 @@ std::string form_urlencoded_decode(const std::string_view input) {
   std::string out(len, '\0');
   char* d = out.data();
   char* const d0 = d;
-  // The input is valid UTF-8, so only a %XX escape of a non-ASCII byte can
-  // make the decoded bytes ill-formed.
-  bool decoded_non_ascii = false;
 
   const size_t prefix = static_cast<size_t>(p - src);
   std::memcpy(d, src, prefix);
@@ -658,8 +665,9 @@ std::string form_urlencoded_decode(const std::string_view input) {
         if ((hi | lo) >= 16) {
           break;
         }
-        *d++ = static_cast<char>((hi << 4) | lo);
-        decoded_non_ascii |= hi >= 8;
+        const auto byte = static_cast<uint8_t>((hi << 4) | lo);
+        *d++ = static_cast<char>(byte);
+        output_bits |= byte;
         p += 3;
       }
       if (p < end && *p == '%') {
@@ -669,10 +677,10 @@ std::string form_urlencoded_decode(const std::string_view input) {
     } else {
       // Copy a plain run until the next '+' or '%'.
       const char* start = p;
-      ++p;
-      while (p < end && *p != '+' && *p != '%') {
+      do {
+        output_bits |= static_cast<uint8_t>(*p);
         ++p;
-      }
+      } while (p < end && *p != '+' && *p != '%');
       const size_t n = static_cast<size_t>(p - start);
       std::memcpy(d, start, n);
       d += n;
@@ -680,7 +688,7 @@ std::string form_urlencoded_decode(const std::string_view input) {
   }
 
   out.resize(static_cast<size_t>(d - d0));
-  if (decoded_non_ascii) {
+  if (output_bits >= 0x80) {
     replace_ill_formed_utf8(out);
   }
   return out;
