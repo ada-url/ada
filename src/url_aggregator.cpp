@@ -310,11 +310,6 @@ bool url_aggregator::set_password(const std::string_view input) {
 }
 
 bool url_aggregator::set_port(const std::string_view input) {
-  return set_port_impl<true>(input);
-}
-
-template <bool enforce_max_input_length>
-bool url_aggregator::set_port_impl(const std::string_view input) {
   ada_log("url_aggregator::set_port ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -349,10 +344,8 @@ bool url_aggregator::set_port_impl(const std::string_view input) {
   // be in range, so an invalid port never mutates anything and needs no
   // rollback; a valid one can only grow the buffer by a few bytes.
   std::optional<url_aggregator> saved_url;
-  if constexpr (enforce_max_input_length) {
-    if (needs_rollback_snapshot(digits_to_parse.size())) {
-      saved_url = *this;
-    }
+  if (needs_rollback_snapshot(digits_to_parse.size())) {
+    saved_url = *this;
   }
   parse_port(digits_to_parse);
   if (!is_valid) {
@@ -715,11 +708,17 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
       // Set url's host to host, buffer to the empty string, and state to port
       // state.
+      // The port state reads the leading ASCII digits (tabs and newlines are
+      // already removed). set_port is not used: it checks the length limit
+      // for the port alone, and check_url_size() must roll back the host
+      // together with a port that does not fit.
       std::string_view port_buffer = new_host.substr(location + 1);
-      if (!port_buffer.empty()) {
-        // check_url_size() checks the limit for the host and port together,
-        // so a port that does not fit rolls back the host too.
-        set_port_impl<false>(port_buffer);
+      std::string_view digits =
+          port_buffer.substr(0, port_buffer.find_first_not_of("0123456789"));
+      if (!digits.empty() && !cannot_have_credentials_or_port()) {
+        // An out-of-range port leaves the buffer unchanged.
+        parse_port(digits);
+        is_valid = true;
       }
       return check_url_size();
     }
