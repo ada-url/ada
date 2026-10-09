@@ -611,6 +611,33 @@ void replace_ill_formed_utf8(std::string& s) {
   }
   s = std::move(out);
 }
+
+// Returns the first '+' or '%' in [p, end), or end, and ORs every byte before
+// it into `seen`. Scans eight bytes at a time until a word holds a '+' or '%'.
+ada_really_inline const char* find_form_urlencoded_delimiter(
+    const char* p, const char* const end, uint64_t& seen) noexcept {
+  constexpr uint64_t ones = broadcast(0x01);
+  constexpr uint64_t highs = broadcast(0x80);
+  constexpr uint64_t plus = broadcast('+');
+  constexpr uint64_t percent = broadcast('%');
+  while (end - p >= 8) {
+    uint64_t word{};
+    std::memcpy(&word, p, sizeof(word));
+    // Nonzero if and only if a byte of the word is '+' or '%'.
+    const uint64_t x1 = word ^ plus;
+    const uint64_t x2 = word ^ percent;
+    if ((((x1 - ones) & ~x1) | ((x2 - ones) & ~x2)) & highs) {
+      break;
+    }
+    seen |= word;
+    p += 8;
+  }
+  while (p < end && *p != '+' && *p != '%') {
+    seen |= static_cast<uint8_t>(*p);
+    ++p;
+  }
+  return p;
+}
 }  // namespace
 
 std::string form_urlencoded_decode(const std::string_view input) {
@@ -622,21 +649,18 @@ std::string form_urlencoded_decode(const std::string_view input) {
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   const char* const src = input.data();
   const char* const end = src + len;
-  const char* p = src;
 
   // The UTF-8 decode step runs on all the bytes, copied or percent-decoded,
-  // and can only change a component that has a non-ASCII byte. OR every
-  // output byte into this: bit 7 is set if any of them is non-ASCII.
-  uint8_t output_bits = 0;
+  // and can only change a component that has a non-ASCII byte. Every output
+  // byte is ORed into this: a set high bit in any of its bytes means one is.
+  uint64_t seen = 0;
+  constexpr uint64_t non_ascii = broadcast(0x80);
 
   // Advance over the untransformed prefix.
-  while (p < end && *p != '+' && *p != '%') {
-    output_bits |= static_cast<uint8_t>(*p);
-    ++p;
-  }
+  const char* p = find_form_urlencoded_delimiter(src, end, seen);
   if (p == end) {
     std::string out(input);
-    if (output_bits >= 0x80) {
+    if (seen & non_ascii) {
       replace_ill_formed_utf8(out);
     }
     return out;
@@ -667,7 +691,7 @@ std::string form_urlencoded_decode(const std::string_view input) {
         }
         const auto byte = static_cast<uint8_t>((hi << 4) | lo);
         *d++ = static_cast<char>(byte);
-        output_bits |= byte;
+        seen |= byte;
         p += 3;
       }
       if (p < end && *p == '%') {
@@ -677,10 +701,7 @@ std::string form_urlencoded_decode(const std::string_view input) {
     } else {
       // Copy a plain run until the next '+' or '%'.
       const char* start = p;
-      do {
-        output_bits |= static_cast<uint8_t>(*p);
-        ++p;
-      } while (p < end && *p != '+' && *p != '%');
+      p = find_form_urlencoded_delimiter(p, end, seen);
       const size_t n = static_cast<size_t>(p - start);
       std::memcpy(d, start, n);
       d += n;
@@ -688,7 +709,7 @@ std::string form_urlencoded_decode(const std::string_view input) {
   }
 
   out.resize(static_cast<size_t>(d - d0));
-  if (output_bits >= 0x80) {
+  if (seen & non_ascii) {
     replace_ill_formed_utf8(out);
   }
   return out;

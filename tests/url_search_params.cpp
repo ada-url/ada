@@ -642,3 +642,20 @@ TEST(url_search_params, percent_decoded_ill_formed_utf8_becomes_replacement) {
   ada::url_search_params values("k=%C3");
   ASSERT_EQ(values.get("k"), "\xEF\xBF\xBD");
 }
+
+TEST(url_search_params, decode_finds_delimiters_at_every_offset) {
+  // The decoder scans plain runs eight bytes at a time: a '+', a '%XX'
+  // escape, or a non-ASCII byte must be found at any offset in a word.
+  for (size_t i = 0; i < 24; i++) {
+    const std::string a(i, 'a');
+    const std::string b(24 - i, 'b');
+    ada::url_search_params plus(a + "+" + b + "%41" + a);
+    ASSERT_EQ(plus.front().first, a + " " + b + "A" + a) << i;
+    ada::url_search_params escape(a + "%3D" + b);
+    ASSERT_EQ(escape.front().first, a + "=" + b) << i;
+    ada::url_search_params raw(a + "\xFF" + b);
+    ASSERT_EQ(raw.front().first, a + "\xEF\xBF\xBD" + b) << i;
+    ada::url_search_params well_formed(a + "\xC3\xA9" + b + "+");
+    ASSERT_EQ(well_formed.front().first, a + "\xC3\xA9" + b + " ") << i;
+  }
+}
