@@ -12,6 +12,8 @@
 #define ADA_URL_H
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <ostream>
 #include <string>

@@ -6,7 +6,11 @@
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <optional>
 #include <ranges>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "ada/character_sets-inl.h"
 #include "ada/checkers-inl.h"

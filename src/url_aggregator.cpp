@@ -10,13 +10,16 @@
 #include "ada/url_aggregator-inl.h"
 #include "ada/url_ip-inl.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
+#include <optional>
 #include <ranges>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace {
 

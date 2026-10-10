@@ -5,8 +5,13 @@
 #ifndef ADA_URL_PATTERN_HELPERS_INL_H
 #define ADA_URL_PATTERN_HELPERS_INL_H
 
+#include <cstddef>
+#include <cstdint>
 #include <optional>
+#include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 #include "ada/common_defs.h"
 #include "ada/expected.h"

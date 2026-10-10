@@ -11,7 +11,13 @@ ADA_POP_DISABLE_WARNINGS
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <cstring>
+#include <iterator>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <utility>
 #if ADA_SSSE3
 #include <tmmintrin.h>
 #elif ADA_NEON

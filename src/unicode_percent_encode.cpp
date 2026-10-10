@@ -7,6 +7,7 @@
 #include "ada/common_defs.h"
 
 #include <cstring>
+#include <string>
 #if ADA_SSSE3
 #include <tmmintrin.h>
 #define ADA_UNICODE_SSSE3 1

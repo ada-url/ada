@@ -8,11 +8,15 @@
 #include "ada/common_defs.h"
 #include "ada/url_base.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <optional>
 #include <string>
 #include <string_view>
-#include <optional>
+#include <utility>
 
 #if ADA_DEVELOPMENT_CHECKS
+#include <cstdlib>
 #include <iostream>
 #endif  // ADA_DEVELOPMENT_CHECKS
 

@@ -14,9 +14,12 @@
 #include "ada/log.h"
 
 #include <charconv>
+#include <cstdint>
 #include <cstring>
 #include <ostream>
+#include <string>
 #include <string_view>
+#include <system_error>
 
 namespace ada {
 

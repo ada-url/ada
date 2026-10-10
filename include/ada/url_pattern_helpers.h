@@ -9,9 +9,14 @@
 #include "ada/common_defs.h"
 #include "ada/url_pattern.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #if ADA_INCLUDE_URL_PATTERN

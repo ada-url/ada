@@ -9,9 +9,14 @@
 #include "ada/url_components.h"
 
 #include <charconv>
+#include <cstdint>
 #include <cstring>
 #include <optional>
+#include <ostream>
 #include <string>
+#include <string_view>
+#include <system_error>
+#include <utility>
 #if ADA_REGULAR_VISUAL_STUDIO
 #include <intrin.h>
 #endif  // ADA_REGULAR_VISUAL_STUDIO

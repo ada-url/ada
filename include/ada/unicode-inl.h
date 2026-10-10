@@ -7,6 +7,11 @@
 #include "ada/unicode.h"
 #include "ada/character_sets.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <string_view>
+
 /**
  * Unicode operations. These functions are not part of our public API and may
  * change at any time.

@@ -17,9 +17,14 @@
 #include "url_pattern_list_compiler.h"
 
 #include <algorithm>
+#include <array>
 #include <bit>
+#include <cstdint>
 #include <cstring>
 #include <span>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #if ADA_INCLUDE_URL_PATTERN
 

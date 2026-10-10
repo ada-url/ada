@@ -11,6 +11,7 @@
 #include "ada/common_defs.h"
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 
 // The IPv6 kernel needs vpermi2b/vpermb (VBMI) and vpcompressb/vpexpandb

@@ -9,8 +9,10 @@
 #include "ada/url_pattern_helpers.h"
 #include "ada/parser.h"
 
+#include <cstdint>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <variant>
 
 namespace ada::parser {

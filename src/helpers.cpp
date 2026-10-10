@@ -1,6 +1,11 @@
+#include <array>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
