@@ -450,12 +450,16 @@ TEST(url_search_params, sort_unicode_code_units_edge_case) {
 }
 
 // Regression test: heap-buffer-overflow in sort() comparator when keys contain
-// truncated (invalid) UTF-8 sequences produced by percent-decoding. The
-// comparator must not read continuation bytes beyond the end of the string.
+// truncated (invalid) UTF-8 sequences. Parsing no longer produces them (it
+// replaces ill-formed decoded bytes with U+FFFD), so they are appended raw.
+// The comparator must not read continuation bytes beyond the end of the
+// string.
 TEST(url_search_params, sort_truncated_utf8_2byte) {
   // 0xC3 is the leading byte of a 2-byte sequence (e.g. U+00E9 = 0xC3 0xA9),
   // but here it appears alone at the end of the key with no continuation byte.
-  ada::url_search_params search_params("%C3=a&b=c");
+  ada::url_search_params search_params;
+  search_params.append("\xC3", "a");
+  search_params.append("b", "c");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -464,7 +468,9 @@ TEST(url_search_params, sort_truncated_utf8_2byte) {
 TEST(url_search_params, sort_truncated_utf8_3byte) {
   // 0xE2 0x82 is the start of a 3-byte sequence (e.g. U+20AC = 0xE2 0x82
   // 0xAC), but the third byte is missing.
-  ada::url_search_params search_params("%E2%82=a&b=c");
+  ada::url_search_params search_params;
+  search_params.append("\xE2\x82", "a");
+  search_params.append("b", "c");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -473,7 +479,9 @@ TEST(url_search_params, sort_truncated_utf8_3byte) {
 TEST(url_search_params, sort_truncated_utf8_4byte) {
   // 0xF0 0x9F 0x8C is the start of a 4-byte sequence (e.g. U+1F308 =
   // 0xF0 0x9F 0x8C 0x88), but the fourth byte is missing.
-  ada::url_search_params search_params("%F0%9F%8C=a&b=c");
+  ada::url_search_params search_params;
+  search_params.append("\xF0\x9F\x8C", "a");
+  search_params.append("b", "c");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -483,7 +491,9 @@ TEST(url_search_params, sort_invalid_utf8_leading_byte) {
   // 0xF8-0xFF are invalid UTF-8 leading bytes (no valid sequence starts with
   // them in UTF-8). They should be treated as raw bytes.
   // Place the invalid-byte key first so it is the lhs in the comparator.
-  ada::url_search_params search_params("%F8=a&b=c");
+  ada::url_search_params search_params;
+  search_params.append("\xF8", "a");
+  search_params.append("b", "c");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -491,7 +501,9 @@ TEST(url_search_params, sort_invalid_utf8_leading_byte) {
 
 TEST(url_search_params, sort_invalid_utf8_leading_byte_rhs) {
   // Same invalid byte, but placed second so it appears as the rhs.
-  ada::url_search_params search_params("b=c&%F8=a");
+  ada::url_search_params search_params;
+  search_params.append("b", "c");
+  search_params.append("\xF8", "a");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -500,7 +512,9 @@ TEST(url_search_params, sort_invalid_utf8_leading_byte_rhs) {
 TEST(url_search_params, sort_truncated_utf8_4byte_lhs) {
   // 0xF0 0x9F 0x8C appears as lhs (first element) so the truncated
   // 4-byte branch is exercised on the lhs side.
-  ada::url_search_params search_params("%F0%9F%8C=a&%FF=b");
+  ada::url_search_params search_params;
+  search_params.append("\xF0\x9F\x8C", "a");
+  search_params.append("\xFF", "b");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -510,7 +524,9 @@ TEST(url_search_params, sort_truncated_utf8_2byte_rhs) {
   // Put the truncated 2-byte key second so it appears as rhs in the
   // comparator, exercising the c2 > 0x7F && c2 <= 0xDF branch with
   // j+1 >= rhs.first.size() (truncated).
-  ada::url_search_params search_params("b=c&%C3=a");
+  ada::url_search_params search_params;
+  search_params.append("b", "c");
+  search_params.append("\xC3", "a");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -519,7 +535,9 @@ TEST(url_search_params, sort_truncated_utf8_2byte_rhs) {
 TEST(url_search_params, sort_truncated_utf8_3byte_rhs) {
   // Put the truncated 3-byte key second so it appears as rhs, exercising
   // the c2 > 0xDF && c2 <= 0xEF branch with j+2 >= rhs.first.size().
-  ada::url_search_params search_params("b=c&%E2%82=a");
+  ada::url_search_params search_params;
+  search_params.append("b", "c");
+  search_params.append("\xE2\x82", "a");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -528,7 +546,9 @@ TEST(url_search_params, sort_truncated_utf8_3byte_rhs) {
 TEST(url_search_params, sort_truncated_utf8_4byte_rhs) {
   // Put the truncated 4-byte key second so it appears as rhs, exercising
   // the c2 > 0xEF && c2 <= 0xF7 branch with j+3 >= rhs.first.size().
-  ada::url_search_params search_params("b=c&%F0%9F%8C=a");
+  ada::url_search_params search_params;
+  search_params.append("b", "c");
+  search_params.append("\xF0\x9F\x8C", "a");
   search_params.sort();
   ASSERT_EQ(search_params.size(), 2);
   SUCCEED();
@@ -580,4 +600,62 @@ TEST(url_search_params, sort_surrogate_lhs_exhausted_pending) {
   ASSERT_EQ(keys.next(), "A\360\237\214\210");
   ASSERT_EQ(keys.next(), "A\360\237\214\210B");
   SUCCEED();
+}
+
+TEST(url_search_params, percent_decoded_ill_formed_utf8_becomes_replacement) {
+  // https://github.com/ada-url/ada/issues/1279
+  // The application/x-www-form-urlencoded parser UTF-8 decodes the
+  // percent-decoded name and value without BOM: each maximal subpart of an
+  // ill-formed sequence becomes U+FFFD. Expected values match whatwg-url.
+  auto check = [](std::string_view init, std::string_view key,
+                  std::string_view serialized) {
+    ada::url_search_params params(init);
+    ASSERT_EQ(params.size(), 1);
+    ASSERT_EQ(params.front().first, key);
+    ASSERT_EQ(params.to_string(), serialized);
+    // Serializing is a fixed point once parsed.
+    ASSERT_EQ(ada::url_search_params(serialized).to_string(), serialized);
+  };
+  check("%aa", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("%C3", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("%C3%28", "\xEF\xBF\xBD(", "%EF%BF%BD%28=");
+  check("%E2%82", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("%ED%A0%80", "\xEF\xBF\xBD\xEF\xBF\xBD\xEF\xBF\xBD",
+        "%EF%BF%BD%EF%BF%BD%EF%BF%BD=");
+  check("%F0%9F%98", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("%F8%80", "\xEF\xBF\xBD\xEF\xBF\xBD", "%EF%BF%BD%EF%BF%BD=");
+  // Octal escapes, since a hex escape would swallow the following "b" or "c".
+  check("a%E2%82%ACb%FFc", "a\342\202\254b\357\277\275c",
+        "a%E2%82%ACb%EF%BF%BDc=");
+  // The decoder runs on all the bytes, so raw ill-formed bytes (which the
+  // API does not accept as valid input) are replaced the same way.
+  check("\xAF", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("\\%\xAF", "\\%\xEF\xBF\xBD", "%5C%25%EF%BF%BD=");
+  // Well-formed sequences, including a BOM, are kept.
+  check("%C3%A9", "\xC3\xA9", "%C3%A9=");
+  check("%EF%BB%BFx", "\xEF\xBB\xBFx", "%EF%BB%BFx=");
+  check("%F0%9F%8C%88", "\xF0\x9F\x8C\x88", "%F0%9F%8C%88=");
+  // Distinct ill-formed escapes are the same key once decoded.
+  ada::url_search_params params("%aa=1&%ab=2");
+  ASSERT_EQ(params.get_all("\xEF\xBF\xBD").size(), 2);
+  // Values are decoded the same way.
+  ada::url_search_params values("k=%C3");
+  ASSERT_EQ(values.get("k"), "\xEF\xBF\xBD");
+}
+
+TEST(url_search_params, decode_finds_delimiters_at_every_offset) {
+  // The decoder scans plain runs eight bytes at a time: a '+', a '%XX'
+  // escape, or a non-ASCII byte must be found at any offset in a word.
+  for (size_t i = 0; i < 24; i++) {
+    const std::string a(i, 'a');
+    const std::string b(24 - i, 'b');
+    ada::url_search_params plus(a + "+" + b + "%41" + a);
+    ASSERT_EQ(plus.front().first, a + " " + b + "A" + a) << i;
+    ada::url_search_params escape(a + "%3D" + b);
+    ASSERT_EQ(escape.front().first, a + "=" + b) << i;
+    ada::url_search_params raw(a + "\xFF" + b);
+    ASSERT_EQ(raw.front().first, a + "\xEF\xBF\xBD" + b) << i;
+    ada::url_search_params well_formed(a + "\xC3\xA9" + b + "+");
+    ASSERT_EQ(well_formed.front().first, a + "\xC3\xA9" + b + " ") << i;
+  }
 }

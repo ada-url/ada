@@ -536,6 +536,116 @@ constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
   return t;
 }();
 
+namespace {
+// Returns the length of the UTF-8 sequence that starts `input` (non-empty)
+// and sets `valid`. For an ill-formed sequence, the length is that of its
+// maximal subpart, which the Encoding Standard's UTF-8 decoder turns into a
+// single U+FFFD before it reads the next byte.
+// https://encoding.spec.whatwg.org/#utf-8-decoder
+size_t utf8_sequence_length(const std::string_view input, bool& valid) {
+  const auto lead = static_cast<uint8_t>(input[0]);
+  valid = true;
+  if (lead < 0x80) {
+    return 1;
+  }
+  size_t needed = 0;
+  uint8_t lower = 0x80;
+  uint8_t upper = 0xBF;
+  if (lead >= 0xC2 && lead <= 0xDF) {
+    needed = 1;
+  } else if (lead >= 0xE0 && lead <= 0xEF) {
+    needed = 2;
+    if (lead == 0xE0) {
+      lower = 0xA0;
+    } else if (lead == 0xED) {
+      upper = 0x9F;
+    }
+  } else if (lead >= 0xF0 && lead <= 0xF4) {
+    needed = 3;
+    if (lead == 0xF0) {
+      lower = 0x90;
+    } else if (lead == 0xF4) {
+      upper = 0x8F;
+    }
+  } else {
+    valid = false;
+    return 1;
+  }
+  size_t seen = 0;
+  while (seen < needed && seen + 1 < input.size()) {
+    const auto c = static_cast<uint8_t>(input[seen + 1]);
+    if (c < lower || c > upper) {
+      break;
+    }
+    lower = 0x80;
+    upper = 0xBF;
+    seen++;
+  }
+  valid = seen == needed;
+  return seen + 1;
+}
+
+// UTF-8 decode without BOM (error mode replacement), then UTF-8 encode:
+// replaces each maximal subpart of an ill-formed sequence with U+FFFD.
+// https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
+void replace_ill_formed_utf8(std::string& s) {
+  const std::string_view view(s);
+  size_t i = 0;
+  bool valid = true;
+  // Most decoded text is well-formed: only copy once an error is found.
+  while (i < view.size()) {
+    const size_t n = utf8_sequence_length(view.substr(i), valid);
+    if (!valid) {
+      break;
+    }
+    i += n;
+  }
+  if (i == view.size()) {
+    return;
+  }
+  std::string out;
+  out.reserve(view.size() + 2);
+  out.append(view.substr(0, i));
+  while (i < view.size()) {
+    const size_t n = utf8_sequence_length(view.substr(i), valid);
+    if (valid) {
+      out.append(view.substr(i, n));
+    } else {
+      out.append("\xEF\xBF\xBD");
+    }
+    i += n;
+  }
+  s = std::move(out);
+}
+
+// Returns the first '+' or '%' in [p, end), or end, and ORs every byte before
+// it into `seen`. Scans eight bytes at a time until a word holds a '+' or '%'.
+ada_really_inline const char* find_form_urlencoded_delimiter(
+    const char* p, const char* const end, uint64_t& seen) noexcept {
+  constexpr uint64_t ones = broadcast(0x01);
+  constexpr uint64_t highs = broadcast(0x80);
+  constexpr uint64_t plus = broadcast('+');
+  constexpr uint64_t percent = broadcast('%');
+  while (end - p >= 8) {
+    uint64_t word{};
+    std::memcpy(&word, p, sizeof(word));
+    // Nonzero if and only if a byte of the word is '+' or '%'.
+    const uint64_t x1 = word ^ plus;
+    const uint64_t x2 = word ^ percent;
+    if ((((x1 - ones) & ~x1) | ((x2 - ones) & ~x2)) & highs) {
+      break;
+    }
+    seen |= word;
+    p += 8;
+  }
+  while (p < end && *p != '+' && *p != '%') {
+    seen |= static_cast<uint8_t>(*p);
+    ++p;
+  }
+  return p;
+}
+}  // namespace
+
 std::string form_urlencoded_decode(const std::string_view input) {
   const size_t len = input.size();
   if (len == 0) [[unlikely]] {
@@ -545,14 +655,21 @@ std::string form_urlencoded_decode(const std::string_view input) {
   // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
   const char* const src = input.data();
   const char* const end = src + len;
-  const char* p = src;
+
+  // The UTF-8 decode step runs on all the bytes, copied or percent-decoded,
+  // and can only change a component that has a non-ASCII byte. Every output
+  // byte is ORed into this: a set high bit in any of its bytes means one is.
+  uint64_t seen = 0;
+  constexpr uint64_t non_ascii = broadcast(0x80);
 
   // Advance over the untransformed prefix.
-  while (p < end && *p != '+' && *p != '%') {
-    ++p;
-  }
+  const char* p = find_form_urlencoded_delimiter(src, end, seen);
   if (p == end) {
-    return std::string(input);
+    std::string out(input);
+    if (seen & non_ascii) {
+      replace_ill_formed_utf8(out);
+    }
+    return out;
   }
 
   // Output is always at most as long as the input: write into a single
@@ -578,7 +695,9 @@ std::string form_urlencoded_decode(const std::string_view input) {
         if ((hi | lo) >= 16) {
           break;
         }
-        *d++ = static_cast<char>((hi << 4) | lo);
+        const auto byte = static_cast<uint8_t>((hi << 4) | lo);
+        *d++ = static_cast<char>(byte);
+        seen |= byte;
         p += 3;
       }
       if (p < end && *p == '%') {
@@ -588,10 +707,7 @@ std::string form_urlencoded_decode(const std::string_view input) {
     } else {
       // Copy a plain run until the next '+' or '%'.
       const char* start = p;
-      ++p;
-      while (p < end && *p != '+' && *p != '%') {
-        ++p;
-      }
+      p = find_form_urlencoded_delimiter(p, end, seen);
       const size_t n = static_cast<size_t>(p - start);
       std::memcpy(d, start, n);
       d += n;
@@ -599,6 +715,9 @@ std::string form_urlencoded_decode(const std::string_view input) {
   }
 
   out.resize(static_cast<size_t>(d - d0));
+  if (seen & non_ascii) {
+    replace_ill_formed_utf8(out);
+  }
   return out;
 }
 

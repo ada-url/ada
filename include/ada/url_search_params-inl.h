@@ -170,8 +170,8 @@ inline void url_search_params::remove(const std::string_view key,
 }
 
 inline void url_search_params::sort() {
-  // Keys are expected to be valid UTF-8, but percent_decode can produce
-  // arbitrary byte sequences. Handle truncated/invalid sequences gracefully.
+  // Keys are expected to be valid UTF-8 (parsing replaces ill-formed decoded
+  // bytes with U+FFFD). Handle truncated/invalid sequences gracefully anyway.
   std::ranges::stable_sort(params, [](const key_value_pair& lhs,
                                       const key_value_pair& rhs) {
     size_t i = 0, j = 0;

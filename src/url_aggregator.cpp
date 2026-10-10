@@ -711,9 +711,17 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
       // Set url's host to host, buffer to the empty string, and state to port
       // state.
+      // The port state reads the leading ASCII digits (tabs and newlines are
+      // already removed). set_port is not used: it checks the length limit
+      // for the port alone, and check_url_size() must roll back the host
+      // together with a port that does not fit.
       std::string_view port_buffer = new_host.substr(location + 1);
-      if (!port_buffer.empty()) {
-        set_port(port_buffer);
+      std::string_view digits =
+          port_buffer.substr(0, port_buffer.find_first_not_of("0123456789"));
+      if (!digits.empty() && !cannot_have_credentials_or_port()) {
+        // An out-of-range port leaves the buffer unchanged.
+        parse_port(digits);
+        is_valid = true;
       }
       return check_url_size();
     }

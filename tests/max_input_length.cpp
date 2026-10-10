@@ -349,3 +349,35 @@ TEST(max_input_length_helpers, url_search_params_accepts_under_limit) {
   ASSERT_EQ(params.get("foo"), "bar");
   ada::set_max_input_length(std::numeric_limits<uint32_t>::max());
 }
+
+TYPED_TEST(max_input_length_tests, set_host_port_that_does_not_fit_rolls_back) {
+  // https://github.com/ada-url/ada/issues/1282
+  // set_host("host:port") sets the host, then the port. When the result does
+  // not fit the limit, the setter fails and the URL is unchanged: the new host
+  // must not stay with the old port, or with none.
+  auto check = [](std::string_view input, std::string_view host,
+                  uint32_t limit) {
+    auto url = ada::parse<TypeParam>(input);
+    ASSERT_TRUE(url);
+    ada::set_max_input_length(limit);
+    ASSERT_FALSE(url->set_host(host)) << input << " " << host;
+    ASSERT_EQ(url->get_href(), input);
+    ada::set_max_input_length(small_limit);
+  };
+  check("https://bank.example:1/", "evil.example:9443", 25);
+  check("http://example.com/", "example.org:8080", 20);
+  check("a:/", "a:0", 7);
+
+  // When the host and port fit together, both are set.
+  auto url = ada::parse<TypeParam>("https://bank.example:1/");
+  ASSERT_TRUE(url);
+  ada::set_max_input_length(26);
+  ASSERT_TRUE(url->set_host("evil.example:9443"));
+  ASSERT_EQ(url->get_href(), "https://evil.example:9443/");
+  // A port the standard rejects still leaves the new host in place.
+  ASSERT_TRUE(url->set_host("bank.example:x"));
+  ASSERT_EQ(url->get_href(), "https://bank.example:9443/");
+  // set_port alone still enforces the limit.
+  ASSERT_FALSE(url->set_port("10000"));
+  ASSERT_EQ(url->get_href(), "https://bank.example:9443/");
+}
