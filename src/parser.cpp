@@ -365,7 +365,7 @@ ada_really_inline bool authority_has_at(const uint8_t* p, size_t host_start,
     const uint64_t delim = neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('/'))) |
                            neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('?'))) |
                            neon_nibble_bits(vceqq_u8(w, vdupq_n_u8('#')));
-    return delim == 0 || std::countr_zero(at) < std::countr_zero(delim);
+    return delim == 0 || trailing_zeroes64(at) < trailing_zeroes64(delim);
   }
 #elif ADA_SSE2
   if (rem >= 16) {
@@ -1372,6 +1372,21 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
     return false;
   }
 #endif
+  return try_parse_simple_absolute_with_scheme(input, out, scheme_type,
+                                               protocol_end, pos);
+}
+
+template <class result_type>
+ada_never_inline bool try_parse_simple_absolute_with_scheme(
+    std::string_view input, result_type& out, ada::scheme::type scheme_type,
+    uint32_t protocol_end, size_t pos) {
+  constexpr bool is_ada_url = std::is_same_v<result_type, ada::url>;
+  constexpr bool is_aggregator =
+      std::is_same_v<result_type, ada::url_aggregator>;
+  static_assert(is_ada_url || is_aggregator);
+
+  const size_t len = input.size();
+  const auto* b = reinterpret_cast<const uint8_t*>(input.data());
   if (pos < len && (b[pos] == '/' || b[pos] == '\\')) [[unlikely]] {
     return false;
   }
@@ -1902,6 +1917,62 @@ result_type parse_url_impl(std::string_view user_input,
       // call so those URLs (including SetHref) do not pay for a miss.
       const auto* p = reinterpret_cast<const uint8_t*>(user_input.data());
       const size_t n = user_input.size();
+#if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
+    defined(_M_X64) || defined(_M_IX86) || defined(_M_AMD64)
+      if (n >= 8) {
+        uint64_t first8 = 0;
+        std::memcpy(&first8, p, 8);
+        if (first8 == 0x2f2f3a7370747468ull) {  // "https://"
+          const uint8_t host_first = n > 8 ? p[8] : 0;
+          const bool skip_ip =
+              host_first == '[' || (host_first >= '0' && host_first <= '9');
+          const bool skip_userinfo = authority_has_at(p, 8, n);
+          hit_fast_path = !skip_ip && !skip_userinfo &&
+                          try_parse_simple_absolute_with_scheme(
+                              user_input, url, ada::scheme::type::HTTPS, 6, 8);
+        } else if ((first8 & 0x00ffffffffffffffull) ==
+                   0x002f2f3a70747468ull) {  // "http://"
+          const uint8_t host_first = n > 7 ? p[7] : 0;
+          const bool skip_ip =
+              host_first == '[' || (host_first >= '0' && host_first <= '9');
+          const bool skip_userinfo = authority_has_at(p, 7, n);
+          hit_fast_path = !skip_ip && !skip_userinfo &&
+                          try_parse_simple_absolute_with_scheme(
+                              user_input, url, ada::scheme::type::HTTP, 5, 7);
+        } else if ((first8 & 0x0000ffffffffffffull) ==
+                   0x00002f2f3a737377ull) {  // "wss://"
+          const uint8_t host_first = n > 6 ? p[6] : 0;
+          const bool skip_ip =
+              host_first == '[' || (host_first >= '0' && host_first <= '9');
+          const bool skip_userinfo = authority_has_at(p, 6, n);
+          hit_fast_path = !skip_ip && !skip_userinfo &&
+                          try_parse_simple_absolute_with_scheme(
+                              user_input, url, ada::scheme::type::WSS, 4, 6);
+        } else if ((first8 & 0x0000ffffffffffffull) ==
+                   0x00002f2f3a707466ull) {  // "ftp://"
+          const uint8_t host_first = n > 6 ? p[6] : 0;
+          const bool skip_ip =
+              host_first == '[' || (host_first >= '0' && host_first <= '9');
+          const bool skip_userinfo = authority_has_at(p, 6, n);
+          hit_fast_path = !skip_ip && !skip_userinfo &&
+                          try_parse_simple_absolute_with_scheme(
+                              user_input, url, ada::scheme::type::FTP, 4, 6);
+        } else if ((first8 & 0x000000ffffffffffull) ==
+                   0x0000002f2f3a7377ull) {  // "ws://"
+          const uint8_t host_first = n > 5 ? p[5] : 0;
+          const bool skip_ip =
+              host_first == '[' || (host_first >= '0' && host_first <= '9');
+          const bool skip_userinfo = authority_has_at(p, 5, n);
+          hit_fast_path = !skip_ip && !skip_userinfo &&
+                          try_parse_simple_absolute_with_scheme(
+                              user_input, url, ada::scheme::type::WS, 3, 5);
+        } else {
+          hit_fast_path = try_parse_simple_absolute(user_input, url);
+        }
+      } else {
+        hit_fast_path = try_parse_simple_absolute(user_input, url);
+      }
+#else
       size_t host_start = 0;
       if (n >= 8 && p[4] == ':' && p[5] == '/' && p[6] == '/') {
         host_start = 7;
@@ -1915,6 +1986,7 @@ result_type parse_url_impl(std::string_view user_input,
           host_start != 0 && authority_has_at(p, host_start, n);
       hit_fast_path = !skip_ip && !skip_userinfo &&
                       try_parse_simple_absolute(user_input, url);
+#endif
     } else {
       hit_fast_path = try_parse_simple_relative(user_input, *base_url, url);
     }
@@ -1924,13 +1996,7 @@ result_type parse_url_impl(std::string_view user_input,
           url.is_valid = false;
         }
       } else {
-        // For a small absolute input, even worst-case normalization cannot
-        // exceed the limit: percent encoding expands at most 3x and IDNA at
-        // most 4.5x. Avoid traversing every stored component on the common
-        // default-limit path.
-        if ((base_url != nullptr ||
-             user_input.size() > static_cast<size_t>(max_input_length) / 5) &&
-            url.get_href_size() > max_input_length) [[unlikely]] {
+        if (url.get_href_size() > max_input_length) [[unlikely]] {
           url.is_valid = false;
         }
       }
@@ -2859,6 +2925,11 @@ result_type parse_url_impl(std::string_view user_input,
 template bool try_parse_simple_absolute<url>(std::string_view, url&);
 template bool try_parse_simple_absolute<url_aggregator>(std::string_view,
                                                         url_aggregator&);
+template bool try_parse_simple_absolute_with_scheme<url>(std::string_view, url&,
+                                                         ada::scheme::type,
+                                                         uint32_t, size_t);
+template bool try_parse_simple_absolute_with_scheme<url_aggregator>(
+    std::string_view, url_aggregator&, ada::scheme::type, uint32_t, size_t);
 template bool finish_simple_absolute_with_port<url>(std::string_view, url&,
                                                     ada::scheme::type, uint32_t,
                                                     size_t, size_t, size_t,
