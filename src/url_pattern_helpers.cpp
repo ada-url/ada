@@ -4,9 +4,16 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
+#include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <ranges>
 #include <string>
+#include <string_view>
+#include <system_error>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "ada/character_sets.h"
 #include "ada/checkers.h"

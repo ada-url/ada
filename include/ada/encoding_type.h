@@ -11,6 +11,7 @@
 
 #include "ada/common_defs.h"
 #include <string>
+#include <string_view>
 
 namespace ada {
 

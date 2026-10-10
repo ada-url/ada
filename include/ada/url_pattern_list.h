@@ -32,6 +32,7 @@
 #include "ada/url_pattern.h"
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <span>

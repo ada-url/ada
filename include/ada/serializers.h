@@ -11,6 +11,8 @@
 #include "ada/common_defs.h"
 
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
 /**

@@ -15,6 +15,7 @@
 #include "ada/url_pattern.h"
 #include "ada/url_pattern_list.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
