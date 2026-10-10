@@ -201,16 +201,14 @@ ada_really_inline int trailing_zeroes64(uint64_t input_num) noexcept {
 // Given a NEON register whose lanes are all either 0x00 or 0xFF (i.e., the
 // result of a comparison), produce a 64-bit value with four bits set per
 // matching input byte, and zero bits elsewhere. Narrowing by four bits per
-// 16-bit lane is cheaper than materializing a 16-bit bitmask, and it keeps
-// the value in a vector register so that the "any match?" test can be done
-// with a floating-point compare against zero, avoiding a transfer to a
-// general-purpose register on the common no-match path.
+// 16-bit lane is cheaper than materializing a 16-bit bitmask.
 //
-// The floating-point compare treats the nibble mask as an IEEE 754 double.
-// Negative zero cannot occur (each byte is 0x00, 0x0F, 0xF0 or 0xFF), but a
-// mask with only low bits set is a denormal: if flush-to-zero is enabled,
-// those compare equal to 0.0. Do not use this on arbitrary vectors.
-// Define ADA_NEON_SAFE_ZERO_CHECK to 1 to use an integer compare instead.
+// With ADA_NEON_SAFE_ZERO_CHECK set to 0, the "any match?" test instead
+// treats the nibble mask as an IEEE 754 double and compares it against zero,
+// avoiding a transfer to a general-purpose register on the common no-match
+// path. Negative zero cannot occur (each byte is 0x00, 0x0F, 0xF0 or 0xFF),
+// but a mask with only low bits set is a denormal: if flush-to-zero is
+// enabled, those compare equal to 0.0. Do not use this on arbitrary vectors.
 ada_really_inline uint8x8_t to_nibble_mask(uint8x16_t comparison) noexcept {
   return vshrn_n_u16(vreinterpretq_u16_u8(comparison), 4);
 }
