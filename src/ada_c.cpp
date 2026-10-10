@@ -653,7 +653,7 @@ size_t ada_strings_size(ada_strings result) {
 
 ada_string ada_strings_get(ada_strings result, size_t index) {
   auto* r = (ada::result<std::vector<std::string>>*)result;
-  if (!r) {
+  if (!r || index >= (*r)->size()) {
     return ada_string_create(nullptr, 0);
   }
   std::string_view view = (*r)->at(index);

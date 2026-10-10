@@ -370,6 +370,33 @@ TEST(ada_c, ada_url_search_params) {
   SUCCEED();
 }
 
+TEST(ada_c, ada_strings_get_out_of_bounds) {
+  std::string_view input = "a=b";
+  ada_url_search_params out =
+      ada_parse_search_params(input.data(), input.size());
+
+  std::string key = "a";
+  ada_strings result =
+      ada_search_params_get_all(out, key.c_str(), key.length());
+  ASSERT_EQ(ada_strings_size(result), 1);
+
+  ada_string in_bounds = ada_strings_get(result, 0);
+  ASSERT_EQ(convert_string(in_bounds), "b");
+
+  // index == size must not throw std::out_of_range across the C ABI.
+  ada_string at_size = ada_strings_get(result, 1);
+  ASSERT_EQ(at_size.data, nullptr);
+  ASSERT_EQ(at_size.length, 0);
+
+  ada_string out_of_bounds = ada_strings_get(result, 100);
+  ASSERT_EQ(out_of_bounds.data, nullptr);
+  ASSERT_EQ(out_of_bounds.length, 0);
+
+  ada_free_strings(result);
+  ada_free_search_params(out);
+  SUCCEED();
+}
+
 TEST(ada_c, ada_get_version) {
   std::string_view raw = ada_get_version();
   ada_version_components parsed = ada_get_version_components();
