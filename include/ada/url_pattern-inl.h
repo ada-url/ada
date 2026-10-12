@@ -222,7 +222,7 @@ url_pattern_component<regex_provider>::compile(
 
 template <url_pattern_regex::regex_concept regex_provider>
 bool url_pattern_component<regex_provider>::fast_test(
-    std::string_view input) const noexcept {
+    std::string_view input) const {
   // Fast path for simple patterns - avoid regex evaluation
   // Using if-else for better branch prediction on common cases
   if (type == url_pattern_component_type::FULL_WILDCARD) {

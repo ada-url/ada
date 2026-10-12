@@ -1372,3 +1372,73 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
   }
   SUCCEED();
 }
+
+#if defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)
+namespace {
+
+struct test_regex_match_exception : std::runtime_error {
+  test_regex_match_exception()
+      : std::runtime_error("custom regex match exception") {}
+};
+
+struct test_regex_search_exception : std::runtime_error {
+  test_regex_search_exception()
+      : std::runtime_error("custom regex search exception") {}
+};
+
+struct throwing_regex_provider final {
+  struct regex_type {};
+
+  static std::optional<regex_type> create_instance(std::string_view, bool) {
+    return regex_type{};
+  }
+
+  static std::optional<std::vector<std::optional<std::string>>> regex_search(
+      std::string_view, const regex_type&) {
+    throw test_regex_search_exception();
+  }
+
+  static bool regex_match(std::string_view, const regex_type&) {
+    throw test_regex_match_exception();
+  }
+};
+
+static_assert(ada::url_pattern_regex::regex_concept<throwing_regex_provider>);
+
+}  // namespace
+
+// Regression test for https://github.com/ada-url/ada/issues/1297
+// fast_test() should propagate exceptions from user-supplied regex providers
+// instead of terminating the process via noexcept.
+TEST(wpt_urlpattern_tests,
+     throwing_regex_provider_fast_test_propagates_exception) {
+  // Test direct component fast_test invocation
+  auto options = ada::url_pattern_compile_component_options::PATHNAME;
+  auto component = ada::url_pattern_component<throwing_regex_provider>::compile(
+      "/foo/(bar)", ada::url_pattern_helpers::canonicalize_pathname, options);
+  ASSERT_TRUE(component.has_value());
+  EXPECT_THROW((void)component->fast_test("/foo/bar"),
+               test_regex_match_exception);
+
+  // Test url_pattern::test() invocation (which uses fast_test)
+  auto init = ada::url_pattern_init{};
+  init.pathname = "/foo/(bar)";
+  auto pattern = ada::parse_url_pattern<throwing_regex_provider>(init);
+  ASSERT_TRUE(pattern.has_value());
+
+  auto input = ada::url_pattern_init{};
+  input.pathname = "/foo/bar";
+  EXPECT_THROW((void)pattern->test(input), test_regex_match_exception);
+
+  // Test url_pattern::exec() invocation (which uses fast_match / regex_search)
+  EXPECT_THROW((void)pattern->exec(input), test_regex_search_exception);
+
+  // Test url_pattern_list::match() invocation (which uses fast_test on regex
+  // routes)
+  std::vector<std::string_view> list_patterns{"/foo/([0-9]+)"};
+  auto list =
+      ada::parse_url_pattern_list<throwing_regex_provider>(list_patterns);
+  ASSERT_TRUE(list.has_value());
+  EXPECT_THROW((void)list->match("/foo/123"), test_regex_match_exception);
+}
+#endif
