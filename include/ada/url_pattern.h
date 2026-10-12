@@ -203,7 +203,8 @@ class url_pattern_component {
 
   // Fast path test that returns true/false without constructing result groups.
   // Uses cached pattern type to skip regex evaluation for simple patterns.
-  bool fast_test(std::string_view input) const noexcept;
+  // Note: Not marked noexcept because the regex provider may throw.
+  bool fast_test(std::string_view input) const;
 
   // Fast path match that returns capture groups without regex for simple
   // patterns. Returns nullopt if pattern doesn't match, otherwise returns
