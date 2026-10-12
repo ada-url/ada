@@ -21,6 +21,4 @@
 #endif
 #endif  // ADA_INCLUDE_URL_PATTERN
 
-#if !defined(ADA_C_API_SEPARATE_TU)
 #include "ada_c.cpp"
-#endif

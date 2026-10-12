@@ -1,9 +1,8 @@
 // NOLINTBEGIN(bugprone-exception-escape,
 // bugprone-suspicious-stringview-data-usage)
 // Same order as ada.h. parser.h has to precede url.h and url_aggregator.h,
-// which befriend parser::parse_url. This file is its own translation unit, so
-// those declarations are not already visible the way they are when ada.cpp
-// includes it.
+// which befriend parser::parse_url. ada.cpp includes this file after those
+// headers; the includes keep the file valid on its own too.
 #include "ada/ada_idna.h"
 #include "ada/character_sets.h"
 #include "ada/character_sets-inl.h"

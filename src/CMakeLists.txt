@@ -7,8 +7,7 @@ target_include_directories(ada-include-source INTERFACE $<BUILD_INTERFACE:${CMAK
 add_library(ada-source INTERFACE)
 target_sources(ada-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/ada.cpp)
 target_link_libraries(ada-source INTERFACE ada-include-source)
-add_library(ada ada.cpp unicode_percent_encode.cpp url_pattern_list.cpp
-            ada_c.cpp)
+add_library(ada ada.cpp unicode_percent_encode.cpp url_pattern_list.cpp)
 target_compile_features(ada PUBLIC cxx_std_20)
 target_include_directories(ada PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
 target_include_directories(ada PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
@@ -76,12 +75,6 @@ target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
 # header so it inlines into url_pattern_list::match. The amalgamated
 # single-file build still includes the builder inline.
 target_compile_definitions(ada PRIVATE ADA_URL_PATTERN_LIST_SEPARATE_TU=1)
-
-# Keep the C API in its own TU. Exception boundaries and handle boxes live
-# there; folding them into ada.cpp changes GCC's unit-wide inlining budget
-# and de-inlines url_aggregator setter hot paths (CodSpeed: SetHash and the
-# other setters). The amalgamated single-file build still includes ada_c.cpp.
-target_compile_definitions(ada PRIVATE ADA_C_API_SEPARATE_TU=1)
 
 if(ADA_INCLUDE_URL_PATTERN)
   target_compile_definitions(ada PRIVATE ADA_INCLUDE_URL_PATTERN=1)
