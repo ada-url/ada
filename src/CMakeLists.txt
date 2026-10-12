@@ -94,30 +94,10 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND UNIX AND NOT APPLE)
   target_sources(ada PRIVATE setter_alias.cpp)
   target_compile_definitions(ada PRIVATE ADA_SETTER_ALIAS_OUTLINE=1)
-  find_program(ADA_OBJCOPY objcopy REQUIRED)
-  set(_ada_unity_object
-      "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ada.dir/ada.cpp.o")
   add_custom_command(
     TARGET ada
     PRE_LINK
-    COMMAND
-      "${ADA_OBJCOPY}" --redefine-sym
-      "_ZN3ada14url_aggregator12set_usernameESt17basic_string_viewIcSt11char_traitsIcEE=_ZN3ada31outline_aggregator_set_usernameERNS_14url_aggregatorESt17basic_string_viewIcSt11char_traitsIcEE"
-      --redefine-sym
-      "_ZN3ada14url_aggregator12set_passwordESt17basic_string_viewIcSt11char_traitsIcEE=_ZN3ada31outline_aggregator_set_passwordERNS_14url_aggregatorESt17basic_string_viewIcSt11char_traitsIcEE"
-      --redefine-sym
-      "_ZN3ada14url_aggregator12set_pathnameESt17basic_string_viewIcSt11char_traitsIcEE=_ZN3ada31outline_aggregator_set_pathnameERNS_14url_aggregatorESt17basic_string_viewIcSt11char_traitsIcEE"
-      --redefine-sym
-      "_ZN3ada3url12set_usernameESt17basic_string_viewIcSt11char_traitsIcEE=_ZN3ada24outline_url_set_usernameERNS_3urlESt17basic_string_viewIcSt11char_traitsIcEE"
-      --redefine-sym
-      "_ZN3ada3url12set_passwordESt17basic_string_viewIcSt11char_traitsIcEE=_ZN3ada24outline_url_set_passwordERNS_3urlESt17basic_string_viewIcSt11char_traitsIcEE"
-      --redefine-sym
-      "_ZN3ada3url12set_pathnameESt17basic_string_viewIcSt11char_traitsIcEE=_ZN3ada24outline_url_set_pathnameERNS_3urlESt17basic_string_viewIcSt11char_traitsIcEE"
-      --redefine-sym "ada_set_username=ada_set_username_unity" --localize-symbol
-      ada_set_username_unity --redefine-sym
-      "ada_set_password=ada_set_password_unity" --localize-symbol
-      ada_set_password_unity --redefine-sym
-      "ada_set_pathname=ada_set_pathname_unity" --localize-symbol
-      ada_set_pathname_unity "${_ada_unity_object}"
+    COMMAND /bin/sh "${CMAKE_CURRENT_SOURCE_DIR}/rename_setter_symbols.sh"
+            "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ada.dir/ada.cpp.o"
     VERBATIM)
 endif()

@@ -1,5 +1,18 @@
-#include "ada.h"
+#if defined(NDEBUG)
+// <iostream> installs a process-wide ios_base::Init in every translation unit
+// that includes it, and helpers.h pulls <iostream> in. Release builds do not
+// need that initializer here. Debug builds do: the development checks call
+// std::cerr.
+#include <ostream>
+#define _GLIBCXX_IOSTREAM 1
+#endif
 
+#include "ada/parser.h"
+#include "ada/url.h"
+#include "ada/url_aggregator.h"
+#include "ada/implementation.h"
+
+#include <cstdint>
 #include <string>
 #include <string_view>
 
@@ -8,6 +21,16 @@ extern "C" {
 }
 
 namespace ada {
+
+// parse_port is inline and invoked from the class definition. This unit never
+// calls it. A visible definition keeps -Werror happy; because nothing odr-uses
+// it, the compiler does not emit it, so it cannot displace the real body.
+ada_really_inline size_t url::parse_port(std::string_view, bool) noexcept {
+  return 0;
+}
+ada_really_inline size_t url_aggregator::parse_port(std::string_view, bool) {
+  return 0;
+}
 
 // The unity translation unit's setter bodies are renamed to these symbols.
 // Calling convention matches the member functions: the URL is the first
@@ -24,11 +47,12 @@ bool outline_url_set_pathname(url& self, std::string_view input);
 
 namespace {
 
-// Same predicate as helpers::overlaps. Inlined here so the fast path is a
-// compare and a tail call, not another frame.
+// One unsigned compare. An empty member cannot overlap: the distance from
+// data() is never below a zero size.
 bool aliases(std::string_view input, const std::string& member) noexcept {
-  return !input.empty() && !member.empty() && input.data() >= member.data() &&
-         input.data() < member.data() + member.size();
+  const auto ptr = reinterpret_cast<uintptr_t>(input.data());
+  const auto begin = reinterpret_cast<uintptr_t>(member.data());
+  return (ptr - begin) < member.size();
 }
 
 // The owning string must not live in the setter. Its destructor forces a stack
