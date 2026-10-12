@@ -742,21 +742,35 @@ bool url::set_hostname(const std::string_view input) {
   return set_host_or_hostname<true>(input);
 }
 
+namespace {
+
+ada_never_inline bool call_with_detached_input(
+    url& self, std::string_view input, bool (url::*method)(std::string_view)) {
+  const std::string copy(input);
+  return (self.*method)(copy);
+}
+
+bool aliases_member(std::string_view input,
+                    const std::string& member) noexcept {
+  return !input.empty() && input.data() >= member.data() &&
+         input.data() < member.data() + member.size();
+}
+
+}  // namespace
+
 bool url::set_username(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
   // percent_encode reads the view after username is moved. A view into
-  // username (including a short SSO string) would then be dangling.
-  std::string input_copy;
-  std::string_view source = input;
-  if (helpers::overlaps(input, username)) {
-    input_copy.assign(input.data(), input.size());
-    source = input_copy;
+  // username (including a short SSO string) would then be dangling. The copy
+  // stays out of this frame so the fast path does not grow a destructor.
+  if (aliases_member(input, username)) {
+    return call_with_detached_input(*this, input, &url::set_username);
   }
   auto previous_username = std::move(username);
   username = ada::unicode::percent_encode(
-      source, character_sets::USERINFO_PERCENT_ENCODE);
+      input, character_sets::USERINFO_PERCENT_ENCODE);
   if (get_href_size() > ada::get_max_input_length()) {
     username = std::move(previous_username);
     return false;
@@ -768,15 +782,12 @@ bool url::set_password(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
-  std::string input_copy;
-  std::string_view source = input;
-  if (helpers::overlaps(input, password)) {
-    input_copy.assign(input.data(), input.size());
-    source = input_copy;
+  if (aliases_member(input, password)) {
+    return call_with_detached_input(*this, input, &url::set_password);
   }
   auto previous_password = std::move(password);
   password = ada::unicode::percent_encode(
-      source, character_sets::USERINFO_PERCENT_ENCODE);
+      input, character_sets::USERINFO_PERCENT_ENCODE);
   if (get_href_size() > ada::get_max_input_length()) {
     password = std::move(previous_password);
     return false;
@@ -872,15 +883,12 @@ bool url::set_pathname(const std::string_view input) {
     return false;
   }
   // parse_path reads the view after path is moved.
-  std::string input_copy;
-  std::string_view source = input;
-  if (helpers::overlaps(input, path)) {
-    input_copy.assign(input.data(), input.size());
-    source = input_copy;
+  if (aliases_member(input, path)) {
+    return call_with_detached_input(*this, input, &url::set_pathname);
   }
   auto previous_path = std::move(path);
   path.clear();
-  parse_path(source);
+  parse_path(input);
   if (get_href_size() > ada::get_max_input_length()) {
     path = std::move(previous_path);
     return false;
