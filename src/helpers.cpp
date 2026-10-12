@@ -12,6 +12,7 @@
 #include "ada/helpers.h"
 #include "ada/scheme.h"
 #include "ada/state.h"
+#include "ada/unicode.h"
 
 #if ADA_SSSE3
 #include <tmmintrin.h>
@@ -153,8 +154,13 @@ ada_really_inline bool shorten_path(std::string_view& path,
 }
 
 ada_really_inline void remove_ascii_tab_or_newline(std::string& input) {
-  // if this ever becomes a performance issue, we could use an approach similar
-  // to has_tabs_or_newline
+  // Fast path: inputs with no tab/newline (the common case) avoid the
+  // per-character erase_if scan. has_tabs_or_newline uses SIMD for inputs
+  // >= 16 bytes, making this check much cheaper than erase_if's scalar
+  // predicate walk when there is nothing to remove.
+  if (!ada::unicode::has_tabs_or_newline(input)) {
+    return;
+  }
   std::erase_if(input, ada::unicode::is_ascii_tab_or_newline);
 }
 
