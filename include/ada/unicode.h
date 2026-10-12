@@ -210,6 +210,14 @@ std::string percent_decode(std::string_view input, size_t first_percent);
 std::string utf8_decode_without_bom(std::string_view input);
 
 /**
+ * @private
+ * Map '+' to space and percent-decode. No UTF-8 replacement. Kept in the
+ * unity translation unit so the setter inlining budget matches that loop
+ * on its own; form_urlencoded_decode applies the UTF-8 pass outside it.
+ */
+std::string form_urlencoded_percent_decode(std::string_view input);
+
+/**
  * Decode an application/x-www-form-urlencoded component: map '+' to space,
  * percent-decode, then UTF-8 decode with replacement as the standard does,
  * so that escapes of ill-formed UTF-8 (`%FF`) become U+FFFD and the result

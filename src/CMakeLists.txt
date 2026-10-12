@@ -69,8 +69,9 @@ endif()
 # inlining budget for setters matches main.
 target_compile_definitions(ada PRIVATE ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1)
 
-# The UTF-8 replacement decoder is large enough to reshuffle that same
-# budget (CodSpeed: SetHostname). Keep it out of the unity TU as well.
+# The UTF-8 replacement pass on form-urlencoded output is large enough to
+# reshuffle that same budget (CodSpeed: SetHostname). The percent-decode
+# loop stays in the unity TU; only the replacement pass lives out here.
 target_compile_definitions(ada PRIVATE ADA_UTF8_DECODE_SEPARATE_TU=1)
 
 # Keep the URLPattern route-set compiler (the builder, src/url_pattern_list.cpp)

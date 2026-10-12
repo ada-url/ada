@@ -1,5 +1,6 @@
 #include "ada/unicode.h"
 
+#include <cstring>
 #include <string>
 #include <string_view>
 
@@ -58,6 +59,42 @@ std::string utf8_decode_without_bom(std::string_view input) {
       out.append(replacement);
     }
     i += seen + 1;
+  }
+  return out;
+}
+
+namespace {
+// Word-wise high-bit test. Percent-decoding can turn an all-ASCII escape
+// (`%AA`) into a non-ASCII byte, so the check runs on the decoded buffer
+// once, after the hot loop, instead of on every copied run.
+ada_really_inline bool contains_non_ascii(const char* s, size_t n) noexcept {
+  constexpr uint64_t high_bit = 0x8080808080808080ull;
+  size_t i = 0;
+  for (; i + sizeof(uint64_t) <= n; i += sizeof(uint64_t)) {
+    uint64_t word;
+    std::memcpy(&word, s + i, sizeof(word));
+    if ((word & high_bit) != 0) {
+      return true;
+    }
+  }
+  if (i < n) {
+    uint64_t word = 0;
+    std::memcpy(&word, s + i, n - i);
+    if ((word & high_bit) != 0) {
+      return true;
+    }
+  }
+  return false;
+}
+}  // namespace
+
+// The percent-decode loop stays in the unity TU (see unicode.cpp) so GCC's
+// inlining budget for URL setters matches a build without this pass. Only
+// the replacement step lives here.
+std::string form_urlencoded_decode(const std::string_view input) {
+  std::string out = form_urlencoded_percent_decode(input);
+  if (contains_non_ascii(out.data(), out.size())) [[unlikely]] {
+    return utf8_decode_without_bom(out);
   }
   return out;
 }

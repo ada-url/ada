@@ -536,18 +536,7 @@ constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
   return t;
 }();
 
-namespace {
-ada_really_inline bool contains_non_ascii(const char* s, size_t n) noexcept {
-  for (size_t i = 0; i < n; ++i) {
-    if (static_cast<uint8_t>(s[i]) >= 0x80) {
-      return true;
-    }
-  }
-  return false;
-}
-}  // namespace
-
-std::string form_urlencoded_decode(const std::string_view input) {
+std::string form_urlencoded_percent_decode(const std::string_view input) {
   const size_t len = input.size();
   if (len == 0) [[unlikely]] {
     return {};
@@ -563,23 +552,17 @@ std::string form_urlencoded_decode(const std::string_view input) {
     ++p;
   }
   if (p == end) {
-    // No '+' or '%', but a raw non-ASCII byte still has to be UTF-8 decoded.
-    if (contains_non_ascii(src, len)) {
-      return utf8_decode_without_bom(input);
-    }
     return std::string(input);
   }
 
-  // Percent-decoding never grows the input. The UTF-8 pass below may.
+  // Output is always at most as long as the input: write into a single
+  // pre-sized buffer, then shrink to the final length.
   std::string out(len, '\0');
   char* d = out.data();
   char* const d0 = d;
-  // A non-ASCII byte in the percent-decoded output may be ill-formed UTF-8.
-  bool needs_utf8 = false;
 
   const size_t prefix = static_cast<size_t>(p - src);
   std::memcpy(d, src, prefix);
-  needs_utf8 = contains_non_ascii(src, prefix);
   d += prefix;
 
   while (p < end) {
@@ -596,7 +579,6 @@ std::string form_urlencoded_decode(const std::string_view input) {
           break;
         }
         *d++ = static_cast<char>((hi << 4) | lo);
-        needs_utf8 |= hi >= 8;
         p += 3;
       }
       if (p < end && *p == '%') {
@@ -612,16 +594,11 @@ std::string form_urlencoded_decode(const std::string_view input) {
       }
       const size_t n = static_cast<size_t>(p - start);
       std::memcpy(d, start, n);
-      needs_utf8 = needs_utf8 || contains_non_ascii(start, n);
       d += n;
     }
   }
 
   out.resize(static_cast<size_t>(d - d0));
-  // The parser UTF-8 decodes the percent-decoded bytes, with replacement.
-  if (needs_utf8) {
-    return utf8_decode_without_bom(out);
-  }
   return out;
 }
 
