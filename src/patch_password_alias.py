@@ -72,9 +72,70 @@ def cstr(blob, offset):
     return blob[offset:end].decode()
 
 
+def is_x86_64(data):
+    # EM_X86_64, ELFCLASS64, ELFDATA2LSB. Other objects keep the weak setter.
+    return (
+        len(data) >= 64
+        and data[:4] == b"\x7fELF"
+        and data[4] == 2
+        and data[5] == 1
+        and struct.unpack_from("<H", data, 18)[0] == 62
+    )
+
+
+def reject(message):
+    print("patch_password_alias: " + message, file=sys.stderr)
+    sys.exit(2)
+
+
+def relocation_in_range(data, rela, text, start, length):
+    if rela["entsize"] != 24:
+        return True
+    for index in range(rela["size"] // 24):
+        r_offset = struct.unpack_from("<Q", data, rela["offset"] + index * 24)[0]
+        if start <= r_offset < start + length:
+            return True
+    return False
+
+
+def strengthen(path, symbol):
+    """Turn the weak fallback into a global once it is the only definition."""
+    data = bytearray(open(path, "rb").read())
+    if not (
+        len(data) >= 64
+        and data[:4] == b"\x7fELF"
+        and data[4] == 2
+        and data[5] == 1
+    ):
+        return
+    headers = sections(data)
+    symtab = by_name(headers, ".symtab")
+    strtab = by_name(headers, ".strtab")
+    names = data[strtab["offset"] : strtab["offset"] + strtab["size"]]
+    found = False
+    for index in range(symtab["size"] // symtab["entsize"]):
+        off = symtab["offset"] + index * symtab["entsize"]
+        st_name = struct.unpack_from("<I", data, off)[0]
+        if not st_name or cstr(names, st_name) != symbol:
+            continue
+        info = data[off + 4]
+        if (info >> 4) == 2:
+            data[off + 4] = (1 << 4) | (info & 0xF)
+        found = True
+    if not found:
+        sys.exit("patch_password_alias: cannot strengthen " + symbol)
+    with open(path, "wb") as handle:
+        handle.write(data)
+
+
 def main():
+    if len(sys.argv) == 4 and sys.argv[1] == "--strengthen":
+        strengthen(sys.argv[2], sys.argv[3])
+        return
     path = sys.argv[1]
     data = bytearray(open(path, "rb").read())
+    if not is_x86_64(data):
+        reject("not an x86_64 object")
     headers = sections(data)
     text = by_name(headers, ".text")
     symtab = by_name(headers, ".symtab")
@@ -104,14 +165,17 @@ def main():
     if data[entry : entry + 3] == STUB_HEAD[:3]:
         return
     if data[entry : entry + 4] != ENDBR or data[entry + 4 : entry + 6] != PUSH_R13:
-        sys.exit("patch_password_alias: unexpected set_password prologue")
+        reject("unexpected set_password prologue")
 
     stub_addr = value + 4 - STUB_LEN
+    stub_off = stub_addr - text["addr"]
+    if stub_off < 0 or relocation_in_range(data, rela, text, stub_off, STUB_LEN):
+        reject("no padding in front of set_password")
     for _, shndx, sym_value, sym_size, sym_name in symbols:
         if shndx != text["index"] or sym_value >= value or sym_size == 0:
             continue
         if sym_value + sym_size > stub_addr:
-            sys.exit("patch_password_alias: stub would overlap " + sym_name)
+            reject("stub would overlap " + sym_name)
 
     data[file_at(stub_addr) : file_at(stub_addr) + STUB_LEN] = STUB_HEAD + b"\x00\x00\x00\x00"
     struct.pack_into("<Q", data, password[0] + 8, stub_addr)

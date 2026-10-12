@@ -39,6 +39,10 @@ bool outline_aggregator_set_username(url_aggregator& self,
                                      std::string_view input);
 bool outline_aggregator_set_pathname(url_aggregator& self,
                                      std::string_view input);
+// The unity body keeps its original name when the padding patch applies, so
+// this reference stays unresolved there. Other builds rename that body here.
+__attribute__((weak)) bool outline_aggregator_set_password(
+    url_aggregator& self, std::string_view input);
 bool outline_url_set_username(url& self, std::string_view input);
 bool outline_url_set_password(url& self, std::string_view input);
 bool outline_url_set_pathname(url& self, std::string_view input);
@@ -75,6 +79,16 @@ bool url_aggregator::set_pathname(std::string_view input) {
     return call_on_copy(*this, input, outline_aggregator_set_pathname);
   }
   return outline_aggregator_set_pathname(*this, input);
+}
+
+// noipa: this definition must stay a real call, so a strong set_password in
+// the unity object (the padding patch) is the one that actually runs.
+__attribute__((noinline, noipa, weak)) bool url_aggregator::set_password(
+    std::string_view input) {
+  if (aliases(input, buffer)) {
+    return call_on_copy(*this, input, outline_aggregator_set_password);
+  }
+  return outline_aggregator_set_password(*this, input);
 }
 
 bool url::set_username(std::string_view input) {
