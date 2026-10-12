@@ -25,6 +25,10 @@ namespace ada {
 // strings (ada.h includes both headers).
 uint32_t get_max_input_length();
 
+// Out of line so the scan does not enlarge ada.cpp. Empty segments (a leading
+// or repeated '&') are not counted.
+size_t urlencoded_pair_count(std::string_view input) noexcept;
+
 // A default, empty url_search_params for use with empty iterators.
 template <typename T, ada::url_search_params_iter_type Type>
 url_search_params url_search_params_iter<T, Type>::EMPTY;
@@ -46,22 +50,9 @@ inline void url_search_params::initialize(std::string_view input) {
     return;
   }
 
-  // Count pairs the parser will keep. Empty segments (a leading or repeated
-  // '&') are skipped, so reserving one slot per '&' over-allocates.
-  size_t pairs = 0;
-  for (size_t i = 0; i < input.size();) {
-    if (input[i] == '&') {
-      ++i;
-      continue;
-    }
-    ++pairs;
-    const size_t amp = input.find('&', i);
-    if (amp == std::string_view::npos) {
-      break;
-    }
-    i = amp + 1;
-  }
-  params.reserve(pairs);
+  // Empty segments (a leading or repeated '&') are skipped, so reserving one
+  // slot per '&' over-allocates.
+  params.reserve(urlencoded_pair_count(input));
 
   auto process_key_value = [&](const std::string_view current) {
     const auto equal = current.find('=');

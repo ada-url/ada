@@ -8,6 +8,7 @@
 
 #include <cstring>
 #include <string>
+#include <string_view>
 #if ADA_SSSE3
 #include <tmmintrin.h>
 #define ADA_UNICODE_SSSE3 1
@@ -311,3 +312,24 @@ void percent_encode_suffix(const char* p, const char* end,
 }
 
 }  // namespace ada::unicode
+
+namespace ada {
+
+size_t urlencoded_pair_count(std::string_view input) noexcept {
+  size_t pairs = 0;
+  for (size_t i = 0; i < input.size();) {
+    if (input[i] == '&') {
+      ++i;
+      continue;
+    }
+    ++pairs;
+    const size_t amp = input.find('&', i);
+    if (amp == std::string_view::npos) {
+      break;
+    }
+    i = amp + 1;
+  }
+  return pairs;
+}
+
+}  // namespace ada
