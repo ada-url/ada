@@ -909,7 +909,7 @@ bool url::set_href(const std::string_view input) {
     if (out->get_href_size() > ada::get_max_input_length()) {
       return false;
     }
-    *this = *out;
+    *this = std::move(*out);
   }
 
   return out.has_value();
