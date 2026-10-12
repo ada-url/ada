@@ -1,7 +1,36 @@
 // NOLINTBEGIN(bugprone-exception-escape,
 // bugprone-suspicious-stringview-data-usage)
+// Same order as ada.h. parser.h has to precede url.h and url_aggregator.h,
+// which befriend parser::parse_url. This file is its own translation unit, so
+// those declarations are not already visible the way they are when ada.cpp
+// includes it.
+#include "ada/ada_idna.h"
+#include "ada/character_sets.h"
+#include "ada/character_sets-inl.h"
+#include "ada/checkers-inl.h"
+#include "ada/common_defs.h"
+#include "ada/log.h"
+#include "ada/encoding_type.h"
+#include "ada/helpers.h"
+#include "ada/parser.h"
+#include "ada/parser-inl.h"
+#include "ada/scheme.h"
+#include "ada/scheme-inl.h"
+#include "ada/serializers.h"
+#include "ada/state.h"
+#include "ada/unicode.h"
+#include "ada/url_base.h"
+#include "ada/url_base-inl.h"
+#include "ada/url-inl.h"
+#include "ada/url_components.h"
+#include "ada/url_components-inl.h"
+#include "ada/url_aggregator.h"
 #include "ada/url_aggregator-inl.h"
+#include "ada/url_search_params.h"
 #include "ada/url_search_params-inl.h"
+#include "ada/ada_version.h"
+#include "ada/implementation.h"
+#include "ada/implementation-inl.h"
 
 #include <cstring>
 #include <string>
@@ -163,9 +192,9 @@ struct ada_url_components {
 ada_url ada_parse(const char* input, size_t length) noexcept try {
   return box_new<handle_kind::url>(url_result(
       ada::parse<ada::url_aggregator>(std::string_view(input, length))));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 ada_url ada_parse_with_base(const char* input, size_t input_length,
                             const char* base, size_t base_length) noexcept try {
@@ -178,43 +207,43 @@ ada_url ada_parse_with_base(const char* input, size_t input_length,
 
   return box_new<handle_kind::url>(url_result(ada::parse<ada::url_aggregator>(
       std::string_view(input, input_length), &base_out.value())));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_can_parse(const char* input, size_t length) noexcept try {
   return ada::can_parse(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_can_parse_with_base(const char* input, size_t input_length,
                              const char* base, size_t base_length) noexcept
     try {
   std::string_view base_view(base, base_length);
   return ada::can_parse(std::string_view(input, input_length), &base_view);
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 void ada_free(ada_url result) noexcept try {
   box_delete<handle_kind::url, url_result>(result);
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 ada_url ada_copy(ada_url input) noexcept try {
   url_result& r = get_instance(input);
   return box_new<handle_kind::url>(url_result(r));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_is_valid(ada_url result) noexcept try {
   url_result& r = get_instance(result);
   return r.has_value();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 // caller must free the result with ada_free_owned_string
 ada_owned_string ada_get_origin(ada_url result) noexcept try {
@@ -223,14 +252,14 @@ ada_owned_string ada_get_origin(ada_url result) noexcept try {
     return empty_owned();
   }
   return copy_owned(r->get_origin());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return empty_owned();
-}
+}  // LCOV_EXCL_STOP
 
 void ada_free_owned_string(ada_owned_string owned) noexcept try {
   delete[] owned.data;
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_href(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -239,9 +268,9 @@ ada_string ada_get_href(ada_url result) noexcept try {
   }
   std::string_view out = r->get_href();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_username(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -250,9 +279,9 @@ ada_string ada_get_username(ada_url result) noexcept try {
   }
   std::string_view out = r->get_username();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_password(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -261,9 +290,9 @@ ada_string ada_get_password(ada_url result) noexcept try {
   }
   std::string_view out = r->get_password();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_port(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -272,9 +301,9 @@ ada_string ada_get_port(ada_url result) noexcept try {
   }
   std::string_view out = r->get_port();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_hash(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -283,9 +312,9 @@ ada_string ada_get_hash(ada_url result) noexcept try {
   }
   std::string_view out = r->get_hash();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_host(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -294,9 +323,9 @@ ada_string ada_get_host(ada_url result) noexcept try {
   }
   std::string_view out = r->get_host();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_hostname(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -305,9 +334,9 @@ ada_string ada_get_hostname(ada_url result) noexcept try {
   }
   std::string_view out = r->get_hostname();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_pathname(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -316,9 +345,9 @@ ada_string ada_get_pathname(ada_url result) noexcept try {
   }
   std::string_view out = r->get_pathname();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_search(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -327,9 +356,9 @@ ada_string ada_get_search(ada_url result) noexcept try {
   }
   std::string_view out = r->get_search();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_get_protocol(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -338,9 +367,9 @@ ada_string ada_get_protocol(ada_url result) noexcept try {
   }
   std::string_view out = r->get_protocol();
   return ada_string_create(out.data(), out.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 uint8_t ada_get_host_type(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -348,9 +377,9 @@ uint8_t ada_get_host_type(ada_url result) noexcept try {
     return 0;
   }
   return r->host_type;
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return 0;
-}
+}  // LCOV_EXCL_STOP
 
 uint8_t ada_get_scheme_type(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -358,9 +387,9 @@ uint8_t ada_get_scheme_type(ada_url result) noexcept try {
     return 0;
   }
   return r->type;
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return 0;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_set_href(ada_url result, const char* input, size_t length) noexcept
     try {
@@ -369,9 +398,9 @@ bool ada_set_href(ada_url result, const char* input, size_t length) noexcept
     return false;
   }
   return r->set_href(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_set_host(ada_url result, const char* input, size_t length) noexcept
     try {
@@ -380,9 +409,9 @@ bool ada_set_host(ada_url result, const char* input, size_t length) noexcept
     return false;
   }
   return r->set_host(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_set_hostname(ada_url result, const char* input, size_t length) noexcept
     try {
@@ -391,9 +420,9 @@ bool ada_set_hostname(ada_url result, const char* input, size_t length) noexcept
     return false;
   }
   return r->set_hostname(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_set_protocol(ada_url result, const char* input, size_t length) noexcept
     try {
@@ -402,9 +431,9 @@ bool ada_set_protocol(ada_url result, const char* input, size_t length) noexcept
     return false;
   }
   return r->set_protocol(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_set_username(ada_url result, const char* input, size_t length) noexcept
     try {
@@ -413,9 +442,9 @@ bool ada_set_username(ada_url result, const char* input, size_t length) noexcept
     return false;
   }
   return r->set_username(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_set_password(ada_url result, const char* input, size_t length) noexcept
     try {
@@ -424,9 +453,9 @@ bool ada_set_password(ada_url result, const char* input, size_t length) noexcept
     return false;
   }
   return r->set_password(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_set_port(ada_url result, const char* input, size_t length) noexcept
     try {
@@ -435,9 +464,9 @@ bool ada_set_port(ada_url result, const char* input, size_t length) noexcept
     return false;
   }
   return r->set_port(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_set_pathname(ada_url result, const char* input, size_t length) noexcept
     try {
@@ -446,9 +475,9 @@ bool ada_set_pathname(ada_url result, const char* input, size_t length) noexcept
     return false;
   }
   return r->set_pathname(std::string_view(input, length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 /**
  * Update the search/query of the URL.
@@ -463,8 +492,8 @@ void ada_set_search(ada_url result, const char* input, size_t length) noexcept
   if (r) {
     r->set_search(std::string_view(input, length));
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 /**
  * Update the hash/fragment of the URL.
@@ -479,16 +508,16 @@ void ada_set_hash(ada_url result, const char* input, size_t length) noexcept
   if (r) {
     r->set_hash(std::string_view(input, length));
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 void ada_clear_port(ada_url result) noexcept try {
   url_result& r = get_instance(result);
   if (r) {
     r->clear_port();
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 /**
  * Removes the hash of the URL.
@@ -501,8 +530,8 @@ void ada_clear_hash(ada_url result) noexcept try {
   if (r) {
     r->clear_hash();
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 /**
  * Removes the search of the URL.
@@ -515,8 +544,8 @@ void ada_clear_search(ada_url result) noexcept try {
   if (r) {
     r->clear_search();
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 bool ada_has_credentials(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -524,9 +553,9 @@ bool ada_has_credentials(ada_url result) noexcept try {
     return false;
   }
   return r->has_credentials();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_has_empty_hostname(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -534,9 +563,9 @@ bool ada_has_empty_hostname(ada_url result) noexcept try {
     return false;
   }
   return r->has_empty_hostname();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_has_hostname(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -544,9 +573,9 @@ bool ada_has_hostname(ada_url result) noexcept try {
     return false;
   }
   return r->has_hostname();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_has_non_empty_username(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -554,9 +583,9 @@ bool ada_has_non_empty_username(ada_url result) noexcept try {
     return false;
   }
   return r->has_non_empty_username();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_has_non_empty_password(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -564,9 +593,9 @@ bool ada_has_non_empty_password(ada_url result) noexcept try {
     return false;
   }
   return r->has_non_empty_password();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_has_port(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -574,9 +603,9 @@ bool ada_has_port(ada_url result) noexcept try {
     return false;
   }
   return r->has_port();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_has_password(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -584,9 +613,9 @@ bool ada_has_password(ada_url result) noexcept try {
     return false;
   }
   return r->has_password();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_has_hash(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -594,9 +623,9 @@ bool ada_has_hash(ada_url result) noexcept try {
     return false;
   }
   return r->has_hash();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_has_search(ada_url result) noexcept try {
   url_result& r = get_instance(result);
@@ -604,9 +633,9 @@ bool ada_has_search(ada_url result) noexcept try {
     return false;
   }
   return r->has_search();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 // returns a pointer to the internal url_aggregator::url_components
 const ada_url_components* ada_get_components(ada_url result) noexcept try {
@@ -616,34 +645,34 @@ const ada_url_components* ada_get_components(ada_url result) noexcept try {
     return nullptr;
   }
   return reinterpret_cast<const ada_url_components*>(&r->get_components());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 ada_owned_string ada_idna_to_unicode(const char* input, size_t length) try {
   return copy_owned(ada::idna::to_unicode(std::string_view(input, length)));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return empty_owned();
-}
+}  // LCOV_EXCL_STOP
 
 ada_owned_string ada_idna_to_ascii(const char* input, size_t length) try {
   return copy_owned(ada::idna::to_ascii(std::string_view(input, length)));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return empty_owned();
-}
+}  // LCOV_EXCL_STOP
 
 ada_url_search_params ada_parse_search_params(const char* input,
                                               size_t length) try {
   return box_new<handle_kind::search_params>(
       params_result(ada::url_search_params(std::string_view(input, length))));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 void ada_free_search_params(ada_url_search_params result) try {
   box_delete<handle_kind::search_params, params_result>(result);
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 ada_owned_string ada_search_params_to_string(ada_url_search_params result) try {
   params_result& r = search_params_of(result);
@@ -651,9 +680,9 @@ ada_owned_string ada_search_params_to_string(ada_url_search_params result) try {
     return empty_owned();
   }
   return copy_owned(r->to_string());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return empty_owned();
-}
+}  // LCOV_EXCL_STOP
 
 size_t ada_search_params_size(ada_url_search_params result) try {
   params_result& r = search_params_of(result);
@@ -661,17 +690,17 @@ size_t ada_search_params_size(ada_url_search_params result) try {
     return 0;
   }
   return r->size();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return 0;
-}
+}  // LCOV_EXCL_STOP
 
 void ada_search_params_sort(ada_url_search_params result) try {
   params_result& r = search_params_of(result);
   if (r) {
     r->sort();
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 void ada_search_params_reset(ada_url_search_params result, const char* input,
                              size_t length) try {
@@ -679,8 +708,8 @@ void ada_search_params_reset(ada_url_search_params result, const char* input,
   if (r) {
     r->reset(std::string_view(input, length));
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 void ada_search_params_append(ada_url_search_params result, const char* key,
                               size_t key_length, const char* value,
@@ -690,8 +719,8 @@ void ada_search_params_append(ada_url_search_params result, const char* key,
     r->append(std::string_view(key, key_length),
               std::string_view(value, value_length));
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 void ada_search_params_set(ada_url_search_params result, const char* key,
                            size_t key_length, const char* value,
@@ -701,8 +730,8 @@ void ada_search_params_set(ada_url_search_params result, const char* key,
     r->set(std::string_view(key, key_length),
            std::string_view(value, value_length));
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 void ada_search_params_remove(ada_url_search_params result, const char* key,
                               size_t key_length) try {
@@ -710,8 +739,8 @@ void ada_search_params_remove(ada_url_search_params result, const char* key,
   if (r) {
     r->remove(std::string_view(key, key_length));
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 void ada_search_params_remove_value(ada_url_search_params result,
                                     const char* key, size_t key_length,
@@ -722,8 +751,8 @@ void ada_search_params_remove_value(ada_url_search_params result,
     r->remove(std::string_view(key, key_length),
               std::string_view(value, value_length));
   }
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 bool ada_search_params_has(ada_url_search_params result, const char* key,
                            size_t key_length) try {
@@ -732,9 +761,9 @@ bool ada_search_params_has(ada_url_search_params result, const char* key,
     return false;
   }
   return r->has(std::string_view(key, key_length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_search_params_has_value(ada_url_search_params result, const char* key,
                                  size_t key_length, const char* value,
@@ -745,9 +774,9 @@ bool ada_search_params_has_value(ada_url_search_params result, const char* key,
   }
   return r->has(std::string_view(key, key_length),
                 std::string_view(value, value_length));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_search_params_get(ada_url_search_params result, const char* key,
                                  size_t key_length) try {
@@ -760,9 +789,9 @@ ada_string ada_search_params_get(ada_url_search_params result, const char* key,
     return ada_string_create(nullptr, 0);
   }
   return ada_string_create(found->data(), found->length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 ada_strings ada_search_params_get_all(ada_url_search_params result,
                                       const char* key, size_t key_length) try {
@@ -773,9 +802,9 @@ ada_strings ada_search_params_get_all(ada_url_search_params result,
   }
   return box_new<handle_kind::strings>(
       strings_result(r->get_all(std::string_view(key, key_length))));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 ada_url_search_params_keys_iter ada_search_params_get_keys(
     ada_url_search_params result) try {
@@ -785,9 +814,9 @@ ada_url_search_params_keys_iter ada_search_params_get_keys(
         keys_iter_result(ada::url_search_params_keys_iter()));
   }
   return box_new<handle_kind::keys_iter>(keys_iter_result(r->get_keys()));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 ada_url_search_params_values_iter ada_search_params_get_values(
     ada_url_search_params result) try {
@@ -797,9 +826,9 @@ ada_url_search_params_values_iter ada_search_params_get_values(
         values_iter_result(ada::url_search_params_values_iter()));
   }
   return box_new<handle_kind::values_iter>(values_iter_result(r->get_values()));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 ada_url_search_params_entries_iter ada_search_params_get_entries(
     ada_url_search_params result) try {
@@ -810,14 +839,14 @@ ada_url_search_params_entries_iter ada_search_params_get_entries(
   }
   return box_new<handle_kind::entries_iter>(
       entries_iter_result(r->get_entries()));
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return nullptr;
-}
+}  // LCOV_EXCL_STOP
 
 void ada_free_strings(ada_strings result) try {
   box_delete<handle_kind::strings, strings_result>(result);
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 size_t ada_strings_size(ada_strings result) try {
   strings_result* r = box_get<handle_kind::strings, strings_result>(result);
@@ -825,9 +854,9 @@ size_t ada_strings_size(ada_strings result) try {
     return 0;
   }
   return (*r)->size();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return 0;
-}
+}  // LCOV_EXCL_STOP
 
 ada_string ada_strings_get(ada_strings result, size_t index) try {
   strings_result* r = box_get<handle_kind::strings, strings_result>(result);
@@ -836,15 +865,15 @@ ada_string ada_strings_get(ada_strings result, size_t index) try {
   }
   const std::string& view = (*r)->operator[](index);
   return ada_string_create(view.data(), view.length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 void ada_free_search_params_keys_iter(
     ada_url_search_params_keys_iter result) try {
   box_delete<handle_kind::keys_iter, keys_iter_result>(result);
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 ada_string ada_search_params_keys_iter_next(
     ada_url_search_params_keys_iter result) try {
@@ -858,9 +887,9 @@ ada_string ada_search_params_keys_iter_next(
     return ada_string_create(nullptr, 0);
   }
   return ada_string_create(next->data(), next->length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_search_params_keys_iter_has_next(
     ada_url_search_params_keys_iter result) try {
@@ -870,15 +899,15 @@ bool ada_search_params_keys_iter_has_next(
     return false;
   }
   return (*r)->has_next();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 void ada_free_search_params_values_iter(
     ada_url_search_params_values_iter result) try {
   box_delete<handle_kind::values_iter, values_iter_result>(result);
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 ada_string ada_search_params_values_iter_next(
     ada_url_search_params_values_iter result) try {
@@ -892,9 +921,9 @@ ada_string ada_search_params_values_iter_next(
     return ada_string_create(nullptr, 0);
   }
   return ada_string_create(next->data(), next->length());
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return ada_string_create(nullptr, 0);
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_search_params_values_iter_has_next(
     ada_url_search_params_values_iter result) try {
@@ -904,15 +933,15 @@ bool ada_search_params_values_iter_has_next(
     return false;
   }
   return (*r)->has_next();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 void ada_free_search_params_entries_iter(
     ada_url_search_params_entries_iter result) try {
   box_delete<handle_kind::entries_iter, entries_iter_result>(result);
-} catch (...) {
-}
+} catch (...) {  // LCOV_EXCL_START
+}  // LCOV_EXCL_STOP
 
 ada_string_pair ada_search_params_entries_iter_next(
     ada_url_search_params_entries_iter result) try {
@@ -928,9 +957,9 @@ ada_string_pair ada_search_params_entries_iter_next(
   return ada_string_pair{
       ada_string_create(next->first.data(), next->first.length()),
       ada_string_create(next->second.data(), next->second.length())};
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return {ada_string_create(nullptr, 0), ada_string_create(nullptr, 0)};
-}
+}  // LCOV_EXCL_STOP
 
 bool ada_search_params_entries_iter_has_next(
     ada_url_search_params_entries_iter result) try {
@@ -940,9 +969,9 @@ bool ada_search_params_entries_iter_has_next(
     return false;
   }
   return (*r)->has_next();
-} catch (...) {
+} catch (...) {  // LCOV_EXCL_START
   return false;
-}
+}  // LCOV_EXCL_STOP
 
 void ada_set_max_input_length(uint32_t length) noexcept {
   ada::set_max_input_length(length);
