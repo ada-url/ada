@@ -86,3 +86,21 @@ if (ADA_USE_SIMDUTF)
   target_link_libraries(ada PRIVATE simdutf)
   target_compile_definitions(ada PRIVATE ADA_USE_SIMDUTF)
 endif()
+
+# Editing ada_c.cpp inside the unity translation unit changes GCC's inlining of
+# the setters (CodSpeed). On ELF the unity TU keeps a byte-for-byte copy of
+# main's C API, and the fixed implementation is a separate object. The baseline
+# symbols are renamed out of the way before the archive is created.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND UNIX AND NOT APPLE)
+  target_sources(ada PRIVATE ada_c.cpp)
+  target_compile_definitions(ada PRIVATE ADA_C_API_BASELINE=1)
+  find_program(ADA_OBJCOPY objcopy REQUIRED)
+  add_custom_command(
+    TARGET ada
+    PRE_LINK
+    COMMAND
+      /bin/sh "${CMAKE_CURRENT_SOURCE_DIR}/rename_baseline_c_symbols.sh"
+      "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ada.dir/ada.cpp.o"
+      "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ada.dir/ada_c.cpp.o"
+    VERBATIM)
+endif()
