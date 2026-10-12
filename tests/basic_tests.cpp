@@ -2328,3 +2328,38 @@ TEST(basic_tests, tab_removal_is_independent_of_fpcr_fz) {
 #endif
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, long_idna_ascii_host_reparse) {
+  // A Unicode host of 2049 x U+00E0 "." (6147 bytes) parses, and its punycoded
+  // href (2049 x "xn--0ca.", 16392 bytes) reparses and yields the same href.
+  std::string unicode_host;
+  for (int i = 0; i < 2049; i++) {
+    unicode_host += "\xC3\xA0.";
+  }
+  std::string url_str = "http://" + unicode_host + "/";
+  auto u = ada::parse<TypeParam>(url_str);
+  ASSERT_TRUE(u);
+
+  std::string href(u->get_href());
+  ASSERT_GT(href.size(), 16384);
+
+  auto again = ada::parse<TypeParam>(href);
+  ASSERT_TRUE(again);
+  EXPECT_EQ(again->get_href(), href);
+  EXPECT_TRUE(ada::can_parse(href));
+
+  // Also verify can_parse and set_href on the url instance
+  EXPECT_TRUE(u->set_href(href));
+  EXPECT_EQ(u->get_href(), href);
+
+  // A plain ASCII 2049 x 'xn--0ca.' host parses.
+  std::string ascii_host;
+  for (int i = 0; i < 2049; i++) {
+    ascii_host += "xn--0ca.";
+  }
+  std::string ascii_url = "http://" + ascii_host + "/";
+  auto u_ascii = ada::parse<TypeParam>(ascii_url);
+  ASSERT_TRUE(u_ascii);
+  EXPECT_EQ(u_ascii->get_href(), ascii_url);
+  EXPECT_TRUE(ada::can_parse(ascii_url));
+}
