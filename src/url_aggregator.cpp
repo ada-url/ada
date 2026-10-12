@@ -259,22 +259,30 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 bool url_aggregator::set_username(const std::string_view input) {
   ada_log("url_aggregator::set_username '", input, "' ");
   ADA_ASSERT_TRUE(validate());
-  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
+  // Getters return views into buffer. Copy before update_base_username reads
+  // the view while it rewrites that buffer.
+  std::string input_copy;
+  std::string_view source = input;
+  if (helpers::overlaps(input, buffer)) {
+    input_copy.assign(input.data(), input.size());
+    source = input_copy;
+  }
+  ADA_ASSERT_TRUE(!helpers::overlaps(source, buffer));
   if (cannot_have_credentials_or_port()) {
     return false;
   }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(input.size())) {
+  if (needs_rollback_snapshot(source.size())) {
     saved_url = *this;
   }
   size_t idx = ada::unicode::percent_encode_index(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
-  if (idx == input.size()) {
-    update_base_username(input);
+      source, character_sets::USERINFO_PERCENT_ENCODE);
+  if (idx == source.size()) {
+    update_base_username(source);
   } else {
     // We only create a temporary string if we have to!
     update_base_username(ada::unicode::percent_encode(
-        input, character_sets::USERINFO_PERCENT_ENCODE, idx));
+        source, character_sets::USERINFO_PERCENT_ENCODE, idx));
   }
   if (saved_url && buffer.size() > ada::get_max_input_length()) {
     *this = std::move(*saved_url);
@@ -287,22 +295,30 @@ bool url_aggregator::set_username(const std::string_view input) {
 bool url_aggregator::set_password(const std::string_view input) {
   ada_log("url_aggregator::set_password '", input, "'");
   ADA_ASSERT_TRUE(validate());
-  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
+  // Getters return views into buffer. Copy before update_base_password reads
+  // the view while it rewrites that buffer.
+  std::string input_copy;
+  std::string_view source = input;
+  if (helpers::overlaps(input, buffer)) {
+    input_copy.assign(input.data(), input.size());
+    source = input_copy;
+  }
+  ADA_ASSERT_TRUE(!helpers::overlaps(source, buffer));
   if (cannot_have_credentials_or_port()) {
     return false;
   }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(input.size())) {
+  if (needs_rollback_snapshot(source.size())) {
     saved_url = *this;
   }
   size_t idx = ada::unicode::percent_encode_index(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
-  if (idx == input.size()) {
-    update_base_password(input);
+      source, character_sets::USERINFO_PERCENT_ENCODE);
+  if (idx == source.size()) {
+    update_base_password(source);
   } else {
     // We only create a temporary string if we have to!
     update_base_password(ada::unicode::percent_encode(
-        input, character_sets::USERINFO_PERCENT_ENCODE, idx));
+        source, character_sets::USERINFO_PERCENT_ENCODE, idx));
   }
   if (saved_url && buffer.size() > ada::get_max_input_length()) {
     *this = std::move(*saved_url);
@@ -366,16 +382,23 @@ bool url_aggregator::set_port(const std::string_view input) {
 bool url_aggregator::set_pathname(const std::string_view input) {
   ada_log("url_aggregator::set_pathname ", input);
   ADA_ASSERT_TRUE(validate());
-  ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
+  // clear_pathname rewrites buffer before parse_path reads the view.
+  std::string input_copy;
+  std::string_view source = input;
+  if (helpers::overlaps(input, buffer)) {
+    input_copy.assign(input.data(), input.size());
+    source = input_copy;
+  }
+  ADA_ASSERT_TRUE(!helpers::overlaps(source, buffer));
   if (has_opaque_path) {
     return false;
   }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(input.size())) {
+  if (needs_rollback_snapshot(source.size())) {
     saved_url = *this;
   }
   clear_pathname();
-  parse_path(input);
+  parse_path(source);
   if (get_pathname().starts_with("//") && !has_authority() && !has_dash_dot()) {
     buffer.insert(components.pathname_start, "/.");
     components.pathname_start += 2;
@@ -445,8 +468,7 @@ void url_aggregator::set_search(const std::string_view input) {
     return;
   }
 
-  std::string_view stripped =
-      input[0] == '?' ? input.substr(1) : input;
+  std::string_view stripped = input[0] == '?' ? input.substr(1) : input;
   // Fast path: no tabs/newlines (the common case) avoids the std::string
   // allocation entirely by passing the view straight to update_base_search.
   std::string cleaned;
@@ -696,9 +718,9 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   };
 
   size_t host_end_pos = input.find('#');
-  std::string_view host_input(input.data(), host_end_pos != std::string_view::npos
-                                                  ? host_end_pos
-                                                  : input.size());
+  std::string_view host_input(
+      input.data(),
+      host_end_pos != std::string_view::npos ? host_end_pos : input.size());
   // Fast path: no tabs/newlines (the common case) avoids the std::string
   // allocation by viewing the input prefix directly.
   std::string _host_buf;

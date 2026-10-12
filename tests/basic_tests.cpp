@@ -2294,3 +2294,18 @@ TYPED_TEST(basic_tests,
   // a byte that legitimately needs encoding is still encoded
   check("http://ab?x y", "http://ab/?x%20y");
 }
+
+TYPED_TEST(basic_tests, setter_accepts_view_into_its_own_url) {
+  constexpr std::string_view href = "http://user:pass@example.com/pa/th?q#f";
+  auto url = ada::parse<TypeParam>(href);
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->set_pathname(url->get_pathname()));
+  ASSERT_EQ(url->get_href(), href);
+  ASSERT_EQ(url->get_pathname(), "/pa/th");
+  ASSERT_TRUE(url->set_username(url->get_username()));
+  ASSERT_EQ(url->get_username(), "user");
+  ASSERT_EQ(url->get_href(), href);
+  ASSERT_TRUE(url->set_password(url->get_password()));
+  ASSERT_EQ(url->get_password(), "pass");
+  ASSERT_EQ(url->get_href(), href);
+}

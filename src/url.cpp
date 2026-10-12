@@ -746,9 +746,17 @@ bool url::set_username(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+  // percent_encode reads the view after username is moved. A view into
+  // username (including a short SSO string) would then be dangling.
+  std::string input_copy;
+  std::string_view source = input;
+  if (helpers::overlaps(input, username)) {
+    input_copy.assign(input.data(), input.size());
+    source = input_copy;
+  }
   auto previous_username = std::move(username);
   username = ada::unicode::percent_encode(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
+      source, character_sets::USERINFO_PERCENT_ENCODE);
   if (get_href_size() > ada::get_max_input_length()) {
     username = std::move(previous_username);
     return false;
@@ -760,9 +768,15 @@ bool url::set_password(const std::string_view input) {
   if (cannot_have_credentials_or_port()) {
     return false;
   }
+  std::string input_copy;
+  std::string_view source = input;
+  if (helpers::overlaps(input, password)) {
+    input_copy.assign(input.data(), input.size());
+    source = input_copy;
+  }
   auto previous_password = std::move(password);
   password = ada::unicode::percent_encode(
-      input, character_sets::USERINFO_PERCENT_ENCODE);
+      source, character_sets::USERINFO_PERCENT_ENCODE);
   if (get_href_size() > ada::get_max_input_length()) {
     password = std::move(previous_password);
     return false;
@@ -857,9 +871,16 @@ bool url::set_pathname(const std::string_view input) {
   if (has_opaque_path) {
     return false;
   }
+  // parse_path reads the view after path is moved.
+  std::string input_copy;
+  std::string_view source = input;
+  if (helpers::overlaps(input, path)) {
+    input_copy.assign(input.data(), input.size());
+    source = input_copy;
+  }
   auto previous_path = std::move(path);
   path.clear();
-  parse_path(input);
+  parse_path(source);
   if (get_href_size() > ada::get_max_input_length()) {
     path = std::move(previous_path);
     return false;
