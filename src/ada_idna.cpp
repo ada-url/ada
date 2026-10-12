@@ -4970,8 +4970,10 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
     if (buffer == nullptr) {
       // Leave the state uninitialized so a later call can retry. A corrupt
       // blob (below) is permanent; running out of memory may not be.
+      // LCOV_EXCL_START
       tables_init_state.store(kTablesUninit, std::memory_order_release);
       return false;
+      // LCOV_EXCL_STOP
     }
 
     const size_t n = deflate::inflate_raw(table_blob::compressed,
@@ -5046,11 +5048,11 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
     if (state == kTablesFailed) {
       return false;
     }
-    if (state == kTablesUninit) {
+    if (state == kTablesUninit) {  // LCOV_EXCL_START
       // The peer gave up after a failed allocation. Do not spin; the next
       // call can take the init slot.
       return false;
-    }
+    }  // LCOV_EXCL_STOP
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || \
     defined(_M_IX86)
 #if defined(__GNUC__) || defined(__clang__)
