@@ -2309,3 +2309,37 @@ TYPED_TEST(basic_tests, setter_accepts_view_into_its_own_url) {
   ASSERT_EQ(url->get_password(), "pass");
   ASSERT_EQ(url->get_href(), href);
 }
+
+// has_tabs_or_newline() must not depend on the floating-point control register.
+// The NEON path narrows its match mask to eight bytes and, when
+// ADA_NEON_SAFE_ZERO_CHECK is 0, tests that mask by reinterpreting it as a
+// double and comparing against 0.0. Every byte of the mask is 0x00, 0x0F, 0xF0
+// or 0xFF, so when a tab sits at an offset 0..12 (mod 16) and none sits at
+// 13..15, the pattern is an IEEE-754 denormal. Under FPCR.FZ the hardware
+// flushes a denormal operand to zero, the predicate answers "no tabs", and the
+// "Remove all ASCII tab or newline from input" step of the basic URL parser is
+// skipped.
+//
+// Two of the tab/newline cases above already reach the SIMD path, and
+// "http://ab:81/p?x\ty#h" already fails under FPCR.FZ. This test states the
+// invariant explicitly and sets the bit itself, so it holds regardless of how
+// CI configures the floating-point environment. The input is exactly 16 bytes
+// with a tab at offset 8, so the mask is 0x0000000f00000000.
+TEST(basic_tests, tab_removal_is_independent_of_fpcr_fz) {
+#if defined(__aarch64__)
+  unsigned long long fpcr = 0;
+  __asm__ __volatile__("mrs %0, fpcr" : "=r"(fpcr) : : "memory");
+  __asm__ __volatile__("msr fpcr, %0" : : "r"(fpcr | (1ull << 24)) : "memory");
+
+  auto r = ada::parse<ada::url_aggregator>("http://a\tb.com/x");
+  const bool parsed = bool(r);
+  const std::string href = parsed ? std::string(r->get_href()) : std::string();
+
+  // Restore before asserting so a failure cannot leak FZ into later tests.
+  __asm__ __volatile__("msr fpcr, %0" : : "r"(fpcr) : "memory");
+
+  ASSERT_TRUE(parsed);
+  ASSERT_EQ(href, "http://ab.com/x");
+#endif
+  SUCCEED();
+}
