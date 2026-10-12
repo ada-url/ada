@@ -2310,6 +2310,22 @@ TYPED_TEST(basic_tests, setter_accepts_view_into_its_own_url) {
   ASSERT_EQ(url->get_href(), href);
 }
 
+TYPED_TEST(basic_tests, set_search_accepts_view_into_its_own_url) {
+  auto url = ada::parse<TypeParam>("https://example.com/?abc");
+  ASSERT_TRUE(url);
+  url->set_search(url->get_search());
+  ASSERT_EQ(url->get_search(), "?abc");
+  ASSERT_EQ(url->get_href(), "https://example.com/?abc");
+}
+
+TYPED_TEST(basic_tests, set_hash_accepts_view_into_its_own_url) {
+  auto url = ada::parse<TypeParam>("https://example.com/#frag");
+  ASSERT_TRUE(url);
+  url->set_hash(url->get_hash());
+  ASSERT_EQ(url->get_hash(), "#frag");
+  ASSERT_EQ(url->get_href(), "https://example.com/#frag");
+}
+
 // has_tabs_or_newline() must not depend on the floating-point control register.
 // The NEON path narrows its match mask to eight bytes and, when
 // ADA_NEON_SAFE_ZERO_CHECK is 0, tests that mask by reinterpreting it as a

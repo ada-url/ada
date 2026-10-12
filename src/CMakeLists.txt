@@ -86,20 +86,3 @@ if (ADA_USE_SIMDUTF)
   target_link_libraries(ada PRIVATE simdutf)
   target_compile_definitions(ada PRIVATE ADA_USE_SIMDUTF)
 endif()
-
-# An alias check inside the unity translation unit changes GCC's register
-# allocation for the setters (CodSpeed SetPassword / SetSearch). On ELF the
-# other setters are wrappers in setter_alias.cpp. set_password is patched in
-# the padding in front of the existing body when that prologue matches. Other
-# GCC builds keep the weak set_password in setter_alias.cpp.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND UNIX AND NOT APPLE)
-  target_sources(ada PRIVATE setter_alias.cpp)
-  target_compile_definitions(ada PRIVATE ADA_SETTER_ALIAS_OUTLINE=1)
-  add_custom_command(
-    TARGET ada
-    PRE_LINK
-    COMMAND /bin/sh "${CMAKE_CURRENT_SOURCE_DIR}/rename_setter_symbols.sh"
-            "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ada.dir/ada.cpp.o"
-            "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ada.dir/setter_alias.cpp.o"
-    VERBATIM)
-endif()
