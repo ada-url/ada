@@ -588,6 +588,12 @@ url_pattern_list_match_result url_pattern_list<regex_provider>::match(
     std::string_view pathname) const {
   namespace detail = url_pattern_list_detail;
   using url_pattern_list_limits::max_fast_path_pathname_length;
+  // A default-constructed list (or one compiled from no routes) has no
+  // tables. Walking them would dereference section pointers into an empty
+  // arena.
+  if (patterns_.empty() || compiled_.arena.empty()) {
+    return {};
+  }
   // With ignore_case the compiled literals are ASCII-folded, so the fast
   // path probes a folded copy of the input (offsets are unchanged, so the
   // captures still slice the original). Inputs beyond the fast-path length
