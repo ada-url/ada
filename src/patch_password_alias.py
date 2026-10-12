@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa
 """Plant a not-taken alias check in the padding before set_password.
 
 The fast path falls through into the existing prologue, so the function body
@@ -9,13 +10,11 @@ ada_agg_set_password_alias.
 import struct
 import sys
 
-from elftools.elf.elffile import ELFFile
-
 PASSWORD = (
     "_ZN3ada14url_aggregator12set_passwordESt17basic_string_viewIcSt11char_"
     "traitsIcEE"
 )
-ALIAS = "ada_agg_set_password_alias"
+ALIAS = b"ada_agg_set_password_alias\x00"
 ENDBR = bytes.fromhex("f30f1efa")
 PUSH_R13 = bytes.fromhex("4155")
 # mov rax, rdx; sub rax, [rdi+0x30]; cmp rax, [rdi+0x38]; jb rel32
@@ -24,49 +23,83 @@ STUB_LEN = len(STUB_HEAD) + 4
 R_X86_64_PLT32 = 4
 
 
-def load(path):
-    with open(path, "rb") as handle:
-        elf = ELFFile(handle)
-        sections = list(elf.iter_sections())
-        symtab = elf.get_section_by_name(".symtab")
-        symbols = list(symtab.iter_symbols())
-    return sections, symtab, symbols
-
-
-def section_index(sections, name):
-    for index, section in enumerate(sections):
-        if section.name == name:
-            return index
-    sys.exit(f"patch_password_alias: missing {name}")
-
-
-def patch_section_header(data, sections, index, offset, size):
+def sections(data):
     e_shoff = struct.unpack_from("<Q", data, 40)[0]
     e_shentsize = struct.unpack_from("<H", data, 58)[0]
-    base = e_shoff + index * e_shentsize
-    struct.pack_into("<Q", data, base + 24, offset)
-    struct.pack_into("<Q", data, base + 32, size)
+    e_shnum = struct.unpack_from("<H", data, 60)[0]
+    e_shstrndx = struct.unpack_from("<H", data, 62)[0]
+    headers = []
+    for index in range(e_shnum):
+        base = e_shoff + index * e_shentsize
+        name, sh_type, sh_flags, sh_addr, sh_offset, sh_size, sh_link, sh_info, sh_addralign, sh_entsize = struct.unpack_from(
+            "<IIQQQQIIQQ", data, base
+        )
+        headers.append(
+            {
+                "index": index,
+                "name_off": name,
+                "offset": sh_offset,
+                "size": sh_size,
+                "addr": sh_addr,
+                "entsize": sh_entsize,
+                "base": base,
+            }
+        )
+    strtab = headers[e_shstrndx]
+    blob = data[strtab["offset"] : strtab["offset"] + strtab["size"]]
+    for header in headers:
+        end = blob.index(b"\x00", header["name_off"])
+        header["name"] = blob[header["name_off"] : end].decode()
+    return headers
+
+
+def by_name(headers, name):
+    for header in headers:
+        if header["name"] == name:
+            return header
+    sys.exit("patch_password_alias: missing " + name)
+
+
+def set_header(data, header, offset, size):
+    struct.pack_into("<Q", data, header["base"] + 24, offset)
+    struct.pack_into("<Q", data, header["base"] + 32, size)
+    header["offset"] = offset
+    header["size"] = size
+
+
+def cstr(blob, offset):
+    end = blob.index(b"\x00", offset)
+    return blob[offset:end].decode()
 
 
 def main():
     path = sys.argv[1]
-    sections, symtab, symbols = load(path)
-    text = sections[section_index(sections, ".text")]
-    password_index = next(
-        (i for i, symbol in enumerate(symbols) if symbol.name == PASSWORD), None
-    )
-    if password_index is None:
+    data = bytearray(open(path, "rb").read())
+    headers = sections(data)
+    text = by_name(headers, ".text")
+    symtab = by_name(headers, ".symtab")
+    strtab = by_name(headers, ".strtab")
+    rela = by_name(headers, ".rela.text")
+    names = data[strtab["offset"] : strtab["offset"] + strtab["size"]]
+
+    password = None
+    symbols = []
+    for index in range(symtab["size"] // symtab["entsize"]):
+        off = symtab["offset"] + index * symtab["entsize"]
+        st_name, st_info, st_other, st_shndx, st_value, st_size = struct.unpack_from(
+            "<IBBHQQ", data, off
+        )
+        symbols.append((off, st_shndx, st_value, st_size, cstr(names, st_name) if st_name else ""))
+        if symbols[-1][4] == PASSWORD:
+            password = symbols[-1]
+
+    if password is None:
         sys.exit("patch_password_alias: set_password symbol missing")
-    password = symbols[password_index]
-    value = password["st_value"]
-    size = password["st_size"]
-    text_off = text["sh_offset"]
-    text_addr = text["sh_addr"]
+    _, _, value, size, _ = password
 
     def file_at(addr):
-        return text_off + (addr - text_addr)
+        return text["offset"] + (addr - text["addr"])
 
-    data = bytearray(open(path, "rb").read())
     entry = file_at(value)
     if data[entry : entry + 3] == STUB_HEAD[:3]:
         return
@@ -74,57 +107,37 @@ def main():
         sys.exit("patch_password_alias: unexpected set_password prologue")
 
     stub_addr = value + 4 - STUB_LEN
-    text_index = section_index(sections, ".text")
-    for symbol in symbols:
-        if symbol["st_shndx"] != text_index or symbol["st_value"] >= value:
+    for _, shndx, sym_value, sym_size, sym_name in symbols:
+        if shndx != text["index"] or sym_value >= value or sym_size == 0:
             continue
-        end = symbol["st_value"] + symbol["st_size"]
-        if end > stub_addr:
-            sys.exit("patch_password_alias: stub would overlap " + symbol.name)
+        if sym_value + sym_size > stub_addr:
+            sys.exit("patch_password_alias: stub would overlap " + sym_name)
 
-    stub_file = file_at(stub_addr)
-    data[stub_file : stub_file + STUB_LEN] = STUB_HEAD + b"\x00\x00\x00\x00"
+    data[file_at(stub_addr) : file_at(stub_addr) + STUB_LEN] = STUB_HEAD + b"\x00\x00\x00\x00"
+    struct.pack_into("<Q", data, password[0] + 8, stub_addr)
+    struct.pack_into("<Q", data, password[0] + 16, size + (value - stub_addr))
 
-    sym_off = symtab["sh_offset"] + password_index * symtab["sh_entsize"]
-    struct.pack_into("<Q", data, sym_off + 8, stub_addr)
-    struct.pack_into("<Q", data, sym_off + 16, size + (value - stub_addr))
-
-    strtab_index = section_index(sections, ".strtab")
-    rela_index = section_index(sections, ".rela.text")
-    symtab_index = section_index(sections, ".symtab")
-    strtab = sections[strtab_index]
-    rela = sections[rela_index]
-
-    new_str = bytearray(
-        data[strtab["sh_offset"] : strtab["sh_offset"] + strtab["sh_size"]]
-    )
+    new_str = bytearray(data[strtab["offset"] : strtab["offset"] + strtab["size"]])
     name_off = len(new_str)
-    new_str += ALIAS.encode() + b"\x00"
+    new_str += ALIAS
     str_file = len(data)
     data += new_str
-    patch_section_header(data, sections, strtab_index, str_file, len(new_str))
+    set_header(data, strtab, str_file, len(new_str))
 
-    old_syms = bytes(
-        data[symtab["sh_offset"] : symtab["sh_offset"] + symtab["sh_size"]]
-    )
-    # Global function, undefined.
+    old_syms = bytes(data[symtab["offset"] : symtab["offset"] + symtab["size"]])
     new_sym = struct.pack("<IBBHQQ", name_off, 0x12, 0, 0, 0, 0)
     sym_file = len(data)
     data += old_syms + new_sym
-    new_sym_index = len(symbols)
-    patch_section_header(
-        data, sections, symtab_index, sym_file, len(old_syms) + len(new_sym)
-    )
+    new_index = len(symbols)
+    set_header(data, symtab, sym_file, len(old_syms) + len(new_sym))
 
-    old_rela = bytes(data[rela["sh_offset"] : rela["sh_offset"] + rela["sh_size"]])
-    r_offset = stub_addr + len(STUB_HEAD)
-    r_info = (new_sym_index << 32) | R_X86_64_PLT32
-    new_rela = struct.pack("<QQq", r_offset, r_info, -4)
+    old_rela = bytes(data[rela["offset"] : rela["offset"] + rela["size"]])
+    new_rela = struct.pack(
+        "<QQq", stub_addr + len(STUB_HEAD), (new_index << 32) | R_X86_64_PLT32, -4
+    )
     rela_file = len(data)
     data += old_rela + new_rela
-    patch_section_header(
-        data, sections, rela_index, rela_file, len(old_rela) + len(new_rela)
-    )
+    set_header(data, rela, rela_file, len(old_rela) + len(new_rela))
 
     with open(path, "wb") as handle:
         handle.write(data)
