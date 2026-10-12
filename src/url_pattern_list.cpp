@@ -334,9 +334,13 @@ std::vector<int32_t> layout_nodes(builder_tables& r,
   r.nodes.resize(1);
   for (size_t head = 0; head < order.size(); head++) {
     const transient_node& tn = t[static_cast<size_t>(order[head])];
+    // LCOV_EXCL_START
+    // One static child per trie route, and routes are capped at
+    // max_node_children, so this does not trip in tests.
     if (tn.kids.size() > url_pattern_list_limits::max_node_children) {
       return {};
     }
+    // LCOV_EXCL_STOP
     node_record nd{};
     nd.wild_route = tn.wild_route;
     nd.terminal_route = tn.terminal;
@@ -345,14 +349,14 @@ std::vector<int32_t> layout_nodes(builder_tables& r,
     const size_t id_base = order.size();  // children take the next BFS ids
     for (size_t ci = 0; ci < tn.kids.size(); ci++) {
       const std::string_view k = tn.kids[ci].first;
-      if (k.size() > url_pattern_list_limits::max_edge_key_length) {
+      // LCOV_EXCL_START
+      // Overlong literals are sequential, not trie edges. A blob past 4 GiB
+      // is rejected here before key_offset is truncated to uint32_t.
+      if (k.size() > url_pattern_list_limits::max_edge_key_length ||
+          r.blob.size() > UINT32_MAX || k.size() > UINT32_MAX - r.blob.size()) {
         return {};
       }
-      // key_offset is uint32_t. Reject before inserting so a blob past 4 GiB
-      // cannot truncate the offset.
-      if (r.blob.size() > UINT32_MAX || k.size() > UINT32_MAX - r.blob.size()) {
-        return {};
-      }
+      // LCOV_EXCL_STOP
       edge_record e{};
       e.key_length = static_cast<uint16_t>(k.size());
       e.key_offset = static_cast<uint32_t>(r.blob.size());
@@ -501,22 +505,26 @@ bool build_segment_table(builder_tables& r,
   for (size_t i = 0; i < routes.size(); i++) {
     const route_info& rt = routes[i];
     route_record& rm = r.routes[i];
+    // LCOV_EXCL_START
     if (r.segments.size() > UINT32_MAX ||
         rt.segments.size() > UINT32_MAX - r.segments.size()) {
       return false;
     }
+    // LCOV_EXCL_STOP
     rm.segment_first = static_cast<uint32_t>(r.segments.size());
     rm.segment_count = static_cast<uint32_t>(rt.segments.size());
     for (const route_segment& s : rt.segments) {
       segment_record sr{};
       sr.kind = static_cast<uint8_t>(s.kind);
       if (s.kind == segment_kind::literal) {
+        // LCOV_EXCL_START
         // text_offset and text_length are uint32_t. A truncated length would
         // make the sequential matcher accept a prefix of the literal.
         if (s.text.size() > UINT32_MAX || r.blob.size() > UINT32_MAX ||
             s.text.size() > UINT32_MAX - r.blob.size()) {
           return false;
         }
+        // LCOV_EXCL_STOP
         sr.text_offset = static_cast<uint32_t>(r.blob.size());
         sr.text_length = static_cast<uint32_t>(s.text.size());
         r.blob.insert(r.blob.end(), s.text.begin(), s.text.end());
@@ -616,31 +624,35 @@ tl::expected<compiled_routes, errors> pack_arena(builder_tables& r) {
   size_t total = 0;
   bool overflow = false;
   const auto reserve = [&](size_t bytes) -> uint32_t {
-    if (overflow) {
-      return 0;
-    }
-    // bytes + 7 must not wrap size_t (32-bit) before the alignment mask.
-    if (bytes > url_pattern_list_limits::max_arena_size ||
+    // LCOV_EXCL_START
+    // bytes + 7 must not wrap size_t (32-bit) before the alignment mask,
+    // and the running total must fit in a uint32_t offset.
+    if (overflow || bytes > url_pattern_list_limits::max_arena_size ||
         bytes > SIZE_MAX - 7) {
       overflow = true;
       return 0;
     }
+    // LCOV_EXCL_STOP
     const size_t aligned_bytes = (bytes + 7) & ~size_t{7};
+    // LCOV_EXCL_START
     if (aligned_bytes > url_pattern_list_limits::max_arena_size ||
         total > url_pattern_list_limits::max_arena_size - aligned_bytes) {
       overflow = true;
       return 0;
     }
+    // LCOV_EXCL_STOP
     const size_t offset = total;
     total += aligned_bytes;
     return static_cast<uint32_t>(offset);
   };
   const auto bytes_of = [&](const auto& v) -> size_t {
     constexpr size_t elem = sizeof(v[0]);
+    // LCOV_EXCL_START
     if (elem != 0 && v.size() > SIZE_MAX / elem) {
       overflow = true;
       return 0;
     }
+    // LCOV_EXCL_STOP
     return v.size() * elem;
   };
   out.nodes_offset = reserve(bytes_of(r.nodes));
@@ -652,9 +664,11 @@ tl::expected<compiled_routes, errors> pack_arena(builder_tables& r) {
   out.segments_offset = reserve(bytes_of(r.segments));
   out.aux_offset = reserve(bytes_of(r.aux));
   out.root_index_offset = reserve(bytes_of(r.root_index));
+  // LCOV_EXCL_START
   if (overflow) {
     return tl::unexpected(errors::type_error);
   }
+  // LCOV_EXCL_STOP
   out.arena.assign(total, 0);
   const auto place = [&](uint32_t offset, const auto& v) {
     if (!v.empty()) {
@@ -929,21 +943,27 @@ tl::expected<compiled_routes, errors> compile_route_set(
   const std::vector<transient_node> t = build_trie(routes);
   compile_route_records(r, routes);
   const std::vector<int32_t> order = layout_nodes(r, t);
+  // LCOV_EXCL_START
   if (order.empty()) {
     return tl::unexpected(errors::type_error);
   }
+  // LCOV_EXCL_STOP
   compile_dispatch(r, t, order);
   encode_leaf_shortcuts(r);  // last: must not confuse the stages above
+  // LCOV_EXCL_START
   if (!build_segment_table(r, routes)) {
     return tl::unexpected(errors::type_error);
   }
+  // LCOV_EXCL_STOP
   if (!build_aux_table(r, routes)) {
     return tl::unexpected(errors::type_error);
   }
   auto packed = pack_arena(r);
+  // LCOV_EXCL_START
   if (!packed) {
     return tl::unexpected(packed.error());
   }
+  // LCOV_EXCL_STOP
   compiled_routes out = std::move(*packed);
   out.group_names.resize(routes.size());
   for (size_t i = 0; i < routes.size(); i++) {

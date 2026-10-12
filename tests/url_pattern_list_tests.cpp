@@ -1913,3 +1913,33 @@ TEST(url_pattern_list, bounds_and_limits_checks) {
   std::vector<std::string_view> views(storage.begin(), storage.end());
   EXPECT_FALSE(parse_list(views).has_value());
 }
+
+TEST(url_pattern_list, challenger_table_is_bounded) {
+  // A 17-segment literal is sequential and outranks "/*". Each one is a
+  // challenger of every wildcard, so the table grows with the product and
+  // compilation stops at max_aux_entries.
+  constexpr size_t aux_n = 1025;
+  constexpr size_t trie_n = 1024;
+  static_assert(aux_n * (trie_n + 1) >
+                ada::url_pattern_list_limits::max_aux_entries);
+  std::vector<std::string> storage;
+  storage.reserve(aux_n + trie_n);
+  for (size_t i = 0; i < aux_n; i++) {
+    std::string pattern;
+    for (int seg = 0; seg < 17; seg++) {
+      pattern += '/';
+      pattern += std::to_string(i);
+      pattern += '-';
+      pattern += std::to_string(seg);
+    }
+    storage.push_back(std::move(pattern));
+  }
+  for (size_t i = 0; i < trie_n; i++) {
+    storage.push_back("/*");
+  }
+  std::vector<std::string_view> views(storage.begin(), storage.end());
+  // The same shapes compile when the product stays under the cap.
+  std::vector<std::string_view> few{views[0], views[aux_n]};
+  ASSERT_TRUE(parse_list(few).has_value());
+  EXPECT_FALSE(parse_list(views).has_value());
+}
