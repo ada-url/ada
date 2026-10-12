@@ -887,10 +887,18 @@ void approximate_kind_sequence(const std::vector<url_pattern_part>& parts,
     if (part.type == url_pattern_part_type::FULL_WILDCARD ||
         part.modifier != url_pattern_part_modifier::none) {
       // A greedy or modified group can span segments: treat the rest of the
-      // route as a wildcard tail and stop. A "/" prefix still closes the
-      // previous segment as a whole one.
+      // route as a wildcard tail and stop. A "/" prefix closes the previous
+      // segment only when this part must occur. An optional ("?") or
+      // zero-or-more ("*") part, prefix included, may be absent, so the text
+      // after it stays in the same segment ("/reports{/:id}?.json" matches
+      // "/reports.json"). Treating that "/" as a definite boundary certified
+      // a segment the input does not have, and the shape check rejected the
+      // match before the provider ran.
       exact = false;
-      close(part.prefix == "/");
+      const bool must_occur =
+          part.modifier != url_pattern_part_modifier::optional &&
+          part.modifier != url_pattern_part_modifier::zero_or_more;
+      close(must_occur && part.prefix == "/");
       tail_known = false;
       kinds.push_back(2);
       break;

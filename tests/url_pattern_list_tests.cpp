@@ -1943,3 +1943,54 @@ TEST(url_pattern_list, challenger_table_is_bounded) {
   ASSERT_TRUE(parse_list(few).has_value());
   EXPECT_FALSE(parse_list(views).has_value());
 }
+
+TEST(url_pattern_list, optional_group_slash_is_not_a_definite_boundary) {
+  // The "/" inside an optional group is not a segment boundary when the
+  // group is absent: "/reports{/:id}?.json" matches "/reports.json", the
+  // same pathname a single url_pattern accepts. The list used to certify
+  // "reports" as a required segment and reject the input before the
+  // provider ran.
+  auto list = make_list({"/reports{/:id}?.json"});
+  EXPECT_EQ(list.match("/reports.json").route_index, 0);
+  EXPECT_EQ(list.match("/reports/42.json").route_index, 0);
+  EXPECT_EQ(list.match("/reports/1/2.json").route_index, -1);
+  EXPECT_EQ(list.match("/reports/42").route_index, -1);
+  EXPECT_EQ(list.match("/other.json").route_index, -1);
+
+  // Zero or more can also be absent; one or more still requires the slash.
+  auto star = make_list({"/reports{/:id}*.json"});
+  EXPECT_EQ(star.match("/reports.json").route_index, 0);
+  EXPECT_EQ(star.match("/reports/1/2.json").route_index, 0);
+  auto plus = make_list({"/reports{/:id}+.json"});
+  EXPECT_EQ(plus.match("/reports.json").route_index, -1);
+  EXPECT_EQ(plus.match("/reports/42.json").route_index, 0);
+
+  // A literal segment before the optional group stays certified.
+  auto nested = make_list({"/foo/reports{/:id}?.json"});
+  EXPECT_EQ(nested.match("/foo/reports.json").route_index, 0);
+  EXPECT_EQ(nested.match("/foo/reports/7.json").route_index, 0);
+  EXPECT_EQ(nested.match("/bar/reports.json").route_index, -1);
+
+  // A more specific literal route still wins when both match.
+  auto both = make_list({"/reports.json", "/reports{/:id}?.json"});
+  EXPECT_EQ(both.match("/reports.json").route_index, 0);
+  EXPECT_EQ(both.match("/reports/42.json").route_index, 1);
+
+  // A required full wildcard keeps its "/" prefix.
+  auto files = make_list({"/files/*"});
+  EXPECT_EQ(files.match("/files/a").route_index, 0);
+  EXPECT_EQ(files.match("/files").route_index, -1);
+
+  ada::url_pattern_init init{};
+  init.pathname = "/reports{/:id}?.json";
+  auto pattern = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(pattern);
+  for (std::string_view input :
+       {"/reports.json", "/reports/42.json", "/reports/42", "/other.json"}) {
+    ada::url_pattern_init url_init{};
+    url_init.pathname = std::string(input);
+    auto tested = pattern->test(url_init);
+    ASSERT_TRUE(tested);
+    EXPECT_EQ(list.match(input).has_match(), *tested) << input;
+  }
+}
