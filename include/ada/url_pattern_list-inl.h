@@ -18,6 +18,7 @@
 #include "ada/url_pattern_helpers-inl.h"
 
 #include <bit>
+#include <cstdint>
 #include <cstring>
 #include <optional>
 #include <string>

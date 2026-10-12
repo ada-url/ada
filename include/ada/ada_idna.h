@@ -1,4 +1,4 @@
-/* auto-generated on 2026-07-12 20:34:08 -0400. Do not edit! */
+/* auto-generated on 2026-10-09 11:29:39 -0400. Do not edit! */
 /* begin file include/idna.h */
 #ifndef ADA_IDNA_H
 #define ADA_IDNA_H
@@ -118,7 +118,8 @@ bool is_label_valid(std::u32string_view label);
 
 namespace ada::idna {
 
-// Maximum accepted UTF-8 domain length for to_ascii / to_unicode.
+// Maximum accepted UTF-8 domain length for non-ASCII to_ascii input and for
+// to_unicode input.
 // Bounds heap growth under untrusted input (DoS resistance). DNS wire limits
 // are smaller; this allows long Unicode labels used in URL tests/fixtures.
 inline constexpr size_t max_domain_input_bytes = 16384;
@@ -135,8 +136,9 @@ namespace ada::idna {
 // decoding: percent decoding should be done prior to calling this function. We
 // do not remove tabs and spaces, they should have been removed prior to calling
 // this function. We also do not trim control characters. We also assume that
-// the input is not empty. We return "" on error. Inputs longer than
-// max_domain_input_bytes are rejected.
+// the input is not empty. We return "" on error. Non-ASCII inputs longer than
+// max_domain_input_bytes are rejected; ASCII inputs of any length are accepted
+// (they are only lowercased).
 //
 // This function may accept or even produce invalid domains (WHATWG carve-outs).
 std::string to_ascii(std::string_view ut8_string);

@@ -11,6 +11,8 @@
 #ifndef ADA_PARSER_H
 #define ADA_PARSER_H
 
+#include <cstddef>
+#include <cstdint>
 #include <string_view>
 #include <variant>
 

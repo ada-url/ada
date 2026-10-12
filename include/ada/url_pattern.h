@@ -17,10 +17,13 @@
 #include "ada/parser.h"
 #include "ada/url_pattern_init.h"
 
+#include <cstdint>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 

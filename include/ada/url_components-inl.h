@@ -7,6 +7,8 @@
 
 #include "ada/url_components.h"
 
+#include <cstdint>
+
 namespace ada {
 
 [[nodiscard]] constexpr bool url_components::check_offset_consistency()

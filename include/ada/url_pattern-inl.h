@@ -10,8 +10,13 @@
 #include "ada/url_pattern.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <optional>
+#include <string>
 #include <string_view>
 #include <utility>
+#include <variant>
+#include <vector>
 
 #if ADA_INCLUDE_URL_PATTERN
 namespace ada {

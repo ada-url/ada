@@ -25,8 +25,10 @@
 #define TL_EXPECTED_VERSION_MINOR 1
 #define TL_EXPECTED_VERSION_PATCH 0
 
+#include <cstddef>
 #include <exception>
 #include <functional>
+#include <initializer_list>
 #include <type_traits>
 #include <utility>
 

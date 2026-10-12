@@ -10,6 +10,7 @@
 #include "ada/character_sets.h"
 
 #include <array>
+#include <cstdint>
 
 /**
  * These functions are not part of our public API and may
