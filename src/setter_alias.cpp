@@ -119,15 +119,6 @@ bool url::set_pathname(std::string_view input) {
 // units, including C callers, actually link.
 extern "C" {
 
-// Entered with the same registers as url_aggregator::set_password
-// (rdi = this, rsi = length, rdx = data) when the view overlaps the buffer.
-// The copy does not overlap, so the patched setter takes its fast path.
-__attribute__((noinline)) bool ada_agg_set_password_alias(
-    ada::url_aggregator& self, std::string_view input) {
-  const std::string copy(input);
-  return self.set_password(copy);
-}
-
 bool ada_set_username(ada_url result, const char* input, size_t length) {
   auto& r = *static_cast<ada::result<ada::url_aggregator>*>(result);
   if (!r) {
