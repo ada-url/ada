@@ -293,7 +293,7 @@ namespace ada {
 // reinterpreting the bits as a double. The double compare is faster (no
 // GPR transfer) but is incorrect if flush-to-zero is enabled.
 #ifndef ADA_NEON_SAFE_ZERO_CHECK
-#define ADA_NEON_SAFE_ZERO_CHECK 0
+#define ADA_NEON_SAFE_ZERO_CHECK 1
 #endif  // ADA_NEON_SAFE_ZERO_CHECK
 
 #endif  // ADA_COMMON_DEFS_H
