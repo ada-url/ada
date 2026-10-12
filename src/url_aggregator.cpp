@@ -445,8 +445,7 @@ void url_aggregator::set_search(const std::string_view input) {
     return;
   }
 
-  std::string_view stripped =
-      input[0] == '?' ? input.substr(1) : input;
+  std::string_view stripped = input[0] == '?' ? input.substr(1) : input;
   // Fast path: no tabs/newlines (the common case) avoids the std::string
   // allocation entirely by passing the view straight to update_base_search.
   std::string cleaned;
@@ -696,9 +695,9 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   };
 
   size_t host_end_pos = input.find('#');
-  std::string_view host_input(input.data(), host_end_pos != std::string_view::npos
-                                                  ? host_end_pos
-                                                  : input.size());
+  std::string_view host_input(
+      input.data(),
+      host_end_pos != std::string_view::npos ? host_end_pos : input.size());
   // Fast path: no tabs/newlines (the common case) avoids the std::string
   // allocation by viewing the input prefix directly.
   std::string _host_buf;

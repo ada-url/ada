@@ -518,7 +518,11 @@ tl::expected<std::string, errors> canonicalize_pathname(
   // query/fragment, so the pathname was silently truncated at the first literal
   // '?' or '#'. set_pathname runs the parser in path state override, matching
   // how canonicalize_hostname uses set_hostname.
-  auto url = ada::parse<url_aggregator>("fake://fake-url", nullptr);
+  // The spec's "create a dummy URL" is "https://dummy.invalid/": a special
+  // URL, so the path parser turns "\\" into "/" as it does in a special URL.
+  // A non-special dummy kept a literal backslash, so a pattern such as
+  // "/a\\b" never matched "https://h/a/b".
+  auto url = ada::parse<url_aggregator>("https://dummy.invalid/", nullptr);
   ADA_ASSERT_TRUE(url);
   if (!url->set_pathname(modified_value)) {
     // If parseResult is failure, then throw a TypeError.
