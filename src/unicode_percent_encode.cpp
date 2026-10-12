@@ -30,7 +30,10 @@
 #define ADA_UNICODE_SSSE3 0
 #endif
 #ifdef ADA_UNICODE_NEED_SSSE3_TARGET
-#define ADA_UNICODE_SIMD __attribute__((target("ssse3")))
+// noinline: these functions must not be inlined into a caller that also
+// contains the CPU check. A target("ssse3") function can use SSSE3 in its
+// prologue, before any check inside it would run.
+#define ADA_UNICODE_SIMD __attribute__((target("ssse3"), noinline))
 #else
 #define ADA_UNICODE_SIMD ada_really_inline
 #endif
@@ -293,7 +296,13 @@ void percent_encode_to_wide(const char* p, const char* end,
 void percent_encode_suffix(const char* p, const char* end,
                            const uint8_t character_set[], std::string& out) {
 #if ADA_UNICODE_SSSE3 || ADA_NEON || ADA_RVV
-  if (static_cast<size_t>(end - p) >= kPercentEncodeSimdMin) {
+#ifdef ADA_UNICODE_NEED_SSSE3_TARGET
+  static const bool ssse3_supported = __builtin_cpu_supports("ssse3") != 0;
+  const bool use_wide = ssse3_supported;
+#else
+  const bool use_wide = true;
+#endif
+  if (use_wide && static_cast<size_t>(end - p) >= kPercentEncodeSimdMin) {
     percent_encode_to_wide(p, end, character_set, out);
     return;
   }
