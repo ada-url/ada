@@ -651,3 +651,60 @@ TEST(ada_c, max_input_length) {
   ada_set_max_input_length(original);
   ASSERT_EQ(ada_get_max_input_length(), original);
 }
+
+TEST(ada_c, owned_strings_are_nul_terminated) {
+  const auto expect_nul = [](ada_owned_string owned) {
+    ASSERT_NE(owned.data, nullptr);
+    ASSERT_EQ(owned.data[owned.length], '\0');
+    ada_free_owned_string(owned);
+  };
+
+  ada_owned_string empty_ascii = ada_idna_to_ascii("", 0);
+  expect_nul(empty_ascii);
+  ada_owned_string empty_unicode = ada_idna_to_unicode("", 0);
+  expect_nul(empty_unicode);
+
+  std::string_view host = "example.com";
+  ada_owned_string ascii = ada_idna_to_ascii(host.data(), host.size());
+  ASSERT_EQ(std::string_view(ascii.data, ascii.length), host);
+  expect_nul(ascii);
+
+  std::string_view input = "https://example.com/a";
+  ada_url url = ada_parse(input.data(), input.size());
+  ASSERT_TRUE(ada_is_valid(url));
+  ada_owned_string origin = ada_get_origin(url);
+  ASSERT_EQ(std::string_view(origin.data, origin.length),
+            "https://example.com");
+  expect_nul(origin);
+
+  std::string_view query = "a=b";
+  ada_url_search_params params =
+      ada_parse_search_params(query.data(), query.size());
+  ada_owned_string serialized = ada_search_params_to_string(params);
+  ASSERT_EQ(std::string_view(serialized.data, serialized.length), query);
+  expect_nul(serialized);
+  ada_free_search_params(params);
+  ada_free(url);
+}
+
+TEST(ada_c, free_of_the_wrong_handle_type_does_nothing) {
+  std::string_view input = "https://example.com/path";
+  ada_url url = ada_parse(input.data(), input.size());
+  ASSERT_TRUE(ada_is_valid(url));
+
+  ada_free_search_params(url);
+  ASSERT_TRUE(ada_is_valid(url));
+  ada_string href = ada_get_href(url);
+  ASSERT_EQ(std::string_view(href.data, href.length),
+            "https://example.com/path");
+
+  std::string_view query = "a=1&b=2";
+  ada_url_search_params params =
+      ada_parse_search_params(query.data(), query.size());
+  ASSERT_EQ(ada_search_params_size(params), 2u);
+  ada_free(params);
+  ASSERT_EQ(ada_search_params_size(params), 2u);
+
+  ada_free_search_params(params);
+  ada_free(url);
+}
