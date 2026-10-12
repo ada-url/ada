@@ -5045,14 +5045,15 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
     if (state == kTablesReady) {
       return true;
     }
-    if (state == kTablesFailed) {
+    // Failed is permanent. Uninit means the peer gave up after a failed
+    // allocation: do not spin, the next call can take the init slot. One
+    // comparison, same shape as the old Failed check, so this wait loop does
+    // not grow the unity translation unit.
+    // LCOV_EXCL_START
+    if (state != kTablesInProgress) {
       return false;
     }
-    if (state == kTablesUninit) {  // LCOV_EXCL_START
-      // The peer gave up after a failed allocation. Do not spin; the next
-      // call can take the init slot.
-      return false;
-    }  // LCOV_EXCL_STOP
+    // LCOV_EXCL_STOP
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || \
     defined(_M_IX86)
 #if defined(__GNUC__) || defined(__clang__)
