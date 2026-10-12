@@ -1442,3 +1442,86 @@ TEST(wpt_urlpattern_tests,
   EXPECT_THROW((void)list->match("/foo/123"), test_regex_match_exception);
 }
 #endif
+
+TEST(wpt_urlpattern_tests, special_scheme_pathname_converts_backslash) {
+  // canonicalize_pathname (used when the protocol matches a special scheme)
+  // runs the URL path parser on the spec's dummy URL, https://dummy.invalid/.
+  // A literal backslash in the pathname value therefore becomes "/", and ".."
+  // is resolved. In the pattern string a literal backslash is written escaped,
+  // as two backslash characters.
+  auto compile = [](std::string_view protocol, std::string_view pathname) {
+    ada::url_pattern_init init{};
+    init.protocol = protocol;
+    init.hostname = "h";
+    init.pathname = pathname;
+    auto p = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_TRUE(p) << pathname;
+    return p ? std::string(p->get_pathname()) : std::string("(error)");
+  };
+  // Two source backslashes -> one literal backslash -> "/" for a special
+  // scheme.
+  EXPECT_EQ(compile("https", "/a\\\\b"), "/a/b");
+  EXPECT_EQ(compile("ftp", "/a\\\\b"), "/a/b");
+  // ".." followed by a literal backslash is a dot segment once "\\" is "/".
+  EXPECT_EQ(compile("https", "/a/..\\\\b"), "/b");
+  // Dot segments are normalized as a special path.
+  EXPECT_EQ(compile("https", "/a/../b"), "/b");
+  // The same patterns match the canonical URL.
+  auto matches = [](std::string_view protocol, std::string_view pathname,
+                    std::string_view url) {
+    ada::url_pattern_init init{};
+    init.protocol = protocol;
+    init.hostname = "h";
+    init.pathname = pathname;
+    auto p = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(p);
+    auto t = p->test(url);
+    ASSERT_TRUE(t);
+    EXPECT_TRUE(*t) << url;
+  };
+  matches("https", "/a\\\\b", "https://h/a/b");
+  matches("ftp", "/a\\\\b", "ftp://h/a/b");
+  matches("https", "/a/..\\\\b", "https://h/b");
+}
+
+TEST(wpt_urlpattern_tests, string_input_without_base_must_parse_alone) {
+  // A string input is parsed with the base URL string only when one is
+  // given. A relative string with no base is not a URL, so test() is false
+  // and exec() is null, whatever the pattern.
+  auto check_init = [](ada::url_pattern_init init, std::string_view input) {
+    auto p = ada::parse_url_pattern<regex_provider>(std::move(init));
+    ASSERT_TRUE(p);
+    auto t = p->test(input);
+    ASSERT_TRUE(t);
+    EXPECT_FALSE(*t) << input;
+    auto e = p->exec(input);
+    ASSERT_TRUE(e);
+    EXPECT_FALSE(e->has_value()) << input;
+  };
+  ada::url_pattern_init users{};
+  users.pathname = "/users/:id";
+  check_init(users, "/users/1");
+  ada::url_pattern_init admin{};
+  admin.pathname = "/admin/*";
+  check_init(admin, "/admin/x");
+
+  auto star = ada::parse_url_pattern<regex_provider>(std::string_view("*://*"));
+  ASSERT_TRUE(star);
+  auto star_test = star->test(std::string_view("not a url"));
+  ASSERT_TRUE(star_test);
+  EXPECT_FALSE(*star_test);
+  auto star_exec = star->exec(std::string_view("not a url"));
+  ASSERT_TRUE(star_exec);
+  EXPECT_FALSE(star_exec->has_value());
+
+  // With a base, the same relative input matches.
+  auto p = ada::parse_url_pattern<regex_provider>(users);
+  ASSERT_TRUE(p);
+  std::string_view base = "https://example.com";
+  auto with_base = p->test("/users/1", &base);
+  ASSERT_TRUE(with_base);
+  EXPECT_TRUE(*with_base);
+  auto with_base_exec = p->exec("/users/1", &base);
+  ASSERT_TRUE(with_base_exec);
+  EXPECT_TRUE(with_base_exec->has_value());
+}

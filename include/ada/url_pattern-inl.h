@@ -322,8 +322,11 @@ result<bool> url_pattern<regex_provider>::test(
                            search_view, *apply_result->hash);
   }
 
-  // URL string input path
-  result<url_aggregator> base_url;
+  // URL string input path.
+  // Let baseURL be null. A default-constructed result holds a value (an
+  // empty URL), and a relative input would then resolve against it. Start
+  // from an error so "no base given" means no value.
+  result<url_aggregator> base_url = tl::unexpected(errors::type_error);
   if (base_url_string) {
     base_url = ada::parse<url_aggregator>(*base_url_string, nullptr);
     if (!base_url) {
@@ -439,8 +442,10 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   } else {
     ADA_ASSERT_TRUE(std::holds_alternative<std::string_view>(input));
 
-    // Let baseURL be null.
-    result<url_aggregator> base_url;
+    // Let baseURL be null. A default-constructed result holds a value (an
+    // empty URL), and a relative input would then resolve against it. Start
+    // from an error so "no base given" means no value.
+    result<url_aggregator> base_url = tl::unexpected(errors::type_error);
 
     // If baseURLString was given, then:
     if (base_url_string) {
