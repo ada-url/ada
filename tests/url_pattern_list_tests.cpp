@@ -163,6 +163,20 @@ TEST(url_pattern_list, empty_list_and_empty_pattern) {
   EXPECT_EQ(list.match("/").route_index, -1);
 }
 
+TEST(url_pattern_list, default_constructed_empty_list_match_is_safe) {
+  // A default-constructed list never compiles tables. match() must return
+  // the default no-match result rather than dereference section pointers.
+  const list_type list{};
+  EXPECT_EQ(list.size(), 0u);
+  const auto result = list.match("/hello");
+  EXPECT_EQ(result.route_index, -1);
+  EXPECT_FALSE(result.has_match());
+  EXPECT_EQ(result.capture_count, 0u);
+  EXPECT_FALSE(result.captures_truncated);
+  EXPECT_FALSE(result.regexp_route);
+  EXPECT_TRUE(result.regexp_groups.empty());
+}
+
 TEST(url_pattern_list, agrees_with_url_pattern_on_boundary_cases) {
   // Pin the static/":param"/"*" subset semantics to ada::url_pattern itself:
   // for every (pattern, input) pair, a single-route list must match exactly
