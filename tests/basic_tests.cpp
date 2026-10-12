@@ -2328,3 +2328,47 @@ TEST(basic_tests, tab_removal_is_independent_of_fpcr_fz) {
 #endif
   SUCCEED();
 }
+
+TYPED_TEST(basic_tests, idna_hangul_and_bidi_regressions) {
+  // ada-url/idna#104: Hangul LV + trailing T jamo composes to an LVT syllable.
+  {
+    auto r = ada::parse<TypeParam>("http://\uAC00\u11A8.example/");
+    ASSERT_TRUE(r);
+    EXPECT_EQ(r->get_hostname(), "xn--p39a.example");
+  }
+
+  // ada-url/ada#1277: RFC 5893 applies to every label in a Bidi domain, and
+  // RFC 5892 ContextJ still rejects a ZWNJ that is not between joining types.
+  {
+    // U+0031 . U+0627: the digit label violates Bidi rule 1.
+    auto r = ada::parse<TypeParam>("http://1.\u0627/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+0627 . U+0031 U+0061: "1a" violates Bidi rule 1.
+    auto r = ada::parse<TypeParam>("http://\u0627.1a/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+0644 U+200C U+0073 U+06EF: ZWNJ between LAM and 's' violates ContextJ.
+    auto r = ada::parse<TypeParam>("http://\u0644\u200Cs\u06EF/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+0061 U+0644 U+200C U+06EF: LTR label with Arabic letters violates
+    // rule 5.
+    auto r = ada::parse<TypeParam>("http://a\u0644\u200C\u06EF/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+0627 U+0BCD U+200D: RTL label ending in ZWJ violates Bidi rule 3.
+    auto r = ada::parse<TypeParam>("http://\u0627\u0BCD\u200D/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // An LTR label that starts and ends with L is allowed beside an RTL label.
+    auto r = ada::parse<TypeParam>("http://example.\u0627/");
+    ASSERT_TRUE(r);
+    EXPECT_EQ(r->get_hostname(), "example.xn--mgb");
+  }
+}
