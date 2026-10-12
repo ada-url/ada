@@ -1014,9 +1014,10 @@ TEST(url_pattern_list, slot_tables_beyond_64_keys) {
 }
 
 TEST(url_pattern_list, huge_static_key) {
-  // A 70000-byte static segment: the key lives in the blob (memcmp path)
-  // and the 70001-byte input is beyond the fast-path length limit, so the
-  // route answers through the sequential fallback.
+  // A 70000-byte static segment is longer than a trie edge can store
+  // (key_length is 16-bit), so the route is compiled in sequential mode.
+  // The sequential matcher keeps the full length and must not accept a
+  // truncated prefix.
   const std::string huge = "/" + std::string(70000, 'a');
   auto list = make_list({huge, "/ok"});
   EXPECT_EQ(list.match(huge).route_index, 0);
@@ -1885,4 +1886,30 @@ TEST(url_pattern_list, inputs_need_no_terminator) {
   EXPECT_EQ(exact(indexed, "/posts/"), -1);
   EXPECT_EQ(exact(indexed, "/p"), -1);
   EXPECT_EQ(exact(indexed, "/posts"), 2);
+}
+
+TEST(url_pattern_list, bounds_and_limits_checks) {
+  // 65546 truncates to 10 in uint16_t. The route must still match the full
+  // pathname and must not match that truncated prefix.
+  const std::string overlong = "/" + std::string(65546, 'A');
+  auto overlong_res = parse_list({overlong, "/ok"});
+  ASSERT_TRUE(overlong_res.has_value());
+  EXPECT_EQ(overlong_res->match(overlong).route_index, 0);
+  EXPECT_EQ(overlong_res->match("/" + std::string(10, 'A')).route_index, -1);
+  EXPECT_EQ(overlong_res->match("/" + std::string(65535, 'A')).route_index, -1);
+  EXPECT_EQ(overlong_res->match("/ok").route_index, 1);
+
+  const std::string max_key = "/" + std::string(65535, 'A');
+  auto max_res = parse_list({max_key});
+  ASSERT_TRUE(max_res.has_value());
+  EXPECT_EQ(max_res->match(max_key).route_index, 0);
+  EXPECT_EQ(max_res->match("/" + std::string(10, 'A')).route_index, -1);
+
+  std::vector<std::string> storage;
+  storage.reserve(ada::url_pattern_list_limits::max_routes + 1);
+  for (size_t i = 0; i < ada::url_pattern_list_limits::max_routes + 1; i++) {
+    storage.push_back("/r" + std::to_string(i));
+  }
+  std::vector<std::string_view> views(storage.begin(), storage.end());
+  EXPECT_FALSE(parse_list(views).has_value());
 }

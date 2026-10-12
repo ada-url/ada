@@ -325,7 +325,8 @@ void compile_route_records(builder_tables& r,
 
 // BFS layout: assign final node ids breadth-first so each node's static
 // children occupy a contiguous block of edges[]. Returns the transient-node
-// id per final id.
+// id per final id. Returns empty on error (e.g. child count or key length
+// exceeds limits).
 std::vector<int32_t> layout_nodes(builder_tables& r,
                                   const std::vector<transient_node>& t) {
   std::vector<int32_t> order;  // transient id per final id
@@ -333,6 +334,9 @@ std::vector<int32_t> layout_nodes(builder_tables& r,
   r.nodes.resize(1);
   for (size_t head = 0; head < order.size(); head++) {
     const transient_node& tn = t[static_cast<size_t>(order[head])];
+    if (tn.kids.size() > url_pattern_list_limits::max_node_children) {
+      return {};
+    }
     node_record nd{};
     nd.wild_route = tn.wild_route;
     nd.terminal_route = tn.terminal;
@@ -341,6 +345,14 @@ std::vector<int32_t> layout_nodes(builder_tables& r,
     const size_t id_base = order.size();  // children take the next BFS ids
     for (size_t ci = 0; ci < tn.kids.size(); ci++) {
       const std::string_view k = tn.kids[ci].first;
+      if (k.size() > url_pattern_list_limits::max_edge_key_length) {
+        return {};
+      }
+      // key_offset is uint32_t. Reject before inserting so a blob past 4 GiB
+      // cannot truncate the offset.
+      if (r.blob.size() > UINT32_MAX || k.size() > UINT32_MAX - r.blob.size()) {
+        return {};
+      }
       edge_record e{};
       e.key_length = static_cast<uint16_t>(k.size());
       e.key_offset = static_cast<uint32_t>(r.blob.size());
@@ -484,17 +496,27 @@ void encode_leaf_shortcuts(builder_tables& r) {
 // in the blob), so the sequential fallback beyond the fast-path limits can
 // match any route without the compiler's types; for regexp routes, the
 // anchored literal prefix the matcher checks before running the provider.
-void build_segment_table(builder_tables& r,
+bool build_segment_table(builder_tables& r,
                          const std::vector<route_info>& routes) {
   for (size_t i = 0; i < routes.size(); i++) {
     const route_info& rt = routes[i];
     route_record& rm = r.routes[i];
+    if (r.segments.size() > UINT32_MAX ||
+        rt.segments.size() > UINT32_MAX - r.segments.size()) {
+      return false;
+    }
     rm.segment_first = static_cast<uint32_t>(r.segments.size());
     rm.segment_count = static_cast<uint32_t>(rt.segments.size());
     for (const route_segment& s : rt.segments) {
       segment_record sr{};
       sr.kind = static_cast<uint8_t>(s.kind);
       if (s.kind == segment_kind::literal) {
+        // text_offset and text_length are uint32_t. A truncated length would
+        // make the sequential matcher accept a prefix of the literal.
+        if (s.text.size() > UINT32_MAX || r.blob.size() > UINT32_MAX ||
+            s.text.size() > UINT32_MAX - r.blob.size()) {
+          return false;
+        }
         sr.text_offset = static_cast<uint32_t>(r.blob.size());
         sr.text_length = static_cast<uint32_t>(s.text.size());
         r.blob.insert(r.blob.end(), s.text.begin(), s.text.end());
@@ -502,6 +524,7 @@ void build_segment_table(builder_tables& r,
       r.segments.push_back(sr);
     }
   }
+  return true;
 }
 
 // Could some pathname match both a fast-path route `w` (full segment
@@ -553,7 +576,7 @@ bool co_matchable(const route_info& w, const route_info& c) noexcept {
 // trie route: the auxiliary routes that outrank it AND could match the same
 // input. After a fast-path hit only the winner's challengers are tested
 // (usually none).
-void build_aux_table(builder_tables& r, const std::vector<route_info>& routes) {
+bool build_aux_table(builder_tables& r, const std::vector<route_info>& routes) {
   std::vector<uint32_t> aux_all;
   for (size_t i = 0; i < routes.size(); i++) {
     if (routes[i].mode != route_mode::trie) {
@@ -572,27 +595,54 @@ void build_aux_table(builder_tables& r, const std::vector<route_info>& routes) {
     for (const uint32_t c : aux_all) {
       if (route_outranks(routes[c], c, winner, w) &&
           co_matchable(winner, routes[c])) {
+        if (r.aux.size() >= url_pattern_list_limits::max_aux_entries) {
+          return false;
+        }
         r.aux.push_back(c);
       }
     }
     rm.challenger_count =
         static_cast<uint32_t>(r.aux.size()) - rm.challenger_first;
   }
+  return true;
 }
 
 // Packs every table into one arena, each section 8-byte aligned, and
 // records the section offsets. The blob gets 8 bytes of zero padding so
 // short key windows can always be loaded whole.
-compiled_routes pack_arena(builder_tables& r) {
+tl::expected<compiled_routes, errors> pack_arena(builder_tables& r) {
   compiled_routes out{};
   r.blob.insert(r.blob.end(), 8, '\0');
   size_t total = 0;
-  const auto reserve = [&](size_t bytes) {
+  bool overflow = false;
+  const auto reserve = [&](size_t bytes) -> uint32_t {
+    if (overflow) {
+      return 0;
+    }
+    // bytes + 7 must not wrap size_t (32-bit) before the alignment mask.
+    if (bytes > url_pattern_list_limits::max_arena_size ||
+        bytes > SIZE_MAX - 7) {
+      overflow = true;
+      return 0;
+    }
+    const size_t aligned_bytes = (bytes + 7) & ~size_t{7};
+    if (aligned_bytes > url_pattern_list_limits::max_arena_size ||
+        total > url_pattern_list_limits::max_arena_size - aligned_bytes) {
+      overflow = true;
+      return 0;
+    }
     const size_t offset = total;
-    total += (bytes + 7) & ~size_t{7};
+    total += aligned_bytes;
     return static_cast<uint32_t>(offset);
   };
-  const auto bytes_of = [](const auto& v) { return v.size() * sizeof(v[0]); };
+  const auto bytes_of = [&](const auto& v) -> size_t {
+    constexpr size_t elem = sizeof(v[0]);
+    if (elem != 0 && v.size() > SIZE_MAX / elem) {
+      overflow = true;
+      return 0;
+    }
+    return v.size() * elem;
+  };
   out.nodes_offset = reserve(bytes_of(r.nodes));
   out.hashes_offset = reserve(bytes_of(r.hashes));
   out.edges_offset = reserve(bytes_of(r.edges));
@@ -602,6 +652,9 @@ compiled_routes pack_arena(builder_tables& r) {
   out.segments_offset = reserve(bytes_of(r.segments));
   out.aux_offset = reserve(bytes_of(r.aux));
   out.root_index_offset = reserve(bytes_of(r.root_index));
+  if (overflow) {
+    return tl::unexpected(errors::type_error);
+  }
   out.arena.assign(total, 0);
   const auto place = [&](uint32_t offset, const auto& v) {
     if (!v.empty()) {
@@ -727,6 +780,7 @@ void finalize_route(route_info& route) noexcept {
   route.all_literal = true;
   route.has_wildcard = false;
   size_t n_params = 0;
+  bool literal_fits = true;
   for (const route_segment& s : route.segments) {
     if (s.kind != segment_kind::literal) {
       route.all_literal = false;
@@ -735,10 +789,15 @@ void finalize_route(route_info& route) noexcept {
       } else {
         route.has_wildcard = true;
       }
+    } else if (s.text.size() > url_pattern_list_limits::max_edge_key_length) {
+      // Trie edges store key_length in uint16_t. A longer literal would
+      // truncate and match a short prefix of itself. Sequential mode keeps
+      // the full length in uint32_t.
+      literal_fits = false;
     }
   }
   const size_t n_captures = n_params + (route.has_wildcard ? 1 : 0);
-  const bool trie_safe = !route.segments.empty() &&
+  const bool trie_safe = literal_fits && !route.segments.empty() &&
                          route.segments.size() <= max_trie_pattern_segments &&
                          n_captures <= max_captures_per_route;
   route.mode = trie_safe ? route_mode::trie : route_mode::sequential;
@@ -864,16 +923,28 @@ void approximate_kind_sequence(const std::vector<url_pattern_part>& parts,
   route.segments = std::move(shape);
 }
 
-compiled_routes compile_route_set(std::vector<route_info>& routes) {
+tl::expected<compiled_routes, errors> compile_route_set(
+    std::vector<route_info>& routes) {
   builder_tables r{};
   const std::vector<transient_node> t = build_trie(routes);
   compile_route_records(r, routes);
   const std::vector<int32_t> order = layout_nodes(r, t);
+  if (order.empty()) {
+    return tl::unexpected(errors::type_error);
+  }
   compile_dispatch(r, t, order);
   encode_leaf_shortcuts(r);  // last: must not confuse the stages above
-  build_segment_table(r, routes);
-  build_aux_table(r, routes);
-  compiled_routes out = pack_arena(r);
+  if (!build_segment_table(r, routes)) {
+    return tl::unexpected(errors::type_error);
+  }
+  if (!build_aux_table(r, routes)) {
+    return tl::unexpected(errors::type_error);
+  }
+  auto packed = pack_arena(r);
+  if (!packed) {
+    return tl::unexpected(packed.error());
+  }
+  compiled_routes out = std::move(*packed);
   out.group_names.resize(routes.size());
   for (size_t i = 0; i < routes.size(); i++) {
     if (routes[i].mode != route_mode::regexp) {
@@ -889,6 +960,9 @@ namespace ada::url_pattern_list_detail {
 
 tl::expected<compiled_routes, errors> compile_pathname_patterns(
     std::span<const std::string> patterns, bool ignore_case) {
+  if (patterns.size() > url_pattern_list_limits::max_routes) {
+    return tl::unexpected(errors::type_error);
+  }
   namespace compiler = url_pattern_list_compiler;
   std::vector<compiler::route_info> routes;
   routes.reserve(patterns.size());
@@ -924,8 +998,11 @@ tl::expected<compiled_routes, errors> compile_pathname_patterns(
     }
     routes.push_back(std::move(route));
   }
-  compiled_routes compiled = compiler::compile_route_set(routes);
-  compiled.ignore_case = ignore_case ? 1 : 0;
+  auto compiled = compiler::compile_route_set(routes);
+  if (!compiled) {
+    return tl::unexpected(compiled.error());
+  }
+  compiled->ignore_case = ignore_case ? 1 : 0;
   return compiled;
 }
 
