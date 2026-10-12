@@ -1,10 +1,15 @@
 // gtest is a C++ library so we are in C++.
+#include "ada.h"
 #include "gtest/gtest.h"
 #include "simdjson.h"
 #include <filesystem>
 extern "C" {
 #include "ada_c.h"
 }
+
+// Defined in src/ada_c.cpp. Calling it keeps the ABI anchor executed under
+// coverage; production code never needs to call it.
+extern "C" void __ada_c_search_params_abi_anchor();
 
 #ifndef WPT_DATA_DIR
 #define WPT_DATA_DIR "wpt/"
@@ -475,6 +480,86 @@ TEST(ada_c, search_params_null_and_empty_handles) {
   ada_string_pair e = ada_search_params_entries_iter_next(entries);
   ASSERT_EQ(e.key.data, nullptr);
   ASSERT_EQ(e.value.data, nullptr);
+  ada_free_search_params_entries_iter(entries);
+
+  ada_free_search_params(nullptr);
+
+  ada_strings all = ada_search_params_get_all(nullptr, "a", 1);
+  ASSERT_EQ(ada_strings_size(all), 0);
+  ada_string missing = ada_strings_get(all, 0);
+  ASSERT_EQ(missing.data, nullptr);
+  ada_free_strings(all);
+
+  ASSERT_FALSE(ada_search_params_keys_iter_has_next(nullptr));
+  ada_string keys_next = ada_search_params_keys_iter_next(nullptr);
+  ASSERT_EQ(keys_next.data, nullptr);
+  ada_free_search_params_keys_iter(nullptr);
+
+  ASSERT_FALSE(ada_search_params_values_iter_has_next(nullptr));
+  ada_string values_next = ada_search_params_values_iter_next(nullptr);
+  ASSERT_EQ(values_next.data, nullptr);
+  ada_free_search_params_values_iter(nullptr);
+
+  ASSERT_FALSE(ada_search_params_entries_iter_has_next(nullptr));
+  ada_string_pair entries_next = ada_search_params_entries_iter_next(nullptr);
+  ASSERT_EQ(entries_next.key.data, nullptr);
+  ASSERT_EQ(entries_next.value.data, nullptr);
+  ada_free_search_params_entries_iter(nullptr);
+}
+
+TEST(ada_c, search_params_set_missing_key) {
+  std::string_view input = "a=b";
+  ada_url_search_params params =
+      ada_parse_search_params(input.data(), input.size());
+  ada_search_params_set(params, "brand_new", 9, "value", 5);
+  ASSERT_EQ(ada_search_params_size(params), 2);
+  ASSERT_TRUE(ada_search_params_has(params, "brand_new", 9));
+  ada_string got = ada_search_params_get(params, "brand_new", 9);
+  ASSERT_EQ(std::string(got.data, got.length), "value");
+  ada_free_search_params(params);
+}
+
+TEST(ada_c, search_params_error_result) {
+  __ada_c_search_params_abi_anchor();
+
+  // ada_parse_search_params only returns a successful result. Build an error
+  // result directly so the C API's `if (!r)` arms are exercised.
+  ada::result<ada::url_search_params> bad{
+      tl::unexpected(ada::errors::type_error)};
+  auto handle = reinterpret_cast<ada_url_search_params>(&bad);
+
+  ASSERT_EQ(ada_search_params_size(handle), 0);
+  ada_owned_string serialized = ada_search_params_to_string(handle);
+  ASSERT_EQ(serialized.data, nullptr);
+  ada_free_owned_string(serialized);
+  ASSERT_FALSE(ada_search_params_has(handle, "a", 1));
+  ASSERT_FALSE(ada_search_params_has_value(handle, "a", 1, "b", 1));
+  ada_string missing = ada_search_params_get(handle, "a", 1);
+  ASSERT_EQ(missing.data, nullptr);
+
+  ada_search_params_sort(handle);
+  ada_search_params_reset(handle, "a=b", 3);
+  ada_search_params_append(handle, "a", 1, "b", 1);
+  ada_search_params_set(handle, "a", 1, "b", 1);
+  ada_search_params_remove(handle, "a", 1);
+  ada_search_params_remove_value(handle, "a", 1, "b", 1);
+
+  ada_strings all = ada_search_params_get_all(handle, "a", 1);
+  ASSERT_EQ(ada_strings_size(all), 0);
+  ada_free_strings(all);
+
+  ada_url_search_params_keys_iter keys = ada_search_params_get_keys(handle);
+  ASSERT_FALSE(ada_search_params_keys_iter_has_next(keys));
+  ada_free_search_params_keys_iter(keys);
+
+  ada_url_search_params_values_iter values =
+      ada_search_params_get_values(handle);
+  ASSERT_FALSE(ada_search_params_values_iter_has_next(values));
+  ada_free_search_params_values_iter(values);
+
+  ada_url_search_params_entries_iter entries =
+      ada_search_params_get_entries(handle);
+  ASSERT_FALSE(ada_search_params_entries_iter_has_next(entries));
   ada_free_search_params_entries_iter(entries);
 }
 

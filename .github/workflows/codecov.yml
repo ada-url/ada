@@ -56,6 +56,10 @@ jobs:
           --exclude 'benchmarks/.*'
           --exclude 'tests/.*'
           --exclude 'include/ada/expected.h'
+          # std::string / operator new exception edges are not taken in tests.
+          # Counting them as missed branches marks executed lines partial and
+          # pulls patch coverage under the 60% gate for ordinary copies.
+          --exclude-throw-branches
           --gcov-executable gcov-12
           --xml
           --output build/coverage.xml
