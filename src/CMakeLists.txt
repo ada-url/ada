@@ -88,24 +88,16 @@ if (ADA_USE_SIMDUTF)
 endif()
 
 # An alias check inside the unity translation unit changes GCC's register
-# allocation for the setters (CodSpeed SetPassword / SetSearch). On ELF, keep
-# those bodies identical to a build without the check and append the public
-# entry points at the end of the unity object so the existing functions stay
-# at the same offsets.
+# allocation for the setters (CodSpeed SetPassword / SetSearch). On ELF the
+# other setters are wrappers in setter_alias.cpp. set_password is patched in
+# the padding in front of the existing body so that function does not move.
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND UNIX AND NOT APPLE)
+  target_sources(ada PRIVATE setter_alias.cpp)
   target_compile_definitions(ada PRIVATE ADA_SETTER_ALIAS_OUTLINE=1)
-  add_library(ada_setter_alias OBJECT setter_alias.cpp)
-  target_compile_features(ada_setter_alias PRIVATE cxx_std_20)
-  set_target_properties(ada_setter_alias PROPERTIES POSITION_INDEPENDENT_CODE ON)
-  target_compile_options(ada_setter_alias PRIVATE $<TARGET_PROPERTY:ada,COMPILE_OPTIONS>)
-  target_compile_definitions(ada_setter_alias PRIVATE $<TARGET_PROPERTY:ada,COMPILE_DEFINITIONS>)
-  target_include_directories(ada_setter_alias PRIVATE $<TARGET_PROPERTY:ada,INCLUDE_DIRECTORIES>)
-  add_dependencies(ada ada_setter_alias)
   add_custom_command(
     TARGET ada
     PRE_LINK
     COMMAND /bin/sh "${CMAKE_CURRENT_SOURCE_DIR}/rename_setter_symbols.sh"
             "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ada.dir/ada.cpp.o"
-            $<TARGET_OBJECTS:ada_setter_alias>
     VERBATIM)
 endif()
