@@ -46,7 +46,22 @@ inline void url_search_params::initialize(std::string_view input) {
     return;
   }
 
-  params.reserve(size_t(std::count(input.begin(), input.end(), '&')) + 1);
+  // Count pairs the parser will keep. Empty segments (a leading or repeated
+  // '&') are skipped, so reserving one slot per '&' over-allocates.
+  size_t pairs = 0;
+  for (size_t i = 0; i < input.size();) {
+    if (input[i] == '&') {
+      ++i;
+      continue;
+    }
+    ++pairs;
+    const size_t amp = input.find('&', i);
+    if (amp == std::string_view::npos) {
+      break;
+    }
+    i = amp + 1;
+  }
+  params.reserve(pairs);
 
   auto process_key_value = [&](const std::string_view current) {
     const auto equal = current.find('=');
