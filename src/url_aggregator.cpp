@@ -40,6 +40,25 @@ ada_really_inline void apply_shifted_non_scheme_offsets(
 }  // namespace
 
 namespace ada {
+#if !defined(ADA_SETTER_ALIAS_OUTLINE)
+namespace {
+// noinline: an inlined alias compare changes register allocation for the whole
+// setter (CodSpeed SetPassword). The owning string stays in the copy helper so
+// this frame does not grow a destructor.
+ada_never_inline bool input_aliases_buffer(std::string_view input,
+                                           const std::string& buffer) noexcept {
+  return helpers::overlaps(input, buffer);
+}
+
+ada_never_inline bool call_aggregator_setter_on_copy(
+    url_aggregator& self, std::string_view input,
+    bool (url_aggregator::*method)(std::string_view)) {
+  const std::string copy(input);
+  return (self.*method)(copy);
+}
+}  // namespace
+#endif
+
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(
     const std::string_view input_with_colon) {
@@ -256,35 +275,15 @@ bool url_aggregator::set_protocol(const std::string_view input) {
   return false;
 }
 
-namespace {
-
-// The copy must not live in the setter. A std::string local adds a destructor
-// to the fast path and knocks these functions out of GCC's inliner.
-ada_never_inline bool call_with_detached_input(
-    url_aggregator& url, std::string_view input,
-    bool (url_aggregator::*method)(std::string_view)) {
-  const std::string copy(input);
-  return (url.*method)(copy);
-}
-
-bool aliases_buffer(std::string_view input,
-                    const std::string& buffer) noexcept {
-  return !input.empty() && input.data() >= buffer.data() &&
-         input.data() < buffer.data() + buffer.size();
-}
-
-}  // namespace
-
 bool url_aggregator::set_username(const std::string_view input) {
+#if !defined(ADA_SETTER_ALIAS_OUTLINE)
+  if (input_aliases_buffer(input, buffer)) {
+    return call_aggregator_setter_on_copy(*this, input,
+                                          &url_aggregator::set_username);
+  }
+#endif
   ada_log("url_aggregator::set_username '", input, "' ");
   ADA_ASSERT_TRUE(validate());
-  // Getters return views into buffer. Copy before update_base_username reads
-  // the view while it rewrites that buffer. The recursive call sees the copy,
-  // which does not alias buffer, and takes the fast path.
-  if (aliases_buffer(input, buffer)) {
-    return call_with_detached_input(*this, input,
-                                    &url_aggregator::set_username);
-  }
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (cannot_have_credentials_or_port()) {
     return false;
@@ -311,14 +310,14 @@ bool url_aggregator::set_username(const std::string_view input) {
 }
 
 bool url_aggregator::set_password(const std::string_view input) {
+#if !defined(ADA_SETTER_ALIAS_OUTLINE)
+  if (input_aliases_buffer(input, buffer)) {
+    return call_aggregator_setter_on_copy(*this, input,
+                                          &url_aggregator::set_password);
+  }
+#endif
   ada_log("url_aggregator::set_password '", input, "'");
   ADA_ASSERT_TRUE(validate());
-  // Getters return views into buffer. Copy before update_base_password reads
-  // the view while it rewrites that buffer.
-  if (aliases_buffer(input, buffer)) {
-    return call_with_detached_input(*this, input,
-                                    &url_aggregator::set_password);
-  }
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (cannot_have_credentials_or_port()) {
     return false;
@@ -396,13 +395,14 @@ bool url_aggregator::set_port(const std::string_view input) {
 }
 
 bool url_aggregator::set_pathname(const std::string_view input) {
+#if !defined(ADA_SETTER_ALIAS_OUTLINE)
+  if (input_aliases_buffer(input, buffer)) {
+    return call_aggregator_setter_on_copy(*this, input,
+                                          &url_aggregator::set_pathname);
+  }
+#endif
   ada_log("url_aggregator::set_pathname ", input);
   ADA_ASSERT_TRUE(validate());
-  // clear_pathname rewrites buffer before parse_path reads the view.
-  if (aliases_buffer(input, buffer)) {
-    return call_with_detached_input(*this, input,
-                                    &url_aggregator::set_pathname);
-  }
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   if (has_opaque_path) {
     return false;
