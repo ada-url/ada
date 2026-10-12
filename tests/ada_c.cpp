@@ -287,6 +287,197 @@ TEST(ada_c, ada_search_params_reset) {
   SUCCEED();
 }
 
+TEST(ada_c, issue_1295_iterators_after_free) {
+  // Test keys iterator after ada_free_search_params
+  {
+    std::string_view input = "key1=val1&key2=val2";
+    ada_url_search_params p =
+        ada_parse_search_params(input.data(), input.size());
+    ada_url_search_params_keys_iter it = ada_search_params_get_keys(p);
+    ada_free_search_params(p);
+    ASSERT_TRUE(ada_search_params_keys_iter_has_next(it));
+    ada_string k1 = ada_search_params_keys_iter_next(it);
+    ASSERT_EQ(std::string(k1.data, k1.length), "key1");
+    ASSERT_TRUE(ada_search_params_keys_iter_has_next(it));
+    ada_string k2 = ada_search_params_keys_iter_next(it);
+    ASSERT_EQ(std::string(k2.data, k2.length), "key2");
+    ASSERT_FALSE(ada_search_params_keys_iter_has_next(it));
+    ada_free_search_params_keys_iter(it);
+  }
+
+  // Test values iterator after ada_free_search_params
+  {
+    std::string_view input = "key1=val1&key2=val2";
+    ada_url_search_params p =
+        ada_parse_search_params(input.data(), input.size());
+    ada_url_search_params_values_iter it = ada_search_params_get_values(p);
+    ada_free_search_params(p);
+    ASSERT_TRUE(ada_search_params_values_iter_has_next(it));
+    ada_string v1 = ada_search_params_values_iter_next(it);
+    ASSERT_EQ(std::string(v1.data, v1.length), "val1");
+    ASSERT_TRUE(ada_search_params_values_iter_has_next(it));
+    ada_string v2 = ada_search_params_values_iter_next(it);
+    ASSERT_EQ(std::string(v2.data, v2.length), "val2");
+    ASSERT_FALSE(ada_search_params_values_iter_has_next(it));
+    ada_free_search_params_values_iter(it);
+  }
+
+  // Test entries iterator after ada_free_search_params
+  {
+    std::string_view input = "key1=val1&key2=val2";
+    ada_url_search_params p =
+        ada_parse_search_params(input.data(), input.size());
+    ada_url_search_params_entries_iter it = ada_search_params_get_entries(p);
+    ada_free_search_params(p);
+    ASSERT_TRUE(ada_search_params_entries_iter_has_next(it));
+    ada_string_pair e1 = ada_search_params_entries_iter_next(it);
+    ASSERT_EQ(std::string(e1.key.data, e1.key.length), "key1");
+    ASSERT_EQ(std::string(e1.value.data, e1.value.length), "val1");
+    ASSERT_TRUE(ada_search_params_entries_iter_has_next(it));
+    ada_string_pair e2 = ada_search_params_entries_iter_next(it);
+    ASSERT_EQ(std::string(e2.key.data, e2.key.length), "key2");
+    ASSERT_EQ(std::string(e2.value.data, e2.value.length), "val2");
+    ASSERT_FALSE(ada_search_params_entries_iter_has_next(it));
+    ada_free_search_params_entries_iter(it);
+  }
+}
+
+TEST(ada_c, issue_1296_reset_aliased_input) {
+  // Use a string long enough to exceed SSO (e.g. > 15 chars) to force heap
+  // allocation
+  std::string_view input =
+      "a=somewhat_longer_value_string_to_force_heap_allocation";
+  ada_url_search_params p = ada_parse_search_params(input.data(), input.size());
+  ada_string v = ada_search_params_get(p, "a", 1);
+  ada_search_params_reset(p, v.data, v.length);
+  ASSERT_EQ(ada_search_params_size(p), 1);
+  ada_free_search_params(p);
+}
+
+TEST(ada_c, search_params_setters_aliased_input) {
+  // Test ada_search_params_remove with aliased key (forces heap allocation)
+  {
+    std::string_view input =
+        "long_key_name_one=val1&middle_key=val2&long_key_name_one=val3";
+    ada_url_search_params p =
+        ada_parse_search_params(input.data(), input.size());
+    ada_url_search_params_keys_iter it = ada_search_params_get_keys(p);
+    ada_string k = ada_search_params_keys_iter_next(it);
+    ada_search_params_remove(p, k.data, k.length);
+    ada_free_search_params_keys_iter(it);
+    ASSERT_EQ(ada_search_params_size(p), 1);
+    ASSERT_FALSE(ada_search_params_has(p, "long_key_name_one",
+                                       strlen("long_key_name_one")));
+    ASSERT_TRUE(ada_search_params_has(p, "middle_key", strlen("middle_key")));
+    ada_free_search_params(p);
+  }
+
+  // Test ada_search_params_remove_value with aliased key and value
+  {
+    std::string_view input =
+        "long_key_name_one=long_val_name_one&middle_key=val2&long_key_name_one="
+        "long_val_name_one";
+    ada_url_search_params p =
+        ada_parse_search_params(input.data(), input.size());
+    ada_url_search_params_entries_iter it = ada_search_params_get_entries(p);
+    ada_string_pair e = ada_search_params_entries_iter_next(it);
+    ada_search_params_remove_value(p, e.key.data, e.key.length, e.value.data,
+                                   e.value.length);
+    ada_free_search_params_entries_iter(it);
+    ASSERT_EQ(ada_search_params_size(p), 1);
+    ada_free_search_params(p);
+  }
+
+  // Test ada_search_params_set with aliased key and value
+  {
+    std::string_view input =
+        "long_key_name_one=val1&long_key_name_one=val2&long_key_name_one=val3";
+    ada_url_search_params p =
+        ada_parse_search_params(input.data(), input.size());
+    ada_url_search_params_entries_iter it = ada_search_params_get_entries(p);
+    ada_string_pair e = ada_search_params_entries_iter_next(it);
+    ada_search_params_set(p, e.key.data, e.key.length, e.value.data,
+                          e.value.length);
+    ada_free_search_params_entries_iter(it);
+    ASSERT_EQ(ada_search_params_size(p), 1);
+    ada_free_search_params(p);
+  }
+
+  // Test ada_search_params_append with aliased key and value
+  {
+    std::string_view input = "long_key_name_one=long_value_name_one";
+    ada_url_search_params p =
+        ada_parse_search_params(input.data(), input.size());
+    ada_string v = ada_search_params_get(p, "long_key_name_one",
+                                         strlen("long_key_name_one"));
+    for (int i = 0; i < 20; ++i) {
+      ada_search_params_append(p, "new_key", 7, v.data, v.length);
+      v = ada_search_params_get(p, "long_key_name_one",
+                                strlen("long_key_name_one"));
+    }
+    ASSERT_EQ(ada_search_params_size(p), 21);
+    ada_free_search_params(p);
+  }
+}
+
+TEST(ada_c, search_params_iterators_snapshot_isolation) {
+  std::string_view input = "a=1&b=2";
+  ada_url_search_params p = ada_parse_search_params(input.data(), input.size());
+  ada_url_search_params_keys_iter keys = ada_search_params_get_keys(p);
+  // Reset the search params while iterator is alive
+  std::string_view new_input = "c=3&d=4";
+  ada_search_params_reset(p, new_input.data(), new_input.size());
+  ASSERT_EQ(ada_search_params_size(p), 2);
+  // Iterator should still yield original keys
+  ASSERT_TRUE(ada_search_params_keys_iter_has_next(keys));
+  ada_string k1 = ada_search_params_keys_iter_next(keys);
+  ASSERT_EQ(std::string(k1.data, k1.length), "a");
+  ASSERT_TRUE(ada_search_params_keys_iter_has_next(keys));
+  ada_string k2 = ada_search_params_keys_iter_next(keys);
+  ASSERT_EQ(std::string(k2.data, k2.length), "b");
+  ASSERT_FALSE(ada_search_params_keys_iter_has_next(keys));
+  ada_free_search_params_keys_iter(keys);
+  ada_free_search_params(p);
+}
+
+TEST(ada_c, search_params_null_and_empty_handles) {
+  // Null handle checks
+  ASSERT_EQ(ada_search_params_size(nullptr), 0);
+  ada_search_params_sort(nullptr);
+  ada_search_params_reset(nullptr, "a=b", 3);
+  ada_search_params_append(nullptr, "a", 1, "b", 1);
+  ada_search_params_set(nullptr, "a", 1, "b", 1);
+  ada_search_params_remove(nullptr, "a", 1);
+  ada_search_params_remove_value(nullptr, "a", 1, "b", 1);
+  ASSERT_FALSE(ada_search_params_has(nullptr, "a", 1));
+  ASSERT_FALSE(ada_search_params_has_value(nullptr, "a", 1, "b", 1));
+  ada_string get_res = ada_search_params_get(nullptr, "a", 1);
+  ASSERT_EQ(get_res.data, nullptr);
+  ada_owned_string to_str = ada_search_params_to_string(nullptr);
+  ASSERT_EQ(to_str.data, nullptr);
+
+  ada_url_search_params_keys_iter keys = ada_search_params_get_keys(nullptr);
+  ASSERT_FALSE(ada_search_params_keys_iter_has_next(keys));
+  ada_string k = ada_search_params_keys_iter_next(keys);
+  ASSERT_EQ(k.data, nullptr);
+  ada_free_search_params_keys_iter(keys);
+
+  ada_url_search_params_values_iter values =
+      ada_search_params_get_values(nullptr);
+  ASSERT_FALSE(ada_search_params_values_iter_has_next(values));
+  ada_string v = ada_search_params_values_iter_next(values);
+  ASSERT_EQ(v.data, nullptr);
+  ada_free_search_params_values_iter(values);
+
+  ada_url_search_params_entries_iter entries =
+      ada_search_params_get_entries(nullptr);
+  ASSERT_FALSE(ada_search_params_entries_iter_has_next(entries));
+  ada_string_pair e = ada_search_params_entries_iter_next(entries);
+  ASSERT_EQ(e.key.data, nullptr);
+  ASSERT_EQ(e.value.data, nullptr);
+  ada_free_search_params_entries_iter(entries);
+}
+
 TEST(ada_c, ada_url_search_params) {
   std::string_view input;
   ada_url_search_params out;
