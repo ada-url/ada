@@ -581,3 +581,29 @@ TEST(url_search_params, sort_surrogate_lhs_exhausted_pending) {
   ASSERT_EQ(keys.next(), "A\360\237\214\210B");
   SUCCEED();
 }
+
+TEST(url_search_params, percent_decoded_ill_formed_utf8_becomes_replacement) {
+  // The application/x-www-form-urlencoded parser UTF-8 decodes the
+  // percent-decoded name and value without BOM: each maximal ill-formed
+  // subsequence becomes U+FFFD, and the entries are valid UTF-8.
+  auto check = [](std::string_view init, std::string_view key,
+                  std::string_view serialized) {
+    ada::url_search_params params(init);
+    ASSERT_EQ(params.size(), 1);
+    ASSERT_EQ(params.front().first, key);
+    ASSERT_EQ(params.to_string(), serialized);
+  };
+  check("%aa", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("%C3", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("%C3%28", "\xEF\xBF\xBD(", "%EF%BF%BD%28=");
+  check("%E2%82", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("%ED%A0%80", "\xEF\xBF\xBD\xEF\xBF\xBD\xEF\xBF\xBD",
+        "%EF%BF%BD%EF%BF%BD%EF%BF%BD=");
+  check("%F0%9F%98", "\xEF\xBF\xBD", "%EF%BF%BD=");
+  check("%C3%A9", "\xC3\xA9", "%C3%A9=");
+  // A well-formed 4-byte sequence is kept, and a broken value is replaced.
+  check("%F0%9F%98%80=%F5", "\xF0\x9F\x98\x80", "%F0%9F%98%80=%EF%BF%BD");
+  // Distinct ill-formed escapes are the same key once decoded.
+  ada::url_search_params params("%aa=1&%ab=2");
+  ASSERT_EQ(params.get_all("\xEF\xBF\xBD").size(), 2);
+}

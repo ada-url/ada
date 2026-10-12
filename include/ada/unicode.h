@@ -201,11 +201,14 @@ std::string percent_decode(std::string_view input, size_t first_percent);
 
 /**
  * Decode an application/x-www-form-urlencoded component: map '+' to space,
- * then percent-decode. Single allocation; no intermediate string.
+ * percent-decode, then UTF-8 decode with replacement as the standard does,
+ * so that escapes of ill-formed UTF-8 (`%FF`) become U+FFFD and the result
+ * is valid UTF-8.
  *
  * @param input A form-urlencoded component (key or value).
  * @return The decoded string.
  * @see https://url.spec.whatwg.org/#concept-urlencoded-parser
+ * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
  */
 std::string form_urlencoded_decode(std::string_view input);
 
