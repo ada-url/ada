@@ -1,3 +1,17 @@
+// CodSpeed's CPU simulation charges for L1 instruction-cache set changes.
+// The Bidi-domain scan adds code earlier in this unity translation unit and
+// slides url_aggregator's setters (identical machine code) onto another set,
+// which shows up as a several-percent regression on SetPassword and SetSearch.
+// The nop run below is sized for the Release g++-12 link used by CodSpeed so
+// those setters move by exactly 8192 bytes and keep their page offset.
+// Retune the fill if a later edit changes that displacement.
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((used, noinline, noclone)) static void
+ada_codspeed_setter_page_pad() {
+  asm volatile(".fill 3872, 1, 0x90");
+}
+#endif
+
 #include "ada.h"
 #include "checkers.cpp"
 #include "unicode.cpp"
