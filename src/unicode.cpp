@@ -536,6 +536,9 @@ constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
   return t;
 }();
 
+// Percent-decode only. The UTF-8 replacement entry point lives in
+// unicode_utf8.cpp. This body stays in the unity TU, at the same size as the
+// historical form_urlencoded_decode, so GCC's setter inlining does not move.
 std::string form_urlencoded_percent_decode(const std::string_view input) {
   const size_t len = input.size();
   if (len == 0) [[unlikely]] {

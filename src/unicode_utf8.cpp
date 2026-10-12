@@ -1,5 +1,6 @@
 #include "ada/unicode.h"
 
+#include <array>
 #include <cstring>
 #include <string>
 #include <string_view>
@@ -63,37 +64,98 @@ std::string utf8_decode_without_bom(std::string_view input) {
   return out;
 }
 
-namespace {
-// Word-wise high-bit test. Percent-decoding can turn an all-ASCII escape
-// (`%AA`) into a non-ASCII byte, so the check runs on the decoded buffer
-// once, after the hot loop, instead of on every copied run.
-ada_really_inline bool contains_non_ascii(const char* s, size_t n) noexcept {
-  constexpr uint64_t high_bit = 0x8080808080808080ull;
-  size_t i = 0;
-  for (; i + sizeof(uint64_t) <= n; i += sizeof(uint64_t)) {
-    uint64_t word;
-    std::memcpy(&word, s + i, sizeof(word));
-    if ((word & high_bit) != 0) {
-      return true;
-    }
+// 0..15 for hex digits, 0xFF otherwise - validate and decode with two loads.
+constexpr static std::array<uint8_t, 256> form_unhex_table = []() consteval {
+  std::array<uint8_t, 256> t{};
+  for (size_t i = 0; i < 256; ++i) {
+    t[i] = 0xFF;
   }
-  if (i < n) {
-    uint64_t word = 0;
-    std::memcpy(&word, s + i, n - i);
-    if ((word & high_bit) != 0) {
-      return true;
-    }
+  for (uint8_t i = 0; i < 10; ++i) {
+    t[static_cast<size_t>('0') + i] = i;
   }
-  return false;
-}
-}  // namespace
+  for (uint8_t i = 0; i < 6; ++i) {
+    t[static_cast<size_t>('A') + i] = static_cast<uint8_t>(10 + i);
+    t[static_cast<size_t>('a') + i] = static_cast<uint8_t>(10 + i);
+  }
+  return t;
+}();
 
-// The percent-decode loop stays in the unity TU (see unicode.cpp) so GCC's
-// inlining budget for URL setters matches a build without this pass. Only
-// the replacement step lives here.
+// Lives outside the unity TU. A non-ASCII result is either a raw input byte
+// or a percent-escape whose high nibble is >= 8; both are noticed while the
+// bytes are already in hand, so ASCII queries do not take a second pass.
 std::string form_urlencoded_decode(const std::string_view input) {
-  std::string out = form_urlencoded_percent_decode(input);
-  if (contains_non_ascii(out.data(), out.size())) [[unlikely]] {
+  const size_t len = input.size();
+  if (len == 0) [[unlikely]] {
+    return {};
+  }
+
+  // NOLINTNEXTLINE(bugprone-suspicious-stringview-data-usage)
+  const char* const src = input.data();
+  const char* const end = src + len;
+  const char* p = src;
+
+  unsigned raw_high = 0;
+  while (p < end && *p != '+' && *p != '%') {
+    raw_high |= static_cast<unsigned char>(*p);
+    ++p;
+  }
+  if (p == end) {
+    if (raw_high >= 0x80) [[unlikely]] {
+      return utf8_decode_without_bom(input);
+    }
+    return std::string(input);
+  }
+
+  // Percent-decoding never grows the input. The UTF-8 pass below may.
+  std::string out(len, '\0');
+  char* d = out.data();
+  char* const d0 = d;
+
+  const size_t prefix = static_cast<size_t>(p - src);
+  std::memcpy(d, src, prefix);
+  d += prefix;
+
+  // High nibbles of decoded escapes. >= 8 means the decoded byte is non-ASCII.
+  unsigned decoded_high = 0;
+
+  while (p < end) {
+    const char c = *p;
+    if (c == '+') {
+      *d++ = ' ';
+      ++p;
+    } else if (c == '%') {
+      // Decode runs of valid %XX tightly (common for nested URL query values).
+      while (p + 2 < end && *p == '%') {
+        const uint8_t hi = form_unhex_table[static_cast<uint8_t>(p[1])];
+        const uint8_t lo = form_unhex_table[static_cast<uint8_t>(p[2])];
+        if ((hi | lo) >= 16) {
+          break;
+        }
+        *d++ = static_cast<char>((hi << 4) | lo);
+        decoded_high |= hi;
+        p += 3;
+      }
+      if (p < end && *p == '%') {
+        // Invalid escape: copy '%' literally and continue.
+        *d++ = *p++;
+      }
+    } else {
+      // Copy a plain run until the next '+' or '%'.
+      const char* start = p;
+      raw_high |= static_cast<unsigned char>(*p);
+      ++p;
+      while (p < end && *p != '+' && *p != '%') {
+        raw_high |= static_cast<unsigned char>(*p);
+        ++p;
+      }
+      const size_t n = static_cast<size_t>(p - start);
+      std::memcpy(d, start, n);
+      d += n;
+    }
+  }
+
+  out.resize(static_cast<size_t>(d - d0));
+  if ((decoded_high >= 8) || (raw_high >= 0x80)) [[unlikely]] {
     return utf8_decode_without_bom(out);
   }
   return out;

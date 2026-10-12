@@ -211,9 +211,9 @@ std::string utf8_decode_without_bom(std::string_view input);
 
 /**
  * @private
- * Map '+' to space and percent-decode. No UTF-8 replacement. Kept in the
- * unity translation unit so the setter inlining budget matches that loop
- * on its own; form_urlencoded_decode applies the UTF-8 pass outside it.
+ * Map '+' to space and percent-decode, with no UTF-8 replacement.
+ * Defined in the unity translation unit so that unit's size matches the
+ * historical decoder; form_urlencoded_decode is the parser entry point.
  */
 std::string form_urlencoded_percent_decode(std::string_view input);
 
