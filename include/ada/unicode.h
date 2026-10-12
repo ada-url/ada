@@ -200,6 +200,16 @@ ada_really_inline unsigned constexpr convert_hex_to_binary(char c) noexcept;
 std::string percent_decode(std::string_view input, size_t first_percent);
 
 /**
+ * @private
+ * UTF-8 decode without BOM. Well-formed sequences are preserved and each
+ * maximal ill-formed subsequence is replaced with U+FFFD.
+ * Defined in its own translation unit so the unity build's inlining budget
+ * for URL setters stays put.
+ * @see https://encoding.spec.whatwg.org/#utf-8-decode-without-bom
+ */
+std::string utf8_decode_without_bom(std::string_view input);
+
+/**
  * Decode an application/x-www-form-urlencoded component: map '+' to space,
  * percent-decode, then UTF-8 decode with replacement as the standard does,
  * so that escapes of ill-formed UTF-8 (`%FF`) become U+FFFD and the result

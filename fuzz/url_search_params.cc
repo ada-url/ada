@@ -235,15 +235,23 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   }
 
   // Mutated params idempotency.
+  //
+  // append/set store caller bytes as-is. Those bytes are not required to be
+  // UTF-8 (#865). Serializing them and parsing the result runs UTF-8 decode
+  // with replacement, so the first serialization need not equal the second
+  // when the stored bytes were ill-formed. The parser's own output must still
+  // be a fixed point.
   {
     std::string s1 = move_assigned.to_string();
-    ada::url_search_params reparsed(s1);
-    std::string s2 = reparsed.to_string();
-    if (s1 != s2) {
+    ada::url_search_params once(s1);
+    std::string s2 = once.to_string();
+    ada::url_search_params twice(s2);
+    std::string s3 = twice.to_string();
+    if (s2 != s3) {
       printf(
-          "url_search_params serialisation not idempotent (mutated)!\n"
-          "  first:  %s\n  second: %s\n",
-          s1.c_str(), s2.c_str());
+          "url_search_params parser output is not a fixed point (mutated)!\n"
+          "  parsed: %s\n  again:  %s\n",
+          s2.c_str(), s3.c_str());
       abort();
     }
   }

@@ -537,58 +537,13 @@ constexpr static std::array<uint8_t, 256> unhex_table = []() consteval {
 }();
 
 namespace {
-// The Encoding Standard's UTF-8 decoder with replacement, re-encoded as
-// UTF-8: well-formed sequences are kept, and each maximal ill-formed
-// subsequence becomes U+FFFD.
-// https://encoding.spec.whatwg.org/#utf-8-decoder
-std::string utf8_decode_without_bom(std::string_view input) {
-  constexpr std::string_view replacement = "\xEF\xBF\xBD";
-  std::string out;
-  out.reserve(input.size());
-  size_t i = 0;
-  while (i < input.size()) {
-    const uint8_t b = static_cast<uint8_t>(input[i]);
-    size_t needed = 0;
-    uint8_t lower = 0x80, upper = 0xBF;
-    if (b <= 0x7F) {
-      out.push_back(static_cast<char>(b));
-      i++;
-      continue;
-    } else if (b >= 0xC2 && b <= 0xDF) {
-      needed = 1;
-    } else if (b >= 0xE0 && b <= 0xEF) {
-      needed = 2;
-      if (b == 0xE0) lower = 0xA0;
-      if (b == 0xED) upper = 0x9F;
-    } else if (b >= 0xF0 && b <= 0xF4) {
-      needed = 3;
-      if (b == 0xF0) lower = 0x90;
-      if (b == 0xF4) upper = 0x8F;
-    } else {
-      out.append(replacement);
-      i++;
-      continue;
+ada_really_inline bool contains_non_ascii(const char* s, size_t n) noexcept {
+  for (size_t i = 0; i < n; ++i) {
+    if (static_cast<uint8_t>(s[i]) >= 0x80) {
+      return true;
     }
-    size_t seen = 0;
-    while (seen < needed && i + 1 + seen < input.size()) {
-      const uint8_t c = static_cast<uint8_t>(input[i + 1 + seen]);
-      if (c < lower || c > upper) {
-        break;
-      }
-      lower = 0x80;
-      upper = 0xBF;
-      seen++;
-    }
-    if (seen == needed) {
-      out.append(input.substr(i, needed + 1));
-    } else {
-      // The lead byte and the continuation bytes that fit form the maximal
-      // subpart; the byte that broke it is read again.
-      out.append(replacement);
-    }
-    i += seen + 1;
   }
-  return out;
+  return false;
 }
 }  // namespace
 
@@ -608,20 +563,23 @@ std::string form_urlencoded_decode(const std::string_view input) {
     ++p;
   }
   if (p == end) {
+    // No '+' or '%', but a raw non-ASCII byte still has to be UTF-8 decoded.
+    if (contains_non_ascii(src, len)) {
+      return utf8_decode_without_bom(input);
+    }
     return std::string(input);
   }
 
-  // Output is always at most as long as the input: write into a single
-  // pre-sized buffer, then shrink to the final length.
+  // Percent-decoding never grows the input. The UTF-8 pass below may.
   std::string out(len, '\0');
   char* d = out.data();
   char* const d0 = d;
-  // Whether an escape decoded to a non-ASCII byte, which may leave the
-  // output ill-formed UTF-8 (the input is valid UTF-8).
-  bool decoded_non_ascii = false;
+  // A non-ASCII byte in the percent-decoded output may be ill-formed UTF-8.
+  bool needs_utf8 = false;
 
   const size_t prefix = static_cast<size_t>(p - src);
   std::memcpy(d, src, prefix);
+  needs_utf8 = contains_non_ascii(src, prefix);
   d += prefix;
 
   while (p < end) {
@@ -638,7 +596,7 @@ std::string form_urlencoded_decode(const std::string_view input) {
           break;
         }
         *d++ = static_cast<char>((hi << 4) | lo);
-        decoded_non_ascii |= hi >= 8;
+        needs_utf8 |= hi >= 8;
         p += 3;
       }
       if (p < end && *p == '%') {
@@ -654,13 +612,14 @@ std::string form_urlencoded_decode(const std::string_view input) {
       }
       const size_t n = static_cast<size_t>(p - start);
       std::memcpy(d, start, n);
+      needs_utf8 = needs_utf8 || contains_non_ascii(start, n);
       d += n;
     }
   }
 
   out.resize(static_cast<size_t>(d - d0));
   // The parser UTF-8 decodes the percent-decoded bytes, with replacement.
-  if (decoded_non_ascii) {
+  if (needs_utf8) {
     return utf8_decode_without_bom(out);
   }
   return out;

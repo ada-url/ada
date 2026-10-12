@@ -607,3 +607,21 @@ TEST(url_search_params, percent_decoded_ill_formed_utf8_becomes_replacement) {
   ada::url_search_params params("%aa=1&%ab=2");
   ASSERT_EQ(params.get_all("\xEF\xBF\xBD").size(), 2);
 }
+
+TEST(url_search_params, raw_ill_formed_utf8_round_trips) {
+  // A raw non-ASCII byte is part of the percent-decoded value and must be
+  // UTF-8 decoded too. This is the url_search_params fuzzer input
+  // "\\&\xA3": the second name is U+FFFD, and serializing then parsing is a
+  // fixed point.
+  ada::url_search_params params(std::string("\\\x26\xa3", 3));
+  ASSERT_EQ(params.get_all("\xEF\xBF\xBD").size(), 1);
+  const std::string serialized = params.to_string();
+  ASSERT_EQ(ada::url_search_params(serialized).to_string(), serialized);
+
+  // Well-formed raw UTF-8 is preserved and also round-trips.
+  ada::url_search_params cafe("caf\xc3\xa9=1");
+  ASSERT_EQ(cafe.front().first, "caf\xc3\xa9");
+  ASSERT_EQ(cafe.front().second, "1");
+  ASSERT_EQ(ada::url_search_params(cafe.to_string()).to_string(),
+            cafe.to_string());
+}
