@@ -76,6 +76,10 @@ ada_string ada_get_hostname(ada_url result);
 ada_string ada_get_pathname(ada_url result);
 ada_string ada_get_search(ada_url result);
 ada_string ada_get_protocol(ada_url result);
+// Returns an allocator-independent estimate of the opaque URL object's
+// retained storage, including its owning result block and URL buffer capacity.
+// Invalid URL results still retain and report their owning result block.
+size_t ada_url_estimated_memory_usage(ada_url result);
 uint8_t ada_get_host_type(ada_url result);
 uint8_t ada_get_scheme_type(ada_url result);
 
@@ -136,6 +140,10 @@ ada_url_search_params ada_parse_search_params(const char* input, size_t length);
 void ada_free_search_params(ada_url_search_params result);
 
 size_t ada_search_params_size(ada_url_search_params result);
+// Returns an allocator-independent estimate of the opaque parameter object's
+// retained storage, including its owning result block, parameter vector, and
+// live string capacities.
+size_t ada_search_params_estimated_memory_usage(ada_url_search_params result);
 void ada_search_params_sort(ada_url_search_params result);
 ada_owned_string ada_search_params_to_string(ada_url_search_params result);
 

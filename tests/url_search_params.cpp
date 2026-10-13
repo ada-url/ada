@@ -17,6 +17,33 @@ TEST(url_search_params, append) {
   SUCCEED();
 }
 
+TEST(url_search_params, estimated_memory_usage_tracks_retained_capacity) {
+  using key_value_pair = std::pair<std::string, std::string>;
+  constexpr size_t entry_count = 64;
+  constexpr size_t string_size = 256;
+
+  ada::url_search_params search_params;
+  const size_t initial_estimate = search_params.estimated_memory_usage();
+  const std::string key(string_size, 'k');
+  const std::string value(string_size, 'v');
+
+  for (size_t index = 0; index < entry_count; ++index) {
+    search_params.append(key, value);
+  }
+
+  const size_t populated_estimate = search_params.estimated_memory_usage();
+  const size_t populated_lower_bound =
+      entry_count * sizeof(key_value_pair) +
+      entry_count * (key.size() + value.size());
+  ASSERT_GE(populated_estimate, populated_lower_bound);
+  ASSERT_GT(populated_estimate, initial_estimate);
+
+  search_params.reset("");
+  ASSERT_GE(search_params.estimated_memory_usage(),
+            entry_count * sizeof(key_value_pair));
+  ASSERT_LE(search_params.estimated_memory_usage(), populated_estimate);
+}
+
 TEST(url_search_params, to_string) {
   auto search_params = ada::url_search_params();
   search_params.append("key1", "value1");

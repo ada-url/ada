@@ -81,6 +81,41 @@ TEST(ada_c, getters) {
   SUCCEED();
 }
 
+TEST(ada_c, estimated_memory_usage) {
+  const std::string short_input = "https://example.com/";
+  ada_url url = ada_parse(short_input.data(), short_input.size());
+  ASSERT_TRUE(ada_is_valid(url));
+  const size_t initial_url_estimate = ada_url_estimated_memory_usage(url);
+  ASSERT_GT(initial_url_estimate, short_input.size());
+
+  const std::string large_input =
+      "https://example.com/" + std::string(8192, 'a');
+  ASSERT_TRUE(ada_set_href(url, large_input.data(), large_input.size()));
+  ASSERT_GE(ada_url_estimated_memory_usage(url), large_input.size());
+  ASSERT_GT(ada_url_estimated_memory_usage(url), initial_url_estimate);
+  ada_free(url);
+
+  const std::string invalid_input = ":";
+  url = ada_parse(invalid_input.data(), invalid_input.size());
+  ASSERT_FALSE(ada_is_valid(url));
+  ASSERT_GT(ada_url_estimated_memory_usage(url), 0);
+  ada_free(url);
+
+  ada_url_search_params params = ada_parse_search_params("", 0);
+  const size_t initial_params_estimate =
+      ada_search_params_estimated_memory_usage(params);
+  ASSERT_GT(initial_params_estimate, 0);
+  const std::string key(256, 'k');
+  const std::string value(256, 'v');
+  for (size_t index = 0; index < 64; ++index) {
+    ada_search_params_append(params, key.data(), key.size(), value.data(),
+                             value.size());
+  }
+  ASSERT_GT(ada_search_params_estimated_memory_usage(params),
+            initial_params_estimate);
+  ada_free_search_params(params);
+}
+
 TEST(ada_c, setters) {
   std::string input =
       "https://username:password@www.google.com:8080/"
