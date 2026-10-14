@@ -360,8 +360,10 @@ TYPED_TEST(max_input_length_tests, set_hostname_idna_expansion_respects_limit) {
   std::string before(url->get_href());
   ada::set_max_input_length(59);
   // U+321E U+33AF U+3319 U+337F: 12 bytes of input, 51 bytes of host.
-  bool ok = url->set_hostname("\xe3\x88\x9e\xe3\x8e\xaf\xe3\x8c\x99\xe3\x8d\xbf");
-  bool ok_host = url->set_host("\xe3\x88\x9e\xe3\x8e\xaf\xe3\x8c\x99\xe3\x8d\xbf");
+  bool ok =
+      url->set_hostname("\xe3\x88\x9e\xe3\x8e\xaf\xe3\x8c\x99\xe3\x8d\xbf");
+  bool ok_host =
+      url->set_host("\xe3\x88\x9e\xe3\x8e\xaf\xe3\x8c\x99\xe3\x8d\xbf");
   ada::set_max_input_length(small_limit);
   ASSERT_FALSE(ok);
   ASSERT_FALSE(ok_host);
