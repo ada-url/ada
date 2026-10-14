@@ -1128,10 +1128,11 @@ std::string generate_pattern_string(
     // - part's suffix is not the empty string.
     // - part's prefix is not the empty string and is not options's prefix code
     // point.
+    // This compares the whole prefix: a prefix such as "/9" starts with the
+    // prefix code point but is not it, and still needs grouping.
     bool needs_grouping =
         !part.suffix.empty() ||
-        (!part.prefix.empty() && (options.get_prefix().empty() ||
-                                  part.prefix[0] != options.get_prefix()[0]));
+        (!part.prefix.empty() && part.prefix != options.get_prefix());
 
     // If all of the following are true:
     // - needs grouping is false; and
