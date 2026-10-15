@@ -704,6 +704,48 @@ TEST(wpt_urlpattern_tests, grouped_part_keeps_braces_without_prefix_option) {
   }
 }
 
+TEST(wpt_urlpattern_tests, grouped_part_keeps_braces_with_longer_prefix) {
+  // "generate a pattern string": needs grouping is true if the part's prefix
+  // is not the empty string and is not options's prefix code point. A prefix
+  // that merely starts with '/' (such as "/9" or "/ab") is not '/', so the
+  // part keeps its braces. Without them the generated string parses back to
+  // a different pattern: the text after '/' becomes fixed text outside the
+  // group, and the modifier no longer covers it.
+  struct test_case {
+    std::string pattern;
+    std::string url;
+    bool matches;
+  };
+  for (const auto& tc : std::vector<test_case>{
+           {"{/9*}", "https://example.com/9x", true},
+           {"/a{/9*}?", "https://example.com/a", true},
+           {"/a{/9*}?", "https://example.com/a/9x", true},
+           {"/a{/ab:id}?", "https://example.com/a", true},
+           {"/a{/ab:id}?", "https://example.com/a/ab", false},
+           {"/a{/ab:id}?", "https://example.com/a/abc", true},
+       }) {
+    SCOPED_TRACE(tc.pattern + " " + tc.url);
+    auto init = ada::url_pattern_init{};
+    init.pathname = tc.pattern;
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_pathname(), tc.pattern);
+    auto result = url->test(std::string_view(tc.url), nullptr);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(*result, tc.matches);
+    // Recompiling the pathname from its own serialization has to give a
+    // pattern that matches the same URLs.
+    auto round = ada::url_pattern_init{};
+    round.pathname = std::string(url->get_pathname());
+    auto again = ada::parse_url_pattern<regex_provider>(round);
+    ASSERT_TRUE(again);
+    EXPECT_EQ(again->get_pathname(), url->get_pathname());
+    auto again_result = again->test(std::string_view(tc.url), nullptr);
+    ASSERT_TRUE(again_result);
+    EXPECT_EQ(*again_result, tc.matches);
+  }
+}
+
 // A constructor string ending with an unterminated "{" must be rejected. The
 // end token has to reach the state machine so the trailing component is
 // captured and compiled; if it is consumed as group content instead, the
