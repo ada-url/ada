@@ -1,7 +1,12 @@
 #include <array>
 #include <filesystem>
 #include <iostream>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <unordered_set>
+#include <utility>
+#include <variant>
 
 #include "ada/log.h"
 #include "gtest/gtest.h"
@@ -1524,4 +1529,127 @@ TEST(wpt_urlpattern_tests, string_input_without_base_must_parse_alone) {
   auto with_base_exec = p->exec("/users/1", &base);
   ASSERT_TRUE(with_base_exec);
   EXPECT_TRUE(with_base_exec->has_value());
+}
+
+namespace {
+
+ada::url_pattern<regex_provider> make_example_wildcard_pattern() {
+  ada::url_pattern_init route{};
+  route.protocol = "https";
+  route.hostname = "example.com";
+  route.pathname = "*";
+  auto pattern = ada::parse_url_pattern<regex_provider>(route);
+  EXPECT_TRUE(pattern);
+  return std::move(*pattern);
+}
+
+std::string_view input_string_view(const ada::url_pattern_input& input) {
+  return std::get<std::string_view>(input);
+}
+
+}  // namespace
+
+// exec()/match() must own URL text. A temporary std::string is destroyed
+// at the end of the full expression; reading inputs afterwards must not
+// be a use-after-free.
+TEST(wpt_urlpattern_tests, exec_owns_temporary_string_input) {
+  auto pattern = make_example_wildcard_pattern();
+  const std::string expected =
+      std::string("https://example.com/") + std::string(100, 'a');
+
+  auto result =
+      pattern.exec(std::string("https://example.com/") + std::string(100, 'a'));
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result->has_value());
+  ASSERT_EQ((*result)->inputs.size(), 1u);
+  ASSERT_TRUE(std::holds_alternative<std::string_view>((*result)->inputs[0]));
+  EXPECT_EQ(input_string_view((*result)->inputs[0]), expected);
+
+  auto copied = **result;
+  EXPECT_EQ(input_string_view(copied.inputs[0]), expected);
+  auto moved = std::move(copied);
+  EXPECT_EQ(input_string_view(moved.inputs[0]), expected);
+  ada::url_pattern_result assigned;
+  assigned = moved;
+  EXPECT_EQ(input_string_view(assigned.inputs[0]), expected);
+}
+
+TEST(wpt_urlpattern_tests, match_owns_temporary_string_input) {
+  auto pattern = make_example_wildcard_pattern();
+  const std::string expected =
+      std::string("https://example.com/") + std::string(100, 'd');
+
+  auto result = pattern.match(std::string("https://example.com/") +
+                              std::string(100, 'd'));
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result->has_value());
+  ASSERT_EQ((*result)->inputs.size(), 1u);
+  ASSERT_TRUE(std::holds_alternative<std::string_view>((*result)->inputs[0]));
+  EXPECT_EQ(input_string_view((*result)->inputs[0]), expected);
+}
+
+TEST(wpt_urlpattern_tests, exec_owns_temporary_base_url) {
+  ada::url_pattern_init route{};
+  route.protocol = "https";
+  route.hostname = "example.com";
+  route.pathname = "/foo/*";
+  auto pattern = ada::parse_url_pattern<regex_provider>(route);
+  ASSERT_TRUE(pattern);
+
+  const std::string expected_input = "/foo/" + std::string(100, 'b');
+  const std::string expected_base =
+      std::string("https://example.com/") + std::string(80, 'c');
+
+  std::optional<ada::url_pattern_result> owned;
+  {
+    std::string base =
+        std::string("https://example.com/") + std::string(80, 'c');
+    std::string_view base_view = base;
+    auto result =
+        pattern->exec(std::string("/foo/") + std::string(100, 'b'), &base_view);
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->has_value());
+    owned = std::move(**result);
+  }
+
+  ASSERT_EQ(owned->inputs.size(), 2u);
+  ASSERT_TRUE(std::holds_alternative<std::string_view>(owned->inputs[0]));
+  ASSERT_TRUE(std::holds_alternative<std::string_view>(owned->inputs[1]));
+  EXPECT_EQ(input_string_view(owned->inputs[0]), expected_input);
+  EXPECT_EQ(input_string_view(owned->inputs[1]), expected_base);
+
+  auto copied = *owned;
+  EXPECT_EQ(input_string_view(copied.inputs[0]), expected_input);
+  EXPECT_EQ(input_string_view(copied.inputs[1]), expected_base);
+}
+
+TEST(wpt_urlpattern_tests, match_owns_temporary_base_url) {
+  ada::url_pattern_init route{};
+  route.protocol = "https";
+  route.hostname = "example.com";
+  route.pathname = "/foo/*";
+  auto pattern = ada::parse_url_pattern<regex_provider>(route);
+  ASSERT_TRUE(pattern);
+
+  const std::string expected_input = "/foo/" + std::string(100, 'e');
+  const std::string expected_base =
+      std::string("https://example.com/") + std::string(80, 'f');
+
+  std::optional<ada::url_pattern_result> owned;
+  {
+    std::string base =
+        std::string("https://example.com/") + std::string(80, 'f');
+    std::string_view base_view = base;
+    auto result = pattern->match(std::string("/foo/") + std::string(100, 'e'),
+                                 &base_view);
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->has_value());
+    owned = std::move(**result);
+  }
+
+  ASSERT_EQ(owned->inputs.size(), 2u);
+  ASSERT_TRUE(std::holds_alternative<std::string_view>(owned->inputs[0]));
+  ASSERT_TRUE(std::holds_alternative<std::string_view>(owned->inputs[1]));
+  EXPECT_EQ(input_string_view(owned->inputs[0]), expected_input);
+  EXPECT_EQ(input_string_view(owned->inputs[1]), expected_base);
 }
