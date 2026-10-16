@@ -327,6 +327,11 @@ struct url_aggregator : url_base {
   template <class result_type>
   friend bool parser::try_parse_simple_absolute(std::string_view, result_type&);
   template <class result_type>
+  friend bool parser::try_parse_simple_absolute_with_scheme(std::string_view,
+                                                            result_type&,
+                                                            ada::scheme::type,
+                                                            uint32_t, size_t);
+  template <class result_type>
   friend bool parser::finish_simple_absolute_with_port(std::string_view,
                                                        result_type&,
                                                        ada::scheme::type,
