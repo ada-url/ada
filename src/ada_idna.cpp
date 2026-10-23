@@ -241,8 +241,9 @@ bool map(std::u32string_view input, std::u32string& out);
 // code; compression only affects on-disk size and one-time init.
 //
 // Thread-safe without mutex: atomic CAS + spin-wait. ensure_tables() returns
-// false if initialization fails (OOM, corrupt blob); callers must treat that
-// as a hard error and not touch table pointers.
+// false if initialization fails. A corrupt blob stays failed for the process.
+// An allocation failure is not latched: a later call tries again. Callers
+// must treat a false return as a hard error and not touch table pointers.
 
 /* begin file src/raw_inflate.hpp */
 // Minimal raw DEFLATE inflater (RFC 1951), enough for zlib raw streams.
@@ -4967,8 +4968,12 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
                                                 std::memory_order_acquire)) {
     uint8_t* buffer = new (std::nothrow) uint8_t[table_blob::uncompressed_size];
     if (buffer == nullptr) {
-      tables_init_state.store(kTablesFailed, std::memory_order_release);
+      // Leave the state uninitialized so a later call can retry. A corrupt
+      // blob (below) is permanent; running out of memory may not be.
+      // LCOV_EXCL_START
+      tables_init_state.store(kTablesUninit, std::memory_order_release);
       return false;
+      // LCOV_EXCL_STOP
     }
 
     const size_t n = deflate::inflate_raw(table_blob::compressed,
@@ -5040,9 +5045,15 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
     if (state == kTablesReady) {
       return true;
     }
-    if (state == kTablesFailed) {
+    // Failed is permanent. Uninit means the peer gave up after a failed
+    // allocation: do not spin, the next call can take the init slot. One
+    // comparison, same shape as the old Failed check, so this wait loop does
+    // not grow the unity translation unit.
+    // LCOV_EXCL_START
+    if (state != kTablesInProgress) {
       return false;
     }
+    // LCOV_EXCL_STOP
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || \
     defined(_M_IX86)
 #if defined(__GNUC__) || defined(__clang__)
