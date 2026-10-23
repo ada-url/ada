@@ -8,6 +8,30 @@ template <class T>
 struct basic_tests : testing::Test {};
 TYPED_TEST_SUITE(basic_tests, Types);
 
+TYPED_TEST(basic_tests, encoded_path_normalization) {
+  const std::pair<std::string_view, std::string_view> cases[] = {
+      {"https://example.com/a b/%2e/c/../é/", "/a%20b/%C3%A9/"},
+      {"https://example.com/a b/.%2E/final", "/final"},
+      {"https://example.com/a b/%2e%2E", "/"},
+      {"https://example.com/a b/%2e", "/a%20b/"},
+      {"https://example.com/a b//%2e%2e/end", "/a%20b/end"},
+      {"file:///C|/a b/../../é", "/C:/%C3%A9"},
+      {"file:///C:/a b/..\\é", "/C:/%C3%A9"},
+      {"custom://host/a b/%2e%2e/é", "/%C3%A9"},
+  };
+  for (const auto& [input, expected] : cases) {
+    auto url = ada::parse<TypeParam>(input);
+    ASSERT_TRUE(url) << input;
+    EXPECT_EQ(url->get_pathname(), expected) << input;
+  }
+  auto file = ada::parse<TypeParam>("file:///");
+  ASSERT_TRUE(file);
+  file->set_pathname("/C|?a b");
+  EXPECT_EQ(file->get_pathname(), "/C|%3Fa%20b");
+  file->set_pathname("/C|#a b");
+  EXPECT_EQ(file->get_pathname(), "/C|%23a%20b");
+}
+
 TYPED_TEST(basic_tests, insane_url) {
   auto r = ada::parse<ada::url_aggregator>("e:@EEEEEEEEEE");
   ASSERT_TRUE(r);
