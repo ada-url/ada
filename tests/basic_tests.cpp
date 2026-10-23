@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 using Types = testing::Types<ada::url, ada::url_aggregator>;
 template <class T>
@@ -2352,4 +2353,174 @@ TEST(basic_tests, tab_removal_is_independent_of_fpcr_fz) {
   ASSERT_EQ(href, "http://ab.com/x");
 #endif
   SUCCEED();
+}
+
+TYPED_TEST(basic_tests, idna_hangul_and_bidi_regressions) {
+  // ada-url/idna#104: Hangul LV + trailing T jamo composes to an LVT syllable.
+  {
+    auto r = ada::parse<TypeParam>("http://\uAC00\u11A8.example/");
+    ASSERT_TRUE(r);
+    EXPECT_EQ(r->get_hostname(), "xn--p39a.example");
+  }
+
+  // ada-url/ada#1277: RFC 5893 applies to every label in a Bidi domain, and
+  // RFC 5892 ContextJ still rejects a ZWNJ that is not between joining types.
+  {
+    // U+0031 . U+0627: the digit label violates Bidi rule 1.
+    auto r = ada::parse<TypeParam>("http://1.\u0627/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+0627 . U+0031 U+0061: "1a" violates Bidi rule 1.
+    auto r = ada::parse<TypeParam>("http://\u0627.1a/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+0644 U+200C U+0073 U+06EF: ZWNJ between LAM and 's' violates ContextJ.
+    auto r = ada::parse<TypeParam>("http://\u0644\u200Cs\u06EF/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+0061 U+0644 U+200C U+06EF: LTR label with Arabic letters violates
+    // rule 5.
+    auto r = ada::parse<TypeParam>("http://a\u0644\u200C\u06EF/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+0627 U+0BCD U+200D: RTL label ending in ZWJ violates Bidi rule 3.
+    auto r = ada::parse<TypeParam>("http://\u0627\u0BCD\u200D/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // An LTR label that starts and ends with L is allowed beside an RTL label.
+    auto r = ada::parse<TypeParam>("http://example.\u0627/");
+    ASSERT_TRUE(r);
+    EXPECT_EQ(r->get_hostname(), "example.xn--mgb");
+  }
+  {
+    // A label that starts with L and ends with EN is also allowed.
+    auto r = ada::parse<TypeParam>("http://a1.\u0627/");
+    ASSERT_TRUE(r);
+    EXPECT_EQ(r->get_hostname(), "a1.xn--mgb");
+  }
+  {
+    // Non-ASCII domain containing an ACE RTL label: CheckBidi still applies
+    // to the ASCII label, which fails rule 1.
+    auto r = ada::parse<TypeParam>("http://1.\u00E4.xn--mgb/");
+    EXPECT_FALSE(r);
+  }
+  {
+    // U+00E4 is an LTR label and may sit beside an ACE RTL label.
+    auto r = ada::parse<TypeParam>("http://\u00E4.xn--mgb/");
+    ASSERT_TRUE(r);
+    EXPECT_EQ(r->get_hostname(), "xn--4ca.xn--mgb");
+  }
+}
+
+// Direct ToASCII/ToUnicode coverage for the Bidi-domain scan. URL parsing
+// never calls ToUnicode, and an all-ASCII input (including a punycode label)
+// returns before the domain scan, so these cases exercise those branches.
+TEST(idna_bidi_domain, to_ascii_and_to_unicode) {
+  std::string out;
+
+  EXPECT_EQ(ada::idna::to_ascii("\uAC00\u11A8.example"), "xn--p39a.example");
+  EXPECT_EQ(ada::idna::to_ascii("1.\u0627"), "");
+  EXPECT_EQ(ada::idna::to_ascii("\u0627.1a"), "");
+  EXPECT_EQ(ada::idna::to_ascii("example.\u0627"), "example.xn--mgb");
+  EXPECT_EQ(ada::idna::to_ascii("a1.\u0627"), "a1.xn--mgb");
+  EXPECT_EQ(ada::idna::to_ascii("\u0627.example"), "xn--mgb.example");
+  EXPECT_EQ(ada::idna::to_ascii("1.example"), "1.example");
+  // All-ASCII input, including ACE, stays on the fast path.
+  EXPECT_EQ(ada::idna::to_ascii("1.xn--mgb"), "1.xn--mgb");
+
+  // U+00FC is LTR, so the domain is not a Bidi domain.
+  EXPECT_EQ(ada::idna::to_ascii("\u00FC.example"), "xn--tda.example");
+  EXPECT_EQ(ada::idna::to_ascii("1.\u00FC"), "1.xn--tda");
+
+  // ACE decoded while scanning a non-ASCII domain.
+  // xn--tda is U+00FC (LTR); the raw label makes the domain Bidi.
+  EXPECT_EQ(ada::idna::to_ascii("xn--tda.\u0627"), "xn--tda.xn--mgb");
+  // Both labels are LTR, including an ACE label that decodes to LTR.
+  EXPECT_EQ(ada::idna::to_ascii("\u00E4.xn--tda"), "xn--4ca.xn--tda");
+  // ACE RTL label next to a valid LTR label.
+  EXPECT_EQ(ada::idna::to_ascii("\u00E4.xn--mgb"), "xn--4ca.xn--mgb");
+  // ACE RTL label discovered first; the digit label then fails rule 1.
+  EXPECT_EQ(ada::idna::to_ascii("xn--mgb.1.\u00E4"), "");
+  // Empty label is ignored by the Bidi scan and kept in the output.
+  EXPECT_EQ(ada::idna::to_ascii(".\u0627."), ".xn--mgb.");
+  EXPECT_EQ(ada::idna::to_ascii("example..\u0627"), "example..xn--mgb");
+  // ACE label that is not itself ASCII.
+  EXPECT_EQ(ada::idna::to_ascii("xn--\u0627.\u0627"), "");
+  // ACE payload that does not decode, with another RTL label.
+  EXPECT_EQ(ada::idna::to_ascii("xn--@@@.\u0627"), "");
+  // U+0627 U+200D ends an RTL label with ZWJ and fails rule 3, including when
+  // that label is already in ACE form beside a non-ASCII label.
+  EXPECT_EQ(ada::idna::to_ascii("example.\u0627\u200D"), "");
+  EXPECT_EQ(ada::idna::to_ascii("\u00E4.xn--mgb473k"), "");
+
+  // ToUnicode keeps the original input when an ASCII label is illegal only
+  // because the domain is a Bidi domain (UTS #46).
+  ASSERT_TRUE(ada::idna::to_unicode("1.xn--mgb", out));
+  EXPECT_EQ(out, "1.xn--mgb");
+  ASSERT_TRUE(ada::idna::to_unicode("xn--mgb.1a", out));
+  EXPECT_EQ(out, "xn--mgb.1a");
+  ASSERT_TRUE(ada::idna::to_unicode("example.1.xn--mgb", out));
+  EXPECT_EQ(out, "example.1.xn--mgb");
+  EXPECT_EQ(ada::idna::to_unicode("xn--mgb.1"), "xn--mgb.1");
+
+  // Valid LTR labels still decode.
+  ASSERT_TRUE(ada::idna::to_unicode("example.xn--mgb", out));
+  EXPECT_EQ(out, "example.\u0627");
+  ASSERT_TRUE(ada::idna::to_unicode("a1.xn--mgb", out));
+  EXPECT_EQ(out, "a1.\u0627");
+  ASSERT_TRUE(ada::idna::to_unicode("xn--mgb.example", out));
+  EXPECT_EQ(out, "\u0627.example");
+  ASSERT_TRUE(ada::idna::to_unicode("example..xn--mgb", out));
+  EXPECT_EQ(out, "example..\u0627");
+  ASSERT_TRUE(ada::idna::to_unicode(".xn--mgb", out));
+  EXPECT_EQ(out, ".\u0627");
+
+  // The RTL label may be raw UTF-8 rather than ACE.
+  ASSERT_TRUE(ada::idna::to_unicode("1.\u0627", out));
+  EXPECT_EQ(out, "1.\u0627");
+  ASSERT_TRUE(ada::idna::to_unicode("example.\u0627", out));
+  EXPECT_EQ(out, "example.\u0627");
+  ASSERT_TRUE(ada::idna::to_unicode("xn--tda.\u0627", out));
+  EXPECT_EQ(out, "\u00FC.\u0627");
+
+  // Not a Bidi domain: a leading digit is allowed and ACE LTR labels decode.
+  ASSERT_TRUE(ada::idna::to_unicode("1.xn--tda", out));
+  EXPECT_EQ(out, "1.\u00FC");
+  ASSERT_TRUE(ada::idna::to_unicode("1.\u00FC", out));
+  EXPECT_EQ(out, "1.\u00FC");
+  EXPECT_EQ(ada::idna::to_unicode("xn--tda"), "\u00FC");
+
+  // ACE that does not decode, an empty ACE label, and a non-ASCII "xn--" label.
+  EXPECT_EQ(ada::idna::to_unicode("xn--@@@.example"), "xn--@@@.example");
+  EXPECT_EQ(ada::idna::to_unicode("xn--.xn--mgb"), "xn--.\u0627");
+  EXPECT_EQ(ada::idna::to_unicode("xn--\u0627.example"), "xn--\u0627.example");
+  // Ill-formed UTF-8 does not make a label RTL; a later ACE label still can.
+  EXPECT_EQ(ada::idna::to_unicode("\xFF.xn--mgb"), "\xFF.\u0627");
+  EXPECT_EQ(ada::idna::to_unicode("\xFF.example"), "\xFF.example");
+
+  // Decoded ACE label fails CheckBidi, so ToUnicode keeps that label.
+  EXPECT_EQ(ada::idna::to_unicode("example.xn--mgb473k"),
+            "example.xn--mgb473k");
+
+  // A trailing dot lets the label scan finish on the loop condition.
+  EXPECT_EQ(ada::idna::to_unicode("example.xn--mgb."), "example.\u0627.");
+  EXPECT_EQ(ada::idna::to_unicode("1.xn--mgb."), "1.xn--mgb.");
+  EXPECT_EQ(ada::idna::to_ascii("\u0627."), "xn--mgb.");
+  // A continuation byte is not a UTF-8 code-point start, so it is not RTL.
+  EXPECT_EQ(ada::idna::to_unicode("\x80.xn--mgb"), "\x80.\u0627");
+  EXPECT_EQ(ada::idna::to_unicode("\x80.example"), "\x80.example");
+  EXPECT_EQ(ada::idna::to_unicode(""), "");
+
+  // The one-argument entry point still checks a single label on its own.
+  EXPECT_TRUE(ada::idna::is_label_valid(U""));
+  EXPECT_TRUE(ada::idna::is_label_valid(U"example"));
+  EXPECT_TRUE(ada::idna::is_label_valid(U"\u00FC"));
+  EXPECT_TRUE(ada::idna::is_label_valid(U"\u0627"));
+  EXPECT_FALSE(ada::idna::is_label_valid(U"\u0627\u200D"));
+  EXPECT_FALSE(ada::idna::is_label_valid(U"1\u0627"));
 }
