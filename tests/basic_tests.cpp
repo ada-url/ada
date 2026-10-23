@@ -8,6 +8,26 @@ template <class T>
 struct basic_tests : testing::Test {};
 TYPED_TEST_SUITE(basic_tests, Types);
 
+TYPED_TEST(basic_tests, absolute_encoded_tail_boundaries) {
+  const std::pair<std::string_view, std::string_view> cases[] = {
+      {"https://example.com/a b", "https://example.com/a%20b"},
+      {"https://example.com/a b?q=hello world#f?g",
+       "https://example.com/a%20b?q=hello%20world#f?g"},
+      {"https://example.com/a b#f?q", "https://example.com/a%20b#f?q"},
+      {"https://example.com/a b?#", "https://example.com/a%20b?#"},
+      {"https://example.com/?q=hello world#f?q",
+       "https://example.com/?q=hello%20world#f?q"},
+      {"https://example.com/?q=hello world",
+       "https://example.com/?q=hello%20world"},
+      {"https://example.com/a b?x\ny#f ", "https://example.com/a%20b?xy#f"},
+  };
+  for (const auto& [input, expected] : cases) {
+    auto url = ada::parse<TypeParam>(input);
+    ASSERT_TRUE(url) << input;
+    EXPECT_EQ(url->get_href(), expected) << input;
+  }
+}
+
 TYPED_TEST(basic_tests, insane_url) {
   auto r = ada::parse<ada::url_aggregator>("e:@EEEEEEEEEE");
   ASSERT_TRUE(r);
