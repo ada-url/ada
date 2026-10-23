@@ -40,6 +40,20 @@ ada_really_inline void apply_shifted_non_scheme_offsets(
 }  // namespace
 
 namespace ada {
+namespace {
+ada_never_inline bool input_aliases_buffer(std::string_view input,
+                                           const std::string& buffer) noexcept {
+  return helpers::overlaps(input, buffer);
+}
+
+ada_never_inline bool call_aggregator_setter_on_copy(
+    url_aggregator& self, std::string_view input,
+    bool (url_aggregator::*method)(std::string_view)) {
+  const std::string copy(input);
+  return (self.*method)(copy);
+}
+}  // namespace
+
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(
     const std::string_view input_with_colon) {
@@ -257,6 +271,10 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 }
 
 bool url_aggregator::set_username(const std::string_view input) {
+  if (input_aliases_buffer(input, buffer)) {
+    return call_aggregator_setter_on_copy(*this, input,
+                                          &url_aggregator::set_username);
+  }
   ada_log("url_aggregator::set_username '", input, "' ");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -285,6 +303,10 @@ bool url_aggregator::set_username(const std::string_view input) {
 }
 
 bool url_aggregator::set_password(const std::string_view input) {
+  if (input_aliases_buffer(input, buffer)) {
+    return call_aggregator_setter_on_copy(*this, input,
+                                          &url_aggregator::set_password);
+  }
   ada_log("url_aggregator::set_password '", input, "'");
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -364,6 +386,10 @@ bool url_aggregator::set_port(const std::string_view input) {
 }
 
 bool url_aggregator::set_pathname(const std::string_view input) {
+  if (input_aliases_buffer(input, buffer)) {
+    return call_aggregator_setter_on_copy(*this, input,
+                                          &url_aggregator::set_pathname);
+  }
   ada_log("url_aggregator::set_pathname ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -436,6 +462,11 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
 }
 
 void url_aggregator::set_search(const std::string_view input) {
+  if (input_aliases_buffer(input, buffer)) {
+    const std::string copy(input);
+    set_search(copy);
+    return;
+  }
   ada_log("url_aggregator::set_search ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
@@ -473,6 +504,11 @@ void url_aggregator::set_search(const std::string_view input) {
 }
 
 void url_aggregator::set_hash(const std::string_view input) {
+  if (input_aliases_buffer(input, buffer)) {
+    const std::string copy(input);
+    set_hash(copy);
+    return;
+  }
   ada_log("url_aggregator::set_hash ", input);
   ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));

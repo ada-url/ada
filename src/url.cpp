@@ -19,6 +19,18 @@
 #include <utility>
 
 namespace ada {
+namespace {
+ada_never_inline bool input_aliases_member(std::string_view input,
+                                           const std::string& member) noexcept {
+  return helpers::overlaps(input, member);
+}
+
+ada_never_inline bool call_url_setter_on_copy(
+    url& self, std::string_view input, bool (url::*method)(std::string_view)) {
+  const std::string copy(input);
+  return (self.*method)(copy);
+}
+}  // namespace
 
 bool url::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
@@ -743,6 +755,9 @@ bool url::set_hostname(const std::string_view input) {
 }
 
 bool url::set_username(const std::string_view input) {
+  if (input_aliases_member(input, username)) {
+    return call_url_setter_on_copy(*this, input, &url::set_username);
+  }
   if (cannot_have_credentials_or_port()) {
     return false;
   }
@@ -757,6 +772,9 @@ bool url::set_username(const std::string_view input) {
 }
 
 bool url::set_password(const std::string_view input) {
+  if (input_aliases_member(input, password)) {
+    return call_url_setter_on_copy(*this, input, &url::set_password);
+  }
   if (cannot_have_credentials_or_port()) {
     return false;
   }
@@ -854,6 +872,9 @@ void url::set_search(const std::string_view input) {
 }
 
 bool url::set_pathname(const std::string_view input) {
+  if (input_aliases_member(input, path)) {
+    return call_url_setter_on_copy(*this, input, &url::set_pathname);
+  }
   if (has_opaque_path) {
     return false;
   }
