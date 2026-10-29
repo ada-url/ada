@@ -9,6 +9,8 @@
 
 #include "ada/character_sets.h"
 
+#include <cstdint>
+
 /**
  * These functions are not part of our public API and may
  * change at any time.

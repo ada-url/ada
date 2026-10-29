@@ -11,10 +11,12 @@
 #ifndef ADA_IMPLEMENTATION_H
 #define ADA_IMPLEMENTATION_H
 
+#include <cstdint>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
+#include <variant>
 
 #include "ada/url.h"
 #include "ada/common_defs.h"

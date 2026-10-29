@@ -11,9 +11,11 @@
 #ifndef ADA_URL_SEARCH_PARAMS_H
 #define ADA_URL_SEARCH_PARAMS_H
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace ada {

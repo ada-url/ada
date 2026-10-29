@@ -6,6 +6,7 @@
 #define ADA_CHECKERS_INL_H
 
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <string_view>
 #include "ada/checkers.h"

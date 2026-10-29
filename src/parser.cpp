@@ -6,7 +6,11 @@
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <optional>
 #include <ranges>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "ada/character_sets-inl.h"
 #include "ada/checkers-inl.h"
@@ -40,9 +44,14 @@
 #endif
 
 #ifdef ADA_PARSER_NEED_SSSE3_TARGET
-#define ADA_PARSER_SIMD __attribute__((target("ssse3")))
+// Scan loops stay on the default ISA (SSE2 for generic x86-64). pshufb lives
+// in a noinline SSSE3 function so the CPU check is not inside a function the
+// compiler is free to compile entirely with SSSE3 instructions.
+#define ADA_PARSER_SIMD ada_really_inline
+#define ADA_PARSER_SSSE3_FN __attribute__((target("ssse3"), noinline))
 #else
 #define ADA_PARSER_SIMD ada_really_inline
+#define ADA_PARSER_SSSE3_FN ada_really_inline
 #endif
 
 #ifdef ADA_REGULAR_VISUAL_STUDIO
@@ -233,8 +242,8 @@ ADA_PARSER_SIMD __m128i nibble_load(const uint8_t* t) noexcept {
 
 // Non-zero lanes are stops. Tables are passed in so the scan loops can hoist
 // the loads out of the 16-byte iteration.
-ADA_PARSER_SIMD int ssse3_nibble_mask(__m128i w, __m128i lo_tbl,
-                                      __m128i hi_tbl) noexcept {
+ADA_PARSER_SSSE3_FN int ssse3_nibble_mask(__m128i w, __m128i lo_tbl,
+                                          __m128i hi_tbl) noexcept {
   const __m128i nibble = _mm_set1_epi8(0x0F);
   const __m128i lo = _mm_and_si128(w, nibble);
   const __m128i hi = _mm_and_si128(_mm_srli_epi16(w, 4), nibble);
@@ -392,6 +401,20 @@ ada_really_inline bool authority_has_at(const uint8_t* p, size_t host_start,
   return false;
 }
 
+#if ADA_PARSER_SSSE3
+// True when this process can execute the SSSE3 scanners. When the binary was
+// built for SSSE3, the check is a constant. Otherwise it is cached from the
+// CPU and the scanners fall back to the scalar loops below.
+ada_really_inline bool parser_use_ssse3() noexcept {
+#ifdef ADA_PARSER_NEED_SSSE3_TARGET
+  static const bool supported = __builtin_cpu_supports("ssse3") != 0;
+  return supported;
+#else
+  return true;
+#endif
+}
+#endif
+
 // Returns false if a forbidden host code point is found. On success, *end is
 // the first / ? # or len. has_upper / has_x only count host bytes, not the
 // path/query bytes that may sit in the same SIMD window after the delimiter.
@@ -402,7 +425,7 @@ ADA_PARSER_SIMD bool scan_plain_host(const uint8_t* b, size_t start, size_t len,
   has_x = false;
   size_t i = start;
 #if ADA_PARSER_SSSE3
-  if (len - start >= 16) {
+  if (parser_use_ssse3() && (len - start >= 16)) {
     const __m128i lo_tbl = nibble_load(k_host_nibbles.low);
     const __m128i hi_tbl = nibble_load(k_host_nibbles.high);
     const __m128i x_splat = _mm_set1_epi8('x');
@@ -635,7 +658,7 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
                                    bool& maybe_dot_segment) noexcept {
   const size_t run_start = i;
 #if ADA_PARSER_SSSE3
-  if (i + 16 <= len) {
+  if (parser_use_ssse3() && (i + 16 <= len)) {
     const __m128i lo_tbl = nibble_load(k_path_nibbles.low);
     const __m128i hi_tbl = nibble_load(k_path_nibbles.high);
     for (; i + 32 <= len; i += 32) {
@@ -807,7 +830,7 @@ ADA_PARSER_SIMD void scan_path_run(const uint8_t* b, size_t& i, size_t len,
 #define ADA_SCAN_STOP_RUN(nibbles, cls, unused_sse2_stop)                    \
   do {                                                                       \
     const size_t scan_start = i;                                             \
-    if (i + 16 <= len) {                                                     \
+    if (parser_use_ssse3() && (i + 16 <= len)) {                             \
       const __m128i lo_tbl = nibble_load((nibbles).low);                     \
       const __m128i hi_tbl = nibble_load((nibbles).high);                    \
       for (; i + 32 <= len; i += 32) {                                       \

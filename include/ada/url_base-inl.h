@@ -9,6 +9,7 @@
 #include "ada/checkers.h"
 #include "ada/url.h"
 
+#include <cstdint>
 #include <string>
 #if ADA_REGULAR_VISUAL_STUDIO
 #include <intrin.h>

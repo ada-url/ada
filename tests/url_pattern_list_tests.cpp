@@ -163,6 +163,33 @@ TEST(url_pattern_list, empty_list_and_empty_pattern) {
   EXPECT_EQ(list.match("/").route_index, -1);
 }
 
+TEST(url_pattern_list, default_constructed_empty_list_match_is_safe) {
+  // A default-constructed list never compiles tables. match() must return
+  // the default no-match result rather than dereference section pointers.
+  const list_type list{};
+  EXPECT_EQ(list.size(), 0u);
+  const auto result = list.match("/hello");
+  EXPECT_EQ(result.route_index, -1);
+  EXPECT_FALSE(result.has_match());
+  EXPECT_EQ(result.capture_count, 0u);
+  EXPECT_FALSE(result.captures_truncated);
+  EXPECT_FALSE(result.regexp_route);
+  EXPECT_TRUE(result.regexp_groups.empty());
+}
+
+TEST(url_pattern_list, long_literal_segment_is_not_truncated) {
+  // A trie edge stores its literal segment length in a uint16_t, so a literal
+  // longer than 65535 bytes used to wrap: "/" + 65536 'a' truncated to length
+  // 0 and matched the empty segment of "/". The route must match only its own
+  // pathname, never a short one whose length equals the truncated value.
+  const std::string big = "/" + std::string(65536, 'a');
+  auto list = make_list({big});
+  ASSERT_EQ(list.size(), 1u);
+  EXPECT_EQ(list.match("/").route_index, -1);
+  EXPECT_EQ(list.match("/a").route_index, -1);
+  EXPECT_EQ(list.match(big).route_index, 0);
+}
+
 TEST(url_pattern_list, agrees_with_url_pattern_on_boundary_cases) {
   // Pin the static/":param"/"*" subset semantics to ada::url_pattern itself:
   // for every (pattern, input) pair, a single-route list must match exactly
@@ -1885,4 +1912,55 @@ TEST(url_pattern_list, inputs_need_no_terminator) {
   EXPECT_EQ(exact(indexed, "/posts/"), -1);
   EXPECT_EQ(exact(indexed, "/p"), -1);
   EXPECT_EQ(exact(indexed, "/posts"), 2);
+}
+
+TEST(url_pattern_list, optional_group_slash_is_not_a_definite_boundary) {
+  // The "/" inside an optional group is not a segment boundary when the
+  // group is absent: "/reports{/:id}?.json" matches "/reports.json", the
+  // same pathname a single url_pattern accepts. The list used to certify
+  // "reports" as a required segment and reject the input before the
+  // provider ran.
+  auto list = make_list({"/reports{/:id}?.json"});
+  EXPECT_EQ(list.match("/reports.json").route_index, 0);
+  EXPECT_EQ(list.match("/reports/42.json").route_index, 0);
+  EXPECT_EQ(list.match("/reports/1/2.json").route_index, -1);
+  EXPECT_EQ(list.match("/reports/42").route_index, -1);
+  EXPECT_EQ(list.match("/other.json").route_index, -1);
+
+  // Zero or more can also be absent; one or more still requires the slash.
+  auto star = make_list({"/reports{/:id}*.json"});
+  EXPECT_EQ(star.match("/reports.json").route_index, 0);
+  EXPECT_EQ(star.match("/reports/1/2.json").route_index, 0);
+  auto plus = make_list({"/reports{/:id}+.json"});
+  EXPECT_EQ(plus.match("/reports.json").route_index, -1);
+  EXPECT_EQ(plus.match("/reports/42.json").route_index, 0);
+
+  // A literal segment before the optional group stays certified.
+  auto nested = make_list({"/foo/reports{/:id}?.json"});
+  EXPECT_EQ(nested.match("/foo/reports.json").route_index, 0);
+  EXPECT_EQ(nested.match("/foo/reports/7.json").route_index, 0);
+  EXPECT_EQ(nested.match("/bar/reports.json").route_index, -1);
+
+  // A more specific literal route still wins when both match.
+  auto both = make_list({"/reports.json", "/reports{/:id}?.json"});
+  EXPECT_EQ(both.match("/reports.json").route_index, 0);
+  EXPECT_EQ(both.match("/reports/42.json").route_index, 1);
+
+  // A required full wildcard keeps its "/" prefix.
+  auto files = make_list({"/files/*"});
+  EXPECT_EQ(files.match("/files/a").route_index, 0);
+  EXPECT_EQ(files.match("/files").route_index, -1);
+
+  ada::url_pattern_init init{};
+  init.pathname = "/reports{/:id}?.json";
+  auto pattern = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(pattern);
+  for (std::string_view input :
+       {"/reports.json", "/reports/42.json", "/reports/42", "/other.json"}) {
+    ada::url_pattern_init url_init{};
+    url_init.pathname = std::string(input);
+    auto tested = pattern->test(url_init);
+    ASSERT_TRUE(tested);
+    EXPECT_EQ(list.match(input).has_match(), *tested) << input;
+  }
 }

@@ -10,8 +10,13 @@
 #include "ada/implementation.h"
 #include "ada/url_pattern_list.h"
 
-#include <variant>
+#include <cstddef>
+#include <span>
+#include <string>
 #include <string_view>
+#include <utility>
+#include <variant>
+#include <vector>
 
 namespace ada {
 

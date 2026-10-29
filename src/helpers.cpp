@@ -1,12 +1,18 @@
+#include <array>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "ada/checkers-inl.h"
 #include "ada/common_defs.h"
 #include "ada/helpers.h"
 #include "ada/scheme.h"
 #include "ada/state.h"
+#include "ada/unicode.h"
 
 #if ADA_SSSE3
 #include <tmmintrin.h>
@@ -148,8 +154,13 @@ ada_really_inline bool shorten_path(std::string_view& path,
 }
 
 ada_really_inline void remove_ascii_tab_or_newline(std::string& input) {
-  // if this ever becomes a performance issue, we could use an approach similar
-  // to has_tabs_or_newline
+  // Fast path: inputs with no tab/newline (the common case) avoid the
+  // per-character erase_if scan. has_tabs_or_newline uses SIMD for inputs
+  // >= 16 bytes, making this check much cheaper than erase_if's scalar
+  // predicate walk when there is nothing to remove.
+  if (!ada::unicode::has_tabs_or_newline(input)) {
+    return;
+  }
   std::erase_if(input, ada::unicode::is_ascii_tab_or_newline);
 }
 
@@ -958,7 +969,6 @@ ada_really_inline void parse_prepared_path(std::string_view input,
     ada_log("parse_path slow");
     // we have reached the general case
     bool needs_percent_encoding = (accumulator & 1);
-    std::string path_buffer_tmp;
     do {
       size_t location = (special && (accumulator & 2))
                             ? input.find_first_of("/\\")
@@ -968,39 +978,37 @@ ada_really_inline void parse_prepared_path(std::string_view input,
         path_view.remove_suffix(path_view.size() - location);
         input.remove_prefix(location + 1);
       }
-      // path_buffer is either path_view or it might point at a percent encoded
-      // temporary file.
-      std::string_view path_buffer =
-          (needs_percent_encoding &&
-           ada::unicode::percent_encode<false>(
-               path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp))
-              ? path_buffer_tmp
-              : path_view;
-      if (unicode::is_double_dot_path_segment(path_buffer)) {
+      // Path encoding preserves dots and percent signs, so normalize first.
+      if (unicode::is_double_dot_path_segment(path_view)) {
         helpers::shorten_path(path, type);
         if (location == std::string_view::npos) {
           path += '/';
         }
-      } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+      } else if (unicode::is_single_dot_path_segment(path_view) &&
                  (location == std::string_view::npos)) {
         path += '/';
       }
-      // Otherwise, if path_buffer is not a single-dot path segment, then:
-      else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-        // If url's scheme is "file", url's path is empty, and path_buffer is a
+      // Otherwise, if path_view is not a single-dot path segment, then:
+      else if (!unicode::is_single_dot_path_segment(path_view)) {
+        // If url's scheme is "file", url's path is empty, and path_view is a
         // Windows drive letter, then replace the second code point in
-        // path_buffer with U+003A (:).
+        // path_view with U+003A (:).
         if (type == ada::scheme::type::FILE && path.empty() &&
-            checkers::is_windows_drive_letter(path_buffer)) {
+            path_view.size() == 2 &&
+            checkers::is_windows_drive_letter(path_view)) {
           path += '/';
-          path += path_buffer[0];
+          path += path_view[0];
           path += ':';
-          path_buffer.remove_prefix(2);
-          path.append(path_buffer);
+          path_view.remove_prefix(2);
+          path.append(path_view);
         } else {
-          // Append path_buffer to url's path.
+          // Append encoded bytes directly to the pathname.
           path += '/';
-          path.append(path_buffer);
+          if (!needs_percent_encoding ||
+              !ada::unicode::percent_encode<true>(
+                  path_view, character_sets::PATH_PERCENT_ENCODE, path)) {
+            path.append(path_view);
+          }
         }
       }
       if (location == std::string_view::npos) {

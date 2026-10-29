@@ -10,7 +10,9 @@
 #include "ada/url_search_params.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <optional>
 #include <ranges>
 #include <string>

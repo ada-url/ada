@@ -12,6 +12,8 @@
 #include "ada/common_defs.h"
 #include "ada/scheme.h"
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <string_view>
 

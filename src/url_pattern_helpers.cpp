@@ -4,9 +4,16 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
+#include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <ranges>
 #include <string>
+#include <string_view>
+#include <system_error>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "ada/character_sets.h"
 #include "ada/checkers.h"
@@ -511,7 +518,11 @@ tl::expected<std::string, errors> canonicalize_pathname(
   // query/fragment, so the pathname was silently truncated at the first literal
   // '?' or '#'. set_pathname runs the parser in path state override, matching
   // how canonicalize_hostname uses set_hostname.
-  auto url = ada::parse<url_aggregator>("fake://fake-url", nullptr);
+  // The spec's "create a dummy URL" is "https://dummy.invalid/": a special
+  // URL, so the path parser turns "\\" into "/" as it does in a special URL.
+  // A non-special dummy kept a literal backslash, so a pattern such as
+  // "/a\\b" never matched "https://h/a/b".
+  auto url = ada::parse<url_aggregator>("https://dummy.invalid/", nullptr);
   ADA_ASSERT_TRUE(url);
   if (!url->set_pathname(modified_value)) {
     // If parseResult is failure, then throw a TypeError.
@@ -1117,10 +1128,11 @@ std::string generate_pattern_string(
     // - part's suffix is not the empty string.
     // - part's prefix is not the empty string and is not options's prefix code
     // point.
+    // This compares the whole prefix: a prefix such as "/9" starts with the
+    // prefix code point but is not it, and still needs grouping.
     bool needs_grouping =
         !part.suffix.empty() ||
-        (!part.prefix.empty() && (options.get_prefix().empty() ||
-                                  part.prefix[0] != options.get_prefix()[0]));
+        (!part.prefix.empty() && part.prefix != options.get_prefix());
 
     // If all of the following are true:
     // - needs grouping is false; and

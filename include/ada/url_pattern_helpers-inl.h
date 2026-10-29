@@ -5,8 +5,13 @@
 #ifndef ADA_URL_PATTERN_HELPERS_INL_H
 #define ADA_URL_PATTERN_HELPERS_INL_H
 
+#include <cstddef>
+#include <cstdint>
 #include <optional>
+#include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 #include "ada/common_defs.h"
 #include "ada/expected.h"
@@ -684,9 +689,10 @@ std::optional<errors> url_pattern_parser<F>::add_part(
     next_numeric_name++;
   }
   // If the result of running is a duplicate name given parser and name is
-  // true, then throw a TypeError.
-  if (std::ranges::any_of(
-          parts, [&name](const auto& part) { return part.name == name; })) {
+  // true, then throw a TypeError. Tracked in a set so this stays O(1): a
+  // linear scan of the part list here is O(n^2) over a pattern string with n
+  // named parts (e.g. "/*" repeated), an algorithmic-complexity DoS.
+  if (!name.empty() && !seen_names.insert(name).second) {
     return errors::type_error;
   }
   // Let encoded prefix be the result of running parser's encoding callback

@@ -13,7 +13,9 @@
 
 #include "ada/common_defs.h"
 
+#include <cstdint>
 #include <string>
+#include <string_view>
 
 /**
  * @namespace ada::scheme

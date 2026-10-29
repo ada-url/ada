@@ -9,6 +9,9 @@
 #ifndef ADA_URL_COMPONENTS_H
 #define ADA_URL_COMPONENTS_H
 
+#include <cstdint>
+#include <string>
+
 namespace ada {
 
 /**

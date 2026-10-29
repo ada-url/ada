@@ -704,6 +704,48 @@ TEST(wpt_urlpattern_tests, grouped_part_keeps_braces_without_prefix_option) {
   }
 }
 
+TEST(wpt_urlpattern_tests, grouped_part_keeps_braces_with_longer_prefix) {
+  // "generate a pattern string": needs grouping is true if the part's prefix
+  // is not the empty string and is not options's prefix code point. A prefix
+  // that merely starts with '/' (such as "/9" or "/ab") is not '/', so the
+  // part keeps its braces. Without them the generated string parses back to
+  // a different pattern: the text after '/' becomes fixed text outside the
+  // group, and the modifier no longer covers it.
+  struct test_case {
+    std::string pattern;
+    std::string url;
+    bool matches;
+  };
+  for (const auto& tc : std::vector<test_case>{
+           {"{/9*}", "https://example.com/9x", true},
+           {"/a{/9*}?", "https://example.com/a", true},
+           {"/a{/9*}?", "https://example.com/a/9x", true},
+           {"/a{/ab:id}?", "https://example.com/a", true},
+           {"/a{/ab:id}?", "https://example.com/a/ab", false},
+           {"/a{/ab:id}?", "https://example.com/a/abc", true},
+       }) {
+    SCOPED_TRACE(tc.pattern + " " + tc.url);
+    auto init = ada::url_pattern_init{};
+    init.pathname = tc.pattern;
+    auto url = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(url);
+    EXPECT_EQ(url->get_pathname(), tc.pattern);
+    auto result = url->test(std::string_view(tc.url), nullptr);
+    ASSERT_TRUE(result);
+    EXPECT_EQ(*result, tc.matches);
+    // Recompiling the pathname from its own serialization has to give a
+    // pattern that matches the same URLs.
+    auto round = ada::url_pattern_init{};
+    round.pathname = std::string(url->get_pathname());
+    auto again = ada::parse_url_pattern<regex_provider>(round);
+    ASSERT_TRUE(again);
+    EXPECT_EQ(again->get_pathname(), url->get_pathname());
+    auto again_result = again->test(std::string_view(tc.url), nullptr);
+    ASSERT_TRUE(again_result);
+    EXPECT_EQ(*again_result, tc.matches);
+  }
+}
+
 // A constructor string ending with an unterminated "{" must be rejected. The
 // end token has to reach the state machine so the trailing component is
 // captured and compiled; if it is consumed as group content instead, the
@@ -1371,4 +1413,157 @@ TEST(wpt_urlpattern_tests, urlpattern_test_data) {
     FAIL();
   }
   SUCCEED();
+}
+
+#if defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)
+namespace {
+
+struct test_regex_match_exception : std::runtime_error {
+  test_regex_match_exception()
+      : std::runtime_error("custom regex match exception") {}
+};
+
+struct test_regex_search_exception : std::runtime_error {
+  test_regex_search_exception()
+      : std::runtime_error("custom regex search exception") {}
+};
+
+struct throwing_regex_provider final {
+  struct regex_type {};
+
+  static std::optional<regex_type> create_instance(std::string_view, bool) {
+    return regex_type{};
+  }
+
+  static std::optional<std::vector<std::optional<std::string>>> regex_search(
+      std::string_view, const regex_type&) {
+    throw test_regex_search_exception();
+  }
+
+  static bool regex_match(std::string_view, const regex_type&) {
+    throw test_regex_match_exception();
+  }
+};
+
+static_assert(ada::url_pattern_regex::regex_concept<throwing_regex_provider>);
+
+}  // namespace
+
+// Regression test for https://github.com/ada-url/ada/issues/1297
+// fast_test() should propagate exceptions from user-supplied regex providers
+// instead of terminating the process via noexcept.
+TEST(wpt_urlpattern_tests,
+     throwing_regex_provider_fast_test_propagates_exception) {
+  // Test direct component fast_test invocation
+  auto options = ada::url_pattern_compile_component_options::PATHNAME;
+  auto component = ada::url_pattern_component<throwing_regex_provider>::compile(
+      "/foo/(bar)", ada::url_pattern_helpers::canonicalize_pathname, options);
+  ASSERT_TRUE(component.has_value());
+  EXPECT_THROW((void)component->fast_test("/foo/bar"),
+               test_regex_match_exception);
+
+  // Test url_pattern::test() invocation (which uses fast_test)
+  auto init = ada::url_pattern_init{};
+  init.pathname = "/foo/(bar)";
+  auto pattern = ada::parse_url_pattern<throwing_regex_provider>(init);
+  ASSERT_TRUE(pattern.has_value());
+
+  auto input = ada::url_pattern_init{};
+  input.pathname = "/foo/bar";
+  EXPECT_THROW((void)pattern->test(input), test_regex_match_exception);
+
+  // Test url_pattern::exec() invocation (which uses fast_match / regex_search)
+  EXPECT_THROW((void)pattern->exec(input), test_regex_search_exception);
+
+  // Test url_pattern_list::match() invocation (which uses fast_test on regex
+  // routes)
+  std::vector<std::string_view> list_patterns{"/foo/([0-9]+)"};
+  auto list =
+      ada::parse_url_pattern_list<throwing_regex_provider>(list_patterns);
+  ASSERT_TRUE(list.has_value());
+  EXPECT_THROW((void)list->match("/foo/123"), test_regex_match_exception);
+}
+#endif
+
+TEST(wpt_urlpattern_tests, special_scheme_pathname_converts_backslash) {
+  // canonicalize_pathname (used when the protocol matches a special scheme)
+  // runs the URL path parser on the spec's dummy URL, https://dummy.invalid/.
+  // A literal backslash in the pathname value therefore becomes "/", and ".."
+  // is resolved. In the pattern string a literal backslash is written escaped,
+  // as two backslash characters.
+  auto compile = [](std::string_view protocol, std::string_view pathname) {
+    ada::url_pattern_init init{};
+    init.protocol = protocol;
+    init.hostname = "h";
+    init.pathname = pathname;
+    auto p = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_TRUE(p) << pathname;
+    return p ? std::string(p->get_pathname()) : std::string("(error)");
+  };
+  // Two source backslashes -> one literal backslash -> "/" for a special
+  // scheme.
+  EXPECT_EQ(compile("https", "/a\\\\b"), "/a/b");
+  EXPECT_EQ(compile("ftp", "/a\\\\b"), "/a/b");
+  // ".." followed by a literal backslash is a dot segment once "\\" is "/".
+  EXPECT_EQ(compile("https", "/a/..\\\\b"), "/b");
+  // Dot segments are normalized as a special path.
+  EXPECT_EQ(compile("https", "/a/../b"), "/b");
+  // The same patterns match the canonical URL.
+  auto matches = [](std::string_view protocol, std::string_view pathname,
+                    std::string_view url) {
+    ada::url_pattern_init init{};
+    init.protocol = protocol;
+    init.hostname = "h";
+    init.pathname = pathname;
+    auto p = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(p);
+    auto t = p->test(url);
+    ASSERT_TRUE(t);
+    EXPECT_TRUE(*t) << url;
+  };
+  matches("https", "/a\\\\b", "https://h/a/b");
+  matches("ftp", "/a\\\\b", "ftp://h/a/b");
+  matches("https", "/a/..\\\\b", "https://h/b");
+}
+
+TEST(wpt_urlpattern_tests, string_input_without_base_must_parse_alone) {
+  // A string input is parsed with the base URL string only when one is
+  // given. A relative string with no base is not a URL, so test() is false
+  // and exec() is null, whatever the pattern.
+  auto check_init = [](ada::url_pattern_init init, std::string_view input) {
+    auto p = ada::parse_url_pattern<regex_provider>(std::move(init));
+    ASSERT_TRUE(p);
+    auto t = p->test(input);
+    ASSERT_TRUE(t);
+    EXPECT_FALSE(*t) << input;
+    auto e = p->exec(input);
+    ASSERT_TRUE(e);
+    EXPECT_FALSE(e->has_value()) << input;
+  };
+  ada::url_pattern_init users{};
+  users.pathname = "/users/:id";
+  check_init(users, "/users/1");
+  ada::url_pattern_init admin{};
+  admin.pathname = "/admin/*";
+  check_init(admin, "/admin/x");
+
+  auto star = ada::parse_url_pattern<regex_provider>(std::string_view("*://*"));
+  ASSERT_TRUE(star);
+  auto star_test = star->test(std::string_view("not a url"));
+  ASSERT_TRUE(star_test);
+  EXPECT_FALSE(*star_test);
+  auto star_exec = star->exec(std::string_view("not a url"));
+  ASSERT_TRUE(star_exec);
+  EXPECT_FALSE(star_exec->has_value());
+
+  // With a base, the same relative input matches.
+  auto p = ada::parse_url_pattern<regex_provider>(users);
+  ASSERT_TRUE(p);
+  std::string_view base = "https://example.com";
+  auto with_base = p->test("/users/1", &base);
+  ASSERT_TRUE(with_base);
+  EXPECT_TRUE(*with_base);
+  auto with_base_exec = p->exec("/users/1", &base);
+  ASSERT_TRUE(with_base_exec);
+  EXPECT_TRUE(with_base_exec->has_value());
 }

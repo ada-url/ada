@@ -10,13 +10,16 @@
 #include "ada/url_aggregator-inl.h"
 #include "ada/url_ip-inl.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
+#include <optional>
 #include <ranges>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace {
 
@@ -442,19 +445,26 @@ void url_aggregator::set_search(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '?' ? input.substr(1) : input;
-  helpers::remove_ascii_tab_or_newline(new_value);
+  std::string_view stripped = input[0] == '?' ? input.substr(1) : input;
+  // Fast path: no tabs/newlines (the common case) avoids the std::string
+  // allocation entirely by passing the view straight to update_base_search.
+  std::string cleaned;
+  std::string_view effective = stripped;
+  if (unicode::has_tabs_or_newline(stripped)) {
+    cleaned = stripped;
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    effective = cleaned;
+  }
 
   auto query_percent_encode_set =
       is_special() ? ada::character_sets::SPECIAL_QUERY_PERCENT_ENCODE
                    : ada::character_sets::QUERY_PERCENT_ENCODE;
 
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(new_value.size())) {
+  if (needs_rollback_snapshot(effective.size())) {
     saved_url = *this;
   }
-  update_base_search(new_value, query_percent_encode_set);
+  update_base_search(effective, query_percent_encode_set);
   if (saved_url && buffer.size() > ada::get_max_input_length()) {
     *this = std::move(*saved_url);
     return;
@@ -475,14 +485,21 @@ void url_aggregator::set_hash(const std::string_view input) {
     return;
   }
 
-  std::string new_value;
-  new_value = input[0] == '#' ? input.substr(1) : input;
-  helpers::remove_ascii_tab_or_newline(new_value);
+  std::string_view stripped = input[0] == '#' ? input.substr(1) : input;
+  // Fast path: no tabs/newlines (the common case) avoids the std::string
+  // allocation entirely by passing the view straight through.
+  std::string cleaned;
+  std::string_view effective = stripped;
+  if (unicode::has_tabs_or_newline(stripped)) {
+    cleaned = stripped;
+    helpers::remove_ascii_tab_or_newline(cleaned);
+    effective = cleaned;
+  }
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(new_value.size())) {
+  if (needs_rollback_snapshot(effective.size())) {
     saved_url = *this;
   }
-  update_unencoded_base_hash(new_value);
+  update_unencoded_base_hash(effective);
   if (saved_url && buffer.size() > ada::get_max_input_length()) {
     *this = std::move(*saved_url);
     return;
@@ -504,7 +521,7 @@ bool url_aggregator::set_href(const std::string_view input) {
     }
     ada_log("url_aggregator::set_href, parsed ", out->to_string());
     // TODO: Figure out why the following line puts test to never finish.
-    *this = *out;
+    *this = std::move(*out);
   }
 
   return out.has_value();
@@ -572,22 +589,25 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
       unicode::to_lower_ascii(lowered.data(), lowered.size());
       if (lowered.find('-') == std::string_view::npos ||
           lowered.find(xn_dash) == std::string_view::npos) {
-        update_base_hostname(lowered);
+        // Check IPv4 before mutating so failures leave the buffer untouched.
+        // This also avoids a double buffer rewrite for hex/octal IPv4.
         if (checkers::is_ipv4(lowered)) {
           ada_log("parse_host fast path ipv4");
-          return parse_ipv4(lowered, true);
+          return parse_ipv4(lowered, false);
         }
+        update_base_hostname(lowered);
         ada_log("parse_host fast path ", get_hostname());
         is_valid = true;
         return true;
       }
     } else if (input.find('-') == std::string_view::npos ||
                input.find(xn_dash) == std::string_view::npos) {
-      update_base_hostname(input);
+      // Check IPv4 before mutating so failures leave the buffer untouched.
       if (checkers::is_ipv4(input)) {
         ada_log("parse_host fast path ipv4");
-        return parse_ipv4(input, true);
+        return parse_ipv4(input, false);
       }
+      update_base_hostname(input);
       ada_log("parse_host fast path ", get_hostname());
       is_valid = true;
       return true;
@@ -604,10 +624,11 @@ ada_really_inline bool url_aggregator::parse_host(std::string_view input) {
       }
       if (decoded.find('-') == std::string_view::npos ||
           decoded.find(xn_dash) == std::string_view::npos) {
-        update_base_hostname(decoded);
+        // Check IPv4 before mutating so failures leave the buffer untouched.
         if (checkers::is_ipv4(decoded)) {
-          return parse_ipv4(decoded, true);
+          return parse_ipv4(decoded, false);
         }
+        update_base_hostname(decoded);
         is_valid = true;
         return true;
       }
@@ -653,18 +674,45 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
     return false;
   }
 
-  url_aggregator saved_url(*this);
+  // parse_host no longer mutates the buffer on failure (IPv4 is checked
+  // before update_base_hostname), so the only rollback needed is for the
+  // length limit. Snapshot only when the bound can be reached, like the
+  // other setters do via needs_rollback_snapshot.
+  const bool was_valid = is_valid;
+  std::optional<url_aggregator> saved_url;
+  if (needs_rollback_snapshot(input.size())) {
+    saved_url = *this;
+  }
+
+  auto restore_on_failure = [&]() {
+    if (saved_url) {
+      *this = std::move(*saved_url);
+    } else {
+      // Buffer is untouched on parse failure; just restore the is_valid flag
+      // that parse_host may have cleared.
+      is_valid = was_valid;
+    }
+  };
 
   size_t host_end_pos = input.find('#');
-  std::string _host(input.data(), host_end_pos != std::string_view::npos
-                                      ? host_end_pos
-                                      : input.size());
-  helpers::remove_ascii_tab_or_newline(_host);
-  std::string_view new_host(_host);
+  std::string_view host_input(
+      input.data(),
+      host_end_pos != std::string_view::npos ? host_end_pos : input.size());
+  // Fast path: no tabs/newlines (the common case) avoids the std::string
+  // allocation by viewing the input prefix directly.
+  std::string _host_buf;
+  std::string_view new_host;
+  if (unicode::has_tabs_or_newline(host_input)) {
+    _host_buf = host_input;
+    helpers::remove_ascii_tab_or_newline(_host_buf);
+    new_host = _host_buf;
+  } else {
+    new_host = host_input;
+  }
 
   auto check_url_size = [&]() -> bool {
-    if (buffer.size() > ada::get_max_input_length()) {
-      *this = std::move(saved_url);
+    if (saved_url && buffer.size() > ada::get_max_input_length()) {
+      *this = std::move(*saved_url);
       return false;
     }
     return true;
@@ -673,7 +721,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   // If url's scheme is "file", then set state to file host state, instead of
   // host state.
   if (type != ada::scheme::type::FILE) {
-    std::string_view host_view(_host.data(), _host.length());
+    std::string_view host_view = new_host;
     auto [location, found_colon] =
         helpers::get_host_delimiter_location(is_special(), host_view);
 
@@ -697,7 +745,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
       // Let host be the result of host parsing buffer with url is not special.
       bool succeeded = parse_host(host_buffer);
       if (!succeeded) {
-        *this = std::move(saved_url);
+        restore_on_failure();
         return false;
       } else if (has_dash_dot()) {
         // The url now has a non-null host, so the "/." that guarded a
@@ -749,7 +797,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 
       bool succeeded = parse_host(host_view);
       if (!succeeded) {
-        *this = std::move(saved_url);
+        restore_on_failure();
         return false;
       } else if (has_dash_dot()) {
         // Should remove dash_dot from pathname
@@ -770,7 +818,7 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   } else {
     // Let host be the result of host parsing buffer with url is not special.
     if (!parse_host(new_host)) {
-      *this = std::move(saved_url);
+      restore_on_failure();
       return false;
     }
 
@@ -1586,7 +1634,6 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
     ada_log("parse_path slow");
     // we have reached the general case
     bool needs_percent_encoding = (accumulator & 1);
-    std::string path_buffer_tmp;
     do {
       size_t location = (special && (accumulator & 2))
                             ? input.find_first_of("/\\")
@@ -1596,39 +1643,37 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
         path_view.remove_suffix(path_view.size() - location);
         input.remove_prefix(location + 1);
       }
-      // path_buffer is either path_view or it might point at a percent encoded
-      // temporary string.
-      std::string_view path_buffer =
-          (needs_percent_encoding &&
-           ada::unicode::percent_encode<false>(
-               path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp))
-              ? path_buffer_tmp
-              : path_view;
-      if (unicode::is_double_dot_path_segment(path_buffer)) {
+      // Path encoding preserves dots and percent signs, so normalize first.
+      if (unicode::is_double_dot_path_segment(path_view)) {
         helpers::shorten_path(path, type);
         if (location == std::string_view::npos) {
           path += '/';
         }
-      } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+      } else if (unicode::is_single_dot_path_segment(path_view) &&
                  (location == std::string_view::npos)) {
         path += '/';
       }
-      // Otherwise, if path_buffer is not a single-dot path segment, then:
-      else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-        // If url's scheme is "file", url's path is empty, and path_buffer is a
+      // Otherwise, if path_view is not a single-dot path segment, then:
+      else if (!unicode::is_single_dot_path_segment(path_view)) {
+        // If url's scheme is "file", url's path is empty, and path_view is a
         // Windows drive letter, then replace the second code point in
-        // path_buffer with U+003A (:).
+        // path_view with U+003A (:).
         if (type == ada::scheme::type::FILE && path.empty() &&
-            checkers::is_windows_drive_letter(path_buffer)) {
+            path_view.size() == 2 &&
+            checkers::is_windows_drive_letter(path_view)) {
           path += '/';
-          path += path_buffer[0];
+          path += path_view[0];
           path += ':';
-          path_buffer.remove_prefix(2);
-          path.append(path_buffer);
+          path_view.remove_prefix(2);
+          path.append(path_view);
         } else {
-          // Append path_buffer to url's path.
+          // Append encoded bytes directly to the pathname.
           path += '/';
-          path.append(path_buffer);
+          if (!needs_percent_encoding ||
+              !ada::unicode::percent_encode<true>(
+                  path_view, character_sets::PATH_PERCENT_ENCODE, path)) {
+            path.append(path_view);
+          }
         }
       }
       if (location == std::string_view::npos) {

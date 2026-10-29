@@ -8,9 +8,11 @@
 #include "ada/common_defs.h"
 #include "ada/ada_idna.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <optional>
 #include <string>
 #include <string_view>
-#include <optional>
 
 /**
  * Unicode operations. These functions are not part of our public API and may

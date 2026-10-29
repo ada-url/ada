@@ -2,6 +2,15 @@
 
 #include "ada/url_pattern_regex.h"
 
+#ifdef ADA_USE_UNSAFE_STD_REGEX_PROVIDER
+#include <cstddef>
+#include <optional>
+#include <regex>
+#include <string>
+#include <string_view>
+#include <vector>
+#endif  // ADA_USE_UNSAFE_STD_REGEX_PROVIDER
+
 namespace ada::url_pattern_regex {
 
 #ifdef ADA_USE_UNSAFE_STD_REGEX_PROVIDER

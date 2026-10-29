@@ -10,8 +10,13 @@
 #include "ada/url_pattern.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <optional>
+#include <string>
 #include <string_view>
 #include <utility>
+#include <variant>
+#include <vector>
 
 #if ADA_INCLUDE_URL_PATTERN
 namespace ada {
@@ -217,7 +222,7 @@ url_pattern_component<regex_provider>::compile(
 
 template <url_pattern_regex::regex_concept regex_provider>
 bool url_pattern_component<regex_provider>::fast_test(
-    std::string_view input) const noexcept {
+    std::string_view input) const {
   // Fast path for simple patterns - avoid regex evaluation
   // Using if-else for better branch prediction on common cases
   if (type == url_pattern_component_type::FULL_WILDCARD) {
@@ -317,8 +322,11 @@ result<bool> url_pattern<regex_provider>::test(
                            search_view, *apply_result->hash);
   }
 
-  // URL string input path
-  result<url_aggregator> base_url;
+  // URL string input path.
+  // Let baseURL be null. A default-constructed result holds a value (an
+  // empty URL), and a relative input would then resolve against it. Start
+  // from an error so "no base given" means no value.
+  result<url_aggregator> base_url = tl::unexpected(errors::type_error);
   if (base_url_string) {
     base_url = ada::parse<url_aggregator>(*base_url_string, nullptr);
     if (!base_url) {
@@ -434,8 +442,10 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   } else {
     ADA_ASSERT_TRUE(std::holds_alternative<std::string_view>(input));
 
-    // Let baseURL be null.
-    result<url_aggregator> base_url;
+    // Let baseURL be null. A default-constructed result holds a value (an
+    // empty URL), and a relative input would then resolve against it. Start
+    // from an error so "no base given" means no value.
+    result<url_aggregator> base_url = tl::unexpected(errors::type_error);
 
     // If baseURLString was given, then:
     if (base_url_string) {

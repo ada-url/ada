@@ -17,9 +17,15 @@
 #include "url_pattern_list_compiler.h"
 
 #include <algorithm>
+#include <array>
 #include <bit>
+#include <cstdint>
 #include <cstring>
+#include <limits>
 #include <span>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #if ADA_INCLUDE_URL_PATTERN
 
@@ -722,6 +728,12 @@ void finalize_route(route_info& route) noexcept {
   route.all_literal = true;
   route.has_wildcard = false;
   size_t n_params = 0;
+  // A trie edge keeps its literal segment length in edge_record::key_length, a
+  // uint16_t. A literal longer than that wraps around, so the trie would match
+  // a shorter, truncated length (e.g. a 65536-byte segment becomes length 0 and
+  // matches an empty segment). Keep such a route out of the trie and let the
+  // sequential matcher, which compares the whole segment, answer it.
+  bool literal_fits_edge = true;
   for (const route_segment& s : route.segments) {
     if (s.kind != segment_kind::literal) {
       route.all_literal = false;
@@ -730,12 +742,15 @@ void finalize_route(route_info& route) noexcept {
       } else {
         route.has_wildcard = true;
       }
+    } else if (s.text.size() > std::numeric_limits<uint16_t>::max()) {
+      literal_fits_edge = false;
     }
   }
   const size_t n_captures = n_params + (route.has_wildcard ? 1 : 0);
   const bool trie_safe = !route.segments.empty() &&
                          route.segments.size() <= max_trie_pattern_segments &&
-                         n_captures <= max_captures_per_route;
+                         n_captures <= max_captures_per_route &&
+                         literal_fits_edge;
   route.mode = trie_safe ? route_mode::trie : route_mode::sequential;
 }
 
@@ -809,10 +824,18 @@ void approximate_kind_sequence(const std::vector<url_pattern_part>& parts,
     if (part.type == url_pattern_part_type::FULL_WILDCARD ||
         part.modifier != url_pattern_part_modifier::none) {
       // A greedy or modified group can span segments: treat the rest of the
-      // route as a wildcard tail and stop. A "/" prefix still closes the
-      // previous segment as a whole one.
+      // route as a wildcard tail and stop. A "/" prefix closes the previous
+      // segment only when this part must occur. An optional ("?") or
+      // zero-or-more ("*") part, prefix included, may be absent, so the text
+      // after it stays in the same segment ("/reports{/:id}?.json" matches
+      // "/reports.json"). Treating that "/" as a definite boundary certified
+      // a segment the input does not have, and the shape check rejected the
+      // match before the provider ran.
       exact = false;
-      close(part.prefix == "/");
+      const bool must_occur =
+          part.modifier != url_pattern_part_modifier::optional &&
+          part.modifier != url_pattern_part_modifier::zero_or_more;
+      close(must_occur && part.prefix == "/");
       tail_known = false;
       kinds.push_back(2);
       break;
