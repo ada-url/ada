@@ -81,6 +81,26 @@ TEST(ada_c, getters) {
   SUCCEED();
 }
 
+TEST(ada_c, setters_accept_view_into_own_url) {
+  const char* input = "https://user:pass@example.com/pa/th";
+  ada_url url = ada_parse(input, strlen(input));
+  ASSERT_TRUE(ada_is_valid(url));
+
+  ada_string username = ada_get_username(url);
+  ASSERT_TRUE(ada_set_username(url, username.data, username.length));
+  ASSERT_EQ(convert_string(ada_get_username(url)), "user");
+
+  ada_string password = ada_get_password(url);
+  ASSERT_TRUE(ada_set_password(url, password.data, password.length));
+  ASSERT_EQ(convert_string(ada_get_password(url)), "pass");
+
+  ada_string pathname = ada_get_pathname(url);
+  ASSERT_TRUE(ada_set_pathname(url, pathname.data, pathname.length));
+  ASSERT_EQ(convert_string(ada_get_pathname(url)), "/pa/th");
+
+  ada_free(url);
+}
+
 TEST(ada_c, setters) {
   std::string input =
       "https://username:password@www.google.com:8080/"

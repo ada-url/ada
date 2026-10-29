@@ -2344,6 +2344,37 @@ TYPED_TEST(basic_tests,
   check("http://ab?x y", "http://ab/?x%20y");
 }
 
+TYPED_TEST(basic_tests, setter_accepts_view_into_its_own_url) {
+  constexpr std::string_view href = "http://user:pass@example.com/pa/th?q#f";
+  auto url = ada::parse<TypeParam>(href);
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->set_pathname(url->get_pathname()));
+  ASSERT_EQ(url->get_href(), href);
+  ASSERT_EQ(url->get_pathname(), "/pa/th");
+  ASSERT_TRUE(url->set_username(url->get_username()));
+  ASSERT_EQ(url->get_username(), "user");
+  ASSERT_EQ(url->get_href(), href);
+  ASSERT_TRUE(url->set_password(url->get_password()));
+  ASSERT_EQ(url->get_password(), "pass");
+  ASSERT_EQ(url->get_href(), href);
+}
+
+TYPED_TEST(basic_tests, set_search_accepts_view_into_its_own_url) {
+  auto url = ada::parse<TypeParam>("https://example.com/?abc");
+  ASSERT_TRUE(url);
+  url->set_search(url->get_search());
+  ASSERT_EQ(url->get_search(), "?abc");
+  ASSERT_EQ(url->get_href(), "https://example.com/?abc");
+}
+
+TYPED_TEST(basic_tests, set_hash_accepts_view_into_its_own_url) {
+  auto url = ada::parse<TypeParam>("https://example.com/#frag");
+  ASSERT_TRUE(url);
+  url->set_hash(url->get_hash());
+  ASSERT_EQ(url->get_hash(), "#frag");
+  ASSERT_EQ(url->get_href(), "https://example.com/#frag");
+}
+
 // has_tabs_or_newline() must not depend on the floating-point control register.
 // The NEON path narrows its match mask to eight bytes and, when
 // ADA_NEON_SAFE_ZERO_CHECK is 0, tests that mask by reinterpreting it as a
