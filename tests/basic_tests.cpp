@@ -10,14 +10,14 @@ TYPED_TEST_SUITE(basic_tests, Types);
 
 TYPED_TEST(basic_tests, encoded_path_normalization) {
   const std::pair<std::string_view, std::string_view> cases[] = {
-      {"https://example.com/a b/%2e/c/../é/", "/a%20b/%C3%A9/"},
+      {"https://example.com/a b/%2e/c/../\xC3\xA9/", "/a%20b/%C3%A9/"},
       {"https://example.com/a b/.%2E/final", "/final"},
       {"https://example.com/a b/%2e%2E", "/"},
       {"https://example.com/a b/%2e", "/a%20b/"},
       {"https://example.com/a b//%2e%2e/end", "/a%20b/end"},
-      {"file:///C|/a b/../../é", "/C:/%C3%A9"},
-      {"file:///C:/a b/..\\é", "/C:/%C3%A9"},
-      {"custom://host/a b/%2e%2e/é", "/%C3%A9"},
+      {"file:///C|/a b/../../\xC3\xA9", "/C:/%C3%A9"},
+      {"file:///C:/a b/..\\\xC3\xA9", "/C:/%C3%A9"},
+      {"custom://host/a b/%2e%2e/\xC3\xA9", "/%C3%A9"},
   };
   for (const auto& [input, expected] : cases) {
     auto url = ada::parse<TypeParam>(input);
