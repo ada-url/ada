@@ -1468,21 +1468,13 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
         goto scan_hash;
       }
       rest_simple = false;
-      for (; i < len; ++i) {
-        if (b[i] == '?') {
-          path_end = i;
-          query_start = i;
-          ++i;
-          goto scan_query_boundary;
-        }
-        if (b[i] == '#') {
-          path_end = i;
-          hash_start = i;
-          ++i;
-          goto after_rest;
-        }
+      hash_start = input.find('#', i);
+      query_start = input.substr(0, hash_start).find('?', i);
+      if (query_start != std::string_view::npos) {
+        path_end = query_start;
+      } else {
+        path_end = hash_start != std::string_view::npos ? hash_start : len;
       }
-      path_end = i;
       goto after_rest;
     }
     path_end = i;
@@ -1511,13 +1503,7 @@ scan_query:
   goto after_rest;
 
 scan_query_boundary:
-  for (; i < len; ++i) {
-    if (b[i] == '#') {
-      hash_start = i;
-      ++i;
-      goto after_rest;
-    }
-  }
+  hash_start = input.find('#', i);
   goto after_rest;
 
 scan_hash:
