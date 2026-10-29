@@ -1,4 +1,4 @@
-/* auto-generated on 2026-10-09 11:29:39 -0400. Do not edit! */
+/* auto-generated on 2026-10-12 02:37:12 +0000. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 /* begin file include/ada/idna/unicode_transcoding.h */
@@ -6147,7 +6147,9 @@ inline static size_t find_last_not_of_nsm(
 }
 
 // An RTL label is a label that contains at least one character of type R, AL,
-// or AN. https://www.rfc-editor.org/rfc/rfc5893#section-2
+// or AN. A domain containing one is a Bidi domain name: RFC 5893 then applies
+// to every label, including labels that are themselves all LTR.
+// https://www.rfc-editor.org/rfc/rfc5893#section-2
 inline static bool is_rtl_label(const std::u32string_view label) noexcept {
   const size_t mask =
       (1u << direction::R) | (1u << direction::AL) | (1u << direction::AN);
@@ -6159,7 +6161,21 @@ inline static bool is_rtl_label(const std::u32string_view label) noexcept {
   return (directions & mask) != 0;
 }
 
-bool is_label_valid(const std::u32string_view label) {
+// Same as is_rtl_label, but loads the Bidi tables first. Visible to to_ascii
+// and to_unicode, which are part of this translation unit.
+inline static bool label_contains_rtl(std::u32string_view label) noexcept {
+  if (label.empty() || !ensure_tables() || dir_start == nullptr ||
+      dir_final == nullptr || dir_value == nullptr) {
+    return false;
+  }
+  return is_rtl_label(label);
+}
+
+// `bidi_domain` is true when the domain name contains at least one RTL label.
+// CheckBidi then applies to this label even if the label itself has no R, AL,
+// or AN character (RFC 5893). The one-argument is_label_valid() passes false,
+// which preserves the per-label check for callers that do not know yet.
+static bool check_label(const std::u32string_view label, bool bidi_domain) {
   if (label.empty()) {
     return true;
   }
@@ -6250,8 +6266,8 @@ bool is_label_valid(const std::u32string_view label) {
 
   // A "Bidi domain name" is a domain name that contains at least one RTL label.
   // The following rule, consisting of six conditions, applies to labels in Bidi
-  // domain names.
-  if (is_rtl_label(label)) {
+  // domain names: every label, not only the RTL ones.
+  if (bidi_domain || is_rtl_label(label)) {
     // The first character must be a character with Bidi property L, R,
     // or AL. If it has the R or AL property, it is an RTL label; if it
     // has the L property, it is an LTR label.
@@ -6318,6 +6334,10 @@ bool is_label_valid(const std::u32string_view label) {
   }
 
   return true;
+}
+
+bool is_label_valid(const std::u32string_view label) {
+  return check_label(label, false);
 }
 
 }  // namespace ada::idna
@@ -6477,6 +6497,53 @@ static bool is_ace_prefix(std::u32string_view label) noexcept {
          label[2] == U'-' && label[3] == U'-';
 }
 
+// RFC 5893: a Bidi domain name contains at least one RTL label. CheckBidi then
+// applies to every label in the domain, so this must be known before the first
+// label is validated. ACE labels are decoded; a decode failure is left for the
+// conversion pass, which rejects the domain.
+static bool mapped_domain_is_bidi(std::u32string_view mapped) {
+  const char32_t* p = mapped.data();
+  const char32_t* const end = p + mapped.size();
+  std::string puny;
+  std::u32string decoded;
+  while (p < end) {
+    const char32_t* begin = p;
+    while (p < end && *p != U'.') {
+      ++p;
+    }
+    const std::u32string_view label(begin, static_cast<size_t>(p - begin));
+    if (p < end) {
+      ++p;
+    }
+    if (label.empty()) {
+      continue;
+    }
+    if (is_ace_prefix(label)) {
+      bool ace_ascii = true;
+      for (char32_t c : label) {
+        if (c >= 0x80) {
+          ace_ascii = false;
+          break;
+        }
+      }
+      if (!ace_ascii) {
+        continue;
+      }
+      puny.resize(label.size() - 4);
+      for (size_t i = 0; i < puny.size(); i++) {
+        puny[i] = static_cast<char>(label[i + 4]);
+      }
+      decoded.clear();
+      if (punycode_to_utf32(puny, decoded) && label_contains_rtl(decoded)) {
+        return true;
+      }
+    } else if (label_contains_rtl(label)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 [[nodiscard]] bool to_ascii(std::string_view ut8_string, std::string& out) {
   out.clear();
   // The ASCII path is a single same-size copy, so it needs no length bound.
@@ -6528,6 +6595,9 @@ static bool is_ace_prefix(std::u32string_view label) noexcept {
       return false;
     }
   }
+
+  // CheckBidi applies to every label once any label is RTL (RFC 5893).
+  const bool bidi_domain = mapped_domain_is_bidi(mapped);
 
   // Estimate ASCII output size (punycode may expand non-ASCII labels).
   out.reserve(mapped.size() + 8);
@@ -6581,14 +6651,20 @@ static bool is_ace_prefix(std::u32string_view label) noexcept {
           return false;
         }
       }
-      if (post_map.empty() || !is_label_valid(post_map)) {
+      if (post_map.empty() || !check_label(post_map, bidi_domain)) {
         out.clear();
         return false;
       }
     } else if (is_ascii(label_view)) {
+      // All-ASCII domains never reach here (they return above). An ASCII label
+      // in a Bidi domain must still satisfy RFC 5893 rules 1, 5, and 6.
+      if (bidi_domain && !check_label(label_view, true)) {
+        out.clear();
+        return false;
+      }
       append_ascii_label(out, label_view);
     } else {
-      if (!is_label_valid(label_view)) {
+      if (!check_label(label_view, bidi_domain)) {
         out.clear();
         return false;
       }
@@ -6679,10 +6755,78 @@ bool valid_name_code_point(char32_t code_point, bool first);
 
 namespace ada::idna {
 
+// True when an all-ASCII label is valid on its own but violates RFC 5893
+// because the domain contains an RTL label (for example a label starting
+// with a digit). ToUnicode then returns the original input (UTS #46).
+static bool ascii_label_fails_bidi_domain(std::string_view label) {
+  std::u32string utf32(label.size(), 0);
+  for (size_t i = 0; i < label.size(); i++) {
+    utf32[i] = static_cast<unsigned char>(label[i]);
+  }
+  return check_label(utf32, false) && !check_label(utf32, true);
+}
+
+static bool utf8_domain_is_bidi(std::string_view input) {
+  std::u32string decoded;
+  size_t label_start = 0;
+  while (label_start < input.size()) {
+    const size_t loc_dot = input.find('.', label_start);
+    const bool is_last_label = (loc_dot == std::string_view::npos);
+    const size_t label_size =
+        is_last_label ? input.size() - label_start : loc_dot - label_start;
+    const std::string_view label = input.substr(label_start, label_size);
+    if (label.starts_with("xn--") && is_ascii(label)) {
+      decoded.clear();
+      if (label.size() > 4 && punycode_to_utf32(label.substr(4), decoded) &&
+          label_contains_rtl(decoded)) {
+        return true;
+      }
+    } else if (!is_ascii(label)) {
+      const size_t utf32_length =
+          utf32_length_from_utf8(label.data(), label.size());
+      if (utf32_length != 0) {
+        decoded.assign(utf32_length, 0);
+        const size_t written =
+            utf8_to_utf32(label.data(), label.size(), decoded.data());
+        if (written == utf32_length && label_contains_rtl(decoded)) {
+          return true;
+        }
+      }
+    }
+    if (is_last_label) {
+      break;
+    }
+    label_start += label_size + 1;
+  }
+  return false;
+}
+
 [[nodiscard]] bool to_unicode(std::string_view input, std::string& output) {
   output.clear();
   if (input.size() > max_domain_input_bytes) {
     return false;
+  }
+  // An ASCII label that is only illegal because the domain is a Bidi domain
+  // fails ToUnicode for the whole input (UTS #46), not just that label.
+  const bool bidi_domain = utf8_domain_is_bidi(input);
+  if (bidi_domain) {
+    size_t label_start = 0;
+    while (label_start < input.size()) {
+      const size_t loc_dot = input.find('.', label_start);
+      const bool is_last_label = (loc_dot == std::string_view::npos);
+      const size_t label_size =
+          is_last_label ? input.size() - label_start : loc_dot - label_start;
+      const std::string_view label = input.substr(label_start, label_size);
+      if (!label.empty() && is_ascii(label) && !label.starts_with("xn--") &&
+          ascii_label_fails_bidi_domain(label)) {
+        output.assign(input);
+        return true;
+      }
+      if (is_last_label) {
+        break;
+      }
+      label_start += label_size + 1;
+    }
   }
   output.reserve(input.size());
 
@@ -6712,7 +6856,7 @@ namespace ada::idna {
             accept_decoded = false;
           } else if (!ada::idna::normalize(post_map) ||
                      post_map != tmp_buffer || post_map.empty() ||
-                     !ada::idna::is_label_valid(post_map)) {
+                     !check_label(post_map, bidi_domain)) {
             accept_decoded = false;
           }
         }
