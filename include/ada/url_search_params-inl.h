@@ -25,6 +25,12 @@ namespace ada {
 // strings (ada.h includes both headers).
 uint32_t get_max_input_length();
 
+#if !defined(ADA_PRESERVE_UNITY_CODEGEN)
+// Empty segments (a leading or repeated '&') are not counted. Out of line so
+// the scan is not part of the unity translation unit.
+size_t urlencoded_pair_count(std::string_view input) noexcept;
+#endif
+
 // A default, empty url_search_params for use with empty iterators.
 template <typename T, ada::url_search_params_iter_type Type>
 url_search_params url_search_params_iter<T, Type>::EMPTY;
@@ -46,7 +52,15 @@ inline void url_search_params::initialize(std::string_view input) {
     return;
   }
 
+#if defined(ADA_PRESERVE_UNITY_CODEGEN)
+  // The unity translation unit keeps this expression so GCC's inlining of the
+  // setters stays put. Every other translation unit counts real pairs.
   params.reserve(size_t(std::count(input.begin(), input.end(), '&')) + 1);
+#else
+  // Empty segments (a leading or repeated '&') are skipped, so reserving one
+  // slot per '&' over-allocates.
+  params.reserve(urlencoded_pair_count(input));
+#endif
 
   auto process_key_value = [&](const std::string_view current) {
     const auto equal = current.find('=');
