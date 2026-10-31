@@ -349,3 +349,23 @@ TEST(max_input_length_helpers, url_search_params_accepts_under_limit) {
   ASSERT_EQ(params.get("foo"), "bar");
   ada::set_max_input_length(std::numeric_limits<uint32_t>::max());
 }
+
+TYPED_TEST(max_input_length_tests, set_hostname_idna_expansion_respects_limit) {
+  // Domain to ASCII can grow a host by more than 3x its input (U+337F, 3
+  // bytes, becomes the 17-byte label "xn--6oqv20b1zgzxr"). A host setter
+  // whose result does not fit the limit must fail and leave the URL
+  // unchanged, however much IDNA grew it.
+  auto url = ada::parse<TypeParam>("ws:a");
+  ASSERT_TRUE(url);
+  std::string before(url->get_href());
+  ada::set_max_input_length(59);
+  // U+321E U+33AF U+3319 U+337F: 12 bytes of input, 51 bytes of host.
+  bool ok =
+      url->set_hostname("\xe3\x88\x9e\xe3\x8e\xaf\xe3\x8c\x99\xe3\x8d\xbf");
+  bool ok_host =
+      url->set_host("\xe3\x88\x9e\xe3\x8e\xaf\xe3\x8c\x99\xe3\x8d\xbf");
+  ada::set_max_input_length(small_limit);
+  ASSERT_FALSE(ok);
+  ASSERT_FALSE(ok_host);
+  ASSERT_EQ(url->get_href(), before);
+}
