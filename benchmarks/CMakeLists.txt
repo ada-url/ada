@@ -332,7 +332,12 @@ else(ZURI_FOUND)
     message(STATUS "Zuri not found! Please install to include in benchmark.")
 endif(ZURI_FOUND)
 
-if(NOT WIN32)
+# The CodSpeed runner image ships rustc. Leave this ON for local comparisons
+# and pass OFF in .github/workflows/codspeed.yml so servo-url does not appear
+# or disappear between reports.
+option(ADA_BENCHMARK_SERVO_URL "Benchmark servo-url when Rust is available." ON)
+
+if(NOT WIN32 AND ADA_BENCHMARK_SERVO_URL)
 # We want the check whether Rust is available before trying to build a crate.
 CPMAddPackage(
   NAME corrosion
@@ -344,7 +349,7 @@ CPMAddPackage(
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
 endif()
 
-if(RUST_FOUND)
+if(ADA_BENCHMARK_SERVO_URL AND RUST_FOUND)
   message(STATUS "Rust found: " ${Rust_VERSION} )
   add_subdirectory("${corrosion_SOURCE_DIR}" "${PROJECT_BINARY_DIR}/_deps/corrosion" EXCLUDE_FROM_ALL)
   # Important: we want to build in release mode!
@@ -370,6 +375,8 @@ if(RUST_FOUND)
   else()
     message(SEND_ERROR "Rust servo-url target was not created successfully. Likely due to a bug.")
   endif()
+elseif(NOT ADA_BENCHMARK_SERVO_URL)
+  message(STATUS "servo-url benchmarks are disabled.")
 else()
   message(STATUS "Rust/Cargo is unavailable." )
   message(STATUS "We will not benchmark servo-url." )

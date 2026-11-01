@@ -27,12 +27,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y g++-12 libicu-dev
-          # servo-url is linked into several benches when rustc is present.
-          # Keeping it absent stops the measured set from changing with the image.
-          if command -v rustc >/dev/null 2>&1; then
-            echo "rustc is installed; CodSpeed would gain servo-url benchmarks."
-            exit 1
-          fi
       - name: Build the benchmark target(s)
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release \
@@ -43,6 +37,7 @@ jobs:
             -DCODSPEED_MODE=simulation \
             -DCMAKE_DISABLE_FIND_PACKAGE_CURL=ON \
             -DCMAKE_DISABLE_FIND_PACKAGE_ZURI=ON \
+            -DADA_BENCHMARK_SERVO_URL=OFF \
             -G Ninja -B build
           cmake --build build -j
         env:
