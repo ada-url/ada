@@ -121,11 +121,18 @@ add_custom_target(run_all_benchmarks
         COMMAND ${CMAKE_COMMAND} -E echo "Running all benchmarks..."
 )
 foreach(benchmark IN LISTS BENCHMARKS)
+    # wpt_bench exits without measuring anything unless it is given the WPT
+    # dataset. Passing it here is what makes those benches show up in CodSpeed.
+    if(benchmark STREQUAL "wpt_bench")
+        set(benchmark_args "${PROJECT_SOURCE_DIR}/tests/wpt/urltestdata.json" --benchmark_min_time=1s)
+    else()
+        set(benchmark_args --benchmark_min_time=1s)
+    endif()
     add_custom_command(
             TARGET run_all_benchmarks
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Running ${benchmark}..."
-            COMMAND $<TARGET_FILE:${benchmark}> --benchmark_min_time=1s
+            COMMAND $<TARGET_FILE:${benchmark}> ${benchmark_args}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 endforeach()

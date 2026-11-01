@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - "main"
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
   pull_request:
   # `workflow_dispatch` allows CodSpeed to trigger backtest
   # performance analysis in order to generate initial data.
@@ -18,12 +15,35 @@ permissions:
 jobs:
   benchmarks:
     name: Run benchmarks
-    runs-on: ubuntu-latest
+    # Pin the image label. `ubuntu-latest` moves, and a move retimes every
+    # benchmark at once. x64 CPU and cache still vary inside this image;
+    # iteration-invariant benches keep that from showing up as a regression.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install the benchmark toolchain
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-12 libicu-dev
+          # servo-url is linked into several benches when rustc is present.
+          # Keeping it absent stops the measured set from changing with the image.
+          if command -v rustc >/dev/null 2>&1; then
+            echo "rustc is installed; CodSpeed would gain servo-url benchmarks."
+            exit 1
+          fi
       - name: Build the benchmark target(s)
         run: |
-          cmake -DCMAKE_BUILD_TYPE=Release -DADA_TESTING=OFF -DADA_DEVELOPMENT_CHECKS=OFF -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON -DADA_BENCHMARKS=ON -DCODSPEED_MODE=simulation -G Ninja -B build
+          cmake -DCMAKE_BUILD_TYPE=Release \
+            -DADA_TESTING=OFF \
+            -DADA_DEVELOPMENT_CHECKS=OFF \
+            -DADA_USE_UNSAFE_STD_REGEX_PROVIDER=ON \
+            -DADA_BENCHMARKS=ON \
+            -DCODSPEED_MODE=simulation \
+            -DCMAKE_DISABLE_FIND_PACKAGE_CURL=ON \
+            -DCMAKE_DISABLE_FIND_PACKAGE_ZURI=ON \
+            -G Ninja -B build
           cmake --build build -j
         env:
           CXX: g++-12
@@ -32,4 +52,3 @@ jobs:
         with:
           mode: simulation
           run: cmake --build build --target run_all_benchmarks
-
