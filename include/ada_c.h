@@ -24,7 +24,11 @@ typedef struct {
   size_t length;
 } ada_string;
 
-// string that must be freed by the caller
+// string that must be freed by the caller with ada_free_owned_string.
+//
+// When data is non-NULL, it points at length bytes followed by a NUL
+// terminator. length does not include that NUL. data is NULL only on failure
+// (or when the source URL is invalid); length is then 0.
 typedef struct {
   const char* data;
   size_t length;
@@ -41,6 +45,9 @@ typedef struct {
   uint32_t hash_start;
 } ada_url_components;
 
+// Opaque handle. Do not cast it or inspect the bytes it points at.
+// Pass each handle only to functions that take that handle type.
+// ada_free_* on a null pointer or on a handle of a different type does nothing.
 typedef void* ada_url;
 
 // input should be a null terminated C string (ASCII or UTF-8)
@@ -117,6 +124,8 @@ const ada_url_components* ada_get_components(ada_url result);
 ada_owned_string ada_idna_to_unicode(const char* input, size_t length);
 ada_owned_string ada_idna_to_ascii(const char* input, size_t length);
 
+// Opaque handles. Do not cast them or pass one to a free function for a
+// different handle type; that call does nothing.
 // url search params
 typedef void* ada_url_search_params;
 

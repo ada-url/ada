@@ -34,5 +34,9 @@ ignore:
   - "benchmarks/**"
   # Test files themselves should not count toward library coverage.
   - "tests/**"
+  # Byte-for-byte copy of main's C API, compiled into the GCC unity TU only so
+  # that translation unit's inlining stays identical to main. The exported
+  # implementation is src/ada_c.cpp.
+  - "src/ada_c_baseline.cpp"
   # Documentation sources.
   - "docs/**"
