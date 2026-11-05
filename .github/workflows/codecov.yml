@@ -44,6 +44,11 @@ jobs:
       - name: Run tests
         run: ctest --output-on-failure --test-dir build
 
+      # Exception edges on std::string and operator new are not taken in tests.
+      # Counting them as missed branches marks executed lines partial and pulls
+      # patch coverage under the 60% gate for ordinary copies. Keep this comment
+      # outside the folded run script: a '#' there is a shell comment and drops
+      # the rest of the gcovr command, including --xml.
       - name: Generate coverage report
         run: >
           gcovr
@@ -56,6 +61,7 @@ jobs:
           --exclude 'benchmarks/.*'
           --exclude 'tests/.*'
           --exclude 'include/ada/expected.h'
+          --exclude-throw-branches
           --gcov-executable gcov-12
           --xml
           --output build/coverage.xml
