@@ -81,6 +81,33 @@ inline constexpr uint32_t max_fast_path_pathname_length = 4096;
  */
 inline constexpr uint32_t max_trie_pattern_segments = 16;
 
+/**
+ * Maximum number of routes in a url_pattern_list.
+ */
+inline constexpr size_t max_routes = 65535;
+
+/**
+ * Maximum number of auxiliary/challenger table entries. The challenger
+ * table is one range per trie route and grows with overlapping routes;
+ * past this bound compilation fails instead of allocating without limit.
+ */
+inline constexpr size_t max_aux_entries = 1u << 20;
+
+/**
+ * Maximum length of a literal edge key in bytes (must fit in uint16_t).
+ */
+inline constexpr size_t max_edge_key_length = 65535;
+
+/**
+ * Maximum number of static children per trie node (must fit in uint16_t).
+ */
+inline constexpr size_t max_node_children = 65535;
+
+/**
+ * Maximum total compiled arena size in bytes (must fit in uint32_t).
+ */
+inline constexpr size_t max_arena_size = 0xFFFFFFFF;
+
 }  // namespace url_pattern_list_limits
 
 /**

@@ -127,14 +127,16 @@ constexpr bool route_outranks(const route_info& a, size_t a_index,
 /**
  * Compiles the route set: builds the trie and its dispatch plans over the
  * trie-mode routes, the segment table, the auxiliary-route table with its
- * per-route challenger ranges, and packs everything into one arena. Never
- * fails: any node whose offline search fails is demoted to a slower but
- * correct plan.
+ * per-route challenger ranges, and packs everything into one arena. A node
+ * whose offline search fails is demoted to a slower but correct plan.
+ * Compilation fails when a table would not fit its integer encoding (arena
+ * offsets, segment-blob offsets) or when the challenger table exceeds
+ * url_pattern_list_limits::max_aux_entries.
  * Literal texts are used as given (the caller has already case-folded them
  * when ignore_case is set).
  */
-url_pattern_list_detail::compiled_routes compile_route_set(
-    std::vector<route_info>& routes);
+tl::expected<url_pattern_list_detail::compiled_routes, errors>
+compile_route_set(std::vector<route_info>& routes);
 
 }  // namespace ada::url_pattern_list_compiler
 #endif  // ADA_INCLUDE_URL_PATTERN
