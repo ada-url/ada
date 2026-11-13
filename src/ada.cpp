@@ -21,4 +21,8 @@
 #endif
 #endif  // ADA_INCLUDE_URL_PATTERN
 
+#if defined(ADA_C_API_BASELINE)
+#include "ada_c_baseline.cpp"
+#else
 #include "ada_c.cpp"
+#endif

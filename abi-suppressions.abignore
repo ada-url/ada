@@ -30,3 +30,9 @@
 # parameter lists when call sites shift; the template itself is unchanged.
 [suppress_function]
   name_regexp = ^ada::helpers::concat
+
+# Inline lambda inside url_search_params::remove(string_view, string_view).
+# std::erase_if emits an out-of-line copy with no debug info. Compiling the
+# C API in its own translation unit drops that copy. Not part of the public API.
+[suppress_function]
+  symbol_name_regexp = ^_ZZN3ada17url_search_params6removeE
