@@ -33,6 +33,100 @@ inline bool url_pattern_component_result::operator==(
   return input == other.input && groups == other.groups;
 }
 
+inline void url_pattern_result::rebind_owned_input_views() {
+  size_t owned_index = 0;
+  for (auto& value : inputs) {
+    if (std::holds_alternative<std::string_view>(value)) {
+      if (owned_index >= owned_strings_.size()) {
+        break;
+      }
+      value = std::string_view(owned_strings_[owned_index]);
+      ++owned_index;
+    }
+  }
+}
+
+inline void url_pattern_result::store_inputs(const url_pattern_input& input,
+                                             const std::string_view* base_url) {
+  owned_strings_.clear();
+  inputs.clear();
+  if (std::holds_alternative<std::string_view>(input)) {
+    owned_strings_.emplace_back(std::get<std::string_view>(input));
+  }
+  if (base_url != nullptr) {
+    owned_strings_.emplace_back(*base_url);
+  }
+  size_t owned_index = 0;
+  if (std::holds_alternative<std::string_view>(input)) {
+    inputs.emplace_back(std::string_view(owned_strings_[owned_index++]));
+  } else {
+    inputs.emplace_back(std::get<url_pattern_init>(input));
+  }
+  if (base_url != nullptr) {
+    inputs.emplace_back(std::string_view(owned_strings_[owned_index]));
+  }
+}
+
+inline url_pattern_result::url_pattern_result(const url_pattern_result& other)
+    : inputs(other.inputs),
+      protocol(other.protocol),
+      username(other.username),
+      password(other.password),
+      hostname(other.hostname),
+      port(other.port),
+      pathname(other.pathname),
+      search(other.search),
+      hash(other.hash),
+      owned_strings_(other.owned_strings_) {
+  rebind_owned_input_views();
+}
+
+inline url_pattern_result::url_pattern_result(
+    url_pattern_result&& other) noexcept
+    : inputs(std::move(other.inputs)),
+      protocol(std::move(other.protocol)),
+      username(std::move(other.username)),
+      password(std::move(other.password)),
+      hostname(std::move(other.hostname)),
+      port(std::move(other.port)),
+      pathname(std::move(other.pathname)),
+      search(std::move(other.search)),
+      hash(std::move(other.hash)),
+      owned_strings_(std::move(other.owned_strings_)) {
+  rebind_owned_input_views();
+  other.inputs.clear();
+  other.owned_strings_.clear();
+}
+
+inline url_pattern_result& url_pattern_result::operator=(
+    const url_pattern_result& other) {
+  if (this != &other) {
+    url_pattern_result tmp(other);
+    *this = std::move(tmp);
+  }
+  return *this;
+}
+
+inline url_pattern_result& url_pattern_result::operator=(
+    url_pattern_result&& other) noexcept {
+  if (this != &other) {
+    inputs = std::move(other.inputs);
+    protocol = std::move(other.protocol);
+    username = std::move(other.username);
+    password = std::move(other.password);
+    hostname = std::move(other.hostname);
+    port = std::move(other.port);
+    pathname = std::move(other.pathname);
+    search = std::move(other.search);
+    hash = std::move(other.hash);
+    owned_strings_ = std::move(other.owned_strings_);
+    rebind_owned_input_views();
+    other.inputs.clear();
+    other.owned_strings_.clear();
+  }
+  return *this;
+}
+
 template <url_pattern_regex::regex_concept regex_provider>
 url_pattern_component_result
 url_pattern_component<regex_provider>::create_component_match_result(
@@ -375,10 +469,6 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   std::string search{};
   std::string hash{};
 
-  // Let inputs be an empty list.
-  // Append input to inputs.
-  std::vector inputs{input};
-
   // If input is a URLPatternInit then:
   if (std::holds_alternative<url_pattern_init>(input)) {
     ada_log(
@@ -458,9 +548,6 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
                 *base_url_string);
         return std::nullopt;
       }
-
-      // Append baseURLString to inputs.
-      inputs.emplace_back(*base_url_string);
     }
 
     url_aggregator* base_url_value =
@@ -572,8 +659,9 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
 
   // Let result be a new URLPatternResult.
   auto result = url_pattern_result{};
-  // Set result["inputs"] to inputs.
-  result.inputs = std::move(inputs);
+  // Set result["inputs"] to inputs. Copy URL / base URL text into the
+  // result so inputs[] string_views outlive the caller's arguments.
+  result.store_inputs(input, base_url_string);
   // Set result["protocol"] to the result of creating a component match result
   // given urlPattern's protocol component, protocol, and protocolExecResult.
   result.protocol = protocol_component.create_component_match_result(
