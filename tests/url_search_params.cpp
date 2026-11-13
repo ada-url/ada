@@ -323,6 +323,21 @@ TEST(url_search_params, string_constructor_with_edge_cases) {
   SUCCEED();
 }
 
+TEST(url_search_params, repeated_ampersands_do_not_create_pairs) {
+  auto only_amps = ada::url_search_params(std::string(10000, '&'));
+  ASSERT_EQ(only_amps.size(), 0u);
+  ASSERT_EQ(only_amps.to_string(), "");
+
+  auto one = ada::url_search_params("&&&&a=1");
+  ASSERT_EQ(one.size(), 1u);
+  ASSERT_EQ(one.get("a").value_or(""), "1");
+  ASSERT_EQ(one.to_string(), "a=1");
+
+  auto mixed = ada::url_search_params("a=1&&b=2&");
+  ASSERT_EQ(mixed.size(), 2u);
+  ASSERT_EQ(mixed.to_string(), "a=1&b=2");
+}
+
 TEST(url_search_params, has) {
   auto search_params = ada::url_search_params("key1=value1&key2=value2");
   ASSERT_TRUE(search_params.has("key1"));
