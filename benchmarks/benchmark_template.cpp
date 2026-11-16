@@ -616,7 +616,7 @@ static void BasicBench_urlparser_just_parse(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -624,7 +624,7 @@ static void BasicBench_urlparser_just_parse(benchmark::State& state) {
         std::unique_ptr<EdUrlParser> url(EdUrlParser::parseUrl(url_string));
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -672,7 +672,7 @@ static void BasicBench_http_parser_just_parse(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -681,7 +681,7 @@ static void BasicBench_http_parser_just_parse(benchmark::State& state) {
             !http_parser_parse_url(url_string.data(), url_string.size(), 0, &u);
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     state.counters["cycles/url"] =
@@ -757,7 +757,7 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
     }
   }
   if (collector.has_events()) {
-    event_aggregate aggregate{};
+    counters::event_aggregate aggregate{};
     for (size_t i = 0; i < N; i++) {
       std::atomic_thread_fence(std::memory_order_acquire);
       collector.start();
@@ -770,7 +770,7 @@ static void BasicBench_ServoUrl(benchmark::State& state) {
         }
       }
       std::atomic_thread_fence(std::memory_order_release);
-      event_count allocate_count = collector.end();
+      counters::event_count allocate_count = collector.end();
       aggregate << allocate_count;
     }
     (void)success;
