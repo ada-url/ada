@@ -1916,10 +1916,12 @@ result_type parse_url_impl(std::string_view user_input,
       const uint8_t host_first = host_start != 0 ? p[host_start] : 0;
       const bool skip_ip =
           host_first == '[' || (host_first >= '0' && host_first <= '9');
-      const bool skip_userinfo =
-          host_start != 0 && authority_has_at(p, host_start, n);
-      hit_fast_path = !skip_ip && !skip_userinfo &&
-                      try_parse_simple_absolute(user_input, url);
+      // Only scan for userinfo when the host is not an IP literal, so
+      // IPv4/IPv6 inputs skip the SIMD '@' check entirely.
+      hit_fast_path =
+          !skip_ip &&
+          !(host_start != 0 && authority_has_at(p, host_start, n)) &&
+          try_parse_simple_absolute(user_input, url);
     } else {
       hit_fast_path = try_parse_simple_relative(user_input, *base_url, url);
     }
