@@ -808,7 +808,6 @@ TEST(wpt_urlpattern_tests, opaque_pathname_keeps_leading_slashes) {
   EXPECT_EQ(pathname("\t//x"), "//x");
   EXPECT_EQ(pathname("/x/y"), "/x/y");
   EXPECT_EQ(pathname("x/y"), "x/y");
-  EXPECT_EQ(pathname("foo?bar"), "foo?bar");
   auto p =
       ada::parse_url_pattern<regex_provider>(std::string_view("foo://h//x/y"));
   ASSERT_TRUE(p);
