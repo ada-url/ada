@@ -227,6 +227,10 @@ static void add_counters(benchmark::State& state, size_t n_urls) {
 
 static void BasicBench_SequentialURLPatternExec(benchmark::State& state) {
   const auto& urls = url_stream();
+  // Pattern compilation is a function-local static inside sequential_route().
+  // Touch it once here so a run that skips main()'s cross-check does not fold
+  // that one-time cost into CodSpeed's single measured iteration.
+  (void)sequential_patterns();
   volatile int64_t sum = 0;
   for (auto _ : state) {
     for (const std::string& url : urls) {

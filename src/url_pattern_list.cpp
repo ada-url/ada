@@ -21,6 +21,7 @@
 #include <bit>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -727,6 +728,12 @@ void finalize_route(route_info& route) noexcept {
   route.all_literal = true;
   route.has_wildcard = false;
   size_t n_params = 0;
+  // A trie edge keeps its literal segment length in edge_record::key_length, a
+  // uint16_t. A literal longer than that wraps around, so the trie would match
+  // a shorter, truncated length (e.g. a 65536-byte segment becomes length 0 and
+  // matches an empty segment). Keep such a route out of the trie and let the
+  // sequential matcher, which compares the whole segment, answer it.
+  bool literal_fits_edge = true;
   for (const route_segment& s : route.segments) {
     if (s.kind != segment_kind::literal) {
       route.all_literal = false;
@@ -735,12 +742,15 @@ void finalize_route(route_info& route) noexcept {
       } else {
         route.has_wildcard = true;
       }
+    } else if (s.text.size() > std::numeric_limits<uint16_t>::max()) {
+      literal_fits_edge = false;
     }
   }
   const size_t n_captures = n_params + (route.has_wildcard ? 1 : 0);
   const bool trie_safe = !route.segments.empty() &&
                          route.segments.size() <= max_trie_pattern_segments &&
-                         n_captures <= max_captures_per_route;
+                         n_captures <= max_captures_per_route &&
+                         literal_fits_edge;
   route.mode = trie_safe ? route_mode::trie : route_mode::sequential;
 }
 
