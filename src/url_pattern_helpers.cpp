@@ -246,8 +246,6 @@ tl::expected<std::string, errors> canonicalize_protocol(
 
   if (input.ends_with(":")) {
     input.remove_suffix(1);
-    // A bare ":" reaches here from an escaped-colon protocol pattern.
-    // The spec rejects it, and input[0] below must not be read (#1283).
     if (input.empty()) [[unlikely]] {
       return tl::unexpected(errors::type_error);
     }
@@ -553,17 +551,9 @@ tl::expected<std::string, errors> canonicalize_opaque_pathname(
   if (input.empty()) [[unlikely]] {
     return "";
   }
-  // Opaque-path state (URL parser, state override) appends every code
-  // point to the path, UTF-8 percent-encoded with the C0 control set.
-  // It does not parse an authority and does not normalize dot segments.
-  // Parsing "fake:" + value instead treats a leading "//" as an authority
-  // ("//x/y" became "/y") and a leading "/" as a hierarchical path (#1284).
-  // ASCII tab/newline are removed first, as the URL parser does.
+  // Opaque-path state: no authority and no dot-segment normalization.
   std::string value(input);
   helpers::remove_ascii_tab_or_newline(value);
-  if (value.empty()) {
-    return "";
-  }
   return ada::unicode::percent_encode(
       value, character_sets::C0_CONTROL_PERCENT_ENCODE);
 }
@@ -584,9 +574,7 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
     return "";
   }
 
-  // The spec's dummy URL (https://dummy.invalid/) is special, so the
-  // query state uses the special-query percent-encode set, which also
-  // encodes U+0027 APOSTROPHE (#1285).
+  // The spec's dummy URL is special, so use the special-query set.
   size_t idx = ada::unicode::percent_encode_index(
       new_value, character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
   if (idx == new_value.size()) {

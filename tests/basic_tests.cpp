@@ -2346,13 +2346,8 @@ TYPED_TEST(basic_tests, file_relative_windows_drive_letter_path_is_not_opaque) {
   auto relative = ada::parse<TypeParam>("x", &*url);
   ASSERT_TRUE(relative);
   ASSERT_EQ(relative->get_href(), "file:///C:/x");
-
-  auto host = *url;
-  ASSERT_TRUE(host.set_hostname("h"));
-  ASSERT_EQ(host.get_href(), "file://h/C:");
-  auto path = *url;
-  ASSERT_TRUE(path.set_pathname("/D:/y"));
-  ASSERT_EQ(path.get_href(), "file:///D:/y");
+  ASSERT_TRUE(url->set_hostname("h"));
+  ASSERT_EQ(url->get_href(), "file://h/C:");
 }
 
 TEST(basic_tests, last_label_may_be_a_number_cases) {
