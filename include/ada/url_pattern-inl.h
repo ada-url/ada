@@ -33,6 +33,122 @@ inline bool url_pattern_component_result::operator==(
   return input == other.input && groups == other.groups;
 }
 
+inline void url_pattern_result::rebind_owned_input_views(
+    const std::pair<const char*, size_t>* from, size_t from_size) {
+  // A view the caller pushed into `inputs` does not alias `from` and
+  // is left unchanged.
+  for (auto& value : inputs) {
+    auto* sv = std::get_if<std::string_view>(&value);
+    if (sv == nullptr) {
+      continue;
+    }
+    for (size_t i = 0; i < from_size && i < owned_strings_.size(); ++i) {
+      const char* const begin = from[i].first;
+      const char* const end = begin + from[i].second;
+      if (sv->data() >= begin && sv->data() <= end &&
+          static_cast<size_t>(end - sv->data()) >= sv->size()) {
+        const size_t off = static_cast<size_t>(sv->data() - begin);
+        value = std::string_view(owned_strings_[i].data() + off, sv->size());
+        break;
+      }
+    }
+  }
+}
+
+inline void url_pattern_result::take_inputs(
+    url_pattern_result& other) noexcept {
+  // SSO buffers change address when a std::string is moved, so the
+  // source addresses have to be captured first. store_inputs never
+  // owns more than two strings, which keeps this noexcept.
+  std::pair<const char*, size_t> from[2];
+  const size_t n =
+      other.owned_strings_.size() < 2 ? other.owned_strings_.size() : 2;
+  for (size_t i = 0; i < n; ++i) {
+    from[i] = {other.owned_strings_[i].data(), other.owned_strings_[i].size()};
+  }
+  inputs = std::move(other.inputs);
+  owned_strings_ = std::move(other.owned_strings_);
+  rebind_owned_input_views(from, n);
+  other.inputs.clear();
+  other.owned_strings_.clear();
+}
+
+inline void url_pattern_result::store_inputs(const url_pattern_input& input,
+                                             const std::string_view* base_url) {
+  owned_strings_.clear();
+  inputs.clear();
+  if (std::holds_alternative<std::string_view>(input)) {
+    owned_strings_.emplace_back(std::get<std::string_view>(input));
+    inputs.emplace_back(std::string_view(owned_strings_.back()));
+  } else {
+    inputs.emplace_back(std::get<url_pattern_init>(input));
+  }
+  if (base_url != nullptr) {
+    owned_strings_.emplace_back(*base_url);
+    inputs.emplace_back(std::string_view(owned_strings_.back()));
+  }
+}
+
+inline url_pattern_result::url_pattern_result(const url_pattern_result& other)
+    : inputs(other.inputs),
+      protocol(other.protocol),
+      username(other.username),
+      password(other.password),
+      hostname(other.hostname),
+      port(other.port),
+      pathname(other.pathname),
+      search(other.search),
+      hash(other.hash),
+      owned_strings_(other.owned_strings_) {
+  // `other` is unchanged, so its buffers are still the ones inputs
+  // may point at.
+  std::pair<const char*, size_t> from[2];
+  const size_t n =
+      other.owned_strings_.size() < 2 ? other.owned_strings_.size() : 2;
+  for (size_t i = 0; i < n; ++i) {
+    from[i] = {other.owned_strings_[i].data(), other.owned_strings_[i].size()};
+  }
+  rebind_owned_input_views(from, n);
+}
+
+inline url_pattern_result::url_pattern_result(
+    url_pattern_result&& other) noexcept
+    : protocol(std::move(other.protocol)),
+      username(std::move(other.username)),
+      password(std::move(other.password)),
+      hostname(std::move(other.hostname)),
+      port(std::move(other.port)),
+      pathname(std::move(other.pathname)),
+      search(std::move(other.search)),
+      hash(std::move(other.hash)) {
+  take_inputs(other);
+}
+
+inline url_pattern_result& url_pattern_result::operator=(
+    const url_pattern_result& other) {
+  if (this != &other) {
+    url_pattern_result tmp(other);
+    *this = std::move(tmp);
+  }
+  return *this;
+}
+
+inline url_pattern_result& url_pattern_result::operator=(
+    url_pattern_result&& other) noexcept {
+  if (this != &other) {
+    protocol = std::move(other.protocol);
+    username = std::move(other.username);
+    password = std::move(other.password);
+    hostname = std::move(other.hostname);
+    port = std::move(other.port);
+    pathname = std::move(other.pathname);
+    search = std::move(other.search);
+    hash = std::move(other.hash);
+    take_inputs(other);
+  }
+  return *this;
+}
+
 template <url_pattern_regex::regex_concept regex_provider>
 url_pattern_component_result
 url_pattern_component<regex_provider>::create_component_match_result(
@@ -375,10 +491,6 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
   std::string search{};
   std::string hash{};
 
-  // Let inputs be an empty list.
-  // Append input to inputs.
-  std::vector inputs{input};
-
   // If input is a URLPatternInit then:
   if (std::holds_alternative<url_pattern_init>(input)) {
     ada_log(
@@ -458,9 +570,6 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
                 *base_url_string);
         return std::nullopt;
       }
-
-      // Append baseURLString to inputs.
-      inputs.emplace_back(*base_url_string);
     }
 
     url_aggregator* base_url_value =
@@ -572,8 +681,9 @@ result<std::optional<url_pattern_result>> url_pattern<regex_provider>::match(
 
   // Let result be a new URLPatternResult.
   auto result = url_pattern_result{};
-  // Set result["inputs"] to inputs.
-  result.inputs = std::move(inputs);
+  // Set result["inputs"] to inputs. Copy URL / base URL text into the
+  // result so inputs[] string_views outlive the caller's arguments.
+  result.store_inputs(input, base_url_string);
   // Set result["protocol"] to the result of creating a component match result
   // given urlPattern's protocol component, protocol, and protocolExecResult.
   result.protocol = protocol_component.create_component_match_result(
