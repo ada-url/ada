@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [macos-14, macos-15, macos-26]
+        runner: [macos-15, macos-26]
         shared: [OFF]
     name: build (${{ matrix.runner }}, shared=${{ matrix.shared }})
     uses: ./.github/workflows/_build.yaml
