@@ -19,18 +19,6 @@
 #include <utility>
 
 namespace ada {
-namespace {
-// True when input's first byte sits inside storage. Inlined so a normal
-// setter call does not pay for an out-of-line overlap check.
-ada_really_inline bool url_input_aliases(std::string_view input,
-                                         const std::string& storage) noexcept {
-  if (input.empty() || storage.empty()) {
-    return false;
-  }
-  const char* const begin = storage.data();
-  return input.data() >= begin && input.data() < begin + storage.size();
-}
-}  // namespace
 
 bool url::parse_opaque_host(std::string_view input) {
   ada_log("parse_opaque_host ", input, " [", input.size(), " bytes]");
@@ -747,22 +735,15 @@ bool url::set_host_or_hostname(const std::string_view input) {
 }
 
 bool url::set_host(const std::string_view input) {
-  // host (and the port substring) may alias this->host.
-  if (host && url_input_aliases(input, *host)) {
-    return set_host(std::string(input));
-  }
   return set_host_or_hostname<false>(input);
 }
 
 bool url::set_hostname(const std::string_view input) {
-  if (host && url_input_aliases(input, *host)) {
-    return set_hostname(std::string(input));
-  }
   return set_host_or_hostname<true>(input);
 }
 
 bool url::set_username(const std::string_view input) {
-  if (url_input_aliases(input, username)) {
+  if (helpers::overlaps(input, username)) {
     return set_username(std::string(input));
   }
   if (cannot_have_credentials_or_port()) {
@@ -779,7 +760,7 @@ bool url::set_username(const std::string_view input) {
 }
 
 bool url::set_password(const std::string_view input) {
-  if (url_input_aliases(input, password)) {
+  if (helpers::overlaps(input, password)) {
     return set_password(std::string(input));
   }
   if (cannot_have_credentials_or_port()) {
@@ -879,7 +860,7 @@ void url::set_search(const std::string_view input) {
 }
 
 bool url::set_pathname(const std::string_view input) {
-  if (url_input_aliases(input, path)) {
+  if (helpers::overlaps(input, path)) {
     return set_pathname(std::string(input));
   }
   if (has_opaque_path) {

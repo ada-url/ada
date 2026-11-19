@@ -40,19 +40,6 @@ ada_really_inline void apply_shifted_non_scheme_offsets(
 }  // namespace
 
 namespace ada {
-namespace {
-// True when input's first byte sits inside storage. Inlined: the non-alias
-// setter path must not pay for a call. The copy happens only on a hit.
-ada_really_inline bool aliases_storage(std::string_view input,
-                                       const std::string& storage) noexcept {
-  if (input.empty() || storage.empty()) {
-    return false;
-  }
-  const char* const begin = storage.data();
-  return input.data() >= begin && input.data() < begin + storage.size();
-}
-}  // namespace
-
 template <bool has_state_override>
 [[nodiscard]] ada_really_inline bool url_aggregator::parse_scheme_with_colon(
     const std::string_view input_with_colon) {
@@ -270,7 +257,7 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 }
 
 bool url_aggregator::set_username(const std::string_view input) {
-  if (aliases_storage(input, buffer)) {
+  if (helpers::overlaps(input, buffer)) {
     return set_username(std::string(input));
   }
   ada_log("url_aggregator::set_username '", input, "' ");
@@ -301,7 +288,7 @@ bool url_aggregator::set_username(const std::string_view input) {
 }
 
 bool url_aggregator::set_password(const std::string_view input) {
-  if (aliases_storage(input, buffer)) {
+  if (helpers::overlaps(input, buffer)) {
     return set_password(std::string(input));
   }
   ada_log("url_aggregator::set_password '", input, "'");
@@ -383,7 +370,7 @@ bool url_aggregator::set_port(const std::string_view input) {
 }
 
 bool url_aggregator::set_pathname(const std::string_view input) {
-  if (aliases_storage(input, buffer)) {
+  if (helpers::overlaps(input, buffer)) {
     return set_pathname(std::string(input));
   }
   ada_log("url_aggregator::set_pathname ", input);
@@ -458,7 +445,7 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
 }
 
 void url_aggregator::set_search(const std::string_view input) {
-  if (aliases_storage(input, buffer)) {
+  if (helpers::overlaps(input, buffer)) {
     set_search(std::string(input));
     return;
   }
@@ -499,7 +486,7 @@ void url_aggregator::set_search(const std::string_view input) {
 }
 
 void url_aggregator::set_hash(const std::string_view input) {
-  if (aliases_storage(input, buffer)) {
+  if (helpers::overlaps(input, buffer)) {
     set_hash(std::string(input));
     return;
   }
@@ -882,21 +869,21 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 }
 
 bool url_aggregator::set_host(const std::string_view input) {
-  ada_log("url_aggregator::set_host '", input, "'");
-  ADA_ASSERT_TRUE(validate());
-  if (aliases_storage(input, buffer)) {
+  if (helpers::overlaps(input, buffer)) {
     return set_host(std::string(input));
   }
+  ada_log("url_aggregator::set_host '", input, "'");
+  ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<false>(input);
 }
 
 bool url_aggregator::set_hostname(const std::string_view input) {
-  ada_log("url_aggregator::set_hostname '", input, "'");
-  ADA_ASSERT_TRUE(validate());
-  if (aliases_storage(input, buffer)) {
+  if (helpers::overlaps(input, buffer)) {
     return set_hostname(std::string(input));
   }
+  ada_log("url_aggregator::set_hostname '", input, "'");
+  ADA_ASSERT_TRUE(validate());
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<true>(input);
 }
