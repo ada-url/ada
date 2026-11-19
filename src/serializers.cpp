@@ -92,8 +92,8 @@ std::string ipv6(const std::array<uint16_t, 8>& address) {
   }
 
   // Max: '[' + 8*4 hex + 7 ':' + ']' = 41
-  std::string output(4 * 8 + 7 + 2, '\0');
-  char* point = output.data();
+  char output[4 * 8 + 7 + 2];
+  char* point = output;
   *point++ = '[';
   size_t piece_index = 0;
   while (true) {
@@ -116,8 +116,7 @@ std::string ipv6(const std::array<uint16_t, 8>& address) {
     *point++ = ':';
   }
   *point++ = ']';
-  output.resize(static_cast<size_t>(point - output.data()));
-  return output;
+  return std::string(output, static_cast<size_t>(point - output));
 }
 
 std::string ipv4(const uint64_t address) {
