@@ -25,8 +25,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+<<<<<<< HEAD
         # macos-14 is gone from GitHub-hosted runners
         # ("macos-14-arm64-us-default is not supported").
+=======
+>>>>>>> origin/main
         runner: [macos-15, macos-26]
         shared: [OFF]
     name: build (${{ matrix.runner }}, shared=${{ matrix.shared }})
