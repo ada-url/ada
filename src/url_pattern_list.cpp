@@ -553,8 +553,8 @@ bool co_matchable(const route_info& w, const route_info& c) noexcept {
 // sequential mode), in insertion order, followed by one challenger range per
 // trie route: the auxiliary routes that outrank it AND could match the same
 // input. After a fast-path hit only the winner's challengers are tested
-// (usually none).
-void build_aux_table(builder_tables& r, const std::vector<route_info>& routes) {
+// (usually none). Fails past url_pattern_list_limits::max_aux_entries.
+bool build_aux_table(builder_tables& r, const std::vector<route_info>& routes) {
   std::vector<uint32_t> aux_all;
   for (size_t i = 0; i < routes.size(); i++) {
     if (routes[i].mode != route_mode::trie) {
@@ -573,23 +573,29 @@ void build_aux_table(builder_tables& r, const std::vector<route_info>& routes) {
     for (const uint32_t c : aux_all) {
       if (route_outranks(routes[c], c, winner, w) &&
           co_matchable(winner, routes[c])) {
+        if (r.aux.size() >= url_pattern_list_limits::max_aux_entries) {
+          return false;
+        }
         r.aux.push_back(c);
       }
     }
     rm.challenger_count =
         static_cast<uint32_t>(r.aux.size()) - rm.challenger_first;
   }
+  return true;
 }
 
 // Packs every table into one arena, each section 8-byte aligned, and
 // records the section offsets. The blob gets 8 bytes of zero padding so
-// short key windows can always be loaded whole.
-compiled_routes pack_arena(builder_tables& r) {
+// short key windows can always be loaded whole. Fails when the arena does not
+// fit the uint32_t offsets, which also bounds every offset and count stored
+// in the tables.
+tl::expected<compiled_routes, errors> pack_arena(builder_tables& r) {
   compiled_routes out{};
   r.blob.insert(r.blob.end(), 8, '\0');
-  size_t total = 0;
+  uint64_t total = 0;
   const auto reserve = [&](size_t bytes) {
-    const size_t offset = total;
+    const uint64_t offset = total;
     total += (bytes + 7) & ~size_t{7};
     return static_cast<uint32_t>(offset);
   };
@@ -603,7 +609,12 @@ compiled_routes pack_arena(builder_tables& r) {
   out.segments_offset = reserve(bytes_of(r.segments));
   out.aux_offset = reserve(bytes_of(r.aux));
   out.root_index_offset = reserve(bytes_of(r.root_index));
-  out.arena.assign(total, 0);
+  // LCOV_EXCL_START
+  if (total > UINT32_MAX) {
+    return tl::unexpected(errors::type_error);
+  }
+  // LCOV_EXCL_STOP
+  out.arena.assign(static_cast<size_t>(total), 0);
   const auto place = [&](uint32_t offset, const auto& v) {
     if (!v.empty()) {
       std::memcpy(out.arena.data() + offset, v.data(), v.size() * sizeof(v[0]));
@@ -882,7 +893,8 @@ void approximate_kind_sequence(const std::vector<url_pattern_part>& parts,
   route.segments = std::move(shape);
 }
 
-compiled_routes compile_route_set(std::vector<route_info>& routes) {
+tl::expected<compiled_routes, errors> compile_route_set(
+    std::vector<route_info>& routes) {
   builder_tables r{};
   const std::vector<transient_node> t = build_trie(routes);
   compile_route_records(r, routes);
@@ -890,12 +902,17 @@ compiled_routes compile_route_set(std::vector<route_info>& routes) {
   compile_dispatch(r, t, order);
   encode_leaf_shortcuts(r);  // last: must not confuse the stages above
   build_segment_table(r, routes);
-  build_aux_table(r, routes);
-  compiled_routes out = pack_arena(r);
-  out.group_names.resize(routes.size());
+  if (!build_aux_table(r, routes)) {
+    return tl::unexpected(errors::type_error);
+  }
+  auto out = pack_arena(r);
+  if (!out) {
+    return out;
+  }
+  out->group_names.resize(routes.size());
   for (size_t i = 0; i < routes.size(); i++) {
     if (routes[i].mode != route_mode::regexp) {
-      out.group_names[i] = routes[i].group_names;
+      out->group_names[i] = routes[i].group_names;
     }
   }
   return out;
@@ -907,6 +924,9 @@ namespace ada::url_pattern_list_detail {
 
 tl::expected<compiled_routes, errors> compile_pathname_patterns(
     std::span<const std::string> patterns, bool ignore_case) {
+  if (patterns.size() > url_pattern_list_limits::max_routes) {
+    return tl::unexpected(errors::type_error);
+  }
   namespace compiler = url_pattern_list_compiler;
   std::vector<compiler::route_info> routes;
   routes.reserve(patterns.size());
@@ -942,8 +962,10 @@ tl::expected<compiled_routes, errors> compile_pathname_patterns(
     }
     routes.push_back(std::move(route));
   }
-  compiled_routes compiled = compiler::compile_route_set(routes);
-  compiled.ignore_case = ignore_case ? 1 : 0;
+  auto compiled = compiler::compile_route_set(routes);
+  if (compiled) {
+    compiled->ignore_case = ignore_case ? 1 : 0;
+  }
   return compiled;
 }
 

@@ -113,14 +113,16 @@ inline url_pattern_result::url_pattern_result(const url_pattern_result& other)
 
 inline url_pattern_result::url_pattern_result(
     url_pattern_result&& other) noexcept
-    : protocol(std::move(other.protocol)),
+    : inputs(),
+      protocol(std::move(other.protocol)),
       username(std::move(other.username)),
       password(std::move(other.password)),
       hostname(std::move(other.hostname)),
       port(std::move(other.port)),
       pathname(std::move(other.pathname)),
       search(std::move(other.search)),
-      hash(std::move(other.hash)) {
+      hash(std::move(other.hash)),
+      owned_strings_() {
   take_inputs(other);
 }
 
