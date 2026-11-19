@@ -22,7 +22,3 @@
 #endif  // ADA_INCLUDE_URL_PATTERN
 
 #include "ada_c.cpp"
-
-#if !defined(ADA_URL_SEARCH_PARAMS_SEPARATE_TU)
-#include "url_search_params.cpp"
-#endif
