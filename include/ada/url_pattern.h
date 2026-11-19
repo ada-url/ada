@@ -241,6 +241,10 @@ using url_pattern_input = std::variant<std::string_view, url_pattern_init>;
 // A struct providing the URLPattern matching results for all
 // components of a URL. The URLPatternResult API is defined as
 // part of the URLPattern specification.
+//
+// string_view entries in `inputs` that were filled by exec/match
+// point at storage owned by this object and stay valid for its
+// lifetime, including after copy and move.
 struct url_pattern_result {
   std::vector<url_pattern_input> inputs;
   url_pattern_component_result protocol;
@@ -251,6 +255,32 @@ struct url_pattern_result {
   url_pattern_component_result pathname;
   url_pattern_component_result search;
   url_pattern_component_result hash;
+
+  url_pattern_result() = default;
+  url_pattern_result(const url_pattern_result& other);
+  url_pattern_result(url_pattern_result&& other) noexcept;
+  url_pattern_result& operator=(const url_pattern_result& other);
+  url_pattern_result& operator=(url_pattern_result&& other) noexcept;
+  ~url_pattern_result() = default;
+
+ private:
+  // At most two strings: the input URL and the optional base URL.
+  // Filled only by store_inputs.
+  std::vector<std::string> owned_strings_{};
+
+  // Point each inputs[] view that aliases `from[i]` at the same
+  // offset inside owned_strings_[i].
+  void rebind_owned_input_views(const std::pair<const char*, size_t>* from,
+                                size_t from_size);
+  // Move inputs + owned_strings_ from other and rebind. other is
+  // left with empty inputs / owned_strings_. Component results are
+  // not touched.
+  void take_inputs(url_pattern_result& other) noexcept;
+  void store_inputs(const url_pattern_input& input,
+                    const std::string_view* base_url = nullptr);
+
+  template <url_pattern_regex::regex_concept regex_provider>
+  friend class url_pattern;
 };
 
 struct url_pattern_options {
