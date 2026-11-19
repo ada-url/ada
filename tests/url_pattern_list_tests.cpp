@@ -1914,6 +1914,35 @@ TEST(url_pattern_list, inputs_need_no_terminator) {
   EXPECT_EQ(exact(indexed, "/posts"), 2);
 }
 
+TEST(url_pattern_list, rejects_more_than_max_routes) {
+  std::vector<std::string> storage;
+  for (size_t i = 0; i <= ada::url_pattern_list_limits::max_routes; i++) {
+    storage.push_back("/r" + std::to_string(i));
+  }
+  std::vector<std::string_view> views(storage.begin(), storage.end());
+  EXPECT_FALSE(parse_list(views).has_value());
+}
+
+TEST(url_pattern_list, challenger_table_is_bounded) {
+  // A 17-segment literal is sequential and outranks "/*", so every one of
+  // them is a challenger of every "/*" route.
+  constexpr size_t aux_n = 1025;
+  constexpr size_t trie_n = 1024;
+  static_assert(aux_n * trie_n > ada::url_pattern_list_limits::max_aux_entries);
+  std::vector<std::string> storage;
+  for (size_t i = 0; i < aux_n; i++) {
+    std::string pattern;
+    for (int seg = 0; seg < 17; seg++) {
+      pattern += "/" + std::to_string(i);
+    }
+    storage.push_back(std::move(pattern));
+  }
+  storage.insert(storage.end(), trie_n, "/*");
+  std::vector<std::string_view> views(storage.begin(), storage.end());
+  EXPECT_TRUE(parse_list({views[0], views[aux_n]}).has_value());
+  EXPECT_FALSE(parse_list(views).has_value());
+}
+
 TEST(url_pattern_list, optional_group_slash_is_not_a_definite_boundary) {
   // The "/" inside an optional group is not a segment boundary when the
   // group is absent: "/reports{/:id}?.json" matches "/reports.json", the

@@ -81,6 +81,18 @@ inline constexpr uint32_t max_fast_path_pathname_length = 4096;
  */
 inline constexpr uint32_t max_trie_pattern_segments = 16;
 
+/**
+ * Maximum number of routes in a url_pattern_list (a node's static child
+ * count is a uint16_t).
+ */
+inline constexpr size_t max_routes = 65535;
+
+/**
+ * Maximum number of challenger table entries. The table grows with the
+ * product of overlapping auxiliary and trie routes.
+ */
+inline constexpr size_t max_aux_entries = 1u << 20;
+
 }  // namespace url_pattern_list_limits
 
 /**
