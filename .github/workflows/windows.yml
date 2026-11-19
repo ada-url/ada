@@ -57,4 +57,18 @@ jobs:
     with:
       runner: windows-2025
       build_type: ${{ matrix.build_type }}
+      # windows-2025 ships LLVM 20.1.8. The VS 2026 MSVC STL refuses anything
+      # older than Clang 22 (error STL1000). Install LLVM 22 ahead of configure
+      # and put it first on PATH so clang-cl resolves to that build.
+      setup_script: |
+        pwsh -NoProfile -Command '
+          $ErrorActionPreference = "Stop"
+          $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.8/LLVM-22.1.8-win64.exe"
+          $exe = Join-Path $env:RUNNER_TEMP "LLVM-22.1.8-win64.exe"
+          Invoke-WebRequest -Uri $url -OutFile $exe
+          $p = Start-Process -FilePath $exe -ArgumentList "/S","/D=C:\LLVM-22" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "LLVM installer exited $($p.ExitCode)" }
+          & "C:\LLVM-22\bin\clang-cl.exe" --version
+          Add-Content -Path $env:GITHUB_PATH -Value "C:\LLVM-22\bin"
+        '
       cmake_args: '-DADA_DEVELOPMENT_CHECKS=ON -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl'
