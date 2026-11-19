@@ -246,6 +246,9 @@ tl::expected<std::string, errors> canonicalize_protocol(
 
   if (input.ends_with(":")) {
     input.remove_suffix(1);
+    if (input.empty()) [[unlikely]] {
+      return tl::unexpected(errors::type_error);
+    }
   }
 
   // Fast path: special schemes are already canonical
@@ -548,17 +551,11 @@ tl::expected<std::string, errors> canonicalize_opaque_pathname(
   if (input.empty()) [[unlikely]] {
     return "";
   }
-  // Let dummyURL be a new URL record.
-  // Set dummyURL's path to the empty string.
-  // Let parseResult be the result of running URL parsing given value with
-  // dummyURL as url and opaque path state as state override.
-  if (auto url =
-          ada::parse<url_aggregator>("fake:" + std::string(input), nullptr)) {
-    // Return the result of URL path serializing dummyURL.
-    return std::string(url->get_pathname());
-  }
-  // If parseResult is failure, then throw a TypeError.
-  return tl::unexpected(errors::type_error);
+  // Opaque-path state: no authority and no dot-segment normalization.
+  std::string value(input);
+  helpers::remove_ascii_tab_or_newline(value);
+  return ada::unicode::percent_encode(
+      value, character_sets::C0_CONTROL_PERCENT_ENCODE);
 }
 
 tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
@@ -577,18 +574,16 @@ tl::expected<std::string, errors> canonicalize_search(std::string_view input) {
     return "";
   }
 
-  // Percent-encode using QUERY_PERCENT_ENCODE (for non-special URLs)
-  // Note: "fake://dummy.test" is not a special URL, so we use
-  // QUERY_PERCENT_ENCODE
+  // The spec's dummy URL is special, so use the special-query set.
   size_t idx = ada::unicode::percent_encode_index(
-      new_value, character_sets::QUERY_PERCENT_ENCODE);
+      new_value, character_sets::SPECIAL_QUERY_PERCENT_ENCODE);
   if (idx == new_value.size()) {
     // No encoding needed
     return new_value;
   }
   // Percent-encode from the first character that needs encoding
   return ada::unicode::percent_encode(
-      new_value, character_sets::QUERY_PERCENT_ENCODE, idx);
+      new_value, character_sets::SPECIAL_QUERY_PERCENT_ENCODE, idx);
 }
 
 tl::expected<std::string, errors> canonicalize_hash(std::string_view input) {

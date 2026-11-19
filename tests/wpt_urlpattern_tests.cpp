@@ -775,6 +775,39 @@ TEST(wpt_urlpattern_tests, constructor_string_unterminated_group) {
   EXPECT_EQ(url->get_pathname(), "/ab");
 }
 
+TEST(wpt_urlpattern_tests, protocol_bare_colon_is_rejected) {
+  // https://github.com/ada-url/ada/issues/1283
+  for (auto src : {"\\:", "\\:?"}) {
+    ada::url_pattern_init init{};
+    init.protocol = src;
+    EXPECT_FALSE(ada::parse_url_pattern<regex_provider>(init)) << src;
+  }
+}
+
+TEST(wpt_urlpattern_tests, opaque_pathname_keeps_leading_slashes) {
+  // https://github.com/ada-url/ada/issues/1284
+  for (auto value : {"//x/y", "//x/../y"}) {
+    ada::url_pattern_init init{};
+    init.protocol = "foo";
+    init.pathname = value;
+    auto p = ada::parse_url_pattern<regex_provider>(init);
+    ASSERT_TRUE(p) << value;
+    EXPECT_EQ(p->get_pathname(), value);
+  }
+}
+
+TEST(wpt_urlpattern_tests, search_uses_special_query_percent_encode_set) {
+  // https://github.com/ada-url/ada/issues/1285
+  ada::url_pattern_init init{};
+  init.search = "q='x'";
+  auto p = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(p);
+  EXPECT_EQ(p->get_search(), "q=%27x%27");
+  auto t = p->test(std::string_view("https://h/?q='x'"));
+  ASSERT_TRUE(t);
+  EXPECT_TRUE(*t);
+}
+
 // "file" is one of the special schemes, so a protocol component that matches it
 // must compile the pathname with the pathname options (segment wildcards stop
 // at "/") and make an absent pathname default to "/".

@@ -2347,6 +2347,22 @@ TEST(basic_tests, ada_url_get_href_assembly) {
   }
 }
 
+TYPED_TEST(basic_tests, file_relative_windows_drive_letter_path_is_not_opaque) {
+  // https://github.com/ada-url/ada/issues/1278
+  auto file = ada::parse<TypeParam>("file:");
+  ASSERT_TRUE(file);
+  auto url = ada::parse<TypeParam>("C|", &*file);
+  ASSERT_TRUE(url);
+  ASSERT_EQ(url->get_href(), "file:///C:");
+  ASSERT_FALSE(url->has_opaque_path);
+
+  auto relative = ada::parse<TypeParam>("x", &*url);
+  ASSERT_TRUE(relative);
+  ASSERT_EQ(relative->get_href(), "file:///C:/x");
+  ASSERT_TRUE(url->set_hostname("h"));
+  ASSERT_EQ(url->get_href(), "file://h/C:");
+}
+
 TEST(basic_tests, last_label_may_be_a_number_cases) {
   using ada::checkers::last_label_may_be_a_number;
   ASSERT_FALSE(last_label_may_be_a_number(""));

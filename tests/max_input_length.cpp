@@ -297,6 +297,15 @@ TYPED_TEST(max_input_length_tests, set_protocol_url_unchanged_after_reject) {
   ASSERT_EQ(result->get_href(), original_href);
 }
 
+TYPED_TEST(max_input_length_tests, set_host_port_that_does_not_fit_rolls_back) {
+  // https://github.com/ada-url/ada/issues/1282
+  auto url = ada::parse<TypeParam>("https://bank.example:1/");
+  ASSERT_TRUE(url);
+  ada::set_max_input_length(25);
+  ASSERT_FALSE(url->set_host("evil.example:9443"));
+  ASSERT_EQ(url->get_href(), "https://bank.example:1/");
+}
+
 TEST(max_input_length_helpers, href_from_file_rejects_overlength_input) {
   const uint32_t previous_limit = ada::get_max_input_length();
   struct restore_t {
