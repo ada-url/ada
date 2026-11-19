@@ -1848,7 +1848,8 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
   SUCCEED();
 }
 
-TYPED_TEST(basic_tests, idna_bidi_domain_rejects_ascii_labels_that_break_rfc5893) {
+TYPED_TEST(basic_tests,
+           idna_bidi_domain_rejects_ascii_labels_that_break_rfc5893) {
   // https://github.com/ada-url/ada/issues/1277
   // RFC 5893 applies to every label in a Bidi domain, including ASCII ones.
   const char* bad[] = {
