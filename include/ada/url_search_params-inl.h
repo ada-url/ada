@@ -154,16 +154,12 @@ inline std::string url_search_params::to_string() const {
 
 inline void url_search_params::set(const std::string_view key,
                                    const std::string_view value) {
-  // key may point into an entry that remove_if moves.
-  std::string key_copy(key);
-  const auto find = [&key_copy](const auto& param) {
-    return param.first == key_copy;
-  };
+  const auto find = [&key](const auto& param) { return param.first == key; };
 
   auto it = std::ranges::find_if(params, find);
 
   if (it == params.end()) {
-    params.emplace_back(std::move(key_copy), value);
+    params.emplace_back(key, value);
   } else {
     it->second = value;
     params.erase(std::remove_if(std::next(it), params.end(), find),
@@ -172,20 +168,14 @@ inline void url_search_params::set(const std::string_view key,
 }
 
 inline void url_search_params::remove(const std::string_view key) {
-  // key may point into an entry that erase_if moves.
-  const std::string key_copy(key);
-  std::erase_if(params, [&key_copy](const auto& param) {
-    return param.first == key_copy;
-  });
+  std::erase_if(params,
+                [&key](const auto& param) { return param.first == key; });
 }
 
 inline void url_search_params::remove(const std::string_view key,
                                       const std::string_view value) {
-  // key and value may point into an entry that erase_if moves.
-  const std::string key_copy(key);
-  const std::string value_copy(value);
-  std::erase_if(params, [&key_copy, &value_copy](const auto& param) {
-    return param.first == key_copy && param.second == value_copy;
+  std::erase_if(params, [&key, &value](const auto& param) {
+    return param.first == key && param.second == value;
   });
 }
 

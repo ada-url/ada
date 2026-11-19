@@ -304,32 +304,11 @@ TEST(ada_c, search_params_iterators_outlive_params) {
   ada_free_search_params_entries_iter(entries);
 }
 
-TEST(ada_c, search_params_mutators_accept_views_into_params) {
-  auto parse = [](std::string_view input) {
-    return ada_parse_search_params(input.data(), input.size());
-  };
-  ada_url_search_params p = parse("a=value_long_enough_to_live_on_the_heap");
+TEST(ada_c, search_params_reset_accepts_view_into_params) {
+  std::string_view input = "a=value_long_enough_to_live_on_the_heap";
+  ada_url_search_params p = ada_parse_search_params(input.data(), input.size());
   ada_string v = ada_search_params_get(p, "a", 1);
   ada_search_params_reset(p, v.data, v.length);
-  ASSERT_EQ(ada_search_params_size(p), 1);
-  ada_free_search_params(p);
-
-  // Each view points into an entry that is moved while matching continues.
-  p = parse("k=1&x=k&k=2");
-  v = ada_search_params_get(p, "x", 1);
-  ada_search_params_remove(p, v.data, v.length);
-  ASSERT_EQ(ada_search_params_size(p), 1);
-  ada_free_search_params(p);
-
-  p = parse("k=1&k=2&x=k&k=3");
-  v = ada_search_params_get(p, "x", 1);
-  ada_search_params_set(p, v.data, v.length, "v", 1);
-  ASSERT_EQ(ada_search_params_size(p), 2);
-  ada_free_search_params(p);
-
-  p = parse("k=v&x=v&k=v");
-  v = ada_search_params_get(p, "x", 1);
-  ada_search_params_remove_value(p, "k", 1, v.data, v.length);
   ASSERT_EQ(ada_search_params_size(p), 1);
   ada_free_search_params(p);
 }

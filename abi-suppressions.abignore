@@ -31,15 +31,11 @@
 [suppress_function]
   name_regexp = ^ada::helpers::concat
 
-# url_search_params is header-only: its destructor, lambdas local to its
-# members, and the iterator EMPTY template statics (with their guard
-# variables). Every caller instantiates them from the headers; libada only
-# exports a copy while ada_c.cpp happens to use them out of line.
+# Header-inline url_search_params destructor and the iterator EMPTY template
+# statics (with their guard variables). Every caller instantiates them from
+# the headers; libada only exports a copy while ada_c.cpp happens to use them.
 [suppress_function]
   symbol_name_regexp = ^_ZN3ada17url_search_paramsD[012]Ev$
-
-[suppress_function]
-  symbol_name_regexp = ^_ZZN3ada17url_search_params
 
 [suppress_variable]
   symbol_name_regexp = ^_Z(GV)?N3ada22url_search_params_iter.*5EMPTYE$
