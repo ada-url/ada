@@ -2313,6 +2313,19 @@ TEST(basic_tests, try_parse_simple_absolute_ada_url) {
   }
 }
 
+TYPED_TEST(basic_tests, setters_accept_views_into_their_own_url) {
+  constexpr std::string_view href = "http://user:pass@example.com/pa/th?q#f";
+  auto url = ada::parse<TypeParam>(href);
+  ASSERT_TRUE(url);
+  ASSERT_TRUE(url->set_username(url->get_username()));
+  ASSERT_TRUE(url->set_password(url->get_password()));
+  ASSERT_TRUE(url->set_hostname(url->get_hostname()));
+  ASSERT_TRUE(url->set_pathname(url->get_pathname()));
+  url->set_search(url->get_search());
+  url->set_hash(url->get_hash());
+  ASSERT_EQ(url->get_href(), href);
+}
+
 TEST(basic_tests, ada_url_get_href_assembly) {
   {
     auto u = ada::parse<ada::url>("https://example.com/path?q=1#f");

@@ -743,6 +743,9 @@ bool url::set_hostname(const std::string_view input) {
 }
 
 bool url::set_username(const std::string_view input) {
+  if (helpers::overlaps(input, username)) {
+    return set_username(std::string(input));
+  }
   if (cannot_have_credentials_or_port()) {
     return false;
   }
@@ -757,6 +760,9 @@ bool url::set_username(const std::string_view input) {
 }
 
 bool url::set_password(const std::string_view input) {
+  if (helpers::overlaps(input, password)) {
+    return set_password(std::string(input));
+  }
   if (cannot_have_credentials_or_port()) {
     return false;
   }
@@ -854,6 +860,9 @@ void url::set_search(const std::string_view input) {
 }
 
 bool url::set_pathname(const std::string_view input) {
+  if (helpers::overlaps(input, path)) {
+    return set_pathname(std::string(input));
+  }
   if (has_opaque_path) {
     return false;
   }
