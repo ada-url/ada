@@ -1848,6 +1848,23 @@ TYPED_TEST(basic_tests, simple_absolute_fast_path) {
   SUCCEED();
 }
 
+TYPED_TEST(basic_tests, idna_bidi_domain_rejects_ascii_labels_that_break_rfc5893) {
+  // https://github.com/ada-url/ada/issues/1277
+  // RFC 5893 applies to every label in a Bidi domain, including ASCII ones.
+  const char* bad[] = {
+      "http://1.\xd8\xa7/",
+      "http://\xd8\xa7.1a/",
+  };
+  for (const char* s : bad) {
+    auto r = ada::parse<TypeParam>(s);
+    EXPECT_FALSE(r) << s;
+  }
+  // An LTR label that satisfies rules 1, 5 and 6 is still allowed.
+  auto ok = ada::parse<TypeParam>("http://example.\xd8\xa7/");
+  ASSERT_TRUE(ok);
+  EXPECT_EQ(ok->get_hostname(), "example.xn--mgb");
+}
+
 TYPED_TEST(basic_tests, last_label_may_be_a_number_gate) {
   // Ordinary .com hosts end with a hex letter; the last-label gate must
   // still treat them as domains, not IPv4.
