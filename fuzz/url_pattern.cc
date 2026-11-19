@@ -40,13 +40,48 @@ static void exercise_match_result(const ada::url_pattern_result& match) {
   exercise_component(match.search);
   exercise_component(match.hash);
   // Exercise the 'inputs' vector (each element is a url_pattern_input
-  // variant holding either a string_view or url_pattern_init).
+  // variant holding either a string_view or url_pattern_init). Read every
+  // byte: the views point into storage owned by the result, and a dangling
+  // view is only visible to the sanitizers when it is dereferenced.
   for (const auto& inp : match.inputs) {
     if (std::holds_alternative<std::string_view>(inp)) {
-      len += std::get<std::string_view>(inp).size();
+      for (char c : std::get<std::string_view>(inp)) {
+        len += static_cast<unsigned char>(c);
+      }
     }
   }
   (void)len;
+}
+
+// exec() and match() copy their string arguments into the result, so
+// inputs[] must read back exactly what the caller passed, including after the
+// result is copied or moved.
+static void check_string_inputs(const ada::url_pattern_result& match,
+                                std::string_view input,
+                                const std::string_view* base) {
+  const size_t expected_size = base != nullptr ? 2 : 1;
+  auto is_view_of = [&match](size_t i, std::string_view expected) {
+    const auto* view = std::get_if<std::string_view>(&match.inputs[i]);
+    return view != nullptr && *view == expected;
+  };
+  if (match.inputs.size() != expected_size || !is_view_of(0, input) ||
+      (base != nullptr && !is_view_of(1, *base))) {
+    printf("exec/match result inputs do not match the arguments\n");
+    abort();
+  }
+}
+
+static void check_string_inputs_survive_copies(
+    const ada::url_pattern_result& match, std::string_view input,
+    const std::string_view* base) {
+  check_string_inputs(match, input, base);
+  ada::url_pattern_result copied = match;
+  check_string_inputs(copied, input, base);
+  ada::url_pattern_result moved = std::move(copied);
+  check_string_inputs(moved, input, base);
+  ada::url_pattern_result assigned;
+  assigned = moved;
+  check_string_inputs(assigned, input, base);
 }
 
 // Exercise exec() and test() on a parsed url_pattern with an ASCII input.
@@ -74,6 +109,7 @@ static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
 
   if (exec_result && exec_result->has_value()) {
     exercise_match_result(**exec_result);
+    check_string_inputs_survive_copies(**exec_result, test_view, nullptr);
   }
 
   // test() with base URL
@@ -95,6 +131,13 @@ static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
 
     if (exec_with_base && exec_with_base->has_value()) {
       exercise_match_result(**exec_with_base);
+      check_string_inputs_survive_copies(**exec_with_base, test_view,
+                                         &base_view);
+    }
+
+    auto match_with_base = pattern.match(test_view, &base_view);
+    if (match_with_base && match_with_base->has_value()) {
+      check_string_inputs(**match_with_base, test_view, &base_view);
     }
   }
 
@@ -131,7 +174,9 @@ static void exercise_exec_and_test(ada::url_pattern<regex_provider>& pattern,
 
   // match() — the internal method underlying exec(); must not crash.
   auto match_result = pattern.match(test_view, nullptr);
-  (void)match_result;
+  if (match_result && match_result->has_value()) {
+    check_string_inputs(**match_result, test_view, nullptr);
+  }
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
@@ -154,10 +199,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   std::string source_2 = "https://ada-url.com/*";
   std::string base_source_2 = "https://ada-url.com";
 
-  // Additional test input for exec/test calls (also ASCII-only)
-  std::string test_input = "https://" +
-                           to_ascii(fdp.ConsumeRandomLengthString(30)) + "/" +
-                           to_ascii(fdp.ConsumeRandomLengthString(20));
+  // Additional test input for exec/test calls (also ASCII-only). Relative
+  // inputs ("./x", "?q", "#h") only parse against the base URL, and short
+  // ones are stored inline (SSO) by std::string, which moves their bytes
+  // whenever the owning string moves.
+  std::string test_input =
+      fdp.ConsumeBool()
+          ? to_ascii(fdp.ConsumeRandomLengthString(15))
+          : "https://" + to_ascii(fdp.ConsumeRandomLengthString(30)) + "/" +
+                to_ascii(fdp.ConsumeRandomLengthString(20));
   std::string test_base = "https://ada-url.com";
 
   std::array<std::pair<std::string, std::string>, 2> sources = {{
