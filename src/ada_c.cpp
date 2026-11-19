@@ -621,14 +621,6 @@ ada_strings ada_search_params_get_all(ada_url_search_params result,
       r->get_all(std::string_view(key, key_length)));
 }
 
-// Ensure default iterators, EMPTY, and ~url_search_params remain emitted
-// for ABI compatibility with binaries compiled against v4.0.0.
-void __ada_c_search_params_abi_anchor() {
-  (void)ada::url_search_params_keys_iter();
-  (void)ada::url_search_params_values_iter();
-  (void)ada::url_search_params_entries_iter();
-}
-
 struct ada_c_search_params_keys_iter {
   ada::url_search_params params{};
   ada::url_search_params_keys_iter iter;

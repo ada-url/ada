@@ -7,10 +7,6 @@ extern "C" {
 #include "ada_c.h"
 }
 
-// Defined in src/ada_c.cpp. Calling it keeps the ABI anchor executed under
-// coverage; production code never needs to call it.
-extern "C" void __ada_c_search_params_abi_anchor();
-
 #ifndef WPT_DATA_DIR
 #define WPT_DATA_DIR "wpt/"
 #endif
@@ -520,8 +516,6 @@ TEST(ada_c, search_params_set_missing_key) {
 }
 
 TEST(ada_c, search_params_error_result) {
-  __ada_c_search_params_abi_anchor();
-
   // ada_parse_search_params only returns a successful result. Build an error
   // result directly so the C API's `if (!r)` arms are exercised.
   ada::result<ada::url_search_params> bad{
