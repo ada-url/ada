@@ -956,6 +956,32 @@ TEST(wpt_urlpattern_tests, match_owns_temporary_base_url) {
   EXPECT_EQ(input_string_view(owned->inputs[1]), expected_base);
 }
 
+// Short strings are stored inline (SSO), so their bytes move whenever the
+// std::string that owns them moves.
+TEST(wpt_urlpattern_tests, exec_owns_short_input_with_base_url) {
+  ada::url_pattern_init route{};
+  route.pathname = "/foo/bar";
+  auto pattern = ada::parse_url_pattern<regex_provider>(route);
+  ASSERT_TRUE(pattern);
+
+  std::string_view base = "https://example.com";
+  auto result = pattern->exec(std::string_view("./foo/bar"), &base);
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result->has_value());
+  ASSERT_EQ((*result)->inputs.size(), 2u);
+  ASSERT_TRUE(std::holds_alternative<std::string_view>((*result)->inputs[0]));
+  ASSERT_TRUE(std::holds_alternative<std::string_view>((*result)->inputs[1]));
+  EXPECT_EQ(input_string_view((*result)->inputs[0]), "./foo/bar");
+  EXPECT_EQ(input_string_view((*result)->inputs[1]), base);
+
+  auto copied = **result;
+  EXPECT_EQ(input_string_view(copied.inputs[0]), "./foo/bar");
+  EXPECT_EQ(input_string_view(copied.inputs[1]), base);
+  auto moved = std::move(copied);
+  EXPECT_EQ(input_string_view(moved.inputs[0]), "./foo/bar");
+  EXPECT_EQ(input_string_view(moved.inputs[1]), base);
+}
+
 TEST(wpt_urlpattern_tests, has_regexp_groups) {
   auto create_init = [](std::string_view component,
                         std::string value) -> ada::url_pattern_init {
