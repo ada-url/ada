@@ -34,6 +34,7 @@
       "href": "https://yagiz.co:443",
       "new_value": "\u000080\u0000",
       "expected": {
+        "href": "https://yagiz.co/",
         "port": ""
       }
     },
@@ -42,6 +43,7 @@
       "href": "https://yagiz.co:443",
       "new_value": "\u00098080",
       "expected": {
+        "href": "https://yagiz.co:8080/",
         "port": "8080"
       }
     },
@@ -50,6 +52,7 @@
       "href": "wpt++://yagiz.co:443",
       "new_value": "\u00098080",
       "expected": {
+        "href": "wpt++://yagiz.co:8080",
         "port": "8080"
       }
     },
@@ -58,6 +61,7 @@
       "href": "https://yagiz.co:443",
       "new_value": "8080\u0000",
       "expected": {
+        "href": "https://yagiz.co:8080/",
         "port": "8080"
       }
     },
@@ -65,6 +69,7 @@
       "href": "https://yagiz.co",
       "new_value": "\u000044\u00093\u0000",
       "expected": {
+        "href": "https://yagiz.co/",
         "port": ""
       }
     },
@@ -72,6 +77,7 @@
       "href": "https://yagiz.co:443",
       "new_value": "\u0000\u0009\u0000",
       "expected": {
+        "href": "https://yagiz.co/",
         "port": ""
       }
     },
@@ -80,6 +86,7 @@
       "href": "https://www.google.com:443",
       "new_value": "99999",
       "expected": {
+        "href": "https://www.google.com/",
         "port": ""
       }
     },
@@ -88,6 +95,7 @@
       "href": "https://www.google.com:4343",
       "new_value": "yagiz",
       "expected": {
+        "href": "https://www.google.com:4343/",
         "port": "4343"
       }
     },
@@ -96,6 +104,7 @@
       "href": "https://www.google.com:4343",
       "new_value": "4yagiz",
       "expected": {
+        "href": "https://www.google.com:4/",
         "port": "4"
       }
     },
@@ -103,15 +112,17 @@
       "href": "https://domain.com:3000",
       "new_value": "\n\t80\n\t80\n\t",
       "expected": {
-          "port": "8080"
+        "href": "https://domain.com:8080/",
+        "port": "8080"
       }
     },
     {
-        "href": "https://domain.com:3000",
-        "new_value": "\n\n\t\t",
-        "expected": {
-            "port": "3000"
-        }
+      "href": "https://domain.com:3000",
+      "new_value": "\n\n\t\t",
+      "expected": {
+        "href": "https://domain.com:3000/",
+        "port": "3000"
+      }
     }
   ],
   "hash": [
@@ -120,6 +131,7 @@
       "href": "https://domain.com",
       "new_value": "\u0000hello\u0000",
       "expected": {
+        "href": "https://domain.com/#%00hello%00",
         "hash": "#%00hello%00"
       }
     }
@@ -130,6 +142,7 @@
       "href": "file://",
       "new_value": "/Users/yagiz/Developer/node/test/fixtures/loop.%25.js",
       "expected": {
+        "href": "file:///Users/yagiz/Developer/node/test/fixtures/loop.%25.js",
         "pathname": "/Users/yagiz/Developer/node/test/fixtures/loop.%25.js"
       }
     }
@@ -140,6 +153,7 @@
       "href": "data:space    ?test",
       "new_value": "",
       "expected": {
+        "href": "data:space   %20",
         "search": "",
         "pathname": "space   %20"
       }

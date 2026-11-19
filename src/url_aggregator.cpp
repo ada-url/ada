@@ -41,16 +41,13 @@ ada_really_inline void apply_shifted_non_scheme_offsets(
 
 namespace ada {
 namespace {
-ada_never_inline bool input_aliases_buffer(std::string_view input,
-                                           const std::string& buffer) noexcept {
-  return helpers::overlaps(input, buffer);
-}
-
-ada_never_inline bool call_aggregator_setter_on_copy(
-    url_aggregator& self, std::string_view input,
-    bool (url_aggregator::*method)(std::string_view)) {
-  const std::string copy(input);
-  return (self.*method)(copy);
+// True when input's first byte sits inside storage. Inlined: the non-alias
+// setter path must not pay for a call. The copy happens only on a hit.
+ada_really_inline bool aliases_storage(std::string_view input,
+                                       const std::string& storage) noexcept {
+  return !input.empty() && !storage.empty() &&
+         input.data() >= storage.data() &&
+         input.data() < storage.data() + storage.size();
 }
 }  // namespace
 
@@ -271,9 +268,8 @@ bool url_aggregator::set_protocol(const std::string_view input) {
 }
 
 bool url_aggregator::set_username(const std::string_view input) {
-  if (input_aliases_buffer(input, buffer)) {
-    return call_aggregator_setter_on_copy(*this, input,
-                                          &url_aggregator::set_username);
+  if (aliases_storage(input, buffer)) {
+    return set_username(std::string(input));
   }
   ada_log("url_aggregator::set_username '", input, "' ");
   ADA_ASSERT_TRUE(validate());
@@ -303,9 +299,8 @@ bool url_aggregator::set_username(const std::string_view input) {
 }
 
 bool url_aggregator::set_password(const std::string_view input) {
-  if (input_aliases_buffer(input, buffer)) {
-    return call_aggregator_setter_on_copy(*this, input,
-                                          &url_aggregator::set_password);
+  if (aliases_storage(input, buffer)) {
+    return set_password(std::string(input));
   }
   ada_log("url_aggregator::set_password '", input, "'");
   ADA_ASSERT_TRUE(validate());
@@ -386,9 +381,8 @@ bool url_aggregator::set_port(const std::string_view input) {
 }
 
 bool url_aggregator::set_pathname(const std::string_view input) {
-  if (input_aliases_buffer(input, buffer)) {
-    return call_aggregator_setter_on_copy(*this, input,
-                                          &url_aggregator::set_pathname);
+  if (aliases_storage(input, buffer)) {
+    return set_pathname(std::string(input));
   }
   ada_log("url_aggregator::set_pathname ", input);
   ADA_ASSERT_TRUE(validate());
@@ -462,9 +456,8 @@ ada_really_inline void url_aggregator::parse_path(std::string_view input) {
 }
 
 void url_aggregator::set_search(const std::string_view input) {
-  if (input_aliases_buffer(input, buffer)) {
-    const std::string copy(input);
-    set_search(copy);
+  if (aliases_storage(input, buffer)) {
+    set_search(std::string(input));
     return;
   }
   ada_log("url_aggregator::set_search ", input);
@@ -504,9 +497,8 @@ void url_aggregator::set_search(const std::string_view input) {
 }
 
 void url_aggregator::set_hash(const std::string_view input) {
-  if (input_aliases_buffer(input, buffer)) {
-    const std::string copy(input);
-    set_hash(copy);
+  if (aliases_storage(input, buffer)) {
+    set_hash(std::string(input));
     return;
   }
   ada_log("url_aggregator::set_hash ", input);
@@ -871,6 +863,9 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
 bool url_aggregator::set_host(const std::string_view input) {
   ada_log("url_aggregator::set_host '", input, "'");
   ADA_ASSERT_TRUE(validate());
+  if (aliases_storage(input, buffer)) {
+    return set_host(std::string(input));
+  }
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<false>(input);
 }
@@ -878,6 +873,9 @@ bool url_aggregator::set_host(const std::string_view input) {
 bool url_aggregator::set_hostname(const std::string_view input) {
   ada_log("url_aggregator::set_hostname '", input, "'");
   ADA_ASSERT_TRUE(validate());
+  if (aliases_storage(input, buffer)) {
+    return set_hostname(std::string(input));
+  }
   ADA_ASSERT_TRUE(!helpers::overlaps(input, buffer));
   return set_host_or_hostname<true>(input);
 }
@@ -1670,7 +1668,6 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
     ada_log("parse_path slow");
     // we have reached the general case
     bool needs_percent_encoding = (accumulator & 1);
-    std::string path_buffer_tmp;
     do {
       size_t location = (special && (accumulator & 2))
                             ? input.find_first_of("/\\")
@@ -1680,39 +1677,37 @@ inline void url_aggregator::consume_prepared_path(std::string_view input) {
         path_view.remove_suffix(path_view.size() - location);
         input.remove_prefix(location + 1);
       }
-      // path_buffer is either path_view or it might point at a percent encoded
-      // temporary string.
-      std::string_view path_buffer =
-          (needs_percent_encoding &&
-           ada::unicode::percent_encode<false>(
-               path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp))
-              ? path_buffer_tmp
-              : path_view;
-      if (unicode::is_double_dot_path_segment(path_buffer)) {
+      // Path encoding preserves dots and percent signs, so normalize first.
+      if (unicode::is_double_dot_path_segment(path_view)) {
         helpers::shorten_path(path, type);
         if (location == std::string_view::npos) {
           path += '/';
         }
-      } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+      } else if (unicode::is_single_dot_path_segment(path_view) &&
                  (location == std::string_view::npos)) {
         path += '/';
       }
-      // Otherwise, if path_buffer is not a single-dot path segment, then:
-      else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-        // If url's scheme is "file", url's path is empty, and path_buffer is a
+      // Otherwise, if path_view is not a single-dot path segment, then:
+      else if (!unicode::is_single_dot_path_segment(path_view)) {
+        // If url's scheme is "file", url's path is empty, and path_view is a
         // Windows drive letter, then replace the second code point in
-        // path_buffer with U+003A (:).
+        // path_view with U+003A (:).
         if (type == ada::scheme::type::FILE && path.empty() &&
-            checkers::is_windows_drive_letter(path_buffer)) {
+            path_view.size() == 2 &&
+            checkers::is_windows_drive_letter(path_view)) {
           path += '/';
-          path += path_buffer[0];
+          path += path_view[0];
           path += ':';
-          path_buffer.remove_prefix(2);
-          path.append(path_buffer);
+          path_view.remove_prefix(2);
+          path.append(path_view);
         } else {
-          // Append path_buffer to url's path.
+          // Append encoded bytes directly to the pathname.
           path += '/';
-          path.append(path_buffer);
+          if (!needs_percent_encoding ||
+              !ada::unicode::percent_encode<true>(
+                  path_view, character_sets::PATH_PERCENT_ENCODE, path)) {
+            path.append(path_view);
+          }
         }
       }
       if (location == std::string_view::npos) {

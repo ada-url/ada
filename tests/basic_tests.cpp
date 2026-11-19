@@ -8,6 +8,50 @@ template <class T>
 struct basic_tests : testing::Test {};
 TYPED_TEST_SUITE(basic_tests, Types);
 
+TYPED_TEST(basic_tests, absolute_encoded_tail_boundaries) {
+  const std::pair<std::string_view, std::string_view> cases[] = {
+      {"https://example.com/a b", "https://example.com/a%20b"},
+      {"https://example.com/a b?q=hello world#f?g",
+       "https://example.com/a%20b?q=hello%20world#f?g"},
+      {"https://example.com/a b#f?q", "https://example.com/a%20b#f?q"},
+      {"https://example.com/a b?#", "https://example.com/a%20b?#"},
+      {"https://example.com/?q=hello world#f?q",
+       "https://example.com/?q=hello%20world#f?q"},
+      {"https://example.com/?q=hello world",
+       "https://example.com/?q=hello%20world"},
+      {"https://example.com/a b?x\ny#f ", "https://example.com/a%20b?xy#f"},
+  };
+  for (const auto& [input, expected] : cases) {
+    auto url = ada::parse<TypeParam>(input);
+    ASSERT_TRUE(url) << input;
+    EXPECT_EQ(url->get_href(), expected) << input;
+  }
+}
+
+TYPED_TEST(basic_tests, encoded_path_normalization) {
+  const std::pair<std::string_view, std::string_view> cases[] = {
+      {"https://example.com/a b/%2e/c/../\xC3\xA9/", "/a%20b/%C3%A9/"},
+      {"https://example.com/a b/.%2E/final", "/final"},
+      {"https://example.com/a b/%2e%2E", "/"},
+      {"https://example.com/a b/%2e", "/a%20b/"},
+      {"https://example.com/a b//%2e%2e/end", "/a%20b/end"},
+      {"file:///C|/a b/../../\xC3\xA9", "/C:/%C3%A9"},
+      {"file:///C:/a b/..\\\xC3\xA9", "/C:/%C3%A9"},
+      {"custom://host/a b/%2e%2e/\xC3\xA9", "/%C3%A9"},
+  };
+  for (const auto& [input, expected] : cases) {
+    auto url = ada::parse<TypeParam>(input);
+    ASSERT_TRUE(url) << input;
+    EXPECT_EQ(url->get_pathname(), expected) << input;
+  }
+  auto file = ada::parse<TypeParam>("file:///");
+  ASSERT_TRUE(file);
+  file->set_pathname("/C|?a b");
+  EXPECT_EQ(file->get_pathname(), "/C|%3Fa%20b");
+  file->set_pathname("/C|#a b");
+  EXPECT_EQ(file->get_pathname(), "/C|%23a%20b");
+}
+
 TYPED_TEST(basic_tests, insane_url) {
   auto r = ada::parse<ada::url_aggregator>("e:@EEEEEEEEEE");
   ASSERT_TRUE(r);
@@ -1095,6 +1139,31 @@ TYPED_TEST(basic_tests, ipv6_full_width_no_compression) {
   ASSERT_FALSE(ada::parse<TypeParam>(
       "http://[fffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]/"));
   SUCCEED();
+}
+
+TYPED_TEST(basic_tests, ipv6_serialization_lengths_and_zero_runs) {
+  const std::pair<std::string_view, std::string_view> cases[] = {
+      {"[0:0:0:0:0:0:0:0]", "[::]"},
+      {"[0:0:0:0:0:0:0:1]", "[::1]"},
+      {"[2001:0DB8:0:0:0:0:0:1]", "[2001:db8::1]"},
+      {"[::ffff:192.0.2.1]", "[::ffff:c000:201]"},
+      {"[1:0:0:2:0:0:3:4]", "[1::2:0:0:3:4]"},
+      {"[1:2:3:4:5:6:0:0]", "[1:2:3:4:5:6::]"},
+      {"[1:2:3:4:5:6:7:0]", "[1:2:3:4:5:6:7:0]"},
+      {"[FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF]",
+       "[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]"},
+  };
+  for (const auto& [input, expected] : cases) {
+    auto url = ada::parse<TypeParam>("http://" + std::string(input) + "/");
+    ASSERT_TRUE(url) << input;
+    ASSERT_EQ(url->get_hostname(), expected) << input;
+    auto round_trip = ada::parse<TypeParam>(url->get_href());
+    ASSERT_TRUE(round_trip);
+    ASSERT_EQ(round_trip->get_href(), url->get_href());
+    ASSERT_TRUE(url->set_hostname("[::1]"));
+    ASSERT_TRUE(url->set_hostname(input));
+    ASSERT_EQ(url->get_hostname(), expected) << input;
+  }
 }
 
 TEST(ipv4_fast_path, packed_decimal_and_rejects) {
@@ -2295,6 +2364,78 @@ TYPED_TEST(basic_tests,
   check("http://ab?x y", "http://ab/?x%20y");
 }
 
+#if defined(__aarch64__) && (defined(__GNUC__) || defined(__clang__)) && \
+    ADA_NEON_SAFE_ZERO_CHECK
+// Sets FPCR.FZ (flush denormals to zero) on the current thread, as linking with
+// -ffast-math does, and restores the previous FPCR on scope exit.
+class scoped_flush_to_zero {
+ public:
+  scoped_flush_to_zero() {
+    __asm__ __volatile__("mrs %0, fpcr" : "=r"(saved_fpcr) : : "memory");
+    uint64_t fpcr = saved_fpcr | (uint64_t(1) << 24);
+    __asm__ __volatile__("msr fpcr, %0" : : "r"(fpcr) : "memory");
+  }
+  ~scoped_flush_to_zero() {
+    __asm__ __volatile__("msr fpcr, %0" : : "r"(saved_fpcr) : "memory");
+  }
+  scoped_flush_to_zero(const scoped_flush_to_zero&) = delete;
+  scoped_flush_to_zero& operator=(const scoped_flush_to_zero&) = delete;
+
+ private:
+  uint64_t saved_fpcr{};
+};
+
+// The NEON "any match?" tests must not depend on the floating-point
+// environment. Reading a match mask with only its low bytes set as a double
+// gives a denormal, which compares equal to 0.0 when FPCR.FZ is set.
+// https://github.com/ada-url/ada/issues/1286
+TYPED_TEST(basic_tests, neon_scans_ignore_flush_to_zero) {
+  scoped_flush_to_zero flush_to_zero;
+
+  // The parser removes every ASCII tab or newline from the input, so inserting
+  // one anywhere must not change the result.
+  for (std::string_view base :
+       {"http://abc.de/fg?hijklm",
+        "https://user:pass@www.example.com:8080/path/to/file?query#fragment",
+        "foo://example.com/path/to/file?query#fragment"}) {
+    auto expected = ada::parse<TypeParam>(base);
+    ASSERT_TRUE(expected);
+    for (char c : {'\t', '\n', '\r'}) {
+      for (size_t i = 0; i <= base.size(); i++) {
+        std::string input(base);
+        input.insert(i, 1, c);
+        auto r = ada::parse<TypeParam>(input);
+        ASSERT_TRUE(r) << "byte " << int(c) << " at " << i << " in " << base;
+        ASSERT_EQ(r->get_href(), expected->get_href())
+            << "byte " << int(c) << " at " << i << " in " << base;
+      }
+    }
+  }
+
+  // Place the port delimiter at every offset of a 16-byte block of the host
+  // delimiter scans. The leading zeros keep it out of the final overlapping
+  // block, and the uppercase scheme skips the absolute fast path.
+  for (std::string_view scheme : {"HTTPS://", "foo://"}) {
+    for (size_t n = 0; n < 32; n++) {
+      std::string host = std::string(n, 'x') + "example.com";
+      std::string host_and_port = host + ":" + std::string(16, '0') + "8080";
+
+      auto r =
+          ada::parse<TypeParam>(std::string(scheme) + host_and_port + "/p");
+      ASSERT_TRUE(r) << host_and_port;
+      ASSERT_EQ(r->get_hostname(), host) << host_and_port;
+      ASSERT_EQ(r->get_port(), "8080") << host_and_port;
+
+      auto u = ada::parse<TypeParam>(std::string(scheme) + "a/p");
+      ASSERT_TRUE(u);
+      ASSERT_TRUE(u->set_host(host_and_port)) << host_and_port;
+      ASSERT_EQ(u->get_hostname(), host) << host_and_port;
+      ASSERT_EQ(u->get_port(), "8080") << host_and_port;
+    }
+  }
+}
+#endif
+
 TYPED_TEST(basic_tests, setter_accepts_view_into_its_own_url) {
   constexpr std::string_view href = "http://user:pass@example.com/pa/th?q#f";
   auto url = ada::parse<TypeParam>(href);
@@ -2307,6 +2448,9 @@ TYPED_TEST(basic_tests, setter_accepts_view_into_its_own_url) {
   ASSERT_EQ(url->get_href(), href);
   ASSERT_TRUE(url->set_password(url->get_password()));
   ASSERT_EQ(url->get_password(), "pass");
+  ASSERT_EQ(url->get_href(), href);
+  ASSERT_TRUE(url->set_hostname(url->get_hostname()));
+  ASSERT_EQ(url->get_hostname(), "example.com");
   ASSERT_EQ(url->get_href(), href);
 }
 
@@ -2324,38 +2468,4 @@ TYPED_TEST(basic_tests, set_hash_accepts_view_into_its_own_url) {
   url->set_hash(url->get_hash());
   ASSERT_EQ(url->get_hash(), "#frag");
   ASSERT_EQ(url->get_href(), "https://example.com/#frag");
-}
-
-// has_tabs_or_newline() must not depend on the floating-point control register.
-// The NEON path narrows its match mask to eight bytes and, when
-// ADA_NEON_SAFE_ZERO_CHECK is 0, tests that mask by reinterpreting it as a
-// double and comparing against 0.0. Every byte of the mask is 0x00, 0x0F, 0xF0
-// or 0xFF, so when a tab sits at an offset 0..12 (mod 16) and none sits at
-// 13..15, the pattern is an IEEE-754 denormal. Under FPCR.FZ the hardware
-// flushes a denormal operand to zero, the predicate answers "no tabs", and the
-// "Remove all ASCII tab or newline from input" step of the basic URL parser is
-// skipped.
-//
-// Two of the tab/newline cases above already reach the SIMD path, and
-// "http://ab:81/p?x\ty#h" already fails under FPCR.FZ. This test states the
-// invariant explicitly and sets the bit itself, so it holds regardless of how
-// CI configures the floating-point environment. The input is exactly 16 bytes
-// with a tab at offset 8, so the mask is 0x0000000f00000000.
-TEST(basic_tests, tab_removal_is_independent_of_fpcr_fz) {
-#if defined(__aarch64__)
-  unsigned long long fpcr = 0;
-  __asm__ __volatile__("mrs %0, fpcr" : "=r"(fpcr) : : "memory");
-  __asm__ __volatile__("msr fpcr, %0" : : "r"(fpcr | (1ull << 24)) : "memory");
-
-  auto r = ada::parse<ada::url_aggregator>("http://a\tb.com/x");
-  const bool parsed = bool(r);
-  const std::string href = parsed ? std::string(r->get_href()) : std::string();
-
-  // Restore before asserting so a failure cannot leak FZ into later tests.
-  __asm__ __volatile__("msr fpcr, %0" : : "r"(fpcr) : "memory");
-
-  ASSERT_TRUE(parsed);
-  ASSERT_EQ(href, "http://ab.com/x");
-#endif
-  SUCCEED();
 }

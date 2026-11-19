@@ -121,11 +121,18 @@ add_custom_target(run_all_benchmarks
         COMMAND ${CMAKE_COMMAND} -E echo "Running all benchmarks..."
 )
 foreach(benchmark IN LISTS BENCHMARKS)
+    # wpt_bench exits without measuring anything unless it is given the WPT
+    # dataset. Passing it here is what makes those benches show up in CodSpeed.
+    if(benchmark STREQUAL "wpt_bench")
+        set(benchmark_args "${PROJECT_SOURCE_DIR}/tests/wpt/urltestdata.json" --benchmark_min_time=1s)
+    else()
+        set(benchmark_args --benchmark_min_time=1s)
+    endif()
     add_custom_command(
             TARGET run_all_benchmarks
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E echo "Running ${benchmark}..."
-            COMMAND $<TARGET_FILE:${benchmark}> --benchmark_min_time=1s
+            COMMAND $<TARGET_FILE:${benchmark}> ${benchmark_args}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 endforeach()
@@ -325,7 +332,12 @@ else(ZURI_FOUND)
     message(STATUS "Zuri not found! Please install to include in benchmark.")
 endif(ZURI_FOUND)
 
-if(NOT WIN32)
+# The CodSpeed runner image ships rustc. Leave this ON for local comparisons
+# and pass OFF in .github/workflows/codspeed.yml so servo-url does not appear
+# or disappear between reports.
+option(ADA_BENCHMARK_SERVO_URL "Benchmark servo-url when Rust is available." ON)
+
+if(NOT WIN32 AND ADA_BENCHMARK_SERVO_URL)
 # We want the check whether Rust is available before trying to build a crate.
 CPMAddPackage(
   NAME corrosion
@@ -337,7 +349,7 @@ CPMAddPackage(
 include("${corrosion_SOURCE_DIR}/cmake/FindRust.cmake")
 endif()
 
-if(RUST_FOUND)
+if(ADA_BENCHMARK_SERVO_URL AND RUST_FOUND)
   message(STATUS "Rust found: " ${Rust_VERSION} )
   add_subdirectory("${corrosion_SOURCE_DIR}" "${PROJECT_BINARY_DIR}/_deps/corrosion" EXCLUDE_FROM_ALL)
   # Important: we want to build in release mode!
@@ -363,6 +375,8 @@ if(RUST_FOUND)
   else()
     message(SEND_ERROR "Rust servo-url target was not created successfully. Likely due to a bug.")
   endif()
+elseif(NOT ADA_BENCHMARK_SERVO_URL)
+  message(STATUS "servo-url benchmarks are disabled.")
 else()
   message(STATUS "Rust/Cargo is unavailable." )
   message(STATUS "We will not benchmark servo-url." )

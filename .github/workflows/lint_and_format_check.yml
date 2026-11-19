@@ -40,9 +40,12 @@ jobs:
       - name: Install clang-tidy and libc++
         run: |
           wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+          # Match the runner's Ubuntu release: ubuntu-latest moves forward,
+          # and packages from another release's repository cannot install.
+          codename="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+          echo "deb http://apt.llvm.org/${codename}/ llvm-toolchain-${codename}-22 main" | sudo tee /etc/apt/sources.list.d/llvm.list
           sudo apt-get update
-          sudo apt-get install -y clang-tidy-22 libc++-22-dev libc++abi-22-dev
+          sudo apt-get install -y clang-22 clang-tidy-22 libc++-22-dev libc++abi-22-dev
 
       # Run clang-tidy only on src/ada.cpp, the single translation unit that
       # #includes every first-party .cpp. This keeps tests, benchmarks, the

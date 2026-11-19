@@ -20,15 +20,13 @@
 
 namespace ada {
 namespace {
-ada_never_inline bool input_aliases_member(std::string_view input,
-                                           const std::string& member) noexcept {
-  return helpers::overlaps(input, member);
-}
-
-ada_never_inline bool call_url_setter_on_copy(
-    url& self, std::string_view input, bool (url::*method)(std::string_view)) {
-  const std::string copy(input);
-  return (self.*method)(copy);
+// True when input's first byte sits inside storage. Inlined so a normal
+// setter call does not pay for an out-of-line overlap check.
+ada_really_inline bool url_input_aliases(std::string_view input,
+                                         const std::string& storage) noexcept {
+  return !input.empty() && !storage.empty() &&
+         input.data() >= storage.data() &&
+         input.data() < storage.data() + storage.size();
 }
 }  // namespace
 
@@ -747,16 +745,23 @@ bool url::set_host_or_hostname(const std::string_view input) {
 }
 
 bool url::set_host(const std::string_view input) {
+  // host (and the port substring) may alias this->host.
+  if (host && url_input_aliases(input, *host)) {
+    return set_host(std::string(input));
+  }
   return set_host_or_hostname<false>(input);
 }
 
 bool url::set_hostname(const std::string_view input) {
+  if (host && url_input_aliases(input, *host)) {
+    return set_hostname(std::string(input));
+  }
   return set_host_or_hostname<true>(input);
 }
 
 bool url::set_username(const std::string_view input) {
-  if (input_aliases_member(input, username)) {
-    return call_url_setter_on_copy(*this, input, &url::set_username);
+  if (url_input_aliases(input, username)) {
+    return set_username(std::string(input));
   }
   if (cannot_have_credentials_or_port()) {
     return false;
@@ -772,8 +777,8 @@ bool url::set_username(const std::string_view input) {
 }
 
 bool url::set_password(const std::string_view input) {
-  if (input_aliases_member(input, password)) {
-    return call_url_setter_on_copy(*this, input, &url::set_password);
+  if (url_input_aliases(input, password)) {
+    return set_password(std::string(input));
   }
   if (cannot_have_credentials_or_port()) {
     return false;
@@ -872,8 +877,8 @@ void url::set_search(const std::string_view input) {
 }
 
 bool url::set_pathname(const std::string_view input) {
-  if (input_aliases_member(input, path)) {
-    return call_url_setter_on_copy(*this, input, &url::set_pathname);
+  if (url_input_aliases(input, path)) {
+    return set_pathname(std::string(input));
   }
   if (has_opaque_path) {
     return false;
