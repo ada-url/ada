@@ -77,6 +77,9 @@ inline void url_pattern_result::store_inputs(const url_pattern_input& input,
                                              const std::string_view* base_url) {
   owned_strings_.clear();
   inputs.clear();
+  // inputs[] holds views into owned_strings_, so it must not reallocate
+  // (and move SSO buffers) after the first view is taken.
+  owned_strings_.reserve(2);
   if (std::holds_alternative<std::string_view>(input)) {
     owned_strings_.emplace_back(std::get<std::string_view>(input));
     inputs.emplace_back(std::string_view(owned_strings_.back()));
