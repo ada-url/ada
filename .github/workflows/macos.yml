@@ -25,7 +25,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [macos-14, macos-15, macos-26]
+        # macos-14 is gone from GitHub-hosted runners
+        # ("macos-14-arm64-us-default is not supported").
+        runner: [macos-15, macos-26]
         shared: [OFF]
     name: build (${{ matrix.runner }}, shared=${{ matrix.shared }})
     uses: ./.github/workflows/_build.yaml
