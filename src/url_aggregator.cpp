@@ -707,10 +707,29 @@ bool url_aggregator::set_host_or_hostname(const std::string_view input) {
   // parse_host no longer mutates the buffer on failure (IPv4 is checked
   // before update_base_hostname), so the only rollback needed is for the
   // length limit. Snapshot only when the bound can be reached, like the
-  // other setters do via needs_rollback_snapshot.
+  // other setters do via needs_rollback_snapshot. That bound assumes
+  // percent-encoding (3x) is the worst growth, but domain to ASCII can grow
+  // a non-ASCII host further (U+337F, 3 bytes, becomes the 17-byte label
+  // "xn--6oqv20b1zgzxr"), so a non-ASCII host always takes the snapshot.
   const bool was_valid = is_valid;
   std::optional<url_aggregator> saved_url;
-  if (needs_rollback_snapshot(input.size())) {
+  // The 3x bound covers percent-encoding. Domain-to-ASCII can grow a
+  // non-ASCII host further, so those inputs always snapshot. The byte
+  // scan runs only when the 3x bound did not already require a snapshot
+  // (the common ASCII setter path stays a size compare).
+  bool take_snapshot = needs_rollback_snapshot(input.size());
+  if (!take_snapshot) {
+    const size_t host_end = input.find('#');
+    const size_t n =
+        host_end == std::string_view::npos ? input.size() : host_end;
+    for (size_t i = 0; i < n; ++i) {
+      if (static_cast<unsigned char>(input[i]) >= 0x80) {
+        take_snapshot = true;
+        break;
+      }
+    }
+  }
+  if (take_snapshot) {
     saved_url = *this;
   }
 

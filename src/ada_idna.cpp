@@ -1,4 +1,4 @@
-/* auto-generated on 2026-10-09 11:29:39 -0400. Do not edit! */
+/* auto-generated on 2026-11-19 12:09:03 -0500. Do not edit! */
 /* begin file src/idna.cpp */
 /* begin file src/unicode_transcoding.cpp */
 /* begin file include/ada/idna/unicode_transcoding.h */
@@ -10,17 +10,17 @@
 
 namespace ada::idna {
 
-size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output);
+size_t utf8_to_utf32(const char *buf, size_t len, char32_t *utf32_output);
 
-size_t utf8_length_from_utf32(const char32_t* buf, size_t len);
+size_t utf8_length_from_utf32(const char32_t *buf, size_t len);
 
-size_t utf32_length_from_utf8(const char* buf, size_t len);
+size_t utf32_length_from_utf8(const char *buf, size_t len);
 
-size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output);
+size_t utf32_to_utf8(const char32_t *buf, size_t len, char *utf8_output);
 
-}  // namespace ada::idna
+} // namespace ada::idna
 
-#endif  // ADA_IDNA_UNICODE_TRANSCODING_H
+#endif // ADA_IDNA_UNICODE_TRANSCODING_H
 /* end file include/ada/idna/unicode_transcoding.h */
 
 #include <algorithm>
@@ -29,14 +29,14 @@ size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output);
 
 namespace ada::idna {
 
-size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output) {
-  const uint8_t* data = reinterpret_cast<const uint8_t*>(buf);
+size_t utf8_to_utf32(const char *buf, size_t len, char32_t *utf32_output) {
+  const uint8_t *data = reinterpret_cast<const uint8_t *>(buf);
   size_t pos = 0;
-  const char32_t* start{utf32_output};
+  const char32_t *start{utf32_output};
   while (pos < len) {
     // try to convert the next block of 16 ASCII bytes
-    if (pos + 16 <= len) {  // if it is safe to read 16 more
-                            // bytes, check that they are ascii
+    if (pos + 16 <= len) { // if it is safe to read 16 more
+                           // bytes, check that they are ascii
       uint64_t v1;
       std::memcpy(&v1, data + pos, sizeof(uint64_t));
       uint64_t v2;
@@ -51,7 +51,7 @@ size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output) {
         continue;
       }
     }
-    uint8_t leading_byte = data[pos];  // leading byte
+    uint8_t leading_byte = data[pos]; // leading byte
     if (leading_byte < 0b10000000) {
       // converting one ASCII byte !!!
       *utf32_output++ = char32_t(leading_byte);
@@ -60,7 +60,7 @@ size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output) {
       // We have a two-byte UTF-8
       if (pos + 1 >= len) {
         return 0;
-      }  // minimal bound checking
+      } // minimal bound checking
       if ((data[pos + 1] & 0b11000000) != 0b10000000) {
         return 0;
       }
@@ -76,7 +76,7 @@ size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output) {
       // We have a three-byte UTF-8
       if (pos + 2 >= len) {
         return 0;
-      }  // minimal bound checking
+      } // minimal bound checking
 
       if ((data[pos + 1] & 0b11000000) != 0b10000000) {
         return 0;
@@ -94,11 +94,11 @@ size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output) {
       }
       *utf32_output++ = char32_t(code_point);
       pos += 3;
-    } else if ((leading_byte & 0b11111000) == 0b11110000) {  // 0b11110000
+    } else if ((leading_byte & 0b11111000) == 0b11110000) { // 0b11110000
       // we have a 4-byte UTF-8 word.
       if (pos + 3 >= len) {
         return 0;
-      }  // minimal bound checking
+      } // minimal bound checking
       if ((data[pos + 1] & 0b11000000) != 0b10000000) {
         return 0;
       }
@@ -126,21 +126,21 @@ size_t utf8_to_utf32(const char* buf, size_t len, char32_t* utf32_output) {
   return utf32_output - start;
 }
 
-size_t utf8_length_from_utf32(const char32_t* buf, size_t len) {
+size_t utf8_length_from_utf32(const char32_t *buf, size_t len) {
   // We are not BOM aware.
-  const uint32_t* p = reinterpret_cast<const uint32_t*>(buf);
+  const uint32_t *p = reinterpret_cast<const uint32_t *>(buf);
   size_t counter{0};
   for (size_t i = 0; i != len; ++i) {
-    ++counter;                                      // ASCII
-    counter += static_cast<size_t>(p[i] > 0x7F);    // two-byte
-    counter += static_cast<size_t>(p[i] > 0x7FF);   // three-byte
-    counter += static_cast<size_t>(p[i] > 0xFFFF);  // four-bytes
+    ++counter;                                     // ASCII
+    counter += static_cast<size_t>(p[i] > 0x7F);   // two-byte
+    counter += static_cast<size_t>(p[i] > 0x7FF);  // three-byte
+    counter += static_cast<size_t>(p[i] > 0xFFFF); // four-bytes
   }
   return counter;
 }
 
-size_t utf32_length_from_utf8(const char* buf, size_t len) {
-  const int8_t* p = reinterpret_cast<const int8_t*>(buf);
+size_t utf32_length_from_utf8(const char *buf, size_t len) {
+  const int8_t *p = reinterpret_cast<const int8_t *>(buf);
   return std::count_if(p, std::next(p, len), [](int8_t c) {
     // -65 is 0b10111111, anything larger in two-complement's
     // should start a new code point.
@@ -148,14 +148,14 @@ size_t utf32_length_from_utf8(const char* buf, size_t len) {
   });
 }
 
-size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output) {
-  const uint32_t* data = reinterpret_cast<const uint32_t*>(buf);
+size_t utf32_to_utf8(const char32_t *buf, size_t len, char *utf8_output) {
+  const uint32_t *data = reinterpret_cast<const uint32_t *>(buf);
   size_t pos = 0;
-  const char* start{utf8_output};
+  const char *start{utf8_output};
   while (pos < len) {
     // try to convert the next block of 2 ASCII characters
-    if (pos + 2 <= len) {  // if it is safe to read 8 more
-                           // bytes, check that they are ascii
+    if (pos + 2 <= len) { // if it is safe to read 8 more
+                          // bytes, check that they are ascii
       uint64_t v;
       std::memcpy(&v, data + pos, sizeof(uint64_t));
       if ((v & 0xFFFFFF80FFFFFF80) == 0) {
@@ -202,7 +202,7 @@ size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output) {
   }
   return utf8_output - start;
 }
-}  // namespace ada::idna
+} // namespace ada::idna
 /* end file src/unicode_transcoding.cpp */
 /* begin file src/mapping.cpp */
 /* begin file include/ada/idna/mapping.h */
@@ -215,22 +215,22 @@ size_t utf32_to_utf8(const char32_t* buf, size_t len, char* utf8_output) {
 namespace ada::idna {
 
 // If the input is ascii, then the mapping is just -> lower case.
-void ascii_map(char* input, size_t length);
+void ascii_map(char *input, size_t length);
 // Map the characters according to IDNA, returning the empty string on error.
 std::u32string map(std::u32string_view input);
 // Map into an existing buffer (cleared on entry). Returns false if any code
 // point is disallowed. Reusing the buffer avoids repeated heap allocations
 // when called in a loop over multiple labels.
-bool map(std::u32string_view input, std::u32string& out);
+bool map(std::u32string_view input, std::u32string &out);
 
-}  // namespace ada::idna
+} // namespace ada::idna
 
 #endif
 /* end file include/ada/idna/mapping.h */
 
 #include <array>
-#include <cstring>
 #include <cstdint>
+#include <cstring>
 #include <string>
 
 /* begin file src/table_store.hpp */
@@ -241,8 +241,9 @@ bool map(std::u32string_view input, std::u32string& out);
 // code; compression only affects on-disk size and one-time init.
 //
 // Thread-safe without mutex: atomic CAS + spin-wait. ensure_tables() returns
-// false if initialization fails (OOM, corrupt blob); callers must treat that
-// as a hard error and not touch table pointers.
+// false if initialization fails. A corrupt blob stays failed for the process.
+// An allocation failure is not latched: a later call tries again. Callers
+// must treat a false return as a hard error and not touch table pointers.
 
 /* begin file src/raw_inflate.hpp */
 // Minimal raw DEFLATE inflater (RFC 1951), enough for zlib raw streams.
@@ -253,24 +254,26 @@ bool map(std::u32string_view input, std::u32string& out);
 namespace ada::idna::deflate {
 
 struct BitReader {
-  const uint8_t* p;
-  const uint8_t* end;
+  const uint8_t *p;
+  const uint8_t *end;
   uint32_t acc = 0;
   int bits = 0;
 
-  explicit BitReader(const uint8_t* data, size_t len)
+  explicit BitReader(const uint8_t *data, size_t len)
       : p(data), end(data + len) {}
 
   bool ensure(int n) {
     while (bits < n) {
-      if (p >= end) return false;
+      if (p >= end)
+        return false;
       acc |= uint32_t(*p++) << bits;
       bits += 8;
     }
     return true;
   }
   uint32_t get(int n) {
-    if (!ensure(n)) return UINT32_MAX;
+    if (!ensure(n))
+      return UINT32_MAX;
     uint32_t v = acc & ((1u << n) - 1);
     acc >>= n;
     bits -= n;
@@ -296,7 +299,7 @@ struct Huff {
   // Base index into symbols[] for each code length (used by decode).
   int base_idx[MAXBITS + 1]{};
 
-  bool build(const uint8_t* lens, int n) {
+  bool build(const uint8_t *lens, int n) {
     std::memset(counts, 0, sizeof(counts));
     std::memset(first_code, 0, sizeof(first_code));
     std::memset(base_idx, 0, sizeof(base_idx));
@@ -306,7 +309,8 @@ struct Huff {
       lengths[i] = lens[i];
       if (lens[i]) {
         counts[lens[i]]++;
-        if (lens[i] > max_bits) max_bits = lens[i];
+        if (lens[i] > max_bits)
+          max_bits = lens[i];
       }
     }
     // Canonical first code for each bit length (RFC 1951).
@@ -328,12 +332,14 @@ struct Huff {
     return true;
   }
 
-  int decode(BitReader& br) const {
-    if (max_bits == 0) return -1;
+  int decode(BitReader &br) const {
+    if (max_bits == 0)
+      return -1;
     int code = 0;
     for (int len = 1; len <= max_bits; len++) {
       uint32_t b = br.get(1);
-      if (b == UINT32_MAX) return -1;
+      if (b == UINT32_MAX)
+        return -1;
       code = (code << 1) | int(b);
       int first = first_code[len];
       int cnt = counts[len];
@@ -351,10 +357,14 @@ inline Huff make_fixed_litlen_huff() {
   Huff h;
   uint8_t lens[288];
   // Fixed Huffman: 0-143:8, 144-255:9, 256-279:7, 280-287:8
-  for (int i = 0; i <= 143; i++) lens[i] = 8;
-  for (int i = 144; i <= 255; i++) lens[i] = 9;
-  for (int i = 256; i <= 279; i++) lens[i] = 7;
-  for (int i = 280; i <= 287; i++) lens[i] = 8;
+  for (int i = 0; i <= 143; i++)
+    lens[i] = 8;
+  for (int i = 144; i <= 255; i++)
+    lens[i] = 9;
+  for (int i = 256; i <= 279; i++)
+    lens[i] = 7;
+  for (int i = 280; i <= 287; i++)
+    lens[i] = 8;
   h.build(lens, 288);
   return h;
 }
@@ -362,7 +372,8 @@ inline Huff make_fixed_litlen_huff() {
 inline Huff make_fixed_dist_huff() {
   Huff h;
   uint8_t lens[32];
-  for (int i = 0; i < 32; i++) lens[i] = 5;
+  for (int i = 0; i < 32; i++)
+    lens[i] = 5;
   h.build(lens, 32);
   return h;
 }
@@ -372,9 +383,9 @@ inline const Huff kFixedLitLenHuff = make_fixed_litlen_huff();
 // NOLINTNEXTLINE(cert-err58-cpp)
 inline const Huff kFixedDistHuff = make_fixed_dist_huff();
 
-inline int fixed_litlen(BitReader& br) { return kFixedLitLenHuff.decode(br); }
+inline int fixed_litlen(BitReader &br) { return kFixedLitLenHuff.decode(br); }
 
-inline int fixed_dist(BitReader& br) { return kFixedDistHuff.decode(br); }
+inline int fixed_dist(BitReader &br) { return kFixedDistHuff.decode(br); }
 
 // length and distance base tables
 static const uint16_t len_base[29] = {
@@ -391,32 +402,38 @@ static const uint8_t dist_extra[30] = {0, 0, 0,  0,  1,  1,  2,  2,  3,  3,
                                        4, 4, 5,  5,  6,  6,  7,  7,  8,  8,
                                        9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
 
-inline size_t inflate_raw(const uint8_t* src, size_t src_len, uint8_t* dst,
+inline size_t inflate_raw(const uint8_t *src, size_t src_len, uint8_t *dst,
                           size_t dst_cap) {
   BitReader br(src, src_len);
   size_t out = 0;
   for (;;) {
     uint32_t bfinal = br.get(1);
     uint32_t btype = br.get(2);
-    if (bfinal == UINT32_MAX || btype == UINT32_MAX) return 0;
+    if (bfinal == UINT32_MAX || btype == UINT32_MAX)
+      return 0;
     if (btype == 0) {
       // stored
       br.align_byte();
-      if (!br.ensure(16)) return 0;
+      if (!br.ensure(16))
+        return 0;
       // read 16+16 from bit buffer awkwardly - use byte path
       // Align: bits is multiple of 8
       // Get len from remaining bits then bytes
       uint32_t len = br.get(16);
       uint32_t nlen = br.get(16);
-      if (len == UINT32_MAX || nlen == UINT32_MAX) return 0;
-      if ((len ^ 0xFFFF) != nlen) return 0;
+      if (len == UINT32_MAX || nlen == UINT32_MAX)
+        return 0;
+      if ((len ^ 0xFFFF) != nlen)
+        return 0;
       // After get, may have bits in acc from previous - for stored, should be
       // byte aligned Copy len bytes from p
       if (br.bits != 0) {
         // leftover bits should be 0 if aligned
       }
-      if (size_t(br.end - br.p) < len) return 0;
-      if (out + len > dst_cap) return 0;
+      if (size_t(br.end - br.p) < len)
+        return 0;
+      if (out + len > dst_cap)
+        return 0;
       std::memcpy(dst + out, br.p, len);
       br.p += len;
       out += len;
@@ -427,53 +444,68 @@ inline size_t inflate_raw(const uint8_t* src, size_t src_len, uint8_t* dst,
       } else {
         // dynamic
         uint32_t hlit = br.get(5);
-        if (hlit == UINT32_MAX) return 0;
+        if (hlit == UINT32_MAX)
+          return 0;
         hlit += 257;
         uint32_t hdist = br.get(5);
-        if (hdist == UINT32_MAX) return 0;
+        if (hdist == UINT32_MAX)
+          return 0;
         hdist += 1;
         uint32_t hclen = br.get(4);
-        if (hclen == UINT32_MAX) return 0;
+        if (hclen == UINT32_MAX)
+          return 0;
         hclen += 4;
         static const int order[19] = {16, 17, 18, 0, 8,  7, 9,  6, 10, 5,
                                       11, 4,  12, 3, 13, 2, 14, 1, 15};
         uint8_t clen[19]{};
         for (uint32_t i = 0; i < hclen; i++) {
           uint32_t v = br.get(3);
-          if (v == UINT32_MAX) return 0;
+          if (v == UINT32_MAX)
+            return 0;
           clen[order[i]] = uint8_t(v);
         }
         Huff cl;
-        if (!cl.build(clen, 19)) return 0;
+        if (!cl.build(clen, 19))
+          return 0;
         uint8_t lens[288 + 32]{};
         uint32_t n = hlit + hdist;
         for (uint32_t i = 0; i < n;) {
           int sym = cl.decode(br);
-          if (sym < 0) return 0;
+          if (sym < 0)
+            return 0;
           if (sym < 16) {
             lens[i++] = uint8_t(sym);
           } else if (sym == 16) {
             uint32_t rep = br.get(2);
-            if (rep == UINT32_MAX) return 0;
+            if (rep == UINT32_MAX)
+              return 0;
             rep += 3;
-            if (i == 0) return 0;
+            if (i == 0)
+              return 0;
             uint8_t v = lens[i - 1];
-            while (rep--) lens[i++] = v;
+            while (rep--)
+              lens[i++] = v;
           } else if (sym == 17) {
             uint32_t rep = br.get(3);
-            if (rep == UINT32_MAX) return 0;
+            if (rep == UINT32_MAX)
+              return 0;
             rep += 3;
-            while (rep--) lens[i++] = 0;
+            while (rep--)
+              lens[i++] = 0;
           } else if (sym == 18) {
             uint32_t rep = br.get(7);
-            if (rep == UINT32_MAX) return 0;
+            if (rep == UINT32_MAX)
+              return 0;
             rep += 11;
-            while (rep--) lens[i++] = 0;
+            while (rep--)
+              lens[i++] = 0;
           } else
             return 0;
         }
-        if (!lit.build(lens, int(hlit))) return 0;
-        if (!dist.build(lens + hlit, int(hdist))) return 0;
+        if (!lit.build(lens, int(hlit)))
+          return 0;
+        if (!dist.build(lens + hlit, int(hdist)))
+          return 0;
       }
       for (;;) {
         int sym;
@@ -481,17 +513,21 @@ inline size_t inflate_raw(const uint8_t* src, size_t src_len, uint8_t* dst,
           sym = fixed_litlen(br);
         else
           sym = lit.decode(br);
-        if (sym < 0) return 0;
+        if (sym < 0)
+          return 0;
         if (sym < 256) {
-          if (out >= dst_cap) return 0;
+          if (out >= dst_cap)
+            return 0;
           dst[out++] = uint8_t(sym);
         } else if (sym == 256) {
           break;
         } else {
           int len_code = sym - 257;
-          if (len_code < 0 || len_code > 28) return 0;
+          if (len_code < 0 || len_code > 28)
+            return 0;
           uint32_t extra = br.get(len_extra[len_code]);
-          if (len_extra[len_code] && extra == UINT32_MAX) return 0;
+          if (len_extra[len_code] && extra == UINT32_MAX)
+            return 0;
           uint32_t length =
               len_base[len_code] + (len_extra[len_code] ? extra : 0);
           int dsym;
@@ -499,11 +535,14 @@ inline size_t inflate_raw(const uint8_t* src, size_t src_len, uint8_t* dst,
             dsym = fixed_dist(br);
           else
             dsym = dist.decode(br);
-          if (dsym < 0 || dsym > 29) return 0;
+          if (dsym < 0 || dsym > 29)
+            return 0;
           uint32_t dextra = br.get(dist_extra[dsym]);
-          if (dist_extra[dsym] && dextra == UINT32_MAX) return 0;
+          if (dist_extra[dsym] && dextra == UINT32_MAX)
+            return 0;
           uint32_t distance = dist_base[dsym] + (dist_extra[dsym] ? dextra : 0);
-          if (distance > out || out + length > dst_cap) return 0;
+          if (distance > out || out + length > dst_cap)
+            return 0;
           for (uint32_t k = 0; k < length; k++) {
             dst[out] = dst[out - distance];
             out++;
@@ -511,14 +550,15 @@ inline size_t inflate_raw(const uint8_t* src, size_t src_len, uint8_t* dst,
         }
       }
     } else {
-      return 0;  // reserved
+      return 0; // reserved
     }
-    if (bfinal) break;
+    if (bfinal)
+      break;
   }
   return out;
 }
 
-}  // namespace ada::idna::deflate
+} // namespace ada::idna::deflate
 /* end file src/raw_inflate.hpp */
 /* begin file src/table_blob.inc */
 // Auto-generated by scripts/pack_tables.py - do not edit.
@@ -4888,13 +4928,13 @@ inline range_pair_ptr id_continue = nullptr;
 inline range_pair_ptr id_start = nullptr;
 
 // --- Validity (const SoA) ----------------------------------------------------
-inline const uint32_t* dir_start = nullptr;
-inline const uint32_t* dir_final = nullptr;
-inline const uint8_t* dir_value = nullptr;
+inline const uint32_t *dir_start = nullptr;
+inline const uint32_t *dir_final = nullptr;
+inline const uint8_t *dir_value = nullptr;
 inline range_pair_ptr combining_ranges = nullptr;
-inline const uint32_t* joining_start = nullptr;
-inline const uint32_t* joining_final = nullptr;
-inline const uint8_t* joining_value = nullptr;
+inline const uint32_t *joining_start = nullptr;
+inline const uint32_t *joining_final = nullptr;
+inline const uint8_t *joining_value = nullptr;
 
 inline constexpr size_t id_continue_count = table_blob::id_continue_count;
 inline constexpr size_t id_start_count = table_blob::id_start_count;
@@ -4910,10 +4950,10 @@ inline constexpr size_t composition_data_size =
     table_blob::count_composition_data;
 
 inline constexpr size_t kDecompBlockCols =
-    table_blob::decomposition_block_cols;                            // 257
-inline constexpr size_t kCccBlockCols = table_blob::ccc_block_cols;  // 256
+    table_blob::decomposition_block_cols;                           // 257
+inline constexpr size_t kCccBlockCols = table_blob::ccc_block_cols; // 256
 inline constexpr size_t kCompBlockCols =
-    table_blob::composition_block_cols;  // 257
+    table_blob::composition_block_cols; // 257
 inline constexpr size_t kDecompBlockRows = table_blob::decomposition_block_rows;
 inline constexpr size_t kCccBlockRows = table_blob::ccc_block_rows;
 inline constexpr size_t kCompBlockRows = table_blob::composition_block_rows;
@@ -4928,13 +4968,13 @@ inline std::atomic<uint8_t> tables_init_state{kTablesUninit};
 // Process-lifetime allocation published only by the winning init thread.
 // Never freed: shared read-only data for the process. Do not dlclose a DSO
 // that owns this buffer while other code may still call into ada::idna.
-inline uint8_t* tables_buffer = nullptr;
+inline uint8_t *tables_buffer = nullptr;
 
 // Cap spin-wait so a stuck peer cannot hang the process forever.
 inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
 
 // ISO HDLC / zlib CRC-32 of the uncompressed table payload.
-[[nodiscard]] inline uint32_t crc32_ieee(const uint8_t* data,
+[[nodiscard]] inline uint32_t crc32_ieee(const uint8_t *data,
                                          size_t len) noexcept {
   uint32_t c = 0xFFFFFFFFu;
   for (size_t i = 0; i < len; ++i) {
@@ -4965,10 +5005,14 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
   if (tables_init_state.compare_exchange_strong(expected, kTablesInProgress,
                                                 std::memory_order_acq_rel,
                                                 std::memory_order_acquire)) {
-    uint8_t* buffer = new (std::nothrow) uint8_t[table_blob::uncompressed_size];
+    uint8_t *buffer = new (std::nothrow) uint8_t[table_blob::uncompressed_size];
     if (buffer == nullptr) {
-      tables_init_state.store(kTablesFailed, std::memory_order_release);
+      // Leave the state uninitialized so a later call can retry. A corrupt
+      // blob (below) is permanent; running out of memory may not be.
+      // LCOV_EXCL_START
+      tables_init_state.store(kTablesUninit, std::memory_order_release);
       return false;
+      // LCOV_EXCL_STOP
     }
 
     const size_t n = deflate::inflate_raw(table_blob::compressed,
@@ -4984,32 +5028,32 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
     // LE payload verified; convert multi-byte fields for big-endian hosts.
     detail::convert_table_blob_to_host_endian(buffer);
 
-    auto at = [&](size_t off) noexcept -> const uint8_t* {
+    auto at = [&](size_t off) noexcept -> const uint8_t * {
       return buffer + off;
     };
 
     // Publish all non-atomic pointers before READY. Waiters synchronize via
     // acquire on tables_init_state and then observe these writes.
     idna_stage1 =
-        reinterpret_cast<const uint16_t*>(at(table_blob::off_idna_stage1));
+        reinterpret_cast<const uint16_t *>(at(table_blob::off_idna_stage1));
     idna_stage2 =
-        reinterpret_cast<const uint16_t*>(at(table_blob::off_idna_stage2));
-    idna_bool_blocks =
-        reinterpret_cast<const uint64_t*>(at(table_blob::off_idna_bool_blocks));
+        reinterpret_cast<const uint16_t *>(at(table_blob::off_idna_stage2));
+    idna_bool_blocks = reinterpret_cast<const uint64_t *>(
+        at(table_blob::off_idna_bool_blocks));
     idna_utf8_mappings = at(table_blob::off_idna_utf8_mappings);
 
     decomposition_index = at(table_blob::off_decomposition_index);
-    decomposition_block_flat = reinterpret_cast<const uint16_t*>(
+    decomposition_block_flat = reinterpret_cast<const uint16_t *>(
         at(table_blob::off_decomposition_block));
-    decomposition_data = reinterpret_cast<const char32_t*>(
+    decomposition_data = reinterpret_cast<const char32_t *>(
         at(table_blob::off_decomposition_data));
     ccc_index = at(table_blob::off_ccc_index);
     ccc_block_flat = at(table_blob::off_ccc_block);
     composition_index = at(table_blob::off_composition_index);
-    composition_block_flat = reinterpret_cast<const uint16_t*>(
+    composition_block_flat = reinterpret_cast<const uint16_t *>(
         at(table_blob::off_composition_block));
-    composition_data =
-        reinterpret_cast<const char32_t*>(at(table_blob::off_composition_data));
+    composition_data = reinterpret_cast<const char32_t *>(
+        at(table_blob::off_composition_data));
 
     id_continue =
         reinterpret_cast<range_pair_ptr>(at(table_blob::off_id_continue_flat));
@@ -5017,16 +5061,16 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
         reinterpret_cast<range_pair_ptr>(at(table_blob::off_id_start_flat));
 
     dir_start =
-        reinterpret_cast<const uint32_t*>(at(table_blob::off_dir_start));
+        reinterpret_cast<const uint32_t *>(at(table_blob::off_dir_start));
     dir_final =
-        reinterpret_cast<const uint32_t*>(at(table_blob::off_dir_final));
+        reinterpret_cast<const uint32_t *>(at(table_blob::off_dir_final));
     dir_value = at(table_blob::off_dir_value);
     combining_ranges =
         reinterpret_cast<range_pair_ptr>(at(table_blob::off_combining_flat));
     joining_start =
-        reinterpret_cast<const uint32_t*>(at(table_blob::off_joining_start));
+        reinterpret_cast<const uint32_t *>(at(table_blob::off_joining_start));
     joining_final =
-        reinterpret_cast<const uint32_t*>(at(table_blob::off_joining_final));
+        reinterpret_cast<const uint32_t *>(at(table_blob::off_joining_final));
     joining_value = at(table_blob::off_joining_value);
 
     tables_buffer = buffer;
@@ -5040,10 +5084,16 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
     if (state == kTablesReady) {
       return true;
     }
-    if (state == kTablesFailed) {
+    // Failed is permanent. Uninit means the peer gave up after a failed
+    // allocation: do not spin, the next call can take the init slot. One
+    // comparison, same shape as the old Failed check, so this wait loop does
+    // not grow the unity translation unit.
+    // LCOV_EXCL_START
+    if (state != kTablesInProgress) {
       return false;
     }
-#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || \
+    // LCOV_EXCL_STOP
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) ||             \
     defined(_M_IX86)
 #if defined(__GNUC__) || defined(__clang__)
     __builtin_ia32_pause();
@@ -5061,28 +5111,28 @@ inline constexpr uint64_t kTablesSpinLimit = 1'000'000'000ull;
 // O(1) multi-stage accessors. Block indices from the tables are uint8_t and
 // theoretically can be out of range if the blob is corrupt; clamp to a valid
 // empty/default row (index 0) instead of reading OOB.
-inline const uint16_t* decomposition_block_row(uint8_t bi) noexcept {
+inline const uint16_t *decomposition_block_row(uint8_t bi) noexcept {
   if (bi >= kDecompBlockRows) {
     bi = 0;
   }
   return decomposition_block_flat + static_cast<size_t>(bi) * kDecompBlockCols;
 }
 
-inline const uint8_t* ccc_block_row(uint8_t bi) noexcept {
+inline const uint8_t *ccc_block_row(uint8_t bi) noexcept {
   if (bi >= kCccBlockRows) {
     bi = 0;
   }
   return ccc_block_flat + static_cast<size_t>(bi) * kCccBlockCols;
 }
 
-inline const uint16_t* composition_block_row(uint8_t bi) noexcept {
+inline const uint16_t *composition_block_row(uint8_t bi) noexcept {
   if (bi >= kCompBlockRows) {
     bi = 0;
   }
   return composition_block_flat + static_cast<size_t>(bi) * kCompBlockCols;
 }
 
-}  // namespace ada::idna
+} // namespace ada::idna
 /* end file src/table_store.hpp */
 /* begin file src/mapping_tables.cpp */
 // IDNA 18.0.0
@@ -6147,7 +6197,9 @@ inline static size_t find_last_not_of_nsm(
 }
 
 // An RTL label is a label that contains at least one character of type R, AL,
-// or AN. https://www.rfc-editor.org/rfc/rfc5893#section-2
+// or AN. A domain containing one is a Bidi domain name: RFC 5893 then applies
+// to every label, including labels that are themselves all LTR.
+// https://www.rfc-editor.org/rfc/rfc5893#section-2
 inline static bool is_rtl_label(const std::u32string_view label) noexcept {
   const size_t mask =
       (1u << direction::R) | (1u << direction::AL) | (1u << direction::AN);
@@ -6159,7 +6211,21 @@ inline static bool is_rtl_label(const std::u32string_view label) noexcept {
   return (directions & mask) != 0;
 }
 
-bool is_label_valid(const std::u32string_view label) {
+// Same as is_rtl_label, but loads the Bidi tables first. Visible to to_ascii
+// and to_unicode, which are part of this translation unit.
+inline static bool label_contains_rtl(std::u32string_view label) noexcept {
+  if (label.empty() || !ensure_tables() || dir_start == nullptr ||
+      dir_final == nullptr || dir_value == nullptr) {
+    return false;
+  }
+  return is_rtl_label(label);
+}
+
+// `bidi_domain` is true when the domain name contains at least one RTL label.
+// CheckBidi then applies to this label even if the label itself has no R, AL,
+// or AN character (RFC 5893). The one-argument is_label_valid() passes false,
+// which preserves the per-label check for callers that do not know yet.
+static bool check_label(const std::u32string_view label, bool bidi_domain) {
   if (label.empty()) {
     return true;
   }
@@ -6250,8 +6316,8 @@ bool is_label_valid(const std::u32string_view label) {
 
   // A "Bidi domain name" is a domain name that contains at least one RTL label.
   // The following rule, consisting of six conditions, applies to labels in Bidi
-  // domain names.
-  if (is_rtl_label(label)) {
+  // domain names: every label, not only the RTL ones.
+  if (bidi_domain || is_rtl_label(label)) {
     // The first character must be a character with Bidi property L, R,
     // or AL. If it has the R or AL property, it is an RTL label; if it
     // has the L property, it is an LTR label.
@@ -6318,6 +6384,10 @@ bool is_label_valid(const std::u32string_view label) {
   }
 
   return true;
+}
+
+bool is_label_valid(const std::u32string_view label) {
+  return check_label(label, false);
 }
 
 }  // namespace ada::idna
@@ -6477,6 +6547,53 @@ static bool is_ace_prefix(std::u32string_view label) noexcept {
          label[2] == U'-' && label[3] == U'-';
 }
 
+// RFC 5893: a Bidi domain name contains at least one RTL label. CheckBidi then
+// applies to every label in the domain, so this must be known before the first
+// label is validated. ACE labels are decoded; a decode failure is left for the
+// conversion pass, which rejects the domain.
+static bool mapped_domain_is_bidi(std::u32string_view mapped) {
+  const char32_t* p = mapped.data();
+  const char32_t* const end = p + mapped.size();
+  std::string puny;
+  std::u32string decoded;
+  while (p < end) {
+    const char32_t* begin = p;
+    while (p < end && *p != U'.') {
+      ++p;
+    }
+    const std::u32string_view label(begin, static_cast<size_t>(p - begin));
+    if (p < end) {
+      ++p;
+    }
+    if (label.empty()) {
+      continue;
+    }
+    if (is_ace_prefix(label)) {
+      bool ace_ascii = true;
+      for (char32_t c : label) {
+        if (c >= 0x80) {
+          ace_ascii = false;
+          break;
+        }
+      }
+      if (!ace_ascii) {
+        continue;
+      }
+      puny.resize(label.size() - 4);
+      for (size_t i = 0; i < puny.size(); i++) {
+        puny[i] = static_cast<char>(label[i + 4]);
+      }
+      decoded.clear();
+      if (punycode_to_utf32(puny, decoded) && label_contains_rtl(decoded)) {
+        return true;
+      }
+    } else if (label_contains_rtl(label)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 [[nodiscard]] bool to_ascii(std::string_view ut8_string, std::string& out) {
   out.clear();
   // The ASCII path is a single same-size copy, so it needs no length bound.
@@ -6528,6 +6645,9 @@ static bool is_ace_prefix(std::u32string_view label) noexcept {
       return false;
     }
   }
+
+  // CheckBidi applies to every label once any label is RTL (RFC 5893).
+  const bool bidi_domain = mapped_domain_is_bidi(mapped);
 
   // Estimate ASCII output size (punycode may expand non-ASCII labels).
   out.reserve(mapped.size() + 8);
@@ -6581,14 +6701,20 @@ static bool is_ace_prefix(std::u32string_view label) noexcept {
           return false;
         }
       }
-      if (post_map.empty() || !is_label_valid(post_map)) {
+      if (post_map.empty() || !check_label(post_map, bidi_domain)) {
         out.clear();
         return false;
       }
     } else if (is_ascii(label_view)) {
+      // All-ASCII domains never reach here (they return above). An ASCII label
+      // in a Bidi domain must still satisfy RFC 5893 rules 1, 5, and 6.
+      if (bidi_domain && !check_label(label_view, true)) {
+        out.clear();
+        return false;
+      }
       append_ascii_label(out, label_view);
     } else {
-      if (!is_label_valid(label_view)) {
+      if (!check_label(label_view, bidi_domain)) {
         out.clear();
         return false;
       }
@@ -6679,10 +6805,78 @@ bool valid_name_code_point(char32_t code_point, bool first);
 
 namespace ada::idna {
 
+// True when an all-ASCII label is valid on its own but violates RFC 5893
+// because the domain contains an RTL label (for example a label starting
+// with a digit). ToUnicode then returns the original input (UTS #46).
+static bool ascii_label_fails_bidi_domain(std::string_view label) {
+  std::u32string utf32(label.size(), 0);
+  for (size_t i = 0; i < label.size(); i++) {
+    utf32[i] = static_cast<unsigned char>(label[i]);
+  }
+  return check_label(utf32, false) && !check_label(utf32, true);
+}
+
+static bool utf8_domain_is_bidi(std::string_view input) {
+  std::u32string decoded;
+  size_t label_start = 0;
+  while (label_start < input.size()) {
+    const size_t loc_dot = input.find('.', label_start);
+    const bool is_last_label = (loc_dot == std::string_view::npos);
+    const size_t label_size =
+        is_last_label ? input.size() - label_start : loc_dot - label_start;
+    const std::string_view label = input.substr(label_start, label_size);
+    if (label.starts_with("xn--") && is_ascii(label)) {
+      decoded.clear();
+      if (label.size() > 4 && punycode_to_utf32(label.substr(4), decoded) &&
+          label_contains_rtl(decoded)) {
+        return true;
+      }
+    } else if (!is_ascii(label)) {
+      const size_t utf32_length =
+          utf32_length_from_utf8(label.data(), label.size());
+      if (utf32_length != 0) {
+        decoded.assign(utf32_length, 0);
+        const size_t written =
+            utf8_to_utf32(label.data(), label.size(), decoded.data());
+        if (written == utf32_length && label_contains_rtl(decoded)) {
+          return true;
+        }
+      }
+    }
+    if (is_last_label) {
+      break;
+    }
+    label_start += label_size + 1;
+  }
+  return false;
+}
+
 [[nodiscard]] bool to_unicode(std::string_view input, std::string& output) {
   output.clear();
   if (input.size() > max_domain_input_bytes) {
     return false;
+  }
+  // An ASCII label that is only illegal because the domain is a Bidi domain
+  // fails ToUnicode for the whole input (UTS #46), not just that label.
+  const bool bidi_domain = utf8_domain_is_bidi(input);
+  if (bidi_domain) {
+    size_t label_start = 0;
+    while (label_start < input.size()) {
+      const size_t loc_dot = input.find('.', label_start);
+      const bool is_last_label = (loc_dot == std::string_view::npos);
+      const size_t label_size =
+          is_last_label ? input.size() - label_start : loc_dot - label_start;
+      const std::string_view label = input.substr(label_start, label_size);
+      if (!label.empty() && is_ascii(label) && !label.starts_with("xn--") &&
+          ascii_label_fails_bidi_domain(label)) {
+        output.assign(input);
+        return true;
+      }
+      if (is_last_label) {
+        break;
+      }
+      label_start += label_size + 1;
+    }
   }
   output.reserve(input.size());
 
@@ -6712,7 +6906,7 @@ namespace ada::idna {
             accept_decoded = false;
           } else if (!ada::idna::normalize(post_map) ||
                      post_map != tmp_buffer || post_map.empty() ||
-                     !ada::idna::is_label_valid(post_map)) {
+                     !check_label(post_map, bidi_domain)) {
             accept_decoded = false;
           }
         }
