@@ -207,16 +207,14 @@ ada_really_inline int trailing_zeroes64(uint64_t input_num) noexcept {
 // Given a NEON register whose lanes are all either 0x00 or 0xFF (i.e., the
 // result of a comparison), produce a 64-bit value with four bits set per
 // matching input byte, and zero bits elsewhere. Narrowing by four bits per
-// 16-bit lane is cheaper than materializing a 16-bit bitmask, and it keeps
-// the value in a vector register so that the "any match?" test can be done
-// with a floating-point compare against zero, avoiding a transfer to a
-// general-purpose register on the common no-match path.
+// 16-bit lane is cheaper than materializing a 16-bit bitmask.
 //
-// The floating-point compare treats the nibble mask as an IEEE 754 double.
-// Negative zero cannot occur (each byte is 0x00, 0x0F, 0xF0 or 0xFF), but a
-// mask with only low bits set is a denormal: if flush-to-zero is enabled,
-// those compare equal to 0.0. Do not use this on arbitrary vectors.
-// Define ADA_NEON_SAFE_ZERO_CHECK to 1 to use an integer compare instead.
+// With ADA_NEON_SAFE_ZERO_CHECK set to 0, the "any match?" test instead
+// treats the nibble mask as an IEEE 754 double and compares it against zero,
+// avoiding a transfer to a general-purpose register on the common no-match
+// path. Negative zero cannot occur (each byte is 0x00, 0x0F, 0xF0 or 0xFF),
+// but a mask with only low bits set is a denormal: if flush-to-zero is
+// enabled, those compare equal to 0.0. Do not use this on arbitrary vectors.
 ada_really_inline uint8x8_t to_nibble_mask(uint8x16_t comparison) noexcept {
   return vshrn_n_u16(vreinterpretq_u16_u8(comparison), 4);
 }
@@ -971,7 +969,6 @@ ada_really_inline void parse_prepared_path(std::string_view input,
     ada_log("parse_path slow");
     // we have reached the general case
     bool needs_percent_encoding = (accumulator & 1);
-    std::string path_buffer_tmp;
     do {
       size_t location = (special && (accumulator & 2))
                             ? input.find_first_of("/\\")
@@ -981,39 +978,37 @@ ada_really_inline void parse_prepared_path(std::string_view input,
         path_view.remove_suffix(path_view.size() - location);
         input.remove_prefix(location + 1);
       }
-      // path_buffer is either path_view or it might point at a percent encoded
-      // temporary file.
-      std::string_view path_buffer =
-          (needs_percent_encoding &&
-           ada::unicode::percent_encode<false>(
-               path_view, character_sets::PATH_PERCENT_ENCODE, path_buffer_tmp))
-              ? path_buffer_tmp
-              : path_view;
-      if (unicode::is_double_dot_path_segment(path_buffer)) {
+      // Path encoding preserves dots and percent signs, so normalize first.
+      if (unicode::is_double_dot_path_segment(path_view)) {
         helpers::shorten_path(path, type);
         if (location == std::string_view::npos) {
           path += '/';
         }
-      } else if (unicode::is_single_dot_path_segment(path_buffer) &&
+      } else if (unicode::is_single_dot_path_segment(path_view) &&
                  (location == std::string_view::npos)) {
         path += '/';
       }
-      // Otherwise, if path_buffer is not a single-dot path segment, then:
-      else if (!unicode::is_single_dot_path_segment(path_buffer)) {
-        // If url's scheme is "file", url's path is empty, and path_buffer is a
+      // Otherwise, if path_view is not a single-dot path segment, then:
+      else if (!unicode::is_single_dot_path_segment(path_view)) {
+        // If url's scheme is "file", url's path is empty, and path_view is a
         // Windows drive letter, then replace the second code point in
-        // path_buffer with U+003A (:).
+        // path_view with U+003A (:).
         if (type == ada::scheme::type::FILE && path.empty() &&
-            checkers::is_windows_drive_letter(path_buffer)) {
+            path_view.size() == 2 &&
+            checkers::is_windows_drive_letter(path_view)) {
           path += '/';
-          path += path_buffer[0];
+          path += path_view[0];
           path += ':';
-          path_buffer.remove_prefix(2);
-          path.append(path_buffer);
+          path_view.remove_prefix(2);
+          path.append(path_view);
         } else {
-          // Append path_buffer to url's path.
+          // Append encoded bytes directly to the pathname.
           path += '/';
-          path.append(path_buffer);
+          if (!needs_percent_encoding ||
+              !ada::unicode::percent_encode<true>(
+                  path_view, character_sets::PATH_PERCENT_ENCODE, path)) {
+            path.append(path_view);
+          }
         }
       }
       if (location == std::string_view::npos) {
