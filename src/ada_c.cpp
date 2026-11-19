@@ -121,8 +121,10 @@ ada_owned_string ada_get_origin(ada_url result) noexcept {
   }
   std::string out = r->get_origin();
   owned.length = out.size();
-  owned.data = new char[owned.length];
+  // +1 for a trailing NUL. length does not include it. (#1307)
+  owned.data = new char[owned.length + 1];
   memcpy((void*)owned.data, out.data(), owned.length);
+  const_cast<char*>(owned.data)[owned.length] = '\0';
   return owned;
 }
 
@@ -452,8 +454,9 @@ ada_owned_string ada_idna_to_unicode(const char* input, size_t length) {
   std::string out = ada::idna::to_unicode(std::string_view(input, length));
   ada_owned_string owned{};
   owned.length = out.length();
-  owned.data = new char[owned.length];
+  owned.data = new char[owned.length + 1];
   memcpy((void*)owned.data, out.data(), owned.length);
+  const_cast<char*>(owned.data)[owned.length] = '\0';
   return owned;
 }
 
@@ -461,8 +464,9 @@ ada_owned_string ada_idna_to_ascii(const char* input, size_t length) {
   std::string out = ada::idna::to_ascii(std::string_view(input, length));
   ada_owned_string owned{};
   owned.length = out.size();
-  owned.data = new char[owned.length];
+  owned.data = new char[owned.length + 1];
   memcpy((void*)owned.data, out.data(), owned.length);
+  const_cast<char*>(owned.data)[owned.length] = '\0';
   return owned;
 }
 
@@ -486,8 +490,9 @@ ada_owned_string ada_search_params_to_string(ada_url_search_params result) {
   std::string out = r->to_string();
   ada_owned_string owned{};
   owned.length = out.size();
-  owned.data = new char[owned.length];
+  owned.data = new char[owned.length + 1];
   memcpy((void*)owned.data, out.data(), owned.length);
+  const_cast<char*>(owned.data)[owned.length] = '\0';
   return owned;
 }
 

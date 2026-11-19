@@ -51,7 +51,15 @@ inline void url_search_params::initialize(std::string_view input) {
     return;
   }
 
-  params.reserve(size_t(std::count(input.begin(), input.end(), '&')) + 1);
+  // count('&')+1 is an upper bound on the pairs the loop below keeps
+  // (empty segments are skipped). It is one character count, which is
+  // the reserve the parse path already paid for. An input of only '&'
+  // would reserve N+1 pairs and store nothing; skip that.
+  const size_t ampersands = size_t(std::count(input.begin(), input.end(), '&'));
+  if (ampersands == input.size()) {
+    return;
+  }
+  params.reserve(ampersands + 1);
 
   auto process_key_value = [&](const std::string_view current) {
     const auto equal = current.find('=');
