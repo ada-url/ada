@@ -24,6 +24,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <utility>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -269,7 +270,8 @@ struct url_pattern_result {
  private:
   // Backing storage for string_view alternatives in inputs.
   std::vector<std::string> owned_strings_{};
-  void rebind_owned_input_views();
+  void rebind_owned_input_views(const std::pair<const char*, size_t>* from,
+                                size_t from_size);
   // Copy input (and optional base URL) into owned storage and bind
   // `inputs` string_views to that storage.
   void store_inputs(const url_pattern_input& input,

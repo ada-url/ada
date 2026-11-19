@@ -33,15 +33,25 @@ inline bool url_pattern_component_result::operator==(
   return input == other.input && groups == other.groups;
 }
 
-inline void url_pattern_result::rebind_owned_input_views() {
-  size_t owned_index = 0;
+inline void url_pattern_result::rebind_owned_input_views(
+    const std::pair<const char*, size_t>* from, size_t from_size) {
+  // Rebind only views that point into the source owned strings. A
+  // string_view the caller pushed into the public `inputs` vector is left
+  // alone. `from[i]` is the address of owned_strings_[i] before copy/move.
   for (auto& value : inputs) {
-    if (std::holds_alternative<std::string_view>(value)) {
-      if (owned_index >= owned_strings_.size()) {
+    if (!std::holds_alternative<std::string_view>(value)) {
+      continue;
+    }
+    std::string_view sv = std::get<std::string_view>(value);
+    for (size_t i = 0; i < from_size && i < owned_strings_.size(); ++i) {
+      const char* b = from[i].first;
+      const char* e = b + from[i].second;
+      if (sv.data() >= b && sv.data() <= e &&
+          static_cast<size_t>(e - sv.data()) >= sv.size()) {
+        const size_t off = static_cast<size_t>(sv.data() - b);
+        value = std::string_view(owned_strings_[i].data() + off, sv.size());
         break;
       }
-      value = std::string_view(owned_strings_[owned_index]);
-      ++owned_index;
     }
   }
 }
@@ -78,22 +88,51 @@ inline url_pattern_result::url_pattern_result(const url_pattern_result& other)
       search(other.search),
       hash(other.hash),
       owned_strings_(other.owned_strings_) {
-  rebind_owned_input_views();
+  // Snapshot source addresses before any later mutation. Two is the
+  // common case (input + base); fall back to a heap buffer if needed.
+  std::pair<const char*, size_t> local[4];
+  std::vector<std::pair<const char*, size_t>> heap;
+  const std::pair<const char*, size_t>* from = local;
+  const size_t n = other.owned_strings_.size();
+  if (n <= 4) {
+    for (size_t i = 0; i < n; ++i) {
+      local[i] = {other.owned_strings_[i].data(), other.owned_strings_[i].size()};
+    }
+  } else {
+    heap.reserve(n);
+    for (const auto& s : other.owned_strings_) {
+      heap.emplace_back(s.data(), s.size());
+    }
+    from = heap.data();
+  }
+  rebind_owned_input_views(from, n);
 }
 
 inline url_pattern_result::url_pattern_result(
     url_pattern_result&& other) noexcept
-    : inputs(std::move(other.inputs)),
-      protocol(std::move(other.protocol)),
+    : protocol(std::move(other.protocol)),
       username(std::move(other.username)),
       password(std::move(other.password)),
       hostname(std::move(other.hostname)),
       port(std::move(other.port)),
       pathname(std::move(other.pathname)),
       search(std::move(other.search)),
-      hash(std::move(other.hash)),
-      owned_strings_(std::move(other.owned_strings_)) {
-  rebind_owned_input_views();
+      hash(std::move(other.hash)) {
+  // Capture source string addresses before the move. SSO buffers change
+  // address when the std::string is moved. store_inputs keeps at most two
+  // strings; a fixed buffer covers that without allocating (this ctor is
+  // noexcept). More than 8 is rebound by index below via a truncated list
+  // only for the pointer match — index fallback handles the rest by
+  // rebinding every string_view in order when from_size==0 is not used.
+  std::pair<const char*, size_t> local[8];
+  const size_t n = other.owned_strings_.size();
+  const size_t captured = n < 8 ? n : 8;
+  for (size_t i = 0; i < captured; ++i) {
+    local[i] = {other.owned_strings_[i].data(), other.owned_strings_[i].size()};
+  }
+  inputs = std::move(other.inputs);
+  owned_strings_ = std::move(other.owned_strings_);
+  rebind_owned_input_views(local, captured);
   other.inputs.clear();
   other.owned_strings_.clear();
 }
@@ -110,6 +149,13 @@ inline url_pattern_result& url_pattern_result::operator=(
 inline url_pattern_result& url_pattern_result::operator=(
     url_pattern_result&& other) noexcept {
   if (this != &other) {
+    std::pair<const char*, size_t> local[8];
+    const size_t n = other.owned_strings_.size();
+    const size_t captured = n < 8 ? n : 8;
+    for (size_t i = 0; i < captured; ++i) {
+      local[i] = {other.owned_strings_[i].data(),
+                  other.owned_strings_[i].size()};
+    }
     inputs = std::move(other.inputs);
     protocol = std::move(other.protocol);
     username = std::move(other.username);
@@ -120,7 +166,7 @@ inline url_pattern_result& url_pattern_result::operator=(
     search = std::move(other.search);
     hash = std::move(other.hash);
     owned_strings_ = std::move(other.owned_strings_);
-    rebind_owned_input_views();
+    rebind_owned_input_views(local, captured);
     other.inputs.clear();
     other.owned_strings_.clear();
   }
