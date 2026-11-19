@@ -177,6 +177,19 @@ TEST(url_pattern_list, default_constructed_empty_list_match_is_safe) {
   EXPECT_TRUE(result.regexp_groups.empty());
 }
 
+TEST(url_pattern_list, long_literal_segment_is_not_truncated) {
+  // A trie edge stores its literal segment length in a uint16_t, so a literal
+  // longer than 65535 bytes used to wrap: "/" + 65536 'a' truncated to length
+  // 0 and matched the empty segment of "/". The route must match only its own
+  // pathname, never a short one whose length equals the truncated value.
+  const std::string big = "/" + std::string(65536, 'a');
+  auto list = make_list({big});
+  ASSERT_EQ(list.size(), 1u);
+  EXPECT_EQ(list.match("/").route_index, -1);
+  EXPECT_EQ(list.match("/a").route_index, -1);
+  EXPECT_EQ(list.match(big).route_index, 0);
+}
+
 TEST(url_pattern_list, agrees_with_url_pattern_on_boundary_cases) {
   // Pin the static/":param"/"*" subset semantics to ada::url_pattern itself:
   // for every (pattern, input) pair, a single-route list must match exactly
