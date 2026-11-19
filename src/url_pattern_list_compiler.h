@@ -128,10 +128,8 @@ constexpr bool route_outranks(const route_info& a, size_t a_index,
  * Compiles the route set: builds the trie and its dispatch plans over the
  * trie-mode routes, the segment table, the auxiliary-route table with its
  * per-route challenger ranges, and packs everything into one arena. A node
- * whose offline search fails is demoted to a slower but correct plan.
- * Compilation fails when a table would not fit its integer encoding (arena
- * offsets, segment-blob offsets) or when the challenger table exceeds
- * url_pattern_list_limits::max_aux_entries.
+ * whose offline search fails is demoted to a slower but correct plan. Fails
+ * only when a table exceeds its limit or integer encoding.
  * Literal texts are used as given (the caller has already case-folded them
  * when ignore_case is set).
  */
