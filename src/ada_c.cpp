@@ -610,15 +610,31 @@ ada_strings ada_search_params_get_all(ada_url_search_params result,
       r->get_all(std::string_view(key, key_length)));
 }
 
+// next() returns views into the iterator's params, so each C iterator owns a
+// copy that outlives ada_free_search_params and later mutations.
+struct ada_c_search_params_keys_iter {
+  ada::url_search_params params{};
+  ada::url_search_params_keys_iter iter = params.get_keys();
+};
+
+struct ada_c_search_params_values_iter {
+  ada::url_search_params params{};
+  ada::url_search_params_values_iter iter = params.get_values();
+};
+
+struct ada_c_search_params_entries_iter {
+  ada::url_search_params params{};
+  ada::url_search_params_entries_iter iter = params.get_entries();
+};
+
 ada_url_search_params_keys_iter ada_search_params_get_keys(
     ada_url_search_params result) {
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
   if (!r) {
-    return new ada::result<ada::url_search_params_keys_iter>(
-        ada::url_search_params_keys_iter());
+    return new ada_c_search_params_keys_iter{};
   }
-  return new ada::result<ada::url_search_params_keys_iter>(r->get_keys());
+  return new ada_c_search_params_keys_iter{*r};
 }
 
 ada_url_search_params_values_iter ada_search_params_get_values(
@@ -626,10 +642,9 @@ ada_url_search_params_values_iter ada_search_params_get_values(
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
   if (!r) {
-    return new ada::result<ada::url_search_params_values_iter>(
-        ada::url_search_params_values_iter());
+    return new ada_c_search_params_values_iter{};
   }
-  return new ada::result<ada::url_search_params_values_iter>(r->get_values());
+  return new ada_c_search_params_values_iter{*r};
 }
 
 ada_url_search_params_entries_iter ada_search_params_get_entries(
@@ -637,10 +652,9 @@ ada_url_search_params_entries_iter ada_search_params_get_entries(
   ada::result<ada::url_search_params>& r =
       *(ada::result<ada::url_search_params>*)result;
   if (!r) {
-    return new ada::result<ada::url_search_params_entries_iter>(
-        ada::url_search_params_entries_iter());
+    return new ada_c_search_params_entries_iter{};
   }
-  return new ada::result<ada::url_search_params_entries_iter>(r->get_entries());
+  return new ada_c_search_params_entries_iter{*r};
 }
 
 void ada_free_strings(ada_strings result) {
@@ -666,17 +680,17 @@ ada_string ada_strings_get(ada_strings result, size_t index) {
 }
 
 void ada_free_search_params_keys_iter(ada_url_search_params_keys_iter result) {
-  auto* r = (ada::result<ada::url_search_params_keys_iter>*)result;
+  auto* r = (ada_c_search_params_keys_iter*)result;
   delete r;
 }
 
 ada_string ada_search_params_keys_iter_next(
     ada_url_search_params_keys_iter result) {
-  auto* r = (ada::result<ada::url_search_params_keys_iter>*)result;
+  auto* r = (ada_c_search_params_keys_iter*)result;
   if (!r) {
     return ada_string_create(nullptr, 0);
   }
-  auto next = (*r)->next();
+  auto next = r->iter.next();
   if (!next.has_value()) {
     return ada_string_create(nullptr, 0);
   }
@@ -685,26 +699,26 @@ ada_string ada_search_params_keys_iter_next(
 
 bool ada_search_params_keys_iter_has_next(
     ada_url_search_params_keys_iter result) {
-  auto* r = (ada::result<ada::url_search_params_keys_iter>*)result;
+  auto* r = (ada_c_search_params_keys_iter*)result;
   if (!r) {
     return false;
   }
-  return (*r)->has_next();
+  return r->iter.has_next();
 }
 
 void ada_free_search_params_values_iter(
     ada_url_search_params_values_iter result) {
-  auto* r = (ada::result<ada::url_search_params_values_iter>*)result;
+  auto* r = (ada_c_search_params_values_iter*)result;
   delete r;
 }
 
 ada_string ada_search_params_values_iter_next(
     ada_url_search_params_values_iter result) {
-  auto* r = (ada::result<ada::url_search_params_values_iter>*)result;
+  auto* r = (ada_c_search_params_values_iter*)result;
   if (!r) {
     return ada_string_create(nullptr, 0);
   }
-  auto next = (*r)->next();
+  auto next = r->iter.next();
   if (!next.has_value()) {
     return ada_string_create(nullptr, 0);
   }
@@ -713,24 +727,24 @@ ada_string ada_search_params_values_iter_next(
 
 bool ada_search_params_values_iter_has_next(
     ada_url_search_params_values_iter result) {
-  auto* r = (ada::result<ada::url_search_params_values_iter>*)result;
+  auto* r = (ada_c_search_params_values_iter*)result;
   if (!r) {
     return false;
   }
-  return (*r)->has_next();
+  return r->iter.has_next();
 }
 
 void ada_free_search_params_entries_iter(
     ada_url_search_params_entries_iter result) {
-  auto* r = (ada::result<ada::url_search_params_entries_iter>*)result;
+  auto* r = (ada_c_search_params_entries_iter*)result;
   delete r;
 }
 
 ada_string_pair ada_search_params_entries_iter_next(
     ada_url_search_params_entries_iter result) {
-  auto* r = (ada::result<ada::url_search_params_entries_iter>*)result;
+  auto* r = (ada_c_search_params_entries_iter*)result;
   if (!r) return {ada_string_create(nullptr, 0), ada_string_create(nullptr, 0)};
-  auto next = (*r)->next();
+  auto next = r->iter.next();
   if (!next.has_value()) {
     return {ada_string_create(nullptr, 0), ada_string_create(nullptr, 0)};
   }
@@ -741,11 +755,11 @@ ada_string_pair ada_search_params_entries_iter_next(
 
 bool ada_search_params_entries_iter_has_next(
     ada_url_search_params_entries_iter result) {
-  auto* r = (ada::result<ada::url_search_params_entries_iter>*)result;
+  auto* r = (ada_c_search_params_entries_iter*)result;
   if (!r) {
     return false;
   }
-  return (*r)->has_next();
+  return r->iter.has_next();
 }
 
 void ada_set_max_input_length(uint32_t length) noexcept {

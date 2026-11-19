@@ -30,8 +30,10 @@ template <typename T, ada::url_search_params_iter_type Type>
 url_search_params url_search_params_iter<T, Type>::EMPTY;
 
 inline void url_search_params::reset(std::string_view input) {
+  // input may point into params.
+  const std::string copy(input);
   params.clear();
-  initialize(input);
+  initialize(copy);
 }
 
 inline void url_search_params::initialize(std::string_view input) {

@@ -287,6 +287,32 @@ TEST(ada_c, ada_search_params_reset) {
   SUCCEED();
 }
 
+TEST(ada_c, search_params_iterators_outlive_params) {
+  std::string_view input = "a=1&b=2";
+  ada_url_search_params p = ada_parse_search_params(input.data(), input.size());
+  ada_url_search_params_keys_iter keys = ada_search_params_get_keys(p);
+  ada_url_search_params_values_iter values = ada_search_params_get_values(p);
+  ada_url_search_params_entries_iter entries = ada_search_params_get_entries(p);
+  ada_free_search_params(p);
+  ASSERT_EQ(convert_string(ada_search_params_keys_iter_next(keys)), "a");
+  ASSERT_EQ(convert_string(ada_search_params_values_iter_next(values)), "1");
+  ada_string_pair entry = ada_search_params_entries_iter_next(entries);
+  ASSERT_EQ(convert_string(entry.key), "a");
+  ASSERT_EQ(convert_string(entry.value), "1");
+  ada_free_search_params_keys_iter(keys);
+  ada_free_search_params_values_iter(values);
+  ada_free_search_params_entries_iter(entries);
+}
+
+TEST(ada_c, search_params_reset_accepts_view_into_params) {
+  std::string_view input = "a=value_long_enough_to_live_on_the_heap";
+  ada_url_search_params p = ada_parse_search_params(input.data(), input.size());
+  ada_string v = ada_search_params_get(p, "a", 1);
+  ada_search_params_reset(p, v.data, v.length);
+  ASSERT_EQ(ada_search_params_size(p), 1);
+  ada_free_search_params(p);
+}
+
 TEST(ada_c, ada_url_search_params) {
   std::string_view input;
   ada_url_search_params out;
