@@ -36,6 +36,14 @@ if(ADA_TESTING OR ADA_BENCHMARKS OR ADA_TOOLS OR ADA_USE_SIMDUTF)
       VERSION 1.15.2
       OPTIONS  "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
     )
+    # Clang 22 treats gtest's char8_t -> char32_t PrintTo cast as
+    # -Wcharacter-conversion, and gtest builds itself with -WX.
+    if(TARGET gtest AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      target_compile_options(gtest PRIVATE -Wno-character-conversion)
+    endif()
+    if(TARGET gtest_main AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+      target_compile_options(gtest_main PRIVATE -Wno-character-conversion)
+    endif()
   endif()
   # We use simdjson in both the benchmarks and tests
   if(ADA_TESTING OR ADA_BENCHMARKS)
