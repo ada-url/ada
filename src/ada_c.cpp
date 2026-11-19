@@ -613,17 +613,17 @@ ada_strings ada_search_params_get_all(ada_url_search_params result,
 // next() returns views into the iterator's params, so each C iterator owns a
 // copy that outlives ada_free_search_params and later mutations.
 struct ada_c_search_params_keys_iter {
-  ada::url_search_params params;
+  ada::url_search_params params{};
   ada::url_search_params_keys_iter iter = params.get_keys();
 };
 
 struct ada_c_search_params_values_iter {
-  ada::url_search_params params;
+  ada::url_search_params params{};
   ada::url_search_params_values_iter iter = params.get_values();
 };
 
 struct ada_c_search_params_entries_iter {
-  ada::url_search_params params;
+  ada::url_search_params params{};
   ada::url_search_params_entries_iter iter = params.get_entries();
 };
 
