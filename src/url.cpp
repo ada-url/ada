@@ -24,9 +24,11 @@ namespace {
 // setter call does not pay for an out-of-line overlap check.
 ada_really_inline bool url_input_aliases(std::string_view input,
                                          const std::string& storage) noexcept {
-  return !input.empty() && !storage.empty() &&
-         input.data() >= storage.data() &&
-         input.data() < storage.data() + storage.size();
+  if (input.empty() || storage.empty()) {
+    return false;
+  }
+  const char* const begin = storage.data();
+  return input.data() >= begin && input.data() < begin + storage.size();
 }
 }  // namespace
 

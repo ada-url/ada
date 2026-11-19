@@ -45,9 +45,11 @@ namespace {
 // setter path must not pay for a call. The copy happens only on a hit.
 ada_really_inline bool aliases_storage(std::string_view input,
                                        const std::string& storage) noexcept {
-  return !input.empty() && !storage.empty() &&
-         input.data() >= storage.data() &&
-         input.data() < storage.data() + storage.size();
+  if (input.empty() || storage.empty()) {
+    return false;
+  }
+  const char* const begin = storage.data();
+  return input.data() >= begin && input.data() < begin + storage.size();
 }
 }  // namespace
 
