@@ -1468,21 +1468,13 @@ ada_never_inline bool try_parse_simple_absolute(std::string_view input,
         goto scan_hash;
       }
       rest_simple = false;
-      for (; i < len; ++i) {
-        if (b[i] == '?') {
-          path_end = i;
-          query_start = i;
-          ++i;
-          goto scan_query_boundary;
-        }
-        if (b[i] == '#') {
-          path_end = i;
-          hash_start = i;
-          ++i;
-          goto after_rest;
-        }
+      hash_start = input.find('#', i);
+      query_start = input.substr(0, hash_start).find('?', i);
+      if (query_start != std::string_view::npos) {
+        path_end = query_start;
+      } else {
+        path_end = hash_start != std::string_view::npos ? hash_start : len;
       }
-      path_end = i;
       goto after_rest;
     }
     path_end = i;
@@ -1511,13 +1503,7 @@ scan_query:
   goto after_rest;
 
 scan_query_boundary:
-  for (; i < len; ++i) {
-    if (b[i] == '#') {
-      hash_start = i;
-      ++i;
-      goto after_rest;
-    }
-  }
+  hash_start = input.find('#', i);
   goto after_rest;
 
 scan_hash:
@@ -1930,10 +1916,12 @@ result_type parse_url_impl(std::string_view user_input,
       const uint8_t host_first = host_start != 0 ? p[host_start] : 0;
       const bool skip_ip =
           host_first == '[' || (host_first >= '0' && host_first <= '9');
-      const bool skip_userinfo =
-          host_start != 0 && authority_has_at(p, host_start, n);
-      hit_fast_path = !skip_ip && !skip_userinfo &&
-                      try_parse_simple_absolute(user_input, url);
+      // Only scan for userinfo when the host is not an IP literal, so
+      // IPv4/IPv6 inputs skip the SIMD '@' check entirely.
+      hit_fast_path =
+          !skip_ip &&
+          !(host_start != 0 && authority_has_at(p, host_start, n)) &&
+          try_parse_simple_absolute(user_input, url);
     } else {
       hit_fast_path = try_parse_simple_relative(user_input, *base_url, url);
     }

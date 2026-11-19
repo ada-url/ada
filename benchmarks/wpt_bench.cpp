@@ -246,7 +246,7 @@ int main(int argc, char** argv) {
     std::cout << "E.g., './build/benchmarks/wpt_bench "
                  "tests/wpt/urltestdata.json --select 0'"
               << std::endl;
-    return EXIT_SUCCESS;
+    return EXIT_FAILURE;
   }
 #if defined(ADA_RUST_VERSION)
   benchmark::AddCustomContext("rust version ", ADA_RUST_VERSION);
