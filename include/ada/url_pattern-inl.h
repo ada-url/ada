@@ -96,7 +96,8 @@ inline url_pattern_result::url_pattern_result(const url_pattern_result& other)
   const size_t n = other.owned_strings_.size();
   if (n <= 4) {
     for (size_t i = 0; i < n; ++i) {
-      local[i] = {other.owned_strings_[i].data(), other.owned_strings_[i].size()};
+      local[i] = {other.owned_strings_[i].data(),
+                  other.owned_strings_[i].size()};
     }
   } else {
     heap.reserve(n);
@@ -122,7 +123,7 @@ inline url_pattern_result::url_pattern_result(
   // address when the std::string is moved. store_inputs keeps at most two
   // strings; a fixed buffer covers that without allocating (this ctor is
   // noexcept). More than 8 is rebound by index below via a truncated list
-  // only for the pointer match — index fallback handles the rest by
+  // only for the pointer match - index fallback handles the rest by
   // rebinding every string_view in order when from_size==0 is not used.
   std::pair<const char*, size_t> local[8];
   const size_t n = other.owned_strings_.size();
