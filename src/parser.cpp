@@ -2831,8 +2831,12 @@ result_type parse_url_impl(std::string_view user_input,
             // Otherwise:
             else {
               // Set url's path to an empty list.
+              // Do not mark the path opaque: a Windows drive letter is a
+              // path segment (the result must match parsing the href
+              // "file:///C:"). Setting has_opaque_path here made host and
+              // path setters fail and prevented the URL from being a base
+              // (#1278).
               url.clear_pathname();
-              url.has_opaque_path = true;
             }
 
             // Set state to path state and decrease pointer by 1.

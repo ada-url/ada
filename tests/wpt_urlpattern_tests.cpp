@@ -1567,3 +1567,71 @@ TEST(wpt_urlpattern_tests, string_input_without_base_must_parse_alone) {
   ASSERT_TRUE(with_base_exec);
   EXPECT_TRUE(with_base_exec->has_value());
 }
+
+TEST(wpt_urlpattern_tests, protocol_bare_colon_is_rejected) {
+  // https://github.com/ada-url/ada/issues/1283
+  for (auto src : {"\\:", "\\:?", "\\:*", "\\:+"}) {
+    ada::url_pattern_init init{};
+    init.protocol = src;
+    EXPECT_FALSE(ada::parse_url_pattern<regex_provider>(init)) << src;
+  }
+  EXPECT_FALSE(
+      ada::parse_url_pattern<regex_provider>(std::string_view("{\\:}?://a")));
+  EXPECT_FALSE(ada::url_pattern_helpers::canonicalize_protocol(":"));
+  ada::url_pattern_init colon{};
+  colon.protocol = ":";
+  auto p = ada::parse_url_pattern<regex_provider>(colon);
+  ASSERT_TRUE(p);
+  EXPECT_EQ(p->get_protocol(), "");
+}
+
+TEST(wpt_urlpattern_tests, opaque_pathname_keeps_leading_slashes) {
+  // https://github.com/ada-url/ada/issues/1284
+  // Opaque-path state keeps a leading "//" and does not normalize dots.
+  auto pathname = [](std::string_view value) {
+    ada::url_pattern_init init{};
+    init.protocol = "foo";
+    init.pathname = value;
+    auto p = ada::parse_url_pattern<regex_provider>(init);
+    EXPECT_TRUE(p) << value;
+    return p ? std::string(p->get_pathname()) : std::string("(error)");
+  };
+  EXPECT_EQ(pathname("//x/y"), "//x/y");
+  EXPECT_EQ(pathname("//x"), "//x");
+  EXPECT_EQ(pathname("//"), "//");
+  EXPECT_EQ(pathname("//x/../y"), "//x/../y");
+  EXPECT_EQ(pathname("\t//x"), "//x");
+  EXPECT_EQ(pathname("/x/y"), "/x/y");
+  EXPECT_EQ(pathname("x/y"), "x/y");
+  EXPECT_EQ(pathname("foo?bar"), "foo?bar");
+  auto p =
+      ada::parse_url_pattern<regex_provider>(std::string_view("foo://h//x/y"));
+  ASSERT_TRUE(p);
+  EXPECT_EQ(p->get_pathname(), "//x/y");
+  auto same = p->test(std::string_view("foo://h//x/y"));
+  ASSERT_TRUE(same);
+  EXPECT_TRUE(*same);
+  auto other = p->test(std::string_view("foo://h/y"));
+  ASSERT_TRUE(other);
+  EXPECT_FALSE(*other);
+}
+
+TEST(wpt_urlpattern_tests, search_uses_special_query_percent_encode_set) {
+  // https://github.com/ada-url/ada/issues/1285
+  ada::url_pattern_init init{};
+  init.search = "q='x'";
+  auto p = ada::parse_url_pattern<regex_provider>(init);
+  ASSERT_TRUE(p);
+  EXPECT_EQ(p->get_search(), "q=%27x%27");
+  auto t = p->test(std::string_view("https://h/?q='x'"));
+  ASSERT_TRUE(t);
+  EXPECT_TRUE(*t);
+  ada::url_pattern_init input{};
+  input.search = "?'";
+  auto all = ada::parse_url_pattern<regex_provider>(ada::url_pattern_init{});
+  ASSERT_TRUE(all);
+  auto m = all->exec(ada::url_pattern_input(input), nullptr);
+  ASSERT_TRUE(m);
+  ASSERT_TRUE(m->has_value());
+  EXPECT_EQ((**m).search.input, "%27");
+}

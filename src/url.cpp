@@ -672,9 +672,17 @@ bool url::set_host_or_hostname(const std::string_view input) {
 
       // Set url's host to host, buffer to the empty string, and state to port
       // state.
+      // Do not call set_port: it enforces the length limit for the port
+      // alone and rolls back only the port. check_url_size() must accept or
+      // reject host and port together (#1282).
       std::string_view port_buffer = new_host.substr(location + 1);
-      if (!port_buffer.empty()) {
-        set_port(port_buffer);
+      std::string_view digits =
+          port_buffer.substr(0, port_buffer.find_first_not_of("0123456789"));
+      if (!digits.empty() && !cannot_have_credentials_or_port()) {
+        parse_port(digits);
+        // An out-of-range port leaves the port unchanged; the host setter
+        // still returns a valid URL.
+        is_valid = true;
       }
       return check_url_size();
     }
