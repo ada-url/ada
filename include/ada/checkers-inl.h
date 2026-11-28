@@ -259,7 +259,7 @@ constexpr size_t pext(uint64_t word) noexcept {
     }
     return result;
   }();
-  return static_cast<size_t>(((word & bits) * magic) >> 58);
+  return ((word & bits) * magic) >> 58;
 }
 
 // Every placement of the five digit bits, with the other bits clear or set,
